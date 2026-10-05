@@ -3,162 +3,204 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visão Geral do Sistema RBAC",
-        "intro": "O PraticOS utiliza um sistema de controle de acesso baseado em perfis (<strong>RBAC - Role-Based Access Control</strong>) para gerenciar as permissões dos colaboradores de cada empresa.",
+        "title": "Como os perfis funcionam",
+        "intro": "Cada pessoa da equipe entra na empresa com um perfil. É o perfil que decide o que ela vê — principalmente preços e totais — e o que ela pode mudar em cada OS. Só o Administrador convida pessoas e troca perfis.",
+        "steps": [
+          "Toque na aba <strong>Mais</strong> e depois em <strong>Colaboradores</strong>.",
+          "Toque em <strong>+</strong> para abrir <strong>Novo Colaborador</strong>.",
+          "Informe o e-mail ou o telefone da pessoa.",
+          "Em <strong>Perfil</strong>, escolha o perfil de acesso e toque em <strong>Adicionar</strong>. A pessoa recebe o convite e entra na empresa ao aceitar."
+        ],
         "infoCard": {
-          "title": "Multi-Tenancy",
-          "content": "Um usuário pode ter perfis diferentes em empresas diferentes. Por exemplo, ser Administrador em uma empresa e Técnico em outra."
+          "title": "Um perfil em cada empresa",
+          "content": "A mesma pessoa pode participar de mais de uma empresa no PraticOS, com um perfil diferente em cada uma — Administrador na própria oficina e Técnico na de um parceiro, por exemplo."
+        },
+        "warningCard": {
+          "title": "Sempre um Administrador",
+          "content": "Para trocar o perfil de alguém, toque no nome da pessoa em <strong>Colaboradores</strong> e escolha <strong>Editar Permissão</strong>. O app não deixa remover nem rebaixar o único Administrador da empresa: promova outra pessoa antes."
         }
       },
       {
         "id": "perfis",
-        "title": "Perfis Disponíveis",
-        "intro": "O sistema conta com 5 perfis distintos, cada um projetado para atender diferentes funções dentro da organização:",
+        "title": "Os cinco perfis",
+        "intro": "Escolha pelo que a pessoa faz no dia a dia, não pelo cargo. Na dúvida, comece pelo perfil com menos acesso e amplie depois.",
         "profiles": [
           {
             "id": "admin",
-            "emoji": "&#128104;&#8205;&#128188;",
             "name": "Administrador",
-            "description": "Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.",
-            "tag": "Gestão Completa",
-            "colorClass": "admin"
+            "description": "O dono ou quem responde pela empresa. Vê e muda tudo, inclusive equipe e dados da empresa."
           },
           {
             "id": "gerente",
-            "emoji": "&#128176;",
             "name": "Gerente",
-            "description": "Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.",
-            "tag": "Financeiro",
-            "colorClass": "manager"
+            "description": "Quem cuida do dinheiro. Vê valores e o Financeiro, ajusta OS, mas não abre OS novas."
           },
           {
             "id": "supervisor",
-            "emoji": "&#129489;&#8205;&#128295;",
             "name": "Supervisor",
-            "description": "Coordena equipes e equipamentos. Não visualiza valores financeiros.",
-            "tag": "Operacional",
-            "colorClass": "supervisor"
+            "description": "Quem coordena o serviço. Abre OS, cuida de clientes, equipamentos e procedimentos, sem ver valores."
           },
           {
             "id": "consultor",
-            "emoji": "&#129489;&#8205;&#128188;",
             "name": "Consultor",
-            "description": "Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.",
-            "tag": "Comercial",
-            "colorClass": "consultant"
+            "description": "Quem vende. Monta orçamentos com preço, mas só enxerga as OS que ele mesmo criou."
           },
           {
             "id": "tecnico",
-            "emoji": "&#128119;",
             "name": "Técnico",
-            "description": "Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.",
-            "tag": "Execução",
-            "colorClass": "technician"
+            "description": "Quem executa. Vê as OS, preenche procedimentos e tira fotos, sem ver valores."
           }
         ]
       },
       {
         "id": "admin",
         "title": "Administrador",
-        "subtitle": "Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.",
-        "headerInline": {
-          "emoji": "&#128104;&#8205;&#128188;",
-          "badgeClass": "admin"
-        },
+        "subtitle": "Acesso total. Configura a empresa, cuida da equipe e vê todos os dados.",
         "permissionsGrid": [
           {
-            "title": "Ordens de Serviço",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Ordens de serviço",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar todas as OS da empresa" },
-              { "status": "allowed", "text": "Criar novas OS" },
-              { "status": "allowed", "text": "Editar qualquer OS" },
-              { "status": "allowed", "text": "Atribuir/reatribuir técnicos" },
-              { "status": "allowed", "text": "Executar serviços" },
-              { "status": "allowed", "text": "Deletar OS" }
+              {
+                "status": "allowed",
+                "text": "Ver todas as OS da empresa"
+              },
+              {
+                "status": "allowed",
+                "text": "Criar e editar OS em qualquer status"
+              },
+              {
+                "status": "allowed",
+                "text": "Mudar o status para qualquer outro, inclusive reabrir uma OS concluída"
+              },
+              {
+                "status": "allowed",
+                "text": "Excluir OS em qualquer status"
+              }
             ]
           },
           {
-            "title": "Dados Financeiros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Valores",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar valores e preços" },
-              { "status": "allowed", "text": "Visualizar faturamento" },
-              { "status": "allowed", "text": "Acessar relatórios financeiros" },
-              { "status": "allowed", "text": "Editar valores e preços" }
+              {
+                "status": "allowed",
+                "text": "Ver preços e totais"
+              },
+              {
+                "status": "allowed",
+                "text": "Registrar pagamentos da OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Gerar o PDF da OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Ver os números da aba <strong>Financeiro</strong>"
+              }
             ]
           },
           {
             "title": "Cadastros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>",
             "permissions": [
-              { "status": "allowed", "text": "Gerenciar clientes" },
-              { "status": "allowed", "text": "Gerenciar produtos" },
-              { "status": "allowed", "text": "Gerenciar serviços" },
-              { "status": "allowed", "text": "Gerenciar dispositivos" }
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar produtos e serviços do catálogo"
+              },
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar dispositivos (veículos, aparelhos, equipamentos — o nome muda conforme o segmento)"
+              },
+              {
+                "status": "allowed",
+                "text": "Criar e editar modelos de procedimento"
+              }
             ]
           },
           {
-            "title": "Administração",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>",
+            "title": "Empresa",
             "permissions": [
-              { "status": "allowed", "text": "Gerenciar usuários e colaboradores" },
-              { "status": "allowed", "text": "Gerenciar perfis e permissões" },
-              { "status": "allowed", "text": "Configurar dados da empresa" },
-              { "status": "allowed", "text": "Configurar parâmetros globais" }
+              {
+                "status": "allowed",
+                "text": "Convidar e remover colaboradores e trocar perfis"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar <strong>Dados da Empresa</strong>"
+              }
             ]
           }
         ]
       },
       {
         "id": "gerente",
-        "title": "Gerente (Financeiro)",
-        "subtitle": "Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.",
-        "headerInline": {
-          "emoji": "&#128176;",
-          "badgeClass": "manager"
-        },
+        "title": "Gerente",
+        "subtitle": "Cuida do financeiro. Vê valores e pode ajustar qualquer OS, mas não abre OS novas.",
         "permissionsGrid": [
           {
-            "title": "Ordens de Serviço",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Ordens de serviço",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar todas as OS" },
-              { "status": "denied", "text": "Criar novas OS" },
-              { "status": "allowed", "text": "Editar OS (ajustes fiscais/financeiros)" },
-              { "status": "denied", "text": "Atribuir técnicos" },
-              { "status": "denied", "text": "Executar serviços" },
-              { "status": "partial", "text": "Deletar OS (apenas status 'Orçamento')" }
+              {
+                "status": "allowed",
+                "text": "Ver todas as OS da empresa"
+              },
+              {
+                "status": "denied",
+                "text": "Criar OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar OS em qualquer status — por exemplo, corrigir um valor depois de aprovado"
+              },
+              {
+                "status": "allowed",
+                "text": "Mudar o status para qualquer outro, inclusive reabrir uma OS concluída"
+              },
+              {
+                "status": "partial",
+                "text": "Excluir OS, só enquanto ela está em Orçamento"
+              }
             ]
           },
           {
-            "title": "Dados Financeiros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Valores",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar valores e preços" },
-              { "status": "allowed", "text": "Visualizar faturamento" },
-              { "status": "allowed", "text": "Acessar relatórios financeiros" },
-              { "status": "allowed", "text": "Editar valores e preços" }
+              {
+                "status": "allowed",
+                "text": "Ver preços e totais"
+              },
+              {
+                "status": "allowed",
+                "text": "Registrar pagamentos da OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Gerar o PDF da OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Ver os números da aba <strong>Financeiro</strong>"
+              }
             ]
           },
           {
-            "title": "Cadastros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
+            "title": "Cadastros e procedimentos",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar clientes" },
-              { "status": "allowed", "text": "Visualizar produtos" },
-              { "status": "allowed", "text": "Visualizar serviços" },
-              { "status": "allowed", "text": "Visualizar dispositivos" },
-              { "status": "denied", "text": "Gerenciar outros cadastros" }
-            ]
-          },
-          {
-            "title": "Relatórios",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"10\"></line><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"14\"></line></svg>",
-            "permissions": [
-              { "status": "allowed", "text": "Relatórios operacionais" },
-              { "status": "allowed", "text": "Dashboard geral" },
-              { "status": "allowed", "text": "Reabrir procedimentos concluídos" }
+              {
+                "status": "allowed",
+                "text": "Consultar clientes, produtos, serviços e dispositivos"
+              },
+              {
+                "status": "denied",
+                "text": "Cadastrar ou editar clientes, catálogo e dispositivos"
+              },
+              {
+                "status": "allowed",
+                "text": "Reabrir um procedimento concluído"
+              }
             ]
           }
         ]
@@ -166,309 +208,678 @@
       {
         "id": "supervisor",
         "title": "Supervisor",
-        "subtitle": "Coordena equipes e equipamentos. Não visualiza valores financeiros.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128295;",
-          "badgeClass": "supervisor"
-        },
-        "warningCard": {
-          "title": "Sem Acesso Financeiro",
-          "content": "Este perfil não visualiza valores, preços, faturamento ou relatórios financeiros. Ideal para colaboradores que focam na operação."
-        },
+        "subtitle": "Coordena o serviço e a equipe de campo. Não vê valores.",
         "permissionsGrid": [
           {
-            "title": "Ordens de Serviço",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Ordens de serviço",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar todas as OS (sem valores)" },
-              { "status": "allowed", "text": "Criar novas OS" },
-              { "status": "partial", "text": "Editar OS completa (apenas status 'Orçamento')" },
-              { "status": "partial", "text": "Editar observações (após 'Orçamento')" },
-              { "status": "allowed", "text": "Atribuir/reatribuir técnicos" },
-              { "status": "allowed", "text": "Executar serviços" },
-              { "status": "partial", "text": "Deletar OS (apenas status 'Orçamento')" }
+              {
+                "status": "allowed",
+                "text": "Ver todas as OS da empresa, sem valores"
+              },
+              {
+                "status": "allowed",
+                "text": "Criar OS"
+              },
+              {
+                "status": "partial",
+                "text": "Editar serviços, produtos, cliente, dispositivo e datas só enquanto a OS está em Orçamento"
+              },
+              {
+                "status": "partial",
+                "text": "Avançar o status de Aprovado para Em Andamento ou Concluído; aprovar orçamentos que ele mesmo criou"
+              },
+              {
+                "status": "partial",
+                "text": "Excluir OS, só enquanto ela está em Orçamento"
+              }
             ]
           },
           {
-            "title": "Dados Financeiros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Valores",
             "permissions": [
-              { "status": "denied", "text": "Visualizar valores e preços" },
-              { "status": "denied", "text": "Visualizar faturamento" },
-              { "status": "denied", "text": "Acessar relatórios financeiros" },
-              { "status": "denied", "text": "Gerar PDF de OS" },
-              { "status": "denied", "text": "Filtros de pagamento ocultos" }
+              {
+                "status": "denied",
+                "text": "Ver preços e totais"
+              },
+              {
+                "status": "denied",
+                "text": "Gerar o PDF da OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver os números da aba <strong>Financeiro</strong>"
+              }
             ]
           },
           {
             "title": "Cadastros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
             "permissions": [
-              { "status": "allowed", "text": "Gerenciar clientes" },
-              { "status": "allowed", "text": "Visualizar produtos (sem ver preços)" },
-              { "status": "allowed", "text": "Visualizar serviços (sem ver preços)" },
-              { "status": "allowed", "text": "Gerenciar dispositivos" }
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar dispositivos"
+              },
+              {
+                "status": "partial",
+                "text": "Consultar produtos e serviços do catálogo, sem preço"
+              }
             ]
           },
           {
-            "title": "Formulários/Procedimentos",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "title": "Procedimentos",
             "permissions": [
-              { "status": "allowed", "text": "Preencher formulários" },
-              { "status": "allowed", "text": "Gerenciar templates de formulários" },
-              { "status": "allowed", "text": "Reabrir procedimentos concluídos" },
-              { "status": "allowed", "text": "Adicionar/remover procedimentos em OS ativa" }
+              {
+                "status": "allowed",
+                "text": "Criar e editar modelos de procedimento"
+              },
+              {
+                "status": "allowed",
+                "text": "Adicionar ou remover procedimentos na OS até ela ser concluída"
+              },
+              {
+                "status": "allowed",
+                "text": "Reabrir um procedimento concluído"
+              }
             ]
           }
-        ]
+        ],
+        "warningCard": {
+          "title": "Sem valores na tela",
+          "content": "O Supervisor não vê preços na lista de OS, dentro da OS nem no catálogo, e a opção de gerar PDF não aparece para ele. Se ele também fecha orçamento com o cliente, ele precisa de outro perfil."
+        }
       },
       {
         "id": "consultor",
-        "title": "Consultor (Vendedor)",
-        "subtitle": "Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128188;",
-          "badgeClass": "consultant"
-        },
-        "infoCard": {
-          "title": "Visibilidade Limitada",
-          "content": "O Consultor só visualiza as OS que ele mesmo criou. Em caso de férias ou ausência, o Administrador pode reatribuir OS para outro consultor."
-        },
+        "title": "Consultor",
+        "subtitle": "Vende e monta orçamentos. Vê preços, mas só as OS que ele mesmo criou.",
         "permissionsGrid": [
           {
-            "title": "Ordens de Serviço",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Ordens de serviço",
             "permissions": [
-              { "status": "partial", "text": "Visualizar apenas OS que criou" },
-              { "status": "allowed", "text": "Criar novas OS" },
-              { "status": "allowed", "text": "Editar suas próprias OS" },
-              { "status": "partial", "text": "Deletar OS que criou (status 'Orçamento')" },
-              { "status": "denied", "text": "Atribuir técnicos" },
-              { "status": "denied", "text": "Executar serviços" }
+              {
+                "status": "partial",
+                "text": "Ver só as OS que ele criou"
+              },
+              {
+                "status": "allowed",
+                "text": "Criar OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar as próprias OS"
+              },
+              {
+                "status": "partial",
+                "text": "Mudar o status só de Orçamento para Aprovado ou Cancelado"
+              },
+              {
+                "status": "partial",
+                "text": "Excluir as próprias OS, só em Orçamento"
+              }
             ]
           },
           {
-            "title": "Dados Financeiros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Valores",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar valores e preços (para orçamentos)" },
-              { "status": "denied", "text": "Visualizar faturamento geral" },
-              { "status": "denied", "text": "Acessar relatórios financeiros" },
-              { "status": "denied", "text": "Editar valores e preços" }
+              {
+                "status": "allowed",
+                "text": "Ver preços e totais para montar o orçamento"
+              },
+              {
+                "status": "allowed",
+                "text": "Gerar o PDF da OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver os números da aba <strong>Financeiro</strong>"
+              }
             ]
           },
           {
-            "title": "Cadastros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
+            "title": "Cadastros e procedimentos",
             "permissions": [
-              { "status": "allowed", "text": "Gerenciar clientes" },
-              { "status": "allowed", "text": "Visualizar produtos" },
-              { "status": "allowed", "text": "Visualizar serviços" },
-              { "status": "allowed", "text": "Visualizar dispositivos" }
-            ]
-          },
-          {
-            "title": "Formulários/Procedimentos",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
-            "permissions": [
-              { "status": "allowed", "text": "Preencher formulários" },
-              { "status": "denied", "text": "Gerenciar templates" },
-              { "status": "denied", "text": "Reabrir procedimentos concluídos" }
+              {
+                "status": "allowed",
+                "text": "Cadastrar e editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Consultar produtos, serviços e dispositivos"
+              },
+              {
+                "status": "allowed",
+                "text": "Adicionar e preencher procedimentos nas próprias OS"
+              },
+              {
+                "status": "denied",
+                "text": "Criar modelos de procedimento"
+              },
+              {
+                "status": "denied",
+                "text": "Reabrir um procedimento concluído"
+              }
             ]
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "Só as OS dele",
+          "content": "O Consultor não vê as OS dos colegas — nem na lista, nem na agenda. As OS que ele criou continuam visíveis para Administrador, Gerente, Supervisor e Técnico, então ninguém perde o histórico se ele sair de férias."
+        }
       },
       {
         "id": "tecnico",
         "title": "Técnico",
-        "subtitle": "Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.",
-        "headerInline": {
-          "emoji": "&#128119;",
-          "badgeClass": "technician"
-        },
-        "warningCard": {
-          "title": "Perfil Operacional",
-          "content": "Foco na execução. Não visualiza valores financeiros e tem edição limitada em OS após aprovação."
-        },
+        "subtitle": "Executa o serviço. Não vê valores e, depois da aprovação, não mexe no que foi orçado.",
         "permissionsGrid": [
           {
-            "title": "Ordens de Serviço",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Ordens de serviço",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar todas as OS (sem valores)" },
-              { "status": "allowed", "text": "Criar novas OS (inicia em 'Orçamento')" },
-              { "status": "partial", "text": "Editar OS completa (apenas status 'Orçamento')" },
-              { "status": "partial", "text": "Editar observações (após 'Orçamento')" },
-              { "status": "partial", "text": "Deletar OS que criou (status 'Orçamento')" },
-              { "status": "denied", "text": "Atribuir técnicos" },
-              { "status": "allowed", "text": "Executar serviços" }
+              {
+                "status": "allowed",
+                "text": "Ver as OS que ele criou, sem valores"
+              },
+              {
+                "status": "allowed",
+                "text": "Criar OS — ela começa em Orçamento"
+              },
+              {
+                "status": "partial",
+                "text": "Editar serviços, produtos, cliente, dispositivo e datas só enquanto a OS está em Orçamento"
+              },
+              {
+                "status": "partial",
+                "text": "Avançar o status de Aprovado para Em Andamento ou Concluído; aprovar orçamentos que ele mesmo criou"
+              },
+              {
+                "status": "partial",
+                "text": "Excluir as próprias OS, só em Orçamento"
+              }
             ]
           },
           {
-            "title": "Dados Financeiros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Valores",
             "permissions": [
-              { "status": "denied", "text": "Visualizar valores e preços" },
-              { "status": "denied", "text": "Visualizar faturamento" },
-              { "status": "denied", "text": "Acessar relatórios financeiros" },
-              { "status": "denied", "text": "Gerar PDF de OS" }
+              {
+                "status": "denied",
+                "text": "Ver preços e totais"
+              },
+              {
+                "status": "denied",
+                "text": "Gerar o PDF da OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver os números da aba <strong>Financeiro</strong>"
+              }
             ]
           },
           {
             "title": "Cadastros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
             "permissions": [
-              { "status": "allowed", "text": "Visualizar clientes (para contato)" },
-              { "status": "denied", "text": "Gerenciar clientes" },
-              { "status": "denied", "text": "Visualizar produtos (valores ocultos)" },
-              { "status": "denied", "text": "Visualizar serviços (valores ocultos)" },
-              { "status": "allowed", "text": "Visualizar dispositivos" }
+              {
+                "status": "allowed",
+                "text": "Consultar clientes e dispositivos — para ligar para o cliente ou achar o endereço"
+              },
+              {
+                "status": "denied",
+                "text": "Cadastrar ou editar clientes"
+              },
+              {
+                "status": "denied",
+                "text": "Abrir o catálogo de produtos e serviços no menu <strong>Mais</strong>"
+              }
             ]
           },
           {
-            "title": "Formulários/Procedimentos",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "title": "Procedimentos e fotos",
             "permissions": [
-              { "status": "allowed", "text": "Preencher formulários e checklists" },
-              { "status": "allowed", "text": "Anexar fotos às OS" },
-              { "status": "denied", "text": "Gerenciar templates" },
-              { "status": "denied", "text": "Reabrir procedimentos concluídos" },
-              { "status": "denied", "text": "Adicionar/remover procedimentos (após 'Orçamento')" }
+              {
+                "status": "allowed",
+                "text": "Preencher procedimentos e anexar fotos"
+              },
+              {
+                "status": "partial",
+                "text": "Adicionar ou remover procedimentos só enquanto a OS está em Orçamento"
+              },
+              {
+                "status": "denied",
+                "text": "Criar modelos de procedimento"
+              },
+              {
+                "status": "denied",
+                "text": "Reabrir um procedimento concluído"
+              }
             ]
           }
         ]
       },
       {
         "id": "matriz",
-        "title": "Matriz de Permissões",
-        "intro": "Visão consolidada de todas as permissões por perfil:",
+        "title": "Tabela de permissões",
+        "intro": "Os cinco perfis lado a lado. O asterisco marca o que depende do status da OS ou de quem a criou — os detalhes estão na seção de cada perfil.",
         "tables": [
           {
-            "title": "Ordens de Serviço",
-            "headers": ["Permissão", "Admin", "Gerente", "Supervisor", "Consultor", "Técnico"],
-            "rows": [
-              { "label": "Ver todas as OS", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}, {"class": "no"}, {"class": "yes"}] },
-              { "label": "Criar OS", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
-              { "label": "Editar OS", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "partial"}, {"class": "partial"}, {"class": "partial"}] },
-              { "label": "Atribuir técnicos", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "no"}, {"class": "no"}] },
-              { "label": "Executar OS", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "no"}, {"class": "yes"}] },
-              { "label": "Deletar OS", "cells": [{"class": "yes"}, {"class": "partial"}, {"class": "partial"}, {"class": "partial"}, {"class": "partial"}] }
+            "title": "Ordens de serviço",
+            "headers": [
+              "Permissão",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
             ],
-            "note": "* Restrições baseadas em status e propriedade da OS. Veja detalhes nas seções de cada perfil."
-          },
-          {
-            "title": "Dados Financeiros",
-            "headers": ["Permissão", "Admin", "Gerente", "Supervisor", "Consultor", "Técnico"],
             "rows": [
-              { "label": "Ver preços", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "no"}] },
-              { "label": "Ver faturamento", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "no"}, {"class": "no"}, {"class": "no"}] },
-              { "label": "Relatórios financeiros", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "no"}, {"class": "no"}, {"class": "no"}] },
-              { "label": "Editar preços", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "no"}, {"class": "no"}, {"class": "no"}] }
+              {
+                "label": "Criar OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              },
+              {
+                "label": "Editar depois de aprovada",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Mudar o status",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Reabrir OS concluída",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Excluir OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Ver OS dos colegas",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              }
             ]
           },
           {
-            "title": "Cadastros",
-            "headers": ["Permissão", "Admin", "Gerente", "Supervisor", "Consultor", "Técnico"],
+            "title": "Valores",
+            "headers": [
+              "Permissão",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
+            ],
             "rows": [
-              { "label": "Gerenciar clientes", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "yes"}, {"class": "no"}] },
-              { "label": "Gerenciar produtos", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}, {"class": "no"}, {"class": "no"}] },
-              { "label": "Gerenciar serviços", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}, {"class": "no"}, {"class": "no"}] },
-              { "label": "Gerenciar dispositivos", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "yes"}, {"class": "no"}, {"class": "no"}] }
+              {
+                "label": "Ver preços e totais",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Gerar PDF da OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Aba Financeiro",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
             ]
+          },
+          {
+            "title": "Cadastros e empresa",
+            "headers": [
+              "Permissão",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
+            ],
+            "rows": [
+              {
+                "label": "Clientes",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Produtos e serviços",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Dispositivos",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Modelos de procedimento",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Colaboradores e dados da empresa",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
+            ],
+            "note": "Nos cadastros, ✓ quer dizer cadastrar e editar. Quem tem ✕ ainda consulta o que precisa para trabalhar na OS."
           }
         ]
       },
       {
         "id": "status",
-        "title": "Regras Baseadas em Status da OS",
-        "intro": "As permissões de edição variam conforme o status atual da OS:",
+        "title": "O que muda com o status da OS",
+        "intro": "Supervisor e Técnico têm mais liberdade enquanto a OS é orçamento. Depois que o cliente aprova, o que foi orçado fica travado para eles — assim ninguém troca uma peça ou um serviço sem passar por quem cuida do preço.",
         "statusFlow": [
-          { "name": "Orçamento", "class": "quote" },
-          { "name": "Aprovado", "class": "approved" },
-          { "name": "Em Andamento", "class": "progress" },
-          { "name": "Concluído", "class": "done" }
+          {
+            "name": "Orçamento",
+            "class": "quote"
+          },
+          {
+            "name": "Aprovado",
+            "class": "approved"
+          },
+          {
+            "name": "Em Andamento",
+            "class": "progress"
+          },
+          {
+            "name": "Concluído",
+            "class": "done"
+          }
         ],
         "statusDetails": [
           {
-            "title": "Status 'Orçamento'",
+            "title": "Em Orçamento",
             "indicatorClass": "quote",
-            "description": "Supervisor e Técnico têm permissões completas de edição:",
+            "description": "Supervisor e Técnico podem mexer em tudo na OS:",
             "list": [
-              "Adicionar/editar/remover serviços e produtos",
-              "Adicionar/remover procedimentos",
-              "Alterar cliente e dispositivo",
-              "Alterar data de entrega",
-              "Adicionar fotos"
+              "Adicionar, editar e remover serviços e produtos",
+              "Trocar cliente e dispositivo",
+              "Mudar as datas de agendamento e entrega",
+              "Adicionar e remover procedimentos",
+              "Anexar fotos"
             ],
-            "note": "<strong>Nota:</strong> Valores financeiros permanecem ocultos para perfis sem acesso financeiro."
+            "note": "Mesmo aqui, eles não veem os valores."
           },
           {
-            "title": "Após Aprovação",
+            "title": "Depois de aprovada",
             "indicatorClass": "approved",
-            "description": "Restrições se aplicam para Supervisor e Técnico:",
+            "description": "Para Supervisor e Técnico, o orçamento fica travado:",
             "permissions": {
-              "canDoTitle": "Pode",
+              "canDoTitle": "Podem",
               "canDo": [
-                "Editar descrição/observações de serviços",
-                "Preencher procedimentos existentes",
-                "Adicionar fotos",
-                "Supervisor: Adicionar/remover procedimentos",
-                "Supervisor: Atribuir/reatribuir técnicos"
+                "Editar as observações de serviços e produtos já lançados",
+                "Preencher os procedimentos da OS",
+                "Anexar fotos",
+                "Avançar para Em Andamento ou Concluído",
+                "Supervisor: adicionar ou remover procedimentos"
               ],
-              "cannotDoTitle": "Não Pode",
+              "cannotDoTitle": "Não podem",
               "cannotDo": [
-                "Adicionar novos serviços ou produtos",
-                "Remover serviços ou produtos",
-                "Editar valores ou quantidades",
-                "Alterar cliente ou dispositivo",
-                "Alterar data de entrega",
-                "Gerar PDF da OS"
+                "Adicionar ou remover serviços e produtos",
+                "Mudar quantidades",
+                "Trocar cliente ou dispositivo",
+                "Mudar as datas",
+                "Técnico: adicionar ou remover procedimentos"
               ]
             }
           },
           {
-            "title": "Status 'Concluído'",
+            "title": "Concluída",
             "indicatorClass": "done",
-            "description": "Apenas <strong>Admin</strong> e <strong>Gerente</strong> podem alterar o status de uma OS concluída.",
-            "paragraphs": ["Consultor, Supervisor e Técnico não podem fazer alterações em OS concluídas, garantindo integridade do histórico."]
+            "description": "Só <strong>Administrador</strong> e <strong>Gerente</strong> mudam o status de uma OS concluída — por exemplo, para reabrir um serviço que voltou com defeito.",
+            "paragraphs": [
+              "Para Supervisor, Consultor e Técnico, o status de uma OS concluída fica como está. Se for preciso corrigir, peça a um Administrador ou Gerente."
+            ]
           }
         ]
       },
       {
         "id": "faq",
-        "title": "Perguntas Frequentes",
+        "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "Um usuário pode ter perfis diferentes em empresas diferentes?",
-            "answer": "Sim. O sistema suporta multi-tenancy, onde um usuário pode ser Admin em uma empresa e Técnico em outra."
+            "question": "O técnico só vê as OS dele?",
+            "answer": "Sim. Técnico e Consultor veem só as OS que eles mesmos criaram, e o Técnico não vê valores. Administrador, Gerente e Supervisor veem todas as OS da empresa."
           },
           {
-            "question": "O que acontece se um perfil não for reconhecido?",
-            "answer": "O sistema normaliza para \"técnico\" (menor privilégio) por segurança."
+            "question": "O técnico vê os preços?",
+            "answer": "Não. O app esconde os valores na lista de OS, dentro da OS e no catálogo, e não mostra a opção de gerar o PDF. O mesmo vale para o Supervisor."
           },
           {
-            "question": "Como adicionar um novo colaborador?",
-            "answer": "Apenas Administradores podem adicionar colaboradores através de <strong>Ajustes > Colaboradores > Adicionar</strong>."
+            "question": "Um técnico pode aprovar o próprio orçamento?",
+            "answer": "Pode, se foi ele quem criou a OS: ele passa de Orçamento para Aprovado ou direto para Em Andamento. Útil para quem atende sozinho na rua e fecha o serviço com o cliente na hora."
           },
           {
-            "question": "Os valores financeiros ficam realmente ocultos para técnicos?",
-            "answer": "Sim. A proteção é feita em múltiplas camadas: UI (widgets), lógica (filtros) e backend (security rules)."
-          },
-          {
-            "question": "Um Técnico pode aprovar sua própria OS?",
-            "answer": "Sim. Se o Técnico (ou Supervisor) criar uma OS, ele pode avançar o status de \"Orçamento\" para \"Aprovado\" ou \"Em Andamento\" diretamente."
+            "question": "Por que o Gerente não cria OS?",
+            "answer": "O perfil foi pensado para quem acompanha o dinheiro, não para quem atende o cliente. Se a pessoa também faz orçamentos, use Administrador — ou Consultor, se ela não precisa do Financeiro."
           },
           {
             "question": "Quem pode reabrir um procedimento concluído?",
-            "answer": "Apenas <strong>Admin</strong>, <strong>Gerente</strong> e <strong>Supervisor</strong>. Consultor e Técnico não têm essa permissão."
+            "answer": "Administrador, Gerente e Supervisor. Para Consultor e Técnico o botão <strong>Reabrir</strong> não aparece."
           },
           {
-            "question": "Admin pode reverter o status de uma OS concluída?",
-            "answer": "Sim. Admin e Gerente são os únicos perfis que podem alterar o status de uma OS concluída, permitindo reabrir ou corrigir quando necessário."
-          },
-          {
-            "question": "Por que Supervisor e Técnico têm restrições similares?",
-            "answer": "Ambos são perfis operacionais sem acesso financeiro. A diferença é que Supervisor pode gerenciar dispositivos, reabrir formulários e adicionar procedimentos em OS ativas."
+            "question": "Como troco o perfil de alguém?",
+            "answer": "Em <strong>Mais → Colaboradores</strong>, toque no nome da pessoa e escolha <strong>Editar Permissão</strong>. A mudança vale para aquela empresa."
           }
         ]
       }
@@ -478,163 +889,883 @@
     "sections": [
       {
         "id": "overview",
-        "title": "RBAC System Overview",
-        "intro": "PraticOS uses a role-based access control system (<strong>RBAC - Role-Based Access Control</strong>) to manage permissions for each company's collaborators.",
+        "title": "How profiles work",
+        "intro": "Everyone on the team joins the company with a profile. The profile decides what they see — prices and totals above all — and what they can change on each work order. Only Administrators invite people and change profiles.",
+        "steps": [
+          "Tap the <strong>More</strong> tab, then <strong>Collaborators</strong>.",
+          "Tap <strong>+</strong> to open <strong>New Collaborator</strong>.",
+          "Enter the person’s email or phone number.",
+          "Under <strong>Profile</strong>, pick their access profile and tap <strong>Add</strong>. They get an invite and join the company once they accept it."
+        ],
         "infoCard": {
-          "title": "Multi-Tenancy",
-          "content": "A user can have different profiles in different companies. For example, be an Administrator in one company and a Technician in another."
+          "title": "One profile per company",
+          "content": "The same person can belong to more than one company in PraticOS, with a different profile in each — Administrator at their own shop and Technician at a partner’s, for example."
+        },
+        "warningCard": {
+          "title": "Always keep an Administrator",
+          "content": "To change someone’s profile, tap their name in <strong>Collaborators</strong> and choose <strong>Edit Permission</strong>. The app won’t let you remove or downgrade the company’s only Administrator: promote someone else first."
         }
       },
       {
         "id": "profiles",
-        "title": "Available Profiles",
-        "intro": "The system has 5 distinct profiles, each designed to serve different roles within the organization:",
+        "title": "The five profiles",
+        "intro": "Pick by what the person does day to day, not by job title. When in doubt, start with less access and widen it later.",
         "profiles": [
           {
             "id": "admin",
-            "emoji": "&#128104;&#8205;&#128188;",
             "name": "Administrator",
-            "description": "Full access. Configures the company, manages users, and accesses all data.",
-            "tag": "Complete Management",
-            "colorClass": "admin"
+            "description": "The owner or whoever runs the business. Sees and changes everything, including the team and company data."
           },
           {
             "id": "manager",
-            "emoji": "&#128176;",
             "name": "Manager",
-            "description": "Focus on results. Views billing and costs, but does not execute services.",
-            "tag": "Financial",
-            "colorClass": "manager"
+            "description": "Handles the money. Sees prices and the Financial tab and adjusts orders, but doesn’t open new ones."
           },
           {
             "id": "supervisor",
-            "emoji": "&#129489;&#8205;&#128295;",
             "name": "Supervisor",
-            "description": "Coordinates teams and equipment. Does not view financial values.",
-            "tag": "Operational",
-            "colorClass": "supervisor"
+            "description": "Runs the jobs. Opens orders and manages customers, equipment and procedures, without seeing prices."
           },
           {
             "id": "consultant",
-            "emoji": "&#129489;&#8205;&#128188;",
             "name": "Consultant",
-            "description": "Creates quotes. Views prices, but accesses only their own Service Orders.",
-            "tag": "Commercial",
-            "colorClass": "consultant"
+            "description": "Sells. Writes quotes with prices, but only sees the orders they created."
           },
           {
             "id": "technician",
-            "emoji": "&#128119;",
             "name": "Technician",
-            "description": "Executes services. Does not view prices and has limited editing after SO approval.",
-            "tag": "Execution",
-            "colorClass": "technician"
+            "description": "Does the work. Sees orders, fills in procedures and takes photos, without seeing prices."
           }
         ]
       },
       {
         "id": "admin",
         "title": "Administrator",
-        "subtitle": "Full access. Configures the company, manages users, and accesses all data.",
-        "headerInline": {
-          "emoji": "&#128104;&#8205;&#128188;",
-          "badgeClass": "admin"
-        },
+        "subtitle": "Full access. Sets up the company, manages the team and sees all data.",
         "permissionsGrid": [
           {
-            "title": "Service Orders",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Work orders",
             "permissions": [
-              { "status": "allowed", "text": "View all company SOs" },
-              { "status": "allowed", "text": "Create new SOs" },
-              { "status": "allowed", "text": "Edit any SO" },
-              { "status": "allowed", "text": "Assign/reassign technicians" },
-              { "status": "allowed", "text": "Execute services" },
-              { "status": "allowed", "text": "Delete SOs" }
+              {
+                "status": "allowed",
+                "text": "See every order in the company"
+              },
+              {
+                "status": "allowed",
+                "text": "Create and edit orders in any status"
+              },
+              {
+                "status": "allowed",
+                "text": "Move an order to any status, including reopening a completed one"
+              },
+              {
+                "status": "allowed",
+                "text": "Delete orders in any status"
+              }
             ]
           },
           {
-            "title": "Financial Data",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Money",
             "permissions": [
-              { "status": "allowed", "text": "View values and prices" },
-              { "status": "allowed", "text": "View billing" },
-              { "status": "allowed", "text": "Access financial reports" },
-              { "status": "allowed", "text": "Edit values and prices" }
+              {
+                "status": "allowed",
+                "text": "See prices and totals"
+              },
+              {
+                "status": "allowed",
+                "text": "Record payments on an order"
+              },
+              {
+                "status": "allowed",
+                "text": "Generate the order PDF"
+              },
+              {
+                "status": "allowed",
+                "text": "See the numbers in the <strong>Financial</strong> tab"
+              }
+            ]
+          },
+          {
+            "title": "Records",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Add and edit customers"
+              },
+              {
+                "status": "allowed",
+                "text": "Add and edit catalog products and services"
+              },
+              {
+                "status": "allowed",
+                "text": "Add and edit devices (vehicles, phones, equipment — the name depends on your segment)"
+              },
+              {
+                "status": "allowed",
+                "text": "Create and edit procedure templates"
+              }
+            ]
+          },
+          {
+            "title": "Company",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Invite and remove collaborators and change profiles"
+              },
+              {
+                "status": "allowed",
+                "text": "Edit <strong>Company Data</strong>"
+              }
             ]
           }
         ]
       },
       {
         "id": "manager",
-        "title": "Manager (Financial)",
-        "subtitle": "Focus on results. Views billing and costs, but does not execute services.",
-        "headerInline": {
-          "emoji": "&#128176;",
-          "badgeClass": "manager"
-        },
-        "paragraphs": ["Full access to financial data. Can edit values and access billing reports. Cannot assign technicians or execute services."]
+        "title": "Manager",
+        "subtitle": "Handles the money. Sees prices and can adjust any order, but doesn’t open new ones.",
+        "permissionsGrid": [
+          {
+            "title": "Work orders",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "See every order in the company"
+              },
+              {
+                "status": "denied",
+                "text": "Create orders"
+              },
+              {
+                "status": "allowed",
+                "text": "Edit orders in any status — fix a price after approval, for example"
+              },
+              {
+                "status": "allowed",
+                "text": "Move an order to any status, including reopening a completed one"
+              },
+              {
+                "status": "partial",
+                "text": "Delete orders, only while they are in Quote"
+              }
+            ]
+          },
+          {
+            "title": "Money",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "See prices and totals"
+              },
+              {
+                "status": "allowed",
+                "text": "Record payments on an order"
+              },
+              {
+                "status": "allowed",
+                "text": "Generate the order PDF"
+              },
+              {
+                "status": "allowed",
+                "text": "See the numbers in the <strong>Financial</strong> tab"
+              }
+            ]
+          },
+          {
+            "title": "Records and procedures",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Look up customers, products, services and devices"
+              },
+              {
+                "status": "denied",
+                "text": "Add or edit customers, catalog items or devices"
+              },
+              {
+                "status": "allowed",
+                "text": "Reopen a completed procedure"
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "supervisor",
         "title": "Supervisor",
-        "subtitle": "Coordinates teams and equipment. Does not view financial values.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128295;",
-          "badgeClass": "supervisor"
-        },
+        "subtitle": "Runs the jobs and the field team. Doesn’t see prices.",
+        "permissionsGrid": [
+          {
+            "title": "Work orders",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "See every order in the company, without prices"
+              },
+              {
+                "status": "allowed",
+                "text": "Create orders"
+              },
+              {
+                "status": "partial",
+                "text": "Edit services, products, customer, device and dates only while the order is in Quote"
+              },
+              {
+                "status": "partial",
+                "text": "Move orders from Approved to In Progress or Completed; approve quotes they created"
+              },
+              {
+                "status": "partial",
+                "text": "Delete orders, only while they are in Quote"
+              }
+            ]
+          },
+          {
+            "title": "Money",
+            "permissions": [
+              {
+                "status": "denied",
+                "text": "See prices and totals"
+              },
+              {
+                "status": "denied",
+                "text": "Generate the order PDF"
+              },
+              {
+                "status": "denied",
+                "text": "See the numbers in the <strong>Financial</strong> tab"
+              }
+            ]
+          },
+          {
+            "title": "Records",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Add and edit customers"
+              },
+              {
+                "status": "allowed",
+                "text": "Add and edit devices"
+              },
+              {
+                "status": "partial",
+                "text": "Look up catalog products and services, without prices"
+              }
+            ]
+          },
+          {
+            "title": "Procedures",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Create and edit procedure templates"
+              },
+              {
+                "status": "allowed",
+                "text": "Add or remove procedures on an order until it is completed"
+              },
+              {
+                "status": "allowed",
+                "text": "Reopen a completed procedure"
+              }
+            ]
+          }
+        ],
         "warningCard": {
-          "title": "No Financial Access",
-          "content": "This profile does not view values, prices, billing, or financial reports. Ideal for collaborators focused on operations."
+          "title": "No prices on screen",
+          "content": "Supervisors don’t see prices in the order list, inside an order or in the catalog, and the PDF option doesn’t show up for them. If they also close deals with customers, they need a different profile."
         }
       },
       {
         "id": "consultant",
-        "title": "Consultant (Sales)",
-        "subtitle": "Creates quotes. Views prices, but accesses only their own Service Orders.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128188;",
-          "badgeClass": "consultant"
-        },
+        "title": "Consultant",
+        "subtitle": "Sells and writes quotes. Sees prices, but only on the orders they created.",
+        "permissionsGrid": [
+          {
+            "title": "Work orders",
+            "permissions": [
+              {
+                "status": "partial",
+                "text": "See only the orders they created"
+              },
+              {
+                "status": "allowed",
+                "text": "Create orders"
+              },
+              {
+                "status": "allowed",
+                "text": "Edit their own orders"
+              },
+              {
+                "status": "partial",
+                "text": "Change status only from Quote to Approved or Canceled"
+              },
+              {
+                "status": "partial",
+                "text": "Delete their own orders, only in Quote"
+              }
+            ]
+          },
+          {
+            "title": "Money",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "See prices and totals to build the quote"
+              },
+              {
+                "status": "allowed",
+                "text": "Generate the order PDF"
+              },
+              {
+                "status": "denied",
+                "text": "See the numbers in the <strong>Financial</strong> tab"
+              }
+            ]
+          },
+          {
+            "title": "Records and procedures",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Add and edit customers"
+              },
+              {
+                "status": "allowed",
+                "text": "Look up products, services and devices"
+              },
+              {
+                "status": "allowed",
+                "text": "Add and fill in procedures on their own orders"
+              },
+              {
+                "status": "denied",
+                "text": "Create procedure templates"
+              },
+              {
+                "status": "denied",
+                "text": "Reopen a completed procedure"
+              }
+            ]
+          }
+        ],
         "infoCard": {
-          "title": "Limited Visibility",
-          "content": "The Consultant only views SOs they created. In case of vacation or absence, the Administrator can reassign SOs to another consultant."
+          "title": "Only their own orders",
+          "content": "Consultants don’t see their coworkers’ orders — not in the list and not on the schedule. The orders they create stay visible to Administrators, Managers, Supervisors and Technicians, so nothing gets lost when they go on vacation."
         }
       },
       {
         "id": "technician",
         "title": "Technician",
-        "subtitle": "Executes services. Does not view prices and has limited editing after SO approval.",
-        "headerInline": {
-          "emoji": "&#128119;",
-          "badgeClass": "technician"
-        },
-        "warningCard": {
-          "title": "Operational Profile",
-          "content": "Focus on execution. Does not view financial values and has limited editing in SOs after approval."
-        }
+        "subtitle": "Does the work. Doesn’t see prices and, after approval, can’t change what was quoted.",
+        "permissionsGrid": [
+          {
+            "title": "Work orders",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "See the orders they created, without prices"
+              },
+              {
+                "status": "allowed",
+                "text": "Create orders — they start in Quote"
+              },
+              {
+                "status": "partial",
+                "text": "Edit services, products, customer, device and dates only while the order is in Quote"
+              },
+              {
+                "status": "partial",
+                "text": "Move orders from Approved to In Progress or Completed; approve quotes they created"
+              },
+              {
+                "status": "partial",
+                "text": "Delete their own orders, only in Quote"
+              }
+            ]
+          },
+          {
+            "title": "Money",
+            "permissions": [
+              {
+                "status": "denied",
+                "text": "See prices and totals"
+              },
+              {
+                "status": "denied",
+                "text": "Generate the order PDF"
+              },
+              {
+                "status": "denied",
+                "text": "See the numbers in the <strong>Financial</strong> tab"
+              }
+            ]
+          },
+          {
+            "title": "Records",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Look up customers and devices — to call the customer or find the address"
+              },
+              {
+                "status": "denied",
+                "text": "Add or edit customers"
+              },
+              {
+                "status": "denied",
+                "text": "Open the product and service catalog from <strong>More</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Procedures and photos",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Fill in procedures and attach photos"
+              },
+              {
+                "status": "partial",
+                "text": "Add or remove procedures only while the order is in Quote"
+              },
+              {
+                "status": "denied",
+                "text": "Create procedure templates"
+              },
+              {
+                "status": "denied",
+                "text": "Reopen a completed procedure"
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "matrix",
-        "title": "Permission Matrix",
-        "intro": "Consolidated view of all permissions by profile. See each profile's section for details."
+        "title": "Permission table",
+        "intro": "All five profiles side by side. The asterisk marks what depends on the order’s status or on who created it — see each profile’s section for the details.",
+        "tables": [
+          {
+            "title": "Work orders",
+            "headers": [
+              "Permission",
+              "Administrator",
+              "Manager",
+              "Supervisor",
+              "Consultant",
+              "Technician"
+            ],
+            "rows": [
+              {
+                "label": "Create orders",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              },
+              {
+                "label": "Edit after approval",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Change status",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Reopen a completed order",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Delete orders",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "See coworkers’ orders",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Money",
+            "headers": [
+              "Permission",
+              "Administrator",
+              "Manager",
+              "Supervisor",
+              "Consultant",
+              "Technician"
+            ],
+            "rows": [
+              {
+                "label": "See prices and totals",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Generate order PDF",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Financial tab",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Records and company",
+            "headers": [
+              "Permission",
+              "Administrator",
+              "Manager",
+              "Supervisor",
+              "Consultant",
+              "Technician"
+            ],
+            "rows": [
+              {
+                "label": "Customers",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Products and services",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Devices",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Procedure templates",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Collaborators and company data",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
+            ],
+            "note": "For records, ✓ means add and edit. Profiles marked ✕ can still look up what they need to work on an order."
+          }
+        ]
       },
       {
         "id": "status",
-        "title": "Status-Based Rules",
-        "intro": "Editing permissions vary according to the current SO status. Full editing in 'Quote' status, limited after approval."
+        "title": "What changes with the order status",
+        "intro": "Supervisors and Technicians have more freedom while the order is a quote. Once the customer approves, what was quoted is locked for them — so nobody swaps a part or a service without going through whoever owns the price.",
+        "statusFlow": [
+          {
+            "name": "Quote",
+            "class": "quote"
+          },
+          {
+            "name": "Approved",
+            "class": "approved"
+          },
+          {
+            "name": "In Progress",
+            "class": "progress"
+          },
+          {
+            "name": "Completed",
+            "class": "done"
+          }
+        ],
+        "statusDetails": [
+          {
+            "title": "In Quote",
+            "indicatorClass": "quote",
+            "description": "Supervisors and Technicians can change everything on the order:",
+            "list": [
+              "Add, edit and remove services and products",
+              "Change the customer and device",
+              "Change the scheduled and delivery dates",
+              "Add and remove procedures",
+              "Attach photos"
+            ],
+            "note": "Even here, they don’t see prices."
+          },
+          {
+            "title": "After approval",
+            "indicatorClass": "approved",
+            "description": "For Supervisors and Technicians, the quote is locked:",
+            "permissions": {
+              "canDoTitle": "Can",
+              "canDo": [
+                "Edit notes on services and products already added",
+                "Fill in the order’s procedures",
+                "Attach photos",
+                "Move the order to In Progress or Completed",
+                "Supervisor: add or remove procedures"
+              ],
+              "cannotDoTitle": "Can’t",
+              "cannotDo": [
+                "Add or remove services and products",
+                "Change quantities",
+                "Change the customer or device",
+                "Change the dates",
+                "Technician: add or remove procedures"
+              ]
+            }
+          },
+          {
+            "title": "Completed",
+            "indicatorClass": "done",
+            "description": "Only <strong>Administrators</strong> and <strong>Managers</strong> can change the status of a completed order — to reopen a job that came back with a problem, for example.",
+            "paragraphs": [
+              "For Supervisors, Consultants and Technicians, a completed order’s status stays as it is. If something needs fixing, ask an Administrator or Manager."
+            ]
+          }
+        ]
       },
       {
         "id": "faq",
-        "title": "Frequently Asked Questions",
+        "title": "FAQ",
         "faq": [
           {
-            "question": "Can a user have different profiles in different companies?",
-            "answer": "Yes. The system supports multi-tenancy, where a user can be Admin in one company and Technician in another."
+            "question": "Do technicians only see their own orders?",
+            "answer": "Yes. Technicians and Consultants see only the orders they created, and Technicians don’t see prices. Administrators, Managers and Supervisors see every order in the company."
           },
           {
-            "question": "What happens if a profile is not recognized?",
-            "answer": "The system normalizes to \"technician\" (least privilege) for security."
+            "question": "Can technicians see prices?",
+            "answer": "No. The app hides prices in the order list, inside the order and in the catalog, and doesn’t show the PDF option. The same goes for Supervisors."
+          },
+          {
+            "question": "Can a technician approve their own quote?",
+            "answer": "Yes, if they created the order: they can move it from Quote to Approved or straight to In Progress. Handy for someone working alone who closes the deal with the customer on the spot."
+          },
+          {
+            "question": "Why can’t Managers create orders?",
+            "answer": "The profile is meant for whoever tracks the money, not whoever serves the customer. If the person also writes quotes, make them an Administrator — or a Consultant, if they don’t need the Financial tab."
+          },
+          {
+            "question": "Who can reopen a completed procedure?",
+            "answer": "Administrators, Managers and Supervisors. Consultants and Technicians don’t get the <strong>Reopen</strong> button."
+          },
+          {
+            "question": "How do I change someone’s profile?",
+            "answer": "In <strong>More → Collaborators</strong>, tap the person’s name and choose <strong>Edit Permission</strong>. The change applies to that company only."
           }
         ]
       }
@@ -644,163 +1775,883 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Visión General del Sistema RBAC",
-        "intro": "PraticOS utiliza un sistema de control de acceso basado en perfiles (<strong>RBAC - Role-Based Access Control</strong>) para gestionar los permisos de los colaboradores de cada empresa.",
+        "title": "Cómo funcionan los perfiles",
+        "intro": "Cada persona del equipo entra a la empresa con un perfil. El perfil decide qué ve — sobre todo precios y totales — y qué puede cambiar en cada OS. Solo el Administrador invita personas y cambia perfiles.",
+        "steps": [
+          "Toca la pestaña <strong>Más</strong> y luego <strong>Colaboradores</strong>.",
+          "Toca <strong>+</strong> para abrir <strong>Nuevo Colaborador</strong>.",
+          "Ingresa el correo o el teléfono de la persona.",
+          "En <strong>Perfil</strong>, elige el perfil de acceso y toca <strong>Agregar</strong>. La persona recibe la invitación y entra a la empresa al aceptarla."
+        ],
         "infoCard": {
-          "title": "Multi-Tenancy",
-          "content": "Un usuario puede tener perfiles diferentes en empresas diferentes. Por ejemplo, ser Administrador en una empresa y Técnico en otra."
+          "title": "Un perfil en cada empresa",
+          "content": "La misma persona puede estar en más de una empresa en PraticOS, con un perfil distinto en cada una — Administrador en su propio taller y Técnico en el de un socio, por ejemplo."
+        },
+        "warningCard": {
+          "title": "Siempre un Administrador",
+          "content": "Para cambiar el perfil de alguien, toca su nombre en <strong>Colaboradores</strong> y elige <strong>Editar Permiso</strong>. La app no deja eliminar ni bajar de perfil al único Administrador de la empresa: promueve a otra persona primero."
         }
       },
       {
         "id": "perfiles",
-        "title": "Perfiles Disponibles",
-        "intro": "El sistema cuenta con 5 perfiles distintos, cada uno diseñado para atender diferentes funciones dentro de la organización:",
+        "title": "Los cinco perfiles",
+        "intro": "Elige según lo que la persona hace en el día a día, no según el cargo. Si tienes dudas, empieza con menos acceso y amplíalo después.",
         "profiles": [
           {
             "id": "admin",
-            "emoji": "&#128104;&#8205;&#128188;",
             "name": "Administrador",
-            "description": "Acceso total. Configura la empresa, gestiona usuarios y accede a todos los datos.",
-            "tag": "Gestión Completa",
-            "colorClass": "admin"
+            "description": "El dueño o quien responde por la empresa. Ve y cambia todo, incluido el equipo y los datos de la empresa."
           },
           {
             "id": "gerente",
-            "emoji": "&#128176;",
             "name": "Gerente",
-            "description": "Enfoque en resultados. Visualiza facturación y costos, pero no ejecuta servicios.",
-            "tag": "Financiero",
-            "colorClass": "manager"
+            "description": "Quien maneja el dinero. Ve precios y la pestaña Financiero y ajusta OS, pero no abre OS nuevas."
           },
           {
             "id": "supervisor",
-            "emoji": "&#129489;&#8205;&#128295;",
             "name": "Supervisor",
-            "description": "Coordina equipos y equipamientos. No visualiza valores financieros.",
-            "tag": "Operacional",
-            "colorClass": "supervisor"
+            "description": "Quien coordina los trabajos. Abre OS y maneja clientes, equipos y procedimientos, sin ver precios."
           },
           {
             "id": "consultor",
-            "emoji": "&#129489;&#8205;&#128188;",
             "name": "Consultor",
-            "description": "Crea presupuestos. Ve precios, pero accede solo a sus propias Órdenes de Servicio.",
-            "tag": "Comercial",
-            "colorClass": "consultant"
+            "description": "Quien vende. Arma presupuestos con precio, pero solo ve las OS que él mismo creó."
           },
           {
             "id": "tecnico",
-            "emoji": "&#128119;",
             "name": "Técnico",
-            "description": "Ejecuta servicios. No ve precios y tiene edición limitada después de la aprobación.",
-            "tag": "Ejecución",
-            "colorClass": "technician"
+            "description": "Quien ejecuta. Ve las OS, llena procedimientos y toma fotos, sin ver precios."
           }
         ]
       },
       {
         "id": "admin",
         "title": "Administrador",
-        "subtitle": "Acceso total. Configura la empresa, gestiona usuarios y accede a todos los datos.",
-        "headerInline": {
-          "emoji": "&#128104;&#8205;&#128188;",
-          "badgeClass": "admin"
-        },
+        "subtitle": "Acceso total. Configura la empresa, maneja el equipo y ve todos los datos.",
         "permissionsGrid": [
           {
-            "title": "Órdenes de Servicio",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "title": "Órdenes de servicio",
             "permissions": [
-              { "status": "allowed", "text": "Ver todas las OS de la empresa" },
-              { "status": "allowed", "text": "Crear nuevas OS" },
-              { "status": "allowed", "text": "Editar cualquier OS" },
-              { "status": "allowed", "text": "Asignar/reasignar técnicos" },
-              { "status": "allowed", "text": "Ejecutar servicios" },
-              { "status": "allowed", "text": "Eliminar OS" }
+              {
+                "status": "allowed",
+                "text": "Ver todas las OS de la empresa"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear y editar OS en cualquier estado"
+              },
+              {
+                "status": "allowed",
+                "text": "Cambiar a cualquier estado, incluso reabrir una OS completada"
+              },
+              {
+                "status": "allowed",
+                "text": "Eliminar OS en cualquier estado"
+              }
             ]
           },
           {
-            "title": "Datos Financieros",
-            "icon": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
+            "title": "Dinero",
             "permissions": [
-              { "status": "allowed", "text": "Ver valores y precios" },
-              { "status": "allowed", "text": "Ver facturación" },
-              { "status": "allowed", "text": "Acceder a informes financieros" },
-              { "status": "allowed", "text": "Editar valores y precios" }
+              {
+                "status": "allowed",
+                "text": "Ver precios y totales"
+              },
+              {
+                "status": "allowed",
+                "text": "Registrar pagos de la OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Generar el PDF de la OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Ver los números de la pestaña <strong>Financiero</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Registros",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Crear y editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear y editar productos y servicios del catálogo"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear y editar dispositivos (vehículos, celulares, equipos — el nombre cambia según el segmento)"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear y editar plantillas de procedimiento"
+              }
+            ]
+          },
+          {
+            "title": "Empresa",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Invitar y eliminar colaboradores y cambiar perfiles"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar <strong>Datos de la Empresa</strong>"
+              }
             ]
           }
         ]
       },
       {
         "id": "gerente",
-        "title": "Gerente (Financiero)",
-        "subtitle": "Enfoque en resultados. Visualiza facturación y costos, pero no ejecuta servicios.",
-        "headerInline": {
-          "emoji": "&#128176;",
-          "badgeClass": "manager"
-        },
-        "paragraphs": ["Acceso completo a datos financieros. Puede editar valores y acceder a informes de facturación. No puede asignar técnicos ni ejecutar servicios."]
+        "title": "Gerente",
+        "subtitle": "Maneja el dinero. Ve precios y puede ajustar cualquier OS, pero no abre OS nuevas.",
+        "permissionsGrid": [
+          {
+            "title": "Órdenes de servicio",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Ver todas las OS de la empresa"
+              },
+              {
+                "status": "denied",
+                "text": "Crear OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar OS en cualquier estado — por ejemplo, corregir un precio después de aprobada"
+              },
+              {
+                "status": "allowed",
+                "text": "Cambiar a cualquier estado, incluso reabrir una OS completada"
+              },
+              {
+                "status": "partial",
+                "text": "Eliminar OS, solo mientras está en Presupuesto"
+              }
+            ]
+          },
+          {
+            "title": "Dinero",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Ver precios y totales"
+              },
+              {
+                "status": "allowed",
+                "text": "Registrar pagos de la OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Generar el PDF de la OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Ver los números de la pestaña <strong>Financiero</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Registros y procedimientos",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Consultar clientes, productos, servicios y dispositivos"
+              },
+              {
+                "status": "denied",
+                "text": "Crear o editar clientes, catálogo y dispositivos"
+              },
+              {
+                "status": "allowed",
+                "text": "Reabrir un procedimiento completado"
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "supervisor",
         "title": "Supervisor",
-        "subtitle": "Coordina equipos y equipamientos. No visualiza valores financieros.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128295;",
-          "badgeClass": "supervisor"
-        },
+        "subtitle": "Coordina los trabajos y el equipo de campo. No ve precios.",
+        "permissionsGrid": [
+          {
+            "title": "Órdenes de servicio",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Ver todas las OS de la empresa, sin precios"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear OS"
+              },
+              {
+                "status": "partial",
+                "text": "Editar servicios, productos, cliente, dispositivo y fechas solo mientras la OS está en Presupuesto"
+              },
+              {
+                "status": "partial",
+                "text": "Pasar de Aprobado a En Progreso o Completado; aprobar presupuestos que él mismo creó"
+              },
+              {
+                "status": "partial",
+                "text": "Eliminar OS, solo mientras está en Presupuesto"
+              }
+            ]
+          },
+          {
+            "title": "Dinero",
+            "permissions": [
+              {
+                "status": "denied",
+                "text": "Ver precios y totales"
+              },
+              {
+                "status": "denied",
+                "text": "Generar el PDF de la OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver los números de la pestaña <strong>Financiero</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Registros",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Crear y editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear y editar dispositivos"
+              },
+              {
+                "status": "partial",
+                "text": "Consultar productos y servicios del catálogo, sin precio"
+              }
+            ]
+          },
+          {
+            "title": "Procedimientos",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Crear y editar plantillas de procedimiento"
+              },
+              {
+                "status": "allowed",
+                "text": "Agregar o quitar procedimientos en la OS hasta que se complete"
+              },
+              {
+                "status": "allowed",
+                "text": "Reabrir un procedimiento completado"
+              }
+            ]
+          }
+        ],
         "warningCard": {
-          "title": "Sin Acceso Financiero",
-          "content": "Este perfil no visualiza valores, precios, facturación ni informes financieros. Ideal para colaboradores enfocados en operaciones."
+          "title": "Sin precios en pantalla",
+          "content": "El Supervisor no ve precios en la lista de OS, dentro de la OS ni en el catálogo, y la opción de generar PDF no le aparece. Si también cierra presupuestos con el cliente, necesita otro perfil."
         }
       },
       {
         "id": "consultor",
-        "title": "Consultor (Vendedor)",
-        "subtitle": "Crea presupuestos. Ve precios, pero accede solo a sus propias Órdenes de Servicio.",
-        "headerInline": {
-          "emoji": "&#129489;&#8205;&#128188;",
-          "badgeClass": "consultant"
-        },
+        "title": "Consultor",
+        "subtitle": "Vende y arma presupuestos. Ve precios, pero solo en las OS que él mismo creó.",
+        "permissionsGrid": [
+          {
+            "title": "Órdenes de servicio",
+            "permissions": [
+              {
+                "status": "partial",
+                "text": "Ver solo las OS que creó"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear OS"
+              },
+              {
+                "status": "allowed",
+                "text": "Editar sus propias OS"
+              },
+              {
+                "status": "partial",
+                "text": "Cambiar el estado solo de Presupuesto a Aprobado o Cancelado"
+              },
+              {
+                "status": "partial",
+                "text": "Eliminar sus propias OS, solo en Presupuesto"
+              }
+            ]
+          },
+          {
+            "title": "Dinero",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Ver precios y totales para armar el presupuesto"
+              },
+              {
+                "status": "allowed",
+                "text": "Generar el PDF de la OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver los números de la pestaña <strong>Financiero</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Registros y procedimientos",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Crear y editar clientes"
+              },
+              {
+                "status": "allowed",
+                "text": "Consultar productos, servicios y dispositivos"
+              },
+              {
+                "status": "allowed",
+                "text": "Agregar y llenar procedimientos en sus propias OS"
+              },
+              {
+                "status": "denied",
+                "text": "Crear plantillas de procedimiento"
+              },
+              {
+                "status": "denied",
+                "text": "Reabrir un procedimiento completado"
+              }
+            ]
+          }
+        ],
         "infoCard": {
-          "title": "Visibilidad Limitada",
-          "content": "El Consultor solo visualiza las OS que él mismo creó. En caso de vacaciones o ausencia, el Administrador puede reasignar OS a otro consultor."
+          "title": "Solo sus OS",
+          "content": "El Consultor no ve las OS de sus compañeros — ni en la lista ni en la agenda. Las OS que él crea siguen visibles para Administrador, Gerente, Supervisor y Técnico, así que nada se pierde si se va de vacaciones."
         }
       },
       {
         "id": "tecnico",
         "title": "Técnico",
-        "subtitle": "Ejecuta servicios. No ve precios y tiene edición limitada después de la aprobación.",
-        "headerInline": {
-          "emoji": "&#128119;",
-          "badgeClass": "technician"
-        },
-        "warningCard": {
-          "title": "Perfil Operacional",
-          "content": "Enfoque en la ejecución. No visualiza valores financieros y tiene edición limitada en OS después de la aprobación."
-        }
+        "subtitle": "Ejecuta el trabajo. No ve precios y, después de la aprobación, no cambia lo presupuestado.",
+        "permissionsGrid": [
+          {
+            "title": "Órdenes de servicio",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Ver las OS que creó, sin precios"
+              },
+              {
+                "status": "allowed",
+                "text": "Crear OS — empiezan en Presupuesto"
+              },
+              {
+                "status": "partial",
+                "text": "Editar servicios, productos, cliente, dispositivo y fechas solo mientras la OS está en Presupuesto"
+              },
+              {
+                "status": "partial",
+                "text": "Pasar de Aprobado a En Progreso o Completado; aprobar presupuestos que él mismo creó"
+              },
+              {
+                "status": "partial",
+                "text": "Eliminar sus propias OS, solo en Presupuesto"
+              }
+            ]
+          },
+          {
+            "title": "Dinero",
+            "permissions": [
+              {
+                "status": "denied",
+                "text": "Ver precios y totales"
+              },
+              {
+                "status": "denied",
+                "text": "Generar el PDF de la OS"
+              },
+              {
+                "status": "denied",
+                "text": "Ver los números de la pestaña <strong>Financiero</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Registros",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Consultar clientes y dispositivos — para llamar al cliente o encontrar la dirección"
+              },
+              {
+                "status": "denied",
+                "text": "Crear o editar clientes"
+              },
+              {
+                "status": "denied",
+                "text": "Abrir el catálogo de productos y servicios desde <strong>Más</strong>"
+              }
+            ]
+          },
+          {
+            "title": "Procedimientos y fotos",
+            "permissions": [
+              {
+                "status": "allowed",
+                "text": "Llenar procedimientos y adjuntar fotos"
+              },
+              {
+                "status": "partial",
+                "text": "Agregar o quitar procedimientos solo mientras la OS está en Presupuesto"
+              },
+              {
+                "status": "denied",
+                "text": "Crear plantillas de procedimiento"
+              },
+              {
+                "status": "denied",
+                "text": "Reabrir un procedimiento completado"
+              }
+            ]
+          }
+        ]
       },
       {
         "id": "matriz",
-        "title": "Matriz de Permisos",
-        "intro": "Visión consolidada de todos los permisos por perfil. Consulte la sección de cada perfil para más detalles."
+        "title": "Tabla de permisos",
+        "intro": "Los cinco perfiles lado a lado. El asterisco marca lo que depende del estado de la OS o de quién la creó — los detalles están en la sección de cada perfil.",
+        "tables": [
+          {
+            "title": "Órdenes de servicio",
+            "headers": [
+              "Permiso",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
+            ],
+            "rows": [
+              {
+                "label": "Crear OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              },
+              {
+                "label": "Editar después de aprobada",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Cambiar el estado",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Reabrir OS completada",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Eliminar OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  },
+                  {
+                    "class": "partial"
+                  }
+                ]
+              },
+              {
+                "label": "Ver OS de los compañeros",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Dinero",
+            "headers": [
+              "Permiso",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
+            ],
+            "rows": [
+              {
+                "label": "Ver precios y totales",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Generar PDF de la OS",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Pestaña Financiero",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Registros y empresa",
+            "headers": [
+              "Permiso",
+              "Administrador",
+              "Gerente",
+              "Supervisor",
+              "Consultor",
+              "Técnico"
+            ],
+            "rows": [
+              {
+                "label": "Clientes",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Productos y servicios",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Dispositivos",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Plantillas de procedimiento",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              },
+              {
+                "label": "Colaboradores y datos de la empresa",
+                "cells": [
+                  {
+                    "class": "yes"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  },
+                  {
+                    "class": "no"
+                  }
+                ]
+              }
+            ],
+            "note": "En los registros, ✓ significa crear y editar. Quien tiene ✕ igual consulta lo que necesita para trabajar en la OS."
+          }
+        ]
       },
       {
         "id": "status",
-        "title": "Reglas Basadas en Estado",
-        "intro": "Los permisos de edición varían según el estado actual de la OS. Edición completa en estado 'Presupuesto', limitada después de la aprobación."
+        "title": "Qué cambia con el estado de la OS",
+        "intro": "Supervisor y Técnico tienen más libertad mientras la OS es presupuesto. Cuando el cliente aprueba, lo presupuestado queda bloqueado para ellos — así nadie cambia una pieza o un servicio sin pasar por quien maneja el precio.",
+        "statusFlow": [
+          {
+            "name": "Presupuesto",
+            "class": "quote"
+          },
+          {
+            "name": "Aprobado",
+            "class": "approved"
+          },
+          {
+            "name": "En Progreso",
+            "class": "progress"
+          },
+          {
+            "name": "Completado",
+            "class": "done"
+          }
+        ],
+        "statusDetails": [
+          {
+            "title": "En Presupuesto",
+            "indicatorClass": "quote",
+            "description": "Supervisor y Técnico pueden cambiar todo en la OS:",
+            "list": [
+              "Agregar, editar y quitar servicios y productos",
+              "Cambiar cliente y dispositivo",
+              "Cambiar las fechas de programación y entrega",
+              "Agregar y quitar procedimientos",
+              "Adjuntar fotos"
+            ],
+            "note": "Aun así, no ven los precios."
+          },
+          {
+            "title": "Después de aprobada",
+            "indicatorClass": "approved",
+            "description": "Para Supervisor y Técnico, el presupuesto queda bloqueado:",
+            "permissions": {
+              "canDoTitle": "Pueden",
+              "canDo": [
+                "Editar las observaciones de servicios y productos ya cargados",
+                "Llenar los procedimientos de la OS",
+                "Adjuntar fotos",
+                "Pasar a En Progreso o Completado",
+                "Supervisor: agregar o quitar procedimientos"
+              ],
+              "cannotDoTitle": "No pueden",
+              "cannotDo": [
+                "Agregar o quitar servicios y productos",
+                "Cambiar cantidades",
+                "Cambiar cliente o dispositivo",
+                "Cambiar las fechas",
+                "Técnico: agregar o quitar procedimientos"
+              ]
+            }
+          },
+          {
+            "title": "Completada",
+            "indicatorClass": "done",
+            "description": "Solo <strong>Administrador</strong> y <strong>Gerente</strong> cambian el estado de una OS completada — por ejemplo, para reabrir un trabajo que volvió con una falla.",
+            "paragraphs": [
+              "Para Supervisor, Consultor y Técnico, el estado de una OS completada queda como está. Si hay que corregir algo, pídeselo a un Administrador o Gerente."
+            ]
+          }
+        ]
       },
       {
         "id": "faq",
-        "title": "Preguntas Frecuentes",
+        "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "¿Un usuario puede tener perfiles diferentes en empresas diferentes?",
-            "answer": "Sí. El sistema soporta multi-tenancy, donde un usuario puede ser Admin en una empresa y Técnico en otra."
+            "question": "¿El técnico solo ve sus OS?",
+            "answer": "Sí. El Técnico y el Consultor ven solo las OS que ellos mismos crearon, y el Técnico no ve precios. Administrador, Gerente y Supervisor ven todas las OS de la empresa."
           },
           {
-            "question": "¿Qué pasa si un perfil no es reconocido?",
-            "answer": "El sistema normaliza a \"técnico\" (menor privilegio) por seguridad."
+            "question": "¿El técnico ve los precios?",
+            "answer": "No. La app oculta los precios en la lista de OS, dentro de la OS y en el catálogo, y no muestra la opción de generar el PDF. Lo mismo vale para el Supervisor."
+          },
+          {
+            "question": "¿Un técnico puede aprobar su propio presupuesto?",
+            "answer": "Sí, si él creó la OS: puede pasarla de Presupuesto a Aprobado o directo a En Progreso. Útil para quien trabaja solo en la calle y cierra el trabajo con el cliente en el momento."
+          },
+          {
+            "question": "¿Por qué el Gerente no crea OS?",
+            "answer": "El perfil está pensado para quien sigue el dinero, no para quien atiende al cliente. Si la persona también arma presupuestos, usa Administrador — o Consultor, si no necesita la pestaña Financiero."
+          },
+          {
+            "question": "¿Quién puede reabrir un procedimiento completado?",
+            "answer": "Administrador, Gerente y Supervisor. Al Consultor y al Técnico no les aparece el botón <strong>Reabrir</strong>."
+          },
+          {
+            "question": "¿Cómo cambio el perfil de alguien?",
+            "answer": "En <strong>Más → Colaboradores</strong>, toca el nombre de la persona y elige <strong>Editar Permiso</strong>. El cambio vale solo para esa empresa."
           }
         ]
       }

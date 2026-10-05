@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/integration_token.dart';
+import 'package:praticos/models/payment_settings.dart';
+import 'package:praticos/screens/integrations/asaas_connection_screen.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/integration_api_service.dart';
 
@@ -83,6 +85,10 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   List<IntegrationToken> _tokens = [];
   bool _loading = true;
   String? _error;
+
+  /// Null hides the Payments section (not owner/admin or no company).
+  late final Stream<PaymentSettings>? _paymentSettings =
+      paymentSettingsStream();
 
   @override
   void initState() {
@@ -228,6 +234,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   @override
   Widget build(BuildContext context) {
     _formatService.setLocale(Localizations.localeOf(context).toString());
+    final paymentSettings = _paymentSettings;
 
     return CupertinoPageScaffold(
       backgroundColor:
@@ -243,6 +250,12 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
             ),
           ),
           SliverToBoxAdapter(child: _buildBody(context)),
+          if (paymentSettings != null)
+            SliverToBoxAdapter(
+              child: PaymentsIntegrationSection(
+                settingsStream: paymentSettings,
+              ),
+            ),
         ],
       ),
     );

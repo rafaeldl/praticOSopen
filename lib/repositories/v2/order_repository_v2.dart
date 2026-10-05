@@ -76,6 +76,11 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   }) =>
       _tenant.updatePayments(companyId, orderId, mutate, actor: actor);
 
+  /// Lê a OS do servidor, ignorando o cache local.
+  /// Ver [TenantOrderRepository.getFromServer].
+  Future<Order?> getFromServer(String companyId, String orderId) =>
+      _tenant.getFromServer(companyId, orderId);
+
   /// Aplica o mapa de update de pagamento com field transforms (offline-safe).
   /// Ver [TenantOrderRepository.applyPaymentFieldUpdate].
   Future<void> applyPaymentFieldUpdate(

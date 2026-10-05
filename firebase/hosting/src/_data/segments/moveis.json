@@ -3,379 +3,439 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Montador de Móveis | PraticOS",
-    "description": "Gerencie montagens, organize sua agenda e documente cada serviço com fotos. Sistema para montadores autônomos e empresas de montagem. Controle lojas, particulares e garantias.",
-    "keywords": "sistema montador de móveis, app montagem de móveis, gestão montador, controle montagens, sistema ordem de serviço móveis",
+    "title": "Sistema para Montador de Móveis: OS e fotos | PraticOS",
+    "description": "App de OS para montador de móveis: agenda de montagens, fotos do móvel na entrega, serviços de lojas e particulares e controle do que falta receber.",
+    "keywords": "sistema montador de móveis, app montagem de móveis, gestão montador de móveis, controle de montagens, ordem de serviço montagem de móveis",
     "ogTitle": "Sistema para Montador de Móveis | PraticOS",
-    "ogDescription": "Gerencie montagens, organize sua agenda e documente cada serviço com fotos. Sistema para montadores autônomos e empresas.",
+    "ogDescription": "Montagens no celular: agenda do dia, OS para loja ou cliente particular, fotos do móvel montado e controle do que cada cliente ainda deve.",
     "hero": {
-      "badge": "🪑 Móveis",
-      "title": "Monte mais, rode menos:",
-      "titleHighlight": "organize suas montagens na palma da mão",
-      "subtitle": "6 montagens por dia sem estresse? Com a agenda certa, dá. Controle serviços de lojas e clientes particulares, registre fotos antes/depois e colete assinatura digital.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "800+", "label": "Montadores ativos" },
-        "orders": { "value": "15k+", "label": "Montagens" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Cada montagem com",
+      "titleMark": "foto e valor na OS.",
+      "lede": "PraticOS é o app de ordem de serviço para montador de móveis. Marque as montagens na agenda, registre o serviço de cada loja ou cliente particular, fotografe o móvel montado e saiba o que falta receber — pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0731",
+        "rows": [
+          { "label": "Cliente", "value": "Patrícia Lemos" },
+          { "label": "Móvel", "value": "Guarda-roupa 6 portas" },
+          { "label": "Agendado", "value": "Sexta, 14h" },
+          { "label": "Serviço", "value": "Montagem e fixação na parede" },
+          { "label": "Fotos", "value": "4 anexadas" }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 280,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": ["Orçamento", "Aprovado", "Em execução", "Concluído", "Pago"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com montagem de móveis",
+      "title": "Onde o montador perde dinheiro",
+      "lede": "Montagem não falta. O que escapa é o endereço anotado errado, a peça que chegou faltando sem foto e a loja que paga no fim do mês sem conferir o que você fez.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📅", "title": "Agenda lotada e desorganizada", "text": "6 montagens marcadas, lugares diferentes, e você não sabe por onde começar. Atrasos em cascata o dia todo." },
-        { "icon": "🏪", "title": "Comunicação com lojas", "text": "Loja passa serviço por WhatsApp, muda, cancela... informações desencontradas e difícil de comprovar." },
-        { "icon": "🔩", "title": "Peças faltantes ou defeituosas", "text": "Abriu a caixa no cliente e faltava parafuso. Perda de tempo, viagem perdida e cliente irritado." },
-        { "icon": "📸", "title": "Sem comprovação do serviço", "text": "Cliente diz que você danificou o móvel, mas estava assim quando chegou. Sem foto, sem prova." },
-        { "icon": "🚗", "title": "Deslocamento caro", "text": "Gastou R$ 80 de combustível para uma montagem de R$ 120. Atendimentos espalhados sem otimização." },
-        { "icon": "💰", "title": "Cobrança atrasada", "text": "Loja devendo há meses, cliente particular pediu para pagar depois. Sem controle do que tem a receber." }
+        {
+          "problem": "Montagem esquecida ou marcada duas vezes",
+          "detail": "A loja manda o pedido por mensagem, o cliente particular liga, e a agenda fica num caderno que ninguém mais lê.",
+          "answer": "Cada montagem é uma OS com dia e hora. A agenda mostra o mês e o celular avisa antes de cada atendimento."
+        },
+        {
+          "problem": "Peça faltando ou avariada sem prova",
+          "detail": "A caixa chega com a porta riscada e, depois da montagem, o cliente diz que foi você.",
+          "answer": "Fotografe as caixas e as avarias na chegada. As fotos ficam na OS, com data, antes de você abrir a primeira embalagem."
+        },
+        {
+          "problem": "Cliente reclama depois da entrega",
+          "detail": "Uma semana depois aparece a reclamação de porta desalinhada ou móvel não fixado.",
+          "answer": "O checklist de entrega registra o móvel conferido com o cliente, as orientações passadas, o prazo de garantia e a foto do móvel montado."
+        },
+        {
+          "problem": "Loja que paga sem conferir",
+          "detail": "Você atende três lojas e particulares. No fim do mês, ninguém sabe quais montagens já foram pagas.",
+          "answer": "Cada OS tem status de pagamento: a receber, parcial ou pago. O painel mostra o que entrou e quanto falta receber."
+        },
+        {
+          "problem": "Valor combinado de boca",
+          "detail": "Montagem de cozinha, desmontagem, fixação na parede. O valor muda e o cliente lembra de outro.",
+          "answer": "O orçamento fica na OS com os serviços do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para montadores de móveis",
-      "items": [
-        { "icon": "📅", "title": "Agenda inteligente", "text": "Organize montagens por data, região e cliente. Veja tudo que tem para o dia.", "highlight": "Nunca mais perca um agendamento." },
-        { "icon": "📋", "title": "Gestão multi-cliente", "text": "Controle serviços de lojas (MadeiraMadeira, Tok&Stok) e clientes particulares em um só lugar." },
-        { "icon": "📸", "title": "Checklist com fotos", "text": "Registre antes, durante e depois. Proteja-se de reclamações e tenha histórico completo." },
-        { "icon": "✍️", "title": "Assinatura digital", "text": "Cliente assina no seu celular ao final. Comprovante enviado na hora por WhatsApp.", "highlight": "Prova de entrega profissional." },
-        { "icon": "🗺️", "title": "Roteirização de rotas", "text": "Agrupe montagens por região e integre com Google Maps. Economize combustível." },
-        { "icon": "💰", "title": "Controle financeiro", "text": "Saiba quanto cada loja te deve. Controle recebimentos e não perca dinheiro." }
+    "workflow": {
+      "title": "Como uma montagem passa pelo PraticOS",
+      "lede": "Do pedido à entrega, cada etapa fica registrada na OS.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Agende a montagem",
+          "text": "Crie a OS com o cliente — loja ou particular — e o móvel. Marque dia e hora: ela entra na agenda e o lembrete é programado no celular.",
+          "facts": [
+            "Agenda do mês com as montagens de cada dia",
+            "Montagem sem hora marcada aparece como “dia todo”",
+            "Serviços do seu catálogo, já com preço"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+        },
+        {
+          "number": "02",
+          "title": "Registre a chegada no local",
+          "text": "Antes de abrir as caixas, fotografe as embalagens e qualquer avaria. Use o checklist de entrada e ajuste os itens ao seu jeito.",
+          "facts": [
+            "Fotos das caixas e das avarias",
+            "Descrição do móvel e defeitos visíveis",
+            "Observações sobre o local de montagem"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "03",
+          "title": "Entregue com conferência",
+          "text": "Ao terminar, preencha o checklist de entrega com o cliente e fotografe o móvel montado. Ele pode acompanhar tudo pelo link da OS.",
+          "facts": [
+            "Móvel conferido e funcionamento demonstrado",
+            "Prazo de garantia registrado na OS",
+            "PDF da OS para enviar à loja ou ao cliente"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "04",
+          "title": "Receba e confira",
+          "text": "Registre o pagamento inteiro ou em parcelas. O painel mostra o faturamento do período e quem ainda deve.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "montagem",
-      "text": "Documente cada montagem com fotos e dados do móvel. Proteja-se de reclamações e tenha histórico completo para garantias.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Montagem",
-      "items": [
-        { "icon": "📦", "text": "Foto da embalagem lacrada" },
-        { "icon": "🔩", "text": "Conferência de peças e acessórios" },
-        { "icon": "📸", "text": "Foto do móvel montado" },
-        { "icon": "📝", "text": "Observações e pendências" },
-        { "icon": "⚠️", "text": "Registro de peças faltantes" },
-        { "icon": "✍️", "text": "Assinatura digital do cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar suas montagens",
-      "subtitle": "Ferramentas para montadores autônomos e empresas",
-      "items": [
-        { "icon": "document", "title": "OS Digital com foto", "text": "Crie ordens de serviço com foto do móvel e da embalagem. Documentação completa." },
-        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monte checklists por tipo de móvel: guarda-roupa, cozinha, escritório.", "color": "yellow" },
-        { "icon": "signature", "title": "Assinatura no celular", "text": "Cliente assina na tela do celular. Comprovante digital enviado na hora.", "color": "orange" },
-        { "icon": "bell", "title": "Controle de garantia", "text": "Histórico de cada montagem. Saiba o que foi feito e quando.", "color": "green" },
-        { "icon": "money", "title": "Financeiro integrado", "text": "Controle o que cada loja deve. Saiba exatamente quanto tem a receber.", "color": "purple" },
-        { "icon": "chart", "title": "Relatórios de produtividade", "text": "Quantas montagens por dia? Quanto faturou no mês? Tudo em relatórios.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Trabalho com 3 lojas diferentes e vivia perdido. Agora tenho tudo organizado, sei quanto cada uma me deve e consigo provar cada montagem com foto e assinatura.",
-      "name": "Ricardo Alves",
-      "role": "Montador autônomo há 6 anos",
-      "metric": "30% mais montagens por mês"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem monta móveis",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Funciona sem internet?", "answer": "Sim! Você pode registrar montagens offline. Quando voltar a ter conexão, tudo sincroniza automaticamente. Perfeito para prédios sem sinal." },
-        { "question": "Consigo controlar várias lojas?", "answer": "Sim! Cadastre cada loja como cliente e controle os serviços separadamente. Saiba quanto cada uma te deve." },
-        { "question": "Cliente recebe comprovante?", "answer": "Sim! Após a assinatura, o cliente recebe automaticamente o comprovante por WhatsApp com as fotos e detalhes da montagem." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia do montador." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Que ramo eu escolho ao criar a empresa?",
+          "answer": "Ainda não há um ramo específico para montagem de móveis. Escolha “Outro”: ele já traz checklists de entrada, registro do serviço e entrega ao cliente, que você ajusta para cada tipo de móvel."
+        },
+        {
+          "question": "Consigo separar o que é de loja e o que é particular?",
+          "answer": "Sim. Cada loja e cada cliente particular é um cliente no app. Busque pelo nome na lista de OS e veja todas as montagens dele, com o status de pagamento de cada uma."
+        },
+        {
+          "question": "Minha equipe pode usar no próprio celular?",
+          "answer": "Sim. Cada montador entra com o próprio usuário e um perfil de acesso. Quem coordena filtra a agenda por montador. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar suas montagens",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Furniture Assembly Service Management | PraticOS",
-    "description": "Manage assemblies, organize your schedule and document each job with photos. System for independent assemblers and assembly companies. Control stores, customers and warranties.",
-    "keywords": "furniture assembly software, assembly service management, furniture installer app, assembly scheduling, work order furniture",
-    "ogTitle": "Furniture Assembly Service Management | PraticOS",
-    "ogDescription": "Manage assemblies, organize your schedule and document each job with photos. System for independent assemblers and companies.",
+    "title": "Furniture Assembly Software: Jobs and Photos | PraticOS",
+    "description": "Work order app for furniture assemblers: job calendar, photos of the finished piece, work for stores and homeowners and a list of who still owes you.",
+    "keywords": "furniture assembly software, furniture assembly service app, furniture installer app, assembly scheduling app, furniture assembly work order",
+    "ogTitle": "Furniture Assembly Software | PraticOS",
+    "ogDescription": "Assembly jobs on your phone: the day's calendar, work orders for stores or homeowners, photos of the finished piece and who still owes you.",
     "hero": {
-      "badge": "🪑 Furniture",
-      "title": "Assemble more, drive less:",
-      "titleHighlight": "organize your assemblies at your fingertips",
-      "subtitle": "6 assemblies per day without stress? With the right scheduling, you can. Control store and private customer jobs, take before/after photos and collect digital signatures.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "800+", "label": "Active assemblers" },
-        "orders": { "value": "15k+", "label": "Assemblies" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Every assembly job with",
+      "titleMark": "photos and price.",
+      "lede": "PraticOS is the work order app for furniture assemblers. Put jobs on the calendar, record the work for each store or homeowner, photograph the finished piece and know what's still owed — from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0731",
+        "rows": [
+          { "label": "Customer", "value": "Patricia Lane" },
+          { "label": "Item", "value": "6-door wardrobe" },
+          { "label": "Scheduled", "value": "Friday, 2 PM" },
+          { "label": "Service", "value": "Assembly and wall anchoring" },
+          { "label": "Photos", "value": "4 attached" }
+        ],
+        "totalLabel": "Total",
+        "total": "$180.00",
+        "stamp": "Approved by customer",
+        "steps": ["Quote", "Approved", "In progress", "Done", "Paid"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for furniture assemblers",
+      "title": "Where an assembler loses money",
+      "lede": "There's no shortage of jobs. What slips away is the wrong address, the missing part with no photo and the store that pays at month's end without checking what you did.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📅", "title": "Overloaded, messy schedule", "text": "6 assemblies booked, different locations, and you don't know where to start. Cascading delays all day." },
-        { "icon": "🏪", "title": "Store communication issues", "text": "Store sends job via WhatsApp, changes it, cancels... conflicting information and hard to prove." },
-        { "icon": "🔩", "title": "Missing or defective parts", "text": "Opened the box at the customer's and screws were missing. Wasted time, wasted trip, angry customer." },
-        { "icon": "📸", "title": "No proof of service", "text": "Customer says you damaged the furniture, but it was like that when you arrived. No photo, no proof." },
-        { "icon": "🚗", "title": "Expensive travel", "text": "Spent $20 in gas for a $30 assembly. Scattered jobs without route optimization." },
-        { "icon": "💰", "title": "Late payments", "text": "Store owes you for months, private customer asked to pay later. No control over receivables." }
+        {
+          "problem": "Jobs forgotten or double-booked",
+          "detail": "The store sends the order by text, a homeowner calls, and the schedule lives in a notebook nobody reads.",
+          "answer": "Every job is a work order with a day and time. The calendar shows the month and your phone reminds you before each visit."
+        },
+        {
+          "problem": "Missing or damaged parts with no proof",
+          "detail": "The box arrives with a scratched door and, after the job, the customer says you did it.",
+          "answer": "Photograph the boxes and any damage on arrival. The photos stay on the work order, dated, before you open the first package."
+        },
+        {
+          "problem": "Complaints after you leave",
+          "detail": "A week later comes a complaint about a crooked door or a piece that wasn't anchored.",
+          "answer": "The handover checklist records the piece checked with the customer, the instructions given, the warranty period and a photo of the finished piece."
+        },
+        {
+          "problem": "Stores that pay without checking",
+          "detail": "You work for three stores plus homeowners. At month's end, nobody knows which jobs were paid.",
+          "answer": "Each work order has a payment status: due, partial or paid. The dashboard shows what came in and what's still owed."
+        },
+        {
+          "problem": "Prices agreed by word of mouth",
+          "detail": "Kitchen install, disassembly, wall anchoring. The price changes and the customer remembers another one.",
+          "answer": "The quote lives on the work order with services from your catalog. The customer approves it by link and the approval is recorded."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for furniture assemblers",
-      "items": [
-        { "icon": "📅", "title": "Smart scheduling", "text": "Organize assemblies by date, region and customer. See everything scheduled for the day.", "highlight": "Never miss an appointment again." },
-        { "icon": "📋", "title": "Multi-client management", "text": "Control store jobs (IKEA, Wayfair) and private customers in one place." },
-        { "icon": "📸", "title": "Photo checklist", "text": "Document before, during and after. Protect yourself from complaints with complete history." },
-        { "icon": "✍️", "title": "Digital signature", "text": "Customer signs on your phone when done. Receipt sent instantly via WhatsApp.", "highlight": "Professional proof of delivery." },
-        { "icon": "🗺️", "title": "Route optimization", "text": "Group assemblies by region and integrate with Google Maps. Save on fuel." },
-        { "icon": "💰", "title": "Financial control", "text": "Know how much each store owes you. Track receivables and never lose money." }
+    "workflow": {
+      "title": "How an assembly job moves through PraticOS",
+      "lede": "From the order to the handover, every step is recorded on the work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Schedule the job",
+          "text": "Create the work order with the customer — store or homeowner — and the piece. Set the day and time: it goes on the calendar and the reminder is set on your phone.",
+          "facts": [
+            "Monthly calendar with each day's jobs",
+            "Jobs without a set time show as “all day”",
+            "Services from your catalog, already priced"
+          ],
+          "image": "agenda.png",
+          "alt": "PraticOS calendar with work orders scheduled across the month"
+        },
+        {
+          "number": "02",
+          "title": "Record what you find on arrival",
+          "text": "Before opening the boxes, photograph the packaging and any damage. Use the intake checklist and adjust the items to the way you work.",
+          "facts": [
+            "Photos of the boxes and any damage",
+            "Description of the piece and visible defects",
+            "Notes about the installation spot"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "03",
+          "title": "Hand over with a walkthrough",
+          "text": "When you're done, go through the handover checklist with the customer and photograph the finished piece. They can follow it all through the work order link.",
+          "facts": [
+            "Piece checked and operation demonstrated",
+            "Warranty period recorded on the work order",
+            "Work order PDF to send to the store or customer"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "04",
+          "title": "Get paid and keep track",
+          "text": "Record the payment in full or in parts. The dashboard shows revenue for the period and who still owes you.",
+          "facts": [
+            "Partial payment and discount on the same work order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Assembly",
-      "titleHighlight": "checklist",
-      "text": "Document each assembly with photos and furniture data. Protect yourself from complaints and have complete history for warranties.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Assembly Checklist",
-      "items": [
-        { "icon": "📦", "text": "Photo of sealed packaging" },
-        { "icon": "🔩", "text": "Parts and accessories check" },
-        { "icon": "📸", "text": "Photo of assembled furniture" },
-        { "icon": "📝", "text": "Notes and pending items" },
-        { "icon": "⚠️", "text": "Missing parts record" },
-        { "icon": "✍️", "text": "Customer digital signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your assemblies",
-      "subtitle": "Tools for independent assemblers and companies",
-      "items": [
-        { "icon": "document", "title": "Digital WO with photo", "text": "Create work orders with furniture and packaging photos. Complete documentation." },
-        { "icon": "checklist", "title": "Custom checklist", "text": "Build checklists by furniture type: wardrobe, kitchen, office.", "color": "yellow" },
-        { "icon": "signature", "title": "Mobile signature", "text": "Customer signs on phone screen. Digital receipt sent instantly.", "color": "orange" },
-        { "icon": "bell", "title": "Warranty tracking", "text": "History of each assembly. Know what was done and when.", "color": "green" },
-        { "icon": "money", "title": "Integrated financials", "text": "Track what each store owes. Know exactly how much you have to receive.", "color": "purple" },
-        { "icon": "chart", "title": "Productivity reports", "text": "How many assemblies per day? Monthly revenue? All in reports.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "I work with 3 different stores and was always lost. Now everything is organized, I know how much each owes me and I can prove every assembly with photos and signature.",
-      "name": "Ricardo Alves",
-      "role": "Independent assembler for 6 years",
-      "metric": "30% more assemblies per month"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from furniture assemblers",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work offline?", "answer": "Yes! You can register assemblies offline. When you get connection back, everything syncs automatically. Perfect for buildings with no signal." },
-        { "question": "Can I manage multiple stores?", "answer": "Yes! Register each store as a customer and control jobs separately. Know how much each owes you." },
-        { "question": "Does the customer get a receipt?", "answer": "Yes! After signing, the customer automatically receives the receipt via WhatsApp with photos and assembly details." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of furniture assemblers." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Which trade do I pick when I set up my company?",
+          "answer": "There's no trade specific to furniture assembly yet. Pick “Other”: it comes with intake, service record and customer handover checklists that you can adjust for each type of piece."
+        },
+        {
+          "question": "Can I keep store jobs separate from homeowner jobs?",
+          "answer": "Yes. Each store and each homeowner is a customer in the app. Search by name in the work order list to see all their jobs, with the payment status of each."
+        },
+        {
+          "question": "Can my crew use it on their own phones?",
+          "answer": "Yes. Each assembler signs in with their own user and an access role. Whoever coordinates can filter the calendar by assembler. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your assemblies",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Montador de Muebles | PraticOS",
-    "description": "Gestiona montajes, organiza tu agenda y documenta cada servicio con fotos. Sistema para montadores autónomos y empresas de montaje. Controla tiendas, particulares y garantías.",
-    "keywords": "sistema montador de muebles, app montaje de muebles, gestión montador, control montajes, sistema orden de servicio muebles",
-    "ogTitle": "Sistema para Montador de Muebles | PraticOS",
-    "ogDescription": "Gestiona montajes, organiza tu agenda y documenta cada servicio con fotos. Sistema para montadores autónomos y empresas.",
+    "title": "Sistema para Armadores de Muebles | PraticOS",
+    "description": "App de órdenes para armadores de muebles: agenda de armados, fotos del mueble terminado, trabajos de tiendas y particulares y lo que falta cobrar.",
+    "keywords": "sistema armador de muebles, app armado de muebles, gestión armador de muebles, control de armados, orden de servicio armado de muebles, montador de muebles",
+    "ogTitle": "Sistema para Armadores de Muebles | PraticOS",
+    "ogDescription": "Armados en el celular: agenda del día, órdenes para tienda o cliente particular, fotos del mueble armado y control de lo que cada cliente todavía debe.",
     "hero": {
-      "badge": "🪑 Muebles",
-      "title": "Monta más, conduce menos:",
-      "titleHighlight": "organiza tus montajes en la palma de tu mano",
-      "subtitle": "¿6 montajes por día sin estrés? Con la agenda correcta, se puede. Controla servicios de tiendas y clientes particulares, registra fotos antes/después y recoge firma digital.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "800+", "label": "Montadores activos" },
-        "orders": { "value": "15k+", "label": "Montajes" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Cada armado con",
+      "titleMark": "fotos y precio en la orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para armadores de muebles. Marca los armados en la agenda, registra el trabajo de cada tienda o cliente particular, fotografía el mueble terminado y sabe lo que falta cobrar — desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0731",
+        "rows": [
+          { "label": "Cliente", "value": "Patricia Lemus" },
+          { "label": "Mueble", "value": "Clóset de 6 puertas" },
+          { "label": "Agendado", "value": "Viernes, 14 h" },
+          { "label": "Servicio", "value": "Armado y fijación a la pared" },
+          { "label": "Fotos", "value": "4 adjuntas" }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 180,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": ["Presupuesto", "Aprobado", "En curso", "Terminado", "Cobrado"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con montaje de muebles",
+      "title": "Dónde pierde plata el armador",
+      "lede": "Trabajo no falta. Lo que se escapa es la dirección mal anotada, la pieza que llegó faltando sin foto y la tienda que paga a fin de mes sin revisar lo que hiciste.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📅", "title": "Agenda llena y desorganizada", "text": "6 montajes marcados, lugares diferentes, y no sabes por dónde empezar. Retrasos en cascada todo el día." },
-        { "icon": "🏪", "title": "Comunicación con tiendas", "text": "Tienda pasa servicio por WhatsApp, cambia, cancela... información contradictoria y difícil de comprobar." },
-        { "icon": "🔩", "title": "Piezas faltantes o defectuosas", "text": "Abriste la caja en el cliente y faltaba tornillo. Pérdida de tiempo, viaje perdido y cliente irritado." },
-        { "icon": "📸", "title": "Sin comprobación del servicio", "text": "Cliente dice que dañaste el mueble, pero estaba así cuando llegaste. Sin foto, sin prueba." },
-        { "icon": "🚗", "title": "Desplazamiento caro", "text": "Gastaste $20 en combustible para un montaje de $30. Atendimientos dispersos sin optimización." },
-        { "icon": "💰", "title": "Cobro atrasado", "text": "Tienda debiendo hace meses, cliente particular pidió pagar después. Sin control de lo que tienes por cobrar." }
+        {
+          "problem": "Armados olvidados o agendados dos veces",
+          "detail": "La tienda manda el pedido por mensaje, el particular llama, y la agenda queda en un cuaderno que nadie lee.",
+          "answer": "Cada armado es una orden con día y hora. La agenda muestra el mes y el celular te avisa antes de cada visita."
+        },
+        {
+          "problem": "Piezas faltantes o dañadas sin prueba",
+          "detail": "La caja llega con la puerta rayada y, después del armado, el cliente dice que fuiste tú.",
+          "answer": "Fotografía las cajas y los daños al llegar. Las fotos quedan en la orden, con fecha, antes de abrir el primer paquete."
+        },
+        {
+          "problem": "Reclamos después de la entrega",
+          "detail": "Una semana después aparece el reclamo de una puerta desalineada o un mueble sin fijar.",
+          "answer": "El checklist de entrega registra el mueble revisado con el cliente, las indicaciones dadas, el plazo de garantía y la foto del mueble armado."
+        },
+        {
+          "problem": "Tiendas que pagan sin revisar",
+          "detail": "Trabajas para tres tiendas y para particulares. A fin de mes nadie sabe qué armados ya se pagaron.",
+          "answer": "Cada orden tiene estado de pago: por cobrar, parcial o pagado. El panel muestra lo que entró y cuánto falta cobrar."
+        },
+        {
+          "problem": "Precio acordado de palabra",
+          "detail": "Armado de cocina, desarmado, fijación a la pared. El precio cambia y el cliente recuerda otro.",
+          "answer": "El presupuesto queda en la orden con los servicios de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para montadores de muebles",
-      "items": [
-        { "icon": "📅", "title": "Agenda inteligente", "text": "Organiza montajes por fecha, región y cliente. Mira todo lo que tienes para el día.", "highlight": "Nunca más pierdas una cita." },
-        { "icon": "📋", "title": "Gestión multi-cliente", "text": "Controla servicios de tiendas (IKEA, Amazon) y clientes particulares en un solo lugar." },
-        { "icon": "📸", "title": "Checklist con fotos", "text": "Registra antes, durante y después. Protégete de reclamaciones con historial completo." },
-        { "icon": "✍️", "title": "Firma digital", "text": "Cliente firma en tu celular al terminar. Comprobante enviado al instante por WhatsApp.", "highlight": "Prueba de entrega profesional." },
-        { "icon": "🗺️", "title": "Optimización de rutas", "text": "Agrupa montajes por región e integra con Google Maps. Ahorra combustible." },
-        { "icon": "💰", "title": "Control financiero", "text": "Sabe cuánto te debe cada tienda. Controla cobros y no pierdas dinero." }
+    "workflow": {
+      "title": "Cómo pasa un armado por PraticOS",
+      "lede": "Del pedido a la entrega, cada paso queda registrado en la orden.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Agenda el armado",
+          "text": "Crea la orden con el cliente — tienda o particular — y el mueble. Marca día y hora: entra en la agenda y el recordatorio queda programado en el celular.",
+          "facts": [
+            "Agenda del mes con los armados de cada día",
+            "Un armado sin hora fija aparece como “todo el día”",
+            "Servicios de tu catálogo, con precio"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+        },
+        {
+          "number": "02",
+          "title": "Registra la llegada",
+          "text": "Antes de abrir las cajas, fotografía los embalajes y cualquier daño. Usa el checklist de ingreso y ajusta los ítems a tu forma de trabajar.",
+          "facts": [
+            "Fotos de las cajas y de los daños",
+            "Descripción del mueble y defectos visibles",
+            "Notas sobre el lugar de armado"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "03",
+          "title": "Entrega con revisión",
+          "text": "Al terminar, completa el checklist de entrega con el cliente y fotografía el mueble armado. El cliente puede seguir todo por el link de la orden.",
+          "facts": [
+            "Mueble revisado y funcionamiento mostrado",
+            "Plazo de garantía registrado en la orden",
+            "PDF de la orden para enviar a la tienda o al cliente"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "04",
+          "title": "Cobra y lleva la cuenta",
+          "text": "Registra el pago total o en partes. El panel muestra la facturación del período y quién todavía debe.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "montaje",
-      "text": "Documenta cada montaje con fotos y datos del mueble. Protégete de reclamaciones y ten historial completo para garantías.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Montaje",
-      "items": [
-        { "icon": "📦", "text": "Foto del embalaje sellado" },
-        { "icon": "🔩", "text": "Verificación de piezas y accesorios" },
-        { "icon": "📸", "text": "Foto del mueble montado" },
-        { "icon": "📝", "text": "Observaciones y pendientes" },
-        { "icon": "⚠️", "text": "Registro de piezas faltantes" },
-        { "icon": "✍️", "text": "Firma digital del cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tus montajes",
-      "subtitle": "Herramientas para montadores autónomos y empresas",
-      "items": [
-        { "icon": "document", "title": "OS Digital con foto", "text": "Crea órdenes de servicio con foto del mueble y embalaje. Documentación completa." },
-        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monta checklists por tipo de mueble: armario, cocina, oficina.", "color": "yellow" },
-        { "icon": "signature", "title": "Firma en el celular", "text": "Cliente firma en la pantalla del celular. Comprobante digital enviado al instante.", "color": "orange" },
-        { "icon": "bell", "title": "Control de garantía", "text": "Historial de cada montaje. Sabe qué se hizo y cuándo.", "color": "green" },
-        { "icon": "money", "title": "Financiero integrado", "text": "Controla lo que cada tienda debe. Sabe exactamente cuánto tienes por cobrar.", "color": "purple" },
-        { "icon": "chart", "title": "Informes de productividad", "text": "¿Cuántos montajes por día? ¿Cuánto facturaste en el mes? Todo en informes.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Trabajo con 3 tiendas diferentes y vivía perdido. Ahora tengo todo organizado, sé cuánto me debe cada una y puedo probar cada montaje con foto y firma.",
-      "name": "Ricardo Alves",
-      "role": "Montador autónomo hace 6 años",
-      "metric": "30% más montajes por mes"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien arma muebles",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Funciona sin internet?", "answer": "¡Sí! Puedes registrar montajes offline. Cuando vuelvas a tener conexión, todo sincroniza automáticamente. Perfecto para edificios sin señal." },
-        { "question": "¿Puedo controlar varias tiendas?", "answer": "¡Sí! Registra cada tienda como cliente y controla los servicios separadamente. Sabe cuánto te debe cada una." },
-        { "question": "¿El cliente recibe comprobante?", "answer": "¡Sí! Después de la firma, el cliente recibe automáticamente el comprobante por WhatsApp con las fotos y detalles del montaje." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día del montador." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Qué rubro elijo al crear la empresa?",
+          "answer": "Todavía no hay un rubro específico para armado de muebles. Elige “Otro”: trae checklists de ingreso, registro del servicio y entrega al cliente, que ajustas para cada tipo de mueble."
+        },
+        {
+          "question": "¿Puedo separar lo de tiendas y lo de particulares?",
+          "answer": "Sí. Cada tienda y cada particular es un cliente en la app. Busca por nombre en la lista de órdenes y ve todos sus armados, con el estado de pago de cada uno."
+        },
+        {
+          "question": "¿Mi equipo puede usarlo en su propio celular?",
+          "answer": "Sí. Cada armador entra con su propio usuario y un perfil de acceso. Quien coordina filtra la agenda por armador. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tus montajes",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

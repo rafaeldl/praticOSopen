@@ -91,6 +91,15 @@ class FormatService {
     ).format(value);
   }
 
+  /// Formata valor em reais (R\$ 1.234,56) independente do locale do app.
+  ///
+  /// Para valores que são sempre em BRL, como as cobranças Asaas.
+  String formatBrl(num? value) => NumberFormat.currency(
+        locale: 'pt_BR',
+        symbol: 'R\$',
+        decimalDigits: 2,
+      ).format(value ?? 0);
+
   /// Formata número decimal simples (ex: 1.234,56, 1,234.56)
   ///
   /// A biblioteca intl detecta automaticamente os separadores corretos

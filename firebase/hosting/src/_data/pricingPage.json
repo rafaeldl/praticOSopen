@@ -1,929 +1,413 @@
 {
   "pt": {
     "header": {
-      "title": "Planos e",
-      "titleHighlight": "Preços",
-      "subtitle": "Comece grátis. Pague só quando crescer.",
-      "subtext": "Sem cartão de crédito. Sem surpresas. Upgrade quando quiser."
+      "titleBefore": "Quatro planos, preço na página e",
+      "titleMark": "sem fidelidade",
+      "lede": "O Free não vence e não pede cartão. Quando entrar mais gente na equipe ou as fotos passarem de 30 por mês, você troca de plano dentro do app.",
+      "terms": ["Sem cartão para começar", "Cobrança mensal na App Store ou no Google Play", "Cancele quando quiser"]
     },
     "plans": [
       {
         "name": "Free",
-        "tag": "Para começar",
+        "tagline": "Para quem trabalha sozinho",
         "currency": "R$",
         "price": "0",
         "period": "/mês",
-        "tagline": "Grátis para sempre",
-        "features": [
-          { "text": "1 usuário" },
-          { "text": "30 fotos/mês" },
-          { "text": "1 checklist" },
-          { "text": "PDF com marca d'água" }
-        ],
-        "cta": "Começar Grátis",
-        "ctaStyle": "primary"
+        "features": ["1 usuário", "30 fotos por mês", "1 checklist", "PDF da OS com marca d’água"],
+        "cta": "Começar grátis"
       },
       {
         "name": "Starter",
-        "tag": "Para crescer",
+        "tagline": "Para a primeira equipe",
         "currency": "R$",
         "price": "59",
         "period": "/mês",
-        "tagline": "Tudo do Free, mais:",
-        "badge": "Mais Popular",
+        "badge": "Recomendado",
         "featured": true,
-        "features": [
-          { "text": "2 usuários", "bold": true, "suffix": " inclusos" },
-          { "text": "200 fotos", "bold": true, "suffix": "/mês" },
-          { "text": "3 checklists" },
-          { "text": "PDF profissional" }
-        ],
-        "cta": "Começar com Starter",
-        "ctaStyle": "primary"
+        "lead": "Tudo do Free, mais:",
+        "features": ["2 usuários incluídos", "200 fotos por mês", "3 checklists", "PDF profissional, sem marca d’água"],
+        "cta": "Começar com o Starter"
       },
       {
         "name": "Pro",
-        "tag": "Para equipes",
+        "tagline": "Para equipes maiores",
         "currency": "R$",
         "price": "119",
         "period": "/mês",
-        "tagline": "Tudo do Starter, mais:",
-        "features": [
-          { "text": "3 usuários", "bold": true, "suffix": " inclusos" },
-          { "text": "1.000 fotos", "bold": true, "suffix": "/mês" },
-          { "text": "10 checklists" },
-          { "text": "", "placeholder": true }
-        ],
-        "cta": "Começar com Pro",
-        "ctaStyle": "outline"
+        "lead": "Tudo do Starter, mais:",
+        "features": ["3 usuários incluídos", "1.000 fotos por mês", "10 checklists"],
+        "cta": "Começar com o Pro"
       },
       {
         "name": "Business",
-        "tag": "Para empresas",
+        "tagline": "Para filiais e franquias",
         "currency": "R$",
         "price": "249",
         "period": "/mês",
-        "tagline": "Tudo do Pro, mais:",
-        "features": [
-          { "text": "5 usuários", "bold": true, "suffix": " inclusos" },
-          { "text": "Fotos", "bold": true, "suffix": " ilimitadas" },
-          { "text": "Checklists", "bold": true, "suffix": " ilimitados" },
-          { "text": "Multi-empresa + API" }
-        ],
-        "cta": "Começar com Business",
-        "ctaStyle": "outline"
+        "lead": "Tudo do Pro, mais:",
+        "features": ["5 usuários incluídos", "Fotos ilimitadas", "Checklists ilimitados", "Várias empresas na mesma conta", "Acesso à API"],
+        "cta": "Começar com o Business"
       }
     ],
-    "included": [
-      "Clientes ilimitados",
-      "OS ilimitadas",
-      "Histórico completo",
-      "Dashboard financeiro",
-      "App iOS/Android"
-    ],
-    "trust": [
-      "Preços transparentes",
-      "Sem cartão para começar",
-      "Cancele quando quiser"
-    ],
+    "included": {
+      "label": "Em todos os planos",
+      "items": ["clientes e OS ilimitados", "histórico completo", "painel financeiro", "app para iPhone e Android"]
+    },
     "comparison": {
-      "tag": "Comparativo",
-      "title": "Compare os",
-      "titleHighlight": "planos",
-      "subtitle": "Veja em detalhes o que cada plano oferece",
-      "rows": [
+      "title": "Compare item por item",
+      "lede": "O que muda de um plano para outro é quantas pessoas usam, quantas fotos cabem no mês e quantos checklists você monta.",
+      "caption": "Comparativo dos planos Free, Starter, Pro e Business",
+      "featureHeader": "Item",
+      "yes": "Incluído",
+      "no": "Não incluído",
+      "scrollHint": "Arraste a tabela para o lado para ver todos os planos.",
+      "prices": { "free": "Grátis", "starter": "R$ 59", "pro": "R$ 119", "business": "R$ 249" },
+      "perMonth": "por mês",
+      "groups": [
         {
-          "feature": "Preço mensal",
-          "free": "Grátis",
-          "starter": "R$ 59",
-          "pro": "R$ 119",
-          "business": "R$ 249"
-        },
-        {
-          "feature": "Usuários inclusos",
-          "free": "1",
-          "starter": "2",
-          "pro": "3",
-          "business": "5"
-        },
-        {
-          "feature": "Usuário adicional",
-          "free": "—",
-          "starter": "+R$ 25/mês",
-          "pro": "+R$ 29/mês",
-          "business": "+R$ 35/mês"
-        },
-        {
-          "feature": "Fotos por mês",
-          "free": "30",
-          "starter": "200",
-          "pro": "1.000",
-          "business": "Ilimitadas"
-        },
-        {
-          "feature": "Checklists/Formulários",
-          "free": "1",
-          "starter": "3",
-          "pro": "10",
-          "business": "Ilimitados"
-        },
-        {
-          "feature": "PDF sem marca d'água",
-          "free": "—",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Multi-empresa",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "Acesso à API",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "Clientes",
-          "free": "Ilimitados",
-          "starter": "Ilimitados",
-          "pro": "Ilimitados",
-          "business": "Ilimitados"
-        },
-        {
-          "feature": "Ordens de Serviço",
-          "free": "Ilimitadas",
-          "starter": "Ilimitadas",
-          "pro": "Ilimitadas",
-          "business": "Ilimitadas"
-        },
-        {
-          "feature": "Histórico completo",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Dashboard financeiro",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "App iOS/Android",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        }
-      ]
-    },
-    "useCases": {
-      "tag": "Casos de uso",
-      "title": "Quem usa",
-      "titleHighlight": "cada plano?",
-      "subtitle": "Encontre o plano ideal para o seu momento",
-      "cases": [
-        {
-          "plan": "Free",
-          "title": "Autônomos começando",
-          "description": "Ideal para quem está começando e quer organizar o básico sem custos.",
-          "items": [
-            "MEIs em início de atividade",
-            "Prestadores solo",
-            "Baixo volume de OS"
+          "title": "Equipe e limites",
+          "rows": [
+            { "feature": "Usuários incluídos", "free": "1", "starter": "2", "pro": "3", "business": "5" },
+            { "feature": "Usuário adicional", "free": "—", "starter": "+R$ 25/mês", "pro": "+R$ 29/mês", "business": "+R$ 35/mês" },
+            { "feature": "Fotos por mês", "free": "30", "starter": "200", "pro": "1.000", "business": "Ilimitadas" },
+            { "feature": "Checklists e formulários", "free": "1", "starter": "3", "pro": "10", "business": "Ilimitados" }
           ]
         },
         {
-          "plan": "Starter",
-          "title": "MEI crescendo",
-          "description": "Para quem já tem demanda regular e precisa de mais recursos.",
-          "items": [
-            "Pequenas empresas (2-4 pessoas)",
-            "Volume médio de fotos",
-            "PDF profissional para clientes"
+          "title": "Documentos e operação",
+          "rows": [
+            { "feature": "PDF sem marca d’água", "free": "—", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Várias empresas na mesma conta", "free": "—", "starter": "—", "pro": "—", "business": "✓" },
+            { "feature": "Acesso à API", "free": "—", "starter": "—", "pro": "—", "business": "✓" }
           ]
         },
         {
-          "plan": "Pro",
-          "title": "Equipes em expansão",
-          "description": "Para equipes que precisam de mais capacidade e checklists.",
-          "items": [
-            "Equipes de 3-8 pessoas",
-            "Alto volume de fotos",
-            "Múltiplos checklists por segmento"
+          "title": "Em todos os planos",
+          "rows": [
+            { "feature": "Clientes", "free": "Ilimitados", "starter": "Ilimitados", "pro": "Ilimitados", "business": "Ilimitados" },
+            { "feature": "Ordens de serviço", "free": "Ilimitadas", "starter": "Ilimitadas", "pro": "Ilimitadas", "business": "Ilimitadas" },
+            { "feature": "Histórico completo", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Painel financeiro", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "App para iPhone e Android", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" }
           ]
-        },
-        {
-          "plan": "Business",
-          "title": "Empresas e franquias",
-          "description": "Para operações maiores com múltiplas unidades ou integrações.",
-          "items": [
-            "Múltiplas filiais/franquias",
-            "Integração com sistemas externos",
-            "Sem limites de fotos e checklists"
-          ]
-        }
-      ]
-    },
-    "differentials": {
-      "tag": "Diferenciais",
-      "title": "Por que escolher o",
-      "titleHighlight": "PráticOS?",
-      "subtitle": "O que nos diferencia da concorrência",
-      "items": [
-        {
-          "icon": "dollar-sign",
-          "title": "Preços públicos e transparentes",
-          "description": "90% dos concorrentes escondem os preços. Aqui você sabe exatamente quanto vai pagar."
-        },
-        {
-          "icon": "user",
-          "title": "Aceita 1 usuário",
-          "description": "Concorrentes exigem mínimo de 4 usuários. Aqui você começa sozinho, se preferir."
-        },
-        {
-          "icon": "shield",
-          "title": "Plano grátis de verdade",
-          "description": "Não é trial de 14 dias. É grátis para sempre, sem surpresas ou cobranças escondidas."
-        },
-        {
-          "icon": "grid",
-          "title": "Self-service completo",
-          "description": "Sem demo obrigatória ou vendedor. Baixe, crie sua conta e comece a usar na hora."
-        },
-        {
-          "icon": "zap",
-          "title": "Sem limite de clientes e OS",
-          "description": "Em todos os planos. Cadastre quantos clientes e OS precisar, sem pagar mais por isso."
-        },
-        {
-          "icon": "arrow-up",
-          "title": "Upgrade e downgrade fáceis",
-          "description": "Mude de plano quando quiser, sem burocracia. O valor é ajustado automaticamente."
         }
       ]
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas sobre",
-      "titleHighlight": "preços",
+      "title": "Dúvidas sobre preço",
+      "lede": "As perguntas que mais chegam por e-mail antes de alguém assinar.",
       "items": [
         {
-          "question": "Como funciona o upgrade?",
-          "answer": "Você pode fazer upgrade a qualquer momento pelo app. O valor é ajustado proporcionalmente ao período restante do seu plano atual."
+          "question": "O Free é um teste que acaba depois de alguns dias?",
+          "answer": "Não. O Free não tem prazo: você usa com 1 usuário, 30 fotos por mês e 1 checklist pelo tempo que quiser. Clientes e OS são ilimitados também no Free."
         },
         {
-          "question": "Posso fazer downgrade?",
-          "answer": "Sim! Você pode mudar para um plano menor a qualquer momento. A mudança entra em vigor no próximo ciclo de cobrança."
+          "question": "Preciso cadastrar cartão para começar?",
+          "answer": "Não. Você baixa o app, cria a conta e já abre a primeira OS. Só informa um meio de pagamento quando decidir assinar um plano pago."
         },
         {
-          "question": "Como é a cobrança?",
-          "answer": "A cobrança é mensal, via App Store (iOS) ou Google Play (Android). Você pode cancelar quando quiser, sem multas."
+          "question": "Como eu pago?",
+          "answer": "A assinatura é mensal e cobrada pela App Store (iPhone) ou pelo Google Play (Android), na mesma conta que você já usa para comprar apps. Dá para cancelar quando quiser, sem multa."
         },
         {
-          "question": "Preciso de cartão para começar?",
-          "answer": "Não! O plano Free é totalmente gratuito e não exige cadastro de cartão de crédito. Só cadastre quando quiser fazer upgrade."
+          "question": "Preciso falar com um vendedor ou agendar uma demonstração?",
+          "answer": "Não. Tudo acontece no app: você escolhe o plano, assina e passa a usar na hora."
         },
         {
-          "question": "O que acontece se ultrapassar os limites?",
-          "answer": "Você receberá um aviso antes de atingir o limite. Se ultrapassar, as novas fotos/checklists ficam pendentes até o upgrade ou próximo mês."
+          "question": "E se eu precisar subir de plano no meio do mês?",
+          "answer": "Pode subir a qualquer momento pelo app. O valor é ajustado proporcionalmente aos dias que faltam no plano atual."
         },
         {
-          "question": "Qual a diferença entre formulário e checklist?",
-          "answer": "São a mesma coisa! Checklists (ou formulários) são modelos personalizáveis para vistorias, laudos e acompanhamento de serviços."
+          "question": "Posso voltar para um plano menor?",
+          "answer": "Pode. A mudança vale a partir do próximo ciclo de cobrança; até lá você continua com o plano atual."
+        },
+        {
+          "question": "O que acontece quando chego no limite de fotos ou checklists?",
+          "answer": "O app avisa antes de você chegar no limite. Se passar, as novas fotos e checklists ficam pendentes até você mudar de plano ou o mês virar."
+        },
+        {
+          "question": "Minha equipe tem mais gente do que o plano inclui. E aí?",
+          "answer": "Nos planos pagos você adiciona usuários avulsos: R$ 25/mês no Starter, R$ 29/mês no Pro e R$ 35/mês no Business, por pessoa."
+        },
+        {
+          "question": "Checklist e formulário são coisas diferentes?",
+          "answer": "Não, é a mesma coisa. São modelos que você monta para vistoria, laudo ou conferência do serviço, e preenche dentro da OS."
         }
       ]
-    },
-    "cta": {
-      "title": "Pronto para",
-      "titleHighlight": "organizar seu negócio?",
-      "description": "Comece grátis agora e descubra como o PráticOS pode transformar sua gestão."
     }
   },
   "en": {
     "header": {
-      "title": "Plans and",
-      "titleHighlight": "Pricing",
-      "subtitle": "Start free. Pay only when you grow.",
-      "subtext": "No credit card required. No surprises. Upgrade whenever you want."
+      "titleBefore": "Four plans, prices on the page and",
+      "titleMark": "no lock-in",
+      "lede": "Free never expires and doesn’t ask for a card. When more people join the team or you need more than 30 photos a month, switch plans inside the app.",
+      "terms": ["No card to start", "Billed monthly through the App Store or Google Play", "Cancel anytime"]
     },
     "plans": [
       {
         "name": "Free",
-        "tag": "To get started",
+        "tagline": "For one-person shops",
         "currency": "$",
         "price": "0",
         "period": "/month",
-        "tagline": "Free forever",
-        "features": [
-          { "text": "1 user" },
-          { "text": "30 photos/month" },
-          { "text": "1 checklist" },
-          { "text": "PDF with watermark" }
-        ],
-        "cta": "Start Free",
-        "ctaStyle": "primary"
+        "features": ["1 user", "30 photos per month", "1 checklist", "Work order PDF with watermark"],
+        "cta": "Start free"
       },
       {
         "name": "Starter",
-        "tag": "To grow",
+        "tagline": "For your first team",
         "currency": "$",
         "price": "12",
         "period": "/month",
-        "tagline": "Everything in Free, plus:",
-        "badge": "Most Popular",
+        "badge": "Recommended",
         "featured": true,
-        "features": [
-          { "text": "2 users", "bold": true, "suffix": " included" },
-          { "text": "200 photos", "bold": true, "suffix": "/month" },
-          { "text": "3 checklists" },
-          { "text": "Professional PDF" }
-        ],
-        "cta": "Start with Starter",
-        "ctaStyle": "primary"
+        "lead": "Everything in Free, plus:",
+        "features": ["2 users included", "200 photos per month", "3 checklists", "Professional PDF, no watermark"],
+        "cta": "Start with Starter"
       },
       {
         "name": "Pro",
-        "tag": "For teams",
+        "tagline": "For larger teams",
         "currency": "$",
         "price": "24",
         "period": "/month",
-        "tagline": "Everything in Starter, plus:",
-        "features": [
-          { "text": "3 users", "bold": true, "suffix": " included" },
-          { "text": "1,000 photos", "bold": true, "suffix": "/month" },
-          { "text": "10 checklists" },
-          { "text": "", "placeholder": true }
-        ],
-        "cta": "Start with Pro",
-        "ctaStyle": "outline"
+        "lead": "Everything in Starter, plus:",
+        "features": ["3 users included", "1,000 photos per month", "10 checklists"],
+        "cta": "Start with Pro"
       },
       {
         "name": "Business",
-        "tag": "For companies",
+        "tagline": "For branches and franchises",
         "currency": "$",
         "price": "49",
         "period": "/month",
-        "tagline": "Everything in Pro, plus:",
-        "features": [
-          { "text": "5 users", "bold": true, "suffix": " included" },
-          { "text": "Unlimited", "bold": true, "suffix": " photos" },
-          { "text": "Unlimited", "bold": true, "suffix": " checklists" },
-          { "text": "Multi-company + API" }
-        ],
-        "cta": "Start with Business",
-        "ctaStyle": "outline"
+        "lead": "Everything in Pro, plus:",
+        "features": ["5 users included", "Unlimited photos", "Unlimited checklists", "Multiple companies in one account", "API access"],
+        "cta": "Start with Business"
       }
     ],
-    "included": [
-      "Unlimited customers",
-      "Unlimited WOs",
-      "Complete history",
-      "Financial dashboard",
-      "iOS/Android app"
-    ],
-    "trust": [
-      "Transparent pricing",
-      "No card to start",
-      "Cancel anytime"
-    ],
+    "included": {
+      "label": "On every plan",
+      "items": ["unlimited customers and work orders", "full history", "finance dashboard", "iPhone and Android app"]
+    },
     "comparison": {
-      "tag": "Comparison",
-      "title": "Compare",
-      "titleHighlight": "plans",
-      "subtitle": "See in detail what each plan offers",
-      "rows": [
+      "title": "Compare line by line",
+      "lede": "What changes from plan to plan is how many people use it, how many photos fit in a month and how many checklists you can build.",
+      "caption": "Comparison of the Free, Starter, Pro and Business plans",
+      "featureHeader": "Item",
+      "yes": "Included",
+      "no": "Not included",
+      "scrollHint": "Swipe the table sideways to see every plan.",
+      "prices": { "free": "Free", "starter": "$12", "pro": "$24", "business": "$49" },
+      "perMonth": "per month",
+      "groups": [
         {
-          "feature": "Monthly price",
-          "free": "Free",
-          "starter": "$12",
-          "pro": "$24",
-          "business": "$49"
-        },
-        {
-          "feature": "Users included",
-          "free": "1",
-          "starter": "2",
-          "pro": "3",
-          "business": "5"
-        },
-        {
-          "feature": "Additional user",
-          "free": "—",
-          "starter": "+$5/month",
-          "pro": "+$6/month",
-          "business": "+$7/month"
-        },
-        {
-          "feature": "Photos per month",
-          "free": "30",
-          "starter": "200",
-          "pro": "1,000",
-          "business": "Unlimited"
-        },
-        {
-          "feature": "Checklists/Forms",
-          "free": "1",
-          "starter": "3",
-          "pro": "10",
-          "business": "Unlimited"
-        },
-        {
-          "feature": "PDF without watermark",
-          "free": "—",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Multi-company",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "API access",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "Customers",
-          "free": "Unlimited",
-          "starter": "Unlimited",
-          "pro": "Unlimited",
-          "business": "Unlimited"
-        },
-        {
-          "feature": "Work Orders",
-          "free": "Unlimited",
-          "starter": "Unlimited",
-          "pro": "Unlimited",
-          "business": "Unlimited"
-        },
-        {
-          "feature": "Complete history",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Financial dashboard",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "iOS/Android app",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        }
-      ]
-    },
-    "useCases": {
-      "tag": "Use cases",
-      "title": "Who uses",
-      "titleHighlight": "each plan?",
-      "subtitle": "Find the ideal plan for your moment",
-      "cases": [
-        {
-          "plan": "Free",
-          "title": "Solo professionals starting",
-          "description": "Ideal for those starting out and wanting to organize the basics at no cost.",
-          "items": [
-            "New MEIs",
-            "Solo service providers",
-            "Low WO volume"
+          "title": "Team and limits",
+          "rows": [
+            { "feature": "Users included", "free": "1", "starter": "2", "pro": "3", "business": "5" },
+            { "feature": "Additional user", "free": "—", "starter": "+$5/month", "pro": "+$6/month", "business": "+$7/month" },
+            { "feature": "Photos per month", "free": "30", "starter": "200", "pro": "1,000", "business": "Unlimited" },
+            { "feature": "Checklists and forms", "free": "1", "starter": "3", "pro": "10", "business": "Unlimited" }
           ]
         },
         {
-          "plan": "Starter",
-          "title": "Growing MEI",
-          "description": "For those who already have regular demand and need more resources.",
-          "items": [
-            "Small businesses (2-4 people)",
-            "Medium photo volume",
-            "Professional PDF for clients"
+          "title": "Documents and operations",
+          "rows": [
+            { "feature": "PDF without watermark", "free": "—", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Multiple companies in one account", "free": "—", "starter": "—", "pro": "—", "business": "✓" },
+            { "feature": "API access", "free": "—", "starter": "—", "pro": "—", "business": "✓" }
           ]
         },
         {
-          "plan": "Pro",
-          "title": "Expanding teams",
-          "description": "For teams that need more capacity and checklists.",
-          "items": [
-            "Teams of 3-8 people",
-            "High photo volume",
-            "Multiple checklists per segment"
+          "title": "On every plan",
+          "rows": [
+            { "feature": "Customers", "free": "Unlimited", "starter": "Unlimited", "pro": "Unlimited", "business": "Unlimited" },
+            { "feature": "Work orders", "free": "Unlimited", "starter": "Unlimited", "pro": "Unlimited", "business": "Unlimited" },
+            { "feature": "Full history", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Finance dashboard", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "iPhone and Android app", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" }
           ]
-        },
-        {
-          "plan": "Business",
-          "title": "Companies and franchises",
-          "description": "For larger operations with multiple units or integrations.",
-          "items": [
-            "Multiple branches/franchises",
-            "Integration with external systems",
-            "No limits on photos and checklists"
-          ]
-        }
-      ]
-    },
-    "differentials": {
-      "tag": "Differentials",
-      "title": "Why choose",
-      "titleHighlight": "PraticOS?",
-      "subtitle": "What sets us apart from the competition",
-      "items": [
-        {
-          "icon": "dollar-sign",
-          "title": "Public and transparent pricing",
-          "description": "90% of competitors hide prices. Here you know exactly what you'll pay."
-        },
-        {
-          "icon": "user",
-          "title": "Accepts 1 user",
-          "description": "Competitors require a minimum of 4 users. Here you can start alone, if you prefer."
-        },
-        {
-          "icon": "shield",
-          "title": "Truly free plan",
-          "description": "It's not a 14-day trial. It's free forever, with no surprises or hidden charges."
-        },
-        {
-          "icon": "grid",
-          "title": "Complete self-service",
-          "description": "No mandatory demo or salesperson. Download, create your account and start using right away."
-        },
-        {
-          "icon": "zap",
-          "title": "No limit on customers and WOs",
-          "description": "On all plans. Register as many customers and WOs as you need, without paying more for it."
-        },
-        {
-          "icon": "arrow-up",
-          "title": "Easy upgrade and downgrade",
-          "description": "Change plans whenever you want, without bureaucracy. The value is adjusted automatically."
         }
       ]
     },
     "faq": {
-      "tag": "Questions",
-      "title": "Questions about",
-      "titleHighlight": "pricing",
+      "title": "Pricing questions",
+      "lede": "What people ask us by email most often before they subscribe.",
       "items": [
         {
-          "question": "How does upgrade work?",
-          "answer": "You can upgrade at any time through the app. The value is adjusted proportionally to the remaining period of your current plan."
+          "question": "Is Free a trial that ends after a few days?",
+          "answer": "No. Free has no end date: you get 1 user, 30 photos a month and 1 checklist for as long as you like. Customers and work orders are unlimited on Free too."
         },
         {
-          "question": "Can I downgrade?",
-          "answer": "Yes! You can switch to a smaller plan at any time. The change takes effect in the next billing cycle."
+          "question": "Do I need a credit card to start?",
+          "answer": "No. Download the app, create your account and open your first work order. You only add a payment method when you decide to subscribe to a paid plan."
         },
         {
-          "question": "How is billing done?",
-          "answer": "Billing is monthly, via App Store (iOS) or Google Play (Android). You can cancel anytime, no penalties."
+          "question": "How do I pay?",
+          "answer": "Subscriptions are monthly and billed through the App Store (iPhone) or Google Play (Android), on the same account you already use to buy apps. Cancel anytime, no fees."
         },
         {
-          "question": "Do I need a card to start?",
-          "answer": "No! The Free plan is completely free and does not require credit card registration. Only register when you want to upgrade."
+          "question": "Do I have to talk to sales or book a demo?",
+          "answer": "No. It all happens in the app: pick a plan, subscribe and start using it right away."
         },
         {
-          "question": "What happens if I exceed the limits?",
-          "answer": "You will receive a warning before reaching the limit. If exceeded, new photos/checklists remain pending until upgrade or next month."
+          "question": "What if I need to upgrade mid-month?",
+          "answer": "Upgrade anytime in the app. The price is prorated for the days left on your current plan."
         },
         {
-          "question": "What's the difference between form and checklist?",
-          "answer": "They're the same thing! Checklists (or forms) are customizable models for inspections, reports and service tracking."
+          "question": "Can I move down to a smaller plan?",
+          "answer": "Yes. The change takes effect on your next billing cycle; until then you keep your current plan."
+        },
+        {
+          "question": "What happens when I hit the photo or checklist limit?",
+          "answer": "The app warns you before you reach the limit. If you go over, new photos and checklists stay pending until you change plans or the month rolls over."
+        },
+        {
+          "question": "My team is bigger than the plan includes. Now what?",
+          "answer": "On paid plans you can add extra users: $5/month on Starter, $6/month on Pro and $7/month on Business, per person."
+        },
+        {
+          "question": "Are checklists and forms different things?",
+          "answer": "No, they’re the same. They’re templates you build for inspections, reports or job sign-off, and fill in inside the work order."
         }
       ]
-    },
-    "cta": {
-      "title": "Ready to",
-      "titleHighlight": "organize your business?",
-      "description": "Start free now and discover how PraticOS can transform your management."
     }
   },
   "es": {
     "header": {
-      "title": "Planes y",
-      "titleHighlight": "Precios",
-      "subtitle": "Empieza gratis. Paga solo cuando crezcas.",
-      "subtext": "Sin tarjeta de crédito. Sin sorpresas. Upgrade cuando quieras."
+      "titleBefore": "Cuatro planes, precio a la vista y",
+      "titleMark": "sin permanencia",
+      "lede": "Free no vence y no pide tarjeta. Cuando entre más gente al equipo o necesites más de 30 fotos al mes, cambias de plan dentro de la app.",
+      "terms": ["Sin tarjeta para empezar", "Cobro mensual por App Store o Google Play", "Cancela cuando quieras"]
     },
     "plans": [
       {
         "name": "Free",
-        "tag": "Para empezar",
+        "tagline": "Para quien trabaja solo",
         "currency": "$",
         "price": "0",
         "period": "/mes",
-        "tagline": "Gratis para siempre",
-        "features": [
-          { "text": "1 usuario" },
-          { "text": "30 fotos/mes" },
-          { "text": "1 checklist" },
-          { "text": "PDF con marca de agua" }
-        ],
-        "cta": "Empezar Gratis",
-        "ctaStyle": "primary"
+        "features": ["1 usuario", "30 fotos por mes", "1 checklist", "PDF de la orden con marca de agua"],
+        "cta": "Empezar gratis"
       },
       {
         "name": "Starter",
-        "tag": "Para crecer",
+        "tagline": "Para tu primer equipo",
         "currency": "$",
         "price": "12",
         "period": "/mes",
-        "tagline": "Todo del Free, más:",
-        "badge": "Más Popular",
+        "badge": "Recomendado",
         "featured": true,
-        "features": [
-          { "text": "2 usuarios", "bold": true, "suffix": " incluidos" },
-          { "text": "200 fotos", "bold": true, "suffix": "/mes" },
-          { "text": "3 checklists" },
-          { "text": "PDF profesional" }
-        ],
-        "cta": "Empezar con Starter",
-        "ctaStyle": "primary"
+        "lead": "Todo lo de Free, más:",
+        "features": ["2 usuarios incluidos", "200 fotos por mes", "3 checklists", "PDF profesional, sin marca de agua"],
+        "cta": "Empezar con Starter"
       },
       {
         "name": "Pro",
-        "tag": "Para equipos",
+        "tagline": "Para equipos más grandes",
         "currency": "$",
         "price": "24",
         "period": "/mes",
-        "tagline": "Todo del Starter, más:",
-        "features": [
-          { "text": "3 usuarios", "bold": true, "suffix": " incluidos" },
-          { "text": "1.000 fotos", "bold": true, "suffix": "/mes" },
-          { "text": "10 checklists" },
-          { "text": "", "placeholder": true }
-        ],
-        "cta": "Empezar con Pro",
-        "ctaStyle": "outline"
+        "lead": "Todo lo de Starter, más:",
+        "features": ["3 usuarios incluidos", "1.000 fotos por mes", "10 checklists"],
+        "cta": "Empezar con Pro"
       },
       {
         "name": "Business",
-        "tag": "Para empresas",
+        "tagline": "Para sucursales y franquicias",
         "currency": "$",
         "price": "49",
         "period": "/mes",
-        "tagline": "Todo del Pro, más:",
-        "features": [
-          { "text": "5 usuarios", "bold": true, "suffix": " incluidos" },
-          { "text": "Fotos", "bold": true, "suffix": " ilimitadas" },
-          { "text": "Checklists", "bold": true, "suffix": " ilimitados" },
-          { "text": "Multi-empresa + API" }
-        ],
-        "cta": "Empezar con Business",
-        "ctaStyle": "outline"
+        "lead": "Todo lo de Pro, más:",
+        "features": ["5 usuarios incluidos", "Fotos ilimitadas", "Checklists ilimitados", "Varias empresas en la misma cuenta", "Acceso a la API"],
+        "cta": "Empezar con Business"
       }
     ],
-    "included": [
-      "Clientes ilimitados",
-      "OS ilimitadas",
-      "Historial completo",
-      "Dashboard financiero",
-      "App iOS/Android"
-    ],
-    "trust": [
-      "Precios transparentes",
-      "Sin tarjeta para empezar",
-      "Cancela cuando quieras"
-    ],
+    "included": {
+      "label": "En todos los planes",
+      "items": ["clientes y órdenes ilimitados", "historial completo", "panel financiero", "app para iPhone y Android"]
+    },
     "comparison": {
-      "tag": "Comparativo",
-      "title": "Compara los",
-      "titleHighlight": "planes",
-      "subtitle": "Ve en detalle lo que ofrece cada plan",
-      "rows": [
+      "title": "Compara punto por punto",
+      "lede": "Lo que cambia de un plan a otro es cuántas personas lo usan, cuántas fotos caben en el mes y cuántos checklists armas.",
+      "caption": "Comparación de los planes Free, Starter, Pro y Business",
+      "featureHeader": "Ítem",
+      "yes": "Incluido",
+      "no": "No incluido",
+      "scrollHint": "Desliza la tabla hacia el lado para ver todos los planes.",
+      "prices": { "free": "Gratis", "starter": "$12", "pro": "$24", "business": "$49" },
+      "perMonth": "por mes",
+      "groups": [
         {
-          "feature": "Precio mensual",
-          "free": "Gratis",
-          "starter": "$12",
-          "pro": "$24",
-          "business": "$49"
-        },
-        {
-          "feature": "Usuarios incluidos",
-          "free": "1",
-          "starter": "2",
-          "pro": "3",
-          "business": "5"
-        },
-        {
-          "feature": "Usuario adicional",
-          "free": "—",
-          "starter": "+$5/mes",
-          "pro": "+$6/mes",
-          "business": "+$7/mes"
-        },
-        {
-          "feature": "Fotos por mes",
-          "free": "30",
-          "starter": "200",
-          "pro": "1.000",
-          "business": "Ilimitadas"
-        },
-        {
-          "feature": "Checklists/Formularios",
-          "free": "1",
-          "starter": "3",
-          "pro": "10",
-          "business": "Ilimitados"
-        },
-        {
-          "feature": "PDF sin marca de agua",
-          "free": "—",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Multi-empresa",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "Acceso a API",
-          "free": "—",
-          "starter": "—",
-          "pro": "—",
-          "business": "✓"
-        },
-        {
-          "feature": "Clientes",
-          "free": "Ilimitados",
-          "starter": "Ilimitados",
-          "pro": "Ilimitados",
-          "business": "Ilimitados"
-        },
-        {
-          "feature": "Órdenes de Servicio",
-          "free": "Ilimitadas",
-          "starter": "Ilimitadas",
-          "pro": "Ilimitadas",
-          "business": "Ilimitadas"
-        },
-        {
-          "feature": "Historial completo",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "Dashboard financiero",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        },
-        {
-          "feature": "App iOS/Android",
-          "free": "✓",
-          "starter": "✓",
-          "pro": "✓",
-          "business": "✓"
-        }
-      ]
-    },
-    "useCases": {
-      "tag": "Casos de uso",
-      "title": "¿Quién usa",
-      "titleHighlight": "cada plan?",
-      "subtitle": "Encuentra el plan ideal para tu momento",
-      "cases": [
-        {
-          "plan": "Free",
-          "title": "Autónomos empezando",
-          "description": "Ideal para quienes están empezando y quieren organizar lo básico sin costos.",
-          "items": [
-            "MEIs en inicio de actividad",
-            "Prestadores solos",
-            "Bajo volumen de OS"
+          "title": "Equipo y límites",
+          "rows": [
+            { "feature": "Usuarios incluidos", "free": "1", "starter": "2", "pro": "3", "business": "5" },
+            { "feature": "Usuario adicional", "free": "—", "starter": "+$5/mes", "pro": "+$6/mes", "business": "+$7/mes" },
+            { "feature": "Fotos por mes", "free": "30", "starter": "200", "pro": "1.000", "business": "Ilimitadas" },
+            { "feature": "Checklists y formularios", "free": "1", "starter": "3", "pro": "10", "business": "Ilimitados" }
           ]
         },
         {
-          "plan": "Starter",
-          "title": "MEI creciendo",
-          "description": "Para quienes ya tienen demanda regular y necesitan más recursos.",
-          "items": [
-            "Pequeñas empresas (2-4 personas)",
-            "Volumen medio de fotos",
-            "PDF profesional para clientes"
+          "title": "Documentos y operación",
+          "rows": [
+            { "feature": "PDF sin marca de agua", "free": "—", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Varias empresas en la misma cuenta", "free": "—", "starter": "—", "pro": "—", "business": "✓" },
+            { "feature": "Acceso a la API", "free": "—", "starter": "—", "pro": "—", "business": "✓" }
           ]
         },
         {
-          "plan": "Pro",
-          "title": "Equipos en expansión",
-          "description": "Para equipos que necesitan más capacidad y checklists.",
-          "items": [
-            "Equipos de 3-8 personas",
-            "Alto volumen de fotos",
-            "Múltiples checklists por segmento"
+          "title": "En todos los planes",
+          "rows": [
+            { "feature": "Clientes", "free": "Ilimitados", "starter": "Ilimitados", "pro": "Ilimitados", "business": "Ilimitados" },
+            { "feature": "Órdenes de servicio", "free": "Ilimitadas", "starter": "Ilimitadas", "pro": "Ilimitadas", "business": "Ilimitadas" },
+            { "feature": "Historial completo", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "Panel financiero", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" },
+            { "feature": "App para iPhone y Android", "free": "✓", "starter": "✓", "pro": "✓", "business": "✓" }
           ]
-        },
-        {
-          "plan": "Business",
-          "title": "Empresas y franquicias",
-          "description": "Para operaciones mayores con múltiples unidades o integraciones.",
-          "items": [
-            "Múltiples filiales/franquicias",
-            "Integración con sistemas externos",
-            "Sin límites de fotos y checklists"
-          ]
-        }
-      ]
-    },
-    "differentials": {
-      "tag": "Diferenciales",
-      "title": "¿Por qué elegir",
-      "titleHighlight": "PraticOS?",
-      "subtitle": "Lo que nos diferencia de la competencia",
-      "items": [
-        {
-          "icon": "dollar-sign",
-          "title": "Precios públicos y transparentes",
-          "description": "90% de los competidores ocultan los precios. Aquí sabes exactamente cuánto vas a pagar."
-        },
-        {
-          "icon": "user",
-          "title": "Acepta 1 usuario",
-          "description": "Los competidores exigen mínimo de 4 usuarios. Aquí empiezas solo, si prefieres."
-        },
-        {
-          "icon": "shield",
-          "title": "Plan gratis de verdad",
-          "description": "No es trial de 14 días. Es gratis para siempre, sin sorpresas o cobros ocultos."
-        },
-        {
-          "icon": "grid",
-          "title": "Self-service completo",
-          "description": "Sin demo obligatoria o vendedor. Descarga, crea tu cuenta y empieza a usar al instante."
-        },
-        {
-          "icon": "zap",
-          "title": "Sin límite de clientes y OS",
-          "description": "En todos los planes. Registra cuantos clientes y OS necesites, sin pagar más por eso."
-        },
-        {
-          "icon": "arrow-up",
-          "title": "Upgrade y downgrade fáciles",
-          "description": "Cambia de plan cuando quieras, sin burocracia. El valor se ajusta automáticamente."
         }
       ]
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas sobre",
-      "titleHighlight": "precios",
+      "title": "Dudas sobre precios",
+      "lede": "Lo que más nos preguntan por correo antes de suscribirse.",
       "items": [
         {
-          "question": "¿Cómo funciona el upgrade?",
-          "answer": "Puedes hacer upgrade en cualquier momento por la app. El valor se ajusta proporcionalmente al período restante de tu plan actual."
+          "question": "¿Free es una prueba que termina en unos días?",
+          "answer": "No. Free no tiene plazo: usas 1 usuario, 30 fotos al mes y 1 checklist todo el tiempo que quieras. Clientes y órdenes también son ilimitados en Free."
         },
         {
-          "question": "¿Puedo hacer downgrade?",
-          "answer": "¡Sí! Puedes cambiar a un plan menor en cualquier momento. El cambio entra en vigor en el próximo ciclo de cobro."
+          "question": "¿Tengo que registrar una tarjeta para empezar?",
+          "answer": "No. Descargas la app, creas la cuenta y abres tu primera orden. Solo agregas un medio de pago cuando decidas suscribirte a un plan pago."
         },
         {
-          "question": "¿Cómo es la cobranza?",
-          "answer": "La cobranza es mensual, vía App Store (iOS) o Google Play (Android). Puedes cancelar cuando quieras, sin multas."
+          "question": "¿Cómo pago?",
+          "answer": "La suscripción es mensual y se cobra por App Store (iPhone) o Google Play (Android), con la misma cuenta que ya usas para comprar apps. Cancelas cuando quieras, sin multa."
         },
         {
-          "question": "¿Necesito tarjeta para empezar?",
-          "answer": "¡No! El plan Free es totalmente gratis y no exige registro de tarjeta de crédito. Solo regístrate cuando quieras hacer upgrade."
+          "question": "¿Tengo que hablar con un vendedor o agendar una demostración?",
+          "answer": "No. Todo pasa en la app: eliges el plan, te suscribes y lo usas en el momento."
         },
         {
-          "question": "¿Qué pasa si supero los límites?",
-          "answer": "Recibirás un aviso antes de alcanzar el límite. Si lo superas, las nuevas fotos/checklists quedan pendientes hasta el upgrade o próximo mes."
+          "question": "¿Y si necesito subir de plan a mitad de mes?",
+          "answer": "Puedes subir en cualquier momento desde la app. El valor se ajusta en proporción a los días que quedan del plan actual."
         },
         {
-          "question": "¿Cuál es la diferencia entre formulario y checklist?",
-          "answer": "¡Son lo mismo! Checklists (o formularios) son modelos personalizables para inspecciones, informes y seguimiento de servicios."
+          "question": "¿Puedo volver a un plan menor?",
+          "answer": "Sí. El cambio rige desde el próximo ciclo de cobro; hasta entonces sigues con el plan actual."
+        },
+        {
+          "question": "¿Qué pasa cuando llego al límite de fotos o checklists?",
+          "answer": "La app te avisa antes de llegar al límite. Si lo pasas, las nuevas fotos y checklists quedan pendientes hasta que cambies de plan o empiece el mes siguiente."
+        },
+        {
+          "question": "Mi equipo tiene más gente de la que incluye el plan. ¿Qué hago?",
+          "answer": "En los planes pagos agregas usuarios adicionales: $5/mes en Starter, $6/mes en Pro y $7/mes en Business, por persona."
+        },
+        {
+          "question": "¿Checklist y formulario son cosas distintas?",
+          "answer": "No, son lo mismo. Son plantillas que armas para inspección, informe o conformidad del trabajo, y llenas dentro de la orden."
         }
       ]
-    },
-    "cta": {
-      "title": "¿Listo para",
-      "titleHighlight": "organizar tu negocio?",
-      "description": "Empieza gratis ahora y descubre cómo PraticOS puede transformar tu gestión."
     }
   }
 }

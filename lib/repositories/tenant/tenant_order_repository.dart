@@ -127,6 +127,16 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     });
   }
 
+  /// Reads the order from the server, skipping the local cache (e.g. after
+  /// an Asaas webhook changed its payments). Throws when offline.
+  Future<Order?> getFromServer(String companyId, String orderId) async {
+    final snap = await collectionFor(companyId)
+        .doc(orderId)
+        .get(const GetOptions(source: Source.server));
+    if (!snap.exists) return null;
+    return fromJson({...snap.data()!, 'id': snap.id});
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // Order-specific methods
   // ═══════════════════════════════════════════════════════════════════

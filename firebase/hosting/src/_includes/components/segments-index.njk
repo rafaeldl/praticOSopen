@@ -1,0 +1,16 @@
+{# Index list of every trade — doubles as internal linking for SEO #}
+{% set seg = segments[langCode] | default(segments.pt) %}
+{% set sg = (homepage[langCode] | default(homepage.pt)).segments %}
+<section class="section section--alt segments-index" id="segmentos">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ sg.title }}</h2>
+            <p>{{ sg.lede }}</p>
+        </div>
+        <ul class="seg-list" role="list">
+            {% for segment in seg.links %}
+            <li><a href="{{ relPath }}{{ segment.href | prettyUrl }}"><span>{{ segment.label }}</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>

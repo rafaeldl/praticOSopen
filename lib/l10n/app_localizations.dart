@@ -6861,6 +6861,408 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver planos'**
   String get viewPlans;
+
+  /// No description provided for @asaasConnected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conectado'**
+  String get asaasConnected;
+
+  /// No description provided for @asaasDisconnected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não conectado'**
+  String get asaasDisconnected;
+
+  /// No description provided for @asaasConnectTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conectar conta Asaas'**
+  String get asaasConnectTitle;
+
+  /// No description provided for @asaasConnectIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba por Pix, boleto ou cartão na conta Asaas da sua empresa. Quando o pagamento é confirmado, a OS dá baixa sozinha.'**
+  String get asaasConnectIntro;
+
+  /// No description provided for @asaasConnectStep1.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. No painel do Asaas, abra Integrações > Chaves de API.'**
+  String get asaasConnectStep1;
+
+  /// No description provided for @asaasConnectStep2.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Gere uma nova chave e copie.'**
+  String get asaasConnectStep2;
+
+  /// No description provided for @asaasConnectStep3.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. Cole a chave abaixo e toque em Conectar.'**
+  String get asaasConnectStep3;
+
+  /// No description provided for @asaasOpenPanel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir painel do Asaas'**
+  String get asaasOpenPanel;
+
+  /// No description provided for @asaasOpenSandboxPanel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir painel de teste (sandbox)'**
+  String get asaasOpenSandboxPanel;
+
+  /// No description provided for @asaasApiKey.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chave de API'**
+  String get asaasApiKey;
+
+  /// No description provided for @asaasApiKeyPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cole a chave aqui'**
+  String get asaasApiKeyPlaceholder;
+
+  /// No description provided for @asaasApiKeyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A chave fica guardada com criptografia no servidor e não aparece de novo no app.'**
+  String get asaasApiKeyHint;
+
+  /// No description provided for @asaasConnect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conectar'**
+  String get asaasConnect;
+
+  /// No description provided for @asaasAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta'**
+  String get asaasAccount;
+
+  /// No description provided for @asaasEnvironment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ambiente'**
+  String get asaasEnvironment;
+
+  /// No description provided for @asaasEnvironmentSandbox.
+  ///
+  /// In pt, this message translates to:
+  /// **'Teste'**
+  String get asaasEnvironmentSandbox;
+
+  /// No description provided for @asaasEnvironmentProduction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produção'**
+  String get asaasEnvironmentProduction;
+
+  /// No description provided for @asaasDisconnect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconectar'**
+  String get asaasDisconnect;
+
+  /// No description provided for @asaasDisconnectConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconectar a conta Asaas? As cobranças em aberto continuam no Asaas, mas os pagamentos deixam de dar baixa na OS.'**
+  String get asaasDisconnectConfirm;
+
+  /// No description provided for @asaasErrorInvalidKey.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chave de API inválida. Confira e tente de novo.'**
+  String get asaasErrorInvalidKey;
+
+  /// No description provided for @asaasErrorForbidden.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não tem permissão para esta ação.'**
+  String get asaasErrorForbidden;
+
+  /// No description provided for @asaasErrorNotConnected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conecte a conta Asaas em Configurações > Integrações.'**
+  String get asaasErrorNotConnected;
+
+  /// No description provided for @asaasErrorExceedsBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor é maior que o saldo da OS.'**
+  String get asaasErrorExceedsBalance;
+
+  /// No description provided for @asaasErrorTaxIdRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o CPF ou CNPJ do cliente.'**
+  String get asaasErrorTaxIdRequired;
+
+  /// No description provided for @asaasErrorCustomerRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione um cliente à OS antes de cobrar.'**
+  String get asaasErrorCustomerRequired;
+
+  /// No description provided for @asaasErrorGeneric.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível concluir. Tente novamente.'**
+  String get asaasErrorGeneric;
+
+  /// No description provided for @invalidTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'CPF ou CNPJ inválido'**
+  String get invalidTaxId;
+
+  /// No description provided for @chargeWithAsaas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrar com Asaas'**
+  String get chargeWithAsaas;
+
+  /// No description provided for @chargeSectionTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança'**
+  String get chargeSectionTitle;
+
+  /// No description provided for @createChargeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova cobrança'**
+  String get createChargeTitle;
+
+  /// No description provided for @chargeValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor'**
+  String get chargeValue;
+
+  /// No description provided for @chargeBalanceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo da OS: {value}'**
+  String chargeBalanceHint(String value);
+
+  /// No description provided for @chargeModeSingle.
+  ///
+  /// In pt, this message translates to:
+  /// **'À vista'**
+  String get chargeModeSingle;
+
+  /// No description provided for @chargeModeInstallments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcelado no cartão'**
+  String get chargeModeInstallments;
+
+  /// No description provided for @chargeSingleHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente escolhe Pix, boleto ou cartão.'**
+  String get chargeSingleHint;
+
+  /// No description provided for @chargeInstallmentsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente paga no cartão de crédito, nas parcelas escolhidas.'**
+  String get chargeInstallmentsHint;
+
+  /// No description provided for @chargeInstallments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcelas'**
+  String get chargeInstallments;
+
+  /// No description provided for @chargeInstallmentOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count}x de {value}'**
+  String chargeInstallmentOption(int count, String value);
+
+  /// No description provided for @chargeDueDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vencimento'**
+  String get chargeDueDate;
+
+  /// No description provided for @chargeTaxIdHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas exige CPF ou CNPJ. Ele fica salvo no cadastro do cliente.'**
+  String get chargeTaxIdHint;
+
+  /// No description provided for @chargeGenerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar cobrança'**
+  String get chargeGenerate;
+
+  /// No description provided for @chargeCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança gerada'**
+  String get chargeCreated;
+
+  /// No description provided for @chargeStatusPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando pagamento'**
+  String get chargeStatusPending;
+
+  /// No description provided for @chargeStatusOverdue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vencida'**
+  String get chargeStatusOverdue;
+
+  /// No description provided for @chargeStatusPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga'**
+  String get chargeStatusPaid;
+
+  /// No description provided for @chargeStatusCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelada'**
+  String get chargeStatusCanceled;
+
+  /// No description provided for @chargeStatusRefunded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estornada'**
+  String get chargeStatusRefunded;
+
+  /// No description provided for @chargeDueOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence em {date}'**
+  String chargeDueOn(String date);
+
+  /// No description provided for @chargeInstallmentsSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count}x no cartão'**
+  String chargeInstallmentsSummary(int count);
+
+  /// No description provided for @chargeShareOrderLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar link da OS'**
+  String get chargeShareOrderLink;
+
+  /// No description provided for @chargeCopyInvoiceLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar link da fatura'**
+  String get chargeCopyInvoiceLink;
+
+  /// No description provided for @chargeInvoiceLinkCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link da fatura copiado'**
+  String get chargeInvoiceLinkCopied;
+
+  /// No description provided for @chargeCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar cobrança'**
+  String get chargeCancel;
+
+  /// No description provided for @chargeCancelConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar esta cobrança no Asaas? O cliente não poderá mais pagar por ela.'**
+  String get chargeCancelConfirm;
+
+  /// No description provided for @chargeKeep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter'**
+  String get chargeKeep;
+
+  /// No description provided for @chargeReplaceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já existe uma cobrança em aberto'**
+  String get chargeReplaceTitle;
+
+  /// No description provided for @chargeReplaceConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar uma nova cobrança cancela a anterior no Asaas.'**
+  String get chargeReplaceConfirm;
+
+  /// No description provided for @chargeReplace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar nova'**
+  String get chargeReplace;
+
+  /// No description provided for @chargeTotalChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'O saldo da OS ({balance}) está diferente do valor da cobrança ({value}).'**
+  String chargeTotalChanged(String balance, String value);
+
+  /// No description provided for @chargeRegenerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar nova cobrança'**
+  String get chargeRegenerate;
+
+  /// No description provided for @asaasErrorInstallmentsInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.'**
+  String get asaasErrorInstallmentsInProgress;
+
+  /// No description provided for @asaasErrorOrderCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS está cancelada e não pode receber cobrança.'**
+  String get asaasErrorOrderCanceled;
+
+  /// No description provided for @asaasErrorInvalidDueDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de vencimento inválida. Escolha hoje ou uma data futura.'**
+  String get asaasErrorInvalidDueDate;
+
+  /// No description provided for @asaasErrorInvalidInstallmentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número de parcelas inválido. Escolha de 2 a 12.'**
+  String get asaasErrorInvalidInstallmentCount;
+
+  /// No description provided for @asaasErrorChargeNotOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta cobrança não está mais em aberto.'**
+  String get asaasErrorChargeNotOpen;
+
+  /// No description provided for @asaasErrorValidation.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas recusou os dados da cobrança. Confira o CPF/CNPJ e o e-mail do cliente.'**
+  String get asaasErrorValidation;
+
+  /// No description provided for @asaasErrorUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas está indisponível no momento. Tente novamente em instantes.'**
+  String get asaasErrorUnavailable;
 }
 
 class _AppLocalizationsDelegate

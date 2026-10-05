@@ -248,7 +248,7 @@ color: CupertinoColors.label
 - Usar dots coloridos (8-10px) em vez de badges pesados
 - Azul = Novo/Aprovado, Verde = Concluído, Vermelho = Problema
 
-### Web (Dark Premium Theme)
+### Web (tema "Ordem de Serviço")
 
 O site institucional usa **Eleventy (11ty)** como Static Site Generator com templates Nunjucks.
 
@@ -278,11 +278,14 @@ npm run dev                  # Servidor local com hot reload
 npm run watch               # Watch mode
 ```
 
-**Design System:**
-- Background: `#0A0E17` (deep blue/black)
-- Gradients para CTAs
-- Glassmorphism para navegação
-- Fonte: `Outfit` (headings), `DM Sans` (body)
+**Design System** (travado em `firebase/hosting/design.md` — ler antes de mexer no site):
+- Linguagem visual de "ordem de serviço": papel claro, tinta grafite, réguas de formulário, números em mono
+- Tokens em `src/css/tokens.css`; base compartilhada em `src/css/site.css`; tema claro por padrão, escuro via `data-theme="dark"`
+- Fontes: `Archivo` (títulos), `IBM Plex Sans` (texto), `IBM Plex Mono` (números/labels)
+- Azul da marca como acento, amarelo do logo só como marca-texto; sem gradientes, glassmorphism ou cards com ícone
+- Nada de números inventados (usuários, notas, depoimentos)
+- Flags em `src/_data/site.json` (`flags.whatsappBot` desligada enquanto o bot estiver fora)
+- `src/style.css` é legado: só `order/` e `login` ainda usam
 
 Ver `docs/WEBSITE_STRUCTURE.md` para documentação completa.
 

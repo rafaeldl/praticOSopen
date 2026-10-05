@@ -3,379 +3,454 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Manutenção Predial | PraticOS",
-    "description": "Centralize chamados de manutenção por unidade! Sistema de OS para construtoras, administradoras e facilities com histórico por apartamento, controle de garantias e link de acompanhamento para moradores. Organize em 5 minutos.",
+    "title": "Sistema para Manutenção Predial por unidade | PraticOS",
+    "description": "App de OS para manutenção predial e assistência técnica de construtora: chamados por unidade, bloco e torre, fotos do reparo e aprovação por link.",
     "keywords": "sistema manutenção predial, software ordem de serviço condomínio, app manutenção predial, sistema chamados condomínio, programa assistência técnica construtora, gestão manutenção edifício",
     "ogTitle": "Sistema para Manutenção Predial | PraticOS",
-    "ogDescription": "Centralize chamados por unidade! Sistema de OS com histórico por apartamento, controle de garantias e link de acompanhamento. Organize em 5 minutos.",
+    "ogDescription": "Chamados de manutenção organizados por unidade: empreendimento, bloco, andar e sistema afetado na OS, fotos do reparo e acompanhamento por link.",
     "hero": {
-      "badge": "🏢 Manutenção Predial",
-      "title": "Gestão completa de manutenção",
-      "titleHighlight": "por unidade, em um só lugar",
-      "subtitle": "Chega de chamados perdidos no WhatsApp. Histórico completo por apartamento, controle de prazos de garantia e link de acompanhamento para morador e síndico. Para construtoras, administradoras e empresas de manutenção.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Técnicos ativos" },
-        "orders": { "value": "5k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Cada chamado na",
+      "titleMark": "unidade certa.",
+      "lede": "PraticOS é o app de ordem de serviço para manutenção predial. Registre o chamado na unidade — empreendimento, bloco, andar e sistema afetado —, fotografe antes e depois, mande o orçamento por link e veja o histórico de cada apartamento.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0214",
+        "rows": [
+          { "label": "Cliente", "value": "Condomínio Jardim das Flores" },
+          { "label": "Unidade", "value": "Torre B · Apto 1204 · 12º andar" },
+          { "label": "Sistema afetado", "value": "Impermeabilização" },
+          { "label": "Serviço", "value": "Infiltração no teto do banheiro" },
+          { "label": "Fotos", "value": "5 anexadas" }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 940,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": ["Orçamento", "Aprovado", "Em reparo", "Resolvido", "Pago"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com manutenção em edifícios",
+      "title": "Onde a manutenção predial perde tempo e dinheiro",
+      "lede": "O problema raramente é o reparo. É o chamado que chega pelo grupo do condomínio, a unidade que ninguém anotou direito e a infiltração que volta sem histórico.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📱", "title": "Chamados perdidos no WhatsApp", "text": "Morador manda foto pelo WhatsApp e o chamado se perde na conversa. Sem registro formal, sem rastreabilidade." },
-        { "icon": "🏠", "title": "Sem histórico por unidade", "text": "Não sabe o que já foi feito no apartamento 101 do bloco A. Técnico chega sem informação e perde tempo." },
-        { "icon": "⏰", "title": "Prazos de garantia sem controle", "text": "Não sabe quando vence a garantia de impermeabilização ou estrutura. Risco de atender fora do prazo ou perder obrigação legal." },
-        { "icon": "📷", "title": "Sem comprovação de reparo", "text": "Sem fotos antes/depois documentadas. Morador contesta, construtora não tem como provar que fez o serviço." },
-        { "icon": "👷", "title": "Coordenar múltiplos prestadores", "text": "3 a 5 prestadores diferentes por condomínio. Sem visibilidade de quem fez o quê e quando." },
-        { "icon": "🔔", "title": "Morador cobra status todo dia", "text": "Morador liga e manda WhatsApp perguntando 'e meu chamado?'. Síndico cobra e não tem onde consultar." }
+        {
+          "problem": "Chamado perdido no grupo",
+          "detail": "O morador manda foto no WhatsApp, o síndico repassa, e uma semana depois ninguém sabe se alguém foi lá.",
+          "answer": "Cada chamado vira uma OS com status: orçamento, aprovado, em reparo, resolvido. A lista mostra o que está parado."
+        },
+        {
+          "problem": "Unidade anotada pela metade",
+          "detail": "“Apto 302” — de qual torre? Em qual empreendimento? A equipe vai ao lugar errado.",
+          "answer": "A unidade é cadastrada com empreendimento ou condomínio, bloco ou torre, número, andar e tipo: apartamento, garagem, depósito, sala ou área comum."
+        },
+        {
+          "problem": "O mesmo vazamento, pela terceira vez",
+          "detail": "A infiltração volta e ninguém sabe o que já foi feito naquele apartamento.",
+          "answer": "Busque pela unidade na lista de OS e veja todos os chamados anteriores, com fotos e materiais usados."
+        },
+        {
+          "problem": "Garantia discutida sem dados",
+          "detail": "Na assistência técnica de construtora, o morador pede um reparo e ninguém confere quando a unidade foi entregue nem qual sistema falhou.",
+          "answer": "A data de entrega da unidade e o sistema afetado — hidráulica, elétrica, estrutura, impermeabilização, esquadrias — ficam na OS."
+        },
+        {
+          "problem": "Reparo feito, morador insatisfeito",
+          "detail": "Sem foto do antes, o morador diz que o problema era outro ou que o serviço ficou pior.",
+          "answer": "Fotos do antes e do depois ficam anexadas à OS. O morador ou síndico abre o link e vê o andamento, sem ligar."
+        },
+        {
+          "problem": "Equipe sem agenda",
+          "detail": "Três técnicos, dois empreendimentos, chamados de urgência no meio. Ninguém sabe quem vai aonde.",
+          "answer": "Cada OS agendada entra na agenda da equipe, com filtro por técnico para quem coordena e aviso no celular antes do atendimento."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para manutenção de edifícios",
-      "items": [
-        { "icon": "📋", "title": "Chamados centralizados por unidade", "text": "Cada apartamento, garagem ou sala comercial tem sua ficha com todo o histórico.", "highlight": "Acabe com o WhatsApp desorganizado." },
-        { "icon": "🏠", "title": "Histórico completo da unidade", "text": "Busque pela unidade e veja tudo: chamados anteriores, fotos, materiais usados, responsáveis." },
-        { "icon": "⏰", "title": "Alertas de prazo e garantia", "text": "Receba notificações antes de vencer garantias (NBR 15575) e prazos de manutenção preventiva." },
-        { "icon": "📸", "title": "Fotos geolocalizadas antes/depois", "text": "Comprove cada reparo com fotos que têm data, hora e localização GPS.", "highlight": "Documentação irrefutável." },
-        { "icon": "👥", "title": "Agenda multi-equipe", "text": "Atribua chamados a diferentes técnicos e prestadores. Cada um vê sua agenda no celular." },
-        { "icon": "🔗", "title": "Link de acompanhamento", "text": "Morador e síndico acompanham o status do chamado pelo celular. Sem ligar, sem WhatsApp." }
+    "workflow": {
+      "title": "Como um chamado passa pelo PraticOS",
+      "lede": "Da solicitação do morador ao reparo resolvido, tudo fica na OS da unidade.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Registre o chamado na unidade",
+          "text": "Abra a OS com o cliente — condomínio, construtora ou morador — e a unidade. Serviços e materiais saem do seu catálogo, já com preço.",
+          "facts": [
+            "Empreendimento, bloco ou torre, número e andar",
+            "Sistema afetado e data de entrega da unidade",
+            "Status do ramo: em reparo, resolvido"
+          ],
+          "image": "home.png",
+          "alt": "Lista de ordens de serviço no app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Agende a visita",
+          "text": "Marque dia e hora na OS. Ela aparece na agenda do mês e o técnico recebe o aviso no celular antes do atendimento.",
+          "facts": [
+            "Agenda com as OS de cada dia",
+            "Filtro por técnico para quem coordena a equipe",
+            "Aviso antes do atendimento, mesmo com o app fechado"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+        },
+        {
+          "number": "03",
+          "title": "Documente com fotos e checklist",
+          "text": "Monte checklists com os itens da sua vistoria — hidráulica, elétrica, impermeabilização — e preencha no local, com fotos em cada item.",
+          "facts": [
+            "Itens de sim, não ou não se aplica, texto e foto",
+            "Fotos do antes e do depois na mesma OS",
+            "PDF da OS para enviar ao síndico ou à construtora"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "04",
+          "title": "Aprove, resolva e cobre",
+          "text": "Mande o orçamento por link para aprovação. Concluído o reparo, registre o pagamento inteiro ou em parcelas.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento e valores a receber no painel"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "manutenção por unidade",
-      "text": "Checklist digital para identificar a unidade, documentar o problema e registrar a solução. Técnico preenche no celular, morador assina digitalmente.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Manutenção",
-      "items": [
-        { "icon": "🏠", "text": "Identificação da unidade (bloco/torre/apto)" },
-        { "icon": "⚠️", "text": "Problema relatado pelo morador" },
-        { "icon": "🔧", "text": "Sistema afetado (hidráulico, elétrico, etc.)" },
-        { "icon": "📸", "text": "Fotos antes e depois do reparo" },
-        { "icon": "🧱", "text": "Materiais utilizados" },
-        { "icon": "✍️", "text": "Assinatura do morador ou zelador" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar manutenção predial",
-      "subtitle": "Ferramentas poderosas e intuitivas para construtoras, administradoras e facilities",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com identificação da unidade, fotos, histórico e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografe o serviço com data, hora e localização GPS. Prova irrefutável do reparo realizado.", "color": "yellow" },
-        { "icon": "pdf", "title": "Relatórios em PDF", "text": "Gere relatórios de manutenção por unidade ou por condomínio. Pronto para enviar ao síndico ou conselho.", "color": "orange" },
-        { "icon": "money", "title": "Controle de Garantias", "text": "Acompanhe prazos de garantia (NBR 15575) por sistema e por empreendimento. Alertas automáticos.", "color": "green" },
-        { "icon": "users", "title": "Gestão Multi-Empreendimento", "text": "Gerencie múltiplos condomínios ou empreendimentos em um só lugar. Visão consolidada.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Morador e síndico acompanham o status do chamado pelo celular. Transparência total.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes a gente perdia chamados no WhatsApp e morador reclamava que nunca resolvia. Com o PraticOS, cada unidade tem seu histórico e o morador acompanha pelo link. A satisfação melhorou demais.",
-      "name": "Fernanda Oliveira",
-      "role": "Gestora de assistência técnica em construtora",
-      "metric": "Redução de 70% em reclamações de moradores"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem cuida de manutenção predial",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Serve para construtora, administradora ou empresa de manutenção?", "answer": "Sim! O PraticOS se adapta a qualquer empresa que faz manutenção em edifícios. Você identifica cada unidade (apartamento, garagem, sala) e mantém o histórico completo." },
-        { "question": "O morador consegue acompanhar o chamado?", "answer": "Sim! Você pode enviar um link de acompanhamento para o morador ou síndico. Eles veem o status atualizado pelo celular, sem precisar ligar ou mandar WhatsApp." },
-        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da manutenção predial." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Serve para assistência técnica de construtora?",
+          "answer": "Sim. O segmento de manutenção predial cobre garantia pós-entrega, manutenção corretiva e preventiva e áreas comuns. A unidade guarda a data de entrega e a OS registra o sistema afetado."
+        },
+        {
+          "question": "Consigo ver tudo o que já foi feito num apartamento?",
+          "answer": "Sim. Busque pela unidade na lista de OS e aparecem todos os chamados daquele apartamento, com fotos e serviços."
+        },
+        {
+          "question": "O app já vem com checklists de vistoria?",
+          "answer": "Para manutenção predial, você monta os seus: escolha os itens, o tipo de resposta e onde pedir foto. Depois aplica o mesmo checklist em qualquer OS."
+        },
+        {
+          "question": "O morador ou o síndico precisa instalar algum app?",
+          "answer": "Não. Eles recebem um link, abrem no navegador do celular e veem a OS com fotos e status. Ali mesmo podem aprovar o orçamento e deixar comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar sua manutenção",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Building Maintenance Management System | PraticOS",
-    "description": "Centralize maintenance requests by unit! Work order system for builders, property managers and facilities with apartment history, warranty tracking and resident tracking link. Get organized in 5 minutes.",
+    "title": "Building Maintenance Software: Requests by Unit | PraticOS",
+    "description": "Work order app for building maintenance and builder warranty service: requests by unit, building and floor, repair photos and approval by link.",
     "keywords": "building maintenance software, property maintenance management, facility maintenance system, building work order app, apartment maintenance software, property management maintenance",
-    "ogTitle": "Building Maintenance Management System | PraticOS",
-    "ogDescription": "Centralize requests by unit! WO system with apartment history, warranty tracking and resident tracking link. Get organized in 5 minutes.",
+    "ogTitle": "Building Maintenance Software | PraticOS",
+    "ogDescription": "Maintenance requests organized by unit: development, building, floor and affected system on the work order, repair photos and progress by link.",
     "hero": {
-      "badge": "🏢 Building Maintenance",
-      "title": "Complete maintenance management",
-      "titleHighlight": "by unit, in one place",
-      "subtitle": "Stop losing requests on WhatsApp. Complete history by apartment, warranty deadline tracking and a tracking link for residents and managers. For builders, property managers and maintenance companies.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Active technicians" },
-        "orders": { "value": "5k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Every request on",
+      "titleMark": "the right unit.",
+      "lede": "PraticOS is the work order app for building maintenance. Log the request on the unit — development, building, floor and affected system —, take before and after photos, send the quote as a link and see the history of every apartment.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0214",
+        "rows": [
+          { "label": "Customer", "value": "Maple Court HOA" },
+          { "label": "Unit", "value": "Building B · Apt 1204 · 12th floor" },
+          { "label": "Affected system", "value": "Waterproofing" },
+          { "label": "Service", "value": "Leak in bathroom ceiling" },
+          { "label": "Photos", "value": "5 attached" }
+        ],
+        "totalLabel": "Total",
+        "total": "$680.00",
+        "stamp": "Approved by customer",
+        "steps": ["Quote", "Approved", "Under repair", "Resolved", "Paid"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for building maintenance teams",
+      "title": "Where building maintenance loses time and money",
+      "lede": "The repair is rarely the problem. It's the request that comes through the residents' group chat, the unit nobody wrote down properly and the leak that comes back with no history.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📱", "title": "Requests lost on WhatsApp", "text": "Resident sends a photo on WhatsApp and the request gets lost in the chat. No formal record, no traceability." },
-        { "icon": "🏠", "title": "No history by unit", "text": "Don't know what was done in apartment 101, building A. Technician arrives with no information and wastes time." },
-        { "icon": "⏰", "title": "Warranty deadlines out of control", "text": "Don't know when waterproofing or structural warranty expires. Risk of servicing out of warranty or missing legal obligations." },
-        { "icon": "📷", "title": "No proof of repair", "text": "No documented before/after photos. Resident disputes, builder can't prove the service was done." },
-        { "icon": "👷", "title": "Coordinating multiple contractors", "text": "3 to 5 different contractors per building. No visibility on who did what and when." },
-        { "icon": "🔔", "title": "Resident asks for updates daily", "text": "Resident calls and texts asking 'what about my request?'. Manager demands status and has nowhere to check." }
+        {
+          "problem": "Requests lost in the group chat",
+          "detail": "A resident sends a photo, the manager forwards it, and a week later nobody knows if anyone went.",
+          "answer": "Every request becomes a work order with a status: quote, approved, under repair, resolved. The list shows what's stuck."
+        },
+        {
+          "problem": "Half a unit address",
+          "detail": "“Apt 302” — which building? Which development? The crew goes to the wrong door.",
+          "answer": "The unit is on file with development or property, building or tower, number, floor and type: apartment, garage, storage, office or common area."
+        },
+        {
+          "problem": "The same leak, for the third time",
+          "detail": "The water comes back and nobody knows what was already done in that apartment.",
+          "answer": "Search for the unit in the work order list and see every past request, with photos and materials used."
+        },
+        {
+          "problem": "Warranty claims argued without data",
+          "detail": "On builder warranty service, a resident asks for a repair and nobody checks when the unit was handed over or which system failed.",
+          "answer": "The unit's handover date and the affected system — plumbing, electrical, structure, waterproofing, windows — are on the work order."
+        },
+        {
+          "problem": "Repair done, resident unhappy",
+          "detail": "With no before photo, the resident says the problem was something else or the fix made it worse.",
+          "answer": "Before and after photos are attached to the work order. The resident or manager opens the link and follows progress without calling."
+        },
+        {
+          "problem": "A crew without a schedule",
+          "detail": "Three techs, two properties, urgent calls in between. Nobody knows who's going where.",
+          "answer": "Every scheduled work order goes on the team calendar, with a filter by technician for whoever coordinates and a phone reminder before each visit."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for building maintenance operations",
-      "items": [
-        { "icon": "📋", "title": "Requests centralized by unit", "text": "Each apartment, garage or commercial unit has its own file with complete history.", "highlight": "End the WhatsApp chaos." },
-        { "icon": "🏠", "title": "Complete unit history", "text": "Search by unit and see everything: previous requests, photos, materials used, responsible parties." },
-        { "icon": "⏰", "title": "Warranty and deadline alerts", "text": "Get notifications before warranties expire and preventive maintenance deadlines approach." },
-        { "icon": "📸", "title": "Geolocated before/after photos", "text": "Prove each repair with photos that have date, time and GPS location.", "highlight": "Irrefutable documentation." },
-        { "icon": "👥", "title": "Multi-team scheduling", "text": "Assign requests to different technicians and contractors. Each sees their schedule on their phone." },
-        { "icon": "🔗", "title": "Tracking link", "text": "Resident and manager track request status on their phone. No calls, no WhatsApp." }
+    "workflow": {
+      "title": "How a request moves through PraticOS",
+      "lede": "From the resident's request to a resolved repair, everything stays on the unit's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Log the request on the unit",
+          "text": "Open the work order with the customer — HOA, builder or resident — and the unit. Services and materials come from your catalog, already priced.",
+          "facts": [
+            "Development, building or tower, number and floor",
+            "Affected system and unit handover date",
+            "Statuses in your trade's words: under repair, resolved"
+          ],
+          "image": "home.png",
+          "alt": "Work order list in the PraticOS app"
+        },
+        {
+          "number": "02",
+          "title": "Schedule the visit",
+          "text": "Set the day and time on the work order. It shows up on the monthly calendar and the tech gets a reminder on their phone before the visit.",
+          "facts": [
+            "Calendar with each day's work orders",
+            "Filter by technician if you coordinate the crew",
+            "Reminder before the visit, even with the app closed"
+          ],
+          "image": "agenda.png",
+          "alt": "PraticOS calendar with work orders scheduled across the month"
+        },
+        {
+          "number": "03",
+          "title": "Document with photos and a checklist",
+          "text": "Build checklists with your inspection items — plumbing, electrical, waterproofing — and fill them in on site, with photos on each item.",
+          "facts": [
+            "Yes, no or N/A items, text and photo",
+            "Before and after photos on the same work order",
+            "Work order PDF to send to the manager or builder"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "04",
+          "title": "Approve, resolve and bill",
+          "text": "Send the quote as a link for approval. Once the repair is done, record the payment in full or in parts.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Partial payment and discount on the same work order",
+            "Revenue and amounts due on the dashboard"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Unit maintenance",
-      "titleHighlight": "checklist",
-      "text": "Digital checklist to identify the unit, document the issue and record the solution. Technician fills on phone, resident signs digitally.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Maintenance Checklist",
-      "items": [
-        { "icon": "🏠", "text": "Unit identification (building/tower/apt)" },
-        { "icon": "⚠️", "text": "Issue reported by resident" },
-        { "icon": "🔧", "text": "Affected system (plumbing, electrical, etc.)" },
-        { "icon": "📸", "text": "Before and after repair photos" },
-        { "icon": "🧱", "text": "Materials used" },
-        { "icon": "✍️", "text": "Resident or caretaker signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage building maintenance",
-      "subtitle": "Powerful and intuitive tools for builders, property managers and facilities",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with unit identification, photos, history and values. All organized." },
-        { "icon": "image", "title": "Geolocated Photos", "text": "Photograph the service with date, time and GPS location. Irrefutable proof of the repair.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Reports", "text": "Generate maintenance reports by unit or by building. Ready to send to the manager or board.", "color": "orange" },
-        { "icon": "money", "title": "Warranty Tracking", "text": "Track warranty deadlines by system and by development. Automatic alerts.", "color": "green" },
-        { "icon": "users", "title": "Multi-Building Management", "text": "Manage multiple buildings or developments in one place. Consolidated view.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Resident and manager track request status on their phone. Total transparency.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before we lost requests on WhatsApp and residents complained nothing was resolved. With PraticOS, each unit has its history and residents track via the link. Satisfaction improved enormously.",
-      "name": "Fernanda Oliveira",
-      "role": "Technical assistance manager at a construction company",
-      "metric": "70% reduction in resident complaints"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from building maintenance teams",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work for builders, property managers or maintenance companies?", "answer": "Yes! PraticOS adapts to any company that does building maintenance. You identify each unit (apartment, garage, office) and keep the complete history." },
-        { "question": "Can residents track their request?", "answer": "Yes! You can send a tracking link to the resident or manager. They see the updated status on their phone, without calling or texting." },
-        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of building maintenance." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Does it work for builder warranty service?",
+          "answer": "Yes. The building maintenance segment covers post-handover warranty, corrective and preventive maintenance and common areas. The unit keeps its handover date and the work order records the affected system."
+        },
+        {
+          "question": "Can I see everything done in an apartment?",
+          "answer": "Yes. Search for the unit in the work order list and every request for that apartment shows up, with photos and services."
+        },
+        {
+          "question": "Does the app come with inspection checklists?",
+          "answer": "For building maintenance you build your own: choose the items, the answer type and where to ask for photos. Then apply the same checklist to any work order."
+        },
+        {
+          "question": "Do residents or managers need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and status. They can approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your maintenance",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Mantenimiento de Edificios | PraticOS",
-    "description": "¡Centraliza solicitudes de mantenimiento por unidad! Sistema de OS para constructoras, administradoras y facilities con historial por departamento, control de garantías y link de seguimiento para residentes. Organiza en 5 minutos.",
-    "keywords": "sistema mantenimiento de edificios, software orden de servicio condominio, app mantenimiento predial, sistema solicitudes condominio, programa asistencia técnica constructora, gestión mantenimiento edificio",
-    "ogTitle": "Sistema para Mantenimiento de Edificios | PraticOS",
-    "ogDescription": "¡Centraliza solicitudes por unidad! Sistema de OS con historial por departamento, control de garantías y link de seguimiento. Organiza en 5 minutos.",
+    "title": "Sistema de Mantenimiento de Edificios | PraticOS",
+    "description": "App de órdenes para mantenimiento de edificios y posventa de constructoras: solicitudes por unidad, torre y piso, fotos del arreglo y aprobación por link.",
+    "keywords": "sistema mantenimiento de edificios, software orden de servicio condominio, app mantenimiento predial, sistema solicitudes condominio, programa posventa constructora, gestión mantenimiento edificio",
+    "ogTitle": "Sistema de Mantenimiento de Edificios | PraticOS",
+    "ogDescription": "Solicitudes de mantenimiento ordenadas por unidad: proyecto, torre, piso y sistema afectado en la orden, fotos del arreglo y seguimiento por link.",
     "hero": {
-      "badge": "🏢 Mantenimiento de Edificios",
-      "title": "Gestión completa de mantenimiento",
-      "titleHighlight": "por unidad, en un solo lugar",
-      "subtitle": "Basta de solicitudes perdidas en WhatsApp. Historial completo por departamento, control de plazos de garantía y link de seguimiento para residente y administrador. Para constructoras, administradoras y empresas de mantenimiento.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Técnicos activos" },
-        "orders": { "value": "5k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Cada solicitud en",
+      "titleMark": "la unidad correcta.",
+      "lede": "PraticOS es la app de órdenes de servicio para mantenimiento de edificios. Registra la solicitud en la unidad — proyecto, torre, piso y sistema afectado —, saca fotos del antes y el después, envía el presupuesto por link y ve el historial de cada departamento.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0214",
+        "rows": [
+          { "label": "Cliente", "value": "Condominio Los Álamos" },
+          { "label": "Unidad", "value": "Torre B · Depto 1204 · piso 12" },
+          { "label": "Sistema afectado", "value": "Impermeabilización" },
+          { "label": "Servicio", "value": "Filtración en el techo del baño" },
+          { "label": "Fotos", "value": "5 adjuntas" }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 680,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": ["Presupuesto", "Aprobado", "En reparación", "Resuelto", "Cobrado"],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con mantenimiento en edificios",
+      "title": "Dónde pierde tiempo y plata el mantenimiento de edificios",
+      "lede": "El problema casi nunca es el arreglo. Es la solicitud que llega por el grupo del condominio, la unidad que nadie anotó bien y la filtración que vuelve sin historial.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📱", "title": "Solicitudes perdidas en WhatsApp", "text": "Residente manda foto por WhatsApp y la solicitud se pierde en la conversación. Sin registro formal, sin rastreabilidad." },
-        { "icon": "🏠", "title": "Sin historial por unidad", "text": "No sabe qué ya se hizo en el departamento 101 del bloque A. Técnico llega sin información y pierde tiempo." },
-        { "icon": "⏰", "title": "Plazos de garantía sin control", "text": "No sabe cuándo vence la garantía de impermeabilización o estructura. Riesgo de atender fuera de plazo o incumplir obligación legal." },
-        { "icon": "📷", "title": "Sin comprobación de reparación", "text": "Sin fotos antes/después documentadas. Residente reclama, constructora no puede probar que hizo el servicio." },
-        { "icon": "👷", "title": "Coordinar múltiples contratistas", "text": "3 a 5 contratistas diferentes por edificio. Sin visibilidad de quién hizo qué y cuándo." },
-        { "icon": "🔔", "title": "Residente pide estado todos los días", "text": "Residente llama y manda WhatsApp preguntando '¿y mi solicitud?'. Administrador exige estado y no tiene dónde consultar." }
+        {
+          "problem": "Solicitudes perdidas en el grupo",
+          "detail": "El vecino manda una foto por WhatsApp, el administrador la reenvía y una semana después nadie sabe si alguien fue.",
+          "answer": "Cada solicitud se vuelve una orden con estado: presupuesto, aprobado, en reparación, resuelto. La lista muestra lo que está parado."
+        },
+        {
+          "problem": "Unidad anotada a medias",
+          "detail": "“Depto 302” — ¿de qué torre? ¿En qué proyecto? El equipo va a la puerta equivocada.",
+          "answer": "La unidad se registra con proyecto o condominio, bloque o torre, número, piso y tipo: departamento, cochera, bodega, oficina o área común."
+        },
+        {
+          "problem": "La misma filtración, por tercera vez",
+          "detail": "El agua vuelve y nadie sabe qué se hizo antes en ese departamento.",
+          "answer": "Busca la unidad en la lista de órdenes y ve todas las solicitudes anteriores, con fotos y materiales usados."
+        },
+        {
+          "problem": "Garantía discutida sin datos",
+          "detail": "En la posventa de la constructora, el propietario pide un arreglo y nadie revisa cuándo se entregó la unidad ni qué sistema falló.",
+          "answer": "La fecha de entrega de la unidad y el sistema afectado — plomería, electricidad, estructura, impermeabilización, aberturas — quedan en la orden."
+        },
+        {
+          "problem": "Arreglo hecho, vecino insatisfecho",
+          "detail": "Sin foto del antes, el vecino dice que el problema era otro o que quedó peor.",
+          "answer": "Las fotos del antes y el después quedan en la orden. El vecino o el administrador abre el link y sigue el avance sin llamar."
+        },
+        {
+          "problem": "Equipo sin agenda",
+          "detail": "Tres técnicos, dos edificios y urgencias en el medio. Nadie sabe quién va a dónde.",
+          "answer": "Cada orden programada entra en la agenda del equipo, con filtro por técnico para quien coordina y aviso en el celular antes de cada visita."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para mantenimiento de edificios",
-      "items": [
-        { "icon": "📋", "title": "Solicitudes centralizadas por unidad", "text": "Cada departamento, cochera o local comercial tiene su ficha con historial completo.", "highlight": "Acaba con el WhatsApp desorganizado." },
-        { "icon": "🏠", "title": "Historial completo de la unidad", "text": "Busca por unidad y ve todo: solicitudes anteriores, fotos, materiales usados, responsables." },
-        { "icon": "⏰", "title": "Alertas de plazo y garantía", "text": "Recibe notificaciones antes de que venzan garantías y plazos de mantenimiento preventivo." },
-        { "icon": "📸", "title": "Fotos geolocalizadas antes/después", "text": "Comprueba cada reparación con fotos que tienen fecha, hora y ubicación GPS.", "highlight": "Documentación irrefutable." },
-        { "icon": "👥", "title": "Agenda multi-equipo", "text": "Asigna solicitudes a diferentes técnicos y contratistas. Cada uno ve su agenda en el celular." },
-        { "icon": "🔗", "title": "Link de seguimiento", "text": "Residente y administrador siguen el estado de la solicitud por el celular. Sin llamar, sin WhatsApp." }
+    "workflow": {
+      "title": "Cómo pasa una solicitud por PraticOS",
+      "lede": "De la solicitud del vecino al arreglo resuelto, todo queda en la orden de la unidad.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Registra la solicitud en la unidad",
+          "text": "Abre la orden con el cliente — condominio, constructora o propietario — y la unidad. Servicios y materiales salen de tu catálogo, con precio.",
+          "facts": [
+            "Proyecto, bloque o torre, número y piso",
+            "Sistema afectado y fecha de entrega de la unidad",
+            "Estados del rubro: en reparación, resuelto"
+          ],
+          "image": "home.png",
+          "alt": "Lista de órdenes de servicio en la app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Agenda la visita",
+          "text": "Marca día y hora en la orden. Aparece en la agenda del mes y el técnico recibe el aviso en el celular antes de la visita.",
+          "facts": [
+            "Agenda con las órdenes de cada día",
+            "Filtro por técnico para quien coordina el equipo",
+            "Aviso antes de la visita, incluso con la app cerrada"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+        },
+        {
+          "number": "03",
+          "title": "Documenta con fotos y checklist",
+          "text": "Arma checklists con los ítems de tu inspección — plomería, electricidad, impermeabilización — y complétalos en el lugar, con fotos en cada ítem.",
+          "facts": [
+            "Ítems de sí, no o no aplica, texto y foto",
+            "Fotos del antes y el después en la misma orden",
+            "PDF de la orden para enviar al administrador o a la constructora"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "04",
+          "title": "Aprueba, resuelve y cobra",
+          "text": "Envía el presupuesto por link para su aprobación. Terminado el arreglo, registra el pago total o en partes.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "Pago parcial y descuento en la misma orden",
+            "Facturación y saldos por cobrar en el panel"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "mantenimiento por unidad",
-      "text": "Checklist digital para identificar la unidad, documentar el problema y registrar la solución. Técnico llena en el celular, residente firma digitalmente.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Mantenimiento",
-      "items": [
-        { "icon": "🏠", "text": "Identificación de la unidad (bloque/torre/depto)" },
-        { "icon": "⚠️", "text": "Problema reportado por el residente" },
-        { "icon": "🔧", "text": "Sistema afectado (hidráulico, eléctrico, etc.)" },
-        { "icon": "📸", "text": "Fotos antes y después de la reparación" },
-        { "icon": "🧱", "text": "Materiales utilizados" },
-        { "icon": "✍️", "text": "Firma del residente o encargado" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar mantenimiento de edificios",
-      "subtitle": "Herramientas potentes e intuitivas para constructoras, administradoras y facilities",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con identificación de unidad, fotos, historial y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografía el servicio con fecha, hora y ubicación GPS. Prueba irrefutable de la reparación.", "color": "yellow" },
-        { "icon": "pdf", "title": "Informes en PDF", "text": "Genera informes de mantenimiento por unidad o por edificio. Listo para enviar al administrador o consejo.", "color": "orange" },
-        { "icon": "money", "title": "Control de Garantías", "text": "Acompaña plazos de garantía por sistema y por proyecto. Alertas automáticas.", "color": "green" },
-        { "icon": "users", "title": "Gestión Multi-Edificio", "text": "Gestiona múltiples edificios o proyectos en un solo lugar. Visión consolidada.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Residente y administrador siguen el estado de la solicitud por el celular. Transparencia total.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes perdíamos solicitudes en WhatsApp y el residente reclamaba que nunca se resolvía. Con PraticOS, cada unidad tiene su historial y el residente sigue por el link. La satisfacción mejoró muchísimo.",
-      "name": "Fernanda Oliveira",
-      "role": "Gestora de asistencia técnica en constructora",
-      "metric": "Reducción de 70% en reclamos de residentes"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien hace mantenimiento de edificios",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Sirve para constructora, administradora o empresa de mantenimiento?", "answer": "¡Sí! PraticOS se adapta a cualquier empresa que hace mantenimiento en edificios. Identificas cada unidad (departamento, cochera, oficina) y mantienes el historial completo." },
-        { "question": "¿El residente puede seguir su solicitud?", "answer": "¡Sí! Puedes enviar un link de seguimiento al residente o administrador. Ven el estado actualizado por el celular, sin necesidad de llamar o mandar WhatsApp." },
-        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día del mantenimiento de edificios." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Sirve para la posventa de una constructora?",
+          "answer": "Sí. El segmento de mantenimiento de edificios cubre garantía posentrega, mantenimiento correctivo y preventivo y áreas comunes. La unidad guarda la fecha de entrega y la orden registra el sistema afectado."
+        },
+        {
+          "question": "¿Puedo ver todo lo que se hizo en un departamento?",
+          "answer": "Sí. Busca la unidad en la lista de órdenes y aparecen todas las solicitudes de ese departamento, con fotos y servicios."
+        },
+        {
+          "question": "¿La app trae checklists de inspección?",
+          "answer": "Para mantenimiento de edificios armas los tuyos: eliges los ítems, el tipo de respuesta y dónde pedir foto. Después aplicas el mismo checklist en cualquier orden."
+        },
+        {
+          "question": "¿El vecino o el administrador tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y estado. Ahí mismo puede aprobar el presupuesto y dejar comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tu mantenimiento",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

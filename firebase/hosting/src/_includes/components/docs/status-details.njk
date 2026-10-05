@@ -1,48 +1,36 @@
-{# Status Details Component - Detailed cards explaining status rules #}
-{# Usage: {% include "components/docs/status-details.njk" with {details: [...]} %} #}
-<div class="status-details">
-    {% for detail in details %}
-    <div class="status-card">
-        <h4>
-            <span class="status-indicator {{ detail.indicatorClass }}"></span>
-            {{ detail.title }}
-        </h4>
-        {% if detail.description %}<p>{{ detail.description | safe }}</p>{% endif %}
-
-        {% if detail.list %}
-        <ul>
-            {% for item in detail.list %}
-            <li>{{ item | safe }}</li>
-            {% endfor %}
-        </ul>
+{# Status details — one ruled block per status.
+   Expects `details` = [{ title, indicatorClass?, description?, paragraphs?, list?, note?,
+   permissions?: { canDoTitle, canDo[], cannotDoTitle, cannotDo[] } }]. #}
+{% for detail in details %}
+<div class="doc-detail">
+    <h3>{% if detail.indicatorClass %}<span class="dot dot--{{ detail.indicatorClass }}" aria-hidden="true"></span>{% endif %}<span>{{ detail.title }}</span></h3>
+    {% if detail.description %}<p>{{ detail.description | safe }}</p>{% endif %}
+    {% for p in detail.paragraphs %}<p>{{ p | safe }}</p>{% endfor %}
+    {% if detail.list %}
+    <ul>
+        {% for item in detail.list %}<li>{{ item | safe }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% if detail.permissions %}
+    <div class="doc-cando">
+        {% if detail.permissions.canDo %}
+        <div>
+            <h4>{{ detail.permissions.canDoTitle }}</h4>
+            <ul class="perm-list" role="list">
+                {% for item in detail.permissions.canDo %}<li><span class="mark-yes" aria-hidden="true">✓</span><span>{{ item | safe }}</span></li>{% endfor %}
+            </ul>
+        </div>
         {% endif %}
-
-        {% if detail.note %}<p class="note">{{ detail.note | safe }}</p>{% endif %}
-
-        {% if detail.permissions %}
-        <div class="status-permissions">
-            {% if detail.permissions.canDo %}
-            <div class="can-do">
-                <h5>&#10003; {{ detail.permissions.canDoTitle }}</h5>
-                <ul>
-                    {% for item in detail.permissions.canDo %}
-                    <li>{{ item | safe }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% if detail.permissions.cannotDo %}
-            <div class="cannot-do">
-                <h5>&#10007; {{ detail.permissions.cannotDoTitle }}</h5>
-                <ul>
-                    {% for item in detail.permissions.cannotDo %}
-                    <li>{{ item | safe }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
+        {% if detail.permissions.cannotDo %}
+        <div>
+            <h4>{{ detail.permissions.cannotDoTitle }}</h4>
+            <ul class="perm-list" role="list">
+                {% for item in detail.permissions.cannotDo %}<li class="denied"><span class="mark-no" aria-hidden="true">✕</span><span>{{ item | safe }}</span></li>{% endfor %}
+            </ul>
         </div>
         {% endif %}
     </div>
-    {% endfor %}
+    {% endif %}
+    {% if detail.note %}<p class="doc-note-small">{{ detail.note | safe }}</p>{% endif %}
 </div>
+{% endfor %}

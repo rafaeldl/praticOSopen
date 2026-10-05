@@ -1,0 +1,111 @@
+/* Hallmark · genre: modern-minimal · theme: custom "Ordem de Serviço" · design-system: design.md
+ * vibe: work-order paper, graphite ink, brand-blue signal, highlighter yellow
+ * paper oklch(97.5% 0.006 85) · accent oklch(52% 0.14 250) brand blue
+ * display Archivo 800 · body IBM Plex Sans · mono IBM Plex Mono
+ * axes: light / grotesk-sans / cool
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Paper + ink (light — default) */
+  --color-paper:      oklch(97.5% 0.006 85);
+  --color-paper-2:    oklch(95% 0.008 85);
+  --color-paper-3:    oklch(91.5% 0.010 85);
+  --color-card:       oklch(99.2% 0.003 85);
+  --color-rule:       oklch(86% 0.010 85);
+  --color-rule-strong:oklch(24% 0.012 255);
+  --color-neutral:    oklch(52% 0.012 255);
+  --color-muted:      oklch(40% 0.014 255);
+  --color-ink:        oklch(21% 0.016 255);
+
+  /* Brand */
+  --color-accent:      oklch(52% 0.14 250);   /* brand blue, text-safe on paper */
+  --color-accent-soft: oklch(93% 0.035 245);
+  --color-accent-ink:  oklch(98.5% 0.005 245);
+  --color-brand:       oklch(64% 0.13 245);   /* logo blue — surfaces only */
+  --color-marker:      oklch(92% 0.17 102);   /* highlighter yellow, from the logo "OS" */
+  --color-marker-ink:  oklch(24% 0.03 95);
+  --color-success:     oklch(52% 0.13 150);
+  --color-warning:     oklch(70% 0.15 70);
+  --color-danger:      oklch(55% 0.19 28);
+  --color-whatsapp:    oklch(62% 0.17 150);
+  --color-whatsapp-ink:oklch(20% 0.04 150);
+  --color-whatsapp-hover: oklch(68% 0.17 150);
+  --color-marker-soft: oklch(92% 0.17 102);
+  --shadow-float: 0 10px 24px -12px oklch(30% 0.1 150 / 0.6);
+  --color-focus:       oklch(55% 0.18 250);
+
+  /* Type */
+  --font-display: "Archivo", "Arial Narrow", ui-sans-serif, sans-serif;
+  --font-body:    "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --text-xs:   0.8125rem;  /* 13 */
+  --text-sm:   0.9375rem;  /* 15 */
+  --text-base: 1.0625rem;  /* 17 */
+  --text-md:   1.25rem;
+  --text-lg:   1.5625rem;
+  --text-xl:   clamp(1.6rem, 1.2rem + 1.4vw, 2.1rem);
+  --text-2xl:  clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --text-display-s: clamp(2.3rem, 1.5rem + 3.4vw, 3.75rem);
+  --text-display:   clamp(2.6rem, 1.6rem + 4.4vw, 4.75rem);
+
+  /* Space — 4pt named scale */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs:  0.75rem;
+  --space-sm:  1rem;
+  --space-md:  1.5rem;
+  --space-lg:  2rem;
+  --space-xl:  3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+
+  --page-max: 74rem;
+  --page-gutter: clamp(1rem, 4vw, 2.5rem);
+  --measure: 62ch;
+
+  /* Rules + radii */
+  --rule: 1px solid var(--color-rule);
+  --rule-strong: 2px solid var(--color-rule-strong);
+  --radius-input: 6px;
+  --radius-card: 10px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-short: 160ms;
+  --dur-mid:   240ms;
+
+  --shadow-card: 0 1px 0 oklch(21% 0.016 255 / 0.04), 0 12px 32px -20px oklch(21% 0.016 255 / 0.28);
+}
+
+/* Dark variant — same hues, only lightness/chroma move */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper:      oklch(17% 0.012 255);
+  --color-paper-2:    oklch(20.5% 0.013 255);
+  --color-paper-3:    oklch(25% 0.014 255);
+  --color-card:       oklch(21.5% 0.013 255);
+  --color-rule:       oklch(32% 0.014 255);
+  --color-rule-strong:oklch(90% 0.008 85);
+  --color-neutral:    oklch(68% 0.012 255);
+  --color-muted:      oklch(78% 0.010 255);
+  --color-ink:        oklch(94.5% 0.006 85);
+
+  --color-accent:      oklch(74% 0.11 245);
+  --color-accent-soft: oklch(30% 0.05 250);
+  --color-accent-ink:  oklch(17% 0.012 255);
+  --color-marker:      oklch(86% 0.15 102);
+  --color-marker-ink:  oklch(20% 0.03 95);
+  --color-marker-soft: oklch(86% 0.15 102 / 0.45);
+  --color-success:     oklch(74% 0.13 150);
+  --color-warning:     oklch(78% 0.13 70);
+  --color-danger:      oklch(68% 0.17 28);
+  --color-focus:       oklch(78% 0.12 245);
+
+  --shadow-card: 0 1px 0 oklch(0% 0 0 / 0.2), 0 16px 36px -22px oklch(0% 0 0 / 0.7);
+}

@@ -3650,4 +3650,233 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get viewPlans => 'Ver planos';
+
+  @override
+  String get asaasConnected => 'Conectado';
+
+  @override
+  String get asaasDisconnected => 'Não conectado';
+
+  @override
+  String get asaasConnectTitle => 'Conectar conta Asaas';
+
+  @override
+  String get asaasConnectIntro =>
+      'Receba por Pix, boleto ou cartão na conta Asaas da sua empresa. Quando o pagamento é confirmado, a OS dá baixa sozinha.';
+
+  @override
+  String get asaasConnectStep1 =>
+      '1. No painel do Asaas, abra Integrações > Chaves de API.';
+
+  @override
+  String get asaasConnectStep2 => '2. Gere uma nova chave e copie.';
+
+  @override
+  String get asaasConnectStep3 => '3. Cole a chave abaixo e toque em Conectar.';
+
+  @override
+  String get asaasOpenPanel => 'Abrir painel do Asaas';
+
+  @override
+  String get asaasOpenSandboxPanel => 'Abrir painel de teste (sandbox)';
+
+  @override
+  String get asaasApiKey => 'Chave de API';
+
+  @override
+  String get asaasApiKeyPlaceholder => 'Cole a chave aqui';
+
+  @override
+  String get asaasApiKeyHint =>
+      'A chave fica guardada com criptografia no servidor e não aparece de novo no app.';
+
+  @override
+  String get asaasConnect => 'Conectar';
+
+  @override
+  String get asaasAccount => 'Conta';
+
+  @override
+  String get asaasEnvironment => 'Ambiente';
+
+  @override
+  String get asaasEnvironmentSandbox => 'Teste';
+
+  @override
+  String get asaasEnvironmentProduction => 'Produção';
+
+  @override
+  String get asaasDisconnect => 'Desconectar';
+
+  @override
+  String get asaasDisconnectConfirm =>
+      'Desconectar a conta Asaas? As cobranças em aberto continuam no Asaas, mas os pagamentos deixam de dar baixa na OS.';
+
+  @override
+  String get asaasErrorInvalidKey =>
+      'Chave de API inválida. Confira e tente de novo.';
+
+  @override
+  String get asaasErrorForbidden => 'Você não tem permissão para esta ação.';
+
+  @override
+  String get asaasErrorNotConnected =>
+      'Conecte a conta Asaas em Configurações > Integrações.';
+
+  @override
+  String get asaasErrorExceedsBalance => 'O valor é maior que o saldo da OS.';
+
+  @override
+  String get asaasErrorTaxIdRequired => 'Informe o CPF ou CNPJ do cliente.';
+
+  @override
+  String get asaasErrorCustomerRequired =>
+      'Adicione um cliente à OS antes de cobrar.';
+
+  @override
+  String get asaasErrorGeneric => 'Não foi possível concluir. Tente novamente.';
+
+  @override
+  String get invalidTaxId => 'CPF ou CNPJ inválido';
+
+  @override
+  String get chargeWithAsaas => 'Cobrar com Asaas';
+
+  @override
+  String get chargeSectionTitle => 'Cobrança';
+
+  @override
+  String get createChargeTitle => 'Nova cobrança';
+
+  @override
+  String get chargeValue => 'Valor';
+
+  @override
+  String chargeBalanceHint(String value) {
+    return 'Saldo da OS: $value';
+  }
+
+  @override
+  String get chargeModeSingle => 'À vista';
+
+  @override
+  String get chargeModeInstallments => 'Parcelado no cartão';
+
+  @override
+  String get chargeSingleHint => 'O cliente escolhe Pix, boleto ou cartão.';
+
+  @override
+  String get chargeInstallmentsHint =>
+      'O cliente paga no cartão de crédito, nas parcelas escolhidas.';
+
+  @override
+  String get chargeInstallments => 'Parcelas';
+
+  @override
+  String chargeInstallmentOption(int count, String value) {
+    return '${count}x de $value';
+  }
+
+  @override
+  String get chargeDueDate => 'Vencimento';
+
+  @override
+  String get chargeTaxIdHint =>
+      'O Asaas exige CPF ou CNPJ. Ele fica salvo no cadastro do cliente.';
+
+  @override
+  String get chargeGenerate => 'Gerar cobrança';
+
+  @override
+  String get chargeCreated => 'Cobrança gerada';
+
+  @override
+  String get chargeStatusPending => 'Aguardando pagamento';
+
+  @override
+  String get chargeStatusOverdue => 'Vencida';
+
+  @override
+  String get chargeStatusPaid => 'Paga';
+
+  @override
+  String get chargeStatusCanceled => 'Cancelada';
+
+  @override
+  String get chargeStatusRefunded => 'Estornada';
+
+  @override
+  String chargeDueOn(String date) {
+    return 'Vence em $date';
+  }
+
+  @override
+  String chargeInstallmentsSummary(int count) {
+    return '${count}x no cartão';
+  }
+
+  @override
+  String get chargeShareOrderLink => 'Compartilhar link da OS';
+
+  @override
+  String get chargeCopyInvoiceLink => 'Copiar link da fatura';
+
+  @override
+  String get chargeInvoiceLinkCopied => 'Link da fatura copiado';
+
+  @override
+  String get chargeCancel => 'Cancelar cobrança';
+
+  @override
+  String get chargeCancelConfirm =>
+      'Cancelar esta cobrança no Asaas? O cliente não poderá mais pagar por ela.';
+
+  @override
+  String get chargeKeep => 'Manter';
+
+  @override
+  String get chargeReplaceTitle => 'Já existe uma cobrança em aberto';
+
+  @override
+  String get chargeReplaceConfirm =>
+      'Gerar uma nova cobrança cancela a anterior no Asaas.';
+
+  @override
+  String get chargeReplace => 'Gerar nova';
+
+  @override
+  String chargeTotalChanged(String balance, String value) {
+    return 'O saldo da OS ($balance) está diferente do valor da cobrança ($value).';
+  }
+
+  @override
+  String get chargeRegenerate => 'Gerar nova cobrança';
+
+  @override
+  String get asaasErrorInstallmentsInProgress =>
+      'Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.';
+
+  @override
+  String get asaasErrorOrderCanceled =>
+      'Esta OS está cancelada e não pode receber cobrança.';
+
+  @override
+  String get asaasErrorInvalidDueDate =>
+      'Data de vencimento inválida. Escolha hoje ou uma data futura.';
+
+  @override
+  String get asaasErrorInvalidInstallmentCount =>
+      'Número de parcelas inválido. Escolha de 2 a 12.';
+
+  @override
+  String get asaasErrorChargeNotOpen =>
+      'Esta cobrança não está mais em aberto.';
+
+  @override
+  String get asaasErrorValidation =>
+      'O Asaas recusou os dados da cobrança. Confira o CPF/CNPJ e o e-mail do cliente.';
+
+  @override
+  String get asaasErrorUnavailable =>
+      'O Asaas está indisponível no momento. Tente novamente em instantes.';
 }

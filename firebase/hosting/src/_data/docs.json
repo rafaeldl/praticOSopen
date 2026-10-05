@@ -1,377 +1,296 @@
 {
   "hub": {
     "pt": {
-      "badge": "Central de Ajuda",
-      "title": "Documentação",
-      "subtitle": "Guias completos e referências para aproveitar ao máximo o PraticOS. Encontre tutoriais, dicas e informações detalhadas sobre cada funcionalidade.",
-      "searchPlaceholder": "Buscar na documentação...",
-      "quickLinksTitle": "Links Rápidos",
-      "categories": [
+      "title": "Central de ajuda",
+      "subtitle": "Como cada parte do PraticOS funciona no dia a dia: agendar uma OS, mandar o link para o cliente aprovar, registrar o pagamento e definir o que cada pessoa da equipe pode ver.",
+      "filterLabel": "Filtrar artigos",
+      "filterPlaceholder": "Ex.: lembrete, pagamento, técnico…",
+      "countOne": "1 artigo encontrado",
+      "countMany": "{n} artigos encontrados",
+      "emptyLead": "Nenhum artigo com esse termo. Tente as",
+      "emptyFaq": "perguntas frequentes",
+      "emptyOr": "ou",
+      "emptySupport": "fale com o suporte",
+      "groups": [
         {
-          "title": "Perfis de Usuários",
-          "description": "Conheça os diferentes perfis (Admin, Gerente, Supervisor, Consultor, Técnico) e suas permissões específicas.",
-          "href": "perfis.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>"
+          "title": "Rotina de trabalho",
+          "items": [
+            {
+              "title": "Agenda",
+              "description": "Calendário do mês com as OS agendadas, horário de cada atendimento e filtro por técnico.",
+              "href": "agenda.html"
+            },
+            {
+              "title": "Lembretes",
+              "description": "Avisos no celular antes de cada agendamento, um resumo diário às 9h e alertas de OS parada.",
+              "href": "lembretes.html"
+            },
+            {
+              "title": "Compartilhar OS",
+              "description": "Envie um link para o cliente ver a OS, aprovar o orçamento e comentar, sem criar conta.",
+              "href": "compartilhar.html"
+            },
+            {
+              "title": "Procedimentos",
+              "description": "Checklists e formulários próprios, preenchidos dentro da OS durante o serviço.",
+              "href": "procedimentos.html"
+            },
+            {
+              "title": "Financeiro",
+              "description": "Pagamentos parciais, descontos, histórico de cada OS e o painel com o que falta receber.",
+              "href": "financeiro.html"
+            }
+          ]
         },
         {
-          "title": "Ordens de Serviço",
-          "description": "Como criar, editar e gerenciar ordens de serviço. Fluxo de status e boas práticas.",
-          "linkText": "Em breve",
-          "badge": "Em breve",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
+          "title": "Equipe e acesso",
+          "items": [
+            {
+              "title": "Perfis de usuário",
+              "description": "O que Administrador, Gerente, Supervisor, Consultor e Técnico podem ver e fazer.",
+              "href": "perfis.html"
+            }
+          ]
         },
         {
-          "title": "Integração ChatGPT e Claude",
-          "description": "Conecte o PraticOS ao ChatGPT e ao Claude via MCP para consultar e atualizar suas ordens de serviço pelo assistente de IA.",
-          "href": "integracoes.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"></path></svg>"
+          "title": "Integrações",
+          "items": [
+            {
+              "title": "ChatGPT e Claude",
+              "description": "Conecte o PraticOS ao assistente de IA para consultar e atualizar suas OS por conversa.",
+              "href": "integracoes.html"
+            },
+            {
+              "title": "WhatsApp",
+              "description": "Vincule sua conta, compartilhe OS e receba avisos no WhatsApp.",
+              "href": "whatsapp.html",
+              "flag": "whatsappBot"
+            }
+          ]
         },
         {
-          "title": "Agenda",
-          "description": "Calendário de agendamentos com visualização mensal, lembretes e filtro por técnico.",
-          "href": "agenda.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>"
-        },
-        {
-          "title": "Compartilhar OS",
-          "description": "Envie links mágicos para clientes visualizarem, aprovarem orçamentos e comentarem.",
-          "href": "compartilhar.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
-        },
-        {
-          "title": "Integração WhatsApp",
-          "description": "Vincule sua conta, compartilhe OS e receba notificações diretamente no seu WhatsApp.",
-          "href": "whatsapp.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>"
-        },
-        {
-          "title": "Procedimentos",
-          "description": "Crie checklists e formulários personalizados para padronizar processos da sua empresa.",
-          "href": "procedimentos.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
-        },
-        {
-          "title": "Lembretes",
-          "description": "Receba notificações automáticas antes dos seus agendamentos. Funciona offline e sem depender de servidores.",
-          "href": "lembretes.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
-        },
-        {
-          "title": "Clientes e Dispositivos",
-          "description": "Gerencie sua base de clientes e equipamentos/dispositivos vinculados.",
-          "linkText": "Em breve",
-          "badge": "Em breve",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path></svg>"
-        },
-        {
-          "title": "Sistema Financeiro",
-          "description": "Pagamentos parciais, descontos, histórico de transações e dashboard financeiro.",
-          "href": "financeiro.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>"
-        },
-        {
-          "title": "Configurações",
-          "description": "Personalize o sistema: dados da empresa, colaboradores, produtos, serviços e mais.",
-          "linkText": "Em breve",
-          "badge": "Em breve",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>"
-        },
-        {
-          "title": "Obras Públicas",
-          "description": "Como usar o PraticOS para gestão de contratos, medições e vistorias em prefeituras.",
-          "href": "obras-publicas.html",
-          "linkText": "Ver documentação ->",
-          "badge": "Novo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 21h18\"></path><path d=\"M5 21V7l7-4 7 4v14\"></path><path d=\"M9 21v-6h6v6\"></path><path d=\"M9 9h1\"></path><path d=\"M14 9h1\"></path><path d=\"M9 13h1\"></path><path d=\"M14 13h1\"></path></svg>"
+          "title": "Por segmento",
+          "items": [
+            {
+              "title": "Obras públicas",
+              "description": "Contratos, medições e vistorias de obras para prefeituras, usando OS, procedimentos e perfis.",
+              "href": "obras-publicas.html"
+            }
+          ]
         }
       ],
+      "quickLinksTitle": "Mais ajuda",
       "quickLinks": [
         {
-          "title": "Perguntas Frequentes",
-          "description": "Respostas para as dúvidas mais comuns",
-          "href": "../faq.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>"
+          "title": "Perguntas frequentes",
+          "description": "Conta e acesso, OS no dia a dia, dados e planos.",
+          "href": "../faq.html"
         },
         {
           "title": "Suporte",
-          "description": "Entre em contato com nossa equipe",
-          "href": "../support.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>"
+          "description": "Escreva para a equipe do PraticOS.",
+          "href": "../support.html"
         },
         {
-          "title": "Baixar App",
-          "description": "Disponível para iOS e Android",
-          "href": "../#download",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path><polyline points=\"7 10 12 15 17 10\"></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line></svg>"
+          "title": "Baixar o app",
+          "description": "Grátis para iPhone e Android.",
+          "href": "../#baixar"
         }
       ]
     },
     "en": {
-      "badge": "Help Center",
-      "title": "Documentation",
-      "subtitle": "Complete guides and references to get the most out of PraticOS. Find tutorials, tips, and detailed information about each feature.",
-      "searchPlaceholder": "Search documentation...",
-      "quickLinksTitle": "Quick Links",
-      "categories": [
+      "title": "Help center",
+      "subtitle": "How each part of PraticOS works on a normal day: scheduling a job, sending the link for the customer to approve, recording the payment and deciding what each person on the team can see.",
+      "filterLabel": "Filter articles",
+      "filterPlaceholder": "e.g. reminder, payment, technician…",
+      "countOne": "1 article found",
+      "countMany": "{n} articles found",
+      "emptyLead": "No article matches that term. Try the",
+      "emptyFaq": "FAQ",
+      "emptyOr": "or",
+      "emptySupport": "contact support",
+      "groups": [
         {
-          "title": "User Profiles",
-          "description": "Learn about the different profiles (Admin, Manager, Supervisor, Consultant, Technician) and their specific permissions.",
-          "href": "perfis-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>"
+          "title": "Daily work",
+          "items": [
+            {
+              "title": "Schedule",
+              "description": "Monthly calendar of scheduled work orders, the time of each visit and a filter by technician.",
+              "href": "agenda-en.html"
+            },
+            {
+              "title": "Reminders",
+              "description": "Phone alerts before each appointment, a daily nudge at 9 a.m. and alerts for stalled orders.",
+              "href": "lembretes-en.html"
+            },
+            {
+              "title": "Share a work order",
+              "description": "Send a link so the customer can view the order, approve the quote and comment — no account needed.",
+              "href": "compartilhar-en.html"
+            },
+            {
+              "title": "Procedures",
+              "description": "Your own checklists and forms, filled in on the work order during the job.",
+              "href": "procedimentos-en.html"
+            },
+            {
+              "title": "Payments",
+              "description": "Partial payments, discounts, each order’s history and a dashboard of what is still owed.",
+              "href": "financeiro-en.html"
+            }
+          ]
         },
         {
-          "title": "Service Orders",
-          "description": "How to create, edit and manage service orders. Status flow and best practices.",
-          "linkText": "Coming soon",
-          "badge": "Coming soon",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
+          "title": "Team and access",
+          "items": [
+            {
+              "title": "User profiles",
+              "description": "What Administrator, Manager, Supervisor, Consultant and Technician can see and do.",
+              "href": "perfis-en.html"
+            }
+          ]
         },
         {
-          "title": "ChatGPT and Claude Integration",
-          "description": "Connect PraticOS to ChatGPT and Claude via MCP to look up and update your service orders from your AI assistant.",
-          "href": "integracoes-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"></path></svg>"
+          "title": "Integrations",
+          "items": [
+            {
+              "title": "ChatGPT and Claude",
+              "description": "Connect PraticOS to your AI assistant to look up and update work orders by chatting.",
+              "href": "integracoes-en.html"
+            },
+            {
+              "title": "WhatsApp",
+              "description": "Link your account, share work orders and get alerts on WhatsApp.",
+              "href": "whatsapp-en.html",
+              "flag": "whatsappBot"
+            }
+          ]
         },
         {
-          "title": "Agenda",
-          "description": "Scheduling calendar with monthly view, reminders and technician filter.",
-          "href": "agenda-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>"
-        },
-        {
-          "title": "Share SO",
-          "description": "Send magic links for customers to view, approve quotes, and comment.",
-          "href": "compartilhar-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
-        },
-        {
-          "title": "WhatsApp Integration",
-          "description": "Link your account, share SO, and receive notifications directly on your WhatsApp.",
-          "href": "whatsapp-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>"
-        },
-        {
-          "title": "Procedures",
-          "description": "Create custom checklists and forms to standardize your company's processes.",
-          "href": "procedimentos-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
-        },
-        {
-          "title": "Reminders",
-          "description": "Receive automatic notifications before your appointments. Works offline and without servers.",
-          "href": "lembretes-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
-        },
-        {
-          "title": "Customers and Devices",
-          "description": "Manage your customer base and linked equipment/devices.",
-          "linkText": "Coming soon",
-          "badge": "Coming soon",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path></svg>"
-        },
-        {
-          "title": "Financial System",
-          "description": "Partial payments, discounts, transaction history and financial dashboard.",
-          "href": "financeiro-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>"
-        },
-        {
-          "title": "Settings",
-          "description": "Customize the system: company data, collaborators, products, services and more.",
-          "linkText": "Coming soon",
-          "badge": "Coming soon",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>"
-        },
-        {
-          "title": "Public Works",
-          "description": "How to use PraticOS for contract management, measurements, and inspections in municipalities.",
-          "href": "obras-publicas-en.html",
-          "linkText": "View documentation ->",
-          "badge": "New",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 21h18\"></path><path d=\"M5 21V7l7-4 7 4v14\"></path><path d=\"M9 21v-6h6v6\"></path><path d=\"M9 9h1\"></path><path d=\"M14 9h1\"></path><path d=\"M9 13h1\"></path><path d=\"M14 13h1\"></path></svg>"
+          "title": "By industry",
+          "items": [
+            {
+              "title": "Public works",
+              "description": "Contracts, measurements and site inspections for city governments, using orders, procedures and profiles.",
+              "href": "obras-publicas-en.html"
+            }
+          ]
         }
       ],
+      "quickLinksTitle": "More help",
       "quickLinks": [
         {
-          "title": "Frequently Asked Questions",
-          "description": "Answers to the most common questions",
-          "href": "../faq-en.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>"
+          "title": "FAQ",
+          "description": "Account, everyday work orders, data and plans.",
+          "href": "../faq-en.html"
         },
         {
           "title": "Support",
-          "description": "Contact our team",
-          "href": "../support-en.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>"
+          "description": "Write to the PraticOS team.",
+          "href": "../support-en.html"
         },
         {
-          "title": "Download App",
-          "description": "Available for iOS and Android",
-          "href": "../#download",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path><polyline points=\"7 10 12 15 17 10\"></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line></svg>"
+          "title": "Download the app",
+          "description": "Free for iPhone and Android.",
+          "href": "../index-en.html#baixar"
         }
       ]
     },
     "es": {
-      "badge": "Centro de Ayuda",
-      "title": "Documentación",
-      "subtitle": "Guías completas y referencias para aprovechar al máximo PraticOS. Encuentra tutoriales, consejos e información detallada sobre cada funcionalidad.",
-      "searchPlaceholder": "Buscar en la documentación...",
-      "quickLinksTitle": "Enlaces Rápidos",
-      "categories": [
+      "title": "Centro de ayuda",
+      "subtitle": "Cómo funciona cada parte de PraticOS en el día a día: programar una OS, enviar el enlace para que el cliente apruebe, registrar el pago y definir qué puede ver cada persona del equipo.",
+      "filterLabel": "Filtrar artículos",
+      "filterPlaceholder": "Ej.: recordatorio, pago, técnico…",
+      "countOne": "1 artículo encontrado",
+      "countMany": "{n} artículos encontrados",
+      "emptyLead": "Ningún artículo con ese término. Prueba las",
+      "emptyFaq": "preguntas frecuentes",
+      "emptyOr": "o",
+      "emptySupport": "habla con soporte",
+      "groups": [
         {
-          "title": "Perfiles de Usuario",
-          "description": "Conoce los diferentes perfiles (Admin, Gerente, Supervisor, Consultor, Técnico) y sus permisos específicos.",
-          "href": "perfis-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>"
+          "title": "Trabajo diario",
+          "items": [
+            {
+              "title": "Agenda",
+              "description": "Calendario del mes con las OS programadas, la hora de cada visita y filtro por técnico.",
+              "href": "agenda-es.html"
+            },
+            {
+              "title": "Recordatorios",
+              "description": "Avisos en el celular antes de cada cita, un recordatorio diario a las 9 h y alertas de OS detenidas.",
+              "href": "lembretes-es.html"
+            },
+            {
+              "title": "Compartir OS",
+              "description": "Envía un enlace para que el cliente vea la OS, apruebe el presupuesto y comente, sin crear cuenta.",
+              "href": "compartilhar-es.html"
+            },
+            {
+              "title": "Procedimientos",
+              "description": "Checklists y formularios propios, que se llenan dentro de la OS durante el servicio.",
+              "href": "procedimentos-es.html"
+            },
+            {
+              "title": "Finanzas",
+              "description": "Pagos parciales, descuentos, historial de cada OS y el panel con lo que falta cobrar.",
+              "href": "financeiro-es.html"
+            }
+          ]
         },
         {
-          "title": "Órdenes de Servicio",
-          "description": "Cómo crear, editar y gestionar órdenes de servicio. Flujo de estados y buenas prácticas.",
-          "linkText": "Próximamente",
-          "badge": "Próximamente",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
+          "title": "Equipo y acceso",
+          "items": [
+            {
+              "title": "Perfiles de usuario",
+              "description": "Qué pueden ver y hacer Administrador, Gerente, Supervisor, Consultor y Técnico.",
+              "href": "perfis-es.html"
+            }
+          ]
         },
         {
-          "title": "Integración ChatGPT y Claude",
-          "description": "Conecta PraticOS con ChatGPT y Claude via MCP para consultar y actualizar tus órdenes de servicio desde el asistente de IA.",
-          "href": "integracoes-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"></path></svg>"
+          "title": "Integraciones",
+          "items": [
+            {
+              "title": "ChatGPT y Claude",
+              "description": "Conecta PraticOS a tu asistente de IA para consultar y actualizar tus OS conversando.",
+              "href": "integracoes-es.html"
+            },
+            {
+              "title": "WhatsApp",
+              "description": "Vincula tu cuenta, comparte OS y recibe avisos en WhatsApp.",
+              "href": "whatsapp-es.html",
+              "flag": "whatsappBot"
+            }
+          ]
         },
         {
-          "title": "Agenda",
-          "description": "Calendario de programaciones con vista mensual, recordatorios y filtro por técnico.",
-          "href": "agenda-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>"
-        },
-        {
-          "title": "Compartir OS",
-          "description": "Envía enlaces mágicos para que clientes visualicen, aprueben presupuestos y comenten.",
-          "href": "compartilhar-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
-        },
-        {
-          "title": "Integración WhatsApp",
-          "description": "Vincule su cuenta, comparta OS y reciba notificaciones directamente en su WhatsApp.",
-          "href": "whatsapp-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>"
-        },
-        {
-          "title": "Procedimientos",
-          "description": "Crea checklists y formularios personalizados para estandarizar los procesos de tu empresa.",
-          "href": "procedimentos-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
-        },
-        {
-          "title": "Recordatorios",
-          "description": "Reciba notificaciones automáticas antes de sus citas. Funciona sin conexión y sin depender de servidores.",
-          "href": "lembretes-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
-        },
-        {
-          "title": "Clientes y Dispositivos",
-          "description": "Gestiona tu base de clientes y equipos/dispositivos vinculados.",
-          "linkText": "Próximamente",
-          "badge": "Próximamente",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path></svg>"
-        },
-        {
-          "title": "Sistema Financiero",
-          "description": "Pagos parciales, descuentos, historial de transacciones y dashboard financiero.",
-          "href": "financeiro-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>"
-        },
-        {
-          "title": "Configuraciones",
-          "description": "Personaliza el sistema: datos de la empresa, colaboradores, productos, servicios y más.",
-          "linkText": "Próximamente",
-          "badge": "Próximamente",
-          "comingSoon": true,
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>"
-        },
-        {
-          "title": "Obras Públicas",
-          "description": "Cómo usar PraticOS para gestión de contratos, mediciones e inspecciones en municipios.",
-          "href": "obras-publicas-es.html",
-          "linkText": "Ver documentación ->",
-          "badge": "Nuevo",
-          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 21h18\"></path><path d=\"M5 21V7l7-4 7 4v14\"></path><path d=\"M9 21v-6h6v6\"></path><path d=\"M9 9h1\"></path><path d=\"M14 9h1\"></path><path d=\"M9 13h1\"></path><path d=\"M14 13h1\"></path></svg>"
+          "title": "Por rubro",
+          "items": [
+            {
+              "title": "Obras públicas",
+              "description": "Contratos, mediciones e inspecciones de obras para municipios, usando OS, procedimientos y perfiles.",
+              "href": "obras-publicas-es.html"
+            }
+          ]
         }
       ],
+      "quickLinksTitle": "Más ayuda",
       "quickLinks": [
         {
-          "title": "Preguntas Frecuentes",
-          "description": "Respuestas a las preguntas más comunes",
-          "href": "../faq-es.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>"
+          "title": "Preguntas frecuentes",
+          "description": "Cuenta, OS en el día a día, datos y planes.",
+          "href": "../faq-es.html"
         },
         {
           "title": "Soporte",
-          "description": "Contacta con nuestro equipo",
-          "href": "../support-es.html",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>"
+          "description": "Escribe al equipo de PraticOS.",
+          "href": "../support-es.html"
         },
         {
-          "title": "Descargar App",
-          "description": "Disponible para iOS y Android",
-          "href": "../#download",
-          "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path><polyline points=\"7 10 12 15 17 10\"></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line></svg>"
+          "title": "Descargar la app",
+          "description": "Gratis para iPhone y Android.",
+          "href": "../index-es.html#baixar"
         }
       ]
     }

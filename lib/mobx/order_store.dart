@@ -22,6 +22,7 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
@@ -1348,6 +1349,10 @@ abstract class _OrderStore with Store {
   /// so they read a server state that already contains it.
   Future<void>? _pendingPaymentFieldWrite;
 
+  @visibleForTesting
+  set pendingPaymentFieldWriteForTest(Future<void>? write) =>
+      _pendingPaymentFieldWrite = write;
+
   /// Transactions added offline whose write the server hasn't acknowledged
   /// yet (by id). Kept when the local state is refreshed from a transaction.
   final Map<String, PaymentTransaction> _pendingTransactions = {};
@@ -1440,6 +1445,40 @@ abstract class _OrderStore with Store {
     } catch (e, stack) {
       lastPaymentFailure = classifyPaymentUpdateFailure(e);
       _logPaymentError(e, stack, 'updatePayments');
+      return false;
+    }
+  }
+
+  /// Reads the order from the server. Test seam for [reloadPayments].
+  late Future<Order?> Function(String companyId, String orderId)
+      fetchOrderFromServer = repository.getFromServer;
+
+  /// Re-reads the order from the server and refreshes the local payment
+  /// state (transactions, paidAmount, paid, payment, discount and total).
+  ///
+  /// [orderStream] doesn't refresh the payment fields, so the screen calls
+  /// this when an Asaas charge is paid or refunded by the webhook.
+  /// Returns false when it couldn't read (offline, missing order) or the
+  /// store moved to another order meanwhile.
+  @action
+  Future<bool> reloadPayments() async {
+    final orderId = order?.id;
+    final company = companyId;
+    if (orderId == null || company == null) return false;
+    try {
+      // Same wait as _runPaymentUpdate: reading before an offline write is
+      // acknowledged would revert it locally. Not acknowledged in time →
+      // skip this reload (the local state already has the write).
+      if (await waitForPendingPaymentWrite(_pendingPaymentFieldWrite) !=
+          null) {
+        return false;
+      }
+      final fresh = await fetchOrderFromServer(company, orderId);
+      if (fresh == null || order?.id != orderId) return false;
+      _applyPaymentState(fresh);
+      return true;
+    } catch (e, stack) {
+      _logPaymentError(e, stack, 'reloadPayments');
       return false;
     }
   }

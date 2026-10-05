@@ -1,0 +1,50 @@
+{# H2 · split diptych — trade headline left; a sample work order for the trade (or a real screenshot) right #}
+{% set hero = data.hero %}
+{% set t = hero.ticket %}
+{% set heroMark = hero.titleMark | default(hero.titleHighlight) %}
+<section class="seg-hero" id="hero">
+    <div class="wrap seg-hero__grid">
+        <div class="seg-hero__copy">
+            <h1>{{ hero.title }}{% if heroMark %} <span class="mark">{{ heroMark }}</span>{% endif %}</h1>
+            <p class="lede">{{ hero.lede | default(hero.subtitle) }}</p>
+            <div class="btn-row">
+                <a href="#baixar" class="btn btn--primary" data-ga="cta_click" data-ga-detail="segment_hero_download">{{ hero.ctaPrimary | default(ui.ctaPrimary) }}</a>
+                <a href="#como-funciona" class="btn btn--secondary" data-ga="select_content" data-ga-detail="segment_hero_how_it_works">{{ hero.ctaSecondary | default(ui.ctaSecondary) }}</a>
+            </div>
+            <p class="seg-hero__note mono">{{ hero.note | default(ui.note) }}</p>
+        </div>
+
+        {% if t %}
+        <figure class="seg-ticket" aria-label="{{ t.caption }}">
+            <figcaption class="seg-ticket__caption label">{{ t.caption }}</figcaption>
+            <div class="seg-ticket__sheet">
+                <header class="seg-ticket__head">
+                    <span class="seg-ticket__title">{{ t.title }}</span>
+                    <span class="seg-ticket__number mono">{{ t.number }}</span>
+                </header>
+                <dl class="seg-ticket__rows">
+                    {% for row in t.rows %}
+                    <div class="seg-ticket__row"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+                    {% endfor %}
+                    <div class="seg-ticket__row seg-ticket__row--total"><dt>{{ t.totalLabel }}</dt><dd class="mono">{{ t.total }}</dd></div>
+                </dl>
+                {% if t.stamp %}<p class="seg-ticket__stamp" aria-hidden="true">{{ t.stamp }}</p>{% endif %}
+                {% if t.steps %}
+                <ol class="seg-ticket__steps" role="list">
+                    {% for step in t.steps %}
+                    <li class="{% if loop.index0 < t.current %}is-done{% elif loop.index0 == t.current %}is-current{% endif %}"{% if loop.index0 == t.current %} aria-current="step"{% endif %}>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+                {% endif %}
+            </div>
+        </figure>
+        {% else %}
+        {% set heroImage = hero.image | default('home.png') %}
+        {% set heroAlt = hero.imageAlt | default(ui.shotAlt) %}
+        <figure class="shot seg-hero__shot">
+            <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ heroImage }}" alt="{{ heroAlt }}" decoding="async" width="1170" height="2532">
+            <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ heroImage }}" alt="{{ heroAlt }}" decoding="async" width="1170" height="2532">
+        </figure>
+        {% endif %}
+    </div>
+</section>

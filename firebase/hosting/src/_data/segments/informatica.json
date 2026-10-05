@@ -4,378 +4,516 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Assistência Técnica de Informática | PraticOS",
-    "description": "Chega de perder equipamentos e prazos! Sistema de OS para assistência técnica de informática com fotos, número de série e link de acompanhamento. Organize sua loja em 5 minutos. Grátis para começar.",
-    "keywords": "sistema para assistência técnica informática, app para técnico de informática, programa ordem de serviço computador, controle de OS informática, software assistência técnica grátis, sistema para loja de informática",
+    "description": "App de ordem de serviço para assistência de informática: entrada com fotos e senha, diagnóstico de hardware, orçamento por link e busca por nº de série.",
+    "keywords": "sistema para assistência técnica de informática, app para técnico de informática, programa ordem de serviço computador, controle de OS informática, software assistência técnica grátis, sistema para loja de informática",
     "ogTitle": "Sistema para Assistência Técnica de Informática | PraticOS",
-    "ogDescription": "Chega de perder equipamentos! Sistema de OS com fotos, número de série e link de acompanhamento. Organize sua assistência em 5 minutos.",
+    "ogDescription": "OS da bancada no celular: computador com especificações, entrada com fotos, diagnóstico de hardware, backup confirmado e orçamento aprovado por link.",
     "hero": {
-      "badge": "💻 Assistência Técnica de Informática",
-      "title": "Chega de perder equipamentos:",
-      "titleHighlight": "organize sua assistência em 5 minutos",
-      "subtitle": "Acabe com o caderninho e com as ligações de \"já ficou pronto?\". Documente cada equipamento com foto e número de série, e deixe o cliente acompanhar sozinho pelo link mágico.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Técnicos ativos" },
-        "orders": { "value": "10k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Notebook, senha e diagnóstico",
+      "titleMark": "na mesma OS.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de informática. Registre o computador com processador, memória e armazenamento, faça a entrada com fotos e o diagnóstico de hardware, mande o orçamento por link e registre o pagamento — pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0733",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Fernanda Costa"
+          },
+          {
+            "label": "Computador",
+            "value": "Notebook Dell Inspiron 15 · série 7HQ2K93"
+          },
+          {
+            "label": "Entrada",
+            "value": "Liga, sem imagem · com carregador"
+          },
+          {
+            "label": "Serviço",
+            "value": "SSD de 512 GB e reinstalação do sistema"
+          },
+          {
+            "label": "Fotos",
+            "value": "5 anexadas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 590,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Concluído",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com assistência técnica de informática",
+      "title": "Onde a assistência de informática perde dinheiro",
+      "lede": "Não falta computador na bancada. Falta saber de quem é cada um, o que já foi testado e se o backup foi feito antes de formatar.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📋", "title": "Perde controle das OS", "text": "Equipamentos acumulam na bancada e você esquece qual é de quem. Prazos passam e cliente reclama." },
-        { "icon": "📞", "title": "Cliente liga toda hora", "text": "Cliente liga 5x por dia perguntando se o computador ficou pronto. Você perde tempo e paciência." },
-        { "icon": "📝", "title": "Anota tudo no caderno", "text": "Informações em papel ou WhatsApp. Perde histórico, esquece detalhes e não encontra quando precisa." },
-        { "icon": "💬", "title": "WhatsApp para tudo", "text": "Orçamentos, fotos, conversas... tudo misturado no WhatsApp. Impossível encontrar depois." },
-        { "icon": "🔍", "title": "Sem histórico do cliente", "text": "Cliente volta e você não lembra o que já fez no equipamento dele. Começa do zero toda vez." },
-        { "icon": "💸", "title": "Não sabe quanto lucrou", "text": "Trabalha o mês inteiro mas no final não sabe quanto sobrou. Sem controle de custos e margem real." }
+        {
+          "problem": "Backup que ninguém confirmou",
+          "detail": "O cliente diz que tinha fotos no HD e que a assistência apagou tudo.",
+          "answer": "O checklist de privacidade e backup registra se o backup foi feito e se o cliente está ciente, antes de qualquer formatação."
+        },
+        {
+          "problem": "Senha num post-it",
+          "detail": "A senha do sistema ficou colada na tampa do notebook, à vista de todos.",
+          "answer": "A senha de acesso fica no checklist de entrada, dentro da OS, junto com fotos, avarias e acessórios deixados."
+        },
+        {
+          "problem": "Diagnóstico refeito do zero",
+          "detail": "O notebook volta e ninguém sabe o que já foi testado.",
+          "answer": "O diagnóstico de hardware guarda memória, HD/SSD com saúde em %, fonte, placa-mãe e temperatura da CPU. Busque pelo número de série e veja as OS anteriores."
+        },
+        {
+          "problem": "Upgrade sem conferência",
+          "detail": "Trocou a memória ou o SSD, e o cliente não sabe o que mudou nem o que pagou.",
+          "answer": "O checklist de upgrade registra o componente trocado, a especificação anterior e a nova, e se o sistema reconheceu o hardware."
+        },
+        {
+          "problem": "Telefone tocando o dia todo",
+          "detail": "“Já ficou pronto?” Cada ligação interrompe quem está na bancada.",
+          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+        },
+        {
+          "problem": "Mês fechado sem saber quanto entrou",
+          "detail": "Pix, cartão e dinheiro anotados em lugares diferentes. Ninguém sabe quem ainda deve.",
+          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia da assistência técnica",
-      "items": [
-        { "icon": "🔗", "title": "Link mágico para o cliente", "text": "Cliente recebe um link e acompanha o status em tempo real.", "highlight": "Reduz ligações em até 70%." },
-        { "icon": "📸", "title": "OS com foto e número de série", "text": "Cada OS tem foto do equipamento, número de série e dados completos. Nunca mais confunda equipamentos." },
-        { "icon": "📋", "title": "Checklist de entrada completo", "text": "Documente o estado do equipamento na entrada com fotos.", "highlight": "Reduz disputas de garantia em 85%." },
-        { "icon": "🗂️", "title": "Histórico completo do cliente", "text": "Veja todos os serviços anteriores do cliente em segundos. Atendimento mais rápido e personalizado." },
-        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou no mês.", "highlight": "Controle total de custos e margem." },
-        { "icon": "📱", "title": "Orçamento profissional", "text": "Envie orçamentos em PDF pelo WhatsApp. Cliente aprova direto no celular." }
+    "workflow": {
+      "title": "Como o computador passa pela bancada no PraticOS",
+      "lede": "Da entrada à retirada, cada etapa fica registrada na OS do equipamento.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Registre a entrada",
+          "text": "Cadastre o cliente e o computador com processador, memória e armazenamento. O checklist de entrada vem pronto e você ajusta os itens.",
+          "facts": [
+            "Liga? Tela funciona? Avarias e acessórios",
+            "Senha de acesso registrada na OS",
+            "Busca pelo número de série na lista de OS"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist de entrada preenchido dentro de uma OS"
+        },
+        {
+          "number": "02",
+          "title": "Diagnostique e orce por link",
+          "text": "Faça o diagnóstico de hardware e monte o orçamento com serviços e peças do catálogo. O cliente abre a OS no navegador, vê tudo e aprova.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Seus termos de garantia e retirada antes da aprovação",
+            "PDF da OS para imprimir ou enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "03",
+          "title": "Execute com checklist",
+          "text": "Formatação, limpeza interna e upgrade têm checklists prontos. A lista de OS mostra o que está em orçamento, aprovado, em execução ou concluído.",
+          "facts": [
+            "Backup, sistema, drivers e dados restaurados",
+            "Temperatura antes e depois da limpeza",
+            "Teste de periféricos na entrega"
+          ],
+          "image": "home.png",
+          "alt": "Lista de ordens de serviço com status no app PraticOS"
+        },
+        {
+          "number": "04",
+          "title": "Entregue e receba",
+          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "entrada do equipamento",
-      "text": "Documente o estado do equipamento na entrada e evite problemas na hora da entrega. O cliente assina digitalmente.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Recebimento",
-      "items": [
-        { "icon": "📸", "text": "Fotos do equipamento (frente/traseira)" },
-        { "icon": "🔢", "text": "Número de série / Service Tag" },
-        { "icon": "💻", "text": "Modelo e especificações" },
-        { "icon": "✅", "text": "Estado: Tela, Teclado, Bateria, Portas" },
-        { "icon": "🔐", "text": "Senha de acesso (se necessário)" },
-        { "icon": "📦", "text": "Acessórios deixados (carregador, mouse)" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar sua assistência",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, número de série, descrição do defeito e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe o estado do equipamento na entrada. Proteja-se de reclamações indevidas.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere orçamentos e recibos em PDF para o cliente. Profissionalismo que impressiona.", "color": "orange" },
-        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente. Todos os equipamentos e serviços anteriores em um só lugar.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do reparo pelo celular. Sem precisar ligar para você.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu perdia 2 horas por dia procurando equipamentos e atendendo ligações de clientes. Agora tudo está organizado e os clientes acompanham pelo link. Minha produtividade triplicou.",
-      "name": "Marcos Oliveira",
-      "role": "Dono de assistência técnica há 10 anos",
-      "metric": "70% menos ligações de clientes"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem tem assistência de informática",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Diferente de 90% dos concorrentes, nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Já tentei outros apps e não gostei", "answer": "PraticOS foi criado por quem trabalha com assistência técnica. Não é um app genérico adaptado — foi feito especificamente para você. Por isso tem checklist de entrada, link de acompanhamento e tudo que você precisa." },
-        { "question": "Funciona sem internet?", "answer": "Você precisa de internet para sincronizar os dados, mas pode visualizar OS já carregadas mesmo offline. Na prática, com o Wi-Fi da loja você não vai ter problemas." },
-        { "question": "Consigo importar meus clientes?", "answer": "Sim! Você pode importar sua lista de clientes via planilha. É só entrar em contato pelo suporte que ajudamos você a migrar seus dados." },
-        { "question": "Tem suporte se eu precisar de ajuda?", "answer": "Sim! Temos suporte por email e uma documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica e vai te ajudar de verdade." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário e 30 fotos por mês. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Serve para redes e servidores?",
+          "answer": "Sim. O segmento de informática cobre desktops, notebooks, redes e servidores. Para atender na empresa do cliente, agende a OS e ela aparece na agenda do técnico."
+        },
+        {
+          "question": "Posso colocar minhas regras de garantia e retirada?",
+          "answer": "Sim. Em Termos e Condições há um texto padrão para informática — retirada, backup, senhas, garantia — que você edita. O cliente vê os termos antes de aprovar o orçamento, e eles saem no PDF da OS."
+        },
+        {
+          "question": "Os técnicos podem usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar sua assistência",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "IT Services Management System | PraticOS",
-    "description": "Stop losing equipment and missing deadlines! Work order system for IT services with photos, serial numbers and customer status link. Get organized in 5 minutes. Free to start.",
-    "keywords": "IT services software, computer repair shop management, work order system IT, tech support app, computer technician software, IT service desk",
-    "ogTitle": "IT Services Management System | PraticOS",
-    "ogDescription": "Stop losing equipment! Work order system with photos, serial numbers and customer status link. Get organized in 5 minutes.",
+    "title": "Computer Repair Shop Software | PraticOS",
+    "description": "Work order app for computer repair shops: check-in with photos and password, hardware diagnosis, quotes approved by link and search by serial number.",
+    "keywords": "computer repair shop software, PC repair work order app, laptop repair shop management, computer technician app, IT repair ticketing software",
+    "ogTitle": "Computer Repair Shop Software | PraticOS",
+    "ogDescription": "Your bench on your phone: computers with specs, check-in photos, hardware diagnosis, confirmed backups and quotes approved by link.",
     "hero": {
-      "badge": "💻 IT Services & Computer Repair",
-      "title": "Stop losing equipment:",
-      "titleHighlight": "organize your shop in 5 minutes",
-      "subtitle": "End the notebook chaos and the \"is it ready yet?\" calls. Document every device with photos and serial numbers, and let customers track status themselves with the magic link.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Active technicians" },
-        "orders": { "value": "10k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Laptop, password and diagnosis",
+      "titleMark": "on one work order.",
+      "lede": "PraticOS is the work order app for computer repair shops. Log the computer with processor, memory and storage, run the check-in with photos and the hardware diagnosis, send the quote as a link and record the payment — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0733",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Jennifer Collins"
+          },
+          {
+            "label": "Computer",
+            "value": "Dell Inspiron 15 laptop · SN 7HQ2K93"
+          },
+          {
+            "label": "Check-in",
+            "value": "Powers on, no display · charger left"
+          },
+          {
+            "label": "Service",
+            "value": "512 GB SSD and OS reinstall"
+          },
+          {
+            "label": "Photos",
+            "value": "5 attached"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$185.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Done",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for IT service technicians",
+      "title": "Where a computer repair shop loses money",
+      "lede": "There's no shortage of computers on the bench. What's missing is knowing whose each one is, what's been tested and whether the backup happened before the wipe.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📋", "title": "Losing track of work orders", "text": "Equipment piles up on your bench and you forget whose is which. Deadlines pass and customers complain." },
-        { "icon": "📞", "title": "Customer calls all day", "text": "Customer calls 5x a day asking if the computer is ready. You lose time and patience." },
-        { "icon": "📝", "title": "Writing everything in a notebook", "text": "Information on paper or WhatsApp. Lose history, forget details and can't find it when you need it." },
-        { "icon": "💬", "title": "WhatsApp for everything", "text": "Quotes, photos, conversations... all mixed in WhatsApp. Impossible to find later." },
-        { "icon": "🔍", "title": "No customer history", "text": "Customer returns and you don't remember what you already did on their equipment. Start from zero every time." },
-        { "icon": "💸", "title": "Don't know your profit", "text": "Work all month but don't know how much you actually made. No control over costs and real margins." }
+        {
+          "problem": "A backup nobody confirmed",
+          "detail": "The customer says there were photos on the drive and your shop erased them.",
+          "answer": "The privacy and backup checklist records whether the backup was done and that the customer was informed, before any reinstall."
+        },
+        {
+          "problem": "Passwords on sticky notes",
+          "detail": "The login password is taped to the laptop lid for anyone to see.",
+          "answer": "The password goes on the check-in checklist inside the work order, along with photos, damage and accessories left."
+        },
+        {
+          "problem": "Diagnosing from scratch, again",
+          "detail": "The laptop comes back and nobody knows what was already tested.",
+          "answer": "The hardware diagnosis keeps RAM, drive health in %, power supply, motherboard and CPU temperature. Search by serial number and see past work orders."
+        },
+        {
+          "problem": "Upgrades with no record",
+          "detail": "You swapped the RAM or SSD, and the customer doesn't know what changed or what they paid for.",
+          "answer": "The upgrade checklist records the part replaced, the old and new specs, and whether the system recognized the hardware."
+        },
+        {
+          "problem": "The phone ringing all day",
+          "detail": "“Is it ready yet?” Every call pulls someone off the bench.",
+          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+        },
+        {
+          "problem": "Closing the month without knowing what came in",
+          "detail": "Card, cash and transfers noted in different places. Nobody knows who still owes you.",
+          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for daily IT service operations",
-      "items": [
-        { "icon": "🔗", "title": "Magic link for customers", "text": "Customer receives a link and tracks status in real time.", "highlight": "Reduces calls by up to 70%." },
-        { "icon": "📸", "title": "WO with photo and serial number", "text": "Each WO has device photo, serial number and complete data. Never mix up equipment again." },
-        { "icon": "📋", "title": "Complete intake checklist", "text": "Document equipment condition at intake with photos.", "highlight": "Reduces warranty disputes by 85%." },
-        { "icon": "🗂️", "title": "Complete customer history", "text": "See all previous services for any customer in seconds. Faster, personalized service." },
-        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made this month.", "highlight": "Full control over costs and margins." },
-        { "icon": "📱", "title": "Professional quotes", "text": "Send PDF quotes via WhatsApp. Customer approves right on their phone." }
+    "workflow": {
+      "title": "How a computer moves across the bench in PraticOS",
+      "lede": "From check-in to pickup, every step is recorded on the computer's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Log the check-in",
+          "text": "Add the customer and the computer with processor, memory and storage. The check-in checklist comes ready and you adjust the items.",
+          "facts": [
+            "Powers on? Display works? Damage and accessories",
+            "Login password recorded on the work order",
+            "Search by serial number in the work order list"
+          ],
+          "image": "forms.png",
+          "alt": "A completed check-in checklist inside a work order"
+        },
+        {
+          "number": "02",
+          "title": "Diagnose and quote by link",
+          "text": "Run the hardware diagnosis and build the quote from catalog services and parts. The customer opens the work order in a browser, reviews it and approves.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Your warranty and pickup terms shown before approval",
+            "Work order PDF to print or send"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "03",
+          "title": "Do the work with checklists",
+          "text": "OS install, internal cleaning and upgrades have ready-made checklists. The work order list shows what's quoted, approved, in progress or done.",
+          "facts": [
+            "Backup, OS, drivers and data restored",
+            "Temperature before and after cleaning",
+            "Peripheral test at handover"
+          ],
+          "image": "home.png",
+          "alt": "Work order list with statuses in the PraticOS app"
+        },
+        {
+          "number": "04",
+          "title": "Hand it back and get paid",
+          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "facts": [
+            "Partial payment and discount on the same work order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Equipment",
-      "titleHighlight": "intake checklist",
-      "text": "Document the equipment condition at intake and avoid problems at delivery. Customer signs digitally.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Intake Checklist",
-      "items": [
-        { "icon": "📸", "text": "Equipment photos (front/back)" },
-        { "icon": "🔢", "text": "Serial number / Service Tag" },
-        { "icon": "💻", "text": "Model and specifications" },
-        { "icon": "✅", "text": "Condition: Screen, Keyboard, Battery, Ports" },
-        { "icon": "🔐", "text": "Access password (if needed)" },
-        { "icon": "📦", "text": "Accessories left (charger, mouse)" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your shop",
-      "subtitle": "Powerful and intuitive tools to boost your productivity",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, serial numbers, defect description and values. All organized." },
-        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph equipment condition at intake. Protect yourself from undue complaints.", "color": "yellow" },
-        { "icon": "pdf", "title": "Professional PDF", "text": "Generate quotes and receipts in PDF for the customer. Professionalism that impresses.", "color": "orange" },
-        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
-        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer. All equipment and previous services in one place.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks repair status on their phone. No need to call you.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "I used to lose 2 hours a day looking for equipment and answering customer calls. Now everything is organized and customers track via the link. My productivity tripled.",
-      "name": "Marcos Oliveira",
-      "role": "IT shop owner for 10 years",
-      "metric": "70% fewer customer calls"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from computer repair shops",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Unlike 90% of competitors, our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "I've tried other apps and didn't like them", "answer": "PraticOS was created by people who work in IT services. It's not a generic app adapted for your use — it was built specifically for you. That's why it has intake checklist, status tracking link and everything you need." },
-        { "question": "Does it work offline?", "answer": "You need internet to sync data, but you can view already loaded work orders offline. In practice, with your shop's Wi-Fi you won't have any issues." },
-        { "question": "Can I import my customers?", "answer": "Yes! You can import your customer list via spreadsheet. Just contact our support and we'll help you migrate your data." },
-        { "question": "Is there support if I need help?", "answer": "Yes! We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of IT services and will truly help you." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user and 30 photos per month. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Does it work for networks and servers?",
+          "answer": "Yes. The computers segment covers desktops, laptops, networks and servers. For on-site jobs, schedule the work order and it shows up on the technician's calendar."
+        },
+        {
+          "question": "Can I add my own warranty and pickup rules?",
+          "answer": "Yes. Terms and Conditions comes with a default text for computer repair — pickup, backup, passwords, warranty — that you can edit. The customer sees it before approving the quote, and it prints on the work order PDF."
+        },
+        {
+          "question": "Can my technicians use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your shop",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Asistencia Técnica de Informática | PraticOS",
-    "description": "¡Basta de perder equipos y plazos! Sistema de OS para asistencia técnica de informática con fotos, número de serie y link de seguimiento. Organiza tu tienda en 5 minutos. Gratis para empezar.",
-    "keywords": "sistema asistencia técnica informática, app técnico informática, programa orden servicio computador, control OS informática, software asistencia técnica gratis, sistema para tienda informática",
-    "ogTitle": "Sistema para Asistencia Técnica de Informática | PraticOS",
-    "ogDescription": "¡Basta de perder equipos! Sistema de OS con fotos, número de serie y link de seguimiento. Organiza tu asistencia en 5 minutos.",
+    "title": "Sistema para Servicio Técnico de Computadoras | PraticOS",
+    "description": "App de órdenes de servicio para servicio técnico de computadoras: ingreso con fotos y contraseña, diagnóstico de hardware y presupuesto aprobado por link.",
+    "keywords": "sistema para servicio técnico de computadoras, app para técnico en informática, programa orden de servicio computadoras, software servicio técnico informática, sistema para tienda de informática",
+    "ogTitle": "Sistema para Servicio Técnico de Computadoras | PraticOS",
+    "ogDescription": "El taller en el celular: computadoras con especificaciones, ingreso con fotos, diagnóstico de hardware, backup confirmado y presupuesto por link.",
     "hero": {
-      "badge": "💻 Asistencia Técnica de Informática",
-      "title": "Basta de perder equipos:",
-      "titleHighlight": "organiza tu asistencia en 5 minutos",
-      "subtitle": "Acaba con el cuaderno y con las llamadas de \"¿ya está listo?\". Documenta cada equipo con foto y número de serie, y deja que el cliente lo siga solo por el link mágico.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Técnicos activos" },
-        "orders": { "value": "10k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Notebook, clave y diagnóstico",
+      "titleMark": "en una sola orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para servicio técnico de computadoras. Registra la computadora con procesador, memoria y almacenamiento, haz el ingreso con fotos y el diagnóstico de hardware, envía el presupuesto por link y registra el pago — desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0733",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Fernanda Costa"
+          },
+          {
+            "label": "Computadora",
+            "value": "Notebook Dell Inspiron 15 · serie 7HQ2K93"
+          },
+          {
+            "label": "Ingreso",
+            "value": "Enciende, sin imagen · con cargador"
+          },
+          {
+            "label": "Servicio",
+            "value": "SSD de 512 GB y reinstalación del sistema"
+          },
+          {
+            "label": "Fotos",
+            "value": "5 adjuntas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 185,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En curso",
+          "Terminado",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con asistencia técnica de informática",
+      "title": "Dónde pierde plata el servicio técnico de computadoras",
+      "lede": "No faltan computadoras en el banco. Falta saber de quién es cada una, qué ya se probó y si se hizo el backup antes de formatear.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📋", "title": "Pierde control de las OS", "text": "Equipos se acumulan en la mesa y olvidas cuál es de quién. Plazos pasan y cliente reclama." },
-        { "icon": "📞", "title": "Cliente llama todo el día", "text": "Cliente llama 5x al día preguntando si la computadora está lista. Pierdes tiempo y paciencia." },
-        { "icon": "📝", "title": "Anota todo en el cuaderno", "text": "Informaciones en papel o WhatsApp. Pierde historial, olvida detalles y no encuentra cuando necesita." },
-        { "icon": "💬", "title": "WhatsApp para todo", "text": "Presupuestos, fotos, conversaciones... todo mezclado en WhatsApp. Imposible encontrar después." },
-        { "icon": "🔍", "title": "Sin historial del cliente", "text": "Cliente vuelve y no recuerdas qué ya hiciste en su equipo. Empiezas de cero cada vez." },
-        { "icon": "💸", "title": "No sabe cuánto ganó", "text": "Trabaja todo el mes pero al final no sabe cuánto sobró. Sin control de costos y margen real." }
+        {
+          "problem": "Un backup que nadie confirmó",
+          "detail": "El cliente dice que tenía fotos en el disco y que el servicio técnico las borró.",
+          "answer": "El checklist de privacidad y backup registra si se hizo el backup y si el cliente está al tanto, antes de cualquier formateo."
+        },
+        {
+          "problem": "Contraseñas en un papelito",
+          "detail": "La contraseña del sistema quedó pegada en la tapa de la notebook, a la vista de todos.",
+          "answer": "La contraseña va en el checklist de ingreso, dentro de la orden, junto con fotos, daños y accesorios entregados."
+        },
+        {
+          "problem": "Diagnóstico desde cero, otra vez",
+          "detail": "La notebook vuelve y nadie sabe qué ya se probó.",
+          "answer": "El diagnóstico de hardware guarda RAM, salud del disco en %, fuente, placa madre y temperatura del CPU. Busca por número de serie y ve las órdenes anteriores."
+        },
+        {
+          "problem": "Upgrades sin registro",
+          "detail": "Cambiaste la memoria o el SSD, y el cliente no sabe qué cambió ni qué pagó.",
+          "answer": "El checklist de upgrade registra el componente cambiado, la especificación anterior y la nueva, y si el sistema reconoció el hardware."
+        },
+        {
+          "problem": "El teléfono sonando todo el día",
+          "detail": "“¿Ya está lista?” Cada llamada saca a alguien del banco.",
+          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+        },
+        {
+          "problem": "Cerrar el mes sin saber cuánto entró",
+          "detail": "Tarjeta, efectivo y transferencias anotados en lugares distintos. Nadie sabe quién todavía debe.",
+          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el día a día de la asistencia técnica",
-      "items": [
-        { "icon": "🔗", "title": "Link mágico para el cliente", "text": "Cliente recibe un link y sigue el estado en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📸", "title": "OS con foto y número de serie", "text": "Cada OS tiene foto del equipo, número de serie y datos completos. Nunca más confundas equipos." },
-        { "icon": "📋", "title": "Checklist de entrada completo", "text": "Documenta el estado del equipo en la entrada con fotos.", "highlight": "Reduce disputas de garantía en 85%." },
-        { "icon": "🗂️", "title": "Historial completo del cliente", "text": "Ve todos los servicios anteriores del cliente en segundos. Atención más rápida y personalizada." },
-        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuánto ganaste en el mes.", "highlight": "Control total de costos y margen." },
-        { "icon": "📱", "title": "Presupuesto profesional", "text": "Envía presupuestos en PDF por WhatsApp. Cliente aprueba directo en el celular." }
+    "workflow": {
+      "title": "Cómo pasa una computadora por el banco en PraticOS",
+      "lede": "Del ingreso al retiro, cada paso queda registrado en la orden del equipo.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Registra el ingreso",
+          "text": "Registra al cliente y la computadora con procesador, memoria y almacenamiento. El checklist de ingreso viene listo y tú ajustas los ítems.",
+          "facts": [
+            "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
+            "Contraseña de acceso registrada en la orden",
+            "Búsqueda por número de serie en la lista de órdenes"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist de ingreso completado dentro de una orden"
+        },
+        {
+          "number": "02",
+          "title": "Diagnostica y cotiza por link",
+          "text": "Haz el diagnóstico de hardware y arma el presupuesto con servicios y repuestos del catálogo. El cliente abre la orden en el navegador, la revisa y aprueba.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "Tus términos de garantía y retiro antes de aprobar",
+            "PDF de la orden para imprimir o enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "03",
+          "title": "Trabaja con checklist",
+          "text": "Formateo, limpieza interna y upgrade tienen checklists listos. La lista de órdenes muestra qué está en presupuesto, aprobado, en curso o terminado.",
+          "facts": [
+            "Backup, sistema, drivers y datos restaurados",
+            "Temperatura antes y después de la limpieza",
+            "Prueba de periféricos en la entrega"
+          ],
+          "image": "home.png",
+          "alt": "Lista de órdenes de servicio con estados en la app PraticOS"
+        },
+        {
+          "number": "04",
+          "title": "Entrega y cobra",
+          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "entrada del equipo",
-      "text": "Documenta el estado del equipo en la entrada y evita problemas a la hora de entregar. El cliente firma digitalmente.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Recepción",
-      "items": [
-        { "icon": "📸", "text": "Fotos del equipo (frente/atrás)" },
-        { "icon": "🔢", "text": "Número de serie / Service Tag" },
-        { "icon": "💻", "text": "Modelo y especificaciones" },
-        { "icon": "✅", "text": "Estado: Pantalla, Teclado, Batería, Puertos" },
-        { "icon": "🔐", "text": "Contraseña de acceso (si es necesario)" },
-        { "icon": "📦", "text": "Accesorios dejados (cargador, mouse)" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tu asistencia",
-      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, número de serie, descripción del defecto y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía el estado del equipo en la entrada. Protégete de reclamaciones indebidas.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera presupuestos y recibos en PDF para el cliente. Profesionalismo que impresiona.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente. Todos los equipos y servicios anteriores en un solo lugar.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado de la reparación por el celular. Sin necesidad de llamarte.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes perdía 2 horas al día buscando equipos y atendiendo llamadas de clientes. Ahora todo está organizado y los clientes siguen por el link. Mi productividad se triplicó.",
-      "name": "Marcos Oliveira",
-      "role": "Dueño de asistencia técnica hace 10 años",
-      "metric": "70% menos llamadas de clientes"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien tiene servicio técnico de computadoras",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. A diferencia del 90% de la competencia, nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "Ya probé otras apps y no me gustaron", "answer": "PraticOS fue creado por quienes trabajan con asistencia técnica. No es una app genérica adaptada — fue hecha específicamente para ti. Por eso tiene checklist de entrada, link de seguimiento y todo lo que necesitas." },
-        { "question": "¿Funciona sin internet?", "answer": "Necesitas internet para sincronizar los datos, pero puedes ver OS ya cargadas sin conexión. En la práctica, con el Wi-Fi de la tienda no tendrás problemas." },
-        { "question": "¿Puedo importar mis clientes?", "answer": "¡Sí! Puedes importar tu lista de clientes vía planilla. Solo contacta nuestro soporte y te ayudamos a migrar tus datos." },
-        { "question": "¿Hay soporte si necesito ayuda?", "answer": "¡Sí! Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la asistencia técnica y te va a ayudar de verdad." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario y 30 fotos por mes. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Sirve para redes y servidores?",
+          "answer": "Sí. El segmento de informática cubre computadoras de escritorio, notebooks, redes y servidores. Para atender en la empresa del cliente, agenda la orden y aparece en la agenda del técnico."
+        },
+        {
+          "question": "¿Puedo poner mis reglas de garantía y retiro?",
+          "answer": "Sí. Términos y Condiciones trae un texto estándar para informática — retiro, backup, contraseñas, garantía — que puedes editar. El cliente lo ve antes de aprobar el presupuesto y sale en el PDF de la orden."
+        },
+        {
+          "question": "¿Los técnicos pueden usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tu asistencia",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

@@ -3,236 +3,239 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visão Geral do Compartilhamento",
-        "intro": "O PraticOS permite compartilhar Ordens de Serviço com seus clientes através de links mágicos. O cliente pode visualizar detalhes, aprovar orçamentos e comentar - tudo sem precisar criar conta ou fazer login.",
-        "infoCard": {
-          "title": "Acesso Seguro",
-          "content": "Cada link é único, temporário e pode ser revogado a qualquer momento. O cliente acessa apenas a OS compartilhada, com permissões controladas por você."
-        },
+        "title": "O que o cliente vê no link",
+        "intro": "O link abre no navegador do cliente uma página com a OS: serviços, produtos, valores, fotos e status, além do nome e do telefone da sua empresa. Ele não precisa criar conta nem baixar o app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "Visualização",
-            "description": "Cliente vê detalhes da OS, serviços e valores em tempo real"
+            "title": "Ver a OS",
+            "description": "Todo link mostra a OS. É o mínimo; não dá para desligar."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "green",
-            "title": "Aprovação",
-            "description": "Aprove ou rejeite orçamentos diretamente pelo link"
+            "title": "Aprovar ou recusar",
+            "description": "Enquanto a OS está em Orçamento, o cliente responde pelo próprio link. Ao recusar, pode escrever o motivo."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "orange",
-            "title": "Comentários",
-            "description": "Comunicação direta entre cliente e equipe técnica"
+            "title": "Comentar",
+            "description": "Perguntas e recados do cliente entram nos comentários da OS."
+          },
+          {
+            "title": "Avaliar",
+            "description": "Depois que a OS é concluída, o cliente dá de 1 a 5 estrelas."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "O que fica de fora",
+          "content": "Comentários internos da equipe não aparecem no link. O nome e o telefone do cliente e o número de série do equipamento aparecem parcialmente ocultos."
+        }
       },
       {
         "id": "como-compartilhar",
-        "title": "Como Compartilhar uma OS",
-        "intro": "Compartilhar uma Ordem de Serviço é simples e pode ser feito de várias formas.",
+        "title": "Enviar o link",
+        "intro": "Há dois caminhos. O botão de compartilhar é o mais rápido; o menu da OS dá mais opções. Nos dois, a OS precisa estar salva.",
         "subsections": [
           {
-            "title": "Passo a Passo",
+            "title": "Pelo botão de compartilhar",
             "steps": [
-              "Abra a Ordem de Serviço que deseja compartilhar",
-              "Toque no botão <strong>Compartilhar</strong> no canto superior direito",
-              "O link será gerado automaticamente",
-              "Escolha como enviar: <strong>WhatsApp</strong>, <strong>Compartilhar</strong> ou <strong>Copiar Link</strong>"
+              "Abra a OS.",
+              "Toque no ícone de compartilhar, no topo da tela.",
+              "O app reaproveita o link ativo da OS ou cria um novo, com validade de 7 dias, e abre o menu de compartilhamento do celular com uma mensagem pronta.",
+              "Escolha o WhatsApp, o e-mail ou outro app e envie."
+            ]
+          },
+          {
+            "title": "Pelo menu da OS",
+            "steps": [
+              "Na OS, toque em <strong>⋯</strong> e depois em <strong>Compartilhar com Cliente</strong>.",
+              "Se o cliente tem telefone cadastrado, toque em <strong>Enviar via WhatsApp</strong>: a conversa com ele abre com a mensagem e o link prontos.",
+              "Sem telefone, use <strong>Compartilhar</strong> para escolher o app.",
+              "Para colar o link em outro lugar, toque em <strong>Copiar Link</strong>, ao lado da validade."
             ]
           }
         ],
         "infoCard": {
-          "title": "Dica: WhatsApp Direto",
-          "content": "Se o cliente tiver telefone cadastrado, o botão WhatsApp já abre a conversa com o link e mensagem personalizada prontos para enviar."
+          "title": "Ao mudar o status",
+          "content": "Quando a OS passa para Aprovado, Em Andamento ou Concluído, o cliente tem telefone e ainda não há link ativo, o app pergunta se você quer enviar a atualização. <strong>Enviar via WhatsApp</strong> abre o menu de compartilhamento com o link e uma mensagem sobre o novo status; <strong>Agora não</strong> fecha o aviso."
+        },
+        "warningCard": {
+          "title": "Telefone com DDI",
+          "content": "O botão do WhatsApp trata números sem código do país como brasileiros. Se o cliente é de outro país, cadastre o telefone com o DDI."
         }
       },
       {
         "id": "permissoes",
-        "title": "Permissões do Link",
-        "intro": "Você controla o que o cliente pode fazer ao acessar o link. Por padrão, todas as permissões estão ativadas.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "Visualizar",
-            "description": "Ver detalhes da OS, lista de serviços, produtos e valores totais."
-          },
-          {
-            "color": "green",
-            "title": "Aprovar",
-            "description": "Aprovar ou rejeitar o orçamento. Ao rejeitar, pode incluir motivo."
-          },
-          {
-            "color": "orange",
-            "title": "Comentar",
-            "description": "Enviar comentários e dúvidas diretamente na OS."
-          }
+        "title": "Escolher o que o cliente pode fazer",
+        "intro": "Os links nascem com <strong>Pode aprovar</strong> e <strong>Pode comentar</strong> ligados. Desligue quando quiser só mostrar a OS — por exemplo, um serviço já combinado por telefone, em que o cliente só precisa acompanhar.",
+        "steps": [
+          "Na OS, toque em <strong>⋯ → Compartilhar com Cliente</strong>.",
+          "Toque em <strong>Opções avançadas</strong>.",
+          "Em <strong>Permissões do Link</strong>, ligue ou desligue <strong>Pode aprovar</strong> e <strong>Pode comentar</strong>.",
+          "Cada mudança cria um link novo. Envie esse link ao cliente."
         ],
-        "subsections": [
-          {
-            "title": "Personalizando Permissões",
-            "steps": [
-              "Na tela de compartilhamento, toque em <strong>Opções Avançadas</strong>",
-              "Ative ou desative cada permissão conforme necessário",
-              "As alterações são aplicadas ao próximo link gerado"
-            ]
-          }
-        ]
+        "warningCard": {
+          "title": "Link ativo encontrado",
+          "content": "Se a OS já tem um link valendo, as opções aparecem travadas. Toque em <strong>Gerar novo</strong> para mudar permissões ou validade. O link anterior continua funcionando até vencer; se ele não deve mais funcionar, revogue-o antes de gerar o novo."
+        }
       },
       {
         "id": "validade",
-        "title": "Validade do Link",
-        "intro": "Links de compartilhamento têm validade configurável para garantir segurança.",
+        "title": "Validade do link",
+        "intro": "Todo link vence. Depois disso, o cliente vê um aviso de que o acesso expirou.",
         "subsections": [
           {
-            "title": "Opções de Validade",
+            "title": "Prazos",
             "validationList": [
-              { "label": "7 dias", "text": "Padrão - ideal para orçamentos simples" },
-              { "label": "14 dias", "text": "Para serviços que precisam de mais tempo de análise" },
-              { "label": "30 dias", "text": "Para projetos maiores ou clientes que demoram a decidir" }
+              {
+                "label": "7 dias",
+                "text": "Padrão. Serve para a maioria dos orçamentos."
+              },
+              {
+                "label": "14 dias",
+                "text": "Para clientes que precisam consultar alguém antes de aprovar."
+              },
+              {
+                "label": "30 dias",
+                "text": "Para serviços longos, em que o cliente acompanha a OS até a entrega."
+              }
+            ]
+          },
+          {
+            "title": "Escolher a validade",
+            "steps": [
+              "Em <strong>Compartilhar com Cliente</strong>, toque em <strong>Opções avançadas</strong>.",
+              "Toque em <strong>Validade do Link</strong> e escolha o prazo.",
+              "O prazo vale para o link que está sendo criado. Se aparecer <strong>Link ativo encontrado</strong>, toque em <strong>Gerar novo</strong> primeiro."
             ]
           }
         ],
-        "warningCard": {
-          "title": "Link Expirado",
-          "content": "Quando o link expira, o cliente vê uma mensagem informando que o acesso não está mais disponível. Você pode gerar um novo link a qualquer momento."
+        "infoCard": {
+          "title": "Link vencido",
+          "content": "Basta compartilhar a OS de novo: sem link ativo, o app cria um novo e você envia ao cliente."
         }
       },
       {
         "id": "acompanhamento",
-        "title": "Acompanhamento de Acessos",
-        "intro": "O sistema registra automaticamente quando o cliente acessa o link compartilhado.",
-        "metrics": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "Visualizações",
-            "description": "Quantidade de vezes que o link foi acessado"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Último Acesso",
-            "description": "Data e hora da última visualização pelo cliente"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "orange",
-            "title": "Status",
-            "description": "Se foi aprovado, rejeitado ou ainda pendente"
-          }
-        ]
-      },
-      {
-        "id": "revogar",
-        "title": "Revogar Acesso",
-        "intro": "Você pode remover o acesso do cliente a qualquer momento, mesmo antes do link expirar.",
+        "title": "Ver a resposta do cliente",
+        "intro": "O que o cliente faz no link aparece na própria OS, sem você precisar perguntar.",
         "subsections": [
           {
-            "title": "Como Revogar",
-            "steps": [
-              "Abra a OS e toque em <strong>Compartilhar</strong>",
-              "Role até o final e toque em <strong>Revogar Link</strong>",
-              "Confirme a ação no diálogo que aparece",
-              "O link deixa de funcionar imediatamente"
+            "title": "O que muda na OS",
+            "validationList": [
+              {
+                "label": "Aprovou",
+                "text": "A OS passa para Aprovado e um comentário registra a aprovação."
+              },
+              {
+                "label": "Recusou",
+                "text": "A OS passa para Cancelado e o comentário traz o motivo, se o cliente escreveu."
+              },
+              {
+                "label": "Comentou",
+                "text": "A mensagem entra em <strong>Comentários</strong>, marcada como Cliente."
+              }
             ]
+          },
+          {
+            "title": "Responder ao cliente",
+            "content": "Escreva em <strong>Comentários</strong>, na OS. Com <strong>Comentário público</strong>, a resposta aparece no link. Ligue a chave para <strong>Comentário interno</strong> quando o recado for só para a equipe."
           }
         ],
         "warningCard": {
-          "title": "Ação Irreversível",
-          "content": "Ao revogar, o cliente perde acesso instantaneamente. Se precisar, você pode gerar um novo link depois."
+          "title": "Aprovar só vale em Orçamento",
+          "content": "O cliente só consegue aprovar ou recusar enquanto a OS está em Orçamento. Se você mudar o status antes, o link deixa de aceitar a resposta."
+        }
+      },
+      {
+        "id": "revogar",
+        "title": "Cancelar um link",
+        "intro": "Revogue quando o link foi para a pessoa errada ou a OS não deve mais ser vista. O link para de funcionar na hora, mesmo antes de vencer.",
+        "steps": [
+          "Na OS, toque em <strong>⋯ → Compartilhar com Cliente</strong>.",
+          "Toque em <strong>Opções avançadas</strong>.",
+          "Toque em <strong>Revogar Link</strong> e confirme."
+        ],
+        "warningCard": {
+          "title": "Não dá para desfazer",
+          "content": "Um link revogado não volta a funcionar. Para o cliente acessar de novo, compartilhe a OS outra vez e envie o link novo."
         }
       },
       {
         "id": "notificacoes",
-        "title": "Notificações",
-        "intro": "Sua equipe recebe notificações push quando o cliente interage com a OS compartilhada.",
+        "title": "Avisos para a equipe",
+        "intro": "Quando o cliente responde pelo link, o PraticOS manda uma notificação no celular de quem precisa saber.",
         "subsections": [
           {
-            "title": "Você Será Notificado Quando",
+            "title": "Quando chega aviso",
             "validationList": [
-              { "label": "Aprovação", "text": "Cliente aprovou o orçamento pelo link" },
-              { "label": "Rejeição", "text": "Cliente rejeitou o orçamento (com motivo, se informado)" },
-              { "label": "Comentário", "text": "Cliente enviou um novo comentário ou pergunta" }
+              {
+                "label": "Aprovação",
+                "text": "O cliente aprovou o orçamento."
+              },
+              {
+                "label": "Recusa",
+                "text": "O cliente recusou, com o motivo, se ele escreveu."
+              },
+              {
+                "label": "Comentário",
+                "text": "O cliente mandou uma mensagem."
+              },
+              {
+                "label": "Avaliação",
+                "text": "O cliente avaliou uma OS concluída."
+              }
             ]
+          },
+          {
+            "title": "Quem recebe",
+            "content": "O técnico responsável pela OS, quem criou a OS, o dono da empresa e quem tem perfil de Administrador, Gerente ou Supervisor."
           }
         ],
         "infoCard": {
-          "title": "Resposta Rápida",
-          "content": "As notificações permitem que você responda rapidamente ao cliente, melhorando a experiência e agilizando aprovações."
+          "title": "Não chegou?",
+          "content": "Confira se as notificações do PraticOS estão permitidas nos ajustes do celular."
         }
       },
       {
         "id": "avaliacao",
-        "title": "Avaliação do Cliente",
-        "intro": "Quando a OS é concluída, o cliente pode avaliar o serviço diretamente pelo link compartilhado.",
-        "features": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
-            "color": "yellow",
-            "title": "1 a 5 Estrelas",
-            "description": "Avaliação simples e intuitiva com estrelas"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "blue",
-            "title": "Comentário Opcional",
-            "description": "Cliente pode deixar feedback detalhado (até 500 caracteres)"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
-            "color": "green",
-            "title": "Uma Vez",
-            "description": "Cada OS pode ser avaliada apenas uma vez pelo cliente"
-          }
-        ],
-        "subsections": [
-          {
-            "title": "Como Funciona",
-            "steps": [
-              "OS é marcada como <strong>Concluída</strong> pelo técnico",
-              "Cliente acessa o link de compartilhamento",
-              "Seção de avaliação aparece automaticamente",
-              "Cliente seleciona 1 a 5 estrelas e opcionalmente comenta",
-              "Você recebe notificação push da nova avaliação"
-            ]
-          }
+        "title": "Avaliação do cliente",
+        "intro": "Quando a OS chega a Concluído, o mesmo link passa a mostrar a avaliação. É um bom momento para mandar o link de novo, junto com o aviso de que o serviço ficou pronto.",
+        "steps": [
+          "Marque a OS como <strong>Concluído</strong>.",
+          "O cliente abre o link e escolhe de 1 a 5 estrelas.",
+          "Se quiser, ele escreve um comentário de até 500 caracteres.",
+          "A avaliação entra nos comentários da OS e a equipe recebe o aviso."
         ],
         "infoCard": {
-          "title": "Veja Todas as Avaliações",
-          "content": "No app, acesse Configurações > Avaliações para ver média geral, total de avaliações e lista completa com comentários."
+          "title": "Ver todas as avaliações",
+          "content": "Em <strong>Mais → Avaliações</strong>, o Administrador vê a média, o total e cada avaliação com o comentário. Cada OS só pode ser avaliada uma vez."
         }
       },
       {
         "id": "faq",
-        "title": "Perguntas Frequentes",
+        "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "O cliente precisa criar conta para acessar?",
-            "answer": "Não. O link mágico permite acesso direto sem cadastro ou login. Basta clicar no link."
+            "question": "O cliente precisa criar conta?",
+            "answer": "Não. Ele abre o link no navegador do celular ou do computador e já vê a OS."
           },
           {
-            "question": "Posso compartilhar a mesma OS várias vezes?",
-            "answer": "Sim. Se já existir um link válido, ele será reutilizado. Você também pode revogar e criar um novo link quando quiser."
+            "question": "Dá para saber se o cliente abriu o link?",
+            "answer": "Ainda não aparece no app. Você fica sabendo quando ele aprova, recusa, comenta ou avalia."
           },
           {
-            "question": "O que acontece quando o cliente aprova?",
-            "answer": "A OS muda automaticamente para status Aprovado, um comentário é adicionado ao histórico e sua equipe recebe notificação."
+            "question": "Se eu compartilhar a mesma OS de novo, o link muda?",
+            "answer": "Não, enquanto o link estiver valendo: o app reaproveita o mesmo. Um link novo só é criado quando o anterior vence, é revogado ou você toca em <strong>Gerar novo</strong>."
           },
           {
-            "question": "Posso ver os comentários do cliente?",
-            "answer": "Sim. Os comentários aparecem no histórico da OS, identificados como vindos do link de compartilhamento."
+            "question": "Mandei o link para a pessoa errada. E agora?",
+            "answer": "Revogue o link em <strong>⋯ → Compartilhar com Cliente → Opções avançadas → Revogar Link</strong> e envie um novo para o cliente certo."
           },
           {
-            "question": "O link funciona no computador e celular?",
-            "answer": "Sim. A página se adapta automaticamente ao dispositivo do cliente (responsiva)."
+            "question": "O link mostra os valores?",
+            "answer": "Sim. A página mostra os serviços, os produtos, o desconto e o total da OS."
           },
           {
-            "question": "Como saber se o cliente visualizou?",
-            "answer": "Na tela de compartilhamento você vê o contador de visualizações e a data do último acesso."
+            "question": "O cliente recusou por engano. Dá para voltar?",
+            "answer": "A recusa leva a OS para Cancelado. Combine com o cliente e mude o status direto na OS."
           }
         ]
       }
@@ -242,236 +245,239 @@
     "sections": [
       {
         "id": "overview",
-        "title": "Sharing Overview",
-        "intro": "PraticOS allows you to share Service Orders with your customers through magic links. Customers can view details, approve quotes, and comment - all without creating an account or logging in.",
-        "infoCard": {
-          "title": "Secure Access",
-          "content": "Each link is unique, temporary, and can be revoked at any time. The customer only accesses the shared SO, with permissions controlled by you."
-        },
+        "title": "What the customer sees",
+        "intro": "The link opens a page in the customer’s browser with the work order: services, products, prices, photos and status, plus your company’s name and phone number. They don’t need an account or the app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "View",
-            "description": "Customer sees SO details, services, and values in real time"
+            "title": "View the order",
+            "description": "Every link shows the order. That is the minimum and can’t be turned off."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "green",
-            "title": "Approval",
-            "description": "Approve or reject quotes directly through the link"
+            "title": "Approve or decline",
+            "description": "While the order is a Quote, the customer answers from the link. When declining, they can add a reason."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "orange",
-            "title": "Comments",
-            "description": "Direct communication between customer and technical team"
+            "title": "Comment",
+            "description": "The customer’s questions and notes land in the order’s comments."
+          },
+          {
+            "title": "Rate",
+            "description": "Once the order is completed, the customer gives it 1 to 5 stars."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "What stays hidden",
+          "content": "Internal team comments never show on the link. The customer’s name and phone and the equipment serial number are partly masked."
+        }
       },
       {
         "id": "how-to-share",
-        "title": "How to Share an SO",
-        "intro": "Sharing a Service Order is simple and can be done in several ways.",
+        "title": "Send the link",
+        "intro": "There are two ways. The share button is the quickest; the order menu has more options. Either way, the order has to be saved first.",
         "subsections": [
           {
-            "title": "Step by Step",
+            "title": "With the share button",
             "steps": [
-              "Open the Service Order you want to share",
-              "Tap the <strong>Share</strong> button in the top right corner",
-              "The link will be generated automatically",
-              "Choose how to send: <strong>WhatsApp</strong>, <strong>Share</strong>, or <strong>Copy Link</strong>"
+              "Open the order.",
+              "Tap the share icon at the top of the screen.",
+              "The app reuses the order’s active link or creates a new one, valid for 7 days, and opens your phone’s share sheet with a message ready.",
+              "Pick WhatsApp, email or another app and send it."
+            ]
+          },
+          {
+            "title": "From the order menu",
+            "steps": [
+              "On the order, tap <strong>⋯</strong>, then <strong>Share with Customer</strong>.",
+              "If the customer has a phone number on file, tap <strong>Send via WhatsApp</strong>: the chat opens with the message and link filled in.",
+              "With no phone number, use <strong>Share</strong> to pick an app.",
+              "To paste the link somewhere else, tap <strong>Copy Link</strong>, next to the validity."
             ]
           }
         ],
         "infoCard": {
-          "title": "Tip: Direct WhatsApp",
-          "content": "If the customer has a registered phone number, the WhatsApp button opens the conversation with the link and personalized message ready to send."
+          "title": "When the status changes",
+          "content": "When an order moves to Approved, In Progress or Completed, the customer has a phone number and there is no active link yet, the app asks whether to send the update. <strong>Send via WhatsApp</strong> opens the share sheet with the link and a message about the new status; <strong>Not now</strong> closes the prompt."
+        },
+        "warningCard": {
+          "title": "Include the country code",
+          "content": "The WhatsApp button treats numbers without a country code as Brazilian. Save your customers’ phone numbers with the country code (for example, +1 for the US)."
         }
       },
       {
         "id": "permissions",
-        "title": "Link Permissions",
-        "intro": "You control what the customer can do when accessing the link. By default, all permissions are enabled.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "View",
-            "description": "See SO details, list of services, products, and total values."
-          },
-          {
-            "color": "green",
-            "title": "Approve",
-            "description": "Approve or reject the quote. When rejecting, can include a reason."
-          },
-          {
-            "color": "orange",
-            "title": "Comment",
-            "description": "Send comments and questions directly on the SO."
-          }
+        "title": "Choose what the customer can do",
+        "intro": "Links start with <strong>Can approve</strong> and <strong>Can comment</strong> turned on. Turn them off when you only want to show the order — say, a job already agreed on the phone that the customer just wants to follow.",
+        "steps": [
+          "On the order, tap <strong>⋯ → Share with Customer</strong>.",
+          "Tap <strong>Advanced options</strong>.",
+          "Under <strong>Link Permissions</strong>, switch <strong>Can approve</strong> and <strong>Can comment</strong> on or off.",
+          "Each change creates a new link. Send that one to the customer."
         ],
-        "subsections": [
-          {
-            "title": "Customizing Permissions",
-            "steps": [
-              "On the sharing screen, tap <strong>Advanced Options</strong>",
-              "Enable or disable each permission as needed",
-              "Changes are applied to the next generated link"
-            ]
-          }
-        ]
+        "warningCard": {
+          "title": "Active link found",
+          "content": "If the order already has a live link, the options are locked. Tap <strong>Generate new</strong> to change permissions or validity. The previous link keeps working until it expires; if it shouldn’t, revoke it before generating the new one."
+        }
       },
       {
         "id": "validity",
-        "title": "Link Validity",
-        "intro": "Share links have configurable validity to ensure security.",
+        "title": "Link validity",
+        "intro": "Every link expires. After that, the customer sees a notice that access has ended.",
         "subsections": [
           {
-            "title": "Validity Options",
+            "title": "Options",
             "validationList": [
-              { "label": "7 days", "text": "Default - ideal for simple quotes" },
-              { "label": "14 days", "text": "For services that need more analysis time" },
-              { "label": "30 days", "text": "For larger projects or customers who take time to decide" }
+              {
+                "label": "7 days",
+                "text": "Default. Works for most quotes."
+              },
+              {
+                "label": "14 days",
+                "text": "For customers who need to check with someone before approving."
+              },
+              {
+                "label": "30 days",
+                "text": "For long jobs, where the customer follows the order until delivery."
+              }
+            ]
+          },
+          {
+            "title": "Set the validity",
+            "steps": [
+              "In <strong>Share with Customer</strong>, tap <strong>Advanced options</strong>.",
+              "Tap <strong>Link Validity</strong> and pick the period.",
+              "It applies to the link being created. If you see <strong>Active link found</strong>, tap <strong>Generate new</strong> first."
             ]
           }
         ],
-        "warningCard": {
-          "title": "Expired Link",
-          "content": "When the link expires, the customer sees a message informing that access is no longer available. You can generate a new link at any time."
+        "infoCard": {
+          "title": "Expired link",
+          "content": "Just share the order again: with no active link, the app creates a new one for you to send."
         }
       },
       {
         "id": "tracking",
-        "title": "Access Tracking",
-        "intro": "The system automatically records when the customer accesses the shared link.",
-        "metrics": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "Views",
-            "description": "Number of times the link was accessed"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Last Access",
-            "description": "Date and time of last customer view"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "orange",
-            "title": "Status",
-            "description": "Whether it was approved, rejected, or still pending"
-          }
-        ]
-      },
-      {
-        "id": "revoke",
-        "title": "Revoke Access",
-        "intro": "You can remove customer access at any time, even before the link expires.",
+        "title": "See the customer’s answer",
+        "intro": "Whatever the customer does on the link shows up on the order itself, so you don’t have to chase them.",
         "subsections": [
           {
-            "title": "How to Revoke",
-            "steps": [
-              "Open the SO and tap <strong>Share</strong>",
-              "Scroll to the bottom and tap <strong>Revoke Link</strong>",
-              "Confirm the action in the dialog that appears",
-              "The link stops working immediately"
+            "title": "What changes on the order",
+            "validationList": [
+              {
+                "label": "Approved",
+                "text": "The order moves to Approved and a comment records the approval."
+              },
+              {
+                "label": "Declined",
+                "text": "The order moves to Cancelled and the comment includes the reason, if the customer gave one."
+              },
+              {
+                "label": "Commented",
+                "text": "The message lands in <strong>Comments</strong>, tagged Customer."
+              }
             ]
+          },
+          {
+            "title": "Reply to the customer",
+            "content": "Write in <strong>Comments</strong> on the order. With <strong>Public comment</strong>, your reply shows on the link. Flip the switch to <strong>Internal comment</strong> when the note is for the team only."
           }
         ],
         "warningCard": {
-          "title": "Irreversible Action",
-          "content": "When revoked, the customer loses access instantly. If needed, you can generate a new link afterward."
+          "title": "Approval only works on a Quote",
+          "content": "The customer can only approve or decline while the order is a Quote. If you change the status first, the link stops accepting an answer."
+        }
+      },
+      {
+        "id": "revoke",
+        "title": "Revoke a link",
+        "intro": "Revoke a link that went to the wrong person or an order that should no longer be seen. It stops working right away, even before it expires.",
+        "steps": [
+          "On the order, tap <strong>⋯ → Share with Customer</strong>.",
+          "Tap <strong>Advanced options</strong>.",
+          "Tap <strong>Revoke Link</strong> and confirm."
+        ],
+        "warningCard": {
+          "title": "There is no undo",
+          "content": "A revoked link never works again. To give the customer access, share the order again and send the new link."
         }
       },
       {
         "id": "notifications",
-        "title": "Notifications",
-        "intro": "Your team receives push notifications when the customer interacts with the shared SO.",
+        "title": "Alerts for the team",
+        "intro": "When the customer answers on the link, PraticOS sends a phone notification to the people who need to know.",
         "subsections": [
           {
-            "title": "You Will Be Notified When",
+            "title": "What triggers an alert",
             "validationList": [
-              { "label": "Approval", "text": "Customer approved the quote through the link" },
-              { "label": "Rejection", "text": "Customer rejected the quote (with reason, if provided)" },
-              { "label": "Comment", "text": "Customer sent a new comment or question" }
+              {
+                "label": "Approval",
+                "text": "The customer approved the quote."
+              },
+              {
+                "label": "Decline",
+                "text": "The customer declined, with the reason if they gave one."
+              },
+              {
+                "label": "Comment",
+                "text": "The customer sent a message."
+              },
+              {
+                "label": "Rating",
+                "text": "The customer rated a completed order."
+              }
             ]
+          },
+          {
+            "title": "Who gets it",
+            "content": "The technician assigned to the order, whoever created it, the company owner and anyone with the Administrator, Manager or Supervisor profile."
           }
         ],
         "infoCard": {
-          "title": "Quick Response",
-          "content": "Notifications allow you to respond quickly to the customer, improving the experience and speeding up approvals."
+          "title": "Nothing arrived?",
+          "content": "Check that PraticOS notifications are allowed in the phone’s settings."
         }
       },
       {
         "id": "rating",
-        "title": "Customer Rating",
-        "intro": "When the SO is completed, the customer can rate the service directly through the shared link.",
-        "features": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
-            "color": "yellow",
-            "title": "1 to 5 Stars",
-            "description": "Simple and intuitive star rating"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "blue",
-            "title": "Optional Comment",
-            "description": "Customer can leave detailed feedback (up to 500 characters)"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
-            "color": "green",
-            "title": "Once Only",
-            "description": "Each SO can only be rated once by the customer"
-          }
-        ],
-        "subsections": [
-          {
-            "title": "How It Works",
-            "steps": [
-              "SO is marked as <strong>Completed</strong> by the technician",
-              "Customer accesses the share link",
-              "Rating section appears automatically",
-              "Customer selects 1 to 5 stars and optionally comments",
-              "You receive a push notification of the new rating"
-            ]
-          }
+        "title": "Customer rating",
+        "intro": "When the order reaches Completed, the same link starts showing the rating. It is a good moment to send the link again with a note that the job is done.",
+        "steps": [
+          "Mark the order as <strong>Completed</strong>.",
+          "The customer opens the link and picks 1 to 5 stars.",
+          "If they want, they add a comment of up to 500 characters.",
+          "The rating is added to the order’s comments and the team gets an alert."
         ],
         "infoCard": {
-          "title": "View All Ratings",
-          "content": "In the app, go to Settings > Ratings to see overall average, total ratings, and complete list with comments."
+          "title": "See every rating",
+          "content": "In <strong>More → Ratings</strong>, Administrators see the average, the total and each rating with its comment. Each order can be rated only once."
         }
       },
       {
         "id": "faq",
-        "title": "Frequently Asked Questions",
+        "title": "FAQ",
         "faq": [
           {
-            "question": "Does the customer need to create an account to access?",
-            "answer": "No. The magic link allows direct access without registration or login. Just click the link."
+            "question": "Does the customer need an account?",
+            "answer": "No. They open the link in their phone or computer browser and see the order right away."
           },
           {
-            "question": "Can I share the same SO multiple times?",
-            "answer": "Yes. If a valid link already exists, it will be reused. You can also revoke and create a new link whenever you want."
+            "question": "Can I tell whether the customer opened the link?",
+            "answer": "Not in the app yet. You find out when they approve, decline, comment or rate."
           },
           {
-            "question": "What happens when the customer approves?",
-            "answer": "The SO automatically changes to Approved status, a comment is added to the history, and your team receives a notification."
+            "question": "If I share the same order again, does the link change?",
+            "answer": "Not while it is still valid: the app reuses it. A new link is only created when the old one expires, is revoked or you tap <strong>Generate new</strong>."
           },
           {
-            "question": "Can I see the customer's comments?",
-            "answer": "Yes. Comments appear in the SO history, identified as coming from the share link."
+            "question": "I sent the link to the wrong person. What now?",
+            "answer": "Revoke it in <strong>⋯ → Share with Customer → Advanced options → Revoke Link</strong> and send a new one to the right customer."
           },
           {
-            "question": "Does the link work on computer and mobile?",
-            "answer": "Yes. The page automatically adapts to the customer's device (responsive)."
+            "question": "Does the link show prices?",
+            "answer": "Yes. The page shows the services, products, discount and order total."
           },
           {
-            "question": "How do I know if the customer viewed it?",
-            "answer": "On the sharing screen you see the view counter and the date of last access."
+            "question": "The customer declined by mistake. Can it be undone?",
+            "answer": "Declining moves the order to Cancelled. Check with the customer and change the status on the order yourself."
           }
         ]
       }
@@ -481,236 +487,239 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Visión General del Compartir",
-        "intro": "PraticOS permite compartir Órdenes de Servicio con sus clientes a través de enlaces mágicos. El cliente puede ver detalles, aprobar presupuestos y comentar, todo sin necesidad de crear una cuenta o iniciar sesión.",
-        "infoCard": {
-          "title": "Acceso Seguro",
-          "content": "Cada enlace es único, temporal y puede ser revocado en cualquier momento. El cliente solo accede a la OS compartida, con permisos controlados por usted."
-        },
+        "title": "Qué ve el cliente en el enlace",
+        "intro": "El enlace abre en el navegador del cliente una página con la OS: servicios, productos, valores, fotos y estado, además del nombre y el teléfono de tu empresa. No necesita crear cuenta ni descargar la app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "Visualización",
-            "description": "Cliente ve detalles de la OS, servicios y valores en tiempo real"
+            "title": "Ver la OS",
+            "description": "Todo enlace muestra la OS. Es lo mínimo; no se puede desactivar."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "green",
-            "title": "Aprobación",
-            "description": "Apruebe o rechace presupuestos directamente por el enlace"
+            "title": "Aprobar o rechazar",
+            "description": "Mientras la OS está en Presupuesto, el cliente responde desde el enlace. Al rechazar, puede escribir el motivo."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "orange",
-            "title": "Comentarios",
-            "description": "Comunicación directa entre cliente y equipo técnico"
+            "title": "Comentar",
+            "description": "Las preguntas y mensajes del cliente quedan en los comentarios de la OS."
+          },
+          {
+            "title": "Calificar",
+            "description": "Cuando la OS se completa, el cliente da de 1 a 5 estrellas."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "Lo que no se muestra",
+          "content": "Los comentarios internos del equipo no aparecen en el enlace. El nombre y el teléfono del cliente y el número de serie del equipo aparecen parcialmente ocultos."
+        }
       },
       {
         "id": "como-compartir",
-        "title": "Cómo Compartir una OS",
-        "intro": "Compartir una Orden de Servicio es simple y se puede hacer de varias formas.",
+        "title": "Enviar el enlace",
+        "intro": "Hay dos caminos. El botón de compartir es el más rápido; el menú de la OS tiene más opciones. En ambos, la OS tiene que estar guardada.",
         "subsections": [
           {
-            "title": "Paso a Paso",
+            "title": "Con el botón de compartir",
             "steps": [
-              "Abra la Orden de Servicio que desea compartir",
-              "Toque el botón <strong>Compartir</strong> en la esquina superior derecha",
-              "El enlace se generará automáticamente",
-              "Elija cómo enviar: <strong>WhatsApp</strong>, <strong>Compartir</strong> o <strong>Copiar Enlace</strong>"
+              "Abre la OS.",
+              "Toca el ícono de compartir, arriba en la pantalla.",
+              "La app reutiliza el enlace activo de la OS o crea uno nuevo, válido por 7 días, y abre el menú de compartir del celular con un mensaje listo.",
+              "Elige WhatsApp, correo u otra app y envíalo."
+            ]
+          },
+          {
+            "title": "Desde el menú de la OS",
+            "steps": [
+              "En la OS, toca <strong>⋯</strong> y luego <strong>Compartir con Cliente</strong>.",
+              "Si el cliente tiene teléfono registrado, toca <strong>Enviar vía WhatsApp</strong>: se abre el chat con el mensaje y el enlace listos.",
+              "Sin teléfono, usa <strong>Compartir</strong> para elegir la app.",
+              "Para pegar el enlace en otro lugar, toca <strong>Copiar Enlace</strong>, junto a la validez."
             ]
           }
         ],
         "infoCard": {
-          "title": "Consejo: WhatsApp Directo",
-          "content": "Si el cliente tiene teléfono registrado, el botón WhatsApp ya abre la conversación con el enlace y mensaje personalizado listos para enviar."
+          "title": "Al cambiar el estado",
+          "content": "Cuando la OS pasa a Aprobado, En Progreso o Completado, el cliente tiene teléfono y todavía no hay enlace activo, la app pregunta si quieres enviar la actualización. <strong>Enviar vía WhatsApp</strong> abre el menú de compartir con el enlace y un mensaje sobre el nuevo estado; <strong>Ahora no</strong> cierra el aviso."
+        },
+        "warningCard": {
+          "title": "Teléfono con código de país",
+          "content": "El botón de WhatsApp trata los números sin código de país como brasileños. Registra el teléfono de tus clientes con el código de país (por ejemplo, +52 para México)."
         }
       },
       {
         "id": "permisos",
-        "title": "Permisos del Enlace",
-        "intro": "Usted controla lo que el cliente puede hacer al acceder al enlace. Por defecto, todos los permisos están activados.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "Visualizar",
-            "description": "Ver detalles de la OS, lista de servicios, productos y valores totales."
-          },
-          {
-            "color": "green",
-            "title": "Aprobar",
-            "description": "Aprobar o rechazar el presupuesto. Al rechazar, puede incluir motivo."
-          },
-          {
-            "color": "orange",
-            "title": "Comentar",
-            "description": "Enviar comentarios y dudas directamente en la OS."
-          }
+        "title": "Elegir qué puede hacer el cliente",
+        "intro": "Los enlaces se crean con <strong>Puede aprobar</strong> y <strong>Puede comentar</strong> activados. Desactívalos cuando solo quieras mostrar la OS — por ejemplo, un trabajo ya acordado por teléfono que el cliente solo quiere seguir.",
+        "steps": [
+          "En la OS, toca <strong>⋯ → Compartir con Cliente</strong>.",
+          "Toca <strong>Opciones avanzadas</strong>.",
+          "En <strong>Permisos del Enlace</strong>, activa o desactiva <strong>Puede aprobar</strong> y <strong>Puede comentar</strong>.",
+          "Cada cambio crea un enlace nuevo. Envía ese enlace al cliente."
         ],
-        "subsections": [
-          {
-            "title": "Personalizando Permisos",
-            "steps": [
-              "En la pantalla de compartir, toque en <strong>Opciones Avanzadas</strong>",
-              "Active o desactive cada permiso según sea necesario",
-              "Los cambios se aplican al próximo enlace generado"
-            ]
-          }
-        ]
+        "warningCard": {
+          "title": "Enlace activo encontrado",
+          "content": "Si la OS ya tiene un enlace vigente, las opciones aparecen bloqueadas. Toca <strong>Generar nuevo</strong> para cambiar permisos o validez. El enlace anterior sigue funcionando hasta que vence; si ya no debe funcionar, revócalo antes de generar el nuevo."
+        }
       },
       {
         "id": "validez",
-        "title": "Validez del Enlace",
-        "intro": "Los enlaces de compartir tienen validez configurable para garantizar seguridad.",
+        "title": "Validez del enlace",
+        "intro": "Todo enlace vence. Después, el cliente ve un aviso de que el acceso expiró.",
         "subsections": [
           {
-            "title": "Opciones de Validez",
+            "title": "Plazos",
             "validationList": [
-              { "label": "7 días", "text": "Por defecto - ideal para presupuestos simples" },
-              { "label": "14 días", "text": "Para servicios que necesitan más tiempo de análisis" },
-              { "label": "30 días", "text": "Para proyectos mayores o clientes que demoran en decidir" }
+              {
+                "label": "7 días",
+                "text": "Por defecto. Sirve para la mayoría de los presupuestos."
+              },
+              {
+                "label": "14 días",
+                "text": "Para clientes que necesitan consultar a alguien antes de aprobar."
+              },
+              {
+                "label": "30 días",
+                "text": "Para trabajos largos, en los que el cliente sigue la OS hasta la entrega."
+              }
+            ]
+          },
+          {
+            "title": "Elegir la validez",
+            "steps": [
+              "En <strong>Compartir con Cliente</strong>, toca <strong>Opciones avanzadas</strong>.",
+              "Toca <strong>Validez del Enlace</strong> y elige el plazo.",
+              "El plazo vale para el enlace que se está creando. Si aparece <strong>Enlace activo encontrado</strong>, toca primero <strong>Generar nuevo</strong>."
             ]
           }
         ],
-        "warningCard": {
-          "title": "Enlace Expirado",
-          "content": "Cuando el enlace expira, el cliente ve un mensaje informando que el acceso ya no está disponible. Puede generar un nuevo enlace en cualquier momento."
+        "infoCard": {
+          "title": "Enlace vencido",
+          "content": "Solo comparte la OS otra vez: sin enlace activo, la app crea uno nuevo para que lo envíes."
         }
       },
       {
         "id": "seguimiento",
-        "title": "Seguimiento de Accesos",
-        "intro": "El sistema registra automáticamente cuando el cliente accede al enlace compartido.",
-        "metrics": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
-            "color": "blue",
-            "title": "Visualizaciones",
-            "description": "Cantidad de veces que el enlace fue accedido"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Último Acceso",
-            "description": "Fecha y hora de la última visualización por el cliente"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
-            "color": "orange",
-            "title": "Estado",
-            "description": "Si fue aprobado, rechazado o aún pendiente"
-          }
-        ]
-      },
-      {
-        "id": "revocar",
-        "title": "Revocar Acceso",
-        "intro": "Puede remover el acceso del cliente en cualquier momento, incluso antes de que el enlace expire.",
+        "title": "Ver la respuesta del cliente",
+        "intro": "Lo que el cliente hace en el enlace aparece en la propia OS, sin que tengas que preguntarle.",
         "subsections": [
           {
-            "title": "Cómo Revocar",
-            "steps": [
-              "Abra la OS y toque en <strong>Compartir</strong>",
-              "Desplácese hasta el final y toque en <strong>Revocar Enlace</strong>",
-              "Confirme la acción en el diálogo que aparece",
-              "El enlace deja de funcionar inmediatamente"
+            "title": "Qué cambia en la OS",
+            "validationList": [
+              {
+                "label": "Aprobó",
+                "text": "La OS pasa a Aprobado y un comentario registra la aprobación."
+              },
+              {
+                "label": "Rechazó",
+                "text": "La OS pasa a Cancelado y el comentario incluye el motivo, si el cliente lo escribió."
+              },
+              {
+                "label": "Comentó",
+                "text": "El mensaje queda en <strong>Comentarios</strong>, marcado como Cliente."
+              }
             ]
+          },
+          {
+            "title": "Responder al cliente",
+            "content": "Escribe en <strong>Comentarios</strong>, en la OS. Con <strong>Comentario público</strong>, la respuesta aparece en el enlace. Cambia el interruptor a <strong>Comentario interno</strong> cuando el mensaje sea solo para el equipo."
           }
         ],
         "warningCard": {
-          "title": "Acción Irreversible",
-          "content": "Al revocar, el cliente pierde acceso instantáneamente. Si lo necesita, puede generar un nuevo enlace después."
+          "title": "Aprobar solo funciona en Presupuesto",
+          "content": "El cliente solo puede aprobar o rechazar mientras la OS está en Presupuesto. Si cambias el estado antes, el enlace deja de aceptar la respuesta."
+        }
+      },
+      {
+        "id": "revocar",
+        "title": "Revocar un enlace",
+        "intro": "Revoca el enlace cuando llegó a la persona equivocada o la OS ya no debe verse. Deja de funcionar al instante, aunque no haya vencido.",
+        "steps": [
+          "En la OS, toca <strong>⋯ → Compartir con Cliente</strong>.",
+          "Toca <strong>Opciones avanzadas</strong>.",
+          "Toca <strong>Revocar Enlace</strong> y confirma."
+        ],
+        "warningCard": {
+          "title": "No se puede deshacer",
+          "content": "Un enlace revocado no vuelve a funcionar. Para que el cliente acceda de nuevo, comparte la OS otra vez y envía el enlace nuevo."
         }
       },
       {
         "id": "notificaciones",
-        "title": "Notificaciones",
-        "intro": "Su equipo recibe notificaciones push cuando el cliente interactúa con la OS compartida.",
+        "title": "Avisos para el equipo",
+        "intro": "Cuando el cliente responde en el enlace, PraticOS manda una notificación al celular de quien necesita saberlo.",
         "subsections": [
           {
-            "title": "Será Notificado Cuando",
+            "title": "Cuándo llega un aviso",
             "validationList": [
-              { "label": "Aprobación", "text": "Cliente aprobó el presupuesto por el enlace" },
-              { "label": "Rechazo", "text": "Cliente rechazó el presupuesto (con motivo, si lo informó)" },
-              { "label": "Comentario", "text": "Cliente envió un nuevo comentario o pregunta" }
+              {
+                "label": "Aprobación",
+                "text": "El cliente aprobó el presupuesto."
+              },
+              {
+                "label": "Rechazo",
+                "text": "El cliente rechazó, con el motivo si lo escribió."
+              },
+              {
+                "label": "Comentario",
+                "text": "El cliente envió un mensaje."
+              },
+              {
+                "label": "Calificación",
+                "text": "El cliente calificó una OS completada."
+              }
             ]
+          },
+          {
+            "title": "Quién lo recibe",
+            "content": "El técnico asignado a la OS, quien la creó, el dueño de la empresa y quienes tienen perfil de Administrador, Gerente o Supervisor."
           }
         ],
         "infoCard": {
-          "title": "Respuesta Rápida",
-          "content": "Las notificaciones permiten que responda rápidamente al cliente, mejorando la experiencia y agilizando aprobaciones."
+          "title": "¿No llegó?",
+          "content": "Revisa que las notificaciones de PraticOS estén permitidas en los ajustes del celular."
         }
       },
       {
         "id": "calificacion",
-        "title": "Calificación del Cliente",
-        "intro": "Cuando la OS está completada, el cliente puede calificar el servicio directamente por el enlace compartido.",
-        "features": [
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
-            "color": "yellow",
-            "title": "1 a 5 Estrellas",
-            "description": "Calificación simple e intuitiva con estrellas"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
-            "color": "blue",
-            "title": "Comentario Opcional",
-            "description": "Cliente puede dejar retroalimentación detallada (hasta 500 caracteres)"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
-            "color": "green",
-            "title": "Una Vez",
-            "description": "Cada OS solo puede ser calificada una vez por el cliente"
-          }
-        ],
-        "subsections": [
-          {
-            "title": "Cómo Funciona",
-            "steps": [
-              "OS es marcada como <strong>Completada</strong> por el técnico",
-              "Cliente accede al enlace de compartir",
-              "Sección de calificación aparece automáticamente",
-              "Cliente selecciona 1 a 5 estrellas y opcionalmente comenta",
-              "Usted recibe notificación push de la nueva calificación"
-            ]
-          }
+        "title": "Calificación del cliente",
+        "intro": "Cuando la OS llega a Completado, el mismo enlace empieza a mostrar la calificación. Es un buen momento para volver a enviar el enlace junto con el aviso de que el trabajo está listo.",
+        "steps": [
+          "Marca la OS como <strong>Completado</strong>.",
+          "El cliente abre el enlace y elige de 1 a 5 estrellas.",
+          "Si quiere, escribe un comentario de hasta 500 caracteres.",
+          "La calificación queda en los comentarios de la OS y el equipo recibe el aviso."
         ],
         "infoCard": {
-          "title": "Ver Todas las Calificaciones",
-          "content": "En la app, acceda a Configuraciones > Calificaciones para ver promedio general, total de calificaciones y lista completa con comentarios."
+          "title": "Ver todas las calificaciones",
+          "content": "En <strong>Más → Calificaciones</strong>, el Administrador ve el promedio, el total y cada calificación con su comentario. Cada OS se puede calificar una sola vez."
         }
       },
       {
         "id": "faq",
-        "title": "Preguntas Frecuentes",
+        "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "El cliente necesita crear cuenta para acceder?",
-            "answer": "No. El enlace mágico permite acceso directo sin registro o inicio de sesión. Solo haga clic en el enlace."
+            "question": "¿El cliente necesita crear cuenta?",
+            "answer": "No. Abre el enlace en el navegador del celular o de la computadora y ve la OS de inmediato."
           },
           {
-            "question": "Puedo compartir la misma OS varias veces?",
-            "answer": "Sí. Si ya existe un enlace válido, será reutilizado. También puede revocar y crear un nuevo enlace cuando quiera."
+            "question": "¿Puedo saber si el cliente abrió el enlace?",
+            "answer": "Todavía no aparece en la app. Te enteras cuando aprueba, rechaza, comenta o califica."
           },
           {
-            "question": "Qué sucede cuando el cliente aprueba?",
-            "answer": "La OS cambia automáticamente a estado Aprobado, un comentario se agrega al historial y su equipo recibe notificación."
+            "question": "Si comparto la misma OS otra vez, ¿cambia el enlace?",
+            "answer": "No, mientras siga vigente: la app reutiliza el mismo. Solo se crea uno nuevo cuando el anterior vence, se revoca o tocas <strong>Generar nuevo</strong>."
           },
           {
-            "question": "Puedo ver los comentarios del cliente?",
-            "answer": "Sí. Los comentarios aparecen en el historial de la OS, identificados como provenientes del enlace de compartir."
+            "question": "Envié el enlace a la persona equivocada. ¿Qué hago?",
+            "answer": "Revócalo en <strong>⋯ → Compartir con Cliente → Opciones avanzadas → Revocar Enlace</strong> y envía uno nuevo al cliente correcto."
           },
           {
-            "question": "El enlace funciona en computadora y celular?",
-            "answer": "Sí. La página se adapta automáticamente al dispositivo del cliente (responsiva)."
+            "question": "¿El enlace muestra los valores?",
+            "answer": "Sí. La página muestra los servicios, los productos, el descuento y el total de la OS."
           },
           {
-            "question": "Cómo saber si el cliente visualizó?",
-            "answer": "En la pantalla de compartir ve el contador de visualizaciones y la fecha del último acceso."
+            "question": "El cliente rechazó por error. ¿Se puede revertir?",
+            "answer": "El rechazo pasa la OS a Cancelado. Confírmalo con el cliente y cambia el estado directamente en la OS."
           }
         ]
       }

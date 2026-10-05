@@ -1,7 +1,9 @@
-{# Validation List Component - List of validation rules #}
-{# Usage: {% include "components/docs/validation-list.njk" with {items: [...]} %} #}
-<ul class="validation-list">
+{# Options / rules as definition rows. Expects `items` = [{ label?, text }]. #}
+<dl class="doc-dl">
     {% for item in items %}
-    <li>{% if item.label %}<strong>{{ item.label }}:</strong> {% endif %}{{ item.text }}</li>
+    <div>
+        <dt>{{ item.label }}</dt>
+        <dd>{{ item.text | safe }}</dd>
+    </div>
     {% endfor %}
-</ul>
+</dl>

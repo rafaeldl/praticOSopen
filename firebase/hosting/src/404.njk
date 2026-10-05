@@ -1,70 +1,30 @@
 ---
+layout: layouts/base.njk
 permalink: /404.html
+eleventyExcludeFromCollections: true
+lang: pt-BR
+langCode: pt
+pageType: not_found
+pageStyles: content
+noindex: true
+title: Página não encontrada — PraticOS
+description: Este endereço não existe no site do PraticOS. Volte para a página inicial, a Ajuda, as perguntas frequentes ou os planos.
+indexPage: index.html
+relPath: /
 ---
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página não encontrada - PráticOS</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/images/logo.png">
-
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .error-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px;
-        }
-
-        .error-content {
-            max-width: 500px;
-        }
-
-        .error-code {
-            font-family: var(--font-heading);
-            font-size: clamp(6rem, 20vw, 12rem);
-            font-weight: 800;
-            line-height: 1;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 24px;
-        }
-
-        .error-content h1 {
-            font-size: 1.5rem;
-            margin-bottom: 16px;
-        }
-
-        .error-content p {
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="error-page">
-        <div class="error-content">
-            <div class="error-code">404</div>
-            <h1>Página não encontrada</h1>
-            <p>A página que você está procurando não existe ou foi movida. Verifique o endereço ou volte para a página inicial.</p>
-            <a href="/" class="btn btn-primary btn-large">Voltar ao Início</a>
-        </div>
+{# Hallmark · genre: modern-minimal · Long Document family · design-system: design.md
+   Served by Firebase at any depth, so every link uses absolute paths (relPath: /). #}
+{% set arrow %}<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endset %}
+<section class="notfound">
+    <div class="wrap">
+        <p class="notfound__code">Erro 404</p>
+        <h1>Esta página não existe</h1>
+        <p class="lede">O endereço pode ter mudado ou ter sido digitado com algum erro. Daqui você chega ao que costuma procurar:</p>
+        <nav class="notfound__links" aria-label="Páginas principais">
+            <a href="/" data-ga="select_content" data-ga-detail="404_home"><strong>Página inicial</strong><span>Como o PraticOS funciona</span>{{ arrow | safe }}</a>
+            <a href="/docs/" data-ga="select_content" data-ga-detail="404_docs"><strong>Ajuda</strong><span>Guias passo a passo do app</span>{{ arrow | safe }}</a>
+            <a href="/faq.html" data-ga="select_content" data-ga-detail="404_faq"><strong>Perguntas frequentes</strong><span>Conta, OS, dados e planos</span>{{ arrow | safe }}</a>
+            <a href="/pricing.html" data-ga="select_content" data-ga-detail="404_pricing"><strong>Planos e preços</strong><span>Free e planos pagos</span>{{ arrow | safe }}</a>
+        </nav>
     </div>
-</body>
-
-</html>
+</section>

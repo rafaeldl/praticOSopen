@@ -6,11 +6,16 @@ import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_document.dart';
+import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/screens/payments/create_charge_screen.dart';
+import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
+import 'package:praticos/screens/payments/widgets/payment_transaction_icon.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -108,6 +113,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   _buildSummarySection(),
                   const SizedBox(height: 20),
                   _buildFormOrPaidSection(),
+                  if (_store != null)
+                    OrderChargeSection(
+                      store: _store!,
+                      onCreateCharge: _openCreateCharge,
+                    ),
                   const SizedBox(height: 20),
                   _buildHistorySection(),
                   const SizedBox(height: 40),
@@ -249,6 +259,29 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         return _buildFormSection();
       },
     );
+  }
+
+  // ============================================================
+  // ASAAS CHARGE
+  // ============================================================
+
+  /// Opens the create-charge screen. Returns the push future so the card
+  /// keeps "Cobrar" disabled while the screen is open.
+  Future<void> _openCreateCharge(double remaining) async {
+    final order = _store?.order;
+    if (order?.id == null) return;
+
+    final charge = await Navigator.of(context).push<OrderCharge>(
+      CupertinoPageRoute(
+        builder: (_) => CreateChargeScreen(
+          order: order!,
+          remainingBalance: remaining,
+        ),
+      ),
+    );
+    if (charge != null && mounted) {
+      _showSuccess(context.l10n.chargeCreated);
+    }
   }
 
   Widget _buildPaymentNotAllowedSection(String? status) {
@@ -680,25 +713,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               child: Row(
                 children: [
                   // Icon container
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isPayment
-                          ? CupertinoColors.systemGreen.withValues(alpha: 0.15)
-                          : CupertinoColors.systemOrange.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      isPayment
-                          ? CupertinoIcons.arrow_down_circle
-                          : CupertinoIcons.tag,
-                      color: isPayment
-                          ? CupertinoColors.systemGreen
-                          : CupertinoColors.systemOrange,
-                      size: 20,
-                    ),
-                  ),
+                  PaymentTransactionIcon(transaction: transaction),
                   const SizedBox(width: 12),
                   // Details
                   Expanded(
@@ -821,38 +836,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // ACTIONS
   // ============================================================
 
-  double _parseValue(String value) {
-    if (value.isEmpty) return 0;
-
-    try {
-      // Tenta fazer parse usando o formato de moeda do locale atual
-      final formatService = FormatService();
-      final currencyFormat = formatService.currencyFormat;
-
-      // Remove espaços extras
-      final cleanValue = value.trim();
-
-      // Tenta parsear usando o NumberFormat do locale
-      final parsed = currencyFormat.parse(cleanValue);
-      return parsed.toDouble();
-    } catch (e) {
-      // Fallback: tenta remover símbolos comuns e parsear
-      final cleanValue = value
-          .replaceAll(RegExp(r'[R\$€£¥\s]'), '') // Remove símbolos de moeda e espaços
-          .replaceAll(RegExp(r'\.(?=.*,)'), '') // Remove pontos antes de vírgula (pt-BR)
-          .replaceAll(RegExp(r',(?=.*\.)'), '') // Remove vírgulas antes de ponto (en-US)
-          .replaceAll(',', '.') // Normaliza decimal para ponto
-          .trim();
-      return double.tryParse(cleanValue) ?? 0;
-    }
-  }
-
   String? _validateValue(String? value) {
     if (value == null || value.isEmpty) {
       return context.l10n.fillValue;
     }
 
-    final valueDouble = _parseValue(value);
+    final valueDouble = parseCurrencyInput(value);
     if (valueDouble <= 0) {
       return context.l10n.valueMustBeGreaterThanZero;
     }
@@ -878,7 +867,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final store = _store;
     if (store == null) return;
 
-    final value = _parseValue(_valueController.text);
+    final value = parseCurrencyInput(_valueController.text);
     final description = _descriptionController.text.isNotEmpty
         ? _descriptionController.text
         : null;

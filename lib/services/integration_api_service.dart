@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/integration_token.dart';
 import 'package:praticos/services/api_headers.dart';
@@ -33,18 +31,7 @@ class IntegrationApiService {
   }) =>
       IntegrationApiService._(client, tokenProvider);
 
-  static String get _baseUrl {
-    if (kDebugMode) {
-      // Use ngrok for iOS simulator (localhost:5000 conflicts with AirTunes)
-      // For Android emulator, use 10.0.2.2
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:5000/praticos/southamerica-east1/api';
-      }
-      // iOS simulator - use ngrok tunnel
-      return 'https://acidogenic-lorinda-unnymphean.ngrok-free.dev/praticos/southamerica-east1/api';
-    }
-    return 'https://southamerica-east1-praticos.cloudfunctions.net/api';
-  }
+  static String get _baseUrl => appApiBaseUrl;
 
   static List<IntegrationToken> parseList(String body) {
     final decoded = jsonDecode(body) as Map<String, dynamic>;

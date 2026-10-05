@@ -185,6 +185,11 @@ class NotificationListTile extends StatelessWidget {
           icon: CupertinoIcons.star_fill,
           color: const Color(0xFFFFD700),
         );
+      case NotificationType.paymentReceived:
+        return _NotificationTypeInfo(
+          icon: CupertinoIcons.creditcard,
+          color: CupertinoColors.systemGreen,
+        );
       default:
         return _NotificationTypeInfo(
           icon: CupertinoIcons.bell,

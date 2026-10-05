@@ -5,7 +5,7 @@
   "email": "praticos@rafsoft.com.br",
   "company": "Rafsoft",
   "companyUrl": "https://www.rafsoft.com.br",
-  "year": "2025",
+  "year": "2026",
   "appStore": "https://apps.apple.com/br/app/praticos/id1534604555",
   "playStore": "https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
   "stats": {
@@ -21,5 +21,9 @@
       "en": "Hello! I want to start using PraticOS",
       "es": "¡Hola! Quiero empezar a usar PraticOS"
     }
+  },
+  "flags": {
+    "whatsappBot": false,
+    "whatsappContact": true
   }
 }
