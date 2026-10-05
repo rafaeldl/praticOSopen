@@ -14,8 +14,9 @@ part 'user_role.g.dart';
 /// - [consultant]: Commercial profile
 /// - [technician]: Service execution
 ///
-/// Note: Fields using this enum should have @JsonKey(unknownEnumValue: RolesType.technician)
-/// to prevent errors when legacy or invalid role data exists in Firestore.
+/// Note: Fields using this enum should use @JsonKey(fromJson: rolesTypeFromJson)
+/// so legacy or invalid role data in Firestore does not throw, and the
+/// 'owner' role (written for companies created via WhatsApp) acts as admin.
 enum RolesType {
   /// 👨‍💼 Admin - Full system access
   /// Can: manage users, roles, permissions, access all areas,
@@ -43,10 +44,28 @@ enum RolesType {
   technician,
 }
 
+/// Parses a stored role into [RolesType].
+///
+/// - 'owner' (company owner, e.g. created via the WhatsApp bot) -> [RolesType.admin]
+/// - known values -> the matching [RolesType]
+/// - unknown values -> [RolesType.technician] (least privilege)
+/// - null -> null
+///
+/// Read-only mapping: toJson writes the enum name, so if a model parsed from
+/// 'owner' is saved again the stored value becomes 'admin' (same claim power).
+RolesType? rolesTypeFromJson(Object? value) {
+  if (value == null) return null;
+  if (value == 'owner') return RolesType.admin;
+  for (final role in RolesType.values) {
+    if (role.name == value) return role;
+  }
+  return RolesType.technician;
+}
+
 @JsonSerializable(explicitToJson: true)
 class UserRole extends BaseAuditCompany {
   UserAggr? user;
-  @JsonKey(unknownEnumValue: RolesType.technician)
+  @JsonKey(fromJson: rolesTypeFromJson)
   RolesType? role;
 
   UserRole();
@@ -62,7 +81,7 @@ class UserRole extends BaseAuditCompany {
 @JsonSerializable(explicitToJson: true)
 class UserRoleAggr {
   UserAggr? user;
-  @JsonKey(unknownEnumValue: RolesType.technician)
+  @JsonKey(fromJson: rolesTypeFromJson)
   RolesType? role;
 
   UserRoleAggr();
@@ -74,7 +93,7 @@ class UserRoleAggr {
 @JsonSerializable(explicitToJson: true)
 class CompanyRoleAggr {
   CompanyAggr? company;
-  @JsonKey(unknownEnumValue: RolesType.technician)
+  @JsonKey(fromJson: rolesTypeFromJson)
   RolesType? role;
 
   CompanyRoleAggr();

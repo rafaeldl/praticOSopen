@@ -15,11 +15,7 @@ Invite _$InviteFromJson(Map<String, dynamic> json) => Invite()
   ..company = json['company'] == null
       ? null
       : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
-  ..role = $enumDecodeNullable(
-    _$RolesTypeEnumMap,
-    json['role'],
-    unknownValue: RolesType.technician,
-  )
+  ..role = rolesTypeFromJson(json['role'])
   ..invitedBy = json['invitedBy'] == null
       ? null
       : UserAggr.fromJson(json['invitedBy'] as Map<String, dynamic>)
@@ -61,14 +57,6 @@ Map<String, dynamic> _$InviteToJson(Invite instance) => <String, dynamic>{
   'channel': _$InviteChannelEnumMap[instance.channel],
 };
 
-const _$RolesTypeEnumMap = {
-  RolesType.admin: 'admin',
-  RolesType.supervisor: 'supervisor',
-  RolesType.manager: 'manager',
-  RolesType.consultant: 'consultant',
-  RolesType.technician: 'technician',
-};
-
 const _$InviteStatusEnumMap = {
   InviteStatus.pending: 'pending',
   InviteStatus.accepted: 'accepted',
@@ -79,4 +67,12 @@ const _$InviteStatusEnumMap = {
 const _$InviteChannelEnumMap = {
   InviteChannel.app: 'app',
   InviteChannel.whatsapp: 'whatsapp',
+};
+
+const _$RolesTypeEnumMap = {
+  RolesType.admin: 'admin',
+  RolesType.supervisor: 'supervisor',
+  RolesType.manager: 'manager',
+  RolesType.consultant: 'consultant',
+  RolesType.technician: 'technician',
 };
