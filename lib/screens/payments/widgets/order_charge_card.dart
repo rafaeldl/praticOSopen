@@ -47,15 +47,28 @@ String chargeStatusLabel(AppLocalizations l10n, ChargeStatus? status) {
 }
 
 /// Whether a charge going from [prev] to [next] changed the order payments
-/// (the webhook added or reverted a transaction): true when [next] is paid
-/// or refunded and differs from [prev].
+/// (the webhook added or reverted transactions), so the screen must reload
+/// them:
+/// - [next] became paid or refunded (status differs from [prev]); or
+/// - the number of paid installments (`paidAsaasPaymentIds`) changed: with
+///   card installments the server books each installment on the order while
+///   the charge stays pending until the last one.
 ///
-/// [prev] is null for a charge not seen before. The card never calls this
-/// for the first stream emission (that is the initial state, not a
-/// transition), so opening the screen doesn't trigger a reload.
-bool chargeSettled(ChargeStatus? prev, ChargeStatus? next) =>
-    (next == ChargeStatus.paid || next == ChargeStatus.refunded) &&
-    prev != next;
+/// [prev] is the same charge (by id) in the previous emission, or null for
+/// a charge not seen before. The card never calls this for the first stream
+/// emission (that is the initial state, not a transition), so opening the
+/// screen doesn't trigger a reload.
+bool chargeSettled(OrderCharge? prev, OrderCharge next) {
+  final status = next.status;
+  if ((status == ChargeStatus.paid || status == ChargeStatus.refunded) &&
+      prev?.status != status) {
+    return true;
+  }
+  return _paidCount(prev) != _paidCount(next);
+}
+
+int _paidCount(OrderCharge? charge) =>
+    charge?.paidAsaasPaymentIds?.length ?? 0;
 
 /// Open charge with installments already paid: the server refuses to cancel
 /// or replace it (`INSTALLMENTS_IN_PROGRESS`).
@@ -89,8 +102,8 @@ class OrderChargeCard extends StatefulWidget {
   /// returned future completes (await the pushed route).
   final FutureOr<void> Function() onCreateCharge;
 
-  /// Called when a watched charge becomes paid or refunded (see
-  /// [chargeSettled]); the screen reloads the order payments.
+  /// Called when a watched charge is paid, refunded or gets an installment
+  /// paid (see [chargeSettled]); the screen reloads the order payments.
   final VoidCallback? onChargeSettled;
 
   /// Test seam; defaults to [OrderChargeRepository.watch].
@@ -108,8 +121,8 @@ class _OrderChargeCardState extends State<OrderChargeCard> {
   StreamSubscription<List<OrderCharge>>? _subscription;
   List<OrderCharge> _charges = const [];
 
-  /// Last known status per charge id; null until the first emission.
-  Map<String, ChargeStatus?>? _knownStatuses;
+  /// Charges of the last emission by id; null until the first emission.
+  Map<String, OrderCharge>? _previous;
 
   bool _canceling = false;
   bool _creating = false;
@@ -147,10 +160,10 @@ class _OrderChargeCardState extends State<OrderChargeCard> {
   }
 
   void _onCharges(List<OrderCharge> charges) {
-    final previous = _knownStatuses;
+    final previous = _previous;
     final settled = previous != null &&
-        charges.any((c) => chargeSettled(previous[c.id], c.status));
-    _knownStatuses = {for (final c in charges) c.id ?? '': c.status};
+        charges.any((c) => chargeSettled(previous[c.id], c));
+    _previous = {for (final c in charges) c.id ?? '': c};
     if (!mounted) return;
     setState(() => _charges = charges);
     if (settled) widget.onChargeSettled?.call();

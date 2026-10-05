@@ -104,23 +104,55 @@ void main() {
   });
 
   group('chargeSettled', () {
+    OrderCharge c(ChargeStatus? status, [int paid = 0]) => OrderCharge(
+        id: 'ch1',
+        status: status,
+        paidAsaasPaymentIds: [for (var i = 0; i < paid; i++) 'pay_$i']);
+
     test('true quando passa para paga ou estornada', () {
-      expect(chargeSettled(ChargeStatus.pending, ChargeStatus.paid), isTrue);
-      expect(chargeSettled(ChargeStatus.overdue, ChargeStatus.paid), isTrue);
-      expect(chargeSettled(ChargeStatus.paid, ChargeStatus.refunded), isTrue);
+      expect(chargeSettled(c(ChargeStatus.pending), c(ChargeStatus.paid)),
+          isTrue);
+      expect(chargeSettled(c(ChargeStatus.overdue), c(ChargeStatus.paid)),
+          isTrue);
+      expect(chargeSettled(c(ChargeStatus.paid), c(ChargeStatus.refunded)),
+          isTrue);
       // Charge not seen before (after the first emission) already paid
-      expect(chargeSettled(null, ChargeStatus.paid), isTrue);
+      expect(chargeSettled(null, c(ChargeStatus.paid)), isTrue);
+    });
+
+    test('true quando o número de parcelas pagas muda', () {
+      expect(
+          chargeSettled(
+              c(ChargeStatus.pending, 1), c(ChargeStatus.pending, 2)),
+          isTrue);
+      expect(
+          chargeSettled(c(ChargeStatus.pending), c(ChargeStatus.pending, 1)),
+          isTrue);
+      expect(chargeSettled(null, c(ChargeStatus.pending, 1)), isTrue);
+      // Refund of an installment shrinks the list
+      expect(
+          chargeSettled(
+              c(ChargeStatus.pending, 2), c(ChargeStatus.pending, 1)),
+          isTrue);
     });
 
     test('false sem mudança ou para status sem pagamento', () {
-      expect(chargeSettled(ChargeStatus.paid, ChargeStatus.paid), isFalse);
+      expect(chargeSettled(c(ChargeStatus.paid), c(ChargeStatus.paid)),
+          isFalse);
       expect(
-          chargeSettled(ChargeStatus.refunded, ChargeStatus.refunded), isFalse);
-      expect(chargeSettled(ChargeStatus.pending, ChargeStatus.overdue), isFalse);
+          chargeSettled(c(ChargeStatus.refunded), c(ChargeStatus.refunded)),
+          isFalse);
+      expect(chargeSettled(c(ChargeStatus.pending), c(ChargeStatus.overdue)),
+          isFalse);
       expect(
-          chargeSettled(ChargeStatus.pending, ChargeStatus.canceled), isFalse);
-      expect(chargeSettled(null, ChargeStatus.pending), isFalse);
-      expect(chargeSettled(ChargeStatus.paid, null), isFalse);
+          chargeSettled(c(ChargeStatus.pending), c(ChargeStatus.canceled)),
+          isFalse);
+      expect(chargeSettled(null, c(ChargeStatus.pending)), isFalse);
+      expect(chargeSettled(c(ChargeStatus.paid), c(null)), isFalse);
+      expect(
+          chargeSettled(
+              c(ChargeStatus.pending, 2), c(ChargeStatus.overdue, 2)),
+          isFalse);
     });
   });
 
@@ -429,6 +461,43 @@ void main() {
 
         await emit(tester, [charge(status: ChargeStatus.refunded)]);
         expect(settled, 2);
+      });
+
+      testWidgets('parcela paga com cobrança ainda pendente recarrega',
+          (tester) async {
+        OrderCharge installments(int paid) => charge(
+              mode: ChargeMode.cardInstallments,
+              installmentCount: 3,
+              paidAsaasPaymentIds: [for (var i = 0; i < paid; i++) 'pay_$i'],
+            );
+        await pumpCard(tester,
+            stream: controller.stream, onSettled: () => settled++);
+        // First emission with paid installments: initial state, no reload
+        await emit(tester, [installments(1)]);
+        expect(settled, 0);
+
+        await emit(tester, [installments(2)]);
+        expect(settled, 1);
+
+        // Same count again: no reload
+        await emit(tester, [installments(2)]);
+        expect(settled, 1);
+      });
+
+      testWidgets('várias mudanças na mesma emissão recarregam uma vez',
+          (tester) async {
+        await pumpCard(tester,
+            stream: controller.stream, onSettled: () => settled++);
+        await emit(tester, [
+          charge(id: 'ch2'),
+          charge(id: 'ch1', status: ChargeStatus.overdue),
+        ]);
+        await emit(tester, [
+          charge(id: 'ch2', paidAsaasPaymentIds: ['pay_1']),
+          charge(id: 'ch1', status: ChargeStatus.paid),
+        ]);
+
+        expect(settled, 1);
       });
 
       testWidgets('cancelada ou vencida não recarrega', (tester) async {

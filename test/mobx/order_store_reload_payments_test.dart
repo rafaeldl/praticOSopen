@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,6 +100,29 @@ void main() {
     // total = items - discount
     expect(store.order!.total, 950);
     expect(store.total, 950);
+  });
+
+  test('waits for the pending offline payment write before reading',
+      () async {
+    final write = Completer<void>();
+    store.pendingPaymentFieldWriteForTest = write.future;
+    store.fetchOrderFromServer = (companyId, orderId) async {
+      fetched.add(orderId);
+      return Order()
+        ..id = 'o1'
+        ..paidAmount = 300
+        ..payment = 'unpaid'
+        ..transactions = [];
+    };
+
+    final result = store.reloadPayments();
+    await Future<void>.delayed(Duration.zero);
+    expect(fetched, isEmpty);
+
+    write.complete();
+    expect(await result, isTrue);
+    expect(fetched, ['o1']);
+    expect(store.order!.paidAmount, 300);
   });
 
   test('offline keeps the local state and returns false', () async {

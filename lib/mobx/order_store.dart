@@ -22,6 +22,7 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
@@ -1348,6 +1349,10 @@ abstract class _OrderStore with Store {
   /// so they read a server state that already contains it.
   Future<void>? _pendingPaymentFieldWrite;
 
+  @visibleForTesting
+  set pendingPaymentFieldWriteForTest(Future<void>? write) =>
+      _pendingPaymentFieldWrite = write;
+
   /// Transactions added offline whose write the server hasn't acknowledged
   /// yet (by id). Kept when the local state is refreshed from a transaction.
   final Map<String, PaymentTransaction> _pendingTransactions = {};
@@ -1461,6 +1466,13 @@ abstract class _OrderStore with Store {
     final company = companyId;
     if (orderId == null || company == null) return false;
     try {
+      // Same wait as _runPaymentUpdate: reading before an offline write is
+      // acknowledged would revert it locally. Not acknowledged in time →
+      // skip this reload (the local state already has the write).
+      if (await waitForPendingPaymentWrite(_pendingPaymentFieldWrite) !=
+          null) {
+        return false;
+      }
       final fresh = await fetchOrderFromServer(company, orderId);
       if (fresh == null || order?.id != orderId) return false;
       _applyPaymentState(fresh);
