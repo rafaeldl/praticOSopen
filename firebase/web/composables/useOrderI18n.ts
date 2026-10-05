@@ -126,7 +126,7 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     chargeInstallments: 'Em {count}x no cartão',
     chargeDue: 'Vence em {date}',
     chargeOverdue: 'Cobrança vencida. Fale com a empresa',
-    chargePaid: 'Pago ✓',
+    chargePaid: 'Pago {amount} ✓',
   },
   en: {
     pageTitle: 'Track your Order - PraticOS',
@@ -229,7 +229,7 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     chargeInstallments: '{count} card installments',
     chargeDue: 'Due {date}',
     chargeOverdue: 'Payment overdue. Please contact the company',
-    chargePaid: 'Paid ✓',
+    chargePaid: 'Paid {amount} ✓',
   },
   es: {
     pageTitle: 'Seguí tu OS - PraticOS',
@@ -332,7 +332,7 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     chargeInstallments: 'En {count} cuotas con tarjeta',
     chargeDue: 'Vence el {date}',
     chargeOverdue: 'Cobro vencido. Contacta a la empresa',
-    chargePaid: 'Pagado ✓',
+    chargePaid: 'Pagado {amount} ✓',
   },
 }
 

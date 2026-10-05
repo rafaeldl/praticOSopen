@@ -16,7 +16,7 @@ export interface PublicOrderCharge {
 export type ChargeView =
   | { kind: 'pay'; value: number; dueDate: string; invoiceUrl: string; installmentCount: number | null }
   | { kind: 'overdue' }
-  | { kind: 'paid' }
+  | { kind: 'paid'; value: number }
   | { kind: 'none' }
 
 /** Only https links hosted on asaas.com (or a subdomain, e.g. sandbox.asaas.com). */
@@ -34,7 +34,7 @@ export function isSafeInvoiceUrl(url: string | undefined): boolean {
 
 export function getChargeView(charge: PublicOrderCharge | null | undefined): ChargeView {
   if (!charge) return { kind: 'none' }
-  if (charge.status === 'paid') return { kind: 'paid' }
+  if (charge.status === 'paid') return { kind: 'paid', value: charge.value }
   if (charge.status === 'overdue') return { kind: 'overdue' }
   if (charge.status === 'pending' && isSafeInvoiceUrl(charge.invoiceUrl)) {
     return {

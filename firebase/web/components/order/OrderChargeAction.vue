@@ -29,7 +29,7 @@
       role="status"
       class="flex items-center justify-center gap-2 rounded-xl bg-[#F0FDF4] px-4 py-3 text-[14px] font-semibold text-[#16A34A]"
     >
-      {{ t.chargePaid }}
+      {{ paidLabel }}
     </div>
   </div>
 </template>
@@ -51,6 +51,12 @@ const payLabel = computed(() => {
   const v = view.value
   if (v.kind !== 'pay') return ''
   return t.value.chargePay.replace('{amount}', formatCurrency(v.value, 'BR'))
+})
+
+const paidLabel = computed(() => {
+  const v = view.value
+  if (v.kind !== 'paid') return ''
+  return t.value.chargePaid.replace('{amount}', formatCurrency(v.value, 'BR'))
 })
 
 const detailLabel = computed(() => {

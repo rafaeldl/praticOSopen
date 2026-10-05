@@ -53,7 +53,7 @@ test('isSafeInvoiceUrl accepts only https on asaas.com or its subdomains', () =>
 
 test('overdue and paid charges render their messages', () => {
   assert.deepEqual(getChargeView({ ...pending, status: 'overdue' }), { kind: 'overdue' })
-  assert.deepEqual(getChargeView({ ...pending, status: 'paid' }), { kind: 'paid' })
+  assert.deepEqual(getChargeView({ ...pending, status: 'paid' }), { kind: 'paid', value: pending.value })
 })
 
 test('missing charge renders nothing', () => {

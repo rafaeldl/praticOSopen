@@ -6,6 +6,9 @@ on:
       - 'firebase/web/**'
       - '.github/workflows/web_check.yml'
 
+permissions:
+  contents: read
+
 jobs:
   check:
     name: Test + Build

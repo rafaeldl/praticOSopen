@@ -147,6 +147,7 @@
 
 <script setup lang="ts">
 import { shouldRefreshCharge } from '~/utils/charge'
+import { quietRefresh } from '~/utils/quiet-refresh'
 
 const route = useRoute()
 const token = route.params.token as string
@@ -165,7 +166,13 @@ const permissions = computed(() => (orderData.value as any)?.data?.permissions |
 const charge = computed(() => (orderData.value as any)?.data?.charge ?? null)
 
 // Customer pays the Asaas invoice in another tab; reflect it when they come back
-useRefreshOnVisible(() => refreshOrder(), { when: () => shouldRefreshCharge(charge.value), minIntervalMs: 10_000 })
+// Quiet fetch: a failed background refresh must not flip the page to the invalid-link screen.
+useRefreshOnVisible(
+  () => quietRefresh(() => $fetch(`/api/orders/${token}`), (fresh) => { orderData.value = fresh as typeof orderData.value }),
+  { when: () => shouldRefreshCharge(charge.value),     when: () => shouldRefreshCharge(charge.value),
+    minIntervalMs: 10_000,
+  },
+)
 
 // Apply segment custom labels (e.g. "Veículos" for automotive, "Aparelhos" for electronics)
 const segmentLabels = computed(() => (orderData.value as any)?.data?.segmentLabels || null)
