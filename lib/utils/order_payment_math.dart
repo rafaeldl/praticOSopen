@@ -48,6 +48,10 @@ class OrderPaymentMath {
     'payment',
   ];
 
+  /// Half a cent: same as the server's CENT_TOLERANCE. Money comparisons
+  /// (e.g. charge value vs. remaining balance) allow this slack.
+  static const double centTolerance = 0.005;
+
   static double roundMoney(double value) =>
       (value * 100).roundToDouble() / 100;
 

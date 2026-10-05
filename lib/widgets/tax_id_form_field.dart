@@ -15,16 +15,28 @@ String? validateTaxIdInput(
   return isValidTaxId(id) ? null : l10n.invalidTaxId;
 }
 
-/// Optional CPF/CNPJ row for Cupertino forms.
+/// CPF/CNPJ row for Cupertino forms (optional unless [required]).
 ///
 /// Text keyboard (alphanumeric CNPJ), uppercase input, no mask while typing;
 /// the value is formatted for display when the field loses focus. Saves the
 /// normalized value (digits / uppercase letters) or null when empty.
 class TaxIdFormField extends StatefulWidget {
-  const TaxIdFormField({super.key, this.initialValue, this.onSaved});
+  const TaxIdFormField({
+    super.key,
+    this.initialValue,
+    this.onSaved,
+    this.onChanged,
+    this.required = false,
+  });
 
   final String? initialValue;
   final ValueChanged<String?>? onSaved;
+
+  /// Called on every edit with the normalized value ('' when empty).
+  final ValueChanged<String>? onChanged;
+
+  /// Empty is an error (and the "optional" placeholder is hidden).
+  final bool required;
 
   @override
   State<TaxIdFormField> createState() => _TaxIdFormFieldState();
@@ -66,13 +78,18 @@ class _TaxIdFormFieldState extends State<TaxIdFormField> {
       prefix: Text(context.l10n.cpfCnpj, style: const TextStyle(fontSize: 16)),
       controller: _controller,
       focusNode: _focusNode,
-      placeholder: context.l10n.optional,
+      placeholder:
+          widget.required ? context.l10n.required : context.l10n.optional,
       keyboardType: TextInputType.text,
       textCapitalization: TextCapitalization.characters,
       autocorrect: false,
       enableSuggestions: false,
       textAlign: TextAlign.right,
-      validator: (value) => validateTaxIdInput(context.l10n, value),
+      onChanged: widget.onChanged == null
+          ? null
+          : (value) => widget.onChanged!(normalizeTaxId(value)),
+      validator: (value) => validateTaxIdInput(context.l10n, value,
+          required: widget.required),
       onSaved: (value) {
         final id = normalizeTaxId(value ?? '');
         widget.onSaved?.call(id.isEmpty ? null : id);
