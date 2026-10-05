@@ -163,7 +163,7 @@ Browser → https://praticos.web.app/q/{token}
 ```
 
 A página `/q/{token}` (Nuxt, Cloud Run `praticos-web`) carrega a OS com `useFetch('/api/orders/{token}')`.
-No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar ou avaliar)
+No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar, avaliar ou quando a aba volta a ficar visível com cobrança Asaas pendente/vencida, via `useRefreshOnVisible`/`createVisibilityRefresher`, no máximo 1 vez a cada 10 s; esses refreshes em segundo plano também contam como visualização: incrementam `viewCount` e atualizam `lastViewedAt`, então enquanto há cobrança aberta o contador sobe a cada retorno à aba, respeitando o intervalo de 10 s)
 faz GET em `https://praticos.web.app/api/orders/{token}`. Por isso `firebase/firebase.json` precisa do rewrite
 `/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
 404 e a página cai na tela de erro.
@@ -284,9 +284,18 @@ Visualiza ordem via magic link.
     "phone": "..."
   },
   "comments": [...],
-  "permissions": ["view", "approve", "comment"]
+  "permissions": ["view", "approve", "comment"],
+  "charge": {
+    "status": "pending",
+    "value": 150.00,
+    "dueDate": "2026-10-07",
+    "mode": "single",
+    "invoiceUrl": "https://www.asaas.com/i/..."
+  }
 }
 ```
+
+`charge` é a cobrança Asaas aberta (`pending`/`overdue`) ou a última paga da OS (`getOpenOrLatestPaidCharge`), ou `null`. Só esses campos saem; ids do Asaas e auditoria nunca são expostos. `installmentCount` aparece só em `mode: "cardInstallments"`. Parcelamento no cartão com parcela já paga aparece como `paid`. Se o Asaas da empresa foi desconectado, cobrança aberta vira `null` (a paga continua aparecendo). Erro ao ler a cobrança devolve `null` sem derrubar a página. Ver `docs/ASAAS_INTEGRATION.md`.
 
 #### `POST /public/orders/{token}/approve`
 
