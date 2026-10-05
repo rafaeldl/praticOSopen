@@ -12,6 +12,12 @@ describe('enable-asaas-pilot', () => {
     expect(() => parseArgs(['--company', '--dry-run'])).toThrow();
   });
 
+  it('rejects unknown arguments', () => {
+    expect(() => parseArgs(['--company', 'a', '--disble'])).toThrow(/unknown argument/);
+    expect(() => parseArgs(['--company', 'a', '--dryrun'])).toThrow(/unknown argument/);
+    expect(() => parseArgs(['--company', 'a', 'extra'])).toThrow(/unknown argument/);
+  });
+
   it('refuses production without --project', () => {
     expect(() => resolveTarget(parseArgs(['--company', 'a']), {})).toThrow(/production/);
   });

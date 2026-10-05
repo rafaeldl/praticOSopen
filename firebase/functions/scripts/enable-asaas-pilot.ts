@@ -31,6 +31,7 @@ export const USAGE =
 export function parseArgs(argv: string[]): Args {
   const companyIds: string[] = [];
   let project: string | undefined;
+  const flags = ['--dry-run', '--disable', '--yes'];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--company' || argv[i] === '--project') {
       const value = argv[i + 1];
@@ -38,6 +39,8 @@ export function parseArgs(argv: string[]): Args {
       if (argv[i] === '--company') companyIds.push(value);
       else project = value;
       i++;
+    } else if (!flags.includes(argv[i])) {
+      throw new Error(`unknown argument: ${argv[i]}`);
     }
   }
   if (companyIds.length === 0) throw new Error('at least one --company is required');
