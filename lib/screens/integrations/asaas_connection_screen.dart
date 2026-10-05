@@ -137,6 +137,10 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
     } on AsaasApiException catch (e) {
       if (!mounted) return;
       _showMessage(asaasErrorText(context.l10n, e));
+    } catch (_) {
+      // Unexpected response (e.g. malformed body): generic text, never raw.
+      if (!mounted) return;
+      _showMessage(context.l10n.asaasErrorGeneric);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -178,6 +182,10 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
     } on AsaasApiException catch (e) {
       if (!mounted) return;
       _showMessage(asaasErrorText(context.l10n, e));
+    } catch (_) {
+      // Unexpected response (e.g. malformed body): generic text, never raw.
+      if (!mounted) return;
+      _showMessage(context.l10n.asaasErrorGeneric);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

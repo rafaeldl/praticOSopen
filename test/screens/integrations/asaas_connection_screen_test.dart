@@ -127,6 +127,41 @@ void main() {
     });
   });
 
+  testWidgets('resposta 200 malformada ao conectar mostra erro genérico',
+      (tester) async {
+    await pumpScreen(tester,
+        settings: disconnected,
+        api: service((_) async => http.Response('not json', 200)));
+
+    await tester.enterText(
+        find.byKey(const Key('asaasApiKeyField')), '\$aact_hmlg_000');
+    await tapKey(tester, 'asaasConnectButton');
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(l10n.asaasErrorGeneric), findsOneWidget);
+    final button = tester.widget<CupertinoButton>(
+        find.byKey(const Key('asaasConnectButton')));
+    expect(button.onPressed, isNotNull);
+  });
+
+  testWidgets('erro inesperado ao desconectar mostra erro genérico',
+      (tester) async {
+    await pumpScreen(tester,
+        settings: PaymentSettings(
+          asaasEnabled: true,
+          asaasConnected: true,
+          asaasAccountName: 'Oficina do João',
+        ),
+        api: service((_) async => throw StateError('unexpected')));
+
+    await tapKey(tester, 'asaasDisconnectTile');
+    await tester.tap(find.byKey(const Key('confirmAsaasDisconnectAction')));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(l10n.asaasErrorGeneric), findsOneWidget);
+  });
+
   group('AsaasConnectionScreen conectada', () {
     final connected = PaymentSettings(
       asaasEnabled: true,
