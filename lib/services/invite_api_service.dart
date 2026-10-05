@@ -329,22 +329,8 @@ class InviteApiService {
     }
   }
 
-  RolesType _parseRole(String? role) {
-    switch (role) {
-      case 'admin':
-        return RolesType.admin;
-      case 'supervisor':
-        return RolesType.supervisor;
-      case 'manager':
-        return RolesType.manager;
-      case 'consultant':
-        return RolesType.consultant;
-      case 'technician':
-        return RolesType.technician;
-      default:
-        return RolesType.technician;
-    }
-  }
+  RolesType _parseRole(String? role) =>
+      rolesTypeFromJson(role) ?? RolesType.technician;
 }
 
 /// Result of creating an invite

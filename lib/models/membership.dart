@@ -40,7 +40,7 @@ class Membership {
   UserAggr? user;
 
   /// Papel do usuário na empresa
-  @JsonKey(unknownEnumValue: RolesType.technician)
+  @JsonKey(fromJson: rolesTypeFromJson)
   RolesType? role;
 
   /// Data de entrada na empresa

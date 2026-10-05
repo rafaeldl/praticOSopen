@@ -26,11 +26,7 @@ UserRole _$UserRoleFromJson(Map<String, dynamic> json) => UserRole()
   ..user = json['user'] == null
       ? null
       : UserAggr.fromJson(json['user'] as Map<String, dynamic>)
-  ..role = $enumDecodeNullable(
-    _$RolesTypeEnumMap,
-    json['role'],
-    unknownValue: RolesType.technician,
-  );
+  ..role = rolesTypeFromJson(json['role']);
 
 Map<String, dynamic> _$UserRoleToJson(UserRole instance) => <String, dynamic>{
   'id': instance.id,
@@ -55,11 +51,7 @@ UserRoleAggr _$UserRoleAggrFromJson(Map<String, dynamic> json) => UserRoleAggr()
   ..user = json['user'] == null
       ? null
       : UserAggr.fromJson(json['user'] as Map<String, dynamic>)
-  ..role = $enumDecodeNullable(
-    _$RolesTypeEnumMap,
-    json['role'],
-    unknownValue: RolesType.technician,
-  );
+  ..role = rolesTypeFromJson(json['role']);
 
 Map<String, dynamic> _$UserRoleAggrToJson(UserRoleAggr instance) =>
     <String, dynamic>{
@@ -72,11 +64,7 @@ CompanyRoleAggr _$CompanyRoleAggrFromJson(Map<String, dynamic> json) =>
       ..company = json['company'] == null
           ? null
           : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
-      ..role = $enumDecodeNullable(
-        _$RolesTypeEnumMap,
-        json['role'],
-        unknownValue: RolesType.technician,
-      );
+      ..role = rolesTypeFromJson(json['role']);
 
 Map<String, dynamic> _$CompanyRoleAggrToJson(CompanyRoleAggr instance) =>
     <String, dynamic>{

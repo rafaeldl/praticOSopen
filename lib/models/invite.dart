@@ -43,7 +43,7 @@ class Invite {
   CompanyAggr? company;
 
   /// Perfil de acesso que será concedido.
-  @JsonKey(unknownEnumValue: RolesType.technician)
+  @JsonKey(fromJson: rolesTypeFromJson)
   RolesType? role;
 
   /// Usuário que criou o convite.
