@@ -3638,4 +3638,233 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewPlans => 'View plans';
+
+  @override
+  String get asaasConnected => 'Connected';
+
+  @override
+  String get asaasDisconnected => 'Not connected';
+
+  @override
+  String get asaasConnectTitle => 'Connect Asaas account';
+
+  @override
+  String get asaasConnectIntro =>
+      'Get paid by Pix, boleto or card in your company\'s Asaas account. When the payment is confirmed, the order is marked as paid automatically.';
+
+  @override
+  String get asaasConnectStep1 =>
+      '1. In the Asaas dashboard, open Integrations > API Keys.';
+
+  @override
+  String get asaasConnectStep2 => '2. Generate a new key and copy it.';
+
+  @override
+  String get asaasConnectStep3 => '3. Paste the key below and tap Connect.';
+
+  @override
+  String get asaasOpenPanel => 'Open Asaas dashboard';
+
+  @override
+  String get asaasOpenSandboxPanel => 'Open test dashboard (sandbox)';
+
+  @override
+  String get asaasApiKey => 'API key';
+
+  @override
+  String get asaasApiKeyPlaceholder => 'Paste the key here';
+
+  @override
+  String get asaasApiKeyHint =>
+      'The key is stored encrypted on the server and is never shown in the app again.';
+
+  @override
+  String get asaasConnect => 'Connect';
+
+  @override
+  String get asaasAccount => 'Account';
+
+  @override
+  String get asaasEnvironment => 'Environment';
+
+  @override
+  String get asaasEnvironmentSandbox => 'Test';
+
+  @override
+  String get asaasEnvironmentProduction => 'Production';
+
+  @override
+  String get asaasDisconnect => 'Disconnect';
+
+  @override
+  String get asaasDisconnectConfirm =>
+      'Disconnect the Asaas account? Open charges stay in Asaas, but payments will no longer update the order.';
+
+  @override
+  String get asaasErrorInvalidKey => 'Invalid API key. Check it and try again.';
+
+  @override
+  String get asaasErrorForbidden =>
+      'You don\'t have permission for this action.';
+
+  @override
+  String get asaasErrorNotConnected =>
+      'Connect the Asaas account in Settings > Integrations.';
+
+  @override
+  String get asaasErrorExceedsBalance =>
+      'The amount is higher than the order balance.';
+
+  @override
+  String get asaasErrorTaxIdRequired => 'Enter the customer\'s CPF or CNPJ.';
+
+  @override
+  String get asaasErrorCustomerRequired =>
+      'Add a customer to the order before charging.';
+
+  @override
+  String get asaasErrorGeneric => 'Could not complete. Please try again.';
+
+  @override
+  String get invalidTaxId => 'Invalid CPF or CNPJ';
+
+  @override
+  String get chargeWithAsaas => 'Charge with Asaas';
+
+  @override
+  String get chargeSectionTitle => 'Charge';
+
+  @override
+  String get createChargeTitle => 'New charge';
+
+  @override
+  String get chargeValue => 'Amount';
+
+  @override
+  String chargeBalanceHint(String value) {
+    return 'Order balance: $value';
+  }
+
+  @override
+  String get chargeModeSingle => 'One-time';
+
+  @override
+  String get chargeModeInstallments => 'Card installments';
+
+  @override
+  String get chargeSingleHint => 'The customer chooses Pix, boleto or card.';
+
+  @override
+  String get chargeInstallmentsHint =>
+      'The customer pays by credit card in the chosen installments.';
+
+  @override
+  String get chargeInstallments => 'Installments';
+
+  @override
+  String chargeInstallmentOption(int count, String value) {
+    return '${count}x of $value';
+  }
+
+  @override
+  String get chargeDueDate => 'Due date';
+
+  @override
+  String get chargeTaxIdHint =>
+      'Asaas requires a CPF or CNPJ. It is saved to the customer record.';
+
+  @override
+  String get chargeGenerate => 'Create charge';
+
+  @override
+  String get chargeCreated => 'Charge created';
+
+  @override
+  String get chargeStatusPending => 'Awaiting payment';
+
+  @override
+  String get chargeStatusOverdue => 'Overdue';
+
+  @override
+  String get chargeStatusPaid => 'Paid';
+
+  @override
+  String get chargeStatusCanceled => 'Canceled';
+
+  @override
+  String get chargeStatusRefunded => 'Refunded';
+
+  @override
+  String chargeDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String chargeInstallmentsSummary(int count) {
+    return '${count}x on card';
+  }
+
+  @override
+  String get chargeShareOrderLink => 'Share order link';
+
+  @override
+  String get chargeCopyInvoiceLink => 'Copy invoice link';
+
+  @override
+  String get chargeInvoiceLinkCopied => 'Invoice link copied';
+
+  @override
+  String get chargeCancel => 'Cancel charge';
+
+  @override
+  String get chargeCancelConfirm =>
+      'Cancel this charge in Asaas? The customer will no longer be able to pay it.';
+
+  @override
+  String get chargeKeep => 'Keep';
+
+  @override
+  String get chargeReplaceTitle => 'There is already an open charge';
+
+  @override
+  String get chargeReplaceConfirm =>
+      'Creating a new charge cancels the previous one in Asaas.';
+
+  @override
+  String get chargeReplace => 'Create new';
+
+  @override
+  String chargeTotalChanged(String balance, String value) {
+    return 'The order balance ($balance) differs from the charge amount ($value).';
+  }
+
+  @override
+  String get chargeRegenerate => 'Create new charge';
+
+  @override
+  String get asaasErrorInstallmentsInProgress =>
+      'This installment plan already has paid installments. Wait for it to finish or refund in Asaas.';
+
+  @override
+  String get asaasErrorOrderCanceled =>
+      'This order is canceled and cannot be charged.';
+
+  @override
+  String get asaasErrorInvalidDueDate =>
+      'Invalid due date. Choose today or a future date.';
+
+  @override
+  String get asaasErrorInvalidInstallmentCount =>
+      'Invalid number of installments. Choose from 2 to 12.';
+
+  @override
+  String get asaasErrorChargeNotOpen => 'This charge is no longer open.';
+
+  @override
+  String get asaasErrorValidation =>
+      'Asaas rejected the charge data. Check the customer\'s CPF/CNPJ and email.';
+
+  @override
+  String get asaasErrorUnavailable =>
+      'Asaas is unavailable right now. Please try again shortly.';
 }
