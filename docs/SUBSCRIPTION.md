@@ -198,8 +198,16 @@ Rules:
 - Android and web keep plans, limits and purchase UI unchanged.
 - Usage counters (`subscription.usage.*`) are still incremented on iOS, so limits
   keep working for the same company on other platforms.
-- The App Review notes sent by fastlane (`ios/fastlane/Deliverfile`) state this
-  behaviour. Keep them true: if limits return to iOS, update the notes.
+- The App Review notes sent by fastlane (`ios/fastlane/Deliverfile` and
+  `ios/fastlane/metadata/review_information/notes.txt`) state this behaviour.
+  Keep them true: if limits return to iOS, or if any plan starts being sold on
+  any platform, update the notes.
+- 1.53.0 was rejected again under 3.1.1, now for "account registration for
+  businesses", because the old notes said paid plans existed on the website.
+  No plan is sold anywhere (RevenueCat is disabled), so the notes now say that
+  registration is free, nothing is purchasable on any platform, and future paid
+  plans will use In-App Purchase on iOS. Never describe paid plans as available
+  outside the app in the notes.
 - To restore limits on iOS: ship In-App Purchase first (see
   `docs/IAP_IMPLEMENTATION_PLAN.md`), then remove both platform checks.
 
