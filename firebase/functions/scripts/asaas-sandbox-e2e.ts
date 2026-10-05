@@ -13,14 +13,17 @@
  *   6. alphanumeric CNPJ: does Asaas accept a customer with cpfCnpj 12ABC34501DE35?
  *   7. GET /webhooks (read only): what a webhook object looks like
  *
- * Full flow against a deployed or tunneled PraticOS API. The company must already be
- * connected (Integrações > Asaas) with the SAME sandbox key, and the order must have
- * a remaining balance and a share link:
+ * Full flow against a PraticOS API that WRITES a charge on a real order. Point it only at
+ * the Functions emulator (or a tunnel to it) or at a dedicated test company connected to
+ * the Asaas SANDBOX (Integrações > Asaas, same sandbox key); never at a customer's company.
+ * The order must have a remaining balance and a share link. The target host must be
+ * confirmed explicitly with PRATICOS_E2E_ALLOW_BASE:
  *   npm run e2e:asaas -- --with-api
  *
  * Env (firebase/functions/.env.local is loaded when present; it is gitignored):
  *   ASAAS_SANDBOX_API_KEY   required, must start with $aact_hmlg
- *   PRATICOS_API_BASE       --with-api, e.g. https://southamerica-east1-praticos.cloudfunctions.net/api
+ *   PRATICOS_API_BASE       --with-api, e.g. http://127.0.0.1:5001/<project>/southamerica-east1/api (emulator)
+ *   PRATICOS_E2E_ALLOW_BASE --with-api, must equal the host of PRATICOS_API_BASE (e.g. 127.0.0.1)
  *   PRATICOS_ID_TOKEN       --with-api, Firebase ID token of an owner/admin/manager
  *   PRATICOS_COMPANY_ID     --with-api
  *   PRATICOS_ORDER_ID       --with-api
@@ -166,7 +169,7 @@ async function asaas<T>(apiKey: string, method: HttpMethod, pathname: string, bo
 
 async function praticos<T>(
   base: string,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'DELETE',
   pathname: string,
   opts: { idToken?: string; companyId?: string; body?: unknown; label?: string } = {},
 ): Promise<T> {
@@ -318,12 +321,18 @@ async function runAsaasOnly(apiKey: string) {
       );
       const plan = await asaas<Record<string, unknown>>(apiKey, 'GET', `/installments/${installmentId}`);
       facts.push(`installment object fields: ${Object.keys(plan).sort().join(', ')}`);
-      const page = await fetch(first.invoiceUrl, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
-      const html = await page.text();
-      // Does the first installment's invoice present the whole plan (total + "Parcelado em N x")?
-      const needles = [`R$ ${E2E_INSTALLMENT_TOTAL},00`, `Parcelado em ${E2E_INSTALLMENT_COUNT} x`, `1 de ${E2E_INSTALLMENT_COUNT}`];
-      const mentions = needles.filter((needle) => html.includes(needle));
-      facts.push(`first invoice page HTTP ${page.status}, shows: ${mentions.length ? mentions.map((m) => `"${m}"`).join(', ') : '(none)'}`);
+      // Informational only: a failure here must not fail the run.
+      try {
+        const page = await fetch(first.invoiceUrl, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+        const html = await page.text();
+        // Does the first installment's invoice present the whole plan (total + "Parcelado em N x")?
+        const needles = [`R$ ${E2E_INSTALLMENT_TOTAL},00`, `Parcelado em ${E2E_INSTALLMENT_COUNT} x`, `1 de ${E2E_INSTALLMENT_COUNT}`];
+        const mentions = needles.filter((needle) => html.includes(needle));
+        facts.push(`first invoice page HTTP ${page.status}, shows: ${mentions.length ? mentions.map((m) => `"${m}"`).join(', ') : '(none)'}`);
+      } catch (error) {
+        console.warn(`  warning: could not inspect the invoice page (${(error as Error).message})`);
+        facts.push('first invoice page: not inspected (fetch failed)');
+      }
     } finally {
       cleanup.push(await tryCleanup(`installment ${installmentId}`, () => asaas(apiKey, 'DELETE', `/installments/${installmentId}`)));
     }
@@ -382,7 +391,15 @@ async function runWithApi(apiKey: string) {
   const companyId = requireEnv('PRATICOS_COMPANY_ID');
   const orderId = requireEnv('PRATICOS_ORDER_ID');
   const shareToken = requireEnv('PRATICOS_SHARE_TOKEN');
+  const allowHost = requireEnv('PRATICOS_E2E_ALLOW_BASE').trim();
   const publicLabel = '/public/orders/{token}';
+
+  // Nothing else ties this mode to a non-production target: the operator must name the host.
+  const targetHost = new URL(base).host;
+  if (allowHost !== targetHost && allowHost !== new URL(base).hostname) {
+    throw new Error(`PRATICOS_E2E_ALLOW_BASE (${allowHost}) does not match the PRATICOS_API_BASE host (${targetHost}). Aborting.`);
+  }
+  console.log(`--with-api target: host ${targetHost}, company ${companyId}, order ${orderId}`);
 
   console.log('A/5 GET /public/orders/{token} (remaining balance)');
   const before = await praticos<PublicOrderData>(base, 'GET', `/public/orders/${shareToken}`, { label: publicLabel });
@@ -400,18 +417,30 @@ async function runWithApi(apiKey: string) {
   if (!chargeId) throw new Error('Charge response without id');
   console.log(`  charge: ${chargeId}`);
 
-  console.log('C/5 find the Asaas payment by externalReference');
-  const ref = `${companyId}:${orderId}:${chargeId}`;
-  const list = await asaas<AsaasList<AsaasPayment>>(
-    apiKey, 'GET', `/payments?externalReference=${encodeURIComponent(ref)}`,
-  );
-  if (list.data.length === 0) {
-    throw new Error(`No Asaas payment with externalReference ${ref}. Is the company connected with the same sandbox key?`);
-  }
-  const paymentId = list.data[0].id;
+  let paymentId: string;
+  try {
+    console.log('C/5 find the Asaas payment by externalReference');
+    const ref = `${companyId}:${orderId}:${chargeId}`;
+    const list = await asaas<AsaasList<AsaasPayment>>(
+      apiKey, 'GET', `/payments?externalReference=${encodeURIComponent(ref)}`,
+    );
+    if (list.data.length === 0) {
+      throw new Error(`No Asaas payment with externalReference ${ref}. Is the company connected with the same sandbox key?`);
+    }
+    paymentId = list.data[0].id;
 
-  console.log('D/5 confirm in the sandbox');
-  await confirmAndWait(apiKey, paymentId);
+    console.log('D/5 confirm in the sandbox');
+    await confirmAndWait(apiKey, paymentId);
+  } catch (error) {
+    // Not paid yet: best-effort cancel so no open charge is left on the order.
+    try {
+      await praticos<unknown>(base, 'DELETE', `/v1/app/orders/${orderId}/charges/${chargeId}`, { idToken, companyId });
+      console.log(`  cleanup: charge ${chargeId} canceled`);
+    } catch (cancelError) {
+      console.warn(`  cleanup: could not cancel charge ${chargeId} (${(cancelError as Error).message})`);
+    }
+    throw error;
+  }
 
   console.log('E/5 poll /public/orders/{token} until the webhook marks the order paid');
   const deadline = Date.now() + API_POLL_TIMEOUT_MS;
