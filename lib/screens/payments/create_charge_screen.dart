@@ -116,7 +116,11 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     return DateTime(now.year, now.month, now.day);
   }
 
-  bool get _needsTaxId => !_loadingTaxId && (_knownTaxId ?? '').isEmpty;
+  /// Also true for an old invalid tax id: the server would reject it.
+  bool get _needsTaxId => !_loadingTaxId && !_hasValidTaxId(_knownTaxId);
+
+  static bool _hasValidTaxId(String? taxId) =>
+      (taxId ?? '').isNotEmpty && isValidTaxId(taxId!);
 
   @override
   void initState() {
@@ -131,7 +135,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     _valueController.addListener(_onValueChanged);
 
     _knownTaxId = widget.order.customer?.taxId;
-    if ((_knownTaxId ?? '').isEmpty && widget.order.customer?.id != null) {
+    if (!_hasValidTaxId(_knownTaxId) && widget.order.customer?.id != null) {
       _loadingTaxId = true;
       _loadCustomerTaxId();
     }
@@ -236,7 +240,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
               },
               child: Text(sheetContext.l10n.chargeInstallmentOption(
                 count,
-                _formatService.formatCurrency(value / count),
+                _formatService.formatBrl(value / count),
               )),
             ),
         ],
@@ -303,7 +307,6 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _formatService.setLocale(Localizations.localeOf(context).toString());
     final l10n = context.l10n;
     final value = parseCurrencyInput(_valueController.text);
 
@@ -319,7 +322,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
             CupertinoListSection.insetGrouped(
               header: Text(l10n.chargeValue.toUpperCase()),
               footer: Text(l10n.chargeBalanceHint(
-                  _formatService.formatCurrency(widget.remainingBalance))),
+                  _formatService.formatBrl(widget.remainingBalance))),
               children: [
                 Padding(
                   padding:
@@ -380,7 +383,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
                     title: Text(l10n.chargeInstallments),
                     additionalInfo: Text(l10n.chargeInstallmentOption(
                       _installmentCount,
-                      _formatService.formatCurrency(value / _installmentCount),
+                      _formatService.formatBrl(value / _installmentCount),
                     )),
                     trailing: const CupertinoListTileChevron(),
                     onTap: _submitting ? null : _pickInstallments,

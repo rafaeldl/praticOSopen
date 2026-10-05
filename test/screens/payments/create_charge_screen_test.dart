@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/l10n/app_localizations_en.dart';
 import 'package:praticos/l10n/app_localizations_pt.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
@@ -43,11 +44,12 @@ void main() {
     required AsaasApiService api,
     double remaining = 1000,
     String? loadedTaxId,
+    Locale locale = const Locale('pt'),
   }) async {
     final results = <OrderCharge?>[];
     await tester.pumpWidget(
       CupertinoApp(
-        locale: const Locale('pt'),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
@@ -157,6 +159,37 @@ void main() {
           api: service((_) async => http.Response('{}', 500)));
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
+    });
+
+    testWidgets('CPF antigo inválido no agregado e no cadastro pede o documento',
+        (tester) async {
+      await pumpHost(tester,
+          order: order(taxId: '12345678900'),
+          loadedTaxId: '12345678900',
+          api: service((_) async => http.Response('{}', 500)));
+
+      expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
+    });
+
+    testWidgets('CPF inválido no agregado usa o válido do cadastro',
+        (tester) async {
+      await pumpHost(tester,
+          order: order(taxId: '12345678900'),
+          loadedTaxId: '52998224725',
+          api: service((_) async => http.Response('{}', 500)));
+
+      expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
+    });
+
+    testWidgets('valores em R\$ mesmo com o app em inglês', (tester) async {
+      await pumpHost(tester,
+          order: order(taxId: '52998224725'),
+          remaining: 1234.5,
+          locale: const Locale('en'),
+          api: service((_) async => http.Response('{}', 500)));
+
+      final hint = AppLocalizationsEn().chargeBalanceHint('R\$\u00a01.234,50');
+      expect(find.text(hint), findsOneWidget);
     });
 
     testWidgets('valor acima do saldo mostra erro e não chama a API',

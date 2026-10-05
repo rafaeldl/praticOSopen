@@ -178,7 +178,6 @@ class _OrderChargeCardState extends State<OrderChargeCard> {
 
   @override
   Widget build(BuildContext context) {
-    _formatService.setLocale(Localizations.localeOf(context).toString());
     final charge = OrderCharge.current(_charges);
     if (charge == null && !_showCreateButton) {
       return const SizedBox.shrink();
@@ -221,7 +220,7 @@ class _OrderChargeCardState extends State<OrderChargeCard> {
         ),
         title: Text(chargeStatusLabel(l10n, charge.status)),
         subtitle: Text(_subtitle(l10n, charge)),
-        additionalInfo: Text(_formatService.formatCurrency(value)),
+        additionalInfo: Text(_formatService.formatBrl(value)),
       ),
       if (balanceBelowCharge) _buildBalanceWarning(context, charge),
       if (canShare)
@@ -285,8 +284,8 @@ class _OrderChargeCardState extends State<OrderChargeCard> {
               Expanded(
                 child: Text(
                   l10n.chargeTotalChanged(
-                    _formatService.formatCurrency(widget.remainingBalance),
-                    _formatService.formatCurrency(charge.value ?? 0),
+                    _formatService.formatBrl(widget.remainingBalance),
+                    _formatService.formatBrl(charge.value ?? 0),
                   ),
                   style: TextStyle(
                     fontSize: 14,
