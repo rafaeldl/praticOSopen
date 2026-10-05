@@ -1,39 +1,46 @@
 ---
 layout: layouts/base.njk
-navbarScrolled: true
 ---
-{# Get legal page data #}
+{# Hallmark · genre: modern-minimal · macrostructure: Long Document · design-system: design.md
+   Legal wording lives in _data/legal.json and is not rewritten here. #}
 {% set legalData = legal[pageType][langCode] %}
+{% set tocLabel = { pt: 'Nesta página', en: 'On this page', es: 'En esta página' }[langCode] | default('Nesta página') %}
 
-<!-- Page Header -->
-<header class="page-header">
-    <div class="container">
-        <h1>{{ legalData.title }} <span class="gradient-text">{{ legalData.titleHighlight }}</span></h1>
-        <p>{{ legalData.subtitle }}</p>
+<header class="page-head">
+    <div class="wrap">
+        <h1>{{ legalData.title }} {{ legalData.titleHighlight }}</h1>
+        <p class="lede">{{ legalData.subtitle }}</p>
+        <p class="page-head__meta">{{ legalData.lastUpdated }}</p>
     </div>
 </header>
 
-<!-- Legal Content -->
-<main class="page-content">
-    <div class="container">
-        {% for section in legalData.sections %}
-        <div class="content-section">
-            <h2>{{ section.title }}</h2>
-            {% if section.paragraphs %}
+<div class="doc">
+    <div class="wrap doc__grid">
+        <nav class="toc" aria-labelledby="toc-label">
+            <p class="label" id="toc-label">{{ tocLabel }}</p>
+            <ol>
+                {% for section in legalData.sections %}
+                <li><a href="#{{ section.title | slugify }}">{{ section.title }}</a></li>
+                {% endfor %}
+            </ol>
+        </nav>
+
+        <article class="doc__body">
+            {% for section in legalData.sections %}
+            <section class="doc__section" aria-labelledby="{{ section.title | slugify }}">
+                <h2 id="{{ section.title | slugify }}">{{ section.title }}</h2>
                 {% for para in section.paragraphs %}
                 <p>{{ para | safe }}</p>
                 {% endfor %}
-            {% endif %}
-            {% if section.list %}
-            <ul>
-                {% for item in section.list %}
-                <li>{{ item | safe }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </div>
-        {% endfor %}
-
-        <p style="color: var(--text-muted); margin-top: 48px; font-size: 0.875rem;">{{ legalData.lastUpdated }}</p>
+                {% if section.list %}
+                <ul>
+                    {% for item in section.list %}
+                    <li>{{ item | safe }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </section>
+            {% endfor %}
+        </article>
     </div>
-</main>
+</div>

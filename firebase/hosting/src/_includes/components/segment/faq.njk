@@ -1,0 +1,23 @@
+{# Conversational FAQ — native <details> accordion + FAQPage structured data #}
+{% set fq = data.faq %}
+<section class="section seg-faq" id="perguntas">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ fq.title | default(ui.faqTitle) }}{% if fq.titleHighlight %} {{ fq.titleHighlight }}{% endif %}</h2>
+            {% if fq.lede or fq.subtitle %}<p>{{ fq.lede | default(fq.subtitle) }}</p>{% endif %}
+        </div>
+        <div class="seg-faq__list">
+            {% for item in fq.items %}
+            <details class="seg-faq__item">
+                <summary><h3>{{ item.question }}</h3><svg class="seg-faq__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <p>{{ item.answer }}</p>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% set faqLd = [] %}
+{% for item in fq.items %}
+{% set _faqPush = faqLd.push({ "@type": "Question", "name": item.question, "acceptedAnswer": { "@type": "Answer", "text": item.answer } }) %}
+{% endfor %}
+<script type="application/ld+json">{{ { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faqLd } | dump | safe }}</script>

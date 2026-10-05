@@ -1,287 +1,218 @@
 {
   "pt": {
-    "title": "Central de",
-    "titleHighlight": "Suporte",
-    "subtitle": "Estamos aqui para ajudá-lo a aproveitar ao máximo o PráticOS",
-    "cards": [
-      {
-        "icon": "email",
-        "iconColor": "#FF6F0F",
-        "iconBg": "rgba(255, 111, 15, 0.2)",
-        "title": "Email de Suporte",
-        "text": "Entre em contato com nossa equipe de suporte. Respondemos em até 24 horas úteis.",
-        "linkText": "praticos@rafsoft.com.br",
-        "linkHref": "mailto:praticos@rafsoft.com.br",
-        "linkExternal": true
-      },
-      {
-        "icon": "question",
-        "iconColor": "#FFD43A",
-        "iconBg": "rgba(255, 212, 58, 0.2)",
-        "title": "Perguntas Frequentes",
-        "text": "Encontre respostas rápidas para as dúvidas mais comuns sobre o PráticOS.",
-        "linkText": "Ver FAQ completo",
-        "linkHref": "faq.html"
-      },
-      {
-        "icon": "docs",
-        "iconColor": "#3B82F6",
-        "iconBg": "rgba(59, 130, 246, 0.2)",
-        "title": "Documentação",
-        "text": "Guias e tutoriais completos para aproveitar ao máximo todas as funcionalidades.",
-        "linkText": "Acessar documentação",
-        "linkHref": "docs/"
-      }
-    ],
-    "contactTitle": "Como podemos ajudar?",
-    "contactItems": [
-      {
-        "icon": "chat",
-        "title": "Dúvidas sobre o aplicativo",
-        "text": "Se você tem dúvidas sobre como usar alguma funcionalidade do PráticOS, consulte primeiro nosso FAQ. Se não encontrar a resposta, envie um email para nossa equipe.",
-        "links": [
-          { "text": "Ver FAQ", "href": "faq.html" },
-          { "text": "Enviar email", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "warning",
-        "title": "Relatar um problema",
-        "text": "Encontrou um bug ou comportamento inesperado? Nos ajude a melhorar! Envie um email descrevendo o problema, incluindo capturas de tela se possível.",
-        "links": [
-          { "text": "Relatar problema", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "feedback",
-        "title": "Sugerir melhorias",
-        "text": "Tem uma ideia para melhorar o PráticOS? Adoramos feedback! Envie suas sugestões e ajude a tornar o aplicativo ainda melhor.",
-        "links": [
-          { "text": "Enviar sugestão", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "user",
-        "title": "Gerenciar minha conta",
-        "text": "Para questões relacionadas à sua conta, assinatura, privacidade ou exclusão de dados, você pode gerenciar tudo diretamente no aplicativo ou entrar em contato conosco.",
-        "links": [
-          { "text": "Política de Privacidade", "href": "privacy.html" },
-          { "text": "Contato", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      }
-    ],
-    "faqPreviewTitle": "Perguntas Frequentes",
-    "faqPreviewItems": [
-      {
-        "question": "Como faço para criar uma conta no PráticOS?",
-        "answer": "Baixe o aplicativo na App Store ou Google Play, abra o app e escolha uma das opções de login: Google, Apple ou Email."
-      },
-      {
-        "question": "Como excluir minha conta?",
-        "answer": "Você pode excluir sua conta diretamente no aplicativo: vá em Ajustes > Conta > Excluir Conta. Esta ação é permanente e remove todos os seus dados."
-      },
-      {
-        "question": "Meus dados estão seguros?",
-        "answer": "Sim! Utilizamos Firebase para armazenamento, com criptografia em trânsito e em repouso. Seguimos as melhores práticas de segurança."
-      },
-      {
-        "question": "Como entro em contato com o suporte?",
-        "answer": "Envie um email para praticos@rafsoft.com.br. Respondemos em até 24 horas úteis."
-      }
-    ],
-    "viewAllFaq": "Ver todas as perguntas",
-    "needMoreHelp": "Precisa de mais ajuda?",
-    "teamReady": "Nossa equipe está pronta para ajudá-lo",
-    "contactUs": "Entrar em Contato"
+    "title": "Suporte",
+    "lede": "Dúvida de uso, problema no app ou ideia de melhoria: escreva para a gente. Respondemos em até 24 horas úteis.",
+    "contact": {
+      "title": "Fale com a gente",
+      "emailLabel": "E-mail",
+      "emailCta": "Escrever e-mail",
+      "emailSubject": "Suporte PraticOS",
+      "whatsappLabel": "WhatsApp",
+      "whatsappCta": "Chamar no WhatsApp",
+      "whatsappMessage": "Olá, preciso de ajuda com o PraticOS.",
+      "note": "Respondemos em até 24 horas úteis. Se for um problema no app, um print da tela ajuda muito."
+    },
+    "topics": {
+      "title": "Escolha o assunto",
+      "lede": "Algumas respostas já estão na Ajuda. Para o resto, diga o que aconteceu e a gente resolve por e-mail.",
+      "items": [
+        {
+          "title": "Dúvida de como usar",
+          "text": "A Ajuda tem guias passo a passo de agenda, financeiro, equipe e link para o cliente. As perguntas frequentes cobrem conta e planos.",
+          "links": [
+            { "text": "Abrir a Ajuda", "href": "docs/", "ga": "support_docs" },
+            { "text": "Ver perguntas frequentes", "href": "faq.html", "ga": "support_faq" }
+          ]
+        },
+        {
+          "title": "Relatar um problema",
+          "text": "Conte o que você estava fazendo, o que esperava que acontecesse e o que aconteceu. Diga o modelo do celular e mande um print da tela, se puder.",
+          "links": [
+            { "text": "Relatar por e-mail", "mailSubject": "Problema no PraticOS", "ga": "support_bug_email" }
+          ]
+        },
+        {
+          "title": "Sugerir uma melhoria",
+          "text": "Explique o que você precisa resolver no seu trabalho, não só o botão que está faltando. Assim fica mais fácil entender o caso.",
+          "links": [
+            { "text": "Enviar sugestão", "mailSubject": "Sugestão para o PraticOS", "ga": "support_idea_email" }
+          ]
+        },
+        {
+          "title": "Conta, assinatura e privacidade",
+          "text": "Para excluir a conta, vá no app em Ajustes › Conta › Excluir conta. A assinatura é cobrada pela App Store ou pelo Google Play, e o cancelamento é feito lá.",
+          "links": [
+            { "text": "Política de Privacidade", "href": "privacy.html", "ga": "support_privacy" },
+            { "text": "Termos de uso", "href": "terms.html", "ga": "support_terms" }
+          ]
+        }
+      ]
+    },
+    "quick": {
+      "title": "Respostas rápidas",
+      "items": [
+        {
+          "question": "Como crio minha conta?",
+          "answer": "Baixe o app na App Store ou no Google Play, abra e entre com Google, Apple ou e-mail."
+        },
+        {
+          "question": "Como excluo minha conta?",
+          "answer": "No app, vá em Ajustes › Conta › Excluir conta. A exclusão é permanente e apaga todos os seus dados."
+        },
+        {
+          "question": "Meus dados estão seguros?",
+          "answer": "Os dados ficam no Firebase, do Google, com criptografia na transmissão e no armazenamento."
+        },
+        {
+          "question": "Quanto tempo leva para responderem?",
+          "answer": "Respondemos em até 24 horas úteis pelo e-mail praticos@rafsoft.com.br."
+        }
+      ],
+      "allLink": "Ver todas as perguntas frequentes"
+    }
   },
   "en": {
     "title": "Support",
-    "titleHighlight": "Center",
-    "subtitle": "We're here to help you get the most out of PráticOS",
-    "cards": [
-      {
-        "icon": "email",
-        "iconColor": "#FF6F0F",
-        "iconBg": "rgba(255, 111, 15, 0.2)",
-        "title": "Support Email",
-        "text": "Contact our support team. We respond within 24 business hours.",
-        "linkText": "praticos@rafsoft.com.br",
-        "linkHref": "mailto:praticos@rafsoft.com.br",
-        "linkExternal": true
-      },
-      {
-        "icon": "question",
-        "iconColor": "#FFD43A",
-        "iconBg": "rgba(255, 212, 58, 0.2)",
-        "title": "Frequently Asked Questions",
-        "text": "Find quick answers to the most common questions about PráticOS.",
-        "linkText": "View full FAQ",
-        "linkHref": "faq-en.html"
-      },
-      {
-        "icon": "docs",
-        "iconColor": "#3B82F6",
-        "iconBg": "rgba(59, 130, 246, 0.2)",
-        "title": "Documentation",
-        "text": "Complete guides and tutorials to get the most out of all features.",
-        "linkText": "Access documentation",
-        "linkHref": "docs/index-en.html"
-      }
-    ],
-    "contactTitle": "How can we help?",
-    "contactItems": [
-      {
-        "icon": "chat",
-        "title": "Questions about the app",
-        "text": "If you have questions about how to use any PráticOS feature, check our FAQ first. If you can't find the answer, send an email to our team.",
-        "links": [
-          { "text": "View FAQ", "href": "faq-en.html" },
-          { "text": "Send email", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "warning",
-        "title": "Report an issue",
-        "text": "Found a bug or unexpected behavior? Help us improve! Send an email describing the issue, including screenshots if possible.",
-        "links": [
-          { "text": "Report issue", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "feedback",
-        "title": "Suggest improvements",
-        "text": "Have an idea to improve PráticOS? We love feedback! Send your suggestions and help make the app even better.",
-        "links": [
-          { "text": "Send suggestion", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "user",
-        "title": "Manage my account",
-        "text": "For account, subscription, privacy, or data deletion questions, you can manage everything directly in the app or contact us.",
-        "links": [
-          { "text": "Privacy Policy", "href": "privacy-en.html" },
-          { "text": "Contact", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      }
-    ],
-    "faqPreviewTitle": "Frequently Asked Questions",
-    "faqPreviewItems": [
-      {
-        "question": "How do I create an account on PráticOS?",
-        "answer": "Download the app from App Store or Google Play, open the app and choose one of the login options: Google, Apple or Email."
-      },
-      {
-        "question": "How do I delete my account?",
-        "answer": "You can delete your account directly in the app: go to Settings > Account > Delete Account. This action is permanent and removes all your data."
-      },
-      {
-        "question": "Is my data secure?",
-        "answer": "Yes! We use Firebase for storage, with encryption in transit and at rest. We follow security best practices."
-      },
-      {
-        "question": "How do I contact support?",
-        "answer": "Send an email to praticos@rafsoft.com.br. We respond within 24 business hours."
-      }
-    ],
-    "viewAllFaq": "View all questions",
-    "needMoreHelp": "Need more help?",
-    "teamReady": "Our team is ready to assist you",
-    "contactUs": "Contact Us"
+    "lede": "A how-to question, a problem in the app or an idea to make it better: write to us. We reply within 24 business hours.",
+    "contact": {
+      "title": "Talk to us",
+      "emailLabel": "Email",
+      "emailCta": "Write an email",
+      "emailSubject": "PraticOS support",
+      "whatsappLabel": "WhatsApp",
+      "whatsappCta": "Message on WhatsApp",
+      "whatsappMessage": "Hello, I need help with PraticOS.",
+      "note": "We reply within 24 business hours. If something’s wrong in the app, a screenshot helps a lot."
+    },
+    "topics": {
+      "title": "Pick a topic",
+      "lede": "Some answers are already in Help. For everything else, tell us what happened and we’ll sort it out by email.",
+      "items": [
+        {
+          "title": "How do I use it?",
+          "text": "Help has step-by-step guides for scheduling, finances, your team and the customer link. The FAQ covers your account and plans.",
+          "links": [
+            { "text": "Open Help", "href": "docs/index-en.html", "ga": "support_docs" },
+            { "text": "Read the FAQ", "href": "faq-en.html", "ga": "support_faq" }
+          ]
+        },
+        {
+          "title": "Report a problem",
+          "text": "Tell us what you were doing, what you expected and what happened instead. Include your phone model and a screenshot if you can.",
+          "links": [
+            { "text": "Report by email", "mailSubject": "Problem in PraticOS", "ga": "support_bug_email" }
+          ]
+        },
+        {
+          "title": "Suggest an improvement",
+          "text": "Explain what you need to get done in your work, not just the button that’s missing. It makes the case much easier to understand.",
+          "links": [
+            { "text": "Send a suggestion", "mailSubject": "Suggestion for PraticOS", "ga": "support_idea_email" }
+          ]
+        },
+        {
+          "title": "Account, subscription and privacy",
+          "text": "To delete your account, go to Settings › Account › Delete account in the app. Subscriptions are billed through the App Store or Google Play, and you cancel them there.",
+          "links": [
+            { "text": "Privacy Policy", "href": "privacy-en.html", "ga": "support_privacy" },
+            { "text": "Terms of Use", "href": "terms-en.html", "ga": "support_terms" }
+          ]
+        }
+      ]
+    },
+    "quick": {
+      "title": "Quick answers",
+      "items": [
+        {
+          "question": "How do I create an account?",
+          "answer": "Download the app from the App Store or Google Play, open it and sign in with Google, Apple or email."
+        },
+        {
+          "question": "How do I delete my account?",
+          "answer": "In the app, go to Settings › Account › Delete account. Deletion is permanent and removes all your data."
+        },
+        {
+          "question": "Is my data safe?",
+          "answer": "Data is stored on Google’s Firebase, encrypted in transit and at rest."
+        },
+        {
+          "question": "How long until you reply?",
+          "answer": "We reply within 24 business hours at praticos@rafsoft.com.br."
+        }
+      ],
+      "allLink": "See all frequently asked questions"
+    }
   },
   "es": {
-    "title": "Centro de",
-    "titleHighlight": "Soporte",
-    "subtitle": "Estamos aquí para ayudarlo a aprovechar al máximo PráticOS",
-    "cards": [
-      {
-        "icon": "email",
-        "iconColor": "#FF6F0F",
-        "iconBg": "rgba(255, 111, 15, 0.2)",
-        "title": "Email de Soporte",
-        "text": "Póngase en contacto con nuestro equipo de soporte. Respondemos en 24 horas hábiles.",
-        "linkText": "praticos@rafsoft.com.br",
-        "linkHref": "mailto:praticos@rafsoft.com.br",
-        "linkExternal": true
-      },
-      {
-        "icon": "question",
-        "iconColor": "#FFD43A",
-        "iconBg": "rgba(255, 212, 58, 0.2)",
-        "title": "Preguntas Frecuentes",
-        "text": "Encuentre respuestas rápidas a las preguntas más comunes sobre PráticOS.",
-        "linkText": "Ver FAQ completo",
-        "linkHref": "faq-es.html"
-      },
-      {
-        "icon": "docs",
-        "iconColor": "#3B82F6",
-        "iconBg": "rgba(59, 130, 246, 0.2)",
-        "title": "Documentación",
-        "text": "Guías y tutoriales completos para aprovechar al máximo todas las funciones.",
-        "linkText": "Acceder a documentación",
-        "linkHref": "docs/index-es.html"
-      }
-    ],
-    "contactTitle": "¿Cómo podemos ayudarlo?",
-    "contactItems": [
-      {
-        "icon": "chat",
-        "title": "Preguntas sobre la aplicación",
-        "text": "Si tiene preguntas sobre cómo usar alguna función de PráticOS, consulte primero nuestro FAQ. Si no encuentra la respuesta, envíe un correo a nuestro equipo.",
-        "links": [
-          { "text": "Ver FAQ", "href": "faq-es.html" },
-          { "text": "Enviar correo", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "warning",
-        "title": "Informar un problema",
-        "text": "¿Encontró un error o comportamiento inesperado? ¡Ayúdenos a mejorar! Envíe un correo describiendo el problema, incluyendo capturas de pantalla si es posible.",
-        "links": [
-          { "text": "Informar problema", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "feedback",
-        "title": "Sugerir mejoras",
-        "text": "¿Tiene una idea para mejorar PráticOS? ¡Nos encanta recibir comentarios! Envíe sus sugerencias y ayude a hacer la aplicación aún mejor.",
-        "links": [
-          { "text": "Enviar sugerencia", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      },
-      {
-        "icon": "user",
-        "title": "Administrar mi cuenta",
-        "text": "Para cuestiones relacionadas con su cuenta, suscripción, privacidad o eliminación de datos, puede administrar todo directamente en la aplicación o contactarnos.",
-        "links": [
-          { "text": "Política de Privacidad", "href": "privacy-es.html" },
-          { "text": "Contacto", "href": "mailto:praticos@rafsoft.com.br" }
-        ]
-      }
-    ],
-    "faqPreviewTitle": "Preguntas Frecuentes",
-    "faqPreviewItems": [
-      {
-        "question": "¿Cómo creo una cuenta en PráticOS?",
-        "answer": "Descargue la aplicación desde App Store o Google Play, abra la app y elija una de las opciones de inicio de sesión: Google, Apple o Email."
-      },
-      {
-        "question": "¿Cómo elimino mi cuenta?",
-        "answer": "Puede eliminar su cuenta directamente en la aplicación: vaya a Ajustes > Cuenta > Eliminar Cuenta. Esta acción es permanente y elimina todos sus datos."
-      },
-      {
-        "question": "¿Están seguros mis datos?",
-        "answer": "¡Sí! Utilizamos Firebase para almacenamiento, con cifrado en tránsito y en reposo. Seguimos las mejores prácticas de seguridad."
-      },
-      {
-        "question": "¿Cómo me pongo en contacto con el soporte?",
-        "answer": "Envíe un correo a praticos@rafsoft.com.br. Respondemos en 24 horas hábiles."
-      }
-    ],
-    "viewAllFaq": "Ver todas las preguntas",
-    "needMoreHelp": "¿Necesita más ayuda?",
-    "teamReady": "Nuestro equipo está listo para ayudarlo",
-    "contactUs": "Contactar"
+    "title": "Soporte",
+    "lede": "Una duda de uso, un problema en la app o una idea para mejorarla: escríbenos. Respondemos en hasta 24 horas hábiles.",
+    "contact": {
+      "title": "Habla con nosotros",
+      "emailLabel": "Correo",
+      "emailCta": "Escribir un correo",
+      "emailSubject": "Soporte PraticOS",
+      "whatsappLabel": "WhatsApp",
+      "whatsappCta": "Escribir por WhatsApp",
+      "whatsappMessage": "Hola, necesito ayuda con PraticOS.",
+      "note": "Respondemos en hasta 24 horas hábiles. Si es un problema en la app, una captura de pantalla ayuda mucho."
+    },
+    "topics": {
+      "title": "Elige el tema",
+      "lede": "Algunas respuestas ya están en la Ayuda. Para lo demás, cuéntanos qué pasó y lo resolvemos por correo.",
+      "items": [
+        {
+          "title": "Duda de cómo usarlo",
+          "text": "La Ayuda tiene guías paso a paso de agenda, finanzas, equipo y enlace para el cliente. Las preguntas frecuentes cubren la cuenta y los planes.",
+          "links": [
+            { "text": "Abrir la Ayuda", "href": "docs/index-es.html", "ga": "support_docs" },
+            { "text": "Ver preguntas frecuentes", "href": "faq-es.html", "ga": "support_faq" }
+          ]
+        },
+        {
+          "title": "Reportar un problema",
+          "text": "Cuéntanos qué estabas haciendo, qué esperabas que pasara y qué pasó. Indica el modelo del celular y manda una captura de pantalla si puedes.",
+          "links": [
+            { "text": "Reportar por correo", "mailSubject": "Problema en PraticOS", "ga": "support_bug_email" }
+          ]
+        },
+        {
+          "title": "Sugerir una mejora",
+          "text": "Explica lo que necesitas resolver en tu trabajo, no solo el botón que falta. Así es más fácil entender el caso.",
+          "links": [
+            { "text": "Enviar sugerencia", "mailSubject": "Sugerencia para PraticOS", "ga": "support_idea_email" }
+          ]
+        },
+        {
+          "title": "Cuenta, suscripción y privacidad",
+          "text": "Para eliminar la cuenta, ve en la app a Ajustes › Cuenta › Eliminar cuenta. La suscripción se cobra por App Store o Google Play, y se cancela allí.",
+          "links": [
+            { "text": "Política de Privacidad", "href": "privacy-es.html", "ga": "support_privacy" },
+            { "text": "Términos de uso", "href": "terms-es.html", "ga": "support_terms" }
+          ]
+        }
+      ]
+    },
+    "quick": {
+      "title": "Respuestas rápidas",
+      "items": [
+        {
+          "question": "¿Cómo creo mi cuenta?",
+          "answer": "Descarga la app en App Store o Google Play, ábrela y entra con Google, Apple o correo."
+        },
+        {
+          "question": "¿Cómo elimino mi cuenta?",
+          "answer": "En la app, ve a Ajustes › Cuenta › Eliminar cuenta. La eliminación es permanente y borra todos tus datos."
+        },
+        {
+          "question": "¿Mis datos están seguros?",
+          "answer": "Los datos se guardan en Firebase, de Google, cifrados en tránsito y en reposo."
+        },
+        {
+          "question": "¿Cuánto tardan en responder?",
+          "answer": "Respondemos en hasta 24 horas hábiles en praticos@rafsoft.com.br."
+        }
+      ],
+      "allLink": "Ver todas las preguntas frecuentes"
+    }
   }
 }

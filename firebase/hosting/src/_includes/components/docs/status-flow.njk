@@ -1,13 +1,6 @@
-{# Status Flow Component - Horizontal flow diagram of status transitions #}
-{# Usage: {% include "components/docs/status-flow.njk" with {statuses: [...]} %} #}
-<div class="status-flow">
+{# Status flow — statuses in order. Expects `statuses` = [{ name, class: quote|approved|progress|done|… }]. #}
+<ol class="doc-flow" role="list">
     {% for status in statuses %}
-    {% if not loop.first %}
-    <div class="status-arrow">&#8594;</div>
-    {% endif %}
-    <div class="status-item status-{{ status.class }}">
-        <span class="status-dot"></span>
-        <span class="status-name">{{ status.name }}</span>
-    </div>
+    <li><span class="dot dot--{{ status.class }}" aria-hidden="true"></span>{{ status.name }}</li>
     {% endfor %}
-</div>
+</ol>

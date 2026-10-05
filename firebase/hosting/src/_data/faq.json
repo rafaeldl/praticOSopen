@@ -1,114 +1,256 @@
 {
   "pt": {
-    "title": "Perguntas",
-    "titleHighlight": "Frequentes",
-    "subtitle": "Encontre respostas para as dúvidas mais comuns sobre o PráticOS",
-    "items": [
+    "title": "Perguntas frequentes",
+    "lede": "Respostas curtas sobre conta, ordens de serviço, dados e planos. Se a sua dúvida não estiver aqui, escreva para a gente.",
+    "tocLabel": "Nesta página",
+    "groups": [
       {
-        "question": "Como faço para criar uma conta no PráticOS?",
-        "answer": "Baixe o aplicativo na App Store ou Google Play, abra o app e escolha uma das opções de login: Google, Apple ou Email. Siga as instruções na tela para completar seu cadastro em poucos segundos."
+        "id": "conta",
+        "title": "Conta e acesso",
+        "items": [
+          {
+            "question": "Como crio minha conta?",
+            "answer": "Baixe o app na App Store ou no Google Play, abra e entre com Google, Apple ou e-mail. Depois é só seguir as telas do cadastro."
+          },
+          {
+            "question": "Esqueci a senha. E agora?",
+            "answer": "Na tela de login, toque em “Esqueci minha senha” e informe o e-mail da conta. Chega um link para criar uma senha nova. Se você entra com Google ou Apple, não existe senha do PraticOS: é só entrar de novo pela mesma conta."
+          },
+          {
+            "question": "Posso usar no celular e no tablet ao mesmo tempo?",
+            "answer": "Pode. Os dados ficam na nuvem e sincronizam entre os aparelhos. Entre com a mesma conta em cada um."
+          },
+          {
+            "question": "Como excluo minha conta?",
+            "answer": "No app, vá em Ajustes › Conta › Excluir conta. A exclusão é permanente e apaga seus dados, inclusive ordens de serviço, clientes e configurações. Se você for o único administrador da empresa, os dados da empresa também são apagados."
+          }
+        ]
       },
       {
-        "question": "Esqueci minha senha. O que devo fazer?",
-        "answer": "Na tela de login, toque em \"Esqueci minha senha\" e informe seu email. Você receberá um link para redefinir sua senha. Se estiver usando login social (Google/Apple), basta fazer login novamente com sua conta."
+        "id": "dia-a-dia",
+        "title": "Ordens de serviço no dia a dia",
+        "items": [
+          {
+            "question": "Como abro uma OS nova?",
+            "answer": "Na tela inicial, toque no “+” no canto superior. Escolha o cliente, descreva o serviço, anexe fotos se quiser e lance os valores. Toque em “Salvar” e a OS está criada."
+          },
+          {
+            "question": "Dá para anexar fotos na OS?",
+            "answer": "Dá, várias por OS. Use para registrar como o equipamento chegou, a peça trocada e o serviço pronto. A quantidade de fotos por mês depende do plano: 30 no Free, 200 no Starter, 1.000 no Pro e ilimitadas no Business."
+          },
+          {
+            "question": "O que o painel financeiro mostra?",
+            "answer": "O faturamento, o que já foi recebido e o que falta receber. Você filtra por hoje, semana, mês ou ano e vê quanto veio de serviços e quanto veio de produtos."
+          },
+          {
+            "question": "Consigo gerar o PDF da OS para mandar ao cliente?",
+            "answer": "Consegue, em todos os planos. No Free o PDF sai com a marca d’água do PraticOS; a partir do Starter sai sem marca d’água."
+          },
+          {
+            "question": "Tenho mais de uma empresa ou filial. Uso uma conta só?",
+            "answer": "Sim, no plano Business. Cada empresa fica com clientes, OS e financeiro separados, e você alterna entre elas no app. Serve para franquias e para quem toca mais de um negócio."
+          }
+        ]
       },
       {
-        "question": "Posso usar o PráticOS em mais de um dispositivo?",
-        "answer": "Sim! Seus dados são sincronizados na nuvem via Firebase, então você pode acessar sua conta de qualquer dispositivo. Basta fazer login com a mesma conta."
+        "id": "dados",
+        "title": "Dados e segurança",
+        "items": [
+          {
+            "question": "Meus dados estão seguros?",
+            "answer": "Os dados ficam no Firebase, do Google, com criptografia na transmissão e no armazenamento, e cada empresa só enxerga os próprios dados. Os detalhes estão na <a href=\"privacy.html\">Política de Privacidade</a>."
+          }
+        ]
       },
       {
-        "question": "Como criar uma nova ordem de serviço?",
-        "answer": "Na tela inicial, toque no botão \"+\" no canto superior. Preencha os dados do cliente, descrição do serviço, fotos (se necessário) e valores. Toque em \"Salvar\" para criar a OS."
+        "id": "planos",
+        "title": "Planos e cobrança",
+        "items": [
+          {
+            "question": "Quanto custa?",
+            "answer": "O Free não custa nada e não tem prazo para acabar. Os planos pagos vão de R$ 59 a R$ 249 por mês, cobrados pela App Store ou pelo Google Play. A tabela completa está em <a href=\"pricing.html\">Planos e preços</a>."
+          }
+        ]
       },
       {
-        "question": "Posso adicionar fotos às ordens de serviço?",
-        "answer": "Sim! Você pode adicionar várias fotos em cada ordem de serviço para documentar o estado do equipamento, peças trocadas ou resultado final do serviço."
-      },
-      {
-        "question": "Como funciona o Dashboard Financeiro?",
-        "answer": "O Dashboard mostra um resumo do seu faturamento, valores recebidos e a receber. Você pode filtrar por período (hoje, semana, mês, ano) e ver a composição entre serviços e produtos."
-      },
-      {
-        "question": "O que é Multi-Tenancy?",
-        "answer": "Multi-Tenancy permite que você gerencie múltiplas empresas ou filiais em uma única conta, com dados completamente isolados. Ideal para franquias ou prestadores com múltiplos negócios."
-      },
-      {
-        "question": "Meus dados estão seguros no PráticOS?",
-        "answer": "Sim! Utilizamos Firebase para armazenamento, que oferece criptografia em trânsito e em repouso. Seguimos as melhores práticas de segurança e privacidade para proteger suas informações."
-      },
-      {
-        "question": "Como excluir minha conta?",
-        "answer": "Você pode excluir sua conta diretamente no aplicativo em Ajustes > Conta > Excluir Conta. Esta ação é permanente e irá remover todos os seus dados, incluindo ordens de serviço, clientes e configurações. Se você é o único administrador de uma empresa, todos os dados da empresa também serão excluídos."
-      },
-      {
-        "question": "Como entro em contato com o suporte?",
-        "answer": "Você pode enviar um email para <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> ou acessar nossa <a href=\"support.html\">página de suporte</a>. Respondemos em até 24 horas úteis."
-      },
-      {
-        "question": "Posso exportar relatórios das minhas ordens de serviço?",
-        "answer": "Sim! No plano Pro e Empresarial você pode gerar relatórios em PDF com detalhes das suas ordens de serviço, facilitando o controle e prestação de contas."
+        "id": "suporte",
+        "title": "Suporte",
+        "items": [
+          {
+            "question": "Como falo com o suporte?",
+            "answer": "Mande um e-mail para <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> ou veja os outros canais na <a href=\"support.html\">página de suporte</a>. Respondemos em até 24 horas úteis."
+          }
+        ]
       }
     ]
   },
   "en": {
-    "title": "Frequently Asked",
-    "titleHighlight": "Questions",
-    "subtitle": "Find answers to the most common questions about PraticOS",
-    "items": [
+    "title": "Frequently asked questions",
+    "lede": "Short answers about your account, work orders, data and plans. If your question isn’t here, email us.",
+    "tocLabel": "On this page",
+    "groups": [
       {
-        "question": "How do I create an account on PraticOS?",
-        "answer": "Download the app from the App Store or Google Play, open it and choose one of the login options: Google, Apple, or Email. Follow the on-screen instructions to complete your registration in seconds."
+        "id": "account",
+        "title": "Account and sign-in",
+        "items": [
+          {
+            "question": "How do I create an account?",
+            "answer": "Download the app from the App Store or Google Play, open it and sign in with Google, Apple or email. Then follow the sign-up screens."
+          },
+          {
+            "question": "I forgot my password. What now?",
+            "answer": "On the sign-in screen, tap “Forgot my password” and enter your account email. You’ll get a link to set a new one. If you sign in with Google or Apple, there’s no PraticOS password: just sign in again with that account."
+          },
+          {
+            "question": "Can I use it on my phone and tablet at the same time?",
+            "answer": "Yes. Your data lives in the cloud and syncs between devices. Sign in with the same account on each one."
+          },
+          {
+            "question": "How do I delete my account?",
+            "answer": "In the app, go to Settings › Account › Delete account. Deletion is permanent and removes your data, including work orders, customers and settings. If you’re the only admin of a company, the company’s data is deleted too."
+          }
+        ]
       },
       {
-        "question": "I forgot my password. What should I do?",
-        "answer": "On the login screen, tap \"Forgot my password\" and enter your email. You will receive a link to reset your password. If using social login (Google/Apple), just log in again with your account."
+        "id": "daily-work",
+        "title": "Work orders day to day",
+        "items": [
+          {
+            "question": "How do I open a new work order?",
+            "answer": "On the home screen, tap “+” in the top corner. Pick the customer, describe the job, attach photos if you like and enter the amounts. Tap “Save” and the work order is created."
+          },
+          {
+            "question": "Can I attach photos to a work order?",
+            "answer": "Yes, several per order. Use them to record how the equipment came in, the part you replaced and the finished job. Monthly photos depend on your plan: 30 on Free, 200 on Starter, 1,000 on Pro and unlimited on Business."
+          },
+          {
+            "question": "What does the finance dashboard show?",
+            "answer": "Your revenue, what’s been paid and what’s still owed. Filter by today, week, month or year and see how much came from services and how much from products."
+          },
+          {
+            "question": "Can I send the customer a PDF of the work order?",
+            "answer": "Yes, on every plan. On Free the PDF carries the PraticOS watermark; from Starter up it has no watermark."
+          },
+          {
+            "question": "I run more than one company or branch. Can I use one account?",
+            "answer": "Yes, on the Business plan. Each company keeps its own customers, work orders and finances, and you switch between them in the app. It fits franchises and anyone running more than one business."
+          }
+        ]
       },
       {
-        "question": "Can I use PraticOS on more than one device?",
-        "answer": "Yes! Your data is synced to the cloud via Firebase, so you can access your account from any device. Just log in with the same account."
+        "id": "data",
+        "title": "Data and security",
+        "items": [
+          {
+            "question": "Is my data safe?",
+            "answer": "Data is stored on Google’s Firebase, encrypted in transit and at rest, and each company only sees its own data. Details are in our <a href=\"privacy-en.html\">Privacy Policy</a>."
+          }
+        ]
       },
       {
-        "question": "How do I create a new service order?",
-        "answer": "On the home screen, tap the \"+\" button in the upper corner. Fill in the customer data, service description, photos (if needed), and values. Tap \"Save\" to create the service order."
+        "id": "plans",
+        "title": "Plans and billing",
+        "items": [
+          {
+            "question": "How much does it cost?",
+            "answer": "Free costs nothing and has no end date. Paid plans run from $12 to $49 a month, billed through the App Store or Google Play. The full table is on <a href=\"pricing-en.html\">Pricing</a>."
+          }
+        ]
       },
       {
-        "question": "Is my data safe on PraticOS?",
-        "answer": "Yes! We use Firebase for storage, which offers encryption in transit and at rest. We follow best security and privacy practices to protect your information."
-      },
-      {
-        "question": "How do I contact support?",
-        "answer": "You can send an email to <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> or use the contact form on our website. We respond within 24 business hours."
+        "id": "support",
+        "title": "Support",
+        "items": [
+          {
+            "question": "How do I reach support?",
+            "answer": "Email <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> or see the other channels on our <a href=\"support-en.html\">support page</a>. We reply within 24 business hours."
+          }
+        ]
       }
     ]
   },
   "es": {
-    "title": "Preguntas",
-    "titleHighlight": "Frecuentes",
-    "subtitle": "Encuentre respuestas a las preguntas más comunes sobre PraticOS",
-    "items": [
+    "title": "Preguntas frecuentes",
+    "lede": "Respuestas cortas sobre la cuenta, las órdenes de servicio, los datos y los planes. Si tu duda no está aquí, escríbenos.",
+    "tocLabel": "En esta página",
+    "groups": [
       {
-        "question": "¿Cómo creo una cuenta en PraticOS?",
-        "answer": "Descargue la aplicación de App Store o Google Play, ábrala y elija una de las opciones de inicio de sesión: Google, Apple o Email. Siga las instrucciones en pantalla para completar su registro en segundos."
+        "id": "cuenta",
+        "title": "Cuenta y acceso",
+        "items": [
+          {
+            "question": "¿Cómo creo mi cuenta?",
+            "answer": "Descarga la app en App Store o Google Play, ábrela y entra con Google, Apple o correo. Después solo sigue las pantallas del registro."
+          },
+          {
+            "question": "Olvidé la contraseña. ¿Y ahora?",
+            "answer": "En la pantalla de inicio de sesión, toca “Olvidé mi contraseña” e ingresa el correo de la cuenta. Te llega un enlace para crear una nueva. Si entras con Google o Apple, no hay contraseña de PraticOS: solo vuelve a entrar con esa cuenta."
+          },
+          {
+            "question": "¿Puedo usarlo en el celular y en la tablet a la vez?",
+            "answer": "Sí. Los datos están en la nube y se sincronizan entre dispositivos. Entra con la misma cuenta en cada uno."
+          },
+          {
+            "question": "¿Cómo elimino mi cuenta?",
+            "answer": "En la app, ve a Ajustes › Cuenta › Eliminar cuenta. La eliminación es permanente y borra tus datos, incluidas órdenes de servicio, clientes y configuraciones. Si eres el único administrador de la empresa, los datos de la empresa también se borran."
+          }
+        ]
       },
       {
-        "question": "Olvidé mi contraseña. ¿Qué debo hacer?",
-        "answer": "En la pantalla de inicio de sesión, toque \"Olvidé mi contraseña\" e ingrese su correo electrónico. Recibirá un enlace para restablecer su contraseña. Si usa inicio de sesión social (Google/Apple), simplemente inicie sesión nuevamente con su cuenta."
+        "id": "dia-a-dia",
+        "title": "Órdenes de servicio en el día a día",
+        "items": [
+          {
+            "question": "¿Cómo abro una orden nueva?",
+            "answer": "En la pantalla de inicio, toca el “+” en la esquina superior. Elige el cliente, describe el trabajo, adjunta fotos si quieres y carga los valores. Toca “Guardar” y la orden queda creada."
+          },
+          {
+            "question": "¿Puedo adjuntar fotos a la orden?",
+            "answer": "Sí, varias por orden. Úsalas para registrar cómo llegó el equipo, la pieza que cambiaste y el trabajo terminado. Las fotos por mes dependen del plan: 30 en Free, 200 en Starter, 1.000 en Pro e ilimitadas en Business."
+          },
+          {
+            "question": "¿Qué muestra el panel financiero?",
+            "answer": "La facturación, lo que ya cobraste y lo que falta cobrar. Filtras por hoy, semana, mes o año y ves cuánto vino de servicios y cuánto de productos."
+          },
+          {
+            "question": "¿Puedo generar el PDF de la orden para enviarlo al cliente?",
+            "answer": "Sí, en todos los planes. En Free el PDF sale con la marca de agua de PraticOS; desde Starter sale sin marca de agua."
+          },
+          {
+            "question": "Tengo más de una empresa o sucursal. ¿Uso una sola cuenta?",
+            "answer": "Sí, en el plan Business. Cada empresa tiene sus propios clientes, órdenes y finanzas, y cambias entre ellas en la app. Sirve para franquicias y para quien lleva más de un negocio."
+          }
+        ]
       },
       {
-        "question": "¿Puedo usar PraticOS en más de un dispositivo?",
-        "answer": "¡Sí! Sus datos se sincronizan en la nube a través de Firebase, por lo que puede acceder a su cuenta desde cualquier dispositivo. Simplemente inicie sesión con la misma cuenta."
+        "id": "datos",
+        "title": "Datos y seguridad",
+        "items": [
+          {
+            "question": "¿Mis datos están seguros?",
+            "answer": "Los datos se guardan en Firebase, de Google, cifrados en tránsito y en reposo, y cada empresa solo ve sus propios datos. Los detalles están en la <a href=\"privacy-es.html\">Política de Privacidad</a>."
+          }
+        ]
       },
       {
-        "question": "¿Cómo creo una nueva orden de servicio?",
-        "answer": "En la pantalla de inicio, toque el botón \"+\" en la esquina superior. Complete los datos del cliente, descripción del servicio, fotos (si es necesario) y valores. Toque \"Guardar\" para crear la orden de servicio."
+        "id": "planes",
+        "title": "Planes y cobro",
+        "items": [
+          {
+            "question": "¿Cuánto cuesta?",
+            "answer": "Free no cuesta nada y no tiene plazo. Los planes pagos van de $12 a $49 al mes, cobrados por App Store o Google Play. La tabla completa está en <a href=\"pricing-es.html\">Precios</a>."
+          }
+        ]
       },
       {
-        "question": "¿Mis datos están seguros en PraticOS?",
-        "answer": "¡Sí! Utilizamos Firebase para almacenamiento, que ofrece cifrado en tránsito y en reposo. Seguimos las mejores prácticas de seguridad y privacidad para proteger su información."
-      },
-      {
-        "question": "¿Cómo contacto al soporte?",
-        "answer": "Puede enviar un correo electrónico a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> o usar el formulario de contacto en nuestro sitio web. Respondemos en 24 horas hábiles."
+        "id": "soporte",
+        "title": "Soporte",
+        "items": [
+          {
+            "question": "¿Cómo contacto al soporte?",
+            "answer": "Escribe a <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a> o mira los otros canales en la <a href=\"support-es.html\">página de soporte</a>. Respondemos en hasta 24 horas hábiles."
+          }
+        ]
       }
     ]
   }

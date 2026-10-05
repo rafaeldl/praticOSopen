@@ -1,0 +1,26 @@
+{# Split Studio rows — where the trade loses money (left) → how it looks in PraticOS (right). No icons, just rules. #}
+{% set pb = data.problems %}
+<section class="section section--alt seg-problems" id="problemas">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ pb.title }}{% if pb.titleHighlight %} {{ pb.titleHighlight }}{% endif %}</h2>
+            {% if pb.lede or pb.subtitle %}<p>{{ pb.lede | default(pb.subtitle) }}</p>{% endif %}
+        </div>
+        <ol class="seg-split" role="list">
+            {% for item in pb.items %}
+            <li class="seg-split__row">
+                <div class="seg-split__problem">
+                    <span class="seg-split__num mono" aria-hidden="true">{{ "0" if loop.index < 10 }}{{ loop.index }}</span>
+                    <div>
+                        <h3>{{ item.problem | default(item.title) }}</h3>
+                        <p>{{ item.detail | default(item.text) }}</p>
+                    </div>
+                </div>
+                {% if item.answer %}
+                <p class="seg-split__answer"><span class="label">{{ pb.answerLabel | default(ui.answerLabel) }}</span>{{ item.answer }}</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>

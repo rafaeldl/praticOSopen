@@ -1,115 +1,122 @@
 ---
 layout: layouts/base.njk
-navbarScrolled: true
 docsStyles: true
 pageType: docs
 ---
+{# Hallmark · genre: modern-minimal · macrostructure: Long Document · design-system: design.md
+   Front matter: breadcrumbRoot, breadcrumbCurrent, docsIndexLink, heroTitle (+ optional legacy heroTitleHighlight,
+   appended with a space), heroSubtitle, sidebarTitle, sidebarNav[{id,label}], prevLink/nextLink{href,label,title},
+   faqLink, supportLink, docsData. #}
+{% set ui = {
+  pt: { crumbs: 'Trilha de navegação', related: 'Continue lendo', help: 'Não achou a resposta? Veja as', faq: 'perguntas frequentes', or: 'ou', support: 'fale com o suporte', all: 'Todos os artigos' },
+  en: { crumbs: 'Breadcrumb', related: 'Keep reading', help: 'Didn’t find your answer? Check the', faq: 'FAQ', or: 'or', support: 'contact support', all: 'All articles' },
+  es: { crumbs: 'Ruta de navegación', related: 'Sigue leyendo', help: '¿No encontraste la respuesta? Revisa las', faq: 'preguntas frecuentes', or: 'o', support: 'habla con soporte', all: 'Todos los artículos' }
+}[langCode] | default({}) %}
+<div class="wrap doc">
+    <header class="doc__head">
+        <nav class="crumbs" aria-label="{{ ui.crumbs }}">
+            <ol>
+                <li><a href="{{ docsIndexLink }}">{{ breadcrumbRoot }}</a></li>
+                <li aria-current="page">{{ breadcrumbCurrent }}</li>
+            </ol>
+        </nav>
+        <h1>{{ heroTitle }}{% if heroTitleHighlight %} {{ heroTitleHighlight }}{% endif %}</h1>
+        {% if heroSubtitle %}<p class="doc__summary">{{ heroSubtitle }}</p>{% endif %}
+    </header>
 
-<!-- Page Header -->
-<section class="docs-hero compact">
-    <div class="hero-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-    </div>
-    <div class="container">
-        <div class="docs-breadcrumb">
-            <a href="{{ docsIndexLink }}">{{ breadcrumbRoot }}</a>
-            <span>/</span>
-            <span>{{ breadcrumbCurrent }}</span>
-        </div>
-        <div class="docs-hero-content">
-            <h1>{{ heroTitle }} <span class="gradient-text">{{ heroTitleHighlight }}</span></h1>
-            <p class="hero-subtitle">{{ heroSubtitle }}</p>
-        </div>
-    </div>
-</section>
-
-<!-- Docs Content -->
-<section class="docs-content">
-    <div class="container docs-container">
-        <!-- Sidebar Navigation -->
-        <aside class="docs-sidebar">
-            <div class="sidebar-sticky">
-                <h4>{{ sidebarTitle }}</h4>
-                <nav class="docs-nav">
+    {% if sidebarNav %}
+    <aside class="doc__toc">
+        <details class="toc" data-toc>
+            <summary class="label">{{ sidebarTitle }}</summary>
+            <nav aria-label="{{ sidebarTitle }}">
+                <ol>
                     {% for item in sidebarNav %}
-                    <a href="#{{ item.id }}"{% if loop.first %} class="active"{% endif %}>{{ item.label }}</a>
+                    <li><a href="#{{ item.id }}">{{ item.label }}</a></li>
                     {% endfor %}
-                </nav>
-            </div>
-        </aside>
+                </ol>
+            </nav>
+        </details>
+    </aside>
+    {% endif %}
 
-        <!-- Main Content -->
-        <main class="docs-main">
-            {# If docsData is defined, render from JSON; otherwise render content from njk file #}
-            {% if docsData %}
-                {# Access the data file based on the docsData path (e.g., "docs/perfis" -> docs.perfis) #}
-                {% set dataFile = docs[docsData | replace("docs/", "")] %}
-                {% set langData = dataFile[langCode] %}
-                {% if langData and langData.sections %}
-                    {% for section in langData.sections %}
-                        {% set section = section %}
-                        {% include "components/docs/section-renderer.njk" %}
-                    {% endfor %}
-                {% endif %}
-            {% else %}
-                {{ content | safe }}
+    <article class="doc__body">
+        {% if docsData %}
+            {% set dataFile = docs[docsData | replace("docs/", "")] %}
+            {% set langData = dataFile[langCode] %}
+            {% if langData and langData.sections %}
+                {% for section in langData.sections %}
+                    {% include "components/docs/section-renderer.njk" %}
+                {% endfor %}
             {% endif %}
+        {% else %}
+            {{ content | safe }}
+        {% endif %}
 
-            <!-- Navigation -->
-            <div class="docs-navigation">
+        <footer class="doc-end">
+            <h2>{{ ui.related }}</h2>
+            <ul class="doc-pager" role="list">
                 {% if prevLink %}
-                <a href="{{ prevLink.href }}" class="nav-link prev">
-                    <span class="nav-direction">&#8592; {{ prevLink.label }}</span>
-                    <span class="nav-title">{{ prevLink.title }}</span>
-                </a>
+                <li class="is-prev">
+                    <a href="{{ prevLink.href }}" rel="prev">
+                        <span class="label">← {{ prevLink.label }}</span>
+                        <span class="doc-pager__title">{{ prevLink.title }}</span>
+                    </a>
+                </li>
                 {% endif %}
                 {% if nextLink %}
-                <a href="{{ nextLink.href }}" class="nav-link next">
-                    <span class="nav-direction">{{ nextLink.label }} &#8594;</span>
-                    <span class="nav-title">{{ nextLink.title }}</span>
-                </a>
+                <li class="is-next">
+                    <a href="{{ nextLink.href }}" rel="next">
+                        <span class="label">{{ nextLink.label }} →</span>
+                        <span class="doc-pager__title">{{ nextLink.title }}</span>
+                    </a>
+                </li>
                 {% endif %}
-            </div>
-        </main>
-    </div>
-</section>
+            </ul>
+            <p class="doc-help">
+                {{ ui.help }} <a href="{{ faqLink }}">{{ ui.faq }}</a> {{ ui.or }} <a href="{{ supportLink }}">{{ ui.support }}</a>.
+            </p>
+            <p class="doc-help"><a href="{{ docsIndexLink }}">← {{ ui.all }}</a></p>
+        </footer>
+    </article>
+</div>
 
 <script>
-    // Sidebar navigation active state
-    const sections = document.querySelectorAll('.docs-section');
-    const navLinks = document.querySelectorAll('.docs-nav a');
+(function () {
+    var toc = document.querySelector('[data-toc]');
+    if (!toc) return;
+    var wide = window.matchMedia('(min-width: 64rem)');
+    function sync() { if (wide.matches) toc.setAttribute('open', ''); }
+    sync();
+    if (wide.addEventListener) wide.addEventListener('change', sync);
 
-    const observerOptions = {
-        rootMargin: '-100px 0px -70% 0px',
-        threshold: 0
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                navLinks.forEach(link => link.classList.remove('active'));
-                const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
-                if (activeLink) activeLink.classList.add('active');
-            }
-        });
-    }, observerOptions);
-
-    sections.forEach(section => observer.observe(section));
-
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                const offset = 100;
-                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
+    // Close the mobile index after picking a section
+    toc.addEventListener('click', function (e) {
+        if (e.target.closest('a') && !wide.matches) toc.removeAttribute('open');
     });
+
+    // Highlight the section being read
+    if (!('IntersectionObserver' in window)) return;
+    var links = Array.prototype.slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var byId = {};
+    links.forEach(function (a) { byId[decodeURIComponent(a.getAttribute('href').slice(1))] = a; });
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var link = byId[entry.target.id];
+            if (!link) return;
+            links.forEach(function (a) { a.removeAttribute('aria-current'); });
+            link.setAttribute('aria-current', 'true');
+        });
+    }, { rootMargin: '-90px 0px -65% 0px', threshold: 0 });
+    Object.keys(byId).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+    // The last sections are short: when the page bottom is reached, mark the last entry
+    window.addEventListener('scroll', function () {
+        if (window.innerHeight + window.scrollY < document.documentElement.scrollHeight - 4) return;
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        links[links.length - 1].setAttribute('aria-current', 'true');
+    }, { passive: true });
+})();
 </script>

@@ -4,378 +4,513 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Empresa de CFTV e Segurança | PraticOS",
-    "description": "Chega de retrabalho por falta de informação! Sistema de OS para empresas de CFTV e segurança com histórico do equipamento, rotas otimizadas e relatório fotográfico. Organize sua empresa em 5 minutos.",
-    "keywords": "sistema para empresa de cftv, software empresa de segurança, programa para instalador de câmeras, ordem de serviço cftv, app instalação câmeras, gestão empresa segurança eletrônica",
+    "description": "App de OS para empresa de CFTV, alarme e controle de acesso: vistoria pré-instalação, comissionamento com fotos e orçamento aprovado por link.",
+    "keywords": "sistema para empresa de cftv, software empresa de segurança, programa para instalador de câmeras, ordem de serviço cftv, app instalação de câmeras, gestão empresa de segurança eletrônica",
     "ogTitle": "Sistema para Empresa de CFTV e Segurança | PraticOS",
-    "ogDescription": "Chega de retrabalho! Sistema de OS com histórico do equipamento por QR code, rotas otimizadas e relatório fotográfico automático.",
+    "ogDescription": "OS de segurança eletrônica no celular: vistoria antes da instalação, checklist de comissionamento com fotos, histórico por sistema e aprovação por link.",
     "hero": {
-      "badge": "📹 CFTV e Segurança",
-      "title": "Chega de retrabalho por falta de informação:",
-      "titleHighlight": "organize sua empresa em 5 minutos",
-      "subtitle": "Acabe com a planilha e saiba exatamente onde cada equipamento está instalado. Histórico completo por QR code, rota otimizada e cliente acompanhando pelo celular.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Técnicos ativos" },
-        "orders": { "value": "8k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Da vistoria à entrega",
+      "titleMark": "com cada câmera registrada.",
+      "lede": "PraticOS é o app de ordem de serviço para empresas de CFTV, alarme, controle de acesso e cerca elétrica. Faça a vistoria do local, mande o orçamento por link, registre o comissionamento com fotos e receba — pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0582",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Mercado São Jorge"
+          },
+          {
+            "label": "Sistema",
+            "value": "CFTV · NVR 16 canais"
+          },
+          {
+            "label": "Serviço",
+            "value": "Instalação de 8 câmeras IP"
+          },
+          {
+            "label": "Acesso remoto",
+            "value": "Configurado no celular do dono"
+          },
+          {
+            "label": "Fotos",
+            "value": "14 anexadas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 4.650,00",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em instalação",
+          "Operacional",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com CFTV e segurança eletrônica",
+      "title": "Onde a empresa de segurança perde dinheiro",
+      "lede": "Não é falta de instalação. É a visita técnica que não virou orçamento, a senha que ninguém anotou e o chamado de “câmera parada” sem histórico.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📍", "title": "Técnico vai no endereço errado", "text": "Falta de informação clara na OS. Técnico perde tempo procurando o local ou vai no endereço antigo do cliente." },
-        { "icon": "🚗", "title": "Sem controle de rotas", "text": "Técnicos cruzam a cidade sem planejamento. Combustível e tempo desperdiçados todos os dias." },
-        { "icon": "📞", "title": "Cliente não sabe quando o técnico chega", "text": "Ligações constantes perguntando horário. Você para o serviço para responder WhatsApp." },
-        { "icon": "📝", "title": "Documentação manual dá dor de cabeça", "text": "OS em papel se perde, foto fica no celular do técnico. No final, não tem como comprovar o serviço." },
-        { "icon": "📸", "title": "Relatório fotográfico demora horas", "text": "Juntar fotos, montar documento, enviar pro cliente. Tempo que poderia estar atendendo outro chamado." },
-        { "icon": "🔔", "title": "Esquece da manutenção preventiva", "text": "Contrato de manutenção mensal mas só lembra quando o cliente reclama. Perde credibilidade e renovação." }
+        {
+          "problem": "Vistoria anotada no papel",
+          "detail": "O técnico vê os pontos, a internet e a energia do local, mas o orçamento sai dias depois, com metade da informação.",
+          "answer": "O checklist de vistoria pré-instalação registra tipo de sistema, internet disponível, pontos de energia e fotos de cada ponto, já dentro da OS."
+        },
+        {
+          "problem": "Orçamento que o cliente “não viu”",
+          "detail": "A proposta foi por mensagem e o cliente some. Quando volta, o valor das câmeras já mudou.",
+          "answer": "O orçamento fica na OS com equipamentos e mão de obra do seu catálogo. O cliente aprova pelo link e você recebe uma notificação."
+        },
+        {
+          "problem": "Instalação entregue sem teste documentado",
+          "detail": "Um mês depois o cliente diz que a gravação nunca funcionou. Não há como provar o contrário.",
+          "answer": "O checklist de comissionamento marca gravação, acesso remoto, senhas padrão alteradas e testes feitos, com foto da configuração como evidência."
+        },
+        {
+          "problem": "Chamado sem histórico do sistema",
+          "detail": "O técnico chega para manutenção sem saber quantos canais tem o gravador nem o que foi trocado da última vez.",
+          "answer": "Cada sistema fica cadastrado com tipo e número de canais. Busque pelo nome ou identificador e veja todas as OS daquele cliente."
+        },
+        {
+          "problem": "Responsabilidade sobre senhas e gravação",
+          "detail": "O cliente perde a senha do NVR ou questiona o uso das imagens, e a culpa cai na empresa.",
+          "answer": "O termo de autorização e privacidade registra o responsável do cliente e a ciência sobre guarda de senhas e uso da gravação."
+        },
+        {
+          "problem": "Mensalidades e serviços sem controle",
+          "detail": "Instalação parcelada, manutenção avulsa e cliente que paga atrasado no mesmo caderno.",
+          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia de empresas de CFTV",
-      "items": [
-        { "icon": "📍", "title": "OS digital com localização", "text": "Endereço completo com mapa integrado. Técnico abre o Waze direto do app.", "highlight": "Zero retrabalho por endereço errado." },
-        { "icon": "🗺️", "title": "Rota otimizada do dia", "text": "Sistema organiza os atendimentos por proximidade. Menos km rodados, mais clientes atendidos." },
-        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe link e vê a posição do técnico em tempo real.", "highlight": "Reduz ligações em até 70%." },
-        { "icon": "📸", "title": "Relatório fotográfico automático", "text": "Fotos com data/hora e localização. Relatório gerado em 1 clique para enviar ao cliente." },
-        { "icon": "🔄", "title": "Gestão de serviços recorrentes", "text": "Cadastre contratos de manutenção. Sistema avisa quando está chegando a data.", "highlight": "Nunca mais esqueça uma preventiva." },
-        { "icon": "📱", "title": "Histórico do equipamento por QR code", "text": "Cole um QR code na câmera/DVR. Escaneie e veja todo histórico de manutenção." }
+    "workflow": {
+      "title": "Como uma instalação passa pelo PraticOS",
+      "lede": "Da vistoria ao sistema operacional, cada etapa fica registrada na OS.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Faça a vistoria do local",
+          "text": "Abra a OS com o cliente e o sistema. O checklist de vistoria vem pronto e você ajusta os itens.",
+          "facts": [
+            "Tipo de sistema: CFTV, alarme, controle de acesso, interfonia",
+            "Internet e pontos de energia no local",
+            "Fotos dos pontos de instalação"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "02",
+          "title": "Mande o orçamento por link",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Vê as fotos da vistoria, os equipamentos e a mão de obra, aprova e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Notificação quando o cliente aprova ou comenta",
+            "PDF da OS para imprimir ou enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "03",
+          "title": "Agende a instalação",
+          "text": "Marque dia e hora na OS. Ela aparece na agenda da equipe e o celular avisa antes do atendimento.",
+          "facts": [
+            "Agenda do mês com as OS de cada dia",
+            "Filtro por técnico para quem coordena a equipe",
+            "Status do ramo: em instalação, operacional"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+        },
+        {
+          "number": "04",
+          "title": "Comissione, entregue e receba",
+          "text": "Registre os testes do sistema e o termo do cliente. Depois lance o pagamento inteiro ou em parcelas.",
+          "facts": [
+            "Gravação, playback, notificações e sensores testados",
+            "Senhas padrão alteradas e acesso remoto configurado",
+            "Pagamento parcial e desconto na mesma OS"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "instalação CFTV",
-      "text": "Documente cada etapa da instalação e evite chamados de garantia. Cliente assina digitalmente.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Instalação",
-      "items": [
-        { "icon": "📸", "text": "Fotos antes e depois da instalação" },
-        { "icon": "📍", "text": "Localização GPS automática" },
-        { "icon": "✅", "text": "Teste de cada câmera instalada" },
-        { "icon": "🔧", "text": "Configurações do DVR/NVR" },
-        { "icon": "📱", "text": "Acesso remoto configurado" },
-        { "icon": "✍️", "text": "Assinatura digital do cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar sua empresa",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, localização e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalação. Relatório automático com data e hora.", "color": "yellow" },
-        { "icon": "pdf", "title": "Relatório PDF", "text": "Gere relatórios profissionais em PDF para enviar ao cliente. Em 1 clique.", "color": "orange" },
-        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestão de Equipamentos", "text": "Histórico completo de cada equipamento instalado. Todas as manutenções anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status e localização do técnico pelo celular.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu perdia muito tempo montando relatório fotográfico manualmente. Agora o PraticOS gera tudo automático e o cliente recebe na hora. Ganhei pelo menos 2 horas por dia.",
-      "name": "Carlos Eduardo",
-      "role": "Dono de empresa de CFTV há 8 anos",
-      "metric": "Redução de 60% no tempo administrativo"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem tem empresa de segurança",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Funciona para instalação e manutenção?", "answer": "Sim! PraticOS funciona tanto para instalações novas quanto para manutenções preventivas e corretivas. O sistema se adapta ao seu fluxo de trabalho." },
-        { "question": "Consigo controlar contratos de manutenção?", "answer": "Sim! Cadastre serviços recorrentes e o sistema avisa automaticamente quando está chegando a data. Nunca mais perca uma preventiva." },
-        { "question": "O QR code do equipamento funciona como?", "answer": "Você gera um QR code único para cada equipamento. Cole na câmera ou DVR. Quando precisar, escaneie e veja todo o histórico de manutenção na hora." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia de empresas de CFTV." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Serve para alarme, controle de acesso e cerca elétrica?",
+          "answer": "Sim. O segmento de segurança eletrônica cobre CFTV, alarmes, controle de acesso e cerca elétrica. O app usa os termos do ramo: sistema, identificador, canais."
+        },
+        {
+          "question": "Consigo ver o que já foi feito num cliente?",
+          "answer": "Sim. Busque pelo nome do cliente, do sistema ou pelo identificador na lista de OS e aparecem todas as ordens, com fotos e checklists."
+        },
+        {
+          "question": "Os técnicos podem usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar sua empresa",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "CCTV & Security Company Management | PraticOS",
-    "description": "Stop rework due to missing information! Work order system for CCTV and security companies with equipment history, optimized routes and photo reports. Get organized in 5 minutes.",
-    "keywords": "cctv company software, security company management, work order system cctv, camera installation app, security business software",
-    "ogTitle": "CCTV & Security Company Management | PraticOS",
-    "ogDescription": "Stop rework! WO system with equipment history by QR code, optimized routes and automatic photo reports.",
+    "title": "CCTV and Security Installer Software | PraticOS",
+    "description": "Work order app for CCTV, alarm and access control installers: site survey, commissioning checklist with photos and quotes approved by link.",
+    "keywords": "cctv company software, security installer software, work order system cctv, camera installation app, security business software, alarm installer app",
+    "ogTitle": "CCTV and Security Installer Software | PraticOS",
+    "ogDescription": "Security work orders on your phone: pre-install site survey, commissioning checklist with photos, history by system and approval by link.",
     "hero": {
-      "badge": "📹 CCTV & Security",
-      "title": "Stop rework due to missing information:",
-      "titleHighlight": "organize your company in 5 minutes",
-      "subtitle": "Ditch the spreadsheet and know exactly where each equipment is installed. Complete history by QR code, optimized routes and customer tracking on their phone.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Active technicians" },
-        "orders": { "value": "8k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "From survey to handover,",
+      "titleMark": "every camera on file.",
+      "lede": "PraticOS is the work order app for CCTV, alarm, access control and electric fence companies. Survey the site, send the quote as a link, record commissioning with photos and get paid — from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0582",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Corner Market on 5th"
+          },
+          {
+            "label": "System",
+            "value": "CCTV · 16-channel NVR"
+          },
+          {
+            "label": "Service",
+            "value": "Install 8 IP cameras"
+          },
+          {
+            "label": "Remote access",
+            "value": "Set up on owner's phone"
+          },
+          {
+            "label": "Photos",
+            "value": "14 attached"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$2,850.00",
+        "steps": [
+          "Quote",
+          "Approved",
+          "Installing",
+          "Operational",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for CCTV and electronic security companies",
+      "title": "Where a security company loses money",
+      "lede": "It's not a lack of installs. It's the site visit that never became a quote, the password nobody wrote down and the “camera's down” call with no history.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📍", "title": "Technician goes to wrong address", "text": "Lack of clear information on the WO. Technician wastes time searching for the location or goes to customer's old address." },
-        { "icon": "🚗", "title": "No route control", "text": "Technicians cross the city without planning. Fuel and time wasted every day." },
-        { "icon": "📞", "title": "Customer doesn't know when technician arrives", "text": "Constant calls asking about arrival time. You stop working to answer WhatsApp." },
-        { "icon": "📝", "title": "Manual documentation is a headache", "text": "Paper WOs get lost, photos stay on technician's phone. In the end, no way to prove the service." },
-        { "icon": "📸", "title": "Photo report takes hours", "text": "Gathering photos, creating document, sending to client. Time that could be spent on another job." },
-        { "icon": "🔔", "title": "Forget preventive maintenance", "text": "Monthly maintenance contract but only remember when customer complains. Lose credibility and renewal." }
+        {
+          "problem": "Site surveys on paper",
+          "detail": "The tech checks the mounting points, internet and power, but the quote goes out days later with half the details.",
+          "answer": "The pre-install survey checklist records system type, available internet, power points and photos of each spot, right on the work order."
+        },
+        {
+          "problem": "Quotes the customer “never saw”",
+          "detail": "The proposal went out by text and the customer goes quiet. When they come back, camera prices have changed.",
+          "answer": "The quote lives on the work order with equipment and labor from your catalog. The customer approves it by link and you get notified."
+        },
+        {
+          "problem": "Installs handed over with no documented test",
+          "detail": "A month later the customer says recording never worked. You can't prove otherwise.",
+          "answer": "The commissioning checklist covers recording, remote access, default passwords changed and tests run, with a photo of the setup as evidence."
+        },
+        {
+          "problem": "Service calls with no system history",
+          "detail": "The tech shows up without knowing how many channels the recorder has or what was replaced last time.",
+          "answer": "Each system is on file with type and channel count. Search by name or identifier and see every work order for that customer."
+        },
+        {
+          "problem": "Who's responsible for passwords and footage",
+          "detail": "The customer loses the NVR password or questions how footage is used, and the blame lands on you.",
+          "answer": "The authorization and privacy form records the customer's contact person and their acknowledgment about keeping passwords and using recordings."
+        },
+        {
+          "problem": "Installments and service calls untracked",
+          "detail": "Install paid in parts, one-off maintenance and late payers all in the same notebook.",
+          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still to collect."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for daily CCTV company operations",
-      "items": [
-        { "icon": "📍", "title": "Digital WO with location", "text": "Complete address with integrated map. Technician opens Waze directly from the app.", "highlight": "Zero rework due to wrong address." },
-        { "icon": "🗺️", "title": "Optimized daily route", "text": "System organizes appointments by proximity. Less miles driven, more customers served." },
-        { "icon": "🔗", "title": "Link for customer tracking", "text": "Customer receives link and sees technician's position in real time.", "highlight": "Reduces calls by up to 70%." },
-        { "icon": "📸", "title": "Automatic photo report", "text": "Photos with date/time and location. Report generated in 1 click to send to customer." },
-        { "icon": "🔄", "title": "Recurring service management", "text": "Register maintenance contracts. System alerts when date is approaching.", "highlight": "Never forget a preventive again." },
-        { "icon": "📱", "title": "Equipment history by QR code", "text": "Stick a QR code on camera/DVR. Scan and see complete maintenance history." }
+    "workflow": {
+      "title": "How an install moves through PraticOS",
+      "lede": "From site survey to an operational system, every step is recorded on the work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Survey the site",
+          "text": "Open the work order with the customer and the system. The site survey checklist comes ready to use and you can adjust the items.",
+          "facts": [
+            "System type: CCTV, alarm, access control, intercom",
+            "Internet and power available on site",
+            "Photos of each mounting point"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "02",
+          "title": "Send the quote as a link",
+          "text": "The customer opens the work order in a browser, nothing to install. They see the survey photos, equipment and labor, approve it and leave comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Notification when the customer approves or comments",
+            "Work order PDF to print or send"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "03",
+          "title": "Schedule the install",
+          "text": "Set the day and time on the work order. It shows up on the team calendar and your phone reminds you before the visit.",
+          "facts": [
+            "Monthly calendar with each day's work orders",
+            "Filter by technician if you coordinate the crew",
+            "Statuses in your trade's words: installing, operational"
+          ],
+          "image": "agenda.png",
+          "alt": "PraticOS calendar with work orders scheduled across the month"
+        },
+        {
+          "number": "04",
+          "title": "Commission, hand over and get paid",
+          "text": "Record the system tests and the customer's sign-off form. Then log the payment in full or in parts.",
+          "facts": [
+            "Recording, playback, notifications and sensors tested",
+            "Default passwords changed and remote access set up",
+            "Partial payment and discount on the same work order"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "CCTV",
-      "titleHighlight": "installation checklist",
-      "text": "Document each installation step and avoid warranty calls. Customer signs digitally.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Installation Checklist",
-      "items": [
-        { "icon": "📸", "text": "Before and after installation photos" },
-        { "icon": "📍", "text": "Automatic GPS location" },
-        { "icon": "✅", "text": "Test of each installed camera" },
-        { "icon": "🔧", "text": "DVR/NVR configurations" },
-        { "icon": "📱", "text": "Remote access configured" },
-        { "icon": "✍️", "text": "Customer digital signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your company",
-      "subtitle": "Powerful and intuitive tools to boost your productivity",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, location and values. All organized." },
-        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph each installation step. Automatic report with date and time.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Report", "text": "Generate professional PDF reports to send to customers. In 1 click.", "color": "orange" },
-        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
-        { "icon": "users", "title": "Equipment Management", "text": "Complete history of each installed equipment. All previous maintenance.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks technician status and location on their phone.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I wasted a lot of time manually creating photo reports. Now PraticOS generates everything automatically and the customer receives it instantly. I gained at least 2 hours a day.",
-      "name": "Carlos Eduardo",
-      "role": "CCTV company owner for 8 years",
-      "metric": "60% reduction in administrative time"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from security company owners",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work for installation and maintenance?", "answer": "Yes! PraticOS works for both new installations and preventive/corrective maintenance. The system adapts to your workflow." },
-        { "question": "Can I control maintenance contracts?", "answer": "Yes! Register recurring services and the system automatically alerts when the date is approaching. Never miss a preventive again." },
-        { "question": "How does the equipment QR code work?", "answer": "You generate a unique QR code for each equipment. Stick it on the camera or DVR. When needed, scan and see the complete maintenance history instantly." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of CCTV companies." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Does it work for alarms, access control and electric fences?",
+          "answer": "Yes. The electronic security segment covers CCTV, alarms, access control and electric fences. The app uses your trade's words: system, identifier, channels."
+        },
+        {
+          "question": "Can I see what was already done for a customer?",
+          "answer": "Yes. Search by customer name, system name or identifier in the work order list and every order shows up, with photos and checklists."
+        },
+        {
+          "question": "Can my techs use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see prices. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your company",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Empresa de CFTV y Seguridad | PraticOS",
-    "description": "Basta de retrabajo por falta de información! Sistema de OS para empresas de CCTV y seguridad con historial del equipo, rutas optimizadas e informe fotográfico. Organiza tu empresa en 5 minutos.",
-    "keywords": "sistema para empresa de cctv, software empresa de seguridad, programa para instalador de cámaras, orden de servicio cctv, app instalación cámaras, gestión empresa seguridad electrónica",
-    "ogTitle": "Sistema para Empresa de CFTV y Seguridad | PraticOS",
-    "ogDescription": "Basta de retrabajo! Sistema de OS con historial del equipo por código QR, rutas optimizadas e informe fotográfico automático.",
+    "title": "Sistema para Empresas de CCTV y Seguridad | PraticOS",
+    "description": "App de órdenes para empresas de CCTV, alarmas y control de acceso: relevamiento previo, checklist de puesta en marcha con fotos y presupuesto por link.",
+    "keywords": "sistema para empresa de cctv, software empresa de seguridad, programa para instalador de cámaras, orden de servicio cctv, app instalación de cámaras, gestión empresa de seguridad electrónica",
+    "ogTitle": "Sistema para Empresas de CCTV y Seguridad | PraticOS",
+    "ogDescription": "Órdenes de seguridad electrónica en el celular: relevamiento antes de instalar, puesta en marcha con fotos, historial por sistema y aprobación por link.",
     "hero": {
-      "badge": "📹 CCTV y Seguridad",
-      "title": "Basta de retrabajo por falta de información:",
-      "titleHighlight": "organiza tu empresa en 5 minutos",
-      "subtitle": "Acaba con la planilla y sabe exactamente donde cada equipo está instalado. Historial completo por código QR, ruta optimizada y cliente siguiendo por el celular.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Técnicos activos" },
-        "orders": { "value": "8k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "De la visita a la entrega,",
+      "titleMark": "cada cámara registrada.",
+      "lede": "PraticOS es la app de órdenes de servicio para empresas de CCTV, alarmas, control de acceso y cerco eléctrico. Haz el relevamiento del lugar, envía el presupuesto por link, registra la puesta en marcha con fotos y cobra — desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0582",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Minimarket San Jorge"
+          },
+          {
+            "label": "Sistema",
+            "value": "CCTV · NVR de 16 canales"
+          },
+          {
+            "label": "Servicio",
+            "value": "Instalación de 8 cámaras IP"
+          },
+          {
+            "label": "Acceso remoto",
+            "value": "Configurado en el celular del dueño"
+          },
+          {
+            "label": "Fotos",
+            "value": "14 adjuntas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 2.850,00",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En instalación",
+          "Operativo",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con CCTV y seguridad electrónica",
+      "title": "Dónde pierde plata la empresa de seguridad",
+      "lede": "No es falta de instalaciones. Es la visita técnica que nunca se volvió presupuesto, la contraseña que nadie anotó y el llamado de “la cámara no graba” sin historial.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📍", "title": "Técnico va a la dirección equivocada", "text": "Falta de información clara en la OS. Técnico pierde tiempo buscando el lugar o va a la dirección antigua del cliente." },
-        { "icon": "🚗", "title": "Sin control de rutas", "text": "Técnicos cruzan la ciudad sin planificación. Combustible y tiempo desperdiciados todos los días." },
-        { "icon": "📞", "title": "Cliente no sabe cuándo llega el técnico", "text": "Llamadas constantes preguntando horario. Paras el servicio para responder WhatsApp." },
-        { "icon": "📝", "title": "Documentación manual da dolor de cabeza", "text": "OS en papel se pierde, foto queda en el celular del técnico. Al final, no hay como comprobar el servicio." },
-        { "icon": "📸", "title": "Informe fotográfico demora horas", "text": "Juntar fotos, armar documento, enviar al cliente. Tiempo que podría estar atendiendo otro llamado." },
-        { "icon": "🔔", "title": "Olvida el mantenimiento preventivo", "text": "Contrato de mantenimiento mensual pero solo recuerda cuando el cliente reclama. Pierde credibilidad y renovación." }
+        {
+          "problem": "Relevamiento anotado en papel",
+          "detail": "El técnico ve los puntos, la internet y la energía del lugar, pero el presupuesto sale días después y con la mitad de los datos.",
+          "answer": "El checklist de relevamiento previo registra tipo de sistema, internet disponible, puntos de energía y fotos de cada punto, dentro de la orden."
+        },
+        {
+          "problem": "Presupuesto que el cliente “no vio”",
+          "detail": "La propuesta se fue por mensaje y el cliente desaparece. Cuando vuelve, el precio de las cámaras ya cambió.",
+          "answer": "El presupuesto queda en la orden con equipos y mano de obra de tu catálogo. El cliente lo aprueba por link y recibes una notificación."
+        },
+        {
+          "problem": "Instalación entregada sin prueba documentada",
+          "detail": "Un mes después el cliente dice que la grabación nunca funcionó. No tienes cómo demostrar lo contrario.",
+          "answer": "El checklist de puesta en marcha marca grabación, acceso remoto, contraseñas de fábrica cambiadas y pruebas hechas, con foto de la configuración."
+        },
+        {
+          "problem": "Llamado técnico sin historial del sistema",
+          "detail": "El técnico llega al mantenimiento sin saber cuántos canales tiene el grabador ni qué se cambió la última vez.",
+          "answer": "Cada sistema queda registrado con tipo y cantidad de canales. Búscalo por nombre o identificador y ve todas las órdenes de ese cliente."
+        },
+        {
+          "problem": "Responsabilidad sobre contraseñas y grabaciones",
+          "detail": "El cliente pierde la contraseña del NVR o cuestiona el uso de las imágenes, y la culpa recae en la empresa.",
+          "answer": "El formulario de autorización y privacidad registra al responsable del cliente y su conformidad sobre la guarda de contraseñas y el uso de la grabación."
+        },
+        {
+          "problem": "Cuotas y servicios sin control",
+          "detail": "Instalación en cuotas, mantenimiento suelto y clientes que pagan tarde en el mismo cuaderno.",
+          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el día a día de empresas de CCTV",
-      "items": [
-        { "icon": "📍", "title": "OS digital con ubicación", "text": "Dirección completa con mapa integrado. Técnico abre Waze directo de la app.", "highlight": "Cero retrabajo por dirección equivocada." },
-        { "icon": "🗺️", "title": "Ruta optimizada del día", "text": "Sistema organiza las atenciones por proximidad. Menos km recorridos, más clientes atendidos." },
-        { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe link y ve la posición del técnico en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📸", "title": "Informe fotográfico automático", "text": "Fotos con fecha/hora y ubicación. Informe generado en 1 clic para enviar al cliente." },
-        { "icon": "🔄", "title": "Gestión de servicios recurrentes", "text": "Registra contratos de mantenimiento. Sistema avisa cuando se acerca la fecha.", "highlight": "Nunca más olvides una preventiva." },
-        { "icon": "📱", "title": "Historial del equipo por código QR", "text": "Pega un código QR en la cámara/DVR. Escanea y ve todo el historial de mantenimiento." }
+    "workflow": {
+      "title": "Cómo pasa una instalación por PraticOS",
+      "lede": "Del relevamiento al sistema operativo, cada paso queda registrado en la orden.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Haz el relevamiento del lugar",
+          "text": "Abre la orden con el cliente y el sistema. El checklist de relevamiento viene listo y tú ajustas los ítems.",
+          "facts": [
+            "Tipo de sistema: CCTV, alarma, control de acceso, intercomunicador",
+            "Internet y puntos de energía en el lugar",
+            "Fotos de los puntos de instalación"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "02",
+          "title": "Envía el presupuesto por link",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos del relevamiento, los equipos y la mano de obra, aprueba y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "Notificación cuando el cliente aprueba o comenta",
+            "PDF de la orden para imprimir o enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "03",
+          "title": "Agenda la instalación",
+          "text": "Marca día y hora en la orden. Aparece en la agenda del equipo y el celular te avisa antes de la visita.",
+          "facts": [
+            "Agenda del mes con las órdenes de cada día",
+            "Filtro por técnico para quien coordina el equipo",
+            "Estados del rubro: en instalación, operativo"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+        },
+        {
+          "number": "04",
+          "title": "Pon en marcha, entrega y cobra",
+          "text": "Registra las pruebas del sistema y la conformidad del cliente. Después carga el pago total o en partes.",
+          "facts": [
+            "Grabación, reproducción, notificaciones y sensores probados",
+            "Contraseñas de fábrica cambiadas y acceso remoto configurado",
+            "Pago parcial y descuento en la misma orden"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "instalación CCTV",
-      "text": "Documenta cada etapa de la instalación y evita llamados de garantía. Cliente firma digitalmente.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Instalación",
-      "items": [
-        { "icon": "📸", "text": "Fotos antes y después de la instalación" },
-        { "icon": "📍", "text": "Ubicación GPS automática" },
-        { "icon": "✅", "text": "Prueba de cada cámara instalada" },
-        { "icon": "🔧", "text": "Configuraciones del DVR/NVR" },
-        { "icon": "📱", "text": "Acceso remoto configurado" },
-        { "icon": "✍️", "text": "Firma digital del cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tu empresa",
-      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, ubicación y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografías de cada etapa de la instalación. Informe automático con fecha y hora.", "color": "yellow" },
-        { "icon": "pdf", "title": "Informe PDF", "text": "Genera informes profesionales en PDF para enviar al cliente. En 1 clic.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestión de Equipos", "text": "Historial completo de cada equipo instalado. Todos los mantenimientos anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado y ubicación del técnico por el celular.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes perdía mucho tiempo armando informe fotográfico manualmente. Ahora PraticOS genera todo automático y el cliente recibe al instante. Gané por lo menos 2 horas por día.",
-      "name": "Carlos Eduardo",
-      "role": "Dueño de empresa de CCTV hace 8 años",
-      "metric": "Reducción de 60% en tiempo administrativo"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien tiene empresa de seguridad",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "Necesito pagar para usar?", "answer": "No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "Funciona para instalación y mantenimiento?", "answer": "Sí! PraticOS funciona tanto para instalaciones nuevas como para mantenimientos preventivos y correctivos. El sistema se adapta a tu flujo de trabajo." },
-        { "question": "Puedo controlar contratos de mantenimiento?", "answer": "Sí! Registra servicios recurrentes y el sistema avisa automáticamente cuando se acerca la fecha. Nunca más pierdas una preventiva." },
-        { "question": "Cómo funciona el código QR del equipo?", "answer": "Generas un código QR único para cada equipo. Lo pegas en la cámara o DVR. Cuando necesites, escanea y ve todo el historial de mantenimiento al instante." },
-        { "question": "Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de empresas de CCTV." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Sirve para alarmas, control de acceso y cerco eléctrico?",
+          "answer": "Sí. El segmento de seguridad electrónica cubre CCTV, alarmas, control de acceso y cerco eléctrico. La app usa los términos del rubro: sistema, identificador, canales."
+        },
+        {
+          "question": "¿Puedo ver lo que ya se hizo para un cliente?",
+          "answer": "Sí. Busca por el nombre del cliente, del sistema o por el identificador en la lista de órdenes y aparecen todas, con fotos y checklists."
+        },
+        {
+          "question": "¿Los técnicos pueden usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tu empresa",
-      "text": "Disponible para iOS y Android. Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

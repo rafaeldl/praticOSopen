@@ -7,11 +7,14 @@ featureSlug: whatsapp-bot
 featureStyles: true
 relPath: "../"
 indexPage: index-es.html
-title: "Asistente WhatsApp con IA - PraticOS"
-description: "Cree órdenes de servicio, envíe fotos, audios y gestione su negocio directamente por WhatsApp con inteligencia artificial."
-keywords: "bot whatsapp, orden de servicio, gestión, automatización, inteligencia artificial, praticos"
-ogTitle: "Asistente WhatsApp con IA - PraticOS"
-ogDescription: "Cree órdenes de servicio por WhatsApp con IA. Fotos, audios y links mágicos."
+title: "Asistente de WhatsApp para órdenes de servicio | PraticOS"
+keywords: "asistente whatsapp, orden de servicio por whatsapp, órdenes por whatsapp, praticos"
+# The assistant is shut down while site.flags.whatsappBot is false:
+# keep the URL live but out of the index, and describe the current state.
+eleventyComputed:
+  noindex: "{% if not site.flags.whatsappBot %}true{% endif %}"
+  description: "{% if site.flags.whatsappBot %}Abre órdenes por WhatsApp: manda texto, foto o audio y el asistente de PraticOS registra cliente, servicios y precios.{% else %}El asistente de PraticOS en WhatsApp no está disponible. Mira dónde abrir órdenes, adjuntar fotos y enviar el enlace en la app gratis.{% endif %}"
+  ogDescription: "{% if site.flags.whatsappBot %}Abre órdenes por WhatsApp: manda texto, foto o audio y el asistente de PraticOS registra cliente, servicios y precios.{% else %}El asistente de PraticOS en WhatsApp no está disponible. Mira dónde abrir órdenes, adjuntar fotos y enviar el enlace en la app gratis.{% endif %}"
 langSwitch:
   - code: PT
     href: whatsapp-bot.html

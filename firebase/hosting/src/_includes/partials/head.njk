@@ -3,7 +3,7 @@
 <title>{{ title }}</title>
 <meta name="description" content="{{ description }}">
 <meta name="keywords" content="{{ keywords }}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="{% if noindex %}noindex, follow{% else %}index, follow{% endif %}">
 
 <!-- Anti-FOUC: apply saved theme before CSS loads -->
 <script>
@@ -70,7 +70,10 @@
 <link rel="stylesheet" href="{{ relPath }}css/feature.css">
 {% endif %}
 {% if pageStyles %}
-<link rel="stylesheet" href="{{ relPath }}css/{{ pageStyles }}.css">
+{% set pageStyleList = [pageStyles] if pageStyles is string else pageStyles %}
+{% for sheet in pageStyleList %}
+<link rel="stylesheet" href="{{ relPath }}css/{{ sheet }}.css">
+{% endfor %}
 {% endif %}
 
 <!-- Google Analytics 4 + Google Ads Conversion Tracking -->

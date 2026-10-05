@@ -1,99 +1,86 @@
 ---
 layout: layouts/base.njk
-navbarScrolled: true
 docsStyles: true
 pageType: docs
 ---
-{% set docsData = docs.hub[langCode] %}
+{# Hallmark · genre: modern-minimal · macrostructure: Long Document (Index-First) · design-system: design.md
+   Data: docs.json → hub[lang] = { title, subtitle, filterLabel, filterPlaceholder, countOne, countMany, empty*,
+   groups: [{ title, items: [{ title, description, href, flag? }] }], quickLinksTitle, quickLinks: [{ title, description, href }] }.
+   An item with `flag` only renders when site.flags[flag] is true. #}
+{% set hub = docs.hub[langCode] | default(docs.hub.pt) %}
+<div class="wrap hub">
+    <header class="hub__head">
+        <h1>{{ hub.title }}</h1>
+        <p class="lede">{{ hub.subtitle }}</p>
+    </header>
 
-<!-- Page Header -->
-<section class="docs-hero">
-    <div class="hero-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
+    <div class="hub__filter" data-filter hidden>
+        <label class="label" for="docs-filter">{{ hub.filterLabel }}</label>
+        <input type="search" id="docs-filter" placeholder="{{ hub.filterPlaceholder }}" autocomplete="off" spellcheck="false" aria-describedby="docs-filter-count">
+        <p class="hub__count" id="docs-filter-count" aria-live="polite" data-count-one="{{ hub.countOne }}" data-count-many="{{ hub.countMany }}"></p>
     </div>
-    <div class="container">
-        <div class="docs-hero-content">
-            <div class="badge">{{ docsData.badge }}</div>
-            <h1><span class="gradient-text">{{ docsData.title }}</span></h1>
-            <p class="hero-subtitle">{{ docsData.subtitle }}</p>
 
-            <div class="docs-search">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="M21 21l-4.35-4.35"></path>
-                </svg>
-                <input type="text" placeholder="{{ docsData.searchPlaceholder }}" id="docs-search-input">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Docs Categories -->
-<section class="docs-categories">
-    <div class="container">
-        <div class="categories-grid">
-            {% for category in docsData.categories %}
-            {% if category.comingSoon %}
-            <div class="category-card coming-soon">
-            {% else %}
-            <a href="{{ category.href }}" class="category-card">
-            {% endif %}
-                <div class="category-icon">
-                    {{ category.icon | safe }}
-                </div>
-                <div class="category-content">
-                    <h3>{{ category.title }}</h3>
-                    <p>{{ category.description }}</p>
-                    <span class="category-link">{{ category.linkText }}</span>
-                </div>
-                {% if category.badge %}
-                <div class="category-badge{% if category.comingSoon %} soon{% endif %}">{{ category.badge }}</div>
-                {% endif %}
-            {% if category.comingSoon %}
-            </div>
-            {% else %}
-            </a>
+    {% for group in hub.groups %}
+    <section class="hub__group" aria-labelledby="grupo-{{ loop.index }}" data-group>
+        <h2 id="grupo-{{ loop.index }}">{{ group.title }}</h2>
+        <ul class="doc-index" role="list">
+            {% for item in group.items %}
+            {% if not item.flag or site.flags[item.flag] %}
+            <li data-item>
+                <a class="doc-index__link" href="{{ item.href }}">
+                    <span class="doc-index__title">{{ item.title }}</span>
+                    <span class="doc-index__arrow" aria-hidden="true">→</span>
+                    <span class="doc-index__desc">{{ item.description }}</span>
+                </a>
+            </li>
             {% endif %}
             {% endfor %}
-        </div>
-    </div>
-</section>
+        </ul>
+    </section>
+    {% endfor %}
 
-<!-- Quick Links -->
-<section class="docs-quick-links">
-    <div class="container">
-        <h2>{{ docsData.quickLinksTitle }}</h2>
-        <div class="quick-links-grid">
-            {% for link in docsData.quickLinks %}
-            <a href="{{ link.href }}" class="quick-link">
-                <div class="quick-icon">
-                    {{ link.icon | safe }}
-                </div>
-                <div>
-                    <h4>{{ link.title }}</h4>
-                    <p>{{ link.description }}</p>
-                </div>
-            </a>
+    <p class="hub__empty" data-empty hidden>{{ hub.emptyLead }} <a href="{{ faqLink }}">{{ hub.emptyFaq }}</a> {{ hub.emptyOr }} <a href="{{ supportLink }}">{{ hub.emptySupport }}</a>.</p>
+
+    <section class="hub__more" aria-labelledby="mais-ajuda">
+        <h2 id="mais-ajuda">{{ hub.quickLinksTitle }}</h2>
+        <ul class="doc-index" role="list">
+            {% for link in hub.quickLinks %}
+            <li>
+                <a class="doc-index__link" href="{{ link.href }}">
+                    <span class="doc-index__title">{{ link.title }}</span>
+                    <span class="doc-index__arrow" aria-hidden="true">→</span>
+                    <span class="doc-index__desc">{{ link.description }}</span>
+                </a>
+            </li>
             {% endfor %}
-        </div>
-    </div>
-</section>
+        </ul>
+    </section>
+</div>
 
 <script>
-    // Simple search filter
-    const searchInput = document.getElementById('docs-search-input');
-    const cards = document.querySelectorAll('.category-card');
+(function () {
+    var box = document.querySelector('[data-filter]');
+    if (!box) return;
+    box.hidden = false; // filter only exists when JS can run it
+    var input = box.querySelector('input');
+    var count = box.querySelector('.hub__count');
+    var items = Array.prototype.slice.call(document.querySelectorAll('[data-item]'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('[data-group]'));
+    var empty = document.querySelector('[data-empty]');
+    function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+    var texts = items.map(function (li) { return norm(li.textContent); });
 
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            if (text.includes(query) || query === '') {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
+    input.addEventListener('input', function () {
+        var q = norm(input.value.trim());
+        var shown = 0;
+        items.forEach(function (li, i) {
+            var match = !q || texts[i].indexOf(q) !== -1;
+            li.hidden = !match;
+            if (match) shown++;
         });
+        groups.forEach(function (g) { g.hidden = !g.querySelector('[data-item]:not([hidden])'); });
+        empty.hidden = shown !== 0;
+        count.textContent = q ? (shown === 1 ? count.dataset.countOne : count.dataset.countMany.replace('{n}', shown)) : '';
     });
+})();
 </script>

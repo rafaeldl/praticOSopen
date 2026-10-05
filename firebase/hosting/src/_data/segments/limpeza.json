@@ -3,379 +3,517 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Empresa de Limpeza | PraticOS",
-    "description": "Chega de funcionário fantasma! Sistema para empresa de limpeza com check-in por geolocalização, checklist digital e fotos antes/depois. Controle sua equipe em tempo real.",
-    "keywords": "sistema para empresa de limpeza, software limpeza comercial, app limpeza profissional, gestão equipe limpeza, controle funcionários limpeza, ordem de serviço limpeza",
+    "title": "Sistema para Empresa de Limpeza: OS e checklist | PraticOS",
+    "description": "App de ordem de serviço para empresa de limpeza: agenda da equipe, checklist por ambiente, fotos de antes e depois e orçamento aprovado por link.",
+    "keywords": "sistema para empresa de limpeza, software limpeza comercial, app limpeza profissional, gestão equipe limpeza, checklist de limpeza, ordem de serviço limpeza",
     "ogTitle": "Sistema para Empresa de Limpeza | PraticOS",
-    "ogDescription": "Chega de funcionário fantasma! Sistema com check-in por geolocalização, checklist digital e fotos antes/depois. Controle sua equipe em tempo real.",
+    "ogDescription": "Serviços de limpeza no celular: agenda por pessoa da equipe, checklist por ambiente, fotos de antes e depois e orçamento aprovado por link.",
     "hero": {
-      "badge": "🧹 Empresas de Limpeza",
-      "title": "Chega de funcionário fantasma:",
-      "titleHighlight": "saiba onde sua equipe está em tempo real",
-      "subtitle": "Check-in por geolocalização, checklist digital para cada tipo de serviço e fotos antes/depois para provar ao cliente. Relatórios automáticos sem esforço.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Equipes ativas" },
-        "orders": { "value": "8k+", "label": "Serviços realizados" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Antes, depois e checklist",
+      "titleMark": "em cada serviço.",
+      "lede": "PraticOS é o app de ordem de serviço para empresas de limpeza e conservação. Agende o serviço para a equipe, siga o checklist por ambiente com fotos de antes e depois, mande o orçamento por link para o cliente aprovar e registre o pagamento — pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0461",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Clínica Vida Plena"
+          },
+          {
+            "label": "Local",
+            "value": "Rua das Flores, 120 · 2º andar"
+          },
+          {
+            "label": "Agendado",
+            "value": "Sáb, 18/10 · 07:00"
+          },
+          {
+            "label": "Serviço",
+            "value": "Limpeza pós-obra · 180 m²"
+          },
+          {
+            "label": "Fotos",
+            "value": "16 anexadas · antes e depois"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 1.440,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Concluído",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem gerencia empresa de limpeza",
+      "title": "Onde a empresa de limpeza perde dinheiro",
+      "lede": "O serviço foi feito. O prejuízo vem da reclamação sem foto para responder, do orçamento combinado por áudio e da faxina extra que ninguém lançou.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "👻", "title": "Funcionário fantasma", "text": "Colaborador marca ponto mas não está no local. Você paga por serviço que não foi feito e perde a confiança do cliente." },
-        { "icon": "📍", "title": "Não sabe onde a equipe está", "text": "Precisa ligar para cada funcionário para saber se chegou no cliente. Perde tempo e não tem controle real." },
-        { "icon": "😤", "title": "Cliente reclama da qualidade", "text": "Reclamações constantes sobre limpeza mal feita. Sem padrão definido, cada funcionário faz de um jeito." },
-        { "icon": "📝", "title": "Ordem de serviço no papel", "text": "Fichas de papel se perdem, rasgam ou ficam ilegíveis. No final do mês, não sabe quantos serviços foram feitos." },
-        { "icon": "📸", "title": "Não consegue provar o serviço", "text": "Cliente diz que a limpeza não foi feita, mas você não tem fotos antes/depois para comprovar." },
-        { "icon": "📱", "title": "WhatsApp caótico", "text": "Mensagens perdidas em grupos, informações desencontradas e muito tempo gasto coordenando pelo celular." }
+        {
+          "problem": "Reclamação sem como responder",
+          "detail": "“O banheiro não foi limpo.” Sem foto, é a sua palavra contra a do cliente.",
+          "answer": "Cada item do checklist aceita fotos. A equipe registra o ambiente antes e depois, e as fotos ficam na OS."
+        },
+        {
+          "problem": "Cada um limpa de um jeito",
+          "detail": "Quem entrou na equipe esta semana não sabe o padrão que aquele cliente espera.",
+          "answer": "Monte um checklist por tipo de serviço — residencial, comercial, pós-obra — e use em todas as OS. Cada item é marcado sim, não ou não se aplica."
+        },
+        {
+          "problem": "Escala perdida no grupo",
+          "detail": "Quem vai aonde amanhã? A resposta está no meio de cem mensagens.",
+          "answer": "Cada serviço é uma OS com dia, hora e endereço do cliente. A agenda mostra o mês, filtra por pessoa e o celular avisa antes do horário."
+        },
+        {
+          "problem": "Orçamento combinado por áudio",
+          "detail": "O cliente lembra de um preço, você lembra de outro.",
+          "answer": "O orçamento fica na OS, com os serviços do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+        },
+        {
+          "problem": "Serviço feito e não cobrado",
+          "detail": "A faxina extra de sábado não entrou na conta do mês.",
+          "answer": "Cada serviço entra na OS com preço. Registre pagamentos inteiros ou parciais e veja no painel quem ainda deve."
+        },
+        {
+          "problem": "Cliente perguntando se a equipe já foi",
+          "detail": "O gerente do escritório liga para saber se a limpeza de ontem aconteceu.",
+          "answer": "O cliente abre a OS pelo link e vê o status e as fotos do serviço, sem precisar ligar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia da empresa de limpeza",
-      "items": [
-        { "icon": "📍", "title": "Check-in por geolocalização", "text": "Funcionário só marca presença quando está no local.", "highlight": "Acabou o funcionário fantasma." },
-        { "icon": "📋", "title": "Checklist digital por ambiente", "text": "Lista de tarefas para cada cômodo ou área. Funcionário marca o que fez e você acompanha em tempo real." },
-        { "icon": "📸", "title": "Fotos antes e depois", "text": "Documentação visual obrigatória. Prove ao cliente que o serviço foi bem feito." },
-        { "icon": "📊", "title": "Relatório automático para cliente", "text": "Cliente recebe relatório com fotos e checklist preenchido.", "highlight": "Profissionalismo que fideliza." },
-        { "icon": "🗺️", "title": "Acompanhamento em tempo real", "text": "Veja onde cada funcionário está e o status de cada serviço no mapa." },
-        { "icon": "💰", "title": "Controle financeiro completo", "text": "Saiba quanto faturou, custos por serviço e lucro real. Dashboard completo." }
+    "workflow": {
+      "title": "Como um serviço de limpeza passa pelo PraticOS",
+      "lede": "Do orçamento ao pagamento, cada serviço fica registrado na OS do cliente.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Agende o serviço",
+          "text": "Crie a OS com o cliente, o endereço e os serviços do catálogo e marque dia e hora. O serviço aparece na agenda de quem vai executar.",
+          "facts": [
+            "Agenda do mês filtrada por pessoa",
+            "Lembrete no celular antes do horário",
+            "“Dia todo” para serviços sem hora marcada"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do mês com as OS marcadas no app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Siga o checklist com fotos",
+          "text": "No local, a equipe abre a OS e segue o checklist do tipo de serviço, ambiente por ambiente, com fotos de antes e depois.",
+          "facts": [
+            "Itens com verificação, texto ou foto",
+            "Um modelo por tipo de limpeza",
+            "Checklist concluído só reabre com Admin, Gerente ou Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "03",
+          "title": "Mande o link ao cliente",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele aprova o orçamento, acompanha o status, vê as fotos e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Avaliação do cliente depois de concluído",
+            "PDF da OS com checklist e fotos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "04",
+          "title": "Receba pelo serviço",
+          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "limpeza por ambiente",
-      "text": "Padronize a qualidade do serviço com checklists específicos para cada tipo de ambiente. Funcionário marca cada tarefa concluída.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Limpeza",
-      "items": [
-        { "icon": "📸", "text": "Fotos antes de iniciar" },
-        { "icon": "🧹", "text": "Varrer e aspirar todos os ambientes" },
-        { "icon": "🧽", "text": "Limpar superfícies e móveis" },
-        { "icon": "🚿", "text": "Higienizar banheiros" },
-        { "icon": "🍳", "text": "Limpar cozinha e eletrodomésticos" },
-        { "icon": "📸", "text": "Fotos depois de finalizar" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar sua empresa de limpeza",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço com endereço, checklist e instruções específicas para cada cliente." },
-        { "icon": "image", "title": "Fotos Antes/Depois", "text": "Documente o estado do local antes e depois da limpeza. Prove a qualidade do serviço.", "color": "yellow" },
-        { "icon": "location", "title": "Geolocalização", "text": "Saiba exatamente onde sua equipe está. Check-in/check-out com localização comprovada.", "color": "orange" },
-        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestão de Equipe", "text": "Acompanhe a produtividade de cada funcionário. Histórico completo de serviços.", "color": "purple" },
-        { "icon": "pdf", "title": "Relatório para Cliente", "text": "Envie relatórios profissionais com fotos e checklist preenchido automaticamente.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu tinha problemas com funcionários que marcavam ponto mas não iam no cliente. Agora com o check-in por geolocalização acabou esse problema. E os clientes adoram receber o relatório com fotos.",
-      "name": "Carla Mendes",
-      "role": "Dona de empresa de limpeza há 8 anos",
-      "metric": "Redução de 90% nas reclamações"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem tem empresa de limpeza",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Como funciona o check-in por geolocalização?", "answer": "O funcionário abre o app quando chega no local do serviço. O sistema registra a localização automaticamente, garantindo que ele realmente está no endereço do cliente." },
-        { "question": "Posso criar checklists diferentes para cada tipo de limpeza?", "answer": "Sim! Você pode criar checklists específicos para limpeza residencial, comercial, pós-obra, etc. Cada um com as tarefas adequadas para aquele tipo de serviço." },
-        { "question": "Meus funcionários vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se sabe usar o celular, sabe usar o PraticOS." },
-        { "question": "O cliente consegue ver o relatório?", "answer": "Sim! Você pode enviar um relatório automático com todas as fotos e o checklist preenchido. O cliente recebe por email ou WhatsApp." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário e 30 fotos por mês. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "O app registra a localização da equipe?",
+          "answer": "Não. O PraticOS não faz rastreamento nem ponto por GPS. O que ele registra é a OS: horário agendado, checklist marcado e fotos de antes e depois."
+        },
+        {
+          "question": "Posso ter checklists diferentes para cada tipo de limpeza?",
+          "answer": "Sim. Crie um modelo para cada serviço — residencial, comercial, pós-obra, vidros — e escolha o certo ao abrir a OS. Você pode reorganizar e editar os itens quando quiser."
+        },
+        {
+          "question": "A equipe pode usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Quem executa não vê valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "controlar sua equipe",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Cleaning Company Management System | PraticOS",
-    "description": "Stop ghost employees! Cleaning business software with geolocation check-in, digital checklists and before/after photos. Track your team in real time.",
-    "keywords": "cleaning company software, cleaning business management, janitorial service app, cleaning crew tracking, maid service software, cleaning service scheduling",
-    "ogTitle": "Cleaning Company Management System | PraticOS",
-    "ogDescription": "Stop ghost employees! System with geolocation check-in, digital checklists and before/after photos. Track your team in real time.",
+    "title": "Cleaning Business Software: Jobs and Checklists | PraticOS",
+    "description": "Work order app for cleaning companies: crew schedule, room-by-room checklists, before and after photos and quotes customers approve by link. Free plan.",
+    "keywords": "cleaning business software, cleaning company app, janitorial work order software, cleaning checklist app, commercial cleaning scheduling",
+    "ogTitle": "Cleaning Business Software | PraticOS",
+    "ogDescription": "Cleaning jobs on your phone: schedule by crew member, room-by-room checklists, before and after photos and quotes approved by link.",
     "hero": {
-      "badge": "🧹 Cleaning Companies",
-      "title": "Stop ghost employees:",
-      "titleHighlight": "know where your team is in real time",
-      "subtitle": "Geolocation check-in, digital checklists for each service type and before/after photos to prove to the client. Automatic reports effortlessly.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Active teams" },
-        "orders": { "value": "8k+", "label": "Services completed" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Before, after and checklist",
+      "titleMark": "on every job.",
+      "lede": "PraticOS is the work order app for cleaning and janitorial companies. Schedule the job for your crew, follow a room-by-room checklist with before and after photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0461",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Bright Family Dental"
+          },
+          {
+            "label": "Location",
+            "value": "120 Elm St · Suite 200"
+          },
+          {
+            "label": "Scheduled",
+            "value": "Sat, Oct 18 · 7:00 AM"
+          },
+          {
+            "label": "Service",
+            "value": "Post-construction clean · 1,900 sq ft"
+          },
+          {
+            "label": "Photos",
+            "value": "16 attached · before and after"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$680.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Done",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for cleaning business owners",
+      "title": "Where a cleaning company loses money",
+      "lede": "The job got done. The losses come from the complaint with no photo to answer it, the price agreed over a voice note and the extra clean nobody billed.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "👻", "title": "Ghost employees", "text": "Employee clocks in but isn't at the location. You pay for work that wasn't done and lose client trust." },
-        { "icon": "📍", "title": "Don't know where the team is", "text": "Need to call each employee to know if they arrived at the client. Waste time and have no real control." },
-        { "icon": "😤", "title": "Client complaints about quality", "text": "Constant complaints about poor cleaning. Without defined standards, each employee does it differently." },
-        { "icon": "📝", "title": "Paper work orders", "text": "Paper forms get lost, torn or become illegible. At month's end, don't know how many services were done." },
-        { "icon": "📸", "title": "Can't prove the service", "text": "Client says cleaning wasn't done, but you don't have before/after photos to prove it." },
-        { "icon": "📱", "title": "Chaotic WhatsApp", "text": "Lost messages in groups, conflicting information and too much time spent coordinating via phone." }
+        {
+          "problem": "Complaints you can't answer",
+          "detail": "“The bathroom wasn't cleaned.” Without a photo, it's your word against the customer's.",
+          "answer": "Every checklist item takes photos. The crew records each room before and after, and the photos stay on the work order."
+        },
+        {
+          "problem": "Everyone cleans their own way",
+          "detail": "The new hire doesn't know the standard that customer expects.",
+          "answer": "Build a checklist for each type of job — residential, commercial, post-construction — and use it on every work order. Each item is marked yes, no or not applicable."
+        },
+        {
+          "problem": "Schedule lost in the group chat",
+          "detail": "Who's going where tomorrow? The answer is buried under a hundred messages.",
+          "answer": "Each job is a work order with a date, time and the customer's address. The calendar shows the month, filters by person and the phone alerts before the job."
+        },
+        {
+          "problem": "Prices agreed over a voice note",
+          "detail": "The customer remembers one price, you remember another.",
+          "answer": "The quote lives on the work order, with services from your catalog. The customer approves it by link and the approval is recorded."
+        },
+        {
+          "problem": "Work done but never billed",
+          "detail": "The extra Saturday clean never made it onto the monthly invoice.",
+          "answer": "Each service goes on the work order with a price. Record full or partial payments and see on the dashboard who still owes you."
+        },
+        {
+          "problem": "Customers asking if the crew showed up",
+          "detail": "The office manager calls to check whether last night's clean happened.",
+          "answer": "The customer opens the work order from a link and sees the status and photos without calling."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for daily cleaning business operations",
-      "items": [
-        { "icon": "📍", "title": "Geolocation check-in", "text": "Employee can only clock in when at the location.", "highlight": "No more ghost employees." },
-        { "icon": "📋", "title": "Digital checklist by room", "text": "Task list for each room or area. Employee marks what was done and you track in real time." },
-        { "icon": "📸", "title": "Before and after photos", "text": "Mandatory visual documentation. Prove to the client the service was well done." },
-        { "icon": "📊", "title": "Automatic report for client", "text": "Client receives report with photos and filled checklist.", "highlight": "Professionalism that retains clients." },
-        { "icon": "🗺️", "title": "Real-time tracking", "text": "See where each employee is and the status of each service on the map." },
-        { "icon": "💰", "title": "Complete financial control", "text": "Know how much you billed, costs per service and real profit. Complete dashboard." }
+    "workflow": {
+      "title": "How a cleaning job moves through PraticOS",
+      "lede": "From quote to payment, every job is recorded on the customer's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Schedule the job",
+          "text": "Create the work order with the customer, address and catalog services, and set the date and time. The job shows up on the calendar of whoever is doing it.",
+          "facts": [
+            "Monthly calendar filtered by person",
+            "Phone reminder before the start time",
+            "“All day” for jobs with no set time"
+          ],
+          "image": "agenda.png",
+          "alt": "Monthly calendar with scheduled work orders in the PraticOS app"
+        },
+        {
+          "number": "02",
+          "title": "Follow the checklist with photos",
+          "text": "On site, the crew opens the work order and follows the checklist for that job type, room by room, with before and after photos.",
+          "facts": [
+            "Items with check, text or photo",
+            "One template per type of clean",
+            "Completed checklists reopen only for Admin, Manager or Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "03",
+          "title": "Send the customer a link",
+          "text": "The customer opens the work order in a browser, nothing to install. They approve the quote, follow the status, see the photos and leave comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Customer rating once the job is done",
+            "Work order PDF with checklist and photos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "04",
+          "title": "Get paid for the job",
+          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "facts": [
+            "Partial payment and discount on the same work order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Cleaning checklist",
-      "titleHighlight": "by room",
-      "text": "Standardize service quality with specific checklists for each type of environment. Employee marks each completed task.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Cleaning Checklist",
-      "items": [
-        { "icon": "📸", "text": "Photos before starting" },
-        { "icon": "🧹", "text": "Sweep and vacuum all areas" },
-        { "icon": "🧽", "text": "Clean surfaces and furniture" },
-        { "icon": "🚿", "text": "Sanitize bathrooms" },
-        { "icon": "🍳", "text": "Clean kitchen and appliances" },
-        { "icon": "📸", "text": "Photos after finishing" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your cleaning company",
-      "subtitle": "Powerful and intuitive tools to boost your productivity",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create work orders with address, checklist and specific instructions for each client." },
-        { "icon": "image", "title": "Before/After Photos", "text": "Document the location condition before and after cleaning. Prove service quality.", "color": "yellow" },
-        { "icon": "location", "title": "Geolocation", "text": "Know exactly where your team is. Check-in/check-out with verified location.", "color": "orange" },
-        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
-        { "icon": "users", "title": "Team Management", "text": "Track each employee's productivity. Complete service history.", "color": "purple" },
-        { "icon": "pdf", "title": "Client Report", "text": "Send professional reports with photos and automatically filled checklist.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I had problems with employees clocking in but not going to the client. Now with geolocation check-in that problem is gone. And clients love receiving the report with photos.",
-      "name": "Carla Mendes",
-      "role": "Cleaning business owner for 8 years",
-      "metric": "90% reduction in complaints"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from cleaning companies",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "How does geolocation check-in work?", "answer": "The employee opens the app when arriving at the service location. The system automatically records the location, ensuring they are actually at the client's address." },
-        { "question": "Can I create different checklists for each type of cleaning?", "answer": "Yes! You can create specific checklists for residential, commercial, post-construction cleaning, etc. Each with tasks appropriate for that type of service." },
-        { "question": "Will my employees be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
-        { "question": "Can the client see the report?", "answer": "Yes! You can send an automatic report with all photos and the filled checklist. The client receives it by email or WhatsApp." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user and 30 photos per month. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Does the app track my crew's location?",
+          "answer": "No. PraticOS doesn't do GPS tracking or time clocks. What it records is the work order: scheduled time, checklist items marked and before and after photos."
+        },
+        {
+          "question": "Can I have different checklists for each type of clean?",
+          "answer": "Yes. Create a template for each service — residential, commercial, post-construction, windows — and pick the right one when you open the work order. You can reorder and edit the items any time."
+        },
+        {
+          "question": "Can my crew use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Crew members don't see financial values. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and start",
-      "titleHighlight": "controlling your team",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Empresa de Limpieza | PraticOS",
-    "description": "¡Basta de empleados fantasma! Sistema para empresa de limpieza con check-in por geolocalización, checklist digital y fotos antes/después. Controla tu equipo en tiempo real.",
-    "keywords": "sistema para empresa de limpieza, software limpieza comercial, app limpieza profesional, gestión equipo limpieza, control empleados limpieza, orden de servicio limpieza",
+    "title": "Sistema para Empresa de Limpieza y Checklist | PraticOS",
+    "description": "App de órdenes de servicio para empresas de limpieza: agenda del equipo, checklist por ambiente, fotos de antes y después y presupuesto aprobado por link.",
+    "keywords": "sistema para empresa de limpieza, software de limpieza comercial, app limpieza profesional, gestión de equipo de limpieza, checklist de limpieza, orden de servicio limpieza",
     "ogTitle": "Sistema para Empresa de Limpieza | PraticOS",
-    "ogDescription": "¡Basta de empleados fantasma! Sistema con check-in por geolocalización, checklist digital y fotos antes/después. Controla tu equipo en tiempo real.",
+    "ogDescription": "Servicios de limpieza en el celular: agenda por persona del equipo, checklist por ambiente, fotos de antes y después y presupuesto aprobado por link.",
     "hero": {
-      "badge": "🧹 Empresas de Limpieza",
-      "title": "Basta de empleados fantasma:",
-      "titleHighlight": "sabe dónde está tu equipo en tiempo real",
-      "subtitle": "Check-in por geolocalización, checklist digital para cada tipo de servicio y fotos antes/después para probar al cliente. Informes automáticos sin esfuerzo.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Equipos activos" },
-        "orders": { "value": "8k+", "label": "Servicios realizados" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Antes, después y checklist",
+      "titleMark": "en cada servicio.",
+      "lede": "PraticOS es la app de órdenes de servicio para empresas de limpieza y mantenimiento. Agenda el servicio para el equipo, sigue el checklist por ambiente con fotos de antes y después, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0461",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Clínica Vida Plena"
+          },
+          {
+            "label": "Lugar",
+            "value": "Calle Las Flores 120 · 2.º piso"
+          },
+          {
+            "label": "Agendado",
+            "value": "Sáb 18/10 · 07:00"
+          },
+          {
+            "label": "Servicio",
+            "value": "Limpieza de fin de obra · 180 m²"
+          },
+          {
+            "label": "Fotos",
+            "value": "16 adjuntas · antes y después"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 680,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En curso",
+          "Terminado",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien gestiona empresa de limpieza",
+      "title": "Dónde pierde plata la empresa de limpieza",
+      "lede": "El servicio se hizo. La pérdida viene del reclamo sin foto para responder, del precio acordado por audio y de la limpieza extra que nadie cargó.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "👻", "title": "Empleado fantasma", "text": "Colaborador marca entrada pero no está en el lugar. Pagas por servicio que no fue hecho y pierdes la confianza del cliente." },
-        { "icon": "📍", "title": "No sabe dónde está el equipo", "text": "Necesita llamar a cada empleado para saber si llegó al cliente. Pierdes tiempo y no tienes control real." },
-        { "icon": "😤", "title": "Cliente reclama de la calidad", "text": "Reclamos constantes sobre limpieza mal hecha. Sin estándar definido, cada empleado hace de una manera." },
-        { "icon": "📝", "title": "Orden de servicio en papel", "text": "Fichas de papel se pierden, se rompen o quedan ilegibles. Al final del mes, no sabes cuántos servicios fueron hechos." },
-        { "icon": "📸", "title": "No puede probar el servicio", "text": "Cliente dice que la limpieza no fue hecha, pero no tienes fotos antes/después para comprobar." },
-        { "icon": "📱", "title": "WhatsApp caótico", "text": "Mensajes perdidos en grupos, información contradictoria y mucho tiempo gastado coordinando por celular." }
+        {
+          "problem": "Reclamos sin cómo responder",
+          "detail": "“El baño no se limpió.” Sin foto, es tu palabra contra la del cliente.",
+          "answer": "Cada ítem del checklist acepta fotos. El equipo registra el ambiente antes y después, y las fotos quedan en la orden."
+        },
+        {
+          "problem": "Cada uno limpia a su manera",
+          "detail": "Quien entró esta semana no conoce el estándar que espera ese cliente.",
+          "answer": "Arma un checklist por tipo de servicio — residencial, comercial, fin de obra — y úsalo en todas las órdenes. Cada ítem se marca sí, no o no aplica."
+        },
+        {
+          "problem": "Turnos perdidos en el grupo",
+          "detail": "¿Quién va adónde mañana? La respuesta está entre cien mensajes.",
+          "answer": "Cada servicio es una orden con día, hora y dirección del cliente. La agenda muestra el mes, filtra por persona y el celular avisa antes del horario."
+        },
+        {
+          "problem": "Precios acordados por audio",
+          "detail": "El cliente recuerda un precio y tú recuerdas otro.",
+          "answer": "El presupuesto queda en la orden, con los servicios de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+        },
+        {
+          "problem": "Trabajo hecho y no cobrado",
+          "detail": "La limpieza extra del sábado no entró en la cuenta del mes.",
+          "answer": "Cada servicio entra en la orden con precio. Registra pagos totales o parciales y ve en el panel quién todavía debe."
+        },
+        {
+          "problem": "Clientes preguntando si el equipo fue",
+          "detail": "El encargado de la oficina llama para saber si la limpieza de anoche se hizo.",
+          "answer": "El cliente abre la orden desde un link y ve el estado y las fotos del servicio, sin llamar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el día a día de la empresa de limpieza",
-      "items": [
-        { "icon": "📍", "title": "Check-in por geolocalización", "text": "Empleado solo marca presencia cuando está en el lugar.", "highlight": "Se acabó el empleado fantasma." },
-        { "icon": "📋", "title": "Checklist digital por ambiente", "text": "Lista de tareas para cada habitación o área. Empleado marca lo que hizo y tú acompañas en tiempo real." },
-        { "icon": "📸", "title": "Fotos antes y después", "text": "Documentación visual obligatoria. Prueba al cliente que el servicio fue bien hecho." },
-        { "icon": "📊", "title": "Informe automático para cliente", "text": "Cliente recibe informe con fotos y checklist completado.", "highlight": "Profesionalismo que fideliza." },
-        { "icon": "🗺️", "title": "Seguimiento en tiempo real", "text": "Mira dónde está cada empleado y el estado de cada servicio en el mapa." },
-        { "icon": "💰", "title": "Control financiero completo", "text": "Sabe cuánto facturaste, costos por servicio y ganancia real. Dashboard completo." }
+    "workflow": {
+      "title": "Cómo pasa un servicio de limpieza por PraticOS",
+      "lede": "Del presupuesto al pago, cada servicio queda registrado en la orden del cliente.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Agenda el servicio",
+          "text": "Crea la orden con el cliente, la dirección y los servicios del catálogo, y marca día y hora. El servicio aparece en la agenda de quien lo va a hacer.",
+          "facts": [
+            "Agenda del mes filtrada por persona",
+            "Recordatorio en el celular antes del horario",
+            "“Todo el día” para servicios sin hora fija"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda del mes con órdenes marcadas en la app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Sigue el checklist con fotos",
+          "text": "En el lugar, el equipo abre la orden y sigue el checklist de ese tipo de servicio, ambiente por ambiente, con fotos de antes y después.",
+          "facts": [
+            "Ítems con verificación, texto o foto",
+            "Una plantilla por tipo de limpieza",
+            "Un checklist terminado solo se reabre con Admin, Gerente o Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "03",
+          "title": "Envía el link al cliente",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Aprueba el presupuesto, sigue el estado, ve las fotos y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "Calificación del cliente al terminar",
+            "PDF de la orden con checklist y fotos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "04",
+          "title": "Cobra el servicio",
+          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "limpieza por ambiente",
-      "text": "Estandariza la calidad del servicio con checklists específicos para cada tipo de ambiente. Empleado marca cada tarea completada.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Limpieza",
-      "items": [
-        { "icon": "📸", "text": "Fotos antes de iniciar" },
-        { "icon": "🧹", "text": "Barrer y aspirar todos los ambientes" },
-        { "icon": "🧽", "text": "Limpiar superficies y muebles" },
-        { "icon": "🚿", "text": "Higienizar baños" },
-        { "icon": "🍳", "text": "Limpiar cocina y electrodomésticos" },
-        { "icon": "📸", "text": "Fotos después de finalizar" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tu empresa de limpieza",
-      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio con dirección, checklist e instrucciones específicas para cada cliente." },
-        { "icon": "image", "title": "Fotos Antes/Después", "text": "Documenta el estado del lugar antes y después de la limpieza. Prueba la calidad del servicio.", "color": "yellow" },
-        { "icon": "location", "title": "Geolocalización", "text": "Sabe exactamente dónde está tu equipo. Check-in/check-out con ubicación comprobada.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestión de Equipo", "text": "Acompaña la productividad de cada empleado. Historial completo de servicios.", "color": "purple" },
-        { "icon": "pdf", "title": "Informe para Cliente", "text": "Envía informes profesionales con fotos y checklist completado automáticamente.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes tenía problemas con empleados que marcaban entrada pero no iban al cliente. Ahora con el check-in por geolocalización se acabó ese problema. Y los clientes adoran recibir el informe con fotos.",
-      "name": "Carla Mendes",
-      "role": "Dueña de empresa de limpieza hace 8 años",
-      "metric": "Reducción de 90% en reclamos"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien tiene empresa de limpieza",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Cómo funciona el check-in por geolocalización?", "answer": "El empleado abre el app cuando llega al lugar del servicio. El sistema registra la ubicación automáticamente, garantizando que realmente está en la dirección del cliente." },
-        { "question": "¿Puedo crear checklists diferentes para cada tipo de limpieza?", "answer": "¡Sí! Puedes crear checklists específicos para limpieza residencial, comercial, post-obra, etc. Cada uno con las tareas adecuadas para ese tipo de servicio." },
-        { "question": "¿Mis empleados van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
-        { "question": "¿El cliente puede ver el informe?", "answer": "¡Sí! Puedes enviar un informe automático con todas las fotos y el checklist completado. El cliente lo recibe por email o WhatsApp." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario y 30 fotos por mes. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿La app registra la ubicación del equipo?",
+          "answer": "No. PraticOS no hace rastreo ni control de asistencia por GPS. Lo que registra es la orden: horario agendado, checklist marcado y fotos de antes y después."
+        },
+        {
+          "question": "¿Puedo tener checklists distintos para cada tipo de limpieza?",
+          "answer": "Sí. Crea una plantilla para cada servicio — residencial, comercial, fin de obra, vidrios — y elige la correcta al abrir la orden. Puedes reordenar y editar los ítems cuando quieras."
+        },
+        {
+          "question": "¿El equipo puede usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Quien ejecuta no ve valores financieros. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "controlar tu equipo",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

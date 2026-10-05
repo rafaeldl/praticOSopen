@@ -3,155 +3,189 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visão Geral da Agenda",
-        "intro": "A Agenda do PraticOS é uma visualização de calendário mensal que exibe suas Ordens de Serviço agendadas. Ela trabalha com dois tipos de data: a Data Agendada (quando o serviço será realizado) e a Data de Entrega (prazo final para conclusão). A agenda mostra as ordens pela Data Agendada, permitindo que você organize sua rotina de atendimentos de forma visual e prática.",
-        "infoCard": {
-          "title": "Dois Tipos de Data",
-          "content": "A Data Agendada indica quando o serviço será executado e aparece no calendário. A Data de Entrega é o prazo final para conclusão da OS. Ambas são opcionais e independentes — use a que fizer mais sentido para seu negócio."
-        },
+        "title": "Como a agenda funciona",
+        "intro": "A aba <strong>Agenda</strong> mostra o mês em forma de calendário e, em cada dia, as OS marcadas para ele. A OS entra na agenda pela data em que o serviço vai ser feito — não é preciso cadastrar nada à parte.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>",
-            "color": "blue",
-            "title": "Calendário Mensal",
-            "description": "Visualize todas as ordens agendadas por mês com marcadores de pontos nos dias"
+            "title": "Agendado",
+            "description": "Dia e hora em que o técnico vai fazer o serviço. É esta data que a agenda usa."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Horário Preciso",
-            "description": "Agende com data e horário exatos para cada atendimento"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
-            "color": "orange",
-            "title": "Lembretes",
-            "description": "Receba notificações antes dos agendamentos para não perder nenhum compromisso"
-          }
-        ]
-      },
-      {
-        "id": "calendario",
-        "title": "Calendário",
-        "intro": "O calendário mensal exibe pontos coloridos nos dias que possuem ordens de serviço agendadas. Ao tocar em um dia, você vê a lista de ordens agendadas para aquela data, organizadas por horário.",
-        "subsections": [
-          {
-            "title": "Como Usar",
-            "steps": [
-              "Abra o app e toque na aba <strong>Agenda</strong>",
-              "O calendário mensal será exibido com pontos nos dias que possuem ordens agendadas",
-              "Navegue entre os meses tocando nas setas ou deslizando",
-              "Toque em um dia com ponto para ver as ordens daquele dia",
-              "A lista de ordens aparece ordenada por horário",
-              "Toque em uma ordem para abrir seus detalhes"
-            ]
+            "title": "Entrega",
+            "description": "Prazo para entregar o serviço ao cliente. Também aceita hora. A agenda só usa esta data quando o agendamento está desligado."
           }
         ],
         "infoCard": {
-          "title": "Dia Todo",
-          "content": "Ordens agendadas com horário 00:00 (meia-noite) aparecem como \"Dia todo\" no final da lista. Use essa opção quando o horário exato não for relevante."
+          "title": "O campo Agendado não aparece?",
+          "content": "Ele depende de uma opção da empresa. Em <strong>Mais → Dados da Empresa</strong>, ligue <strong>Agendamento</strong>. Com a opção desligada, a agenda passa a mostrar as OS pela data de entrega, todas como “Dia todo”, e os lembretes de agendamento não são enviados."
+        }
+      },
+      {
+        "id": "calendario",
+        "title": "Ver o calendário",
+        "intro": "Os dias com OS marcadas ganham pontos embaixo do número — até quatro, um por OS. Abaixo do calendário fica a lista do dia escolhido, em ordem de horário.",
+        "steps": [
+          "Toque na aba <strong>Agenda</strong>.",
+          "Use as setas ao lado do mês, ou deslize o calendário, para trocar de mês.",
+          "Toque em um dia com pontos para ver as OS daquele dia.",
+          "Toque em uma OS da lista para abrir os detalhes: cliente, serviços, fotos e status."
+        ],
+        "infoCard": {
+          "title": "Dia todo",
+          "content": "Uma OS marcada para 00:00 aparece como “Dia todo”. Use esse horário quando o cliente não marcou hora — por exemplo, um carro que fica na oficina o dia inteiro."
         }
       },
       {
         "id": "agendar",
         "title": "Agendar uma OS",
-        "intro": "Para que uma Ordem de Serviço apareça na agenda, basta definir a Data Agendada no formulário da OS. Você pode escolher tanto a data quanto o horário específico do atendimento.",
-        "subsections": [
-          {
-            "title": "Passo a Passo",
-            "steps": [
-              "Abra o formulário de criação ou edição de uma OS",
-              "Toque no campo <strong>Data Agendada</strong>",
-              "Selecione a data desejada no calendário",
-              "Escolha o horário do atendimento (ou deixe 00:00 para \"Dia todo\")",
-              "Salve a OS — ela aparecerá automaticamente na agenda"
-            ]
-          }
+        "intro": "Agendar é preencher um campo da OS. Dá para fazer na hora de criar o orçamento ou depois, quando o cliente aprovar.",
+        "steps": [
+          "Abra uma OS existente ou crie uma nova.",
+          "Toque em <strong>Agendado</strong>.",
+          "Escolha o dia e a hora do atendimento. Se não houver hora certa, deixe 00:00.",
+          "Salve. A OS aparece no dia escolhido da agenda e o lembrete é programado no celular."
         ],
-        "infoCard": {
-          "title": "Data de Entrega com Horário",
-          "content": "A Data de Entrega agora também suporta seleção de horário. Você pode definir um prazo final com hora específica para maior controle dos prazos."
+        "warningCard": {
+          "title": "Quem pode mudar a data",
+          "content": "Depois que a OS sai de Orçamento, Supervisor e Técnico não editam mais os campos principais, incluindo as datas. Nesse caso, peça a um Administrador ou Gerente. As regras completas estão em <a href=\"perfis.html\">Perfis de usuário</a>."
         }
       },
       {
         "id": "lembretes",
-        "title": "Lembretes",
-        "intro": "Configure notificações para ser lembrado antes dos agendamentos. Os lembretes são enviados como notificações locais no seu dispositivo, garantindo que você não perca nenhum compromisso.",
+        "title": "Lembrete antes do atendimento",
+        "intro": "O celular avisa um pouco antes de cada OS agendada, com o número da OS e o nome do cliente. O aviso é programado no próprio aparelho, então chega mesmo com o app fechado.",
         "subsections": [
           {
-            "title": "Opções de Lembrete",
+            "title": "Antecedência",
             "validationList": [
-              { "label": "Desativado", "text": "Nenhum lembrete será enviado" },
-              { "label": "15 minutos", "text": "Notificação 15 minutos antes do agendamento" },
-              { "label": "30 minutos (padrão)", "text": "Notificação 30 minutos antes do agendamento" },
-              { "label": "1 hora", "text": "Notificação 1 hora antes do agendamento" },
-              { "label": "2 horas", "text": "Notificação 2 horas antes do agendamento" }
+              {
+                "label": "Desativado",
+                "text": "Nenhum aviso de agendamento."
+              },
+              {
+                "label": "15 min antes",
+                "text": "Para quem está perto do cliente ou na própria oficina."
+              },
+              {
+                "label": "30 min antes",
+                "text": "Padrão do app."
+              },
+              {
+                "label": "1 hora antes",
+                "text": "Para deslocamentos curtos."
+              },
+              {
+                "label": "2 horas antes",
+                "text": "Para atendimentos longe ou que exigem separar peças."
+              }
             ]
           },
           {
-            "title": "Como Configurar",
+            "title": "Mudar a antecedência",
             "steps": [
-              "Acesse <strong>Configurações</strong> no app",
-              "Toque em <strong>Lembretes</strong>",
-              "Selecione o tempo de antecedência desejado",
-              "A configuração será aplicada a todos os novos agendamentos"
+              "Toque na aba <strong>Mais</strong>.",
+              "Na seção <strong>Lembretes</strong>, toque em <strong>Lembrete de agendamento</strong>.",
+              "Escolha a antecedência. Ela passa a valer para as próximas OS agendadas."
             ]
           }
         ],
         "infoCard": {
-          "title": "Funciona Sempre",
-          "content": "Os lembretes funcionam mesmo com o app fechado. Após reiniciar o dispositivo, as notificações são reagendadas automaticamente."
+          "title": "Vale só para este celular",
+          "content": "A antecedência fica salva no aparelho, não na conta. Cada pessoa da equipe escolhe a sua. Os outros avisos do app — resumo diário e OS parada — estão em <a href=\"lembretes.html\">Lembretes</a>."
         }
       },
       {
         "id": "filtro",
-        "title": "Filtro por Técnico",
-        "intro": "Administradores, gerentes e supervisores podem filtrar as ordens da agenda por técnico específico. Técnicos visualizam apenas suas próprias ordens automaticamente.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "Admin/Gerente",
-            "description": "Vê todas as ordens da equipe e pode filtrar por técnico específico."
-          },
-          {
-            "color": "green",
-            "title": "Supervisor",
-            "description": "Vê todas as ordens da equipe e pode filtrar por técnico específico."
-          },
-          {
-            "color": "orange",
-            "title": "Técnico",
-            "description": "Vê apenas suas próprias ordens. O filtro por técnico não é exibido."
-          }
-        ]
+        "title": "Quem vê o quê",
+        "intro": "A agenda segue o perfil de cada pessoa. Quem coordena a equipe pode filtrar o calendário por técnico: toque em <strong>Filtrar por técnico</strong> no topo da tela e escolha um nome, ou volte para todos.",
+        "table": {
+          "headers": [
+            "Perfil",
+            "OS na agenda",
+            "Filtrar por técnico"
+          ],
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "text": "Todas da empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "text": "Todas da empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "Todas da empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "text": "Só as que ele criou"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "text": "Só as que ele criou"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ]
+        }
       },
       {
         "id": "faq",
-        "title": "Perguntas Frequentes",
+        "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "Qual a diferença entre Data Agendada e Data de Entrega?",
-            "answer": "A Data Agendada indica quando o serviço será realizado e é exibida no calendário da agenda. A Data de Entrega é o prazo final para conclusão da OS."
+            "question": "Qual a diferença entre Agendado e Entrega?",
+            "answer": "Agendado é quando o serviço vai ser feito; é o que aparece na agenda. Entrega é o prazo para devolver ao cliente. Os dois são opcionais e independentes."
           },
           {
-            "question": "Posso agendar sem definir um horário específico?",
-            "answer": "Sim. Se você definir o horário como 00:00 (meia-noite), a ordem aparece como \"Dia todo\" no final da lista do dia."
+            "question": "Posso agendar sem hora marcada?",
+            "answer": "Pode. Deixe o horário em 00:00 e a OS aparece como “Dia todo”."
           },
           {
-            "question": "Quem pode ver as ordens na agenda?",
-            "answer": "Técnicos veem apenas suas próprias ordens. Administradores, gerentes e supervisores veem todas as ordens e podem filtrar por técnico."
+            "question": "O técnico só vê as OS dele?",
+            "answer": "Sim. Técnico e Consultor veem só as OS que eles mesmos criaram. Administrador, Gerente e Supervisor veem todas as OS da empresa e podem filtrar a agenda por técnico."
           },
           {
-            "question": "Como funcionam os lembretes?",
-            "answer": "O app envia uma notificação local X minutos antes do agendamento (configurável em Configurações). Funciona mesmo com o app fechado."
+            "question": "Por que não recebi o lembrete?",
+            "answer": "Confira três coisas: se a OS tem data em <strong>Agendado</strong>, se o lembrete não está como “Desativado” em <strong>Mais → Lembrete de agendamento</strong> e se as notificações do PraticOS estão permitidas nos ajustes do celular."
           },
           {
-            "question": "Posso usar Data de Entrega e Data Agendada juntas?",
-            "answer": "Sim. Ambas são opcionais e independentes. Use a que fizer mais sentido para o seu fluxo de trabalho."
-          },
-          {
-            "question": "Funciona no iOS e Android?",
-            "answer": "Sim. A agenda e os lembretes funcionam em ambas as plataformas com notificações nativas."
+            "question": "Funciona no iPhone e no Android?",
+            "answer": "Sim. A agenda e os lembretes funcionam nos dois, com as notificações do próprio sistema."
           }
         ]
       }
@@ -161,155 +195,189 @@
     "sections": [
       {
         "id": "overview",
-        "title": "Agenda Overview",
-        "intro": "The PraticOS Agenda is a monthly calendar view that displays your scheduled Service Orders. It works with two date types: the Scheduled Date (when the service will be performed) and the Due Date (delivery deadline). The agenda shows orders by Scheduled Date, allowing you to organize your appointment routine in a visual and practical way.",
-        "infoCard": {
-          "title": "Two Date Types",
-          "content": "The Scheduled Date indicates when the service will be performed and appears on the calendar. The Due Date is the deadline for completing the SO. Both are optional and independent — use whichever makes sense for your business."
-        },
+        "title": "How the schedule works",
+        "intro": "The <strong>Schedule</strong> tab shows the month as a calendar and, for each day, the work orders booked on it. A work order lands on the schedule through the date the job will be done — there is nothing else to set up.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>",
-            "color": "blue",
-            "title": "Monthly Calendar",
-            "description": "View all scheduled orders by month with dot markers on days"
+            "title": "Scheduled",
+            "description": "Day and time the technician will do the job. This is the date the schedule uses."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Precise Time",
-            "description": "Schedule with exact date and time for each appointment"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
-            "color": "orange",
-            "title": "Reminders",
-            "description": "Get notified before appointments so you never miss a commitment"
-          }
-        ]
-      },
-      {
-        "id": "calendar",
-        "title": "Calendar",
-        "intro": "The monthly calendar displays colored dots on days that have scheduled service orders. Tap on a day to see the list of orders scheduled for that date, organized by time.",
-        "subsections": [
-          {
-            "title": "How to Use",
-            "steps": [
-              "Open the app and tap the <strong>Agenda</strong> tab",
-              "The monthly calendar will be displayed with dots on days that have scheduled orders",
-              "Navigate between months by tapping the arrows or swiping",
-              "Tap on a day with a dot to see the orders for that day",
-              "The order list appears sorted by time",
-              "Tap on an order to open its details"
-            ]
+            "title": "Delivery",
+            "description": "Deadline to hand the job back to the customer. It takes a time too. The schedule only uses it when scheduling is turned off."
           }
         ],
         "infoCard": {
-          "title": "All Day",
-          "content": "Orders scheduled at 00:00 (midnight) appear as \"All day\" at the bottom of the list. Use this option when the exact time is not relevant."
+          "title": "Don’t see the Scheduled field?",
+          "content": "It depends on a company setting. In <strong>More → Company Data</strong>, turn on <strong>Scheduling</strong>. With it off, the schedule lists orders by delivery date, all as “All day”, and appointment reminders are not sent."
+        }
+      },
+      {
+        "id": "calendar",
+        "title": "Read the calendar",
+        "intro": "Days with booked orders get dots under the number — up to four, one per order. Below the calendar is the list for the selected day, sorted by time.",
+        "steps": [
+          "Tap the <strong>Schedule</strong> tab.",
+          "Use the arrows next to the month, or swipe the calendar, to change months.",
+          "Tap a day with dots to see that day’s orders.",
+          "Tap an order in the list to open it: customer, services, photos and status."
+        ],
+        "infoCard": {
+          "title": "All day",
+          "content": "An order booked for 00:00 shows as “All day”. Use it when the customer didn’t set a time — a car that stays at the shop all day, for example."
         }
       },
       {
         "id": "schedule",
-        "title": "Schedule an Order",
-        "intro": "For a Service Order to appear on the agenda, simply set the Scheduled Date in the SO form. You can choose both the date and the specific time of the appointment.",
-        "subsections": [
-          {
-            "title": "Step by Step",
-            "steps": [
-              "Open the creation or editing form for an SO",
-              "Tap the <strong>Scheduled Date</strong> field",
-              "Select the desired date on the calendar",
-              "Choose the appointment time (or leave at 00:00 for \"All day\")",
-              "Save the SO — it will automatically appear on the agenda"
-            ]
-          }
+        "title": "Schedule a work order",
+        "intro": "Scheduling is just filling in one field on the order. Do it while writing the quote or later, once the customer approves.",
+        "steps": [
+          "Open an existing order or create a new one.",
+          "Tap <strong>Scheduled</strong>.",
+          "Pick the day and time of the visit. If there is no set time, leave it at 00:00.",
+          "Save. The order shows up on that day and the reminder is set on the phone."
         ],
-        "infoCard": {
-          "title": "Due Date with Time",
-          "content": "The Due Date now also supports time selection. You can set a deadline with a specific time for greater control over deadlines."
+        "warningCard": {
+          "title": "Who can change the date",
+          "content": "Once an order leaves Quote, Supervisors and Technicians can no longer edit its main fields, dates included. Ask an Administrator or Manager. The full rules are in <a href=\"perfis-en.html\">User profiles</a>."
         }
       },
       {
         "id": "reminders",
-        "title": "Reminders",
-        "intro": "Configure notifications to be reminded before scheduled appointments. Reminders are sent as local notifications on your device, ensuring you never miss a commitment.",
+        "title": "Reminder before the visit",
+        "intro": "The phone alerts you shortly before each scheduled order, with the order number and the customer’s name. The alert is set on the device itself, so it arrives even with the app closed.",
         "subsections": [
           {
-            "title": "Reminder Options",
+            "title": "Lead time",
             "validationList": [
-              { "label": "Disabled", "text": "No reminder will be sent" },
-              { "label": "15 minutes", "text": "Notification 15 minutes before the appointment" },
-              { "label": "30 minutes (default)", "text": "Notification 30 minutes before the appointment" },
-              { "label": "1 hour", "text": "Notification 1 hour before the appointment" },
-              { "label": "2 hours", "text": "Notification 2 hours before the appointment" }
+              {
+                "label": "Disabled",
+                "text": "No appointment alerts."
+              },
+              {
+                "label": "15 min before",
+                "text": "When you are close to the customer or working at the shop."
+              },
+              {
+                "label": "30 min before",
+                "text": "The app’s default."
+              },
+              {
+                "label": "1 hour before",
+                "text": "For short drives."
+              },
+              {
+                "label": "2 hours before",
+                "text": "For far-off jobs or ones that need parts picked first."
+              }
             ]
           },
           {
-            "title": "How to Configure",
+            "title": "Change the lead time",
             "steps": [
-              "Go to <strong>Settings</strong> in the app",
-              "Tap <strong>Reminders</strong>",
-              "Select the desired advance time",
-              "The setting will be applied to all new schedules"
+              "Tap the <strong>More</strong> tab.",
+              "Under <strong>Reminders</strong>, tap <strong>Schedule reminder</strong>.",
+              "Pick the lead time. It applies to the next scheduled orders."
             ]
           }
         ],
         "infoCard": {
-          "title": "Always Works",
-          "content": "Reminders work even when the app is closed. After restarting the device, notifications are automatically rescheduled."
+          "title": "Set per phone",
+          "content": "The lead time is saved on the device, not on the account, so everyone on the team picks their own. The app’s other alerts — daily nudge and stalled orders — are covered in <a href=\"lembretes-en.html\">Reminders</a>."
         }
       },
       {
         "id": "filter",
-        "title": "Filter by Technician",
-        "intro": "Administrators, managers, and supervisors can filter agenda orders by specific technician. Technicians automatically see only their own orders.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "Admin/Manager",
-            "description": "See all team orders and can filter by specific technician."
-          },
-          {
-            "color": "green",
-            "title": "Supervisor",
-            "description": "See all team orders and can filter by specific technician."
-          },
-          {
-            "color": "orange",
-            "title": "Technician",
-            "description": "Only sees own orders. The technician filter is not displayed."
-          }
-        ]
+        "title": "Who sees what",
+        "intro": "The schedule follows each person’s profile. People who coordinate the team can filter the calendar by technician: tap <strong>Filter by technician</strong> at the top and pick a name, or go back to everyone.",
+        "table": {
+          "headers": [
+            "Profile",
+            "Orders on the schedule",
+            "Filter by technician"
+          ],
+          "rows": [
+            {
+              "label": "Administrator",
+              "cells": [
+                {
+                  "text": "All company orders"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Manager",
+              "cells": [
+                {
+                  "text": "All company orders"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "All company orders"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Technician",
+              "cells": [
+                {
+                  "text": "Only the ones they created"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Consultant",
+              "cells": [
+                {
+                  "text": "Only the ones they created"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ]
+        }
       },
       {
         "id": "faq",
-        "title": "Frequently Asked Questions",
+        "title": "FAQ",
         "faq": [
           {
-            "question": "What's the difference between Scheduled Date and Due Date?",
-            "answer": "The Scheduled Date indicates when the service will be performed and is displayed on the agenda calendar. The Due Date is the deadline for completing the SO."
+            "question": "What is the difference between Scheduled and Delivery?",
+            "answer": "Scheduled is when the job will be done; it is what shows on the schedule. Delivery is the deadline to hand it back to the customer. Both are optional and independent."
           },
           {
-            "question": "Can I schedule without a specific time?",
-            "answer": "Yes. If you set the time to 00:00 (midnight), the order appears as \"All day\" at the bottom of the day's list."
+            "question": "Can I schedule without a set time?",
+            "answer": "Yes. Leave the time at 00:00 and the order shows as “All day”."
           },
           {
-            "question": "Who can see orders in the agenda?",
-            "answer": "Technicians see only their own orders. Administrators, managers, and supervisors see all orders and can filter by technician."
+            "question": "Do technicians only see their own orders?",
+            "answer": "Yes. Technicians and Consultants see only the orders they created. Administrators, Managers and Supervisors see every order in the company and can filter the schedule by technician."
           },
           {
-            "question": "How do reminders work?",
-            "answer": "The app sends a local notification X minutes before the appointment (configurable in Settings). Works even when the app is closed."
+            "question": "Why didn’t I get the reminder?",
+            "answer": "Check three things: the order has a <strong>Scheduled</strong> date, the reminder is not set to “Disabled” in <strong>More → Schedule reminder</strong>, and PraticOS notifications are allowed in the phone’s settings."
           },
           {
-            "question": "Can I use Due Date and Scheduled Date together?",
-            "answer": "Yes. Both are optional and independent. Use whichever makes sense for your workflow."
-          },
-          {
-            "question": "Does it work on both iOS and Android?",
-            "answer": "Yes. The agenda and reminders work on both platforms with native notifications."
+            "question": "Does it work on iPhone and Android?",
+            "answer": "Yes. The schedule and reminders work on both, using the system’s own notifications."
           }
         ]
       }
@@ -319,155 +387,189 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Visión General de la Agenda",
-        "intro": "La Agenda de PraticOS es una vista de calendario mensual que muestra sus Órdenes de Servicio programadas. Trabaja con dos tipos de fecha: la Fecha Programada (cuándo se realizará el servicio) y la Fecha de Entrega (plazo final de conclusión). La agenda muestra las órdenes por Fecha Programada, permitiéndole organizar su rutina de atendimientos de forma visual y práctica.",
-        "infoCard": {
-          "title": "Dos Tipos de Fecha",
-          "content": "La Fecha Programada indica cuándo se ejecutará el servicio y aparece en el calendario. La Fecha de Entrega es el plazo final para completar la OS. Ambas son opcionales e independientes — use la que tenga más sentido para su negocio."
-        },
+        "title": "Cómo funciona la agenda",
+        "intro": "La pestaña <strong>Agenda</strong> muestra el mes como calendario y, en cada día, las OS programadas para él. La OS entra en la agenda por la fecha en que se hará el servicio — no hay que registrar nada aparte.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>",
-            "color": "blue",
-            "title": "Calendario Mensual",
-            "description": "Visualice todas las órdenes programadas por mes con marcadores de puntos en los días"
+            "title": "Programado",
+            "description": "Día y hora en que el técnico hará el servicio. Es la fecha que usa la agenda."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-            "color": "green",
-            "title": "Horario Preciso",
-            "description": "Programe con fecha y horario exactos para cada atendimiento"
-          },
-          {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
-            "color": "orange",
-            "title": "Recordatorios",
-            "description": "Reciba notificaciones antes de las citas para no perder ningún compromiso"
-          }
-        ]
-      },
-      {
-        "id": "calendario",
-        "title": "Calendario",
-        "intro": "El calendario mensual muestra puntos de colores en los días que tienen órdenes de servicio programadas. Al tocar un día, ve la lista de órdenes programadas para esa fecha, organizadas por horario.",
-        "subsections": [
-          {
-            "title": "Cómo Usar",
-            "steps": [
-              "Abra la app y toque en la pestaña <strong>Agenda</strong>",
-              "El calendario mensual se mostrará con puntos en los días que tienen órdenes programadas",
-              "Navegue entre los meses tocando las flechas o deslizando",
-              "Toque en un día con punto para ver las órdenes de ese día",
-              "La lista de órdenes aparece ordenada por horario",
-              "Toque en una orden para abrir sus detalles"
-            ]
+            "title": "Entrega",
+            "description": "Plazo para entregar el trabajo al cliente. También acepta hora. La agenda solo la usa cuando la programación está desactivada."
           }
         ],
         "infoCard": {
-          "title": "Todo el Día",
-          "content": "Las órdenes programadas con horario 00:00 (medianoche) aparecen como \"Todo el día\" al final de la lista. Use esta opción cuando el horario exacto no sea relevante."
+          "title": "¿No ves el campo Programado?",
+          "content": "Depende de una opción de la empresa. En <strong>Más → Datos de la Empresa</strong>, activa <strong>Programación</strong>. Si está desactivada, la agenda muestra las OS por fecha de entrega, todas como “Todo el día”, y no se envían recordatorios de cita."
+        }
+      },
+      {
+        "id": "calendario",
+        "title": "Ver el calendario",
+        "intro": "Los días con OS programadas tienen puntos debajo del número — hasta cuatro, uno por OS. Debajo del calendario está la lista del día elegido, ordenada por hora.",
+        "steps": [
+          "Toca la pestaña <strong>Agenda</strong>.",
+          "Usa las flechas junto al mes, o desliza el calendario, para cambiar de mes.",
+          "Toca un día con puntos para ver sus OS.",
+          "Toca una OS de la lista para abrir el detalle: cliente, servicios, fotos y estado."
+        ],
+        "infoCard": {
+          "title": "Todo el día",
+          "content": "Una OS programada a las 00:00 aparece como “Todo el día”. Úsalo cuando el cliente no fijó hora — por ejemplo, un auto que se queda en el taller todo el día."
         }
       },
       {
         "id": "programar",
         "title": "Programar una OS",
-        "intro": "Para que una Orden de Servicio aparezca en la agenda, simplemente defina la Fecha Programada en el formulario de la OS. Puede elegir tanto la fecha como el horario específico del atendimiento.",
-        "subsections": [
-          {
-            "title": "Paso a Paso",
-            "steps": [
-              "Abra el formulario de creación o edición de una OS",
-              "Toque en el campo <strong>Fecha Programada</strong>",
-              "Seleccione la fecha deseada en el calendario",
-              "Elija el horario del atendimiento (o deje 00:00 para \"Todo el día\")",
-              "Guarde la OS — aparecerá automáticamente en la agenda"
-            ]
-          }
+        "intro": "Programar es llenar un campo de la OS. Puedes hacerlo al armar el presupuesto o después, cuando el cliente lo apruebe.",
+        "steps": [
+          "Abre una OS existente o crea una nueva.",
+          "Toca <strong>Programado</strong>.",
+          "Elige el día y la hora de la visita. Si no hay hora fija, deja 00:00.",
+          "Guarda. La OS aparece en ese día de la agenda y el recordatorio queda programado en el celular."
         ],
-        "infoCard": {
-          "title": "Fecha de Entrega con Horario",
-          "content": "La Fecha de Entrega ahora también soporta selección de horario. Puede definir un plazo final con hora específica para mayor control de los plazos."
+        "warningCard": {
+          "title": "Quién puede cambiar la fecha",
+          "content": "Cuando la OS sale de Presupuesto, Supervisor y Técnico ya no editan los campos principales, incluidas las fechas. Pídeselo a un Administrador o Gerente. Las reglas completas están en <a href=\"perfis-es.html\">Perfiles de usuario</a>."
         }
       },
       {
         "id": "recordatorios",
-        "title": "Recordatorios",
-        "intro": "Configure notificaciones para ser recordado antes de las citas programadas. Los recordatorios se envían como notificaciones locales en su dispositivo, garantizando que no pierda ningún compromiso.",
+        "title": "Recordatorio antes de la visita",
+        "intro": "El celular avisa poco antes de cada OS programada, con el número de la OS y el nombre del cliente. El aviso se programa en el propio equipo, así que llega aunque la app esté cerrada.",
         "subsections": [
           {
-            "title": "Opciones de Recordatorio",
+            "title": "Anticipación",
             "validationList": [
-              { "label": "Desactivado", "text": "Ningún recordatorio será enviado" },
-              { "label": "15 minutos", "text": "Notificación 15 minutos antes de la cita" },
-              { "label": "30 minutos (predeterminado)", "text": "Notificación 30 minutos antes de la cita" },
-              { "label": "1 hora", "text": "Notificación 1 hora antes de la cita" },
-              { "label": "2 horas", "text": "Notificación 2 horas antes de la cita" }
+              {
+                "label": "Desactivado",
+                "text": "Sin avisos de cita."
+              },
+              {
+                "label": "15 min antes",
+                "text": "Si estás cerca del cliente o trabajas en el taller."
+              },
+              {
+                "label": "30 min antes",
+                "text": "Valor por defecto de la app."
+              },
+              {
+                "label": "1 hora antes",
+                "text": "Para traslados cortos."
+              },
+              {
+                "label": "2 horas antes",
+                "text": "Para visitas lejanas o que requieren preparar repuestos."
+              }
             ]
           },
           {
-            "title": "Cómo Configurar",
+            "title": "Cambiar la anticipación",
             "steps": [
-              "Acceda a <strong>Configuraciones</strong> en la app",
-              "Toque en <strong>Recordatorios</strong>",
-              "Seleccione el tiempo de anticipación deseado",
-              "La configuración se aplicará a todas las nuevas programaciones"
+              "Toca la pestaña <strong>Más</strong>.",
+              "En <strong>Recordatorios</strong>, toca <strong>Recordatorio de cita</strong>.",
+              "Elige la anticipación. Se aplica a las próximas OS programadas."
             ]
           }
         ],
         "infoCard": {
-          "title": "Funciona Siempre",
-          "content": "Los recordatorios funcionan incluso con la app cerrada. Después de reiniciar el dispositivo, las notificaciones se reprograman automáticamente."
+          "title": "Se guarda en cada celular",
+          "content": "La anticipación queda en el equipo, no en la cuenta: cada persona del equipo elige la suya. Los otros avisos de la app — recordatorio diario y OS detenidas — están en <a href=\"lembretes-es.html\">Recordatorios</a>."
         }
       },
       {
         "id": "filtro",
-        "title": "Filtro por Técnico",
-        "intro": "Administradores, gerentes y supervisores pueden filtrar las órdenes de la agenda por técnico específico. Los técnicos ven automáticamente solo sus propias órdenes.",
-        "statusCards": [
-          {
-            "color": "blue",
-            "title": "Admin/Gerente",
-            "description": "Ve todas las órdenes del equipo y puede filtrar por técnico específico."
-          },
-          {
-            "color": "green",
-            "title": "Supervisor",
-            "description": "Ve todas las órdenes del equipo y puede filtrar por técnico específico."
-          },
-          {
-            "color": "orange",
-            "title": "Técnico",
-            "description": "Solo ve sus propias órdenes. El filtro por técnico no se muestra."
-          }
-        ]
+        "title": "Quién ve qué",
+        "intro": "La agenda sigue el perfil de cada persona. Quien coordina el equipo puede filtrar el calendario por técnico: toca <strong>Filtrar por técnico</strong> arriba y elige un nombre, o vuelve a todos.",
+        "table": {
+          "headers": [
+            "Perfil",
+            "OS en la agenda",
+            "Filtrar por técnico"
+          ],
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "text": "Todas las de la empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "text": "Todas las de la empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "text": "Todas las de la empresa"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "text": "Solo las que creó"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "text": "Solo las que creó"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ]
+        }
       },
       {
         "id": "faq",
-        "title": "Preguntas Frecuentes",
+        "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "¿Cuál es la diferencia entre Fecha Programada y Fecha de Entrega?",
-            "answer": "La Fecha Programada indica cuándo se realizará el servicio y se muestra en el calendario de la agenda. La Fecha de Entrega es el plazo final para completar la OS."
+            "question": "¿Qué diferencia hay entre Programado y Entrega?",
+            "answer": "Programado es cuándo se hará el servicio; es lo que aparece en la agenda. Entrega es el plazo para devolverlo al cliente. Ambos son opcionales e independientes."
           },
           {
-            "question": "¿Puedo programar sin definir un horario específico?",
-            "answer": "Sí. Si define el horario como 00:00 (medianoche), la orden aparece como \"Todo el día\" al final de la lista del día."
+            "question": "¿Puedo programar sin hora fija?",
+            "answer": "Sí. Deja la hora en 00:00 y la OS aparece como “Todo el día”."
           },
           {
-            "question": "¿Quién puede ver las órdenes en la agenda?",
-            "answer": "Los técnicos ven solo sus propias órdenes. Administradores, gerentes y supervisores ven todas las órdenes y pueden filtrar por técnico."
+            "question": "¿El técnico solo ve sus OS?",
+            "answer": "Sí. El Técnico y el Consultor ven solo las OS que ellos mismos crearon. Administrador, Gerente y Supervisor ven todas las OS de la empresa y pueden filtrar la agenda por técnico."
           },
           {
-            "question": "¿Cómo funcionan los recordatorios?",
-            "answer": "La app envía una notificación local X minutos antes de la cita (configurable en Configuraciones). Funciona incluso con la app cerrada."
+            "question": "¿Por qué no me llegó el recordatorio?",
+            "answer": "Revisa tres cosas: que la OS tenga fecha en <strong>Programado</strong>, que el recordatorio no esté en “Desactivado” en <strong>Más → Recordatorio de cita</strong> y que las notificaciones de PraticOS estén permitidas en los ajustes del celular."
           },
           {
-            "question": "¿Puedo usar Fecha de Entrega y Fecha Programada juntas?",
-            "answer": "Sí. Ambas son opcionales e independientes. Use la que tenga más sentido para su flujo de trabajo."
-          },
-          {
-            "question": "¿Funciona en iOS y Android?",
-            "answer": "Sí. La agenda y los recordatorios funcionan en ambas plataformas con notificaciones nativas."
+            "question": "¿Funciona en iPhone y Android?",
+            "answer": "Sí. La agenda y los recordatorios funcionan en ambos, con las notificaciones del propio sistema."
           }
         ]
       }

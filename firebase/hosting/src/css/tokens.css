@@ -27,6 +27,8 @@
   --color-marker:      oklch(92% 0.17 102);   /* highlighter yellow, from the logo "OS" */
   --color-marker-ink:  oklch(24% 0.03 95);
   --color-success:     oklch(52% 0.13 150);
+  --color-warning:     oklch(70% 0.15 70);
+  --color-danger:      oklch(55% 0.19 28);
   --color-whatsapp:    oklch(62% 0.17 150);
   --color-whatsapp-ink:oklch(20% 0.04 150);
   --color-whatsapp-hover: oklch(68% 0.17 150);
@@ -101,6 +103,8 @@
   --color-marker-ink:  oklch(20% 0.03 95);
   --color-marker-soft: oklch(86% 0.15 102 / 0.45);
   --color-success:     oklch(74% 0.13 150);
+  --color-warning:     oklch(78% 0.13 70);
+  --color-danger:      oklch(68% 0.17 28);
   --color-focus:       oklch(78% 0.12 245);
 
   --shadow-card: 0 1px 0 oklch(0% 0 0 / 0.2), 0 16px 36px -22px oklch(0% 0 0 / 0.7);

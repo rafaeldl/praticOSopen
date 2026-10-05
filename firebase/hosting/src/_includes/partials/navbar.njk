@@ -22,7 +22,7 @@
                 </button>
                 <div class="nav__dropdown">
                     <div class="nav__dropdown-head">
-                        <span class="label">{{ nav.segmentsAll }}</span>
+                        <span class="label">{{ seg.links | length }} {{ nav.segmentsAll }}</span>
                     </div>
                     <div class="nav__dropdown-grid">
                         {% for segment in seg.links %}
