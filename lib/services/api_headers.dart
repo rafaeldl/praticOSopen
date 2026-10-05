@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:praticos/global.dart';
 
 /// Thrown when there is no signed-in user to authenticate an API call.
@@ -36,4 +39,18 @@ Future<Map<String, String>> appApiHeaders({
     if (resolvedCompanyId != null && resolvedCompanyId.isNotEmpty)
       'X-Company-Id': resolvedCompanyId,
   };
+}
+
+/// Base URL of the PraticOS Functions API (no trailing slash).
+///
+/// Debug builds: emulator host on Android, ngrok tunnel on the iOS simulator
+/// (localhost:5000 conflicts with AirTunes).
+String get appApiBaseUrl {
+  if (kDebugMode) {
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:5000/praticos/southamerica-east1/api';
+    }
+    return 'https://acidogenic-lorinda-unnymphean.ngrok-free.dev/praticos/southamerica-east1/api';
+  }
+  return 'https://southamerica-east1-praticos.cloudfunctions.net/api';
 }
