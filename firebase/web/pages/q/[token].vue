@@ -1,7 +1,7 @@
 <template>
   <main class="magic-link min-h-screen bg-[#F5F7FA] safe-area-bottom">
     <!-- Loading -->
-    <div v-if="pending" class="flex min-h-[60vh] flex-col items-center justify-center gap-6">
+    <div v-if="pending && !orderData" class="flex min-h-[60vh] flex-col items-center justify-center gap-6">
       <div class="h-10 w-10 animate-spin rounded-full border-[2.5px] border-[#E2E8F0] border-t-[#1B5E7B]" />
       <p class="text-[13px] text-[#5A7184]">{{ t.loading }}</p>
     </div>
@@ -146,6 +146,8 @@
 </template>
 
 <script setup lang="ts">
+import { shouldRefreshCharge } from '~/utils/charge'
+
 const route = useRoute()
 const token = route.params.token as string
 
@@ -161,6 +163,9 @@ const company = computed(() => (orderData.value as any)?.data?.company)
 const comments = computed(() => (orderData.value as any)?.data?.comments || [])
 const permissions = computed(() => (orderData.value as any)?.data?.permissions || [])
 const charge = computed(() => (orderData.value as any)?.data?.charge ?? null)
+
+// Customer pays the Asaas invoice in another tab; reflect it when they come back
+useRefreshOnVisible(() => refreshOrder(), { when: () => shouldRefreshCharge(charge.value), minIntervalMs: 10_000 })
 
 // Apply segment custom labels (e.g. "Veículos" for automotive, "Aparelhos" for electronics)
 const segmentLabels = computed(() => (orderData.value as any)?.data?.segmentLabels || null)
