@@ -13,6 +13,9 @@ import * as orderService from '../../services/order.service';
 import * as notificationService from '../../services/notification.service';
 import { timestampToDate } from '../../utils/date.utils';
 import { maskName, maskPhone, maskSerial } from '../../utils/mask.utils';
+import * as chargeService from '../../services/asaas/charge.service';
+import * as connectionService from '../../services/asaas/connection.service';
+import { OrderCharge, ChargeStatus } from '../../models/asaas.types';
 
 const router: Router = Router();
 
@@ -43,6 +46,69 @@ async function getSegmentLabels(segmentId?: string): Promise<Record<string, Reco
 }
 
 /**
+ * Charge fields the customer may see on the magic link.
+ * Never expose Asaas ids, audit fields or anything about the Asaas account.
+ */
+interface PublicOrderCharge {
+  status: ChargeStatus;
+  value: number;
+  dueDate: string;
+  mode: OrderCharge['mode'];
+  installmentCount?: number;
+  invoiceUrl: string;
+}
+
+const OPEN_CHARGE_STATUSES: ChargeStatus[] = ['pending', 'overdue'];
+
+/**
+ * Status shown to the customer. An open card installment plan with paid
+ * installments was already charged on the card, so it is shown as 'paid'
+ * (avoids a pay button pointing at an invoice that is already paid).
+ */
+function publicChargeStatus(charge: OrderCharge): ChargeStatus | null {
+  if (charge.status === 'paid') return 'paid';
+  if (!OPEN_CHARGE_STATUSES.includes(charge.status)) return null;
+  if ((charge.paidAsaasPaymentIds?.length ?? 0) > 0) return 'paid';
+  return charge.status;
+}
+
+function toPublicCharge(charge: OrderCharge | null, asaasConnected: boolean): PublicOrderCharge | null {
+  if (!charge) return null;
+  const status = publicChargeStatus(charge);
+  if (!status) return null;
+  // After Asaas is disconnected, payments of an open charge would never be
+  // booked on the order, so the customer must not be offered to pay it.
+  if (status !== 'paid' && !asaasConnected) return null;
+  return {
+    status,
+    value: charge.value,
+    dueDate: charge.dueDate,
+    mode: charge.mode,
+    ...(charge.mode === 'cardInstallments' && charge.installmentCount
+      ? { installmentCount: charge.installmentCount }
+      : {}),
+    invoiceUrl: charge.invoiceUrl,
+  };
+}
+
+/**
+ * Load the open (or latest paid) Asaas charge for the magic link.
+ * A failure here must not break the order page, so it degrades to null.
+ */
+async function getPublicCharge(companyId: string, orderId: string): Promise<PublicOrderCharge | null> {
+  try {
+    const [charge, settings] = await Promise.all([
+      chargeService.getOpenOrLatestPaidCharge(companyId, orderId),
+      connectionService.getPaymentSettings(companyId),
+    ]);
+    return toPublicCharge(charge, settings.asaasConnected === true);
+  } catch (error) {
+    console.error('Failed to load order charge:', error instanceof Error ? error.message : 'unknown error');
+    return null;
+  }
+}
+
+/**
  * GET /public/orders/:token
  * View order details via share token
  */
@@ -66,6 +132,8 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
 
     // Get customer-visible comments
     const comments = await commentService.getCustomerVisibleComments(companyId, orderId);
+
+    const charge = await getPublicCharge(companyId, orderId);
 
     const remainingBalance = orderService.calculateRemainingBalance(order);
 
@@ -151,6 +219,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
         })),
         permissions: req.shareTokenAuth!.permissions,
         customer: maskedCustomer,
+        charge,
       },
     });
   } catch (error) {

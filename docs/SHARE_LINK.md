@@ -284,9 +284,18 @@ Visualiza ordem via magic link.
     "phone": "..."
   },
   "comments": [...],
-  "permissions": ["view", "approve", "comment"]
+  "permissions": ["view", "approve", "comment"],
+  "charge": {
+    "status": "pending",
+    "value": 150.00,
+    "dueDate": "2026-10-07",
+    "mode": "single",
+    "invoiceUrl": "https://www.asaas.com/i/..."
+  }
 }
 ```
+
+`charge` é a cobrança Asaas aberta (`pending`/`overdue`) ou a última paga da OS (`getOpenOrLatestPaidCharge`), ou `null`. Só esses campos saem; ids do Asaas e auditoria nunca são expostos. `installmentCount` aparece só em `mode: "cardInstallments"`. Parcelamento no cartão com parcela já paga aparece como `paid`. Se o Asaas da empresa foi desconectado, cobrança aberta vira `null` (a paga continua aparecendo). Erro ao ler a cobrança devolve `null` sem derrubar a página. Ver `docs/ASAAS_INTEGRATION.md`.
 
 #### `POST /public/orders/{token}/approve`
 
