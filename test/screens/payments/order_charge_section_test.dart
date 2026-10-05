@@ -162,6 +162,87 @@ void main() {
     expect(find.byKey(const Key('createChargeTile')), findsNothing);
   });
 
+  group('recarga dos pagamentos ao abrir', () {
+    Future<int> pumpWithSettings(
+      WidgetTester tester,
+      Stream<PaymentSettings> settings, {
+      String status = 'approved',
+      bool canCharge = true,
+    }) async {
+      var reloads = 0;
+      final store = storeWith(status)
+        ..fetchOrderFromServer = (companyId, orderId) async {
+          reloads++;
+          return null;
+        };
+      await tester.pumpWidget(
+        CupertinoApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: CupertinoPageScaffold(
+            child: ListView(
+              children: [
+                OrderChargeSection(
+                  store: store,
+                  canCharge: canCharge,
+                  settingsStream: settings,
+                  chargesStream: Stream.value(const <OrderCharge>[]),
+                  onCreateCharge: (_) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return reloads;
+    }
+
+    testWidgets('recarrega uma vez na primeira emissão com Asaas habilitado',
+        (tester) async {
+      final reloads = await pumpWithSettings(
+        tester,
+        Stream.fromIterable([
+          PaymentSettings(asaasEnabled: true, asaasConnected: true),
+          PaymentSettings(asaasEnabled: true, asaasConnected: false),
+          PaymentSettings(asaasEnabled: true, asaasConnected: true),
+        ]),
+      );
+
+      expect(reloads, 1);
+    });
+
+    testWidgets('não recarrega quando asaasEnabled é false', (tester) async {
+      final reloads = await pumpWithSettings(
+        tester,
+        Stream.value(PaymentSettings(asaasEnabled: false)),
+      );
+
+      expect(reloads, 0);
+    });
+
+    testWidgets('não recarrega sem a permissão chargeOrder', (tester) async {
+      final reloads = await pumpWithSettings(
+        tester,
+        Stream.value(PaymentSettings(asaasEnabled: true)),
+        canCharge: false,
+      );
+
+      expect(reloads, 0);
+    });
+
+    testWidgets('não recarrega para orçamento', (tester) async {
+      final reloads = await pumpWithSettings(
+        tester,
+        Stream.value(PaymentSettings(asaasEnabled: true)),
+        status: 'quote',
+      );
+
+      expect(reloads, 0);
+    });
+  });
+
   testWidgets('checagem padrão: sem papel com chargeOrder, oculta',
       (tester) async {
     // No logged user → AuthorizationService denies chargeOrder.

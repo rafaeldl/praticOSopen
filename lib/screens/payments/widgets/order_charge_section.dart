@@ -52,6 +52,9 @@ class _OrderChargeSectionState extends State<OrderChargeSection> {
   /// Null when the user cannot charge or there is no company.
   Stream<PaymentSettings>? _settings;
 
+  /// Whether the payments were already reloaded for this screen.
+  bool _reloadedOnOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +67,19 @@ class _OrderChargeSectionState extends State<OrderChargeSection> {
             ? null
             : PaymentSettingsRepository().watch(companyId));
     if (source != null) _settings = safePaymentSettings(source);
+  }
+
+  /// Reloads the payments once, when the section first shows up.
+  ///
+  /// [OrderStore.orderStream] doesn't refresh the payment fields, so a charge
+  /// paid by the webhook while the order screen was open would leave a stale
+  /// balance here (and a manual payment on top of it would double count).
+  void _reloadOnFirstShow() {
+    if (_reloadedOnOpen) return;
+    _reloadedOnOpen = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.store.reloadPayments();
+    });
   }
 
   @override
@@ -90,6 +106,7 @@ class _OrderChargeSectionState extends State<OrderChargeSection> {
                 status == 'canceled') {
               return const SizedBox.shrink();
             }
+            _reloadOnFirstShow();
             final remaining = OrderPaymentMath.remainingBalance(order!);
             return OrderChargeCard(
               order: order,
