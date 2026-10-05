@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -234,6 +235,20 @@ void main() {
           throwsA(isA<AsaasApiException>().having((e) => e.code, 'code', entry.value)),
         );
       }
+    });
+
+    test('timeout vira NETWORK_ERROR', () async {
+      final service = AsaasApiService.withClient(
+        MockClient((_) => Completer<http.Response>().future),
+        headersProvider: () async => Map.of(_headers),
+        timeout: const Duration(milliseconds: 10),
+      );
+
+      await expectLater(
+        service.disconnect(),
+        throwsA(isA<AsaasApiException>()
+            .having((e) => e.code, 'code', 'NETWORK_ERROR')),
+      );
     });
   });
 }

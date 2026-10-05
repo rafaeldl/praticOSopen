@@ -1,3 +1,4 @@
+import 'dart:async' show TimeoutException;
 import 'dart:convert';
 import 'dart:io' show SocketException;
 
@@ -29,8 +30,10 @@ typedef ApiHeadersProvider = Future<Map<String, String>> Function();
 class AsaasApiService {
   final http.Client _client;
   final ApiHeadersProvider _headersProvider;
+  final Duration _timeout;
 
-  AsaasApiService._(this._client, this._headersProvider);
+  AsaasApiService._(this._client, this._headersProvider,
+      [this._timeout = const Duration(seconds: 30)]);
 
   static final AsaasApiService instance =
       AsaasApiService._(http.Client(), () => appApiHeaders());
@@ -39,8 +42,9 @@ class AsaasApiService {
   static AsaasApiService withClient(
     http.Client client, {
     required ApiHeadersProvider headersProvider,
+    Duration timeout = const Duration(seconds: 30),
   }) =>
-      AsaasApiService._(client, headersProvider);
+      AsaasApiService._(client, headersProvider, timeout);
 
   static Map<String, dynamic> _data(String body) {
     final decoded = jsonDecode(body) as Map<String, dynamic>;
@@ -92,7 +96,9 @@ class AsaasApiService {
 
   Future<http.Response> _send(Future<http.Response> Function() request) async {
     try {
-      return await request();
+      return await request().timeout(_timeout);
+    } on TimeoutException {
+      throw AsaasApiException('NETWORK_ERROR', 'Request timed out');
     } on http.ClientException catch (e) {
       throw AsaasApiException('NETWORK_ERROR', e.message);
     } on SocketException catch (e) {
