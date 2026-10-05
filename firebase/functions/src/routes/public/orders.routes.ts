@@ -131,9 +131,10 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
     const company = companyDoc.exists ? companyDoc.data() as Company : null;
 
     // Get customer-visible comments
-    const comments = await commentService.getCustomerVisibleComments(companyId, orderId);
-
-    const charge = await getPublicCharge(companyId, orderId);
+    const [comments, charge] = await Promise.all([
+      commentService.getCustomerVisibleComments(companyId, orderId),
+      getPublicCharge(companyId, orderId),
+    ]);
 
     const remainingBalance = orderService.calculateRemainingBalance(order);
 

@@ -163,7 +163,7 @@ Browser → https://praticos.web.app/q/{token}
 ```
 
 A página `/q/{token}` (Nuxt, Cloud Run `praticos-web`) carrega a OS com `useFetch('/api/orders/{token}')`.
-No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar, avaliar ou quando a aba volta a ficar visível com cobrança Asaas pendente/vencida, via `useRefreshOnVisible`/`createVisibilityRefresher`, no máximo 1 vez a cada 10 s)
+No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar, avaliar ou quando a aba volta a ficar visível com cobrança Asaas pendente/vencida, via `useRefreshOnVisible`/`createVisibilityRefresher`, no máximo 1 vez a cada 10 s; esses refreshes em segundo plano também contam como visualização: incrementam `viewCount` e atualizam `lastViewedAt`, então enquanto há cobrança aberta o contador sobe a cada retorno à aba, respeitando o intervalo de 10 s)
 faz GET em `https://praticos.web.app/api/orders/{token}`. Por isso `firebase/firebase.json` precisa do rewrite
 `/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
 404 e a página cai na tela de erro.
