@@ -1,128 +1,40 @@
-{# Section Renderer Component - Renders a section based on its type #}
-{# Usage: {% include "components/docs/section-renderer.njk" with {section: {...}} %} #}
-
-<section id="{{ section.id }}" class="docs-section">
-    {% if section.headerInline %}
-    <div class="section-header-inline">
-        <span class="profile-badge {{ section.headerInline.badgeClass }}">{{ section.headerInline.emoji | safe }}</span>
-        <div>
-            <h2>{{ section.title }}</h2>
-            <p class="section-subtitle">{{ section.subtitle }}</p>
-        </div>
-    </div>
-    {% else %}
-    <h2>{{ section.title }}</h2>
-    {% endif %}
+{# Section renderer — one <section> per entry in <article>.json → {lang}.sections[].
+   Order inside a section: heading → subtitle → intro → lists (features, profiles, permissions, status, steps) → subsections → metrics → tables → notes (info, then warning) → faq → paragraphs.
+   Every key below is optional except id + title. Legacy keys (icon, color, emoji, badgeClass, colorClass) are accepted and ignored or mapped to a status dot. #}
+<section id="{{ section.id }}" class="doc-section" aria-labelledby="{{ section.id }}-title">
+    <h2 id="{{ section.id }}-title">{{ section.title }}</h2>
+    {% if section.subtitle %}<p class="doc-subtitle">{{ section.subtitle | safe }}</p>{% endif %}
 
     {% if section.intro %}<p>{{ section.intro | safe }}</p>{% endif %}
 
-    {# Info Card #}
-    {% if section.infoCard %}
-    {% set title = section.infoCard.title %}
-    {% set content = section.infoCard.content %}
-    {% include "components/docs/info-card.njk" %}
-    {% endif %}
+    {% if section.features %}{% set features = section.features %}{% include "components/docs/features-highlight.njk" %}{% endif %}
+    {% if section.profiles %}{% set profiles = section.profiles %}{% include "components/docs/profiles-grid.njk" %}{% endif %}
+    {% if section.permissionsGrid %}{% set categories = section.permissionsGrid %}{% include "components/docs/permissions-grid.njk" %}{% endif %}
+    {% if section.statusCards %}{% set cards = section.statusCards %}{% include "components/docs/status-cards.njk" %}{% endif %}
+    {% if section.statusFlow %}{% set statuses = section.statusFlow %}{% include "components/docs/status-flow.njk" %}{% endif %}
+    {% if section.statusDetails %}{% set details = section.statusDetails %}{% include "components/docs/status-details.njk" %}{% endif %}
 
-    {# Warning Card #}
-    {% if section.warningCard %}
-    {% set title = section.warningCard.title %}
-    {% set content = section.warningCard.content %}
-    {% include "components/docs/warning-card.njk" %}
-    {% endif %}
+    {% if section.steps %}{% set steps = section.steps %}{% include "components/docs/step-list.njk" %}{% endif %}
 
-    {# Features Highlight #}
-    {% if section.features %}
-    {% set features = section.features %}
-    {% include "components/docs/features-highlight.njk" %}
-    {% endif %}
-
-    {# Profiles Grid #}
-    {% if section.profiles %}
-    {% set profiles = section.profiles %}
-    {% include "components/docs/profiles-grid.njk" %}
-    {% endif %}
-
-    {# Permissions Grid #}
-    {% if section.permissionsGrid %}
-    {% set categories = section.permissionsGrid %}
-    {% include "components/docs/permissions-grid.njk" %}
-    {% endif %}
-
-    {# Status Cards #}
-    {% if section.statusCards %}
-    {% set cards = section.statusCards %}
-    {% include "components/docs/status-cards.njk" %}
-    {% endif %}
-
-    {# Status Flow #}
-    {% if section.statusFlow %}
-    {% set statuses = section.statusFlow %}
-    {% include "components/docs/status-flow.njk" %}
-    {% endif %}
-
-    {# Status Details #}
-    {% if section.statusDetails %}
-    {% set details = section.statusDetails %}
-    {% include "components/docs/status-details.njk" %}
-    {% endif %}
-
-    {# Subsections with titles and steps #}
-    {% if section.subsections %}
     {% for sub in section.subsections %}
     <h3>{{ sub.title }}</h3>
+    {% if sub.intro %}<p>{{ sub.intro | safe }}</p>{% endif %}
     {% if sub.content %}<p>{{ sub.content | safe }}</p>{% endif %}
-    {% if sub.steps %}
-    {% set steps = sub.steps %}
-    {% include "components/docs/step-list.njk" %}
-    {% endif %}
-    {% if sub.validationList %}
-    {% set items = sub.validationList %}
-    {% include "components/docs/validation-list.njk" %}
-    {% endif %}
-    {% if sub.infoCard %}
-    {% set title = sub.infoCard.title %}
-    {% set content = sub.infoCard.content %}
-    {% include "components/docs/info-card.njk" %}
-    {% endif %}
+    {% if sub.steps %}{% set steps = sub.steps %}{% include "components/docs/step-list.njk" %}{% endif %}
+    {% if sub.validationList %}{% set items = sub.validationList %}{% include "components/docs/validation-list.njk" %}{% endif %}
+    {% if sub.infoCard %}{% set note = sub.infoCard %}{% include "components/docs/info-card.njk" %}{% endif %}
+    {% if sub.warningCard %}{% set note = sub.warningCard %}{% include "components/docs/warning-card.njk" %}{% endif %}
     {% endfor %}
-    {% endif %}
 
-    {# Metrics Grid #}
-    {% if section.metrics %}
-    {% set metrics = section.metrics %}
-    {% include "components/docs/metrics-grid.njk" %}
-    {% endif %}
+    {% if section.metrics %}{% set metrics = section.metrics %}{% include "components/docs/metrics-grid.njk" %}{% endif %}
 
-    {# Permissions Table(s) #}
-    {% if section.tables %}
-    {% for table in section.tables %}
-    {% set title = table.title %}
-    {% set headers = table.headers %}
-    {% set rows = table.rows %}
-    {% set note = table.note %}
-    {% include "components/docs/permissions-table.njk" %}
-    {% endfor %}
-    {% endif %}
+    {% for table in section.tables %}{% include "components/docs/permissions-table.njk" %}{% endfor %}
+    {% if section.table %}{% set table = section.table %}{% include "components/docs/permissions-table.njk" %}{% endif %}
 
-    {# Single Permissions Table #}
-    {% if section.table %}
-    {% set title = section.table.title %}
-    {% set headers = section.table.headers %}
-    {% set rows = section.table.rows %}
-    {% set note = section.table.note %}
-    {% include "components/docs/permissions-table.njk" %}
-    {% endif %}
+    {% if section.infoCard %}{% set note = section.infoCard %}{% include "components/docs/info-card.njk" %}{% endif %}
+    {% if section.warningCard %}{% set note = section.warningCard %}{% include "components/docs/warning-card.njk" %}{% endif %}
 
-    {# FAQ Grid #}
-    {% if section.faq %}
-    {% set items = section.faq %}
-    {% include "components/docs/faq-grid.njk" %}
-    {% endif %}
+    {% if section.faq %}{% set items = section.faq %}{% include "components/docs/faq-grid.njk" %}{% endif %}
 
-    {# Additional content/paragraphs #}
-    {% if section.paragraphs %}
-    {% for p in section.paragraphs %}
-    <p>{{ p | safe }}</p>
-    {% endfor %}
-    {% endif %}
+    {% for p in section.paragraphs %}<p>{{ p | safe }}</p>{% endfor %}
 </section>

@@ -3,379 +3,517 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Eletricista | PraticOS",
-    "description": "Pare de perder orçamentos e cobrar errado! Sistema de OS para eletricista com calculadora de preços, agendamento e controle financeiro. Profissionalize seu serviço em 5 minutos.",
+    "title": "Sistema para Eletricista: orçamento e OS | PraticOS",
+    "description": "App de OS para eletricista: orçamento com seu catálogo aprovado por link, checklist de segurança NR10, fotos do quadro antes e depois. Plano grátis.",
     "keywords": "sistema para eletricista, programa para eletricista, software eletricista, ordem de serviço eletricista, app eletricista, gestão de serviços elétricos",
     "ogTitle": "Sistema para Eletricista | PraticOS",
-    "ogDescription": "Pare de perder orçamentos e cobrar errado! Sistema de OS com calculadora de preços, agendamento e controle financeiro. Profissionalize seu serviço.",
+    "ogDescription": "OS do eletricista no celular: orçamento aprovado por link, checklist de segurança, medições e fotos do quadro, agenda e controle do que entrou.",
     "hero": {
-      "badge": "⚡ Eletricistas",
-      "title": "Pare de cobrar errado:",
-      "titleHighlight": "saiba exatamente seu lucro",
-      "subtitle": "Chega de dar preço no chute e perder dinheiro. Orçamentos profissionais em segundos, calculadora de custos para garantir lucro e cliente acompanhando pelo celular.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Eletricistas ativos" },
-        "orders": { "value": "5k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Orçamento, medições e fotos do quadro",
+      "titleMark": "na mesma OS.",
+      "lede": "PraticOS é o app de ordem de serviço para eletricistas. Monte o orçamento com o seu catálogo, mande por link para o cliente aprovar, registre tensão, DR e aterramento com fotos do quadro e receba — tudo pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0516",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Patrícia Gomes"
+          },
+          {
+            "label": "Instalação",
+            "value": "Casa · 220V · disjuntor geral 50 A"
+          },
+          {
+            "label": "Serviço",
+            "value": "Troca do quadro e instalação de DR"
+          },
+          {
+            "label": "Medição",
+            "value": "221 V · DR testado OK"
+          },
+          {
+            "label": "Fotos",
+            "value": "6 anexadas · antes e depois"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 1.350,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Liberado",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com serviços elétricos",
+      "title": "Onde o eletricista perde dinheiro",
+      "lede": "Quase nunca é falta de chamado. É o orçamento passado de cabeça, o material que ficou fora da conta e o “depois que você mexeu, o disjuntor cai” sem nada registrado.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "💸", "title": "Não sabe precificar", "text": "Dá preço no chute e depois descobre que trabalhou de graça. Não sabe calcular materiais + mão de obra + lucro." },
-        { "icon": "📝", "title": "Orçamento demora demais", "text": "Cliente pede orçamento e você demora horas para fazer. Enquanto isso, ele já fechou com outro eletricista." },
-        { "icon": "💰", "title": "Mistura dinheiro pessoal", "text": "Entrada e saída tudo junto. No final do mês não sabe se teve lucro ou prejuízo." },
-        { "icon": "📅", "title": "Sem controle de agenda", "text": "Esquece compromissos, marca serviço em cima do outro. Perde cliente por falta de organização." },
-        { "icon": "📞", "title": "Cliente some após orçamento", "text": "Faz orçamento detalhado mas menos de 50% fecham. Não tem tempo para fazer follow-up." },
-        { "icon": "🔧", "title": "Concorrência de 'marido de aluguel'", "text": "Perde serviço para quem cobra barato mas não tem qualificação. Não consegue mostrar seu diferencial." }
+        {
+          "problem": "Preço passado de cabeça",
+          "detail": "Cabo, disjuntor, DR e mão de obra somados no olho. No fim, o serviço saiu mais barato do que custou.",
+          "answer": "Cadastre materiais e serviços com preço uma vez. Na OS você escolhe os itens, ajusta quantidades e o total é somado na hora."
+        },
+        {
+          "problem": "Orçamento por áudio que o cliente esquece",
+          "detail": "O valor foi falado no telefone e, na hora de cobrar, o cliente lembra de outro número.",
+          "answer": "O cliente aprova o orçamento pelo link, e a aprovação fica registrada na própria OS."
+        },
+        {
+          "problem": "“Depois que você mexeu, o disjuntor cai”",
+          "detail": "O cliente liga semanas depois culpando o seu serviço, e você não tem como mostrar como deixou a instalação.",
+          "answer": "O checklist de registro do serviço elétrico guarda tensão e corrente medidas, teste do DR, aterramento e foto do quadro depois do serviço."
+        },
+        {
+          "problem": "Segurança sem registro",
+          "detail": "O circuito foi desligado e testado, mas nada ficou escrito. Se algo der errado, não há como mostrar.",
+          "answer": "O checklist de segurança NR10 registra circuito desenergizado e bloqueado, teste de ausência de tensão, EPI usado, área sinalizada e foto do quadro antes."
+        },
+        {
+          "problem": "Serviço marcado em cima de outro",
+          "detail": "Duas visitas no mesmo horário e um cliente esperando em casa sem notícia.",
+          "answer": "A data da OS coloca o serviço na agenda, e o celular avisa antes de cada atendimento."
+        },
+        {
+          "problem": "Mês fechado sem saber quanto entrou",
+          "detail": "Sinal para comprar material, saldo no fim da obra e cliente que pede para pagar depois.",
+          "answer": "Registre pagamentos inteiros ou parciais. O painel mostra o faturamento do período e o que falta receber."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia do eletricista",
-      "items": [
-        { "icon": "🧮", "title": "Calculadora de preços", "text": "Calcule automaticamente materiais + mão de obra + margem de lucro.", "highlight": "Nunca mais trabalhe no prejuízo." },
-        { "icon": "⚡", "title": "Orçamento em 2 minutos", "text": "Crie orçamentos profissionais rapidamente. Cliente recebe no WhatsApp e aprova na hora." },
-        { "icon": "📅", "title": "Agenda com lembretes", "text": "Organize seus serviços e receba lembretes automáticos. Nunca mais esqueça um compromisso." },
-        { "icon": "📦", "title": "Lista de materiais", "text": "Registre todos os materiais usados. Controle de estoque e custos em um só lugar." },
-        { "icon": "💰", "title": "Controle financeiro separado", "text": "Veja exatamente quanto entrou e saiu do negócio.", "highlight": "Separe do dinheiro pessoal." },
-        { "icon": "🔗", "title": "Link para cliente acompanhar", "text": "Cliente acompanha o status do serviço pelo celular. Profissionalismo que impressiona." }
+    "workflow": {
+      "title": "Como um serviço elétrico passa pelo PraticOS",
+      "lede": "Da visita à liberação, cada etapa fica registrada na OS da instalação.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Visite e faça o orçamento",
+          "text": "Cadastre o cliente e a instalação com a tensão do local e o disjuntor geral. Materiais e serviços saem do seu catálogo, já com preço.",
+          "facts": [
+            "Tensão: 110V, 220V, bivolt ou trifásico",
+            "Disjuntor geral em amperes",
+            "Status claros: orçamento, aprovado, em execução, liberado"
+          ],
+          "image": "home.png",
+          "alt": "Lista de ordens de serviço no app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Mande o orçamento por link",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê materiais e mão de obra, aprova e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Cliente acompanha o andamento sem ligar",
+            "PDF da OS para imprimir ou enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "03",
+          "title": "Execute com checklist",
+          "text": "Os checklists de elétrica vêm prontos e você ajusta os itens: segurança antes de começar, registro do serviço e qualidade na entrega.",
+          "facts": [
+            "Foto do quadro antes e depois",
+            "Tensão e corrente medidas, DR e aterramento",
+            "Circuitos identificados e teste dos pontos"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "04",
+          "title": "Libere e receba",
+          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Orçamento",
-      "title": "Orçamento",
-      "titleHighlight": "profissional completo",
-      "text": "Crie orçamentos detalhados que impressionam o cliente e aumentam sua taxa de conversão. Tudo organizado e profissional.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "⚡ Orçamento de Serviço Elétrico",
-      "items": [
-        { "icon": "📋", "text": "Descrição detalhada do serviço" },
-        { "icon": "📦", "text": "Lista de materiais com preços" },
-        { "icon": "🔧", "text": "Mão de obra discriminada" },
-        { "icon": "💰", "text": "Total com margem de lucro" },
-        { "icon": "📅", "text": "Prazo de execução" },
-        { "icon": "✍️", "text": "Aceite digital do cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "profissionalizar seu serviço",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar seu faturamento",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, materiais e valores. Tudo organizado." },
-        { "icon": "calculator", "title": "Calculadora de Custos", "text": "Calcule o preço certo considerando materiais, tempo e lucro desejado.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere orçamentos e recibos em PDF. Profissionalismo que fecha mais serviços.", "color": "orange" },
-        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "calendar", "title": "Agenda Inteligente", "text": "Organize sua agenda e receba lembretes. Nunca mais perca um compromisso.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do serviço pelo celular. Sem precisar ligar.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu dava preço no chute e várias vezes trabalhei no prejuízo. Agora calculo tudo certinho e sei exatamente meu lucro. Os clientes elogiam o profissionalismo dos orçamentos.",
-      "name": "Carlos Eduardo",
-      "role": "Eletricista há 8 anos",
-      "metric": "Aumento de 40% no lucro"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de eletricistas",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Como funciona a calculadora de preços?", "answer": "Você cadastra seus custos (materiais, deslocamento) e define sua margem de lucro. O sistema calcula automaticamente o preço final garantindo que você não trabalhe no prejuízo." },
-        { "question": "Consigo controlar minha agenda?", "answer": "Sim! O PraticOS tem agenda integrada com lembretes. Você organiza todos os serviços e recebe notificações para não esquecer nenhum compromisso." },
-        { "question": "Funciona para autônomo e empresa?", "answer": "Sim! O sistema se adapta tanto para eletricista autônomo quanto para empresas de serviços elétricos com equipe." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time entende a realidade do eletricista." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Serve para eletricista autônomo e para empresa?",
+          "answer": "Sim. Quem trabalha sozinho usa com 1 usuário. Na empresa, cada eletricista entra com o próprio usuário e um perfil de acesso, como técnico ou gerente; o Starter inclui 2 usuários e o Pro inclui 3."
+        },
+        {
+          "question": "O checklist NR10 substitui a documentação da norma?",
+          "answer": "Não. Ele registra na OS os passos de segurança de cada serviço, com foto. O treinamento e os documentos exigidos pela NR10 continuam sendo responsabilidade da empresa."
+        },
+        {
+          "question": "Consigo organizar minha agenda?",
+          "answer": "Sim. A OS entra na agenda pela data do serviço, e o celular avisa um pouco antes de cada atendimento. Quem coordena a equipe filtra o calendário por técnico."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "lucrar mais",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Electrician Management System | PraticOS",
-    "description": "Stop losing quotes and undercharging! Work order system for electricians with price calculator, scheduling and financial control. Professionalize your service in 5 minutes.",
-    "keywords": "electrician software, electrician management system, work order system electrician, electrician app, electrical service management",
-    "ogTitle": "Electrician Management System | PraticOS",
-    "ogDescription": "Stop losing quotes and undercharging! WO system with price calculator, scheduling and financial control. Professionalize your service.",
+    "title": "Electrician Software: Quotes and Work Orders | PraticOS",
+    "description": "Work order app for electricians: quotes from your catalog approved by link, safety checklist, panel photos before and after, and a schedule. Free plan.",
+    "keywords": "electrician software, electrician management system, electrician work order app, electrician app, electrical service management, electrician quote app",
+    "ogTitle": "Electrician Software | PraticOS",
+    "ogDescription": "Electrician work orders on your phone: quotes approved by link, safety checklist, readings and panel photos, a schedule and a clear view of what came in.",
     "hero": {
-      "badge": "⚡ Electricians",
-      "title": "Stop undercharging:",
-      "titleHighlight": "know your exact profit",
-      "subtitle": "Stop guessing prices and losing money. Professional quotes in seconds, cost calculator to ensure profit and customer tracking on their phone.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Active electricians" },
-        "orders": { "value": "5k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Quote, readings and panel photos",
+      "titleMark": "on one work order.",
+      "lede": "PraticOS is the work order app for electricians. Build the quote from your catalog, send it as a link for the customer to approve, record voltage, GFCI and grounding with panel photos and get paid — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0516",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Patricia Gomez"
+          },
+          {
+            "label": "Installation",
+            "value": "House · 200 A main breaker"
+          },
+          {
+            "label": "Service",
+            "value": "Panel replacement and GFCI circuits"
+          },
+          {
+            "label": "Readings",
+            "value": "241 V · GFCI tested OK"
+          },
+          {
+            "label": "Photos",
+            "value": "6 attached · before and after"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$2,150.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Released",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for electrical service professionals",
+      "title": "Where an electrician loses money",
+      "lede": "It's rarely a lack of calls. It's the quote given off the top of your head, the materials left off the bill and the “ever since you worked on it, the breaker trips” with nothing on record.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "💸", "title": "Don't know how to price", "text": "Guess prices and later find out you worked for free. Don't know how to calculate materials + labor + profit." },
-        { "icon": "📝", "title": "Quotes take too long", "text": "Customer asks for a quote and you take hours to make it. Meanwhile, they already hired another electrician." },
-        { "icon": "💰", "title": "Mixing personal money", "text": "Income and expenses all together. At month's end you don't know if you made profit or loss." },
-        { "icon": "📅", "title": "No schedule control", "text": "Forget appointments, double-book services. Lose customers due to lack of organization." },
-        { "icon": "📞", "title": "Customer disappears after quote", "text": "Make detailed quotes but less than 50% close. No time to follow up." },
-        { "icon": "🔧", "title": "Competition from handymen", "text": "Lose jobs to unqualified workers charging cheap. Can't show your differential." }
+        {
+          "problem": "Prices off the top of your head",
+          "detail": "Wire, breakers, GFCIs and labor added up by eye. In the end, the job paid less than it cost.",
+          "answer": "Add materials and services with prices once. On the work order you pick items, set quantities and the total adds up as you go."
+        },
+        {
+          "problem": "Quotes given over the phone",
+          "detail": "The price was said on a call and, when it's time to bill, the customer remembers a different number.",
+          "answer": "The customer approves the quote by link, and the approval is recorded on the work order."
+        },
+        {
+          "problem": "“Ever since you worked on it, the breaker trips”",
+          "detail": "The customer calls weeks later blaming your work, and you can't show how you left the installation.",
+          "answer": "The electrical service record checklist keeps measured voltage and current, GFCI test, grounding and a photo of the panel after the job."
+        },
+        {
+          "problem": "Safety steps with no record",
+          "detail": "The circuit was shut off and tested, but nothing was written down. If something goes wrong, there's nothing to show.",
+          "answer": "The safety checklist records circuit de-energized and locked out, absence-of-voltage test, PPE used, area marked off and a photo of the panel before."
+        },
+        {
+          "problem": "Jobs booked on top of each other",
+          "detail": "Two visits at the same time and a customer waiting at home with no word.",
+          "answer": "The work order date puts the job on the calendar, and the phone sends a reminder before each visit."
+        },
+        {
+          "problem": "Closing the month without knowing what came in",
+          "detail": "A deposit to buy materials, the balance at the end and a customer who asks to pay later.",
+          "answer": "Record full or partial payments. The dashboard shows revenue for the period and what's still outstanding."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for daily electrician operations",
-      "items": [
-        { "icon": "🧮", "title": "Price calculator", "text": "Automatically calculate materials + labor + profit margin.", "highlight": "Never work at a loss again." },
-        { "icon": "⚡", "title": "Quote in 2 minutes", "text": "Create professional quotes quickly. Customer receives on WhatsApp and approves instantly." },
-        { "icon": "📅", "title": "Schedule with reminders", "text": "Organize your jobs and receive automatic reminders. Never miss an appointment again." },
-        { "icon": "📦", "title": "Materials list", "text": "Record all materials used. Inventory and cost control in one place." },
-        { "icon": "💰", "title": "Separate financial control", "text": "See exactly what came in and out of the business.", "highlight": "Separate from personal money." },
-        { "icon": "🔗", "title": "Link for customer tracking", "text": "Customer tracks service status on their phone. Professionalism that impresses." }
+    "workflow": {
+      "title": "How an electrical job moves through PraticOS",
+      "lede": "From the site visit to sign-off, every step is recorded on the installation's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Visit and quote",
+          "text": "Add the customer and the installation with site voltage and main breaker. Materials and services come from your catalog, already priced.",
+          "facts": [
+            "Voltage: 110V, 220V, dual or three-phase",
+            "Main breaker in amps",
+            "Clear statuses: quote, approved, in progress, released"
+          ],
+          "image": "home.png",
+          "alt": "Work order list in the PraticOS app"
+        },
+        {
+          "number": "02",
+          "title": "Send the quote as a link",
+          "text": "The customer opens the work order in a browser, nothing to install. They see materials and labor, approve it and leave comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Customers follow progress without calling",
+            "Work order PDF to print or send"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "03",
+          "title": "Do the work with a checklist",
+          "text": "Electrical checklists come ready to use and you can adjust the items: safety before you start, service record and handover quality.",
+          "facts": [
+            "Panel photo before and after",
+            "Measured voltage and current, GFCI and grounding",
+            "Circuits labeled and outlets tested"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "04",
+          "title": "Sign off and get paid",
+          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "facts": [
+            "Partial payment and discount on the same work order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Quote",
-      "title": "Complete",
-      "titleHighlight": "professional quote",
-      "text": "Create detailed quotes that impress customers and increase your conversion rate. All organized and professional.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "⚡ Electrical Service Quote",
-      "items": [
-        { "icon": "📋", "text": "Detailed service description" },
-        { "icon": "📦", "text": "Materials list with prices" },
-        { "icon": "🔧", "text": "Itemized labor" },
-        { "icon": "💰", "text": "Total with profit margin" },
-        { "icon": "📅", "text": "Execution timeline" },
-        { "icon": "✍️", "text": "Customer digital acceptance" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "professionalize your service",
-      "subtitle": "Powerful and intuitive tools to boost your revenue",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, materials and values. All organized." },
-        { "icon": "calculator", "title": "Cost Calculator", "text": "Calculate the right price considering materials, time and desired profit.", "color": "yellow" },
-        { "icon": "pdf", "title": "Professional PDF", "text": "Generate quotes and receipts in PDF. Professionalism that closes more jobs.", "color": "orange" },
-        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
-        { "icon": "calendar", "title": "Smart Schedule", "text": "Organize your schedule and receive reminders. Never miss an appointment.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks service status on their phone. No need to call.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I was guessing prices and many times worked at a loss. Now I calculate everything correctly and know exactly my profit. Customers praise the professionalism of the quotes.",
-      "name": "Carlos Eduardo",
-      "role": "Electrician for 8 years",
-      "metric": "40% increase in profit"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from electricians",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "How does the price calculator work?", "answer": "You register your costs (materials, travel) and set your profit margin. The system automatically calculates the final price ensuring you don't work at a loss." },
-        { "question": "Can I control my schedule?", "answer": "Yes! PraticOS has an integrated schedule with reminders. You organize all jobs and receive notifications so you never forget an appointment." },
-        { "question": "Does it work for freelancers and companies?", "answer": "Yes! The system adapts for both freelance electricians and electrical service companies with teams." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team understands the electrician's reality." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Does it work for solo electricians and contractors?",
+          "answer": "Yes. If you work alone, 1 user is enough. In a company, each electrician signs in with their own user and an access role, such as technician or manager; Starter includes 2 users and Pro includes 3."
+        },
+        {
+          "question": "Does the safety checklist replace required safety paperwork?",
+          "answer": "No. It records each job's safety steps on the work order, with photos. Training and the documents your local electrical safety rules require are still the company's responsibility."
+        },
+        {
+          "question": "Can I organize my schedule?",
+          "answer": "Yes. The work order goes on the calendar by its service date, and the phone reminds you shortly before each visit. Whoever coordinates the team can filter the calendar by technician."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and start",
-      "titleHighlight": "earning more",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Electricista | PraticOS",
-    "description": "¡Deja de perder presupuestos y cobrar mal! Sistema de OS para electricista con calculadora de precios, agenda y control financiero. Profesionaliza tu servicio en 5 minutos.",
+    "title": "Sistema para Electricista: presupuestos y órdenes | PraticOS",
+    "description": "App de órdenes de servicio para electricistas: presupuesto con tu catálogo aprobado por link, checklist de seguridad y fotos del tablero. Plan gratis.",
     "keywords": "sistema para electricista, programa para electricista, software electricista, orden de servicio electricista, app electricista, gestión de servicios eléctricos",
     "ogTitle": "Sistema para Electricista | PraticOS",
-    "ogDescription": "¡Deja de perder presupuestos y cobrar mal! Sistema de OS con calculadora de precios, agenda y control financiero. Profesionaliza tu servicio.",
+    "ogDescription": "Las órdenes del electricista en el celular: presupuesto aprobado por link, checklist de seguridad, mediciones y fotos del tablero, y agenda.",
     "hero": {
-      "badge": "⚡ Electricistas",
-      "title": "Deja de cobrar mal:",
-      "titleHighlight": "sabe exactamente tu ganancia",
-      "subtitle": "Basta de dar precios al azar y perder dinero. Presupuestos profesionales en segundos, calculadora de costos para garantizar ganancia y cliente siguiendo por el celular.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "300+", "label": "Electricistas activos" },
-        "orders": { "value": "5k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Presupuesto, mediciones y tablero",
+      "titleMark": "en una orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para electricistas. Arma el presupuesto con tu catálogo, envíalo por link para que el cliente lo apruebe, registra tensión, diferencial y puesta a tierra con fotos del tablero y cobra — todo desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0516",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Patricia Gómez"
+          },
+          {
+            "label": "Instalación",
+            "value": "Casa · 220V · interruptor general 40 A"
+          },
+          {
+            "label": "Servicio",
+            "value": "Cambio de tablero e instalación de diferencial"
+          },
+          {
+            "label": "Medición",
+            "value": "221 V · diferencial probado OK"
+          },
+          {
+            "label": "Fotos",
+            "value": "6 adjuntas · antes y después"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 680,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En progreso",
+          "Liberado",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con servicios eléctricos",
+      "title": "Dónde pierde plata el electricista",
+      "lede": "Casi nunca es falta de trabajo. Es el presupuesto dado de memoria, el material que quedó fuera de la cuenta y el “desde que tocaste, salta la térmica” sin nada registrado.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "💸", "title": "No sabe poner precio", "text": "Da precios al azar y después descubre que trabajó gratis. No sabe calcular materiales + mano de obra + ganancia." },
-        { "icon": "📝", "title": "Presupuesto demora mucho", "text": "Cliente pide presupuesto y tardas horas en hacerlo. Mientras tanto, ya cerró con otro electricista." },
-        { "icon": "💰", "title": "Mezcla dinero personal", "text": "Entradas y salidas todo junto. Al final del mes no sabe si tuvo ganancia o pérdida." },
-        { "icon": "📅", "title": "Sin control de agenda", "text": "Olvida compromisos, agenda servicio encima de otro. Pierde clientes por falta de organización." },
-        { "icon": "📞", "title": "Cliente desaparece después del presupuesto", "text": "Hace presupuesto detallado pero menos del 50% cierran. No tiene tiempo para hacer seguimiento." },
-        { "icon": "🔧", "title": "Competencia de 'toderos'", "text": "Pierde servicios ante quien cobra barato pero no tiene calificación. No logra mostrar su diferencial." }
+        {
+          "problem": "Precio dado de memoria",
+          "detail": "Cable, térmicas, diferencial y mano de obra sumados a ojo. Al final, el trabajo salió más barato de lo que costó.",
+          "answer": "Carga materiales y servicios con precio una vez. En la orden eliges los ítems, ajustas cantidades y el total se suma al momento."
+        },
+        {
+          "problem": "Presupuesto por audio que el cliente olvida",
+          "detail": "El precio se dijo por teléfono y, al cobrar, el cliente recuerda otro número.",
+          "answer": "El cliente aprueba el presupuesto por link, y la aprobación queda registrada en la propia orden."
+        },
+        {
+          "problem": "“Desde que tocaste, salta la térmica”",
+          "detail": "El cliente llama semanas después culpando tu trabajo, y no tienes cómo mostrar cómo dejaste la instalación.",
+          "answer": "El checklist de registro del servicio eléctrico guarda tensión y corriente medidas, prueba del diferencial, puesta a tierra y foto del tablero después."
+        },
+        {
+          "problem": "Seguridad sin registro",
+          "detail": "El circuito se cortó y se probó, pero nada quedó escrito. Si algo sale mal, no hay cómo mostrarlo.",
+          "answer": "El checklist de seguridad registra circuito desenergizado y bloqueado, prueba de ausencia de tensión, EPP usado, área señalizada y foto del tablero antes."
+        },
+        {
+          "problem": "Trabajos agendados uno encima del otro",
+          "detail": "Dos visitas a la misma hora y un cliente esperando en casa sin noticias.",
+          "answer": "La fecha de la orden pone el trabajo en la agenda, y el celular avisa antes de cada visita."
+        },
+        {
+          "problem": "Cerrar el mes sin saber cuánto entró",
+          "detail": "Un anticipo para comprar material, el saldo al final y un cliente que pide pagar después.",
+          "answer": "Registra pagos totales o parciales. El panel muestra la facturación del período y lo que falta cobrar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el día a día del electricista",
-      "items": [
-        { "icon": "🧮", "title": "Calculadora de precios", "text": "Calcula automáticamente materiales + mano de obra + margen de ganancia.", "highlight": "Nunca más trabajes con pérdida." },
-        { "icon": "⚡", "title": "Presupuesto en 2 minutos", "text": "Crea presupuestos profesionales rápidamente. Cliente recibe en WhatsApp y aprueba al instante." },
-        { "icon": "📅", "title": "Agenda con recordatorios", "text": "Organiza tus servicios y recibe recordatorios automáticos. Nunca más olvides un compromiso." },
-        { "icon": "📦", "title": "Lista de materiales", "text": "Registra todos los materiales usados. Control de inventario y costos en un solo lugar." },
-        { "icon": "💰", "title": "Control financiero separado", "text": "Mira exactamente lo que entró y salió del negocio.", "highlight": "Separa del dinero personal." },
-        { "icon": "🔗", "title": "Link para cliente seguir", "text": "Cliente sigue el estado del servicio por el celular. Profesionalismo que impresiona." }
+    "workflow": {
+      "title": "Cómo pasa un trabajo eléctrico por PraticOS",
+      "lede": "De la visita a la liberación, cada paso queda registrado en la orden de la instalación.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Visita y presupuesta",
+          "text": "Registra al cliente y la instalación con el voltaje del lugar y el interruptor general. Materiales y servicios salen de tu catálogo, con precio.",
+          "facts": [
+            "Voltaje: 110V, 220V, doble voltaje o trifásico",
+            "Interruptor general en amperes",
+            "Estados claros: presupuesto, aprobado, en progreso, liberado"
+          ],
+          "image": "home.png",
+          "alt": "Lista de órdenes de servicio en la app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Envía el presupuesto por link",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve materiales y mano de obra, aprueba y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "El cliente sigue el avance sin llamar",
+            "PDF de la orden para imprimir o enviar"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "03",
+          "title": "Ejecuta con checklist",
+          "text": "Los checklists de electricidad vienen listos y tú ajustas los ítems: seguridad antes de empezar, registro del servicio y calidad en la entrega.",
+          "facts": [
+            "Foto del tablero antes y después",
+            "Tensión y corriente medidas, diferencial y puesta a tierra",
+            "Circuitos identificados y prueba de los puntos"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "04",
+          "title": "Libera y cobra",
+          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Presupuesto",
-      "title": "Presupuesto",
-      "titleHighlight": "profesional completo",
-      "text": "Crea presupuestos detallados que impresionan al cliente y aumentan tu tasa de conversión. Todo organizado y profesional.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "⚡ Presupuesto de Servicio Eléctrico",
-      "items": [
-        { "icon": "📋", "text": "Descripción detallada del servicio" },
-        { "icon": "📦", "text": "Lista de materiales con precios" },
-        { "icon": "🔧", "text": "Mano de obra discriminada" },
-        { "icon": "💰", "text": "Total con margen de ganancia" },
-        { "icon": "📅", "text": "Plazo de ejecución" },
-        { "icon": "✍️", "text": "Aceptación digital del cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "profesionalizar tu servicio",
-      "subtitle": "Herramientas potentes e intuitivas para aumentar tu facturación",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, materiales y valores. Todo organizado." },
-        { "icon": "calculator", "title": "Calculadora de Costos", "text": "Calcula el precio correcto considerando materiales, tiempo y ganancia deseada.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera presupuestos y recibos en PDF. Profesionalismo que cierra más servicios.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "calendar", "title": "Agenda Inteligente", "text": "Organiza tu agenda y recibe recordatorios. Nunca más pierdas un compromiso.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado del servicio por el celular. Sin necesidad de llamar.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes daba precios al azar y varias veces trabajé con pérdida. Ahora calculo todo correctamente y sé exactamente mi ganancia. Los clientes elogian el profesionalismo de los presupuestos.",
-      "name": "Carlos Eduardo",
-      "role": "Electricista hace 8 años",
-      "metric": "Aumento de 40% en ganancia"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de electricistas",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Cómo funciona la calculadora de precios?", "answer": "Registras tus costos (materiales, desplazamiento) y defines tu margen de ganancia. El sistema calcula automáticamente el precio final garantizando que no trabajes con pérdida." },
-        { "question": "¿Puedo controlar mi agenda?", "answer": "¡Sí! PraticOS tiene agenda integrada con recordatorios. Organizas todos los servicios y recibes notificaciones para no olvidar ningún compromiso." },
-        { "question": "¿Funciona para autónomo y empresa?", "answer": "¡Sí! El sistema se adapta tanto para electricista autónomo como para empresas de servicios eléctricos con equipo." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo entiende la realidad del electricista." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Sirve para electricista independiente y para empresa?",
+          "answer": "Sí. Si trabajas solo, alcanza con 1 usuario. En una empresa, cada electricista entra con su propio usuario y un perfil de acceso, como técnico o gerente; Starter incluye 2 usuarios y Pro incluye 3."
+        },
+        {
+          "question": "¿El checklist de seguridad reemplaza la documentación obligatoria?",
+          "answer": "No. Registra en la orden los pasos de seguridad de cada trabajo, con foto. La capacitación y los documentos que exige la normativa de tu país siguen siendo responsabilidad de la empresa."
+        },
+        {
+          "question": "¿Puedo organizar mi agenda?",
+          "answer": "Sí. La orden entra en la agenda por la fecha del servicio, y el celular avisa un poco antes de cada visita. Quien coordina el equipo filtra el calendario por técnico."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "ganar más",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

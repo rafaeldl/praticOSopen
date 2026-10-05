@@ -3,379 +3,517 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Assistência Técnica de Eletrodomésticos | PraticOS",
-    "description": "Gerencie atendimentos externos e controle sua equipe de técnicos de linha branca. Sistema com roteirização, histórico do cliente e checklist de visita. Ideal para field service.",
-    "keywords": "sistema assistência técnica eletrodomésticos, software técnico linha branca, app técnico geladeira, gestão equipe externa, sistema field service eletrodomésticos",
-    "ogTitle": "Sistema para Assistência Técnica de Eletrodomésticos | PraticOS",
-    "ogDescription": "Gerencie atendimentos externos e controle sua equipe de técnicos. Sistema com roteirização, histórico do cliente e checklist de visita.",
+    "title": "Sistema para Assistência de Eletrodomésticos | PraticOS",
+    "description": "App de OS para assistência técnica de eletrodomésticos: agenda de visitas por técnico, diagnóstico de geladeira e lavadora, garantia na OS. Plano grátis.",
+    "keywords": "sistema assistência técnica eletrodomésticos, software técnico linha branca, app técnico geladeira, ordem de serviço eletrodomésticos, sistema para conserto de máquina de lavar",
+    "ogTitle": "Sistema para Assistência de Eletrodomésticos | PraticOS",
+    "ogDescription": "OS da linha branca no celular: visitas na agenda por técnico, checklists de diagnóstico, orçamento aprovado por link e garantia registrada.",
     "hero": {
-      "badge": "🔧 Eletrodomésticos",
-      "title": "Gerencie sua equipe externa:",
-      "titleHighlight": "técnicos de linha branca na palma da mão",
-      "subtitle": "70% dos atendimentos são na casa do cliente. Controle rotas, veja onde cada técnico está e envie status automático pelo WhatsApp. Histórico completo de cada cliente e aparelho.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Técnicos ativos" },
-        "orders": { "value": "10k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Visita, diagnóstico e garantia",
+      "titleMark": "na mesma OS.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrodomésticos. Agende a visita, faça o diagnóstico com checklist e fotos, mande o orçamento por link para o cliente aprovar e registre a garantia e o pagamento — tudo pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0633",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Sandra Ribeiro"
+          },
+          {
+            "label": "Eletrodoméstico",
+            "value": "Máquina de lavar 12 kg · 220V"
+          },
+          {
+            "label": "Defeito",
+            "value": "Não centrifuga, barulho no cesto"
+          },
+          {
+            "label": "Diagnóstico",
+            "value": "Rolamentos e retentor do tanque"
+          },
+          {
+            "label": "Garantia",
+            "value": "90 dias"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 420,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Concluído",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com assistência técnica de eletrodomésticos",
+      "title": "Onde a assistência de linha branca perde dinheiro",
+      "lede": "Quase nunca é falta de chamado. É a visita marcada sem saber o defeito, a peça trocada que não entrou na conta e a garantia discutida sem nada escrito.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "🚗", "title": "Deslocamento sem planejamento", "text": "Técnicos perdendo tempo no trânsito porque as visitas não foram organizadas por região. Combustível desperdiçado." },
-        { "icon": "📋", "title": "Sem histórico do cliente", "text": "Cliente liga e você não sabe o que já foi feito no aparelho dele. Perde tempo perguntando tudo de novo." },
-        { "icon": "👥", "title": "Não sabe onde está a equipe", "text": "Técnico saiu para atendimento e você não tem visibilidade. Cliente liga perguntando e você não sabe responder." },
-        { "icon": "📞", "title": "Cliente perguntando pelo técnico", "text": "Ligações constantes: 'O técnico já saiu?' 'Que horas chega?' Interrompe seu trabalho administrativo." },
-        { "icon": "📦", "title": "Controle de peças no veículo", "text": "Técnico usa peça e esquece de avisar. Estoque do carro desatualizado, falta peça no momento crítico." },
-        { "icon": "💸", "title": "Cobrança e inadimplência", "text": "Cliente não paga na hora, técnico volta sem receber. Difícil controlar quem deve e quanto." }
+        {
+          "problem": "Visita sem saber o que levar",
+          "detail": "O técnico chega na casa do cliente sem saber o modelo, a voltagem nem o defeito, e precisa voltar outro dia.",
+          "answer": "A OS já sai com o cliente, o endereço, o eletrodoméstico, a voltagem e o defeito relatado no telefone."
+        },
+        {
+          "problem": "Diagnóstico de cabeça",
+          "detail": "Cada técnico confere uma coisa diferente, e o que foi testado não fica em lugar nenhum.",
+          "answer": "Checklists prontos de diagnóstico de geladeira e freezer, máquina de lavar e micro-ondas, com fotos, preenchidos na casa do cliente."
+        },
+        {
+          "problem": "“O defeito voltou”",
+          "detail": "O cliente liga dois meses depois e ninguém sabe que peça foi trocada nem qual garantia foi dada.",
+          "answer": "O checklist de entrega registra serviço executado, peças trocadas, teste final, orientações e prazo de garantia: 30, 60 ou 90 dias."
+        },
+        {
+          "problem": "Equipe sem agenda",
+          "detail": "Dois técnicos no mesmo bairro em horários diferentes e um cliente esperando a manhã inteira.",
+          "answer": "A data da OS coloca a visita na agenda. Quem coordena filtra o calendário por técnico, e o celular avisa antes de cada atendimento."
+        },
+        {
+          "problem": "Técnico volta sem receber",
+          "detail": "O cliente pede para pagar depois e, no fim do mês, ninguém lembra quem ficou devendo.",
+          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+        },
+        {
+          "problem": "“O técnico já saiu?”",
+          "detail": "O cliente liga para saber do orçamento e do conserto, e a ligação cai no balcão.",
+          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para equipes de field service",
-      "items": [
-        { "icon": "🗺️", "title": "Roteirização integrada", "text": "Organize os atendimentos por região e integre com Google Maps.", "highlight": "Reduza tempo de deslocamento em até 40%." },
-        { "icon": "📋", "title": "Histórico completo do cliente", "text": "Veja todos os atendimentos anteriores daquele cliente. Aparelhos, defeitos, peças trocadas." },
-        { "icon": "📍", "title": "Visibilidade da equipe", "text": "Saiba em tempo real onde cada técnico está e qual o status de cada atendimento." },
-        { "icon": "📱", "title": "WhatsApp automático", "text": "Cliente recebe notificação quando técnico sai para atendimento.", "highlight": "Reduz ligações em até 70%." },
-        { "icon": "📦", "title": "Estoque por técnico", "text": "Controle as peças que cada técnico tem no veículo. Baixa automática quando usa." },
-        { "icon": "✍️", "title": "Assinatura e comprovante", "text": "Cliente assina no celular do técnico. Comprovante enviado na hora por WhatsApp." }
+    "workflow": {
+      "title": "Como um chamado passa pela assistência no PraticOS",
+      "lede": "Da ligação do cliente à garantia, cada etapa fica registrada na OS do eletrodoméstico.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Abra o chamado e agende",
+          "text": "Cadastre o cliente com endereço e o eletrodoméstico com voltagem. A data da OS coloca a visita no calendário do técnico.",
+          "facts": [
+            "Voltagem: 110V, 220V ou bivolt",
+            "Calendário do mês com filtro por técnico",
+            "Lembrete no celular antes do atendimento"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do PraticOS com OS marcadas no mês"
+        },
+        {
+          "number": "02",
+          "title": "Diagnostique no local",
+          "text": "Os checklists de eletrodomésticos vêm prontos e você ajusta os itens: entrada do equipamento, diagnóstico por tipo de aparelho, segurança e teste final.",
+          "facts": [
+            "Geladeira: compressor, gás, termostato, borracha, degelo",
+            "Lavadora: enchimento, drenagem, centrifugação, motor, rolamentos",
+            "Micro-ondas: magnetron, capacitor, trava da porta"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "03",
+          "title": "Mande o orçamento por link",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Cliente acompanha o conserto sem ligar",
+            "PDF da OS com checklists e fotos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "04",
+          "title": "Entregue com garantia e receba",
+          "text": "Registre peças trocadas, teste final e prazo de garantia no checklist de entrega. Depois, o pagamento inteiro ou em parcelas.",
+          "facts": [
+            "Garantia de 30, 60 ou 90 dias na OS",
+            "Pagamento parcial e desconto na mesma OS",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "visita técnica",
-      "text": "Documente cada atendimento com fotos e dados do aparelho. Proteja-se de reclamações e tenha histórico completo.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Visita",
-      "items": [
-        { "icon": "📸", "text": "Foto do aparelho (antes e depois)" },
-        { "icon": "🔧", "text": "Modelo, marca e número de série" },
-        { "icon": "✅", "text": "Checklist de verificação técnica" },
-        { "icon": "📝", "text": "Defeito relatado e solução aplicada" },
-        { "icon": "📦", "text": "Peças utilizadas no atendimento" },
-        { "icon": "✍️", "text": "Assinatura digital do cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar sua equipe",
-      "subtitle": "Ferramentas para assistência técnica de linha branca",
-      "items": [
-        { "icon": "document", "title": "OS Digital com foto", "text": "Crie ordens de serviço com foto do aparelho na entrada. Documentação completa do atendimento." },
-        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monte checklists específicos por tipo de aparelho. Geladeira, máquina de lavar, ar-condicionado.", "color": "yellow" },
-        { "icon": "signature", "title": "Assinatura no celular", "text": "Cliente assina no próprio celular do técnico. Comprovante digital enviado na hora.", "color": "orange" },
-        { "icon": "bell", "title": "Controle de garantia", "text": "Alertas automáticos de vencimento de garantia. Oportunidade de contato proativo.", "color": "green" },
-        { "icon": "money", "title": "Financeiro integrado", "text": "Controle de recebimentos por técnico. Comissões e repasses automáticos.", "color": "purple" },
-        { "icon": "chart", "title": "Relatórios de produtividade", "text": "Veja quantos atendimentos cada técnico fez. Tempo médio por visita.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu não sabia onde meus técnicos estavam e os clientes ligavam o tempo todo. Agora tenho visibilidade total e o cliente recebe atualização automática pelo WhatsApp.",
-      "name": "Carlos Mendes",
-      "role": "Dono de assistência técnica há 8 anos",
-      "metric": "Redução de 60% nas ligações"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem conserta eletrodomésticos",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Funciona para atendimento externo?", "answer": "Sim! O PraticOS foi feito para field service. Técnicos usam no celular durante a visita, com ou sem internet. Sincroniza quando volta a ter conexão." },
-        { "question": "Consigo ver onde meus técnicos estão?", "answer": "Sim! O sistema mostra o status de cada técnico em tempo real: a caminho, em atendimento, finalizado. Você tem visibilidade total da equipe." },
-        { "question": "O cliente recebe notificação?", "answer": "Sim! O cliente recebe mensagem automática pelo WhatsApp quando o técnico sai para o atendimento e quando finaliza. Reduz ligações drasticamente." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Quais aparelhos têm checklist pronto?",
+          "answer": "Há checklists de diagnóstico para geladeira e freezer, máquina de lavar e micro-ondas, além de entrada, segurança, teste final e entrega, que servem para fogão, lava-louças e outros. Dá para editar os itens ou criar os seus."
+        },
+        {
+          "question": "Consigo ver a agenda de cada técnico?",
+          "answer": "Sim. A OS entra na agenda pela data da visita. Quem coordena a equipe filtra o calendário por técnico, e cada técnico recebe um aviso no celular antes do atendimento."
+        },
+        {
+          "question": "Os técnicos podem usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "gerenciar sua equipe",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Appliance Repair Service Management | PraticOS",
-    "description": "Manage field service teams and control your appliance repair technicians. System with route planning, customer history and visit checklist. Perfect for field service.",
-    "keywords": "appliance repair software, home appliance service management, field service app, technician dispatch software, appliance service scheduling",
-    "ogTitle": "Appliance Repair Service Management | PraticOS",
-    "ogDescription": "Manage field service teams and control your technicians. System with route planning, customer history and visit checklist.",
+    "title": "Appliance Repair Software: Work Orders | PraticOS",
+    "description": "Work order app for appliance repair: visits scheduled by technician, fridge and washer diagnostic checklists, warranty on the work order. Free plan.",
+    "keywords": "appliance repair software, appliance repair work order app, appliance technician app, appliance service scheduling, refrigerator and washer repair software",
+    "ogTitle": "Appliance Repair Software | PraticOS",
+    "ogDescription": "Appliance repair work orders on your phone: visits scheduled by technician, diagnostic checklists, quotes approved by link and warranty on record.",
     "hero": {
-      "badge": "🔧 Appliances",
-      "title": "Manage your field team:",
-      "titleHighlight": "appliance technicians at your fingertips",
-      "subtitle": "70% of services are at the customer's home. Control routes, see where each technician is and send automatic WhatsApp updates. Complete history of each customer and appliance.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Active technicians" },
-        "orders": { "value": "10k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Visit, diagnosis and warranty",
+      "titleMark": "on one work order.",
+      "lede": "PraticOS is the work order app for appliance repair. Schedule the visit, run the diagnosis with a checklist and photos, send the quote as a link for the customer to approve and record the warranty and payment — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0633",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Sandra Reed"
+          },
+          {
+            "label": "Appliance",
+            "value": "Front-load washer · 110V"
+          },
+          {
+            "label": "Issue",
+            "value": "Won't spin, noise from the drum"
+          },
+          {
+            "label": "Diagnosis",
+            "value": "Drum bearings and seal"
+          },
+          {
+            "label": "Warranty",
+            "value": "90 days"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$385.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Done",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for appliance repair service providers",
+      "title": "Where an appliance repair business loses money",
+      "lede": "It's rarely a lack of calls. It's the visit booked without knowing the problem, the part swapped but never billed and the warranty argued over with nothing in writing.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "🚗", "title": "Unplanned travel", "text": "Technicians wasting time in traffic because visits weren't organized by region. Wasted fuel." },
-        { "icon": "📋", "title": "No customer history", "text": "Customer calls and you don't know what was already done on their appliance. Waste time asking everything again." },
-        { "icon": "👥", "title": "Don't know where the team is", "text": "Technician left for a service call and you have no visibility. Customer calls asking and you can't answer." },
-        { "icon": "📞", "title": "Customer asking about technician", "text": "Constant calls: 'Did the technician leave yet?' 'What time will they arrive?' Interrupts your admin work." },
-        { "icon": "📦", "title": "Parts control in vehicle", "text": "Technician uses a part and forgets to report. Vehicle stock outdated, part missing at critical moment." },
-        { "icon": "💸", "title": "Collection and defaults", "text": "Customer doesn't pay on the spot, technician returns without payment. Hard to track who owes and how much." }
+        {
+          "problem": "Visits without knowing what to bring",
+          "detail": "The tech shows up without knowing the model, voltage or problem, and has to come back another day.",
+          "answer": "The work order already has the customer, address, appliance, voltage and the problem reported on the phone."
+        },
+        {
+          "problem": "Diagnosis from memory",
+          "detail": "Each tech checks something different, and what was tested isn't written anywhere.",
+          "answer": "Ready-made diagnostic checklists for fridge and freezer, washer and microwave, with photos, filled in at the customer's home."
+        },
+        {
+          "problem": "“It's broken again”",
+          "detail": "The customer calls two months later and nobody knows which part was replaced or what warranty was given.",
+          "answer": "The handover checklist records work done, parts replaced, final test, instructions and warranty period: 30, 60 or 90 days."
+        },
+        {
+          "problem": "A crew with no schedule",
+          "detail": "Two techs in the same neighborhood at different times and a customer waiting all morning.",
+          "answer": "The work order date puts the visit on the calendar. Whoever coordinates filters by technician, and the phone sends a reminder before each visit."
+        },
+        {
+          "problem": "Techs coming back unpaid",
+          "detail": "The customer asks to pay later and, by month-end, nobody remembers who still owes.",
+          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+        },
+        {
+          "problem": "“Is the tech on the way?”",
+          "detail": "The customer calls to ask about the quote and the repair, and the call lands at the front desk.",
+          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for field service teams",
-      "items": [
-        { "icon": "🗺️", "title": "Integrated routing", "text": "Organize visits by region and integrate with Google Maps.", "highlight": "Reduce travel time by up to 40%." },
-        { "icon": "📋", "title": "Complete customer history", "text": "See all previous visits for that customer. Appliances, defects, parts replaced." },
-        { "icon": "📍", "title": "Team visibility", "text": "Know in real time where each technician is and the status of each service call." },
-        { "icon": "📱", "title": "Automatic WhatsApp", "text": "Customer receives notification when technician leaves for service.", "highlight": "Reduces calls by up to 70%." },
-        { "icon": "📦", "title": "Stock per technician", "text": "Control the parts each technician has in their vehicle. Automatic deduction when used." },
-        { "icon": "✍️", "title": "Signature and receipt", "text": "Customer signs on the technician's phone. Receipt sent immediately via WhatsApp." }
+    "workflow": {
+      "title": "How a service call moves through PraticOS",
+      "lede": "From the customer's call to the warranty, every step is recorded on the appliance's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Open the call and schedule",
+          "text": "Add the customer with their address and the appliance with its voltage. The work order date puts the visit on the tech's calendar.",
+          "facts": [
+            "Voltage: 110V, 220V or dual",
+            "Monthly calendar filtered by technician",
+            "Phone reminder before each visit"
+          ],
+          "image": "agenda.png",
+          "alt": "PraticOS calendar with work orders scheduled for the month"
+        },
+        {
+          "number": "02",
+          "title": "Diagnose on site",
+          "text": "Appliance checklists come ready to use and you can adjust the items: intake, diagnosis by appliance type, safety and final test.",
+          "facts": [
+            "Fridge: compressor, refrigerant, thermostat, door gasket, defrost",
+            "Washer: fill, drain, spin, motor, bearings",
+            "Microwave: magnetron, capacitor, door latch"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "03",
+          "title": "Send the quote as a link",
+          "text": "The customer opens the work order in a browser, nothing to install. They see photos, parts and labor, approve it and leave comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Customers follow the repair without calling",
+            "Work order PDF with checklists and photos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "04",
+          "title": "Hand over with warranty and get paid",
+          "text": "Record parts replaced, final test and warranty period on the handover checklist. Then record the payment in full or in parts.",
+          "facts": [
+            "30, 60 or 90-day warranty on the work order",
+            "Partial payment and discount on the same work order",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Technical",
-      "titleHighlight": "visit checklist",
-      "text": "Document each visit with photos and appliance data. Protect yourself from complaints and have complete history.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Visit Checklist",
-      "items": [
-        { "icon": "📸", "text": "Appliance photo (before and after)" },
-        { "icon": "🔧", "text": "Model, brand and serial number" },
-        { "icon": "✅", "text": "Technical verification checklist" },
-        { "icon": "📝", "text": "Reported defect and applied solution" },
-        { "icon": "📦", "text": "Parts used in service" },
-        { "icon": "✍️", "text": "Customer digital signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your team",
-      "subtitle": "Tools for appliance repair service",
-      "items": [
-        { "icon": "document", "title": "Digital WO with photo", "text": "Create work orders with appliance intake photo. Complete service documentation." },
-        { "icon": "checklist", "title": "Custom checklist", "text": "Build specific checklists by appliance type. Refrigerator, washing machine, air conditioner.", "color": "yellow" },
-        { "icon": "signature", "title": "Mobile signature", "text": "Customer signs on the technician's phone. Digital receipt sent immediately.", "color": "orange" },
-        { "icon": "bell", "title": "Warranty control", "text": "Automatic warranty expiration alerts. Opportunity for proactive contact.", "color": "green" },
-        { "icon": "money", "title": "Integrated financials", "text": "Payment tracking by technician. Automatic commissions and transfers.", "color": "purple" },
-        { "icon": "chart", "title": "Productivity reports", "text": "See how many visits each technician completed. Average time per visit.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I didn't know where my technicians were and customers called all the time. Now I have total visibility and customers receive automatic updates via WhatsApp.",
-      "name": "Carlos Mendes",
-      "role": "Appliance service owner for 8 years",
-      "metric": "60% reduction in calls"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from appliance repair businesses",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work for field service?", "answer": "Yes! PraticOS was made for field service. Technicians use it on their phone during visits, with or without internet. Syncs when connection returns." },
-        { "question": "Can I see where my technicians are?", "answer": "Yes! The system shows each technician's status in real time: on the way, in service, finished. You have complete team visibility." },
-        { "question": "Does the customer get notified?", "answer": "Yes! The customer receives an automatic WhatsApp message when the technician leaves for the service and when it's finished. Drastically reduces calls." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of appliance repair services." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Which appliances have ready-made checklists?",
+          "answer": "There are diagnostic checklists for fridge and freezer, washer and microwave, plus intake, safety, final test and handover checklists that work for ranges, dishwashers and more. You can edit the items or build your own."
+        },
+        {
+          "question": "Can I see each technician's schedule?",
+          "answer": "Yes. The work order goes on the calendar by its visit date. Whoever coordinates the team filters the calendar by technician, and each tech gets a phone reminder before the visit."
+        },
+        {
+          "question": "Can my techs use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "manage your team",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Asistencia Técnica de Electrodomésticos | PraticOS",
-    "description": "Gestiona atendimientos externos y controla tu equipo de técnicos de línea blanca. Sistema con rutas, historial del cliente y checklist de visita. Ideal para field service.",
-    "keywords": "sistema asistencia técnica electrodomésticos, software técnico línea blanca, app técnico refrigerador, gestión equipo externo, sistema field service electrodomésticos",
-    "ogTitle": "Sistema para Asistencia Técnica de Electrodomésticos | PraticOS",
-    "ogDescription": "Gestiona atendimientos externos y controla tu equipo de técnicos. Sistema con rutas, historial del cliente y checklist de visita.",
+    "title": "Sistema para Técnico de Electrodomésticos | PraticOS",
+    "description": "App de órdenes de servicio para técnicos de electrodomésticos: agenda por técnico, checklists de refrigerador y lavadora, y garantía. Plan gratis.",
+    "keywords": "sistema servicio técnico electrodomésticos, software técnico línea blanca, app técnico refrigerador, orden de servicio electrodomésticos, sistema para reparación de lavadoras",
+    "ogTitle": "Sistema para Técnico de Electrodomésticos | PraticOS",
+    "ogDescription": "Las órdenes de línea blanca en el celular: visitas en la agenda por técnico, checklists de diagnóstico, presupuesto por link y garantía registrada.",
     "hero": {
-      "badge": "🔧 Electrodomésticos",
-      "title": "Gestiona tu equipo externo:",
-      "titleHighlight": "técnicos de línea blanca en la palma de tu mano",
-      "subtitle": "70% de los atendimientos son en casa del cliente. Controla rutas, mira dónde está cada técnico y envía estado automático por WhatsApp. Historial completo de cada cliente y aparato.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "500+", "label": "Técnicos activos" },
-        "orders": { "value": "10k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Visita, diagnóstico y garantía",
+      "titleMark": "en una orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para técnicos de electrodomésticos. Agenda la visita, haz el diagnóstico con checklist y fotos, envía el presupuesto por link para que el cliente lo apruebe y registra la garantía y el pago — todo desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0633",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Sandra Ribera"
+          },
+          {
+            "label": "Electrodoméstico",
+            "value": "Lavadora 12 kg · 220V"
+          },
+          {
+            "label": "Falla",
+            "value": "No centrifuga, ruido en el tambor"
+          },
+          {
+            "label": "Diagnóstico",
+            "value": "Rodamientos y retén del tambor"
+          },
+          {
+            "label": "Garantía",
+            "value": "90 días"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 210,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En curso",
+          "Terminado",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con asistencia técnica de electrodomésticos",
+      "title": "Dónde pierde plata el servicio técnico de línea blanca",
+      "lede": "Casi nunca es falta de llamados. Es la visita agendada sin saber la falla, el repuesto cambiado que no entró en la cuenta y la garantía discutida sin nada escrito.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "🚗", "title": "Desplazamiento sin planificación", "text": "Técnicos perdiendo tiempo en el tráfico porque las visitas no fueron organizadas por región. Combustible desperdiciado." },
-        { "icon": "📋", "title": "Sin historial del cliente", "text": "Cliente llama y no sabes qué se hizo en su aparato. Pierdes tiempo preguntando todo de nuevo." },
-        { "icon": "👥", "title": "No sabes dónde está el equipo", "text": "Técnico salió para atendimiento y no tienes visibilidad. Cliente llama preguntando y no sabes responder." },
-        { "icon": "📞", "title": "Cliente preguntando por el técnico", "text": "Llamadas constantes: '¿El técnico ya salió?' '¿A qué hora llega?' Interrumpe tu trabajo administrativo." },
-        { "icon": "📦", "title": "Control de piezas en vehículo", "text": "Técnico usa pieza y olvida avisar. Stock del carro desactualizado, falta pieza en momento crítico." },
-        { "icon": "💸", "title": "Cobro y morosidad", "text": "Cliente no paga en el momento, técnico vuelve sin recibir. Difícil controlar quién debe y cuánto." }
+        {
+          "problem": "Visitas sin saber qué llevar",
+          "detail": "El técnico llega a la casa del cliente sin saber el modelo, el voltaje ni la falla, y tiene que volver otro día.",
+          "answer": "La orden ya sale con el cliente, la dirección, el electrodoméstico, el voltaje y la falla que contó por teléfono."
+        },
+        {
+          "problem": "Diagnóstico de memoria",
+          "detail": "Cada técnico revisa algo distinto, y lo que se probó no queda en ningún lado.",
+          "answer": "Checklists listos de diagnóstico de refrigerador y freezer, lavadora y microondas, con fotos, completados en la casa del cliente."
+        },
+        {
+          "problem": "“Volvió a fallar”",
+          "detail": "El cliente llama dos meses después y nadie sabe qué repuesto se cambió ni qué garantía se dio.",
+          "answer": "El checklist de entrega registra el servicio hecho, repuestos cambiados, prueba final, indicaciones y plazo de garantía: 30, 60 o 90 días."
+        },
+        {
+          "problem": "Un equipo sin agenda",
+          "detail": "Dos técnicos en el mismo barrio a horas distintas y un cliente esperando toda la mañana.",
+          "answer": "La fecha de la orden pone la visita en la agenda. Quien coordina filtra por técnico, y el celular avisa antes de cada visita."
+        },
+        {
+          "problem": "El técnico vuelve sin cobrar",
+          "detail": "El cliente pide pagar después y, a fin de mes, nadie recuerda quién quedó debiendo.",
+          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+        },
+        {
+          "problem": "“¿Ya salió el técnico?”",
+          "detail": "El cliente llama para preguntar por el presupuesto y la reparación, y la llamada cae en el mostrador.",
+          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para equipos de field service",
-      "items": [
-        { "icon": "🗺️", "title": "Rutas integradas", "text": "Organiza los atendimientos por región e integra con Google Maps.", "highlight": "Reduce tiempo de desplazamiento hasta 40%." },
-        { "icon": "📋", "title": "Historial completo del cliente", "text": "Mira todos los atendimientos anteriores de ese cliente. Aparatos, defectos, piezas cambiadas." },
-        { "icon": "📍", "title": "Visibilidad del equipo", "text": "Sabe en tiempo real dónde está cada técnico y el estado de cada atendimiento." },
-        { "icon": "📱", "title": "WhatsApp automático", "text": "Cliente recibe notificación cuando técnico sale para atendimiento.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📦", "title": "Stock por técnico", "text": "Controla las piezas que cada técnico tiene en el vehículo. Baja automática cuando usa." },
-        { "icon": "✍️", "title": "Firma y comprobante", "text": "Cliente firma en el celular del técnico. Comprobante enviado al instante por WhatsApp." }
+    "workflow": {
+      "title": "Cómo pasa un llamado por el servicio técnico en PraticOS",
+      "lede": "Del llamado del cliente a la garantía, cada paso queda registrado en la orden del electrodoméstico.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Abre el llamado y agenda",
+          "text": "Registra al cliente con su dirección y el electrodoméstico con su voltaje. La fecha de la orden pone la visita en el calendario del técnico.",
+          "facts": [
+            "Voltaje: 110V, 220V o doble voltaje",
+            "Calendario del mes con filtro por técnico",
+            "Aviso en el celular antes de la visita"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda de PraticOS con órdenes del mes"
+        },
+        {
+          "number": "02",
+          "title": "Diagnostica en el lugar",
+          "text": "Los checklists de electrodomésticos vienen listos y tú ajustas los ítems: ingreso del equipo, diagnóstico por tipo de aparato, seguridad y prueba final.",
+          "facts": [
+            "Refrigerador: compresor, gas, termostato, empaque de la puerta, descongelamiento",
+            "Lavadora: llenado, desagüe, centrifugado, motor, rodamientos",
+            "Microondas: magnetrón, capacitor, traba de la puerta"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "03",
+          "title": "Envía el presupuesto por link",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "El cliente sigue la reparación sin llamar",
+            "PDF de la orden con checklists y fotos"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "04",
+          "title": "Entrega con garantía y cobra",
+          "text": "Registra repuestos cambiados, prueba final y plazo de garantía en el checklist de entrega. Después, el pago total o en partes.",
+          "facts": [
+            "Garantía de 30, 60 o 90 días en la orden",
+            "Pago parcial y descuento en la misma orden",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "visita técnica",
-      "text": "Documenta cada atendimiento con fotos y datos del aparato. Protégete de reclamaciones y ten historial completo.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Visita",
-      "items": [
-        { "icon": "📸", "text": "Foto del aparato (antes y después)" },
-        { "icon": "🔧", "text": "Modelo, marca y número de serie" },
-        { "icon": "✅", "text": "Checklist de verificación técnica" },
-        { "icon": "📝", "text": "Defecto reportado y solución aplicada" },
-        { "icon": "📦", "text": "Piezas utilizadas en el atendimiento" },
-        { "icon": "✍️", "text": "Firma digital del cliente" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tu equipo",
-      "subtitle": "Herramientas para asistencia técnica de línea blanca",
-      "items": [
-        { "icon": "document", "title": "OS Digital con foto", "text": "Crea órdenes de servicio con foto del aparato en la entrada. Documentación completa del atendimiento." },
-        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monta checklists específicos por tipo de aparato. Refrigerador, lavadora, aire acondicionado.", "color": "yellow" },
-        { "icon": "signature", "title": "Firma en el celular", "text": "Cliente firma en el celular del técnico. Comprobante digital enviado al instante.", "color": "orange" },
-        { "icon": "bell", "title": "Control de garantía", "text": "Alertas automáticas de vencimiento de garantía. Oportunidad de contacto proactivo.", "color": "green" },
-        { "icon": "money", "title": "Financiero integrado", "text": "Control de cobros por técnico. Comisiones y traspasos automáticos.", "color": "purple" },
-        { "icon": "chart", "title": "Informes de productividad", "text": "Mira cuántos atendimientos hizo cada técnico. Tiempo promedio por visita.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes no sabía dónde estaban mis técnicos y los clientes llamaban todo el tiempo. Ahora tengo visibilidad total y el cliente recibe actualización automática por WhatsApp.",
-      "name": "Carlos Mendes",
-      "role": "Dueño de asistencia técnica hace 8 años",
-      "metric": "Reducción de 60% en llamadas"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de técnicos de electrodomésticos",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Funciona para atendimiento externo?", "answer": "¡Sí! PraticOS fue hecho para field service. Técnicos lo usan en el celular durante la visita, con o sin internet. Sincroniza cuando vuelve la conexión." },
-        { "question": "¿Puedo ver dónde están mis técnicos?", "answer": "¡Sí! El sistema muestra el estado de cada técnico en tiempo real: en camino, en atendimiento, finalizado. Tienes visibilidad total del equipo." },
-        { "question": "¿El cliente recibe notificación?", "answer": "¡Sí! El cliente recibe mensaje automático por WhatsApp cuando el técnico sale para el atendimiento y cuando finaliza. Reduce llamadas drásticamente." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la asistencia técnica." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Qué aparatos tienen checklist listo?",
+          "answer": "Hay checklists de diagnóstico para refrigerador y freezer, lavadora y microondas, además de ingreso, seguridad, prueba final y entrega, que sirven para cocinas, lavavajillas y otros. Puedes editar los ítems o crear los tuyos."
+        },
+        {
+          "question": "¿Puedo ver la agenda de cada técnico?",
+          "answer": "Sí. La orden entra en la agenda por la fecha de la visita. Quien coordina el equipo filtra el calendario por técnico, y cada técnico recibe un aviso en el celular antes de la visita."
+        },
+        {
+          "question": "¿Los técnicos pueden usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "gestionar tu equipo",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

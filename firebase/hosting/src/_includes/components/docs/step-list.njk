@@ -1,7 +1,6 @@
-{# Step List Component - Ordered list of steps #}
-{# Usage: {% include "components/docs/step-list.njk" with {steps: [...]} %} #}
-<ol class="step-list">
+{# Steps — ordered list, numbered 01, 02… in mono. Expects `steps` = ["html string", …]. #}
+<ol class="doc-steps">
     {% for step in steps %}
-    <li>{{ step | safe }}</li>
+    <li><span>{{ step | safe }}</span></li>
     {% endfor %}
 </ol>

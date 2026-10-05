@@ -3,382 +3,517 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Manutenção de Ativos | PraticOS",
-    "description": "Cadastre seus ativos, programe preventivas e acompanhe cada manutenção com fotos e histórico completo. CMMS simples e acessível para empresas de manutenção industrial, geradores, frotas e equipamentos. Organize em 5 minutos.",
-    "keywords": "sistema manutenção de ativos, CMMS brasileiro, software gestão de ativos, app manutenção preventiva, sistema ordem de serviço manutenção industrial, programa controle manutenção equipamentos",
+    "title": "Sistema para Manutenção de Ativos e Equipamentos | PraticOS",
+    "description": "App de ordem de serviço para manutenção de ativos: cadastro com tag, local e horas de operação, checklist com fotos e histórico por equipamento.",
+    "keywords": "sistema manutenção de ativos, CMMS simples, software gestão de ativos, app manutenção preventiva, sistema ordem de serviço manutenção industrial, programa controle manutenção equipamentos",
     "ogTitle": "Sistema para Manutenção de Ativos | PraticOS",
-    "ogDescription": "Cadastre ativos, programe preventivas e acompanhe manutenções com fotos e histórico. CMMS simples e acessível. Organize em 5 minutos.",
+    "ogDescription": "Preventivas e corretivas no celular: ativos com tag e horas de operação, visitas na agenda, checklist com fotos e orçamento aprovado por link.",
     "hero": {
-      "badge": "🏭 Manutenção de Ativos",
-      "title": "Gestão completa dos seus ativos",
-      "titleHighlight": "com histórico e preventivas automáticas",
-      "subtitle": "Chega de planilha para controlar equipamentos. Cadastre cada ativo, programe manutenções preventivas, registre intervenções com fotos e compartilhe o acompanhamento com seu cliente. Para empresas de manutenção, indústrias e facilities.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Técnicos ativos" },
-        "orders": { "value": "5k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Cada ativo com tag,",
+      "titleMark": "histórico e fotos.",
+      "lede": "PraticOS é o app de ordem de serviço para empresas de manutenção de equipamentos. Cadastre cada ativo com tag, fabricante, localização e horas de operação, registre preventivas e corretivas com checklist e fotos e mande ao cliente o link da OS — pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 2087",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Metalúrgica Vale Verde"
+          },
+          {
+            "label": "Ativo",
+            "value": "GER-004 · Gerador 180 kVA"
+          },
+          {
+            "label": "Localização",
+            "value": "Casa de força · Galpão 2"
+          },
+          {
+            "label": "Horas de operação",
+            "value": "4.320 h"
+          },
+          {
+            "label": "Serviço",
+            "value": "Preventiva: troca de óleo e filtros"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 2.150,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em manutenção",
+          "Operacional",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com manutenção de equipamentos",
+      "title": "Onde a manutenção de ativos perde dinheiro",
+      "lede": "O técnico sabe o que fez. O problema é o que fica fora do registro: a preventiva sem prova, o ativo sem histórico e a peça trocada que ninguém cobrou.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📊", "title": "Controle por planilha insustentável", "text": "Centenas de ativos em planilhas desatualizadas. Versões conflitantes, sem indicadores confiáveis, impossível escalar." },
-        { "icon": "⏰", "title": "Preventiva esquecida ou atrasada", "text": "Sem alertas automáticos, a manutenção preventiva vence e ninguém percebe. Equipamento quebra e o custo da corretiva é 3-5x maior." },
-        { "icon": "📋", "title": "Sem histórico por equipamento", "text": "Técnico chega no cliente sem saber o que já foi feito no ativo. Repete diagnósticos e troca peças sem necessidade." },
-        { "icon": "📷", "title": "Sem comprovação de serviço", "text": "Cliente questiona se a preventiva foi feita. Sem fotos, sem registro geolocalizado. Disputas na hora de renovar contrato." },
-        { "icon": "📝", "title": "Contratos e SLAs sem controle", "text": "Não sabe quais ativos estão cobertos por contrato. Perde prazo de renovação e receita recorrente." },
-        { "icon": "💰", "title": "Custo por ativo desconhecido", "text": "Não sabe quanto gasta em cada equipamento. Decisão de substituir ou manter é no achismo. Impossível precificar contratos." }
+        {
+          "problem": "Planilha que ninguém atualiza",
+          "detail": "Os ativos do cliente estão numa planilha com três versões diferentes.",
+          "answer": "Cada ativo tem cadastro com tag, fabricante, número de série, localização, categoria, data de instalação e vencimento da garantia."
+        },
+        {
+          "problem": "Preventiva sem comprovação",
+          "detail": "Na renovação do contrato, o cliente pergunta se as preventivas foram mesmo feitas.",
+          "answer": "Cada visita é uma OS com checklist e fotos. O cliente abre pelo link, e o PDF sai com uma página por checklist."
+        },
+        {
+          "problem": "Diagnóstico sem histórico",
+          "detail": "O técnico chega no compressor sem saber o que já foi trocado nele.",
+          "answer": "Busque pelo ativo ou pelo número de série na lista de OS e veja as intervenções anteriores, com peças e fotos."
+        },
+        {
+          "problem": "Próxima preventiva na memória",
+          "detail": "Ninguém lembra quando aquele gerador passou pela última revisão.",
+          "answer": "O cadastro guarda a última manutenção e as horas de operação. Agende a próxima visita na OS e o técnico recebe o lembrete no celular."
+        },
+        {
+          "problem": "Peça fora do escopo sem aprovação",
+          "detail": "A correia estava gasta, o técnico trocou, e o cliente contesta a cobrança.",
+          "answer": "Peças e serviços extras entram na OS com preço. O cliente aprova o orçamento pelo link antes da troca, e a aprovação fica registrada."
+        },
+        {
+          "problem": "Fim do mês sem números",
+          "detail": "Contratos, chamados e peças em lugares diferentes. Ninguém sabe quanto entrou.",
+          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para manutenção de ativos e equipamentos",
-      "items": [
-        { "icon": "🏭", "title": "Cadastro completo de ativos", "text": "Cada equipamento tem sua ficha com tag, fabricante, número de série, localização e categoria.", "highlight": "Saia da planilha de vez." },
-        { "icon": "🔔", "title": "Alertas de preventiva automáticos", "text": "Programe manutenções periódicas por ativo. O sistema avisa quando está na hora — nunca mais esqueça uma preventiva." },
-        { "icon": "📋", "title": "Histórico completo por equipamento", "text": "Busque pelo ativo e veja tudo: OS anteriores, fotos, peças trocadas, custos, responsáveis." },
-        { "icon": "📸", "title": "Fotos geolocalizadas com timestamp", "text": "Comprove cada serviço com fotos que têm data, hora e localização GPS.", "highlight": "Prova irrefutável para o cliente." },
-        { "icon": "📄", "title": "Contratos recorrentes com alertas", "text": "Cadastre contratos por cliente e ativo. Receba alertas de renovação e nunca mais perca receita." },
-        { "icon": "🔗", "title": "Link de acompanhamento", "text": "Cliente acompanha o status da manutenção pelo celular. Transparência sem ligar ou mandar WhatsApp." }
+    "workflow": {
+      "title": "Como uma manutenção passa pelo PraticOS",
+      "lede": "Do cadastro do ativo ao relatório, cada intervenção fica registrada na OS.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Cadastre os ativos",
+          "text": "Registre cada equipamento do cliente com tag, fabricante, número de série, localização e categoria. A OS já nasce ligada ao ativo.",
+          "facts": [
+            "Mecânico, elétrico, hidráulico, pneumático, térmico ou eletrônico",
+            "Data de instalação e vencimento da garantia",
+            "Status do ramo: em manutenção e operacional"
+          ],
+          "image": "home.png",
+          "alt": "Lista de ordens de serviço no app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Agende preventivas e chamados",
+          "text": "Marque dia e hora em cada OS. A agenda mostra o mês por técnico, e cada um recebe o aviso no celular antes do atendimento.",
+          "facts": [
+            "Preventiva e corretiva no mesmo calendário",
+            "Agenda filtrada por técnico",
+            "Aviso de OS parada há mais de 7 dias"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do mês com as OS marcadas no app PraticOS"
+        },
+        {
+          "number": "03",
+          "title": "Execute com checklist",
+          "text": "Monte um checklist para cada tipo de equipamento e use em todas as visitas. O técnico marca os itens, anota leituras e fotografa antes e depois.",
+          "facts": [
+            "Itens com verificação, texto ou foto",
+            "Leituras e observações em campo de texto",
+            "Checklist concluído só reabre com Admin, Gerente ou Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "04",
+          "title": "Mande o relatório por link",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê fotos e checklist, aprova o orçamento de peças extras e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "PDF com uma página por checklist",
+            "Pagamentos parciais e faturamento por período"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Checklist de",
-      "titleHighlight": "manutenção de ativos",
-      "text": "Checklist digital para identificar o ativo, registrar parâmetros, documentar a intervenção e coletar assinatura. Técnico preenche no celular em campo.",
-      "cta": "Testar Grátis — Sem Cartão",
-      "previewTitle": "📋 Checklist de Manutenção",
-      "items": [
-        { "icon": "🏷️", "text": "Identificação do ativo (tag, série, localização)" },
-        { "icon": "📏", "text": "Leitura de parâmetros operacionais" },
-        { "icon": "⚠️", "text": "Verificação de itens de segurança" },
-        { "icon": "📸", "text": "Fotos antes e depois da intervenção" },
-        { "icon": "🔧", "text": "Peças substituídas e materiais usados" },
-        { "icon": "✍️", "text": "Assinatura do responsável no local" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar manutenção de ativos",
-      "subtitle": "Ferramentas poderosas e intuitivas para empresas de manutenção, indústrias e facilities",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com identificação do ativo, fotos, peças, custos e histórico. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografe o serviço com data, hora e localização GPS. Prova irrefutável da manutenção realizada.", "color": "yellow" },
-        { "icon": "pdf", "title": "Relatórios em PDF", "text": "Gere relatórios de manutenção por ativo ou por cliente. Pronto para enviar com fotos e assinatura.", "color": "orange" },
-        { "icon": "money", "title": "Contratos Recorrentes", "text": "Cadastre contratos de manutenção com alertas de renovação e vencimento. Nunca mais perca receita.", "color": "green" },
-        { "icon": "users", "title": "Gestão Multi-Ativo", "text": "Gerencie centenas de ativos de múltiplos clientes em um só lugar. Ficha completa por equipamento.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status da OS pelo celular. Transparência total sem ligações.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu controlava 200 ativos em planilha e vivia perdendo preventiva. Com o PraticOS, cada equipamento tem seu histórico, recebo alerta quando vence a manutenção e meu cliente acompanha tudo pelo link. Profissionalizou nosso serviço.",
-      "name": "Ricardo Mendes",
-      "role": "Gestor de manutenção em empresa de serviços industriais",
-      "metric": "Redução de 60% em manutenções corretivas"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem mantém equipamentos",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Serve para qualquer tipo de equipamento?", "answer": "Sim! O PraticOS se adapta a qualquer tipo de ativo: geradores, máquinas industriais, equipamentos HVAC, frotas, equipamentos médicos, cozinhas industriais e muito mais." },
-        { "question": "Consigo programar manutenções preventivas?", "answer": "Sim! Você cadastra o ativo, define a periodicidade da preventiva e o sistema envia alertas automáticos quando estiver na hora. Nunca mais esqueça uma manutenção." },
-        { "question": "Meu cliente consegue acompanhar?", "answer": "Sim! Você pode enviar um link de acompanhamento para o cliente. Ele vê o status atualizado pelo celular, sem precisar ligar ou mandar WhatsApp." },
-        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
-        { "question": "É um CMMS?", "answer": "Sim, é um CMMS (Sistema de Gestão de Manutenção Computadorizado) pensado para ser simples e acessível. Você tem cadastro de ativos, histórico, preventivas e relatórios sem a complexidade dos sistemas enterprise." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário e 30 fotos por mês. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "O PraticOS é um CMMS?",
+          "answer": "Ele cobre o trabalho de campo: cadastro de ativos, OS de preventiva e corretiva, checklists, fotos, agenda e aprovação do cliente. Ele não gera preventivas sozinho por calendário ou por horímetro — cada visita é uma OS que você agenda."
+        },
+        {
+          "question": "Serve para geradores, frotas e cozinhas industriais?",
+          "answer": "Sim. O segmento cobre equipamentos industriais, geradores e nobreaks, climatização comercial, veículos e frotas, equipamentos médicos e cozinhas industriais."
+        },
+        {
+          "question": "Os técnicos podem usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos, checklist e valores. Ali mesmo ele aprova o orçamento e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar sua manutenção",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Asset Maintenance Management System | PraticOS",
-    "description": "Register your assets, schedule preventive maintenance and track every intervention with photos and complete history. Simple and affordable CMMS for industrial maintenance, generators, fleets and equipment. Get organized in 5 minutes.",
-    "keywords": "asset maintenance software, CMMS, asset management system, preventive maintenance app, industrial maintenance work order system, equipment maintenance software",
-    "ogTitle": "Asset Maintenance Management System | PraticOS",
-    "ogDescription": "Register assets, schedule preventive maintenance and track interventions with photos and history. Simple CMMS. Get organized in 5 minutes.",
+    "title": "Asset and Equipment Maintenance Software | PraticOS",
+    "description": "Work order app for asset maintenance: assets with tag, location and run hours, checklists with photos, history per unit and approval by customer link.",
+    "keywords": "asset maintenance software, simple CMMS, equipment maintenance app, preventive maintenance work orders, field maintenance management, industrial maintenance software",
+    "ogTitle": "Asset Maintenance Software | PraticOS",
+    "ogDescription": "Preventive and corrective work on your phone: assets with tags and run hours, visits on the calendar, checklists with photos and quotes approved by link.",
     "hero": {
-      "badge": "🏭 Asset Maintenance",
-      "title": "Complete asset management",
-      "titleHighlight": "with history and automated preventive schedules",
-      "subtitle": "Stop using spreadsheets to track equipment. Register each asset, schedule preventive maintenance, record interventions with photos and share tracking with your client. For maintenance companies, industries and facilities.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Active technicians" },
-        "orders": { "value": "5k+", "label": "WOs created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Every asset with a tag,",
+      "titleMark": "history and photos.",
+      "lede": "PraticOS is the work order app for equipment maintenance companies. Register each asset with tag, manufacturer, location and run hours, log preventive and corrective work with checklists and photos and send the customer a link to the work order — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 2087",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Green Valley Metalworks"
+          },
+          {
+            "label": "Asset",
+            "value": "GEN-004 · 180 kVA generator"
+          },
+          {
+            "label": "Location",
+            "value": "Power room · Building 2"
+          },
+          {
+            "label": "Run hours",
+            "value": "4,320 h"
+          },
+          {
+            "label": "Service",
+            "value": "Preventive: oil and filter change"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$780.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "Under maintenance",
+          "Operational",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for equipment maintenance teams",
+      "title": "Where asset maintenance loses money",
+      "lede": "The technician knows what they did. The trouble is what never gets recorded: the preventive visit with no proof, the asset with no history and the replaced part nobody billed.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📊", "title": "Spreadsheet chaos", "text": "Hundreds of assets in outdated spreadsheets. Conflicting versions, no reliable KPIs, impossible to scale." },
-        { "icon": "⏰", "title": "Missed preventive maintenance", "text": "Without automatic alerts, preventive maintenance expires and nobody notices. Equipment breaks and corrective costs are 3-5x higher." },
-        { "icon": "📋", "title": "No history per asset", "text": "Technician arrives at the client without knowing what was done on the asset. Repeats diagnostics and replaces parts unnecessarily." },
-        { "icon": "📷", "title": "No proof of service", "text": "Client questions whether preventive was actually done. No photos, no geolocated records. Disputes at contract renewal." },
-        { "icon": "📝", "title": "Contracts and SLAs out of control", "text": "Don't know which assets are covered by contract. Miss renewal deadlines and lose recurring revenue." },
-        { "icon": "💰", "title": "Unknown cost per asset", "text": "Don't know how much you spend on each piece of equipment. Replace-or-maintain decisions are guesswork. Impossible to price contracts accurately." }
+        {
+          "problem": "A spreadsheet nobody updates",
+          "detail": "The customer's assets live in a spreadsheet with three different versions.",
+          "answer": "Each asset has a record with tag, manufacturer, serial number, location, category, install date and warranty expiration."
+        },
+        {
+          "problem": "Preventive work with no proof",
+          "detail": "At contract renewal, the customer asks whether the preventive visits really happened.",
+          "answer": "Each visit is a work order with a checklist and photos. The customer opens it from a link, and the PDF includes a page per checklist."
+        },
+        {
+          "problem": "Diagnosis with no history",
+          "detail": "The technician walks up to the compressor without knowing what was already replaced.",
+          "answer": "Search the work order list by asset or serial number and see past interventions, with parts and photos."
+        },
+        {
+          "problem": "Next service date in someone's head",
+          "detail": "Nobody remembers when that generator was last serviced.",
+          "answer": "The asset record keeps the last maintenance date and run hours. Schedule the next visit on the work order and the technician gets a phone reminder."
+        },
+        {
+          "problem": "Out-of-scope parts with no approval",
+          "detail": "The belt was worn, the technician replaced it and the customer disputes the charge.",
+          "answer": "Extra parts and services go on the work order with prices. The customer approves the quote by link before the swap, and the approval is recorded."
+        },
+        {
+          "problem": "Month end with no numbers",
+          "detail": "Contracts, callouts and parts tracked in different places. Nobody knows what came in.",
+          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for asset and equipment maintenance",
-      "items": [
-        { "icon": "🏭", "title": "Complete asset registry", "text": "Each piece of equipment has its own file with tag, manufacturer, serial number, location and category.", "highlight": "Ditch the spreadsheet for good." },
-        { "icon": "🔔", "title": "Automatic preventive alerts", "text": "Schedule periodic maintenance per asset. The system notifies when it's time — never miss a preventive again." },
-        { "icon": "📋", "title": "Complete history per asset", "text": "Search by asset and see everything: previous WOs, photos, replaced parts, costs, responsible parties." },
-        { "icon": "📸", "title": "Geolocated photos with timestamp", "text": "Prove each service with photos that have date, time and GPS location.", "highlight": "Irrefutable proof for the client." },
-        { "icon": "📄", "title": "Recurring contracts with alerts", "text": "Register contracts by client and asset. Get renewal alerts and never lose revenue again." },
-        { "icon": "🔗", "title": "Tracking link", "text": "Client tracks maintenance status on their phone. Transparency without calls or messages." }
+    "workflow": {
+      "title": "How a maintenance job moves through PraticOS",
+      "lede": "From asset record to report, every intervention is recorded on the work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Register the assets",
+          "text": "Add each piece of the customer's equipment with tag, manufacturer, serial number, location and category. Work orders link straight to the asset.",
+          "facts": [
+            "Mechanical, electrical, hydraulic, pneumatic, thermal or electronic",
+            "Install date and warranty expiration",
+            "Trade statuses: under maintenance and operational"
+          ],
+          "image": "home.png",
+          "alt": "Work order list in the PraticOS app"
+        },
+        {
+          "number": "02",
+          "title": "Schedule preventive and corrective work",
+          "text": "Set a date and time on each work order. The calendar shows the month by technician, and each one gets a phone reminder before the visit.",
+          "facts": [
+            "Preventive and corrective on one calendar",
+            "Calendar filtered by technician",
+            "Reminder for work orders idle over 7 days"
+          ],
+          "image": "agenda.png",
+          "alt": "Monthly calendar with scheduled work orders in the PraticOS app"
+        },
+        {
+          "number": "03",
+          "title": "Work from a checklist",
+          "text": "Build a checklist for each type of equipment and use it on every visit. The technician marks items, notes readings and takes before and after photos.",
+          "facts": [
+            "Items with check, text or photo",
+            "Readings and notes in text fields",
+            "Completed checklists reopen only for Admin, Manager or Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "04",
+          "title": "Send the report as a link",
+          "text": "The customer opens the work order in a browser, nothing to install. They see photos and the checklist, approve extra parts and leave comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "PDF with a page per checklist",
+            "Partial payments and revenue by period"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Asset maintenance",
-      "titleHighlight": "checklist",
-      "text": "Digital checklist to identify the asset, record parameters, document the intervention and collect signatures. Technician fills it on their phone in the field.",
-      "cta": "Try Free — No Credit Card",
-      "previewTitle": "📋 Maintenance Checklist",
-      "items": [
-        { "icon": "🏷️", "text": "Asset identification (tag, serial, location)" },
-        { "icon": "📏", "text": "Operational parameter readings" },
-        { "icon": "⚠️", "text": "Safety item verification" },
-        { "icon": "📸", "text": "Before and after intervention photos" },
-        { "icon": "🔧", "text": "Replaced parts and materials used" },
-        { "icon": "✍️", "text": "On-site responsible signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage asset maintenance",
-      "subtitle": "Powerful and intuitive tools for maintenance companies, industries and facilities",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with asset identification, photos, parts, costs and history. All organized." },
-        { "icon": "image", "title": "Geolocated Photos", "text": "Photograph the service with date, time and GPS location. Irrefutable proof of the maintenance performed.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Reports", "text": "Generate maintenance reports by asset or by client. Ready to send with photos and signature.", "color": "orange" },
-        { "icon": "money", "title": "Recurring Contracts", "text": "Register maintenance contracts with renewal and expiration alerts. Never lose revenue again.", "color": "green" },
-        { "icon": "users", "title": "Multi-Asset Management", "text": "Manage hundreds of assets from multiple clients in one place. Complete file per equipment.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Client tracks WO status on their phone. Total transparency without calls.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I tracked 200 assets in a spreadsheet and kept missing preventive maintenance. With PraticOS, each piece of equipment has its history, I get alerts when maintenance is due and my client tracks everything via the link. It professionalized our service.",
-      "name": "Ricardo Mendes",
-      "role": "Maintenance manager at an industrial services company",
-      "metric": "60% reduction in corrective maintenance"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from maintenance companies",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work for any type of equipment?", "answer": "Yes! PraticOS adapts to any type of asset: generators, industrial machines, HVAC equipment, fleets, medical equipment, commercial kitchens and much more." },
-        { "question": "Can I schedule preventive maintenance?", "answer": "Yes! You register the asset, set the preventive frequency and the system sends automatic alerts when it's time. Never miss a maintenance again." },
-        { "question": "Can my client track progress?", "answer": "Yes! You can send a tracking link to the client. They see the updated status on their phone, without calling or texting." },
-        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
-        { "question": "Is it a CMMS?", "answer": "Yes, it's a CMMS (Computerized Maintenance Management System) designed to be simple and affordable. You get asset registry, history, preventive scheduling and reports without enterprise-level complexity." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user and 30 photos per month. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Is PraticOS a CMMS?",
+          "answer": "It covers the field work: asset records, preventive and corrective work orders, checklists, photos, scheduling and customer approval. It doesn't generate preventive visits by calendar or run hours on its own — each visit is a work order you schedule."
+        },
+        {
+          "question": "Does it work for generators, fleets and commercial kitchens?",
+          "answer": "Yes. The segment covers industrial equipment, generators and UPS, commercial HVAC, vehicles and fleets, medical equipment and commercial kitchens."
+        },
+        {
+          "question": "Can my technicians use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos, checklist and prices. They approve the quote and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your maintenance",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Mantenimiento de Activos | PraticOS",
-    "description": "Registra tus activos, programa mantenimientos preventivos y acompaña cada intervención con fotos e historial completo. CMMS simple y accesible para empresas de mantenimiento industrial, generadores, flotas y equipos. Organiza en 5 minutos.",
-    "keywords": "sistema mantenimiento de activos, CMMS, software gestión de activos, app mantenimiento preventivo, sistema orden de servicio mantenimiento industrial, programa control mantenimiento equipos",
+    "title": "Sistema para Mantenimiento de Activos y Equipos | PraticOS",
+    "description": "App de órdenes de servicio para mantenimiento de activos: equipos con etiqueta, ubicación y horas de uso, checklist con fotos e historial por equipo.",
+    "keywords": "sistema de mantenimiento de activos, CMMS simple, software gestión de activos, app mantenimiento preventivo, orden de servicio mantenimiento industrial, programa control de mantenimiento de equipos",
     "ogTitle": "Sistema para Mantenimiento de Activos | PraticOS",
-    "ogDescription": "Registra activos, programa preventivos y acompaña mantenimientos con fotos e historial. CMMS simple y accesible. Organiza en 5 minutos.",
+    "ogDescription": "Preventivos y correctivos en el celular: activos con etiqueta y horas de uso, visitas en la agenda, checklist con fotos y presupuesto aprobado por link.",
     "hero": {
-      "badge": "🏭 Mantenimiento de Activos",
-      "title": "Gestión completa de tus activos",
-      "titleHighlight": "con historial y preventivos automáticos",
-      "subtitle": "Basta de planillas para controlar equipos. Registra cada activo, programa mantenimientos preventivos, registra intervenciones con fotos y comparte el seguimiento con tu cliente. Para empresas de mantenimiento, industrias y facilities.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Técnicos activos" },
-        "orders": { "value": "5k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Cada activo con etiqueta,",
+      "titleMark": "historial y fotos.",
+      "lede": "PraticOS es la app de órdenes de servicio para empresas de mantenimiento de equipos. Registra cada activo con etiqueta, fabricante, ubicación y horas de operación, documenta preventivos y correctivos con checklist y fotos y envía al cliente el link de la orden — desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 2087",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Metalúrgica Valle Verde"
+          },
+          {
+            "label": "Activo",
+            "value": "GEN-004 · Generador 180 kVA"
+          },
+          {
+            "label": "Ubicación",
+            "value": "Sala de máquinas · Galpón 2"
+          },
+          {
+            "label": "Horas de operación",
+            "value": "4.320 h"
+          },
+          {
+            "label": "Servicio",
+            "value": "Preventivo: cambio de aceite y filtros"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 780,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En mantenimiento",
+          "Operativo",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con mantenimiento de equipos",
+      "title": "Dónde pierde plata el mantenimiento de activos",
+      "lede": "El técnico sabe lo que hizo. El problema es lo que queda fuera del registro: el preventivo sin prueba, el activo sin historial y el repuesto que nadie cobró.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📊", "title": "Control por planilla insostenible", "text": "Cientos de activos en planillas desactualizadas. Versiones conflictivas, sin indicadores confiables, imposible escalar." },
-        { "icon": "⏰", "title": "Preventivo olvidado o atrasado", "text": "Sin alertas automáticas, el mantenimiento preventivo vence y nadie se da cuenta. El equipo se rompe y el costo correctivo es 3-5x mayor." },
-        { "icon": "📋", "title": "Sin historial por equipo", "text": "Técnico llega al cliente sin saber qué ya se hizo en el activo. Repite diagnósticos y cambia piezas innecesariamente." },
-        { "icon": "📷", "title": "Sin comprobación de servicio", "text": "Cliente cuestiona si el preventivo se hizo realmente. Sin fotos, sin registro geolocalizado. Disputas al renovar contrato." },
-        { "icon": "📝", "title": "Contratos y SLAs sin control", "text": "No sabe qué activos están cubiertos por contrato. Pierde plazos de renovación y ingresos recurrentes." },
-        { "icon": "💰", "title": "Costo por activo desconocido", "text": "No sabe cuánto gasta en cada equipo. Decisión de reemplazar o mantener es por intuición. Imposible cotizar contratos con precisión." }
+        {
+          "problem": "Una planilla que nadie actualiza",
+          "detail": "Los activos del cliente están en una planilla con tres versiones distintas.",
+          "answer": "Cada activo tiene su ficha con etiqueta, fabricante, número de serie, ubicación, categoría, fecha de instalación y vencimiento de la garantía."
+        },
+        {
+          "problem": "Preventivos sin comprobante",
+          "detail": "Al renovar el contrato, el cliente pregunta si de verdad se hicieron los preventivos.",
+          "answer": "Cada visita es una orden con checklist y fotos. El cliente la abre por link, y el PDF sale con una página por checklist."
+        },
+        {
+          "problem": "Diagnóstico sin historial",
+          "detail": "El técnico llega al compresor sin saber qué ya se le cambió.",
+          "answer": "Busca por activo o por número de serie en la lista de órdenes y ve las intervenciones anteriores, con repuestos y fotos."
+        },
+        {
+          "problem": "El próximo preventivo de memoria",
+          "detail": "Nadie recuerda cuándo fue la última revisión de ese generador.",
+          "answer": "La ficha guarda el último mantenimiento y las horas de operación. Agenda la próxima visita en la orden y el técnico recibe el recordatorio en el celular."
+        },
+        {
+          "problem": "Repuestos fuera de alcance sin aprobación",
+          "detail": "La correa estaba gastada, el técnico la cambió y el cliente discute el cobro.",
+          "answer": "Repuestos y servicios extra entran en la orden con precio. El cliente aprueba el presupuesto por link antes del cambio, y la aprobación queda registrada."
+        },
+        {
+          "problem": "Fin de mes sin números",
+          "detail": "Contratos, llamados y repuestos en lugares distintos. Nadie sabe cuánto entró.",
+          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para mantenimiento de activos y equipos",
-      "items": [
-        { "icon": "🏭", "title": "Registro completo de activos", "text": "Cada equipo tiene su ficha con etiqueta, fabricante, número de serie, ubicación y categoría.", "highlight": "Deja la planilla de una vez." },
-        { "icon": "🔔", "title": "Alertas de preventivo automáticos", "text": "Programa mantenimientos periódicos por activo. El sistema avisa cuando es hora — nunca más olvides un preventivo." },
-        { "icon": "📋", "title": "Historial completo por equipo", "text": "Busca por activo y ve todo: OS anteriores, fotos, piezas cambiadas, costos, responsables." },
-        { "icon": "📸", "title": "Fotos geolocalizadas con timestamp", "text": "Comprueba cada servicio con fotos que tienen fecha, hora y ubicación GPS.", "highlight": "Prueba irrefutable para el cliente." },
-        { "icon": "📄", "title": "Contratos recurrentes con alertas", "text": "Registra contratos por cliente y activo. Recibe alertas de renovación y nunca más pierdas ingresos." },
-        { "icon": "🔗", "title": "Link de seguimiento", "text": "Cliente acompaña el estado del mantenimiento por el celular. Transparencia sin llamar ni escribir." }
+    "workflow": {
+      "title": "Cómo pasa un mantenimiento por PraticOS",
+      "lede": "De la ficha del activo al informe, cada intervención queda registrada en la orden.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Registra los activos",
+          "text": "Registra cada equipo del cliente con etiqueta, fabricante, número de serie, ubicación y categoría. La orden nace vinculada al activo.",
+          "facts": [
+            "Mecánico, eléctrico, hidráulico, neumático, térmico o electrónico",
+            "Fecha de instalación y vencimiento de la garantía",
+            "Estados del rubro: en mantenimiento y operativo"
+          ],
+          "image": "home.png",
+          "alt": "Lista de órdenes de servicio en la app PraticOS"
+        },
+        {
+          "number": "02",
+          "title": "Agenda preventivos y llamados",
+          "text": "Marca día y hora en cada orden. La agenda muestra el mes por técnico, y cada uno recibe el aviso en el celular antes de la visita.",
+          "facts": [
+            "Preventivo y correctivo en el mismo calendario",
+            "Agenda filtrada por técnico",
+            "Aviso de órdenes detenidas más de 7 días"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda del mes con órdenes marcadas en la app PraticOS"
+        },
+        {
+          "number": "03",
+          "title": "Trabaja con checklist",
+          "text": "Arma un checklist para cada tipo de equipo y úsalo en todas las visitas. El técnico marca los ítems, anota lecturas y toma fotos de antes y después.",
+          "facts": [
+            "Ítems con verificación, texto o foto",
+            "Lecturas y observaciones en campos de texto",
+            "Un checklist terminado solo se reabre con Admin, Gerente o Supervisor"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "04",
+          "title": "Envía el informe por link",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve fotos y checklist, aprueba los repuestos extra y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "PDF con una página por checklist",
+            "Pagos parciales y facturación por período"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Checklist de",
-      "titleHighlight": "mantenimiento de activos",
-      "text": "Checklist digital para identificar el activo, registrar parámetros, documentar la intervención y recoger firma. Técnico llena en el celular en campo.",
-      "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Mantenimiento",
-      "items": [
-        { "icon": "🏷️", "text": "Identificación del activo (etiqueta, serie, ubicación)" },
-        { "icon": "📏", "text": "Lectura de parámetros operacionales" },
-        { "icon": "⚠️", "text": "Verificación de ítems de seguridad" },
-        { "icon": "📸", "text": "Fotos antes y después de la intervención" },
-        { "icon": "🔧", "text": "Piezas sustituidas y materiales usados" },
-        { "icon": "✍️", "text": "Firma del responsable en el lugar" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar mantenimiento de activos",
-      "subtitle": "Herramientas potentes e intuitivas para empresas de mantenimiento, industrias y facilities",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con identificación del activo, fotos, piezas, costos e historial. Todo organizado." },
-        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografía el servicio con fecha, hora y ubicación GPS. Prueba irrefutable del mantenimiento realizado.", "color": "yellow" },
-        { "icon": "pdf", "title": "Informes en PDF", "text": "Genera informes de mantenimiento por activo o por cliente. Listo para enviar con fotos y firma.", "color": "orange" },
-        { "icon": "money", "title": "Contratos Recurrentes", "text": "Registra contratos de mantenimiento con alertas de renovación y vencimiento. Nunca más pierdas ingresos.", "color": "green" },
-        { "icon": "users", "title": "Gestión Multi-Activo", "text": "Gestiona cientos de activos de múltiples clientes en un solo lugar. Ficha completa por equipo.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente acompaña el estado de la OS por el celular. Transparencia total sin llamadas.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes controlaba 200 activos en planilla y siempre perdía preventivos. Con PraticOS, cada equipo tiene su historial, recibo alerta cuando vence el mantenimiento y mi cliente acompaña todo por el link. Profesionalizó nuestro servicio.",
-      "name": "Ricardo Mendes",
-      "role": "Gestor de mantenimiento en empresa de servicios industriales",
-      "metric": "Reducción de 60% en mantenimientos correctivos"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien mantiene equipos",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Sirve para cualquier tipo de equipo?", "answer": "¡Sí! PraticOS se adapta a cualquier tipo de activo: generadores, máquinas industriales, equipos HVAC, flotas, equipos médicos, cocinas industriales y mucho más." },
-        { "question": "¿Puedo programar mantenimientos preventivos?", "answer": "¡Sí! Registras el activo, defines la periodicidad del preventivo y el sistema envía alertas automáticas cuando sea hora. Nunca más olvides un mantenimiento." },
-        { "question": "¿Mi cliente puede acompañar?", "answer": "¡Sí! Puedes enviar un link de seguimiento al cliente. Ve el estado actualizado por el celular, sin necesidad de llamar o escribir." },
-        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
-        { "question": "¿Es un CMMS?", "answer": "Sí, es un CMMS (Sistema de Gestión de Mantenimiento Computarizado) pensado para ser simple y accesible. Tienes registro de activos, historial, preventivos e informes sin la complejidad de los sistemas enterprise." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario y 30 fotos por mes. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿PraticOS es un CMMS?",
+          "answer": "Cubre el trabajo de campo: fichas de activos, órdenes de preventivo y correctivo, checklists, fotos, agenda y aprobación del cliente. No genera preventivos solo por calendario ni por horómetro — cada visita es una orden que tú agendas."
+        },
+        {
+          "question": "¿Sirve para generadores, flotas y cocinas industriales?",
+          "answer": "Sí. El segmento cubre equipos industriales, generadores y UPS, climatización comercial, vehículos y flotas, equipos médicos y cocinas industriales."
+        },
+        {
+          "question": "¿Los técnicos pueden usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos, checklist y valores. Ahí mismo aprueba el presupuesto y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tu mantenimiento",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

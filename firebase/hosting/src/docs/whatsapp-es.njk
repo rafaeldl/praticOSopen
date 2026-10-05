@@ -47,4 +47,8 @@ langSwitch:
     active: true
 relPath: ../
 docsData: docs/whatsapp
+# The WhatsApp bot is shut down while site.flags.whatsappBot is false:
+# keep the URL live but out of the index.
+eleventyComputed:
+  noindex: "{% if not site.flags.whatsappBot %}true{% endif %}"
 ---

@@ -1,47 +1,61 @@
 ---
 layout: layouts/base.njk
-navbarScrolled: true
 pageType: faq
+pageStyles: content
 ---
-{# Get FAQ data #}
-{% set faqData = faq[langCode] %}
+{# Hallmark · genre: modern-minimal · macrostructure: Long Document · design-system: design.md #}
+{% set faqData = faq[langCode] | default(faq.pt) %}
 
-<!-- Page Header -->
-<header class="page-header">
-    <div class="container">
-        <h1>{{ faqData.title }} <span class="gradient-text">{{ faqData.titleHighlight }}</span></h1>
-        <p>{{ faqData.subtitle }}</p>
+<header class="page-head">
+    <div class="wrap">
+        <h1>{{ faqData.title }}</h1>
+        <p class="lede">{{ faqData.lede }}</p>
     </div>
 </header>
 
-<!-- FAQ Content -->
-<main class="page-content">
-    <div class="container">
-        {% for item in faqData.items %}
-        <div class="faq-item">
-            <h4>{{ item.question }}</h4>
-            <p>{{ item.answer | safe }}</p>
-        </div>
-        {% endfor %}
-    </div>
-</main>
+<div class="doc">
+    <div class="wrap doc__grid">
+        <nav class="toc" aria-labelledby="toc-label">
+            <p class="label" id="toc-label">{{ faqData.tocLabel }}</p>
+            <ol>
+                {% for group in faqData.groups %}
+                <li><a href="#{{ group.id }}">{{ group.title }}</a></li>
+                {% endfor %}
+            </ol>
+        </nav>
 
-<!-- FAQ Structured Data -->
+        <div class="doc__body">
+            {% for group in faqData.groups %}
+            <section class="doc__section" aria-labelledby="{{ group.id }}">
+                <h2 id="{{ group.id }}">{{ group.title }}</h2>
+                <div class="qa-list">
+                    {% for item in group.items %}
+                    <details class="qa">
+                        <summary>{{ item.question }}</summary>
+                        <div class="qa__answer"><p>{{ item.answer | safe }}</p></div>
+                    </details>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {% for item in faqData.items %}
+    {% for group in faqData.groups %}{% set outerLast = loop.last %}{% for item in group.items %}
     {
       "@type": "Question",
-      "name": "{{ item.question }}",
+      "name": {{ item.question | dump | safe }},
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "{{ item.answer | striptags }}"
+        "text": {{ item.answer | striptags | dump | safe }}
       }
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
+    }{% if not (outerLast and loop.last) %},{% endif %}{% endfor %}{% endfor %}
   ]
 }
 </script>

@@ -3,17 +3,17 @@
 <title>{{ title }}</title>
 <meta name="description" content="{{ description }}">
 <meta name="keywords" content="{{ keywords }}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="{% if noindex %}noindex, follow{% else %}index, follow{% endif %}">
 
 <!-- Anti-FOUC: apply saved theme before CSS loads -->
 <script>
 (function(){
   try{var s=localStorage.getItem('theme')}catch(e){var s=null}
-  var t=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  var t=s||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   document.documentElement.setAttribute('data-theme',t);
 })();
 </script>
-<meta name="theme-color" content="#0A0E17" id="meta-theme-color">
+<meta name="theme-color" content="#F8F6F1" id="meta-theme-color">
 
 <!-- Canonical URL -->
 <link rel="canonical" href="{{ permalink | prettyUrl | siteUrl(site.baseUrl) }}">
@@ -30,7 +30,7 @@
 <!-- Open Graph -->
 <meta property="og:title" content="{{ ogTitle | default(title) }}">
 <meta property="og:description" content="{{ ogDescription | default(description) }}">
-<meta property="og:image" content="{{ '/assets/images/logo.png' | siteUrl(site.baseUrl) }}">
+<meta property="og:image" content="{{ '/assets/images/logo-512.png' | siteUrl(site.baseUrl) }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ permalink | prettyUrl | siteUrl(site.baseUrl) }}">
 <meta property="og:locale" content="{{ lang | replace('-', '_') | default('pt_BR') }}">
@@ -40,18 +40,23 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{{ ogTitle | default(title) }}">
 <meta name="twitter:description" content="{{ ogDescription | default(description) }}">
-<meta name="twitter:image" content="{{ site.baseUrl }}/assets/images/logo.png">
+<meta name="twitter:image" content="{{ site.baseUrl }}/assets/images/logo-512.png">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Favicon -->
-<link rel="icon" type="image/png" href="{{ relPath }}assets/images/logo.png">
+<link rel="icon" type="image/png" href="{{ relPath }}assets/images/logo-96.png">
+<link rel="apple-touch-icon" href="{{ relPath }}assets/images/logo-512.png">
 
 <!-- Stylesheets -->
-<link rel="stylesheet" href="{{ relPath }}style.css">
+<link rel="stylesheet" href="{{ relPath }}css/tokens.css">
+<link rel="stylesheet" href="{{ relPath }}css/site.css">
+{% if pageType == 'homepage' %}
+<link rel="stylesheet" href="{{ relPath }}css/home.css">
+{% endif %}
 {% if segmentStyles %}
 <link rel="stylesheet" href="{{ relPath }}css/segments.css">
 {% endif %}
@@ -63,6 +68,12 @@
 {% endif %}
 {% if featureStyles %}
 <link rel="stylesheet" href="{{ relPath }}css/feature.css">
+{% endif %}
+{% if pageStyles %}
+{% set pageStyleList = [pageStyles] if pageStyles is string else pageStyles %}
+{% for sheet in pageStyleList %}
+<link rel="stylesheet" href="{{ relPath }}css/{{ sheet }}.css">
+{% endfor %}
 {% endif %}
 
 <!-- Google Analytics 4 + Google Ads Conversion Tracking -->
@@ -113,12 +124,6 @@
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "BRL"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "bestRating": "5",
-    "ratingCount": "500"
   }
 }
 </script>

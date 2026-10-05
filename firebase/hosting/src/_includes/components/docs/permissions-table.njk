@@ -1,25 +1,31 @@
-{# Permissions Table Component - Table with yes/no/partial permissions #}
-{# Usage: {% include "components/docs/permissions-table.njk" with {title: "Title", headers: [...], rows: [...], note: "..."} %} #}
-<div class="table-wrapper">
-    {% if title %}<h4>{{ title }}</h4>{% endif %}
-    <table class="permissions-table">
-        <thead>
-            <tr>
-                {% for header in headers %}
-                <th>{{ header }}</th>
+{# Table — hairlines, first column as row header. Expects `table` = { title?, headers[], rows: [{ label, cells: [{ class: yes|no|partial } | { text }] }], note? }. #}
+{% set markLabels = { pt: { yes: 'Sim', no: 'Não', partial: 'Parcial' }, en: { yes: 'Yes', no: 'No', partial: 'Partial' }, es: { yes: 'Sí', no: 'No', partial: 'Parcial' } }[langCode] | default({ yes: 'Sim', no: 'Não', partial: 'Parcial' }) %}
+<div class="doc-table">
+    {% if table.title %}<h3>{{ table.title }}</h3>{% endif %}
+    <div class="doc-table__scroll" role="region" aria-label="{{ table.title | default(table.headers[0]) }}" tabindex="0">
+        <table>
+            <thead>
+                <tr>
+                    {% for header in table.headers %}
+                    <th scope="col"{% if not loop.first and table.rows[0].cells[loop.index0 - 1].class %} class="is-mark"{% endif %}>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table.rows %}
+                <tr>
+                    <th scope="row">{{ row.label }}</th>
+                    {% for cell in row.cells %}
+                    {% if cell.class %}
+                    <td class="is-mark">{% if cell.class == 'yes' %}<span class="mark-yes" aria-hidden="true">✓</span>{% elif cell.class == 'no' %}<span class="mark-no" aria-hidden="true">✕</span>{% else %}<span class="mark-partial" aria-hidden="true">*</span>{% endif %}<span class="doc-sr">{{ markLabels[cell.class] }}</span></td>
+                    {% else %}
+                    <td>{{ cell.text | safe }}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr>
-                <td>{{ row.label }}</td>
-                {% for cell in row.cells %}
-                <td class="{{ cell.class }}">{% if cell.class == 'yes' %}&#10003;{% elif cell.class == 'no' %}&#10007;{% else %}*{% endif %}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if note %}<p class="table-note">{{ note }}</p>{% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% if table.note %}<p class="doc-table__note">{{ table.note | safe }}</p>{% endif %}
 </div>

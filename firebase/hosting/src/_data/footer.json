@@ -1,86 +1,92 @@
 {
   "pt": {
-    "brand": "Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.",
+    "brand": "App de ordens de serviço para quem conserta, instala e faz manutenção. Do orçamento ao pagamento, pelo celular.",
     "product": {
       "title": "Produto",
       "links": [
-        { "href": "#features", "label": "Funcionalidades" },
-        { "href": "funcionalidades/whatsapp-bot.html", "label": "Assistente WhatsApp" },
-        { "href": "#pricing", "label": "Planos" },
-        { "href": "#download", "label": "Download" }
+        { "href": "#como-funciona", "label": "Como funciona" },
+        { "href": "funcionalidades/whatsapp-bot.html", "label": "Assistente no WhatsApp", "flag": "whatsappBot" },
+        { "href": "pricing.html", "label": "Planos e preços" },
+        { "href": "#baixar", "label": "Baixar o app" }
       ]
     },
     "support": {
-      "title": "Suporte",
+      "title": "Ajuda",
       "links": [
         { "href": "docs/", "label": "Documentação" },
-        { "href": "support.html", "label": "Central de Suporte" },
-        { "href": "faq.html", "label": "FAQ" },
-        { "href": "#contact", "label": "Contato" },
-        { "href": "privacy.html", "label": "Privacidade" },
-        { "href": "terms.html", "label": "Termos de Uso" }
+        { "href": "faq.html", "label": "Perguntas frequentes" },
+        { "href": "support.html", "label": "Suporte" }
       ]
     },
-    "company": {
-      "title": "Empresa"
+    "legal": {
+      "title": "Empresa",
+      "links": [
+        { "href": "privacy.html", "label": "Privacidade" },
+        { "href": "terms.html", "label": "Termos de uso" }
+      ]
     },
+    "segmentsLabel": "Segmentos",
     "copyright": "Todos os direitos reservados.",
-    "madeWith": "Desenvolvido com ❤️ por"
+    "madeBy": "Feito por"
   },
   "en": {
-    "brand": "Complete system for work order management. Simplify your business.",
+    "brand": "Work order app for people who repair, install and maintain. From quote to payment, on your phone.",
     "product": {
       "title": "Product",
       "links": [
-        { "href": "#features", "label": "Features" },
-        { "href": "funcionalidades/whatsapp-bot-en.html", "label": "WhatsApp Assistant" },
-        { "href": "#pricing", "label": "Pricing" },
-        { "href": "#download", "label": "Download" }
+        { "href": "#como-funciona", "label": "How it works" },
+        { "href": "funcionalidades/whatsapp-bot-en.html", "label": "WhatsApp assistant", "flag": "whatsappBot" },
+        { "href": "pricing-en.html", "label": "Plans and pricing" },
+        { "href": "#baixar", "label": "Download the app" }
       ]
     },
     "support": {
-      "title": "Support",
+      "title": "Help",
       "links": [
-        { "href": "docs/", "label": "Documentation" },
-        { "href": "support-en.html", "label": "Support Center" },
+        { "href": "docs/index-en.html", "label": "Documentation" },
         { "href": "faq-en.html", "label": "FAQ" },
-        { "href": "#contact", "label": "Contact" },
-        { "href": "privacy-en.html", "label": "Privacy" },
-        { "href": "terms-en.html", "label": "Terms of Use" }
+        { "href": "support-en.html", "label": "Support" }
       ]
     },
-    "company": {
-      "title": "Company"
+    "legal": {
+      "title": "Company",
+      "links": [
+        { "href": "privacy-en.html", "label": "Privacy" },
+        { "href": "terms-en.html", "label": "Terms of use" }
+      ]
     },
+    "segmentsLabel": "Trades",
     "copyright": "All rights reserved.",
-    "madeWith": "Made with ❤️ by"
+    "madeBy": "Made by"
   },
   "es": {
-    "brand": "Sistema completo para gestión de órdenes de servicio. Simplifique su negocio.",
+    "brand": "App de órdenes de servicio para quien repara, instala y hace mantenimiento. Del presupuesto al cobro, desde el celular.",
     "product": {
       "title": "Producto",
       "links": [
-        { "href": "#features", "label": "Funciones" },
-        { "href": "funcionalidades/whatsapp-bot-es.html", "label": "Asistente WhatsApp" },
-        { "href": "#pricing", "label": "Planes" },
-        { "href": "#download", "label": "Descargar" }
+        { "href": "#como-funciona", "label": "Cómo funciona" },
+        { "href": "funcionalidades/whatsapp-bot-es.html", "label": "Asistente en WhatsApp", "flag": "whatsappBot" },
+        { "href": "pricing-es.html", "label": "Planes y precios" },
+        { "href": "#baixar", "label": "Descargar la app" }
       ]
     },
     "support": {
-      "title": "Soporte",
+      "title": "Ayuda",
       "links": [
-        { "href": "docs/", "label": "Documentación" },
-        { "href": "support-es.html", "label": "Centro de Soporte" },
-        { "href": "faq-es.html", "label": "FAQ" },
-        { "href": "#contact", "label": "Contacto" },
-        { "href": "privacy-es.html", "label": "Privacidad" },
-        { "href": "terms-es.html", "label": "Términos de Uso" }
+        { "href": "docs/index-es.html", "label": "Documentación" },
+        { "href": "faq-es.html", "label": "Preguntas frecuentes" },
+        { "href": "support-es.html", "label": "Soporte" }
       ]
     },
-    "company": {
-      "title": "Empresa"
+    "legal": {
+      "title": "Empresa",
+      "links": [
+        { "href": "privacy-es.html", "label": "Privacidad" },
+        { "href": "terms-es.html", "label": "Términos de uso" }
+      ]
     },
+    "segmentsLabel": "Rubros",
     "copyright": "Todos los derechos reservados.",
-    "madeWith": "Desarrollado con ❤️ por"
+    "madeBy": "Hecho por"
   }
 }

@@ -1,24 +1,8 @@
-{# Profile Detail Component - Detailed section for a single profile #}
-{# Usage: {% include "components/docs/profile-detail.njk" with {profile: {...}, categories: [...]} %} #}
-<div class="section-header-inline">
-    <span class="profile-badge {{ profile.badgeClass }}">{{ profile.emoji | safe }}</span>
-    <div>
-        <h2>{{ profile.name }}</h2>
-        <p class="section-subtitle">{{ profile.subtitle }}</p>
-    </div>
-</div>
-
-{% if profile.warningCard %}
-{% set title = profile.warningCard.title %}
-{% set content = profile.warningCard.content %}
-{% include "components/docs/warning-card.njk" %}
-{% endif %}
-
-{% if profile.infoCard %}
-{% set title = profile.infoCard.title %}
-{% set content = profile.infoCard.content %}
-{% include "components/docs/info-card.njk" %}
-{% endif %}
-
-{% set categories = categories %}
+{# Profile detail — not used by the section renderer (perfis.json renders each profile as a normal section
+   with subtitle + notes + permissionsGrid). Kept for templates that include it directly.
+   Expects `profile` = { name, subtitle, warningCard?, infoCard? } and `categories`. #}
+<h2>{{ profile.name }}</h2>
+{% if profile.subtitle %}<p class="doc-subtitle">{{ profile.subtitle }}</p>{% endif %}
+{% if profile.warningCard %}{% set note = profile.warningCard %}{% include "components/docs/warning-card.njk" %}{% endif %}
+{% if profile.infoCard %}{% set note = profile.infoCard %}{% include "components/docs/info-card.njk" %}{% endif %}
 {% include "components/docs/permissions-grid.njk" %}

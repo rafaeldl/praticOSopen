@@ -3,172 +3,148 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visão Geral da Integração",
-        "intro": "O PraticOS pode ser conectado ao <strong>ChatGPT</strong> e ao <strong>Claude</strong> como um connector. Depois de conectado, você conversa com o assistente para consultar e até atualizar as ordens de serviço da sua empresa, sem sair do app de IA que já usa no dia a dia.",
-        "infoCard": {
-          "title": "Onde fica",
-          "content": "A integração é configurada em Ajustes → Integrações, dentro do app PraticOS. É lá que você cria e revoga as conexões."
-        },
+        "title": "O que a integração faz",
+        "intro": "Conectado ao <strong>ChatGPT</strong> ou ao <strong>Claude</strong>, o PraticOS vira uma fonte de dados do assistente. Você pergunta em texto — “quais orçamentos estão parados?”, “quanto faturei este mês?” — e pede ações, como abrir uma OS ou marcar uma como concluída, sem abrir o app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg>",
-            "color": "blue",
             "title": "Consultar",
-            "description": "Pergunte pelo resumo do dia, ordens pendentes, faturamento ou detalhes de uma OS específica."
+            "description": "Resumo do dia, OS pendentes, faturamento e os detalhes de uma OS."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 20h9\"></path><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z\"></path></svg>",
-            "color": "green",
             "title": "Agir",
-            "description": "Peça para criar uma ordem de serviço, aprovar, marcar como concluída, adicionar um item ou comentário, ou cadastrar um cliente."
+            "description": "Criar OS, mudar o status, incluir serviço ou produto, comentar, anexar foto e cadastrar clientes."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
-            "color": "orange",
-            "title": "Com segurança",
-            "description": "Toda ação que altera dados fica registrada, e os dados de cada empresa ficam isolados dos demais clientes do PraticOS."
+            "title": "Uma empresa por conexão",
+            "description": "Cada URL dá acesso só aos dados da empresa que a gerou. Cada alteração feita pelo assistente fica registrada no PraticOS."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "Onde fica no app",
+          "content": "Em <strong>Mais → Integrações</strong>. É lá que você cria e revoga as conexões."
+        }
       },
       {
         "id": "gerar-conexao",
-        "title": "Gerar a Conexão em Ajustes → Integrações",
-        "intro": "A conexão é criada dentro do app PraticOS e usada uma única vez para configurar o ChatGPT ou o Claude.",
+        "title": "Gerar a conexão",
+        "intro": "A conexão é uma URL criada no app. Você cola essa URL uma vez no ChatGPT ou no Claude e pronto.",
+        "steps": [
+          "No app, toque em <strong>Mais → Integrações</strong>.",
+          "Toque em <strong>+</strong> e dê um nome à conexão, por exemplo “Meu ChatGPT”.",
+          "Toque em <strong>Salvar</strong>.",
+          "A URL aparece na tela uma única vez. Toque em <strong>Copiar URL</strong> e cole no assistente em seguida."
+        ],
         "infoCard": {
           "title": "Quem pode gerar",
-          "content": "Apenas o dono da empresa ou um administrador pode criar e revogar conexões. Empresas cujo dono se cadastrou pelo bot do WhatsApp podem não ver esta opção ainda enquanto ajustamos o reconhecimento desse perfil no app - se for o seu caso, fale com o suporte."
+          "content": "Só o dono da empresa e quem tem perfil de Administrador. Se você é o dono e não vê <strong>Integrações</strong> no menu, fale com o suporte."
         },
-        "subsections": [
-          {
-            "title": "Passo a Passo",
-            "steps": [
-              "Abra o app PraticOS e vá em <strong>Ajustes → Integrações</strong>",
-              "Toque no botão de adicionar (+) e dê um nome para a conexão, por exemplo \"Meu ChatGPT\"",
-              "Toque em <strong>Salvar</strong>",
-              "A URL de conexão aparece na tela. Toque em <strong>Copiar URL</strong>",
-              "Guarde essa URL para usar no passo de configuração do ChatGPT ou do Claude"
-            ]
-          }
-        ],
         "warningCard": {
-          "title": "Leia antes de gerar",
-          "content": "A URL de conexão funciona como uma senha: quem tiver acesso a ela consegue ler e alterar os dados da sua empresa. Ela é exibida apenas uma vez - se perder, revogue e gere outra. Pode ser revogada a qualquer momento em Ajustes → Integrações, e expira sozinha em 90 dias. Enquanto a conexão usar essa URL, o endereço completo fica registrado nos logs técnicos da infraestrutura do PraticOS (Google Cloud/Firebase); a futura opção \"Conectar com PraticOS\", por login, vai eliminar esse registro."
+          "title": "A URL funciona como uma senha",
+          "content": "Quem tiver a URL consegue ler e alterar os dados da sua empresa. Não mande por mensagem nem guarde em lugar aberto. Ela vence em 90 dias e pode ser revogada a qualquer momento em <strong>Mais → Integrações</strong>. Enquanto estiver em uso, o endereço completo aparece nos registros técnicos da infraestrutura do PraticOS (Google Cloud)."
         }
       },
       {
         "id": "chatgpt",
-        "title": "Como Adicionar no ChatGPT",
-        "intro": "O ChatGPT permite adicionar serviços externos como conectores personalizados.",
-        "subsections": [
-          {
-            "title": "Passo a Passo",
-            "steps": [
-              "Copie a URL de conexão gerada em Ajustes → Integrações (veja a seção anterior)",
-              "Nas configurações de conectores do ChatGPT, adicione um <strong>conector personalizado</strong>",
-              "Cole a URL copiada quando for solicitado o endereço do connector",
-              "Confirme a criação do conector",
-              "Na conversa, ative o connector do PraticOS para que o assistente possa usá-lo"
-            ]
-          }
+        "title": "Adicionar no ChatGPT",
+        "intro": "O ChatGPT aceita serviços externos como conectores personalizados.",
+        "steps": [
+          "Gere a URL de conexão no PraticOS (seção anterior) e copie.",
+          "Nas configurações de conectores do ChatGPT, adicione um <strong>conector personalizado</strong>.",
+          "Cole a URL no campo de endereço do conector e confirme.",
+          "Em uma conversa, ative o conector do PraticOS para o assistente poder usá-lo."
         ],
         "infoCard": {
-          "title": "Nomes de tela podem variar",
-          "content": "O ChatGPT organiza essa configuração dentro de suas próprias telas de conectores/integrações, que podem mudar de nome com o tempo. Procure por uma opção de adicionar um conector ou uma fonte de dados personalizada e cole a URL copiada."
+          "title": "O nome das telas pode mudar",
+          "content": "Os menus do ChatGPT mudam de nome com frequência. Procure a opção de adicionar um conector ou uma fonte de dados personalizada."
         }
       },
       {
         "id": "claude",
-        "title": "Como Adicionar no Claude",
-        "intro": "O Claude também permite conectar serviços externos como conectores personalizados.",
-        "subsections": [
-          {
-            "title": "Passo a Passo",
-            "steps": [
-              "Copie a URL de conexão gerada em Ajustes → Integrações (veja a seção anterior)",
-              "Nas configurações de conectores do Claude, adicione um <strong>conector personalizado</strong>",
-              "Cole a URL copiada quando for solicitado o endereço do connector",
-              "Confirme a criação do conector",
-              "Na conversa, habilite o connector do PraticOS para que o assistente possa usá-lo"
-            ]
-          }
+        "title": "Adicionar no Claude",
+        "intro": "O Claude também aceita serviços externos como conectores personalizados.",
+        "steps": [
+          "Gere a URL de conexão no PraticOS (seção anterior) e copie.",
+          "Nas configurações de conectores do Claude, adicione um <strong>conector personalizado</strong>.",
+          "Cole a URL no campo de endereço do conector e confirme.",
+          "Em uma conversa, ative o conector do PraticOS para o assistente poder usá-lo."
         ],
         "infoCard": {
-          "title": "Nomes de tela podem variar",
-          "content": "O Claude organiza essa configuração dentro de suas próprias telas de conectores, que podem mudar de nome com o tempo. Procure por uma opção de adicionar um conector personalizado e cole a URL copiada."
+          "title": "O nome das telas pode mudar",
+          "content": "Os menus do Claude mudam de nome com o tempo. Procure a opção de adicionar um conector personalizado."
         }
       },
       {
         "id": "o-que-faz",
-        "title": "O que o Assistente Consegue Fazer",
-        "intro": "Depois de conectado, o assistente responde perguntas sobre suas ordens de serviço e pode realizar ações a seu pedido.",
+        "title": "O que o assistente consegue fazer",
+        "intro": "Com o conector ativo, o assistente consulta e altera os dados da empresa a seu pedido. Peça como pediria a alguém do escritório.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
-            "color": "blue",
-            "title": "Ordens de Serviço",
-            "description": "Buscar, listar, ver detalhes (com foto de capa), listar e anexar fotos, criar, aprovar, marcar como concluída, adicionar itens e comentários."
+            "title": "Ordens de serviço",
+            "description": "Buscar e listar OS, ver detalhes e fotos, criar OS, aprovar, iniciar, concluir ou cancelar, incluir serviços e produtos, comentar, anexar e apagar fotos."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
-            "color": "green",
-            "title": "Resumo e Faturamento",
-            "description": "Resumo do dia, ordens pendentes e faturamento, sem precisar abrir o app."
+            "title": "Resumo e faturamento",
+            "description": "Resumo do dia, OS pendentes e faturamento do período."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
-            "color": "orange",
             "title": "Cadastros",
-            "description": "Buscar e cadastrar clientes, dispositivos, serviços e produtos."
+            "description": "Buscar e cadastrar clientes, equipamentos, serviços e produtos."
           }
         ],
-        "paragraphs": [
-          "Em apps que suportam o recurso, algumas respostas sobre uma ordem de serviço vêm acompanhadas de um cartão visual com botões (aprovar, concluir, copiar o link do cliente). Nos demais assistentes, ou quando esse recurso não está disponível, a resposta em texto já vem completa - você não perde nenhuma informação."
+        "infoCard": {
+          "title": "Confira antes de confirmar",
+          "content": "O assistente pode entender o pedido errado. Antes de aprovar, cancelar ou apagar algo, leia o que ele vai fazer."
+        }
+      },
+      {
+        "id": "order-card",
+        "title": "Cartão da OS",
+        "intro": "Em assistentes que suportam o recurso, algumas respostas sobre uma OS vêm com um cartão: foto de capa (quando houver), equipamento, cliente, serviços, produtos e total. O cartão segue o tema claro ou escuro do chat. Nos outros assistentes, a mesma informação vem em texto.",
+        "subsections": [
+          {
+            "title": "Botões do cartão",
+            "validationList": [
+              {
+                "label": "Compartilhar",
+                "text": "Abre o menu de compartilhamento do aparelho com o resumo e o link da OS. Se o menu não estiver disponível, oferece WhatsApp, Telegram ou copiar o link."
+              },
+              {
+                "label": "Abrir no PraticOS",
+                "text": "Abre a página web da OS. Ainda não abre direto no app instalado."
+              },
+              {
+                "label": "Aprovar e Concluir OS",
+                "text": "Pedem confirmação antes de mudar o status."
+              }
+            ]
+          }
         ]
       },
       {
         "id": "faq",
-        "title": "Perguntas Frequentes",
+        "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "Por quanto tempo a conexão fica ativa?",
-            "answer": "90 dias a partir da criação. Depois disso, é preciso gerar uma nova conexão em Ajustes → Integrações."
+            "question": "Por quanto tempo a conexão vale?",
+            "answer": "90 dias a partir da criação. Depois, gere outra em <strong>Mais → Integrações</strong> e troque a URL no assistente."
           },
           {
-            "question": "Posso revogar uma conexão antes disso?",
-            "answer": "Sim, a qualquer momento, em Ajustes → Integrações. Quem estiver usando aquela URL perde o acesso imediatamente."
+            "question": "Posso cancelar antes?",
+            "answer": "Sim. Em <strong>Mais → Integrações</strong>, toque em <strong>Revogar</strong> na conexão. Quem estiver usando aquela URL perde o acesso na hora."
           },
           {
-            "question": "Quem pode criar uma conexão?",
-            "answer": "O dono da empresa ou um administrador."
+            "question": "Perdi a URL. Dá para ver de novo?",
+            "answer": "Não. Ela só aparece ao criar a conexão. Revogue a antiga e gere uma nova."
+          },
+          {
+            "question": "Como sei se a conexão está sendo usada?",
+            "answer": "A lista em <strong>Mais → Integrações</strong> mostra a data do último uso de cada conexão."
           },
           {
             "question": "O assistente vê o telefone dos meus clientes?",
-            "answer": "Não. O telefone dos seus clientes nunca é enviado para o cartão visual nem exposto ao assistente. A foto de capa da ordem de serviço é exibida no cartão visual quando houver fotos anexadas."
-          },
-          {
-            "question": "O cartão visual sempre aparece?",
-            "answer": "Só em assistentes que suportam esse recurso. Nos demais, você recebe a mesma informação em texto, sempre completa."
-          },
-          {
-            "question": "É seguro colar essa URL em qualquer lugar?",
-            "answer": "Não. Trate a URL como uma senha da sua empresa. Cole apenas na tela de configuração do connector do ChatGPT ou do Claude, e revogue imediatamente se desconfiar que ela vazou."
+            "answer": "As respostas sobre OS e clientes e o cartão da OS não trazem o telefone do cliente. Se você informar um telefone ao cadastrar um cliente pela conversa, ele é salvo no PraticOS."
           }
         ]
-      },
-      {
-        "id": "order-card",
-        "title": "Card da ordem de serviço",
-        "intro": "O card mostra a foto de capa, quando disponível, os dados do dispositivo e cliente, serviços, produtos e total. Sem foto, os dados ocupam o espaço. O visual acompanha o tema claro ou escuro do chat.",
-        "subsections": [
-          {
-            "title": "Compartilhar",
-            "content": "Abre o menu de compartilhamento do dispositivo para escolher onde enviar o resumo e link da OS. Se indisponível ou bloqueado, oferece WhatsApp, Telegram ou copiar o link para usar em qualquer aplicativo. Cancelar o menu não envia nada."
-          }
-        ],
-        "infoCard": {
-          "title": "Outras ações",
-          "content": "Abrir no PraticOS abre a página web da OS. Abertura direta da OS no aplicativo instalado ainda não está disponível. Aprovar e Concluir OS continuam exigindo confirmação."
-        }
       }
     ]
   },
@@ -176,172 +152,148 @@
     "sections": [
       {
         "id": "overview",
-        "title": "Integration Overview",
-        "intro": "PraticOS can be connected to <strong>ChatGPT</strong> and <strong>Claude</strong> as a connector. Once connected, you can talk to the assistant to check and even update your company's service orders, without leaving the AI app you already use every day.",
-        "infoCard": {
-          "title": "Where to find it",
-          "content": "The integration is set up under Settings → Integrations, inside the PraticOS app. That's where you create and revoke connections."
-        },
+        "title": "What the integration does",
+        "intro": "Once connected to <strong>ChatGPT</strong> or <strong>Claude</strong>, PraticOS becomes a data source for the assistant. Ask in plain words — “which quotes are stuck?”, “how much did I bill this month?” — and ask for actions, like opening a work order or marking one complete, without opening the app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg>",
-            "color": "blue",
             "title": "Look things up",
-            "description": "Ask for today's summary, pending orders, revenue, or the details of a specific service order."
+            "description": "Today’s summary, pending orders, billing and the details of an order."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 20h9\"></path><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z\"></path></svg>",
-            "color": "green",
             "title": "Take action",
-            "description": "Ask it to create a service order, approve it, mark it done, add an item or comment, or register a customer."
+            "description": "Create orders, change status, add a service or product, comment, attach photos and add customers."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
-            "color": "orange",
-            "title": "Built with security in mind",
-            "description": "Every action that changes data is logged, and each company's data stays isolated from every other PraticOS customer."
+            "title": "One company per connection",
+            "description": "Each URL only reaches the data of the company that created it. Every change the assistant makes is logged in PraticOS."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "Where it lives in the app",
+          "content": "Under <strong>More → Integrations</strong>. That is where you create and revoke connections."
+        }
       },
       {
         "id": "generate-connection",
-        "title": "Generate the Connection under Settings → Integrations",
-        "intro": "The connection is created inside the PraticOS app and used once to set up ChatGPT or Claude.",
-        "infoCard": {
-          "title": "Who can generate one",
-          "content": "Only the company owner or an administrator can create and revoke connections. Companies whose owner signed up through the WhatsApp bot may not see this option yet while we finish rolling out that role in the app - if that's your case, contact support."
-        },
-        "subsections": [
-          {
-            "title": "Step by Step",
-            "steps": [
-              "Open the PraticOS app and go to <strong>Settings → Integrations</strong>",
-              "Tap the add button (+) and give the connection a name, e.g. \"My ChatGPT\"",
-              "Tap <strong>Save</strong>",
-              "The connection URL appears on screen. Tap <strong>Copy URL</strong>",
-              "Keep that URL for the ChatGPT or Claude setup step"
-            ]
-          }
+        "title": "Create the connection",
+        "intro": "The connection is a URL created in the app. You paste it once into ChatGPT or Claude and you’re set.",
+        "steps": [
+          "In the app, tap <strong>More → Integrations</strong>.",
+          "Tap <strong>+</strong> and name the connection, for example “My ChatGPT”.",
+          "Tap <strong>Save</strong>.",
+          "The URL appears on screen only once. Tap <strong>Copy URL</strong> and paste it into the assistant right away."
         ],
+        "infoCard": {
+          "title": "Who can create it",
+          "content": "Only the company owner and people with the Administrator profile. If you are the owner and don’t see <strong>Integrations</strong> in the menu, contact support."
+        },
         "warningCard": {
-          "title": "Read this before generating one",
-          "content": "The connection URL works like a password: anyone who has it can read and change your company's data. It is shown only once - if you lose it, revoke it and generate a new one. It can be revoked at any time under Settings → Integrations, and it expires on its own after 90 days. While the connection uses this URL, the full address is recorded in PraticOS's own infrastructure logs (Google Cloud/Firebase); the upcoming \"Connect with PraticOS\" sign-in option will remove that."
+          "title": "Treat the URL like a password",
+          "content": "Anyone with the URL can read and change your company’s data. Don’t send it in a chat or leave it lying around. It expires after 90 days and can be revoked any time under <strong>More → Integrations</strong>. While in use, the full address shows up in the technical logs of PraticOS’s infrastructure (Google Cloud)."
         }
       },
       {
         "id": "chatgpt",
-        "title": "Adding it in ChatGPT",
-        "intro": "ChatGPT lets you add external services as custom connectors.",
-        "subsections": [
-          {
-            "title": "Step by Step",
-            "steps": [
-              "Copy the connection URL generated under Settings → Integrations (see previous section)",
-              "In ChatGPT's connectors settings, add a <strong>custom connector</strong>",
-              "Paste the copied URL when asked for the connector's address",
-              "Confirm the connector creation",
-              "In your conversation, enable the PraticOS connector so the assistant can use it"
-            ]
-          }
+        "title": "Add it to ChatGPT",
+        "intro": "ChatGPT accepts outside services as custom connectors.",
+        "steps": [
+          "Generate the connection URL in PraticOS (previous section) and copy it.",
+          "In ChatGPT’s connector settings, add a <strong>custom connector</strong>.",
+          "Paste the URL into the connector address field and confirm.",
+          "In a chat, turn on the PraticOS connector so the assistant can use it."
         ],
         "infoCard": {
-          "title": "Screen names may vary",
-          "content": "ChatGPT organizes this setting inside its own connectors/integrations screens, which may change names over time. Look for an option to add a connector or a custom data source and paste the copied URL there."
+          "title": "Screen names change",
+          "content": "ChatGPT renames its menus often. Look for the option to add a custom connector or data source."
         }
       },
       {
         "id": "claude",
-        "title": "Adding it in Claude",
-        "intro": "Claude also lets you connect external services as custom connectors.",
-        "subsections": [
-          {
-            "title": "Step by Step",
-            "steps": [
-              "Copy the connection URL generated under Settings → Integrations (see previous section)",
-              "In Claude's connectors settings, add a <strong>custom connector</strong>",
-              "Paste the copied URL when asked for the connector's address",
-              "Confirm the connector creation",
-              "In your conversation, enable the PraticOS connector so the assistant can use it"
-            ]
-          }
+        "title": "Add it to Claude",
+        "intro": "Claude also accepts outside services as custom connectors.",
+        "steps": [
+          "Generate the connection URL in PraticOS (previous section) and copy it.",
+          "In Claude’s connector settings, add a <strong>custom connector</strong>.",
+          "Paste the URL into the connector address field and confirm.",
+          "In a chat, turn on the PraticOS connector so the assistant can use it."
         ],
         "infoCard": {
-          "title": "Screen names may vary",
-          "content": "Claude organizes this setting inside its own connectors screens, which may change names over time. Look for an option to add a custom connector and paste the copied URL there."
+          "title": "Screen names change",
+          "content": "Claude’s menus get renamed over time. Look for the option to add a custom connector."
         }
       },
       {
         "id": "what-it-can-do",
-        "title": "What the Assistant Can Do",
-        "intro": "Once connected, the assistant answers questions about your service orders and can take action on your request.",
+        "title": "What the assistant can do",
+        "intro": "With the connector on, the assistant reads and changes your company’s data when you ask. Ask the way you would ask someone at the office.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
-            "color": "blue",
-            "title": "Service Orders",
-            "description": "Search, list, view details (with cover photo), list and attach photos, create, approve, mark as done, add items and comments."
+            "title": "Work orders",
+            "description": "Find and list orders, see details and photos, create orders, approve, start, complete or cancel them, add services and products, comment, attach and delete photos."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
-            "color": "green",
-            "title": "Summary and Revenue",
-            "description": "Today's summary, pending orders and revenue, without opening the app."
+            "title": "Summary and billing",
+            "description": "Today’s summary, pending orders and billing for a period."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
-            "color": "orange",
             "title": "Records",
-            "description": "Look up and register customers, devices, services and products."
+            "description": "Find and add customers, equipment, services and products."
           }
         ],
-        "paragraphs": [
-          "In apps that support the feature, some answers about a service order come with a visual card with buttons (approve, mark done, copy the customer link). In other assistants, or when this feature isn't available, the text answer is already complete - you don't lose any information."
+        "infoCard": {
+          "title": "Check before you confirm",
+          "content": "The assistant can misread a request. Before approving, cancelling or deleting anything, read what it is about to do."
+        }
+      },
+      {
+        "id": "order-card",
+        "title": "Order card",
+        "intro": "In assistants that support it, some answers about an order come with a card: cover photo (when there is one), equipment, customer, services, products and total. The card follows the chat’s light or dark theme. In other assistants, the same information comes as text.",
+        "subsections": [
+          {
+            "title": "Card buttons",
+            "validationList": [
+              {
+                "label": "Share",
+                "text": "Opens the device’s share sheet with the order summary and link. If the sheet isn’t available, it offers WhatsApp, Telegram or copying the link."
+              },
+              {
+                "label": "Open in PraticOS",
+                "text": "Opens the order’s web page. It doesn’t open the installed app yet."
+              },
+              {
+                "label": "Approve and Complete order",
+                "text": "Both ask for confirmation before changing the status."
+              }
+            ]
+          }
         ]
       },
       {
         "id": "faq",
-        "title": "Frequently Asked Questions",
+        "title": "FAQ",
         "faq": [
           {
-            "question": "How long does the connection stay active?",
-            "answer": "90 days from creation. After that, you need to generate a new connection under Settings → Integrations."
+            "question": "How long does a connection last?",
+            "answer": "90 days from creation. After that, create a new one under <strong>More → Integrations</strong> and replace the URL in the assistant."
           },
           {
-            "question": "Can I revoke a connection before that?",
-            "answer": "Yes, at any time, under Settings → Integrations. Anyone using that URL loses access immediately."
+            "question": "Can I cancel it sooner?",
+            "answer": "Yes. Under <strong>More → Integrations</strong>, tap <strong>Revoke</strong> on the connection. Anyone using that URL loses access right away."
           },
           {
-            "question": "Who can create a connection?",
-            "answer": "The company owner or an administrator."
+            "question": "I lost the URL. Can I see it again?",
+            "answer": "No. It only shows when the connection is created. Revoke the old one and create a new one."
           },
           {
-            "question": "Can the assistant see my customers' phone numbers?",
-            "answer": "No. Customer phone numbers are never sent to the visual card or exposed to the assistant. The service order cover photo is shown in the visual card when photos are attached."
+            "question": "How do I know whether a connection is in use?",
+            "answer": "The list under <strong>More → Integrations</strong> shows when each connection was last used."
           },
           {
-            "question": "Does the visual card always show up?",
-            "answer": "Only in assistants that support this feature. Everywhere else, you get the same information in text, always complete."
-          },
-          {
-            "question": "Is it safe to paste this URL anywhere?",
-            "answer": "No. Treat the URL like a password for your company. Only paste it into ChatGPT's or Claude's connector setup screen, and revoke it immediately if you suspect it leaked."
+            "question": "Does the assistant see my customers’ phone numbers?",
+            "answer": "Answers about orders and customers, and the order card, don’t include the customer’s phone. If you give a phone number while adding a customer in the chat, it is saved in PraticOS."
           }
         ]
-      },
-      {
-        "id": "order-card",
-        "title": "Service order card",
-        "intro": "The card shows the cover photo when available, device and customer details, services, products and total. Without a photo, the details fill the space. The card follows the chat’s light or dark theme.",
-        "subsections": [
-          {
-            "title": "Share",
-            "content": "Opens the device share menu to choose where to send the order summary and link. When unavailable or blocked, choose WhatsApp, Telegram, or copy the link to use in any app. Canceling sends nothing."
-          }
-        ],
-        "infoCard": {
-          "title": "Other actions",
-          "content": "Open in PraticOS opens the order web page. Opening the order directly in the installed app is not available yet. Approve and Complete order still require confirmation."
-        }
       }
     ]
   },
@@ -349,172 +301,148 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Visión General de la Integración",
-        "intro": "PraticOS puede conectarse a <strong>ChatGPT</strong> y a <strong>Claude</strong> como un conector. Una vez conectado, puedes hablar con el asistente para consultar e incluso actualizar las órdenes de servicio de tu empresa, sin salir de la app de IA que ya usas a diario.",
-        "infoCard": {
-          "title": "Dónde encontrarla",
-          "content": "La integración se configura en Ajustes → Integraciones, dentro de la app PraticOS. Allí creas y revocas las conexiones."
-        },
+        "title": "Qué hace la integración",
+        "intro": "Conectado a <strong>ChatGPT</strong> o a <strong>Claude</strong>, PraticOS se vuelve una fuente de datos del asistente. Preguntas con tus palabras — “¿qué presupuestos están detenidos?”, “¿cuánto facturé este mes?” — y pides acciones, como abrir una OS o marcarla como completada, sin abrir la app.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg>",
-            "color": "blue",
             "title": "Consultar",
-            "description": "Pregunta por el resumen del día, órdenes pendientes, facturación o los detalles de una orden de servicio específica."
+            "description": "Resumen del día, OS pendientes, facturación y el detalle de una OS."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 20h9\"></path><path d=\"M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z\"></path></svg>",
-            "color": "green",
             "title": "Actuar",
-            "description": "Pídele crear una orden de servicio, aprobarla, marcarla como concluida, agregar un ítem o comentario, o registrar un cliente."
+            "description": "Crear OS, cambiar el estado, agregar servicios o productos, comentar, adjuntar fotos y registrar clientes."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
-            "color": "orange",
-            "title": "Con seguridad",
-            "description": "Toda acción que cambia datos queda registrada, y los datos de cada empresa quedan aislados de los demás clientes de PraticOS."
+            "title": "Una empresa por conexión",
+            "description": "Cada URL solo accede a los datos de la empresa que la generó. Cada cambio que hace el asistente queda registrado en PraticOS."
           }
-        ]
+        ],
+        "infoCard": {
+          "title": "Dónde está en la app",
+          "content": "En <strong>Más → Integraciones</strong>. Ahí creas y revocas las conexiones."
+        }
       },
       {
         "id": "generar-conexion",
-        "title": "Generar la Conexión en Ajustes → Integraciones",
-        "intro": "La conexión se crea dentro de la app PraticOS y se usa una única vez para configurar ChatGPT o Claude.",
+        "title": "Generar la conexión",
+        "intro": "La conexión es una URL creada en la app. La pegas una vez en ChatGPT o en Claude y listo.",
+        "steps": [
+          "En la app, toca <strong>Más → Integraciones</strong>.",
+          "Toca <strong>+</strong> y ponle un nombre a la conexión, por ejemplo “Mi ChatGPT”.",
+          "Toca <strong>Guardar</strong>.",
+          "La URL aparece en pantalla una sola vez. Toca <strong>Copiar URL</strong> y pégala en el asistente enseguida."
+        ],
         "infoCard": {
           "title": "Quién puede generarla",
-          "content": "Solo el dueño de la empresa o un administrador puede crear y revocar conexiones. Las empresas cuyo dueño se registró mediante el bot de WhatsApp pueden no ver todavía esta opción mientras terminamos de habilitar ese rol en la app - si es tu caso, contacta con soporte."
+          "content": "Solo el dueño de la empresa y quienes tienen perfil de Administrador. Si eres el dueño y no ves <strong>Integraciones</strong> en el menú, escribe a soporte."
         },
-        "subsections": [
-          {
-            "title": "Paso a Paso",
-            "steps": [
-              "Abre la app PraticOS y ve a <strong>Ajustes → Integraciones</strong>",
-              "Toca el botón de agregar (+) y dale un nombre a la conexión, por ejemplo \"Mi ChatGPT\"",
-              "Toca <strong>Guardar</strong>",
-              "La URL de conexión aparece en pantalla. Toca <strong>Copiar URL</strong>",
-              "Guarda esa URL para usarla en el paso de configuración de ChatGPT o Claude"
-            ]
-          }
-        ],
         "warningCard": {
-          "title": "Lee esto antes de generarla",
-          "content": "La URL de conexión funciona como una contraseña: quien la tenga puede leer y modificar los datos de tu empresa. Se muestra una sola vez - si la pierdes, revócala y genera otra. Puede revocarse en cualquier momento en Ajustes → Integraciones, y expira sola a los 90 días. Mientras la conexión use esta URL, la dirección completa queda registrada en los logs técnicos de la infraestructura de PraticOS (Google Cloud/Firebase); la futura opción \"Conectar con PraticOS\", por inicio de sesión, eliminará ese registro."
+          "title": "La URL funciona como una contraseña",
+          "content": "Quien tenga la URL puede leer y cambiar los datos de tu empresa. No la mandes por mensaje ni la dejes a la vista. Vence a los 90 días y se puede revocar en cualquier momento en <strong>Más → Integraciones</strong>. Mientras esté en uso, la dirección completa aparece en los registros técnicos de la infraestructura de PraticOS (Google Cloud)."
         }
       },
       {
         "id": "chatgpt",
-        "title": "Cómo Agregarla en ChatGPT",
-        "intro": "ChatGPT permite agregar servicios externos como conectores personalizados.",
-        "subsections": [
-          {
-            "title": "Paso a Paso",
-            "steps": [
-              "Copia la URL de conexión generada en Ajustes → Integraciones (ver la sección anterior)",
-              "En la configuración de conectores de ChatGPT, agrega un <strong>conector personalizado</strong>",
-              "Pega la URL copiada cuando se solicite la dirección del conector",
-              "Confirma la creación del conector",
-              "En la conversación, activa el conector de PraticOS para que el asistente pueda usarlo"
-            ]
-          }
+        "title": "Agregar en ChatGPT",
+        "intro": "ChatGPT acepta servicios externos como conectores personalizados.",
+        "steps": [
+          "Genera la URL de conexión en PraticOS (sección anterior) y cópiala.",
+          "En la configuración de conectores de ChatGPT, agrega un <strong>conector personalizado</strong>.",
+          "Pega la URL en el campo de dirección del conector y confirma.",
+          "En una conversación, activa el conector de PraticOS para que el asistente pueda usarlo."
         ],
         "infoCard": {
-          "title": "Los nombres de pantalla pueden variar",
-          "content": "ChatGPT organiza esta configuración dentro de sus propias pantallas de conectores/integraciones, que pueden cambiar de nombre con el tiempo. Busca una opción para agregar un conector o una fuente de datos personalizada y pega allí la URL copiada."
+          "title": "Los nombres de las pantallas cambian",
+          "content": "ChatGPT cambia el nombre de sus menús con frecuencia. Busca la opción para agregar un conector o una fuente de datos personalizada."
         }
       },
       {
         "id": "claude",
-        "title": "Cómo Agregarla en Claude",
-        "intro": "Claude también permite conectar servicios externos como conectores personalizados.",
-        "subsections": [
-          {
-            "title": "Paso a Paso",
-            "steps": [
-              "Copia la URL de conexión generada en Ajustes → Integraciones (ver la sección anterior)",
-              "En la configuración de conectores de Claude, agrega un <strong>conector personalizado</strong>",
-              "Pega la URL copiada cuando se solicite la dirección del conector",
-              "Confirma la creación del conector",
-              "En la conversación, habilita el conector de PraticOS para que el asistente pueda usarlo"
-            ]
-          }
+        "title": "Agregar en Claude",
+        "intro": "Claude también acepta servicios externos como conectores personalizados.",
+        "steps": [
+          "Genera la URL de conexión en PraticOS (sección anterior) y cópiala.",
+          "En la configuración de conectores de Claude, agrega un <strong>conector personalizado</strong>.",
+          "Pega la URL en el campo de dirección del conector y confirma.",
+          "En una conversación, activa el conector de PraticOS para que el asistente pueda usarlo."
         ],
         "infoCard": {
-          "title": "Los nombres de pantalla pueden variar",
-          "content": "Claude organiza esta configuración dentro de sus propias pantallas de conectores, que pueden cambiar de nombre con el tiempo. Busca una opción para agregar un conector personalizado y pega allí la URL copiada."
+          "title": "Los nombres de las pantallas cambian",
+          "content": "Los menús de Claude cambian de nombre con el tiempo. Busca la opción para agregar un conector personalizado."
         }
       },
       {
         "id": "que-puede-hacer",
-        "title": "Qué Puede Hacer el Asistente",
-        "intro": "Una vez conectado, el asistente responde preguntas sobre tus órdenes de servicio y puede realizar acciones a tu pedido.",
+        "title": "Qué puede hacer el asistente",
+        "intro": "Con el conector activo, el asistente consulta y cambia los datos de tu empresa cuando se lo pides. Pídelo como se lo pedirías a alguien de la oficina.",
         "features": [
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
-            "color": "blue",
-            "title": "Órdenes de Servicio",
-            "description": "Buscar, listar, ver detalles (con foto de portada), listar y adjuntar fotos, crear, aprobar, marcar como concluida, agregar ítems y comentarios."
+            "title": "Órdenes de servicio",
+            "description": "Buscar y listar OS, ver detalles y fotos, crear OS, aprobarlas, iniciarlas, completarlas o cancelarlas, agregar servicios y productos, comentar, adjuntar y borrar fotos."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
-            "color": "green",
-            "title": "Resumen y Facturación",
-            "description": "Resumen del día, órdenes pendientes y facturación, sin necesidad de abrir la app."
+            "title": "Resumen y facturación",
+            "description": "Resumen del día, OS pendientes y facturación del período."
           },
           {
-            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle></svg>",
-            "color": "orange",
             "title": "Registros",
-            "description": "Buscar y registrar clientes, dispositivos, servicios y productos."
+            "description": "Buscar y registrar clientes, equipos, servicios y productos."
           }
         ],
-        "paragraphs": [
-          "En apps que admiten esta función, algunas respuestas sobre una orden de servicio vienen acompañadas de una tarjeta visual con botones (aprobar, concluir, copiar el enlace del cliente). En los demás asistentes, o cuando esta función no está disponible, la respuesta en texto ya viene completa - no pierdes ninguna información."
+        "infoCard": {
+          "title": "Revisa antes de confirmar",
+          "content": "El asistente puede entender mal un pedido. Antes de aprobar, cancelar o borrar algo, lee lo que va a hacer."
+        }
+      },
+      {
+        "id": "order-card",
+        "title": "Tarjeta de la OS",
+        "intro": "En los asistentes que lo admiten, algunas respuestas sobre una OS vienen con una tarjeta: foto de portada (si la hay), equipo, cliente, servicios, productos y total. La tarjeta sigue el tema claro u oscuro del chat. En los demás asistentes, la misma información llega como texto.",
+        "subsections": [
+          {
+            "title": "Botones de la tarjeta",
+            "validationList": [
+              {
+                "label": "Compartir",
+                "text": "Abre el menú de compartir del equipo con el resumen y el enlace de la OS. Si el menú no está disponible, ofrece WhatsApp, Telegram o copiar el enlace."
+              },
+              {
+                "label": "Abrir en PraticOS",
+                "text": "Abre la página web de la OS. Todavía no abre directamente la app instalada."
+              },
+              {
+                "label": "Aprobar y Completar OS",
+                "text": "Piden confirmación antes de cambiar el estado."
+              }
+            ]
+          }
         ]
       },
       {
         "id": "faq",
-        "title": "Preguntas Frecuentes",
+        "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "¿Por cuánto tiempo permanece activa la conexión?",
-            "answer": "90 días desde su creación. Después de eso, es necesario generar una nueva conexión en Ajustes → Integraciones."
+            "question": "¿Cuánto dura una conexión?",
+            "answer": "90 días desde que se crea. Después, genera otra en <strong>Más → Integraciones</strong> y cambia la URL en el asistente."
           },
           {
-            "question": "¿Puedo revocar una conexión antes de ese plazo?",
-            "answer": "Sí, en cualquier momento, en Ajustes → Integraciones. Quien esté usando esa URL pierde el acceso de inmediato."
+            "question": "¿Puedo cancelarla antes?",
+            "answer": "Sí. En <strong>Más → Integraciones</strong>, toca <strong>Revocar</strong> en la conexión. Quien use esa URL pierde el acceso de inmediato."
           },
           {
-            "question": "¿Quién puede crear una conexión?",
-            "answer": "El dueño de la empresa o un administrador."
+            "question": "Perdí la URL. ¿Puedo verla otra vez?",
+            "answer": "No. Solo aparece al crear la conexión. Revoca la anterior y genera una nueva."
+          },
+          {
+            "question": "¿Cómo sé si una conexión se está usando?",
+            "answer": "La lista en <strong>Más → Integraciones</strong> muestra la fecha del último uso de cada conexión."
           },
           {
             "question": "¿El asistente ve el teléfono de mis clientes?",
-            "answer": "No. El teléfono de tus clientes nunca se envía a la tarjeta visual ni se expone al asistente. La foto de portada de la orden de servicio se muestra en la tarjeta visual cuando hay fotos adjuntas."
-          },
-          {
-            "question": "¿La tarjeta visual aparece siempre?",
-            "answer": "Solo en asistentes que admiten esta función. En los demás, recibes la misma información en texto, siempre completa."
-          },
-          {
-            "question": "¿Es seguro pegar esta URL en cualquier lugar?",
-            "answer": "No. Trata la URL como una contraseña de tu empresa. Pégala únicamente en la pantalla de configuración del conector de ChatGPT o Claude, y revócala de inmediato si sospechas que se filtró."
+            "answer": "Las respuestas sobre OS y clientes, y la tarjeta de la OS, no incluyen el teléfono del cliente. Si das un teléfono al registrar un cliente en la conversación, se guarda en PraticOS."
           }
         ]
-      },
-      {
-        "id": "order-card",
-        "title": "Tarjeta de la orden de servicio",
-        "intro": "La tarjeta muestra la foto de portada cuando está disponible, datos del dispositivo y cliente, servicios, productos y total. Sin foto, los datos ocupan el espacio. El diseño sigue el tema claro u oscuro del chat.",
-        "subsections": [
-          {
-            "title": "Compartir",
-            "content": "Abre el menú de compartir del dispositivo para elegir dónde enviar el resumen y enlace de la OS. Si no está disponible o está bloqueado, ofrece WhatsApp, Telegram o copiar el enlace para usarlo en cualquier aplicación. Cancelar no envía nada."
-          }
-        ],
-        "infoCard": {
-          "title": "Otras acciones",
-          "content": "Abrir en PraticOS abre la página web de la OS. Abrir la OS directamente en la aplicación instalada aún no está disponible. Aprobar y Completar OS siguen pidiendo confirmación."
-        }
       }
     ]
   }

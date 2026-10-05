@@ -1,14 +1,13 @@
-{# Profiles Grid Component - Grid of profile cards #}
-{# Usage: {% include "components/docs/profiles-grid.njk" with {profiles: [...]} %} #}
-<div class="profiles-grid">
+{# Profiles — ruled index linking to each profile's section. Expects `profiles` = [{ id, name, description, tag? }];
+   legacy emoji/colorClass are ignored. #}
+<ul class="doc-index doc-index--meta" role="list">
     {% for profile in profiles %}
-    <a href="#{{ profile.id }}" class="profile-card profile-{{ profile.colorClass }}">
-        <div class="profile-icon">
-            <span class="profile-emoji">{{ profile.emoji | safe }}</span>
-        </div>
-        <h3>{{ profile.name }}</h3>
-        <p>{{ profile.description }}</p>
-        <span class="profile-tag">{{ profile.tag }}</span>
-    </a>
+    <li>
+        <a class="doc-index__link" href="#{{ profile.id }}">
+            <span class="doc-index__title">{{ profile.name }}</span>
+            {% if profile.tag %}<span class="doc-index__meta label">{{ profile.tag }}</span>{% endif %}
+            <span class="doc-index__desc">{{ profile.description }}</span>
+        </a>
+    </li>
     {% endfor %}
-</div>
+</ul>

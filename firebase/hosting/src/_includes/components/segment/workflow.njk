@@ -1,0 +1,57 @@
+{# F4 · step sequence for the trade — numbered stages, each with a real screenshot.
+ # Legacy fallback: segment files not yet migrated have `solutions` instead of `workflow`;
+ # those render as plain ruled stages without screenshots until migrated. #}
+{% set wf = data.workflow %}
+{% if wf and wf.stages %}
+<section class="section seg-flow" id="como-funciona">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ wf.title }}</h2>
+            {% if wf.lede %}<p>{{ wf.lede }}</p>{% endif %}
+        </div>
+        <ol class="seg-stages" role="list">
+            {% for stage in wf.stages %}
+            <li class="seg-stage{% if not stage.image %} seg-stage--text{% endif %}">
+                <div class="seg-stage__copy">
+                    <span class="seg-stage__num mono" aria-hidden="true">{{ stage.number | default(("0" if loop.index < 10) ~ loop.index) }}</span>
+                    <h3>{{ stage.title }}</h3>
+                    {% if stage.text %}<p>{{ stage.text }}</p>{% endif %}
+                    {% if stage.facts %}
+                    <ul class="seg-stage__facts" role="list">
+                        {% for fact in stage.facts %}<li>{{ fact }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% if stage.image %}
+                <figure class="shot seg-stage__shot">
+                    <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="1170" height="2532">
+                    <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="1170" height="2532">
+                </figure>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+{% elif data.solutions and data.solutions.items %}
+{% set sol = data.solutions %}
+<section class="section seg-flow" id="como-funciona">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ sol.title }}{% if sol.titleHighlight %} {{ sol.titleHighlight }}{% endif %}</h2>
+            {% if sol.subtitle %}<p>{{ sol.subtitle }}</p>{% endif %}
+        </div>
+        <ol class="seg-stages" role="list">
+            {% for item in sol.items %}
+            <li class="seg-stage seg-stage--text">
+                <div class="seg-stage__copy">
+                    <span class="seg-stage__num mono" aria-hidden="true">{{ "0" if loop.index < 10 }}{{ loop.index }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
+{% endif %}

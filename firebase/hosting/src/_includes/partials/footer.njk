@@ -1,42 +1,37 @@
-{# Get footer data based on language #}
+{# Ft4 · dense typographic — three short columns + every segment inline (SEO) #}
 {% set foot = footer[langCode] | default(footer.pt) %}
 {% set seg = segments[langCode] | default(segments.pt) %}
+{% set homeHref = relPath ~ (indexPage | default('index.html') | prettyUrl) %}
 
-<!-- Footer -->
 <footer class="footer">
-    <div class="container">
-        <div class="footer-grid">
-            <div class="footer-brand">
-                <a href="{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}" class="nav-logo">
-                    <img src="{{ relPath }}assets/images/logo.png" alt="PraticOS" class="logo-img">
-                    <span class="logo-text">{{ site.logoText | safe }}</span>
+    <div class="wrap">
+        <div class="footer__top">
+            <div class="footer__brand">
+                <a href="{{ homeHref }}" class="brand">
+                    <img src="{{ relPath }}assets/images/logo-96.png" alt="" width="32" height="32" loading="lazy">
+                    <span class="brand__word">Pratic<b>OS</b></span>
                 </a>
                 <p>{{ foot.brand }}</p>
             </div>
-            <div class="footer-links">
-                <h4>{{ foot.product.title }}</h4>
-                {% for link in foot.product.links %}
-                <a href="{% if (link.href | first) == '#' and not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{{ link.href }}{% elif (link.href | first) == '#' %}{{ link.href }}{% else %}{{ relPath }}{{ link.href | prettyUrl }}{% endif %}">{{ link.label }}</a>
-                {% endfor %}
-                <h4 class="footer-subtitle">{{ foot.company.title }}</h4>
-                <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a>
-            </div>
-            <div class="footer-links">
-                <h4>{{ seg.title }}</h4>
-                {% for link in seg.links %}
-                <a href="{{ relPath }}{{ link.href | prettyUrl }}">{{ link.label }}</a>
-                {% endfor %}
-            </div>
-            <div class="footer-links">
-                <h4>{{ foot.support.title }}</h4>
-                {% for link in foot.support.links %}
-                <a href="{% if (link.href | first) == '#' and not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{{ link.href }}{% elif (link.href | first) == '#' %}{{ link.href }}{% else %}{{ relPath }}{{ link.href | prettyUrl }}{% endif %}">{{ link.label }}</a>
+            <div class="footer__cols">
+                {% for col in [foot.product, foot.support, foot.legal] %}
+                <div class="footer__col">
+                    <h2>{{ col.title }}</h2>
+                    <ul>
+                        {% for link in col.links %}{% if not link.flag or site.flags[link.flag] %}
+                        <li><a href="{% if (link.href | first) == '#' %}{% if isHomepage %}{{ link.href }}{% else %}{{ homeHref }}{{ link.href }}{% endif %}{% else %}{{ relPath }}{{ link.href | prettyUrl }}{% endif %}">{{ link.label }}</a></li>{% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endfor %}
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; {{ site.year }} {{ site.name }}. {{ foot.copyright }}</p>
-            <p>{{ foot.madeWith }} <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a></p>
+        {% if not simpleFooter %}
+        <p class="footer__segments"><span>{{ foot.segmentsLabel }}</span>{% for segment in seg.links %}<a href="{{ relPath }}{{ segment.href | prettyUrl }}">{{ segment.label }}</a>{% if not loop.last %} <i aria-hidden="true">·</i> {% endif %}{% endfor %}</p>
+        {% endif %}
+        <div class="footer__bottom">
+            <span>© {{ site.year }} {{ site.name }}. {{ foot.copyright }}</span>
+            <span>{{ foot.madeBy }} <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a> · <a href="mailto:{{ site.email }}">{{ site.email }}</a></span>
         </div>
     </div>
 </footer>

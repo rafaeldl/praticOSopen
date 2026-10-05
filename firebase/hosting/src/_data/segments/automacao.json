@@ -4,378 +4,516 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Integrador de Automação Residencial | PraticOS",
-    "description": "Chega de orçamento no Excel e projeto no WhatsApp! Sistema de OS para automação residencial com histórico de instalação, documentação com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
+    "description": "App de OS para integrador de automação residencial: proposta com seu catálogo, aprovação por link, fotos da instalação e controle do que falta receber.",
     "keywords": "sistema para automação residencial, programa para integrador de automação, software casa inteligente, ordem de serviço automação, app integrador residencial, gestão de projetos automação",
-    "ogTitle": "Sistema para Integrador de Automação Residencial | PraticOS",
-    "ogDescription": "Chega de orçamento no Excel! Sistema de OS com histórico de instalação, documentação com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
+    "ogTitle": "Sistema para Integrador de Automação | PraticOS",
+    "ogDescription": "Cada obra de automação numa OS: proposta com seu catálogo, aprovação por link, checklist da instalação com fotos e pagamentos em etapas.",
     "hero": {
-      "badge": "🏠 Automação Residencial",
-      "title": "Chega de projeto no WhatsApp:",
-      "titleHighlight": "organize sua empresa em 5 minutos",
-      "subtitle": "Acabe com orçamentos no Excel e tenha controle total dos seus projetos. Histórico completo de cada instalação, documentação com fotos e cliente acompanhando pelo celular.",
-      "ctaPrimary": "Testar Grátis",
-      "ctaWhatsapp": "Começar pelo WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Integradores ativos" },
-        "orders": { "value": "5k+", "label": "Projetos criados" },
-        "rating": { "value": "4.8", "label": "Avaliação" }
+      "title": "Proposta, instalação e pós-venda",
+      "titleMark": "na mesma OS.",
+      "lede": "PraticOS é o app de ordem de serviço para integradores de automação residencial. Monte a proposta com o seu catálogo, mande por link para o cliente aprovar, registre a instalação com fotos e acompanhe o que falta receber — tudo pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0152",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Marcos Lima"
+          },
+          {
+            "label": "Local",
+            "value": "Apartamento 1204 · sala, suíte e varanda"
+          },
+          {
+            "label": "Escopo",
+            "value": "Iluminação, cortinas e cenas"
+          },
+          {
+            "label": "Itens",
+            "value": "1 hub, 8 módulos, 2 motores de cortina"
+          },
+          {
+            "label": "Fotos",
+            "value": "14 anexadas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 7.480,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Concluído",
+          "Pago"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "Você enfrenta",
-      "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com automação residencial",
+      "title": "Onde o integrador perde dinheiro",
+      "lede": "Quase nunca é na instalação. É a proposta refeita do zero, a hora de programação que não foi cobrada e o chamado de pós-venda sem nenhum registro do que foi feito.",
+      "answerLabel": "No PraticOS",
       "items": [
-        { "icon": "📝", "title": "Orçamentos no Excel, projetos no WhatsApp", "text": "Cada orçamento é feito do zero no Excel. Informações do projeto espalhadas em grupos de WhatsApp. Impossível encontrar algo quando precisa." },
-        { "icon": "📞", "title": "Pós-venda problemático", "text": "Cliente liga 2 anos depois com problema e você não tem nenhuma documentação. Qual equipamento instalou? Qual firmware? Qual senha do roteador?" },
-        { "icon": "📦", "title": "Sem controle de estoque", "text": "Não sabe o que tem na van, o que tem no depósito. Chega no cliente e falta uma fonte. Viagem perdida." },
-        { "icon": "💰", "title": "Precificação inconsistente", "text": "Cada orçamento é calculado de um jeito diferente. Esquece de cobrar horas de programação, cabo, infraestrutura." },
-        { "icon": "😤", "title": "Cliente não entende o valor", "text": "'Por que tão caro se eu posso comprar na Amazon?' Cliente não vê o trabalho de integração, configuração, programação." },
-        { "icon": "💸", "title": "Fluxo de caixa apertado", "text": "Cliente paga parcelado, fornecedor quer à vista. Sem controle, você não sabe se o projeto deu lucro." }
+        {
+          "problem": "Proposta montada do zero toda vez",
+          "detail": "Cada orçamento vira uma planilha nova, com preço de módulo, cabo e mão de obra digitados à mão.",
+          "answer": "Cadastre produtos e serviços com preço uma vez. Na OS você escolhe os itens, ajusta quantidades e o total é somado na hora."
+        },
+        {
+          "problem": "Programação que ninguém vê",
+          "detail": "O cliente compara o preço do módulo na internet e não enxerga as horas de configuração e de cenas.",
+          "answer": "Mão de obra de programação entra como item da OS, separada dos equipamentos. O cliente vê tudo discriminado pelo link e no PDF."
+        },
+        {
+          "problem": "Obra espalhada em grupos de conversa",
+          "detail": "Planta, fotos do rack e combinados ficam perdidos entre mensagens de três pessoas diferentes.",
+          "answer": "A OS reúne cliente, endereço, itens, fotos e os comentários que o cliente deixa pelo link, num lugar só."
+        },
+        {
+          "problem": "Pós-venda sem registro",
+          "detail": "Dois anos depois o cliente chama e ninguém lembra qual equipamento foi instalado em qual ambiente.",
+          "answer": "Crie um checklist de registro da instalação com os campos que você usa — ambiente, equipamento, observações e fotos — e ele fica na OS do cliente."
+        },
+        {
+          "problem": "Entrada paga, saldo esquecido",
+          "detail": "O cliente paga uma parte para comprar o material e o restante fica para depois. Depois, ninguém lembra quanto falta.",
+          "answer": "Registre cada pagamento parcial na OS. O painel mostra o faturamento do período e quem ainda deve."
+        },
+        {
+          "problem": "Equipe em várias obras ao mesmo tempo",
+          "detail": "Dois técnicos marcados no mesmo dia, um cliente esperando e ninguém avisado.",
+          "answer": "A data da OS coloca a instalação na agenda. Dá para filtrar por técnico, e o celular avisa antes de cada atendimento."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluções",
-      "title": "Como o",
-      "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia do integrador de automação",
-      "items": [
-        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe um link e acompanha o status do projeto em tempo real.", "highlight": "Reduz ligações em até 70%." },
-        { "icon": "📋", "title": "Histórico completo por cliente", "text": "Busque pelo cliente e veja todo o histórico. Equipamentos instalados, configurações, senhas, observações." },
-        { "icon": "📸", "title": "Documentação com fotos", "text": "Fotografe cada etapa da instalação. Infraestrutura, equipamentos, telas de configuração. Proteja-se de reclamações." },
-        { "icon": "🧮", "title": "Orçamento profissional rápido", "text": "Catálogo de produtos e serviços pré-cadastrados. Monte orçamentos em minutos, não em horas." },
-        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou em cada projeto.", "highlight": "Controle total de custos e margem." },
-        { "icon": "📱", "title": "Proposta em PDF pelo WhatsApp", "text": "Envie propostas profissionais em 2 cliques. Impressione o cliente desde o primeiro contato." }
+    "workflow": {
+      "title": "Como uma obra de automação passa pelo PraticOS",
+      "lede": "Da visita técnica à entrega, cada etapa fica registrada na OS do cliente.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Faça a visita técnica",
+          "text": "Monte um checklist de vistoria com o que você confere em toda obra — infraestrutura de rede, pontos de energia, quadro, ambientes — e use em todas as visitas.",
+          "facts": [
+            "Campos de texto, número, sim/não, lista e foto",
+            "Fotos em cada item do checklist",
+            "O mesmo modelo para todas as obras"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
+        },
+        {
+          "number": "02",
+          "title": "Mande a proposta por link",
+          "text": "Equipamentos e serviços saem do seu catálogo, já com preço. O cliente abre a OS no navegador, vê os itens e as fotos, aprova e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Equipamentos e programação discriminados",
+            "PDF da OS para enviar ou imprimir"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
+        },
+        {
+          "number": "03",
+          "title": "Agende a instalação",
+          "text": "A data da OS coloca a obra no calendário. Quem coordena vê o mês inteiro e filtra por técnico.",
+          "facts": [
+            "Calendário do mês com as OS de cada dia",
+            "Filtro por técnico",
+            "Lembrete no celular antes do atendimento"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda do PraticOS com OS marcadas no mês"
+        },
+        {
+          "number": "04",
+          "title": "Entregue a obra e receba",
+          "text": "Registre o que foi instalado com fotos e receba em etapas: entrada, parcelas e saldo, com desconto se precisar.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, numa lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulário",
-      "title": "Documentação de",
-      "titleHighlight": "instalação",
-      "text": "Documente cada instalação com fotos e informações técnicas. O cliente assina digitalmente a entrega.",
-      "cta": "Testar Grátis - Sem Cartão",
-      "previewTitle": "📋 Checklist de Instalação",
-      "items": [
-        { "icon": "📸", "text": "Fotos da infraestrutura" },
-        { "icon": "🔌", "text": "Equipamentos instalados e localização" },
-        { "icon": "⚙️", "text": "Configurações e senhas (criptografadas)" },
-        { "icon": "📱", "text": "Apps configurados no celular do cliente" },
-        { "icon": "📝", "text": "Treinamento realizado" },
-        { "icon": "✍️", "text": "Assinatura digital de entrega" }
-      ]
-    },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar seus projetos",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, equipamentos e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalação. Documentação completa para pós-venda.", "color": "yellow" },
-        { "icon": "pdf", "title": "Proposta em PDF", "text": "Gere propostas profissionais em PDF. Destaque-se da concorrência.", "color": "orange" },
-        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente e instalação. Todos os projetos anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do projeto pelo celular. Sem precisar ligar.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes eu perdia horas fazendo orçamentos no Excel e quando o cliente ligava meses depois, eu não tinha nenhuma documentação. Agora tenho tudo organizado e os clientes confiam muito mais no meu trabalho.",
-      "name": "Fernando Costa",
-      "role": "Integrador de automação há 8 anos",
-      "metric": "Aumento de 40% no faturamento"
     },
     "faq": {
-      "tag": "Dúvidas",
-      "title": "Perguntas",
-      "titleHighlight": "frequentes",
-      "subtitle": "Tire suas dúvidas antes de começar",
+      "title": "Perguntas de quem trabalha com automação",
+      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
-        { "question": "Funciona para qualquer tipo de automação?", "answer": "Sim! PraticOS funciona para integradores de automação residencial, comercial, áudio e vídeo, iluminação, ar condicionado e muito mais. O sistema se adapta ao seu negócio." },
-        { "question": "Consigo guardar senhas e configurações?", "answer": "Sim! Você pode documentar todas as configurações, senhas de roteadores, IPs de equipamentos. Tudo fica organizado e acessível quando precisar." },
-        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time entende as necessidades do integrador de automação." }
+        {
+          "question": "Preciso pagar para usar?",
+          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+        },
+        {
+          "question": "Existe um segmento de automação no app?",
+          "answer": "Ainda não há um segmento só para automação. Você escolhe o segmento “Outro”, que traz checklists genéricos de entrada, registro do serviço e entrega ao cliente, e cria os seus checklists de vistoria e instalação."
+        },
+        {
+          "question": "Serve para áudio e vídeo, redes e iluminação?",
+          "answer": "Sim. A OS registra qualquer tipo de serviço e equipamento. O que muda de uma obra para outra são os itens do catálogo e os checklists que você monta."
+        },
+        {
+          "question": "Os técnicos podem usar no próprio celular?",
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+        },
+        {
+          "question": "O cliente precisa instalar algum app?",
+          "answer": "Não. Ele recebe um link, abre no navegador do celular e vê a OS com fotos e valores. Ali mesmo ele aprova a proposta e deixa comentários."
+        }
       ]
-    },
-    "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar seus projetos",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
     }
   },
   "en": {
     "lang": "en",
     "langCode": "en",
-    "title": "Home Automation Integrator System | PraticOS",
-    "description": "Stop managing projects on WhatsApp! Work order system for home automation integrators with installation history, photo documentation and financial control. Get organized in 5 minutes.",
-    "keywords": "home automation software, smart home integrator system, work order automation installer, home automation business app, smart home project management",
-    "ogTitle": "Home Automation Integrator System | PraticOS",
-    "ogDescription": "Stop managing projects on WhatsApp! WO system with installation history, photo documentation and financial control. Get organized in 5 minutes.",
+    "title": "Home Automation Installer Software | PraticOS",
+    "description": "Work order app for home automation installers: proposals from your catalog, approval by link, install photos and a clear view of what's still owed.",
+    "keywords": "home automation software, smart home integrator software, home automation installer app, work orders for smart home installers, smart home project management",
+    "ogTitle": "Home Automation Installer Software | PraticOS",
+    "ogDescription": "Each smart home job on one work order: proposal from your catalog, approval by link, install checklist with photos and staged payments.",
     "hero": {
-      "badge": "🏠 Home Automation",
-      "title": "Stop managing projects on WhatsApp:",
-      "titleHighlight": "organize your business in 5 minutes",
-      "subtitle": "Ditch Excel quotes and get full control of your projects. Complete history of every installation, photo documentation and customer tracking on their phone.",
-      "ctaPrimary": "Try Free",
-      "ctaWhatsapp": "Start on WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Active integrators" },
-        "orders": { "value": "5k+", "label": "Projects created" },
-        "rating": { "value": "4.8", "label": "Rating" }
+      "title": "Proposal, install and follow-up",
+      "titleMark": "on one work order.",
+      "lede": "PraticOS is the work order app for home automation installers. Build the proposal from your catalog, send it as a link for the customer to approve, record the install with photos and track what's still owed — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0152",
+        "rows": [
+          {
+            "label": "Customer",
+            "value": "Mark Lindsay"
+          },
+          {
+            "label": "Site",
+            "value": "Unit 1204 · living room, primary suite, balcony"
+          },
+          {
+            "label": "Scope",
+            "value": "Lighting, shades and scenes"
+          },
+          {
+            "label": "Items",
+            "value": "1 hub, 8 modules, 2 shade motors"
+          },
+          {
+            "label": "Photos",
+            "value": "14 attached"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$4,850.00",
+        "stamp": "Approved by customer",
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Done",
+          "Paid"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problems",
-      "title": "Do you face",
-      "titleHighlight": "these problems?",
-      "subtitle": "Common pain points for home automation integrators",
+      "title": "Where an installer loses money",
+      "lede": "It's rarely the install itself. It's the proposal rebuilt from scratch, the programming hours nobody billed and the service call with no record of what was done.",
+      "answerLabel": "In PraticOS",
       "items": [
-        { "icon": "📝", "title": "Quotes in Excel, projects on WhatsApp", "text": "Every quote built from scratch in Excel. Project info scattered across WhatsApp groups. Impossible to find anything when needed." },
-        { "icon": "📞", "title": "Problematic after-sales", "text": "Customer calls 2 years later with an issue and you have no documentation. What equipment was installed? What firmware? What's the router password?" },
-        { "icon": "📦", "title": "No inventory control", "text": "Don't know what's in the van, what's in the warehouse. Arrive at the customer's and you're missing a power supply. Trip wasted." },
-        { "icon": "💰", "title": "Inconsistent pricing", "text": "Every quote is calculated differently. Forget to charge for programming hours, cable, infrastructure." },
-        { "icon": "😤", "title": "Customer doesn't see the value", "text": "'Why so expensive if I can buy it on Amazon?' Customer doesn't see the integration work, configuration, programming." },
-        { "icon": "💸", "title": "Tight cash flow", "text": "Customer pays in installments, supplier wants cash upfront. Without control, you don't know if the project was profitable." }
+        {
+          "problem": "Every proposal starts from zero",
+          "detail": "Each quote becomes a new spreadsheet, with module, cable and labor prices typed by hand.",
+          "answer": "Add products and services with prices once. On the work order you pick items, set quantities and the total adds up as you go."
+        },
+        {
+          "problem": "Programming nobody sees",
+          "detail": "The customer compares module prices online and doesn't see the hours spent on setup and scenes.",
+          "answer": "Programming labor is its own line on the work order, separate from equipment. The customer sees it itemized in the link and the PDF."
+        },
+        {
+          "problem": "The job scattered across group chats",
+          "detail": "Floor plans, rack photos and agreements get lost between messages from three different people.",
+          "answer": "The work order keeps the customer, address, items, photos and the comments the customer leaves on the link in one place."
+        },
+        {
+          "problem": "Service calls with no record",
+          "detail": "Two years later the customer calls and nobody remembers which device went into which room.",
+          "answer": "Build an install record checklist with the fields you use — room, device, notes and photos — and it stays on the customer's work order."
+        },
+        {
+          "problem": "Deposit paid, balance forgotten",
+          "detail": "The customer pays part up front for materials and the rest comes later. Later, nobody knows how much is left.",
+          "answer": "Record each partial payment on the work order. The dashboard shows revenue for the period and who still owes you."
+        },
+        {
+          "problem": "One crew, several jobs at once",
+          "detail": "Two techs booked on the same day, a customer waiting and nobody told.",
+          "answer": "The work order date puts the install on the calendar. You can filter by technician, and the phone sends a reminder before each visit."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Solutions",
-      "title": "How",
-      "titleHighlight": "PraticOS solves it",
-      "subtitle": "Features designed for daily home automation operations",
-      "items": [
-        { "icon": "🔗", "title": "Link for customer tracking", "text": "Customer receives a link and tracks project status in real time.", "highlight": "Reduces calls by up to 70%." },
-        { "icon": "📋", "title": "Complete history by customer", "text": "Search by customer and see the complete history. Equipment installed, configurations, passwords, notes." },
-        { "icon": "📸", "title": "Photo documentation", "text": "Photograph every installation stage. Infrastructure, equipment, configuration screens. Protect yourself from complaints." },
-        { "icon": "🧮", "title": "Quick professional quotes", "text": "Pre-registered products and services catalog. Build quotes in minutes, not hours." },
-        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made on each project.", "highlight": "Full control over costs and margins." },
-        { "icon": "📱", "title": "PDF proposal via WhatsApp", "text": "Send professional proposals in 2 clicks. Impress the customer from the first contact." }
+    "workflow": {
+      "title": "How a smart home job moves through PraticOS",
+      "lede": "From site survey to handover, every step is recorded on the customer's work order.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Do the site survey",
+          "text": "Build a survey checklist with what you check on every job — network, power outlets, electrical panel, rooms — and reuse it on every visit.",
+          "facts": [
+            "Text, number, yes/no, list and photo fields",
+            "Photos on every checklist item",
+            "One template for every job"
+          ],
+          "image": "forms.png",
+          "alt": "A completed checklist inside a work order"
+        },
+        {
+          "number": "02",
+          "title": "Send the proposal as a link",
+          "text": "Equipment and services come from your catalog, already priced. The customer opens the work order in a browser, sees items and photos, approves it and leaves comments.",
+          "facts": [
+            "Approval recorded on the work order",
+            "Equipment and programming itemized",
+            "Work order PDF to send or print"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
+        },
+        {
+          "number": "03",
+          "title": "Schedule the install",
+          "text": "The work order date puts the job on the calendar. Whoever coordinates sees the whole month and filters by technician.",
+          "facts": [
+            "Monthly calendar with each day's work orders",
+            "Filter by technician",
+            "Phone reminder before each visit"
+          ],
+          "image": "agenda.png",
+          "alt": "PraticOS calendar with work orders scheduled for the month"
+        },
+        {
+          "number": "04",
+          "title": "Hand over the job and get paid",
+          "text": "Record what was installed with photos and get paid in stages: deposit, installments and balance, with a discount if needed.",
+          "facts": [
+            "Partial payment and discount on the same work order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Form",
-      "title": "Installation",
-      "titleHighlight": "documentation",
-      "text": "Document every installation with photos and technical information. Customer signs digitally at handover.",
-      "cta": "Try Free - No Credit Card",
-      "previewTitle": "📋 Installation Checklist",
-      "items": [
-        { "icon": "📸", "text": "Infrastructure photos" },
-        { "icon": "🔌", "text": "Equipment installed and location" },
-        { "icon": "⚙️", "text": "Configurations and passwords (encrypted)" },
-        { "icon": "📱", "text": "Apps configured on customer's phone" },
-        { "icon": "📝", "text": "Training completed" },
-        { "icon": "✍️", "text": "Digital handover signature" }
-      ]
-    },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your projects",
-      "subtitle": "Powerful and intuitive tools to boost your productivity",
-      "items": [
-        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, equipment and values. All organized." },
-        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph every installation stage. Complete documentation for after-sales.", "color": "yellow" },
-        { "icon": "pdf", "title": "PDF Proposal", "text": "Generate professional proposals in PDF. Stand out from the competition.", "color": "orange" },
-        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
-        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer and installation. All previous projects.", "color": "purple" },
-        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks project status on their phone. No need to call.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Before I spent hours building quotes in Excel and when customers called months later, I had no documentation. Now everything is organized and customers trust my work much more.",
-      "name": "Fernando Costa",
-      "role": "Home automation integrator for 8 years",
-      "metric": "40% increase in revenue"
     },
     "faq": {
-      "tag": "FAQ",
-      "title": "Frequently asked",
-      "titleHighlight": "questions",
-      "subtitle": "Get your questions answered before you start",
+      "title": "Questions from automation installers",
+      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
-        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
-        { "question": "Does it work for any type of automation?", "answer": "Yes! PraticOS works for residential automation integrators, commercial, audio and video, lighting, HVAC and more. The system adapts to your business." },
-        { "question": "Can I store passwords and configurations?", "answer": "Yes! You can document all configurations, router passwords, equipment IPs. Everything stays organized and accessible when needed." },
-        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
-        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team understands the needs of home automation integrators." }
+        {
+          "question": "Do I have to pay to use it?",
+          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+        },
+        {
+          "question": "Is there a home automation segment in the app?",
+          "answer": "Not yet. You pick the “Other” segment, which comes with general checklists for intake, service record and customer handover, and build your own survey and install checklists."
+        },
+        {
+          "question": "Does it work for AV, networking and lighting?",
+          "answer": "Yes. A work order can hold any kind of service and equipment. What changes from job to job are your catalog items and the checklists you build."
+        },
+        {
+          "question": "Can my techs use it on their own phones?",
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Free has 1 user; Starter includes 2 and Pro includes 3."
+        },
+        {
+          "question": "Does the customer need to install an app?",
+          "answer": "No. They get a link, open it in their phone's browser and see the work order with photos and prices. They approve the proposal and leave comments right there."
+        }
       ]
-    },
-    "download": {
-      "title": "Download now and",
-      "titleHighlight": "organize your projects",
-      "text": "Available for iOS and Android. Start free!",
-      "appStore": { "label": "Download on the", "name": "App Store" },
-      "playStore": { "label": "Get it on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
     }
   },
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Integrador de Automatización Residencial | PraticOS",
-    "description": "¡Basta de presupuestos en Excel y proyectos en WhatsApp! Sistema de OS para automatización residencial con historial de instalación, documentación con fotos y control financiero. Organiza tu empresa en 5 minutos.",
-    "keywords": "sistema para automatización residencial, programa para integrador de automatización, software casa inteligente, orden de servicio automatización, app integrador residencial, gestión de proyectos automatización",
-    "ogTitle": "Sistema para Integrador de Automatización Residencial | PraticOS",
-    "ogDescription": "¡Basta de presupuestos en Excel! Sistema de OS con historial de instalación, documentación con fotos y control financiero. Organiza tu empresa en 5 minutos.",
+    "title": "Sistema para Automatización Residencial | PraticOS",
+    "description": "App de órdenes de servicio para integradores de domótica: propuesta con tu catálogo, aprobación por link, fotos de la instalación y saldos por cobrar.",
+    "keywords": "sistema para automatización residencial, programa para integrador de domótica, software casa inteligente, orden de servicio automatización, app integrador residencial, gestión de proyectos de domótica",
+    "ogTitle": "Sistema para Automatización Residencial | PraticOS",
+    "ogDescription": "Cada obra de domótica en una orden: propuesta con tu catálogo, aprobación por link, checklist de instalación con fotos y pagos por etapas.",
     "hero": {
-      "badge": "🏠 Automatización Residencial",
-      "title": "Basta de proyectos en WhatsApp:",
-      "titleHighlight": "organiza tu empresa en 5 minutos",
-      "subtitle": "Acaba con presupuestos en Excel y ten control total de tus proyectos. Historial completo de cada instalación, documentación con fotos y cliente siguiendo por el celular.",
-      "ctaPrimary": "Probar Gratis",
-      "ctaWhatsapp": "Empezar por WhatsApp",
-      "stats": {
-        "users": { "value": "200+", "label": "Integradores activos" },
-        "orders": { "value": "5k+", "label": "Proyectos creados" },
-        "rating": { "value": "4.8", "label": "Calificación" }
+      "title": "Propuesta, instalación y posventa",
+      "titleMark": "en una orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para integradores de automatización residencial. Arma la propuesta con tu catálogo, envíala por link para que el cliente la apruebe, registra la instalación con fotos y controla lo que falta cobrar — todo desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0152",
+        "rows": [
+          {
+            "label": "Cliente",
+            "value": "Marcos Lima"
+          },
+          {
+            "label": "Lugar",
+            "value": "Depto. 1204 · sala, suite y balcón"
+          },
+          {
+            "label": "Alcance",
+            "value": "Iluminación, cortinas y escenas"
+          },
+          {
+            "label": "Ítems",
+            "value": "1 hub, 8 módulos, 2 motores de cortina"
+          },
+          {
+            "label": "Fotos",
+            "value": "14 adjuntas"
+          }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 4.850,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En curso",
+          "Terminado",
+          "Cobrado"
+        ],
+        "current": 2
       }
     },
     "problems": {
-      "tag": "Problemas",
-      "title": "¿Enfrentas",
-      "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con automatización residencial",
+      "title": "Dónde pierde plata el integrador",
+      "lede": "Casi nunca es en la instalación. Es la propuesta rehecha desde cero, las horas de programación que no se cobraron y la visita de posventa sin ningún registro de lo que se hizo.",
+      "answerLabel": "En PraticOS",
       "items": [
-        { "icon": "📝", "title": "Presupuestos en Excel, proyectos en WhatsApp", "text": "Cada presupuesto se hace desde cero en Excel. Información del proyecto dispersa en grupos de WhatsApp. Imposible encontrar algo cuando se necesita." },
-        { "icon": "📞", "title": "Posventa problemático", "text": "Cliente llama 2 años después con un problema y no tienes ninguna documentación. ¿Qué equipo instalaste? ¿Qué firmware? ¿Cuál es la contraseña del router?" },
-        { "icon": "📦", "title": "Sin control de inventario", "text": "No sabes qué tienes en la camioneta, qué tienes en el depósito. Llegas donde el cliente y falta una fuente. Viaje perdido." },
-        { "icon": "💰", "title": "Precios inconsistentes", "text": "Cada presupuesto se calcula de manera diferente. Olvidas cobrar horas de programación, cable, infraestructura." },
-        { "icon": "😤", "title": "Cliente no entiende el valor", "text": "'¿Por qué tan caro si puedo comprarlo en Amazon?' Cliente no ve el trabajo de integración, configuración, programación." },
-        { "icon": "💸", "title": "Flujo de caja apretado", "text": "Cliente paga en cuotas, proveedor quiere al contado. Sin control, no sabes si el proyecto dio ganancia." }
+        {
+          "problem": "Cada propuesta desde cero",
+          "detail": "Cada presupuesto es una planilla nueva, con precios de módulos, cable y mano de obra escritos a mano.",
+          "answer": "Carga productos y servicios con precio una vez. En la orden eliges los ítems, ajustas cantidades y el total se suma al momento."
+        },
+        {
+          "problem": "Programación que nadie ve",
+          "detail": "El cliente compara el precio del módulo en internet y no ve las horas de configuración y escenas.",
+          "answer": "La mano de obra de programación entra como ítem de la orden, separada de los equipos. El cliente la ve detallada en el link y en el PDF."
+        },
+        {
+          "problem": "La obra repartida en grupos de chat",
+          "detail": "Planos, fotos del rack y acuerdos se pierden entre mensajes de tres personas distintas.",
+          "answer": "La orden reúne cliente, dirección, ítems, fotos y los comentarios que el cliente deja en el link, en un solo lugar."
+        },
+        {
+          "problem": "Posventa sin registro",
+          "detail": "Dos años después el cliente llama y nadie recuerda qué equipo se instaló en qué ambiente.",
+          "answer": "Crea un checklist de registro de instalación con los campos que usas — ambiente, equipo, observaciones y fotos — y queda en la orden del cliente."
+        },
+        {
+          "problem": "Anticipo cobrado, saldo olvidado",
+          "detail": "El cliente paga una parte para comprar el material y el resto queda para después. Después, nadie sabe cuánto falta.",
+          "answer": "Registra cada pago parcial en la orden. El panel muestra la facturación del período y quién todavía debe."
+        },
+        {
+          "problem": "Un equipo en varias obras a la vez",
+          "detail": "Dos técnicos agendados el mismo día, un cliente esperando y nadie avisado.",
+          "answer": "La fecha de la orden pone la instalación en la agenda. Puedes filtrar por técnico, y el celular avisa antes de cada visita."
+        }
       ]
     },
-    "solutions": {
-      "tag": "Soluciones",
-      "title": "Cómo",
-      "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el día a día del integrador de automatización",
-      "items": [
-        { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe un link y sigue el estado del proyecto en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📋", "title": "Historial completo por cliente", "text": "Busca por cliente y ve todo el historial. Equipos instalados, configuraciones, contraseñas, observaciones." },
-        { "icon": "📸", "title": "Documentación con fotos", "text": "Fotografía cada etapa de la instalación. Infraestructura, equipos, pantallas de configuración. Protégete de reclamos." },
-        { "icon": "🧮", "title": "Presupuesto profesional rápido", "text": "Catálogo de productos y servicios pre-registrados. Arma presupuestos en minutos, no en horas." },
-        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuánto ganaste en cada proyecto.", "highlight": "Control total de costos y margen." },
-        { "icon": "📱", "title": "Propuesta en PDF por WhatsApp", "text": "Envía propuestas profesionales en 2 clics. Impresiona al cliente desde el primer contacto." }
+    "workflow": {
+      "title": "Cómo pasa una obra de domótica por PraticOS",
+      "lede": "De la visita técnica a la entrega, cada paso queda registrado en la orden del cliente.",
+      "stages": [
+        {
+          "number": "01",
+          "title": "Haz la visita técnica",
+          "text": "Arma un checklist de relevamiento con lo que revisas en toda obra — red, tomas de energía, tablero, ambientes — y úsalo en todas las visitas.",
+          "facts": [
+            "Campos de texto, número, sí/no, lista y foto",
+            "Fotos en cada ítem del checklist",
+            "La misma plantilla para todas las obras"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
+        },
+        {
+          "number": "02",
+          "title": "Envía la propuesta por link",
+          "text": "Equipos y servicios salen de tu catálogo, con precio. El cliente abre la orden en el navegador, ve los ítems y las fotos, aprueba y deja comentarios.",
+          "facts": [
+            "Aprobación registrada en la propia orden",
+            "Equipos y programación detallados",
+            "PDF de la orden para enviar o imprimir"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
+        },
+        {
+          "number": "03",
+          "title": "Agenda la instalación",
+          "text": "La fecha de la orden pone la obra en el calendario. Quien coordina ve todo el mes y filtra por técnico.",
+          "facts": [
+            "Calendario del mes con las órdenes de cada día",
+            "Filtro por técnico",
+            "Aviso en el celular antes de la visita"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda de PraticOS con órdenes del mes"
+        },
+        {
+          "number": "04",
+          "title": "Entrega la obra y cobra",
+          "text": "Registra lo instalado con fotos y cobra por etapas: anticipo, cuotas y saldo, con descuento si hace falta.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién todavía debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
+        }
       ]
-    },
-    "checklist": {
-      "tag": "Formulario",
-      "title": "Documentación de",
-      "titleHighlight": "instalación",
-      "text": "Documenta cada instalación con fotos e información técnica. El cliente firma digitalmente la entrega.",
-      "cta": "Probar Gratis - Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Instalación",
-      "items": [
-        { "icon": "📸", "text": "Fotos de la infraestructura" },
-        { "icon": "🔌", "text": "Equipos instalados y ubicación" },
-        { "icon": "⚙️", "text": "Configuraciones y contraseñas (encriptadas)" },
-        { "icon": "📱", "text": "Apps configuradas en el celular del cliente" },
-        { "icon": "📝", "text": "Capacitación realizada" },
-        { "icon": "✍️", "text": "Firma digital de entrega" }
-      ]
-    },
-    "features": {
-      "tag": "Funciones",
-      "title": "Todo lo que necesitas para",
-      "titleHighlight": "gestionar tus proyectos",
-      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
-      "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, equipos y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía cada etapa de la instalación. Documentación completa para posventa.", "color": "yellow" },
-        { "icon": "pdf", "title": "Propuesta en PDF", "text": "Genera propuestas profesionales en PDF. Destácate de la competencia.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente e instalación. Todos los proyectos anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado del proyecto por el celular. Sin necesidad de llamar.", "color": "cyan" }
-      ]
-    },
-    "testimonial": {
-      "quote": "Antes pasaba horas haciendo presupuestos en Excel y cuando el cliente llamaba meses después, no tenía ninguna documentación. Ahora tengo todo organizado y los clientes confían mucho más en mi trabajo.",
-      "name": "Fernando Costa",
-      "role": "Integrador de automatización hace 8 años",
-      "metric": "Aumento de 40% en facturación"
     },
     "faq": {
-      "tag": "Dudas",
-      "title": "Preguntas",
-      "titleHighlight": "frecuentes",
-      "subtitle": "Resuelve tus dudas antes de empezar",
+      "title": "Preguntas de quien trabaja con domótica",
+      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Funciona para cualquier tipo de automatización?", "answer": "¡Sí! PraticOS funciona para integradores de automatización residencial, comercial, audio y video, iluminación, aire acondicionado y más. El sistema se adapta a tu negocio." },
-        { "question": "¿Puedo guardar contraseñas y configuraciones?", "answer": "¡Sí! Puedes documentar todas las configuraciones, contraseñas de routers, IPs de equipos. Todo queda organizado y accesible cuando lo necesites." },
-        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo entiende las necesidades del integrador de automatización." }
+        {
+          "question": "¿Tengo que pagar para usarlo?",
+          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+        },
+        {
+          "question": "¿Hay un segmento de automatización en la app?",
+          "answer": "Todavía no. Eliges el segmento “Otro”, que trae checklists genéricos de ingreso, registro del servicio y entrega al cliente, y creas tus propios checklists de relevamiento e instalación."
+        },
+        {
+          "question": "¿Sirve para audio y video, redes e iluminación?",
+          "answer": "Sí. La orden registra cualquier tipo de servicio y equipo. Lo que cambia de una obra a otra son los ítems del catálogo y los checklists que armas."
+        },
+        {
+          "question": "¿Los técnicos pueden usarlo en su propio celular?",
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+        },
+        {
+          "question": "¿El cliente tiene que instalar una app?",
+          "answer": "No. Recibe un link, lo abre en el navegador del celular y ve la orden con fotos y valores. Ahí mismo aprueba la propuesta y deja comentarios."
+        }
       ]
-    },
-    "download": {
-      "title": "Descarga ahora y empieza a",
-      "titleHighlight": "organizar tus proyectos",
-      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
-      "appStore": { "label": "Descarga en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesitas",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderte",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Tu nombre",
-        "email": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudar?",
-        "submit": "Enviar Mensaje"
-      }
     }
   }
 }

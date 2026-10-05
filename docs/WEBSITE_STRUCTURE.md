@@ -434,32 +434,24 @@ Calcula prefixo de caminho relativo baseado na URL:
 
 | Arquivo | Escopo |
 |---------|--------|
-| `style.css` | Estilos globais, variaveis, componentes base |
+| `css/tokens.css` | Tokens (cores OKLCH, fontes, espaços, tipografia, motion) — claro e escuro |
+| `css/site.css` | Base compartilhada: reset, tipografia, botões, nav, footer, faixa final de CTA |
+| `css/home.css` | Home |
 | `css/segments.css` | Paginas de segmento |
-| `css/support.css` | Central de suporte |
 | `css/docs.css` | Paginas de documentacao |
+| `css/support.css` | Central de suporte |
+| `style.css` | **Legado** — usado apenas por `order/` e `login` |
+
+Paginas podem carregar um CSS proprio com `pageStyles: <nome>` no front matter.
 
 ### Tema Visual
 
-- **Background**: `#0A0E17` (deep blue/black)
-- **Accent**: Gradientes azul/roxo
-- **Texto**: Branco com opacidades
-- **Cards**: Glassmorphism com backdrop-filter
-- **Fontes**: `Outfit` (headings), `DM Sans` (body)
+O sistema completo esta em `firebase/hosting/design.md` (fonte da verdade). Resumo:
 
-### Variaveis CSS Principais
-
-```css
-:root {
-  --bg-primary: #0A0E17;
-  --bg-secondary: #0D1220;
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --accent-blue: #3B82F6;
-  --accent-purple: #8B5CF6;
-  --gradient-cta: linear-gradient(135deg, #3B82F6, #8B5CF6);
-}
-```
+- **Ideia**: o site parece uma ordem de servico — papel claro, tinta grafite, reguas, numeros em mono
+- **Fontes**: `Archivo` 800 (titulos), `IBM Plex Sans` (texto), `IBM Plex Mono` (numeros, labels)
+- **Cor**: azul da marca como acento; amarelo do logo so como marca-texto (`.mark`)
+- **Proibido**: gradientes, glassmorphism, orbs, cards com icone, numeros inventados
 
 ## Deploy
 

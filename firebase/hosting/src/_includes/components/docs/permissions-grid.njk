@@ -1,17 +1,14 @@
-{# Permissions Grid Component - Grid of permission categories #}
-{# Usage: {% include "components/docs/permissions-grid.njk" with {categories: [...]} %} #}
-<div class="permissions-grid">
-    {% for category in categories %}
-    <div class="permission-category">
-        <h4>
-            {{ category.icon | safe }}
-            {{ category.title }}
-        </h4>
-        <ul class="permission-list">
-            {% for permission in category.permissions %}
-            <li class="{{ permission.status }}"><span class="icon">{% if permission.status == 'allowed' %}&#10003;{% elif permission.status == 'denied' %}&#10007;{% else %}&#9888;{% endif %}</span> {{ permission.text }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+{# Permission groups — h3 per group, list with ✓ / ✕ / ~ marks.
+   Expects `categories` = [{ title, permissions: [{ status: allowed|denied|partial, text }] }]; legacy icon is ignored. #}
+{% set permLabels = { pt: { allowed: 'Permitido', denied: 'Não permitido', partial: 'Com restrição' }, en: { allowed: 'Allowed', denied: 'Not allowed', partial: 'Restricted' }, es: { allowed: 'Permitido', denied: 'No permitido', partial: 'Con restricción' } }[langCode] | default({ allowed: 'Permitido', denied: 'Não permitido', partial: 'Com restrição' }) %}
+{% for category in categories %}
+<h3>{{ category.title }}</h3>
+<ul class="perm-list" role="list">
+    {% for permission in category.permissions %}
+    <li class="{{ permission.status }}">
+        {% if permission.status == 'allowed' %}<span class="mark-yes" aria-hidden="true">✓</span>{% elif permission.status == 'denied' %}<span class="mark-no" aria-hidden="true">✕</span>{% else %}<span class="mark-partial" aria-hidden="true">~</span>{% endif %}
+        <span><span class="doc-sr">{{ permLabels[permission.status] }}: </span>{{ permission.text | safe }}</span>
+    </li>
     {% endfor %}
-</div>
+</ul>
+{% endfor %}

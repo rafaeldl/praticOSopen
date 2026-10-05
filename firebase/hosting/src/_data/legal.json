@@ -207,7 +207,7 @@
           "list": [
             "Cifrado de datos en tránsito (HTTPS/TLS)",
             "Cifrado de datos en reposo",
-            "Autenticación segura via Firebase Authentication",
+            "Autenticación segura vía Firebase Authentication",
             "Reglas de seguridad en la base de datos",
             "Copias de seguridad regulares y redundancia"
           ]

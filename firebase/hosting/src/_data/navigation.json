@@ -1,50 +1,95 @@
 {
   "pt": {
+    "skip": "Pular para o conteúdo",
+    "home": "Página inicial do PraticOS",
     "links": [
-      { "href": "#features", "label": "Funcionalidades" },
-      { "href": "#screenshots", "label": "Telas" },
-      { "href": "#pricing", "label": "Planos" },
-      { "href": "#contact", "label": "Contato" }
+      {
+        "href": "#como-funciona",
+        "label": "Como funciona"
+      },
+      {
+        "segments": true
+      },
+      {
+        "href": "funcionalidades/whatsapp-bot.html",
+        "label": "WhatsApp",
+        "flag": "whatsappBot"
+      },
+      {
+        "href": "pricing.html",
+        "label": "Planos"
+      },
+      {
+        "href": "docs/",
+        "label": "Ajuda"
+      }
     ],
-    "cta": "Baixar App",
-    "mobileLinks": [
-      { "href": "#features", "label": "Funcionalidades" },
-      { "href": "#screenshots", "label": "Telas" },
-      { "href": "#pricing", "label": "Planos" },
-      { "href": "support.html", "label": "Suporte", "external": true },
-      { "href": "#contact", "label": "Contato" }
-    ]
+    "segmentsAll": "segmentos",
+    "cta": "Baixar grátis",
+    "menu": "Abrir menu",
+    "themeToggle": "Alternar tema claro/escuro",
+    "language": "Idioma"
   },
   "en": {
+    "skip": "Skip to content",
+    "home": "PraticOS home",
     "links": [
-      { "href": "#features", "label": "Features" },
-      { "href": "#screenshots", "label": "Screenshots" },
-      { "href": "#pricing", "label": "Pricing" },
-      { "href": "#contact", "label": "Contact" }
+      {
+        "href": "#como-funciona",
+        "label": "How it works"
+      },
+      {
+        "segments": true
+      },
+      {
+        "href": "funcionalidades/whatsapp-bot-en.html",
+        "label": "WhatsApp",
+        "flag": "whatsappBot"
+      },
+      {
+        "href": "pricing-en.html",
+        "label": "Pricing"
+      },
+      {
+        "href": "docs/index-en.html",
+        "label": "Help"
+      }
     ],
-    "cta": "Download App",
-    "mobileLinks": [
-      { "href": "#features", "label": "Features" },
-      { "href": "#screenshots", "label": "Screenshots" },
-      { "href": "#pricing", "label": "Pricing" },
-      { "href": "support-en.html", "label": "Support", "external": true },
-      { "href": "#contact", "label": "Contact" }
-    ]
+    "segmentsAll": "trades",
+    "cta": "Download free",
+    "menu": "Open menu",
+    "themeToggle": "Toggle light/dark theme",
+    "language": "Language"
   },
   "es": {
+    "skip": "Saltar al contenido",
+    "home": "Inicio de PraticOS",
     "links": [
-      { "href": "#features", "label": "Funciones" },
-      { "href": "#screenshots", "label": "Capturas" },
-      { "href": "#pricing", "label": "Planes" },
-      { "href": "#contact", "label": "Contacto" }
+      {
+        "href": "#como-funciona",
+        "label": "Cómo funciona"
+      },
+      {
+        "segments": true
+      },
+      {
+        "href": "funcionalidades/whatsapp-bot-es.html",
+        "label": "WhatsApp",
+        "flag": "whatsappBot"
+      },
+      {
+        "href": "pricing-es.html",
+        "label": "Planes"
+      },
+      {
+        "href": "docs/index-es.html",
+        "label": "Ayuda"
+      }
     ],
-    "cta": "Descargar App",
-    "mobileLinks": [
-      { "href": "#features", "label": "Funciones" },
-      { "href": "#screenshots", "label": "Capturas" },
-      { "href": "#pricing", "label": "Planes" },
-      { "href": "support-es.html", "label": "Soporte", "external": true },
-      { "href": "#contact", "label": "Contacto" }
-    ]
+    "segmentsAll": "rubros",
+    "cta": "Descargar gratis",
+    "menu": "Abrir menú",
+    "themeToggle": "Cambiar tema claro/oscuro",
+    "language": "Idioma"
   }
 }
