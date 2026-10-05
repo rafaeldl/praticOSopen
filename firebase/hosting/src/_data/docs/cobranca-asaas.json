@@ -95,7 +95,7 @@
         ],
         "infoCard": {
           "title": "Uma cobrança aberta por vez",
-          "content": "Gerar uma nova cobrança cancela a anterior que ainda não foi paga. Você também pode usar <strong>Cancelar cobrança</strong> no card da cobrança. Se o saldo da OS mudar, o app avisa e oferece <strong>Gerar nova cobrança</strong> com o valor atualizado. Cancelar a OS cancela a cobrança em aberto."
+          "content": "Gerar uma nova cobrança cancela a anterior que ainda não foi paga. Você também pode usar <strong>Cancelar cobrança</strong> no card da cobrança. Se o saldo da OS ficar menor que a cobrança, o app avisa e oferece <strong>Gerar nova cobrança</strong> com o valor atualizado. Cancelar a OS cancela a cobrança em aberto."
         }
       },
       {
@@ -344,7 +344,7 @@
         ],
         "infoCard": {
           "title": "One open charge at a time",
-          "content": "Creating a new charge cancels the previous unpaid one. You can also tap <strong>Cancel charge</strong> on the charge card. If the order balance changes, the app warns you and offers <strong>Create new charge</strong> with the updated amount. Canceling the order cancels the open charge."
+          "content": "Creating a new charge cancels the previous unpaid one. You can also tap <strong>Cancel charge</strong> on the charge card. If the order balance becomes smaller than the charge, the app warns you and offers <strong>Create new charge</strong> with the updated amount. Canceling the order cancels the open charge."
         }
       },
       {
@@ -364,7 +364,7 @@
         ],
         "paragraphs": [
           "Prefer to send the invoice directly? Tap <strong>Copy invoice link</strong> on the charge card.",
-          "If the charge becomes overdue, the order link shows <strong>Charge overdue</strong> and tells the customer to contact your company. Create a new charge on the order."
+          "If the charge becomes overdue, the order link shows <strong>Payment overdue. Please contact the company</strong>. Create a new charge on the order."
         ]
       },
       {
@@ -385,7 +385,7 @@
               },
               {
                 "label": "Notification",
-                "text": "Team members with access to payments get a <strong>Payment received</strong> push notification"
+                "text": "Team members with access to payments get a push notification titled <strong>Pagamento recebido</strong> (it arrives in Portuguese)"
               },
               {
                 "label": "Refund",
@@ -593,7 +593,7 @@
         ],
         "infoCard": {
           "title": "Un cobro abierto a la vez",
-          "content": "Generar un nuevo cobro cancela el anterior que aún no se pagó. También puedes tocar <strong>Cancelar cobro</strong> en la tarjeta del cobro. Si el saldo de la orden cambia, la app avisa y ofrece <strong>Generar nuevo cobro</strong> con el monto actualizado. Cancelar la orden cancela el cobro abierto."
+          "content": "Generar un nuevo cobro cancela el anterior que aún no se pagó. También puedes tocar <strong>Cancelar cobro</strong> en la tarjeta del cobro. Si el saldo de la orden queda menor que el cobro, la app avisa y ofrece <strong>Generar nuevo cobro</strong> con el monto actualizado. Cancelar la orden cancela el cobro abierto."
         }
       },
       {
@@ -613,7 +613,7 @@
         ],
         "paragraphs": [
           "Si prefieres, toca <strong>Copiar enlace de la factura</strong> en la tarjeta del cobro y envía la factura directamente.",
-          "Si el cobro vence, el enlace de la orden muestra <strong>Cobro vencido</strong> e indica al cliente que hable con la empresa. Genera un nuevo cobro en la orden."
+          "Si el cobro vence, el enlace de la orden muestra <strong>Cobro vencido. Contacta a la empresa</strong>. Genera un nuevo cobro en la orden."
         ]
       },
       {
@@ -634,7 +634,7 @@
               },
               {
                 "label": "Aviso",
-                "text": "El equipo con acceso a pagos recibe la notificación <strong>Pago recibido</strong> en el celular"
+                "text": "El equipo con acceso a pagos recibe en el celular la notificación <strong>Pagamento recebido</strong> (llega en portugués)"
               },
               {
                 "label": "Reembolso",
