@@ -8,6 +8,8 @@ service cloud.firestore {
     // ════════════════════════════════════════════════════════════════════════
     //
     // User roles in PraticOS:
+    // - owner: Company owner - superset of admin (claim set for owners whose
+    //   own companies entry says 'owner', e.g. companies created via WhatsApp)
     // - admin: Administrator - Full system access
     // - manager: Manager (Financial) - Financial management
     // - supervisor: Supervisor - Operational management
@@ -28,33 +30,33 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] == role;
     }
 
-    // Verifica se o usuário é admin da empresa
+    // Verifica se o usuário é admin da empresa ('owner' é superconjunto de 'admin')
     function isCompanyAdmin(companyId) {
-      return hasRole(companyId, 'admin');
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in ['owner', 'admin'];
     }
 
-    // Verifica se o usuário pode gerenciar a empresa (admin apenas)
+    // Verifica se o usuário pode gerenciar a empresa (owner/admin apenas)
     function canManageCompany(companyId) {
-      return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] == 'admin';
+      return isCompanyAdmin(companyId);
     }
 
     // Verifica se o usuário pode gerenciar dispositivos (admin ou supervisor)
     function canManageDevices(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor'];
     }
 
     // Verifica se o usuário pode gerenciar clientes (admin, supervisor ou consultant)
     function canManageCustomers(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor', 'consultant'];
     }
 
     // Verifica se o usuário pode visualizar dados financeiros (admin ou manager)
     function canViewFinancial(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'manager'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'manager'];
     }
 
     // Verifica se o usuário é o dono da empresa (role 'owner' nas claims ou owner.id no doc)
@@ -78,7 +80,7 @@ service cloud.firestore {
     // Verifica se o usuário pode criar/editar OS (admin, supervisor, consultant, technician)
     function canManageOrders(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant', 'technician'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor', 'consultant', 'technician'];
     }
 
     // Verifica se o usuário pode executar OS (todos os perfis)
@@ -89,13 +91,13 @@ service cloud.firestore {
     // Verifica se o usuário pode atribuir técnicos (admin, supervisor)
     function canAssignOrders(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor'];
     }
 
     // Verifica se o usuário pode gerenciar templates (admin, supervisor)
     function canManageTemplates(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor'];
     }
 
     // Empresa criada pelo próprio usuário nesta mesma escrita (batch de cadastro)
@@ -330,7 +332,7 @@ service cloud.firestore {
       match /orders/{orderId} {
         // Leitura: membros podem ler, exceto consultores/técnicos que só veem as próprias
         allow read: if belongsToCompany(companyId) && (
-          hasRole(companyId, 'admin')
+          isCompanyAdmin(companyId)
           || hasRole(companyId, 'manager')
           || hasRole(companyId, 'supervisor')
           || resource.data.createdBy.id == request.auth.uid

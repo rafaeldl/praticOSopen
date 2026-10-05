@@ -483,4 +483,115 @@ describeEmulator('firestore.rules', () => {
       );
     });
   });
+
+  describe("'owner' claim is a superset of 'admin' (#312)", () => {
+    // ownerX/adminX are not owner.id of c1, so only the claim grants access.
+    const asRole = (role: string) => asUser(`${role}X`, { c1: role });
+    const roles = ['admin', 'owner'];
+
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/o2'), {
+          number: 2,
+          status: 'approved',
+          createdBy: { id: 'tech1', name: 'Tech' },
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c1/customers/cu1'), { name: 'Customer' });
+        await fs.setDoc(fs.doc(db, 'companies/c1/settings/payments'), { asaasEnabled: true });
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/o2/charges/ch1'), { status: 'pending' });
+        await fs.setDoc(fs.doc(db, 'companies/c2'), { name: 'Company c2', owner: { id: 'someone' } });
+        await fs.setDoc(fs.doc(db, 'companies/c2/orders/o1'), {
+          number: 1,
+          status: 'quote',
+          createdBy: { id: 'someone' },
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c2/customers/cu1'), { name: 'Customer' });
+        await fs.setDoc(fs.doc(db, 'companies/c2/financialEntries/fe1'), { value: 1 });
+        await fs.setDoc(fs.doc(db, 'companies/c2/settings/payments'), { asaasEnabled: true });
+        await fs.setDoc(fs.doc(db, 'companies/c2/orders/o1/charges/ch1'), { status: 'pending' });
+      });
+    });
+
+    it.each(roles)('%s reads, lists, creates, updates and deletes orders (incl. by others)', async (role) => {
+      const db = asRole(role);
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1/orders/o2')));
+      await rut.assertSucceeds(fs.getDocs(fs.collection(db, 'companies/c1/orders')));
+      await rut.assertSucceeds(
+        fs.setDoc(fs.doc(db, 'companies/c1/orders/new'), { status: 'quote', createdBy: { id: `${role}X` } }),
+      );
+      await rut.assertSucceeds(fs.updateDoc(fs.doc(db, 'companies/c1/orders/o2'), { status: 'done' }));
+      await rut.assertSucceeds(fs.deleteDoc(fs.doc(db, 'companies/c1/orders/o2')));
+    });
+
+    it.each(roles)('%s manages customers, devices, catalog and templates', async (role) => {
+      const db = asRole(role);
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1/customers/cu1')));
+      await rut.assertSucceeds(fs.updateDoc(fs.doc(db, 'companies/c1/customers/cu1'), { name: 'X' }));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/customers/cu2'), { name: 'Y' }));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/devices/d1'), { name: 'D' }));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/products/p1'), { name: 'P' }));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/services/s1'), { name: 'S' }));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/forms/f1'), { title: 'F' }));
+    });
+
+    it.each(roles)('%s reads and writes financial collections', async (role) => {
+      const db = asRole(role);
+      for (const col of ['financialAccounts', 'financialEntries', 'financialPayments']) {
+        await rut.assertSucceeds(fs.setDoc(fs.doc(db, `companies/c1/${col}/x1`), { value: 1 }));
+        await rut.assertSucceeds(fs.updateDoc(fs.doc(db, `companies/c1/${col}/x1`), { value: 2 }));
+        await rut.assertSucceeds(fs.getDocs(fs.collection(db, `companies/c1/${col}`)));
+        await rut.assertFails(fs.deleteDoc(fs.doc(db, `companies/c1/${col}/x1`)));
+      }
+    });
+
+    it.each(roles)('%s reads settings/payments and charges, but cannot write them', async (role) => {
+      const db = asRole(role);
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1/settings/payments')));
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1/orders/o2/charges/ch1')));
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'companies/c1/settings/payments'), { asaasEnabled: false }));
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'companies/c1/orders/o2/charges/ch1'), { status: 'paid' }));
+    });
+
+    it.each(roles)('%s updates the company doc and manages memberships/invites', async (role) => {
+      const db = asRole(role);
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1')));
+      await rut.assertSucceeds(fs.updateDoc(fs.doc(db, 'companies/c1'), { name: 'Renamed' }));
+      await rut.assertSucceeds(
+        fs.setDoc(fs.doc(db, 'companies/c1/memberships/tech1'), { user: { id: 'tech1' }, role: 'technician' }),
+      );
+      await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'links/invites/tokens/INV_1')));
+      await rut.assertSucceeds(fs.updateDoc(fs.doc(db, 'links/invites/tokens/INV_1'), { status: 'cancelled' }));
+    });
+
+    it("an 'owner' of c1 gets nothing on c2", async () => {
+      const db = asRole('owner');
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2')));
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'companies/c2'), { name: 'Hijacked' }));
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2/orders/o1')));
+      await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c2/orders/new'), { status: 'quote' }));
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'companies/c2/orders/o1'), { status: 'done' }));
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2/customers/cu1')));
+      await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c2/customers/cu2'), { name: 'X' }));
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2/financialEntries/fe1')));
+      await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c2/financialEntries/fe2'), { value: 1 }));
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2/settings/payments')));
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c2/orders/o1/charges/ch1')));
+      await rut.assertFails(
+        fs.setDoc(fs.doc(db, 'companies/c2/memberships/ownerX'), { user: { id: 'ownerX' }, role: 'admin' }),
+      );
+    });
+
+    it.each(['manager', 'supervisor', 'consultant', 'technician'])(
+      'non-owner role %s is not broadened (no company update, no membership create)',
+      async (role) => {
+        const db = asRole(role);
+        await rut.assertFails(fs.updateDoc(fs.doc(db, 'companies/c1'), { name: 'Renamed' }));
+        await rut.assertFails(
+          fs.setDoc(fs.doc(db, 'companies/c1/memberships/tech1'), { user: { id: 'tech1' }, role: 'technician' }),
+        );
+        await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/products/p1'), { name: 'P' }));
+      },
+    );
+  });
 });
