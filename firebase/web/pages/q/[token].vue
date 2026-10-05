@@ -169,7 +169,8 @@ const charge = computed(() => (orderData.value as any)?.data?.charge ?? null)
 // Quiet fetch: a failed background refresh must not flip the page to the invalid-link screen.
 useRefreshOnVisible(
   () => quietRefresh(() => $fetch(`/api/orders/${token}`), (fresh) => { orderData.value = fresh as typeof orderData.value }),
-  { when: () => shouldRefreshCharge(charge.value),     when: () => shouldRefreshCharge(charge.value),
+  {
+    when: () => shouldRefreshCharge(charge.value),
     minIntervalMs: 10_000,
   },
 )
