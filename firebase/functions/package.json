@@ -16,6 +16,7 @@
     "lint:fix": "eslint src/ --fix",
     "setup-test": "npx ts-node scripts/setup-test-data.ts",
     "e2e:asaas": "ts-node scripts/asaas-sandbox-e2e.ts",
+    "asaas:pilot": "ts-node scripts/enable-asaas-pilot.ts",
     "claims:recompute": "ts-node scripts/recompute-claims.ts",
     "memberships:seed": "ts-node scripts/seed-private-membership.ts",
     "test": "jest",
