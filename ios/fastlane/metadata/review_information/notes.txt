@@ -1,6 +1,6 @@
 REGARDING GUIDELINE 3.1.1 - PLEASE READ
 
-Account registration in PraticOS is free and does not give access to anything that is sold outside the app. PraticOS does not sell paid plans or subscriptions on any platform (website, Android or iOS) at this time: our website lists planned prices, but no plan can be purchased anywhere. There is no external purchase mechanism of any kind.
+Account registration in PraticOS is free and does not give access to anything that is sold outside the app. PraticOS does not sell paid plans or subscriptions on any platform (website, Android or iOS) at this time: our website shows no pricing and no plan can be purchased anywhere. There is no external purchase mechanism of any kind.
 
 - Creating a company account is free and unlocks every feature of the iOS app, with no limits.
 - There is no purchasing of any kind inside the app, and no plan, pricing or subscription screens on iOS.

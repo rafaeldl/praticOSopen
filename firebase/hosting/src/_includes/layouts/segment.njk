@@ -4,15 +4,15 @@ pageType: segment
 ---
 {# Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow (trade) · design-system: design.md
  # Segment landing: hero (H2 split diptych) → problem/answer rows (Split Studio) → workflow stages
- # → FAQ → plans → final CTA. Data: _data/segments/<slug>.json, one object per language.
+ # → FAQ → final CTA. Data: _data/segments/<slug>.json, one object per language.
  # Optional blocks (hero.ticket, problems, workflow, faq) are skipped when missing. #}
 {% set segmentData = segments[segmentSlug] %}
 {% set data = segmentData[langCode] | default(segmentData.pt) %}
 {% set homeHref = relPath ~ (indexPage | default('index.html') | prettyUrl) %}
 {% set ui = {
-    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', note: 'Plano grátis para sempre · iOS e Android · sem cartão de crédito', answerLabel: 'No PraticOS', faqTitle: 'Perguntas frequentes', shotAlt: 'Lista de ordens de serviço no app PraticOS' },
-    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', note: 'Free plan forever · iOS and Android · no credit card', answerLabel: 'In PraticOS', faqTitle: 'Frequently asked questions', shotAlt: 'Work order list in the PraticOS app' },
-    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', note: 'Plan gratis para siempre · iOS y Android · sin tarjeta de crédito', answerLabel: 'En PraticOS', faqTitle: 'Preguntas frecuentes', shotAlt: 'Lista de órdenes de servicio en la app PraticOS' }
+    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', note: 'Grátis · iOS e Android · sem cartão de crédito', answerLabel: 'No PraticOS', faqTitle: 'Perguntas frequentes', shotAlt: 'Lista de ordens de serviço no app PraticOS' },
+    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', note: 'Free · iOS and Android · no credit card', answerLabel: 'In PraticOS', faqTitle: 'Frequently asked questions', shotAlt: 'Work order list in the PraticOS app' },
+    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', note: 'Gratis · iOS y Android · sin tarjeta de crédito', answerLabel: 'En PraticOS', faqTitle: 'Preguntas frecuentes', shotAlt: 'Lista de órdenes de servicio en la app PraticOS' }
 }[langCode] | default({}) %}
 
 {% include "components/segment/hero.njk" %}
@@ -20,5 +20,4 @@ pageType: segment
 {% include "components/segment/workflow.njk" %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
 {% if data.faq and data.faq.items %}{% include "components/segment/faq.njk" %}{% endif %}
-{% include "components/pricing.njk" %}
 {% include "components/download.njk" %}

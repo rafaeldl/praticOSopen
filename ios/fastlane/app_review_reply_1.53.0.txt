@@ -1,0 +1,15 @@
+Hello,
+
+Thank you for your review. We have made the following changes:
+
+- We removed all pricing and plan information from our website (https://praticos.web.app). It no longer shows prices, plans, plan limits or upgrade calls to action.
+- We corrected the App Review notes for this version.
+
+PraticOS is completely free on every platform. There is no paid plan, subscription or purchase of any kind, inside or outside the app.
+
+Company registration and the company profile are free and optional. They only store the business name, logo and contact details that are printed on the work order. They do not create a paid account and do not unlock anything.
+
+If we ever introduce paid plans, they will be sold on iOS exclusively through In-App Purchase.
+
+Best regards,
+PraticOS team

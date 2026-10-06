@@ -14,7 +14,7 @@
       "lede": "PraticOS ajuda a secretaria de obras a acompanhar a execução dos contratos. Cada contrato tem a obra, a empresa contratada e o fiscal; as medições e vistorias são feitas no celular, com fotos, e o saldo a liberar fica sempre à vista.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "note": "Grátis · iOS e Android · sem cartão de crédito",
       "ticket": {
         "caption": "Exemplo de contrato",
         "title": "Contrato",
@@ -165,7 +165,7 @@
         },
         {
           "question": "Quanto custa?",
-          "answer": "Dá para começar no plano Free, que não tem prazo para acabar. Os planos para equipes maiores estão logo abaixo."
+          "answer": "Nada. O PraticOS é gratuito no iOS e no Android, sem cartão de crédito."
         }
       ]
     }
@@ -184,7 +184,7 @@
       "lede": "PraticOS helps public works departments track how contracts are carried out. Each contract has the project, the contractor and the inspector; measurements and inspections are done on a phone, with photos, and the balance left to release is always in view.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free plan forever · iOS and Android · no credit card",
+      "note": "Free · iOS and Android · no credit card",
       "ticket": {
         "caption": "Sample contract",
         "title": "Contract",
@@ -335,7 +335,7 @@
         },
         {
           "question": "How much does it cost?",
-          "answer": "You can start on the Free plan, which never expires. Plans for larger teams are listed below."
+          "answer": "Nothing. PraticOS is free on iOS and Android, with no credit card."
         }
       ]
     }
@@ -354,7 +354,7 @@
       "lede": "PraticOS ayuda a la secretaría de obras a seguir la ejecución de los contratos. Cada contrato tiene la obra, la empresa contratada y el fiscal; las mediciones e inspecciones se hacen en el celular, con fotos, y el saldo por liberar siempre está a la vista.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
       "ticket": {
         "caption": "Ejemplo de contrato",
         "title": "Contrato",
@@ -505,7 +505,7 @@
         },
         {
           "question": "¿Cuánto cuesta?",
-          "answer": "Puedes empezar en el plan Free, que no vence. Los planes para equipos más grandes están más abajo."
+          "answer": "Nada. PraticOS es gratis en iOS y Android, sin tarjeta de crédito."
         }
       ]
     }
