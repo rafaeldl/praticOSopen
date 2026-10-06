@@ -102,8 +102,13 @@ jobs:
         run: sudo xcodebuild -license accept
 
       # Download iOS Platform
+      # Baixa o runtime do simulador. O archive para dispositivo usa o SDK que já
+      # vem no Xcode; na imagem macos-26 este download passou a falhar com
+      # "Unable to connect to simulator" (exit 70), então a falha vira aviso.
       - name: Download iOS Platform
-        run: xcodebuild -downloadPlatform iOS
+        run: |
+          xcodebuild -downloadPlatform iOS \
+            || echo "::warning title=Download iOS Platform::xcodebuild -downloadPlatform iOS falhou; seguindo com o SDK do Xcode"
 
       # Ruby + Bundler
       - name: Ruby (bundler cache)
