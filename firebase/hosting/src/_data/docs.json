@@ -88,7 +88,7 @@
       "quickLinks": [
         {
           "title": "Perguntas frequentes",
-          "description": "Conta e acesso, OS no dia a dia, dados e planos.",
+          "description": "Conta e acesso, OS no dia a dia e dados.",
           "href": "../faq.html"
         },
         {
@@ -191,7 +191,7 @@
       "quickLinks": [
         {
           "title": "FAQ",
-          "description": "Account, everyday work orders, data and plans.",
+          "description": "Account, everyday work orders and data.",
           "href": "../faq-en.html"
         },
         {
@@ -294,7 +294,7 @@
       "quickLinks": [
         {
           "title": "Preguntas frecuentes",
-          "description": "Cuenta, OS en el día a día, datos y planes.",
+          "description": "Cuenta, OS en el día a día y datos.",
           "href": "../faq-es.html"
         },
         {

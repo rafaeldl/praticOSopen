@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para técnico de refrigeração e ar-condicionado. Cadastre o equipamento com BTUs, voltagem e tipo de gás, preencha o checklist com fotos no local, mande o orçamento por link e registre o pagamento — pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "note": "Grátis · iOS e Android · sem cartão de crédito",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -130,7 +130,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
         },
         {
           "question": "Serve para residencial, comercial e ar automotivo?",
@@ -142,7 +142,7 @@
         },
         {
           "question": "Meus técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -165,7 +165,7 @@
       "lede": "PraticOS is the work order app for HVAC and refrigeration technicians. Add the unit with BTUs, voltage and refrigerant, fill in the checklist with photos on site, send the quote as a link and record the payment — from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free plan forever · iOS and Android · no credit card",
+      "note": "Free · iOS and Android · no credit card",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -281,7 +281,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
         },
         {
           "question": "Does it work for residential, commercial and automotive AC?",
@@ -293,7 +293,7 @@
         },
         {
           "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see prices. Free has 1 user; Starter includes 2 and Pro includes 3."
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see prices."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -316,7 +316,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para técnicos de refrigeración y aire acondicionado. Registra el equipo con BTU, voltaje y tipo de gas, completa el checklist con fotos en el lugar, envía el presupuesto por link y registra el pago — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -432,7 +432,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
         },
         {
           "question": "¿Sirve para residencial, comercial y aire automotriz?",
@@ -444,7 +444,7 @@
         },
         {
           "question": "¿Mis técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

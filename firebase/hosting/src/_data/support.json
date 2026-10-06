@@ -18,7 +18,7 @@
       "items": [
         {
           "title": "Dúvida de como usar",
-          "text": "A Ajuda tem guias passo a passo de agenda, financeiro, equipe e link para o cliente. As perguntas frequentes cobrem conta e planos.",
+          "text": "A Ajuda tem guias passo a passo de agenda, financeiro, equipe e link para o cliente. As perguntas frequentes cobrem conta, OS e dados.",
           "links": [
             { "text": "Abrir a Ajuda", "href": "docs/", "ga": "support_docs" },
             { "text": "Ver perguntas frequentes", "href": "faq.html", "ga": "support_faq" }
@@ -39,8 +39,8 @@
           ]
         },
         {
-          "title": "Conta, assinatura e privacidade",
-          "text": "Para excluir a conta, vá no app em Ajustes › Conta › Excluir conta. A assinatura é cobrada pela App Store ou pelo Google Play, e o cancelamento é feito lá.",
+          "title": "Conta e privacidade",
+          "text": "Para excluir a conta, vá no app em Ajustes › Conta › Excluir conta.",
           "links": [
             { "text": "Política de Privacidade", "href": "privacy.html", "ga": "support_privacy" },
             { "text": "Termos de uso", "href": "terms.html", "ga": "support_terms" }
@@ -90,7 +90,7 @@
       "items": [
         {
           "title": "How do I use it?",
-          "text": "Help has step-by-step guides for scheduling, finances, your team and the customer link. The FAQ covers your account and plans.",
+          "text": "Help has step-by-step guides for scheduling, finances, your team and the customer link. The FAQ covers your account, work orders and data.",
           "links": [
             { "text": "Open Help", "href": "docs/index-en.html", "ga": "support_docs" },
             { "text": "Read the FAQ", "href": "faq-en.html", "ga": "support_faq" }
@@ -111,8 +111,8 @@
           ]
         },
         {
-          "title": "Account, subscription and privacy",
-          "text": "To delete your account, go to Settings › Account › Delete account in the app. Subscriptions are billed through the App Store or Google Play, and you cancel them there.",
+          "title": "Account and privacy",
+          "text": "To delete your account, go to Settings › Account › Delete account in the app.",
           "links": [
             { "text": "Privacy Policy", "href": "privacy-en.html", "ga": "support_privacy" },
             { "text": "Terms of Use", "href": "terms-en.html", "ga": "support_terms" }
@@ -162,7 +162,7 @@
       "items": [
         {
           "title": "Duda de cómo usarlo",
-          "text": "La Ayuda tiene guías paso a paso de agenda, finanzas, equipo y enlace para el cliente. Las preguntas frecuentes cubren la cuenta y los planes.",
+          "text": "La Ayuda tiene guías paso a paso de agenda, finanzas, equipo y enlace para el cliente. Las preguntas frecuentes cubren la cuenta, las órdenes y los datos.",
           "links": [
             { "text": "Abrir la Ayuda", "href": "docs/index-es.html", "ga": "support_docs" },
             { "text": "Ver preguntas frecuentes", "href": "faq-es.html", "ga": "support_faq" }
@@ -183,8 +183,8 @@
           ]
         },
         {
-          "title": "Cuenta, suscripción y privacidad",
-          "text": "Para eliminar la cuenta, ve en la app a Ajustes › Cuenta › Eliminar cuenta. La suscripción se cobra por App Store o Google Play, y se cancela allí.",
+          "title": "Cuenta y privacidad",
+          "text": "Para eliminar la cuenta, ve en la app a Ajustes › Cuenta › Eliminar cuenta.",
           "links": [
             { "text": "Política de Privacidad", "href": "privacy-es.html", "ga": "support_privacy" },
             { "text": "Términos de uso", "href": "terms-es.html", "ga": "support_terms" }

@@ -1,7 +1,7 @@
 {
   "pt": {
     "title": "Perguntas frequentes",
-    "lede": "Respostas curtas sobre conta, ordens de serviço, dados e planos. Se a sua dúvida não estiver aqui, escreva para a gente.",
+    "lede": "Respostas curtas sobre conta, ordens de serviço e dados. Se a sua dúvida não estiver aqui, escreva para a gente.",
     "tocLabel": "Nesta página",
     "groups": [
       {
@@ -36,7 +36,7 @@
           },
           {
             "question": "Dá para anexar fotos na OS?",
-            "answer": "Dá, várias por OS. Use para registrar como o equipamento chegou, a peça trocada e o serviço pronto. A quantidade de fotos por mês depende do plano: 30 no Free, 200 no Starter, 1.000 no Pro e ilimitadas no Business."
+            "answer": "Dá, várias por OS. Use para registrar como o equipamento chegou, a peça trocada e o serviço pronto."
           },
           {
             "question": "O que o painel financeiro mostra?",
@@ -44,11 +44,11 @@
           },
           {
             "question": "Consigo gerar o PDF da OS para mandar ao cliente?",
-            "answer": "Consegue, em todos os planos. No Free o PDF sai com a marca d’água do PraticOS; a partir do Starter sai sem marca d’água."
+            "answer": "Consegue. Gere o PDF na própria OS e mande ao cliente ou imprima."
           },
           {
             "question": "Tenho mais de uma empresa ou filial. Uso uma conta só?",
-            "answer": "Sim, no plano Business. Cada empresa fica com clientes, OS e financeiro separados, e você alterna entre elas no app. Serve para franquias e para quem toca mais de um negócio."
+            "answer": "Sim. Cada empresa fica com clientes, OS e financeiro separados, e você alterna entre elas no app. Serve para franquias e para quem toca mais de um negócio."
           }
         ]
       },
@@ -63,12 +63,12 @@
         ]
       },
       {
-        "id": "planos",
-        "title": "Planos e cobrança",
+        "id": "custo",
+        "title": "Custo",
         "items": [
           {
             "question": "Quanto custa?",
-            "answer": "O Free não custa nada e não tem prazo para acabar. Os planos pagos vão de R$ 59 a R$ 249 por mês, cobrados pela App Store ou pelo Google Play. A tabela completa está em <a href=\"pricing.html\">Planos e preços</a>."
+            "answer": "Nada. O PraticOS é gratuito no iOS e no Android, sem cartão de crédito."
           }
         ]
       },
@@ -86,7 +86,7 @@
   },
   "en": {
     "title": "Frequently asked questions",
-    "lede": "Short answers about your account, work orders, data and plans. If your question isn’t here, email us.",
+    "lede": "Short answers about your account, work orders and data. If your question isn’t here, email us.",
     "tocLabel": "On this page",
     "groups": [
       {
@@ -121,7 +121,7 @@
           },
           {
             "question": "Can I attach photos to a work order?",
-            "answer": "Yes, several per order. Use them to record how the equipment came in, the part you replaced and the finished job. Monthly photos depend on your plan: 30 on Free, 200 on Starter, 1,000 on Pro and unlimited on Business."
+            "answer": "Yes, several per order. Use them to record how the equipment came in, the part you replaced and the finished job."
           },
           {
             "question": "What does the finance dashboard show?",
@@ -129,11 +129,11 @@
           },
           {
             "question": "Can I send the customer a PDF of the work order?",
-            "answer": "Yes, on every plan. On Free the PDF carries the PraticOS watermark; from Starter up it has no watermark."
+            "answer": "Yes. Create the PDF from the work order and send it to the customer or print it."
           },
           {
             "question": "I run more than one company or branch. Can I use one account?",
-            "answer": "Yes, on the Business plan. Each company keeps its own customers, work orders and finances, and you switch between them in the app. It fits franchises and anyone running more than one business."
+            "answer": "Yes. Each company keeps its own customers, work orders and finances, and you switch between them in the app. It fits franchises and anyone running more than one business."
           }
         ]
       },
@@ -148,12 +148,12 @@
         ]
       },
       {
-        "id": "plans",
-        "title": "Plans and billing",
+        "id": "cost",
+        "title": "Cost",
         "items": [
           {
             "question": "How much does it cost?",
-            "answer": "Free costs nothing and has no end date. Paid plans run from $12 to $49 a month, billed through the App Store or Google Play. The full table is on <a href=\"pricing-en.html\">Pricing</a>."
+            "answer": "Nothing. PraticOS is free on iOS and Android, with no credit card."
           }
         ]
       },
@@ -171,7 +171,7 @@
   },
   "es": {
     "title": "Preguntas frecuentes",
-    "lede": "Respuestas cortas sobre la cuenta, las órdenes de servicio, los datos y los planes. Si tu duda no está aquí, escríbenos.",
+    "lede": "Respuestas cortas sobre la cuenta, las órdenes de servicio y los datos. Si tu duda no está aquí, escríbenos.",
     "tocLabel": "En esta página",
     "groups": [
       {
@@ -206,7 +206,7 @@
           },
           {
             "question": "¿Puedo adjuntar fotos a la orden?",
-            "answer": "Sí, varias por orden. Úsalas para registrar cómo llegó el equipo, la pieza que cambiaste y el trabajo terminado. Las fotos por mes dependen del plan: 30 en Free, 200 en Starter, 1.000 en Pro e ilimitadas en Business."
+            "answer": "Sí, varias por orden. Úsalas para registrar cómo llegó el equipo, la pieza que cambiaste y el trabajo terminado."
           },
           {
             "question": "¿Qué muestra el panel financiero?",
@@ -214,11 +214,11 @@
           },
           {
             "question": "¿Puedo generar el PDF de la orden para enviarlo al cliente?",
-            "answer": "Sí, en todos los planes. En Free el PDF sale con la marca de agua de PraticOS; desde Starter sale sin marca de agua."
+            "answer": "Sí. Genera el PDF desde la orden y envíalo al cliente o imprímelo."
           },
           {
             "question": "Tengo más de una empresa o sucursal. ¿Uso una sola cuenta?",
-            "answer": "Sí, en el plan Business. Cada empresa tiene sus propios clientes, órdenes y finanzas, y cambias entre ellas en la app. Sirve para franquicias y para quien lleva más de un negocio."
+            "answer": "Sí. Cada empresa tiene sus propios clientes, órdenes y finanzas, y cambias entre ellas en la app. Sirve para franquicias y para quien lleva más de un negocio."
           }
         ]
       },
@@ -233,12 +233,12 @@
         ]
       },
       {
-        "id": "planes",
-        "title": "Planes y cobro",
+        "id": "costo",
+        "title": "Costo",
         "items": [
           {
             "question": "¿Cuánto cuesta?",
-            "answer": "Free no cuesta nada y no tiene plazo. Los planes pagos van de $12 a $49 al mes, cobrados por App Store o Google Play. La tabla completa está en <a href=\"pricing-es.html\">Precios</a>."
+            "answer": "Nada. PraticOS es gratis en iOS y Android, sin tarjeta de crédito."
           }
         ]
       },

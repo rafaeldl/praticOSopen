@@ -4,7 +4,7 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Oficina Mecânica: OS pelo celular | PraticOS",
-    "description": "App de ordem de serviço para oficina mecânica: checklist de entrada com fotos, busca pela placa e orçamento que o cliente aprova por link. Plano grátis.",
+    "description": "App de ordem de serviço para oficina mecânica: checklist de entrada com fotos, busca pela placa e orçamento que o cliente aprova por link. Grátis.",
     "keywords": "sistema para oficina mecânica, programa para oficina mecânica, software oficina mecânica, ordem de serviço oficina, app oficina mecânica, checklist de entrada de veículo",
     "ogTitle": "Sistema para Oficina Mecânica | PraticOS",
     "ogDescription": "OS da oficina no celular: checklist de entrada com fotos, histórico pela placa, orçamento aprovado por link e controle do que entrou.",
@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para oficina mecânica. Cadastre o carro pela placa, faça o checklist de entrada com fotos, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "note": "Grátis · iOS e Android · sem cartão de crédito",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário e 30 fotos por mês. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
         },
         {
           "question": "Serve para funilaria, lanternagem e lava-car?",
@@ -163,7 +163,7 @@
         },
         {
           "question": "Os mecânicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -176,7 +176,7 @@
     "lang": "en",
     "langCode": "en",
     "title": "Auto Repair Shop Software: Work Orders by Phone | PraticOS",
-    "description": "Work order app for auto repair shops: vehicle intake checklist with photos, search by license plate and quotes customers approve by link. Free plan.",
+    "description": "Work order app for auto repair shops: vehicle intake checklist with photos, search by license plate and quotes customers approve by link. Free.",
     "keywords": "auto repair shop software, mechanic shop management, work order app for mechanics, car repair shop app, vehicle inspection checklist app",
     "ogTitle": "Auto Repair Shop Software | PraticOS",
     "ogDescription": "Shop work orders on your phone: intake checklist with photos, history by license plate, quotes approved by link and a clear view of what came in.",
@@ -186,7 +186,7 @@
       "lede": "PraticOS is the work order app for auto repair shops. Add the car by license plate, run the intake checklist with photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free plan forever · iOS and Android · no credit card",
+      "note": "Free · iOS and Android · no credit card",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -323,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user and 30 photos per month. Paid plans are for when your team grows and are listed below."
+          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
         },
         {
           "question": "Does it work for body shops, dent repair and car washes?",
@@ -335,7 +335,7 @@
         },
         {
           "question": "Can my mechanics use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Free has 1 user; Starter includes 2 and Pro includes 3."
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -348,7 +348,7 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Taller Mecánico: órdenes y fotos | PraticOS",
-    "description": "App de órdenes de servicio para taller mecánico: checklist de ingreso con fotos, búsqueda por placa y presupuesto aprobado por link. Plan gratis.",
+    "description": "App de órdenes de servicio para taller mecánico: checklist de ingreso con fotos, búsqueda por placa y presupuesto aprobado por link. Gratis.",
     "keywords": "sistema para taller mecánico, programa para taller mecánico, software taller mecánico, orden de servicio taller, app taller mecánico, checklist de ingreso de vehículo",
     "ogTitle": "Sistema para Taller Mecánico | PraticOS",
     "ogDescription": "Las órdenes del taller en el celular: checklist de ingreso con fotos, historial por placa, presupuesto aprobado por link y control de lo cobrado.",
@@ -358,7 +358,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para talleres mecánicos. Registra el auto por la placa, haz el checklist de ingreso con fotos, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario y 30 fotos por mes. Los planes pagos son para cuando el equipo crece y están más abajo."
+          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
         },
         {
           "question": "¿Sirve para chapa y pintura, desabollado y lavado de autos?",
@@ -507,7 +507,7 @@
         },
         {
           "question": "¿Los mecánicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

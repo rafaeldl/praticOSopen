@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para empresas de manutenção de elevadores. Agende a visita, faça o checklist de preventiva com fotos no celular, registre as peças trocadas e mande ao síndico o link da OS para ele ver o serviço e aprovar o reparo extra.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "note": "Grátis · iOS e Android · sem cartão de crédito",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário e 30 fotos por mês. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
         },
         {
           "question": "O app cria as preventivas do mês sozinho?",
@@ -163,7 +163,7 @@
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
         },
         {
           "question": "O síndico precisa instalar algum app?",
@@ -186,7 +186,7 @@
       "lede": "PraticOS is the work order app for elevator maintenance companies. Schedule the visit, run the maintenance checklist with photos on your phone, log replaced parts and send the property manager a link to review the job and approve extra repairs.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free plan forever · iOS and Android · no credit card",
+      "note": "Free · iOS and Android · no credit card",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -323,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user and 30 photos per month. Paid plans are for when your team grows and are listed below."
+          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
         },
         {
           "question": "Does the app create monthly maintenance visits on its own?",
@@ -335,7 +335,7 @@
         },
         {
           "question": "Can my technicians use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values. Free has 1 user; Starter includes 2 and Pro includes 3."
+          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values."
         },
         {
           "question": "Does the property manager need to install an app?",
@@ -358,7 +358,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para empresas de mantenimiento de ascensores. Agenda la visita, haz el checklist de mantenimiento con fotos en el celular, registra los repuestos cambiados y envía al administrador el link de la orden para que vea el trabajo y apruebe las reparaciones extra.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario y 30 fotos por mes. Los planes pagos son para cuando el equipo crece y están más abajo."
+          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
         },
         {
           "question": "¿La app crea sola las visitas preventivas del mes?",
@@ -507,7 +507,7 @@
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros."
         },
         {
           "question": "¿El administrador tiene que instalar una app?",

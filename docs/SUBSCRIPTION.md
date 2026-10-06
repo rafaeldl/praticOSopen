@@ -208,6 +208,15 @@ Rules:
   registration is free, nothing is purchasable on any platform, and future paid
   plans will use In-App Purchase on iOS. Never describe paid plans as available
   outside the app in the notes.
+- **The website must not show prices while iOS has no In-App Purchase.**
+  The 1.53.0 rejection also came from `praticos.web.app` (the app's marketing
+  URL) showing a Free/Starter/Pro price table, plan limits and "upgrade" CTAs,
+  which contradicted the notes. The pricing page, the plans section on the home
+  and segment pages, the "Planos" menu item and every plan/price mention in the
+  FAQ, support, terms and segment pages were removed; `/pricing*.html` now
+  301-redirects to the home page (`firebase/firebase.json`). Do not bring back
+  prices, plan names, plan limits or "upgrade" language on the site until paid
+  plans are sold on iOS through In-App Purchase.
 - To restore limits on iOS: ship In-App Purchase first (see
   `docs/IAP_IMPLEMENTATION_PLAN.md`), then remove both platform checks.
 

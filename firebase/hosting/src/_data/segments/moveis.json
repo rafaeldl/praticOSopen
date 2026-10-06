@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para montador de móveis. Marque as montagens na agenda, registre o serviço de cada loja ou cliente particular, fotografe o móvel montado e saiba o que falta receber — pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "note": "Grátis · iOS e Android · sem cartão de crédito",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -125,7 +125,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O plano Free não tem prazo para acabar e inclui OS e clientes ilimitados, 1 usuário, 30 fotos por mês e 1 checklist. Os planos pagos servem para quando a equipe crescer e estão logo abaixo."
+          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
         },
         {
           "question": "Que ramo eu escolho ao criar a empresa?",
@@ -137,7 +137,7 @@
         },
         {
           "question": "Minha equipe pode usar no próprio celular?",
-          "answer": "Sim. Cada montador entra com o próprio usuário e um perfil de acesso. Quem coordena filtra a agenda por montador. O Free tem 1 usuário; o Starter inclui 2 e o Pro inclui 3."
+          "answer": "Sim. Cada montador entra com o próprio usuário e um perfil de acesso. Quem coordena filtra a agenda por montador."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -160,7 +160,7 @@
       "lede": "PraticOS is the work order app for furniture assemblers. Put jobs on the calendar, record the work for each store or homeowner, photograph the finished piece and know what's still owed — from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free plan forever · iOS and Android · no credit card",
+      "note": "Free · iOS and Android · no credit card",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -271,7 +271,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. The Free plan never expires and includes unlimited work orders and customers, 1 user, 30 photos per month and 1 checklist. Paid plans are for when your team grows and are listed below."
+          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
         },
         {
           "question": "Which trade do I pick when I set up my company?",
@@ -283,7 +283,7 @@
         },
         {
           "question": "Can my crew use it on their own phones?",
-          "answer": "Yes. Each assembler signs in with their own user and an access role. Whoever coordinates can filter the calendar by assembler. Free has 1 user; Starter includes 2 and Pro includes 3."
+          "answer": "Yes. Each assembler signs in with their own user and an access role. Whoever coordinates can filter the calendar by assembler."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -306,7 +306,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para armadores de muebles. Marca los armados en la agenda, registra el trabajo de cada tienda o cliente particular, fotografía el mueble terminado y sabe lo que falta cobrar — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -417,7 +417,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. El plan Free no vence e incluye órdenes y clientes ilimitados, 1 usuario, 30 fotos por mes y 1 checklist. Los planes pagos son para cuando el equipo crece y están más abajo."
+          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
         },
         {
           "question": "¿Qué rubro elijo al crear la empresa?",
@@ -429,7 +429,7 @@
         },
         {
           "question": "¿Mi equipo puede usarlo en su propio celular?",
-          "answer": "Sí. Cada armador entra con su propio usuario y un perfil de acceso. Quien coordina filtra la agenda por armador. Free tiene 1 usuario; Starter incluye 2 y Pro incluye 3."
+          "answer": "Sí. Cada armador entra con su propio usuario y un perfil de acceso. Quien coordina filtra la agenda por armador."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

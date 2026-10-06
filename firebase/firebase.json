@@ -20,6 +20,14 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      { "source": "/pricing.html", "destination": "/", "type": 301 },
+      { "source": "/pricing", "destination": "/", "type": 301 },
+      { "source": "/pricing-en.html", "destination": "/index-en.html", "type": 301 },
+      { "source": "/pricing-en", "destination": "/index-en.html", "type": 301 },
+      { "source": "/pricing-es.html", "destination": "/index-es.html", "type": 301 },
+      { "source": "/pricing-es", "destination": "/index-es.html", "type": 301 }
+    ],
     "headers": [
       {
         "source": "/mcp/**",
