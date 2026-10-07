@@ -158,9 +158,6 @@ Depois de obter as chaves da Fase 5, executar:
 # RevenueCat API Keys
 gh secret set REVENUECAT_IOS_API_KEY --body "appl_VALOR_AQUI"
 gh secret set REVENUECAT_ANDROID_API_KEY --body "goog_VALOR_AQUI"
-
-# RevenueCat Webhook Secret (para Cloud Functions)
-gh secret set REVENUECAT_WEBHOOK_SECRET --body "whsec_VALOR_AQUI"
 ```
 
 ### Verificar secrets configurados
@@ -187,7 +184,6 @@ gh secret list
 > Os antigos `IOS_DIST_CERTIFICATE_BASE64`, `IOS_DIST_CERTIFICATE_PASSWORD` e `IOS_PROVISIONING_PROFILE_BASE64` foram substituidos pelo fastlane match (ver `docs/IOS_CODE_SIGNING.md`).
 | `REVENUECAT_IOS_API_KEY` | **NOVO** |
 | `REVENUECAT_ANDROID_API_KEY` | **NOVO** |
-| `REVENUECAT_WEBHOOK_SECRET` | **NOVO** |
 
 ---
 
@@ -201,11 +197,13 @@ npm run build
 firebase deploy --only functions
 ```
 
-### Configurar Webhook Secret no Firebase
+### Configurar os secrets do webhook no Firebase (antes do deploy)
 
 ```bash
-firebase functions:secrets:set REVENUECAT_WEBHOOK_SECRET
-# Colar o valor do webhook signing secret quando solicitado
+firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH --project praticos
+# Colar o mesmo valor do Authorization header configurado no webhook do RevenueCat
+firebase functions:secrets:set REVENUECAT_SECRET_API_KEY --project praticos
+# Colar a Secret API key (sk_...) do RevenueCat
 ```
 
 ---
