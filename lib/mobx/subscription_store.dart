@@ -63,27 +63,6 @@ abstract class _SubscriptionStore with Store {
   @computed
   bool get hasPaidPlan => currentPlan != 'free';
 
-  /// Verifica se esta em periodo de trial
-  @computed
-  bool get isInTrial {
-    if (customerInfo == null) return false;
-    return _service.isInTrial(customerInfo!);
-  }
-
-  /// Data de expiracao do plano atual
-  @computed
-  DateTime? get expirationDate {
-    if (customerInfo == null) return null;
-    return _service.getExpirationDate(customerInfo!);
-  }
-
-  /// Indica se a assinatura vai renovar automaticamente
-  @computed
-  bool get willRenew {
-    if (customerInfo == null) return false;
-    return _service.willRenew(customerInfo!);
-  }
-
   /// Ofertas da "current offering" do RevenueCat
   @computed
   List<Package> get availablePackages {

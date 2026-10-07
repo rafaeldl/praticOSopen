@@ -23,28 +23,6 @@ mixin _$SubscriptionStore on _SubscriptionStore, Store {
     () => super.hasPaidPlan,
     name: '_SubscriptionStore.hasPaidPlan',
   )).value;
-  Computed<bool>? _$isInTrialComputed;
-
-  @override
-  bool get isInTrial => (_$isInTrialComputed ??= Computed<bool>(
-    () => super.isInTrial,
-    name: '_SubscriptionStore.isInTrial',
-  )).value;
-  Computed<DateTime?>? _$expirationDateComputed;
-
-  @override
-  DateTime? get expirationDate =>
-      (_$expirationDateComputed ??= Computed<DateTime?>(
-        () => super.expirationDate,
-        name: '_SubscriptionStore.expirationDate',
-      )).value;
-  Computed<bool>? _$willRenewComputed;
-
-  @override
-  bool get willRenew => (_$willRenewComputed ??= Computed<bool>(
-    () => super.willRenew,
-    name: '_SubscriptionStore.willRenew',
-  )).value;
   Computed<List<Package>>? _$availablePackagesComputed;
 
   @override
@@ -260,9 +238,6 @@ isPurchasing: ${isPurchasing},
 errorMessage: ${errorMessage},
 currentPlan: ${currentPlan},
 hasPaidPlan: ${hasPaidPlan},
-isInTrial: ${isInTrial},
-expirationDate: ${expirationDate},
-willRenew: ${willRenew},
 availablePackages: ${availablePackages},
 monthlyPackage: ${monthlyPackage},
 annualPackage: ${annualPackage}

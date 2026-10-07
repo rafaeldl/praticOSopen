@@ -5,57 +5,33 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
-/// Servico de assinaturas usando RevenueCat.
+/// RevenueCat wrapper (App Store In-App Purchase and Google Play Billing).
 ///
-/// Responsavel por:
-/// - Inicializar o SDK RevenueCat
-/// - Buscar informacoes do assinante
-/// - Listar ofertas/planos disponiveis
-/// - Realizar compras
-/// - Restaurar compras
-/// - Determinar plano atual baseado em entitlements
-/// - Apresentar Paywalls nativos do RevenueCat
-/// - Apresentar Customer Center para gerenciamento de assinaturas
+/// The RevenueCat `appUserID` is the company id: the subscription belongs to
+/// the company, not to the user.
 ///
-/// ## Configuracao de API Keys
+/// ## API keys
 ///
-/// Para producao, use --dart-define:
+/// Injected at build time:
 /// ```bash
-/// flutter run --dart-define=REVENUECAT_ANDROID_API_KEY=your_key
-/// flutter run --dart-define=REVENUECAT_IOS_API_KEY=your_key
+/// flutter build ios --dart-define=REVENUECAT_IOS_API_KEY=appl_xxx
+/// flutter build appbundle --dart-define=REVENUECAT_ANDROID_API_KEY=goog_xxx
 /// ```
 ///
-/// Para teste/desenvolvimento local, voce pode usar a key de sandbox:
-/// `test_rHipMRrqwezbhAuzyWKGLEqwfhP`
+/// Paid plans ([paidPlansEnabled]) need a real store key for the platform
+/// (`appl_` on iOS, `goog_` on Android). Without it the app has no purchase UI
+/// and no plan limits on any platform. A Test Store key (`test_`) only
+/// configures the SDK in debug builds and never turns paid plans on.
 ///
-/// A key da Test Store (`test_`) funciona SOMENTE em debug: em build de
-/// release o SDK encerra o app de proposito, entao o servico a ignora e
-/// segue sem assinaturas (ver [shouldConfigureSdk]).
+/// ## Entitlements
 ///
-/// ## RevenueCat desativado temporariamente
-///
-/// A cobranca ainda nao esta ativa no app: enquanto [revenueCatEnabled] for
-/// `false`, o SDK nao e configurado, independente das keys do build.
-///
-/// ## Entitlements Suportados
-///
-/// - `Rafsoft Pro` - Entitlement para acesso completo ao app (ambiente de teste)
-/// - `business` - Plano Business (producao)
-/// - `pro` - Plano Pro (producao)
-/// - `starter` - Plano Starter (producao)
-///
-/// ## Produtos Configurados
-///
-/// - `monthly` - Assinatura mensal
-/// - `yearly` - Assinatura anual
-/// - `lifetime` - Compra unica vitalicia
+/// `business`, `pro`, `starter` ([entitlementIds], highest plan first).
 class SubscriptionService {
   static SubscriptionService? _instance;
   static SubscriptionService get instance => _instance ??= SubscriptionService._();
 
   SubscriptionService._();
 
-  /// API Keys do RevenueCat (configuradas via --dart-define)
   static const _iosApiKey = String.fromEnvironment(
     'REVENUECAT_IOS_API_KEY',
     defaultValue: '',
@@ -65,42 +41,94 @@ class SubscriptionService {
     defaultValue: '',
   );
 
-  /// Entitlement principal para ambiente de teste
-  static const _mainEntitlement = 'Rafsoft Pro';
+  /// Production entitlements, highest plan first.
+  static const List<String> entitlementIds = ['business', 'pro', 'starter'];
 
-  /// Entitlements de producao ordenados por prioridade
-  static const _productionEntitlements = ['business', 'pro', 'starter'];
+  /// Overrides [paidPlansEnabled] in tests. Always reset to null afterwards.
+  @visibleForTesting
+  static bool? debugPaidPlansEnabledOverride;
 
-  /// Todos os entitlements reconhecidos
-  static const _allEntitlements = [_mainEntitlement, ..._productionEntitlements];
+  /// Single switch for paid plans: SDK, purchase UI and plan limits.
+  ///
+  /// `true` only when this build carries a real store key for the platform.
+  static bool get paidPlansEnabled {
+    final override = debugPaidPlansEnabledOverride;
+    if (override != null) return override;
+    if (kIsWeb) return false;
+    return isPaidPlansKey(
+      _platformApiKey(),
+      isIOS: Platform.isIOS,
+      isAndroid: Platform.isAndroid,
+    );
+  }
+
+  /// Whether purchase UI (paywall, plans, upgrade CTAs) may appear.
+  static bool get purchaseUiEnabled => paidPlansEnabled;
+
+  /// Whether [apiKey] turns paid plans on for the given platform.
+  @visibleForTesting
+  static bool isPaidPlansKey(
+    String apiKey, {
+    required bool isIOS,
+    required bool isAndroid,
+    bool releaseMode = kReleaseMode,
+  }) {
+    if (!shouldConfigureSdk(apiKey, releaseMode: releaseMode)) return false;
+    if (isIOS) return apiKey.startsWith('appl_');
+    if (isAndroid) return apiKey.startsWith('goog_');
+    return false;
+  }
+
+  /// Whether the SDK may be configured with [apiKey].
+  ///
+  /// Test Store keys (`test_`) only work in debug: in release builds the
+  /// RevenueCat SDK (9+) terminates the app on purpose when configured with one.
+  @visibleForTesting
+  static bool shouldConfigureSdk(
+    String apiKey, {
+    bool releaseMode = kReleaseMode,
+  }) {
+    if (apiKey.isEmpty) return false;
+    if (releaseMode && apiKey.startsWith('test_')) return false;
+    return true;
+  }
+
+  static String _platformApiKey() {
+    if (kIsWeb) return '';
+    if (Platform.isIOS) return _iosApiKey;
+    if (Platform.isAndroid) return _androidApiKey;
+    return '';
+  }
+
+  /// Plan id ('business', 'pro', 'starter' or 'free') for the active
+  /// entitlement ids, highest plan first.
+  @visibleForTesting
+  static String planForEntitlementIds(Iterable<String> activeIds) {
+    for (final id in entitlementIds) {
+      if (activeIds.contains(id)) return id;
+    }
+    return 'free';
+  }
 
   bool _isInitialized = false;
 
-  /// Verifica se o SDK foi inicializado com sucesso.
+  /// Whether the SDK was configured in this session.
   bool get isInitialized => _isInitialized;
 
-  /// Inicializa o RevenueCat SDK.
-  ///
-  /// Deve ser chamado apos autenticacao, passando o userId (ou companyId)
-  /// como appUserId para vincular assinaturas ao usuario.
-  ///
-  /// [userId] - ID do usuario ou empresa para vincular assinaturas
-  Future<void> initialize(String userId) async {
+  /// Configures the SDK for [companyId], or switches the RevenueCat customer
+  /// to [companyId] when it is already configured. No-op without a key.
+  Future<void> initialize(String companyId) async {
     if (_isInitialized) {
-      debugPrint('SubscriptionService: Already initialized, updating appUserId');
-      await Purchases.logIn(userId);
+      await Purchases.logIn(companyId);
       return;
     }
 
-    final apiKey = _getApiKey();
+    final apiKey = _platformApiKey();
     if (!shouldConfigureSdk(apiKey)) {
-      if (!revenueCatEnabled) {
-        debugPrint('SubscriptionService: RevenueCat disabled, skipping initialization');
-      } else if (apiKey.isEmpty) {
+      if (apiKey.isEmpty) {
         debugPrint('SubscriptionService: No API key configured, skipping initialization');
       } else {
-        // Key da Test Store em release: o SDK encerraria o app de proposito.
-        // Segue sem assinaturas e registra no Crashlytics para ser corrigido.
+        // Test Store key in a release build: the SDK would kill the app.
         FirebaseCrashlytics.instance.recordError(
           StateError('RevenueCat Test Store API key used in release build'),
           StackTrace.current,
@@ -111,407 +139,82 @@ class SubscriptionService {
       return;
     }
 
-    try {
-      final configuration = PurchasesConfiguration(apiKey)..appUserID = userId;
-      await Purchases.configure(configuration);
-      _isInitialized = true;
-      debugPrint('SubscriptionService: Initialized successfully for user $userId');
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error initializing: $e\n$stack');
-      rethrow;
-    }
+    final configuration = PurchasesConfiguration(apiKey)..appUserID = companyId;
+    await Purchases.configure(configuration);
+    _isInitialized = true;
+    debugPrint('SubscriptionService: Initialized');
   }
 
-  /// Chave geral do RevenueCat.
-  ///
-  /// Desativado temporariamente: a cobranca ainda nao esta ativa no app.
-  /// Enquanto `false`, o SDK nunca e configurado (sem assinaturas e sem risco
-  /// de crash por key invalida). Para reativar: trocar os secrets
-  /// REVENUECAT_*_API_KEY pelas keys reais (goog_/appl_) e mudar para `true`.
-  static const revenueCatEnabled = false;
-
-  /// Indica se a UI de compra (paywall, planos, CTAs de upgrade) pode aparecer.
-  ///
-  /// No iOS fica sempre `false`: a App Review rejeitou a 1.51.0 pela guideline
-  /// 3.1.1 (Payments - In-App Purchase) por expor assinatura sem compra via
-  /// StoreKit. Enquanto o IAP nao estiver implementado, o app nao mostra preco,
-  /// plano nem botao de assinar no iOS. Para reativar: implementar o IAP e
-  /// remover a condicao de plataforma.
-  static bool get purchaseUiEnabled => !Platform.isIOS;
-
-  /// Indica se o SDK deve ser configurado com a API key.
-  ///
-  /// Nunca configura com o RevenueCat desativado ([revenueCatEnabled]). Keys da
-  /// Test Store (`test_`) so funcionam em debug: em build de release o SDK do
-  /// RevenueCat (9+) encerra o app de proposito ao configurar com elas.
-  @visibleForTesting
-  static bool shouldConfigureSdk(
-    String apiKey, {
-    bool enabled = revenueCatEnabled,
-    bool releaseMode = kReleaseMode,
-  }) {
-    if (!enabled || apiKey.isEmpty) return false;
-    if (releaseMode && apiKey.startsWith('test_')) return false;
-    return true;
-  }
-
-  /// Falha em Dart quando o SDK nao foi configurado (sem key ou key recusada).
-  ///
-  /// Chamar o SDK nativo sem configurar derruba o app no iOS
-  /// (`Purchases.shared` da fatalError).
+  /// Fails in Dart when the SDK is not configured: calling the native SDK
+  /// unconfigured crashes the app on iOS (`Purchases.shared` fatalError).
   void _ensureInitialized() {
     if (!_isInitialized) {
       throw StateError('SubscriptionService: RevenueCat not initialized');
     }
   }
 
-  /// Retorna a API key apropriada para a plataforma atual.
-  String _getApiKey() {
-    if (kIsWeb) return '';
-
-    if (Platform.isIOS) return _iosApiKey;
-    if (Platform.isAndroid) return _androidApiKey;
-
-    return '';
-  }
-
-  /// Busca informacoes do assinante atual.
-  ///
-  /// Retorna [CustomerInfo] com entitlements ativos, datas de expiracao, etc.
   Future<CustomerInfo> getCustomerInfo() async {
     _ensureInitialized();
-    return await Purchases.getCustomerInfo();
+    return Purchases.getCustomerInfo();
   }
 
-  /// Busca ofertas/planos disponiveis para compra.
-  ///
-  /// Retorna [Offerings] com os pacotes configurados no RevenueCat.
-  /// Pacotes esperados: monthly, yearly, lifetime
   Future<Offerings?> getOfferings() async {
     _ensureInitialized();
-    try {
-      final offerings = await Purchases.getOfferings();
-      debugPrint('SubscriptionService: Fetched offerings: ${offerings.current?.identifier}');
-
-      // Log dos pacotes disponiveis para debug
-      if (offerings.current != null) {
-        for (final package in offerings.current!.availablePackages) {
-          debugPrint('  - Package: ${package.identifier} (${package.packageType})');
-        }
-      }
-
-      return offerings;
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error fetching offerings: $e\n$stack');
-      rethrow;
-    }
+    return Purchases.getOfferings();
   }
 
-  /// Realiza a compra de um pacote.
-  ///
-  /// [package] - Pacote a ser comprado (obtido via getOfferings)
-  /// Retorna [CustomerInfo] atualizado apos a compra.
-  ///
-  /// Throws [PlatformException] se ocorrer um erro ou cancelamento.
-  /// Use [PurchasesErrorHelper.getErrorCode] para verificar o tipo de erro.
+  /// Buys [package]. Throws [PlatformException] on error or cancellation.
   Future<CustomerInfo> purchasePackage(Package package) async {
     _ensureInitialized();
-    try {
-      debugPrint('SubscriptionService: Purchasing package ${package.identifier}');
-      // A partir do purchases_flutter 9, Purchases.purchase retorna um
-      // PurchaseResult (CustomerInfo + StoreTransaction) em vez de CustomerInfo
-      final result = await Purchases.purchase(
-        PurchaseParams.package(package),
-      );
-      debugPrint('SubscriptionService: Purchase successful');
-      return result.customerInfo;
-    } on PlatformException catch (e) {
-      debugPrint('SubscriptionService: Purchase error: $e');
-      rethrow;
-    }
+    final result = await Purchases.purchase(PurchaseParams.package(package));
+    return result.customerInfo;
   }
 
-  /// Restaura compras anteriores.
-  ///
-  /// Util para usuarios que reinstalaram o app ou trocaram de dispositivo.
-  /// Retorna [CustomerInfo] com assinaturas restauradas.
+  /// Restores the store purchases into the current company.
   Future<CustomerInfo> restorePurchases() async {
     _ensureInitialized();
-    try {
-      debugPrint('SubscriptionService: Restoring purchases');
-      final customerInfo = await Purchases.restorePurchases();
-      debugPrint('SubscriptionService: Restore completed');
-      return customerInfo;
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error restoring purchases: $e\n$stack');
-      rethrow;
-    }
+    return Purchases.restorePurchases();
   }
 
-  /// Verifica se o usuario tem acesso ao entitlement principal (Rafsoft Pro).
-  ///
-  /// Retorna true se o usuario tem entitlement "Rafsoft Pro" ativo.
-  bool hasProEntitlement(CustomerInfo info) {
-    return info.entitlements.active.containsKey(_mainEntitlement);
-  }
+  /// 'business', 'pro', 'starter' or 'free'.
+  String getPlanFromEntitlements(CustomerInfo info) =>
+      planForEntitlementIds(info.entitlements.active.keys);
 
-  /// Determina o plano atual baseado nos entitlements ativos.
-  ///
-  /// Retorna: 'Rafsoft Pro', 'business', 'pro', 'starter', ou 'free'
-  /// Prioriza planos maiores e o entitlement de teste.
-  String getPlanFromEntitlements(CustomerInfo info) {
-    final entitlements = info.entitlements.active;
+  /// Whether [info] has an active paid plan.
+  bool hasActivePlan(CustomerInfo info) => getPlanFromEntitlements(info) != 'free';
 
-    // Verifica todos os entitlements reconhecidos em ordem de prioridade
-    for (final entitlement in _allEntitlements) {
-      if (entitlements.containsKey(entitlement)) {
-        return entitlement;
-      }
-    }
-
-    return 'free';
-  }
-
-  /// Verifica se o usuario tem um plano ativo (nao-free).
-  bool hasActivePlan(CustomerInfo info) {
-    return getPlanFromEntitlements(info) != 'free';
-  }
-
-  /// Retorna a data de expiracao do plano atual, se houver.
-  DateTime? getExpirationDate(CustomerInfo info) {
-    final entitlements = info.entitlements.active;
-
-    // Busca a expiracao do entitlement ativo de maior prioridade
-    for (final key in _allEntitlements) {
-      if (entitlements.containsKey(key)) {
-        final expDateStr = entitlements[key]?.expirationDate;
-        if (expDateStr != null) {
-          return DateTime.tryParse(expDateStr);
-        }
-        return null; // Lifetime purchase sem expiracao
-      }
-    }
-
-    return null;
-  }
-
-  /// Verifica se o plano esta em periodo de trial.
-  bool isInTrial(CustomerInfo info) {
-    final entitlements = info.entitlements.active;
-
-    for (final key in _allEntitlements) {
-      if (entitlements.containsKey(key)) {
-        final periodType = entitlements[key]?.periodType;
-        return periodType == PeriodType.trial;
-      }
-    }
-
-    return false;
-  }
-
-  /// Verifica se a assinatura foi cancelada (mas ainda ativa ate expirar).
-  bool willRenew(CustomerInfo info) {
-    final entitlements = info.entitlements.active;
-
-    for (final key in _allEntitlements) {
-      if (entitlements.containsKey(key)) {
-        return entitlements[key]?.willRenew ?? false;
-      }
-    }
-
-    return false;
-  }
-
-  /// Verifica se o usuario tem uma compra vitalicia (lifetime).
-  bool hasLifetimePurchase(CustomerInfo info) {
-    final entitlements = info.entitlements.active;
-
-    for (final key in _allEntitlements) {
-      if (entitlements.containsKey(key)) {
-        // Lifetime purchases nao expiram
-        return entitlements[key]?.expirationDate == null;
-      }
-    }
-
-    return false;
-  }
-
-  // ============================================================
-  // PAYWALL - RevenueCat Native Paywall
-  // ============================================================
-
-  /// Apresenta o Paywall nativo do RevenueCat.
-  ///
-  /// O Paywall e configurado no RevenueCat Dashboard e apresenta
-  /// os planos disponiveis (monthly, yearly, lifetime) de forma
-  /// nativa e otimizada para conversao.
-  ///
-  /// Retorna [PaywallResult] indicando se houve compra, cancelamento,
-  /// ou erro.
-  ///
-  /// Exemplo de uso:
-  /// ```dart
-  /// final result = await SubscriptionService.instance.presentPaywall();
-  /// if (result == PaywallResult.purchased) {
-  ///   // Usuario comprou - atualizar UI
-  /// }
-  /// ```
+  /// Presents the RevenueCat paywall of [offering] (default: the current
+  /// offering, `default`). Price, period, renewal terms, Terms, Privacy and
+  /// Restore are configured in the RevenueCat dashboard.
   Future<PaywallResult> presentPaywall({Offering? offering}) async {
     _ensureInitialized();
-    try {
-      debugPrint('SubscriptionService: Presenting paywall');
-      final result = await RevenueCatUI.presentPaywall(
-        offering: offering,
-      );
-      debugPrint('SubscriptionService: Paywall result: $result');
-      return result;
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error presenting paywall: $e\n$stack');
-      rethrow;
-    }
+    return RevenueCatUI.presentPaywall(
+      offering: offering,
+      displayCloseButton: true,
+    );
   }
 
-  /// Apresenta o Paywall para um offering especifico identificado pelo nome.
-  ///
-  /// [offeringIdentifier] - Identificador do offering no RevenueCat Dashboard
-  ///
-  /// Primeiro busca o offering, depois apresenta o paywall.
-  Future<PaywallResult> presentPaywallForOffering(String offeringIdentifier) async {
-    try {
-      final offerings = await getOfferings();
-      final offering = offerings?.getOffering(offeringIdentifier);
-      if (offering == null) {
-        debugPrint('SubscriptionService: Offering $offeringIdentifier not found');
-        throw Exception('Offering $offeringIdentifier not found');
-      }
-      return await presentPaywall(offering: offering);
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error presenting paywall for offering: $e\n$stack');
-      rethrow;
-    }
-  }
-
-  /// Apresenta o Paywall condicionalmente se o usuario nao tiver entitlement.
-  ///
-  /// [requiredEntitlement] - Entitlement necessario (default: 'Rafsoft Pro')
-  ///
-  /// Retorna [PaywallResult] indicando a acao do usuario.
-  /// Se o usuario ja tiver o entitlement, retorna [PaywallResult.notPresented].
-  ///
-  /// Exemplo de uso:
-  /// ```dart
-  /// final result = await SubscriptionService.instance.presentPaywallIfNeeded();
-  /// if (result == PaywallResult.purchased) {
-  ///   // Acesso liberado
-  /// } else if (result == PaywallResult.notPresented) {
-  ///   // Usuario ja tem acesso
-  /// }
-  /// ```
-  Future<PaywallResult> presentPaywallIfNeeded({
-    String? requiredEntitlement,
-  }) async {
-    _ensureInitialized();
-    try {
-      final entitlement = requiredEntitlement ?? _mainEntitlement;
-      debugPrint('SubscriptionService: Presenting paywall if needed for: $entitlement');
-      final result = await RevenueCatUI.presentPaywallIfNeeded(entitlement);
-      debugPrint('SubscriptionService: Paywall if needed result: $result');
-      return result;
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error presenting paywall if needed: $e\n$stack');
-      rethrow;
-    }
-  }
-
-  // ============================================================
-  // CUSTOMER CENTER - Gerenciamento de Assinaturas
-  // ============================================================
-
-  /// Apresenta o Customer Center do RevenueCat.
-  ///
-  /// O Customer Center permite ao usuario:
-  /// - Ver detalhes da assinatura atual
-  /// - Cancelar assinatura
-  /// - Alterar plano
-  /// - Restaurar compras
-  /// - Acessar suporte
-  ///
-  /// E configurado no RevenueCat Dashboard e usa telas nativas.
-  ///
-  /// Exemplo de uso:
-  /// ```dart
-  /// await SubscriptionService.instance.presentCustomerCenter();
-  /// ```
+  /// Presents the RevenueCat Customer Center (manage, cancel, change plan).
   Future<void> presentCustomerCenter() async {
     _ensureInitialized();
-    try {
-      debugPrint('SubscriptionService: Presenting customer center');
-      await RevenueCatUI.presentCustomerCenter();
-      debugPrint('SubscriptionService: Customer center closed');
-    } catch (e, stack) {
-      debugPrint('SubscriptionService: Error presenting customer center: $e\n$stack');
-      rethrow;
-    }
+    await RevenueCatUI.presentCustomerCenter();
   }
 
-  // ============================================================
-  // USER MANAGEMENT
-  // ============================================================
-
-  /// Faz logout do usuario atual no RevenueCat.
-  ///
-  /// Deve ser chamado quando o usuario faz logout do app.
+  /// Logs the RevenueCat customer out. No-op when the SDK is not configured.
   Future<void> logout() async {
     if (!_isInitialized) return;
-
     try {
       await Purchases.logOut();
-      debugPrint('SubscriptionService: Logged out');
     } catch (e) {
+      // logOut throws when the current customer is already anonymous.
       debugPrint('SubscriptionService: Error logging out: $e');
     }
   }
 
-  /// Identifica um novo usuario no RevenueCat.
-  ///
-  /// Util quando o usuario faz login em uma conta diferente.
-  Future<CustomerInfo> logIn(String userId) async {
+  /// Switches the RevenueCat customer to [companyId].
+  Future<CustomerInfo> logIn(String companyId) async {
     _ensureInitialized();
-    final result = await Purchases.logIn(userId);
-    debugPrint('SubscriptionService: Logged in as $userId');
+    final result = await Purchases.logIn(companyId);
     return result.customerInfo;
-  }
-
-  // ============================================================
-  // HELPERS - Informacoes uteis
-  // ============================================================
-
-  /// Retorna informacoes formatadas sobre o entitlement ativo.
-  ///
-  /// Util para exibir na UI detalhes da assinatura.
-  Map<String, dynamic> getSubscriptionDetails(CustomerInfo info) {
-    final plan = getPlanFromEntitlements(info);
-    final expiration = getExpirationDate(info);
-    final inTrial = isInTrial(info);
-    final renews = willRenew(info);
-    final lifetime = hasLifetimePurchase(info);
-
-    return {
-      'plan': plan,
-      'isPremium': plan != 'free',
-      'expirationDate': expiration,
-      'isInTrial': inTrial,
-      'willRenew': renews,
-      'isLifetime': lifetime,
-      'status': _getStatusLabel(plan, inTrial, renews, lifetime),
-    };
-  }
-
-  String _getStatusLabel(String plan, bool inTrial, bool renews, bool lifetime) {
-    if (plan == 'free') return 'Gratuito';
-    if (lifetime) return 'Vitalicio';
-    if (inTrial) return 'Trial';
-    if (!renews) return 'Cancelado';
-    return 'Ativo';
   }
 }
