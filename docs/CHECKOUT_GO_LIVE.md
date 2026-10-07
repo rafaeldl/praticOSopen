@@ -166,7 +166,7 @@ gh secret set REVENUECAT_ANDROID_API_KEY --body "goog_VALOR_AQUI"
 gh secret list
 ```
 
-**Secrets esperados (total 14):**
+**Secrets esperados (total 13):**
 | Secret | Status |
 |--------|--------|
 | `ANDROID_GOOGLE_SERVICES_JSON_BASE64` | Ja existe |
@@ -180,10 +180,10 @@ gh secret list
 | `MATCH_PASSWORD` | Criado por `ios/scripts/bootstrap_match.sh` |
 | `MATCH_GIT_PRIVATE_KEY` | Criado por `ios/scripts/bootstrap_match.sh` |
 | `PAT_TOKEN` | Ja existe |
-
-> Os antigos `IOS_DIST_CERTIFICATE_BASE64`, `IOS_DIST_CERTIFICATE_PASSWORD` e `IOS_PROVISIONING_PROFILE_BASE64` foram substituidos pelo fastlane match (ver `docs/IOS_CODE_SIGNING.md`).
 | `REVENUECAT_IOS_API_KEY` | **NOVO** |
 | `REVENUECAT_ANDROID_API_KEY` | **NOVO** |
+
+> Os antigos `IOS_DIST_CERTIFICATE_BASE64`, `IOS_DIST_CERTIFICATE_PASSWORD` e `IOS_PROVISIONING_PROFILE_BASE64` foram substituidos pelo fastlane match (ver `docs/IOS_CODE_SIGNING.md`).
 
 ---
 

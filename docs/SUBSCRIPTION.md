@@ -292,14 +292,18 @@ and `src/services/revenuecat.client.ts`.
 Daily at 04:30 America/Sao_Paulo (timeout 540s, concurrency 5). Companies with
 `subscription.plan` in starter/pro/business and `expiresAt` in the past are re-synced from
 RevenueCat: renewed ones get the new `expiresAt`, the rest drop to Free (`expired`).
-Covers the end of the grace period and missed webhooks.
+Covers the end of the grace period and missed webhooks. A grace company that never
+opened the paywall has no RevenueCat customer yet; `GET /v1/subscribers/{companyId}`
+creates one (empty, no entitlements) and the company drops to Free. Harmless: it is the
+same id the app logs in with later.
 
 ### Monthly usage reset `scheduledResetMonthlyUsage`
 
 1st of each month, 03:00 America/Sao_Paulo. Sets `usage.photosThisMonth = 0` and
-`usage.usageResetAt` (next 1st, 00:00 UTC) for every company with `subscription.plan`
-(query `subscription.plan in [free, starter, pro, business]`; companies without
-`subscription` have no counter).
+`usage.usageResetAt` (next 1st, 00:00 UTC) for every company with
+`subscription.usage.photosThisMonth > 0` (single-field query, automatic index). This
+includes a `subscription` map without `plan` (only `usage`, created by the app's dotted
+usage updates; treated as Free everywhere). Companies already at 0 are not written.
 
 ### Launch grace period
 
