@@ -135,6 +135,9 @@ service cloud.firestore {
       let after = request.resource.data.get('subscription', null);
       return after == before
         || (before == null && isClientFreeSubscription(after))
+        // Mapa só com `usage` (criado por updates com caminho pontuado): sem
+        // plano é Free, então o merge legado da Free do cliente é aceito.
+        || (before is map && !('plan' in before) && isClientFreeSubscription(after))
         || (before is map && after is map
           && after.diff(before).affectedKeys().hasOnly(['usage', 'id',
             'currentPeriodStart', 'currentPeriodEnd', 'revenueCatCustomerId']));
