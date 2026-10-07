@@ -9,6 +9,8 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
   @override
@@ -101,6 +103,8 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
           }
         }
       }
+    } on FeatureGateLimitException catch (e) {
+      if (mounted) showFeatureLimitDialog(context, e.result);
     } catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
