@@ -171,7 +171,7 @@ describe('resetMonthlyUsage', () => {
 
   beforeEach(() => fake.reset());
 
-  it('zeroes photosThisMonth of every company that has a subscription', async () => {
+  it('zeroes photosThisMonth of every company that has used photos this month', async () => {
     // usageResetAt in the future: the old query (usageResetAt <= now) skipped this company.
     seedCompany('a', { plan: 'free', status: 'active', usage: { ...USAGE, usageResetAt: '2027-05-01T00:00:00.000Z' } });
     seedCompany('b', GRACE);
@@ -189,6 +189,27 @@ describe('resetMonthlyUsage', () => {
     }
     expect(subscriptionOf('b')).toMatchObject({ plan: 'pro', source: 'grace', expiresAt: FUTURE });
     expect(fake.read('companies/c')).toEqual({ name: 'Company c' });
+  });
+
+  it('resets a usage-only subscription (map without plan, written by dotted usage updates)', async () => {
+    seedCompany('u', { usage: { photosThisMonth: 7, formTemplates: 1 } });
+
+    await expect(resetMonthlyUsage(RUN_AT)).resolves.toBe(1);
+
+    expect(subscriptionOf('u')).toEqual({
+      usage: { photosThisMonth: 0, formTemplates: 1, usageResetAt: '2026-12-01T00:00:00.000Z' },
+    });
+  });
+
+  it('does not write companies whose counter is already 0', async () => {
+    const zero = { plan: 'free', status: 'active', usage: { ...USAGE, photosThisMonth: 0 } };
+    seedCompany('z', zero);
+    seedCompany('p', { plan: 'pro', status: 'active', usage: USAGE });
+
+    await expect(resetMonthlyUsage(RUN_AT)).resolves.toBe(1);
+
+    expect(subscriptionOf('z')).toEqual(zero);
+    expect(subscriptionOf('p')?.usage).toMatchObject({ photosThisMonth: 0, usageResetAt: '2026-12-01T00:00:00.000Z' });
   });
 
   it('writes more companies than fit in one batch', async () => {

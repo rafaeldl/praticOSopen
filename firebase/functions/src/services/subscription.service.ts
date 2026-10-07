@@ -10,7 +10,7 @@ import {
   getDocument,
   updateDocument,
 } from './firestore.service';
-import { Subscription, SubscriptionPlan } from '../models/types';
+import { Subscription } from '../models/types';
 import {
   PAID_PLANS_BY_RANK,
   PLAN_LIMITS,
@@ -106,21 +106,21 @@ export async function updateUserCount(companyId: string, count: number): Promise
   });
 }
 
-const ALL_PLANS: SubscriptionPlan[] = ['free', 'starter', 'pro', 'business'];
 const BATCH_LIMIT = 400;
 
 /**
- * Resets the monthly counters (photosThisMonth) of every company that has a
- * subscription. Firestore cannot query "field exists", so the query matches
- * every plan value (`in` on one field: automatic single-field index, no
- * composite index); companies without `subscription` have no counter.
+ * Resets the monthly counters (photosThisMonth) of every company that used
+ * photos this month. Queries `subscription.usage.photosThisMonth > 0`
+ * (automatic single-field index, no composite index), so it also covers a
+ * subscription map without `plan` (only `usage`, created by the app's dotted
+ * usage updates) and skips companies already at 0 (no-op writes).
  * Called by scheduledResetMonthlyUsage on the 1st of each month.
  */
 export async function resetMonthlyUsage(now: Date = new Date()): Promise<number> {
   const nowIso = now.toISOString();
   const nextReset = getNextMonthReset(now);
   const snapshot = await getRootCollection('companies')
-    .where('subscription.plan', 'in', ALL_PLANS)
+    .where('subscription.usage.photosThisMonth', '>', 0)
     .get();
 
   let batch = db.batch();

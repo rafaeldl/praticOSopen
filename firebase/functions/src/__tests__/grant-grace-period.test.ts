@@ -83,6 +83,24 @@ describe('grant-grace-period', () => {
     });
   });
 
+  it('grants grace to a usage-only subscription (no plan) with dotted paths, keeping usage', () => {
+    const plan = planGrace({ usage: { formTemplates: 1 } }, EXPIRES, NOW);
+
+    expect(plan).toEqual({
+      action: 'grant',
+      update: {
+        'subscription.plan': 'pro',
+        'subscription.status': 'active',
+        'subscription.source': 'grace',
+        'subscription.store': null,
+        'subscription.expiresAt': EXPIRES.toISOString(),
+        'subscription.limits': PLAN_LIMITS.pro,
+        'subscription.updatedAt': NOW.toISOString(),
+        updatedAt: NOW.toISOString(),
+      },
+    });
+  });
+
   it('adds usage when the existing subscription has none', () => {
     const plan = planGrace({ plan: 'free', status: 'active' }, EXPIRES, NOW);
 

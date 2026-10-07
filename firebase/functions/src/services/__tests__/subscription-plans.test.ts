@@ -153,6 +153,15 @@ describe('resolveSubscriptionState', () => {
     expect(resolveSubscriptionState(byProduct, NOW).plan).toBe('pro');
     expect(resolveSubscriptionState(unknown, NOW).plan).toBe('free');
   });
+
+  it('strips the Play base plan suffix (productId:basePlanId) in the product fallback', () => {
+    const play = subscriber(
+      { 'Rafsoft Pro': { ...entitlement('praticos_pro_monthly:monthly'), store: 'play_store' } },
+      { 'praticos_pro_monthly:monthly': storeSub({ store: 'play_store' }) },
+    );
+
+    expect(resolveSubscriptionState(play, NOW)).toMatchObject({ plan: 'pro', store: 'play_store' });
+  });
 });
 
 describe('getPlanLimits', () => {
@@ -255,6 +264,16 @@ describe('buildGraceSubscription', () => {
     const legacy: Subscription = { plan: 'pro', status: 'expired', limits: PLAN_LIMITS.pro, usage: USAGE };
 
     expect(buildGraceSubscription(legacy, EXPIRES, NOW)).toMatchObject({ plan: 'pro', source: 'grace', usage: USAGE });
+  });
+
+  it('treats a usage-only subscription (no plan) as Free: grants grace and keeps usage', () => {
+    const usageOnly = { usage: { formTemplates: 1 } } as unknown as Subscription;
+
+    expect(buildGraceSubscription(usageOnly, EXPIRES, NOW)).toMatchObject({
+      plan: 'pro',
+      source: 'grace',
+      usage: { formTemplates: 1 },
+    });
   });
 
   it('grants grace over a legacy paid subscription with a past expiresAt', () => {

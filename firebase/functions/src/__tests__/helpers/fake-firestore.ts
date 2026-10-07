@@ -41,6 +41,14 @@ function getField(data: Data | undefined, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, key) => (isPlainObject(acc) ? acc[key] : undefined), data);
 }
 
+/** Firestore filter semantics used by the tests: ==, in, and numeric > (numbers only). */
+function matches(actual: unknown, op: string, value: unknown): boolean {
+  if (op === '==') return actual === value;
+  if (op === 'in') return Array.isArray(value) && value.includes(actual);
+  if (op === '>') return typeof actual === 'number' && typeof value === 'number' && actual > value;
+  throw new Error(`FakeQuery: unsupported operator ${op}`);
+}
+
 export class FakeSnapshot {
   constructor(
     public ref: FakeDoc,
@@ -106,9 +114,7 @@ class FakeQuery {
     const source = this.group ? this.store.listCollectionGroup(this.path) : this.store.listCollection(this.path);
     const docs = source
       .filter((d) =>
-        this.filters.every(([f, op, v]) =>
-          op === '==' ? getField(d.value, f) === v : op === 'in' && Array.isArray(v) && v.includes(getField(d.value, f)),
-        ),
+        this.filters.every(([f, op, v]) => matches(getField(d.value, f), op, v)),
       )
       .map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), d.value));
     return { empty: docs.length === 0, size: docs.length, docs };

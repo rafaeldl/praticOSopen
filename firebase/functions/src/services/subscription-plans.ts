@@ -85,7 +85,8 @@ function toStore(store: string | undefined): SubscriptionStore | null {
 
 function planOf(entitlementId: string, productId: string): SubscriptionPlan | undefined {
   if ((PAID_PLANS_BY_RANK as string[]).includes(entitlementId)) return entitlementId as SubscriptionPlan;
-  return PRODUCT_TO_PLAN[productId];
+  // Play reports subscriptions as `productId:basePlanId`.
+  return PRODUCT_TO_PLAN[productId.split(':')[0]];
 }
 
 /**
@@ -144,19 +145,21 @@ function defaultUsage(): SubscriptionUsage {
  * Grace subscription (Pro until expiresAt, source 'grace') keeping the
  * existing usage. Null when the company already has an active paid store
  * subscription, or a legacy paid one (set manually: paid plan, no source,
- * not expired, no expiry or expiry in the future).
+ * not expired, no expiry or expiry in the future). A missing plan is Free.
  */
 export function buildGraceSubscription(
   existing: Subscription | undefined,
   expiresAt: Date,
   now: Date = new Date(),
 ): Subscription | null {
-  if (existing && existing.source === 'store' && existing.plan !== 'free' && existing.status !== 'expired') {
+  // A map without plan (only usage, created by the app's dotted usage updates) is Free.
+  const plan = existing?.plan ?? 'free';
+  if (existing && existing.source === 'store' && plan !== 'free' && existing.status !== 'expired') {
     return null;
   }
   if (
     existing &&
-    existing.plan !== 'free' &&
+    plan !== 'free' &&
     existing.source === undefined &&
     existing.status !== 'expired' &&
     (!existing.expiresAt || isAfter(existing.expiresAt, now))

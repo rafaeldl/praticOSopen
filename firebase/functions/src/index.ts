@@ -157,7 +157,7 @@ import { fetchSubscriber } from './services/revenuecat.client';
  * Scheduled function to reset monthly usage counters for subscriptions.
  * Runs at 03:00 America/Sao_Paulo on the 1st of every month.
  *
- * For every company with `subscription.plan` set:
+ * For every company with `subscription.usage.photosThisMonth` > 0 (with or without `plan`):
  * - photosThisMonth = 0
  * - usageResetAt = first day of the following month (00:00 UTC)
  */
