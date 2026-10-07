@@ -17,7 +17,12 @@ import {
   PLAN_LIMITS,
   PRODUCT_TO_PLAN,
   getNextMonthReset,
+  getPlanLimits,
+  isGraceActive,
+  resolveSubscriptionState,
+  type ResolvedSubscriptionState,
 } from './subscription-plans';
+import type { RcSubscriber } from './revenuecat.client';
 
 export {
   PLAN_LIMITS,
@@ -297,4 +302,64 @@ export async function processRevenueCatWebhook(event: RevenueCatWebhookEvent): P
       console.log(`[Webhook] Unknown event type: ${type}`);
       return true;
   }
+}
+
+// ============================================================================
+// RevenueCat sync (authoritative state)
+// ============================================================================
+
+type FieldUpdates = FirebaseFirestore.UpdateData<FirebaseFirestore.DocumentData>;
+
+export interface SyncDeps {
+  /** Reads GET /v1/subscribers/{appUserId} (bound to the secret API key by the caller). */
+  fetchSubscriber: (appUserId: string) => Promise<RcSubscriber>;
+  now?: Date;
+}
+
+export type SyncResult = 'updated' | 'grace_kept' | 'company_not_found';
+
+/** Dotted-path update with the plan fields only; never touches subscription.usage. */
+function buildPlanUpdate(
+  companyId: string,
+  subscriber: RcSubscriber,
+  state: ResolvedSubscriptionState,
+  now: Date,
+): FieldUpdates {
+  const nowIso = now.toISOString();
+  return {
+    'subscription.plan': state.plan,
+    'subscription.status': state.status,
+    'subscription.limits': getPlanLimits(state.plan),
+    'subscription.expiresAt': state.expiresAt,
+    'subscription.store': state.store,
+    'subscription.source': 'store',
+    'subscription.rcSubscriberId': subscriber.original_app_user_id || companyId,
+    'subscription.updatedAt': nowIso,
+    updatedAt: nowIso,
+  };
+}
+
+/**
+ * Writes the company's current subscription as RevenueCat reports it
+ * (app_user_id = companyId). Idempotent: safe for repeated and out-of-order
+ * webhook events. A running launch grace period is kept while RevenueCat has
+ * no active entitlement.
+ */
+export async function syncCompanySubscription(companyId: string, deps: SyncDeps): Promise<SyncResult> {
+  const now = deps.now ?? new Date();
+  const ref = getRootCollection('companies').doc(companyId);
+  const snapshot = await ref.get();
+  if (!snapshot.exists) return 'company_not_found';
+
+  const subscriber = await deps.fetchSubscriber(companyId);
+  const state = resolveSubscriptionState(subscriber, now);
+  const current = snapshot.get('subscription') as Subscription | undefined;
+  if (state.plan === 'free' && isGraceActive(current, now)) {
+    console.log(`[Subscription] Grace period kept for company ${companyId}`);
+    return 'grace_kept';
+  }
+
+  await ref.update(buildPlanUpdate(companyId, subscriber, state, now));
+  console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
+  return 'updated';
 }
