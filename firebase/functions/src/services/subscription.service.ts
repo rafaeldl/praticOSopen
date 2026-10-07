@@ -11,51 +11,23 @@ import {
 } from './firestore.service';
 import {
   Subscription,
-  SubscriptionPlan,
   SubscriptionStatus,
-  SubscriptionLimits,
 } from '../models/types';
+import {
+  PLAN_LIMITS,
+  PRODUCT_TO_PLAN,
+  getNextMonthReset,
+} from './subscription-plans';
 
-// ============================================================================
-// Plan Limits Configuration
-// ============================================================================
-
-const PLAN_LIMITS: Record<SubscriptionPlan, SubscriptionLimits> = {
-  free: {
-    photosPerMonth: 30,
-    formTemplates: 1,
-    users: 1,
-    pdfWatermark: true,
-  },
-  starter: {
-    photosPerMonth: 200,
-    formTemplates: 3,
-    users: 3,
-    pdfWatermark: false,
-  },
-  pro: {
-    photosPerMonth: 500,
-    formTemplates: 10,
-    users: 5,
-    pdfWatermark: false,
-  },
-  business: {
-    photosPerMonth: -1, // unlimited
-    formTemplates: -1,
-    users: -1,
-    pdfWatermark: false,
-  },
-};
-
-// RevenueCat product ID to plan mapping
-const PRODUCT_TO_PLAN: Record<string, SubscriptionPlan> = {
-  'praticos_starter_monthly': 'starter',
-  'praticos_starter_annual': 'starter',
-  'praticos_pro_monthly': 'pro',
-  'praticos_pro_annual': 'pro',
-  'praticos_business_monthly': 'business',
-  'praticos_business_annual': 'business',
-};
+export {
+  PLAN_LIMITS,
+  getPlanLimits,
+  getNextMonthReset,
+  resolveSubscriptionState,
+  isGraceActive,
+  buildGraceSubscription,
+} from './subscription-plans';
+export type { ResolvedSubscriptionState } from './subscription-plans';
 
 // ============================================================================
 // Subscription Operations
@@ -325,24 +297,4 @@ export async function processRevenueCatWebhook(event: RevenueCatWebhookEvent): P
       console.log(`[Webhook] Unknown event type: ${type}`);
       return true;
   }
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Get the first day of next month as ISO string
- */
-function getNextMonthReset(): string {
-  const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return nextMonth.toISOString();
-}
-
-/**
- * Get plan limits by plan name
- */
-export function getPlanLimits(plan: SubscriptionPlan): SubscriptionLimits {
-  return PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 }
