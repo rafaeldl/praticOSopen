@@ -1,3 +1,5 @@
+import 'dart:io' show File;
+
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/subscription.dart';
@@ -231,6 +233,12 @@ void main() {
         final sub = Subscription.fromJson(doc['subscription'] as Map<String, dynamic>);
         expect(read(sub), 7, reason: path);
       });
+    });
+
+    test('no app code writes usage counters to the tenants collection', () {
+      final source = File('lib/services/photo_service.dart').readAsStringSync();
+      expect(source.contains("collection('tenants')"), isFalse);
+      expect(source.contains('SubscriptionUsagePaths.photosThisMonth'), isTrue);
     });
   });
 
