@@ -5,7 +5,7 @@ jest.mock('../firestore.service', () =>
 
 import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
-import { syncCompanySubscription } from '../subscription.service';
+import { resetMonthlyUsage, syncCompanySubscription } from '../subscription.service';
 import { PLAN_LIMITS } from '../subscription-plans';
 import type { RcSubscriber, RcSubscription } from '../revenuecat.client';
 
@@ -163,5 +163,42 @@ describe('syncCompanySubscription', () => {
     await expect(syncCompanySubscription('c1', { fetchSubscriber, now: NOW })).rejects.toThrow('HTTP 503');
 
     expect(subscriptionOf('c1')).toEqual(GRACE);
+  });
+});
+
+describe('resetMonthlyUsage', () => {
+  const RUN_AT = new Date('2026-11-01T03:00:00.000Z');
+
+  beforeEach(() => fake.reset());
+
+  it('zeroes photosThisMonth of every company that has a subscription', async () => {
+    // usageResetAt in the future: the old query (usageResetAt <= now) skipped this company.
+    seedCompany('a', { plan: 'free', status: 'active', usage: { ...USAGE, usageResetAt: '2027-05-01T00:00:00.000Z' } });
+    seedCompany('b', GRACE);
+    seedCompany('c');
+
+    await expect(resetMonthlyUsage(RUN_AT)).resolves.toBe(2);
+
+    for (const id of ['a', 'b']) {
+      expect(subscriptionOf(id)?.usage).toEqual({
+        photosThisMonth: 0,
+        formTemplatesActive: 2,
+        usersActive: 3,
+        usageResetAt: '2026-12-01T00:00:00.000Z',
+      });
+    }
+    expect(subscriptionOf('b')).toMatchObject({ plan: 'pro', source: 'grace', expiresAt: FUTURE });
+    expect(fake.read('companies/c')).toEqual({ name: 'Company c' });
+  });
+
+  it('writes more companies than fit in one batch', async () => {
+    for (let i = 0; i < 450; i++) {
+      seedCompany(`c${i}`, { plan: 'free', status: 'active', usage: USAGE });
+    }
+
+    await expect(resetMonthlyUsage(RUN_AT)).resolves.toBe(450);
+
+    expect(subscriptionOf('c0')?.usage).toMatchObject({ photosThisMonth: 0 });
+    expect(subscriptionOf('c449')?.usage).toMatchObject({ photosThisMonth: 0 });
   });
 });

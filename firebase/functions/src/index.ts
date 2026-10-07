@@ -154,11 +154,11 @@ import { resetMonthlyUsage } from './services/subscription.service';
 
 /**
  * Scheduled function to reset monthly usage counters for subscriptions.
- * Runs at midnight on the 1st of every month (BRT timezone = UTC-3).
+ * Runs at 03:00 America/Sao_Paulo on the 1st of every month.
  *
- * Resets:
- * - photosThisMonth counter for all companies
- * - Sets next usageResetAt to first day of following month
+ * For every company with `subscription.plan` set:
+ * - photosThisMonth = 0
+ * - usageResetAt = first day of the following month (00:00 UTC)
  */
 export const scheduledResetMonthlyUsage = onSchedule(
   {

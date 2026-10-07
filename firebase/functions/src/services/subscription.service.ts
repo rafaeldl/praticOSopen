@@ -10,7 +10,7 @@ import {
   getDocument,
   updateDocument,
 } from './firestore.service';
-import { Subscription } from '../models/types';
+import { Subscription, SubscriptionPlan } from '../models/types';
 import {
   PLAN_LIMITS,
   getNextMonthReset,
@@ -105,37 +105,42 @@ export async function updateUserCount(companyId: string, count: number): Promise
   });
 }
 
-/**
- * Reset monthly usage counters for all companies
- * Called by scheduled Cloud Function
- */
-export async function resetMonthlyUsage(): Promise<number> {
-  const now = new Date();
-  const nextReset = getNextMonthReset();
-  let count = 0;
+const ALL_PLANS: SubscriptionPlan[] = ['free', 'starter', 'pro', 'business'];
+const BATCH_LIMIT = 400;
 
-  // Query companies where usageResetAt is in the past
-  const companiesRef = db.collection('companies');
-  const snapshot = await companiesRef
-    .where('subscription.usage.usageResetAt', '<=', now.toISOString())
+/**
+ * Resets the monthly counters (photosThisMonth) of every company that has a
+ * subscription. Firestore cannot query "field exists", so the query matches
+ * every plan value (`in` on one field: automatic single-field index, no
+ * composite index); companies without `subscription` have no counter.
+ * Called by scheduledResetMonthlyUsage on the 1st of each month.
+ */
+export async function resetMonthlyUsage(now: Date = new Date()): Promise<number> {
+  const nowIso = now.toISOString();
+  const nextReset = getNextMonthReset(now);
+  const snapshot = await getRootCollection('companies')
+    .where('subscription.plan', 'in', ALL_PLANS)
     .get();
 
-  const batch = db.batch();
-  snapshot.docs.forEach((doc) => {
+  let batch = db.batch();
+  let pending = 0;
+  for (const doc of snapshot.docs) {
     batch.update(doc.ref, {
       'subscription.usage.photosThisMonth': 0,
       'subscription.usage.usageResetAt': nextReset,
-      updatedAt: new Date().toISOString(),
+      updatedAt: nowIso,
     });
-    count++;
-  });
-
-  if (count > 0) {
-    await batch.commit();
-    console.log(`[Subscription] Reset monthly usage for ${count} companies`);
+    pending++;
+    if (pending === BATCH_LIMIT) {
+      await batch.commit();
+      batch = db.batch();
+      pending = 0;
+    }
   }
+  if (pending > 0) await batch.commit();
 
-  return count;
+  console.log(`[Subscription] Reset monthly usage for ${snapshot.size} companies`);
+  return snapshot.size;
 }
 
 // ============================================================================
