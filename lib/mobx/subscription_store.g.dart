@@ -9,206 +9,77 @@ part of 'subscription_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$SubscriptionStore on _SubscriptionStore, Store {
-  Computed<String>? _$currentPlanComputed;
+  Computed<Subscription?>? _$subscriptionComputed;
 
   @override
-  String get currentPlan => (_$currentPlanComputed ??= Computed<String>(
-    () => super.currentPlan,
-    name: '_SubscriptionStore.currentPlan',
-  )).value;
-  Computed<bool>? _$hasPaidPlanComputed;
-
-  @override
-  bool get hasPaidPlan => (_$hasPaidPlanComputed ??= Computed<bool>(
-    () => super.hasPaidPlan,
-    name: '_SubscriptionStore.hasPaidPlan',
-  )).value;
-  Computed<List<Package>>? _$availablePackagesComputed;
-
-  @override
-  List<Package> get availablePackages =>
-      (_$availablePackagesComputed ??= Computed<List<Package>>(
-        () => super.availablePackages,
-        name: '_SubscriptionStore.availablePackages',
+  Subscription? get subscription =>
+      (_$subscriptionComputed ??= Computed<Subscription?>(
+        () => super.subscription,
+        name: '_SubscriptionStore.subscription',
       )).value;
-  Computed<Package?>? _$monthlyPackageComputed;
+  Computed<SubscriptionPlan>? _$effectivePlanComputed;
 
   @override
-  Package? get monthlyPackage =>
-      (_$monthlyPackageComputed ??= Computed<Package?>(
-        () => super.monthlyPackage,
-        name: '_SubscriptionStore.monthlyPackage',
+  SubscriptionPlan get effectivePlan =>
+      (_$effectivePlanComputed ??= Computed<SubscriptionPlan>(
+        () => super.effectivePlan,
+        name: '_SubscriptionStore.effectivePlan',
       )).value;
-  Computed<Package?>? _$annualPackageComputed;
 
-  @override
-  Package? get annualPackage => (_$annualPackageComputed ??= Computed<Package?>(
-    () => super.annualPackage,
-    name: '_SubscriptionStore.annualPackage',
-  )).value;
-
-  late final _$customerInfoAtom = Atom(
-    name: '_SubscriptionStore.customerInfo',
+  late final _$companyIdAtom = Atom(
+    name: '_SubscriptionStore.companyId',
     context: context,
   );
 
   @override
-  CustomerInfo? get customerInfo {
-    _$customerInfoAtom.reportRead();
-    return super.customerInfo;
+  String? get companyId {
+    _$companyIdAtom.reportRead();
+    return super.companyId;
   }
 
   @override
-  set customerInfo(CustomerInfo? value) {
-    _$customerInfoAtom.reportWrite(value, super.customerInfo, () {
-      super.customerInfo = value;
+  set companyId(String? value) {
+    _$companyIdAtom.reportWrite(value, super.companyId, () {
+      super.companyId = value;
     });
   }
 
-  late final _$offeringsAtom = Atom(
-    name: '_SubscriptionStore.offerings',
+  late final _$latestAtom = Atom(
+    name: '_SubscriptionStore.latest',
     context: context,
   );
 
   @override
-  Offerings? get offerings {
-    _$offeringsAtom.reportRead();
-    return super.offerings;
+  Subscription? get latest {
+    _$latestAtom.reportRead();
+    return super.latest;
   }
 
   @override
-  set offerings(Offerings? value) {
-    _$offeringsAtom.reportWrite(value, super.offerings, () {
-      super.offerings = value;
+  set latest(Subscription? value) {
+    _$latestAtom.reportWrite(value, super.latest, () {
+      super.latest = value;
     });
   }
 
-  late final _$isLoadingAtom = Atom(
-    name: '_SubscriptionStore.isLoading',
+  late final _$bindCompanyAsyncAction = AsyncAction(
+    '_SubscriptionStore.bindCompany',
     context: context,
   );
 
   @override
-  bool get isLoading {
-    _$isLoadingAtom.reportRead();
-    return super.isLoading;
+  Future<void> bindCompany(String id) {
+    return _$bindCompanyAsyncAction.run(() => super.bindCompany(id));
   }
 
-  @override
-  set isLoading(bool value) {
-    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
-      super.isLoading = value;
-    });
-  }
-
-  late final _$isPurchasingAtom = Atom(
-    name: '_SubscriptionStore.isPurchasing',
+  late final _$unbindAsyncAction = AsyncAction(
+    '_SubscriptionStore.unbind',
     context: context,
   );
 
   @override
-  bool get isPurchasing {
-    _$isPurchasingAtom.reportRead();
-    return super.isPurchasing;
-  }
-
-  @override
-  set isPurchasing(bool value) {
-    _$isPurchasingAtom.reportWrite(value, super.isPurchasing, () {
-      super.isPurchasing = value;
-    });
-  }
-
-  late final _$errorMessageAtom = Atom(
-    name: '_SubscriptionStore.errorMessage',
-    context: context,
-  );
-
-  @override
-  String? get errorMessage {
-    _$errorMessageAtom.reportRead();
-    return super.errorMessage;
-  }
-
-  @override
-  set errorMessage(String? value) {
-    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
-      super.errorMessage = value;
-    });
-  }
-
-  late final _$initializeAsyncAction = AsyncAction(
-    '_SubscriptionStore.initialize',
-    context: context,
-  );
-
-  @override
-  Future<void> initialize(String userId) {
-    return _$initializeAsyncAction.run(() => super.initialize(userId));
-  }
-
-  late final _$refreshCustomerInfoAsyncAction = AsyncAction(
-    '_SubscriptionStore.refreshCustomerInfo',
-    context: context,
-  );
-
-  @override
-  Future<void> refreshCustomerInfo() {
-    return _$refreshCustomerInfoAsyncAction.run(
-      () => super.refreshCustomerInfo(),
-    );
-  }
-
-  late final _$refreshOfferingsAsyncAction = AsyncAction(
-    '_SubscriptionStore.refreshOfferings',
-    context: context,
-  );
-
-  @override
-  Future<void> refreshOfferings() {
-    return _$refreshOfferingsAsyncAction.run(() => super.refreshOfferings());
-  }
-
-  late final _$purchasePackageAsyncAction = AsyncAction(
-    '_SubscriptionStore.purchasePackage',
-    context: context,
-  );
-
-  @override
-  Future<bool> purchasePackage(Package package) {
-    return _$purchasePackageAsyncAction.run(
-      () => super.purchasePackage(package),
-    );
-  }
-
-  late final _$restorePurchasesAsyncAction = AsyncAction(
-    '_SubscriptionStore.restorePurchases',
-    context: context,
-  );
-
-  @override
-  Future<bool> restorePurchases() {
-    return _$restorePurchasesAsyncAction.run(() => super.restorePurchases());
-  }
-
-  late final _$logoutAsyncAction = AsyncAction(
-    '_SubscriptionStore.logout',
-    context: context,
-  );
-
-  @override
-  Future<void> logout() {
-    return _$logoutAsyncAction.run(() => super.logout());
-  }
-
-  late final _$logInAsyncAction = AsyncAction(
-    '_SubscriptionStore.logIn',
-    context: context,
-  );
-
-  @override
-  Future<void> logIn(String userId) {
-    return _$logInAsyncAction.run(() => super.logIn(userId));
+  Future<void> unbind() {
+    return _$unbindAsyncAction.run(() => super.unbind());
   }
 
   late final _$_SubscriptionStoreActionController = ActionController(
@@ -217,12 +88,12 @@ mixin _$SubscriptionStore on _SubscriptionStore, Store {
   );
 
   @override
-  void clearError() {
+  void applyCompanyDoc(Map<String, dynamic>? data) {
     final _$actionInfo = _$_SubscriptionStoreActionController.startAction(
-      name: '_SubscriptionStore.clearError',
+      name: '_SubscriptionStore.applyCompanyDoc',
     );
     try {
-      return super.clearError();
+      return super.applyCompanyDoc(data);
     } finally {
       _$_SubscriptionStoreActionController.endAction(_$actionInfo);
     }
@@ -231,16 +102,10 @@ mixin _$SubscriptionStore on _SubscriptionStore, Store {
   @override
   String toString() {
     return '''
-customerInfo: ${customerInfo},
-offerings: ${offerings},
-isLoading: ${isLoading},
-isPurchasing: ${isPurchasing},
-errorMessage: ${errorMessage},
-currentPlan: ${currentPlan},
-hasPaidPlan: ${hasPaidPlan},
-availablePackages: ${availablePackages},
-monthlyPackage: ${monthlyPackage},
-annualPackage: ${annualPackage}
+companyId: ${companyId},
+latest: ${latest},
+subscription: ${subscription},
+effectivePlan: ${effectivePlan}
     ''';
   }
 }

@@ -1,227 +1,112 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:mobx/mobx.dart';
-import 'package:purchases_flutter/purchases_flutter.dart' hide Store;
+import 'package:praticos/global.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/subscription_service.dart';
 
 part 'subscription_store.g.dart';
 
+/// Source of the company document data.
+typedef CompanyDocStream = Stream<Map<String, dynamic>?> Function(String companyId);
+
+Stream<Map<String, dynamic>?> _firestoreCompanyDoc(String companyId) =>
+    FirebaseFirestore.instance
+        .collection(SubscriptionUsagePaths.collection)
+        .doc(companyId)
+        .snapshots()
+        .map((snapshot) => snapshot.data());
+
 class SubscriptionStore = _SubscriptionStore with _$SubscriptionStore;
 
-/// Gerenciador de instancia global do SubscriptionStore.
-/// Usado para acesso em contextos sem Provider (ex: OrderStore).
-class SubscriptionStoreHolder {
-  static SubscriptionStore? instance;
-}
-
-/// Store MobX para gerenciar estado de assinaturas.
+/// Live subscription of the current company.
 ///
-/// Responsavel por:
-/// - Manter estado reativo da assinatura atual
-/// - Carregar e atualizar informacoes do assinante
-/// - Gerenciar fluxo de compra
-/// - Expor computed properties para UI
+/// Listens to `companies/{companyId}`, exposes `subscription` and keeps
+/// [Global.subscription] in sync for [FeatureGateService], `OrderStore`,
+/// `PhotoService` and `PdfService`. Also links the RevenueCat customer to the
+/// company (`appUserID = companyId`).
 abstract class _SubscriptionStore with Store {
-  final SubscriptionService _service = SubscriptionService.instance;
+  /// Company document source. Tests replace it with a fake stream.
+  CompanyDocStream companyDocStream = _firestoreCompanyDoc;
 
-  // ============================================================
-  // OBSERVABLES
-  // ============================================================
+  /// Links the RevenueCat customer to the company. No-op without SDK key.
+  Future<void> Function(String companyId) identify =
+      SubscriptionService.instance.initialize;
 
-  /// Informacoes do assinante do RevenueCat
+  /// Resets the RevenueCat customer. No-op when the SDK is not configured.
+  Future<void> Function() resetIdentity = SubscriptionService.instance.logout;
+
+  StreamSubscription<Map<String, dynamic>?>? _listener;
+
   @observable
-  CustomerInfo? customerInfo;
+  String? companyId;
 
-  /// Ofertas/planos disponiveis
   @observable
-  Offerings? offerings;
+  Subscription? latest;
 
-  /// Indica se esta carregando dados
-  @observable
-  bool isLoading = false;
-
-  /// Indica se uma compra esta em progresso
-  @observable
-  bool isPurchasing = false;
-
-  /// Mensagem de erro, se houver
-  @observable
-  String? errorMessage;
-
-  // ============================================================
-  // COMPUTED
-  // ============================================================
-
-  /// Plano atual do usuario: 'free', 'starter', 'pro', 'business'
+  /// Subscription written by the server, or null (Free) when absent.
   @computed
-  String get currentPlan {
-    if (customerInfo == null) return 'free';
-    return _service.getPlanFromEntitlements(customerInfo!);
-  }
+  Subscription? get subscription => latest;
 
-  /// Verifica se o usuario tem um plano pago ativo
+  /// Plan in force now (expired plans count as Free).
   @computed
-  bool get hasPaidPlan => currentPlan != 'free';
+  SubscriptionPlan get effectivePlan =>
+      (latest ?? Subscription()).effectivePlan(DateTime.now());
 
-  /// Ofertas da "current offering" do RevenueCat
-  @computed
-  List<Package> get availablePackages {
-    return offerings?.current?.availablePackages ?? [];
-  }
-
-  /// Pacote mensal, se disponivel
-  @computed
-  Package? get monthlyPackage => offerings?.current?.monthly;
-
-  /// Pacote anual, se disponivel
-  @computed
-  Package? get annualPackage => offerings?.current?.annual;
-
-  // ============================================================
-  // ACTIONS
-  // ============================================================
-
-  /// Inicializa o store carregando dados do assinante e ofertas.
-  ///
-  /// [userId] - ID do usuario/empresa para identificar no RevenueCat
+  /// Starts following [id]. Called after login and on company switch.
   @action
-  Future<void> initialize(String userId) async {
-    isLoading = true;
-    errorMessage = null;
+  Future<void> bindCompany(String id) async {
+    if (companyId == id && _listener != null) return;
+
+    await _listener?.cancel();
+    companyId = id;
+    latest = null;
+    Global.subscription = null;
+
+    _listener = companyDocStream(id).listen(
+      applyCompanyDoc,
+      onError: (Object e) => debugPrint('SubscriptionStore: listener error: $e'),
+    );
 
     try {
-      await _service.initialize(userId);
-      await Future.wait([
-        _loadCustomerInfo(),
-        _loadOfferings(),
-      ]);
-    } catch (e, stack) {
-      debugPrint('SubscriptionStore: Error initializing: $e\n$stack');
-      errorMessage = 'Erro ao carregar informacoes de assinatura';
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  /// Recarrega informacoes do assinante.
-  @action
-  Future<void> refreshCustomerInfo() async {
-    try {
-      await _loadCustomerInfo();
+      await identify(id);
     } catch (e) {
-      debugPrint('SubscriptionStore: Error refreshing customer info: $e');
+      // RevenueCat failures must not block login or the Firestore listener.
+      debugPrint('SubscriptionStore: RevenueCat identify failed: $e');
     }
   }
 
-  /// Recarrega ofertas disponiveis.
+  /// Applies a company document snapshot.
   @action
-  Future<void> refreshOfferings() async {
+  void applyCompanyDoc(Map<String, dynamic>? data) {
+    final raw = data?['subscription'];
+    Subscription? parsed;
+    if (raw is Map) {
+      try {
+        parsed = Subscription.fromJson(Map<String, dynamic>.from(raw));
+      } catch (e) {
+        debugPrint('SubscriptionStore: invalid subscription data: $e');
+      }
+    }
+    latest = parsed;
+    Global.subscription = parsed;
+  }
+
+  /// Stops following the company. Called on logout and account deletion.
+  @action
+  Future<void> unbind() async {
+    await _listener?.cancel();
+    _listener = null;
+    companyId = null;
+    latest = null;
+    Global.subscription = null;
+
     try {
-      await _loadOfferings();
+      await resetIdentity();
     } catch (e) {
-      debugPrint('SubscriptionStore: Error refreshing offerings: $e');
+      debugPrint('SubscriptionStore: RevenueCat logout failed: $e');
     }
-  }
-
-  /// Realiza a compra de um pacote.
-  ///
-  /// Retorna true se a compra foi bem-sucedida, false se cancelada ou erro.
-  @action
-  Future<bool> purchasePackage(Package package) async {
-    isPurchasing = true;
-    errorMessage = null;
-
-    try {
-      customerInfo = await _service.purchasePackage(package);
-      return true;
-    } on PlatformException catch (e) {
-      final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
-        // Usuario cancelou, nao e um erro
-        debugPrint('SubscriptionStore: Purchase cancelled by user');
-        return false;
-      }
-      debugPrint('SubscriptionStore: Purchase error: $errorCode - ${e.message}');
-      errorMessage = 'Erro ao processar compra. Tente novamente.';
-      return false;
-    } catch (e, stack) {
-      debugPrint('SubscriptionStore: Purchase error: $e\n$stack');
-      errorMessage = 'Erro ao processar compra. Tente novamente.';
-      return false;
-    } finally {
-      isPurchasing = false;
-    }
-  }
-
-  /// Restaura compras anteriores.
-  ///
-  /// Retorna true se restaurou alguma assinatura, false caso contrario.
-  @action
-  Future<bool> restorePurchases() async {
-    isLoading = true;
-    errorMessage = null;
-
-    try {
-      final info = await _service.restorePurchases();
-      customerInfo = info;
-
-      final restored = _service.hasActivePlan(info);
-      if (!restored) {
-        errorMessage = 'Nenhuma assinatura encontrada para restaurar';
-      }
-      return restored;
-    } catch (e, stack) {
-      debugPrint('SubscriptionStore: Restore error: $e\n$stack');
-      errorMessage = 'Erro ao restaurar compras. Tente novamente.';
-      return false;
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  /// Limpa o estado ao fazer logout.
-  @action
-  Future<void> logout() async {
-    await _service.logout();
-    customerInfo = null;
-    offerings = null;
-    errorMessage = null;
-  }
-
-  /// Faz login com novo usuario.
-  @action
-  Future<void> logIn(String userId) async {
-    isLoading = true;
-    errorMessage = null;
-
-    try {
-      customerInfo = await _service.logIn(userId);
-      await _loadOfferings();
-    } catch (e, stack) {
-      debugPrint('SubscriptionStore: Login error: $e\n$stack');
-      errorMessage = 'Erro ao carregar assinatura';
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  /// Limpa mensagem de erro.
-  @action
-  void clearError() {
-    errorMessage = null;
-  }
-
-  // ============================================================
-  // HELPERS PRIVADOS
-  // ============================================================
-
-  Future<void> _loadCustomerInfo() async {
-    customerInfo = await _service.getCustomerInfo();
-    debugPrint('SubscriptionStore: Loaded customer info, plan: $currentPlan');
-  }
-
-  Future<void> _loadOfferings() async {
-    offerings = await _service.getOfferings();
-    debugPrint('SubscriptionStore: Loaded offerings, packages: ${availablePackages.length}');
   }
 }
