@@ -210,7 +210,7 @@ describe('expireSubscriptions', () => {
     seedCompany('c1', { ...GRACE, expiresAt: PAST });
     const fetchSubscriber = jest.fn().mockResolvedValue(EMPTY);
 
-    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 1 });
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toMatchObject({ expired: 1 });
 
     expect(fetchSubscriber).toHaveBeenCalledWith('c1');
     expect(subscriptionOf('c1')).toMatchObject({
@@ -226,7 +226,7 @@ describe('expireSubscriptions', () => {
     seedCompany('c1', { plan: 'pro', status: 'active', source: 'store', expiresAt: PAST, limits: PLAN_LIMITS.pro, usage: USAGE });
     const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('pro'));
 
-    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 0 });
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toMatchObject({ expired: 0 });
 
     expect(subscriptionOf('c1')).toMatchObject({ plan: 'pro', status: 'active', expiresAt: FUTURE });
   });
@@ -237,7 +237,7 @@ describe('expireSubscriptions', () => {
     seedCompany('pro2', { plan: 'pro', status: 'active', source: 'store', expiresAt: null, usage: USAGE });
     const fetchSubscriber = jest.fn();
 
-    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 0 });
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toMatchObject({ expired: 0 });
 
     expect(fetchSubscriber).not.toHaveBeenCalled();
   });
@@ -251,11 +251,35 @@ describe('expireSubscriptions', () => {
     });
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 1 });
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 1, checked: 2, errors: 1 });
 
     expect(subscriptionOf('broken')).toMatchObject({ plan: 'pro', source: 'grace' });
     expect(subscriptionOf('c1')).toMatchObject({ plan: 'free' });
     expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it('processes every company under concurrency when some fail', async () => {
+    for (let i = 0; i < 23; i++) seedCompany(`c${i}`, { ...GRACE, expiresAt: PAST });
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const fetchSubscriber = jest.fn(async (id: string) => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      inFlight--;
+      if (id === 'c3' || id === 'c11') throw new Error('HTTP 503');
+      return EMPTY;
+    });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 21, checked: 23, errors: 2 });
+
+    expect(fetchSubscriber).toHaveBeenCalledTimes(23);
+    expect(maxInFlight).toBeLessThanOrEqual(5);
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(subscriptionOf('c3')).toMatchObject({ plan: 'pro' });
+    expect(subscriptionOf('c22')).toMatchObject({ plan: 'free' });
     errorSpy.mockRestore();
   });
 });

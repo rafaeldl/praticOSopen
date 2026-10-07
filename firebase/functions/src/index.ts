@@ -163,7 +163,7 @@ import { fetchSubscriber } from './services/revenuecat.client';
  */
 export const scheduledResetMonthlyUsage = onSchedule(
   {
-    schedule: '0 3 1 * *', // 3 AM UTC = midnight BRT on 1st of month
+    schedule: '0 3 1 * *', // 03:00 America/Sao_Paulo on the 1st of the month
     region: 'southamerica-east1',
     timeZone: 'America/Sao_Paulo',
     retryCount: 3,
@@ -189,6 +189,7 @@ export const scheduledExpireSubscriptions = onSchedule(
     timeZone: 'America/Sao_Paulo',
     retryCount: 3,
     memory: '256MiB',
+    timeoutSeconds: 540,
     secrets: [revenuecatSecretApiKey],
   },
   async () => {

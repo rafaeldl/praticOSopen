@@ -204,6 +204,8 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
   return 'updated';
 }
 
+const EXPIRY_CONCURRENCY = 5;
+
 export interface ExpireDeps {
   fetchSubscriber: (appUserId: string) => Promise<RcSubscriber>;
 }
@@ -214,30 +216,46 @@ export interface ExpireDeps {
  * Without an active entitlement they drop to Free/expired; renewed ones get
  * the new expiresAt. A failure on one company is logged and skipped.
  */
-export async function expireSubscriptions(now: Date, deps: ExpireDeps): Promise<{ expired: number }> {
+export async function expireSubscriptions(
+  now: Date,
+  deps: ExpireDeps,
+): Promise<{ expired: number; checked: number; errors: number }> {
   const snapshot = await getRootCollection('companies')
     .where('subscription.plan', 'in', PAID_PLANS_BY_RANK)
     .get();
 
+  const due = snapshot.docs.filter((doc) => {
+    const expiresAt = (doc.get('subscription') as Subscription | undefined)?.expiresAt;
+    return typeof expiresAt === 'string' && Date.parse(expiresAt) <= now.getTime();
+  });
+
   let expired = 0;
-  for (const doc of snapshot.docs) {
-    const current = doc.get('subscription') as Subscription | undefined;
-    const expiresAt = current?.expiresAt;
-    if (typeof expiresAt !== 'string' || Date.parse(expiresAt) > now.getTime()) continue;
-
-    try {
-      const subscriber = await deps.fetchSubscriber(doc.id);
-      const state = resolveSubscriptionState(subscriber, now);
-      await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
-      if (state.plan === 'free') expired++;
-    } catch (error) {
-      console.error('[Subscription] Expiry check failed', {
-        companyId: doc.id,
-        error: error instanceof Error ? error.message : 'unknown',
-      });
+  let errors = 0;
+  const failedIds: string[] = [];
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < due.length) {
+      const doc = due[next++];
+      try {
+        const subscriber = await deps.fetchSubscriber(doc.id);
+        const state = resolveSubscriptionState(subscriber, now);
+        await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
+        if (state.plan === 'free') expired++;
+      } catch (error) {
+        errors++;
+        failedIds.push(doc.id);
+        console.error('[Subscription] Expiry check failed', {
+          companyId: doc.id,
+          error: error instanceof Error ? error.message : 'unknown',
+        });
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(EXPIRY_CONCURRENCY, due.length) }, worker));
 
-  console.log(`[Subscription] Expiry check: ${expired} companies moved to Free`);
-  return { expired };
+  console.log(
+    `[Subscription] Expiry check: checked=${due.length} expired=${expired} errors=${errors}` +
+      (failedIds.length ? ` failedIds=${failedIds.join(',')}` : ''),
+  );
+  return { expired, checked: due.length, errors };
 }
