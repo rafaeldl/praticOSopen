@@ -243,4 +243,29 @@ describe('buildGraceSubscription', () => {
 
     expect(buildGraceSubscription(expired, EXPIRES)).toMatchObject({ plan: 'pro', source: 'grace', usage: USAGE });
   });
+
+  it('returns null for a legacy paid subscription without source', () => {
+    const legacy: Subscription = { plan: 'business', status: 'active', limits: PLAN_LIMITS.business, usage: USAGE };
+
+    expect(buildGraceSubscription(legacy, EXPIRES, NOW)).toBeNull();
+    expect(buildGraceSubscription({ ...legacy, expiresAt: FUTURE }, EXPIRES, NOW)).toBeNull();
+  });
+
+  it('grants grace over a legacy paid subscription with expired status', () => {
+    const legacy: Subscription = { plan: 'pro', status: 'expired', limits: PLAN_LIMITS.pro, usage: USAGE };
+
+    expect(buildGraceSubscription(legacy, EXPIRES, NOW)).toMatchObject({ plan: 'pro', source: 'grace', usage: USAGE });
+  });
+
+  it('grants grace over a legacy paid subscription with a past expiresAt', () => {
+    const legacy: Subscription = {
+      plan: 'starter',
+      status: 'active',
+      expiresAt: PAST,
+      limits: PLAN_LIMITS.starter,
+      usage: USAGE,
+    };
+
+    expect(buildGraceSubscription(legacy, EXPIRES, NOW)).toMatchObject({ plan: 'pro', source: 'grace' });
+  });
 });

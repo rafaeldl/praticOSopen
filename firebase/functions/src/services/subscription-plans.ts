@@ -143,10 +143,24 @@ function defaultUsage(): SubscriptionUsage {
 /**
  * Grace subscription (Pro until expiresAt, source 'grace') keeping the
  * existing usage. Null when the company already has an active paid store
- * subscription.
+ * subscription, or a legacy paid one (set manually: paid plan, no source,
+ * not expired, no expiry or expiry in the future).
  */
-export function buildGraceSubscription(existing: Subscription | undefined, expiresAt: Date): Subscription | null {
+export function buildGraceSubscription(
+  existing: Subscription | undefined,
+  expiresAt: Date,
+  now: Date = new Date(),
+): Subscription | null {
   if (existing && existing.source === 'store' && existing.plan !== 'free' && existing.status !== 'expired') {
+    return null;
+  }
+  if (
+    existing &&
+    existing.plan !== 'free' &&
+    existing.source === undefined &&
+    existing.status !== 'expired' &&
+    (!existing.expiresAt || isAfter(existing.expiresAt, now))
+  ) {
     return null;
   }
   return {
