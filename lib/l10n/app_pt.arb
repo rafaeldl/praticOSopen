@@ -1626,6 +1626,18 @@
   "photoLimitReachedMessage": "Você atingiu o limite de fotos deste mês.",
   "photoLimitUpgradeHint": "Faça upgrade para adicionar mais fotos.",
   "viewPlans": "Ver planos",
+  "planValidUntil": "Válido até {date}",
+  "@planValidUntil": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "askAdminToChangePlanTitle": "Fale com o administrador",
+  "askAdminToChangePlan": "Peça ao administrador da empresa para mudar de plano.",
+  "subscriptionUnavailable": "As assinaturas não estão disponíveis agora. Tente novamente mais tarde.",
+  "restorePurchasesNothingFound": "Nenhuma assinatura ativa foi encontrada nesta conta da loja.",
+  "planLimitUpgradeHint": "Assine um plano para aumentar este limite.",
+  "deleteAccountStoreSubscriptionWarning": "Excluir a conta não cancela a assinatura da App Store ou do Google Play. Cancele antes nos ajustes da loja para não ser cobrado de novo.",
   "asaasConnected": "Conectado",
   "asaasDisconnected": "Não conectado",
   "asaasConnectTitle": "Conectar conta Asaas",
