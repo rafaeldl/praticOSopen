@@ -150,7 +150,8 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
 // SCHEDULED FUNCTIONS
 // ============================================================================
 
-import { resetMonthlyUsage } from './services/subscription.service';
+import { expireSubscriptions, resetMonthlyUsage } from './services/subscription.service';
+import { fetchSubscriber } from './services/revenuecat.client';
 
 /**
  * Scheduled function to reset monthly usage counters for subscriptions.
@@ -172,6 +173,30 @@ export const scheduledResetMonthlyUsage = onSchedule(
     console.log('[Scheduled] Running monthly usage reset...');
     const count = await resetMonthlyUsage();
     console.log(`[Scheduled] Reset completed. ${count} companies updated.`);
+  }
+);
+
+/**
+ * Daily subscription expiry (docs/SUBSCRIPTION.md). Companies on a paid plan
+ * whose expiresAt has passed are re-synced from RevenueCat; without an active
+ * entitlement they drop to Free. Covers the end of the launch grace period
+ * and missed webhooks.
+ */
+export const scheduledExpireSubscriptions = onSchedule(
+  {
+    schedule: '30 4 * * *', // 04:30 America/Sao_Paulo, daily
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 3,
+    memory: '256MiB',
+    secrets: [revenuecatSecretApiKey],
+  },
+  async () => {
+    const apiKey = revenuecatSecretApiKey.value();
+    const { expired } = await expireSubscriptions(new Date(), {
+      fetchSubscriber: (companyId) => fetchSubscriber(companyId, apiKey),
+    });
+    console.log(`[Scheduled] Subscription expiry completed. ${expired} companies moved to Free.`);
   }
 );
 

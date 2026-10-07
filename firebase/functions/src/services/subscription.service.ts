@@ -12,6 +12,7 @@ import {
 } from './firestore.service';
 import { Subscription, SubscriptionPlan } from '../models/types';
 import {
+  PAID_PLANS_BY_RANK,
   PLAN_LIMITS,
   getNextMonthReset,
   getPlanLimits,
@@ -158,7 +159,7 @@ export interface SyncDeps {
 export type SyncResult = 'updated' | 'grace_kept' | 'company_not_found';
 
 /** Dotted-path update with the plan fields only; never touches subscription.usage. */
-function buildPlanUpdate(
+export function buildPlanUpdate(
   companyId: string,
   subscriber: RcSubscriber,
   state: ResolvedSubscriptionState,
@@ -201,4 +202,42 @@ export async function syncCompanySubscription(companyId: string, deps: SyncDeps)
   await ref.update(buildPlanUpdate(companyId, subscriber, state, now));
   console.log(`[Subscription] Company ${companyId} synced: ${state.plan} (${state.status})`);
   return 'updated';
+}
+
+export interface ExpireDeps {
+  fetchSubscriber: (appUserId: string) => Promise<RcSubscriber>;
+}
+
+/**
+ * Daily backstop: companies on a paid plan whose expiresAt has passed (end of
+ * the launch grace period, missed webhooks) are re-synced from RevenueCat.
+ * Without an active entitlement they drop to Free/expired; renewed ones get
+ * the new expiresAt. A failure on one company is logged and skipped.
+ */
+export async function expireSubscriptions(now: Date, deps: ExpireDeps): Promise<{ expired: number }> {
+  const snapshot = await getRootCollection('companies')
+    .where('subscription.plan', 'in', PAID_PLANS_BY_RANK)
+    .get();
+
+  let expired = 0;
+  for (const doc of snapshot.docs) {
+    const current = doc.get('subscription') as Subscription | undefined;
+    const expiresAt = current?.expiresAt;
+    if (typeof expiresAt !== 'string' || Date.parse(expiresAt) > now.getTime()) continue;
+
+    try {
+      const subscriber = await deps.fetchSubscriber(doc.id);
+      const state = resolveSubscriptionState(subscriber, now);
+      await doc.ref.update(buildPlanUpdate(doc.id, subscriber, state, now));
+      if (state.plan === 'free') expired++;
+    } catch (error) {
+      console.error('[Subscription] Expiry check failed', {
+        companyId: doc.id,
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+    }
+  }
+
+  console.log(`[Subscription] Expiry check: ${expired} companies moved to Free`);
+  return { expired };
 }

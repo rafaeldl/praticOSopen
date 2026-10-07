@@ -5,7 +5,7 @@ jest.mock('../firestore.service', () =>
 
 import * as firestoreService from '../firestore.service';
 import { FakeFirestore } from '../../__tests__/helpers/fake-firestore';
-import { resetMonthlyUsage, syncCompanySubscription } from '../subscription.service';
+import { expireSubscriptions, resetMonthlyUsage, syncCompanySubscription } from '../subscription.service';
 import { PLAN_LIMITS } from '../subscription-plans';
 import type { RcSubscriber, RcSubscription } from '../revenuecat.client';
 
@@ -200,5 +200,62 @@ describe('resetMonthlyUsage', () => {
 
     expect(subscriptionOf('c0')?.usage).toMatchObject({ photosThisMonth: 0 });
     expect(subscriptionOf('c449')?.usage).toMatchObject({ photosThisMonth: 0 });
+  });
+});
+
+describe('expireSubscriptions', () => {
+  beforeEach(() => fake.reset());
+
+  it('moves an ended grace period to Free when RevenueCat has no entitlement', async () => {
+    seedCompany('c1', { ...GRACE, expiresAt: PAST });
+    const fetchSubscriber = jest.fn().mockResolvedValue(EMPTY);
+
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 1 });
+
+    expect(fetchSubscriber).toHaveBeenCalledWith('c1');
+    expect(subscriptionOf('c1')).toMatchObject({
+      plan: 'free',
+      status: 'expired',
+      source: 'store',
+      limits: PLAN_LIMITS.free,
+      usage: USAGE,
+    });
+  });
+
+  it('keeps a renewed subscription whose webhook was missed', async () => {
+    seedCompany('c1', { plan: 'pro', status: 'active', source: 'store', expiresAt: PAST, limits: PLAN_LIMITS.pro, usage: USAGE });
+    const fetchSubscriber = jest.fn().mockResolvedValue(activeSubscriber('pro'));
+
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 0 });
+
+    expect(subscriptionOf('c1')).toMatchObject({ plan: 'pro', status: 'active', expiresAt: FUTURE });
+  });
+
+  it('skips Free companies and subscriptions that have not ended', async () => {
+    seedCompany('free1', { plan: 'free', status: 'active', usage: USAGE });
+    seedCompany('pro1', { plan: 'pro', status: 'cancelled', source: 'store', expiresAt: FUTURE, usage: USAGE });
+    seedCompany('pro2', { plan: 'pro', status: 'active', source: 'store', expiresAt: null, usage: USAGE });
+    const fetchSubscriber = jest.fn();
+
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 0 });
+
+    expect(fetchSubscriber).not.toHaveBeenCalled();
+  });
+
+  it('continues after a RevenueCat failure on one company', async () => {
+    seedCompany('broken', { ...GRACE, expiresAt: PAST });
+    seedCompany('c1', { ...GRACE, expiresAt: PAST });
+    const fetchSubscriber = jest.fn(async (id: string) => {
+      if (id === 'broken') throw new Error('RevenueCat GET /subscribers failed: HTTP 503');
+      return EMPTY;
+    });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(expireSubscriptions(NOW, { fetchSubscriber })).resolves.toEqual({ expired: 1 });
+
+    expect(subscriptionOf('broken')).toMatchObject({ plan: 'pro', source: 'grace' });
+    expect(subscriptionOf('c1')).toMatchObject({ plan: 'free' });
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });
