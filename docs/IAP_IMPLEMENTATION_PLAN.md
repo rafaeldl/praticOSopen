@@ -1,8 +1,10 @@
 # Plano Tecnico: In-App Purchase (PRA-11)
 
+> **Substituído** pela spec `docs/superpowers/specs/2026-10-07-paid-plans-iap-design.md` e pela documentação atual em `docs/SUBSCRIPTION.md`. Mantido só como histórico; não usar como referência de implementação.
+
 **Data:** 2026-04-03
 **Autor:** CTO Agent
-**Status:** Em revisao
+**Status:** Substituído (2026-10-07)
 **Issue:** PRA-11
 
 ---
