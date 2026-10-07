@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 void main() {
   group('FeatureGateService', () {
+    setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = true);
+    tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+
     test('canAddPhoto allows photo when within limit (Free)', () {
       final subscription = Subscription(
         plan: SubscriptionPlan.free,
@@ -98,7 +102,7 @@ void main() {
     });
   });
 
-  group('FeatureGateService on iOS (no paid features, guideline 3.1.1)', () {
+  group('FeatureGateService with paid plans disabled (no store key)', () {
     setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = false);
     tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
 
@@ -203,6 +207,39 @@ void main() {
       );
 
       expect(FeatureGateService.shouldShowPdfWatermark(sub), isTrue);
+    });
+  });
+
+  group('FeatureGateService.planLimitsEnforced follows paidPlansEnabled', () {
+    tearDown(() {
+      SubscriptionService.debugPaidPlansEnabledOverride = null;
+      FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+    });
+
+    test('limits apply when paid plans are enabled', () {
+      SubscriptionService.debugPaidPlansEnabledOverride = true;
+
+      expect(FeatureGateService.planLimitsEnforced, isTrue);
+      final result = FeatureGateService.canAddPhoto(
+        Subscription(usage: SubscriptionUsage(photosThisMonth: 30)),
+      );
+      expect(result.isAllowed, isFalse);
+    });
+
+    test('everything is unlimited when paid plans are disabled', () {
+      SubscriptionService.debugPaidPlansEnabledOverride = false;
+
+      expect(FeatureGateService.planLimitsEnforced, isFalse);
+      final result = FeatureGateService.canAddPhoto(
+        Subscription(usage: SubscriptionUsage(photosThisMonth: 9999)),
+      );
+      expect(result.isAllowed, isTrue);
+      expect(FeatureGateService.shouldShowPdfWatermark(null), isFalse);
+    });
+
+    test('a build without RevenueCat key has no limits', () {
+      expect(SubscriptionService.paidPlansEnabled, isFalse);
+      expect(FeatureGateService.planLimitsEnforced, isFalse);
     });
   });
 }

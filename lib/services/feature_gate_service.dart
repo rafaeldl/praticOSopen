@@ -1,8 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 /// Tipos de features limitadas por plano.
 enum FeatureType {
@@ -142,15 +141,13 @@ class FeatureGateService {
   @visibleForTesting
   static bool? debugPlanLimitsEnforcedOverride;
 
-  /// Whether subscription plan limits apply on this platform.
+  /// Whether subscription plan limits apply.
   ///
-  /// Always `false` on iOS: App Review rejected the app under guideline 3.1.1
-  /// because it accessed paid content that is not sold through In-App Purchase.
-  /// With no IAP, the iOS app must not contain any paid feature, so every limit
-  /// is lifted there (unlimited photos, forms and collaborators, no PDF
-  /// watermark). To restore limits on iOS: ship IAP first, then drop this check.
+  /// Follows [SubscriptionService.paidPlansEnabled] on every platform: limits
+  /// only exist where plans can be bought in the app (App Review 3.1.1). A
+  /// build without a real RevenueCat key is unlimited and has no purchase UI.
   static bool get planLimitsEnforced =>
-      debugPlanLimitsEnforcedOverride ?? !Platform.isIOS;
+      debugPlanLimitsEnforcedOverride ?? SubscriptionService.paidPlansEnabled;
 
   /// Plan limit for the platform: the real one, or -1 (unlimited).
   static int _effectiveLimit(int planLimit) =>
