@@ -25,9 +25,6 @@ import 'package:praticos/screens/notifications/notification_list_screen.dart';
 import 'package:praticos/screens/devices/device_detail_screen.dart';
 import 'package:praticos/screens/contracts/contract_list_screen.dart';
 import 'package:praticos/screens/integrations/integration_list_screen.dart';
-import 'package:praticos/screens/subscription/plans_screen.dart';
-import 'package:praticos/screens/subscription/subscription_success_screen.dart';
-import 'package:praticos/screens/subscription/manage_subscription_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
@@ -57,8 +54,4 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/notifications': (context) => const NotificationListScreen(),
   '/contract_list': (context) => const ContractListScreen(),
   '/integrations': (context) => const IntegrationListScreen(),
-  '/subscription/plans': (context) => const PlansScreen(),
-  '/subscription/success': (context) => const SubscriptionSuccessScreen(),
-  '/plans': (context) => const PlansScreen(),
-  '/manage_subscription': (context) => const ManageSubscriptionScreen(),
 };
