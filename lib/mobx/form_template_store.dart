@@ -197,8 +197,8 @@ abstract class _FormTemplateStore with Store {
   /// Atualiza o contador de formulários ativos no Firestore e local.
   ///
   /// Conta quantos templates ativos existem e atualiza:
-  /// 1. Firestore: company.subscription.usage.formTemplates
-  /// 2. Local: Global.subscription.usage.formTemplates
+  /// 1. Firestore: companies/{id}.subscription.usage.formTemplatesActive
+  /// 2. Local: Global.subscription.usage.formTemplatesActive
   Future<void> _updateFormTemplateCounter() async {
     if (companyId == null) return;
 
@@ -216,15 +216,15 @@ abstract class _FormTemplateStore with Store {
 
       // Atualiza no Firestore
       await FirebaseFirestore.instance
-          .collection('companies')
+          .collection(SubscriptionUsagePaths.collection)
           .doc(companyId)
           .update({
-        'subscription.usage.formTemplates': activeCount,
+        SubscriptionUsagePaths.formTemplatesActive: activeCount,
       });
 
       // Atualiza local
       if (Global.subscription != null) {
-        Global.subscription!.usage.formTemplates = activeCount;
+        Global.subscription!.usage.formTemplatesActive = activeCount;
       }
     } catch (e) {
       // Falha na atualização do contador não deve bloquear a operação

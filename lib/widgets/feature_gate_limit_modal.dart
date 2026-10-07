@@ -290,7 +290,7 @@ class _FeatureGateLimitSheet extends StatelessWidget {
       case FeatureType.formTemplate:
         return limits.formTemplates;
       case FeatureType.collaborator:
-        return limits.collaborators;
+        return limits.users;
     }
   }
 }
