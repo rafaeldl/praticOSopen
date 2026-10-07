@@ -68,7 +68,7 @@
         "items": [
           {
             "question": "Quanto custa?",
-            "answer": "Nada. O PraticOS é gratuito no iOS e no Android, sem cartão de crédito."
+            "answer": "Comece grátis. Planos pagos disponíveis no app."
           }
         ]
       },
@@ -153,7 +153,7 @@
         "items": [
           {
             "question": "How much does it cost?",
-            "answer": "Nothing. PraticOS is free on iOS and Android, with no credit card."
+            "answer": "Start free. Paid plans available in the app."
           }
         ]
       },
@@ -238,7 +238,7 @@
         "items": [
           {
             "question": "¿Cuánto cuesta?",
-            "answer": "Nada. PraticOS es gratis en iOS y Android, sin tarjeta de crédito."
+            "answer": "Empieza gratis. Planes pagos disponibles en la app."
           }
         ]
       },

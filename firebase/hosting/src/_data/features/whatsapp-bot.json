@@ -15,7 +15,7 @@
     "notice": {
       "label": "Aviso",
       "title": "O assistente está fora do ar por enquanto.",
-      "text": "Abrir OS, anexar fotos, preencher checklists, mandar o link ao cliente e ver o faturamento continuam no app — grátis no iOS e no Android.",
+      "text": "Abrir OS, anexar fotos, preencher checklists, mandar o link ao cliente e ver o faturamento continuam no app — comece grátis no iOS e no Android.",
       "cta": "Baixar o app grátis"
     },
     "inApp": {
@@ -186,7 +186,7 @@
     "notice": {
       "label": "Notice",
       "title": "The assistant is offline for now.",
-      "text": "Opening work orders, attaching photos, filling in checklists, sending the customer link and checking revenue all still work in the app — free on iOS and Android.",
+      "text": "Opening work orders, attaching photos, filling in checklists, sending the customer link and checking revenue all still work in the app — start free on iOS and Android.",
       "cta": "Download the app free"
     },
     "inApp": {
@@ -357,7 +357,7 @@
     "notice": {
       "label": "Aviso",
       "title": "El asistente no está disponible por ahora.",
-      "text": "Abrir órdenes, adjuntar fotos, llenar checklists, enviar el enlace al cliente y ver la facturación siguen en la app — gratis en iOS y Android.",
+      "text": "Abrir órdenes, adjuntar fotos, llenar checklists, enviar el enlace al cliente y ver la facturación siguen en la app — empieza gratis en iOS y Android.",
       "cta": "Descargar la app gratis"
     },
     "inApp": {

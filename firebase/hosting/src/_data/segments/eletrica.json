@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para eletricistas. Monte o orçamento com o seu catálogo, mande por link para o cliente aprovar, registre tensão, DR e aterramento com fotos do quadro e receba — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Grátis · iOS e Android · sem cartão de crédito",
+      "note": "Comece grátis · iOS e Android · planos pagos no app",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
+          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
         },
         {
           "question": "Serve para eletricista autônomo e para empresa?",
@@ -186,7 +186,7 @@
       "lede": "PraticOS is the work order app for electricians. Build the quote from your catalog, send it as a link for the customer to approve, record voltage, GFCI and grounding with panel photos and get paid — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free · iOS and Android · no credit card",
+      "note": "Start free · iOS and Android · paid plans in the app",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -323,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
+          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
         },
         {
           "question": "Does it work for solo electricians and contractors?",
@@ -358,7 +358,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para electricistas. Arma el presupuesto con tu catálogo, envíalo por link para que el cliente lo apruebe, registra tensión, diferencial y puesta a tierra con fotos del tablero y cobra — todo desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
+      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
+          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
         },
         {
           "question": "¿Sirve para electricista independiente y para empresa?",

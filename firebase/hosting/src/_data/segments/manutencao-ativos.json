@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para empresas de manutenção de equipamentos. Cadastre cada ativo com tag, fabricante, localização e horas de operação, registre preventivas e corretivas com checklist e fotos e mande ao cliente o link da OS — pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Grátis · iOS e Android · sem cartão de crédito",
+      "note": "Comece grátis · iOS e Android · planos pagos no app",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
+          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
         },
         {
           "question": "O PraticOS é um CMMS?",
@@ -186,7 +186,7 @@
       "lede": "PraticOS is the work order app for equipment maintenance companies. Register each asset with tag, manufacturer, location and run hours, log preventive and corrective work with checklists and photos and send the customer a link to the work order — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free · iOS and Android · no credit card",
+      "note": "Start free · iOS and Android · paid plans in the app",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -323,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
+          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
         },
         {
           "question": "Is PraticOS a CMMS?",
@@ -358,7 +358,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para empresas de mantenimiento de equipos. Registra cada activo con etiqueta, fabricante, ubicación y horas de operación, documenta preventivos y correctivos con checklist y fotos y envía al cliente el link de la orden — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
+      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
+          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
         },
         {
           "question": "¿PraticOS es un CMMS?",
