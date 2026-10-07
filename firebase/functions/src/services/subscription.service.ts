@@ -1,6 +1,7 @@
 /**
  * Subscription Service
- * Handles RevenueCat webhooks and subscription management
+ * Server-side subscription state: RevenueCat sync, usage counters, expiry.
+ * Plan fields are written only here (Firestore rules block clients).
  */
 
 import {
@@ -9,13 +10,9 @@ import {
   getDocument,
   updateDocument,
 } from './firestore.service';
-import {
-  Subscription,
-  SubscriptionStatus,
-} from '../models/types';
+import { Subscription } from '../models/types';
 import {
   PLAN_LIMITS,
-  PRODUCT_TO_PLAN,
   getNextMonthReset,
   getPlanLimits,
   isGraceActive,
@@ -62,82 +59,6 @@ export function createFreeSubscription(): Subscription {
       usageResetAt: getNextMonthReset(),
     },
   };
-}
-
-/**
- * Update subscription from RevenueCat webhook
- */
-export async function updateSubscriptionFromWebhook(
-  companyId: string,
-  productId: string,
-  status: SubscriptionStatus,
-  expiresAt?: string,
-  subscriberId?: string
-): Promise<boolean> {
-  const plan = PRODUCT_TO_PLAN[productId] || 'free';
-  const limits = PLAN_LIMITS[plan];
-
-  const collection = getRootCollection('companies');
-  const company = await getDocument<{ subscription?: Subscription }>(collection, companyId);
-  if (!company) return false;
-
-  // Preserve existing usage data
-  const currentUsage = company.subscription?.usage || {
-    photosThisMonth: 0,
-    formTemplatesActive: 0,
-    usersActive: 1,
-    usageResetAt: getNextMonthReset(),
-  };
-
-  const subscription: Subscription = {
-    plan,
-    status,
-    rcSubscriberId: subscriberId,
-    subscribedAt: company.subscription?.subscribedAt || new Date().toISOString(),
-    expiresAt,
-    limits,
-    usage: currentUsage,
-  };
-
-  await updateDocument(collection, companyId, {
-    subscription,
-    updatedAt: new Date().toISOString(),
-  });
-
-  console.log(`[Subscription] Updated company ${companyId} to plan ${plan} (${status})`);
-  return true;
-}
-
-/**
- * Cancel subscription (revert to free)
- */
-export async function cancelSubscription(companyId: string): Promise<boolean> {
-  const collection = getRootCollection('companies');
-  const company = await getDocument<{ subscription?: Subscription }>(collection, companyId);
-  if (!company) return false;
-
-  const currentUsage = company.subscription?.usage || {
-    photosThisMonth: 0,
-    formTemplatesActive: 0,
-    usersActive: 1,
-    usageResetAt: getNextMonthReset(),
-  };
-
-  const subscription: Subscription = {
-    plan: 'free',
-    status: 'cancelled',
-    cancelledAt: new Date().toISOString(),
-    limits: PLAN_LIMITS.free,
-    usage: currentUsage,
-  };
-
-  await updateDocument(collection, companyId, {
-    subscription,
-    updatedAt: new Date().toISOString(),
-  });
-
-  console.log(`[Subscription] Cancelled subscription for company ${companyId}`);
-  return true;
 }
 
 /**
@@ -215,93 +136,6 @@ export async function resetMonthlyUsage(): Promise<number> {
   }
 
   return count;
-}
-
-// ============================================================================
-// RevenueCat Webhook Handling
-// ============================================================================
-
-export interface RevenueCatWebhookEvent {
-  type: string;
-  id: string;
-  event_timestamp_ms: number;
-  app_user_id: string;
-  product_id?: string;
-  entitlement_id?: string;
-  expiration_at_ms?: number;
-  subscriber?: {
-    original_app_user_id: string;
-    entitlements?: Record<string, {
-      product_identifier: string;
-      expires_date?: string;
-    }>;
-  };
-}
-
-/**
- * Process RevenueCat webhook event
- */
-export async function processRevenueCatWebhook(event: RevenueCatWebhookEvent): Promise<boolean> {
-  const { type, app_user_id, product_id, expiration_at_ms } = event;
-
-  // app_user_id should be the companyId
-  const companyId = app_user_id;
-  if (!companyId) {
-    console.error('[Webhook] Missing app_user_id (companyId)');
-    return false;
-  }
-
-  console.log(`[Webhook] Processing ${type} for company ${companyId}`);
-
-  switch (type) {
-    case 'INITIAL_PURCHASE':
-    case 'RENEWAL':
-    case 'PRODUCT_CHANGE': {
-      if (!product_id) {
-        console.error('[Webhook] Missing product_id for purchase event');
-        return false;
-      }
-      const expiresAt = expiration_at_ms
-        ? new Date(expiration_at_ms).toISOString()
-        : undefined;
-      return updateSubscriptionFromWebhook(
-        companyId,
-        product_id,
-        'active',
-        expiresAt,
-        event.subscriber?.original_app_user_id
-      );
-    }
-
-    case 'CANCELLATION':
-    case 'EXPIRATION':
-      return cancelSubscription(companyId);
-
-    case 'BILLING_ISSUE':
-      // Mark as past_due but don't cancel yet
-      if (product_id) {
-        const expiresAtBilling = expiration_at_ms
-          ? new Date(expiration_at_ms).toISOString()
-          : undefined;
-        return updateSubscriptionFromWebhook(
-          companyId,
-          product_id,
-          'past_due',
-          expiresAtBilling
-        );
-      }
-      return false;
-
-    case 'SUBSCRIBER_ALIAS':
-    case 'TRANSFER':
-      // These don't change subscription state
-      console.log(`[Webhook] Ignoring event type: ${type}`);
-      return true;
-
-    default:
-      console.log(`[Webhook] Unknown event type: ${type}`);
-      return true;
-  }
 }
 
 // ============================================================================

@@ -115,6 +115,16 @@ import { handleOrderUpdatedAsaas } from './services/asaas/order-trigger.service'
 const asaasCredentialsKey = defineSecret('ASAAS_CREDENTIALS_KEY');
 
 /**
+ * RevenueCat secrets (Secret Manager). Bound functions see them as process.env:
+ * - REVENUECAT_WEBHOOK_AUTH: exact `Authorization` header value configured on
+ *   the RevenueCat webhook (routes/webhooks/revenuecat.routes.ts);
+ * - REVENUECAT_SECRET_API_KEY: secret API key (sk_...) for GET /v1/subscribers.
+ * Both must exist before deploy: `firebase functions:secrets:set <NAME>`.
+ */
+const revenuecatWebhookAuth = defineSecret('REVENUECAT_WEBHOOK_AUTH');
+const revenuecatSecretApiKey = defineSecret('REVENUECAT_SECRET_API_KEY');
+
+/**
  * [Asaas] Single trigger for order updates (never add a second
  * onDocumentUpdated on this path). The app writes orders directly to
  * Firestore, so this runs as a trigger instead of inside an API route:
@@ -518,7 +528,7 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
-    secrets: [ssrApiSecret, asaasCredentialsKey],
+    secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],
   },
   app
 );
