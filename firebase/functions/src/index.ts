@@ -115,6 +115,16 @@ import { handleOrderUpdatedAsaas } from './services/asaas/order-trigger.service'
 const asaasCredentialsKey = defineSecret('ASAAS_CREDENTIALS_KEY');
 
 /**
+ * RevenueCat secrets (Secret Manager). Bound functions see them as process.env:
+ * - REVENUECAT_WEBHOOK_AUTH: exact `Authorization` header value configured on
+ *   the RevenueCat webhook (routes/webhooks/revenuecat.routes.ts);
+ * - REVENUECAT_SECRET_API_KEY: secret API key (sk_...) for GET /v1/subscribers.
+ * Both must exist before deploy: `firebase functions:secrets:set <NAME>`.
+ */
+const revenuecatWebhookAuth = defineSecret('REVENUECAT_WEBHOOK_AUTH');
+const revenuecatSecretApiKey = defineSecret('REVENUECAT_SECRET_API_KEY');
+
+/**
  * [Asaas] Single trigger for order updates (never add a second
  * onDocumentUpdated on this path). The app writes orders directly to
  * Firestore, so this runs as a trigger instead of inside an API route:
@@ -140,19 +150,20 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
 // SCHEDULED FUNCTIONS
 // ============================================================================
 
-import { resetMonthlyUsage } from './services/subscription.service';
+import { expireSubscriptions, resetMonthlyUsage } from './services/subscription.service';
+import { fetchSubscriber } from './services/revenuecat.client';
 
 /**
  * Scheduled function to reset monthly usage counters for subscriptions.
- * Runs at midnight on the 1st of every month (BRT timezone = UTC-3).
+ * Runs at 03:00 America/Sao_Paulo on the 1st of every month.
  *
- * Resets:
- * - photosThisMonth counter for all companies
- * - Sets next usageResetAt to first day of following month
+ * For every company with `subscription.usage.photosThisMonth` > 0 (with or without `plan`):
+ * - photosThisMonth = 0
+ * - usageResetAt = first day of the following month (00:00 UTC)
  */
 export const scheduledResetMonthlyUsage = onSchedule(
   {
-    schedule: '0 3 1 * *', // 3 AM UTC = midnight BRT on 1st of month
+    schedule: '0 3 1 * *', // 03:00 America/Sao_Paulo on the 1st of the month
     region: 'southamerica-east1',
     timeZone: 'America/Sao_Paulo',
     retryCount: 3,
@@ -162,6 +173,31 @@ export const scheduledResetMonthlyUsage = onSchedule(
     console.log('[Scheduled] Running monthly usage reset...');
     const count = await resetMonthlyUsage();
     console.log(`[Scheduled] Reset completed. ${count} companies updated.`);
+  }
+);
+
+/**
+ * Daily subscription expiry (docs/SUBSCRIPTION.md). Companies on a paid plan
+ * whose expiresAt has passed are re-synced from RevenueCat; without an active
+ * entitlement they drop to Free. Covers the end of the launch grace period
+ * and missed webhooks.
+ */
+export const scheduledExpireSubscriptions = onSchedule(
+  {
+    schedule: '30 4 * * *', // 04:30 America/Sao_Paulo, daily
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 3,
+    memory: '256MiB',
+    timeoutSeconds: 540,
+    secrets: [revenuecatSecretApiKey],
+  },
+  async () => {
+    const apiKey = revenuecatSecretApiKey.value();
+    const { expired } = await expireSubscriptions(new Date(), {
+      fetchSubscriber: (companyId) => fetchSubscriber(companyId, apiKey),
+    });
+    console.log(`[Scheduled] Subscription expiry completed. ${expired} companies moved to Free.`);
   }
 );
 
@@ -518,7 +554,7 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
-    secrets: [ssrApiSecret, asaasCredentialsKey],
+    secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],
   },
   app
 );
