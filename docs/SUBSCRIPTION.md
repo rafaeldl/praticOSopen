@@ -69,6 +69,7 @@ App Store subscription group `PraticOS`, ordered Business > Pro > Starter. Reven
 - `SubscriptionService.purchaseUiEnabled` and `FeatureGateService.planLimitsEnforced` follow it.
 - Without the key (local builds, CI without secrets, web), the app is unlimited and has no purchase UI. This avoids enforcing limits with no way to buy.
 - A Test Store key (`test_`) configures the SDK in debug builds only, and never turns paid plans on.
+- The CI secrets are the launch switch: a release build with a real `goog_`/`appl_` key turns paid plans on for every user of that platform. Keep a placeholder (e.g. `DISABLED`) in `REVENUECAT_ANDROID_API_KEY`/`REVENUECAT_IOS_API_KEY` until the server (webhook, rules) is deployed and the grace-period script has run.
 - Tests use `SubscriptionService.debugPaidPlansEnabledOverride` and `FeatureGateService.debugPlanLimitsEnforcedOverride` (reset to `null` in `tearDown`).
 
 ```bash
