@@ -60,15 +60,19 @@ abstract class _SubscriptionStore with Store {
   Future<void> bindCompany(String id) async {
     if (companyId == id && _listener != null) return;
 
-    await _listener?.cancel();
+    // Swap state synchronously so concurrent calls cannot interleave.
+    final old = _listener;
     companyId = id;
     latest = null;
     Global.subscription = null;
-
     _listener = companyDocStream(id).listen(
-      applyCompanyDoc,
+      (data) {
+        if (companyId != id) return;
+        applyCompanyDoc(data);
+      },
       onError: (Object e) => debugPrint('SubscriptionStore: listener error: $e'),
     );
+    await old?.cancel();
 
     try {
       await identify(id);

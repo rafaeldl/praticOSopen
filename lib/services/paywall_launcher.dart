@@ -71,6 +71,7 @@ class PaywallLauncher {
     }
 
     final l10n = context.l10n;
+    final navigator = Navigator.of(context, rootNavigator: true);
     showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -92,8 +93,8 @@ class PaywallLauncher {
       message = l10n.restorePurchasesError;
     }
 
+    navigator.pop(); // loading
     if (!context.mounted) return restored;
-    Navigator.of(context, rootNavigator: true).pop(); // loading
     await _showMessage(context, title: title, message: message);
     return restored;
   }

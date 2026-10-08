@@ -795,7 +795,7 @@ class _SettingsState extends State<Settings> {
           leading: _subscriptionIcon(CupertinoIcons.star_fill, CupertinoColors.systemPurple),
           title: Text(context.l10n.currentPlan),
           subtitle: showExpiry
-              ? Text(context.l10n.planValidUntil(FormatService().formatDate(expiresAt)))
+              ? Text(context.l10n.planValidUntil(FormatService().formatDate(expiresAt.toLocal())))
               : null,
           additionalInfo: Text(plan.displayName),
         ),
@@ -821,7 +821,7 @@ class _SettingsState extends State<Settings> {
           ),
         ] else
           CupertinoListTile(
-            leading: _subscriptionIcon(CupertinoIcons.info_circle_fill, CupertinoColors.systemGrey),
+            leading: _subscriptionIcon(CupertinoIcons.info_circle_fill, CupertinoColors.systemGrey.resolveFrom(context)),
             title: Text(context.l10n.askAdminToChangePlan, maxLines: 2),
           ),
       ],

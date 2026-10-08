@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 
 void main() {
   late SubscriptionStore store;
@@ -32,7 +33,10 @@ void main() {
       };
   });
 
-  tearDown(() => Global.subscription = null);
+  tearDown(() {
+    Global.subscription = null;
+    FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+  });
 
   test('bindCompany identifies the company and follows its document', () async {
     await store.bindCompany('c1');
@@ -144,5 +148,63 @@ void main() {
     await flush();
 
     expect(store.subscription!.plan, SubscriptionPlan.pro);
+  });
+
+  test('server-side photo counter below the limit still allows a photo', () async {
+    FeatureGateService.debugPlanLimitsEnforcedOverride = true;
+    await store.bindCompany('c1');
+    docs['c1']!.add({
+      'subscription': {
+        'plan': 'free',
+        'usage': {'photosThisMonth': 29},
+      },
+    });
+    await flush();
+
+    expect(FeatureGateService.canAddPhoto(Global.subscription).isAllowed, isTrue);
+  });
+
+  test('concurrent bindCompany calls leave only the last company listened', () async {
+    final first = store.bindCompany('c1');
+    final second = store.bindCompany('c2');
+    await Future.wait([first, second]);
+
+    expect(store.companyId, 'c2');
+    expect(docs['c1']!.hasListener, isFalse);
+    expect(docs['c2']!.hasListener, isTrue);
+
+    docs['c2']!.add({'subscription': {'plan': 'starter'}});
+    await flush();
+    expect(Global.subscription!.plan, SubscriptionPlan.starter);
+
+    if (docs['c1']!.hasListener) {
+      docs['c1']!.add({'subscription': {'plan': 'business'}});
+      await flush();
+    }
+    expect(Global.subscription!.plan, SubscriptionPlan.starter);
+  });
+
+  test('bind after unbind listens and identifies again', () async {
+    await store.bindCompany('c1');
+    await store.unbind();
+    await store.bindCompany('c1');
+
+    expect(identified, ['c1', 'c1']);
+    expect(docs['c1']!.hasListener, isTrue);
+    docs['c1']!.add({'subscription': {'plan': 'pro'}});
+    await flush();
+    expect(Global.subscription!.plan, SubscriptionPlan.pro);
+  });
+
+  test('stream error does not throw and keeps the last state', () async {
+    await store.bindCompany('c1');
+    docs['c1']!.add({'subscription': {'plan': 'pro'}});
+    await flush();
+
+    docs['c1']!.addError(StateError('boom'));
+    await flush();
+
+    expect(store.subscription!.plan, SubscriptionPlan.pro);
+    expect(Global.subscription!.plan, SubscriptionPlan.pro);
   });
 }

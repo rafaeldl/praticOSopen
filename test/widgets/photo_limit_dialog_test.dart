@@ -80,6 +80,27 @@ void main() {
     expect(find.text(l10n.ok), findsOneWidget);
   });
 
+  testWidgets('photo dialog uses the localized message, not result.message',
+      (tester) async {
+    SubscriptionService.debugPaidPlansEnabledOverride = true;
+    PaywallLauncher.roleResolver = () => 'admin';
+
+    await open(
+      tester,
+      FeatureGateResult(
+        isAllowed: false,
+        currentUsage: 30,
+        limit: 30,
+        featureType: FeatureType.photo,
+        currentPlan: SubscriptionPlan.free,
+        message: 'hardcoded message',
+      ),
+    );
+
+    expect(find.text(l10n.photoLimitReachedMessage), findsOneWidget);
+    expect(find.text('hardcoded message'), findsNothing);
+  });
+
   testWidgets('form template limit uses the generic message', (tester) async {
     SubscriptionService.debugPaidPlansEnabledOverride = true;
     PaywallLauncher.roleResolver = () => 'admin';

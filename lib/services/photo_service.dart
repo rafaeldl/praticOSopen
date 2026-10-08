@@ -201,7 +201,7 @@ class PhotoService {
     }
   }
 
-  /// Incrementa o contador de fotos do mês no Firestore.
+  /// Incrementa o contador de fotos do mês em companies/{companyId}.
   Future<void> _incrementPhotoCounter(String companyId) async {
     try {
       final companyRef = FirebaseFirestore.instance
@@ -211,10 +211,6 @@ class PhotoService {
       await companyRef.update({
         SubscriptionUsagePaths.photosThisMonth: FieldValue.increment(1),
       });
-
-      // Atualizar contador local para verificações subsequentes (o listener
-      // do SubscriptionStore traz o valor do servidor logo em seguida).
-      Global.subscription?.usage.photosThisMonth++;
 
       debugPrint('PhotoService: Contador de fotos incrementado');
     } catch (e) {

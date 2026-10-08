@@ -22,7 +22,7 @@ void showFeatureLimitDialog(BuildContext ctx, FeatureGateResult result) {
   final String message;
   switch (result.featureType) {
     case FeatureType.photo:
-      message = result.message ?? l10n.photoLimitReachedMessage;
+      message = l10n.photoLimitReachedMessage;
     case FeatureType.formTemplate:
       message = l10n.featureLimitReached(l10n.formTemplates);
     case FeatureType.collaborator:
