@@ -7,7 +7,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/auth_service.dart';
-import 'package:praticos/services/subscription_service.dart';
+import 'package:praticos/mobx/subscription_store.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +26,9 @@ abstract class _AuthStore with Store {
 
   /// Injected from main.dart to sync locale on login
   LocaleStore? localeStore;
+
+  /// Injected from main.dart: follows the current company's subscription.
+  SubscriptionStore? subscriptionStore;
 
   @observable
   ObservableStream<User?>? currentUser;
@@ -131,6 +134,7 @@ abstract class _AuthStore with Store {
           method: AnalyticsService.getAuthMethod(),
           hasCompany: false,
         );
+        await subscriptionStore?.unbind();
         return;
       }
 
@@ -158,15 +162,9 @@ abstract class _AuthStore with Store {
             ?.name,
       );
 
-      // Initialize RevenueCat with companyId as appUserId
-      // This links subscriptions to the company, not individual user
+      // Live subscription + RevenueCat customer (appUserID = companyId).
       if (companyId != null) {
-        try {
-          await SubscriptionService.instance.initialize(companyId);
-        } catch (e) {
-          // Log but don't fail login if RevenueCat fails
-          debugPrint('AuthStore: Failed to initialize RevenueCat: $e');
-        }
+        await subscriptionStore?.bindCompany(companyId);
       }
     } catch (e) {
       debugPrint('AuthStore: error loading company data: $e');
@@ -187,6 +185,9 @@ abstract class _AuthStore with Store {
     }
     companyAggr = company.toAggr();
     Global.companyAggr = companyAggr;
+    if (company.id != null) {
+      await subscriptionStore?.bindCompany(company.id!);
+    }
   }
 
   /// Recarrega os dados do usuário e empresa do Firestore
@@ -234,8 +235,8 @@ abstract class _AuthStore with Store {
     Global.currentUser = null;
     Global.companyAggr = null;
     AnalyticsService.instance.clearUser();
-    // Logout from RevenueCat
-    await SubscriptionService.instance.logout();
+    // Stop the subscription listener and log out of RevenueCat
+    await subscriptionStore?.unbind();
     _auth.signOutGoogle();
   }
 
@@ -281,6 +282,7 @@ abstract class _AuthStore with Store {
       await prefs.remove("companyName");
 
       // 4. Clear global state
+      await subscriptionStore?.unbind();
       Global.currentUser = null;
       Global.companyAggr = null;
       companyAggr = null;

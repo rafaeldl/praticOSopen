@@ -5,6 +5,8 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/subscription_service.dart';
+import 'package:praticos/utils/store_subscription.dart';
 
 class UserProfileEditScreen extends StatefulWidget {
   const UserProfileEditScreen({super.key});
@@ -304,12 +306,26 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   }
 
   void _showDeleteAccountConfirmation(BuildContext context) {
+    final paidPlansEnabled = SubscriptionService.paidPlansEnabled;
     showCupertinoDialog(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
         title: Text(context.l10n.deleteAccount),
-        content: Text(context.l10n.deleteAccountWarning),
+        content: Text(
+          deleteAccountDialogMessage(
+            context.l10n,
+            paidPlansEnabled: paidPlansEnabled,
+          ),
+        ),
         actions: [
+          if (paidPlansEnabled)
+            CupertinoDialogAction(
+              child: Text(context.l10n.manageInStore),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                openStoreSubscriptionSettings();
+              },
+            ),
           CupertinoDialogAction(
             child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(dialogContext),

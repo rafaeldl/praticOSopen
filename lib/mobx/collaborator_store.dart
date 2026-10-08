@@ -523,7 +523,7 @@ abstract class _CollaboratorStore with Store {
   /// Falha silenciosa - não bloqueia a operação principal.
   Future<void> _updateCollaboratorCounter() async {
     try {
-      if (Global.companyAggr?.id == null || Global.subscription == null) {
+      if (Global.companyAggr?.id == null) {
         return;
       }
 
@@ -545,14 +545,14 @@ abstract class _CollaboratorStore with Store {
 
       // Atualiza no Firestore
       await _db
-          .collection('companies')
+          .collection(SubscriptionUsagePaths.collection)
           .doc(companyId)
           .update({
-            'subscription.usage.collaborators': totalCollaborators,
+            SubscriptionUsagePaths.usersActive: totalCollaborators,
           });
 
       // Atualiza localmente
-      Global.subscription!.usage.collaborators = totalCollaborators;
+      Global.subscription?.usage.usersActive = totalCollaborators;
 
       debugPrint('[CollaboratorStore] Contador de colaboradores atualizado: $totalCollaborators (membros: $memberCount, convites: $pendingCount)');
     } catch (e) {

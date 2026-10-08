@@ -25,6 +25,9 @@ class Company extends BaseAudit {
   bool? useContracts; // Recurring maintenance contracts
   UserAggr? owner;
   List<UserRoleAggr>? users;
+  /// Server-owned (RevenueCat webhook). Read-only on the client: never sent
+  /// back on company saves, so a stale local copy cannot overwrite the plan.
+  @JsonKey(includeToJson: false)
   Subscription? subscription;
 
   Company();

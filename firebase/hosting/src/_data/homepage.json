@@ -6,7 +6,7 @@
       "lede": "PraticOS é o app de ordem de serviço para quem trabalha na oficina, na bancada ou na casa do cliente. Abra a OS, tire as fotos, mande o link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Grátis · iOS e Android · sem cartão de crédito",
+      "note": "Comece grátis · iOS e Android · planos pagos no app",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -110,7 +110,7 @@
     },
     "download": {
       "title": "Baixe e abra sua primeira OS hoje.",
-      "text": "Grátis no iOS e no Android. Sem cartão de crédito.",
+      "text": "Comece grátis. Planos pagos disponíveis no app.",
       "appStore": { "label": "Baixar na", "name": "App Store" },
       "playStore": { "label": "Disponível no", "name": "Google Play" },
       "contactLead": "Ficou com dúvida?",
@@ -125,7 +125,7 @@
       "lede": "PraticOS is the work order app for people who work in a shop, at a bench or at the customer's door. Open the order, take the photos, send the link for the customer to approve and record the payment — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free · iOS and Android · no credit card",
+      "note": "Start free · iOS and Android · paid plans in the app",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -229,7 +229,7 @@
     },
     "download": {
       "title": "Download it and open your first order today.",
-      "text": "Free on iOS and Android. No credit card.",
+      "text": "Start free. Paid plans available in the app.",
       "appStore": { "label": "Download on the", "name": "App Store" },
       "playStore": { "label": "Get it on", "name": "Google Play" },
       "contactLead": "Questions?",
@@ -244,7 +244,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para quien trabaja en el taller, en el banco de trabajo o en la casa del cliente. Abre la orden, saca las fotos, envía el link para que el cliente apruebe y registra el pago — todo desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
+      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -348,7 +348,7 @@
     },
     "download": {
       "title": "Descárgala y abre tu primera orden hoy.",
-      "text": "Gratis en iOS y Android. Sin tarjeta de crédito.",
+      "text": "Empieza gratis. Planes pagos disponibles en la app.",
       "appStore": { "label": "Descargar en", "name": "App Store" },
       "playStore": { "label": "Disponible en", "name": "Google Play" },
       "contactLead": "¿Dudas?",

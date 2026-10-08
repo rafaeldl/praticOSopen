@@ -29,7 +29,6 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:praticos/global.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
-import 'package:praticos/mobx/subscription_store.dart';
 part 'order_store.g.dart';
 
 class OrderStore = _OrderStore with _$OrderStore;
@@ -948,16 +947,10 @@ abstract class _OrderStore with Store {
   /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromGallery() async {
-    // Verificar limite de fotos do plano usando SubscriptionStore
-    final subscriptionStore = SubscriptionStoreHolder.instance;
-    if (subscriptionStore != null) {
-      // Criar Subscription a partir do currentPlan do store
-      // Por enquanto usamos null para aplicar limites default (Free)
-      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
-      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
-      if (!photoLimitResult!.isAllowed) {
-        return false;
-      }
+    // Limite de fotos do plano efetivo da empresa (SubscriptionStore ao vivo)
+    photoLimitResult = FeatureGateService.canAddPhoto(Global.subscription);
+    if (!photoLimitResult!.isAllowed) {
+      return false;
     }
 
     final List<File> files = await photoService.pickMultipleImagesFromGallery();
@@ -993,15 +986,10 @@ abstract class _OrderStore with Store {
   /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromCamera() async {
-    // Verificar limite de fotos do plano usando SubscriptionStore
-    final subscriptionStore = SubscriptionStoreHolder.instance;
-    if (subscriptionStore != null) {
-      // Por enquanto usamos null para aplicar limites default (Free)
-      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
-      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
-      if (!photoLimitResult!.isAllowed) {
-        return false;
-      }
+    // Limite de fotos do plano efetivo da empresa (SubscriptionStore ao vivo)
+    photoLimitResult = FeatureGateService.canAddPhoto(Global.subscription);
+    if (!photoLimitResult!.isAllowed) {
+      return false;
     }
 
     final File? file = await photoService.takePhoto();

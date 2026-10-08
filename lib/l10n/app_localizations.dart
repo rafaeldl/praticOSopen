@@ -6862,6 +6862,48 @@ abstract class AppLocalizations {
   /// **'Ver planos'**
   String get viewPlans;
 
+  /// No description provided for @planValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Válido até {date}'**
+  String planValidUntil(String date);
+
+  /// No description provided for @askAdminToChangePlanTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fale com o administrador'**
+  String get askAdminToChangePlanTitle;
+
+  /// No description provided for @askAdminToChangePlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ao administrador da empresa para mudar de plano.'**
+  String get askAdminToChangePlan;
+
+  /// No description provided for @subscriptionUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'As assinaturas não estão disponíveis agora. Tente novamente mais tarde.'**
+  String get subscriptionUnavailable;
+
+  /// No description provided for @restorePurchasesNothingFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma assinatura ativa foi encontrada nesta conta da loja.'**
+  String get restorePurchasesNothingFound;
+
+  /// No description provided for @planLimitUpgradeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assine um plano para aumentar este limite.'**
+  String get planLimitUpgradeHint;
+
+  /// No description provided for @deleteAccountStoreSubscriptionWarning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir a conta não cancela a assinatura da App Store ou do Google Play. Cancele antes nos ajustes da loja para não ser cobrado de novo.'**
+  String get deleteAccountStoreSubscriptionWarning;
+
   /// No description provided for @asaasConnected.
   ///
   /// In pt, this message translates to:

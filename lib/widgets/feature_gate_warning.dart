@@ -12,7 +12,7 @@ import 'package:praticos/services/feature_gate_service.dart';
 /// ```dart
 /// FeatureGateWarning(
 ///   result: FeatureGateService.canAddPhoto(subscription),
-///   onUpgrade: () => Navigator.pushNamed(context, '/plans'),
+///   onUpgrade: () => PaywallLauncher.showPaywall(context),
 /// )
 /// ```
 class FeatureGateWarning extends StatelessWidget {
@@ -173,7 +173,7 @@ class FeatureGateWarning extends StatelessWidget {
 /// ```dart
 /// FeatureGateWarningBuilder(
 ///   result: () => FeatureGateService.canAddPhoto(subscription),
-///   onUpgrade: () => Navigator.pushNamed(context, '/plans'),
+///   onUpgrade: () => PaywallLauncher.showPaywall(context),
 ///   child: PhotoGrid(),
 /// )
 /// ```

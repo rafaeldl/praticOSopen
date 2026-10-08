@@ -4,7 +4,7 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Assistência Técnica de Celular | PraticOS",
-    "description": "App de OS para assistência técnica de celular: IMEI na OS, checklist de entrada com fotos e orçamento que o cliente aprova por link. Grátis.",
+    "description": "App de OS para assistência técnica de celular: IMEI na OS, checklist de entrada com fotos e orçamento que o cliente aprova por link. Comece grátis. Planos pagos disponíveis no app.",
     "keywords": "sistema para assistência técnica celular, app para técnico de celular, programa ordem de serviço celular, controle de OS celular, software assistência técnica grátis",
     "ogTitle": "Sistema para Assistência Técnica de Celular | PraticOS",
     "ogDescription": "OS da assistência no celular: aparelho com IMEI, checklist de entrada com fotos, orçamento aprovado por link e controle do que entrou.",
@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para assistência técnica de celular. Registre o aparelho com IMEI, faça o checklist de entrada com fotos, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Grátis · iOS e Android · sem cartão de crédito",
+      "note": "Comece grátis · iOS e Android · planos pagos no app",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -130,7 +130,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
+          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
         },
         {
           "question": "Os checklists de celular já vêm prontos?",
@@ -155,7 +155,7 @@
     "lang": "en",
     "langCode": "en",
     "title": "Phone Repair Shop Software with IMEI Tracking | PraticOS",
-    "description": "Work order app for phone repair shops: IMEI on every ticket, intake checklist with photos and quotes customers approve by link. Free.",
+    "description": "Work order app for phone repair shops: IMEI on every ticket, intake checklist with photos and quotes customers approve by link. Start free. Paid plans available in the app.",
     "keywords": "phone repair shop software, cell phone repair management, phone repair work order app, repair shop app, phone technician app, IMEI tracking",
     "ogTitle": "Phone Repair Shop Software | PraticOS",
     "ogDescription": "Repair tickets on your phone: device with IMEI, intake checklist with photos, quotes approved by link and a clear view of what came in.",
@@ -165,7 +165,7 @@
       "lede": "PraticOS is the work order app for phone repair shops. Log the device with its IMEI, run the intake checklist with photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free · iOS and Android · no credit card",
+      "note": "Start free · iOS and Android · paid plans in the app",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -281,7 +281,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
+          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
         },
         {
           "question": "Do the phone checklists come ready to use?",
@@ -306,7 +306,7 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Asistencia Técnica de Celular | PraticOS",
-    "description": "App de órdenes de servicio para técnicos de celular: IMEI en cada orden, checklist de ingreso con fotos y presupuesto aprobado por link. Gratis.",
+    "description": "App de órdenes de servicio para técnicos de celular: IMEI en cada orden, checklist de ingreso con fotos y presupuesto aprobado por link. Empieza gratis. Planes pagos disponibles en la app.",
     "keywords": "sistema asistencia técnica celular, app técnico celular, programa orden servicio celular, control de órdenes celular, software servicio técnico gratis",
     "ogTitle": "Sistema para Asistencia Técnica de Celular | PraticOS",
     "ogDescription": "Las órdenes del servicio técnico en el celular: equipo con IMEI, checklist de ingreso con fotos, presupuesto aprobado por link y control de lo cobrado.",
@@ -316,7 +316,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para técnicos de celular. Registra el equipo con su IMEI, haz el checklist de ingreso con fotos, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
+      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -432,7 +432,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
+          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
         },
         {
           "question": "¿Los checklists de celular vienen listos?",

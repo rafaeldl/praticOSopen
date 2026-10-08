@@ -1,8 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 /// Tipos de features limitadas por plano.
 enum FeatureType {
@@ -115,7 +114,7 @@ class FeatureGateResult {
       case FeatureType.formTemplate:
         return limits.formTemplates;
       case FeatureType.collaborator:
-        return limits.collaborators;
+        return limits.users;
     }
   }
 }
@@ -135,100 +134,83 @@ class FeatureGateLimitException implements Exception {
 
 /// Serviço central para verificação de feature gates.
 ///
-/// Verifica limites de uso baseado no plano de assinatura do usuário.
+/// Usa o plano efetivo da assinatura: um plano com `expiresAt` vencido conta
+/// como Free, sem esperar o job diário do servidor.
 class FeatureGateService {
   /// Overrides [planLimitsEnforced] in tests. Always reset to null afterwards.
   @visibleForTesting
   static bool? debugPlanLimitsEnforcedOverride;
 
-  /// Whether subscription plan limits apply on this platform.
+  /// Whether subscription plan limits apply.
   ///
-  /// Always `false` on iOS: App Review rejected the app under guideline 3.1.1
-  /// because it accessed paid content that is not sold through In-App Purchase.
-  /// With no IAP, the iOS app must not contain any paid feature, so every limit
-  /// is lifted there (unlimited photos, forms and collaborators, no PDF
-  /// watermark). To restore limits on iOS: ship IAP first, then drop this check.
+  /// Follows [SubscriptionService.paidPlansEnabled] on every platform: limits
+  /// only exist where plans can be bought in the app (App Review 3.1.1). A
+  /// build without a real RevenueCat key is unlimited and has no purchase UI.
   static bool get planLimitsEnforced =>
-      debugPlanLimitsEnforcedOverride ?? !Platform.isIOS;
+      debugPlanLimitsEnforcedOverride ?? SubscriptionService.paidPlansEnabled;
 
-  /// Plan limit for the platform: the real one, or -1 (unlimited) on iOS.
+  /// Plan limit for the platform: the real one, or -1 (unlimited).
   static int _effectiveLimit(int planLimit) =>
       planLimitsEnforced ? planLimit : -1;
 
-  /// Verifica se pode adicionar uma foto.
-  ///
-  /// Se [subscription] for null, usa limites do plano Free.
-  static FeatureGateResult canAddPhoto(Subscription? subscription) =>
-      canAddPhotoWithSubscription(subscription);
+  static int _usageFor(SubscriptionUsage usage, FeatureType type) {
+    switch (type) {
+      case FeatureType.photo:
+        return usage.photosThisMonth;
+      case FeatureType.formTemplate:
+        return usage.formTemplatesActive;
+      case FeatureType.collaborator:
+        return usage.usersActive;
+    }
+  }
 
-  /// Alias of [canAddPhoto] — verifica se pode adicionar uma foto.
-  static FeatureGateResult canAddPhotoWithSubscription(Subscription? subscription) {
+  /// Checks whether [adding] more units of [type] fit in the plan.
+  /// A null [subscription] means the Free plan.
+  static FeatureGateResult _check(
+    Subscription? subscription,
+    FeatureType type, {
+    int adding = 1,
+  }) {
     final sub = subscription ?? Subscription();
-    final limits = sub.limits;
-    final currentUsage = sub.usage.photosThisMonth;
-    final limit = _effectiveLimit(limits.photosPerMonth);
+    final now = DateTime.now();
+    final currentUsage = _usageFor(sub.usage, type);
+    final limit = _effectiveLimit(
+      FeatureGateResult._getLimitForFeature(sub.effectiveLimits(now), type),
+    );
 
     return FeatureGateResult(
-      isAllowed: limit == -1 || currentUsage < limit,
+      isAllowed: limit == -1 || currentUsage + adding <= limit,
       currentUsage: currentUsage,
       limit: limit,
-      featureType: FeatureType.photo,
-      currentPlan: sub.plan,
+      featureType: type,
+      currentPlan: sub.effectivePlan(now),
     );
   }
+
+  /// Verifica se pode adicionar uma foto.
+  static FeatureGateResult canAddPhoto(Subscription? subscription) =>
+      _check(subscription, FeatureType.photo);
+
+  /// Alias of [canAddPhoto].
+  static FeatureGateResult canAddPhotoWithSubscription(Subscription? subscription) =>
+      _check(subscription, FeatureType.photo);
 
   /// Verifica se pode adicionar N fotos.
-  static FeatureGateResult canAddPhotos(Subscription? subscription, int count) {
-    final sub = subscription ?? Subscription();
-    final limits = sub.limits;
-    final currentUsage = sub.usage.photosThisMonth;
-    final limit = _effectiveLimit(limits.photosPerMonth);
+  static FeatureGateResult canAddPhotos(Subscription? subscription, int count) =>
+      _check(subscription, FeatureType.photo, adding: count);
 
-    return FeatureGateResult(
-      isAllowed: limit == -1 || (currentUsage + count) <= limit,
-      currentUsage: currentUsage,
-      limit: limit,
-      featureType: FeatureType.photo,
-      currentPlan: sub.plan,
-    );
-  }
-
-  /// Verifica se pode criar um formulário.
-  static FeatureGateResult canCreateFormTemplate(Subscription? subscription) {
-    final sub = subscription ?? Subscription();
-    final limits = sub.limits;
-    final currentUsage = sub.usage.formTemplates;
-    final limit = _effectiveLimit(limits.formTemplates);
-
-    return FeatureGateResult(
-      isAllowed: limit == -1 || currentUsage < limit,
-      currentUsage: currentUsage,
-      limit: limit,
-      featureType: FeatureType.formTemplate,
-      currentPlan: sub.plan,
-    );
-  }
+  /// Verifica se pode criar (ou ativar) um formulário.
+  static FeatureGateResult canCreateFormTemplate(Subscription? subscription) =>
+      _check(subscription, FeatureType.formTemplate);
 
   /// Verifica se pode adicionar um colaborador.
-  static FeatureGateResult canAddCollaborator(Subscription? subscription) {
-    final sub = subscription ?? Subscription();
-    final limits = sub.limits;
-    final currentUsage = sub.usage.collaborators;
-    final limit = _effectiveLimit(limits.collaborators);
-
-    return FeatureGateResult(
-      isAllowed: limit == -1 || currentUsage < limit,
-      currentUsage: currentUsage,
-      limit: limit,
-      featureType: FeatureType.collaborator,
-      currentPlan: sub.plan,
-    );
-  }
+  static FeatureGateResult canAddCollaborator(Subscription? subscription) =>
+      _check(subscription, FeatureType.collaborator);
 
   /// Verifica se deve exibir marca d'água no PDF.
   static bool shouldShowPdfWatermark(Subscription? subscription) {
     if (!planLimitsEnforced) return false;
     final sub = subscription ?? Subscription();
-    return sub.limits.pdfWatermark;
+    return sub.effectiveLimits(DateTime.now()).pdfWatermark;
   }
 }

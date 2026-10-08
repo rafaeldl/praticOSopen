@@ -1,0 +1,14 @@
+Hello,
+
+Thank you for your review.
+
+We have implemented In-App Purchase for all paid plans. PraticOS is now a freemium app:
+
+- Company registration is free and gives access to the Free plan only. It does not unlock any content sold outside the app.
+- The paid plans (Starter, Pro and Business) are auto-renewable monthly subscriptions sold in the app through In-App Purchase. The subscriptions are attached to this version for review.
+- Paid plans are not sold anywhere else. Our website shows no prices, and the app has no links or calls to action for external purchases.
+
+To see the paywall, sign in with the demo account, open the "Mais" (More) tab and tap "Ver planos" (View plans) in the "Assinatura" (Subscription) section. The App Review notes have the full steps.
+
+Best regards,
+PraticOS team

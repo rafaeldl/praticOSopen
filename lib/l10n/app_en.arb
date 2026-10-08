@@ -1560,6 +1560,18 @@
   "photoLimitReachedMessage": "You have reached this month's photo limit.",
   "photoLimitUpgradeHint": "Upgrade to add more photos.",
   "viewPlans": "View plans",
+  "planValidUntil": "Valid until {date}",
+  "@planValidUntil": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "askAdminToChangePlanTitle": "Talk to your admin",
+  "askAdminToChangePlan": "Ask your company admin to change the plan.",
+  "subscriptionUnavailable": "Subscriptions are not available right now. Please try again later.",
+  "restorePurchasesNothingFound": "No active subscription was found for this store account.",
+  "planLimitUpgradeHint": "Subscribe to a plan to raise this limit.",
+  "deleteAccountStoreSubscriptionWarning": "Deleting your account does not cancel an App Store or Google Play subscription. Cancel it first in your store settings so you are not charged again.",
   "asaasConnected": "Connected",
   "asaasDisconnected": "Not connected",
   "asaasConnectTitle": "Connect Asaas account",

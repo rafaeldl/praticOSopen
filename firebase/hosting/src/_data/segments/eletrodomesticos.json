@@ -4,7 +4,7 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Assistência de Eletrodomésticos | PraticOS",
-    "description": "App de OS para assistência técnica de eletrodomésticos: agenda de visitas por técnico, diagnóstico de geladeira e lavadora, garantia na OS. Grátis.",
+    "description": "App de OS para assistência técnica de eletrodomésticos: agenda de visitas por técnico, diagnóstico de geladeira e lavadora, garantia na OS. Comece grátis. Planos pagos disponíveis no app.",
     "keywords": "sistema assistência técnica eletrodomésticos, software técnico linha branca, app técnico geladeira, ordem de serviço eletrodomésticos, sistema para conserto de máquina de lavar",
     "ogTitle": "Sistema para Assistência de Eletrodomésticos | PraticOS",
     "ogDescription": "OS da linha branca no celular: visitas na agenda por técnico, checklists de diagnóstico, orçamento aprovado por link e garantia registrada.",
@@ -14,7 +14,7 @@
       "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrodomésticos. Agende a visita, faça o diagnóstico com checklist e fotos, mande o orçamento por link para o cliente aprovar e registre a garantia e o pagamento — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
-      "note": "Grátis · iOS e Android · sem cartão de crédito",
+      "note": "Comece grátis · iOS e Android · planos pagos no app",
       "ticket": {
         "caption": "Exemplo de OS",
         "title": "Ordem de serviço",
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Não. O PraticOS é gratuito no iOS e no Android, com OS e clientes ilimitados e sem cartão de crédito."
+          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
         },
         {
           "question": "Quais aparelhos têm checklist pronto?",
@@ -176,7 +176,7 @@
     "lang": "en",
     "langCode": "en",
     "title": "Appliance Repair Software: Work Orders | PraticOS",
-    "description": "Work order app for appliance repair: visits scheduled by technician, fridge and washer diagnostic checklists, warranty on the work order. Free.",
+    "description": "Work order app for appliance repair: visits scheduled by technician, fridge and washer diagnostic checklists, warranty on the work order. Start free. Paid plans available in the app.",
     "keywords": "appliance repair software, appliance repair work order app, appliance technician app, appliance service scheduling, refrigerator and washer repair software",
     "ogTitle": "Appliance Repair Software | PraticOS",
     "ogDescription": "Appliance repair work orders on your phone: visits scheduled by technician, diagnostic checklists, quotes approved by link and warranty on record.",
@@ -186,7 +186,7 @@
       "lede": "PraticOS is the work order app for appliance repair. Schedule the visit, run the diagnosis with a checklist and photos, send the quote as a link for the customer to approve and record the warranty and payment — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
-      "note": "Free · iOS and Android · no credit card",
+      "note": "Start free · iOS and Android · paid plans in the app",
       "ticket": {
         "caption": "Sample work order",
         "title": "Work order",
@@ -323,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "No. PraticOS is free on iOS and Android, with unlimited work orders and customers and no credit card."
+          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
         },
         {
           "question": "Which appliances have ready-made checklists?",
@@ -348,7 +348,7 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Técnico de Electrodomésticos | PraticOS",
-    "description": "App de órdenes de servicio para técnicos de electrodomésticos: agenda por técnico, checklists de refrigerador y lavadora, y garantía. Gratis.",
+    "description": "App de órdenes de servicio para técnicos de electrodomésticos: agenda por técnico, checklists de refrigerador y lavadora, y garantía. Empieza gratis. Planes pagos disponibles en la app.",
     "keywords": "sistema servicio técnico electrodomésticos, software técnico línea blanca, app técnico refrigerador, orden de servicio electrodomésticos, sistema para reparación de lavadoras",
     "ogTitle": "Sistema para Técnico de Electrodomésticos | PraticOS",
     "ogDescription": "Las órdenes de línea blanca en el celular: visitas en la agenda por técnico, checklists de diagnóstico, presupuesto por link y garantía registrada.",
@@ -358,7 +358,7 @@
       "lede": "PraticOS es la app de órdenes de servicio para técnicos de electrodomésticos. Agenda la visita, haz el diagnóstico con checklist y fotos, envía el presupuesto por link para que el cliente lo apruebe y registra la garantía y el pago — todo desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
-      "note": "Gratis · iOS y Android · sin tarjeta de crédito",
+      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
       "ticket": {
         "caption": "Ejemplo de orden",
         "title": "Orden de servicio",
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "No. PraticOS es gratis en iOS y Android, con órdenes y clientes ilimitados y sin tarjeta de crédito."
+          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
         },
         {
           "question": "¿Qué aparatos tienen checklist listo?",

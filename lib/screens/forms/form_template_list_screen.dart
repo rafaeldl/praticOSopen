@@ -5,6 +5,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 class FormTemplateListScreen extends StatefulWidget {
   @override
@@ -609,6 +611,8 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           ),
         );
       }
+    } on FeatureGateLimitException catch (e) {
+      if (mounted) showFeatureLimitDialog(context, e.result);
     } catch (e) {
       if (mounted) {
         showCupertinoDialog(

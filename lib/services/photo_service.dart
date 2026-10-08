@@ -201,25 +201,20 @@ class PhotoService {
     }
   }
 
-  /// Incrementa o contador de fotos do mês no Firestore.
+  /// Incrementa o contador de fotos do mês em companies/{companyId}.
   Future<void> _incrementPhotoCounter(String companyId) async {
     try {
-      final companyRef =
-          FirebaseFirestore.instance.collection('tenants').doc(companyId);
+      final companyRef = FirebaseFirestore.instance
+          .collection(SubscriptionUsagePaths.collection)
+          .doc(companyId);
 
       await companyRef.update({
-        'subscription.usage.photosThisMonth': FieldValue.increment(1),
+        SubscriptionUsagePaths.photosThisMonth: FieldValue.increment(1),
       });
-
-      // Atualizar contador local para verificações subsequentes
-      if (Global.subscription != null) {
-        Global.subscription!.usage.photosThisMonth++;
-      }
 
       debugPrint('PhotoService: Contador de fotos incrementado');
     } catch (e) {
       // Não falhar o upload se o incremento falhar
-      // O contador pode não existir ainda no documento
       debugPrint('PhotoService: Erro ao incrementar contador de fotos: $e');
     }
   }

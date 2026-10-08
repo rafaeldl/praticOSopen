@@ -22,6 +22,10 @@ import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/repositories/company_repository.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 import 'package:praticos/services/subscription_service.dart';
+import 'package:praticos/mobx/subscription_store.dart';
+import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/paywall_launcher.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -411,42 +415,10 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
 
-              // Subscription Section
-              // Oculta no iOS enquanto nao houver In-App Purchase (guideline 3.1.1).
-              if (SubscriptionService.purchaseUiEnabled)
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.subscription.toUpperCase()),
-                children: [
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemPurple,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.star_fill, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.manageSubscription),
-                    subtitle: Text(context.l10n.viewPlanAndBilling),
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: () => Navigator.pushNamed(context, '/manage_subscription'),
-                  ),
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemGreen,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.restorePurchases),
-                    subtitle: Text(context.l10n.restorePreviousPurchases),
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: () => _restorePurchases(context),
-                  ),
-                ],
-              ),
+              // Subscription Section: paid plans via In-App Purchase.
+              // Hidden when the build has no real RevenueCat key.
+              if (SubscriptionService.paidPlansEnabled)
+                Observer(builder: (_) => _buildSubscriptionSection(context)),
 
               // Account Section
               CupertinoListSection.insetGrouped(
@@ -797,62 +769,63 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  /// Restore previous in-app purchases
-  Future<void> _restorePurchases(BuildContext context) async {
-    // Show loading dialog
-    showCupertinoDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => CupertinoAlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CupertinoActivityIndicator(),
-            const SizedBox(height: 16),
-            Text(context.l10n.restoringPurchases),
-          ],
-        ),
+  Widget _subscriptionIcon(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(6),
       ),
+      child: Icon(icon, color: CupertinoColors.white, size: 20),
     );
+  }
 
-    try {
-      // TODO: Implementar restauração real via in_app_purchase
-      await Future.delayed(const Duration(seconds: 2));
+  /// Current plan + paywall, Customer Center and restore (owner/admin only).
+  Widget _buildSubscriptionSection(BuildContext context) {
+    final subscription = context.read<SubscriptionStore>().subscription;
+    final plan = (subscription ?? Subscription()).effectivePlan(DateTime.now());
+    final expiresAt = subscription?.expiresAt;
+    final showExpiry = plan != SubscriptionPlan.free && expiresAt != null;
+    final canPurchase = PaywallLauncher.currentUserCanPurchase;
 
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.success),
-            content: Text(context.l10n.restorePurchasesSuccess),
-            actions: [
-              CupertinoDialogAction(
-                child: Text(context.l10n.ok),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
+    return CupertinoListSection.insetGrouped(
+      header: Text(context.l10n.subscription.toUpperCase()),
+      children: [
+        CupertinoListTile(
+          leading: _subscriptionIcon(CupertinoIcons.star_fill, CupertinoColors.systemPurple),
+          title: Text(context.l10n.currentPlan),
+          subtitle: showExpiry
+              ? Text(context.l10n.planValidUntil(FormatService().formatDate(expiresAt.toLocal())))
+              : null,
+          additionalInfo: Text(plan.displayName),
+        ),
+        if (canPurchase) ...[
+          CupertinoListTile(
+            leading: _subscriptionIcon(CupertinoIcons.cart_fill, CupertinoColors.activeBlue),
+            title: Text(context.l10n.viewPlans),
+            trailing: const CupertinoListTileChevron(),
+            onTap: () => PaywallLauncher.showPaywall(context),
           ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.error),
-            content: Text(context.l10n.restorePurchasesError),
-            actions: [
-              CupertinoDialogAction(
-                child: Text(context.l10n.ok),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
+          CupertinoListTile(
+            leading: _subscriptionIcon(CupertinoIcons.creditcard_fill, CupertinoColors.systemIndigo),
+            title: Text(context.l10n.manageSubscription),
+            trailing: const CupertinoListTileChevron(),
+            onTap: () => PaywallLauncher.showCustomerCenter(context),
           ),
-        );
-      }
-    }
+          CupertinoListTile(
+            leading: _subscriptionIcon(CupertinoIcons.arrow_counterclockwise, CupertinoColors.systemGreen),
+            title: Text(context.l10n.restorePurchases),
+            subtitle: Text(context.l10n.restorePreviousPurchases),
+            trailing: const CupertinoListTileChevron(),
+            onTap: () => PaywallLauncher.restore(context),
+          ),
+        ] else
+          CupertinoListTile(
+            leading: _subscriptionIcon(CupertinoIcons.info_circle_fill, CupertinoColors.systemGrey.resolveFrom(context)),
+            title: Text(context.l10n.askAdminToChangePlan, maxLines: 2),
+          ),
+      ],
+    );
   }
 
   /// Show bottom sheet to link WhatsApp

@@ -1,4 +1,5 @@
 import 'package:praticos/models/company.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:test/test.dart';
@@ -70,6 +71,23 @@ void main() {
       Company newCompany = Company.fromJson(company.toJson());
 
       expect(newCompany.toJson(), equals(company.toJson()));
+    });
+
+    test('never writes subscription (server-owned field)', () {
+      final company = Company()
+        ..id = 'c1'
+        ..subscription = Subscription(plan: SubscriptionPlan.business);
+
+      expect(company.toJson().containsKey('subscription'), isFalse);
+    });
+
+    test('still reads subscription from Firestore', () {
+      final company = Company.fromJson({
+        'id': 'c1',
+        'subscription': {'plan': 'pro', 'status': 'active'},
+      });
+
+      expect(company.subscription?.plan, SubscriptionPlan.pro);
     });
   });
 }

@@ -32,6 +32,7 @@ import 'package:praticos/services/tracking_transparency_service.dart';
 
 LocaleStore _localeStore = LocaleStore();
 AuthStore _authStore = AuthStore();
+SubscriptionStore _subscriptionStore = SubscriptionStore();
 
 // Test locale override (set via --dart-define=TEST_LOCALE=pt-BR)
 const String? _testLocale = String.fromEnvironment('TEST_LOCALE') == ''
@@ -48,6 +49,8 @@ Future<void> main() async {
 
   // Wire localeStore into authStore so language syncs on login
   _authStore.localeStore = _localeStore;
+  // Wire the subscription store so login/switch/logout follow the company
+  _authStore.subscriptionStore = _subscriptionStore;
 
   // If TEST_LOCALE is set (screenshot tests), force that locale
   if (_testLocale != null) {
@@ -74,11 +77,7 @@ Future<void> main() async {
           create: (_) => EngagementReminderStore(),
         ),
         Provider<NotificationStore>(create: (_) => NotificationStore()),
-        Provider<SubscriptionStore>(create: (_) {
-          final store = SubscriptionStore();
-          SubscriptionStoreHolder.instance = store;
-          return store;
-        }),
+        Provider<SubscriptionStore>.value(value: _subscriptionStore),
         ChangeNotifierProvider<SegmentConfigProvider>(
           create: (_) => SegmentConfigProvider(),
         ),

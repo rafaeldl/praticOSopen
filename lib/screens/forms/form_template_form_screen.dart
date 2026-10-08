@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 class FormTemplateFormScreen extends StatefulWidget {
   const FormTemplateFormScreen({super.key});
@@ -75,6 +77,12 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       if (mounted) {
         HapticFeedback.mediumImpact();
         Navigator.pop(context, _template);
+      }
+    } on FeatureGateLimitException catch (e) {
+      if (mounted) {
+        HapticFeedback.heavyImpact();
+        setState(() => _isLoading = false);
+        showFeatureLimitDialog(context, e.result);
       }
     } catch (e) {
       if (mounted) {

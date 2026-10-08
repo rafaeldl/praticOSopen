@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:json_annotation/json_annotation.dart';
 
 part 'subscription.g.dart';
 
-/// Planos disponíveis no PraticOS.
+/// Plans available in PraticOS.
 enum SubscriptionPlan {
   @JsonValue('free')
   free,
@@ -14,130 +15,223 @@ enum SubscriptionPlan {
   business,
 }
 
-/// Status da assinatura.
+/// Product names of the plans. They are brand names, not translated.
+extension SubscriptionPlanName on SubscriptionPlan {
+  String get displayName {
+    switch (this) {
+      case SubscriptionPlan.free:
+        return 'Free';
+      case SubscriptionPlan.starter:
+        return 'Starter';
+      case SubscriptionPlan.pro:
+        return 'Pro';
+      case SubscriptionPlan.business:
+        return 'Business';
+    }
+  }
+}
+
+/// Subscription status. Only the server (RevenueCat webhook) writes it.
 enum SubscriptionStatus {
   @JsonValue('active')
   active,
-  @JsonValue('canceled')
-  canceled,
+  @JsonValue('cancelled')
+  cancelled,
+  @JsonValue('past_due')
+  pastDue,
   @JsonValue('expired')
   expired,
-  @JsonValue('trialing')
-  trialing,
 }
 
-/// Contadores de uso do plano atual.
+/// Where the current plan comes from.
+enum SubscriptionSource {
+  @JsonValue('store')
+  store,
+  @JsonValue('grace')
+  grace,
+}
+
+/// Store that bills the subscription.
+enum BillingStore {
+  @JsonValue('app_store')
+  appStore,
+  @JsonValue('play_store')
+  playStore,
+}
+
+/// Firestore paths of the usage counters. The app writes only these fields
+/// of `subscription`; plan, status, limits and dates belong to the server.
+class SubscriptionUsagePaths {
+  SubscriptionUsagePaths._();
+
+  static const collection = 'companies';
+  static const photosThisMonth = 'subscription.usage.photosThisMonth';
+  static const formTemplatesActive = 'subscription.usage.formTemplatesActive';
+  static const usersActive = 'subscription.usage.usersActive';
+}
+
+/// Accepts ISO strings (server), Firestore Timestamps and epoch millis.
+DateTime? _dateFromJson(Object? value) {
+  if (value == null) return null;
+  if (value is Timestamp) return value.toDate();
+  if (value is String) return DateTime.tryParse(value);
+  if (value is int) return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true);
+  return null;
+}
+
+String? _dateToJson(DateTime? value) => value?.toUtc().toIso8601String();
+
+/// Usage counters of the current period.
 @JsonSerializable()
 class SubscriptionUsage {
   int photosThisMonth;
-  int formTemplates;
-  int collaborators;
-  DateTime? periodStart;
-  DateTime? periodEnd;
+  int formTemplatesActive;
+  int usersActive;
+
+  @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)
+  DateTime? usageResetAt;
 
   SubscriptionUsage({
     this.photosThisMonth = 0,
-    this.formTemplates = 0,
-    this.collaborators = 0,
-    this.periodStart,
-    this.periodEnd,
+    this.formTemplatesActive = 0,
+    this.usersActive = 0,
+    this.usageResetAt,
   });
 
+  /// Reads the server keys and falls back to the legacy client keys
+  /// (`formTemplates`, `collaborators`).
   factory SubscriptionUsage.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionUsageFromJson(json);
+      _$SubscriptionUsageFromJson(<String, dynamic>{
+        ...json,
+        'formTemplatesActive': json['formTemplatesActive'] ?? json['formTemplates'],
+        'usersActive': json['usersActive'] ?? json['collaborators'],
+      });
+
   Map<String, dynamic> toJson() => _$SubscriptionUsageToJson(this);
 }
 
-/// Limites do plano.
+/// Plan limits. -1 means unlimited.
 @JsonSerializable()
 class SubscriptionLimits {
-  /// Fotos por mês. -1 = ilimitado.
+  /// Photos per month.
   final int photosPerMonth;
 
-  /// Formulários ativos. -1 = ilimitado.
+  /// Active form templates.
   final int formTemplates;
 
-  /// Usuários na empresa. -1 = ilimitado.
-  final int collaborators;
+  /// Users in the company (members + pending invites).
+  final int users;
 
-  /// Exibir marca d'água no PDF.
+  /// Show the watermark on the work order PDF.
   final bool pdfWatermark;
 
   const SubscriptionLimits({
     this.photosPerMonth = 30,
     this.formTemplates = 1,
-    this.collaborators = 1,
+    this.users = 1,
     this.pdfWatermark = true,
   });
 
+  /// Reads `users` and falls back to the legacy client key `collaborators`.
   factory SubscriptionLimits.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionLimitsFromJson(json);
+      _$SubscriptionLimitsFromJson(<String, dynamic>{
+        ...json,
+        'users': json['users'] ?? json['collaborators'],
+      });
+
   Map<String, dynamic> toJson() => _$SubscriptionLimitsToJson(this);
 
-  /// Limites padrão por plano.
+  /// Default limits per plan (same values as the server).
   static const Map<SubscriptionPlan, SubscriptionLimits> defaults = {
     SubscriptionPlan.free: SubscriptionLimits(
       photosPerMonth: 30,
       formTemplates: 1,
-      collaborators: 1,
+      users: 1,
       pdfWatermark: true,
     ),
     SubscriptionPlan.starter: SubscriptionLimits(
       photosPerMonth: 200,
       formTemplates: 3,
-      collaborators: 3,
+      users: 3,
       pdfWatermark: false,
     ),
     SubscriptionPlan.pro: SubscriptionLimits(
       photosPerMonth: 500,
       formTemplates: 10,
-      collaborators: 5,
+      users: 5,
       pdfWatermark: false,
     ),
     SubscriptionPlan.business: SubscriptionLimits(
-      photosPerMonth: -1, // ilimitado
+      photosPerMonth: -1,
       formTemplates: -1,
-      collaborators: -1,
+      users: -1,
       pdfWatermark: false,
     ),
   };
 
-  /// Retorna limites para um plano específico.
   static SubscriptionLimits forPlan(SubscriptionPlan plan) {
     return defaults[plan] ?? const SubscriptionLimits();
   }
 }
 
-/// Modelo de assinatura do PraticOS.
+/// `companies/{companyId}.subscription`. Written by the server; the app only
+/// increments the counters in [SubscriptionUsagePaths].
 @JsonSerializable(explicitToJson: true)
 class Subscription {
-  String? id;
+  @JsonKey(unknownEnumValue: SubscriptionPlan.free)
   SubscriptionPlan plan;
+
+  @JsonKey(unknownEnumValue: SubscriptionStatus.active)
   SubscriptionStatus status;
+
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  SubscriptionSource? source;
+
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  BillingStore? store;
+
+  @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)
+  DateTime? expiresAt;
+
+  SubscriptionLimits? limits;
+
   SubscriptionUsage usage;
-  DateTime? currentPeriodStart;
-  DateTime? currentPeriodEnd;
-  String? revenueCatCustomerId;
+
+  String? rcSubscriberId;
+
+  @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)
+  DateTime? updatedAt;
 
   Subscription({
-    this.id,
     this.plan = SubscriptionPlan.free,
     this.status = SubscriptionStatus.active,
+    this.source,
+    this.store,
+    this.expiresAt,
+    this.limits,
     SubscriptionUsage? usage,
-    this.currentPeriodStart,
-    this.currentPeriodEnd,
-    this.revenueCatCustomerId,
+    this.rcSubscriberId,
+    this.updatedAt,
   }) : usage = usage ?? SubscriptionUsage();
 
   factory Subscription.fromJson(Map<String, dynamic> json) =>
       _$SubscriptionFromJson(json);
+
   Map<String, dynamic> toJson() => _$SubscriptionToJson(this);
 
-  /// Retorna os limites do plano atual.
-  SubscriptionLimits get limits => SubscriptionLimits.forPlan(plan);
+  /// Plan in force at [now]: [plan] while [expiresAt] is null or in the
+  /// future, Free afterwards. The app does not wait for the daily job.
+  SubscriptionPlan effectivePlan(DateTime now) {
+    final expires = expiresAt;
+    if (expires == null || expires.isAfter(now)) return plan;
+    return SubscriptionPlan.free;
+  }
 
-  /// Verifica se a assinatura está ativa.
-  bool get isActive =>
-      status == SubscriptionStatus.active ||
-      status == SubscriptionStatus.trialing;
+  /// Limits in force at [now]: the stored limits (or the plan defaults) while
+  /// the plan is in force, Free limits after it expires.
+  SubscriptionLimits effectiveLimits(DateTime now) {
+    final current = effectivePlan(now);
+    if (current != plan) return SubscriptionLimits.forPlan(current);
+    return limits ?? SubscriptionLimits.forPlan(plan);
+  }
 }

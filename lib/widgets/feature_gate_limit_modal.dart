@@ -18,7 +18,7 @@ import 'package:praticos/services/feature_gate_service.dart';
 /// FeatureGateLimitModal.show(
 ///   context,
 ///   result: FeatureGateService.canAddPhoto(subscription),
-///   onUpgrade: () => Navigator.pushNamed(context, '/plans'),
+///   onUpgrade: () => PaywallLauncher.showPaywall(context),
 /// );
 /// ```
 class FeatureGateLimitModal {
@@ -290,7 +290,7 @@ class _FeatureGateLimitSheet extends StatelessWidget {
       case FeatureType.formTemplate:
         return limits.formTemplates;
       case FeatureType.collaborator:
-        return limits.collaborators;
+        return limits.users;
     }
   }
 }
@@ -302,7 +302,7 @@ class _FeatureGateLimitSheet extends StatelessWidget {
 /// final canProceed = await FeatureGateCheck.photos(
 ///   context,
 ///   subscription: subscription,
-///   onUpgrade: () => Navigator.pushNamed(context, '/plans'),
+///   onUpgrade: () => PaywallLauncher.showPaywall(context),
 /// );
 /// if (!canProceed) return;
 /// // Continuar com a ação...

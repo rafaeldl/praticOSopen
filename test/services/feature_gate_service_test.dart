@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 void main() {
   group('FeatureGateService', () {
+    setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = true);
+    tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+
     test('canAddPhoto allows photo when within limit (Free)', () {
       final subscription = Subscription(
         plan: SubscriptionPlan.free,
@@ -82,7 +86,7 @@ void main() {
     test('canAddCollaborator checks collaborator limit (Free)', () {
       final subscription = Subscription(
         plan: SubscriptionPlan.free,
-        usage: SubscriptionUsage(collaborators: 1),
+        usage: SubscriptionUsage(usersActive: 1),
       );
 
       final result = FeatureGateService.canAddCollaborator(subscription);
@@ -98,7 +102,7 @@ void main() {
     });
   });
 
-  group('FeatureGateService on iOS (no paid features, guideline 3.1.1)', () {
+  group('FeatureGateService with paid plans disabled (no store key)', () {
     setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = false);
     tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
 
@@ -106,8 +110,8 @@ void main() {
       plan: SubscriptionPlan.free,
       usage: SubscriptionUsage(
         photosThisMonth: 9999,
-        formTemplates: 9999,
-        collaborators: 9999,
+        formTemplatesActive: 9999,
+        usersActive: 9999,
       ),
     );
 
@@ -136,6 +140,106 @@ void main() {
 
     test('PDF has no watermark even on the Free plan', () {
       expect(FeatureGateService.shouldShowPdfWatermark(null), isFalse);
+    });
+  });
+
+  group('FeatureGateService uses the effective plan', () {
+    setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = true);
+    tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+
+    test('expired paid plan falls back to Free limits', () {
+      final sub = Subscription(
+        plan: SubscriptionPlan.business,
+        expiresAt: DateTime.now().subtract(const Duration(days: 1)),
+        usage: SubscriptionUsage(photosThisMonth: 30),
+      );
+
+      final result = FeatureGateService.canAddPhoto(sub);
+
+      expect(result.isAllowed, isFalse);
+      expect(result.limit, 30);
+      expect(result.currentPlan, SubscriptionPlan.free);
+    });
+
+    test('grace period Pro keeps Pro limits until expiresAt', () {
+      final sub = Subscription(
+        plan: SubscriptionPlan.pro,
+        source: SubscriptionSource.grace,
+        expiresAt: DateTime.now().add(const Duration(days: 30)),
+        usage: SubscriptionUsage(photosThisMonth: 100),
+      );
+
+      final result = FeatureGateService.canAddPhoto(sub);
+
+      expect(result.isAllowed, isTrue);
+      expect(result.limit, 500);
+    });
+
+    test('uses the limits stored by the server', () {
+      final sub = Subscription(
+        plan: SubscriptionPlan.starter,
+        limits: const SubscriptionLimits(
+          photosPerMonth: 50,
+          formTemplates: 3,
+          users: 3,
+          pdfWatermark: false,
+        ),
+        usage: SubscriptionUsage(photosThisMonth: 50),
+      );
+
+      expect(FeatureGateService.canAddPhoto(sub).isAllowed, isFalse);
+      expect(FeatureGateService.canAddPhoto(sub).limit, 50);
+    });
+
+    test('form templates and users read the server usage keys', () {
+      final sub = Subscription(
+        usage: SubscriptionUsage(formTemplatesActive: 1, usersActive: 1),
+      );
+
+      expect(FeatureGateService.canCreateFormTemplate(sub).isAllowed, isFalse);
+      expect(FeatureGateService.canAddCollaborator(sub).isAllowed, isFalse);
+    });
+
+    test('expired plan shows the PDF watermark again', () {
+      final sub = Subscription(
+        plan: SubscriptionPlan.pro,
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+      );
+
+      expect(FeatureGateService.shouldShowPdfWatermark(sub), isTrue);
+    });
+  });
+
+  group('FeatureGateService.planLimitsEnforced follows paidPlansEnabled', () {
+    tearDown(() {
+      SubscriptionService.debugPaidPlansEnabledOverride = null;
+      FeatureGateService.debugPlanLimitsEnforcedOverride = null;
+    });
+
+    test('limits apply when paid plans are enabled', () {
+      SubscriptionService.debugPaidPlansEnabledOverride = true;
+
+      expect(FeatureGateService.planLimitsEnforced, isTrue);
+      final result = FeatureGateService.canAddPhoto(
+        Subscription(usage: SubscriptionUsage(photosThisMonth: 30)),
+      );
+      expect(result.isAllowed, isFalse);
+    });
+
+    test('everything is unlimited when paid plans are disabled', () {
+      SubscriptionService.debugPaidPlansEnabledOverride = false;
+
+      expect(FeatureGateService.planLimitsEnforced, isFalse);
+      final result = FeatureGateService.canAddPhoto(
+        Subscription(usage: SubscriptionUsage(photosThisMonth: 9999)),
+      );
+      expect(result.isAllowed, isTrue);
+      expect(FeatureGateService.shouldShowPdfWatermark(null), isFalse);
+    });
+
+    test('a build without RevenueCat key has no limits', () {
+      expect(SubscriptionService.paidPlansEnabled, isFalse);
+      expect(FeatureGateService.planLimitsEnforced, isFalse);
     });
   });
 }

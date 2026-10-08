@@ -9,30 +9,24 @@ part of 'subscription.dart';
 SubscriptionUsage _$SubscriptionUsageFromJson(Map<String, dynamic> json) =>
     SubscriptionUsage(
       photosThisMonth: (json['photosThisMonth'] as num?)?.toInt() ?? 0,
-      formTemplates: (json['formTemplates'] as num?)?.toInt() ?? 0,
-      collaborators: (json['collaborators'] as num?)?.toInt() ?? 0,
-      periodStart: json['periodStart'] == null
-          ? null
-          : DateTime.parse(json['periodStart'] as String),
-      periodEnd: json['periodEnd'] == null
-          ? null
-          : DateTime.parse(json['periodEnd'] as String),
+      formTemplatesActive: (json['formTemplatesActive'] as num?)?.toInt() ?? 0,
+      usersActive: (json['usersActive'] as num?)?.toInt() ?? 0,
+      usageResetAt: _dateFromJson(json['usageResetAt']),
     );
 
 Map<String, dynamic> _$SubscriptionUsageToJson(SubscriptionUsage instance) =>
     <String, dynamic>{
       'photosThisMonth': instance.photosThisMonth,
-      'formTemplates': instance.formTemplates,
-      'collaborators': instance.collaborators,
-      'periodStart': instance.periodStart?.toIso8601String(),
-      'periodEnd': instance.periodEnd?.toIso8601String(),
+      'formTemplatesActive': instance.formTemplatesActive,
+      'usersActive': instance.usersActive,
+      'usageResetAt': _dateToJson(instance.usageResetAt),
     };
 
 SubscriptionLimits _$SubscriptionLimitsFromJson(Map<String, dynamic> json) =>
     SubscriptionLimits(
       photosPerMonth: (json['photosPerMonth'] as num?)?.toInt() ?? 30,
       formTemplates: (json['formTemplates'] as num?)?.toInt() ?? 1,
-      collaborators: (json['collaborators'] as num?)?.toInt() ?? 1,
+      users: (json['users'] as num?)?.toInt() ?? 1,
       pdfWatermark: json['pdfWatermark'] as bool? ?? true,
     );
 
@@ -40,39 +34,57 @@ Map<String, dynamic> _$SubscriptionLimitsToJson(SubscriptionLimits instance) =>
     <String, dynamic>{
       'photosPerMonth': instance.photosPerMonth,
       'formTemplates': instance.formTemplates,
-      'collaborators': instance.collaborators,
+      'users': instance.users,
       'pdfWatermark': instance.pdfWatermark,
     };
 
 Subscription _$SubscriptionFromJson(Map<String, dynamic> json) => Subscription(
-  id: json['id'] as String?,
   plan:
-      $enumDecodeNullable(_$SubscriptionPlanEnumMap, json['plan']) ??
+      $enumDecodeNullable(
+        _$SubscriptionPlanEnumMap,
+        json['plan'],
+        unknownValue: SubscriptionPlan.free,
+      ) ??
       SubscriptionPlan.free,
   status:
-      $enumDecodeNullable(_$SubscriptionStatusEnumMap, json['status']) ??
+      $enumDecodeNullable(
+        _$SubscriptionStatusEnumMap,
+        json['status'],
+        unknownValue: SubscriptionStatus.active,
+      ) ??
       SubscriptionStatus.active,
+  source: $enumDecodeNullable(
+    _$SubscriptionSourceEnumMap,
+    json['source'],
+    unknownValue: JsonKey.nullForUndefinedEnumValue,
+  ),
+  store: $enumDecodeNullable(
+    _$BillingStoreEnumMap,
+    json['store'],
+    unknownValue: JsonKey.nullForUndefinedEnumValue,
+  ),
+  expiresAt: _dateFromJson(json['expiresAt']),
+  limits: json['limits'] == null
+      ? null
+      : SubscriptionLimits.fromJson(json['limits'] as Map<String, dynamic>),
   usage: json['usage'] == null
       ? null
       : SubscriptionUsage.fromJson(json['usage'] as Map<String, dynamic>),
-  currentPeriodStart: json['currentPeriodStart'] == null
-      ? null
-      : DateTime.parse(json['currentPeriodStart'] as String),
-  currentPeriodEnd: json['currentPeriodEnd'] == null
-      ? null
-      : DateTime.parse(json['currentPeriodEnd'] as String),
-  revenueCatCustomerId: json['revenueCatCustomerId'] as String?,
+  rcSubscriberId: json['rcSubscriberId'] as String?,
+  updatedAt: _dateFromJson(json['updatedAt']),
 );
 
 Map<String, dynamic> _$SubscriptionToJson(Subscription instance) =>
     <String, dynamic>{
-      'id': instance.id,
       'plan': _$SubscriptionPlanEnumMap[instance.plan]!,
       'status': _$SubscriptionStatusEnumMap[instance.status]!,
+      'source': _$SubscriptionSourceEnumMap[instance.source],
+      'store': _$BillingStoreEnumMap[instance.store],
+      'expiresAt': _dateToJson(instance.expiresAt),
+      'limits': instance.limits?.toJson(),
       'usage': instance.usage.toJson(),
-      'currentPeriodStart': instance.currentPeriodStart?.toIso8601String(),
-      'currentPeriodEnd': instance.currentPeriodEnd?.toIso8601String(),
-      'revenueCatCustomerId': instance.revenueCatCustomerId,
+      'rcSubscriberId': instance.rcSubscriberId,
+      'updatedAt': _dateToJson(instance.updatedAt),
     };
 
 const _$SubscriptionPlanEnumMap = {
@@ -84,7 +96,17 @@ const _$SubscriptionPlanEnumMap = {
 
 const _$SubscriptionStatusEnumMap = {
   SubscriptionStatus.active: 'active',
-  SubscriptionStatus.canceled: 'canceled',
+  SubscriptionStatus.cancelled: 'cancelled',
+  SubscriptionStatus.pastDue: 'past_due',
   SubscriptionStatus.expired: 'expired',
-  SubscriptionStatus.trialing: 'trialing',
+};
+
+const _$SubscriptionSourceEnumMap = {
+  SubscriptionSource.store: 'store',
+  SubscriptionSource.grace: 'grace',
+};
+
+const _$BillingStoreEnumMap = {
+  BillingStore.appStore: 'app_store',
+  BillingStore.playStore: 'play_store',
 };

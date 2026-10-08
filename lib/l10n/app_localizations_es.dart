@@ -3659,6 +3659,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get viewPlans => 'Ver planes';
 
   @override
+  String planValidUntil(String date) {
+    return 'Válido hasta $date';
+  }
+
+  @override
+  String get askAdminToChangePlanTitle => 'Habla con el administrador';
+
+  @override
+  String get askAdminToChangePlan =>
+      'Pide al administrador de la empresa que cambie el plan.';
+
+  @override
+  String get subscriptionUnavailable =>
+      'Las suscripciones no están disponibles ahora. Inténtalo de nuevo más tarde.';
+
+  @override
+  String get restorePurchasesNothingFound =>
+      'No se encontró ninguna suscripción activa en esta cuenta de la tienda.';
+
+  @override
+  String get planLimitUpgradeHint =>
+      'Suscríbete a un plan para aumentar este límite.';
+
+  @override
+  String get deleteAccountStoreSubscriptionWarning =>
+      'Eliminar la cuenta no cancela la suscripción de App Store o Google Play. Cancélala antes en los ajustes de la tienda para que no se te cobre de nuevo.';
+
+  @override
   String get asaasConnected => 'Conectado';
 
   @override

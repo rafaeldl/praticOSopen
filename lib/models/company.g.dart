@@ -68,7 +68,6 @@ Map<String, dynamic> _$CompanyToJson(Company instance) => <String, dynamic>{
   'useContracts': instance.useContracts,
   'owner': instance.owner?.toJson(),
   'users': instance.users?.map((e) => e.toJson()).toList(),
-  'subscription': instance.subscription?.toJson(),
 };
 
 CompanyAggr _$CompanyAggrFromJson(Map<String, dynamic> json) => CompanyAggr()

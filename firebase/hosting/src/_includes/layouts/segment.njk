@@ -10,9 +10,9 @@ pageType: segment
 {% set data = segmentData[langCode] | default(segmentData.pt) %}
 {% set homeHref = relPath ~ (indexPage | default('index.html') | prettyUrl) %}
 {% set ui = {
-    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', note: 'Grátis · iOS e Android · sem cartão de crédito', answerLabel: 'No PraticOS', faqTitle: 'Perguntas frequentes', shotAlt: 'Lista de ordens de serviço no app PraticOS' },
-    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', note: 'Free · iOS and Android · no credit card', answerLabel: 'In PraticOS', faqTitle: 'Frequently asked questions', shotAlt: 'Work order list in the PraticOS app' },
-    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', note: 'Gratis · iOS y Android · sin tarjeta de crédito', answerLabel: 'En PraticOS', faqTitle: 'Preguntas frecuentes', shotAlt: 'Lista de órdenes de servicio en la app PraticOS' }
+    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', note: 'Comece grátis · iOS e Android · planos pagos no app', answerLabel: 'No PraticOS', faqTitle: 'Perguntas frequentes', shotAlt: 'Lista de ordens de serviço no app PraticOS' },
+    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', note: 'Start free · iOS and Android · paid plans in the app', answerLabel: 'In PraticOS', faqTitle: 'Frequently asked questions', shotAlt: 'Work order list in the PraticOS app' },
+    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', note: 'Empieza gratis · iOS y Android · planes pagos en la app', answerLabel: 'En PraticOS', faqTitle: 'Preguntas frecuentes', shotAlt: 'Lista de órdenes de servicio en la app PraticOS' }
 }[langCode] | default({}) %}
 
 {% include "components/segment/hero.njk" %}
