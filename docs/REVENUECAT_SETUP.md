@@ -292,10 +292,11 @@ await SubscriptionService.instance.restorePurchases();
    - Copiar Public SDK Key (iOS): `appl_xxxxx`
    - Copiar Public SDK Key (Android): `goog_xxxxx`
 
-2. **Webhook Secret:**
+2. **Webhook:**
    - RevenueCat > Project > Integrations > Webhooks
-   - Configurar webhook URL: `https://us-central1-praticos-app.cloudfunctions.net/webhooks-revenuecat`
-   - Copiar Authorization Header value
+   - URL: `https://southamerica-east1-praticos.cloudfunctions.net/api/webhooks/revenuecat`
+   - Authorization header: gerar um valor (`openssl rand -hex 32`), colar no RevenueCat e gravar o mesmo valor em `firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH --project praticos`
+   - Chave secreta (`sk_...`): RevenueCat > Project Settings > API Keys > Secret API key, gravar com `firebase functions:secrets:set REVENUECAT_SECRET_API_KEY --project praticos`
 
 ---
 
@@ -316,8 +317,10 @@ Adicionar ao GitHub repo (Settings > Secrets > Actions):
 ```
 REVENUECAT_IOS_API_KEY=appl_xxxxx
 REVENUECAT_ANDROID_API_KEY=goog_xxxxx
-REVENUECAT_WEBHOOK_SECRET=whsec_xxxxx
 ```
+
+Os segredos do webhook (`REVENUECAT_WEBHOOK_AUTH`, `REVENUECAT_SECRET_API_KEY`) ficam no
+Secret Manager do Firebase, nao no GitHub (ver `docs/SUBSCRIPTION.md`, secao "Secrets").
 
 Os lanes de release (`android: internal/deploy_with_metadata`, `ios: beta/release_store`)
 validam o prefixo: uma key `test_` (ou da plataforma errada) fica fora do build e a
@@ -403,8 +406,11 @@ execucao mostra o alerta "RevenueCat" — confira o resumo do workflow antes de 
 - Aguardar propagacao (pode levar ate 24h)
 
 ### Erro: "Webhook 401"
-- Verificar REVENUECAT_WEBHOOK_SECRET
+- Verificar se `REVENUECAT_WEBHOOK_AUTH` e identico ao Authorization header configurado no RevenueCat
 - Verificar URL do webhook no RevenueCat
+
+### Erro: "Webhook 500"
+- `REVENUECAT_WEBHOOK_AUTH` ou `REVENUECAT_SECRET_API_KEY` ausente no Secret Manager, ou chave `sk_` invalida (ver logs da funcao `api`)
 
 ### Erro: "Entitlement not active"
 - Verificar mapeamento produto -> entitlement no RevenueCat

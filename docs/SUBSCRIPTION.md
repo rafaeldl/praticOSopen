@@ -123,11 +123,7 @@ GitHub secrets `REVENUECAT_IOS_API_KEY` and `REVENUECAT_ANDROID_API_KEY` are wir
   - `subscription.usage.formTemplatesActive` (`FormTemplateStore`)
   - `subscription.usage.usersActive` (`CollaboratorStore`, members + pending invites)
 
----
-
-## Usage Reset (server)
-
-`usage.usageResetAt` marks the last reset of the usage counters. The monthly Function `scheduledResetMonthlyUsage` (`firebase/functions`) zeroes `photosThisMonth`. Webhook, expiration job and reset details are documented with the server changes.
+**Known limitation:** app versions <= 1.55 cannot parse the statuses `cancelled` and `past_due`; those clients fail to read the subscription of such companies until updated.
 
 ---
 
@@ -218,6 +214,97 @@ Rules:
 | `lib/services/paywall_launcher.dart` | Paywall, Customer Center, restore, owner/admin rule |
 | `lib/widgets/photo_limit_dialog.dart` | Limit dialog for photos, forms and users |
 | `lib/utils/store_subscription.dart` | Delete-account warning and store subscription URL |
+
+---
+
+## Server (Cloud Functions)
+
+Code: `firebase/functions/src/routes/webhooks/revenuecat.routes.ts`,
+`src/services/subscription.service.ts`, `src/services/subscription-plans.ts` (pure rules)
+and `src/services/revenuecat.client.ts`.
+
+### Webhook `POST /webhooks/revenuecat`
+
+- URL: `https://southamerica-east1-praticos.cloudfunctions.net/api/webhooks/revenuecat`.
+- **Auth:** RevenueCat sends the `Authorization` header value configured on the webhook.
+  It must be exactly equal to the `REVENUECAT_WEBHOOK_AUTH` secret (constant-time compare).
+  There is no signature header.
+- **Authoritative state:** the event only tells which company changed (`app_user_id` =
+  `companyId`; `TRANSFER` also syncs the origin and destination ids). For each company the
+  function calls `GET https://api.revenuecat.com/v1/subscribers/{companyId}` with
+  `REVENUECAT_SECRET_API_KEY` and writes the current state. Repeated or out-of-order
+  events are harmless.
+- **Effective plan:** highest active entitlement (`business` > `pro` > `starter`); none: `free`.
+- **Writes** only `plan`, `status`, `limits`, `expiresAt`, `store`, `source` (`store`),
+  `rcSubscriberId` and `updatedAt`, by dotted path. Never touches `usage`.
+- **Grace kept:** with `source == 'grace'`, `expiresAt` in the future and no active
+  entitlement in RevenueCat, nothing is written.
+- **Responses:** `500` when a secret is missing (nothing processed), `401` bad
+  `Authorization`, `400` no event, `200` processed or ignored (anonymous ids, unknown
+  company), `500` on processing errors so RevenueCat retries.
+
+### Daily expiry `scheduledExpireSubscriptions`
+
+Daily at 04:30 America/Sao_Paulo (timeout 540s, concurrency 5). Companies with
+`subscription.plan` in starter/pro/business and `expiresAt` in the past are re-synced from
+RevenueCat: renewed ones get the new `expiresAt`, the rest drop to Free (`expired`).
+Covers the end of the grace period and missed webhooks. A grace company that never
+opened the paywall has no RevenueCat customer yet; `GET /v1/subscribers/{companyId}`
+creates one (empty, no entitlements) and the company drops to Free. Harmless: it is the
+same id the app logs in with later.
+
+### Monthly usage reset `scheduledResetMonthlyUsage`
+
+1st of each month, 03:00 America/Sao_Paulo. Sets `usage.photosThisMonth = 0` and
+`usage.usageResetAt` (next 1st, 00:00 UTC) for every company with
+`subscription.usage.photosThisMonth > 0` (single-field query, automatic index). This
+includes a `subscription` map without `plan` (only `usage`, created by the app's dotted
+usage updates; treated as Free everywhere). Companies already at 0 are not written.
+
+### Launch grace period
+
+`firebase/functions/scripts/grant-grace-period.ts`, run once before paid plans ship.
+Gives 60 days of Pro (`source: 'grace'`) to every company without an active paid store
+subscription, keeps `usage`, and skips companies already in grace (re-running does not
+extend it). Dry-run by default; prints only totals.
+
+```bash
+cd firebase/functions
+npm run subscriptions:grace -- --project=praticos            # dry-run
+npm run subscriptions:grace -- --project=praticos --apply    # write
+# optional: --days=N overrides the 60-day length
+```
+
+### Firestore rules
+
+In both `match /companies/...` blocks, an update by owner/admin may change only `usage`
+inside `subscription`, plus the legacy keys the app up to 1.55 writes back when saving the
+company (`id`, `currentPeriodStart`, `currentPeriodEnd`, `revenueCatCustomerId`; ignored by
+the server). On create, `subscription` must be absent, `null` or Free without server fields.
+Accepted limitation: a member with write access can lower its own usage counter.
+Rules are not published by CI: `firebase deploy --only firestore:rules --project praticos`.
+Rules tests (`npm run test:rules` in `firebase/functions`) need JDK 21+ for the emulator.
+
+### Secrets
+
+| Secret (Secret Manager) | Bound to | Value |
+|-------------------------|----------|-------|
+| `REVENUECAT_WEBHOOK_AUTH` | `api` | Exact `Authorization` header value set in RevenueCat > Integrations > Webhooks |
+| `REVENUECAT_SECRET_API_KEY` | `api`, `scheduledExpireSubscriptions` | RevenueCat secret API key (`sk_...`, API v1) |
+
+```bash
+openssl rand -hex 32   # value for the webhook Authorization header
+firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH --project praticos
+firebase functions:secrets:set REVENUECAT_SECRET_API_KEY --project praticos
+```
+
+Both must exist before Functions are deployed (CI deploys on push to `master` and fails
+on an undefined secret). Each secret also needs the same IAM bindings as
+`ASAAS_CREDENTIALS_KEY`: `roles/secretmanager.secretAccessor` for
+`940190275097-compute@developer.gserviceaccount.com` and `roles/secretmanager.viewer` for
+`github-actions-deployer@praticos.iam.gserviceaccount.com` (without the viewer binding the CI
+deploy fails with 403 on `secretmanager.secrets.get`). For the emulator, put both in `firebase/functions/.secret.local`
+(gitignored).
 
 ---
 

@@ -226,6 +226,200 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('companies/{cid}.subscription', () => {
+    // Shape written by the server (grace script / RevenueCat sync).
+    const SERVER_SUBSCRIPTION = {
+      plan: 'pro',
+      status: 'active',
+      source: 'grace',
+      store: null,
+      expiresAt: '2026-12-06T00:00:00.000Z',
+      limits: { photosPerMonth: 500, formTemplates: 10, users: 5, pdfWatermark: false },
+      usage: { photosThisMonth: 3, formTemplatesActive: 1, usersActive: 1, usageResetAt: '2026-11-01T00:00:00.000Z' },
+    };
+    // Subscription.toJson of the app up to 1.55, merged by CompanyRepository.updateItem.
+    const LEGACY_APP_SUBSCRIPTION = {
+      id: null,
+      plan: 'pro',
+      status: 'active',
+      usage: { photosThisMonth: 4, formTemplates: 1, collaborators: 1, periodStart: null, periodEnd: null },
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+      revenueCatCustomerId: null,
+    };
+    const company = (db: ReturnType<typeof asUser>, id = 'c1') => fs.doc(db, `companies/${id}`);
+    const admin = () => asUser('admin1', { c1: 'admin', c3: 'admin' });
+    const ownerClaim = () => asUser('owner2', { c1: 'owner' });
+    // No claims: only the owner.id checks (legacy match and new match) apply.
+    const ownerWithoutClaims = () => asUser('admin1');
+
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        await fs.setDoc(fs.doc(db, 'companies/c1'), {
+          name: 'Company c1',
+          owner: { id: 'admin1', name: 'Admin' },
+          subscription: SERVER_SUBSCRIPTION,
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c3'), { name: 'Company c3', owner: { id: 'admin1', name: 'Admin' } });
+      });
+    });
+
+    it.each([
+      ['subscription.plan', 'business'],
+      ['subscription.status', 'cancelled'],
+      ['subscription.source', 'store'],
+      ['subscription.expiresAt', '2099-01-01T00:00:00.000Z'],
+      ['subscription.limits.photosPerMonth', -1],
+      ['subscription.rcSubscriberId', 'someone-else'],
+    ])('owner/admin cannot change %s', async (field, value) => {
+      for (const db of [admin(), ownerClaim(), ownerWithoutClaims()]) {
+        await rut.assertFails(fs.updateDoc(company(db), { [field]: value }));
+      }
+    });
+
+    it('owner/admin cannot replace or remove the subscription', async () => {
+      const db = admin();
+      await rut.assertFails(fs.setDoc(company(db), { subscription: { plan: 'business', status: 'active' } }, { merge: true }));
+      await rut.assertFails(fs.updateDoc(company(db), { subscription: { ...SERVER_SUBSCRIPTION, plan: 'business' } }));
+      await rut.assertFails(fs.updateDoc(company(db), { subscription: null }));
+      await rut.assertFails(fs.updateDoc(company(db), { subscription: fs.deleteField() }));
+    });
+
+    it('owner/admin can increment usage', async () => {
+      for (const db of [admin(), ownerClaim(), ownerWithoutClaims()]) {
+        await rut.assertSucceeds(
+          fs.updateDoc(company(db), { 'subscription.usage.photosThisMonth': fs.increment(1) }),
+        );
+      }
+    });
+
+    it('owner/admin can still edit other company fields', async () => {
+      await rut.assertSucceeds(fs.updateDoc(company(admin()), { name: 'Renamed' }));
+    });
+
+    it('accepts the merge write of the current app (Subscription.toJson up to 1.55)', async () => {
+      await rut.assertSucceeds(
+        fs.setDoc(company(admin()), { name: 'Renamed', subscription: LEGACY_APP_SUBSCRIPTION }, { merge: true }),
+      );
+    });
+
+    it.each(['manager', 'supervisor', 'consultant', 'technician'])('%s cannot update usage', async (role) => {
+      await rut.assertFails(
+        fs.updateDoc(company(asUser('member1', { c1: role })), { 'subscription.usage.photosThisMonth': fs.increment(1) }),
+      );
+    });
+
+    it('outsider cannot update usage', async () => {
+      await rut.assertFails(
+        fs.updateDoc(company(asUser('outsider')), { 'subscription.usage.photosThisMonth': fs.increment(1) }),
+      );
+    });
+
+    it('a company without subscription accepts null or a Free client subscription, never a paid one', async () => {
+      const db = admin();
+      await rut.assertFails(fs.setDoc(company(db, 'c3'), { subscription: { plan: 'pro', status: 'active' } }, { merge: true }));
+      await rut.assertSucceeds(fs.setDoc(company(db, 'c3'), { subscription: null }, { merge: true }));
+      await rut.assertSucceeds(
+        fs.setDoc(company(db, 'c3'), { subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'free' } }, { merge: true }),
+      );
+    });
+
+    it('owner/admin can increment usage by dotted path on a company without subscription', async () => {
+      for (const db of [admin(), ownerWithoutClaims()]) {
+        await rut.assertSucceeds(
+          fs.updateDoc(company(db, 'c3'), { 'subscription.usage.photosThisMonth': fs.increment(1) }),
+        );
+      }
+    });
+
+    describe('usage-only subscription (map without plan, created by dotted usage updates)', () => {
+      const USAGE_ONLY = { usage: { formTemplates: 1, photosThisMonth: 2 } };
+
+      beforeEach(async () => {
+        await env.withSecurityRulesDisabled(async (ctx) => {
+          await fs.setDoc(fs.doc(ctx.firestore(), 'companies/c3'), {
+            name: 'Company c3',
+            owner: { id: 'admin1', name: 'Admin' },
+            subscription: USAGE_ONLY,
+          });
+        });
+      });
+
+      it('owner/admin can increment usage', async () => {
+        for (const db of [admin(), ownerWithoutClaims()]) {
+          await rut.assertSucceeds(
+            fs.updateDoc(company(db, 'c3'), { 'subscription.usage.photosThisMonth': fs.increment(1) }),
+          );
+        }
+      });
+
+      it('accepts the legacy merge of a Free client subscription (app up to 1.55)', async () => {
+        await rut.assertSucceeds(
+          fs.setDoc(
+            company(admin(), 'c3'),
+            { name: 'Renamed', subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'free' } },
+            { merge: true },
+          ),
+        );
+      });
+
+      it('rejects a paid plan or server fields', async () => {
+        const db = admin();
+        await rut.assertFails(fs.updateDoc(company(db, 'c3'), { 'subscription.plan': 'pro' }));
+        await rut.assertFails(
+          fs.setDoc(company(db, 'c3'), { subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'pro' } }, { merge: true }),
+        );
+        await rut.assertFails(
+          fs.updateDoc(company(db, 'c3'), { 'subscription.plan': 'free', 'subscription.source': 'grace' }),
+        );
+        await rut.assertFails(
+          fs.updateDoc(company(db, 'c3'), { 'subscription.plan': 'free', 'subscription.expiresAt': '2099-01-01T00:00:00.000Z' }),
+        );
+        await rut.assertFails(
+          fs.updateDoc(company(db, 'c3'), { 'subscription.plan': 'free', 'subscription.limits.photosPerMonth': -1 }),
+        );
+      });
+
+      it.each(['manager', 'technician'])('%s cannot write the legacy merge', async (role) => {
+        await rut.assertFails(
+          fs.setDoc(
+            company(asUser('member1', { c3: role }), 'c3'),
+            { subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'free' } },
+            { merge: true },
+          ),
+        );
+      });
+    });
+
+    describe('on create', () => {
+      const create = (cid: string, extra: Record<string, unknown>) =>
+        fs.setDoc(fs.doc(asUser('new4'), `companies/${cid}`), { name: 'New', owner: { id: 'new4', name: 'New' }, ...extra });
+
+      it('allows no subscription, null or the Free client subscription', async () => {
+        await rut.assertSucceeds(create('cA', {}));
+        await rut.assertSucceeds(create('cB', { subscription: null }));
+        await rut.assertSucceeds(create('cC', { subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'free' } }));
+      });
+
+      it('rejects a paid plan or server fields', async () => {
+        await rut.assertFails(create('cD', { subscription: { ...LEGACY_APP_SUBSCRIPTION, plan: 'business' } }));
+        await rut.assertFails(
+          create('cE', {
+            subscription: {
+              plan: 'free',
+              status: 'active',
+              limits: { photosPerMonth: -1, formTemplates: -1, users: -1, pdfWatermark: false },
+            },
+          }),
+        );
+        await rut.assertFails(
+          create('cF', { subscription: { plan: 'free', status: 'active', source: 'grace', expiresAt: '2099-01-01T00:00:00.000Z' } }),
+        );
+      });
+    });
+  });
+
   describe('companies/{cid}/memberships/{memberId}', () => {
     it('does not allow creating the own membership in an existing company', async () => {
       await rut.assertFails(

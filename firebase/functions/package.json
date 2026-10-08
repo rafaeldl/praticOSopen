@@ -19,6 +19,7 @@
     "asaas:pilot": "ts-node scripts/enable-asaas-pilot.ts",
     "claims:recompute": "ts-node scripts/recompute-claims.ts",
     "memberships:seed": "ts-node scripts/seed-private-membership.ts",
+    "subscriptions:grace": "ts-node scripts/grant-grace-period.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:rules": "firebase emulators:exec --only firestore --project demo-praticos --config ../firebase.json \"jest src/__tests__/firestore.rules.test.ts\""

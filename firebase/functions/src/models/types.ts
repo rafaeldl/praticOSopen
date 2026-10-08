@@ -432,7 +432,10 @@ export interface PendingItems {
 // ============================================================================
 
 export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'business';
-export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'cancelled' | 'expired';
+export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'expired';
+/** 'store' = state read from RevenueCat; 'grace' = launch grace period (script). */
+export type SubscriptionSource = 'store' | 'grace';
+export type SubscriptionStore = 'app_store' | 'play_store';
 
 export interface SubscriptionLimits {
   photosPerMonth: number;      // -1 = unlimited
@@ -451,10 +454,13 @@ export interface SubscriptionUsage {
 export interface Subscription {
   plan: SubscriptionPlan;
   status: SubscriptionStatus;
-  rcSubscriberId?: string;     // RevenueCat subscriber ID
+  source?: SubscriptionSource;
+  store?: SubscriptionStore | null;
+  rcSubscriberId?: string;     // RevenueCat subscriber ID (= companyId)
   subscribedAt?: string;
-  expiresAt?: string;
+  expiresAt?: string | null;   // ISO; null = no expiry
   cancelledAt?: string;
+  updatedAt?: string;          // ISO, last server write
   limits: SubscriptionLimits;
   usage: SubscriptionUsage;
 }
