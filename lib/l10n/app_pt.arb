@@ -1626,6 +1626,19 @@
   "photoLimitReachedMessage": "Você atingiu o limite de fotos deste mês.",
   "photoLimitUpgradeHint": "Faça upgrade para adicionar mais fotos.",
   "viewPlans": "Ver planos",
+  "planCourtesyUntil": "Cortesia até {date}",
+  "@planCourtesyUntil": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "planRenewsOn": "Renova em {date}",
+  "@planRenewsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "planPaymentIssue": "Problema no pagamento",
   "planValidUntil": "Válido até {date}",
   "@planValidUntil": {
     "placeholders": {

@@ -182,6 +182,8 @@ Entry points:
 | Form template and user limits | `showFeatureLimitDialog` in form template and collaborator screens |
 | Deep links `upgrade`/`plans` (paywall), `subscription` (Customer Center), `restore` | `DeepLinkService.subscriptionLinkForPath` / `openSubscriptionLink` |
 
+The "Current plan" row shows `Subscription.periodState`: "Renews on {date}" for an active store subscription, "Valid until {date}" once auto-renew is off, "Courtesy until {date}" during the launch grace period and "Payment issue" when the store reports a billing problem; nothing on Free. "View plans" reads "Change plan" while a store subscription is in force (`hasStoreSubscription`). In TestFlight and sandbox a monthly subscription renews daily, so the date is one day ahead.
+
 The paywall and Customer Center are configured in pt, en and es in the RevenueCat dashboard. There are no plan screens or routes in the app (`PlansScreen`, `SubscriptionSuccessScreen`, `ManageSubscriptionScreen` were removed).
 
 Deleting the account warns that the store subscription must be cancelled in the store settings and links to it (`lib/utils/store_subscription.dart`).

@@ -780,12 +780,32 @@ class _SettingsState extends State<Settings> {
     );
   }
 
+  /// Renewal, end or courtesy date of the current plan; null on Free.
+  Widget? _planPeriodText(BuildContext context, Subscription subscription, DateTime now) {
+    final expiresAt = subscription.expiresAt;
+    final date = expiresAt == null ? null : FormatService().formatDate(expiresAt.toLocal());
+    switch (subscription.periodState(now)) {
+      case SubscriptionPeriodState.free:
+        return null;
+      case SubscriptionPeriodState.paymentIssue:
+        return Text(
+          context.l10n.planPaymentIssue,
+          style: const TextStyle(color: CupertinoColors.systemRed),
+        );
+      case SubscriptionPeriodState.courtesy:
+        return date == null ? null : Text(context.l10n.planCourtesyUntil(date));
+      case SubscriptionPeriodState.renewsOn:
+        return date == null ? null : Text(context.l10n.planRenewsOn(date));
+      case SubscriptionPeriodState.endsOn:
+        return date == null ? null : Text(context.l10n.planValidUntil(date));
+    }
+  }
+
   /// Current plan + paywall, Customer Center and restore (owner/admin only).
   Widget _buildSubscriptionSection(BuildContext context) {
-    final subscription = context.read<SubscriptionStore>().subscription;
-    final plan = (subscription ?? Subscription()).effectivePlan(DateTime.now());
-    final expiresAt = subscription?.expiresAt;
-    final showExpiry = plan != SubscriptionPlan.free && expiresAt != null;
+    final subscription = context.read<SubscriptionStore>().subscription ?? Subscription();
+    final now = DateTime.now();
+    final plan = subscription.effectivePlan(now);
     final canPurchase = PaywallLauncher.currentUserCanPurchase;
 
     return CupertinoListSection.insetGrouped(
@@ -794,15 +814,15 @@ class _SettingsState extends State<Settings> {
         CupertinoListTile(
           leading: _subscriptionIcon(CupertinoIcons.star_fill, CupertinoColors.systemPurple),
           title: Text(context.l10n.currentPlan),
-          subtitle: showExpiry
-              ? Text(context.l10n.planValidUntil(FormatService().formatDate(expiresAt.toLocal())))
-              : null,
+          subtitle: _planPeriodText(context, subscription, now),
           additionalInfo: Text(plan.displayName),
         ),
         if (canPurchase) ...[
           CupertinoListTile(
             leading: _subscriptionIcon(CupertinoIcons.cart_fill, CupertinoColors.activeBlue),
-            title: Text(context.l10n.viewPlans),
+            title: Text(subscription.hasStoreSubscription(now)
+                ? context.l10n.changePlan
+                : context.l10n.viewPlans),
             trailing: const CupertinoListTileChevron(),
             onTap: () => PaywallLauncher.showPaywall(context),
           ),

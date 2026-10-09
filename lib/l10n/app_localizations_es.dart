@@ -3659,6 +3659,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get viewPlans => 'Ver planes';
 
   @override
+  String planCourtesyUntil(String date) {
+    return 'Cortesía hasta $date';
+  }
+
+  @override
+  String planRenewsOn(String date) {
+    return 'Se renueva el $date';
+  }
+
+  @override
+  String get planPaymentIssue => 'Problema con el pago';
+
+  @override
   String planValidUntil(String date) {
     return 'Válido hasta $date';
   }
