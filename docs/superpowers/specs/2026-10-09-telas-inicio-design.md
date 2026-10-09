@@ -10,9 +10,9 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 |---|---|---|---|
 | Abas | `lib/screens/menu_navigation/navigation_controller.dart` | sempre visível | Financeiro só para quem tem permissão; cor da marca nas abas |
 | Início · lista de OS | `lib/screens/menu_navigation/home.dart` (1.131 linhas) | diário, várias vezes | Redesenho completo (6 zonas, status com texto, "Nova OS" como botão principal) |
-| Agenda | `lib/screens/agenda/agenda_screen.dart` | diário para quem agenda | Só correções (cor, status, texto); sem prancha |
-| Notificações | `lib/screens/notifications/notification_list_screen.dart`, `notification_list_tile.dart` | semanal | Só correções; sem prancha |
-| Avaliações | `lib/screens/ratings/ratings_screen.dart` | mensal | Só correções; sem prancha |
+| Agenda | `lib/screens/agenda/agenda_screen.dart` | diário para quem agenda | Só correções (cor, status, texto); prancha "Agenda · dia" |
+| Notificações | `lib/screens/notifications/notification_list_screen.dart`, `notification_list_tile.dart` | semanal | Só correções; prancha "Avisos (sino)" |
+| Avaliações | `lib/screens/ratings/ratings_screen.dart` | mensal | Só correções; prancha "Avaliações" |
 | Loading | `lib/screens/loading_screen.dart` | toda abertura | Fundo certo no modo escuro |
 | Modais mortos | `lib/screens/modal_menu.dart`, `modal_status.dart`, `modal_bottom_sheet.dart` | nenhum | Apagar (nenhuma chamada em `lib/`) |
 
@@ -76,7 +76,7 @@ Empresa sem nenhuma OS. Topo e título iguais (subtítulo some). `NextStepBlock`
 
 Mesmas zonas; cores só por papéis `AppColors.*.resolveFrom(context)`. `warningSoft` do bloco e o `warning` de "Atrasada" seguem os valores escuros do `app_colors.dart`. Teste de widget em claro e escuro.
 
-### Agenda, notificações, avaliações, loading (sem prancha)
+### Agenda, notificações, avaliações, loading (pranchas "Agenda · dia", "Avisos (sino)", "Avaliações")
 
 Só as correções da tabela de achados, sem mudar a estrutura:
 - Agenda: `OrderStatusStyle` + `StatusDot`; linha 1 = cliente, linha 2 = "Aprovada · OS 1234 · aparelho" (sai "OS #"); data do dia como `SectionLabel`; filtro de técnico com texto; vazio do dia: "Nada marcado para este dia." + `TextLink` "Agendar uma OS" (abre `/order` com a data). Lista e calendário sem cartão.

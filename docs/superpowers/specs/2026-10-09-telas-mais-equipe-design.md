@@ -57,7 +57,7 @@ Prancha: **"Mais · aba"**.
 3. **Próximo passo:** não tem na prancha. Só aparece com pendência real, um de cada vez: pagamento do plano com problema ("O pagamento do plano não passou." → `PrimaryButton` "Resolver pagamento") ou convite vencendo (mesmo bloco da Equipe).
 4. **Conteúdo** (`AppListRow` sem ícone colorido, com seta):
    - Linha de perfil: "Rafael" / "Oficina Exemplo · Dono" → Meu perfil.
-   - `SectionLabel` **"Sua empresa"**: "Dados da empresa" · "Equipe" / "3 pessoas · 1 convite esperando" · "Plano" com "Grátis" à direita e linha 2 "Ver o que o Pro libera" (só com `paidPlansEnabled`, `settings.dart:420`).
+   - `SectionLabel` **"Sua empresa"**: "Dados da empresa" · "Equipe" / "2 pessoas · 1 convite esperando" · "Plano" com o nome do plano à direita ("Starter") e linha 2 "Renova em 10/11/2026" (no Grátis: "Ver o que os planos liberam") (só com `paidPlansEnabled`, `settings.dart:420`).
    - `SectionLabel` **"Cadastros"**: "Serviços" · "Produtos" · "Veículos" (rótulo do segmento) · "Checklists" · e, conforme permissão, "Contratos", "Avaliações", "Integrações".
    - Fora da prancha, depois: **"Este aparelho"**: "Idioma" (Português) · "Aparência" (Automático) · "Avisos" (sub-tela com os 4 lembretes). **"Conta"**: "Trocar de empresa" (só com mais de uma) · "Entrar com código de convite" · "Sair" (`danger`, sem ícone). Rodapé "PraticOS 1.56.1" em 15.
 5. **Resumo:** não tem.
@@ -71,7 +71,7 @@ Prancha: **"Mais · aba"**.
 Prancha: **"Mais · equipe"**.
 
 1. **Topo:** "‹ Mais".
-2. **Título:** "Equipe" / "3 pessoas na Oficina Exemplo".
+2. **Título:** "Equipe" / "2 pessoas e 1 convite".
 3. **Próximo passo** (`NextStepBlock` `warning`): rótulo "Convite esperando", frase "Lucas ainda não entrou. O convite vence em 2 dias." + `PrimaryButton` "Reenviar convite". Aparece para o convite pendente mais perto de vencer. Sem convite pendente e só o dono na equipe: "Chame quem trabalha com você para ver as OS." + `PrimaryButton` "Convidar pessoa".
 4. **Conteúdo:**
    - `SectionLabel` "Esperando entrar" (só se houver): nome (19) / `StatusDot` `warning` "Convite enviado · vence em 2 dias". Vencido: `StatusDot` `danger` "Convite vencido". Toque → `MoreMenu`: "Reenviar convite" · `DestructiveAction` "Cancelar convite".
@@ -84,7 +84,9 @@ Prancha: **"Mais · equipe"**.
 - Sai: o "+" do canto; a busca (só aparece com mais de 8 pessoas); o emoji do papel.
 - Erro ao carregar: `EmptyState` "Não deu para carregar a equipe." + `TextLink` "Tentar de novo".
 
-### Outras telas do grupo (só correções, sem prancha)
+### Outras telas do grupo
+
+Pranchas: "Mais · dados da empresa", "Mais · convidar pessoa", "Mais · mandar convite" (`ShareSheet`), "Mais · meu perfil", "Mais · plano", "Mais · lembretes", "Checklists · lista", "Checklists · editar", "Contratos". O plano usa os limites reais de `SubscriptionLimits.defaults` (`lib/models/subscription.dart:163-190`; Starter: 200 fotos, 3 checklists, 3 pessoas contando convites). Correções por tela:
 
 - **Dados da empresa:** "Funcionalidades" → "O que usar no app"; "Gestão de ativos" → "Controle de {aparelhos}"; "Jurídico" → "Termos para o cliente" (`company_form_screen.dart:705`, `:736`, `:768`); ajudas 12 → 15 (`:712-772`); `Icons.business` Material (`:591`) → Cupertino; "Salvar" do topo (`:556`) → `AppBottomBar` "Salvar dados".
 - **Novo colaborador:** rótulos "Quem você quer chamar?", "O que pode fazer", "WhatsApp"; placeholder fixo "+55 11 99999-9999" (`:368`) por l10n; tirar o ícone 100×100 (`:319-333`); "Adicionar" (`:301-307`) → `AppBottomBar` "Criar convite".

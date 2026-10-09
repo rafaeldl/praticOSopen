@@ -97,7 +97,7 @@ Vale para todas: `CupertinoButton.filled`/`activeBlue`, títulos 34, textos 13�
 6. Barra: nenhuma.
 - Carregando: lista com `LoadingState` de uma frase. Erro: `EmptyState` "Não deu para carregar os ramos. Confira a internet." + "Tentar de novo".
 
-**Especialidades (1b, sem prancha).** Só para ramo com `subspecialties`. `AppTopBar` "‹ Ramo"; título "O que você atende?" / "Marque o que fizer sentido. Dá para mudar depois."; `AppListRow` selecionável com `Semantics(selected:)`; `AppBottomBar` com `PrimaryButton` "Continuar" sempre ativo (sem marcar = lista vazia).
+**Especialidades (1b, prancha "Primeiro acesso · especialidades").** Só para ramo com `subspecialties`. `AppTopBar` "‹ Ramo"; título "O que você atende?" / "Marque o que fizer sentido. Dá para mudar depois."; `AppListRow` selecionável com `Semantics(selected:)`; `AppBottomBar` com `PrimaryButton` "Continuar" sempre ativo (sem marcar = lista vazia).
 
 ### Prancha "Primeiro acesso · seu negócio"
 1. Topo: `AppTopBar` "‹ Ramo" (ou "‹ Especialidades").
@@ -109,7 +109,7 @@ Vale para todas: `CupertinoButton.filled`/`activeBlue`, títulos 34, textos 13�
 - Sai: logo, endereço, e-mail, site (Ajustes > Empresa); interruptores (padrão do ramo); cartão de benefícios.
 - Carregando: tela inteira com uma frase, "Preparando seu PraticOS…" (no lugar das 5 mensagens técnicas). Erro: "Não deu para terminar. Confira a internet e tente de novo." + "Tentar de novo", sem `e.toString()`.
 
-**Convite por e-mail (sem prancha).** Mantém prioridade sobre a criação (`auth_wrapper.dart:224`). Com 1 convite: título "A Oficina Exemplo chamou você para a equipe"; `AppListRow` "Convidado por Ana Ribeiro · você entra como técnico"; `PrimaryButton` "Entrar na equipe"; `TextLink` "Recusar convite" (confirma com "Recusar" / "Voltar"), "Tenho outro código", "Criar minha própria empresa". Com N convites: lista de `AppListRow`, tocar abre a confirmação; nenhum botão azul por linha. Aceitar por código: placeholder "Ex.: 7K2P9QXA" (o prefixo já é posto em `accept_invite_screen.dart:55`); erro com ícone + texto 15 em `danger`.
+**Convite por e-mail (prancha "Primeiro acesso · convite recebido").** Mantém prioridade sobre a criação (`auth_wrapper.dart:224`). Com 1 convite: título "A Oficina Exemplo chamou você para a equipe"; `AppListRow` "Convidado por Ana Ribeiro · você entra como técnico"; `PrimaryButton` "Entrar na equipe"; `TextLink` "Recusar convite" (confirma com "Recusar" / "Voltar"), "Tenho outro código", "Criar minha própria empresa". Com N convites: lista de `AppListRow`, tocar abre a confirmação; nenhum botão azul por linha. Aceitar por código: placeholder "Ex.: 7K2P9QXA" (o prefixo já é posto em `accept_invite_screen.dart:55`); erro com ícone + texto 15 em `danger`.
 
 ## Componentes usados
 

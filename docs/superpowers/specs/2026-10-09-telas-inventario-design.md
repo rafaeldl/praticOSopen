@@ -4,7 +4,7 @@ Status: proposta · 2026-10-09 · base: `docs/APP_DESIGN_SYSTEM.md` (PR #326) ·
 
 Este doc é o ponto de entrada da discovery: o inventário de todas as telas, o que se repete entre elas e a ordem de trabalho. Os achados e a tela proposta de cada grupo ficam na spec dele.
 
-Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página **"Telas do app"** (20 pranchas, duas delas no modo escuro). A página "OS com IA" continua com as direções da OS (linha E e "Padrão do app").
+Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página **"Telas do app"** (36 pranchas, duas delas no modo escuro; inclui as telas de uso raro e uma tela de erro com saída). A página "OS com IA" continua com as direções da OS (linha E e "Padrão do app").
 
 **Fora de escopo:** a tela da OS (`order_form.dart`) e os fluxos de criar e editar OS, assistente, nova OS por foto e fotos do WhatsApp, que estão em outra sessão. Telas que só existem dentro da OS (pagamentos da OS, preencher checklist, itens da OS) entram só com os achados, marcadas como "alinhar com a sessão da OS".
 

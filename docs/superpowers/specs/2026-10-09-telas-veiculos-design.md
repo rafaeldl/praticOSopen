@@ -54,7 +54,9 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 - Erro: placa vazia → dica em `danger` "Digite a placa". Upload de foto mantém o overlay atual (`:219-230`).
 - **De onde vêm as sugestões:** `AccumulatedValueRepository` em `companies/{companyId}/accumulatedFields/{fieldType}/values`, tipos `deviceCategory`, `deviceBrand`, `deviceModel` (`accumulated_value_repository.dart:6-25`), ordenadas por `usageCount` no cliente (`:54-56`). O modelo é gravado com `group` = categoria e marca juntas por "-" e em minúsculas (`accumulated_value_list_screen.dart:76-85`, `accumulated_value_repository.dart:126`; chamado com `[category, manufacturer]` em `device_form_screen.dart:504`). Isso não devolve "Fiat" e "Carro" com a grafia original e quebra com hífen no nome. Duas saídas: (a) sugerir a partir dos próprios aparelhos da empresa, que já têm `name`/`manufacturer`/`category` separados (`device.dart:10-13`), contando repetições; (b) gravar `brand` e `category` no valor `deviceModel`. Proposta: (a) para começar, sem migração; continuar chamando `use()` (`:119-163`) para manter o acumulado.
 
-### Detalhe do aparelho (sem prancha, só achados)
+### Detalhe do aparelho (prancha "Veículos · detalhe")
+Topo "‹ Veículos" + "…" (editar, apagar); título modelo, subtítulo "Placa · cliente"; `NextStepBlock` "Abrir uma OS para este veículo?" com `PrimaryButton` "Nova OS"; seções "OS deste veículo" e "Contrato" (só se houver).
+
 `OrderStatusStyle` nas OS (`:76-91`); "Próxima visita: 12/11" em `textSecondary` 15 (`:532-536`); "OS 123 · Aprovada" com `StatusDot` em vez de "#123 - Aprovada" (`:410`); `SectionLabel` em vez de CAIXA ALTA 13 (`:199`, `:220-224`, `:481-485`); fabricante e série só uma vez (cabeçalho `:146-163` repete `:203-208`); lápis (`:115-117`) vira "…" → "Editar".
 
 ### Seletor múltiplo (sem prancha, só achados)
