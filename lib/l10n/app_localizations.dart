@@ -6862,6 +6862,24 @@ abstract class AppLocalizations {
   /// **'Ver planos'**
   String get viewPlans;
 
+  /// No description provided for @planCourtesyUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cortesia até {date}'**
+  String planCourtesyUntil(String date);
+
+  /// No description provided for @planRenewsOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Renova em {date}'**
+  String planRenewsOn(String date);
+
+  /// No description provided for @planPaymentIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Problema no pagamento'**
+  String get planPaymentIssue;
+
   /// No description provided for @planValidUntil.
   ///
   /// In pt, this message translates to:

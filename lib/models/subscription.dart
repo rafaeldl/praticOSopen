@@ -51,6 +51,24 @@ enum SubscriptionSource {
   grace,
 }
 
+/// What the current plan row shows next to the plan name.
+enum SubscriptionPeriodState {
+  /// Free plan: no date.
+  free,
+
+  /// Launch grace period: "courtesy until {date}".
+  courtesy,
+
+  /// Store subscription with auto-renew on: "renews on {date}".
+  renewsOn,
+
+  /// Auto-renew off (or no store): "active until {date}".
+  endsOn,
+
+  /// Store reported a billing issue.
+  paymentIssue,
+}
+
 /// Store that bills the subscription.
 enum BillingStore {
   @JsonValue('app_store')
@@ -226,6 +244,26 @@ class Subscription {
     if (expires == null || expires.isAfter(now)) return plan;
     return SubscriptionPlan.free;
   }
+
+  /// How the current plan's period is shown to the user at [now].
+  SubscriptionPeriodState periodState(DateTime now) {
+    if (effectivePlan(now) == SubscriptionPlan.free) return SubscriptionPeriodState.free;
+    if (source == SubscriptionSource.grace) return SubscriptionPeriodState.courtesy;
+    switch (status) {
+      case SubscriptionStatus.pastDue:
+        return SubscriptionPeriodState.paymentIssue;
+      case SubscriptionStatus.cancelled:
+        return SubscriptionPeriodState.endsOn;
+      case SubscriptionStatus.active:
+        return source == SubscriptionSource.store ? SubscriptionPeriodState.renewsOn : SubscriptionPeriodState.endsOn;
+      case SubscriptionStatus.expired:
+        return SubscriptionPeriodState.free;
+    }
+  }
+
+  /// True when the plan is paid through a store subscription still in force.
+  bool hasStoreSubscription(DateTime now) =>
+      source == SubscriptionSource.store && effectivePlan(now) != SubscriptionPlan.free;
 
   /// Limits in force at [now]: the stored limits (or the plan defaults) while
   /// the plan is in force, Free limits after it expires.

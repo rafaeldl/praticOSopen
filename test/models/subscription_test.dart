@@ -246,4 +246,76 @@ void main() {
     expect(SubscriptionPlan.free.displayName, 'Free');
     expect(SubscriptionPlan.business.displayName, 'Business');
   });
+
+  group('periodState', () {
+    final now = DateTime.utc(2026, 10, 9, 12);
+    final later = DateTime.utc(2026, 10, 10, 12);
+    final earlier = DateTime.utc(2026, 10, 8, 12);
+
+    Subscription sub({
+      SubscriptionPlan plan = SubscriptionPlan.pro,
+      SubscriptionStatus status = SubscriptionStatus.active,
+      SubscriptionSource? source = SubscriptionSource.store,
+      DateTime? expiresAt,
+    }) => Subscription(plan: plan, status: status, source: source, expiresAt: expiresAt ?? later);
+
+    test('free plan shows no date', () {
+      expect(sub(plan: SubscriptionPlan.free).periodState(now), SubscriptionPeriodState.free);
+    });
+
+    test('expired paid plan reads as free', () {
+      expect(sub(expiresAt: earlier).periodState(now), SubscriptionPeriodState.free);
+    });
+
+    test('launch grace is a courtesy', () {
+      expect(sub(source: SubscriptionSource.grace).periodState(now), SubscriptionPeriodState.courtesy);
+    });
+
+    test('active store subscription renews', () {
+      expect(sub().periodState(now), SubscriptionPeriodState.renewsOn);
+    });
+
+    test('cancelled store subscription ends', () {
+      expect(sub(status: SubscriptionStatus.cancelled).periodState(now), SubscriptionPeriodState.endsOn);
+    });
+
+    test('billing issue', () {
+      expect(sub(status: SubscriptionStatus.pastDue).periodState(now), SubscriptionPeriodState.paymentIssue);
+    });
+
+    test('active plan without source ends on its date', () {
+      expect(sub(source: null).periodState(now), SubscriptionPeriodState.endsOn);
+    });
+  });
+
+  group('hasStoreSubscription', () {
+    final now = DateTime.utc(2026, 10, 9, 12);
+
+    test('true for a store plan in force', () {
+      final s = Subscription(
+        plan: SubscriptionPlan.pro,
+        source: SubscriptionSource.store,
+        expiresAt: DateTime.utc(2026, 10, 10),
+      );
+      expect(s.hasStoreSubscription(now), isTrue);
+    });
+
+    test('false for launch grace', () {
+      final s = Subscription(
+        plan: SubscriptionPlan.pro,
+        source: SubscriptionSource.grace,
+        expiresAt: DateTime.utc(2026, 12, 7),
+      );
+      expect(s.hasStoreSubscription(now), isFalse);
+    });
+
+    test('false once the store plan expired', () {
+      final s = Subscription(
+        plan: SubscriptionPlan.pro,
+        source: SubscriptionSource.store,
+        expiresAt: DateTime.utc(2026, 10, 8),
+      );
+      expect(s.hasStoreSubscription(now), isFalse);
+    });
+  });
 }
