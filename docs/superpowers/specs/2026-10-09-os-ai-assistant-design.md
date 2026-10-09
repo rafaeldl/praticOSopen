@@ -143,8 +143,9 @@ Valores sempre em número; a tela formata com `FormatService`. "200 cada" vira `
 
 - Novo campo em `SubscriptionLimits`: `aiRequestsPerMonth`, e em `SubscriptionUsage`: `aiRequestsThisMonth`, no mesmo padrão de `photosPerMonth` / `photosThisMonth` (`FeatureGateService`, `subscription-plans.ts`).
 - Conta **cada chamada** à IA, aplicada ou não.
-- Todos os planos têm IA. Valores iniciais a decidir (sugestão para o piloto: Free 30, Starter 300, Pro 1.000, Business ilimitado). Ao atingir o limite, a barra "Falar" mostra o aviso de plano no mesmo estilo do limite de fotos e o fluxo manual continua livre.
-- Custo: medir por chamada no piloto (tokens de entrada com imagem/áudio são a maior parte) antes de fixar os limites.
+- Todos os planos têm IA, com as mesmas funções; muda só a quantidade: **Free 10, Starter 150, Pro 400, Business 1.000 por mês** (decidido em 2026-10-09). Ao atingir o limite, a barra "Falar" mostra o aviso de plano no mesmo estilo do limite de fotos e o fluxo manual continua livre.
+- Custo estimado: ~US$ 0,008 por chamada com fotos e áudio no Gemini Flash (dobra em 2027). No pior caso, a IA consome 26% (Starter) a 42% (Business) do líquido do plano; medir no piloto.
+- Prazo: a IA precisa estar no ar antes do fim da cortesia Pro (07/12/2026); se atrasar, a cortesia é estendida.
 
 ### 4.3 Receber fotos de outros apps
 
@@ -202,7 +203,6 @@ A fase 1 já entrega valor sozinha e serve de referência para o trabalho das de
 
 ## 8. Decisões em aberto
 
-1. Limites de IA por plano (sugestão em 4.2) e se o Free continua com 30 fotos por mês, já que a IA estimula mandar mais fotos.
-2. Modelo final (Flash atual vs. o mais barato que passe no conjunto de avaliação).
-3. Se o botão do próximo passo em `done` pago deve ser "Enviar para o cliente" ou "Entregue".
-4. Quando a tela nova vira padrão para todos (sugestão: após duas semanas de piloto sem regressão).
+1. Modelo final (Flash atual vs. o mais barato que passe no conjunto de avaliação).
+2. Se o botão do próximo passo em `done` pago deve ser "Enviar para o cliente" ou "Entregue".
+3. Quando a tela nova vira padrão para todos (sugestão: após duas semanas de piloto sem regressão).
