@@ -26,7 +26,7 @@ Telas: `lib/screens/payment_management_screen.dart` (1.313 linhas), `lib/screens
 
 | Prancha | O que responde | Botão azul |
 |---|---|---|
-| Receber · falta receber | "Quanto a Ana pagou?" Valor grande já preenchido com o que falta, "Como pagou" (segmented control Pix/Dinheiro/Cartão) | **Recebi R$ 950** (acompanha o valor digitado) |
+| Receber · falta receber | "Quanto a Ana pagou?" Valor grande já preenchido com o que falta | **Recebi R$ 950** (acompanha o valor digitado) |
 | Receber · tudo recebido | Ponto verde + "Tudo recebido", lista do que entrou | nenhum |
 | Receber · menu "…" | Dar desconto · Desfazer pagamentos (vermelho, com confirmação) | — |
 | Receber · anexar comprovante | Botão "Anexar comprovante" dentro do bloco, antes do "Recebi". Abre: Tirar foto · Escolher da galeria · Escolher arquivo (PDF), como hoje | — |
@@ -35,7 +35,7 @@ Telas: `lib/screens/payment_management_screen.dart` (1.313 linhas), `lib/screens
 | Receber · tocar num pagamento | Sheet: valor, como pagou, quem anotou. Sem comprovante: **Anexar comprovante** (anexar depois). Com comprovante: Ver comprovante · Remover este pagamento | — |
 | Receber · ver comprovante do link | Pagamento que veio pelo link: Ver comprovante · Mandar comprovante para a Ana | — |
 | Receber · criar link para pagar | Sheet (Asaas): valor, "Pagar até", "Parcelar no cartão: Não". CPF/CNPJ só aparece se faltar (como hoje) | Criar e mandar o link (abre o WhatsApp direto) |
-| Receber · link esperando pagamento | "A Ana ainda não pagou os R$ 950. O link vale até 17/10." · link "Ela pagou de outro jeito" | Lembrar a Ana pelo WhatsApp |
+| Receber · link esperando pagamento | "A Ana ainda não pagou os R$ 950. O Asaas já lembra ela até 17/10." · links "Lembrar pelo WhatsApp também" e "Ela pagou de outro jeito" | nenhum (o Asaas já lembra) |
 | Receber · opções do link | Mandar de novo · Copiar o link · Cancelar o link (vermelho) | — |
 
 Regras:
@@ -54,26 +54,24 @@ Regras:
 
 ## Componentes
 
-Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 34, dentro do bloco), `PrimaryButton`, `AppListRow`, `StatusDot`, `SummaryLine`, `MoreMenu`, `SegmentToggle` (segmented control do sistema para "Como pagou"), `DestructiveAction` e `ShareSheet`. Nenhum componente novo.
+Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 34, dentro do bloco), `PrimaryButton`, `AppListRow`, `StatusDot`, `SummaryLine`, `MoreMenu`, `DestructiveAction` e `ShareSheet`. Nenhum componente novo.
 
 ## Ordem de implementação
 
 1. **Textos e cores** (risk:low): trocar o jargão nos `.arb`; status da cobrança com `AppColors`; tirar o link vermelho "A Receber" da tela e levar para o "…"; `FormatService` no campo de valor.
 2. **Tela Receber** (risk:low, UI): bloco de próximo passo com valor + "Recebi R$ X" + "Anexar comprovante"; anexar a um pagamento já salvo; desconto no "…"; tocar no pagamento abre o sheet (sai o arrastar); sem diálogo de sucesso.
 3. **Link para pagar** (risk:high, billing): sheet de criar link; ao criar, abrir o envio pelo WhatsApp direto; estado "esperando pagamento" com "Lembrar".
-4. **Como pagou** (decisão abaixo).
-5. **Comprovante do Asaas** (risk:high, Functions): guardar o link do comprovante no webhook e mostrar no pagamento.
+4. **Comprovante do Asaas** (risk:high, Functions): guardar o link do comprovante no webhook e mostrar no pagamento.
 
-## Perguntas em aberto
+## Decisões (Rafael, 2026-10-10)
 
-1. **"Como pagou" (Pix/Dinheiro/Cartão)**: `PaymentTransaction` não tem esse campo (`lib/models/payment_transaction.dart`). Opções: gravar no `description` (sem migração, risk:low) ou criar `method` no modelo (modelo compartilhado, risk:high, permite relatório por forma de pagamento). Ou deixar de fora.
-2. **Lembrete automático**: o Asaas já manda lembrete por e-mail/SMS? Se sim, o botão "Lembrar a Ana" pode virar secundário.
+1. **Sem "Como pagou" no pagamento manual.** `Order.payment` guarda só o status (pago / não pago) e `PaymentTransaction` não tem forma de pagamento; perguntar sem gravar não faz sentido. A forma aparece só quando vem do Asaas (`billingType` do webhook: Pix, boleto, cartão), ex.: "Pix pelo link". Se um dia houver relatório por forma de pagamento, cria-se o campo.
+2. **O Asaas já manda lembrete.** Na tela do link esperando pagamento não há botão azul; "Lembrar pelo WhatsApp também" fica como link. Link para pagar, lembrete e opções do link só aparecem para empresas com a integração Asaas ativa; sem ela, "Mandar cobrança" compartilha a OS (`ShareLinkSheet`).
 
 ## Conferência (HIG e APP_DESIGN_SYSTEM)
 
 Conferido contra `2026-10-10-telas-hig-design.md` e as regras 1–10 do `APP_DESIGN_SYSTEM.md`:
 - Um botão azul por tela; o resto é link, linha ou menu "…" (regra 2).
-- "Como pagou" usa o segmented control do sistema, não botões próprios (regra 10; HIG `segmented-controls`: "clearly showing selection state matters").
 - Desconto e link para pagar abrem em sheet com "Cancelar" à esquerda (regra 9); o pagamento abre sheet com fechar à esquerda.
 - Menu "…" e opções do link são action sheets nativos; "Desfazer pagamentos" e "Cancelar o link" em vermelho, com confirmação.
 - Status com ponto + texto, cor só no ponto (regra 7). Linhas que abrem algo têm seta. Toques ≥ 44 pt.
