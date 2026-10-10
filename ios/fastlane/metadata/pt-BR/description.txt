@@ -44,3 +44,12 @@ INTERFACE MODERNA
 Ideal para prestadores de serviço, oficinas, assistências técnicas, profissionais autônomos e pequenas empresas que buscam organização e praticidade no dia a dia.
 
 Baixe agora e transforme a gestão do seu negócio!
+
+PLANOS E ASSINATURAS
+O PraticOS é gratuito para começar. O plano Gratuito tem limites mensais de fotos, checklists e usuários. Os planos Starter, Pro e Business aumentam esses limites e são assinaturas mensais com renovação automática, compradas dentro do app.
+• O pagamento é cobrado na sua conta Apple ao confirmar a compra.
+• A assinatura renova automaticamente, a menos que seja cancelada pelo menos 24 horas antes do fim do período atual.
+• Gerencie ou cancele a assinatura a qualquer momento nos Ajustes da sua conta da App Store.
+
+Termos de Uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de Privacidade: https://praticos.web.app/privacy.html
