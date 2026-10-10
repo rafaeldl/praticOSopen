@@ -111,7 +111,7 @@ Fonte: Google Analytics da propriedade `praticos`, relatório "Páginas e telas"
 O que isso muda:
 
 - **Confirma:** tudo que está na aba Mais é raro, e reorganizar a aba tem risco baixo. Marca, modelo e categoria custam caro (413 visualizações a mais só para escolher valores).
-- **Muda a prioridade:** o **catálogo (seletor de serviço e produto) é a tela mais usada depois da OS**, à frente de clientes. A recomendação é que ele suba para o 2º lugar na ordem do inventário, logo depois da Início.
+- **Catálogo:** o uso alto vem do **seletor dentro da OS** (criar uma OS obriga a escolher um item do catálogo), não do cadastro pelo menu Mais. Por isso a prioridade não muda: o seletor anda junto com a sessão da OS, e o cadastro em Mais continua raro. Isso reforça criar o item pela busca, dentro da OS (prancha "Catálogo · criar pela busca").
 - **Falta medir:** o uso de cada aba. Proposta: dar nome às abas e às telas abertas sem rota (`RouteSettings(name: ...)`) para o próximo ciclo. É uma mudança pequena, risk:low.
 
 ## Ordem de implementação
@@ -128,8 +128,5 @@ O que isso muda:
 
 1. O questionário do primeiro acesso não é usado em marketing: **sai**.
 2. Empresas que usam controle de veículos (`useDeviceManagement`) mantêm a lista de todos os veículos em **Mais › Avançado › Veículos**.
-
-## Perguntas em aberto
-
-1. O técnico vê a aba Clientes? Hoje vê. A proposta mantém, porque ele precisa achar o telefone do cliente.
-2. O catálogo sobe para o 2º lugar da prioridade, como os dados indicam?
+3. O técnico continua vendo a aba Clientes (precisa achar o telefone do cliente).
+4. A prioridade não muda: o catálogo é usado como seletor dentro da OS, não pelo menu.
