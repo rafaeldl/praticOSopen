@@ -62,6 +62,7 @@ A auditoria (ver `2026-10-09-telas-inventario-design.md`) achou o mesmo problema
 | `SegmentToggle` | `CupertinoSlidingSegmentedControl` de 2 opções, altura ≥44, texto 17 | Máximo 2 ou 3 opções. Filtros além disso vão para o `MoreMenu` |
 | `AppFormField` | Rótulo `label` 15 acima + campo `body` 19 em `secondaryFill`, canto 12, altura 52, dica opcional embaixo | Placeholder é exemplo do segmento ("Ex.: Fiat Uno 2015"), nunca "Selecionar" |
 | `MoneyField` | `AppFormField` com `FormatService` (locale) para máscara e leitura | Substitui os `CurrencyTextInputFormatter` com `pt_BR` e `R$` fixos |
+| `ChoiceChips` | 2 a 4 opções em linha (ex.: Pix / Dinheiro / Cartão); a escolhida tem contorno `accentText` e ✓, nunca fundo azul | Para não competir com o `PrimaryButton` da tela. Usado em "Receber" |
 | `MoreFieldsLink` | `TextLink` "+ Mais dados (e-mail, CPF ou CNPJ, endereço)" que revela os campos raros | No modo editar, os campos que já têm valor aparecem direto |
 | `SuggestField` | `AppFormField` com sugestões embaixo enquanto digita (ex.: modelo → "Fiat Uno 2015 · Fiat · Carro") | Substitui a cadeia categoria → marca → modelo (3 telas) por uma busca |
 
