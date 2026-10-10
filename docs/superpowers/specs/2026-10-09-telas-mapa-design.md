@@ -38,7 +38,7 @@ O que não responde à pergunta da aba sai da aba.
 | Filtros de ícone na Início (7 a 10) | `home.dart:41`, `:383-467` | Ficam escondidos, são só ícone e têm alvo de 36 | `SegmentToggle` "Em aberto \| Todas"; o resto vai para o "…" |
 | Telas de marca, modelo e categoria | `device_form_screen.dart:444-519` → `accumulated_value_list_screen.dart` | São 3 idas e voltas antes da placa | `SuggestField` de modelo, que já traz marca e tipo (spec de veículos) |
 | Boas-vindas, Contatos, "Quase lá!" | `onboarding/welcome_screen.dart`, `company_contact_screen.dart`, `confirm_bootstrap_screen.dart` | Não pedem nenhuma decisão. O código já trata os dados delas como opcionais ou tem padrão para eles | Dados da empresa, depois do primeiro acesso (spec de primeiro acesso) |
-| Questionário (3 passos) | `onboarding/segmentation_onboarding_screen.dart` | Só grava a resposta no usuário; não muda nada no app | **Depende do Rafael:** o dado é usado em algum lugar (marketing)? |
+| Questionário (3 passos) | `onboarding/segmentation_onboarding_screen.dart` | Só grava a resposta no usuário; não muda nada no app. Rafael confirmou (2026-10-09) que o dado não é usado em marketing | Sai |
 | "Acesso negado" no Financeiro | `navigation_controller.dart:30-37`, `permission_widgets.dart:298` | Técnico toca a aba todo dia e cai numa tela sem saída | A aba só aparece com `viewFinancialReports` |
 | Código morto | Lista em `telas-inventario` | Não aparece na tela | Remoção em PR próprio |
 
@@ -52,7 +52,7 @@ O que não responde à pergunta da aba sai da aba.
 | **Escolher cliente + aba Clientes** | 2 arquivos (`customer_list_screen.dart`, `home_customer_list.dart`) | Uma lista com dois modos: escolher (na OS) e ver (na aba) | Não |
 | **Sua conta** | Perfil, Trocar empresa, "Aceitar" e Sair espalhados em 3 seções de Mais | Uma tela: perfil, trocar empresa, entrar com código e sair | Não |
 | **Preferências** | Idioma, Modo noturno e 4 lembretes soltos em Mais (`settings.dart:267-414`) | Uma tela: idioma, aparência e lembretes | Não |
-| **Avançado** | Integrações e Configurações iniciais misturadas com o dia a dia | Uma tela: integrações (links do ChatGPT/Claude), Asaas, refazer a configuração inicial | Não |
+| **Avançado** | Integrações e Configurações iniciais misturadas com o dia a dia | Uma tela: integrações (links do ChatGPT/Claude), Asaas, refazer a configuração inicial e, para quem usa controle de veículos, a lista de todos os veículos | Não |
 | **Plano** | 4 linhas (plano, ver planos, gerenciar, restaurar) | Uma tela Plano com o uso e os limites reais (`SubscriptionLimits.defaults`) | Não |
 
 ## Dividir
@@ -77,18 +77,42 @@ Hoje as abas são fixas e a navegação é por índice (`navigation_controller.d
 [Rafael · Oficina Exemplo · Administrador]  → Sua conta
 Sua empresa:  Dados da empresa · O que usar no app · Equipe · Plano
 Cadastros:    Catálogo · Checklists · Contratos (se usa) · Avaliações
-Você:         Preferências · Avançado
+Você:         Preferências · Avançado (integrações, Asaas, veículos*, refazer configuração)
+
+* só com controle de veículos ligado
 ```
 
 São 11 linhas, contra ~23 hoje.
 
-## Antes de cortar: confirmar com dados
+## O que o uso real mostra
 
-O app manda as telas visitadas para o Firebase Analytics (`FirebaseAnalyticsObserver`, `lib/main.dart:98`). Isso vale para telas abertas por rota com nome; as abas provavelmente não entram. Um relatório de 30 dias de `screen_view` confirma ou derruba as estimativas de uso. Os pontos que mais dependem desse dado:
+Fonte: Google Analytics da propriedade `praticos`, relatório "Páginas e telas" por nome da tela, de 11/09 a 08/10/2026. Só números agregados. Só as telas abertas por rota com nome (`FirebaseAnalyticsObserver`, `lib/main.dart:98`) aparecem com nome. As abas (Início, Clientes, Agenda, Financeiro, Mais) e as telas abertas sem nome caem em `/` ou "(not set)".
 
-- quantas empresas abrem Veículos pelo menu Mais (decide se vale manter um atalho "Todos os veículos" em Avançado ou no Catálogo);
-- uso de Integrações e Avaliações;
-- uso dos filtros da Início além de "Em aberto".
+| Tela (rota) | Visualizações | Usuários | Leitura |
+|---|---|---|---|
+| `/order` (a OS) | 5.048 | 79 | O centro do app (outra sessão) |
+| `/` e "(not set)" (abas e telas sem nome) | 6.362 | ~260 | Não dá para separar por aba |
+| `/service_list` (catálogo de serviços) | 1.773 | 47 | **A tela mais usada depois da OS.** É o seletor dentro da OS |
+| `/order_service` (item de serviço na OS) | 1.041 | 45 | Fluxo da OS |
+| `/device_form` (cadastro de veículo) | 705 | 32 | ~22 vezes por usuário: cadastro de veículo é trabalho do dia |
+| `/customer_list` (escolher cliente) | 657 | 59 | Diário |
+| `/product_list` (catálogo de produtos) | 613 | 25 | Seletor na OS |
+| `/device_list` (escolher veículo) | 597 | 48 | Diário |
+| `/payment_management` (pagamentos da OS) | 518 | 43 | Fluxo da OS |
+| `/accumulated_value_list` (marca, modelo, categoria) | 413 | 29 | Confirma o custo das 3 telas extras do veículo |
+| `/order_product` | 279 | 18 | Fluxo da OS |
+| `/service_form` | 178 | 37 | Cadastro de serviço, ocasional |
+| `/customer_form` | 175 | 48 | Cliente novo, quase todo usuário |
+| `/product_form` | 138 | 16 | Ocasional |
+| `/notifications` (avisos) | 80 | 15 | Semanal, para poucos |
+| `/form_template_form` (editar checklist) | ≤ 4 | 3 | Raro |
+| Equipe, Dados da empresa, Checklists, Contratos, Avaliações, Integrações, Meu perfil | ≤ 3 cada | — | Não aparecem entre as rotas com mais de 3 visualizações: **raros**, como estimado |
+
+O que isso muda:
+
+- **Confirma:** tudo que está na aba Mais é raro, e reorganizar a aba tem risco baixo. Marca, modelo e categoria custam caro (413 visualizações a mais só para escolher valores).
+- **Muda a prioridade:** o **catálogo (seletor de serviço e produto) é a tela mais usada depois da OS**, à frente de clientes. A recomendação é que ele suba para o 2º lugar na ordem do inventário, logo depois da Início.
+- **Falta medir:** o uso de cada aba. Proposta: dar nome às abas e às telas abertas sem rota (`RouteSettings(name: ...)`) para o próximo ciclo. É uma mudança pequena, risk:low.
 
 ## Ordem de implementação
 
@@ -100,8 +124,12 @@ O app manda as telas visitadas para o Firebase Analytics (`FirebaseAnalyticsObse
 6. **Dados da empresa dividido** (risk:low na tela; **risk:high** se mexer em ramo/segmento, que muda rótulos e formulários).
 7. **Primeiro acesso curto** (**risk:high**: auth e criação de empresa).
 
+## Decisões do Rafael (2026-10-09)
+
+1. O questionário do primeiro acesso não é usado em marketing: **sai**.
+2. Empresas que usam controle de veículos (`useDeviceManagement`) mantêm a lista de todos os veículos em **Mais › Avançado › Veículos**.
+
 ## Perguntas em aberto
 
-1. O dado do questionário do primeiro acesso é usado em algum lugar? Se não for, ele sai.
-2. Empresas que usam controle de veículos (`useDeviceManagement`) ainda precisam de uma lista de todos os veículos fora do cliente? A sugestão é um atalho em Avançado, se o Analytics mostrar uso.
-3. O técnico vê a aba Clientes? Hoje vê. A proposta mantém, porque ele precisa achar o telefone do cliente.
+1. O técnico vê a aba Clientes? Hoje vê. A proposta mantém, porque ele precisa achar o telefone do cliente.
+2. O catálogo sobe para o 2º lugar da prioridade, como os dados indicam?
