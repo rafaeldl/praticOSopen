@@ -1,5 +1,6 @@
 jest.mock('../bridge');
 
+import * as fs from 'fs';
 import { callRoute } from '../bridge';
 import { registerWriteTools } from '../tools/write';
 import { AuthenticatedRequest } from '../../models/types';
@@ -373,6 +374,28 @@ describe('write tools', () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Nenhum anexo de foto fornecido');
     expect(mockCallRoute).not.toHaveBeenCalled();
+  });
+
+  it('upload_order_photo não aceita caminho local nem lê o filesystem do servidor', async () => {
+    const readFileSpy = jest.spyOn(fs.promises, 'readFile');
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+    const tool = server.tools.get('upload_order_photo')!;
+
+    expect(Object.keys(tool.config.inputSchema)).not.toContain('filePath');
+    expect(Object.keys(tool.config.inputSchema)).not.toContain('photoUrl');
+
+    const result = await tool.handler({
+      orderNumber: 42,
+      filePath: '/proc/self/environ',
+      photoUrl: 'file:///workspace/service-account.json',
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Nenhum anexo de foto fornecido');
+    expect(readFileSpy).not.toHaveBeenCalled();
+    expect(mockCallRoute).not.toHaveBeenCalled();
+    readFileSpy.mockRestore();
   });
 
   it('delete_order_photo envia DELETE para /:number/photos/:photoId e audita', async () => {
