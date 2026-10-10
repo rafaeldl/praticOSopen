@@ -843,6 +843,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
+- `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
