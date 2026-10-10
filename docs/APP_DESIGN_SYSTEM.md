@@ -27,7 +27,10 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 4. **Mostrar só o que existe.** Recursos ocasionais (checklist, contrato, endereço, desconto, vários aparelhos) só aparecem na tela quando o registro tem. Para adicionar: menu "…"/"+" ou o assistente.
 5. **A IA sempre pergunta antes.** O que ela vai mudar aparece com marca-texto (`marker`) e o botão de confirmação diz o que acontece ("Está certo, pode fazer").
 6. **Toque fácil.** Botão principal com 58 de altura (`AppSizes.primaryButtonHeight`); qualquer outro alvo com pelo menos 44.
-7. **Cor nunca sozinha.** Todo status tem texto junto. Ponto colorido + texto, nunca selo colorido (ver `UX_GUIDELINES.md`).
+7. **Cor nunca sozinha.** Todo status tem texto junto. A cor fica no ponto; o texto do status é neutro (`textSecondary`), para não ser confundido com link. Nunca selo colorido (ver `UX_GUIDELINES.md`).
+8. **O texto cresce.** Todo texto acompanha o "Tamanho do texto" do iPhone (Dynamic Type). Nada de altura fixa para texto nem reticências em nome, título de linha ou valor: a linha quebra. Ver "Tipografia".
+9. **Cadastro novo abre por cima.** "Novo cliente", "Novo veículo", "Novo serviço" abrem como sheet (tamanho grande), com "Cancelar" à esquerda e o botão grande embaixo como confirmação. Telas de edição de algo que já existe (Sua conta, Dados da empresa) abrem empurradas, com "Voltar".
+10. **Componentes do iPhone quando existem.** Abas, interruptor (verde do sistema), escolha com ✓ à direita, menu "…" com o símbolo `ellipsis`, sheet com fechar à esquerda, botão "Continuar com Apple" nativo (`SignInWithAppleButton`, com logo e proporção da Apple). Não desenhar uma versão própria.
 
 ## Cores
 
@@ -46,13 +49,17 @@ Cada cor tem um papel só. Componentes usam o papel, nunca o hex.
 | `separator` | `#EFEFF4` | `#38383A` | Linhas entre itens |
 | `success` | `#1D7D3E` | `#65C67D` | Pago, concluído. Nunca em botão |
 | `warning` / `warningSoft` / `onWarningSoft` | `#974D00` / `#FFEBD2` / `#7A3B00` | `#ECA851` / `#3E290F` / `#ECA851` | Falta algo: valor, pagamento, foto |
-| `danger` | `#C93029` | `#F17264` | Só ações destrutivas (cancelar OS, apagar) |
+| `danger` | `#C93029` | `#F17264` | Ações destrutivas (cancelar OS, apagar) e problema (OS atrasada) |
 
-Por que não o azul do iOS: `CupertinoColors.activeBlue` (`#007AFF`) com texto branco dá 4,02:1, abaixo do mínimo de 4,5:1. O `#116BB5` dá 5,51:1.
+Por que o azul da marca e não o do iOS: é a cor da marca (a HIG aceita uma cor de destaque própria, usada com moderação). O contraste ajuda nos textos pequenos: `#007AFF` sobre branco dá 4,02:1, abaixo dos 4,5:1 que a HIG pede para texto até 17 pt (links), e o `#116BB5` dá 5,51:1. No botão principal (19 semibold), a HIG pede 3:1, então ali o contraste não é o motivo.
+
+**Aumentar contraste (pendente no código):** a HIG pede, para cores próprias, uma variante clara, uma escura e uma bem mais contrastada para "Aumentar contraste". Cada token passa a usar `CupertinoDynamicColor.withBrightnessAndContrast`; o teste de contraste mede também essas variantes.
+
+**Interruptor:** usar o `CupertinoSwitch` com o verde padrão do sistema. `success` é para status, não para controle.
 
 Por que não um roxo para a IA: duas cores preenchidas disputam o papel de "ação principal" e confundem. A IA se identifica pelo lugar fixo (barra de baixo) e pelo marca-texto amarelo.
 
-Status de OS (ponto + texto): `quote` cinza (`textSecondary`), `approved` azul (`accentText`), `progress` âmbar (`warning`), `done` verde (`success`), `canceled` vermelho (`danger`).
+Status de OS (cor no ponto, texto em `textSecondary`): `quote` cinza, `approved` azul (`accentText`), `progress` âmbar (`warning`), `done` verde (`success`), `canceled` cinza (o texto "Cancelada" diferencia). **Atrasada** não é status, é problema: ponto e texto em `danger`, texto em negrito ("Atrasada 2 dias").
 
 ## Tipografia
 
@@ -60,7 +67,7 @@ Fonte do sistema (SF Pro). Rótulos em sentence case, nunca em caixa alta.
 
 | `AppTypography.` | Tamanho | Uso |
 |---|---|---|
-| `title` | 30 bold | Título da tela |
+| `title` | 34 bold | Título da tela: o Large Title do sistema (`CupertinoSliverNavigationBar.largeTitle`), que vira título pequeno ao rolar |
 | `highlight` | 22 semibold | Frase do próximo passo, o que o usuário falou |
 | `body` / `bodyStrong` | 19 | Linhas, valores, botões |
 | `callout` | 17 | Links, linhas secundárias |
@@ -68,16 +75,20 @@ Fonte do sistema (SF Pro). Rótulos em sentence case, nunca em caixa alta.
 
 Valores em dinheiro usam `AppTypography.tabular` e sempre `FormatService`.
 
+**Dynamic Type.** Os tamanhos acima são os do tamanho padrão do iPhone. O corpo é 19 (e não 17 como no iOS) porque o público tem a vista cansada; 19 equivale ao Body no tamanho "xL". Todos crescem proporcionalmente com o `MediaQuery.textScaler`, que o Flutter já aplica: **nunca** travar ou limitar o `textScaler`, nem usar altura fixa em linha com texto. Em tamanhos de acessibilidade, a linha de lista empilha o valor embaixo do nome. Protótipo: prancha "Início · texto grande (Dynamic Type)".
+
 ## Estrutura de toda tela
 
 Seis zonas, sempre nesta ordem. Zonas vazias não aparecem.
 
-1. **Barra de topo:** voltar, nome curto do registro ("OS 186") e "…". No máximo esses três.
-2. **Título:** grande (`title`), com subtítulo em `textSecondary`.
+1. **Barra de topo:** a barra de navegação do sistema: voltar, nome curto do registro ("OS 186") e "…". No máximo esses três.
+2. **Título:** o título grande do sistema (`title`), com subtítulo em `textSecondary`.
 3. **Próximo passo:** bloco `accentSoft` com uma frase e o único botão `accent`.
 4. **Conteúdo:** listas simples (rótulo + linhas com `separator`). Sem cartão dentro de cartão.
 5. **Resumo:** linha forte acima, totais e o que falta.
-6. **Barra fixa de baixo:** foto + "Falar" (`assistantFill`) nas telas com assistente; ou um botão de largura total nas telas de formulário ("Salvar OS").
+6. **Embaixo:** foto + "Falar" (`assistantFill`) nas telas com assistente; ou um botão de largura total nas telas de formulário ("Salvar OS"). Sem faixa opaca com borda: o conteúdo rola por baixo e some num degradê (efeito de borda de rolagem). Nas telas com abas, o botão flutua logo acima da barra de abas (acessório da tab bar), não numa segunda barra.
+
+**Abas:** a ordem é sempre Início, Clientes, Agenda, Financeiro, Mais. Quem não usa uma aba (técnico sem Financeiro, empresa sem agenda) não a vê, mas as outras mantêm a mesma ordem.
 
 Margens: texto com `AppSpacing.pageMargin` (24), blocos e botões com `AppSpacing.blockMargin` (16). Cantos: botões 16, blocos 20, campos 12.
 
