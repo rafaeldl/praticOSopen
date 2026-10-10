@@ -2,7 +2,7 @@
 
 Status: proposta · 2026-10-09 · base: `docs/APP_DESIGN_SYSTEM.md` · componentes: `2026-10-09-telas-componentes-design.md`
 
-Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app". Pranchas deste grupo: "Financeiro · aba", "Financeiro · modo escuro".
+Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app". Pranchas deste grupo: "Financeiro · quem me deve", "Financeiro · modo escuro".
 
 ## Telas do grupo
 
@@ -34,7 +34,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 
 ## Tela proposta
 
-### Financeiro · aba (prancha "Financeiro · aba")
+### Financeiro · aba (prancha "Financeiro · quem me deve")
 
 Só monta para quem tem `viewFinancialReports` (decisão na spec de Início, `2026-10-09-telas-inicio-design.md`); o `ProtectedRoute` (`:122-124`) fica como proteção extra.
 

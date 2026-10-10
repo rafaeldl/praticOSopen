@@ -2,7 +2,7 @@
 
 Status: proposta · 2026-10-09 · base: `docs/APP_DESIGN_SYSTEM.md` · componentes: `2026-10-09-telas-componentes-design.md`
 
-Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app". Pranchas deste grupo: "Início · lista de OS", "Início · modo escuro", "Início · primeira vez".
+Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app". Pranchas deste grupo: "Início · dono", "Início · modo escuro", "Início · primeira vez".
 
 ## Telas do grupo
 
@@ -41,7 +41,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 
 5 abas para quem tem `viewFinancialReports` (Início, Clientes, Agenda, Financeiro, Mais); 4 para os demais. A navegação é por índice (`navigation_controller.dart:104-110`, `:161`; `home_customer_list.dart:235` usa `setCurrentIndex(0)`). Ao montar a lista condicional, os índices passam a vir de uma lista de abas visíveis (enum), não de números fixos. Cor das abas ativas: `accent` (troca de `main.dart:149`).
 
-### Início · lista de OS (prancha "Início · lista de OS")
+### Início · lista de OS (prancha "Início · dono")
 
 1. **Topo (`AppTopBar`, tela raiz, sem voltar):** buscar, sino (`Semantics` "Avisos, 3 novos") e "…". O "…" (`MoreMenu`): "Ver concluídas", "Ver canceladas", "A receber", "Contratos" (só com `useContracts`), "Filtrar por cliente".
 2. **Título (`ScreenTitle`):** "Ordens de serviço" (rótulo do segmento, `config.serviceOrderPlural`); subtítulo "12 em aberto".
@@ -76,7 +76,7 @@ Empresa sem nenhuma OS. Topo e título iguais (subtítulo some). `NextStepBlock`
 
 Mesmas zonas; cores só por papéis `AppColors.*.resolveFrom(context)`. `warningSoft` do bloco e o `warning` de "Atrasada" seguem os valores escuros do `app_colors.dart`. Teste de widget em claro e escuro.
 
-### Agenda, notificações, avaliações, loading (pranchas "Agenda · dia", "Avisos (sino)", "Avaliações")
+### Agenda, notificações, avaliações, loading (pranchas "Agenda · dia", "Avisos (sino)", "Mais · avaliações")
 
 Só as correções da tabela de achados, sem mudar a estrutura:
 - Agenda: `OrderStatusStyle` + `StatusDot`; linha 1 = cliente, linha 2 = "Aprovada · OS 1234 · aparelho" (sai "OS #"); data do dia como `SectionLabel`; filtro de técnico com texto; vazio do dia: "Nada marcado para este dia." + `TextLink` "Agendar uma OS" (abre `/order` com a data). Lista e calendário sem cartão.

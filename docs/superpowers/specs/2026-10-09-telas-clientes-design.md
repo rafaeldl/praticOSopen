@@ -33,7 +33,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 
 ## Tela proposta
 
-### "Clientes · aba"
+### "Clientes · aba (busca por placa)"
 1. Topo (`AppTopBar`): sem voltar (raiz de aba). À direita só "+" com rótulo "Novo cliente".
 2. Título: "Clientes". Subtítulo: "38 clientes" (contagem real da lista).
 3. Próximo passo: não tem (tela de busca).
@@ -43,7 +43,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 - Vazio: `EmptyState` "Você ainda não tem clientes" + `TextLink` "Cadastrar o primeiro cliente". Busca sem resultado: "Nenhum cliente com “Ana”".
 - Dado de "OS aberta/atrasada": não existe no `Customer` (`lib/models/customer.dart:9-20`). Calcular com uma só consulta das OS em aberto (`status` em `approved`/`progress`, já existe em `tenant_order_repository.dart:332-337`) agrupada por `customer.id` no cliente. Atrasada = `dueDate` no passado.
 
-### "Clientes · tela do cliente (nova)"
+### "Clientes · cliente com veículos"
 1. Topo: "‹ Clientes" + "…" (`MoreMenu`: "Editar", `DestructiveAction` "Apagar").
 2. Título: "Ana Ribeiro". Subtítulo: "(11) 90000-0001".
    Logo abaixo, dois `SecondaryButton`: "Ligar" e "WhatsApp" (só com telefone; sem telefone viram `TextLink` "Adicionar telefone").
@@ -56,7 +56,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 - Erro ao carregar OS: frase "Não deu para carregar as OS. Tente de novo." + `TextLink` "Tentar de novo".
 - "Nova OS para Ana": abre `/order` com `{'order': Order()..customer = customer.toAggr()}`. Uma `Order` sem `id` nem `number` cai em `_store.setOrder(orderArg)` (`order_form.dart:79-96`). **Alinhar com a sessão da OS** (ver abaixo).
 
-### "Clientes · escolher na OS"
+### "Na OS · escolher cliente"
 1. Topo: "‹ OS nova". Sem "…".
 2. Título: "Quem é o cliente?". Subtítulo: "Toque para escolher".
 3. Próximo passo: `AppSearchField` "Buscar por nome ou telefone" com foco automático.

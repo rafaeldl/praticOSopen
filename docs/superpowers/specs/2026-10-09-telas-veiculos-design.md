@@ -35,7 +35,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 
 ## Tela proposta
 
-### "Veículos · escolher na OS"
+### "Na OS · escolher veículo"
 1. Topo: "‹ OS nova". Sem "…".
 2. Título: "Qual é o veículo?". Subtítulo: "Da Ana Ribeiro" (cliente já escolhido na OS; sem cliente, subtítulo some).
 3. Próximo passo: `AppSearchField` "Buscar por modelo ou placa".
@@ -45,7 +45,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 - **Filtrar por cliente hoje:** o `Device` não tem cliente (`lib/models/device.dart:9-18`) e o repositório só busca por série, categoria e fabricante (`tenant_device_repository.dart:24-60`). O vínculo existe só na OS: `customer` e `devices`/`deviceIds` (`lib/models/order.dart:17-19`, `:60`, `:137-143`). "Veículos da Ana" = aparelhos distintos das OS dela, via `streamOrders(customerId:)` (`tenant_order_repository.dart:347-349`, índice `customer.id + createdAt↓` já em `firebase/firestore.indexes.json`). Sem migração, mas um veículo cadastrado e ainda sem OS salva não aparece na seção da Ana (vai em "Outros").
 - Modo Ajustes: título "Veículos", subtítulo "12 veículos", "+" com rótulo no topo, sem seção da Ana, seta e deslize ligados.
 
-### "Veículos · novo (uma tela só)"
+### "Clientes · novo veículo (uma tela)"
 1. Topo: "‹ Voltar". 2. Título: "Novo veículo" (`newEntity`).
 3. Próximo passo: não tem.
 4. Conteúdo: `SuggestField` "Modelo" (placeholder do segmento "Ex.: Fiat Uno 2015"); sugestões enquanto digita: "Fiat Uno 2015 · Fiat · Carro". Escolher uma sugestão preenche `name`, `manufacturer` e `category` de uma vez. Sem sugestão igual: linha "Usar “Fiat Uno 2016”". Depois `AppFormField` "Placa" (rótulo do segmento para `serial`, obrigatório como hoje, `device_form_screen.dart:340`). `TextLink` "+ Foto e mais dados (ano, cor, chassi)": revela foto, marca, categoria, status (só editar, com gestão) e campos do segmento (`DynamicFieldBuilder`, `:420`).
@@ -54,7 +54,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
 - Erro: placa vazia → dica em `danger` "Digite a placa". Upload de foto mantém o overlay atual (`:219-230`).
 - **De onde vêm as sugestões:** `AccumulatedValueRepository` em `companies/{companyId}/accumulatedFields/{fieldType}/values`, tipos `deviceCategory`, `deviceBrand`, `deviceModel` (`accumulated_value_repository.dart:6-25`), ordenadas por `usageCount` no cliente (`:54-56`). O modelo é gravado com `group` = categoria e marca juntas por "-" e em minúsculas (`accumulated_value_list_screen.dart:76-85`, `accumulated_value_repository.dart:126`; chamado com `[category, manufacturer]` em `device_form_screen.dart:504`). Isso não devolve "Fiat" e "Carro" com a grafia original e quebra com hífen no nome. Duas saídas: (a) sugerir a partir dos próprios aparelhos da empresa, que já têm `name`/`manufacturer`/`category` separados (`device.dart:10-13`), contando repetições; (b) gravar `brand` e `category` no valor `deviceModel`. Proposta: (a) para começar, sem migração; continuar chamando `use()` (`:119-163`) para manter o acumulado.
 
-### Detalhe do aparelho (prancha "Veículos · detalhe")
+### Detalhe do aparelho (prancha "Clientes · veículo do cliente")
 Topo "‹ Veículos" + "…" (editar, apagar); título modelo, subtítulo "Placa · cliente"; `NextStepBlock` "Abrir uma OS para este veículo?" com `PrimaryButton` "Nova OS"; seções "OS deste veículo" e "Contrato" (só se houver).
 
 `OrderStatusStyle` nas OS (`:76-91`); "Próxima visita: 12/11" em `textSecondary` 15 (`:532-536`); "OS 123 · Aprovada" com `StatusDot` em vez de "#123 - Aprovada" (`:410`); `SectionLabel` em vez de CAIXA ALTA 13 (`:199`, `:220-224`, `:481-485`); fabricante e série só uma vez (cabeçalho `:146-163` repete `:203-208`); lápis (`:115-117`) vira "…" → "Editar".

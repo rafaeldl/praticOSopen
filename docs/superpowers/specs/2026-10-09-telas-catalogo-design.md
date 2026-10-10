@@ -45,7 +45,7 @@ Produto é igual a serviço trocando os nomes (`diff` dos arquivos mostra só Se
 
 ### Catálogo · escolher serviço (modo escolher, vindo da OS)
 
-Prancha: **"Catálogo · escolher serviço"**.
+Prancha: **"Na OS · escolher serviço"**.
 
 1. **Topo** (`AppTopBar`): "‹ OS 186". Sem "…".
 2. **Título** (`ScreenTitle`): "Qual serviço?" / "Toque para colocar na OS".
@@ -60,7 +60,7 @@ Prancha: **"Catálogo · escolher serviço"**.
 
 ### Catálogo · criar pela busca
 
-Prancha: **"Catálogo · criar pela busca"**.
+Prancha: **"Na OS · criar serviço pela busca"**.
 
 - Busca sem resultado igual: a 1ª linha da lista vira `AddRow` "Criar “Troca de embreagem” e pôr na OS". Embaixo, texto 15 `textSecondary`: "O preço você coloca na própria OS. O serviço fica salvo para as próximas."
 - Toque: cria o `Service` só com o nome (preço vazio) e segue o mesmo caminho de um toque numa linha. Sem abrir formulário.
@@ -69,7 +69,7 @@ Prancha: **"Catálogo · criar pela busca"**.
 
 ### Catálogo · seus serviços (Mais)
 
-Prancha: **"Catálogo · seus serviços (Mais)"**.
+Prancha: **"Mais · catálogo"**.
 
 1. **Topo:** "‹ Mais". Sem "…".
 2. **Título:** "Seus serviços" / "24 serviços" (contagem real).
@@ -83,7 +83,7 @@ Prancha: **"Catálogo · seus serviços (Mais)"**.
 
 ### Catálogo · novo serviço
 
-Prancha: **"Catálogo · novo serviço"**.
+Prancha: **"Mais · novo serviço"**.
 
 1. **Topo:** "‹ Voltar". Ao editar, "…" com `DestructiveAction` "Apagar serviço" (confirmação: "Apagar Troca de óleo?" / "Apagar" e "Voltar").
 2. **Título:** "Novo serviço" (ao editar: o nome do serviço).

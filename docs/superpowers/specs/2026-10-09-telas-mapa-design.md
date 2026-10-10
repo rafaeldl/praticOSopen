@@ -4,7 +4,7 @@ Status: proposta, esperando aprovação · 2026-10-09 · base: `2026-10-09-telas
 
 As outras specs melhoram cada tela no lugar onde ela está. Esta spec decide **onde cada coisa fica**: o que sai, o que junta com outra tela e o que vira duas. Ela vem antes das outras: se uma decisão daqui mudar, a spec do grupo segue o que estiver aqui.
 
-Canvas: https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página **"Mapa do app"**. Ela tem três pranchas: "Mapa · hoje" (cada lugar com a etiqueta do que acontece com ele), "Mapa · proposto" e "Mapa · decisões".
+Canvas: https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página **"Mapa do app"**. A página **"Telas do app"** já está organizada por este mapa (linhas por aba). Pranchas novas por causa do mapa: "Início · técnico (sem Financeiro)", "Clientes · cliente com veículos", "Financeiro · relatório", "Mais · o que usar no app", "Mais · catálogo" (Serviços | Produtos), "Mais · sua conta", "Mais · preferências", "Mais · avançado". Ela tem três pranchas: "Mapa · hoje" (cada lugar com a etiqueta do que acontece com ele), "Mapa · proposto" e "Mapa · decisões".
 
 **Fora de escopo:** a OS, que está em outra sessão. No mapa ela aparece como um bloco cinza.
 
@@ -111,7 +111,7 @@ Fonte: Google Analytics da propriedade `praticos`, relatório "Páginas e telas"
 O que isso muda:
 
 - **Confirma:** tudo que está na aba Mais é raro, e reorganizar a aba tem risco baixo. Marca, modelo e categoria custam caro (413 visualizações a mais só para escolher valores).
-- **Catálogo:** o uso alto vem do **seletor dentro da OS** (criar uma OS obriga a escolher um item do catálogo), não do cadastro pelo menu Mais. Por isso a prioridade não muda: o seletor anda junto com a sessão da OS, e o cadastro em Mais continua raro. Isso reforça criar o item pela busca, dentro da OS (prancha "Catálogo · criar pela busca").
+- **Catálogo:** o uso alto vem do **seletor dentro da OS** (criar uma OS obriga a escolher um item do catálogo), não do cadastro pelo menu Mais. Por isso a prioridade não muda: o seletor anda junto com a sessão da OS, e o cadastro em Mais continua raro. Isso reforça criar o item pela busca, dentro da OS (prancha "Na OS · criar serviço pela busca").
 - **Falta medir:** o uso de cada aba. Proposta: dar nome às abas e às telas abertas sem rota (`RouteSettings(name: ...)`) para o próximo ciclo. É uma mudança pequena, risk:low.
 
 ## Ordem de implementação

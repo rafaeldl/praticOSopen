@@ -86,7 +86,7 @@ Prancha: **"Mais · equipe"**.
 
 ### Outras telas do grupo
 
-Pranchas: "Mais · dados da empresa", "Mais · convidar pessoa", "Mais · mandar convite" (`ShareSheet`), "Mais · meu perfil", "Mais · plano", "Mais · lembretes", "Checklists · lista", "Checklists · editar", "Contratos". O plano usa os limites reais de `SubscriptionLimits.defaults` (`lib/models/subscription.dart:163-190`; Starter: 200 fotos, 3 checklists, 3 pessoas contando convites). Correções por tela:
+Pranchas: "Mais · dados da empresa", "Mais · convidar pessoa", "Mais · mandar convite" (`ShareSheet`), "Mais · sua conta", "Mais · plano", "Mais · preferências", "Mais · checklists", "Mais · editar checklist", "Mais · contratos". O plano usa os limites reais de `SubscriptionLimits.defaults` (`lib/models/subscription.dart:163-190`; Starter: 200 fotos, 3 checklists, 3 pessoas contando convites). Correções por tela:
 
 - **Dados da empresa:** "Funcionalidades" → "O que usar no app"; "Gestão de ativos" → "Controle de {aparelhos}"; "Jurídico" → "Termos para o cliente" (`company_form_screen.dart:705`, `:736`, `:768`); ajudas 12 → 15 (`:712-772`); `Icons.business` Material (`:591`) → Cupertino; "Salvar" do topo (`:556`) → `AppBottomBar` "Salvar dados".
 - **Novo colaborador:** rótulos "Quem você quer chamar?", "O que pode fazer", "WhatsApp"; placeholder fixo "+55 11 99999-9999" (`:368`) por l10n; tirar o ícone 100×100 (`:319-333`); "Adicionar" (`:301-307`) → `AppBottomBar` "Criar convite".
