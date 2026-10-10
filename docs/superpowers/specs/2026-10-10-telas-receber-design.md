@@ -28,9 +28,12 @@ Telas: `lib/screens/payment_management_screen.dart` (1.313 linhas), `lib/screens
 |---|---|---|
 | Receber · falta receber | "Quanto a Ana pagou?" Valor grande já preenchido com o que falta, "Como pagou" (segmented control Pix/Dinheiro/Cartão) | **Recebi R$ 950** (acompanha o valor digitado) |
 | Receber · tudo recebido | Ponto verde + "Tudo recebido", lista do que entrou | nenhum |
-| Receber · menu "…" | Dar desconto · Anexar comprovante · Desfazer pagamentos (vermelho, com confirmação) | — |
+| Receber · menu "…" | Dar desconto · Desfazer pagamentos (vermelho, com confirmação) | — |
+| Receber · anexar comprovante | Botão "Anexar comprovante" dentro do bloco, antes do "Recebi". Abre: Tirar foto · Escolher da galeria · Escolher arquivo (PDF), como hoje | — |
+| Receber · comprovante anexado | Miniatura + "Comprovante do Pix" + ✕ para tirar, antes de confirmar | Recebi R$ 950 |
 | Receber · dar desconto | Sheet com Cancelar; diz o novo total ("passa de R$ 1.250 para R$ 1.200") | Dar R$ 50 de desconto |
-| Receber · tocar num pagamento | Sheet: valor, como pagou, quem anotou · Ver comprovante · Remover este pagamento | — |
+| Receber · tocar num pagamento | Sheet: valor, como pagou, quem anotou. Sem comprovante: **Anexar comprovante** (anexar depois). Com comprovante: Ver comprovante · Remover este pagamento | — |
+| Receber · ver comprovante do link | Pagamento que veio pelo link: Ver comprovante · Mandar comprovante para a Ana | — |
 | Receber · criar link para pagar | Sheet (Asaas): valor, "Pagar até", "Parcelar no cartão: Não". CPF/CNPJ só aparece se faltar (como hoje) | Criar e mandar o link (abre o WhatsApp direto) |
 | Receber · link esperando pagamento | "A Ana ainda não pagou os R$ 950. O link vale até 17/10." · link "Ela pagou de outro jeito" | Lembrar a Ana pelo WhatsApp |
 | Receber · opções do link | Mandar de novo · Copiar o link · Cancelar o link (vermelho) | — |
@@ -42,6 +45,13 @@ Regras:
 - Sem diálogo de sucesso: depois de "Recebi", a tela vira "Tudo recebido" ou mostra o novo "Falta receber".
 - No Financeiro, tocar numa linha de "Falta receber" abre esta tela (OS com uma pendência) ou o cliente (mais de uma OS).
 
+## Comprovante
+
+- Hoje só dá para anexar **na hora de registrar** (`payment_management_screen.dart:549-571`, câmera/galeria/arquivo em `:1032+`). Depois de salvo, o pagamento fica sem comprovante para sempre.
+- Proposta: o anexo fica visível no bloco (não no "…"), e cada pagamento na lista diz "com comprovante" ou "sem comprovante". Tocar num pagamento sem comprovante oferece "Anexar comprovante". O store já aceita anexar a um pagamento existente (`OrderStore.attachReceiptToTransaction(index, …)`, `lib/mobx/order_store.dart:1226`); falta só a tela chamar.
+- Continua exigindo a permissão de anexar fotos (`attachPhotos`) para anexar e `viewPhotos` para ver, como hoje (`:549`, `:755`).
+- Pagamento pelo link do Asaas: o Asaas gera um comprovante da transação, mas o app não guarda esse link hoje (nenhuma referência no código). Guardar e mostrar em "Ver comprovante" é trabalho no webhook (Functions, risk:high).
+
 ## Componentes
 
 Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 34, dentro do bloco), `PrimaryButton`, `AppListRow`, `StatusDot`, `SummaryLine`, `MoreMenu`, `SegmentToggle` (segmented control do sistema para "Como pagou"), `DestructiveAction` e `ShareSheet`. Nenhum componente novo.
@@ -49,9 +59,10 @@ Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 3
 ## Ordem de implementação
 
 1. **Textos e cores** (risk:low): trocar o jargão nos `.arb`; status da cobrança com `AppColors`; tirar o link vermelho "A Receber" da tela e levar para o "…"; `FormatService` no campo de valor.
-2. **Tela Receber** (risk:low, UI): bloco de próximo passo com valor + "Recebi R$ X"; desconto e anexo no "…"; tocar no pagamento abre o sheet (sai o arrastar); sem diálogo de sucesso.
+2. **Tela Receber** (risk:low, UI): bloco de próximo passo com valor + "Recebi R$ X" + "Anexar comprovante"; anexar a um pagamento já salvo; desconto no "…"; tocar no pagamento abre o sheet (sai o arrastar); sem diálogo de sucesso.
 3. **Link para pagar** (risk:high, billing): sheet de criar link; ao criar, abrir o envio pelo WhatsApp direto; estado "esperando pagamento" com "Lembrar".
 4. **Como pagou** (decisão abaixo).
+5. **Comprovante do Asaas** (risk:high, Functions): guardar o link do comprovante no webhook e mostrar no pagamento.
 
 ## Perguntas em aberto
 
