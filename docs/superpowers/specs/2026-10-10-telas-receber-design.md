@@ -26,7 +26,7 @@ Telas: `lib/screens/payment_management_screen.dart` (1.313 linhas), `lib/screens
 
 | Prancha | O que responde | Botão azul |
 |---|---|---|
-| Receber · falta receber | "Quanto a Ana pagou?" Valor grande já preenchido com o que falta, "Como pagou" (Pix/Dinheiro/Cartão) | **Recebi R$ 950** (acompanha o valor digitado) |
+| Receber · falta receber | "Quanto a Ana pagou?" Valor grande já preenchido com o que falta, "Como pagou" (segmented control Pix/Dinheiro/Cartão) | **Recebi R$ 950** (acompanha o valor digitado) |
 | Receber · tudo recebido | Ponto verde + "Tudo recebido", lista do que entrou | nenhum |
 | Receber · menu "…" | Dar desconto · Anexar comprovante · Desfazer pagamentos (vermelho, com confirmação) | — |
 | Receber · dar desconto | Sheet com Cancelar; diz o novo total ("passa de R$ 1.250 para R$ 1.200") | Dar R$ 50 de desconto |
@@ -44,7 +44,7 @@ Regras:
 
 ## Componentes
 
-Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 34, dentro do bloco), `PrimaryButton`, `AppListRow`, `StatusDot`, `SummaryLine`, `MoreMenu`, `DestructiveAction` e `ShareSheet`. Novo, registrado no doc comum: `ChoiceChips`.
+Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 34, dentro do bloco), `PrimaryButton`, `AppListRow`, `StatusDot`, `SummaryLine`, `MoreMenu`, `SegmentToggle` (segmented control do sistema para "Como pagou"), `DestructiveAction` e `ShareSheet`. Nenhum componente novo.
 
 ## Ordem de implementação
 
@@ -57,3 +57,13 @@ Reaproveita `AppTopBar`, `ScreenTitle`, `NextStepBlock`, `MoneyField` (aqui em 3
 
 1. **"Como pagou" (Pix/Dinheiro/Cartão)**: `PaymentTransaction` não tem esse campo (`lib/models/payment_transaction.dart`). Opções: gravar no `description` (sem migração, risk:low) ou criar `method` no modelo (modelo compartilhado, risk:high, permite relatório por forma de pagamento). Ou deixar de fora.
 2. **Lembrete automático**: o Asaas já manda lembrete por e-mail/SMS? Se sim, o botão "Lembrar a Ana" pode virar secundário.
+
+## Conferência (HIG e APP_DESIGN_SYSTEM)
+
+Conferido contra `2026-10-10-telas-hig-design.md` e as regras 1–10 do `APP_DESIGN_SYSTEM.md`:
+- Um botão azul por tela; o resto é link, linha ou menu "…" (regra 2).
+- "Como pagou" usa o segmented control do sistema, não botões próprios (regra 10; HIG `segmented-controls`: "clearly showing selection state matters").
+- Desconto e link para pagar abrem em sheet com "Cancelar" à esquerda (regra 9); o pagamento abre sheet com fechar à esquerda.
+- Menu "…" e opções do link são action sheets nativos; "Desfazer pagamentos" e "Cancelar o link" em vermelho, com confirmação.
+- Status com ponto + texto, cor só no ponto (regra 7). Linhas que abrem algo têm seta. Toques ≥ 44 pt.
+- Como nas outras pranchas, a tab bar foi omitida nas telas empurradas; no app ela continua visível (pendente da HIG).
