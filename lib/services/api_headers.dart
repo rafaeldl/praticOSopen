@@ -45,9 +45,22 @@ Future<Map<String, String>> appApiHeaders({
 ///
 /// Debug builds: emulator host on Android, ngrok tunnel on the iOS simulator
 /// (localhost:5000 conflicts with AirTunes).
-String get appApiBaseUrl {
-  if (kDebugMode) {
-    if (Platform.isAndroid) {
+String get appApiBaseUrl => resolveAppApiBaseUrl(
+      override: const String.fromEnvironment('API_BASE_URL'),
+      debug: kDebugMode,
+      android: Platform.isAndroid,
+    );
+
+/// [override] (`--dart-define=API_BASE_URL=...`) wins, e.g. to point a debug
+/// build on the simulator at production.
+String resolveAppApiBaseUrl({
+  required String override,
+  required bool debug,
+  required bool android,
+}) {
+  if (override.isNotEmpty) return override;
+  if (debug) {
+    if (android) {
       return 'http://10.0.2.2:5000/praticos/southamerica-east1/api';
     }
     return 'https://acidogenic-lorinda-unnymphean.ngrok-free.dev/praticos/southamerica-east1/api';
