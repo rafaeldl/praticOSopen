@@ -5158,4 +5158,589 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accumulatedLeaveBlank => 'Dejar en blanco';
+
+  @override
+  String get moreSectionCompany => 'Empresa';
+
+  @override
+  String get moreSectionRecords => 'Registros';
+
+  @override
+  String get moreSectionYou => 'Tú';
+
+  @override
+  String get moreCompanySubtitle => 'Datos en la OS, rubro y funciones';
+
+  @override
+  String moreCatalogSubtitle(String products) {
+    return 'Servicios y $products';
+  }
+
+  @override
+  String saveEntityButton(String entity) {
+    return 'Guardar $entity';
+  }
+
+  @override
+  String planHeaderRenews(String plan, String date) {
+    return '$plan · se renueva el $date';
+  }
+
+  @override
+  String planHeaderValidUntil(String plan, String date) {
+    return '$plan · válido hasta el $date';
+  }
+
+  @override
+  String planHeaderCourtesy(String plan, String date) {
+    return '$plan · cortesía hasta el $date';
+  }
+
+  @override
+  String planHeaderPaymentIssue(String plan) {
+    return '$plan · problema con el pago';
+  }
+
+  @override
+  String get planLimitLabel => 'Límite del plan';
+
+  @override
+  String planLimitTeam(String used, String limit) {
+    return 'El equipo ya tiene $used de $limit personas. Para invitar a alguien más, cambia de plan.';
+  }
+
+  @override
+  String planLimitPhotos(String used, String limit) {
+    return 'Ya usaste $used de $limit fotos este mes. Para sacar más, cambia de plan.';
+  }
+
+  @override
+  String planLimitChecklists(String used, String limit) {
+    return 'Ya tienes $used de $limit checklists. Para crear otro, cambia de plan.';
+  }
+
+  @override
+  String get planUsageSection => 'Lo que estás usando';
+
+  @override
+  String get planUsageTeam => 'Personas en el equipo';
+
+  @override
+  String get planUsagePhotos => 'Fotos este mes';
+
+  @override
+  String get planUsageChecklists => 'Checklists';
+
+  @override
+  String planUsageOf(String used, String limit) {
+    return '$used de $limit';
+  }
+
+  @override
+  String get planUsageAtLimit => 'En el límite';
+
+  @override
+  String get planUsageAtLimitInvites => 'En el límite · cuenta la invitación';
+
+  @override
+  String get planUsageNearLimit => 'Casi en el límite';
+
+  @override
+  String get planUsageUnlimited => 'Sin límite';
+
+  @override
+  String get companyShownOnOrder => 'Aparece en la orden del cliente';
+
+  @override
+  String get companyNameLogoContact => 'Nombre, logo y contacto';
+
+  @override
+  String get customerTerms => 'Términos para el cliente';
+
+  @override
+  String get customerTermsHint => 'Garantía y condiciones';
+
+  @override
+  String get segmentRow => 'Rubro';
+
+  @override
+  String get segmentRowHint => 'Cambia los servicios y checklists listos';
+
+  @override
+  String get schedulingRow => 'Agenda';
+
+  @override
+  String get schedulingRowHint => 'Marcar día y hora de las órdenes';
+
+  @override
+  String get fieldServiceRow => 'Atención en el lugar del cliente';
+
+  @override
+  String get fieldServiceRowHint => 'Dirección del cliente en la orden';
+
+  @override
+  String get contractsRowHint => 'Órdenes que se repiten solas';
+
+  @override
+  String deviceControlRow(String devices) {
+    return 'Control de $devices';
+  }
+
+  @override
+  String get deviceControlRowHint => 'Historial y lista completa';
+
+  @override
+  String get companySettingSaveError =>
+      'No se pudo guardar. Revisa la conexión e intenta de nuevo.';
+
+  @override
+  String customerSpentValue(String value) {
+    return 'gastó $value';
+  }
+
+  @override
+  String customerOwesValue(String value) {
+    return 'Falta cobrar $value';
+  }
+
+  @override
+  String askOrderForCustomer(String name) {
+    return '¿Abrir una OS para $name?';
+  }
+
+  @override
+  String askOrderForDevice(String device) {
+    return '¿Abrir una OS para este $device?';
+  }
+
+  @override
+  String addAnotherDevice(String device) {
+    return 'Agregar otro $device';
+  }
+
+  @override
+  String get latestOrders => 'Últimas OS';
+
+  @override
+  String ordersOfDevice(String device) {
+    return 'OS de este $device';
+  }
+
+  @override
+  String orderCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceOwnerPrefix => 'de ';
+
+  @override
+  String get financialReportShort => 'Informe';
+
+  @override
+  String receiveSubtitle(String customer, String total) {
+    return '$customer · total $total';
+  }
+
+  @override
+  String receiveSubtitleNoCustomer(String total) {
+    return 'total $total';
+  }
+
+  @override
+  String receiveOrderLink(int number) {
+    return 'Orden $number';
+  }
+
+  @override
+  String get receiveAmountHint => '¿Recibió solo una parte? Cambie el valor.';
+
+  @override
+  String orderMenuPdfOf(String order) {
+    return 'PDF de la $order';
+  }
+
+  @override
+  String get orderAddItem => 'Servicio o repuesto';
+
+  @override
+  String get orderAddContractMonthly => 'Repetir cada mes (contrato)';
+
+  @override
+  String get ratingsSubtitle => 'Lo que opinaron los clientes';
+
+  @override
+  String get ratingsLatest => 'Últimas';
+
+  @override
+  String ratingScoreOf(String score) {
+    return '$score de 5';
+  }
+
+  @override
+  String ratingsAverageOf(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'valoraciones',
+      one: 'valoración',
+    );
+    return 'promedio de $count $_temp0';
+  }
+
+  @override
+  String ratingCommentOrder(String comment, int number) {
+    return '“$comment” · Orden $number';
+  }
+
+  @override
+  String ratingNoCommentOrder(int number) {
+    return 'Sin comentario · Orden $number';
+  }
+
+  @override
+  String get remindersSubtitle => 'Valen solo en este celular';
+
+  @override
+  String get reminderBeforeTitle => 'Antes de la hora marcada';
+
+  @override
+  String get reminderDailyTitle => 'Resumen del día a las 9h';
+
+  @override
+  String get reminderDailySubtitle => 'Qué hay para hoy';
+
+  @override
+  String get reminderPendingTitle => 'OS paradas';
+
+  @override
+  String get reminderPendingSubtitle =>
+      'Presupuestos sin respuesta hace 7 días';
+
+  @override
+  String get reminderInactivityTitle => 'Si paso días sin abrir la app';
+
+  @override
+  String reminderMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String reminderHoursValue(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'horas',
+      one: 'hora',
+    );
+    return '$hours $_temp0';
+  }
+
+  @override
+  String get catalogSubtitle => 'Lo que pones en las OS';
+
+  @override
+  String catalogKindWithCount(String kind, int count) {
+    return '$kind ($count)';
+  }
+
+  @override
+  String get catalogTip =>
+      'Consejo: puedes registrar directo en la OS, escribiendo el nombre en la búsqueda.';
+
+  @override
+  String get teamTitle => 'Equipo';
+
+  @override
+  String teamSummary(String people, String invites) {
+    return '$people y $invites';
+  }
+
+  @override
+  String teamPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personas',
+      one: '1 persona',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String teamInvitesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitaciones',
+      one: '1 invitación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteWaitingLabel => 'Invitación esperando';
+
+  @override
+  String teamInviteWaitingText(String name, String expiry) {
+    return '$name todavía no entró. $expiry';
+  }
+
+  @override
+  String teamInviteExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'La invitación vence en $count días.',
+      one: 'La invitación vence en 1 día.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteExpiresToday => 'La invitación vence hoy.';
+
+  @override
+  String get teamInviteExpired => 'La invitación venció.';
+
+  @override
+  String get teamResendInvite => 'Reenviar invitación';
+
+  @override
+  String get teamWaitingSection => 'Esperando entrar';
+
+  @override
+  String get teamMembersSection => 'En el equipo';
+
+  @override
+  String teamInviteSent(String expiry) {
+    return 'Invitación enviada · $expiry';
+  }
+
+  @override
+  String teamInviteDueInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'vence en $count días',
+      one: 'vence en 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteDueToday => 'vence hoy';
+
+  @override
+  String get teamInviteDueExpired => 'venció';
+
+  @override
+  String teamYou(String name) {
+    return '$name (tú)';
+  }
+
+  @override
+  String get teamInviteAnother => 'Invitar a otra persona';
+
+  @override
+  String get teamInviteFirst => 'Invitar a una persona';
+
+  @override
+  String get roleShortAdmin => 've y cambia todo';
+
+  @override
+  String get roleShortSupervisor => 'coordina el equipo, no ve precios';
+
+  @override
+  String get roleShortManager => 've facturación y costos';
+
+  @override
+  String get roleShortConsultant => 'hace presupuestos, ve solo sus órdenes';
+
+  @override
+  String get roleShortTechnician => 'hace los servicios, no ve precios';
+
+  @override
+  String get checklistsTitle => 'Checklists';
+
+  @override
+  String get checklistsSubtitle =>
+      'Preguntas que el técnico responde en la orden';
+
+  @override
+  String get checklistsYours => 'Tus checklists';
+
+  @override
+  String get checklistsReady => 'Listos para usar';
+
+  @override
+  String checklistQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count preguntas',
+      one: '1 pregunta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistWithPhotos => 'con fotos';
+
+  @override
+  String get checklistOff => 'Desactivado';
+
+  @override
+  String get checklistUse => 'Usar';
+
+  @override
+  String get checklistNew => 'Nuevo checklist';
+
+  @override
+  String get checklistsEmpty =>
+      'Aún no hay checklists. Crea uno o usa uno listo.';
+
+  @override
+  String get noticesTitle => 'Avisos';
+
+  @override
+  String noticesNewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nuevos',
+      one: '1 nuevo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noticesMarkAllRead => 'Marcar todos como leídos';
+
+  @override
+  String get noticesSectionNew => 'Nuevos';
+
+  @override
+  String get noticesSectionBefore => 'Antes';
+
+  @override
+  String get noticesEmpty => 'Aún no hay avisos.';
+
+  @override
+  String get timeAgoNow => 'ahora';
+
+  @override
+  String timeAgoMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count minutos',
+      one: 'hace 1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count horas',
+      one: 'hace 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count días',
+      one: 'hace 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractsSubtitle(String order) {
+    return '$order que se repiten solas';
+  }
+
+  @override
+  String get contractsTabActive => 'Activos';
+
+  @override
+  String get contractsTabEnded => 'Terminados';
+
+  @override
+  String contractEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cada $count días',
+      one: 'Todos los días',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cada $count semanas',
+      one: 'Todas las semanas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cada $count meses',
+      one: 'Todos los meses',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cada $count años',
+      one: 'Todos los años',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractNextOrderOn(String date, String order) {
+    return 'Próxima $order el $date';
+  }
+
+  @override
+  String contractEndedOn(String date) {
+    return 'Terminado el $date';
+  }
+
+  @override
+  String get contractEnded => 'Terminado';
+
+  @override
+  String get contractsEmptyEnded => 'No hay contratos terminados.';
+
+  @override
+  String contractsFooterHint(String order) {
+    return 'Los contratos nacen dentro de una $order: activa “Repetir esta $order”.';
+  }
 }

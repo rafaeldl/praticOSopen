@@ -54,50 +54,6 @@ class _NavigationControllerState extends State<NavigationController>
     };
   }
 
-  BottomNavigationBarItem _buildTabItem(BuildContext context, AppTab tab) {
-    return switch (tab) {
-      AppTab.home => BottomNavigationBarItem(
-        icon: Semantics(
-          identifier: 'tab_home',
-          child: const Icon(CupertinoIcons.house),
-        ),
-        activeIcon: const Icon(CupertinoIcons.house_fill),
-        label: context.l10n.home,
-      ),
-      AppTab.customers => BottomNavigationBarItem(
-        icon: Semantics(
-          identifier: 'tab_customers',
-          child: const Icon(CupertinoIcons.person_2),
-        ),
-        activeIcon: const Icon(CupertinoIcons.person_2_fill),
-        label: context.l10n.customers,
-      ),
-      AppTab.agenda => BottomNavigationBarItem(
-        icon: Semantics(
-          identifier: 'tab_agenda',
-          child: const Icon(CupertinoIcons.calendar),
-        ),
-        activeIcon: const Icon(CupertinoIcons.calendar_today),
-        label: context.l10n.agenda,
-      ),
-      AppTab.financial => BottomNavigationBarItem(
-        icon: Semantics(
-          identifier: 'tab_financial',
-          child: const Icon(CupertinoIcons.chart_pie),
-        ),
-        activeIcon: const Icon(CupertinoIcons.chart_pie_fill),
-        label: context.l10n.financial,
-      ),
-      AppTab.more => BottomNavigationBarItem(
-        icon: Semantics(
-          identifier: 'tab_settings',
-          child: const Icon(CupertinoIcons.ellipsis),
-        ),
-        label: context.l10n.more,
-      ),
-    };
-  }
-
   /// Applies a new set of visible tabs, keeping the selected tab when it is
   /// still visible (otherwise falls back to Início).
   void _syncTabs(List<AppTab> tabs) {
@@ -233,7 +189,7 @@ class _NavigationControllerState extends State<NavigationController>
             onTap: (index) {
               navigationStore.setCurrentIndex(index);
             },
-            items: [for (final tab in tabs) _buildTabItem(context, tab)],
+            items: [for (final tab in tabs) buildAppTabItem(context, tab)],
           ),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTabView(
@@ -247,4 +203,33 @@ class _NavigationControllerState extends State<NavigationController>
       },
     );
   }
+}
+
+/// Tab bar item for [tab]: icon, filled icon when selected and label.
+BottomNavigationBarItem buildAppTabItem(BuildContext context, AppTab tab) {
+  final (id, icon, activeIcon, label) = switch (tab) {
+    AppTab.home => ('tab_home', CupertinoIcons.house,
+        CupertinoIcons.house_fill, context.l10n.home),
+    AppTab.customers => ('tab_customers', CupertinoIcons.person_2,
+        CupertinoIcons.person_2_fill, context.l10n.customers),
+    AppTab.agenda => ('tab_agenda', CupertinoIcons.calendar,
+        CupertinoIcons.calendar_today, context.l10n.agenda),
+    AppTab.financial => ('tab_financial', CupertinoIcons.chart_pie,
+        CupertinoIcons.chart_pie_fill, context.l10n.financial),
+    AppTab.more => ('tab_settings', CupertinoIcons.ellipsis,
+        CupertinoIcons.ellipsis, context.l10n.more),
+  };
+  // The button flag merges into the tab item (CupertinoTabBar merges each
+  // item's semantics), so VoiceOver and UI tests see every tab as a button,
+  // selected or not.
+  Widget wrap(IconData data) => Semantics(
+        identifier: id,
+        button: true,
+        child: Icon(data),
+      );
+  return BottomNavigationBarItem(
+    icon: wrap(icon),
+    activeIcon: wrap(activeIcon),
+    label: label,
+  );
 }

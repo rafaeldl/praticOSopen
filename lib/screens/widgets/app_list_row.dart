@@ -19,6 +19,7 @@ class AppListRow extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
+    this.subtitleWidget,
     this.trailing,
     this.leading,
     this.onTap,
@@ -30,6 +31,10 @@ class AppListRow extends StatelessWidget {
 
   final String title;
   final String? subtitle;
+
+  /// Second line built by the caller (e.g. a status dot and text). Wins over
+  /// [subtitle].
+  final Widget? subtitleWidget;
 
   /// Value shown at the end of the row (e.g. a formatted amount or status).
   final String? trailing;
@@ -77,7 +82,12 @@ class AppListRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         titleText,
-        if (subtitle != null)
+        if (subtitleWidget != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: subtitleWidget,
+          )
+        else if (subtitle != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Text(
@@ -110,7 +120,12 @@ class AppListRow extends StatelessWidget {
             Expanded(child: main),
             if (!stacked && valueText != null) ...[
               const SizedBox(width: AppSpacing.md),
-              Flexible(child: valueText),
+              Flexible(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: valueText,
+                ),
+              ),
             ],
             if (chevron) ...[
               const SizedBox(width: AppSpacing.sm),
@@ -130,10 +145,13 @@ class AppListRow extends StatelessWidget {
         : row;
 
     if (onTap == null) return content;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: content,
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: content,
+      ),
     );
   }
 }

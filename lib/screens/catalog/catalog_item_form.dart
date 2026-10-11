@@ -221,7 +221,8 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
     if (widget.asSheet) {
       return AppSheet(
         title: title,
-        actionLabel: l10n.save,
+        primaryLabel:
+            _isService ? l10n.saveServiceButton : l10n.saveProductButton,
         onAction: _save,
         busy: _saving,
         child: body,

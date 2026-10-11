@@ -4,25 +4,30 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/order_history_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Customer screen (`/customer_detail`, argument `customer`): call / WhatsApp,
-/// "Nova OS para Ana", the customer's vehicles and orders, and "Total gasto"
-/// (sum of the completed orders) and, with the view-prices permission, "Falta
-/// receber" (what is still open on the customer's orders). Edit and delete live in the "…" menu.
+/// Customer screen (`/customer_detail`, arguments `customer` and optionally
+/// `previousTitle`, the label of the back button): phone with "gastou R$ X"
+/// and, with the view-prices permission, "Falta receber R$ X" (what is still
+/// open on the customer's orders); call / WhatsApp, "Nova OS para Ana", the
+/// customer's vehicles (with "Cadastrar outro veículo") and the latest orders.
+/// Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
   const CustomerDetailScreen({
     super.key,
@@ -37,7 +42,7 @@ class CustomerDetailScreen extends StatefulWidget {
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
 
-  /// Order totals and "Total gasto". Defaults to the `viewPrices`
+  /// Order totals and "gastou". Defaults to the `viewPrices`
   /// permission, which is off for everyone when the company does not use
   /// values and billing (`Company.useFinancial == false`).
   final bool? showPrices;
@@ -50,6 +55,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   late final CustomerDirectory _directory =
       widget.directory ?? FirestoreCustomerDirectory();
   Customer? _customer;
+  String? _previousTitle;
   Stream<List<Order>>? _orders;
 
   bool get _showPrices =>
@@ -62,6 +68,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _customer = widget.customer ?? args?['customer'] as Customer?;
+    _previousTitle = args?['previousTitle'] as String?;
     _loadOrders();
   }
 
@@ -89,6 +96,23 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       context,
       '/order',
       arguments: {'order': Order()..customer = _customer!.toAggr()},
+    );
+  }
+
+  Future<void> _addDevice() async {
+    final created = await AppSheet.show<Device>(
+      context,
+      (_) => const DeviceFormScreen(asSheet: true),
+    );
+    if (created == null || !mounted) return;
+    Navigator.pushNamed(
+      context,
+      '/device_detail',
+      arguments: {
+        'device': created,
+        'customer': _customer,
+        'previousTitle': _customer?.name,
+      },
     );
   }
 
@@ -168,228 +192,196 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         child: const SizedBox.shrink(),
       );
     }
-    final hasPhone = customer.phone?.isNotEmpty ?? false;
+    final config = context.watch<SegmentConfigProvider>();
 
     return CupertinoPageScaffold(
       backgroundColor: background,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(customer.name ?? ''),
-            backgroundColor: background,
-            border: null,
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(44, 44),
-              onPressed: _showMenu,
-              child: Semantics(
-                label: l10n.customerActions,
-                child: const Icon(CupertinoIcons.ellipsis_circle),
-              ),
-            ),
-          ),
-          if (hasPhone)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
-                ),
-                child: Text(
-                  customer.phone!,
-                  style: AppTypography.callout.copyWith(
-                    color: AppColors.textSecondary.resolveFrom(context),
+      child: StreamBuilder<List<Order>>(
+        stream: _orders,
+        builder: (context, snapshot) {
+          final orders = snapshot.data;
+          return CustomScrollView(
+            slivers: [
+              CupertinoSliverNavigationBar(
+                largeTitle: Text(customer.name ?? ''),
+                previousPageTitle: _previousTitle ?? config.customerPlural,
+                backgroundColor: background,
+                border: null,
+                trailing: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(44, 44),
+                  onPressed: _showMenu,
+                  child: Semantics(
+                    label: l10n.customerActions,
+                    child: const Icon(CupertinoIcons.ellipsis_circle),
                   ),
                 ),
               ),
-            ),
-          if (hasPhone)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.blockMargin,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _SecondaryButton(
-                        icon: CupertinoIcons.phone,
-                        label: l10n.callAction,
-                        onPressed: _call,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: _SecondaryButton(
-                        icon: CupertinoIcons.chat_bubble_text,
-                        label: l10n.whatsapp,
-                        onPressed: _whatsapp,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.blockMargin,
-                AppSpacing.lg,
-                AppSpacing.blockMargin,
-                0,
-              ),
-              child: _PrimaryButton(
-                label: l10n.newOrderFor(_firstName),
-                onPressed: _newOrder,
-              ),
-            ),
-          ),
-          StreamBuilder<List<Order>>(
-            stream: _orders,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return SliverToBoxAdapter(
+              ..._buildHeader(customer, orders),
+              if (snapshot.hasError)
+                SliverToBoxAdapter(
                   child: SizedBox(
                     height: 200,
                     child: ErrorState(onRetry: _loadOrders),
                   ),
-                );
-              }
-              final orders = snapshot.data;
-              if (orders == null) {
-                return const SliverToBoxAdapter(
+                )
+              else if (orders == null)
+                const SliverToBoxAdapter(
                   child: SizedBox(height: 120, child: LoadingState()),
-                );
-              }
-              return SliverList(
-                delegate: SliverChildListDelegate(_buildOrderSections(orders)),
-              );
-            },
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+                )
+              else
+                SliverList(
+                  delegate: SliverChildListDelegate(_buildOrderSections(orders)),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          );
+        },
       ),
     );
   }
 
+  List<Widget> _buildHeader(Customer customer, List<Order>? orders) {
+    final l10n = context.l10n;
+    final hasPhone = customer.phone?.isNotEmpty ?? false;
+    final format = FormatService()..setLocale(l10n.localeName);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final spent = orders == null ? 0.0 : totalSpent(orders);
+    final owed = orders == null ? 0.0 : customerOwed(orders);
+    final infoLines = [
+      [
+        if (hasPhone) formatPhone(customer.phone),
+        if (_showPrices && spent > 0)
+          l10n.customerSpentValue(format.formatCurrency(spent)),
+      ].join(' · '),
+      if (_showPrices && owed > 0)
+        l10n.customerOwesValue(format.formatCurrency(owed)),
+    ].where((line) => line.isNotEmpty).toList();
+
+    return [
+      if (infoLines.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final line in infoLines)
+                  Text(
+                    line,
+                    style: AppTypography.callout.copyWith(color: secondary),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      if (hasPhone)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.blockMargin,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _SecondaryButton(
+                    icon: CupertinoIcons.phone,
+                    label: l10n.callAction,
+                    onPressed: _call,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: _SecondaryButton(
+                    icon: CupertinoIcons.chat_bubble_text,
+                    label: l10n.whatsapp,
+                    onPressed: _whatsapp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.blockMargin,
+            AppSpacing.lg,
+            AppSpacing.blockMargin,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Text(
+                  l10n.askOrderForCustomer(_firstName),
+                  style: AppTypography.callout.copyWith(color: secondary),
+                ),
+              ),
+              _PrimaryButton(
+                label: l10n.newOrderFor(_firstName),
+                onPressed: _newOrder,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ];
+  }
+
   List<Widget> _buildOrderSections(List<Order> orders) {
-    if (orders.isEmpty) return const [];
     final l10n = context.l10n;
     final config = context.watch<SegmentConfigProvider>();
-    final format = FormatService()..setLocale(l10n.localeName);
     final vehicles = distinctVehicles(orders);
     final name = _firstName;
 
     return [
-      if (vehicles.isNotEmpty) ...[
-        SectionLabel(l10n.devicesOfCustomer(config.devicePlural, name)),
-        for (final v in vehicles) _vehicleRow(v),
+      SectionLabel(l10n.devicesOfCustomer(config.devicePlural, name)),
+      for (final v in vehicles) _vehicleRow(v, orders),
+      AddRow(
+        label: l10n.addAnotherDevice(config.device.toLowerCase()),
+        onTap: _addDevice,
+      ),
+      if (orders.isNotEmpty) ...[
+        SectionLabel(l10n.latestOrders),
+        for (final o in orders) _orderRow(o),
       ],
-      SectionLabel(l10n.ordersOfCustomer(name)),
-      for (final o in orders) _orderRow(o, format),
-      if (_showPrices && customerOwed(orders) > 0)
-        _TotalLine(
-          label: l10n.financialToReceive,
-          value: format.formatCurrency(customerOwed(orders)),
-        ),
-      if (_showPrices)
-        _TotalLine(
-          label: l10n.totalSpent,
-          value: format.formatCurrency(totalSpent(orders)),
-        ),
     ];
   }
 
-  Widget _vehicleRow(DeviceAggr vehicle) {
+  Widget _vehicleRow(DeviceAggr vehicle, List<Order> orders) {
     final l10n = context.l10n;
     final parts = [
       if (vehicle.serial?.isNotEmpty ?? false) l10n.plateValue(vehicle.serial!),
-      if (vehicle.manufacturer?.isNotEmpty ?? false) vehicle.manufacturer!,
+      l10n.orderCountShort(orderCountForDevice(orders, vehicle.id)),
     ];
     return AppListRow(
       title: vehicle.name ?? '',
-      subtitle: parts.isEmpty ? null : parts.join(' · '),
+      subtitle: parts.join(' · '),
       onTap: () => Navigator.pushNamed(
         context,
         '/device_detail',
         arguments: {
           'device': Device.fromJson(vehicle.toJson()),
           'customer': _customer,
+          'previousTitle': _customer?.name,
         },
       ),
     );
   }
 
-  Widget _orderRow(Order order, FormatService format) {
-    final l10n = context.l10n;
-    final isOpen = order.status == 'approved' || order.status == 'progress';
-    final late = isOpen &&
-        order.dueDate != null &&
-        order.dueDate!.isBefore(DateTime.now());
-    final dotColor =
-        late ? OrderStatusStyle.overdueColor : OrderStatusStyle.dotColor(order.status);
-    final statusText = late
-        ? l10n.orderOverdue
-        : OrderStatusStyle.label(l10n, order.status);
-    final device = order.devices?.isNotEmpty == true
-        ? order.devices!.first.name
-        : order.device?.name;
-    final number = order.number == null ? '' : ' #${order.number}';
-
-    return AppListRow(
-      leading: StatusDot(color: dotColor),
-      title: [
-        '${l10n.order}$number',
-        if (device?.isNotEmpty ?? false) device!,
-      ].join(' · '),
-      subtitle: [
-        statusText,
-        if (order.createdAt != null) format.formatDate(order.createdAt),
-      ].join(' · '),
-      trailing: !_showPrices || order.total == null
-          ? null
-          : format.formatCurrency(order.total),
+  Widget _orderRow(Order order) {
+    return OrderHistoryRow(
+      order: order,
+      showPrices: _showPrices,
       onTap: () => Navigator.pushNamed(
         context,
         '/order',
         arguments: {'order': order},
-      ),
-    );
-  }
-}
-
-class _TotalLine extends StatelessWidget {
-  const _TotalLine({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppColors.text.resolveFrom(context);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.pageMargin, AppSpacing.lg, AppSpacing.pageMargin, 0,
-      ),
-      padding: const EdgeInsets.only(top: AppSpacing.md),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: text, width: 2)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: AppTypography.bodyStrong.copyWith(color: text),
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.bodyStrong.copyWith(
-              color: text,
-              fontFeatures: AppTypography.tabular,
-            ),
-          ),
-        ],
       ),
     );
   }

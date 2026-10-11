@@ -71,6 +71,16 @@ class FormatService {
     return DateFormat.Md(_intlLocale).format(date);
   }
 
+  /// Dia e mês para datas do ano corrente; data completa (com ano) para
+  /// outros anos, para não parecer uma data futura (ex: 09/01, 09/01/2025).
+  String formatDayMonthOrDate(DateTime? date, {DateTime? now}) {
+    if (date == null) return '';
+    final reference = now ?? DateTime.now();
+    return date.year == reference.year
+        ? formatDayMonth(date)
+        : formatDate(date);
+  }
+
   /// Formata mês e ano por extenso, com inicial maiúscula
   /// (ex: Outubro de 2026, October 2026)
   String formatMonthYearTitle(DateTime? date) {

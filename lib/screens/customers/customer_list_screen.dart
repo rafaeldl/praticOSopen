@@ -17,6 +17,7 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/utils/phone_format.dart';
 
 /// Result of the customer picker: the customer and, when known, the vehicle.
 ///
@@ -237,7 +238,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     Widget row(Customer c, {Device? device}) => AppListRow(
           title: c.name ?? '',
           subtitle: device == null
-              ? (c.phone?.isNotEmpty ?? false ? c.phone : null)
+              ? (c.phone?.isNotEmpty ?? false ? formatPhone(c.phone) : null)
               : '${l10n.plateValue(device.serial ?? '')} · ${device.name ?? ''}',
           showChevron: false,
           onTap: () => _pick(c, device: device),

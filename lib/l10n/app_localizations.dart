@@ -1141,13 +1141,13 @@ abstract class AppLocalizations {
   /// No description provided for @newCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Novo Cliente'**
+  /// **'Novo cliente'**
   String get newCustomer;
 
   /// No description provided for @editCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Editar Cliente'**
+  /// **'Editar cliente'**
   String get editCustomer;
 
   /// No description provided for @customerDetails.
@@ -8047,7 +8047,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderAddDueDate.
   ///
   /// In pt, this message translates to:
-  /// **'Prazo de entrega'**
+  /// **'Data de entrega'**
   String get orderAddDueDate;
 
   /// No description provided for @orderAddAnotherDevice.
@@ -9225,6 +9225,774 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Deixar em branco'**
   String get accumulatedLeaveBlank;
+
+  /// No description provided for @moreSectionCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empresa'**
+  String get moreSectionCompany;
+
+  /// No description provided for @moreSectionRecords.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastros'**
+  String get moreSectionRecords;
+
+  /// No description provided for @moreSectionYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você'**
+  String get moreSectionYou;
+
+  /// No description provided for @moreCompanySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados na OS, ramo e recursos'**
+  String get moreCompanySubtitle;
+
+  /// No description provided for @moreCatalogSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços e {products}'**
+  String moreCatalogSubtitle(String products);
+
+  /// No description provided for @saveEntityButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar {entity}'**
+  String saveEntityButton(String entity);
+
+  /// No description provided for @planHeaderRenews.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · renova em {date}'**
+  String planHeaderRenews(String plan, String date);
+
+  /// No description provided for @planHeaderValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · válido até {date}'**
+  String planHeaderValidUntil(String plan, String date);
+
+  /// No description provided for @planHeaderCourtesy.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · cortesia até {date}'**
+  String planHeaderCourtesy(String plan, String date);
+
+  /// No description provided for @planHeaderPaymentIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · problema no pagamento'**
+  String planHeaderPaymentIssue(String plan);
+
+  /// No description provided for @planLimitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite do plano'**
+  String get planLimitLabel;
+
+  /// No description provided for @planLimitTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'A equipe já tem {used} de {limit} pessoas. Para chamar mais alguém, mude de plano.'**
+  String planLimitTeam(String used, String limit);
+
+  /// No description provided for @planLimitPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já foram {used} de {limit} fotos este mês. Para tirar mais, mude de plano.'**
+  String planLimitPhotos(String used, String limit);
+
+  /// No description provided for @planLimitChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já tem {used} de {limit} checklists. Para criar outro, mude de plano.'**
+  String planLimitChecklists(String used, String limit);
+
+  /// No description provided for @planUsageSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você está usando'**
+  String get planUsageSection;
+
+  /// No description provided for @planUsageTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pessoas na equipe'**
+  String get planUsageTeam;
+
+  /// No description provided for @planUsagePhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos este mês'**
+  String get planUsagePhotos;
+
+  /// No description provided for @planUsageChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists'**
+  String get planUsageChecklists;
+
+  /// No description provided for @planUsageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{used} de {limit}'**
+  String planUsageOf(String used, String limit);
+
+  /// No description provided for @planUsageAtLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'No limite'**
+  String get planUsageAtLimit;
+
+  /// No description provided for @planUsageAtLimitInvites.
+  ///
+  /// In pt, this message translates to:
+  /// **'No limite · conta o convite'**
+  String get planUsageAtLimitInvites;
+
+  /// No description provided for @planUsageNearLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quase no limite'**
+  String get planUsageNearLimit;
+
+  /// No description provided for @planUsageUnlimited.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem limite'**
+  String get planUsageUnlimited;
+
+  /// No description provided for @companyShownOnOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aparece na OS do cliente'**
+  String get companyShownOnOrder;
+
+  /// No description provided for @companyNameLogoContact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome, logo e contato'**
+  String get companyNameLogoContact;
+
+  /// No description provided for @customerTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos para o cliente'**
+  String get customerTerms;
+
+  /// No description provided for @customerTermsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Garantia e condições'**
+  String get customerTermsHint;
+
+  /// No description provided for @segmentRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ramo'**
+  String get segmentRow;
+
+  /// No description provided for @segmentRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muda serviços e checklists prontos'**
+  String get segmentRowHint;
+
+  /// No description provided for @schedulingRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda'**
+  String get schedulingRow;
+
+  /// No description provided for @schedulingRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar dia e hora das OS'**
+  String get schedulingRowHint;
+
+  /// No description provided for @fieldServiceRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atendimento no local do cliente'**
+  String get fieldServiceRow;
+
+  /// No description provided for @fieldServiceRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço do cliente na OS'**
+  String get fieldServiceRowHint;
+
+  /// No description provided for @contractsRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS que se repetem sozinhas'**
+  String get contractsRowHint;
+
+  /// No description provided for @deviceControlRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de {devices}'**
+  String deviceControlRow(String devices);
+
+  /// No description provided for @deviceControlRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico e lista completa'**
+  String get deviceControlRowHint;
+
+  /// No description provided for @companySettingSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
+  String get companySettingSaveError;
+
+  /// No description provided for @customerSpentValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'gastou {value}'**
+  String customerSpentValue(String value);
+
+  /// No description provided for @customerOwesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {value}'**
+  String customerOwesValue(String value);
+
+  /// No description provided for @askOrderForCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir uma OS para {name}?'**
+  String askOrderForCustomer(String name);
+
+  /// No description provided for @askOrderForDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir uma OS para este {device}?'**
+  String askOrderForDevice(String device);
+
+  /// No description provided for @addAnotherDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar outro {device}'**
+  String addAnotherDevice(String device);
+
+  /// No description provided for @latestOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas OS'**
+  String get latestOrders;
+
+  /// No description provided for @ordersOfDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS deste {device}'**
+  String ordersOfDevice(String device);
+
+  /// No description provided for @orderCountShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS} other{{count} OS}}'**
+  String orderCountShort(int count);
+
+  /// No description provided for @deviceOwnerPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'da '**
+  String get deviceOwnerPrefix;
+
+  /// No description provided for @financialReportShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório'**
+  String get financialReportShort;
+
+  /// No description provided for @receiveSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{customer} · total {total}'**
+  String receiveSubtitle(String customer, String total);
+
+  /// No description provided for @receiveSubtitleNoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {total}'**
+  String receiveSubtitleNoCustomer(String total);
+
+  /// No description provided for @receiveOrderLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String receiveOrderLink(int number);
+
+  /// No description provided for @receiveAmountHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebeu só uma parte? Mude o valor.'**
+  String get receiveAmountHint;
+
+  /// No description provided for @orderMenuPdfOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF da {order}'**
+  String orderMenuPdfOf(String order);
+
+  /// No description provided for @orderAddItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço ou peça'**
+  String get orderAddItem;
+
+  /// No description provided for @orderAddContractMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir todo mês (contrato)'**
+  String get orderAddContractMonthly;
+
+  /// No description provided for @ratingsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que os clientes acharam'**
+  String get ratingsSubtitle;
+
+  /// No description provided for @ratingsLatest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas'**
+  String get ratingsLatest;
+
+  /// No description provided for @ratingScoreOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{score} de 5'**
+  String ratingScoreOf(String score);
+
+  /// No description provided for @ratingsAverageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'média de {count} {count, plural, =1{avaliação} other{avaliações}}'**
+  String ratingsAverageOf(int count);
+
+  /// No description provided for @ratingCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{comment}” · OS {number}'**
+  String ratingCommentOrder(String comment, int number);
+
+  /// No description provided for @ratingNoCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem comentário · OS {number}'**
+  String ratingNoCommentOrder(int number);
+
+  /// No description provided for @remindersSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valem só neste celular'**
+  String get remindersSubtitle;
+
+  /// No description provided for @reminderBeforeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes do horário marcado'**
+  String get reminderBeforeTitle;
+
+  /// No description provided for @reminderDailyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do dia às 9h'**
+  String get reminderDailyTitle;
+
+  /// No description provided for @reminderDailySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que tem para hoje'**
+  String get reminderDailySubtitle;
+
+  /// No description provided for @reminderPendingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS paradas'**
+  String get reminderPendingTitle;
+
+  /// No description provided for @reminderPendingSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamentos sem resposta há 7 dias'**
+  String get reminderPendingSubtitle;
+
+  /// No description provided for @reminderInactivityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se eu ficar dias sem abrir o app'**
+  String get reminderInactivityTitle;
+
+  /// No description provided for @reminderMinutesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min'**
+  String reminderMinutesValue(int minutes);
+
+  /// No description provided for @reminderHoursValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{hours} {hours, plural, =1{hora} other{horas}}'**
+  String reminderHoursValue(int hours);
+
+  /// No description provided for @catalogSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você coloca nas OS'**
+  String get catalogSubtitle;
+
+  /// No description provided for @catalogKindWithCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{kind} ({count})'**
+  String catalogKindWithCount(String kind, int count);
+
+  /// No description provided for @catalogTip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'**
+  String get catalogTip;
+
+  /// No description provided for @teamTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipe'**
+  String get teamTitle;
+
+  /// No description provided for @teamSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{people} e {invites}'**
+  String teamSummary(String people, String invites);
+
+  /// No description provided for @teamPeopleCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 pessoa} other{{count} pessoas}}'**
+  String teamPeopleCount(int count);
+
+  /// No description provided for @teamInvitesCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 convite} other{{count} convites}}'**
+  String teamInvitesCount(int count);
+
+  /// No description provided for @teamInviteWaitingLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite esperando'**
+  String get teamInviteWaitingLabel;
+
+  /// No description provided for @teamInviteWaitingText.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} ainda não entrou. {expiry}'**
+  String teamInviteWaitingText(String name, String expiry);
+
+  /// No description provided for @teamInviteExpiresInDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{O convite vence em 1 dia.} other{O convite vence em {count} dias.}}'**
+  String teamInviteExpiresInDays(int count);
+
+  /// No description provided for @teamInviteExpiresToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'O convite vence hoje.'**
+  String get teamInviteExpiresToday;
+
+  /// No description provided for @teamInviteExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'O convite venceu.'**
+  String get teamInviteExpired;
+
+  /// No description provided for @teamResendInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reenviar convite'**
+  String get teamResendInvite;
+
+  /// No description provided for @teamWaitingSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando entrar'**
+  String get teamWaitingSection;
+
+  /// No description provided for @teamMembersSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Na equipe'**
+  String get teamMembersSection;
+
+  /// No description provided for @teamInviteSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite enviado · {expiry}'**
+  String teamInviteSent(String expiry);
+
+  /// No description provided for @teamInviteDueInDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{vence em 1 dia} other{vence em {count} dias}}'**
+  String teamInviteDueInDays(int count);
+
+  /// No description provided for @teamInviteDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'vence hoje'**
+  String get teamInviteDueToday;
+
+  /// No description provided for @teamInviteDueExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'venceu'**
+  String get teamInviteDueExpired;
+
+  /// No description provided for @teamYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} (você)'**
+  String teamYou(String name);
+
+  /// No description provided for @teamInviteAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar outra pessoa'**
+  String get teamInviteAnother;
+
+  /// No description provided for @teamInviteFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar uma pessoa'**
+  String get teamInviteFirst;
+
+  /// No description provided for @roleShortAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'vê e muda tudo'**
+  String get roleShortAdmin;
+
+  /// No description provided for @roleShortSupervisor.
+  ///
+  /// In pt, this message translates to:
+  /// **'coordena a equipe, não vê preços'**
+  String get roleShortSupervisor;
+
+  /// No description provided for @roleShortManager.
+  ///
+  /// In pt, this message translates to:
+  /// **'vê faturamento e custos'**
+  String get roleShortManager;
+
+  /// No description provided for @roleShortConsultant.
+  ///
+  /// In pt, this message translates to:
+  /// **'faz orçamentos, vê só as suas OS'**
+  String get roleShortConsultant;
+
+  /// No description provided for @roleShortTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'faz os serviços, não vê preços'**
+  String get roleShortTechnician;
+
+  /// No description provided for @checklistsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists'**
+  String get checklistsTitle;
+
+  /// No description provided for @checklistsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas que o técnico responde na OS'**
+  String get checklistsSubtitle;
+
+  /// No description provided for @checklistsYours.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus checklists'**
+  String get checklistsYours;
+
+  /// No description provided for @checklistsReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prontos para usar'**
+  String get checklistsReady;
+
+  /// No description provided for @checklistQuestions.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 pergunta} other{{count} perguntas}}'**
+  String checklistQuestions(int count);
+
+  /// No description provided for @checklistWithPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'com fotos'**
+  String get checklistWithPhotos;
+
+  /// No description provided for @checklistOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligado'**
+  String get checklistOff;
+
+  /// No description provided for @checklistUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar'**
+  String get checklistUse;
+
+  /// No description provided for @checklistNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo checklist'**
+  String get checklistNew;
+
+  /// No description provided for @checklistsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum checklist ainda. Crie um ou use um pronto.'**
+  String get checklistsEmpty;
+
+  /// No description provided for @noticesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos'**
+  String get noticesTitle;
+
+  /// No description provided for @noticesNewCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 novo} other{{count} novos}}'**
+  String noticesNewCount(int count);
+
+  /// No description provided for @noticesMarkAllRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar todos como lidos'**
+  String get noticesMarkAllRead;
+
+  /// No description provided for @noticesSectionNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novos'**
+  String get noticesSectionNew;
+
+  /// No description provided for @noticesSectionBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes'**
+  String get noticesSectionBefore;
+
+  /// No description provided for @noticesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum aviso por enquanto.'**
+  String get noticesEmpty;
+
+  /// No description provided for @timeAgoNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'agora'**
+  String get timeAgoNow;
+
+  /// No description provided for @timeAgoMinutes.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 minuto} other{há {count} minutos}}'**
+  String timeAgoMinutes(int count);
+
+  /// No description provided for @timeAgoHours.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 hora} other{há {count} horas}}'**
+  String timeAgoHours(int count);
+
+  /// No description provided for @timeAgoDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 dia} other{há {count} dias}}'**
+  String timeAgoDays(int count);
+
+  /// No description provided for @contractsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{order} que se repetem sozinhas'**
+  String contractsSubtitle(String order);
+
+  /// No description provided for @contractsTabActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativos'**
+  String get contractsTabActive;
+
+  /// No description provided for @contractsTabEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrados'**
+  String get contractsTabEnded;
+
+  /// No description provided for @contractEveryDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo dia} other{A cada {count} dias}}'**
+  String contractEveryDays(int count);
+
+  /// No description provided for @contractEveryWeeks.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Toda semana} other{A cada {count} semanas}}'**
+  String contractEveryWeeks(int count);
+
+  /// No description provided for @contractEveryMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo mês} other{A cada {count} meses}}'**
+  String contractEveryMonths(int count);
+
+  /// No description provided for @contractEveryYears.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo ano} other{A cada {count} anos}}'**
+  String contractEveryYears(int count);
+
+  /// No description provided for @contractNextOrderOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima {order} em {date}'**
+  String contractNextOrderOn(String date, String order);
+
+  /// No description provided for @contractEndedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrado em {date}'**
+  String contractEndedOn(String date);
+
+  /// No description provided for @contractEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrado'**
+  String get contractEnded;
+
+  /// No description provided for @contractsEmptyEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum contrato encerrado.'**
+  String get contractsEmptyEnded;
+
+  /// No description provided for @contractsFooterHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.'**
+  String contractsFooterHint(String order);
 }
 
 class _AppLocalizationsDelegate

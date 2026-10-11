@@ -82,7 +82,7 @@ class OrderScreenActions {
     return Navigator.pushNamed(
       context,
       '/payment_management',
-      arguments: {'orderStore': store},
+      arguments: {'orderStore': store, 'fromOrder': true},
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -7,9 +8,27 @@ import 'package:praticos/theme/app_typography.dart';
 /// Page of the "Mais" area: native large title that collapses on scroll,
 /// followed by [children] (rows, section labels, footnotes).
 class MorePage extends StatelessWidget {
-  const MorePage({super.key, required this.title, required this.children});
+  const MorePage({
+    super.key,
+    required this.title,
+    required this.children,
+    this.previousPageTitle,
+    this.subtitle,
+    this.floatingButton,
+  });
 
   final String title;
+
+  /// Back button label; defaults to "Mais", where every page of this kind
+  /// is opened from.
+  final String? previousPageTitle;
+
+  /// One line under the large title.
+  final String? subtitle;
+
+  /// The screen's single blue button, floating over the bottom of the page
+  /// (design system rule 11). The list gets room so nothing hides under it.
+  final Widget? floatingButton;
   final List<Widget> children;
 
   @override
@@ -18,10 +37,11 @@ class MorePage extends StatelessWidget {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: Material(
         type: MaterialType.transparency,
-        child: CustomScrollView(
+        child: _withFloatingButton(context, CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(title),
+              previousPageTitle: previousPageTitle ?? context.l10n.more,
               backgroundColor: AppColors.background.resolveFrom(context),
               border: null,
             ),
@@ -29,14 +49,51 @@ class MorePage extends StatelessWidget {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  if (subtitle != null)
+                    Padding(
+                      // Lined up with the large title (16 from the edge).
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.blockMargin,
+                        0,
+                        AppSpacing.pageMargin,
+                        AppSpacing.sm,
+                      ),
+                      child: Text(
+                        subtitle!,
+                        key: const Key('morePageSubtitle'),
+                        style: AppTypography.callout.copyWith(
+                          color: AppColors.textSecondary.resolveFrom(context),
+                        ),
+                      ),
+                    ),
                   ...children,
-                  const SizedBox(height: AppSpacing.xxl),
+                  SizedBox(
+                    height: floatingButton == null
+                        ? AppSpacing.xxl
+                        : AppSizes.primaryButtonHeight + AppSpacing.xxl * 2,
+                  ),
                 ]),
               ),
             ),
           ],
-        ),
+        )),
       ),
+    );
+  }
+
+  Widget _withFloatingButton(BuildContext context, Widget scroll) {
+    final button = floatingButton;
+    if (button == null) return scroll;
+    return Stack(
+      children: [
+        Positioned.fill(child: scroll),
+        Positioned(
+          left: AppSpacing.blockMargin,
+          right: AppSpacing.blockMargin,
+          bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+          child: button,
+        ),
+      ],
     );
   }
 }

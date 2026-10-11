@@ -2287,7 +2287,7 @@ class _OrderFormState extends State<OrderForm> {
     Navigator.pushNamed(
       context,
       '/payment_management',
-      arguments: {'orderStore': _store},
+      arguments: {'orderStore': _store, 'fromOrder': true},
     );
   }
 

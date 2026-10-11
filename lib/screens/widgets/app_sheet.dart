@@ -1,13 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// Modal sheet for creating a record (new customer, vehicle, service).
 ///
-/// HIG: "Cancelar" on the leading edge, the confirming action (if any) on the
-/// trailing edge, title in the middle. Editing an existing record stays a
-/// pushed screen. Open it with [AppSheet.show] and put an [AppSheet] as the
+/// HIG: "Cancelar" on the leading edge, title in the middle. A record form
+/// (new customer, vehicle, service) confirms with the big button at the
+/// bottom ([primaryLabel], design system rule 9, "Salvar cliente"); small
+/// sheets confirm on the trailing edge ([actionLabel]). Never both. Editing an
+/// existing record stays a pushed screen. Open it with [AppSheet.show] and put an [AppSheet] as the
 /// root of the builder.
 class AppSheet extends StatelessWidget {
   const AppSheet({
@@ -15,6 +19,7 @@ class AppSheet extends StatelessWidget {
     required this.title,
     required this.child,
     this.actionLabel,
+    this.primaryLabel,
     this.onAction,
     this.busy = false,
     this.onCancel,
@@ -25,6 +30,10 @@ class AppSheet extends StatelessWidget {
 
   /// Label of the trailing action (e.g. "Salvar"). No action when null.
   final String? actionLabel;
+
+  /// Label of the big confirming button at the bottom (e.g. "Salvar
+  /// cliente"). Takes the place of [actionLabel].
+  final String? primaryLabel;
 
   /// Disabled while null or [busy].
   final VoidCallback? onAction;
@@ -66,7 +75,7 @@ class AppSheet extends StatelessWidget {
             color: AppColors.text.resolveFrom(context),
           ),
         ),
-        trailing: actionLabel == null
+        trailing: actionLabel == null || primaryLabel != null
             ? null
             : CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -83,7 +92,32 @@ class AppSheet extends StatelessWidget {
                       ),
               ),
       ),
-      child: SafeArea(child: child),
+      child: SafeArea(
+        child: primaryLabel == null
+            ? child
+            : Column(
+                children: [
+                  Expanded(child: child),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.blockMargin,
+                      AppSpacing.sm,
+                      AppSpacing.blockMargin,
+                      AppSpacing.lg,
+                    ),
+                    child: busy
+                        ? const SizedBox(
+                            height: AppSizes.primaryButtonHeight,
+                            child: CupertinoActivityIndicator(),
+                          )
+                        : PrimaryButton(
+                            label: primaryLabel!,
+                            onPressed: onAction,
+                          ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

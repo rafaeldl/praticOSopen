@@ -24,6 +24,7 @@ import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/utils/phone_format.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/screens/widgets/order_custom_fields.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
@@ -493,6 +494,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return ok ?? false;
   }
 
+  /// "OS" for the default label; a segment that renames the order keeps it.
+  String _shortOrderLabel(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    return config.serviceOrder == l10n.order
+        ? l10n.orderShort
+        : config.serviceOrder;
+  }
+
   // ─── "…" menu ────────────────────────────────────────────────────────────
 
   Future<void> _showMenu() async {
@@ -500,7 +509,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (order == null) return;
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
-    final orderLabel = config.serviceOrder;
+    final orderLabel = _shortOrderLabel(config);
     final canCancel = _store.status != 'canceled' &&
         _permissions.canChangeStatus(order, 'canceled');
     final canDelete = order.id != null && _permissions.canDelete(order);
@@ -525,7 +534,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ))
             CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(ctx, 'pdf'),
-              child: Text(l10n.orderMenuPdf),
+              child: Text(l10n.orderMenuPdfOf(orderLabel)),
             ),
           // 3. Cancelar OS / Apagar OS
           if (canCancel)
@@ -576,25 +585,27 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (order == null) return;
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
-    final orderLabel = config.serviceOrder;
+    final orderLabel = _shortOrderLabel(config);
     final saved = order.id != null;
     final canEdit = _permissions.canEditMainFields(order);
     final options = <(String, String)>[
+      if (canEdit) ('item', l10n.orderAddItem),
       if (saved && _permissions.canManageForms(order))
         ('checklist', l10n.orderAddChecklist),
-      if (saved && _permissions.canAttachMedia())
-        ('media', l10n.orderAddMedia),
-      if (saved && order.company?.id != null)
-        ('comment', l10n.orderAddComment),
-      if (canEdit && config.fieldService && !_hasAddress)
-        ('address', l10n.orderAddAddress),
+      if (canEdit && order.dueDate == null) ('due', l10n.orderAddDueDate),
       if (canEdit && config.useScheduling && order.scheduledDate == null)
         ('schedule', l10n.orderAddSchedule),
-      if (canEdit && order.dueDate == null) ('due', l10n.orderAddDueDate),
+      if (canEdit && config.fieldService && !_hasAddress)
+        ('address', l10n.orderAddAddress),
+      if (canEdit)
+        ('device', l10n.orderAddAnotherDevice(config.device.toLowerCase())),
       if (_canGiveDiscount) ('discount', l10n.orderAddDiscount),
+      if (saved && order.company?.id != null)
+        ('comment', l10n.orderAddComment),
+      if (saved && _permissions.canAttachMedia())
+        ('media', l10n.orderAddMedia),
       if (canEdit && saved && config.useContracts && !_store.hasContract)
-        ('contract', l10n.orderAddContract(orderLabel)),
-      if (canEdit) ('device', l10n.orderAddAnotherDevice(config.device)),
+        ('contract', l10n.orderAddContractMonthly),
     ];
     final choice = await showCupertinoModalPopup<String>(
       context: context,
@@ -615,6 +626,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (!mounted || choice == null) return;
     switch (choice) {
+      case 'item':
+        await _addItem();
       case 'checklist':
         await _actions.addChecklist(context, _store);
       case 'media':
@@ -1091,9 +1104,19 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String _title(SegmentConfigProvider config) {
     final l10n = context.l10n;
     if (_isNew) return l10n.orderNewTitle(config.serviceOrder);
+    return _header(config).title;
+  }
+
+  /// Vehicle in the large title, "Cliente · OS 186" under it (app-os).
+  OrderHeaderTexts _header(SegmentConfigProvider config) {
     final number = _store.orderStream?.value?.number ?? _store.order?.number;
-    if (number == null) return config.serviceOrder;
-    return l10n.orderNumberTitle(config.serviceOrder, '$number');
+    return orderHeaderTexts(
+      deviceName: _store.devices.isEmpty ? null : _store.devices.first.name,
+      customerName: _store.customer?.name,
+      orderLabel: number == null
+          ? config.serviceOrder
+          : '${_shortOrderLabel(config)} $number',
+    );
   }
 
   Widget _buildContent(SegmentConfigProvider config) {
@@ -1105,9 +1128,24 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final nextStep = _isNew ? null : _nextStep(config, canViewPrices);
     final comments = _buildComments();
 
+    final subtitle = _isNew ? null : _header(config).subtitle;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (subtitle != null)
+          Padding(
+            // Lined up with the large title (16 from the edge).
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.blockMargin, 0, AppSpacing.pageMargin, AppSpacing.xs,
+            ),
+            child: Text(
+              subtitle,
+              key: const ValueKey('order_header_subtitle'),
+              style: AppTypography.callout.copyWith(
+                color: AppColors.textSecondary.resolveFrom(context),
+              ),
+            ),
+          ),
         _buildStatusRow(config),
         if (nextStep != null) _buildNextStep(nextStep),
         if (_isNew && _marked.isNotEmpty)
@@ -1137,7 +1175,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           AppListRow(
             title: _store.customer!.name ?? '',
             subtitle: (_store.customer!.phone?.isNotEmpty ?? false)
-                ? _store.customer!.phone
+                ? formatPhone(_store.customer!.phone)
                 : null,
             marked: _marked.contains('customer'),
             onTap: _pickCustomer,
@@ -1146,7 +1184,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           AppListRow(
             title: device.name ?? '',
             subtitle: (device.serial?.isNotEmpty ?? false) ? device.serial : null,
-            showChevron: false,
             marked: _marked.contains('device:${device.id}'),
             onTap: () => _changeDevice(device),
           ),
@@ -1988,4 +2025,27 @@ class _AssistantBusy extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Large title and the line under it of an existing order.
+typedef OrderHeaderTexts = ({String title, String? subtitle});
+
+/// app-os header: the vehicle as the title and "Cliente · OS 186" under it.
+/// Without a vehicle the customer takes the title; without either, the
+/// order label does.
+OrderHeaderTexts orderHeaderTexts({
+  String? deviceName,
+  String? customerName,
+  required String orderLabel,
+}) {
+  final device = deviceName?.trim() ?? '';
+  final customer = customerName?.trim() ?? '';
+  if (device.isNotEmpty) {
+    return (
+      title: device,
+      subtitle: customer.isEmpty ? orderLabel : '$customer · $orderLabel',
+    );
+  }
+  if (customer.isNotEmpty) return (title: customer, subtitle: orderLabel);
+  return (title: orderLabel, subtitle: null);
 }

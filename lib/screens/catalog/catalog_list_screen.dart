@@ -94,6 +94,12 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       _kind = kinds.first;
     }
     _listen(_kind);
+    // Counts in the segments need both lists (only the kinds the user may see).
+    if (!_selecting) {
+      for (final k in kinds) {
+        if (k != _kind) _listen(k);
+      }
+    }
     (widget.mostUsed ?? loadMostUsedItemKeys)().then((keys) {
       if (mounted) setState(() => _mostUsedKeys = keys);
     }).catchError((_) {
@@ -195,6 +201,24 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
                 backgroundColor: AppColors.background.resolveFrom(context),
                 border: null,
               ),
+              if (!_selecting)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.pageMargin,
+                      0,
+                      AppSpacing.pageMargin,
+                      AppSpacing.sm,
+                    ),
+                    child: Text(
+                      l10n.catalogSubtitle,
+                      key: const Key('catalogSubtitle'),
+                      style: AppTypography.callout.copyWith(
+                        color: AppColors.textSecondary.resolveFrom(context),
+                      ),
+                    ),
+                  ),
+                ),
               if (showSegments)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -216,9 +240,7 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
                               vertical: AppSpacing.xs,
                             ),
                             child: Text(
-                              k == CatalogKind.service
-                                  ? l10n.services
-                                  : l10n.products,
+                              _segmentLabel(k),
                               style: AppTypography.callout,
                             ),
                           ),
@@ -253,6 +275,14 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
         ],
       ),
     );
+  }
+
+  /// "Serviços (24)" once the count of that kind is known.
+  String _segmentLabel(CatalogKind kind) {
+    final l10n = context.l10n;
+    final name = kind == CatalogKind.service ? l10n.services : l10n.products;
+    final count = _items[kind]?.length;
+    return count == null ? name : l10n.catalogKindWithCount(name, count);
   }
 
   Widget _buildFloatingButton() {
@@ -402,6 +432,27 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
         ),
       ),
     );
+    if (!_selecting && query.isEmpty) {
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.lg,
+              AppSpacing.pageMargin,
+              0,
+            ),
+            child: Text(
+              l10n.catalogTip,
+              key: const Key('catalogTip'),
+              style: AppTypography.label.copyWith(
+                color: AppColors.textSecondary.resolveFrom(context),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return slivers;
   }
 

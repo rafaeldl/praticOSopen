@@ -31,10 +31,18 @@ class _SettingsState extends State<Settings> {
   final AuthorizationService _authService = AuthorizationService.instance;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    // Once: calling this in build replaced the user stream on every rebuild
+    // (coming back from a pushed screen), and while the new stream had no
+    // value yet every permission read as false, hiding Sua empresa, Equipe,
+    // Catálogo, Checklists and Avaliações.
     _userStore.findCurrentUser();
-    // Set the UserStore instance for AuthorizationService to use
     AuthorizationService.setUserStore(_userStore);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
     final authStore = context.watch<AuthStore>();
     final subscription =
@@ -58,17 +66,14 @@ class _SettingsState extends State<Settings> {
       );
       final userName =
           _userStore.user?.value?.name ?? Global.currentUser?.displayName;
-      final companyName = authStore.companyAggr?.name;
-      final subtitle = [
-        if (userName != null && userName.isNotEmpty) userName,
-        if (companyName != null)
-          '$companyName · ${_authService.getRoleLabelLocalized(context.l10n)}',
-      ].join('\n');
-
+      final l10n = context.l10n;
       return MoreView(
         visibility: visibility,
         planName: subscription.effectivePlan(DateTime.now()).displayName,
-        accountSubtitle: subtitle.isEmpty ? null : subtitle,
+        accountName: userName,
+        companyName: authStore.companyAggr?.name,
+        catalogSubtitle:
+            l10n.moreCatalogSubtitle(l10n.products.toLowerCase()),
         version: Global.version,
         onOpen: (destination) => _open(context, destination, config),
       );
@@ -99,6 +104,7 @@ class _SettingsState extends State<Settings> {
           context,
           MyCompanySettings(
             companyId: Global.companyAggr?.id,
+            companyName: Global.companyAggr?.name,
             onOpenCompanyData: () =>
                 Navigator.pushNamed(context, '/company_form'),
           ),
@@ -130,41 +136,10 @@ class _SettingsState extends State<Settings> {
     }
   }
 
-  /// Catalog entry point. The unified "Serviços | Produtos" screen comes in
-  /// a parallel change; until then this opens the existing list (asking
-  /// which one when the role can see both).
+  /// Catalog entry point: the unified "Serviços | Produtos" screen, opened
+  /// on the kind the role can see.
   void _openCatalog(BuildContext context) {
     final canServices = _authService.hasPermission(PermissionType.viewServices);
-    final canProducts = _authService.hasPermission(PermissionType.viewProducts);
-    if (canServices && canProducts) {
-      showCupertinoModalPopup<void>(
-        context: context,
-        builder: (sheetContext) => CupertinoActionSheet(
-          title: Text(sheetContext.l10n.catalog),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(sheetContext);
-                Navigator.pushNamed(context, '/service_list');
-              },
-              child: Text(sheetContext.l10n.services),
-            ),
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(sheetContext);
-                Navigator.pushNamed(context, '/product_list');
-              },
-              child: Text(sheetContext.l10n.products),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(sheetContext),
-            child: Text(sheetContext.l10n.cancel),
-          ),
-        ),
-      );
-      return;
-    }
     Navigator.pushNamed(
         context, canServices ? '/service_list' : '/product_list');
   }

@@ -9,17 +9,13 @@ enum HomeView {
   all,
 
   /// Canceled orders ("…" menu).
-  canceled,
-
-  /// Contract orders ("…" menu, only with `useContracts`).
-  contracts;
+  canceled;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
     HomeView.open => 'open',
     HomeView.all => null,
     HomeView.canceled => 'canceled',
-    HomeView.contracts => 'contract',
   };
 
   /// Whether the "Em aberto | Todas" toggle is shown in this view.

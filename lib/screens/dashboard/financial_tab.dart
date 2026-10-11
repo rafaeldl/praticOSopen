@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/mobx/order_store.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_tab_store.dart';
@@ -88,9 +89,12 @@ class _FinancialTabState extends State<FinancialTab> {
     if (open != null) {
       open(context, order);
     } else {
-      await Navigator.of(
-        context,
-      ).pushNamed('/order', arguments: {'order': order});
+      // "Receber" of the order, as in the prototype (app-financeiro →
+      // app-receber); the order itself is one tap away from there.
+      await Navigator.of(context).pushNamed(
+        '/payment_management',
+        arguments: {'orderStore': OrderStore()..setOrder(order)},
+      );
     }
     // The order may have been paid there.
     if (mounted) _store.refresh();
@@ -160,7 +164,7 @@ class _FinancialTabState extends State<FinancialTab> {
                 l10n.financialOrderOption(
                   order.number ?? 0,
                   format.formatCurrency(FinancialSummary.openAmount(order)),
-                  format.formatDayMonth(order.createdAt),
+                  format.formatDayMonthOrDate(order.createdAt),
                 ),
               ),
             ),
@@ -184,7 +188,7 @@ class _FinancialTabState extends State<FinancialTab> {
               Navigator.of(sheetContext).pop();
               _openReport();
             },
-            child: Text(l10n.financialReport),
+            child: Text(l10n.financialReportShort),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
@@ -320,7 +324,7 @@ class _FinancialTabState extends State<FinancialTab> {
             ],
             const SizedBox(height: AppSpacing.xl),
             AppListRow(
-              title: l10n.financialReport,
+              title: l10n.financialReportShort,
               onTap: () => _openReport(),
             ),
           ],
@@ -346,11 +350,11 @@ class _FinancialTabState extends State<FinancialTab> {
           subtitle: debtor.hasSingleOrder
               ? l10n.financialOrderSince(
                   debtor.oldestOrder.number ?? 0,
-                  format.formatDayMonth(debtor.since),
+                  format.formatDayMonthOrDate(debtor.since),
                 )
               : l10n.financialOrdersSince(
                   debtor.orders.length,
-                  format.formatDayMonth(debtor.since),
+                  format.formatDayMonthOrDate(debtor.since),
                 ),
           onTap: () => _openDebtor(debtor),
         ),
@@ -447,7 +451,7 @@ class _NextStepBlock extends StatelessWidget {
                 l10n.financialOldestDebt(
                   name,
                   format.formatCurrency(debtor.amount),
-                  format.formatDayMonth(debtor.since),
+                  format.formatDayMonthOrDate(debtor.since),
                 ),
                 style: AppTypography.callout.copyWith(color: onSoft),
               ),

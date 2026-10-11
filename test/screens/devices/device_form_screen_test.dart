@@ -76,7 +76,7 @@ void main() {
     await h.open(tester);
 
     expect(find.text('Cancelar'), findsOneWidget);
-    expect(find.text('Salvar'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^Salvar')), findsOneWidget);
     expect(find.byType(EditableText), findsNWidgets(2));
     expect(find.text('+ Foto e mais dados'), findsOneWidget);
 
@@ -90,7 +90,7 @@ void main() {
     final h = _Harness();
     await h.open(tester);
 
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Preencha o campo'), findsOneWidget);
@@ -119,7 +119,7 @@ void main() {
     expect(find.text('Fiat'), findsOneWidget);
     expect(find.text('Carro'), findsOneWidget);
 
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
     await tester.pumpAndSettle();
 
     expect(h.saved, hasLength(1));
@@ -141,7 +141,7 @@ void main() {
     expect(find.text('Usar “Fiat Uno 2016”'), findsOneWidget);
 
     await tester.enterText(find.byType(EditableText).at(1), 'XYZ9K88');
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
     await tester.pumpAndSettle();
 
     expect(h.saved.single.name, 'Fiat Uno 2016');
@@ -164,7 +164,7 @@ void main() {
     expect(find.text('VW'), findsOneWidget);
     expect(find.text('+ Foto e mais dados'), findsNothing);
 
-    await tester.tap(find.text('Salvar'));
+    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
     await tester.pumpAndSettle();
     expect(h.saved.single, same(device));
   });

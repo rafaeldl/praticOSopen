@@ -23,6 +23,7 @@ import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/asaas_billing.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
@@ -81,6 +82,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   final TextEditingController _valueController = TextEditingController();
   _PickedReceipt? _receipt;
 
+  /// Opened from the order screen: "‹ OS 183" just goes back to it.
+  bool _fromOrder = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -92,6 +96,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         if (args != null && args.containsKey('orderStore')) {
           _store = args['orderStore'];
         }
+        _fromOrder = args?['fromOrder'] == true;
       }
       _prefillValue();
       _initialized = true;
@@ -141,8 +146,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.receiveTitle),
+              leading: _buildOrderLink(),
               trailing: _buildMoreButton(),
             ),
+            SliverToBoxAdapter(child: _buildSubtitle()),
             SliverSafeArea(
               top: false,
               sliver: SliverList(
@@ -163,6 +170,69 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
       ),
     );
+  }
+
+  /// "‹ OS 183", the back button: back to the order when it opened this
+  /// screen; otherwise (Financeiro) this screen is replaced by the order, so
+  /// the stack never piles up Receber → OS → Receber.
+  Widget _buildOrderLink() {
+    final order = _store?.order;
+    if (order == null || order.number == null) return const SizedBox.shrink();
+    return CupertinoButton(
+      key: const Key('receiveOrderLink'),
+      padding: EdgeInsets.zero,
+      minimumSize:
+          const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+      onPressed: () => _fromOrder
+          ? Navigator.of(context).pop()
+          : Navigator.of(context)
+              .pushReplacementNamed('/order', arguments: {'order': order}),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CupertinoIcons.chevron_back,
+            size: 22,
+            color: AppColors.accentText.resolveFrom(context),
+          ),
+          Text(
+            context.l10n.receiveOrderLink(order.number!),
+            style: AppTypography.body.copyWith(
+              color: AppColors.accentText.resolveFrom(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "Ana Ribeiro · total R$ 1.250" under the title.
+  Widget _buildSubtitle() {
+    return Observer(builder: (_) {
+      final store = _store;
+      if (store == null) return const SizedBox.shrink();
+      final total = FormatService().formatCurrency(store.total ?? 0.0);
+      final name = store.customerName;
+      final text = name == null || name.isEmpty
+          ? context.l10n.receiveSubtitleNoCustomer(total)
+          : context.l10n.receiveSubtitle(name, total);
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pageMargin,
+          0,
+          AppSpacing.pageMargin,
+          AppSpacing.sm,
+        ),
+        child: Text(
+          text,
+          key: const Key('receiveSubtitle'),
+          style: AppTypography.callout.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
+            fontFeatures: AppTypography.tabular,
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildMoreButton() {
