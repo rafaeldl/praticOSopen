@@ -25,7 +25,33 @@ build_app  →  .ipa assinado  →  TestFlight / App Store
 | Bootstrap | `ios/scripts/bootstrap_match.sh` |
 | Uso no CI | `.github/workflows/ios_release.yml` |
 
-O `sync_signing` roda no **início** das lanes `beta` (TestFlight) e `release_store` (App Store) e devolve o nome do profile, que alimenta o `update_code_signing_settings` e o `export_options` do `build_app`.
+O `sync_signing` roda no **início** das lanes `beta` (TestFlight) e `release_store` (App Store) e devolve um profile por target, que alimenta o `update_code_signing_settings` (via `apply_signing`) e o `export_options` do `build_app` (via `export_profiles`).
+
+### App e Share Extension
+
+São dois bundle ids, cada um com o seu profile `appstore` no match:
+
+| Target | Bundle id | Capabilities |
+|---|---|---|
+| `Runner` | `br.com.rafsoft.praticos` | Push, Sign in with Apple, **App Groups** |
+| `ShareExtension` | `br.com.rafsoft.praticos.ShareExtension` | **App Groups** |
+
+Os dois usam o App Group `group.br.com.rafsoft.praticos` (ver `docs/RECEIVE_SHARE.md`). Se faltar o profile de um deles, o `sync_signing` falha no começo da lane com a mensagem "Sem provisioning profile do match".
+
+#### Setup da extensão (uma vez, por uma pessoa)
+
+1. No [Apple Developer › Identifiers](https://developer.apple.com/account/resources/identifiers/list):
+   - App Groups › **+** › `group.br.com.rafsoft.praticos`.
+   - App ID `br.com.rafsoft.praticos` › ligar **App Groups** › Configure › marcar o grupo acima.
+   - **+** App ID `br.com.rafsoft.praticos.ShareExtension` (tipo App, descrição "PraticOS Share Extension") › ligar **App Groups** › marcar o mesmo grupo.
+2. Regerar os profiles (o do app muda porque ganhou App Groups; o da extensão é novo):
+
+   ```bash
+   cd ios && env -u CI bundle exec fastlane match appstore --force
+   ```
+
+   O `Matchfile` já lista os dois ids. Não precisa mexer em secrets: a deploy key e a passphrase são as mesmas.
+3. Rodar o **Release iOS** e conferir no TestFlight que o PraticOS aparece em Compartilhar (Fotos e Arquivos).
 
 ### Falha rápida
 
@@ -115,6 +141,8 @@ A Apple limita o número de certificados de distribuição por conta. Se o CI pu
 | `Could not decrypt` / `Invalid password` | `MATCH_PASSWORD` diferente do usado no bootstrap |
 | `No code signing identity found` | Storage vazio ou sem certificado para o team `46AUA3GASK` |
 | `Your certificate has expired` | Fazer a renovação anual acima |
+| `Sem provisioning profile do match para ...ShareExtension` | Setup da extensão (acima) ainda não feito |
+| `Provisioning profile ... doesn't support the App Groups capability` | Profile antigo do app: rodar o `match appstore --force` do setup da extensão |
 
 ## Inventario de acessos
 

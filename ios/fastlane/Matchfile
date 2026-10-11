@@ -14,7 +14,9 @@ storage_mode("git")
 
 type("appstore")
 
-app_identifier(["br.com.rafsoft.praticos"])
+# App + Share Extension ("Compartilhar -> PraticOS"), ambos com o App Group
+# group.br.com.rafsoft.praticos.
+app_identifier(["br.com.rafsoft.praticos", "br.com.rafsoft.praticos.ShareExtension"])
 team_id("46AUA3GASK")
 
 # No CI nunca criamos nem renovamos credenciais: so consumimos o que ja esta

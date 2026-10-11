@@ -1,8 +1,9 @@
 default_platform(:ios)
 
 platform :ios do
-  # Instala certificado + provisioning profile via match e devolve o nome do
-  # profile para uso no export.
+  # Instala certificados + provisioning profiles via match (app e Share
+  # Extension) e devolve { target => [bundle_id, profile] } para o
+  # update_code_signing_settings e o export.
   #
   # No CI o match roda em readonly (ver Matchfile): se as credenciais nao
   # estiverem no storage, falha explicitamente em vez de criar um certificado
@@ -13,12 +14,44 @@ platform :ios do
     # a action import-codesign-certs que criava o keychain). No-op fora do CI.
     setup_ci
 
-    sync_code_signing(type: "appstore")
-
     app_identifier = ENV['BUNDLE_ID'] || "br.com.rafsoft.praticos"
-    profile_name = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][app_identifier]
-    UI.message("Assinatura via match - profile: #{profile_name}")
-    profile_name
+    # Share Extension ("Compartilhar -> PraticOS"). O receive_sharing_intent
+    # deriva o id do app tirando o ultimo componente do id da extensao.
+    extension_identifier = "#{app_identifier}.ShareExtension"
+
+    sync_code_signing(type: "appstore", app_identifier: [app_identifier, extension_identifier])
+
+    mapping = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    profiles = {
+      "Runner" => [app_identifier, mapping[app_identifier]],
+      "ShareExtension" => [extension_identifier, mapping[extension_identifier]]
+    }
+    profiles.each do |target, (bundle_id, profile_name)|
+      UI.user_error!("Sem provisioning profile do match para #{bundle_id} - ver docs/IOS_CODE_SIGNING.md") if profile_name.to_s.empty?
+      UI.message("Assinatura via match - #{target}: #{profile_name}")
+    end
+    profiles
+  end
+
+  # Forca assinatura manual (Release) no app e na extensao, cada um com o seu
+  # profile do match.
+  def apply_signing(profiles)
+    profiles.each do |target, (_bundle_id, profile_name)|
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        path: "Runner.xcodeproj",
+        targets: [target],
+        build_configurations: ["Release"],
+        team_id: ENV['DEVELOPMENT_TEAM'],
+        code_sign_identity: "Apple Distribution",
+        profile_name: profile_name
+      )
+    end
+  end
+
+  # { bundle_id => profile } para o export_options do build_app.
+  def export_profiles(profiles)
+    profiles.values.to_h
   end
 
   # API key do RevenueCat como --dart-define, validada antes do build.
@@ -88,7 +121,7 @@ platform :ios do
     # 🔐 certificado + provisioning profile via match
     # Roda ANTES do build do Flutter: se a assinatura nao estiver disponivel,
     # a lane falha em segundos em vez de depois de ~30 min de compilacao.
-    profile_name = sync_signing
+    profiles = sync_signing
 
     # Busca o próximo build number
     current_build = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
@@ -103,16 +136,8 @@ platform :ios do
       sh(*flutter_build_args)
     end
 
-    # 🔧 força assinatura só no Runner (Release)
-    update_code_signing_settings(
-      use_automatic_signing: false,
-      path: "Runner.xcodeproj",
-      targets: ["Runner"],
-      build_configurations: ["Release"],
-      team_id: ENV['DEVELOPMENT_TEAM'],
-      code_sign_identity: "Apple Distribution",
-      profile_name: profile_name
-    )
+    # 🔧 força assinatura manual no Runner e na ShareExtension (Release)
+    apply_signing(profiles)
 
     # 🏗️ archive + export
     build_app(
@@ -123,9 +148,7 @@ platform :ios do
       skip_profile_detection: true,
       export_options: {
         signingStyle: "manual",
-        provisioningProfiles: {
-          ENV['BUNDLE_ID'] => profile_name
-        }
+        provisioningProfiles: export_profiles(profiles)
       },
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"
     )
@@ -179,7 +202,7 @@ platform :ios do
     # 🔐 certificado + provisioning profile via match
     # Roda ANTES do build do Flutter: se a assinatura nao estiver disponivel,
     # a lane falha em segundos em vez de depois de ~30 min de compilacao.
-    profile_name = sync_signing
+    profiles = sync_signing
 
     # Busca o próximo build number
     current_build = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
@@ -194,16 +217,8 @@ platform :ios do
       sh(*flutter_build_args)
     end
 
-    # 🔧 força assinatura só no Runner (Release)
-    update_code_signing_settings(
-      use_automatic_signing: false,
-      path: "Runner.xcodeproj",
-      targets: ["Runner"],
-      build_configurations: ["Release"],
-      team_id: ENV['DEVELOPMENT_TEAM'],
-      code_sign_identity: "Apple Distribution",
-      profile_name: profile_name
-    )
+    # 🔧 força assinatura manual no Runner e na ShareExtension (Release)
+    apply_signing(profiles)
 
     # 🏗️ archive + export
     build_app(
@@ -214,9 +229,7 @@ platform :ios do
       skip_profile_detection: true,
       export_options: {
         signingStyle: "manual",
-        provisioningProfiles: {
-          ENV['BUNDLE_ID'] => profile_name
-        }
+        provisioningProfiles: export_profiles(profiles)
       },
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"
     )
