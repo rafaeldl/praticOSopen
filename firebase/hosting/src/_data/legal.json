@@ -15,7 +15,9 @@
         },
         {
           "title": "Dados que Coletamos",
-          "paragraphs": ["Coletamos apenas as informações necessárias para o funcionamento do aplicativo:"],
+          "paragraphs": [
+            "Coletamos apenas as informações necessárias para o funcionamento do aplicativo:"
+          ],
           "list": [
             "<strong>Dados de cadastro:</strong> Nome, email e foto de perfil (quando usando login social)",
             "<strong>Dados de uso:</strong> Informações sobre ordens de serviço, clientes e transações que você cria no app",
@@ -24,7 +26,9 @@
         },
         {
           "title": "Como Usamos seus Dados",
-          "paragraphs": ["Utilizamos suas informações para:"],
+          "paragraphs": [
+            "Utilizamos suas informações para:"
+          ],
           "list": [
             "Autenticar e identificar você no aplicativo",
             "Sincronizar seus dados entre dispositivos",
@@ -47,7 +51,9 @@
         },
         {
           "title": "Segurança dos Dados",
-          "paragraphs": ["Implementamos medidas de segurança robustas para proteger suas informações:"],
+          "paragraphs": [
+            "Implementamos medidas de segurança robustas para proteger suas informações:"
+          ],
           "list": [
             "Criptografia de dados em trânsito (HTTPS/TLS)",
             "Criptografia de dados em repouso",
@@ -58,7 +64,9 @@
         },
         {
           "title": "Seus Direitos",
-          "paragraphs": ["De acordo com a Lei Geral de Proteção de Dados (LGPD), você tem direito a:"],
+          "paragraphs": [
+            "De acordo com a Lei Geral de Proteção de Dados (LGPD), você tem direito a:"
+          ],
           "list": [
             "Acessar seus dados pessoais",
             "Corrigir dados incompletos ou incorretos",
@@ -106,7 +114,9 @@
         },
         {
           "title": "Data We Collect",
-          "paragraphs": ["We only collect information necessary for the app to function:"],
+          "paragraphs": [
+            "We only collect information necessary for the app to function:"
+          ],
           "list": [
             "<strong>Registration data:</strong> Name, email, and profile picture (when using social login)",
             "<strong>Usage data:</strong> Information about service orders, customers, and transactions you create in the app",
@@ -115,7 +125,9 @@
         },
         {
           "title": "How We Use Your Data",
-          "paragraphs": ["We use your information to:"],
+          "paragraphs": [
+            "We use your information to:"
+          ],
           "list": [
             "Authenticate and identify you in the app",
             "Sync your data across devices",
@@ -138,7 +150,9 @@
         },
         {
           "title": "Data Security",
-          "paragraphs": ["We implement robust security measures to protect your information:"],
+          "paragraphs": [
+            "We implement robust security measures to protect your information:"
+          ],
           "list": [
             "Data encryption in transit (HTTPS/TLS)",
             "Data encryption at rest",
@@ -171,7 +185,9 @@
         },
         {
           "title": "Datos que Recopilamos",
-          "paragraphs": ["Solo recopilamos la información necesaria para el funcionamiento de la aplicación:"],
+          "paragraphs": [
+            "Solo recopilamos la información necesaria para el funcionamiento de la aplicación:"
+          ],
           "list": [
             "<strong>Datos de registro:</strong> Nombre, correo electrónico y foto de perfil (al usar inicio de sesión social)",
             "<strong>Datos de uso:</strong> Información sobre órdenes de servicio, clientes y transacciones que crea en la app",
@@ -180,7 +196,9 @@
         },
         {
           "title": "Cómo Usamos sus Datos",
-          "paragraphs": ["Utilizamos su información para:"],
+          "paragraphs": [
+            "Utilizamos su información para:"
+          ],
           "list": [
             "Autenticar e identificarlo en la aplicación",
             "Sincronizar sus datos entre dispositivos",
@@ -203,7 +221,9 @@
         },
         {
           "title": "Seguridad de los Datos",
-          "paragraphs": ["Implementamos medidas de seguridad robustas para proteger su información:"],
+          "paragraphs": [
+            "Implementamos medidas de seguridad robustas para proteger su información:"
+          ],
           "list": [
             "Cifrado de datos en tránsito (HTTPS/TLS)",
             "Cifrado de datos en reposo",
@@ -411,6 +431,158 @@
           "paragraphs": [
             "Para preguntas sobre estos términos, contáctenos:",
             "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    }
+  },
+  "accountDeletion": {
+    "pt": {
+      "title": "Excluir conta do",
+      "titleHighlight": "PraticOS",
+      "subtitle": "Como pedir a exclusão da sua conta e dos seus dados no app PraticOS, da Rafsoft",
+      "lastUpdated": "Última atualização: Outubro de 2026",
+      "sections": [
+        {
+          "title": "Pelo app",
+          "paragraphs": [
+            "É o jeito mais rápido. A exclusão acontece na hora:"
+          ],
+          "list": [
+            "Abra o PraticOS e entre na sua conta",
+            "Toque na aba <strong>Mais</strong>",
+            "Toque em <strong>Sua conta</strong>",
+            "Toque em <strong>Apagar minha conta</strong> e confirme. Se o app pedir, entre de novo para confirmar que é você"
+          ]
+        },
+        {
+          "title": "Por e-mail",
+          "paragraphs": [
+            "Se você não consegue mais abrir o app, mande um e-mail para <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a> com o assunto \"Excluir minha conta\", a partir do e-mail cadastrado na conta. Confirmamos o pedido e excluímos a conta em até 30 dias."
+          ]
+        },
+        {
+          "title": "O que é apagado",
+          "paragraphs": [
+            "Ao excluir a conta, apagamos:"
+          ],
+          "list": [
+            "Sua conta de acesso (nome, e-mail e foto de perfil)",
+            "Seu vínculo com as empresas de que você participa",
+            "Se você é o único dono da empresa: a empresa inteira, com ordens de serviço, clientes, serviços, produtos, agenda, financeiro, fotos e arquivos"
+          ]
+        },
+        {
+          "title": "O que fica guardado",
+          "paragraphs": [
+            "Se a empresa tem outros membros, o dono precisa transferir a empresa ou remover os membros antes de excluir a conta. As ordens de serviço e os clientes da empresa continuam com ela, porque pertencem à empresa.",
+            "Cópias de segurança são apagadas em até 30 dias. Registros de compra de assinatura ficam com o Google Play e a Apple, conforme as regras deles. Registros técnicos de erro e uso, sem dados de cadastro, são apagados automaticamente pelo Firebase conforme o prazo de retenção do serviço."
+          ]
+        },
+        {
+          "title": "Contato",
+          "paragraphs": [
+            "Dúvidas sobre exclusão ou privacidade: <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a>. Veja também a <a href=\"privacy.html\">Política de Privacidade</a>."
+          ]
+        }
+      ]
+    },
+    "en": {
+      "title": "Delete your",
+      "titleHighlight": "PraticOS account",
+      "subtitle": "How to request deletion of your account and data in the PraticOS app, by Rafsoft",
+      "lastUpdated": "Last updated: October 2026",
+      "sections": [
+        {
+          "title": "In the app",
+          "paragraphs": [
+            "This is the fastest way. Deletion happens right away:"
+          ],
+          "list": [
+            "Open PraticOS and sign in",
+            "Tap the <strong>More</strong> tab",
+            "Tap <strong>Your account</strong>",
+            "Tap <strong>Delete my account</strong> and confirm. If asked, sign in again to confirm it's you"
+          ]
+        },
+        {
+          "title": "By email",
+          "paragraphs": [
+            "If you can no longer open the app, email <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a> with the subject \"Delete my account\" from the email address on your account. We confirm the request and delete the account within 30 days."
+          ]
+        },
+        {
+          "title": "What is deleted",
+          "paragraphs": [
+            "When you delete your account, we delete:"
+          ],
+          "list": [
+            "Your sign-in account (name, email and profile photo)",
+            "Your membership in the companies you belong to",
+            "If you are the company's only owner: the whole company, with work orders, customers, services, products, schedule, finances, photos and files"
+          ]
+        },
+        {
+          "title": "What is kept",
+          "paragraphs": [
+            "If the company has other members, the owner must transfer the company or remove the members before deleting the account. The company's work orders and customers stay with the company, because they belong to it.",
+            "Backups are deleted within 30 days. Subscription purchase records are kept by Google Play and Apple under their own rules. Technical error and usage logs, without account details, are deleted automatically by Firebase under its retention period."
+          ]
+        },
+        {
+          "title": "Contact",
+          "paragraphs": [
+            "Questions about deletion or privacy: <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a>. See also the <a href=\"privacy-en.html\">Privacy Policy</a>."
+          ]
+        }
+      ]
+    },
+    "es": {
+      "title": "Eliminar cuenta de",
+      "titleHighlight": "PraticOS",
+      "subtitle": "Cómo pedir la eliminación de tu cuenta y tus datos en la app PraticOS, de Rafsoft",
+      "lastUpdated": "Última actualización: Octubre de 2026",
+      "sections": [
+        {
+          "title": "En la app",
+          "paragraphs": [
+            "Es la forma más rápida. La eliminación ocurre al instante:"
+          ],
+          "list": [
+            "Abre PraticOS e inicia sesión",
+            "Toca la pestaña <strong>Más</strong>",
+            "Toca <strong>Tu cuenta</strong>",
+            "Toca <strong>Eliminar mi cuenta</strong> y confirma. Si la app lo pide, inicia sesión de nuevo para confirmar que eres tú"
+          ]
+        },
+        {
+          "title": "Por correo",
+          "paragraphs": [
+            "Si ya no puedes abrir la app, envía un correo a <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a> con el asunto \"Eliminar mi cuenta\" desde el correo registrado en la cuenta. Confirmamos el pedido y eliminamos la cuenta en hasta 30 días."
+          ]
+        },
+        {
+          "title": "Qué se elimina",
+          "paragraphs": [
+            "Al eliminar la cuenta, borramos:"
+          ],
+          "list": [
+            "Tu cuenta de acceso (nombre, correo y foto de perfil)",
+            "Tu vínculo con las empresas de las que participas",
+            "Si eres el único dueño de la empresa: la empresa entera, con órdenes de servicio, clientes, servicios, productos, agenda, finanzas, fotos y archivos"
+          ]
+        },
+        {
+          "title": "Qué se conserva",
+          "paragraphs": [
+            "Si la empresa tiene otros miembros, el dueño debe transferir la empresa o quitar a los miembros antes de eliminar la cuenta. Las órdenes de servicio y los clientes siguen con la empresa, porque le pertenecen.",
+            "Las copias de seguridad se borran en hasta 30 días. Los registros de compra de suscripción quedan con Google Play y Apple, según sus reglas. Los registros técnicos de errores y uso, sin datos de cuenta, los borra Firebase automáticamente según su plazo de retención."
+          ]
+        },
+        {
+          "title": "Contacto",
+          "paragraphs": [
+            "Dudas sobre eliminación o privacidad: <a href=\"mailto:praticos@rafsoft.com.br?subject=Excluir%20minha%20conta\">praticos@rafsoft.com.br</a>. Ver también la <a href=\"privacy-es.html\">Política de Privacidad</a>."
           ]
         }
       ]
