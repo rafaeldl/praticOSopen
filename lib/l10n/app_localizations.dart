@@ -8751,6 +8751,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ocultar senha'**
   String get hidePassword;
+
+  /// No description provided for @receivedWhichOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em qual OS?'**
+  String get receivedWhichOrder;
+
+  /// No description provided for @receivedPhotosCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String receivedPhotosCount(int count);
+
+  /// No description provided for @receivedPdfsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 PDF} other{{count} PDFs}}'**
+  String receivedPdfsCount(int count);
+
+  /// No description provided for @receivedSummaryBoth.
+  ///
+  /// In pt, this message translates to:
+  /// **'{photos} e {pdfs}'**
+  String receivedSummaryBoth(String photos, String pdfs);
+
+  /// No description provided for @receivedSavedInOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardado na OS {number} · {summary}'**
+  String receivedSavedInOrder(String number, String summary);
+
+  /// No description provided for @receivedSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar. Tente de novo.'**
+  String get receivedSaveFailed;
+
+  /// No description provided for @receivedOpenOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir a OS'**
+  String get receivedOpenOrder;
 }
 
 class _AppLocalizationsDelegate
