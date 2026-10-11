@@ -5188,4 +5188,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderAddContractMonthly => 'Repeat every month (contract)';
+
+  @override
+  String get ratingsSubtitle => 'What customers thought';
+
+  @override
+  String get ratingsLatest => 'Latest';
+
+  @override
+  String ratingScoreOf(String score) {
+    return '$score of 5';
+  }
+
+  @override
+  String ratingsAverageOf(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ratings',
+      one: 'rating',
+    );
+    return 'average of $count $_temp0';
+  }
+
+  @override
+  String ratingCommentOrder(String comment, int number) {
+    return '“$comment” · Order $number';
+  }
+
+  @override
+  String ratingNoCommentOrder(int number) {
+    return 'No comment · Order $number';
+  }
 }

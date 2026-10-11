@@ -9309,6 +9309,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Repetir todo mês (contrato)'**
   String get orderAddContractMonthly;
+
+  /// No description provided for @ratingsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que os clientes acharam'**
+  String get ratingsSubtitle;
+
+  /// No description provided for @ratingsLatest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas'**
+  String get ratingsLatest;
+
+  /// No description provided for @ratingScoreOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{score} de 5'**
+  String ratingScoreOf(String score);
+
+  /// No description provided for @ratingsAverageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'média de {count} {count, plural, =1{avaliação} other{avaliações}}'**
+  String ratingsAverageOf(int count);
+
+  /// No description provided for @ratingCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{comment}” · OS {number}'**
+  String ratingCommentOrder(String comment, int number);
+
+  /// No description provided for @ratingNoCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem comentário · OS {number}'**
+  String ratingNoCommentOrder(int number);
 }
 
 class _AppLocalizationsDelegate

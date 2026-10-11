@@ -2552,5 +2552,15 @@
   "orderMenuPdfOf": "PDF de la {order}",
   "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
   "orderAddItem": "Servicio o repuesto",
-  "orderAddContractMonthly": "Repetir cada mes (contrato)"
+  "orderAddContractMonthly": "Repetir cada mes (contrato)",
+  "ratingsSubtitle": "Lo que opinaron los clientes",
+  "ratingsLatest": "Últimas",
+  "ratingScoreOf": "{score} de 5",
+  "@ratingScoreOf": {"placeholders": {"score": {"type": "String"}}},
+  "ratingsAverageOf": "promedio de {count} {count, plural, =1{valoración} other{valoraciones}}",
+  "@ratingsAverageOf": {"placeholders": {"count": {"type": "int"}}},
+  "ratingCommentOrder": "“{comment}” · Orden {number}",
+  "@ratingCommentOrder": {"placeholders": {"comment": {"type": "String"}, "number": {"type": "int"}}},
+  "ratingNoCommentOrder": "Sin comentario · Orden {number}",
+  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}}
 }

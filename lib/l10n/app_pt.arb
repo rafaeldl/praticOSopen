@@ -2644,5 +2644,15 @@
   "orderMenuPdfOf": "PDF da {order}",
   "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
   "orderAddItem": "Serviço ou peça",
-  "orderAddContractMonthly": "Repetir todo mês (contrato)"
+  "orderAddContractMonthly": "Repetir todo mês (contrato)",
+  "ratingsSubtitle": "O que os clientes acharam",
+  "ratingsLatest": "Últimas",
+  "ratingScoreOf": "{score} de 5",
+  "@ratingScoreOf": {"placeholders": {"score": {"type": "String"}}},
+  "ratingsAverageOf": "média de {count} {count, plural, =1{avaliação} other{avaliações}}",
+  "@ratingsAverageOf": {"placeholders": {"count": {"type": "int"}}},
+  "ratingCommentOrder": "“{comment}” · OS {number}",
+  "@ratingCommentOrder": {"placeholders": {"comment": {"type": "String"}, "number": {"type": "int"}}},
+  "ratingNoCommentOrder": "Sem comentário · OS {number}",
+  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}}
 }
