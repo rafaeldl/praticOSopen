@@ -18,6 +18,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/auth_wrapper.dart';
+import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -118,6 +119,7 @@ class MyApp extends StatelessWidget {
       builder: (_) {
         return MaterialApp(
           title: 'PraticOS',
+          navigatorKey: NotificationTapHandler.navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
