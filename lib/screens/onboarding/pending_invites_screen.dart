@@ -14,6 +14,7 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/invite_error.dart';
+import 'package:praticos/utils/platform_policy.dart';
 
 /// Tela de convites pendentes.
 ///
@@ -271,7 +272,9 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                     onPressed: _openAcceptInviteScreen,
                   ),
                 ),
-                if (widget.onCreateCompany != null)
+                // Never on iOS (App Store 3.1.1): no company creation there.
+                if (widget.onCreateCompany != null &&
+                    PlatformPolicy.canCreateCompanyInApp)
                   Center(
                     child: TextLink(
                       label: context.l10n.inviteCreateOwnCompany,

@@ -7,14 +7,18 @@ app_review_information(
   demo_user: "demo@praticos.com.br",
   demo_password: "Demo@2024!",
   notes: <<~NOTES
-    IN-APP PURCHASE (GUIDELINE 3.1.1) - PLEASE READ
+    GUIDELINE 3.1.1 - PLEASE READ
 
-    PraticOS is a freemium app. All paid plans are sold only through In-App Purchase.
+    Company accounts are not created in the iOS app.
+    - The iOS app has no business or organization registration. It is used by team members invited by their company and by owners of companies that already exist.
+    - A signed-in user who is not linked to any company only sees a screen to join with an invite code from the company administrator, sign out or delete the account. The app does not mention or link to any other place to create a company.
+    - The demo account (demo@praticos.com.br) is the owner of an existing company with sample data.
 
-    - Creating a company account is free and gives access to the Free plan. Registration does not unlock any paid content.
+    In-App Purchase:
+    - PraticOS is a freemium app. All paid plans are sold in the iOS app only through In-App Purchase.
     - The Free plan has monthly limits on photos, checklist form templates and team users. Paid plans raise these limits and remove the watermark from PDF work orders.
     - Paid plans are auto-renewable monthly subscriptions sold through In-App Purchase: Starter, Pro and Business (subscription group "PraticOS").
-    - Paid plans cannot be bought anywhere else: the website shows no prices, and the app has no external purchase links or calls to action.
+    - The app has no external purchase links or calls to action, and the website shows no prices.
 
     Where to find the paywall:
     1. Sign in with the demo account (steps below).
@@ -27,18 +31,18 @@ app_review_information(
 
     ----------
 
-    Para fazer login com a conta demo:
+    How to sign in with the demo account:
 
-    1. Na tela de login, toque no link "Entrar com email" abaixo dos botões de login social
-    2. Digite o email e senha fornecidos nos campos correspondentes
-    3. Toque no botão "Entrar"
+    1. On the login screen, tap the "Entrar com email" (Sign in with email) link below the social sign-in buttons.
+    2. Enter the email and password provided.
+    3. Tap "Entrar" (Sign in).
 
-    A conta demo possui dados de exemplo incluindo:
-    - 5 clientes cadastrados
-    - 5 ordens de serviço com diferentes status (orçamento, aprovado, em andamento, concluído)
-    - Dados financeiros para visualização no painel
+    The demo account owns an existing company with sample data:
+    - 5 customers
+    - 5 work orders in different statuses (quote, approved, in progress, completed)
+    - Financial data on the dashboard
 
-    Todas as funcionalidades do app podem ser testadas com esta conta.
+    All features of the app can be tested with this account.
   NOTES
 )
 

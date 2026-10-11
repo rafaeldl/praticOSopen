@@ -10,6 +10,10 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
+import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
+import 'package:praticos/screens/onboarding/no_company_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/account_deletion.dart';
+import 'package:praticos/utils/platform_policy.dart';
 import 'package:praticos/screens/onboarding/segmentation_onboarding_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -23,7 +27,8 @@ import 'package:praticos/theme/app_colors.dart';
 /// Se sim → NavigationController (Home)
 /// Se não tem empresa → Verifica convites pendentes
 /// Se tem convites → PendingInvitesScreen
-/// Se não tem convites → WelcomeScreen (criar empresa)
+/// Se não tem convites → WelcomeScreen (criar empresa) ou, no iOS (App Store
+/// 3.1.1, ver `PlatformPolicy`), NoCompanyScreen (entrar com código)
 class AuthWrapper extends StatefulWidget {
   final AuthStore authStore;
 
@@ -176,11 +181,21 @@ class _AuthWrapperState extends State<AuthWrapper> {
         }
 
         final hasPendingInvites = inviteSnapshot.data ?? false;
+        final canCreateCompany = PlatformPolicy.canCreateCompanyInApp;
+        final destination = noCompanyDestination(
+          hasPendingInvites: hasPendingInvites,
+          canCreateCompany: canCreateCompany,
+        );
 
-        if (hasPendingInvites) {
+        if (destination == NoCompanyDestination.noCompany) {
+          // iOS (App Store 3.1.1): no company creation in the app.
+          return _buildNoCompanyScreen(context);
+        }
+
+        if (destination == NoCompanyDestination.pendingInvites) {
           // Tem convites pendentes → Mostrar tela de convites
           return PendingInvitesScreen(
-            onCreateCompany: () {
+            onCreateCompany: !canCreateCompany ? null : () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -197,10 +212,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 ),
               );
             },
-            onInviteAccepted: () {
-              // Força rebuild para verificar novamente
-              setState(() {});
-            },
+            // Reloads the user and runs the company check again.
+            onInviteAccepted: _retryLoad,
           );
         }
 
@@ -216,6 +229,32 @@ class _AuthWrapperState extends State<AuthWrapper> {
           initialSite: result.companySite,
         );
       },
+    );
+  }
+
+  /// No company and company creation forbidden (iOS): join with an invite
+  /// code, sign out or delete the account.
+  Widget _buildNoCompanyScreen(BuildContext context) {
+    final authStore = widget.authStore;
+    return NoCompanyScreen(
+      email: FirebaseAuth.instance.currentUser?.email,
+      onJoinWithCode: () => Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (routeContext) => AcceptInviteScreen(
+            onInviteAccepted: () {
+              Navigator.pop(routeContext);
+              _retryLoad();
+            },
+            onCancel: () => Navigator.pop(routeContext),
+          ),
+        ),
+      ),
+      onSignOut: () => authStore.signOutGoogle(),
+      deletion: AccountDeletionFlow(
+        deleteAccount: authStore.deleteAccount,
+        reauthenticate: authStore.reauthenticate,
+      ),
     );
   }
 

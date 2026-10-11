@@ -203,6 +203,18 @@ Rules:
 - **The website shows no prices.** It says "Start free. Paid plans available in the app." (pt/en/es) and never shows prices, plan limits or upgrade CTAs. `/pricing*.html` keeps redirecting to the home page (`firebase/firebase.json`).
 - Before each submission: the three subscriptions are attached to the version, each with its review screenshot.
 
+### No company creation on iOS
+
+Apple kept rejecting under 3.1.1 because the iOS app allowed "account registration for businesses and organizations" (creating a company/tenant). Since then **the iOS app never creates a company**. It is used by team members invited by their company and by owners of companies that already exist. Android and web keep the in-app onboarding.
+
+- Single switch: `PlatformPolicy.canCreateCompanyInApp` (`lib/utils/platform_policy.dart`), false on iOS (`!kIsWeb && Platform.isIOS`). Tests use `PlatformPolicy.debugCanCreateCompanyOverride`.
+- Routing for a user with no company (`AuthWrapper._buildOnboardingDecision`, `noCompanyDestination`): pending invites (matched by email) → `PendingInvitesScreen` without "Criar minha própria empresa"; no invites → `NoCompanyScreen` on iOS, `WelcomeScreen` elsewhere.
+- `NoCompanyScreen` (`lib/screens/onboarding/no_company_screen.dart`) says the account is not linked to a company yet and that the administrator must send an invite. Actions: join with an invite code (`AcceptInviteScreen`), sign out, delete the account (`AccountDeletionFlow`). **It must not mention or link to any other place to create a company (website, Android)**: Apple treats that as steering.
+- `WelcomeScreen` on iOS only completes the setup of an existing company without segment (`companyId` set, update path in `ConfirmBootstrapScreen`); "Configurar depois" (which creates a default company) is hidden.
+- Defensive guard: `UserStore.createCompanyForUser` calls `PlatformPolicy.ensureCanCreateCompany()` first and throws `CompanyCreationNotAllowedException` on iOS.
+- Sign in with Apple users may sign in with a private relay email that does not match an email invite. They join with the invite code instead (the code does not depend on the email).
+- The App Review notes say companies are not created in the iOS app and that the demo account owns an existing company.
+
 ---
 
 ## Key Files
