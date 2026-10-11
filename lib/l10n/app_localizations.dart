@@ -8793,6 +8793,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir a OS'**
   String get receivedOpenOrder;
+
+  /// No description provided for @valuesAndBillingOffTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar valores e cobrança?'**
+  String get valuesAndBillingOffTitle;
+
+  /// No description provided for @valuesAndBillingOffMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.'**
+  String get valuesAndBillingOffMessage;
+
+  /// No description provided for @valuesAndBillingOffAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar'**
+  String get valuesAndBillingOffAction;
+
+  /// No description provided for @valuesAndBillingSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
+  String get valuesAndBillingSaveError;
+
+  /// No description provided for @inviteGenericError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para concluir. Confira a internet e tente de novo.'**
+  String get inviteGenericError;
+
+  /// No description provided for @inviteLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os convites. Confira a internet.'**
+  String get inviteLoadError;
+
+  /// No description provided for @inviteTitleOne.
+  ///
+  /// In pt, this message translates to:
+  /// **'{company} chamou você para a equipe'**
+  String inviteTitleOne(String company);
+
+  /// No description provided for @inviteInvitedByAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidado por {name} · você entra como {role}'**
+  String inviteInvitedByAs(String name, String role);
+
+  /// No description provided for @inviteEntersAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você entra como {role}'**
+  String inviteEntersAs(String role);
+
+  /// No description provided for @inviteJoinTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar na equipe'**
+  String get inviteJoinTeam;
+
+  /// No description provided for @inviteDecline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recusar convite'**
+  String get inviteDecline;
+
+  /// No description provided for @inviteHaveAnotherCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho outro código'**
+  String get inviteHaveAnotherCode;
+
+  /// No description provided for @inviteCreateOwnCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar minha própria empresa'**
+  String get inviteCreateOwnCompany;
+
+  /// No description provided for @inviteCodePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 7K2P9QXA'**
+  String get inviteCodePlaceholder;
+
+  /// No description provided for @segmentLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
+  String get segmentLoadError;
 }
 
 class _AppLocalizationsDelegate

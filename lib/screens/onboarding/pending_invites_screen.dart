@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/models/invite.dart';
@@ -7,19 +6,32 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/invite_error.dart';
 
 /// Tela de convites pendentes.
 ///
 /// Mostrada quando o usuário tem convites pendentes para entrar em empresas.
-/// Permite aceitar ou rejeitar os convites.
+/// Um único botão primário ("Entrar na equipe"); recusar é um link de texto
+/// com confirmação. Com vários convites, tocar na linha abre as opções.
 class PendingInvitesScreen extends StatefulWidget {
   final VoidCallback? onCreateCompany;
   final VoidCallback? onInviteAccepted;
+
+  /// Tests pre-populate [InviteStore] and skip the Firestore load.
+  final bool loadOnInit;
 
   const PendingInvitesScreen({
     super.key,
     this.onCreateCompany,
     this.onInviteAccepted,
+    @visibleForTesting this.loadOnInit = true,
   });
 
   @override
@@ -32,7 +44,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
   @override
   void initState() {
     super.initState();
-    _inviteStore.loadPendingInvites();
+    if (widget.loadOnInit) _inviteStore.loadPendingInvites();
   }
 
   String _getRoleLabel(RolesType? role) {
@@ -47,12 +59,13 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
       if (mounted) {
         _showSuccessDialog(
           context.l10n.inviteAccepted,
-          context.l10n.youAreNowPartOf(invite.company?.name ?? "a empresa"),
+          context.l10n.youAreNowPartOf(invite.company?.name ?? ''),
         );
       }
     } catch (e) {
+      debugPrint('[PendingInvites] accept failed: $e');
       if (mounted) {
-        _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+        _showErrorDialog(friendlyInviteError(e, context.l10n));
       }
     }
   }
@@ -61,8 +74,9 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     try {
       await _inviteStore.rejectInvite(invite);
     } catch (e) {
+      debugPrint('[PendingInvites] reject failed: $e');
       if (mounted) {
-        _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+        _showErrorDialog(friendlyInviteError(e, context.l10n));
       }
     }
   }
@@ -123,11 +137,11 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
       builder: (context) => CupertinoAlertDialog(
         title: Text(context.l10n.rejectInvite),
         content: Text(
-          context.l10n.areYouSureReject(invite.company?.name ?? "a empresa"),
+          context.l10n.areYouSureReject(invite.company?.name ?? ''),
         ),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
+            child: Text(context.l10n.back),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -136,267 +150,137 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
               Navigator.pop(context);
               _rejectInvite(invite);
             },
-            child: Text(context.l10n.delete),
+            child: Text(context.l10n.reject),
           ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          child: Observer(
-            builder: (_) {
-              if (_inviteStore.isLoading) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-
-              return CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.envelope_badge_fill,
-                              size: 40,
-                              color: CupertinoColors.activeBlue,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            context.l10n.pendingInvites,
-                            style: CupertinoTheme.of(context)
-                                .textTheme
-                                .navLargeTitleTextStyle,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            context.l10n.youHaveBeenInvited,
-                            style: CupertinoTheme.of(context)
-                                .textTheme
-                                .textStyle
-                                .copyWith(
-                                  fontSize: 17,
-                                  color: CupertinoColors.secondaryLabel,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (_inviteStore.pendingInvites.isEmpty)
-                    SliverFillRemaining(
-                      child: Center(
-                        child: Text(context.l10n.noPendingInvites),
-                      ),
-                    )
-                  else
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final invite = _inviteStore.pendingInvites[index];
-                          return _buildInviteCard(invite);
-                        },
-                        childCount: _inviteStore.pendingInvites.length,
-                      ),
-                    ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  color: CupertinoColors.systemGrey5,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  context.l10n.or,
-                                  style: TextStyle(
-                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  color: CupertinoColors.systemGrey5,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          // Botão para digitar código de convite
-                          SizedBox(
-                            width: double.infinity,
-                            child: CupertinoButton.filled(
-                              onPressed: _openAcceptInviteScreen,
-                              child: Text(
-                                context.l10n.enterInviteCode,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: CupertinoButton(
-                              color: CupertinoColors.systemGrey5,
-                              onPressed: widget.onCreateCompany,
-                              child: Text(
-                                context.l10n.createMyCompany,
-                                style: TextStyle(
-                                  color: CupertinoColors.label.resolveFrom(context),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
+  /// With several invites, tapping a row offers join / decline.
+  void _showInviteOptions(Invite invite) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(invite.company?.name ?? ''),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              _acceptInvite(invite);
             },
+            child: Text(context.l10n.inviteJoinTeam),
           ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              _showRejectConfirmation(invite);
+            },
+            child: Text(context.l10n.inviteDecline),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(sheetContext),
+          child: Text(context.l10n.back),
         ),
       ),
     );
   }
 
-  Widget _buildInviteCard(Invite invite) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.systemGrey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      (invite.company?.name?.substring(0, 1).toUpperCase()) ?? 'E',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: CupertinoColors.activeBlue,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        invite.company?.name ?? 'Empresa',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label.resolveFrom(context),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.roleLabel(_getRoleLabel(invite.role)),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (invite.invitedBy?.name != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.invitedBy(invite.invitedBy!.name!),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
+  String _subtitle(Invite invite) {
+    final role = _getRoleLabel(invite.role);
+    final name = invite.invitedBy?.name;
+    return name == null
+        ? context.l10n.inviteEntersAs(role)
+        : context.l10n.inviteInvitedByAs(name, role);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: SafeArea(
+        child: Observer(
+          builder: (_) {
+            if (_inviteStore.isLoading) {
+              return const LoadingState();
+            }
+            if (_inviteStore.errorMessage != null &&
+                _inviteStore.pendingInvites.isEmpty) {
+              return ErrorState(
+                message: context.l10n.inviteLoadError,
+                onRetry: _inviteStore.loadPendingInvites,
+              );
+            }
+
+            final invites = _inviteStore.pendingInvites.toList();
+            final single = invites.length == 1 ? invites.first : null;
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageMargin,
+                AppSpacing.xxl,
+                AppSpacing.pageMargin,
+                AppSpacing.xl,
               ),
-            ],
-            const SizedBox(height: 16),
-            Row(
               children: [
-                Expanded(
-                  child: CupertinoButton(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    color: CupertinoColors.systemGrey5,
-                    onPressed: () => _showRejectConfirmation(invite),
-                    child: Text(
-                      context.l10n.reject,
-                      style: TextStyle(
-                        color: CupertinoColors.label.resolveFrom(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                Text(
+                  single != null
+                      ? context.l10n.inviteTitleOne(single.company?.name ?? '')
+                      : context.l10n.pendingInvites,
+                  style: AppTypography.title.copyWith(
+                    color: AppColors.text.resolveFrom(context),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: CupertinoButton.filled(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    onPressed: () => _acceptInvite(invite),
-                    child: Text(
-                      context.l10n.acceptInvite,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                const SizedBox(height: AppSpacing.md),
+                if (invites.isEmpty)
+                  Text(
+                    context.l10n.noPendingInvites,
+                    style: AppTypography.callout.copyWith(
+                      color: AppColors.textSecondary.resolveFrom(context),
                     ),
                   ),
+                if (single != null) ...[
+                  AppListRow(
+                    title: single.company?.name ?? '',
+                    subtitle: _subtitle(single),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  PrimaryButton(
+                    label: context.l10n.inviteJoinTeam,
+                    onPressed: () => _acceptInvite(single),
+                  ),
+                  Center(
+                    child: TextLink(
+                      label: context.l10n.inviteDecline,
+                      onPressed: () => _showRejectConfirmation(single),
+                    ),
+                  ),
+                ] else
+                  for (final invite in invites)
+                    AppListRow(
+                      title: invite.company?.name ?? '',
+                      subtitle: _subtitle(invite),
+                      onTap: () => _showInviteOptions(invite),
+                    ),
+                const SizedBox(height: AppSpacing.lg),
+                Center(
+                  child: TextLink(
+                    label: context.l10n.inviteHaveAnotherCode,
+                    onPressed: _openAcceptInviteScreen,
+                  ),
                 ),
+                if (widget.onCreateCompany != null)
+                  Center(
+                    child: TextLink(
+                      label: context.l10n.inviteCreateOwnCompany,
+                      onPressed: widget.onCreateCompany,
+                    ),
+                  ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
