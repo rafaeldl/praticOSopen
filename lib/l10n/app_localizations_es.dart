@@ -4615,18 +4615,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Precios en la OS, cobros y pestaña Finanzas';
 
   @override
-  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
-
-  @override
-  String get valuesAndBillingOffMessage =>
-      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
-
-  @override
-  String get valuesAndBillingOffAction => 'Desactivar';
-
-  @override
-  String get valuesAndBillingSaveError =>
-      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
 
   @override
   String get nameAndPhoto => 'Nombre y foto';
@@ -4953,6 +4942,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir la OS';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Período siguiente';
 
   @override
   String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
