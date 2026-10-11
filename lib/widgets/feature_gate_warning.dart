@@ -41,7 +41,7 @@ class FeatureGateWarning extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Não mostra se está no limite (deve usar FeatureGateLimitModal)
+    // Não mostra se está no limite (o limite é tratado em outro fluxo)
     if (result.isAtLimit) {
       return const SizedBox.shrink();
     }

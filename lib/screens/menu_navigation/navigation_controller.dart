@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart'; // Import for reaction
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import 'package:praticos/services/engagement_scheduler.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 
 import 'home.dart';
+import 'tab_routes.dart';
 
 class NavigationController extends StatefulWidget {
   const NavigationController({super.key});
@@ -84,9 +86,23 @@ class _NavigationControllerState extends State<NavigationController>
     ];
   }
 
+  void _logTabScreen(int index) {
+    final name = TabRoutes.nameForIndex(index);
+    if (name == null) return;
+    try {
+      FirebaseAnalytics.instance
+          .logScreenView(screenName: name, screenClass: name)
+          .catchError((_) {});
+    } catch (_) {
+      // Analytics unavailable (e.g. tests); ignore.
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _tabController.addListener(() => _logTabScreen(_tabController.index));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _logTabScreen(0));
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       TrackingTransparencyService.instance.requestIfEligible();
