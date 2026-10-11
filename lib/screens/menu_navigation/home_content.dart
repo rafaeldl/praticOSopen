@@ -656,7 +656,7 @@ class _HomeContentState extends State<HomeContent> {
     final format = FormatService();
     for (final entry in HomeRules.groupByMonth(visible)) {
       if (entry.key != null) {
-        items.add(SectionLabel(format.formatMonthYear(entry.key)));
+        items.add(SectionLabel(format.formatMonthYearTitle(entry.key)));
       }
       for (final order in entry.value) {
         items.add(_buildRow(context, order, now));
