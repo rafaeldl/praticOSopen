@@ -5168,4 +5168,51 @@ class AppLocalizationsPt extends AppLocalizations {
   String saveEntityButton(String entity) {
     return 'Salvar $entity';
   }
+
+  @override
+  String customerSpentValue(String value) {
+    return 'gastou $value';
+  }
+
+  @override
+  String customerOwesValue(String value) {
+    return 'Falta receber $value';
+  }
+
+  @override
+  String askOrderForCustomer(String name) {
+    return 'Abrir uma OS para $name?';
+  }
+
+  @override
+  String askOrderForDevice(String device) {
+    return 'Abrir uma OS para este $device?';
+  }
+
+  @override
+  String addAnotherDevice(String device) {
+    return 'Cadastrar outro $device';
+  }
+
+  @override
+  String get latestOrders => 'Últimas OS';
+
+  @override
+  String ordersOfDevice(String device) {
+    return 'OS deste $device';
+  }
+
+  @override
+  String orderCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceOwnerPrefix => 'da ';
 }

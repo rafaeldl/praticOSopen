@@ -8,6 +8,8 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/service.dart';
+import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_detail_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
@@ -360,30 +362,81 @@ void main() {
       return h;
     }
 
-    testWidgets('lists vehicles and orders and sums only completed orders',
+    testWidgets('header shows the formatted phone with "gastou" and asks '
+        'before the Nova OS button', (tester) async {
+      final raw = customer('c1', 'Ana Ribeiro', phone: '+5511900000001');
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: raw,
+          directory: FakeDirectory(orders: {
+            'c1': [order(1, 'done', 1740)],
+          }),
+          showPrices: true,
+        ),
+        direct: true,
+      );
+      expect(
+        find.text('(11) 90000-0001 · gastou R\$ 1.740,00'),
+        findsOneWidget,
+      );
+      expect(find.text('+5511900000001'), findsNothing);
+      final question = tester.getTopLeft(find.text('Abrir uma OS para Ana?'));
+      final button = tester.getTopLeft(find.text('Nova OS para Ana'));
+      expect(question.dy, lessThan(button.dy));
+    });
+
+    testWidgets('vehicles show plate and order count, then the add row, '
+        'then "Últimas OS" with the order title', (tester) async {
+      final gol = aggr('d1', 'VW Gol 2018')..serial = 'ABC1D23';
+      final svc = OrderService()..service = (ServiceAggr()..name = 'Revisão');
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [
+            order(3, 'progress', 999, devices: [gol])..services = [svc],
+            order(2, 'done', 40.5, devices: [gol]),
+            order(4, 'canceled', 500),
+          ],
+        }),
+      );
+      expect(find.text('Ligar'), findsOneWidget);
+      expect(find.text('WhatsApp'), findsOneWidget);
+      expect(find.text('Placa ABC1D23 · 2 OS'), findsOneWidget);
+      expect(find.textContaining('Cadastrar outro'), findsOneWidget);
+      expect(find.text('Últimas OS'), findsOneWidget);
+      expect(find.text('OS 3 · Revisão'), findsOneWidget);
+      expect(find.text('OS 2'), findsOneWidget);
+      expect(find.textContaining('#'), findsNothing);
+      final add = tester.getTopLeft(find.textContaining('Cadastrar outro'));
+      final latest = tester.getTopLeft(find.text('Últimas OS'));
+      expect(add.dy, lessThan(latest.dy));
+    });
+
+    testWidgets('"Cadastrar outro dispositivo" opens the new-vehicle sheet',
+        (tester) async {
+      await pumpDetail(tester, FakeDirectory());
+      await tester.tap(find.textContaining('Cadastrar outro'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DeviceFormScreen), findsOneWidget);
+      expect(find.text('Cancelar'), findsOneWidget);
+    });
+
+    testWidgets('overdue order shows the status in bold with the order value',
         (tester) async {
       await pumpDetail(
         tester,
         FakeDirectory(orders: {
           'c1': [
-            order(3, 'progress', 999, devices: [aggr('d2', 'Gol')]),
-            order(2, 'done', 40.5, devices: [aggr('d1', 'Fiat Uno')]),
-            order(1, 'done', 100, devices: [aggr('d1', 'Fiat Uno')]),
-            order(4, 'canceled', 500),
+            order(1, 'progress', 1250)
+              ..dueDate = DateTime.now().subtract(const Duration(days: 1)),
           ],
         }),
       );
-      expect(find.text('Ana Ribeiro'), findsWidgets);
-      expect(find.text('Ligar'), findsOneWidget);
-      expect(find.text('WhatsApp'), findsOneWidget);
-      expect(find.text('Nova OS para Ana'), findsOneWidget);
-      expect(find.textContaining('Fiat Uno'), findsWidgets);
-      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
-      expect(find.text('Total gasto'), findsOneWidget);
-      expect(
-        find.text('R\$ 140,50'.replaceAll(' ', ' ')),
-        findsOneWidget,
-      );
+      final text = tester.widget<Text>(find.text('Atrasada'));
+      expect(text.style?.fontWeight, FontWeight.w700);
+      expect(find.text('R\$ 1.250,00'), findsOneWidget);
     });
 
     testWidgets('"Falta receber" sums the open amount of unpaid orders',
@@ -400,9 +453,8 @@ void main() {
           ],
         }),
       );
-      await tester.scrollUntilVisible(find.text('Falta receber'), 300);
       // 60 (100 - 40) + 50
-      expect(find.text('R\$ 110,00'.replaceAll(' ', '\u00a0')), findsOneWidget);
+      expect(find.text('Falta receber R\$ 110,00'), findsOneWidget);
     });
 
     testWidgets('"Falta receber" is hidden when nothing is open',
@@ -413,11 +465,11 @@ void main() {
           'c1': [order(1, 'done', 50)..payment = 'paid'],
         }),
       );
-      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
-      expect(find.text('Falta receber'), findsNothing);
+      expect(find.textContaining('Falta receber'), findsNothing);
+      expect(find.textContaining('gastou'), findsOneWidget);
     });
 
-    testWidgets('without values and billing hides totals and Total gasto',
+    testWidgets('without values and billing hides totals and values',
         (tester) async {
       await pumpDetail(
         tester,
@@ -428,17 +480,17 @@ void main() {
         }),
         showPrices: false,
       );
-      expect(find.text('Total gasto'), findsNothing);
-      expect(find.text('Falta receber'), findsNothing);
+      expect(find.textContaining('gastou'), findsNothing);
+      expect(find.textContaining('Falta receber'), findsNothing);
       expect(find.textContaining('100,00'), findsNothing);
-      expect(find.textContaining('#1'), findsWidgets);
+      expect(find.text('OS 1'), findsOneWidget);
     });
 
-    testWidgets('customer without orders has no list and no total',
-        (tester) async {
+    testWidgets('customer without orders has no order list', (tester) async {
       await pumpDetail(tester, FakeDirectory());
       expect(find.text('Nova OS para Ana'), findsOneWidget);
-      expect(find.text('Total gasto'), findsNothing);
+      expect(find.text('Últimas OS'), findsNothing);
+      expect(find.textContaining('gastou'), findsNothing);
     });
 
     testWidgets('"Nova OS para Ana" opens the order with the customer',
@@ -496,6 +548,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(h.pushed.last.name, '/customer_detail');
       expect(((h.pushed.last.arguments as Map)['customer'] as Customer).id, 'c1');
+    });
+
+    testWidgets('shows the phone formatted for the country', (tester) async {
+      await Harness().pump(
+        tester,
+        HomeCustomerList(
+          directory: FakeDirectory(
+            customers: [customer('c9', 'Carla', phone: '+5548984087801')],
+          ),
+        ),
+        direct: true,
+      );
+      expect(find.text('(48) 98408-7801'), findsOneWidget);
+      expect(find.text('+5548984087801'), findsNothing);
     });
 
     testWidgets('searching by plate lists the owner', (tester) async {

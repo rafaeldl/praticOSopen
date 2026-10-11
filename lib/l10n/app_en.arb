@@ -2540,5 +2540,14 @@
   "moreSectionYou": "You",
   "moreCompanySubtitle": "Order details, business type and features",
   "moreCatalogSubtitle": "Services and {products}",
-  "saveEntityButton": "Save {entity}"
+  "saveEntityButton": "Save {entity}",
+  "customerSpentValue": "spent {value}",
+  "customerOwesValue": "Owes {value}",
+  "askOrderForCustomer": "Open a work order for {name}?",
+  "askOrderForDevice": "Open a work order for this {device}?",
+  "addAnotherDevice": "Add another {device}",
+  "latestOrders": "Latest work orders",
+  "ordersOfDevice": "Work orders of this {device}",
+  "orderCountShort": "{count, plural, =1{1 WO} other{{count} WO}}",
+  "deviceOwnerPrefix": "owner: "
 }

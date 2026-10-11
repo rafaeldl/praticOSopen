@@ -13,13 +13,12 @@ import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/order_history_row.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
 
@@ -65,6 +64,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Device? _device;
   Customer? _customer;
+  String? _previousTitle;
   TenantOrderRepository? _repo;
   Stream<List<Order?>>? _orderStream;
   Stream<List<Order?>>? _contractStream;
@@ -80,6 +80,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _device = widget.device ?? args?['device'] as Device?;
     _customer = widget.customer ?? args?['customer'] as Customer?;
+    _previousTitle = args?['previousTitle'] as String?;
     _loadOrders();
   }
 
@@ -231,6 +232,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         slivers: [
           CupertinoSliverNavigationBar(
             largeTitle: Text(device.name ?? config.device),
+            previousPageTitle: _previousTitle ?? config.devicePlural,
             backgroundColor: background,
             border: null,
             trailing: CupertinoButton(
@@ -285,14 +287,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     final l10n = context.l10n;
     final device = _device!;
     final owner = _ownerFrom(orders);
-    final format = FormatService()..setLocale(l10n.localeName);
     final serialLabel = config.label(LabelKeys.deviceSerialNumber);
     final secondary = AppColors.textSecondary.resolveFrom(context);
 
-    final subtitle = [
-      if (device.serial?.isNotEmpty ?? false) '$serialLabel ${device.serial}',
-      if (owner?.name?.isNotEmpty ?? false) owner!.name!,
-    ].join(' · ');
+    final plate = (device.serial?.isNotEmpty ?? false)
+        ? '$serialLabel ${device.serial}'
+        : '';
+    final ownerName = owner?.name ?? '';
+    final subtitle = [plate, if (ownerName.isNotEmpty) ownerName].join(' · ');
+    final subtitleStyle = AppTypography.callout.copyWith(color: secondary);
+    final deviceLower = config.device.toLowerCase();
 
     return [
       if (subtitle.isNotEmpty || (device.photo?.isNotEmpty ?? false))
@@ -316,10 +320,38 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               ],
               if (subtitle.isNotEmpty)
                 Expanded(
-                  child: Text(
-                    subtitle,
-                    style: AppTypography.callout.copyWith(color: secondary),
-                  ),
+                  child: ownerName.isEmpty
+                      ? Text(plate, style: subtitleStyle)
+                      : Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              '${plate.isEmpty ? '' : '$plate · '}'
+                              '${l10n.deviceOwnerPrefix}',
+                              style: subtitleStyle,
+                            ),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _openOwner(owner!),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: AppSizes.minTouchTarget,
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  widthFactor: 1,
+                                  child: Text(
+                                    ownerName,
+                                    style: subtitleStyle.copyWith(
+                                      color: AppColors.accentText
+                                          .resolveFrom(context),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
             ],
           ),
@@ -328,25 +360,25 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
         ),
-        child: _PrimaryButton(
-          label: l10n.newOrderAction,
-          onPressed: () => _newOrder(owner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(
+                l10n.askOrderForDevice(deviceLower),
+                style: AppTypography.callout.copyWith(color: secondary),
+              ),
+            ),
+            _PrimaryButton(
+              label: l10n.newOrderAction,
+              onPressed: () => _newOrder(owner),
+            ),
+          ],
         ),
       ),
-      if (owner != null) ...[
-        SectionLabel(config.customer),
-        AppListRow(
-          title: owner.name ?? '',
-          subtitle: owner.phone,
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/customer_detail',
-            arguments: {'customer': owner},
-          ),
-        ),
-      ],
       ..._buildInfoRows(config),
-      SectionLabel(l10n.orderHistory),
+      SectionLabel(l10n.ordersOfDevice(deviceLower)),
       if (orders.isEmpty)
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -359,7 +391,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
         )
       else
-        for (final o in orders) _orderRow(o, config, format),
+        for (final o in orders) _orderRow(o, config),
     ];
   }
 
@@ -375,16 +407,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     add(config.label(LabelKeys.deviceBrand), device.manufacturer);
     add(config.label(LabelKeys.deviceCategory), device.category);
     rows.addAll(_customDataRows(config));
-    if (config.useDeviceManagement) {
-      rows.add(AppListRow(
-        leading: StatusDot(
-          color: DeviceStatusStyle.dotColor(device.status),
-          size: 10,
-        ),
-        title: l10n.status,
-        trailing: DeviceStatusStyle.label(l10n, device.status),
-      ));
-    }
     if (rows.isEmpty) return const [];
     return [SectionLabel(l10n.deviceDetailsLabel), ...rows];
   }
@@ -418,27 +440,20 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     }).toList();
   }
 
-  Widget _orderRow(Order order, SegmentConfigProvider config, FormatService format) {
-    final l10n = context.l10n;
-    final isOpen = order.status == 'approved' || order.status == 'progress';
-    final late = isOpen &&
-        order.dueDate != null &&
-        order.dueDate!.isBefore(DateTime.now());
-    final dotColor =
-        late ? OrderStatusStyle.overdueColor : OrderStatusStyle.dotColor(order.status);
-    final statusText = late ? l10n.orderOverdue : config.getStatus(order.status);
-    final number = order.number == null ? '' : ' #${order.number}';
+  void _openOwner(Customer owner) {
+    Navigator.pushNamed(
+      context,
+      '/customer_detail',
+      arguments: {'customer': owner, 'previousTitle': _device?.name},
+    );
+  }
 
-    return AppListRow(
-      leading: StatusDot(color: dotColor),
-      title: '${l10n.order}$number',
-      subtitle: [
-        statusText,
-        if (order.createdAt != null) format.formatDate(order.createdAt),
-      ].join(' · '),
-      trailing: !_showPrices || order.total == null
-          ? null
-          : format.formatCurrency(order.total),
+  Widget _orderRow(Order order, SegmentConfigProvider config) {
+    return OrderHistoryRow(
+      order: order,
+      showPrices: _showPrices,
+      showDate: true,
+      statusLabel: config.getStatus,
       onTap: () => Navigator.pushNamed(
         context,
         '/order',

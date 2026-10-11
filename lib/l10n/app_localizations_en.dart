@@ -5156,4 +5156,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String saveEntityButton(String entity) {
     return 'Save $entity';
   }
+
+  @override
+  String customerSpentValue(String value) {
+    return 'spent $value';
+  }
+
+  @override
+  String customerOwesValue(String value) {
+    return 'Owes $value';
+  }
+
+  @override
+  String askOrderForCustomer(String name) {
+    return 'Open a work order for $name?';
+  }
+
+  @override
+  String askOrderForDevice(String device) {
+    return 'Open a work order for this $device?';
+  }
+
+  @override
+  String addAnotherDevice(String device) {
+    return 'Add another $device';
+  }
+
+  @override
+  String get latestOrders => 'Latest work orders';
+
+  @override
+  String ordersOfDevice(String device) {
+    return 'Work orders of this $device';
+  }
+
+  @override
+  String orderCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count WO',
+      one: '1 WO',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceOwnerPrefix => 'owner: ';
 }

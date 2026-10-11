@@ -121,6 +121,18 @@ void main() {
     expect(summary['2']!.late, 0);
   });
 
+  test('orderCountForDevice counts orders with the device, legacy included',
+      () {
+    final d = DeviceAggr()..id = 'd1';
+    final orders = [
+      Order()..devices = [d],
+      Order()..device = d,
+      Order()..devices = [DeviceAggr()..id = 'd2'],
+    ];
+    expect(orderCountForDevice(orders, 'd1'), 2);
+    expect(orderCountForDevice(orders, null), 0);
+  });
+
   test('whatsappNumber adds Brazil code to local numbers', () {
     expect(whatsappNumber('(11) 90000-0001'), '5511900000001');
     expect(whatsappNumber('+55 11 90000-0001'), '5511900000001');

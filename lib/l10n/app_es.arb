@@ -2540,5 +2540,14 @@
   "moreSectionYou": "Tú",
   "moreCompanySubtitle": "Datos en la OS, rubro y funciones",
   "moreCatalogSubtitle": "Servicios y {products}",
-  "saveEntityButton": "Guardar {entity}"
+  "saveEntityButton": "Guardar {entity}",
+  "customerSpentValue": "gastó {value}",
+  "customerOwesValue": "Falta cobrar {value}",
+  "askOrderForCustomer": "¿Abrir una OS para {name}?",
+  "askOrderForDevice": "¿Abrir una OS para este {device}?",
+  "addAnotherDevice": "Agregar otro {device}",
+  "latestOrders": "Últimas OS",
+  "ordersOfDevice": "OS de este {device}",
+  "orderCountShort": "{count, plural, =1{1 OS} other{{count} OS}}",
+  "deviceOwnerPrefix": "de "
 }

@@ -17,6 +17,7 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 
 /// Clientes tab: searchable list (name, phone or vehicle plate) grouped by
@@ -226,7 +227,8 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       status = l10n.openOrdersCount(summary.open);
       dot = AppColors.warning;
     }
-    final phone = (customer.phone?.isNotEmpty ?? false) ? customer.phone : null;
+    final phone =
+        (customer.phone?.isNotEmpty ?? false) ? formatPhone(customer.phone) : null;
     final subtitle = [?plate, ?status, ?phone].join(' · ');
     return AppListRow(
       leading: dot == null ? null : StatusDot(color: dot),

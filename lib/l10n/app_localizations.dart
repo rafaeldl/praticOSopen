@@ -9261,6 +9261,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar {entity}'**
   String saveEntityButton(String entity);
+
+  /// No description provided for @customerSpentValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'gastou {value}'**
+  String customerSpentValue(String value);
+
+  /// No description provided for @customerOwesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {value}'**
+  String customerOwesValue(String value);
+
+  /// No description provided for @askOrderForCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir uma OS para {name}?'**
+  String askOrderForCustomer(String name);
+
+  /// No description provided for @askOrderForDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir uma OS para este {device}?'**
+  String askOrderForDevice(String device);
+
+  /// No description provided for @addAnotherDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar outro {device}'**
+  String addAnotherDevice(String device);
+
+  /// No description provided for @latestOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas OS'**
+  String get latestOrders;
+
+  /// No description provided for @ordersOfDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS deste {device}'**
+  String ordersOfDevice(String device);
+
+  /// No description provided for @orderCountShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS} other{{count} OS}}'**
+  String orderCountShort(int count);
+
+  /// No description provided for @deviceOwnerPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'da '**
+  String get deviceOwnerPrefix;
 }
 
 class _AppLocalizationsDelegate
