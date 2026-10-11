@@ -2044,6 +2044,54 @@
     }
   },
   "orderAddMore": "Checklist, fotos, comentário e mais",
+  "orderInThisOrder": "Nesta {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos ou documento",
+  "orderAddComment": "Comentário",
+  "orderAddAddress": "Endereço do atendimento",
+  "orderAddSchedule": "Agendar dia e hora",
+  "orderAddDiscount": "Desconto",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Outros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Pronto",
+  "orderAddressChange": "Mudar endereço",
+  "orderAddressRemove": "Tirar endereço",
+  "orderScheduleRemove": "Tirar agendamento",
+  "orderContractSummary": "{frequency} · próxima em {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Mudar contrato",
+  "orderUploading": "Enviando…",
   "orderCancelConfirmTitle": "Cancelar {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2195,10 +2243,7 @@
   "howYouWork": "Como você trabalha",
   "valuesAndBilling": "Valores e cobrança",
   "valuesAndBillingHint": "Preços na OS, receber e aba Financeiro",
-  "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
-  "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
-  "valuesAndBillingOffAction": "Desligar",
-  "valuesAndBillingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
+  "valuesAndBillingSoon": "Ligado. Em breve você poderá desligar.",
   "nameAndPhoto": "Nome e foto",
   "joinWithInviteCode": "Entrar com código de convite",
   "followsPhoneSettings": "O idioma e a aparência seguem o ajuste do iPhone.",
@@ -2438,6 +2483,91 @@
   },
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
   "receivedOpenOrder": "Abrir a OS",
+  "pickDeviceTitle": "Qual é o {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Outros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Cadastrar {device} novo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Apagar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Deixar em branco",
+  "orderAssistantHint": "Tire foto da placa e fale o serviço",
+  "orderAssistantPlaceholder": "Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450",
+  "orderAssistantDone": "Pronto",
+  "orderAssistantAddPhoto": "Tirar outra foto",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@orderAssistantPhotoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderAssistantReading": "Lendo o que você mandou…",
+  "orderAssistantFilledNote": "Confira o que está marcado em amarelo antes de salvar.",
+  "orderAssistantCustomerGuess": "Ouvi “{name}”. Toque para escolher o cliente",
+  "@orderAssistantCustomerGuess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantDeviceGuess": "“{device}” não está no cadastro",
+  "@orderAssistantDeviceGuess": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantErrorTitle": "Assistente",
+  "orderAssistantErrorDisabled": "O assistente ainda não está liberado para a sua empresa.",
+  "orderAssistantErrorQuota": "Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.",
+  "@orderAssistantErrorQuota": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
+  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Próximo período",
   "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
   "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
   "valuesAndBillingOffAction": "Desligar",

@@ -1982,6 +1982,54 @@
     }
   },
   "orderAddMore": "Checklist, fotos, comentario y más",
+  "orderInThisOrder": "En esta {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos o documento",
+  "orderAddComment": "Comentario",
+  "orderAddAddress": "Dirección del servicio",
+  "orderAddSchedule": "Agendar día y hora",
+  "orderAddDiscount": "Descuento",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Otros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pregunta} other{Faltan {count} preguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Listo",
+  "orderAddressChange": "Cambiar dirección",
+  "orderAddressRemove": "Quitar dirección",
+  "orderScheduleRemove": "Quitar agenda",
+  "orderContractSummary": "{frequency} · próxima el {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Cambiar contrato",
+  "orderUploading": "Enviando…",
   "orderCancelConfirmTitle": "¿Cancelar {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2133,10 +2181,7 @@
   "howYouWork": "Cómo trabajas",
   "valuesAndBilling": "Valores y cobros",
   "valuesAndBillingHint": "Precios en la OS, cobros y pestaña Finanzas",
-  "valuesAndBillingOffTitle": "¿Desactivar valores y cobros?",
-  "valuesAndBillingOffMessage": "Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.",
-  "valuesAndBillingOffAction": "Desactivar",
-  "valuesAndBillingSaveError": "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.",
+  "valuesAndBillingSoon": "Activado. Pronto podrás desactivarlo.",
   "nameAndPhoto": "Nombre y foto",
   "joinWithInviteCode": "Entrar con código de invitación",
   "followsPhoneSettings": "El idioma y la apariencia siguen los ajustes del iPhone.",
@@ -2376,6 +2421,63 @@
   },
   "receivedSaveFailed": "No se pudo guardar. Inténtalo de nuevo.",
   "receivedOpenOrder": "Abrir la OS",
+  "pickDeviceTitle": "¿Cuál es el {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Otros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Registrar {device} nuevo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "¿Borrar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Dejar en blanco",
+  "orderAssistantHint": "Saca una foto de la matrícula y di el servicio",
+  "orderAssistantPlaceholder": "Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450",
+  "orderAssistantDone": "Listo",
+  "orderAssistantAddPhoto": "Sacar otra foto",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "orderAssistantReading": "Leyendo lo que enviaste…",
+  "orderAssistantFilledNote": "Revisa lo que está marcado en amarillo antes de guardar.",
+  "orderAssistantCustomerGuess": "Escuché “{name}”. Toca para elegir el cliente",
+  "orderAssistantDeviceGuess": "“{device}” no está registrado",
+  "orderAssistantErrorTitle": "Asistente",
+  "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
+  "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
+  "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
+  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Período siguiente",
   "valuesAndBillingOffTitle": "¿Desactivar valores y cobros?",
   "valuesAndBillingOffMessage": "Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.",
   "valuesAndBillingOffAction": "Desactivar",
