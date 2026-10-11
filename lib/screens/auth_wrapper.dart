@@ -15,7 +15,6 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/theme/app_colors.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
@@ -448,14 +447,6 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         _isLoading = false;
       });
     }
-  }
-
-  void _retry() {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-    _loadSegmentConfig();
   }
 
   @override
