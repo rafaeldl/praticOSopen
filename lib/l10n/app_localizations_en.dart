@@ -3916,152 +3916,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not load this. Check your connection and try again.';
 
   @override
-  String get financialLoadError => 'Could not load your finances.';
+  String get loginTitle => 'Sign in to get started';
 
   @override
-  String financialEmptyMonth(String month) {
-    return 'No orders in $month.';
-  }
+  String get loginSubtitle =>
+      'Your orders stay saved and your team sees the same ones.';
 
   @override
-  String get financialToReceive => 'To collect';
+  String get loginWithEmailLink => 'Sign in with email and password';
 
   @override
-  String get financialReceived => 'Received';
+  String get errorSignInAppleFriendly =>
+      'Could not sign in with Apple. Please try again.';
 
   @override
-  String financialSummaryLine(String entered, String owed) {
-    return 'In $entered · Owed $owed';
-  }
+  String get errorSignInGoogleFriendly =>
+      'Could not sign in with Google. Please try again.';
 
   @override
-  String financialOrderSince(int number, String date) {
-    return 'Order $number · since $date';
-  }
+  String get forgotPasswordQuestion => 'Forgot your password?';
 
   @override
-  String financialOrdersSince(int count, String date) {
-    return '$count orders · since $date';
-  }
+  String get showPassword => 'Show password';
 
   @override
-  String financialPaidOn(int number, String date) {
-    return 'Order $number · paid $date';
-  }
-
-  @override
-  String get financialOtherPeriod => 'Other period';
-
-  @override
-  String get financialPreviousMonth => 'Previous month';
-
-  @override
-  String get financialNextMonth => 'Next month';
-
-  @override
-  String financialNextStep(String amount, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count customers',
-      one: '1 customer',
-    );
-    return '$amount to collect from $_temp0';
-  }
-
-  @override
-  String financialOldestDebt(String name, String amount, String date) {
-    return '$name has owed the longest: $amount since $date.';
-  }
-
-  @override
-  String financialSendChargeTo(String name) {
-    return 'Send payment request to $name';
-  }
-
-  @override
-  String financialPickOrderTitle(String name) {
-    return 'Open orders of $name';
-  }
-
-  @override
-  String financialOrderOption(int number, String amount, String date) {
-    return 'Order $number · $amount · since $date';
-  }
-
-  @override
-  String get receiveTitle => 'Receive';
-
-  @override
-  String get receiveMissing => 'Left to receive';
-
-  @override
-  String get receiveAllDone => 'All received';
-
-  @override
-  String receiveButton(String amount) {
-    return 'Received $amount';
-  }
-
-  @override
-  String get receiveAttachReceipt => 'Attach receipt';
-
-  @override
-  String get receiveAlreadyReceived => 'Already received';
-
-  @override
-  String get receiveWithReceipt => 'with receipt';
-
-  @override
-  String get receiveNoReceipt => 'no receipt';
-
-  @override
-  String get receiveViaPix => 'Pix via link';
-
-  @override
-  String get receiveViaBoleto => 'Boleto via link';
-
-  @override
-  String get receiveViaCard => 'Card via link';
-
-  @override
-  String get receiveViaLink => 'Via link';
-
-  @override
-  String get receiveGiveDiscount => 'Give a discount';
-
-  @override
-  String get receiveUndoPayments => 'Undo payments';
-
-  @override
-  String receiveDiscountNewTotal(String from, String to) {
-    return 'The total goes from $from to $to';
-  }
-
-  @override
-  String receiveDiscountButton(String amount) {
-    return 'Give $amount discount';
-  }
-
-  @override
-  String get receiveViewReceipt => 'View receipt';
-
-  @override
-  String get receiveRemovePayment => 'Remove this payment';
-
-  @override
-  String receiveRecordedBy(String name, String date) {
-    return 'Recorded by $name on $date';
-  }
-
-  @override
-  String receiveRecordedAuto(String date) {
-    return 'Recorded automatically by the app on $date';
-  }
-
-  @override
-  String get receiveMoreOptions => 'More options';
-
-  @override
-  String get receiveRemoveReceipt => 'Remove receipt';
+  String get hidePassword => 'Hide password';
 }

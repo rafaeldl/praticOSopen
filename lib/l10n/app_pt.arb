@@ -2385,5 +2385,13 @@
     }
   },
   "receiveMoreOptions": "Mais opções",
-  "receiveRemoveReceipt": "Tirar comprovante"
+  "receiveRemoveReceipt": "Tirar comprovante",
+  "loginTitle": "Entre para começar",
+  "loginSubtitle": "Suas OS ficam salvas e a equipe vê as mesmas.",
+  "loginWithEmailLink": "Entrar com e-mail e senha",
+  "errorSignInAppleFriendly": "Não deu para entrar com a Apple. Tente de novo.",
+  "errorSignInGoogleFriendly": "Não deu para entrar com o Google. Tente de novo.",
+  "forgotPasswordQuestion": "Esqueceu a senha?",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Ocultar senha"
 }

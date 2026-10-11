@@ -3936,152 +3936,29 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo cargar. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get financialLoadError => 'No se pudo cargar las finanzas.';
+  String get loginTitle => 'Entra para empezar';
 
   @override
-  String financialEmptyMonth(String month) {
-    return 'Ninguna orden en $month.';
-  }
+  String get loginSubtitle =>
+      'Tus órdenes quedan guardadas y tu equipo ve las mismas.';
 
   @override
-  String get financialToReceive => 'Falta cobrar';
+  String get loginWithEmailLink => 'Entrar con correo y contraseña';
 
   @override
-  String get financialReceived => 'Cobrado';
+  String get errorSignInAppleFriendly =>
+      'No se pudo entrar con Apple. Inténtalo de nuevo.';
 
   @override
-  String financialSummaryLine(String entered, String owed) {
-    return 'Entró $entered · Falta $owed';
-  }
+  String get errorSignInGoogleFriendly =>
+      'No se pudo entrar con Google. Inténtalo de nuevo.';
 
   @override
-  String financialOrderSince(int number, String date) {
-    return 'Orden $number · desde $date';
-  }
+  String get forgotPasswordQuestion => '¿Olvidaste tu contraseña?';
 
   @override
-  String financialOrdersSince(int count, String date) {
-    return '$count órdenes · desde $date';
-  }
+  String get showPassword => 'Mostrar contraseña';
 
   @override
-  String financialPaidOn(int number, String date) {
-    return 'Orden $number · pagada $date';
-  }
-
-  @override
-  String get financialOtherPeriod => 'Otro período';
-
-  @override
-  String get financialPreviousMonth => 'Mes anterior';
-
-  @override
-  String get financialNextMonth => 'Mes siguiente';
-
-  @override
-  String financialNextStep(String amount, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count clientes',
-      one: '1 cliente',
-    );
-    return 'Falta cobrar $amount de $_temp0';
-  }
-
-  @override
-  String financialOldestDebt(String name, String amount, String date) {
-    return '$name debe desde hace más tiempo: $amount desde $date.';
-  }
-
-  @override
-  String financialSendChargeTo(String name) {
-    return 'Enviar cobro a $name';
-  }
-
-  @override
-  String financialPickOrderTitle(String name) {
-    return 'Órdenes abiertas de $name';
-  }
-
-  @override
-  String financialOrderOption(int number, String amount, String date) {
-    return 'Orden $number · $amount · desde $date';
-  }
-
-  @override
-  String get receiveTitle => 'Cobrar';
-
-  @override
-  String get receiveMissing => 'Falta por cobrar';
-
-  @override
-  String get receiveAllDone => 'Todo cobrado';
-
-  @override
-  String receiveButton(String amount) {
-    return 'Recibí $amount';
-  }
-
-  @override
-  String get receiveAttachReceipt => 'Adjuntar comprobante';
-
-  @override
-  String get receiveAlreadyReceived => 'Ya cobrado';
-
-  @override
-  String get receiveWithReceipt => 'con comprobante';
-
-  @override
-  String get receiveNoReceipt => 'sin comprobante';
-
-  @override
-  String get receiveViaPix => 'Pix por enlace';
-
-  @override
-  String get receiveViaBoleto => 'Boleto por enlace';
-
-  @override
-  String get receiveViaCard => 'Tarjeta por enlace';
-
-  @override
-  String get receiveViaLink => 'Por enlace';
-
-  @override
-  String get receiveGiveDiscount => 'Dar descuento';
-
-  @override
-  String get receiveUndoPayments => 'Deshacer pagos';
-
-  @override
-  String receiveDiscountNewTotal(String from, String to) {
-    return 'El total pasa de $from a $to';
-  }
-
-  @override
-  String receiveDiscountButton(String amount) {
-    return 'Dar $amount de descuento';
-  }
-
-  @override
-  String get receiveViewReceipt => 'Ver comprobante';
-
-  @override
-  String get receiveRemovePayment => 'Quitar este pago';
-
-  @override
-  String receiveRecordedBy(String name, String date) {
-    return 'Anotado por $name el $date';
-  }
-
-  @override
-  String receiveRecordedAuto(String date) {
-    return 'La app lo anotó sola el $date';
-  }
-
-  @override
-  String get receiveMoreOptions => 'Más opciones';
-
-  @override
-  String get receiveRemoveReceipt => 'Quitar comprobante';
+  String get hidePassword => 'Ocultar contraseña';
 }

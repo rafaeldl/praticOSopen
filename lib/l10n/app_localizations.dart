@@ -7336,233 +7336,53 @@ abstract class AppLocalizations {
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
 
-  /// No description provided for @financialLoadError.
+  /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Não deu para carregar o financeiro.'**
-  String get financialLoadError;
+  /// **'Entre para começar'**
+  String get loginTitle;
 
-  /// No description provided for @financialEmptyMonth.
+  /// No description provided for @loginSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma OS em {month}.'**
-  String financialEmptyMonth(String month);
+  /// **'Suas OS ficam salvas e a equipe vê as mesmas.'**
+  String get loginSubtitle;
 
-  /// No description provided for @financialToReceive.
+  /// No description provided for @loginWithEmailLink.
   ///
   /// In pt, this message translates to:
-  /// **'Falta receber'**
-  String get financialToReceive;
+  /// **'Entrar com e-mail e senha'**
+  String get loginWithEmailLink;
 
-  /// No description provided for @financialReceived.
+  /// No description provided for @errorSignInAppleFriendly.
   ///
   /// In pt, this message translates to:
-  /// **'Recebido'**
-  String get financialReceived;
+  /// **'Não deu para entrar com a Apple. Tente de novo.'**
+  String get errorSignInAppleFriendly;
 
-  /// No description provided for @financialSummaryLine.
+  /// No description provided for @errorSignInGoogleFriendly.
   ///
   /// In pt, this message translates to:
-  /// **'Entrou {entered} · Falta {owed}'**
-  String financialSummaryLine(String entered, String owed);
+  /// **'Não deu para entrar com o Google. Tente de novo.'**
+  String get errorSignInGoogleFriendly;
 
-  /// No description provided for @financialOrderSince.
+  /// No description provided for @forgotPasswordQuestion.
   ///
   /// In pt, this message translates to:
-  /// **'OS {number} · desde {date}'**
-  String financialOrderSince(int number, String date);
+  /// **'Esqueceu a senha?'**
+  String get forgotPasswordQuestion;
 
-  /// No description provided for @financialOrdersSince.
+  /// No description provided for @showPassword.
   ///
   /// In pt, this message translates to:
-  /// **'{count} OS · desde {date}'**
-  String financialOrdersSince(int count, String date);
+  /// **'Mostrar senha'**
+  String get showPassword;
 
-  /// No description provided for @financialPaidOn.
+  /// No description provided for @hidePassword.
   ///
   /// In pt, this message translates to:
-  /// **'OS {number} · pago {date}'**
-  String financialPaidOn(int number, String date);
-
-  /// No description provided for @financialOtherPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Outro período'**
-  String get financialOtherPeriod;
-
-  /// No description provided for @financialPreviousMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mês anterior'**
-  String get financialPreviousMonth;
-
-  /// No description provided for @financialNextMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'Próximo mês'**
-  String get financialNextMonth;
-
-  /// No description provided for @financialNextStep.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
-  String financialNextStep(String amount, int count);
-
-  /// No description provided for @financialOldestDebt.
-  ///
-  /// In pt, this message translates to:
-  /// **'{name} deve há mais tempo: {amount} desde {date}.'**
-  String financialOldestDebt(String name, String amount, String date);
-
-  /// No description provided for @financialSendChargeTo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mandar cobrança para {name}'**
-  String financialSendChargeTo(String name);
-
-  /// No description provided for @financialPickOrderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS em aberto de {name}'**
-  String financialPickOrderTitle(String name);
-
-  /// No description provided for @financialOrderOption.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · {amount} · desde {date}'**
-  String financialOrderOption(int number, String amount, String date);
-
-  /// No description provided for @receiveTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receber'**
-  String get receiveTitle;
-
-  /// No description provided for @receiveMissing.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta receber'**
-  String get receiveMissing;
-
-  /// No description provided for @receiveAllDone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tudo recebido'**
-  String get receiveAllDone;
-
-  /// No description provided for @receiveButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recebi {amount}'**
-  String receiveButton(String amount);
-
-  /// No description provided for @receiveAttachReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Anexar comprovante'**
-  String get receiveAttachReceipt;
-
-  /// No description provided for @receiveAlreadyReceived.
-  ///
-  /// In pt, this message translates to:
-  /// **'Já recebido'**
-  String get receiveAlreadyReceived;
-
-  /// No description provided for @receiveWithReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'com comprovante'**
-  String get receiveWithReceipt;
-
-  /// No description provided for @receiveNoReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'sem comprovante'**
-  String get receiveNoReceipt;
-
-  /// No description provided for @receiveViaPix.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pix pelo link'**
-  String get receiveViaPix;
-
-  /// No description provided for @receiveViaBoleto.
-  ///
-  /// In pt, this message translates to:
-  /// **'Boleto pelo link'**
-  String get receiveViaBoleto;
-
-  /// No description provided for @receiveViaCard.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cartão pelo link'**
-  String get receiveViaCard;
-
-  /// No description provided for @receiveViaLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pelo link'**
-  String get receiveViaLink;
-
-  /// No description provided for @receiveGiveDiscount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dar desconto'**
-  String get receiveGiveDiscount;
-
-  /// No description provided for @receiveUndoPayments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desfazer pagamentos'**
-  String get receiveUndoPayments;
-
-  /// No description provided for @receiveDiscountNewTotal.
-  ///
-  /// In pt, this message translates to:
-  /// **'O total passa de {from} para {to}'**
-  String receiveDiscountNewTotal(String from, String to);
-
-  /// No description provided for @receiveDiscountButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dar {amount} de desconto'**
-  String receiveDiscountButton(String amount);
-
-  /// No description provided for @receiveViewReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver comprovante'**
-  String get receiveViewReceipt;
-
-  /// No description provided for @receiveRemovePayment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover este pagamento'**
-  String get receiveRemovePayment;
-
-  /// No description provided for @receiveRecordedBy.
-  ///
-  /// In pt, this message translates to:
-  /// **'Anotado por {name} em {date}'**
-  String receiveRecordedBy(String name, String date);
-
-  /// No description provided for @receiveRecordedAuto.
-  ///
-  /// In pt, this message translates to:
-  /// **'O app anotou sozinho em {date}'**
-  String receiveRecordedAuto(String date);
-
-  /// No description provided for @receiveMoreOptions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mais opções'**
-  String get receiveMoreOptions;
-
-  /// No description provided for @receiveRemoveReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tirar comprovante'**
-  String get receiveRemoveReceipt;
+  /// **'Ocultar senha'**
+  String get hidePassword;
 }
 
 class _AppLocalizationsDelegate

@@ -2323,5 +2323,13 @@
     }
   },
   "receiveMoreOptions": "More options",
-  "receiveRemoveReceipt": "Remove receipt"
+  "receiveRemoveReceipt": "Remove receipt",
+  "loginTitle": "Sign in to get started",
+  "loginSubtitle": "Your orders stay saved and your team sees the same ones.",
+  "loginWithEmailLink": "Sign in with email and password",
+  "errorSignInAppleFriendly": "Could not sign in with Apple. Please try again.",
+  "errorSignInGoogleFriendly": "Could not sign in with Google. Please try again.",
+  "forgotPasswordQuestion": "Forgot your password?",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password"
 }
