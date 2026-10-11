@@ -2334,5 +2334,46 @@
   "errorSignInGoogleFriendly": "Could not sign in with Google. Please try again.",
   "forgotPasswordQuestion": "Forgot your password?",
   "showPassword": "Show password",
-  "hidePassword": "Hide password"
+  "hidePassword": "Hide password",
+  "receivedWhichOrder": "Which order?",
+  "receivedPhotosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} and {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Saved to order {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Could not save. Try again.",
+  "receivedOpenOrder": "Open the order"
 }

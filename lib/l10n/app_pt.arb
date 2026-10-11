@@ -2396,5 +2396,46 @@
   "errorSignInGoogleFriendly": "Não deu para entrar com o Google. Tente de novo.",
   "forgotPasswordQuestion": "Esqueceu a senha?",
   "showPassword": "Mostrar senha",
-  "hidePassword": "Ocultar senha"
+  "hidePassword": "Ocultar senha",
+  "receivedWhichOrder": "Em qual OS?",
+  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} e {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Guardado na OS {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
+  "receivedOpenOrder": "Abrir a OS"
 }
