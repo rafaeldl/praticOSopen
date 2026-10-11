@@ -14,7 +14,9 @@ import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/service_form_screen.dart';
 import 'package:praticos/screens/service_list_screen.dart';
-import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/screens/dashboard/financial_report_screen.dart';
+import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/forms/form_template_list_screen.dart';
 import 'package:praticos/screens/forms/form_template_form_screen.dart';
 import 'package:praticos/screens/user_profile_edit_screen.dart';
@@ -41,7 +43,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/order_service': (context) => OrderServiceScreen(),
   '/order_product': (context) => OrderProductScreen(),
   '/payment_management': (context) => PaymentManagementScreen(),
-  '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
+  '/financial_report': (context) => ProtectedRoute(
+    permission: PermissionType.viewFinancialReports,
+    child: const FinancialReportScreen(),
+  ),
   '/collaborator_list': (context) => CollaboratorListScreen(),
   '/collaborator_form': (context) => CollaboratorFormScreen(),
   '/company_form': (context) => CompanyFormScreen(),

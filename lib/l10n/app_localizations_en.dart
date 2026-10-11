@@ -3914,4 +3914,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listLoadError =>
       'Could not load this. Check your connection and try again.';
+
+  @override
+  String get financialLoadError => 'Could not load your finances.';
+
+  @override
+  String financialEmptyMonth(String month) {
+    return 'No orders in $month.';
+  }
+
+  @override
+  String get financialToReceive => 'To collect';
+
+  @override
+  String get financialReceived => 'Received';
+
+  @override
+  String financialSummaryLine(String entered, String owed) {
+    return 'In $entered · Owed $owed';
+  }
+
+  @override
+  String financialOrderSince(int number, String date) {
+    return 'Order $number · since $date';
+  }
+
+  @override
+  String financialOrdersSince(int count, String date) {
+    return '$count orders · since $date';
+  }
+
+  @override
+  String financialPaidOn(int number, String date) {
+    return 'Order $number · paid $date';
+  }
+
+  @override
+  String get financialOtherPeriod => 'Other period';
+
+  @override
+  String get financialPreviousMonth => 'Previous month';
+
+  @override
+  String get financialNextMonth => 'Next month';
+
+  @override
+  String financialNextStep(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers',
+      one: '1 customer',
+    );
+    return '$amount to collect from $_temp0';
+  }
+
+  @override
+  String financialOldestDebt(String name, String amount, String date) {
+    return '$name has owed the longest: $amount since $date.';
+  }
+
+  @override
+  String financialSendChargeTo(String name) {
+    return 'Send payment request to $name';
+  }
+
+  @override
+  String financialPickOrderTitle(String name) {
+    return 'Open orders of $name';
+  }
+
+  @override
+  String financialOrderOption(int number, String amount, String date) {
+    return 'Order $number · $amount · since $date';
+  }
 }

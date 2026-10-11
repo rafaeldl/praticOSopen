@@ -240,6 +240,16 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     }
   }
 
+  /// Busca todas as orders com pagamento em aberto (`payment == 'unpaid'`),
+  /// de qualquer período. Equality-only filter: needs no composite index.
+  /// Errors are not swallowed so callers can show a retry state.
+  Future<List<Order?>> getUnpaidOrders(String companyId) {
+    return getQueryList(
+      companyId,
+      args: [QueryArgs('payment', 'unpaid')],
+    );
+  }
+
   /// Busca orders por intervalo de scheduledDate.
   Future<List<Order?>> getOrdersByScheduledDateRange(
     String companyId,

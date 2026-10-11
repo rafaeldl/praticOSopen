@@ -7335,6 +7335,102 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
+
+  /// No description provided for @financialLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar o financeiro.'**
+  String get financialLoadError;
+
+  /// No description provided for @financialEmptyMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS em {month}.'**
+  String financialEmptyMonth(String month);
+
+  /// No description provided for @financialToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber'**
+  String get financialToReceive;
+
+  /// No description provided for @financialReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido'**
+  String get financialReceived;
+
+  /// No description provided for @financialSummaryLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrou {entered} · Falta {owed}'**
+  String financialSummaryLine(String entered, String owed);
+
+  /// No description provided for @financialOrderSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · desde {date}'**
+  String financialOrderSince(int number, String date);
+
+  /// No description provided for @financialOrdersSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} OS · desde {date}'**
+  String financialOrdersSince(int count, String date);
+
+  /// No description provided for @financialPaidOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · pago {date}'**
+  String financialPaidOn(int number, String date);
+
+  /// No description provided for @financialOtherPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro período'**
+  String get financialOtherPeriod;
+
+  /// No description provided for @financialPreviousMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês anterior'**
+  String get financialPreviousMonth;
+
+  /// No description provided for @financialNextMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo mês'**
+  String get financialNextMonth;
+
+  /// No description provided for @financialNextStep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String financialNextStep(String amount, int count);
+
+  /// No description provided for @financialOldestDebt.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} deve há mais tempo: {amount} desde {date}.'**
+  String financialOldestDebt(String name, String amount, String date);
+
+  /// No description provided for @financialSendChargeTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar cobrança para {name}'**
+  String financialSendChargeTo(String name);
+
+  /// No description provided for @financialPickOrderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS em aberto de {name}'**
+  String financialPickOrderTitle(String name);
+
+  /// No description provided for @financialOrderOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {amount} · desde {date}'**
+  String financialOrderOption(int number, String amount, String date);
 }
 
 class _AppLocalizationsDelegate

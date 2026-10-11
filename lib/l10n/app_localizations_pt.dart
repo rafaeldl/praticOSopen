@@ -3927,4 +3927,78 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get listLoadError =>
       'Não deu para carregar. Verifique a internet e tente de novo.';
+
+  @override
+  String get financialLoadError => 'Não deu para carregar o financeiro.';
+
+  @override
+  String financialEmptyMonth(String month) {
+    return 'Nenhuma OS em $month.';
+  }
+
+  @override
+  String get financialToReceive => 'Falta receber';
+
+  @override
+  String get financialReceived => 'Recebido';
+
+  @override
+  String financialSummaryLine(String entered, String owed) {
+    return 'Entrou $entered · Falta $owed';
+  }
+
+  @override
+  String financialOrderSince(int number, String date) {
+    return 'OS $number · desde $date';
+  }
+
+  @override
+  String financialOrdersSince(int count, String date) {
+    return '$count OS · desde $date';
+  }
+
+  @override
+  String financialPaidOn(int number, String date) {
+    return 'OS $number · pago $date';
+  }
+
+  @override
+  String get financialOtherPeriod => 'Outro período';
+
+  @override
+  String get financialPreviousMonth => 'Mês anterior';
+
+  @override
+  String get financialNextMonth => 'Próximo mês';
+
+  @override
+  String financialNextStep(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clientes',
+      one: '1 cliente',
+    );
+    return 'Falta receber $amount de $_temp0';
+  }
+
+  @override
+  String financialOldestDebt(String name, String amount, String date) {
+    return '$name deve há mais tempo: $amount desde $date.';
+  }
+
+  @override
+  String financialSendChargeTo(String name) {
+    return 'Mandar cobrança para $name';
+  }
+
+  @override
+  String financialPickOrderTitle(String name) {
+    return 'OS em aberto de $name';
+  }
+
+  @override
+  String financialOrderOption(int number, String amount, String date) {
+    return 'OS $number · $amount · desde $date';
+  }
 }

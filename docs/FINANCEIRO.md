@@ -103,10 +103,33 @@ Cada transação registra:
 
 ---
 
-## Dashboard Financeiro
+## Aba Financeiro ("Quem me deve")
+
+Aba fixa na barra inferior (requer `viewFinancialReports`). Responde só "quem me deve":
+
+- **Mês** com setas (`PeriodStepper`); o mês seguinte fica desabilitado no mês atual.
+- **Próximo passo**: "Falta receber R$ X de N clientes", quem deve há mais tempo e o botão
+  "Mandar cobrança para ..." que abre o `ShareLinkSheet` da OS em aberto mais antiga desse cliente.
+  Sem dívida, o bloco some. Não gera cobrança Asaas nesta etapa.
+- **Falta receber**: **tudo** o que está em aberto, de qualquer mês (`getUnpaidOrders`: `payment == 'unpaid'`,
+  sem orçamento e sem OS cancelada), agrupado por cliente, mais antigo primeiro. 5 linhas + "Ver todos (N)".
+  Cliente com uma OS abre a OS; com várias, abre uma lista para escolher a OS.
+- **Recebido**: OS pagas do mês, mais recentes primeiro.
+- **Resumo fixo** acima da barra: "Entrou R$ X · Falta R$ Y" (Y = tudo em aberto).
+- Mês sem OS e sem dívida: `EmptyState`. Erro: mensagem fixa + "Tentar novamente".
+- "…" e a linha "Relatório Financeiro" abrem o Relatório (com "Outro período" abrindo o seletor).
+
+Arquivos: `lib/screens/dashboard/financial_tab.dart`, `lib/mobx/financial_tab_store.dart`,
+`lib/utils/financial_summary.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`.
+
+## Relatório Financeiro
+
+Tela aberta pela aba (`lib/screens/dashboard/financial_report_screen.dart`, rota `/financial_report`).
+Mantém tudo o que o antigo painel tinha: períodos (hoje, semana, mês, ano, outro), faturamento, composição,
+ranking de clientes, serviços e produtos, OS do período e PDF para compartilhar.
 
 ### Acesso
-Menu lateral > **Dashboard** (requer permissão `viewFinancialReports`)
+Aba Financeiro > Relatório Financeiro (requer permissão `viewFinancialReports`)
 
 ### Indicadores
 
@@ -279,7 +302,8 @@ Isso garante que:
 | `lib/models/order.dart` | Campos financeiros da OS |
 | `lib/mobx/order_store.dart` | Lógica de cálculo e ações |
 | `lib/services/pdf/pdf_main_os_builder.dart` | Geração do PDF |
-| `lib/screens/dashboard/financial_dashboard_simple.dart` | Dashboard financeiro |
+| `lib/screens/dashboard/financial_tab.dart` | Aba Financeiro (quem me deve) |
+| `lib/screens/dashboard/financial_report_screen.dart` | Relatório financeiro |
 
 ### Métodos do OrderStore
 
