@@ -44,7 +44,7 @@ Sem modelo novo e sem campo novo (nada muda no Firestore nem nas Functions). Est
 9. Depois de mudar para Aprovada, Em andamento ou Pronta, "Avisar o cliente?" (mesma regra da tela antiga: cliente com telefone, sem link ativo, sem "Agora não" nesta sessão). "Enviar via WhatsApp" abre o compartilhar com o link.
 10. Desconto entra como transação (`addDiscountTransaction`, o mesmo do Receber) e aparece acima do total.
 11. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
-12. Foto e "Falar o que fazer" ficam escondidos (`showAssistant`) até a fase 2 (IA).
+12. Foto e "Falar o que fazer" só aparecem na Nova OS com `kAiOrderAssistEnabled` (desligado por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
 
 ## Exemplos de Uso
 

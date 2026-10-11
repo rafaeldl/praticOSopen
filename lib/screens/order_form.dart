@@ -1853,8 +1853,12 @@ class _OrderFormState extends State<OrderForm> {
                 ShareLinkSheet.show(context, _store.order!);
               },
             ),
-          // Compartilhar PDF para usuários com acesso a valores
-          if (canViewPrices)
+          // Compartilhar PDF: com valores para quem os vê; sem valores
+          // quando a empresa desligou "Valores e cobrança"
+          if (canShareOrderPdf(
+            canViewPrices: canViewPrices,
+            useFinancial: config.useFinancial,
+          ))
             CupertinoActionSheetAction(
               child: Text('${context.l10n.share} PDF'),
               onPressed: () {

@@ -54,8 +54,22 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Whether the company uses recurring maintenance contracts
   bool get useContracts => _service.useContracts;
 
+  /// Whether the company uses prices, receiving payments and the Financial
+  /// tab (`Company.useFinancial`, absent = true).
+  bool get useFinancial => _service.useFinancial;
+
+  /// Default useFinancial value from the segment document
+  bool get segmentUseFinancialDefault => _service.segmentUseFinancialDefault;
+
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _service.defaultTermsOfService;
+
+  /// Updates the resolved `useFinancial` value and notifies listeners.
+  void setUseFinancial(bool value) {
+    if (_service.useFinancial == value) return;
+    _service.setUseFinancial(value);
+    notifyListeners();
+  }
 
   /// Sets resolved company config values and notifies listeners
   void setCompanyConfig({
@@ -63,12 +77,14 @@ class SegmentConfigProvider extends ChangeNotifier {
     required bool useScheduling,
     required bool useDeviceManagement,
     required bool useContracts,
+    bool useFinancial = true,
   }) {
     _service.setCompanyConfig(
       fieldService: fieldService,
       useScheduling: useScheduling,
       useDeviceManagement: useDeviceManagement,
       useContracts: useContracts,
+      useFinancial: useFinancial,
     );
     notifyListeners();
   }

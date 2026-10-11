@@ -89,5 +89,31 @@ void main() {
 
       expect(company.subscription?.plan, SubscriptionPlan.pro);
     });
+
+    group('useFinancial', () {
+      test('absent in Firestore reads as null (resolved as on)', () {
+        final company = Company.fromJson({'id': 'c1'});
+        expect(company.useFinancial, isNull);
+      });
+
+      test('round-trips false and true', () {
+        for (final value in [false, true]) {
+          final company = Company()
+            ..id = 'c1'
+            ..useFinancial = value;
+          final json = company.toJson();
+          expect(json['useFinancial'], value);
+          expect(Company.fromJson(json).useFinancial, value);
+        }
+      });
+
+      test('is not part of the aggregate embedded in other documents', () {
+        final aggr = (Company()
+              ..id = 'c1'
+              ..useFinancial = false)
+            .toAggr();
+        expect(aggr.toJson().containsKey('useFinancial'), isFalse);
+      });
+    });
   });
 }

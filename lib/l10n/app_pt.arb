@@ -2482,5 +2482,129 @@
     }
   },
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
-  "receivedOpenOrder": "Abrir a OS"
+  "receivedOpenOrder": "Abrir a OS",
+  "pickDeviceTitle": "Qual é o {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Outros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Cadastrar {device} novo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Apagar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Deixar em branco",
+  "orderAssistantHint": "Tire foto da placa e fale o serviço",
+  "orderAssistantPlaceholder": "Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450",
+  "orderAssistantDone": "Pronto",
+  "orderAssistantAddPhoto": "Tirar outra foto",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@orderAssistantPhotoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderAssistantReading": "Lendo o que você mandou…",
+  "orderAssistantFilledNote": "Confira o que está marcado em amarelo antes de salvar.",
+  "orderAssistantCustomerGuess": "Ouvi “{name}”. Toque para escolher o cliente",
+  "@orderAssistantCustomerGuess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantDeviceGuess": "“{device}” não está no cadastro",
+  "@orderAssistantDeviceGuess": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantErrorTitle": "Assistente",
+  "orderAssistantErrorDisabled": "O assistente ainda não está liberado para a sua empresa.",
+  "orderAssistantErrorQuota": "Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.",
+  "@orderAssistantErrorQuota": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
+  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Próximo período",
+  "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
+  "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
+  "valuesAndBillingOffAction": "Desligar",
+  "valuesAndBillingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
+  "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
+  "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
+  "inviteTitleOne": "{company} chamou você para a equipe",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Convidado por {name} · você entra como {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "Você entra como {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Entrar na equipe",
+  "inviteDecline": "Recusar convite",
+  "inviteHaveAnotherCode": "Tenho outro código",
+  "inviteCreateOwnCompany": "Criar minha própria empresa",
+  "inviteCodePlaceholder": "Ex.: 7K2P9QXA",
+  "segmentLoadError": "Não deu para abrir a sua empresa. Confira a internet e tente de novo."
 }

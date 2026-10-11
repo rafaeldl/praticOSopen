@@ -38,7 +38,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/customer_list': (context) => CustomerListScreen(),
   '/customer_detail': (context) => const CustomerDetailScreen(),
   '/device_form': (context) => DeviceFormScreen(),
-  '/device_list': (context) => DeviceListScreen(),
+  '/device_list': (context) => const DeviceListScreen(),
   '/device_detail': (context) => const DeviceDetailScreen(),
   '/accumulated_value_list': (context) => AccumulatedValueListScreen(),
   // Legacy OrderForm by default; the new screen with "Nova tela da OS".

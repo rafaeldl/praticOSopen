@@ -38,17 +38,39 @@ void main() {
       );
     });
 
+    test('hides Financeiro when the company does not use values and billing',
+        () {
+      expect(
+        visibleAppTabs(
+          useScheduling: true,
+          canViewFinancialReports: true,
+          useFinancial: false,
+        ),
+        [AppTab.home, AppTab.customers, AppTab.agenda, AppTab.more],
+      );
+    });
+
+    test('useFinancial defaults to on (field absent = current behavior)', () {
+      expect(
+        visibleAppTabs(useScheduling: true, canViewFinancialReports: true),
+        contains(AppTab.financial),
+      );
+    });
+
     test('every combination keeps the relative order of AppTab', () {
       for (final scheduling in [true, false]) {
         for (final financial in [true, false]) {
-          final tabs = visibleAppTabs(
-            useScheduling: scheduling,
-            canViewFinancialReports: financial,
-          );
-          final indexes = tabs.map((t) => t.index).toList();
-          expect(indexes, [...indexes]..sort());
-          expect(tabs.first, AppTab.home);
-          expect(tabs.last, AppTab.more);
+          for (final useFinancial in [true, false]) {
+            final tabs = visibleAppTabs(
+              useScheduling: scheduling,
+              canViewFinancialReports: financial,
+              useFinancial: useFinancial,
+            );
+            final indexes = tabs.map((t) => t.index).toList();
+            expect(indexes, [...indexes]..sort());
+            expect(tabs.first, AppTab.home);
+            expect(tabs.last, AppTab.more);
+          }
         }
       }
     });

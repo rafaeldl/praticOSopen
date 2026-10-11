@@ -71,6 +71,7 @@ void main() {
                 ),
                 builder: (_) => DeviceDetailScreen(
                   orderRepository: _FakeOrderRepository([order]),
+                  showPrices: true,
                 ),
               );
             }
@@ -103,6 +104,7 @@ void main() {
     Device device,
     List<Order> orders, {
     Customer? customer,
+    bool showPrices = true,
   }) async {
     final pushed = <RouteSettings>[];
     await tester.pumpWidget(
@@ -122,6 +124,7 @@ void main() {
                 ),
                 builder: (_) => DeviceDetailScreen(
                   orderRepository: _FakeOrderRepository(orders),
+                  showPrices: showPrices,
                 ),
               );
             }
@@ -213,5 +216,22 @@ void main() {
     expect(find.text('Nenhuma ordem de serviço registrada'), findsOneWidget);
     expect(find.text('Histórico de OS'), findsOneWidget);
     expect(find.text('Nova OS'), findsOneWidget);
+  });
+
+  testWidgets('history hides order totals without values and billing',
+      (tester) async {
+    final device = Device()
+      ..id = 'd1'
+      ..name = 'Fiat Uno';
+    final orders = [
+      Order()
+        ..id = 'o1'
+        ..number = 7
+        ..status = 'done'
+        ..total = 150,
+    ];
+    await pumpDetail(tester, device, orders, showPrices: false);
+    expect(find.textContaining('#7'), findsOneWidget);
+    expect(find.textContaining('150,00'), findsNothing);
   });
 }

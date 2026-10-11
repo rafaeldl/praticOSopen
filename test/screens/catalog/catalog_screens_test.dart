@@ -100,6 +100,79 @@ void main() {
     products: [item('p1', 'Filtro de óleo', 35.5)],
   );
 
+  group('catalog list: Mais usados', () {
+    final src = FakeSource(
+      services: [
+        item('s1', 'Troca de óleo', 120),
+        item('s2', 'Alinhamento'),
+        item('s3', 'Balanceamento'),
+      ],
+      products: [item('p1', 'Filtro de óleo', 35.5)],
+    );
+
+    testWidgets('shows the most used items of the kind on top, then all',
+        (tester) async {
+      await pump(
+        tester,
+        CatalogListScreen(
+          source: src,
+          permissions: allPermissions,
+          mostUsed: () async => ['service:s3', 'product:p1', 'service:zz'],
+        ),
+      );
+      expect(find.text('Mais usados'), findsOneWidget);
+      expect(find.text('Todos'), findsOneWidget);
+      // Balanceamento appears twice (Mais usados + all); products do not leak.
+      expect(find.text('Balanceamento'), findsNWidgets(2));
+      expect(find.text('Filtro de óleo'), findsNothing);
+      final used = tester.getTopLeft(find.text('Mais usados')).dy;
+      final first = tester.getTopLeft(find.text('Balanceamento').first).dy;
+      final troca = tester.getTopLeft(find.text('Troca de óleo')).dy;
+      expect(used, lessThan(first));
+      expect(first, lessThan(troca));
+    });
+
+    testWidgets('is hidden while searching and when nothing was used',
+        (tester) async {
+      await pump(
+        tester,
+        CatalogListScreen(
+          source: src,
+          permissions: allPermissions,
+          mostUsed: () async => ['service:s3'],
+        ),
+      );
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'bal');
+      await tester.pumpAndSettle();
+      expect(find.text('Mais usados'), findsNothing);
+      expect(find.text('Balanceamento'), findsOneWidget);
+
+      await pump(
+        tester,
+        CatalogListScreen(
+          source: src,
+          permissions: allPermissions,
+          mostUsed: () async => const [],
+        ),
+      );
+      expect(find.text('Mais usados'), findsNothing);
+    });
+
+    testWidgets('a failure loading usage keeps the plain list',
+        (tester) async {
+      await pump(
+        tester,
+        CatalogListScreen(
+          source: src,
+          permissions: allPermissions,
+          mostUsed: () async => throw StateError('offline'),
+        ),
+      );
+      expect(find.text('Mais usados'), findsNothing);
+      expect(find.text('Troca de óleo'), findsOneWidget);
+    });
+  });
+
   group('catalog list: Serviços | Produtos', () {
     testWidgets('segmented control switches between services and products',
         (tester) async {
@@ -390,6 +463,21 @@ void main() {
       await tester.tap(find.text('Apagar'));
       await tester.pumpAndSettle();
       expect(src.deleted.single.id, 's1');
+    });
+
+    testWidgets(
+        'without viewPrices (values and billing off) the price field is '
+        'hidden and the stored price is kept on save', (tester) async {
+      final src = FakeSource();
+      await pumpEdit(
+        tester,
+        src,
+        CatalogPermissions((p) => p != PermissionType.viewPrices),
+      );
+      expect(find.text('Preço'), findsNothing);
+      await tester.tap(find.text('Salvar serviço'));
+      await tester.pumpAndSettle();
+      expect(src.saved.single.value, 120);
     });
 
     testWidgets('editing without manage permission has no delete menu',

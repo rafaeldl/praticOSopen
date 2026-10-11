@@ -4935,4 +4935,155 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir a OS';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return 'Qual é o $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Outros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Cadastrar $device novo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return 'Apagar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Deixar em branco';
+
+  @override
+  String get orderAssistantHint => 'Tire foto da placa e fale o serviço';
+
+  @override
+  String get orderAssistantPlaceholder =>
+      'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450';
+
+  @override
+  String get orderAssistantDone => 'Pronto';
+
+  @override
+  String get orderAssistantAddPhoto => 'Tirar outra foto';
+
+  @override
+  String orderAssistantPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderAssistantReading => 'Lendo o que você mandou…';
+
+  @override
+  String get orderAssistantFilledNote =>
+      'Confira o que está marcado em amarelo antes de salvar.';
+
+  @override
+  String orderAssistantCustomerGuess(String name) {
+    return 'Ouvi “$name”. Toque para escolher o cliente';
+  }
+
+  @override
+  String orderAssistantDeviceGuess(String device) {
+    return '“$device” não está no cadastro';
+  }
+
+  @override
+  String get orderAssistantErrorTitle => 'Assistente';
+
+  @override
+  String get orderAssistantErrorDisabled =>
+      'O assistente ainda não está liberado para a sua empresa.';
+
+  @override
+  String orderAssistantErrorQuota(String limit) {
+    return 'Você já usou os $limit pedidos do assistente deste mês. Dá para continuar preenchendo à mão.';
+  }
+
+  @override
+  String get orderAssistantErrorUnavailable =>
+      'Não deu para ler agora. Tente de novo ou preencha à mão.';
+
+  @override
+  String get orderAssistantNothingFound =>
+      'Não achei o que pôr. Tente de novo ou preencha à mão.';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Próximo período';
+
+  @override
+  String get valuesAndBillingOffTitle => 'Desligar valores e cobrança?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desligar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Não deu para salvar. Confira a internet e tente de novo.';
+
+  @override
+  String get inviteGenericError =>
+      'Não deu para concluir. Confira a internet e tente de novo.';
+
+  @override
+  String get inviteLoadError =>
+      'Não deu para carregar os convites. Confira a internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company chamou você para a equipe';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Convidado por $name · você entra como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Você entra como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar na equipe';
+
+  @override
+  String get inviteDecline => 'Recusar convite';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tenho outro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Criar minha própria empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ex.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Não deu para abrir a sua empresa. Confira a internet e tente de novo.';
 }

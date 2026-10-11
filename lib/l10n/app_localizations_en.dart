@@ -4923,4 +4923,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Open the order';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return 'Which $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Other $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Register new $device';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return 'Delete “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Use “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Leave blank';
+
+  @override
+  String get orderAssistantHint =>
+      'Take a photo of the plate and say the service';
+
+  @override
+  String get orderAssistantPlaceholder =>
+      'Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450';
+
+  @override
+  String get orderAssistantDone => 'Done';
+
+  @override
+  String get orderAssistantAddPhoto => 'Take another photo';
+
+  @override
+  String orderAssistantPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderAssistantReading => 'Reading what you sent…';
+
+  @override
+  String get orderAssistantFilledNote =>
+      'Check what is highlighted in yellow before saving.';
+
+  @override
+  String orderAssistantCustomerGuess(String name) {
+    return 'I heard “$name”. Tap to choose the customer';
+  }
+
+  @override
+  String orderAssistantDeviceGuess(String device) {
+    return '“$device” is not registered';
+  }
+
+  @override
+  String get orderAssistantErrorTitle => 'Assistant';
+
+  @override
+  String get orderAssistantErrorDisabled =>
+      'The assistant is not available for your company yet.';
+
+  @override
+  String orderAssistantErrorQuota(String limit) {
+    return 'You have used this month\'s $limit assistant requests. You can keep filling it in by hand.';
+  }
+
+  @override
+  String get orderAssistantErrorUnavailable =>
+      'Couldn\'t read it now. Try again or fill it in by hand.';
+
+  @override
+  String get orderAssistantNothingFound =>
+      'I found nothing to add. Try again or fill it in by hand.';
+
+  @override
+  String get reportPreviousPeriod => 'Previous period';
+
+  @override
+  String get reportNextPeriod => 'Next period';
+
+  @override
+  String get valuesAndBillingOffTitle => 'Turn off prices and billing?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Turn off';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Could not save. Check your connection and try again.';
+
+  @override
+  String get inviteGenericError =>
+      'Could not finish. Check your internet and try again.';
+
+  @override
+  String get inviteLoadError =>
+      'Could not load the invites. Check your internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company invited you to the team';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invited by $name · you join as $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'You join as $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Join the team';
+
+  @override
+  String get inviteDecline => 'Decline invite';
+
+  @override
+  String get inviteHaveAnotherCode => 'I have another code';
+
+  @override
+  String get inviteCreateOwnCompany => 'Create my own company';
+
+  @override
+  String get inviteCodePlaceholder => 'E.g. 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Could not open your company. Check your internet and try again.';
 }

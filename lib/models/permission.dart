@@ -129,6 +129,29 @@ enum PermissionType {
 ///
 /// Define quais permissões cada perfil possui no sistema.
 class RolePermissions {
+  /// Permissions that only make sense when the company uses values and
+  /// billing (`Company.useFinancial`). With the option off they are denied
+  /// for every role, the owner included.
+  static const Set<PermissionType> financialPermissions = {
+    PermissionType.viewPrices,
+    PermissionType.viewBilling,
+    PermissionType.viewFinancialReports,
+    PermissionType.editPrices,
+    PermissionType.chargeOrder,
+  };
+
+  /// Whether [role] has [permission] in a company with [useFinancial].
+  static bool hasPermissionInCompany(
+    RolesType role,
+    PermissionType permission, {
+    required bool useFinancial,
+  }) {
+    if (!useFinancial && financialPermissions.contains(permission)) {
+      return false;
+    }
+    return hasPermission(role, permission);
+  }
+
   /// Returns the set of permissions for a given role.
   static Set<PermissionType> getPermissions(RolesType role) {
     switch (role) {
