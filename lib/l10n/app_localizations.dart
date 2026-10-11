@@ -8386,11 +8386,29 @@ abstract class AppLocalizations {
   /// **'Preços na OS, receber e aba Financeiro'**
   String get valuesAndBillingHint;
 
-  /// No description provided for @valuesAndBillingSoon.
+  /// No description provided for @valuesAndBillingOffTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Ligado. Em breve você poderá desligar.'**
-  String get valuesAndBillingSoon;
+  /// **'Desligar valores e cobrança?'**
+  String get valuesAndBillingOffTitle;
+
+  /// No description provided for @valuesAndBillingOffMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.'**
+  String get valuesAndBillingOffMessage;
+
+  /// No description provided for @valuesAndBillingOffAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar'**
+  String get valuesAndBillingOffAction;
+
+  /// No description provided for @valuesAndBillingSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
+  String get valuesAndBillingSaveError;
 
   /// No description provided for @nameAndPhoto.
   ///

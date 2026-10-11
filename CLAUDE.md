@@ -841,6 +841,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
+- `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/APP_DESIGN_SYSTEM.md` - Padrão de design do app: cores (`AppColors`), tipografia, estrutura de tela e regras (vale sobre o UX_GUIDELINES em cor/estrutura)

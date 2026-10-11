@@ -207,13 +207,16 @@ class _NavigationControllerState extends State<NavigationController>
   @override
   Widget build(BuildContext context) {
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
-    final useScheduling = context.watch<SegmentConfigProvider>().useScheduling;
+    final segmentConfig = context.watch<SegmentConfigProvider>();
+    final useScheduling = segmentConfig.useScheduling;
+    final useFinancial = segmentConfig.useFinancial;
 
     return Observer(
       builder: (context) {
         _syncTabs(
           visibleAppTabs(
             useScheduling: useScheduling,
+            useFinancial: useFinancial,
             canViewFinancialReports:
                 AuthorizationService.instance.canViewFinancialReports,
           ),

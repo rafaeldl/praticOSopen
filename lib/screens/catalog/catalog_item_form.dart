@@ -203,12 +203,15 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
                     : l10n.productNameRequired)
                 : null,
           ),
-          MoneyField(
-            label: l10n.catalogPriceLabel,
-            initialValue: _item.value,
-            hint: l10n.catalogPriceHint,
-            onSavedNullable: (v) => _item.value = v,
-          ),
+          // Hidden without `viewPrices` (e.g. `Company.useFinancial ==
+          // false`); the stored value is kept untouched on save.
+          if (widget.permissions.canViewPrices)
+            MoneyField(
+              label: l10n.catalogPriceLabel,
+              initialValue: _item.value,
+              hint: l10n.catalogPriceHint,
+              onSavedNullable: (v) => _item.value = v,
+            ),
           ..._buildCustomFieldSections(config),
           _buildPhoto(),
         ],

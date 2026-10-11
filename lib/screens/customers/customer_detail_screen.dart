@@ -8,6 +8,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -22,13 +23,23 @@ import 'package:url_launcher/url_launcher.dart';
 /// "Nova OS para Ana", the customer's vehicles and orders, and "Total gasto"
 /// (sum of the completed orders). Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
-  const CustomerDetailScreen({super.key, this.customer, this.directory});
+  const CustomerDetailScreen({
+    super.key,
+    this.customer,
+    this.directory,
+    this.showPrices,
+  });
 
   /// Falls back to the `customer` route argument.
   final Customer? customer;
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
+
+  /// Order totals and "Total gasto". Defaults to the `viewPrices`
+  /// permission, which is off for everyone when the company does not use
+  /// values and billing (`Company.useFinancial == false`).
+  final bool? showPrices;
 
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
@@ -39,6 +50,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       widget.directory ?? FirestoreCustomerDirectory();
   Customer? _customer;
   Stream<List<Order>>? _orders;
+
+  bool get _showPrices =>
+      widget.showPrices ?? AuthorizationService.instance.canViewPrices;
 
   @override
   void didChangeDependencies() {
@@ -271,10 +285,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ],
       SectionLabel(l10n.ordersOfCustomer(name)),
       for (final o in orders) _orderRow(o, format),
-      _TotalLine(
-        label: l10n.totalSpent,
-        value: format.formatCurrency(totalSpent(orders)),
-      ),
+      if (_showPrices)
+        _TotalLine(
+          label: l10n.totalSpent,
+          value: format.formatCurrency(totalSpent(orders)),
+        ),
     ];
   }
 
@@ -324,7 +339,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         statusText,
         if (order.createdAt != null) format.formatDate(order.createdAt),
       ].join(' · '),
-      trailing: order.total == null ? null : format.formatCurrency(order.total),
+      trailing: !_showPrices || order.total == null
+          ? null
+          : format.formatCurrency(order.total),
       onTap: () => Navigator.pushNamed(
         context,
         '/order',

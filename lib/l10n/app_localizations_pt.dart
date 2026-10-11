@@ -4606,7 +4606,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get valuesAndBillingHint => 'Preços na OS, receber e aba Financeiro';
 
   @override
-  String get valuesAndBillingSoon => 'Ligado. Em breve você poderá desligar.';
+  String get valuesAndBillingOffTitle => 'Desligar valores e cobrança?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desligar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Não deu para salvar. Confira a internet e tente de novo.';
 
   @override
   String get nameAndPhoto => 'Nome e foto';

@@ -35,6 +35,7 @@ class DeviceDetailScreen extends StatefulWidget {
     this.customer,
     this.orderRepository,
     this.onDelete,
+    this.showPrices,
   });
 
   /// Falls back to the `device` route argument.
@@ -50,11 +51,18 @@ class DeviceDetailScreen extends StatefulWidget {
   /// Deletes the device. Defaults to [DeviceStore.deleteDevice].
   final Future<void> Function(Device device)? onDelete;
 
+  /// Order totals. Defaults to the `viewPrices` permission (off for everyone
+  /// when `Company.useFinancial == false`).
+  final bool? showPrices;
+
   @override
   State<DeviceDetailScreen> createState() => _DeviceDetailScreenState();
 }
 
 class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
+  bool get _showPrices =>
+      widget.showPrices ?? AuthorizationService.instance.canViewPrices;
+
   Device? _device;
   Customer? _customer;
   TenantOrderRepository? _repo;
@@ -428,7 +436,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         statusText,
         if (order.createdAt != null) format.formatDate(order.createdAt),
       ].join(' · '),
-      trailing: order.total == null ? null : format.formatCurrency(order.total),
+      trailing: !_showPrices || order.total == null
+          ? null
+          : format.formatCurrency(order.total),
       onTap: () => Navigator.pushNamed(
         context,
         '/order',

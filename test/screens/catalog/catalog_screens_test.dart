@@ -392,6 +392,21 @@ void main() {
       expect(src.deleted.single.id, 's1');
     });
 
+    testWidgets(
+        'without viewPrices (values and billing off) the price field is '
+        'hidden and the stored price is kept on save', (tester) async {
+      final src = FakeSource();
+      await pumpEdit(
+        tester,
+        src,
+        CatalogPermissions((p) => p != PermissionType.viewPrices),
+      );
+      expect(find.text('Preço'), findsNothing);
+      await tester.tap(find.text('Salvar serviço'));
+      await tester.pumpAndSettle();
+      expect(src.saved.single.value, 120);
+    });
+
     testWidgets('editing without manage permission has no delete menu',
         (tester) async {
       await pumpEdit(tester, FakeSource(),

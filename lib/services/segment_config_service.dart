@@ -13,7 +13,8 @@ class SegmentConfigService {
   factory SegmentConfigService() => _instance;
   SegmentConfigService._internal();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // Lazy so the singleton can be used without Firebase (tests).
+  FirebaseFirestore get _db => FirebaseFirestore.instance;
 
   // Estado
   String _locale = 'pt-BR';
@@ -28,6 +29,9 @@ class SegmentConfigService {
   // Segment-level default for fieldService
   bool _segmentFieldService = true;
 
+  // Segment-level default for useFinancial
+  bool _segmentUseFinancial = true;
+
   // Segment-level default terms of service (i18n)
   String? _defaultTermsOfService;
 
@@ -36,6 +40,7 @@ class SegmentConfigService {
   bool _useScheduling = true;
   bool _useDeviceManagement = false;
   bool _useContracts = false;
+  bool _useFinancial = true;
 
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
@@ -144,6 +149,9 @@ class SegmentConfigService {
 
       // Read segment-level fieldService default
       _segmentFieldService = data['fieldService'] as bool? ?? true;
+
+      // Read segment-level useFinancial default
+      _segmentUseFinancial = data['useFinancial'] as bool? ?? true;
 
       // Read segment-level default terms of service (i18n)
       final termsI18n = data['defaultTermsOfService'] as Map<String, dynamic>?;
@@ -541,12 +549,27 @@ class SegmentConfigService {
     required bool useScheduling,
     required bool useDeviceManagement,
     required bool useContracts,
+    bool useFinancial = true,
   }) {
     _fieldService = fieldService;
     _useScheduling = useScheduling;
     _useDeviceManagement = useDeviceManagement;
     _useContracts = useContracts;
+    _useFinancial = useFinancial;
   }
+
+  /// Updates only the resolved `useFinancial` value (Mais › Sua empresa).
+  void setUseFinancial(bool value) {
+    _useFinancial = value;
+  }
+
+  /// Whether the company uses prices, receiving payments and the Financial
+  /// tab (`Company.useFinancial`, absent = true). When false,
+  /// `AuthorizationService` denies the financial permissions for every role.
+  bool get useFinancial => _useFinancial;
+
+  /// Default useFinancial value from the segment document
+  bool get segmentUseFinancialDefault => _segmentUseFinancial;
 
   /// Whether the company does field service (attends at customer location)
   bool get fieldService => _fieldService;
@@ -572,11 +595,13 @@ class SegmentConfigService {
     _labelCache.clear();
     _customFields.clear();
     _segmentFieldService = true;
+    _segmentUseFinancial = true;
     _defaultTermsOfService = null;
     _fieldService = true;
     _useScheduling = true;
     _useDeviceManagement = false;
     _useContracts = false;
+    _useFinancial = true;
   }
 
   /// Getters de estado
