@@ -28,8 +28,9 @@ Quase ninguém usa: **no máximo 3 aberturas em 28 dias** no Analytics. O que o 
 - **OS nova** (com cliente salvo): o modelo aparece em **"Nesta OS"** como uma linha "Entrada do veículo · Faltam 5 perguntas", com ponto âmbar (`warning`) e texto. Não cria instância no Firestore até a primeira resposta: é só uma sugestão.
 - Se for o próximo passo natural, o bloco azul diz **"Próximo passo: conferir a entrada do carro"** com o botão "Conferir entrada · 5 perguntas" (`chk-os-sugerido`). Depois da entrada conferida, o próximo passo volta ao fluxo normal da OS (`chk-pronto`): "mandar o orçamento para a Ana".
 - Quem não quer: "…" → "Não usar nesta OS" na linha.
-- **Mais › Checklists** (`chk-modelos-ramo`) mostra o resultado em vez da configuração, em duas seções: **"Já vem em toda OS"** e **"Para usar quando precisar"**. Não tem interruptor na lista nem texto explicando.
-- Para trocar um checklist de seção, a pessoa abre o checklist (`chk-modelo-editar`): a primeira linha é **"Vir em toda OS nova"**, com interruptor, e as perguntas vêm embaixo.
+- **Mais › Checklists** (`chk-modelos-ramo`) mostra o resultado em vez da configuração, em três seções: **"Já vem em toda OS"**, **"Para usar quando precisar"** e **"Não usados na empresa"** (em cinza; só aparece se houver algum). Não tem interruptor na lista nem texto explicando.
+- Para trocar um checklist de seção, a pessoa abre o checklist (`chk-modelo-editar`). No topo vem **"Quando usar"**, com três opções e ✓ à direita: "Em toda OS nova", "Quando eu precisar" e "Não usar na empresa". As perguntas vêm embaixo.
+- "Não usar na empresa" **esconde, não apaga**: o checklist some da OS e do "Adicionar", e volta escolhendo outra opção. Ele vira o campo `usage: 'auto' | 'onDemand' | 'off'` no modelo da empresa (`companies/{id}/forms/{formId}`), e a sincronização do ramo não pode religar o que a empresa desligou (ver etapa 6). Checklist criado pela empresa ganha também "Apagar checklist", em vermelho, no fim da tela.
 - Os outros modelos do ramo ficam em **"Adicionar à OS ›"** (menu "…" da OS, como na spec da OS), já filtrados pelo ramo e pelos serviços da OS.
 
 ### 2. Uma pergunta por vez
