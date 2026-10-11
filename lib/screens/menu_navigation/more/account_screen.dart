@@ -102,23 +102,29 @@ class AccountView extends StatelessWidget {
   }
 
   Widget _avatar(BuildContext context) {
+    // The person icon shows while the photo loads and when it fails, never
+    // a spinner that may not stop.
+    final fallback = Container(
+      key: const ValueKey('account_avatar_fallback'),
+      width: 56,
+      height: 56,
+      color: AppColors.secondaryFill.resolveFrom(context),
+      child: Icon(
+        CupertinoIcons.person_solid,
+        color: AppColors.textSecondary.resolveFrom(context),
+      ),
+    );
     return ClipOval(
-      child: photoUrl != null
+      child: photoUrl != null && photoUrl!.isNotEmpty
           ? CachedImage(
               imageUrl: photoUrl!,
               width: 56,
               height: 56,
               fit: BoxFit.cover,
+              placeholder: fallback,
+              errorWidget: fallback,
             )
-          : Container(
-              width: 56,
-              height: 56,
-              color: AppColors.secondaryFill.resolveFrom(context),
-              child: Icon(
-                CupertinoIcons.person_solid,
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
+          : fallback,
     );
   }
 

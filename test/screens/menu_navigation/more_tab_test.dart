@@ -165,6 +165,24 @@ void main() {
       expect(find.text(pt.switchCompany), findsNothing);
     });
 
+    testWidgets('photo shows the person icon while loading, no spinner',
+        (tester) async {
+      await tester.pumpWidget(app(AccountView(
+        name: 'Maria',
+        photoUrl: 'https://example.com/photo.jpg',
+        onSignOut: () async {},
+        deletion: AccountDeletionFlow(
+          paidPlansEnabled: false,
+          deleteAccount: () async {},
+          reauthenticate: () async {},
+        ),
+      )));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('account_avatar_fallback')),
+          findsOneWidget);
+      expect(find.byType(CupertinoActivityIndicator), findsNothing);
+    });
+
     testWidgets('delete asks twice before deleting', (tester) async {
       final calls = await pumpAccount(tester);
 
