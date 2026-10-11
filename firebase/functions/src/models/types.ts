@@ -230,6 +230,10 @@ export interface PaymentTransaction {
   description?: string;
   createdAt: DateValue;
   createdBy: UserAggr;
+  /** Asaas only: receipt page of the payment (`transactionReceiptUrl`). Optional, additive. */
+  receiptUrl?: string;
+  /** Asaas only: how the customer paid (PIX | BOLETO | CREDIT_CARD | DEBIT_CARD ...). Optional, additive. */
+  billingType?: string;
 }
 
 export interface OrderAggr {

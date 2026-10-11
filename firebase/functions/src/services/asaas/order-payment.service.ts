@@ -9,6 +9,10 @@
  * transaction so the repair trigger can restore one that an old app version
  * overwrote.
  *
+ * Asaas transactions also carry the optional `billingType` and `receiptUrl`
+ * (Asaas `transactionReceiptUrl`, https on asaas.com only). Both are additive:
+ * old app versions ignore them, and payloads without them still book.
+ *
  * Payment status follows the app convention: `paid` | `unpaid` ("partial" is
  * computed in memory by the app). Remaining balance = total - paidAmount.
  */
@@ -70,6 +74,49 @@ export function describeAsaasPayment(
   return description;
 }
 
+const BILLING_TYPE_PATTERN = /^[A-Z_]{1,32}$/;
+
+/** Asaas billing type to store on the transaction, or undefined when missing/unexpected. */
+export function sanitizeBillingType(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const billingType = value.trim().toUpperCase();
+  return BILLING_TYPE_PATTERN.test(billingType) ? billingType : undefined;
+}
+
+/**
+ * Receipt URL to store on the transaction: only https links on an Asaas
+ * domain (asaas.com and its subdomains, e.g. sandbox.asaas.com). Anything else
+ * (missing, malformed, other host) is dropped, so the app never opens a link
+ * that did not come from Asaas.
+ */
+export function sanitizeReceiptUrl(value: unknown): string | undefined {
+  if (typeof value !== 'string' || value.length > 2048) return undefined;
+  let url: URL;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== 'https:') return undefined;
+  const host = url.hostname.toLowerCase();
+  if (host !== 'asaas.com' && !host.endsWith('.asaas.com')) return undefined;
+  return url.toString();
+}
+
+/**
+ * Optional Asaas details of a payment (`receiptUrl`, `billingType`). Keys are
+ * left out when there is no valid value: Firestore rejects undefined and old
+ * payloads (no `transactionReceiptUrl`) keep working.
+ */
+export function asaasPaymentDetails(payment: AsaasPaymentEvent): Pick<PaymentTransaction, 'receiptUrl' | 'billingType'> {
+  const details: Pick<PaymentTransaction, 'receiptUrl' | 'billingType'> = {};
+  const billingType = sanitizeBillingType(payment.billingType);
+  if (billingType) details.billingType = billingType;
+  const receiptUrl = sanitizeReceiptUrl(payment.transactionReceiptUrl);
+  if (receiptUrl) details.receiptUrl = receiptUrl;
+  return details;
+}
+
 /** The order transaction for an Asaas payment (gross `value`, what the customer paid). */
 export function buildAsaasTransaction(
   payment: AsaasPaymentEvent,
@@ -84,7 +131,30 @@ export function buildAsaasTransaction(
     description: describeAsaasPayment(payment, charge, fallbackInstallmentNumber),
     createdAt: now.toISOString(),
     createdBy: { ...ASAAS_ACTOR },
+    ...asaasPaymentDetails(payment),
   };
+}
+
+/**
+ * Copies `receiptUrl`/`billingType` from `source` into `target` when `target`
+ * lacks them. Returns the merged transaction, or null when nothing changes
+ * (an existing value is never overwritten).
+ */
+export function mergeAsaasDetails(
+  target: PaymentTransaction,
+  source: Pick<PaymentTransaction, 'receiptUrl' | 'billingType'>,
+): PaymentTransaction | null {
+  const merged: PaymentTransaction = { ...target };
+  let changed = false;
+  if (!target.receiptUrl && source.receiptUrl) {
+    merged.receiptUrl = source.receiptUrl;
+    changed = true;
+  }
+  if (!target.billingType && source.billingType) {
+    merged.billingType = source.billingType;
+    changed = true;
+  }
+  return changed ? merged : null;
 }
 
 function sumPayments(transactions: PaymentTransaction[]): number {
@@ -147,8 +217,13 @@ export async function applyAsaasPayment(
     const order = orderSnap.data() as Order;
     const charge = chargeSnap.data() as OrderCharge;
     const paidIds = charge.paidAsaasPaymentIds ?? [];
-    if (paidIds.includes(payment.id)) return { applied: false };
     if ((charge.refundedAsaasPaymentIds ?? []).includes(payment.id)) return { applied: false };
+    if (paidIds.includes(payment.id)) {
+      // Already booked (e.g. card CONFIRMED, then RECEIVED with the receipt):
+      // only fill in receipt/billing type that the first event did not carry.
+      backfillAsaasDetails(tx, oRef, cRef, order, charge, payment);
+      return { applied: false };
+    }
 
     const now = new Date();
     const transaction = buildAsaasTransaction(payment, charge, now, paidIds.length + 1);
@@ -186,6 +261,43 @@ export async function applyAsaasPayment(
 
     return { applied: !alreadyOnOrder };
   });
+}
+
+/**
+ * Adds `receiptUrl`/`billingType` of an already booked payment to the order
+ * transaction and to the charge copy when they are missing. Never touches
+ * amounts or status, never overwrites a stored value and writes nothing when
+ * there is nothing new (redeliveries stay no-ops).
+ */
+function backfillAsaasDetails(
+  tx: FirebaseFirestore.Transaction,
+  oRef: FirebaseFirestore.DocumentReference,
+  cRef: FirebaseFirestore.DocumentReference,
+  order: Order,
+  charge: OrderCharge,
+  payment: AsaasPaymentEvent,
+): void {
+  const details = asaasPaymentDetails(payment);
+  if (!details.receiptUrl && !details.billingType) return;
+  const transactionId = asaasTransactionId(payment.id);
+
+  const transactions = order.transactions ?? [];
+  const orderIndex = transactions.findIndex((t) => t.id === transactionId);
+  const orderMerged = orderIndex >= 0 ? mergeAsaasDetails(transactions[orderIndex], details) : null;
+  if (orderMerged) {
+    const next = [...transactions];
+    next[orderIndex] = orderMerged;
+    tx.update(oRef, { transactions: next });
+  }
+
+  const applied = charge.appliedTransactions ?? [];
+  const appliedIndex = applied.findIndex((t) => t.id === transactionId);
+  const appliedMerged = appliedIndex >= 0 ? mergeAsaasDetails(applied[appliedIndex], details) : null;
+  if (appliedMerged) {
+    const next = [...applied];
+    next[appliedIndex] = appliedMerged;
+    tx.update(cRef, { appliedTransactions: next });
+  }
 }
 
 const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -282,6 +394,10 @@ export async function revertAsaasPayment(
  *    Quotes and canceled orders keep `payment: null, paid: false` (same rule
  *    as the app), so a canceled order is never flipped to paid.
  *
+ * 3. Puts back `receiptUrl`/`billingType` on booked Asaas transactions when an
+ *    old app version (model without these keys) saved the order without them,
+ *    copying them from the charge's `appliedTransactions`.
+ *
  * Writes only when something actually changes, so the trigger that calls it
  * does not loop. A status-only fix keeps the app's updatedAt/updatedBy.
  */
@@ -328,9 +444,24 @@ export async function repairAsaasTransactions(
       }
     }
 
+    // An old app version (model without receiptUrl/billingType) drops these
+    // keys when it saves the order: put them back from the charge copy.
+    const appliedById = new Map<string, PaymentTransaction>();
+    for (const { charge } of charges) {
+      for (const copy of charge.appliedTransactions ?? []) appliedById.set(copy.id, copy);
+    }
+    let enriched = 0;
+    const kept = current.map((t) => {
+      const copy = t.id?.startsWith(ASAAS_TRANSACTION_PREFIX) ? appliedById.get(t.id) : undefined;
+      const merged = copy ? mergeAsaasDetails(t, copy) : null;
+      if (!merged) return t;
+      enriched += 1;
+      return merged;
+    });
+
     const repaired = missing.length + removed;
     if (repaired > 0) {
-      const fields = computePaymentFields(order, [...current, ...missing]);
+      const fields = computePaymentFields(order, [...kept, ...missing]);
       tx.update(oRef, { ...fields, updatedAt: new Date().toISOString(), updatedBy: { ...ASAAS_ACTOR } });
       console.log('[AsaasPayment] repaired order transactions', {
         companyId, orderId, restored: missing.length, removedRefunded: removed,
@@ -338,20 +469,31 @@ export async function repairAsaasTransactions(
       return { repaired };
     }
 
+    // Details-only restore: amounts are unchanged, so keep the app's
+    // updatedAt/updatedBy (same as the status-only fix below).
+    const update: Record<string, unknown> = {};
+    if (enriched > 0) {
+      update.transactions = kept;
+      console.log('[AsaasPayment] restored Asaas payment details', { companyId, orderId, enriched });
+    }
+
     // Legacy orders (payment set, no paidAmount; the app falls back to total)
     // are never downgraded by the status-only fix.
-    if (order.paidAmount === undefined || order.paidAmount === null) return { repaired: 0 };
-
-    const fields = computePaymentFields(order, current);
-    const storedPaidAmount = roundMoney(Number(order.paidAmount) || 0);
-    if (
-      storedPaidAmount !== fields.paidAmount ||
-      (order.paid === true) !== fields.paid ||
-      (order.payment ?? null) !== fields.payment
-    ) {
-      tx.update(oRef, { paidAmount: fields.paidAmount, paid: fields.paid, payment: fields.payment });
-      console.log('[AsaasPayment] fixed order payment fields', { companyId, orderId });
+    if (order.paidAmount !== undefined && order.paidAmount !== null) {
+      const fields = computePaymentFields(order, current);
+      const storedPaidAmount = roundMoney(Number(order.paidAmount) || 0);
+      if (
+        storedPaidAmount !== fields.paidAmount ||
+        (order.paid === true) !== fields.paid ||
+        (order.payment ?? null) !== fields.payment
+      ) {
+        update.paidAmount = fields.paidAmount;
+        update.paid = fields.paid;
+        update.payment = fields.payment;
+        console.log('[AsaasPayment] fixed order payment fields', { companyId, orderId });
+      }
     }
+    if (Object.keys(update).length > 0) tx.update(oRef, update);
     return { repaired: 0 };
   });
 }

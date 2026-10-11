@@ -7,7 +7,10 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/financial_tab_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_charge.dart';
+import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/screens/dashboard/financial_tab.dart';
+import 'package:praticos/screens/payments/send_charge_flow.dart';
 import 'package:praticos/services/format_service.dart';
 
 Order _order(
@@ -334,5 +337,55 @@ void main() {
 
     expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('"Mandar cobrança" with Asaas: creates the charge, then shares, once',
+      (tester) async {
+    FormatService().setLocale('pt');
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+
+    final calls = <String>[];
+    final createGate = Completer<OrderCharge?>();
+    final flow = SendChargeFlow(
+      canCharge: true,
+      settingsLoader: () async =>
+          PaymentSettings(asaasEnabled: true, asaasConnected: true),
+      openChargeLoader: (_) async => null,
+      createCharge: (_, order, remaining) {
+        calls.add('create:${order.id}:$remaining');
+        return createGate.future;
+      },
+      share: (_, order) async => calls.add('share:${order.id}'),
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: FinancialTab(
+          store: storeWith(open: [ana]),
+          sendChargeFlow: flow,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('financialSendCharge')));
+    await tester.pump();
+    await tester.pump();
+    // Second tap while the charge screen is open is ignored.
+    await tester.tap(find.byKey(const Key('financialSendCharge')));
+    await tester.pump();
+    expect(calls, ['create:a1:1250.0']);
+
+    createGate.complete(OrderCharge(id: 'ch1', status: ChargeStatus.pending));
+    await tester.pump();
+    await tester.pump();
+    expect(calls, ['create:a1:1250.0', 'share:a1']);
+    expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
   });
 }

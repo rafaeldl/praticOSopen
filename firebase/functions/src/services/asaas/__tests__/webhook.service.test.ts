@@ -249,4 +249,67 @@ describe('webhook.service - handleAsaasEvent', () => {
     expect(all).not.toContain('João');
     expect(all).not.toContain('990');
   });
+
+  it('PAYMENT_RECEIVED com transactionReceiptUrl (payload real do Asaas) guarda comprovante e forma', async () => {
+    seed();
+    const receipt = 'https://www.asaas.com/comprovantes/6412875634';
+
+    await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', {
+      billingType: 'PIX',
+      transactionReceiptUrl: receipt,
+      // Extra fields Asaas sends are ignored.
+      ...({ invoiceUrl: 'https://www.asaas.com/i/1', confirmedDate: '2026-10-04', customer: 'cus_1' } as object),
+    }));
+
+    const [transaction] = data(ORDER_PATH).transactions as any[];
+    expect(transaction).toEqual(expect.objectContaining({ id: 'asaas_pay_1', receiptUrl: receipt, billingType: 'PIX' }));
+    expect(mockNotify).toHaveBeenCalledTimes(1);
+  });
+
+  it('payload antigo (sem transactionReceiptUrl) continua lançando, sem comprovante', async () => {
+    seed();
+    const legacy = event('PAYMENT_CONFIRMED', { billingType: 'BOLETO', status: 'CONFIRMED' });
+
+    await handleAsaasEvent('c1', legacy);
+
+    const [transaction] = data(ORDER_PATH).transactions as any[];
+    expect(transaction.description).toBe('Asaas • Boleto');
+    expect(transaction.billingType).toBe('BOLETO');
+    expect(transaction.receiptUrl).toBeUndefined();
+    expect(data(ORDER_PATH).paidAmount).toBe(1000);
+  });
+
+  it('CONFIRMED e depois RECEIVED com comprovante: um lançamento, um push, comprovante gravado', async () => {
+    seed();
+    const receipt = 'https://www.asaas.com/comprovantes/1';
+
+    await handleAsaasEvent('c1', event('PAYMENT_CONFIRMED', { billingType: 'CREDIT_CARD', status: 'CONFIRMED' }));
+    await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', { billingType: 'CREDIT_CARD', transactionReceiptUrl: receipt }));
+
+    const order = data(ORDER_PATH);
+    expect(order.transactions).toHaveLength(1);
+    expect(order.paidAmount).toBe(1000);
+    expect((order.transactions as any[])[0].receiptUrl).toBe(receipt);
+    expect(mockNotify).toHaveBeenCalledTimes(1);
+  });
+
+  it('mesmo evento com comprovante reenviado é ignorado pelo id', async () => {
+    seed();
+    const received = event('PAYMENT_RECEIVED', { transactionReceiptUrl: 'https://www.asaas.com/comprovantes/1' }, 'evt_receipt&1');
+
+    await handleAsaasEvent('c1', received);
+    const after = data(ORDER_PATH);
+    await handleAsaasEvent('c1', received);
+
+    expect(data(ORDER_PATH)).toEqual(after);
+    expect(mockNotify).toHaveBeenCalledTimes(1);
+  });
+
+  it('não loga o link do comprovante', async () => {
+    seed();
+    await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', { transactionReceiptUrl: 'https://www.asaas.com/comprovantes/secret123' }));
+
+    const all = JSON.stringify([...errorSpy.mock.calls, ...warnSpy.mock.calls, ...logSpy.mock.calls]);
+    expect(all).not.toContain('secret123');
+  });
 });
