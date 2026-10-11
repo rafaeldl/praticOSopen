@@ -28,6 +28,7 @@
           :order="order"
           :country="company?.country"
           :terms-of-service="company?.termsOfService ?? null"
+          :show-values="showValues"
           @approve="showApproveModal = true"
           @reject="showRejectModal = true"
         />
@@ -42,7 +43,7 @@
         />
 
         <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-        <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" />
+        <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" :show-values="showValues" />
         <OrderVehiclesCard :order="order" />
         <OrderChecklistCard :forms="order.forms" />
         <OrderActivityCard :comments="comments" />
@@ -64,12 +65,13 @@
             :order="order"
             :country="company?.country"
             :terms-of-service="company?.termsOfService ?? null"
+            :show-values="showValues"
             @approve="showApproveModal = true"
             @reject="showRejectModal = true"
           />
           <OrderProgressCard v-else :status="order.status" />
           <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-          <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" />
+          <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" :show-values="showValues" />
           <OrderChecklistCard :forms="order.forms" />
         </div>
 
@@ -148,6 +150,7 @@
 <script setup lang="ts">
 import { shouldRefreshCharge } from '~/utils/charge'
 import { quietRefresh } from '~/utils/quiet-refresh'
+import { showsValues } from '~/utils/values'
 
 const route = useRoute()
 const token = route.params.token as string
@@ -164,6 +167,8 @@ const company = computed(() => (orderData.value as any)?.data?.company)
 const comments = computed(() => (orderData.value as any)?.data?.comments || [])
 const permissions = computed(() => (orderData.value as any)?.data?.permissions || [])
 const charge = computed(() => (orderData.value as any)?.data?.charge ?? null)
+// "Valores e cobrança" off: the page is a service report, without prices
+const showValues = computed(() => showsValues((orderData.value as any)?.data))
 
 // Customer pays the Asaas invoice in another tab; reflect it when they come back
 // Quiet fetch: a failed background refresh must not flip the page to the invalid-link screen.

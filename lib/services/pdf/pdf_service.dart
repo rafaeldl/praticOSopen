@@ -15,6 +15,30 @@ import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_main_os_builder.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
+/// Whether the order PDF shows prices, totals and payments.
+///
+/// [companyUseFinancial] is `Company.useFinancial` as stored (null = absent);
+/// [resolvedUseFinancial] is the value already resolved for the session
+/// (company > segment default > true). Only `false` hides the values.
+bool orderPdfShowsValues({
+  bool? companyUseFinancial,
+  bool resolvedUseFinancial = true,
+}) {
+  return companyUseFinancial ?? resolvedUseFinancial;
+}
+
+/// Whether the order "…" menu offers the PDF.
+///
+/// People who see prices get the full PDF. When the company turned off
+/// "Valores e cobrança" nobody sees prices, so everybody gets the PDF
+/// without values (a service report).
+bool canShareOrderPdf({
+  required bool canViewPrices,
+  required bool useFinancial,
+}) {
+  return canViewPrices || !useFinancial;
+}
+
 /// Dados necessarios para gerar o PDF da OS
 class OsPdfData {
   final Order order;
@@ -24,6 +48,9 @@ class OsPdfData {
   final SegmentConfigProvider config;
   final PdfLocalizations localizations;
 
+  /// Overrides [showValues]; null derives it from the company / config.
+  final bool? showValuesOverride;
+
   OsPdfData({
     required this.order,
     this.customer,
@@ -31,7 +58,17 @@ class OsPdfData {
     required this.forms,
     required this.config,
     required this.localizations,
+    this.showValuesOverride,
   });
+
+  /// `false` renders the PDF without prices, totals or payments
+  /// (`Company.useFinancial == false`).
+  bool get showValues =>
+      showValuesOverride ??
+      orderPdfShowsValues(
+        companyUseFinancial: company.useFinancial,
+        resolvedUseFinancial: config.useFinancial,
+      );
 }
 
 /// Opcoes para geracao do PDF
@@ -95,6 +132,7 @@ class PdfService {
       config: data.config,
       localizations: data.localizations,
       showWatermark: showWatermark,
+      showValues: data.showValues,
     );
 
     final formsBuilder = PdfFormsBuilder(

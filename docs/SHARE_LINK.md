@@ -351,6 +351,22 @@ Adiciona comentário.
 
 Lista comentários visíveis ao cliente.
 
+### Empresa sem "Valores e cobrança"
+
+Com `companies/{id}.useFinancial == false`, `GET /public/orders/:token` vira
+um relatório do serviço (ver `docs/VALUES_AND_BILLING_TOGGLE.md`):
+
+- `order.services[].value`, `order.products[].value`, `order.total`,
+  `order.discount`, `order.paidAmount` e `order.remainingBalance` **não são
+  enviados**.
+- `charge` é sempre `null` (a cobrança Asaas nem é lida).
+- `data.showValues: false` (campo novo; `true` nos demais casos).
+
+Campo ausente ou `true` = resposta igual à de antes. A página `/q/{token}`
+(`firebase/web`) usa `showsValues()` (`utils/values.ts`) para esconder o card
+de total, os preços dos itens e o total do orçamento; uma página antiga que
+ignore o campo só não recebe os valores.
+
 ### Endpoints Bot (WhatsApp)
 
 #### `POST /bot/orders/{number}/share`

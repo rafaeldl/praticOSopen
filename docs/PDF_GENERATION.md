@@ -112,6 +112,26 @@ final bytes = await PdfService().generateOsPdf(
 );
 ```
 
+## PDF sem valores ("Valores e cobrança" desligada)
+
+Quando a empresa desliga "Valores e cobrança" (`Company.useFinancial == false`,
+ver `docs/VALUES_AND_BILLING_TOGGLE.md`), o PDF vira um relatório do serviço:
+
+- Sem o card "Resumo" (serviços, produtos, desconto, total, pago); o card do
+  cliente ocupa a largura toda.
+- Tabela de itens só com Tipo, Descrição e Qtd (sem "Valor unit." e "Total").
+- Sem subtotal no cabeçalho de cada equipamento.
+- Fotos, checklists, QR Code, termos e assinaturas continuam iguais.
+
+Como é decidido:
+
+| Peça | Regra |
+|------|-------|
+| `orderPdfShowsValues()` (`pdf_service.dart`) | `company.useFinancial` se gravado; senão o valor resolvido na sessão (`SegmentConfigProvider.useFinancial`, padrão `true`) |
+| `OsPdfData.showValues` | usa a regra acima; `showValuesOverride` força um valor |
+| `PdfMainOsBuilder(showValues:)` | padrão `true` (comportamento de sempre) |
+| `canShareOrderPdf()` | o item "PDF" do menu "…" da OS (nova e antiga) aparece para quem vê preços **ou** quando a empresa desligou a opção (aí todo mundo recebe o PDF sem valores) |
+
 ## Testes
 
 - `test/services/pdf/pdf_main_os_builder_photos_test.dart` — seção de fotos, ausência de

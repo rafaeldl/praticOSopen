@@ -36,7 +36,7 @@ Sem modelo novo e sem campo novo. Estado continua no `OrderStore`; repositórios
 5. "Pronta" bloqueia com checklist pendente; "Cancelar OS" pede confirmação.
 6. "…" com 3 grupos: "Adicionar à OS ›" (prazo de entrega, outro veículo, e "Checklist, fotos, comentário e mais", que abre a tela completa); "Mandar para o cliente" · "PDF"; "Cancelar OS" / "Apagar OS" em vermelho.
 7. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
-8. Foto e "Falar o que fazer" ficam escondidos (`showAssistant`) até a fase 2 (IA).
+8. Foto e "Falar o que fazer" só aparecem na Nova OS com `kAiOrderAssistEnabled` (desligado por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
 
 ## Exemplos de Uso
 
