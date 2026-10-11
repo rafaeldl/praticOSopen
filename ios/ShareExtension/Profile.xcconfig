@@ -1,0 +1,15 @@
+// Share Extension: Pods search paths (receive_sharing_intent) + Flutter build
+// name/number, so the extension version always matches the app.
+#include? "../Pods/Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"
+#include "../Flutter/Generated.xcconfig"
+
+// receive_sharing_intent imports Flutter. Flutter's podhelper only adds the
+// engine framework path to pod targets, so add it here too (same layout).
+FLUTTER_ENGINE_FRAMEWORK_DIR[sdk=iphoneos*] = $(FLUTTER_ROOT)/bin/cache/artifacts/engine/ios-release/Flutter.xcframework/ios-arm64
+FLUTTER_ENGINE_FRAMEWORK_DIR[sdk=iphonesimulator*] = $(FLUTTER_ROOT)/bin/cache/artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator
+FRAMEWORK_SEARCH_PATHS = $(inherited) "$(FLUTTER_ENGINE_FRAMEWORK_DIR)"
+
+// The Pods xcconfig links every pod (Firebase, RevenueCat, ...). The extension
+// only uses receive_sharing_intent, so link just that one (no $(inherited)):
+// loading the rest on every share would waste the extension's memory.
+OTHER_LDFLAGS = -framework "receive_sharing_intent"

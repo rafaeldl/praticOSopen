@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
@@ -16,8 +16,9 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Receives photos and PDFs shared from other apps and asks "Em qual OS?".
 ///
-/// Android only: on any other platform [start] does nothing, so iOS behavior
-/// is unchanged (the iOS Share Extension is a separate step).
+/// Android (intent filters) and iOS (Share Extension in `ios/ShareExtension`).
+/// On iOS the extension copies the files to the App Group container and opens
+/// the app; those copies are deleted once handled.
 class ReceiveShareService {
   ReceiveShareService._();
   static final ReceiveShareService instance = ReceiveShareService._();
@@ -25,7 +26,8 @@ class ReceiveShareService {
   StreamSubscription<List<SharedMediaFile>>? _sub;
   bool _busy = false;
 
-  static bool get isSupported => !kIsWeb && Platform.isAndroid;
+  static bool get isSupported => receiveShareSupported(
+      isWeb: kIsWeb, operatingSystem: kIsWeb ? '' : Platform.operatingSystem);
 
   Future<void> start() async {
     if (!isSupported || _sub != null) return;
@@ -40,12 +42,19 @@ class ReceiveShareService {
     }
   }
 
+  /// Files from the plugin payload (Android intent or iOS Share Extension).
+  /// Only images and files are kept; text and URLs are ignored.
+  @visibleForTesting
+  static List<ReceivedFile> filesFromShared(List<SharedMediaFile> media) =>
+      media
+          .where((m) =>
+              m.type == SharedMediaType.image || m.type == SharedMediaType.file)
+          .map((m) => ReceivedFile(
+              path: normalizeSharedPath(m.path), mimeType: m.mimeType))
+          .toList();
+
   Future<void> _onShared(List<SharedMediaFile> media) async {
-    final files = media
-        .where((m) => m.type == SharedMediaType.image ||
-            m.type == SharedMediaType.file)
-        .map((m) => ReceivedFile(path: m.path, mimeType: m.mimeType))
-        .toList();
+    final files = filesFromShared(media);
     try {
       await ReceiveSharingIntent.instance.reset();
     } catch (_) {}
@@ -71,6 +80,18 @@ class ReceiveShareService {
       await _saveAndConfirm(context, companyId, order!, batch);
     } finally {
       _busy = false;
+      _deleteExtensionCopies(files);
+    }
+  }
+
+  /// Deletes the iOS Share Extension copies (saved, canceled or ignored), so
+  /// the App Group container does not grow with every share.
+  void _deleteExtensionCopies(List<ReceivedFile> files) {
+    for (final f in files) {
+      if (!isShareExtensionCopy(f.path)) continue;
+      try {
+        File(f.path).deleteSync();
+      } catch (_) {}
     }
   }
 

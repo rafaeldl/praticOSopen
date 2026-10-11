@@ -62,3 +62,30 @@ class ReceivedBatch {
 
   bool get isEmpty => photos.isEmpty && pdfs.isEmpty;
 }
+
+/// Whether receiving shares from other apps is wired on this platform:
+/// Android (intent filters) and iOS (Share Extension). [operatingSystem] is
+/// `Platform.operatingSystem`.
+bool receiveShareSupported({
+  required bool isWeb,
+  required String operatingSystem,
+}) =>
+    !isWeb && (operatingSystem == 'android' || operatingSystem == 'ios');
+
+/// Turns a path handed over by the share plugin into a plain file path.
+///
+/// The iOS plugin usually strips `file://`, but a `file://` URI (possibly
+/// percent-encoded) is accepted too. Plain paths are returned unchanged.
+String normalizeSharedPath(String path) {
+  if (!path.startsWith('file://')) return path;
+  try {
+    return Uri.parse(path).toFilePath();
+  } catch (_) {
+    return path.substring('file://'.length);
+  }
+}
+
+/// True for the copies the iOS Share Extension leaves in the App Group
+/// container. They are ours to delete once handled; anything else (e.g. a
+/// photo in the iPhone library) is never touched.
+bool isShareExtensionCopy(String path) => path.contains('/Shared/AppGroup/');
