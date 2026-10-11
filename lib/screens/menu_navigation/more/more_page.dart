@@ -14,6 +14,7 @@ class MorePage extends StatelessWidget {
     required this.children,
     this.previousPageTitle,
     this.subtitle,
+    this.floatingButton,
   });
 
   final String title;
@@ -24,6 +25,10 @@ class MorePage extends StatelessWidget {
 
   /// One line under the large title.
   final String? subtitle;
+
+  /// The screen's single blue button, floating over the bottom of the page
+  /// (design system rule 11). The list gets room so nothing hides under it.
+  final Widget? floatingButton;
   final List<Widget> children;
 
   @override
@@ -32,7 +37,7 @@ class MorePage extends StatelessWidget {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: Material(
         type: MaterialType.transparency,
-        child: CustomScrollView(
+        child: _withFloatingButton(context, CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(title),
@@ -62,13 +67,33 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ...children,
-                  const SizedBox(height: AppSpacing.xxl),
+                  SizedBox(
+                    height: floatingButton == null
+                        ? AppSpacing.xxl
+                        : AppSizes.primaryButtonHeight + AppSpacing.xxl * 2,
+                  ),
                 ]),
               ),
             ),
           ],
-        ),
+        )),
       ),
+    );
+  }
+
+  Widget _withFloatingButton(BuildContext context, Widget scroll) {
+    final button = floatingButton;
+    if (button == null) return scroll;
+    return Stack(
+      children: [
+        Positioned.fill(child: scroll),
+        Positioned(
+          left: AppSpacing.blockMargin,
+          right: AppSpacing.blockMargin,
+          bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+          child: button,
+        ),
+      ],
     );
   }
 }

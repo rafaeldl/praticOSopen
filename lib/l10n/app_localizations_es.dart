@@ -5565,4 +5565,44 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get roleShortTechnician => 'hace los servicios, no ve precios';
+
+  @override
+  String get checklistsTitle => 'Checklists';
+
+  @override
+  String get checklistsSubtitle =>
+      'Preguntas que el técnico responde en la orden';
+
+  @override
+  String get checklistsYours => 'Tus checklists';
+
+  @override
+  String get checklistsReady => 'Listos para usar';
+
+  @override
+  String checklistQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count preguntas',
+      one: '1 pregunta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistWithPhotos => 'con fotos';
+
+  @override
+  String get checklistOff => 'Desactivado';
+
+  @override
+  String get checklistUse => 'Usar';
+
+  @override
+  String get checklistNew => 'Nuevo checklist';
+
+  @override
+  String get checklistsEmpty =>
+      'Aún no hay checklists. Crea uno o usa uno listo.';
 }

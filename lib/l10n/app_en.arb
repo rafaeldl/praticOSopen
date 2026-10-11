@@ -2649,5 +2649,15 @@
   "roleShortSupervisor": "coordinates the team, doesn't see prices",
   "roleShortManager": "sees revenue and costs",
   "roleShortConsultant": "makes quotes, sees only their orders",
-  "roleShortTechnician": "does the work, doesn't see prices"
+  "roleShortTechnician": "does the work, doesn't see prices",
+  "checklistsTitle": "Checklists",
+  "checklistsSubtitle": "Questions the technician answers on the order",
+  "checklistsYours": "Your checklists",
+  "checklistsReady": "Ready to use",
+  "checklistQuestions": "{count, plural, =1{1 question} other{{count} questions}}",
+  "checklistWithPhotos": "with photos",
+  "checklistOff": "Off",
+  "checklistUse": "Use",
+  "checklistNew": "New checklist",
+  "checklistsEmpty": "No checklists yet. Create one or use a ready-made one."
 }

@@ -5540,4 +5540,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roleShortTechnician => 'does the work, doesn\'t see prices';
+
+  @override
+  String get checklistsTitle => 'Checklists';
+
+  @override
+  String get checklistsSubtitle =>
+      'Questions the technician answers on the order';
+
+  @override
+  String get checklistsYours => 'Your checklists';
+
+  @override
+  String get checklistsReady => 'Ready to use';
+
+  @override
+  String checklistQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '1 question',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistWithPhotos => 'with photos';
+
+  @override
+  String get checklistOff => 'Off';
+
+  @override
+  String get checklistUse => 'Use';
+
+  @override
+  String get checklistNew => 'New checklist';
+
+  @override
+  String get checklistsEmpty =>
+      'No checklists yet. Create one or use a ready-made one.';
 }

@@ -2649,5 +2649,15 @@
   "roleShortSupervisor": "coordina el equipo, no ve precios",
   "roleShortManager": "ve facturación y costos",
   "roleShortConsultant": "hace presupuestos, ve solo sus órdenes",
-  "roleShortTechnician": "hace los servicios, no ve precios"
+  "roleShortTechnician": "hace los servicios, no ve precios",
+  "checklistsTitle": "Checklists",
+  "checklistsSubtitle": "Preguntas que el técnico responde en la orden",
+  "checklistsYours": "Tus checklists",
+  "checklistsReady": "Listos para usar",
+  "checklistQuestions": "{count, plural, =1{1 pregunta} other{{count} preguntas}}",
+  "checklistWithPhotos": "con fotos",
+  "checklistOff": "Desactivado",
+  "checklistUse": "Usar",
+  "checklistNew": "Nuevo checklist",
+  "checklistsEmpty": "Aún no hay checklists. Crea uno o usa uno listo."
 }

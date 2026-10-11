@@ -9801,6 +9801,66 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'faz os serviços, não vê preços'**
   String get roleShortTechnician;
+
+  /// No description provided for @checklistsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists'**
+  String get checklistsTitle;
+
+  /// No description provided for @checklistsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas que o técnico responde na OS'**
+  String get checklistsSubtitle;
+
+  /// No description provided for @checklistsYours.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus checklists'**
+  String get checklistsYours;
+
+  /// No description provided for @checklistsReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prontos para usar'**
+  String get checklistsReady;
+
+  /// No description provided for @checklistQuestions.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 pergunta} other{{count} perguntas}}'**
+  String checklistQuestions(int count);
+
+  /// No description provided for @checklistWithPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'com fotos'**
+  String get checklistWithPhotos;
+
+  /// No description provided for @checklistOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligado'**
+  String get checklistOff;
+
+  /// No description provided for @checklistUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar'**
+  String get checklistUse;
+
+  /// No description provided for @checklistNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo checklist'**
+  String get checklistNew;
+
+  /// No description provided for @checklistsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum checklist ainda. Crie um ou use um pronto.'**
+  String get checklistsEmpty;
 }
 
 class _AppLocalizationsDelegate
