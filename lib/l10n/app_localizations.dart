@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentCustomers.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes Recentes'**
+  /// **'Usados por último'**
   String get recentCustomers;
 
   /// No description provided for @role.
@@ -7335,6 +7335,180 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
+
+  /// No description provided for @pickCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é o cliente?'**
+  String get pickCustomerTitle;
+
+  /// No description provided for @pickCustomerSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para escolher ou digite o nome, telefone ou placa'**
+  String get pickCustomerSubtitle;
+
+  /// No description provided for @searchCustomerPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar por nome, telefone ou placa'**
+  String get searchCustomerPlaceholder;
+
+  /// No description provided for @searchCustomerNoPlatePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar por nome ou telefone'**
+  String get searchCustomerNoPlatePlaceholder;
+
+  /// No description provided for @addNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar cliente novo'**
+  String get addNewCustomer;
+
+  /// No description provided for @allCustomers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get allCustomers;
+
+  /// No description provided for @plateValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Placa {plate}'**
+  String plateValue(String plate);
+
+  /// No description provided for @customerNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Ana Ribeiro'**
+  String get customerNamePlaceholder;
+
+  /// No description provided for @customerNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do cliente'**
+  String get customerNameRequired;
+
+  /// No description provided for @customerPhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone ou WhatsApp'**
+  String get customerPhoneLabel;
+
+  /// No description provided for @customerPhoneHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usado para mandar o orçamento e o aviso de pronto.'**
+  String get customerPhoneHint;
+
+  /// No description provided for @moreCustomerData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais dados (e-mail, CPF ou CNPJ, endereço)'**
+  String get moreCustomerData;
+
+  /// No description provided for @openInMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir no mapa'**
+  String get openInMap;
+
+  /// No description provided for @callAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar'**
+  String get callAction;
+
+  /// No description provided for @newOrderFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS para {name}'**
+  String newOrderFor(String name);
+
+  /// No description provided for @ordersOfCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS de {name}'**
+  String ordersOfCustomer(String name);
+
+  /// No description provided for @devicesOfCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'{devices} de {name}'**
+  String devicesOfCustomer(String devices, String name);
+
+  /// No description provided for @totalSpent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total gasto'**
+  String get totalSpent;
+
+  /// No description provided for @deleteCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String deleteCustomerTitle(String name);
+
+  /// No description provided for @deleteCustomerKeepsOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'As OS continuam salvas.'**
+  String get deleteCustomerKeepsOrders;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar'**
+  String get deleteAction;
+
+  /// No description provided for @noCustomersYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem clientes'**
+  String get noCustomersYet;
+
+  /// No description provided for @addFirstCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar o primeiro cliente'**
+  String get addFirstCustomer;
+
+  /// No description provided for @noCustomerMatching.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum cliente com “{query}”'**
+  String noCustomerMatching(String query);
+
+  /// No description provided for @customersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String customersCount(int count);
+
+  /// No description provided for @openOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}'**
+  String openOrdersCount(int count);
+
+  /// No description provided for @lateOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS atrasada} other{{count} OS atrasadas}}'**
+  String lateOrdersCount(int count);
+
+  /// No description provided for @customerActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações do cliente'**
+  String get customerActions;
+
+  /// No description provided for @customerLookupError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os clientes. Tente de novo.'**
+  String get customerLookupError;
 }
 
 class _AppLocalizationsDelegate

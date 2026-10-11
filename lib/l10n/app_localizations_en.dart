@@ -1261,7 +1261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentOrders => 'Recent Orders';
 
   @override
-  String get recentCustomers => 'Recent Customers';
+  String get recentCustomers => 'Used last';
 
   @override
   String get role => 'Role';
@@ -3914,4 +3914,129 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listLoadError =>
       'Could not load this. Check your connection and try again.';
+
+  @override
+  String get pickCustomerTitle => 'Who is the customer?';
+
+  @override
+  String get pickCustomerSubtitle =>
+      'Tap to choose, or type a name, phone or plate';
+
+  @override
+  String get searchCustomerPlaceholder => 'Search by name, phone or plate';
+
+  @override
+  String get searchCustomerNoPlatePlaceholder => 'Search by name or phone';
+
+  @override
+  String get addNewCustomer => 'Add a new customer';
+
+  @override
+  String get allCustomers => 'All';
+
+  @override
+  String plateValue(String plate) {
+    return 'Plate $plate';
+  }
+
+  @override
+  String get customerNamePlaceholder => 'E.g.: Ana Ribeiro';
+
+  @override
+  String get customerNameRequired => 'Enter the customer name';
+
+  @override
+  String get customerPhoneLabel => 'Phone or WhatsApp';
+
+  @override
+  String get customerPhoneHint =>
+      'Used to send the quote and the ready notice.';
+
+  @override
+  String get moreCustomerData => 'More details (email, tax ID, address)';
+
+  @override
+  String get openInMap => 'Open in maps';
+
+  @override
+  String get callAction => 'Call';
+
+  @override
+  String newOrderFor(String name) {
+    return 'New order for $name';
+  }
+
+  @override
+  String ordersOfCustomer(String name) {
+    return 'Orders of $name';
+  }
+
+  @override
+  String devicesOfCustomer(String devices, String name) {
+    return '$name\'s $devices';
+  }
+
+  @override
+  String get totalSpent => 'Total spent';
+
+  @override
+  String deleteCustomerTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get deleteCustomerKeepsOrders => 'The orders stay saved.';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get noCustomersYet => 'You have no customers yet';
+
+  @override
+  String get addFirstCustomer => 'Add your first customer';
+
+  @override
+  String noCustomerMatching(String query) {
+    return 'No customer matching “$query”';
+  }
+
+  @override
+  String customersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers',
+      one: '1 customer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openOrdersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open orders',
+      one: '1 open order',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lateOrdersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count late orders',
+      one: '1 late order',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customerActions => 'More customer actions';
+
+  @override
+  String get customerLookupError => 'Could not load customers. Try again.';
 }

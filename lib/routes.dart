@@ -10,6 +10,7 @@ import 'package:praticos/screens/order_service_screen.dart';
 import 'package:praticos/screens/payment_management_screen.dart';
 import 'package:praticos/screens/product_form_screen.dart';
 import 'package:praticos/screens/product_list_screen.dart';
+import 'package:praticos/screens/customers/customer_detail_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/service_form_screen.dart';
@@ -33,6 +34,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/product_form': (context) => ProductFormScreen(),
   '/customer_form': (context) => CustomerFormScreen(),
   '/customer_list': (context) => CustomerListScreen(),
+  '/customer_detail': (context) => const CustomerDetailScreen(),
   '/device_form': (context) => DeviceFormScreen(),
   '/device_list': (context) => DeviceListScreen(),
   '/device_detail': (context) => const DeviceDetailScreen(),

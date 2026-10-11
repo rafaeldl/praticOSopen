@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:praticos/screens/customers/customer_list_screen.dart' show CustomerPick;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider;
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
@@ -1994,9 +1995,12 @@ class _OrderFormState extends State<OrderForm> {
       context,
       '/customer_list',
       arguments: {'order': _store.order},
-    ).then((customer) {
-      if (customer != null) {
-        _store.setCustomer(customer as Customer);
+    ).then((result) {
+      if (result is CustomerPick) {
+        _store.setCustomer(result.customer);
+        if (result.device != null) _store.addDevice(result.device!);
+      } else if (result is Customer) {
+        _store.setCustomer(result);
       }
     });
   }

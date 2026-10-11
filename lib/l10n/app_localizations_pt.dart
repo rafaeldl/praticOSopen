@@ -1263,7 +1263,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get recentOrders => 'OS Recentes';
 
   @override
-  String get recentCustomers => 'Clientes Recentes';
+  String get recentCustomers => 'Usados por último';
 
   @override
   String get role => 'Função';
@@ -3927,4 +3927,130 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get listLoadError =>
       'Não deu para carregar. Verifique a internet e tente de novo.';
+
+  @override
+  String get pickCustomerTitle => 'Quem é o cliente?';
+
+  @override
+  String get pickCustomerSubtitle =>
+      'Toque para escolher ou digite o nome, telefone ou placa';
+
+  @override
+  String get searchCustomerPlaceholder => 'Buscar por nome, telefone ou placa';
+
+  @override
+  String get searchCustomerNoPlatePlaceholder => 'Buscar por nome ou telefone';
+
+  @override
+  String get addNewCustomer => 'Cadastrar cliente novo';
+
+  @override
+  String get allCustomers => 'Todos';
+
+  @override
+  String plateValue(String plate) {
+    return 'Placa $plate';
+  }
+
+  @override
+  String get customerNamePlaceholder => 'Ex.: Ana Ribeiro';
+
+  @override
+  String get customerNameRequired => 'Digite o nome do cliente';
+
+  @override
+  String get customerPhoneLabel => 'Telefone ou WhatsApp';
+
+  @override
+  String get customerPhoneHint =>
+      'Usado para mandar o orçamento e o aviso de pronto.';
+
+  @override
+  String get moreCustomerData => 'Mais dados (e-mail, CPF ou CNPJ, endereço)';
+
+  @override
+  String get openInMap => 'Abrir no mapa';
+
+  @override
+  String get callAction => 'Ligar';
+
+  @override
+  String newOrderFor(String name) {
+    return 'Nova OS para $name';
+  }
+
+  @override
+  String ordersOfCustomer(String name) {
+    return 'OS de $name';
+  }
+
+  @override
+  String devicesOfCustomer(String devices, String name) {
+    return '$devices de $name';
+  }
+
+  @override
+  String get totalSpent => 'Total gasto';
+
+  @override
+  String deleteCustomerTitle(String name) {
+    return 'Apagar $name?';
+  }
+
+  @override
+  String get deleteCustomerKeepsOrders => 'As OS continuam salvas.';
+
+  @override
+  String get deleteAction => 'Apagar';
+
+  @override
+  String get noCustomersYet => 'Você ainda não tem clientes';
+
+  @override
+  String get addFirstCustomer => 'Cadastrar o primeiro cliente';
+
+  @override
+  String noCustomerMatching(String query) {
+    return 'Nenhum cliente com “$query”';
+  }
+
+  @override
+  String customersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clientes',
+      one: '1 cliente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openOrdersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS em aberto',
+      one: '1 OS em aberto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lateOrdersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS atrasadas',
+      one: '1 OS atrasada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customerActions => 'Mais ações do cliente';
+
+  @override
+  String get customerLookupError =>
+      'Não deu para carregar os clientes. Tente de novo.';
 }

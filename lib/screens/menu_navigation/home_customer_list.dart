@@ -1,316 +1,238 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
-import 'package:praticos/mobx/customer_store.dart';
-import 'package:praticos/mobx/order_store.dart';
-import 'package:praticos/models/customer.dart';
-import 'package:provider/provider.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/extensions/context_extensions.dart';
+import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
+import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/models/customer.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/customers/customer_form_screen.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/services/customer_directory.dart';
+import 'package:praticos/services/plate_lookup.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/utils/customer_utils.dart';
+import 'package:provider/provider.dart';
+
+/// Clientes tab: searchable list (name, phone or vehicle plate) grouped by
+/// initial. A row opens the customer screen; "+" opens the new-customer sheet.
 class HomeCustomerList extends StatefulWidget {
+  const HomeCustomerList({super.key, this.directory});
+
+  /// Injected in tests; defaults to [FirestoreCustomerDirectory].
+  final CustomerDirectory? directory;
+
   @override
-  _HomeCustomerListState createState() => _HomeCustomerListState();
+  State<HomeCustomerList> createState() => _HomeCustomerListState();
 }
 
 class _HomeCustomerListState extends State<HomeCustomerList> {
-  CustomerStore customerStore = CustomerStore();
-  late OrderStore orderStore;
-  late BottomNavigationBarStore navegationStore;
+  late final CustomerDirectory _directory =
+      widget.directory ?? FirestoreCustomerDirectory();
+  late final PlateLookup _plates =
+      PlateLookup(_directory, onChanged: () => setState(() {}));
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+
+  StreamSubscription<List<Customer>>? _subscription;
+  List<Customer>? _customers;
+  Map<String, OpenOrdersSummary> _openOrders = const {};
+  bool _hasError = false;
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+    _plates.load();
+    _directory.openOrdersByCustomer().then((summary) {
+      if (mounted) setState(() => _openOrders = summary);
+    }).catchError((_) {});
+  }
+
+  void _listen() {
+    _subscription?.cancel();
+    setState(() {
+      _customers = null;
+      _hasError = false;
+    });
+    _subscription = _directory.watchCustomers().listen(
+      (list) {
+        if (mounted) setState(() => _customers = list);
+      },
+      onError: (_) {
+        if (mounted) setState(() => _hasError = true);
+      },
+    );
+  }
 
   @override
   void dispose() {
+    _subscription?.cancel();
+    _plates.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
+  void _open(Customer customer) {
+    Navigator.pushNamed(
+      context,
+      '/customer_detail',
+      arguments: {'customer': customer},
+    );
+  }
+
+  Future<void> _addCustomer() async {
+    final created = await AppSheet.show<Customer>(
+      context,
+      (_) => const CustomerFormScreen(asSheet: true),
+    );
+    if (created != null && mounted) _open(created);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final config = context.watch<SegmentConfigProvider>();
-    orderStore = Provider.of<OrderStore>(context);
-    navegationStore = Provider.of<BottomNavigationBarStore>(context);
-
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: Text(config.customerPlural),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text(config.customerPlural),
+            backgroundColor: AppColors.background.resolveFrom(context),
+            border: null,
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
+              onPressed: _addCustomer,
+              child: Semantics(
+                label: l10n.newCustomer,
                 child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                   Navigator.pushNamed(context, '/customer_form');
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.blockMargin,
+                vertical: AppSpacing.sm,
+              ),
+              child: CupertinoSearchTextField(
+                controller: _searchController,
+                placeholder: l10n.searchCustomerPlaceholder,
+                backgroundColor: AppColors.secondaryFill.resolveFrom(context),
+                style: AppTypography.body.copyWith(
+                  color: AppColors.text.resolveFrom(context),
+                ),
+                onChanged: (value) {
+                  setState(() => _query = value);
+                  _plates.search(value);
                 },
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  placeholder: '${context.l10n.search} ${config.customer.toLowerCase()}',
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value.toLowerCase();
-                    });
-                  },
-                ),
-              ),
-            ),
-            _buildCustomerList(),
-            // Bottom padding for tab bar
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
-          ],
-        ),
+          ),
+          ..._buildBody(),
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
       ),
     );
   }
 
-  // Need to handle the floating action button equivalent for Cupertino
-  // Usually it's a trailing button in the Nav Bar.
-  // I updated the build method to include the trailing add button logic properly.
-
-  Widget _buildCustomerList() {
-    return Observer(
-      builder: (_) {
-        if (customerStore.customerList == null) {
-          return const SliverFillRemaining(
-            child: Center(child: CupertinoActivityIndicator()),
-          );
-        }
-
-        if (customerStore.customerList!.hasError) {
-          return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
-                  const SizedBox(height: 16),
-                  Text('${context.l10n.errorLoading} ${context.read<SegmentConfigProvider>().customerPlural.toLowerCase()}'),
-                  const SizedBox(height: 16),
-                  CupertinoButton(
-                    child: Text(context.l10n.retryAgain),
-                    onPressed: () => customerStore.retrieveCustomers(),
-                  )
-                ],
-              ),
-            ),
-          );
-        }
-
-        List<Customer?>? customerList = customerStore.customerList!.data;
-        return _buildCustomerListContent(customerList);
-      },
-    );
-  }
-
-  Widget _buildCustomerListContent(List<Customer?>? customerList) {
-    if (customerList == null || customerList.isEmpty) {
-      final config = context.read<SegmentConfigProvider>();
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
-              const SizedBox(height: 16),
-              Text(
-                '${context.l10n.no} ${config.customer.toLowerCase()} ${context.l10n.registered}',
-                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-              ),
-            ],
+  List<Widget> _buildBody() {
+    final l10n = context.l10n;
+    if (_hasError) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: ErrorState(message: l10n.customerLookupError, onRetry: _listen),
+        ),
+      ];
+    }
+    final customers = _customers;
+    if (customers == null) {
+      return const [
+        SliverFillRemaining(hasScrollBody: false, child: LoadingState()),
+      ];
+    }
+    final query = _query.trim();
+    if (customers.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyState(
+            title: l10n.noCustomersYet,
+            actionLabel: l10n.addFirstCustomer,
+            onAction: _addCustomer,
           ),
         ),
-      );
+      ];
     }
 
-    // Filter list
-    List<Customer> filteredList = customerList
-        .where((c) => c != null)
-        .cast<Customer>()
-        .where((customer) {
-      if (_searchQuery.isEmpty) return true;
-      return (customer.name?.toLowerCase().contains(_searchQuery) ?? false) ||
-          (customer.phone?.toLowerCase().contains(_searchQuery) ?? false);
-    }).toList();
+    final hits = query.isEmpty ? const <PlateHit>[] : _plates.hits(query, customers);
+    final hitIds = hits.map((h) => h.customer.id).toSet();
+    final matches = filterCustomers(customers, query)
+        .where((c) => !hitIds.contains(c.id))
+        .toList();
 
-    if (filteredList.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Text(context.l10n.noResultsFound),
+    if (hits.isEmpty && matches.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyState(title: l10n.noCustomerMatching(query)),
         ),
-      );
+      ];
     }
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index >= filteredList.length) return null;
-          return _buildCustomerItem(filteredList[index], index == filteredList.length - 1);
-        },
-        childCount: filteredList.length,
-      ),
-    );
-  }
-
-  Widget _buildCustomerItem(Customer customer, bool isLast) {
-    // Generate initials
-    String initials = '';
-    if (customer.name != null && customer.name!.isNotEmpty) {
-      final parts = customer.name!.trim().split(' ').where((p) => p.isNotEmpty).toList();
-      if (parts.length > 1 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-        initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-      } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
-        initials = parts[0][0].toUpperCase();
-      }
-    }
-
-    return Dismissible(
-      key: Key(customer.id!),
-      direction: DismissDirection.horizontal,
-      background: Container(
-        color: CupertinoColors.systemBlue,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20),
-        child: const Icon(CupertinoIcons.pencil, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        color: CupertinoColors.systemRed,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(CupertinoIcons.trash, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          // Swipe Right -> Edit
-          Navigator.pushNamed(
-            context,
-            '/customer_form',
-            arguments: {'customer': customer},
-          );
-          return false; // Don't dismiss
-        } else {
-          // Swipe Left -> Delete
-          final config = context.read<SegmentConfigProvider>();
-          return await showCupertinoDialog<bool>(
-            context: context,
-            builder: (dialogContext) => CupertinoAlertDialog(
-              title: Text(context.l10n.confirmDelete),
-              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.customer.toLowerCase()} "${customer.name}"?'),
-              actions: [
-                CupertinoDialogAction(
-                  child: Text(context.l10n.cancel),
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                ),
-                CupertinoDialogAction(
-                  isDestructiveAction: true,
-                  child: Text(context.l10n.remove),
-                  onPressed: () => Navigator.pop(dialogContext, true),
-                ),
-              ],
-            ),
-          ) ?? false;
-        }
-      },
-      onDismissed: (_) {
-        customerStore.deleteCustomer(customer);
-      },
-      child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: () {
-              // Filter logic or Edit logic depending on context
-              // In this Tab view, tapping usually filters orders for this customer
-              orderStore.setCustomerFilter(customer);
-              orderStore.loadOrdersInfinite(null); // Force reload with new filter
-              navegationStore.setCurrentIndex(0); // Switch to Home tab
-            },
-            onLongPress: () {
-               Navigator.pushNamed(
-                context,
-                '/customer_form',
-                arguments: {'customer': customer},
-              );
-            },
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      // Avatar
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemGrey5.resolveFrom(context),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          initials,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.systemGrey.resolveFrom(context),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              customer.name ?? context.read<SegmentConfigProvider>().customer,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: CupertinoColors.label.resolveFrom(context),
-                              ),
-                            ),
-                            if (customer.phone != null && customer.phone!.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                _formatPhone(customer.phone),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
-                    ],
-                  ),
-                ),
-                if (!isLast)
-                  Divider(
-                    height: 1,
-                    indent: 72, // Avatar (44) + Padding (16+12)
-                    color: CupertinoColors.systemGrey5.resolveFrom(context),
-                  ),
-              ],
-            ),
+    final children = <Widget>[
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pageMargin, AppSpacing.xs, AppSpacing.pageMargin, 0,
+        ),
+        child: Text(
+          l10n.customersCount(customers.length),
+          style: AppTypography.callout.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
           ),
         ),
       ),
-    );
+      for (final hit in hits)
+        _row(
+          hit.customer,
+          plate: '${l10n.plateValue(hit.device.serial ?? '')} · ${hit.device.name ?? ''}',
+        ),
+    ];
+    for (final entry in groupByInitial(matches).entries) {
+      children.add(SectionLabel(entry.key));
+      children.addAll(entry.value.map(_row));
+    }
+    return [SliverList(delegate: SliverChildListDelegate(children))];
   }
 
-  String _formatPhone(String? phone) {
-    if (phone == null) return '';
-    return phone; // Keep simple or use existing formatting logic
+  Widget _row(Customer customer, {String? plate}) {
+    final l10n = context.l10n;
+    final summary = _openOrders[customer.id];
+    String? status;
+    CupertinoDynamicColor? dot;
+    if (summary != null && summary.late > 0) {
+      status = l10n.lateOrdersCount(summary.late);
+      dot = OrderStatusStyle.overdueColor;
+    } else if (summary != null && summary.open > 0) {
+      status = l10n.openOrdersCount(summary.open);
+      dot = AppColors.warning;
+    }
+    final phone = (customer.phone?.isNotEmpty ?? false) ? customer.phone : null;
+    final subtitle = [?plate, ?status, ?phone].join(' · ');
+    return AppListRow(
+      leading: dot == null ? null : StatusDot(color: dot),
+      title: customer.name ?? '',
+      subtitle: subtitle.isEmpty ? null : subtitle,
+      onTap: () => _open(customer),
+    );
   }
 }

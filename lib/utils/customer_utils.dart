@@ -1,0 +1,146 @@
+import 'package:praticos/models/customer.dart';
+import 'package:praticos/models/device.dart';
+import 'package:praticos/models/order.dart';
+
+/// Pure helpers of the customer screens (list, picker and detail).
+
+/// Lower-cases and strips everything but letters and digits, so "abc-1d23",
+/// "ABC 1D23" and "abc1d23" are the same plate.
+String normalizePlate(String? value) =>
+    (value ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+
+/// Minimum number of characters before a query is also tried as a plate.
+const int kMinPlateQueryLength = 3;
+
+/// Whether [device] has a plate (serial) containing the typed [query].
+bool deviceMatchesPlate(Device device, String query) {
+  final q = normalizePlate(query);
+  if (q.length < kMinPlateQueryLength) return false;
+  return normalizePlate(device.serial).contains(q);
+}
+
+/// Customers whose name or phone contains [query] (case-insensitive).
+List<Customer> filterCustomers(List<Customer> customers, String query) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return customers;
+  // Digit matching only for phone-like queries, so "abc1" does not hit "1".
+  final phoneLike = RegExp(r'^[\d\s()+\-.]+$').hasMatch(q);
+  final digits = phoneLike ? q.replaceAll(RegExp(r'\D'), '') : '';
+  return customers.where((c) {
+    if ((c.name ?? '').toLowerCase().contains(q)) return true;
+    final phone = c.phone ?? '';
+    if (phone.toLowerCase().contains(q)) return true;
+    return digits.isNotEmpty &&
+        phone.replaceAll(RegExp(r'\D'), '').contains(digits);
+  }).toList();
+}
+
+/// First letter of the customer name, upper-cased and without accent;
+/// '#' for names that do not start with a letter.
+String customerInitial(Customer customer) {
+  final name = (customer.name ?? '').trim();
+  if (name.isEmpty) return '#';
+  const from = 'ÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
+  const to = 'AAAAAEEEEIIIIOOOOOUUUUCN';
+  var c = name[0].toUpperCase();
+  final idx = from.indexOf(c);
+  if (idx >= 0) c = to[idx];
+  return RegExp(r'[A-Z]').hasMatch(c) ? c : '#';
+}
+
+/// Groups [customers] (already sorted by name) by initial, keeping order.
+Map<String, List<Customer>> groupByInitial(List<Customer> customers) {
+  final groups = <String, List<Customer>>{};
+  for (final c in customers) {
+    groups.putIfAbsent(customerInitial(c), () => []).add(c);
+  }
+  return groups;
+}
+
+/// Distinct vehicles used in [orders], most recent order first. Uses the
+/// order's `devices` and falls back to the legacy single `device`.
+List<DeviceAggr> distinctVehicles(List<Order> orders) {
+  final sorted = [...orders]..sort(_newestFirst);
+  final seen = <String>{};
+  final result = <DeviceAggr>[];
+  for (final order in sorted) {
+    final devices = (order.devices?.isNotEmpty ?? false)
+        ? order.devices!
+        : [if (order.device != null) order.device!];
+    for (final d in devices) {
+      final id = d.id;
+      if (id == null || !seen.add(id)) continue;
+      result.add(d);
+    }
+  }
+  return result;
+}
+
+/// Sum of the total of the completed orders ("Total gasto").
+double totalSpent(List<Order> orders) => orders
+    .where((o) => o.status == 'done')
+    .fold<double>(0, (sum, o) => sum + (o.total ?? 0));
+
+/// Customer ids of the most recent [orders], distinct, newest first.
+List<String> recentCustomerIdsOf(List<Order> orders, {int max = 5}) {
+  final sorted = [...orders]..sort(_newestFirst);
+  final ids = <String>[];
+  for (final o in sorted) {
+    final id = o.customer?.id;
+    if (id != null && !ids.contains(id)) ids.add(id);
+    if (ids.length >= max) break;
+  }
+  return ids;
+}
+
+/// Id of the customer of the most recent order, or null.
+String? latestCustomerIdOf(List<Order> orders) {
+  final ids = recentCustomerIdsOf(orders, max: 1);
+  return ids.isEmpty ? null : ids.first;
+}
+
+/// Open (approved or in progress) and overdue order counts of a customer.
+class OpenOrdersSummary {
+  const OpenOrdersSummary({this.open = 0, this.late = 0});
+
+  final int open;
+  final int late;
+}
+
+/// Groups the open orders by customer id. An order is late when its due date
+/// is before [now].
+Map<String, OpenOrdersSummary> summarizeOpenOrders(
+  List<Order> orders,
+  DateTime now,
+) {
+  final open = <String, int>{};
+  final late = <String, int>{};
+  for (final o in orders) {
+    final id = o.customer?.id;
+    if (id == null) continue;
+    if (o.status != 'approved' && o.status != 'progress') continue;
+    open[id] = (open[id] ?? 0) + 1;
+    if (o.dueDate != null && o.dueDate!.isBefore(now)) {
+      late[id] = (late[id] ?? 0) + 1;
+    }
+  }
+  return {
+    for (final id in open.keys)
+      id: OpenOrdersSummary(open: open[id]!, late: late[id] ?? 0),
+  };
+}
+
+int _newestFirst(Order a, Order b) {
+  final da = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+  final db = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+  return db.compareTo(da);
+}
+
+/// Number for a `wa.me` link: digits only; Brazilian numbers typed without
+/// the country code (10 or 11 digits) get the 55 prefix.
+String whatsappNumber(String phone) {
+  var digits = phone.replaceAll(RegExp(r'\D'), '');
+  if (digits.startsWith('0')) digits = digits.substring(1);
+  if (digits.length == 10 || digits.length == 11) digits = '55$digits';
+  return digits;
+}

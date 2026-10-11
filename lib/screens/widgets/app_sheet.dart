@@ -1,0 +1,89 @@
+import 'package:flutter/cupertino.dart';
+import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_typography.dart';
+
+/// Modal sheet for creating a record (new customer, vehicle, service).
+///
+/// HIG: "Cancelar" on the leading edge, the confirming action (if any) on the
+/// trailing edge, title in the middle. Editing an existing record stays a
+/// pushed screen. Open it with [AppSheet.show] and put an [AppSheet] as the
+/// root of the builder.
+class AppSheet extends StatelessWidget {
+  const AppSheet({
+    super.key,
+    required this.title,
+    required this.child,
+    this.actionLabel,
+    this.onAction,
+    this.busy = false,
+    this.onCancel,
+  });
+
+  final String title;
+  final Widget child;
+
+  /// Label of the trailing action (e.g. "Salvar"). No action when null.
+  final String? actionLabel;
+
+  /// Disabled while null or [busy].
+  final VoidCallback? onAction;
+
+  /// Shows a spinner instead of the action label.
+  final bool busy;
+
+  /// Defaults to popping the sheet with no result.
+  final VoidCallback? onCancel;
+
+  /// Presents [builder] as a Cupertino sheet and resolves with what the sheet
+  /// pops (null when cancelled).
+  static Future<T?> show<T>(BuildContext context, WidgetBuilder builder) {
+    return showCupertinoSheet<T>(context: context, builder: builder);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppColors.accentText.resolveFrom(context);
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      navigationBar: CupertinoNavigationBar(
+        automaticallyImplyLeading: false,
+        automaticallyImplyMiddle: false,
+        backgroundColor: AppColors.background.resolveFrom(context),
+        border: null,
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 44),
+          onPressed: onCancel ?? () => Navigator.of(context).maybePop(),
+          child: Text(
+            context.l10n.cancel,
+            style: AppTypography.callout.copyWith(color: accent),
+          ),
+        ),
+        middle: Text(
+          title,
+          style: AppTypography.bodyStrong.copyWith(
+            color: AppColors.text.resolveFrom(context),
+          ),
+        ),
+        trailing: actionLabel == null
+            ? null
+            : CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: busy ? null : onAction,
+                child: busy
+                    ? const CupertinoActivityIndicator()
+                    : Text(
+                        actionLabel!,
+                        style: AppTypography.callout.copyWith(
+                          color: accent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
+      ),
+      child: SafeArea(child: child),
+    );
+  }
+}
