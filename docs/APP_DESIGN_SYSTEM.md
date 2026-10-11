@@ -15,7 +15,10 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 | `lib/theme/app_colors.dart` | `AppColors`: papéis de cor como `CupertinoDynamicColor` (claro e escuro) |
 | `lib/theme/app_typography.dart` | `AppTypography`: escala de texto |
 | `lib/theme/app_spacing.dart` | `AppSpacing`, `AppSizes`, `AppRadii` |
-| `test/theme/app_colors_contrast_test.dart` | Mede o contraste WCAG AA de cada par, nos dois modos |
+| `lib/theme/app_glass.dart` | `AppGlass`: vidro da camada de navegação (regra 11), com volta para fundo opaco |
+| `test/theme/app_colors_contrast_test.dart` | Mede o contraste WCAG AA de cada par: claro, escuro e as duas variantes de "Aumentar contraste" |
+| `test/theme/app_typography_test.dart` | Título 34 e texto que cresce com o `textScaler` |
+| `test/theme/app_glass_test.dart` | Vidro translúcido e a volta para fundo opaco |
 
 `lib/theme/app_theme.dart` (azul `#2563EB`) e o `primaryColor: CupertinoColors.activeBlue` de `lib/main.dart` são o padrão antigo. Telas migram para os tokens novos à medida que forem redesenhadas; a troca do `primaryColor` global entra junto com a primeira tela redesenhada (a OS).
 
@@ -32,7 +35,7 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 9. **Cadastro novo abre por cima.** "Novo cliente", "Novo veículo", "Novo serviço" abrem como sheet (tamanho grande), com "Cancelar" à esquerda e o botão grande embaixo como confirmação. Telas de edição de algo que já existe (Sua conta, Dados da empresa) abrem empurradas, com "Voltar".
 10. **Componentes do iPhone quando existem.** Abas, interruptor (verde do sistema), escolha com ✓ à direita, menu "…" com o símbolo `ellipsis`, sheet com fechar à esquerda, botão "Continuar com Apple" nativo (`SignInWithAppleButton`, com logo e proporção da Apple). Não desenhar uma versão própria.
 11. **Vidro só na navegação (Liquid Glass).** Barra de abas, botões do topo (voltar, "…", sino), menus "…", sheets pequenas e o botão principal flutuante acima das abas usam vidro: fundo translúcido com desfoque e sombra leve. O botão principal flutuante é vidro tingido com o azul da marca. O conteúdo (listas, bloco do próximo passo, campos, fundo) fica **sempre opaco** ("Don't use Liquid Glass in the content layer", HIG `materials`). Com "Reduzir transparência" ligado no iPhone, o vidro vira fundo opaco (`surface`).
-   - **Implementação no Flutter:** o Flutter ainda não tem o Liquid Glass nativo (issue flutter/flutter#170310 aberta, P3; o pacote oficial `cupertino_ui` 1.1.2 não tem vidro). Até lá, imitar com `BackdropFilter` só na barra de abas, na barra de topo e nas sheets pequenas, medindo o custo de desempenho. O Flutter não expõe "Reduzir transparência" no `MediaQuery`: ler `UIAccessibility.isReduceTransparencyEnabled` por um canal nativo e, se ligado (ou com `MediaQuery.highContrastOf`), usar fundo opaco. Trocar pelo oficial quando o `cupertino_ui` trouxer o material. Barra de abas nativa via pacote de terceiros (ex.: `real_liquid_glass`) fica como teste isolado, risk:high.
+   - **Implementação no Flutter:** o Flutter ainda não tem o Liquid Glass nativo (issue flutter/flutter#170310 aberta, P3; o pacote oficial `cupertino_ui` 1.1.2 não tem vidro). Até lá, usar o `AppGlass` (`lib/theme/app_glass.dart`: `ClipRRect` + `BackdropFilter` com desfoque + preenchimento translúcido) só na barra de abas, na barra de topo e nas sheets pequenas, medindo o custo de desempenho. Ele vira fundo opaco (sem desfoque) quando "Aumentar contraste" está ligado (`MediaQuery.highContrastOf`), quando recebe `reduceTransparency: true` ou `enabled: false`. O Flutter não expõe "Reduzir transparência" no `MediaQuery`: ler `UIAccessibility.isReduceTransparencyEnabled` por um canal nativo e passar em `reduceTransparency`. Trocar pelo oficial quando o `cupertino_ui` trouxer o material. Barra de abas nativa via pacote de terceiros (ex.: `real_liquid_glass`) fica como teste isolado, risk:high.
 
 ## Cores
 
@@ -55,7 +58,7 @@ Cada cor tem um papel só. Componentes usam o papel, nunca o hex.
 
 Por que o azul da marca e não o do iOS: é a cor da marca (a HIG aceita uma cor de destaque própria, usada com moderação). O contraste ajuda nos textos pequenos: `#007AFF` sobre branco dá 4,02:1, abaixo dos 4,5:1 que a HIG pede para texto até 17 pt (links), e o `#116BB5` dá 5,51:1. No botão principal (19 semibold), a HIG pede 3:1, então ali o contraste não é o motivo.
 
-**Aumentar contraste (pendente no código):** a HIG pede, para cores próprias, uma variante clara, uma escura e uma bem mais contrastada para "Aumentar contraste". Cada token passa a usar `CupertinoDynamicColor.withBrightnessAndContrast`; o teste de contraste mede também essas variantes.
+**Aumentar contraste:** a HIG pede, para cores próprias, uma variante clara, uma escura e uma bem mais contrastada para "Aumentar contraste". Cada token usa `CupertinoDynamicColor.withBrightnessAndContrast` (`highContrastColor` / `darkHighContrastColor`) e o `resolveFrom(context)` escolhe a variante sozinho. Nessas variantes o texto fica mais escuro no claro (`text` preto, `textSecondary` `#3A3A3C`, `accentText` `#0A4F8A`, `danger` `#A1201A`) e mais claro no escuro (`textSecondary` `#D1D1D6`, `accentText` `#9DCBF7`, `danger` `#FF9A8F`), e o `separator` fica mais visível. O teste mede as quatro variantes, exige que "Aumentar contraste" nunca diminua o contraste de um par e que `textSecondary` chegue a 7:1.
 
 **Interruptor:** usar o `CupertinoSwitch` com o verde padrão do sistema. `success` é para status, não para controle.
 
@@ -69,7 +72,7 @@ Fonte do sistema (SF Pro). Rótulos em sentence case, nunca em caixa alta.
 
 | `AppTypography.` | Tamanho | Uso |
 |---|---|---|
-| `title` | 34 bold | Título da tela: o Large Title do sistema (`CupertinoSliverNavigationBar.largeTitle`), que vira título pequeno ao rolar |
+| `title` | 34 bold | Título da tela: o Large Title do sistema (`CupertinoSliverNavigationBar.largeTitle`), que vira título pequeno ao rolar. Sem `height` próprio |
 | `highlight` | 22 semibold | Frase do próximo passo, o que o usuário falou |
 | `body` / `bodyStrong` | 19 | Linhas, valores, botões |
 | `callout` | 17 | Links, linhas secundárias |
@@ -77,7 +80,7 @@ Fonte do sistema (SF Pro). Rótulos em sentence case, nunca em caixa alta.
 
 Valores em dinheiro usam `AppTypography.tabular` e sempre `FormatService`.
 
-**Dynamic Type.** Os tamanhos acima são os do tamanho padrão do iPhone. O corpo é 19 (e não 17 como no iOS) porque o público tem a vista cansada; 19 equivale ao Body no tamanho "xL". Todos crescem proporcionalmente com o `MediaQuery.textScaler`, que o Flutter já aplica: **nunca** travar ou limitar o `textScaler`, nem usar altura fixa em linha com texto. Em tamanhos de acessibilidade, a linha de lista empilha o valor embaixo do nome. Protótipo: prancha "Início · texto grande (Dynamic Type)".
+**Dynamic Type.** Os tamanhos acima são os do tamanho padrão do iPhone. O corpo é 19 (e não 17 como no iOS) porque o público tem a vista cansada; 19 equivale ao Body no tamanho "xL". Todos crescem proporcionalmente com o `MediaQuery.textScaler`, que o Flutter já aplica: **nunca** travar ou limitar o `textScaler`, nem usar altura fixa em linha com texto. O `height` dos estilos é sempre multiplicador do tamanho da fonte (nunca altura em pixels), então a linha cresce junto. Em tamanhos de acessibilidade, a linha de lista empilha o valor embaixo do nome. Protótipo: prancha "Início · texto grande (Dynamic Type)".
 
 ## Estrutura de toda tela
 
@@ -134,4 +137,4 @@ SizedBox(
 
 ## Ao mudar uma cor
 
-Mude o valor em `app_colors.dart` e rode `fvm flutter test test/theme/`. O teste mede todos os pares (texto ≥ 4,5:1, componentes ≥ 3:1) nos dois modos. Se um par novo entrar no padrão, adicione-o à lista do teste.
+Mude o valor em `app_colors.dart` e rode `fvm flutter test test/theme/`. O teste mede todos os pares (texto ≥ 4,5:1, componentes ≥ 3:1) no claro, no escuro e nas duas variantes de "Aumentar contraste". Mudou uma cor? Ajuste também a variante de contraste dela. Se um par novo entrar no padrão, adicione-o à lista do teste.
