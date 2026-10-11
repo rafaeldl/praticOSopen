@@ -4169,7 +4169,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newOrderScreenSettingHint =>
-      'Try the redesigned order. You can switch back anytime.';
+      'Turn off to go back to the old order screen.';
 
   @override
   String orderNewTitle(String order) {

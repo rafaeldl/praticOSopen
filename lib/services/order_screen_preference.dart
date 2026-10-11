@@ -3,22 +3,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Local (per device) switch "Nova tela da OS".
 ///
-/// Off by default: the legacy `OrderForm` stays the order screen until the
-/// redesigned one reaches parity. The value is kept in [SharedPreferences]
-/// and mirrored in [useNewScreen] so routing can read it synchronously.
+/// On by default: the redesigned screen is the order screen for everyone.
+/// Turning it off goes back to the legacy `OrderForm` (escape hatch). The
+/// value is kept in [SharedPreferences] and mirrored in [useNewScreen] so
+/// routing can read it synchronously.
 class OrderScreenPreference {
   OrderScreenPreference._();
 
-  static const String storageKey = 'useNewOrderScreen';
+  /// New key so choices saved during the pilot (default off) are reset and
+  /// every device starts on the new screen.
+  static const String storageKey = 'useNewOrderScreenDefault';
 
-  /// Default while the new screen is in pilot.
-  static const bool defaultValue = false;
+  /// The new screen is the default.
+  static const bool defaultValue = true;
 
   /// Current value. Loaded at startup by [load].
   static final ValueNotifier<bool> useNewScreen =
       ValueNotifier<bool>(defaultValue);
 
-  /// Reads the saved value. Failures keep the default (legacy screen).
+  /// Reads the saved value. Failures keep the default (new screen).
   static Future<void> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();

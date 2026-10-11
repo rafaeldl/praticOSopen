@@ -4191,7 +4191,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get newOrderScreenSettingHint =>
-      'Pruebe la OS rediseñada. Puede volver cuando quiera.';
+      'Desactive para volver a la pantalla anterior de la OS.';
 
   @override
   String orderNewTitle(String order) {

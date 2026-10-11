@@ -1826,7 +1826,7 @@
   "deleteDeviceKeepsOrders": "Las OS siguen guardadas.",
   "deviceDetailsLabel": "Datos",
   "newOrderScreenSetting": "Nueva pantalla de la OS",
-  "newOrderScreenSettingHint": "Pruebe la OS rediseñada. Puede volver cuando quiera.",
+  "newOrderScreenSettingHint": "Desactive para volver a la pantalla anterior de la OS.",
   "orderNewTitle": "Nueva {order}",
   "@orderNewTitle": {
     "placeholders": {

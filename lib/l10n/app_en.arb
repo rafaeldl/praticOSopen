@@ -1826,7 +1826,7 @@
   "deleteDeviceKeepsOrders": "The orders stay saved.",
   "deviceDetailsLabel": "Details",
   "newOrderScreenSetting": "New order screen",
-  "newOrderScreenSettingHint": "Try the redesigned order. You can switch back anytime.",
+  "newOrderScreenSettingHint": "Turn off to go back to the old order screen.",
   "orderNewTitle": "New {order}",
   "@orderNewTitle": {
     "placeholders": {

@@ -7735,7 +7735,7 @@ abstract class AppLocalizations {
   /// No description provided for @newOrderScreenSettingHint.
   ///
   /// In pt, this message translates to:
-  /// **'Teste a OS redesenhada. Dá para voltar quando quiser.'**
+  /// **'Desligue para voltar à tela antiga da OS.'**
   String get newOrderScreenSettingHint;
 
   /// No description provided for @orderNewTitle.
