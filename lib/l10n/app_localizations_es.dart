@@ -5201,4 +5201,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receiveAmountHint => '¿Recibió solo una parte? Cambie el valor.';
+
+  @override
+  String orderMenuPdfOf(String order) {
+    return 'PDF de la $order';
+  }
+
+  @override
+  String get orderAddItem => 'Servicio o repuesto';
+
+  @override
+  String get orderAddContractMonthly => 'Repetir cada mes (contrato)';
 }

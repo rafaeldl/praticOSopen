@@ -2548,5 +2548,9 @@
   "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
   "receiveOrderLink": "Orden {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
-  "receiveAmountHint": "¿Recibió solo una parte? Cambie el valor."
+  "receiveAmountHint": "¿Recibió solo una parte? Cambie el valor.",
+  "orderMenuPdfOf": "PDF de la {order}",
+  "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
+  "orderAddItem": "Servicio o repuesto",
+  "orderAddContractMonthly": "Repetir cada mes (contrato)"
 }

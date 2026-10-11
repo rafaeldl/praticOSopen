@@ -2548,5 +2548,9 @@
   "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
   "receiveOrderLink": "Order {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
-  "receiveAmountHint": "Got only part of it? Change the amount."
+  "receiveAmountHint": "Got only part of it? Change the amount.",
+  "orderMenuPdfOf": "{order} PDF",
+  "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
+  "orderAddItem": "Service or part",
+  "orderAddContractMonthly": "Repeat every month (contract)"
 }

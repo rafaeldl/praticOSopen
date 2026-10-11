@@ -17,6 +17,7 @@ import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
+import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
@@ -246,15 +247,17 @@ void main() {
       await _openAddTo(tester);
 
       expect(_sheetLabels(tester), [
+        'Serviço ou peça',
         'Checklist',
-        'Fotos ou documento',
-        'Comentário',
-        'Endereço do atendimento',
+        'Data de entrega',
         'Agendar dia e hora',
-        'Prazo de entrega',
-        'Repetir esta Ordem de Serviço',
-        'Outro Equipamento',
+        'Endereço do atendimento',
+        'Outro equipamento',
+        'Comentário',
+        'Fotos ou documento',
+        'Repetir todo mês (contrato)',
       ]);
+      expect(find.text('Adicionar à OS'), findsOneWidget); // sheet title
       // Discount only after approval; no escape to the legacy screen.
       expect(find.text('Desconto'), findsNothing);
       expect(find.text('Outros campos'), findsNothing);
@@ -273,7 +276,7 @@ void main() {
       final labels = _sheetLabels(tester);
       expect(labels, isNot(contains('Endereço do atendimento')));
       expect(labels, isNot(contains('Agendar dia e hora')));
-      expect(labels, isNot(contains('Repetir esta Ordem de Serviço')));
+      expect(labels, isNot(contains('Repetir todo mês (contrato)')));
     });
 
     testWidgets('without permission only comment is left', (tester) async {
@@ -480,13 +483,13 @@ void main() {
       expect(find.text('Agendado'), findsOneWidget);
     });
 
-    testWidgets('due date is picked and shows "Prazo de entrega"',
+    testWidgets('due date is picked and shows "Data de entrega"',
         (tester) async {
       final store = OrderStore();
       final due = DateTime(2026, 10, 20, 14, 30);
       await _pump(tester, screen(store),
           args: {'order': _order()..dueDate = due});
-      expect(find.text('Prazo de entrega'), findsOneWidget);
+      expect(find.text('Data de entrega'), findsOneWidget);
       expect(
         find.text((FormatService()..setLocale('pt')).formatDateTime(due)),
         findsOneWidget,
@@ -530,7 +533,7 @@ void main() {
       await _pump(tester, screen(store, actions: actions),
           args: {'order': _order()});
       await _openAddTo(tester);
-      await tester.tap(find.text('Repetir esta Ordem de Serviço'));
+      await tester.tap(find.text('Repetir todo mês (contrato)'));
       await tester.pumpAndSettle();
 
       expect(store.hasContract, isTrue);

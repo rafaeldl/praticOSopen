@@ -4369,7 +4369,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get orderAddDueDate => 'Prazo de entrega';
+  String get orderAddDueDate => 'Data de entrega';
 
   @override
   String orderAddAnotherDevice(String device) {
@@ -5189,4 +5189,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get receiveAmountHint => 'Recebeu só uma parte? Mude o valor.';
+
+  @override
+  String orderMenuPdfOf(String order) {
+    return 'PDF da $order';
+  }
+
+  @override
+  String get orderAddItem => 'Serviço ou peça';
+
+  @override
+  String get orderAddContractMonthly => 'Repetir todo mês (contrato)';
 }

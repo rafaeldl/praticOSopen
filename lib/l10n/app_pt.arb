@@ -2034,7 +2034,7 @@
       }
     }
   },
-  "orderAddDueDate": "Prazo de entrega",
+  "orderAddDueDate": "Data de entrega",
   "orderAddAnotherDevice": "Outro {device}",
   "@orderAddAnotherDevice": {
     "placeholders": {
@@ -2640,5 +2640,9 @@
   "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
   "receiveOrderLink": "OS {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
-  "receiveAmountHint": "Recebeu só uma parte? Mude o valor."
+  "receiveAmountHint": "Recebeu só uma parte? Mude o valor.",
+  "orderMenuPdfOf": "PDF da {order}",
+  "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
+  "orderAddItem": "Serviço ou peça",
+  "orderAddContractMonthly": "Repetir todo mês (contrato)"
 }

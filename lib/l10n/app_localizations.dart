@@ -8047,7 +8047,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderAddDueDate.
   ///
   /// In pt, this message translates to:
-  /// **'Prazo de entrega'**
+  /// **'Data de entrega'**
   String get orderAddDueDate;
 
   /// No description provided for @orderAddAnotherDevice.
@@ -9291,6 +9291,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Recebeu só uma parte? Mude o valor.'**
   String get receiveAmountHint;
+
+  /// No description provided for @orderMenuPdfOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF da {order}'**
+  String orderMenuPdfOf(String order);
+
+  /// No description provided for @orderAddItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço ou peça'**
+  String get orderAddItem;
+
+  /// No description provided for @orderAddContractMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir todo mês (contrato)'**
+  String get orderAddContractMonthly;
 }
 
 class _AppLocalizationsDelegate
