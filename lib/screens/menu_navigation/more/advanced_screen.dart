@@ -51,7 +51,7 @@ class AdvancedScreen extends StatelessWidget {
               onTap: onOpenDevices,
             ),
         ]),
-        // "Nova tela da OS": local pilot switch (off by default)
+        // "Nova tela da OS": on by default; off goes back to the legacy screen
         ValueListenableBuilder<bool>(
           valueListenable: OrderScreenPreference.useNewScreen,
           builder: (context, useNew, _) => CupertinoListSection.insetGrouped(

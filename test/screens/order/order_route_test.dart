@@ -20,20 +20,21 @@ Future<void> _pump(WidgetTester tester, {Map<String, dynamic>? args}) async {
 }
 
 void main() {
-  tearDown(() => OrderScreenPreference.useNewScreen.value = false);
+  tearDown(() => OrderScreenPreference.useNewScreen.value = true);
 
   group('"Nova tela da OS" routing', () {
-    testWidgets('legacy screen by default', (tester) async {
-      expect(OrderScreenPreference.defaultValue, isFalse);
-      await _pump(tester);
-      expect(find.text('legacy screen'), findsOneWidget);
-      expect(find.text('new screen'), findsNothing);
-    });
-
-    testWidgets('new screen when the switch is on', (tester) async {
-      OrderScreenPreference.useNewScreen.value = true;
+    testWidgets('new screen by default', (tester) async {
+      expect(OrderScreenPreference.defaultValue, isTrue);
+      expect(OrderScreenPreference.useNewScreen.value, isTrue);
       await _pump(tester, args: {'order': null});
       expect(find.text('new screen'), findsOneWidget);
+      expect(find.text('legacy screen'), findsNothing);
+    });
+
+    testWidgets('legacy screen when the switch is off', (tester) async {
+      OrderScreenPreference.useNewScreen.value = false;
+      await _pump(tester);
+      expect(find.text('legacy screen'), findsOneWidget);
     });
 
     testWidgets('comments from a notification open on the new screen',
@@ -46,30 +47,37 @@ void main() {
     testWidgets('an open screen is not swapped when the switch flips',
         (tester) async {
       await _pump(tester);
-      OrderScreenPreference.useNewScreen.value = true;
+      OrderScreenPreference.useNewScreen.value = false;
       await tester.pump();
-      expect(find.text('legacy screen'), findsOneWidget);
+      expect(find.text('new screen'), findsOneWidget);
     });
   });
 
   group('OrderScreenPreference', () {
     test('loads the saved value and saves changes', () async {
       SharedPreferences.setMockInitialValues({
-        OrderScreenPreference.storageKey: true,
+        OrderScreenPreference.storageKey: false,
       });
       await OrderScreenPreference.load();
-      expect(OrderScreenPreference.useNewScreen.value, isTrue);
-
-      await OrderScreenPreference.set(false);
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool(OrderScreenPreference.storageKey), isFalse);
       expect(OrderScreenPreference.useNewScreen.value, isFalse);
+
+      await OrderScreenPreference.set(true);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool(OrderScreenPreference.storageKey), isTrue);
+      expect(OrderScreenPreference.useNewScreen.value, isTrue);
     });
 
-    test('defaults to off when nothing is saved', () async {
+    test('defaults to on when nothing is saved', () async {
       SharedPreferences.setMockInitialValues({});
       await OrderScreenPreference.load();
-      expect(OrderScreenPreference.useNewScreen.value, isFalse);
+      expect(OrderScreenPreference.useNewScreen.value, isTrue);
+    });
+
+    test('a choice saved during the pilot does not keep the old screen',
+        () async {
+      SharedPreferences.setMockInitialValues({'useNewOrderScreen': false});
+      await OrderScreenPreference.load();
+      expect(OrderScreenPreference.useNewScreen.value, isTrue);
     });
   });
 }

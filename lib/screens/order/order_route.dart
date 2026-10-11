@@ -3,8 +3,8 @@ import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/order_form.dart';
 import 'package:praticos/services/order_screen_preference.dart';
 
-/// `/order`: opens the redesigned order screen when "Nova tela da OS" is on,
-/// otherwise the legacy [OrderForm] (default).
+/// `/order`: opens the redesigned order screen (default), or the legacy
+/// [OrderForm] when "Nova tela da OS" is turned off.
 ///
 /// The choice is read once when the route is built, so flipping the switch
 /// never swaps a screen that is already open. Both screens read the same

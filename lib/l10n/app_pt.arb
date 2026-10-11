@@ -1888,7 +1888,7 @@
   "deleteDeviceKeepsOrders": "As OS continuam salvas.",
   "deviceDetailsLabel": "Dados",
   "newOrderScreenSetting": "Nova tela da OS",
-  "newOrderScreenSettingHint": "Teste a OS redesenhada. Dá para voltar quando quiser.",
+  "newOrderScreenSettingHint": "Desligue para voltar à tela antiga da OS.",
   "orderNewTitle": "Nova {order}",
   "@orderNewTitle": {
     "placeholders": {
