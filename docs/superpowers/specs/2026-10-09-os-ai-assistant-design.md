@@ -1,7 +1,7 @@
 # Tela da OS com assistente de IA — design
 
 **Data:** 2026-10-09 · **Status:** proposta para revisão · **Padrão visual:** `docs/APP_DESIGN_SYSTEM.md` (PR #326)
-**Protótipos:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — linha **E** (E1 a E4) e prancha "Padrão do app". As linhas A–D foram descartadas por excesso de informação.
+**Protótipos:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — versão atual na página "Telas do app", linha "Nova OS e a OS" (ver `2026-10-11-telas-os-ia-design.md`). As pranchas E1–E4 e as direções A–D e N foram retiradas do canvas em 2026-10-11.
 
 ## 1. Por que
 

@@ -6,7 +6,7 @@ Padrão visual do aplicativo PraticOS. Vale para toda tela nova ou redesenhada. 
 
 Ele complementa o `docs/UX_GUIDELINES.md` (widgets Cupertino, listas, formulários). Quando os dois divergirem em cor, tipografia ou estrutura de tela, vale este documento.
 
-Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — linha "E" e a prancha "Padrão do app".
+Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz — página "Telas do app" (todas as telas, ligadas pelo Play) e a prancha "Padrão do app".
 
 ## Arquitetura
 

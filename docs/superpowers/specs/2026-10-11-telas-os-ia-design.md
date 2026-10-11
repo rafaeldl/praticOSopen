@@ -1,7 +1,7 @@
 # OS e assistente nas telas do app (revisão HIG + simplificação)
 
 **Data:** 2026-10-11 · Complementa `2026-10-09-os-ai-assistant-design.md` (fases, operações, cota e arquitetura continuam valendo).
-**Protótipos:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app", linha **"Nova OS e a OS"** (9 pranchas, ligadas ao resto do app pelo Play). A página "OS com IA" fica como histórico.
+**Protótipos:** canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "Telas do app", linha **"Nova OS e a OS"** (9 pranchas, ligadas ao resto do app pelo Play). A antiga página "OS com IA" foi retirada do canvas em 2026-10-11.
 
 ## O que mudou em relação às pranchas E1–E4 e N1–N3
 
@@ -17,7 +17,7 @@ Conferido contra `docs/APP_DESIGN_SYSTEM.md` (regras 1–11) e a auditoria HIG (
 | N1: roxo, botão "Montar" | Roxo proibido (cores); "Montar" é jargão | Controles em vidro sobre a câmera; "Pronto" (azul da marca) junta fotos e fala numa OS só, como a spec pede |
 | N2: dois botões ("Criar orçamento" / "Criar e aprovar") | Dois botões principais | Um botão só, "Salvar OS", na Nova OS preenchida |
 | E4: item sem valor obrigava preencher | Trava quando o usuário não sabe o valor | O item sem valor vira pergunta na própria Nova OS, com "Tirar"; cliente e veículo são tocáveis para trocar |
-| N3: roxo, cabeçalhos em caixa alta | Cores e tipografia fora do padrão | Sugestão da IA em bloco de próximo passo com um botão ("Pôr nesta OS"); busca e lista das OS em aberto; "Criar OS nova com estas fotos" |
+| N3: só fotos do WhatsApp; roxo; botão "Pôr nesta OS" | Documentos ficavam de fora; um toque a mais | **Receber de qualquer app** (ver abaixo) |
 
 ## Ligações com o resto do app
 
@@ -26,7 +26,20 @@ Conferido contra `docs/APP_DESIGN_SYSTEM.md` (regras 1–11) e a auditoria HIG (
   - **Com IA (2 passos):** Foto e/ou Falar → Nova OS preenchida → Salvar OS.
   - **À mão (3 passos):** Cliente (buscar pela placa já escolhe o veículo; com 1 veículo, escolhe sozinho) → + Serviço ou peça (tocar já põe) → Salvar OS.
 - OS pronta com falta a receber: o próximo passo vira **"Receber R$ 950"** (`app-os-pronta`) → `app-receber`; voltar do Receber leva à OS.
-- Fotos compartilhadas do WhatsApp → `app-os-fotos-recebidas` → OS sugerida, ou "Criar OS nova com estas fotos" → Nova OS preenchida.
+- Compartilhar de qualquer app → `app-recebido` → tocar numa OS (guarda na hora) ou "Criar OS nova com isto" → Nova OS preenchida.
+
+## Receber de qualquer app (fotos e documentos)
+
+Vale para WhatsApp, Arquivos, e-mail, galeria: o usuário toca em Compartilhar → PraticOS.
+
+- **Uma pergunta: "Em qual OS guardar?"** Aparece o que chegou (miniaturas e "2 fotos e 1 PDF"), depois:
+  1. "Criar OS nova com isto" → Nova OS preenchida (a IA lê as fotos; documentos vão anexados).
+  2. As OS em aberto, com a **sugestão da IA** em primeiro e marcada ("sugestão" + o porquê: "a placa da foto é a mesma"). Sem sugestão, a lista aparece sozinha.
+  3. Busca por número, cliente ou placa.
+- **Tocar na OS já guarda**: sem botão de confirmar (o "Cancelar" está no topo). Prancha `app-recebido`.
+- Confirmação curta: "Guardado na OS 186 · 2 fotos e 1 PDF" com **"Abrir a OS"** e "Voltar ao WhatsApp" (nome do app de origem). Prancha `app-recebido-ok`.
+- Fotos vão para as fotos da OS; PDF e outros arquivos vão para os documentos da OS (`OrderDocument`, o mesmo de hoje). Fotos contam na cota como hoje.
+- Implementação (spec original §4.3): Android por `intent-filter` (`image/*` e `application/pdf`, `SEND` e `SEND_MULTIPLE`); iOS por Share Extension (`risk:high`, assinatura). A sugestão usa `aiMatchOrder`.
 
 ## Regras novas
 
