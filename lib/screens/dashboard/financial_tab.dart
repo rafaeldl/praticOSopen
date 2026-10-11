@@ -6,11 +6,11 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
+import 'package:praticos/screens/payments/send_charge_flow.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -41,6 +41,7 @@ class FinancialTab extends StatefulWidget {
     this.onOpenOrder,
     this.onSendCharge,
     this.onOpenReport,
+    this.sendChargeFlow,
   });
 
   final FinancialTabStore? store;
@@ -48,8 +49,14 @@ class FinancialTab extends StatefulWidget {
   /// Opens one order.
   final void Function(BuildContext context, Order order)? onOpenOrder;
 
-  /// Sends the payment link of an order to its customer.
+  /// Sends the payment link of an order to its customer. Overrides
+  /// [sendChargeFlow] entirely (test seam).
   final void Function(BuildContext context, Order order)? onSendCharge;
+
+  /// "Mandar cobrança" flow: with Asaas connected it generates the charge
+  /// first, then shares the link; otherwise it shares the order link.
+  /// Defaults to [SendChargeFlow] with the real dependencies.
+  final SendChargeFlow? sendChargeFlow;
 
   /// Opens the report screen; [customPeriod] asks for the period picker.
   final void Function(BuildContext context, {required bool customPeriod})?
@@ -63,6 +70,10 @@ class _FinancialTabState extends State<FinancialTab> {
   late final FinancialTabStore _store = widget.store ?? FinancialTabStore();
   bool _showAllDebtors = false;
   bool _showAllReceived = false;
+
+  /// True while "Mandar cobrança" runs (reads Asaas state, charge screen,
+  /// share sheet): a second tap is ignored so no duplicate charge is made.
+  bool _sendingCharge = false;
 
   @override
   void initState() {
@@ -85,12 +96,25 @@ class _FinancialTabState extends State<FinancialTab> {
     if (mounted) _store.refresh();
   }
 
-  void _sendCharge(Order order) {
+  Future<void> _sendCharge(Order order) async {
     final send = widget.onSendCharge;
     if (send != null) {
       send(context, order);
-    } else {
-      ShareLinkSheet.show(context, order);
+      return;
+    }
+    if (_sendingCharge) return;
+    setState(() => _sendingCharge = true);
+    try {
+      final action = await (widget.sendChargeFlow ?? SendChargeFlow()).send(
+        context,
+        order,
+      );
+      // A charge may have been created: reload what is owed.
+      if (mounted && action != SendChargeAction.shareOrderLink) {
+        _store.refresh();
+      }
+    } finally {
+      if (mounted) setState(() => _sendingCharge = false);
     }
   }
 
@@ -284,6 +308,7 @@ class _FinancialTabState extends State<FinancialTab> {
             if (summary.hasDebt) ...[
               _NextStepBlock(
                 summary: summary,
+                busy: _sendingCharge,
                 onSend: () => _sendCharge(summary.oldestDebtor!.oldestOrder),
               ),
               SectionLabel(l10n.financialToReceive),
@@ -373,10 +398,17 @@ class _FinancialTabState extends State<FinancialTab> {
 
 /// "Falta receber R$ 1.730 de 3 clientes" + the single filled button.
 class _NextStepBlock extends StatelessWidget {
-  const _NextStepBlock({required this.summary, required this.onSend});
+  const _NextStepBlock({
+    required this.summary,
+    required this.onSend,
+    this.busy = false,
+  });
 
   final FinancialSummary summary;
   final VoidCallback onSend;
+
+  /// Shows a spinner and ignores taps while the charge is being prepared.
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -426,14 +458,22 @@ class _NextStepBlock extends StatelessWidget {
                 minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
                 color: AppColors.accent.resolveFrom(context),
                 borderRadius: BorderRadius.circular(AppRadii.button),
-                onPressed: onSend,
-                child: Text(
-                  l10n.financialSendChargeTo(name),
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyStrong.copyWith(
-                    color: AppColors.onAccent.resolveFrom(context),
-                  ),
-                ),
+                onPressed: busy ? null : onSend,
+                disabledColor: AppColors.accent.resolveFrom(context),
+                child: busy
+                    ? Semantics(
+                        label: l10n.financialSendChargeTo(name),
+                        child: CupertinoActivityIndicator(
+                          color: AppColors.onAccent.resolveFrom(context),
+                        ),
+                      )
+                    : Text(
+                        l10n.financialSendChargeTo(name),
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodyStrong.copyWith(
+                          color: AppColors.onAccent.resolveFrom(context),
+                        ),
+                      ),
               ),
             ],
           ),

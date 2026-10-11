@@ -70,6 +70,7 @@ void main() {
     OrderStore store, {
     bool canAttach = true,
     bool canView = true,
+    List<Uri>? opened,
   }) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -80,6 +81,7 @@ void main() {
           store: store,
           canAttachReceipt: canAttach,
           canViewReceipt: canView,
+          onOpenExternalUrl: (uri) async => opened?.add(uri),
         ),
       ),
     );
@@ -217,5 +219,68 @@ void main() {
     expect(find.byKey(const Key('receiveBlocked')), findsOneWidget);
     expect(find.byKey(const Key('receiveConfirm')), findsNothing);
     expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
+  });
+
+  testWidgets('Asaas receipt from the webhook: row says "com comprovante" and sheet opens it',
+      (tester) async {
+    final opened = <Uri>[];
+    await pumpScreen(
+      tester,
+      storeWith(
+        total: 500,
+        paid: 500,
+        transactions: [
+          PaymentTransaction(
+            id: 'asaas_pay_7',
+            type: PaymentTransactionType.payment,
+            amount: 500,
+            description: 'Asaas',
+            billingType: 'CREDIT_CARD',
+            receiptUrl: 'https://www.asaas.com/comprovantes/7',
+          ),
+        ],
+      ),
+      opened: opened,
+    );
+
+    // Billing type comes from the new field, not the description.
+    expect(find.text('Cartão pelo link'), findsOneWidget);
+    expect(find.textContaining('com comprovante'), findsOneWidget);
+
+    await tester.tap(find.text('Cartão pelo link'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ver comprovante'), findsOneWidget);
+    expect(find.text('Anexar comprovante'), findsNothing);
+    expect(find.text('Remover este pagamento'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('receiveAsaasReceipt')));
+    await tester.pumpAndSettle();
+    expect(opened, [Uri.parse('https://www.asaas.com/comprovantes/7')]);
+  });
+
+  testWidgets('Asaas receipt link outside asaas.com is never offered',
+      (tester) async {
+    await pumpScreen(
+      tester,
+      storeWith(
+        total: 500,
+        paid: 500,
+        transactions: [
+          PaymentTransaction(
+            id: 'asaas_pay_8',
+            type: PaymentTransactionType.payment,
+            amount: 500,
+            description: 'Asaas • Pix',
+            receiptUrl: 'https://evil.example.com/asaas',
+          ),
+        ],
+      ),
+    );
+
+    expect(find.textContaining('sem comprovante'), findsOneWidget);
+    await tester.tap(find.text('Pix pelo link'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('receiveAsaasReceipt')), findsNothing);
+    expect(find.text('Anexar comprovante'), findsOneWidget);
   });
 }

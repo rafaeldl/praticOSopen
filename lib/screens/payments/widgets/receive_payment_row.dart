@@ -50,7 +50,7 @@ class ReceivePaymentRow extends StatelessWidget {
     final parts = <String>[
       format.formatDateTime(transaction.createdAt),
       if (isPayment && showReceiptState)
-        transaction.hasReceipt
+        transaction.hasReceipt || asaasReceiptUri(transaction) != null
             ? context.l10n.receiveWithReceipt
             : context.l10n.receiveNoReceipt,
     ];

@@ -8,8 +8,11 @@ import {
   buildAsaasTransaction,
   computePaymentFields,
   describeAsaasPayment,
+  mergeAsaasDetails,
   repairAsaasTransactions,
   revertAsaasPayment,
+  sanitizeBillingType,
+  sanitizeReceiptUrl,
   transactionsChanged,
 } from '../order-payment.service';
 import type { AsaasPaymentEvent, OrderCharge } from '../../../models/asaas.types';
@@ -96,6 +99,7 @@ describe('order-payment.service - applyAsaasPayment', () => {
         description: 'Asaas • Pix',
         createdAt: expect.stringMatching(ISO),
         createdBy: { id: 'asaas', name: 'Asaas' },
+        billingType: 'PIX',
       },
     ]);
     const charge = read(CHARGE_PATH)!;
@@ -363,6 +367,7 @@ describe('order-payment.service - helpers', () => {
       description: 'Asaas • Pix',
       createdAt: '2026-10-04T12:00:00.000Z',
       createdBy: ASAAS_ACTOR,
+      billingType: 'PIX',
     });
   });
 });
@@ -946,5 +951,134 @@ describe('order-payment.service - transactionsChanged', () => {
     const a = t('a');
     const reordered = { createdBy: a.createdBy, createdAt: a.createdAt, amount: a.amount, type: a.type, id: a.id };
     expect(transactionsChanged({ transactions: [a] }, { transactions: [reordered] })).toBe(false);
+  });
+});
+
+describe('order-payment.service - comprovante e forma de pagamento do Asaas', () => {
+  const RECEIPT = 'https://www.asaas.com/comprovantes/1234567890';
+
+  beforeEach(() => {
+    resetFakeDb();
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('guarda receiptUrl e billingType quando o payload traz o comprovante', async () => {
+    seedOrder();
+    seedCharge();
+
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: RECEIPT }));
+
+    const [transaction] = read(ORDER_PATH)!.transactions as any[];
+    expect(transaction.receiptUrl).toBe(RECEIPT);
+    expect(transaction.billingType).toBe('PIX');
+    expect(read(CHARGE_PATH)!.appliedTransactions).toEqual([transaction]);
+  });
+
+  it('payload antigo sem comprovante: lança sem receiptUrl e sem undefined', async () => {
+    seedOrder();
+    seedCharge();
+
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+
+    const order = read(ORDER_PATH)!;
+    const [transaction] = order.transactions as any[];
+    expect('receiptUrl' in transaction).toBe(false);
+    expect(transaction.billingType).toBe('PIX');
+    expect(hasUndefined(order)).toBe(false);
+    expect(hasUndefined(read(CHARGE_PATH))).toBe(false);
+  });
+
+  it('ignora comprovante fora do domínio do Asaas ou sem https', () => {
+    expect(sanitizeReceiptUrl(RECEIPT)).toBe(RECEIPT);
+    expect(sanitizeReceiptUrl('https://sandbox.asaas.com/comprovantes/1')).toBe('https://sandbox.asaas.com/comprovantes/1');
+    expect(sanitizeReceiptUrl('http://www.asaas.com/comprovantes/1')).toBeUndefined();
+    expect(sanitizeReceiptUrl('https://evil.com/asaas.com')).toBeUndefined();
+    expect(sanitizeReceiptUrl('https://asaas.com.evil.com/x')).toBeUndefined();
+    expect(sanitizeReceiptUrl('javascript:alert(1)')).toBeUndefined();
+    expect(sanitizeReceiptUrl('not a url')).toBeUndefined();
+    expect(sanitizeReceiptUrl(null)).toBeUndefined();
+    expect(sanitizeReceiptUrl(42)).toBeUndefined();
+  });
+
+  it('ignora billingType inesperado', () => {
+    expect(sanitizeBillingType('CREDIT_CARD')).toBe('CREDIT_CARD');
+    expect(sanitizeBillingType('pix')).toBe('PIX');
+    expect(sanitizeBillingType('')).toBeUndefined();
+    expect(sanitizeBillingType('<script>')).toBeUndefined();
+    expect(sanitizeBillingType(undefined)).toBeUndefined();
+  });
+
+  it('CONFIRMED sem comprovante e depois RECEIVED com comprovante: completa sem lançar de novo', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ billingType: 'CREDIT_CARD', status: 'CONFIRMED' }));
+    const before = read(ORDER_PATH)!;
+
+    const second = await applyAsaasPayment(
+      'c1', 'o1', 'ch1', payment({ billingType: 'CREDIT_CARD', transactionReceiptUrl: RECEIPT }),
+    );
+
+    expect(second).toEqual({ applied: false });
+    const order = read(ORDER_PATH)!;
+    expect(order.paidAmount).toBe(1000);
+    expect(order.updatedAt).toBe(before.updatedAt);
+    expect(order.transactions).toHaveLength(1);
+    expect((order.transactions as any[])[0].receiptUrl).toBe(RECEIPT);
+    expect((order.transactions as any[])[0].billingType).toBe('CREDIT_CARD');
+    expect((read(CHARGE_PATH)!.appliedTransactions as any[])[0].receiptUrl).toBe(RECEIPT);
+  });
+
+  it('reentrega com o mesmo comprovante não grava nada e nunca troca o já gravado', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: RECEIPT }));
+    const orderBefore = read(ORDER_PATH);
+    const chargeBefore = read(CHARGE_PATH);
+
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: RECEIPT }));
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: 'https://www.asaas.com/comprovantes/other' }));
+
+    expect(read(ORDER_PATH)).toEqual(orderBefore);
+    expect(read(CHARGE_PATH)).toEqual(chargeBefore);
+  });
+
+  it('estornado: comprovante atrasado não volta para a OS', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: RECEIPT }));
+
+    expect(read(ORDER_PATH)!.transactions).toEqual([]);
+  });
+
+  it('repair devolve comprovante e forma apagados por versão antiga do app, sem mexer em updatedBy', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ transactionReceiptUrl: RECEIPT }));
+    const booked = read(ORDER_PATH)!;
+    const stripped = (booked.transactions as any[]).map(({ receiptUrl: _r, billingType: _b, ...rest }) => rest);
+    seed(ORDER_PATH, { ...booked, transactions: stripped, updatedBy: { id: 'u1', name: 'Ana' } });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual(booked.transactions);
+    expect(order.updatedBy).toEqual({ id: 'u1', name: 'Ana' });
+    expect(order.paidAmount).toBe(1000);
+
+    const again = read(ORDER_PATH);
+    await repairAsaasTransactions('c1', 'o1');
+    expect(read(ORDER_PATH)).toEqual(again);
+  });
+
+  it('mergeAsaasDetails só completa campos vazios', () => {
+    const base = buildAsaasTransaction(payment(), { mode: 'single' }, new Date('2026-10-04T10:00:00Z'));
+    expect(mergeAsaasDetails(base, { billingType: 'BOLETO' })).toBeNull();
+    expect(mergeAsaasDetails(base, { receiptUrl: RECEIPT })).toEqual({ ...base, receiptUrl: RECEIPT });
+    expect(mergeAsaasDetails(base, {})).toBeNull();
   });
 });

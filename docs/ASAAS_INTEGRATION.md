@@ -103,7 +103,7 @@ Rotas `/v1/app/*` usam `bearerAuth` + `resolveCompanyContext`; o app envia `X-Co
 | `companies/{cid}/orders/{oid}/charges/{chargeId}` | leitura owner/admin/manager, escrita servidor | `asaasPaymentId`, `asaasInstallmentId?`, `mode` (`single`\|`cardInstallments`), `installmentCount?`, `value`, `dueDate` (YYYY-MM-DD), `status` (`pending`\|`paid`\|`overdue`\|`canceled`\|`refunded`), `invoiceUrl`, `paidAsaasPaymentIds`, `createdBy`, `createdAt`, `paidAt?`; só servidor: `appliedTransactions`, `refundedAsaasPaymentIds` |
 | `Customer.taxId` / `CustomerAggr.taxId` | app | CPF/CNPJ normalizado: dígitos e, no CNPJ alfanumérico, letras maiúsculas |
 
-Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{paymentId}` e `type: payment` (nunca um tipo novo: versões antigas do app quebram com valor desconhecido). O status de pagamento da OS continua `paid` | `unpaid` (o "parcial" é calculado no app).
+Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{paymentId}` e `type: payment` (nunca um tipo novo: versões antigas do app quebram com valor desconhecido). Campos opcionais e aditivos (só em transações `asaas_*`, gravados pelo webhook): `billingType` (`PIX` | `BOLETO` | `CREDIT_CARD` | `DEBIT_CARD`...) e `receiptUrl` (o `transactionReceiptUrl` do Asaas; só é gravado se for `https` em `asaas.com` ou subdomínio). Versões antigas do app ignoram esses campos; transações antigas não os têm e o app cai na descrição ("Asaas • Pix"). O status de pagamento da OS continua `paid` | `unpaid` (o "parcial" é calculado no app).
 
 **As cobranças são a fonte da verdade** dos pagamentos Asaas da OS: `paidAsaasPaymentIds` lista o que foi lançado e `appliedTransactions` guarda uma cópia de cada transação, usada pelo reparo.
 
@@ -120,7 +120,7 @@ Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{payment
 
 | Evento | Efeito |
 |--------|--------|
-| `PAYMENT_RECEIVED` / `PAYMENT_CONFIRMED` | Em transação Firestore, lança `asaas_{payment.id}` (valor bruto pago pelo cliente) com descrição "Asaas • Pix" / "Asaas • Boleto" / "Asaas • Cartão 2/3", recalcula `paidAmount`, `paid` e `payment`. A cobrança vira `paid` quando todas as parcelas foram lançadas. Push "Pagamento recebido" para dono/admin/gerente. Pagamento que chega numa cobrança `canceled` é lançado mesmo assim (o dinheiro entrou) |
+| `PAYMENT_RECEIVED` / `PAYMENT_CONFIRMED` | Em transação Firestore, lança `asaas_{payment.id}` (valor bruto pago pelo cliente) com descrição "Asaas • Pix" / "Asaas • Boleto" / "Asaas • Cartão 2/3", `billingType` e, quando o payload traz, `receiptUrl`; recalcula `paidAmount`, `paid` e `payment`. Se o pagamento já foi lançado (ex.: cartão chega como CONFIRMED sem comprovante e depois RECEIVED com ele), só completa `receiptUrl`/`billingType` que faltam na OS e na cópia da cobrança, sem mexer em valores nem em `updatedAt` e nunca trocando um valor já gravado. A cobrança vira `paid` quando todas as parcelas foram lançadas. Push "Pagamento recebido" para dono/admin/gerente. Pagamento que chega numa cobrança `canceled` é lançado mesmo assim (o dinheiro entrou) |
 | `PAYMENT_OVERDUE` | `overdue` (se `pending`) |
 | `PAYMENT_REFUNDED` | Remove `asaas_{payment.id}` da OS, recalcula, cobrança `refunded`, comentário interno no histórico da OS. O id vai para `refundedAsaasPaymentIds` e nunca é lançado de novo |
 | `PAYMENT_DELETED` | `canceled` (se `pending`/`overdue` e sem parcela paga; parcelamento parcialmente pago mantém o status) |
@@ -132,7 +132,7 @@ OS em orçamento (`quote`) ou cancelada (`canceled`) fica sem status de pagament
 Único trigger Asaas em `companies/{cid}/orders/{oid}` (onUpdate, lógica em `order-trigger.service.ts`):
 
 - OS passou para `canceled` → cancela no Asaas as cobranças abertas sem parcela paga (só com `asaasConnected`).
-- `transactions` mudou e a empresa tem `asaasConnected` → `repairAsaasTransactions`: reinsere transações Asaas apagadas por uma versão antiga do app que salvou a OS inteira, remove `asaas_*` estornadas que voltaram e corrige `paidAmount`/`paid`/`payment` inconsistentes. Só grava quando algo muda (não entra em loop).
+- `transactions` mudou e a empresa tem `asaasConnected` → `repairAsaasTransactions`: reinsere transações Asaas apagadas por uma versão antiga do app que salvou a OS inteira, remove `asaas_*` estornadas que voltaram, devolve `receiptUrl`/`billingType` que uma versão antiga do app apagou ao salvar (copiando de `appliedTransactions`, sem mexer em `updatedBy`) e corrige `paidAmount`/`paid`/`payment` inconsistentes. Só grava quando algo muda (não entra em loop).
 
 O app novo não envia `transactions`, `paidAmount`, `paid` nem `payment` ao salvar uma OS existente. Pagamento e desconto manuais usam transformações de campo (`arrayUnion`/`increment`, funcionam offline); remover transação, zerar e quitar tudo usam `runTransaction` (pedem conexão).
 
@@ -151,6 +151,8 @@ O app novo não envia `transactions`, `paidAmount`, `paid` nem `payment` ao salv
 - **Seção "Cobrança" na tela de pagamentos da OS** (`lib/screens/payments/widgets/order_charge_section.dart` + `order_charge_card.dart`): mostra a cobrança atual (valor, status, vencimento, parcelas, link da fatura) e o botão Cobrar. Sem a conta conectada, o botão some, mas uma cobrança já existente continua visível.
 - **Nova cobrança** (`lib/screens/payments/create_charge_screen.dart`): valor (pré-preenchido com o saldo em aberto), modo (à vista ou cartão parcelado de 2x a 12x), vencimento e, quando preciso, CPF/CNPJ do cliente. Chama `POST /v1/app/orders/{orderId}/charges`.
 - Transações `asaas_*` não podem ser removidas no app (o estorno é feito no Asaas).
+- **Receber** (`lib/screens/payment_management_screen.dart`): a forma de pagamento ("Pix pelo link", "Cartão pelo link") vem de `billingType`, com a descrição como reserva (`lib/utils/asaas_billing.dart`). Com `receiptUrl`, a linha diz "com comprovante" e o sheet do pagamento oferece "Ver comprovante", que abre o link no navegador (o app confere de novo que é `https` em `asaas.com`).
+- **Financeiro > "Mandar cobrança"** (`lib/screens/payments/send_charge_flow.dart`): com permissão `chargeOrder`, `asaasEnabled` e `asaasConnected`, e a OS com saldo (não orçamento nem cancelada), primeiro garante a cobrança: se já há uma aberta, reaproveita; se não, abre "Nova cobrança" com o saldo (pede CPF/CNPJ se faltar). Depois de criada, abre o envio do link da OS (`ShareLinkSheet`, WhatsApp/compartilhar), onde o cliente paga por Pix, boleto ou cartão. Desistir da cobrança não manda nada. Sem Asaas, ou se não der para ler as configurações/cobranças (erro ou 8 s sem resposta), manda o link da OS como antes. Um segundo toque enquanto o fluxo roda é ignorado.
 
 Valores da cobrança são sempre exibidos em reais (`FormatService().formatBrl`), qualquer que seja o idioma do app: o Asaas só cobra em BRL.
 

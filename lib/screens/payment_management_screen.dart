@@ -23,6 +23,7 @@ import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/utils/asaas_billing.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
@@ -42,6 +43,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.store,
     this.canAttachReceipt,
     this.canViewReceipt,
+    this.onOpenExternalUrl,
   });
 
   /// Order store. When null it comes from the route arguments (`orderStore`).
@@ -50,6 +52,9 @@ class PaymentManagementScreen extends StatefulWidget {
   /// Test seams; default to the attachPhotos / viewPhotos permission checks.
   final bool? canAttachReceipt;
   final bool? canViewReceipt;
+
+  /// Test seam; defaults to opening the link in the browser.
+  final Future<void> Function(Uri uri)? onOpenExternalUrl;
 
   @override
   State<PaymentManagementScreen> createState() =>
@@ -453,7 +458,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           );
     final billing = receiveBillingLabel(context, tx);
     final canViewReceipt = tx.hasReceipt && _canView;
-    final canAttachLater = isPayment && !tx.hasReceipt && _canAttach;
+    // Receipt Asaas generated for a payment made through the link. It is a
+    // payment record, not a photo: shown without the viewPhotos check.
+    final asaasReceipt = tx.hasReceipt ? null : asaasReceiptUri(tx);
+    final canAttachLater =
+        isPayment && !tx.hasReceipt && asaasReceipt == null && _canAttach;
 
     showCupertinoModalPopup<void>(
       context: context,
@@ -469,6 +478,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               onPressed: () {
                 Navigator.pop(ctx);
                 _openReceipt(tx);
+              },
+              child: Text(context.l10n.receiveViewReceipt),
+            ),
+          if (asaasReceipt != null)
+            CupertinoActionSheetAction(
+              key: const Key('receiveAsaasReceipt'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openAsaasReceipt(asaasReceipt);
               },
               child: Text(context.l10n.receiveViewReceipt),
             ),
@@ -496,6 +514,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openAsaasReceipt(Uri uri) async {
+    final open = widget.onOpenExternalUrl;
+    if (open != null) {
+      await open(uri);
+      return;
+    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   int _indexOf(PaymentTransaction tx) {

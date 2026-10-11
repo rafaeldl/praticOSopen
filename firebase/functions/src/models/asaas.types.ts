@@ -186,6 +186,8 @@ export interface AsaasPaymentEvent {
   installment?: string | null;
   installmentNumber?: number | null;
   description?: string | null;
+  /** Asaas receipt page of a confirmed/received payment (absent in older or pending payloads). */
+  transactionReceiptUrl?: string | null;
 }
 
 export interface AsaasWebhookEvent {
