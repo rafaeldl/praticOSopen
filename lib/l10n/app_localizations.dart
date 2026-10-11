@@ -9399,6 +9399,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{hours} {hours, plural, =1{hora} other{horas}}'**
   String reminderHoursValue(int hours);
+
+  /// No description provided for @catalogSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você coloca nas OS'**
+  String get catalogSubtitle;
+
+  /// No description provided for @catalogKindWithCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{kind} ({count})'**
+  String catalogKindWithCount(String kind, int count);
+
+  /// No description provided for @catalogTip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'**
+  String get catalogTip;
 }
 
 class _AppLocalizationsDelegate

@@ -2573,5 +2573,9 @@
   "reminderMinutesValue": "{minutes} min",
   "@reminderMinutesValue": {"placeholders": {"minutes": {"type": "int"}}},
   "reminderHoursValue": "{hours} {hours, plural, =1{hour} other{hours}}",
-  "@reminderHoursValue": {"placeholders": {"hours": {"type": "int"}}}
+  "@reminderHoursValue": {"placeholders": {"hours": {"type": "int"}}},
+  "catalogSubtitle": "What you put on your orders",
+  "catalogKindWithCount": "{kind} ({count})",
+  "@catalogKindWithCount": {"placeholders": {"kind": {"type": "String"}, "count": {"type": "int"}}},
+  "catalogTip": "Tip: you can add items right on the order by typing the name in the search."
 }

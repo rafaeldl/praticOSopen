@@ -17,7 +17,6 @@ import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
-import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';

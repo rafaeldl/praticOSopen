@@ -5269,4 +5269,16 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$hours $_temp0';
   }
+
+  @override
+  String get catalogSubtitle => 'O que você coloca nas OS';
+
+  @override
+  String catalogKindWithCount(String kind, int count) {
+    return '$kind ($count)';
+  }
+
+  @override
+  String get catalogTip =>
+      'Dica: dá para cadastrar direto na OS, digitando o nome na busca.';
 }

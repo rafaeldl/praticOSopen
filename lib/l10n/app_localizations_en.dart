@@ -5257,4 +5257,16 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$hours $_temp0';
   }
+
+  @override
+  String get catalogSubtitle => 'What you put on your orders';
+
+  @override
+  String catalogKindWithCount(String kind, int count) {
+    return '$kind ($count)';
+  }
+
+  @override
+  String get catalogTip =>
+      'Tip: you can add items right on the order by typing the name in the search.';
 }
