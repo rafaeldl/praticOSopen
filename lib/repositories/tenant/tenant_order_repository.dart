@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/utils/merge_order_streams.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
@@ -361,14 +362,20 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
-  /// Stream de orders que contêm um device específico
+  /// Stream de orders que contêm um device específico.
+  ///
+  /// Older orders have only `device` (no `deviceIds`), so both are queried
+  /// and merged; otherwise the vehicle screen missed most of its history.
   Stream<List<Order?>> streamOrdersByDevice(
     String companyId,
     String deviceId,
   ) {
-    return streamQueryList(
-      companyId,
-      args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
+    return mergeOrderStreams(
+      streamQueryList(
+        companyId,
+        args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
+      ),
+      streamQueryList(companyId, args: [QueryArgs('device.id', deviceId)]),
     );
   }
 
