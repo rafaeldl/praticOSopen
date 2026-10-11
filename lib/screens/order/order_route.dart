@@ -8,8 +8,8 @@ import 'package:praticos/services/order_screen_preference.dart';
 ///
 /// The choice is read once when the route is built, so flipping the switch
 /// never swaps a screen that is already open. Both screens read the same
-/// `order` argument. Opening the comments (`scrollToComments`, from a
-/// notification) stays on the legacy screen until the new one has them.
+/// arguments (`order`, and `scrollToComments` / `commentId` from a
+/// notification).
 class OrderRoute extends StatefulWidget {
   const OrderRoute({super.key, this.newScreenBuilder, this.legacyBuilder});
 
@@ -26,10 +26,7 @@ class _OrderRouteState extends State<OrderRoute> {
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    _useNew ??= OrderScreenPreference.useNewScreen.value &&
-        args?['scrollToComments'] != true;
+    _useNew ??= OrderScreenPreference.useNewScreen.value;
     if (_useNew!) {
       return widget.newScreenBuilder?.call(context) ?? const OrderScreenV2();
     }

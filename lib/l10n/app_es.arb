@@ -2445,5 +2445,94 @@
   "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
   "valuesAndBillingSoon": "Activado. Pronto podrás desactivarlo.",
   "reportPreviousPeriod": "Período anterior",
-  "reportNextPeriod": "Período siguiente"
+  "reportNextPeriod": "Período siguiente",
+  "orderInThisOrder": "En esta {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos o documento",
+  "orderAddComment": "Comentario",
+  "orderAddAddress": "Dirección del servicio",
+  "orderAddSchedule": "Agendar día y hora",
+  "orderAddDiscount": "Descuento",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Otros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pregunta} other{Faltan {count} preguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Listo",
+  "orderAddressChange": "Cambiar dirección",
+  "orderAddressRemove": "Quitar dirección",
+  "orderScheduleRemove": "Quitar agenda",
+  "orderContractSummary": "{frequency} · próxima el {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Cambiar contrato",
+  "orderUploading": "Enviando…",
+  "pickDeviceTitle": "¿Cuál es el {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Otros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Registrar {device} nuevo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "¿Borrar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Dejar en blanco"
 }

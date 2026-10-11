@@ -5065,4 +5065,97 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reportNextPeriod => 'Período siguiente';
+
+  @override
+  String orderInThisOrder(String order) {
+    return 'En esta $order';
+  }
+
+  @override
+  String get orderAddChecklist => 'Checklist';
+
+  @override
+  String get orderAddMedia => 'Fotos o documento';
+
+  @override
+  String get orderAddComment => 'Comentario';
+
+  @override
+  String get orderAddAddress => 'Dirección del servicio';
+
+  @override
+  String get orderAddSchedule => 'Agendar día y hora';
+
+  @override
+  String get orderAddDiscount => 'Descuento';
+
+  @override
+  String orderAddContract(String order) {
+    return 'Repetir esta $order';
+  }
+
+  @override
+  String get orderAddOtherFields => 'Otros campos';
+
+  @override
+  String orderChecklistMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Faltan $count preguntas',
+      one: 'Falta 1 pregunta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderChecklistDone => 'Listo';
+
+  @override
+  String get orderAddressChange => 'Cambiar dirección';
+
+  @override
+  String get orderAddressRemove => 'Quitar dirección';
+
+  @override
+  String get orderScheduleRemove => 'Quitar agenda';
+
+  @override
+  String orderContractSummary(String frequency, String date) {
+    return '$frequency · próxima el $date';
+  }
+
+  @override
+  String get orderContractChange => 'Cambiar contrato';
+
+  @override
+  String get orderUploading => 'Enviando…';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return '¿Cuál es el $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Otros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Registrar $device nuevo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return '¿Borrar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Dejar en blanco';
 }

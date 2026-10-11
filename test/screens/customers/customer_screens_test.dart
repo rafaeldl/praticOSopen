@@ -386,6 +386,37 @@ void main() {
       );
     });
 
+    testWidgets('"Falta receber" sums the open amount of unpaid orders',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [
+            order(1, 'done', 100)..paidAmount = 40,
+            order(2, 'progress', 50),
+            order(3, 'done', 80)..payment = 'paid',
+            order(4, 'canceled', 500),
+            order(5, 'quote', 70),
+          ],
+        }),
+      );
+      await tester.scrollUntilVisible(find.text('Falta receber'), 300);
+      // 60 (100 - 40) + 50
+      expect(find.text('R\$ 110,00'.replaceAll(' ', '\u00a0')), findsOneWidget);
+    });
+
+    testWidgets('"Falta receber" is hidden when nothing is open',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [order(1, 'done', 50)..payment = 'paid'],
+        }),
+      );
+      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
+      expect(find.text('Falta receber'), findsNothing);
+    });
+
     testWidgets('without values and billing hides totals and Total gasto',
         (tester) async {
       await pumpDetail(
@@ -398,6 +429,7 @@ void main() {
         showPrices: false,
       );
       expect(find.text('Total gasto'), findsNothing);
+      expect(find.text('Falta receber'), findsNothing);
       expect(find.textContaining('100,00'), findsNothing);
       expect(find.textContaining('#1'), findsWidgets);
     });

@@ -589,6 +589,14 @@ class SegmentConfigService {
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _defaultTermsOfService;
 
+  /// Replaces the loaded custom fields (widget tests only).
+  @visibleForTesting
+  void debugSetCustomFields(List<CustomField> fields) {
+    _customFields
+      ..clear()
+      ..addAll(fields);
+  }
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;

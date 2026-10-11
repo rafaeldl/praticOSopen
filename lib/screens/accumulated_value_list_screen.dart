@@ -3,13 +3,29 @@ import 'package:praticos/models/accumulated_value.dart';
 import 'package:praticos/repositories/accumulated_value_repository.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/screens/widgets/add_row.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
 
 /// Screen for selecting or creating accumulated values.
 ///
 /// Displays a searchable list of previously used values sorted by usage count,
-/// with an option to add new values.
+/// with "Usar “X”" on top for a new value, a check mark on the current choice
+/// and "Deixar em branco" when clearing is allowed. Deleting (swipe) needs the
+/// permission of the field's area (`manageDevices` for device fields,
+/// `manageServices` / `manageProducts` for catalog fields).
 class AccumulatedValueListScreen extends StatefulWidget {
-  const AccumulatedValueListScreen({super.key});
+  const AccumulatedValueListScreen({super.key, this.repository, this.canDelete});
+
+  /// Injected in tests; defaults to [AccumulatedValueRepository].
+  final AccumulatedValueRepository? repository;
+
+  /// Injected in tests; defaults to the permission of the field type.
+  final bool Function(String fieldType)? canDelete;
 
   @override
   State<AccumulatedValueListScreen> createState() =>
@@ -18,7 +34,8 @@ class AccumulatedValueListScreen extends StatefulWidget {
 
 class _AccumulatedValueListScreenState
     extends State<AccumulatedValueListScreen> {
-  final _repo = AccumulatedValueRepository();
+  late final AccumulatedValueRepository _repo =
+      widget.repository ?? AccumulatedValueRepository();
   final _searchController = TextEditingController();
 
   List<AccumulatedValue> _allValues = [];
@@ -181,28 +198,28 @@ class _AccumulatedValueListScreenState
     }
   }
 
+  bool get _mayDelete {
+    final type = _fieldType ?? '';
+    if (widget.canDelete != null) return widget.canDelete!(type);
+    final PermissionType permission;
+    if (type.startsWith('service')) {
+      permission = PermissionType.manageServices;
+    } else if (type.startsWith('product')) {
+      permission = PermissionType.manageProducts;
+    } else {
+      permission = PermissionType.manageDevices;
+    }
+    return AuthorizationService.instance.hasPermission(permission);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Show clear button if allowed and there's a current value
-    final showClearButton = _allowClear && !_multiSelect &&
-        _currentValue != null && _currentValue!.isNotEmpty;
-
+    final background = AppColors.background.resolveFrom(context);
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: background,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_title ?? context.l10n.select),
-        leading: showClearButton
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _clearSelection,
-                child: Text(
-                  context.l10n.clear,
-                  style: const TextStyle(
-                    color: CupertinoColors.destructiveRed,
-                  ),
-                ),
-              )
-            : null,
+        backgroundColor: background,
         trailing: _multiSelect
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -217,20 +234,15 @@ class _AccumulatedValueListScreenState
       child: SafeArea(
         child: Column(
           children: [
-            // Search bar
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.pageMargin),
               child: CupertinoSearchTextField(
                 controller: _searchController,
                 placeholder: context.l10n.searchOrAddNew,
               ),
             ),
-
-            // List
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CupertinoActivityIndicator())
-                  : _buildList(),
+              child: _isLoading ? const LoadingState() : _buildList(),
             ),
           ],
         ),
@@ -239,320 +251,107 @@ class _AccumulatedValueListScreenState
   }
 
   Widget _buildList() {
+    final l10n = context.l10n;
     final searchQuery = _searchController.text.trim();
     final hasSearchQuery = searchQuery.isNotEmpty;
+    final current = _currentValue;
+    final hasCurrent = current != null && current.isNotEmpty;
 
-    // If searching and no results, show "Add '{query}'" option
-    if (_filteredValues.isEmpty && hasSearchQuery) {
-      return ListView(
-        children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _selectValue(searchQuery),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.add_circled_solid,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${context.l10n.add} "$searchQuery"',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: CupertinoTheme.of(context).primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          context.l10n.addNewValue,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-    }
+    bool inList(String v) =>
+        _filteredValues.any((x) => x.value.toLowerCase() == v.toLowerCase());
 
-    // Empty state (no search query)
-    if (_filteredValues.isEmpty) {
-      // If there's a current value, show it as an option to add
-      if (_currentValue != null && _currentValue!.isNotEmpty) {
-        return ListView(
-          children: [
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => _selectValue(_currentValue!),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                color: CupertinoColors.systemBackground.resolveFrom(context),
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.add_circled_solid,
-                      color: CupertinoTheme.of(context).primaryColor,
-                      size: 28,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${context.l10n.add} "$_currentValue"',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: CupertinoTheme.of(context).primaryColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            context.l10n.addNewValue,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      }
+    // New value to confirm: what was typed, or the current value when it is
+    // not saved yet.
+    final String? toAdd = hasSearchQuery
+        ? (inList(searchQuery) ? null : searchQuery)
+        : (hasCurrent && !inList(current) ? current : null);
 
-      // Otherwise show empty state message
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.square_list,
-              size: 64,
-              color: CupertinoColors.systemGrey.resolveFrom(context),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.noValuesRegistered,
-              style: TextStyle(
-                fontSize: 17,
-                color: CupertinoColors.label.resolveFrom(context),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.typeAboveToAdd,
-              style: TextStyle(
-                fontSize: 15,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            ),
-          ],
+    final showClear = _allowClear && !_multiSelect && hasCurrent;
+    final children = <Widget>[
+      if (showClear)
+        AppListRow(
+          title: l10n.accumulatedLeaveBlank,
+          onTap: _clearSelection,
         ),
+      if (toAdd != null)
+        AddRow(
+          label: l10n.accumulatedUse(toAdd),
+          onTap: () => _selectValue(toAdd),
+        ),
+      for (final value in _filteredValues) _valueRow(value),
+    ];
+
+    if (children.isEmpty) {
+      return EmptyState(
+        icon: CupertinoIcons.square_list,
+        title: l10n.noValuesRegistered,
+        message: l10n.typeAboveToAdd,
       );
     }
+    return ListView(children: children);
+  }
 
-    // Check if search query exactly matches any existing value
-    final exactMatch = hasSearchQuery &&
-        _filteredValues.any((v) => v.value.toLowerCase() == searchQuery.toLowerCase());
-
-    // Check if current value is in the list
-    final currentValueInList = _currentValue != null && _currentValue!.isNotEmpty &&
-        _filteredValues.any((v) => v.value.toLowerCase() == _currentValue!.toLowerCase());
-
-    // Show add option for search query OR current value if not in list
-    final showAddOption = (hasSearchQuery && !exactMatch) ||
-        (!hasSearchQuery && _currentValue != null && _currentValue!.isNotEmpty && !currentValueInList);
-
-    final valueToAdd = hasSearchQuery ? searchQuery : _currentValue ?? '';
-
-    return ListView.separated(
-      itemCount: _filteredValues.length + (showAddOption ? 1 : 0),
-      separatorBuilder: (context, index) => Container(
-        height: 0.5,
-        color: CupertinoColors.separator.resolveFrom(context),
-        margin: const EdgeInsets.only(left: 16),
+  Widget _valueRow(AccumulatedValue value) {
+    final isSelected = _multiSelect
+        ? _selectedValues.contains(value.value)
+        : value.value == _currentValue;
+    final row = Container(
+      color: AppColors.background.resolveFrom(context),
+      child: AppListRow(
+        key: ValueKey('value-${value.id ?? value.value}'),
+        title: value.value,
+        subtitle: value.group,
+        trailing: isSelected ? '✓' : null,
+        showChevron: false,
+        titleStyle: isSelected
+            ? const TextStyle(fontWeight: FontWeight.w600)
+            : null,
+        onTap: () => _selectValue(value.value),
       ),
-      itemBuilder: (context, index) {
-        // Show "Add new" option at the bottom
-        if (showAddOption && index == _filteredValues.length) {
-          return CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _selectValue(valueToAdd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.add_circled,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '${context.l10n.add} "$valueToAdd"',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: CupertinoTheme.of(context).primaryColor,
-                      ),
-                    ),
-                  ),
-                ],
+    );
+    if (!_mayDelete) return row;
+
+    return Dismissible(
+      key: Key(value.id ?? value.value),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: CupertinoColors.systemRed,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white),
+      ),
+      confirmDismiss: (direction) async {
+        final confirmed = await showCupertinoDialog<bool>(
+          context: context,
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.accumulatedDeleteConfirm(value.value)),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(context.l10n.cancel),
               ),
-            ),
-          );
-        }
-
-        final value = _filteredValues[index];
-        final isSelected = _multiSelect
-            ? _selectedValues.contains(value.value)
-            : value.value == _currentValue;
-
-        return Dismissible(
-          key: Key(value.id ?? value.value),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            color: CupertinoColors.systemRed,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(
-              CupertinoIcons.delete,
-              color: CupertinoColors.white,
-              size: 24,
-            ),
-          ),
-          confirmDismiss: (direction) async {
-            final confirmed = await showCupertinoDialog<bool>(
-              context: context,
-              builder: (context) => CupertinoAlertDialog(
-                title: Text(context.l10n.delete),
-                content: Text('Deseja excluir "${value.value}"?'),
-                actions: [
-                  CupertinoDialogAction(
-                    isDestructiveAction: true,
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(context.l10n.delete),
-                  ),
-                  CupertinoDialogAction(
-                    isDefaultAction: true,
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(context.l10n.cancel),
-                  ),
-                ],
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(context.l10n.delete),
               ),
-            );
-
-            if (confirmed == true && value.id != null) {
-              try {
-                await _repo.remove(_companyId!, _fieldType!, value.id!);
-                debugPrint('AccumulatedValueListScreen: Deleted value: ${value.value}');
-                // Remove from local list to prevent item from reappearing
-                setState(() {
-                  _allValues.removeWhere((v) => v.id == value.id);
-                  _filteredValues.removeWhere((v) => v.id == value.id);
-                });
-                return true;
-              } catch (e) {
-                debugPrint('Error deleting accumulated value: $e');
-                return false;
-              }
-            }
-            return false;
-          },
-          onDismissed: (direction) {
-            // Deletion already handled in confirmDismiss
-            debugPrint('AccumulatedValueListScreen: Item dismissed from UI');
-          },
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _selectValue(value.value),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                      Text(
-                        value.value,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: CupertinoColors.label.resolveFrom(context),
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
-                        ),
-                      ),
-                      if (value.group != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          value.group!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (value.usageCount > 1) ...[
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.tertiarySystemFill
-                          .resolveFrom(context),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${value.usageCount}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: CupertinoColors.secondaryLabel
-                            .resolveFrom(context),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                if (isSelected)
-                  Icon(
-                    CupertinoIcons.check_mark,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 20,
-                  ),
-              ],
-            ),
+            ],
           ),
-        ),
         );
+        if (confirmed != true || value.id == null) return false;
+        try {
+          await _repo.remove(_companyId!, _fieldType!, value.id!);
+          setState(() {
+            _allValues.removeWhere((v) => v.id == value.id);
+            _filteredValues.removeWhere((v) => v.id == value.id);
+          });
+          return true;
+        } catch (e) {
+          debugPrint('Error deleting accumulated value: $e');
+          return false;
+        }
       },
+      child: row,
     );
   }
 
