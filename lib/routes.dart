@@ -3,7 +3,7 @@ import 'package:praticos/screens/catalog/catalog_list_screen.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/device_list_screen.dart';
-import 'package:praticos/screens/order_form.dart';
+import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/order_product_screen.dart';
 import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
 import 'package:praticos/screens/menu_navigation/collaborator_list_screen.dart';
@@ -39,7 +39,8 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/device_list': (context) => DeviceListScreen(),
   '/device_detail': (context) => const DeviceDetailScreen(),
   '/accumulated_value_list': (context) => AccumulatedValueListScreen(),
-  '/order': (context) => OrderForm(),
+  // Legacy OrderForm by default; the new screen with "Nova tela da OS".
+  '/order': (context) => const OrderRoute(),
   '/order_service': (context) => OrderServiceScreen(),
   '/order_product': (context) => OrderProductScreen(),
   '/payment_management': (context) => PaymentManagementScreen(),

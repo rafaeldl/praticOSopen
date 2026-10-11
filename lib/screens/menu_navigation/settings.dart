@@ -12,6 +12,7 @@ import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/services/order_screen_preference.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -288,6 +289,26 @@ class _SettingsState extends State<Settings> {
                     additionalInfo: Text(_getThemeModeText(context, themeStore.themeMode)),
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
+                  ),
+                  // "Nova tela da OS": local pilot switch (off by default)
+                  ValueListenableBuilder<bool>(
+                    valueListenable: OrderScreenPreference.useNewScreen,
+                    builder: (context, useNew, _) => CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBlue,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.doc_text, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.newOrderScreenSetting),
+                      subtitle: Text(context.l10n.newOrderScreenSettingHint),
+                      trailing: CupertinoSwitch(
+                        value: useNew,
+                        onChanged: OrderScreenPreference.set,
+                      ),
+                    ),
                   ),
                   // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
                   Observer(builder: (_) {

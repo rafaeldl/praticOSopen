@@ -114,7 +114,9 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
 
-      _orderProduct.total = _orderProduct.quantity! * _orderProduct.value!;
+      final value = _orderProduct.value;
+      _orderProduct.total =
+          value == null ? null : (_orderProduct.quantity ?? 1) * value;
 
       if (orderProductIndex == null) {
         _orderStore!.addProduct(_orderProduct);

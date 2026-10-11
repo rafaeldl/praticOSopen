@@ -1824,5 +1824,200 @@
     }
   },
   "deleteDeviceKeepsOrders": "The orders stay saved.",
-  "deviceDetailsLabel": "Details"
+  "deviceDetailsLabel": "Details",
+  "newOrderScreenSetting": "New order screen",
+  "newOrderScreenSettingHint": "Try the redesigned order. You can switch back anytime.",
+  "orderNewTitle": "New {order}",
+  "@orderNewTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNumberTitle": "{order} {number}",
+  "@orderNumberTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "orderChangeStatusLink": "Change",
+  "orderItemsSection": "What will be done",
+  "orderWhatGoesTitle": "What goes on the order?",
+  "orderItemSearchPlaceholder": "Search service or part",
+  "orderCreateAndAdd": "Create “{name}” and add to the order",
+  "@orderCreateAndAdd": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCreateItemHint": "You set the price on the order. It is saved for next time.",
+  "orderCreateItemError": "Could not create it. Try again.",
+  "orderCatalogEmpty": "Your catalog is empty. Type the name in the search to create one.",
+  "orderMostUsed": "Most used",
+  "orderAllItems": "All",
+  "orderItemKindService": "service",
+  "orderItemKindProduct": "product",
+  "orderItemQuantityValue": "{count} units",
+  "@orderItemQuantityValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "orderItemPrice": "Price",
+  "orderItemPriceHint": "You can leave it blank: the item has no price and stays out of the total.",
+  "orderItemQuantity": "Quantity",
+  "orderItemLess": "One less",
+  "orderItemMore": "One more",
+  "orderItemRemove": "Remove from the order",
+  "orderTotalLabel": "Total",
+  "orderRemainingToReceive": "Left to receive {amount}",
+  "@orderRemainingToReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderFullyPaid": "Fully paid",
+  "orderSaveButton": "Save {order}",
+  "@orderSaveButton": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderSaveNeedsCustomer": "Choose the customer to save.",
+  "orderDiscardTitle": "Leave without saving?",
+  "orderDiscardMessage": "What you filled in will be lost.",
+  "orderKeepEditing": "Keep editing",
+  "orderPickDevice": "Choose {device}",
+  "@orderPickDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderPhotoAction": "Photo",
+  "orderTalkAction": "Say what to do",
+  "orderAssistantSoon": "Coming soon",
+  "orderNextStepQuote": "Quote ready for the customer",
+  "orderNextStepQuoteAction": "Customer approved",
+  "orderNextStepApproved": "Approved by the customer",
+  "orderNextStepApprovedAction": "Start the service",
+  "orderNextStepProgress": "Service in progress",
+  "orderNextStepProgressAction": "Mark as done",
+  "orderNextStepDone": "Done",
+  "orderNextStepDoneUnpaid": "Done. {amount} left to receive",
+  "@orderNextStepDoneUnpaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepReceive": "Receive {amount}",
+  "@orderNextStepReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepDonePaid": "All set: done and paid",
+  "orderNextStepSend": "Send to the customer",
+  "orderNextStepCanceled": "{order} canceled",
+  "@orderNextStepCanceled": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepReopen": "Reopen",
+  "orderMenuAddTo": "Add to the {order}",
+  "@orderMenuAddTo": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMenuSendToCustomer": "Send to the customer",
+  "orderMenuPdf": "PDF",
+  "orderMenuCancel": "Cancel {order}",
+  "@orderMenuCancel": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMenuDelete": "Delete {order}",
+  "@orderMenuDelete": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddDueDate": "Delivery date",
+  "orderAddAnotherDevice": "Another {device}",
+  "@orderAddAnotherDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddMore": "Checklist, photos, comment and more",
+  "orderCancelConfirmTitle": "Cancel {order}?",
+  "@orderCancelConfirmTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelConfirmMessage": "It goes to the canceled ones and can be reopened.",
+  "orderDeleteConfirmTitle": "Delete {order}?",
+  "@orderDeleteConfirmTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDeleteConfirmMessage": "This cannot be undone.",
+  "orderPhotosSection": "Photos",
+  "orderDeviceActionChange": "Change",
+  "orderDeviceActionRemove": "Remove from the order",
+  "orderUnpricedCount": "{count, plural, =1{1 item without price, out of the total} other{{count} items without price, out of the total}}",
+  "@orderUnpricedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderPendingChecklists": "{count, plural, =1{1 checklist is not finished} other{{count} checklists are not finished}}",
+  "@orderPendingChecklists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderMoreActions": "More actions"
 }

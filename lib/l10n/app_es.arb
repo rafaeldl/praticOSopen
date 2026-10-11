@@ -1824,5 +1824,200 @@
     }
   },
   "deleteDeviceKeepsOrders": "Las OS siguen guardadas.",
-  "deviceDetailsLabel": "Datos"
+  "deviceDetailsLabel": "Datos",
+  "newOrderScreenSetting": "Nueva pantalla de la OS",
+  "newOrderScreenSettingHint": "Pruebe la OS rediseñada. Puede volver cuando quiera.",
+  "orderNewTitle": "Nueva {order}",
+  "@orderNewTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNumberTitle": "{order} {number}",
+  "@orderNumberTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "orderChangeStatusLink": "Cambiar",
+  "orderItemsSection": "Qué se va a hacer",
+  "orderWhatGoesTitle": "¿Qué va en la OS?",
+  "orderItemSearchPlaceholder": "Buscar servicio o pieza",
+  "orderCreateAndAdd": "Crear “{name}” y ponerlo en la OS",
+  "@orderCreateAndAdd": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCreateItemHint": "El precio lo pone en la propia OS. Queda guardado para las próximas.",
+  "orderCreateItemError": "No se pudo crear. Inténtelo de nuevo.",
+  "orderCatalogEmpty": "Su catálogo está vacío. Escriba el nombre en la búsqueda para crear.",
+  "orderMostUsed": "Más usados",
+  "orderAllItems": "Todos",
+  "orderItemKindService": "servicio",
+  "orderItemKindProduct": "producto",
+  "orderItemQuantityValue": "{count} unidades",
+  "@orderItemQuantityValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "orderItemPrice": "Precio",
+  "orderItemPriceHint": "Puede dejarlo en blanco: el ítem queda sin valor y fuera del total.",
+  "orderItemQuantity": "Cantidad",
+  "orderItemLess": "Uno menos",
+  "orderItemMore": "Uno más",
+  "orderItemRemove": "Quitar de la OS",
+  "orderTotalLabel": "Total",
+  "orderRemainingToReceive": "Falta cobrar {amount}",
+  "@orderRemainingToReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderFullyPaid": "Todo pagado",
+  "orderSaveButton": "Guardar {order}",
+  "@orderSaveButton": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderSaveNeedsCustomer": "Elija el cliente para guardar.",
+  "orderDiscardTitle": "¿Salir sin guardar?",
+  "orderDiscardMessage": "Lo que completó se perderá.",
+  "orderKeepEditing": "Seguir editando",
+  "orderPickDevice": "Elegir {device}",
+  "@orderPickDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderPhotoAction": "Foto",
+  "orderTalkAction": "Decir qué hacer",
+  "orderAssistantSoon": "Próximamente",
+  "orderNextStepQuote": "Presupuesto listo para el cliente",
+  "orderNextStepQuoteAction": "El cliente aprobó",
+  "orderNextStepApproved": "Aprobada por el cliente",
+  "orderNextStepApprovedAction": "Empezar el servicio",
+  "orderNextStepProgress": "Servicio en curso",
+  "orderNextStepProgressAction": "Marcar como listo",
+  "orderNextStepDone": "Listo",
+  "orderNextStepDoneUnpaid": "Listo. Falta cobrar {amount}",
+  "@orderNextStepDoneUnpaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepReceive": "Cobrar {amount}",
+  "@orderNextStepReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepDonePaid": "Todo bien: listo y pagado",
+  "orderNextStepSend": "Enviar al cliente",
+  "orderNextStepCanceled": "{order} cancelada",
+  "@orderNextStepCanceled": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNextStepReopen": "Reabrir",
+  "orderMenuAddTo": "Agregar a la {order}",
+  "@orderMenuAddTo": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMenuSendToCustomer": "Enviar al cliente",
+  "orderMenuPdf": "PDF",
+  "orderMenuCancel": "Cancelar {order}",
+  "@orderMenuCancel": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderMenuDelete": "Eliminar {order}",
+  "@orderMenuDelete": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddDueDate": "Fecha de entrega",
+  "orderAddAnotherDevice": "Otro {device}",
+  "@orderAddAnotherDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddMore": "Checklist, fotos, comentario y más",
+  "orderCancelConfirmTitle": "¿Cancelar {order}?",
+  "@orderCancelConfirmTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelConfirmMessage": "Pasa a las canceladas y se puede reabrir.",
+  "orderDeleteConfirmTitle": "¿Eliminar {order}?",
+  "@orderDeleteConfirmTitle": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDeleteConfirmMessage": "No se puede deshacer.",
+  "orderPhotosSection": "Fotos",
+  "orderDeviceActionChange": "Cambiar",
+  "orderDeviceActionRemove": "Quitar de la OS",
+  "orderUnpricedCount": "{count, plural, =1{1 ítem sin valor, fuera del total} other{{count} ítems sin valor, fuera del total}}",
+  "@orderUnpricedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderPendingChecklists": "{count, plural, =1{Falta terminar 1 checklist} other{Faltan terminar {count} checklists}}",
+  "@orderPendingChecklists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderMoreActions": "Más acciones"
 }

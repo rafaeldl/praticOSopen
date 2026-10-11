@@ -29,6 +29,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/services/order_screen_preference.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 
@@ -60,6 +61,9 @@ Future<void> main() async {
   } else {
     await _localeStore.load();
   }
+
+  // "Nova tela da OS" (local switch, off by default)
+  await OrderScreenPreference.load();
 
   runApp(
     MultiProvider(
