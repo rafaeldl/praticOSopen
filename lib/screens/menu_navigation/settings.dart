@@ -1,898 +1,170 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:praticos/config/feature_flags.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
-import 'package:praticos/mobx/locale_store.dart';
-import 'package:praticos/mobx/user_store.dart';
-import 'package:praticos/mobx/theme_store.dart';
-import 'package:praticos/mobx/reminder_store.dart';
-import 'package:praticos/mobx/engagement_reminder_store.dart';
-import 'package:praticos/mobx/whatsapp_link_store.dart';
-import 'package:praticos/services/notification_service.dart';
-import 'package:praticos/models/permission.dart';
-import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/screens/onboarding/company_info_screen.dart';
-import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
-import 'package:praticos/repositories/company_repository.dart';
-import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
-import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/mobx/subscription_store.dart';
+import 'package:praticos/mobx/user_store.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/subscription.dart';
-import 'package:praticos/services/format_service.dart';
-import 'package:praticos/services/paywall_launcher.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/menu_navigation/more/account_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/more_view.dart';
+import 'package:praticos/screens/menu_navigation/more/my_company_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/plan_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/reminders_screen.dart';
+import 'package:praticos/services/authorization_service.dart';
 
+/// The "Mais" tab. Builds [MoreView] with the rows the current role can see
+/// and opens the destination of each row.
 class Settings extends StatefulWidget {
+  const Settings({super.key});
+
   @override
-  _SettingsState createState() => _SettingsState();
+  State<Settings> createState() => _SettingsState();
 }
 
 class _SettingsState extends State<Settings> {
   final UserStore _userStore = UserStore();
-  late AuthStore _authStore;
   final AuthorizationService _authService = AuthorizationService.instance;
-  final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
-
-  @override
-  void initState() {
-    super.initState();
-    if (kWhatsAppBotEnabled) {
-      _whatsappStore.loadStatus();
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _authStore = context.read<AuthStore>();
-  }
 
   @override
   Widget build(BuildContext context) {
     _userStore.findCurrentUser();
     // Set the UserStore instance for AuthorizationService to use
     AuthorizationService.setUserStore(_userStore);
-    final themeStore = Provider.of<ThemeStore>(context);
-    final reminderStore = Provider.of<ReminderStore>(context);
-    final engagementStore = Provider.of<EngagementReminderStore>(context);
     final config = context.watch<SegmentConfigProvider>();
+    final authStore = context.watch<AuthStore>();
+    final subscription =
+        context.watch<SubscriptionStore>().subscription ?? Subscription();
 
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: CustomScrollView(
-          slivers: [
-                      CupertinoSliverNavigationBar(
-                        largeTitle: Text(context.l10n.settings),
-                      ),
-                      SliverSafeArea(
-                        top: false,
-                        sliver: SliverList(
-                          delegate: SliverChildListDelegate([
-                              // Profile Section
-                            CupertinoListSection.insetGrouped(                children: [
-                  Observer(builder: (_) {
-                    final user = _userStore.user?.value;
-                    final userName = user?.name ?? Global.currentUser?.displayName ?? 'Usuário';
-                    // Prefer photo from Firestore user, fallback to Firebase Auth
-                    final userPhoto = user?.photo ?? Global.currentUser?.photoURL;
-
-                    return CupertinoListTile(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      leadingSize: 60,
-                      leading: ClipOval(
-                        child: userPhoto != null
-                            ? CachedImage(
-                                imageUrl: userPhoto,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: 60,
-                                height: 60,
-                                color: CupertinoColors.systemGrey5,
-                                child: const Icon(CupertinoIcons.person_solid, color: CupertinoColors.systemGrey),
-                              ),
-                      ),
-                      title: Text(
-                        userName,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                      ),
-                      subtitle: _authStore.companyAggr?.name != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _authStore.companyAggr!.name!,
-                                  style: const TextStyle(
-                                    color: CupertinoColors.activeBlue,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2.0),
-                                  child: Text(
-                                    _authService.getRoleLabelLocalized(context.l10n),
-                                    style: TextStyle(
-                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : null,
-                      trailing: const CupertinoListTileChevron(),
-                      onTap: () => Navigator.pushNamed(context, '/user_profile_edit'),
-                    );
-                  }),
-                ],
-              ),
-
-              // Company Switcher (if applicable)
-              Observer(builder: (_) {
-                if (_userStore.user?.value != null &&
-                    _userStore.user!.value!.companies != null &&
-                    _userStore.user!.value!.companies!.length > 1) {
-                  return CupertinoListSection.insetGrouped(
-                    header: Text(context.l10n.organization.toUpperCase()),
-                    children: [
-                      CupertinoListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemPurple,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(CupertinoIcons.building_2_fill, color: CupertinoColors.white, size: 20),
-                        ),
-                        title: Text(context.l10n.switchCompany),
-                        subtitle: Text(context.l10n.switchBetweenOrganizations),
-                        trailing: const CupertinoListTileChevron(),
-                        onTap: () => _showCompanySelectionModal(context, config),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-
-              // Admin/Management Section - RBAC based
-              Observer(builder: (ctx) {
-                final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
-                final canManageUsers = _authService.hasPermission(PermissionType.manageUsers);
-                final canManageForms = _authService.hasPermission(PermissionType.manageForms);
-                final canViewDevices = _authService.hasPermission(PermissionType.viewDevices);
-                final canViewServices = _authService.hasPermission(PermissionType.viewServices);
-                final canViewProducts = _authService.hasPermission(PermissionType.viewProducts);
-
-                return CupertinoListSection.insetGrouped(
-                  header: Text(context.l10n.management.toUpperCase()),
-                  children: [
-                    // Dados da Empresa - apenas Admin
-                    if (canManageCompany)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.briefcase_fill,
-                        color: CupertinoColors.systemOrange,
-                        title: context.l10n.companyData,
-                        onTap: () => Navigator.pushNamed(context, '/company_form'),
-                      ),
-
-                    // Colaboradores - apenas Admin
-                    if (canManageUsers)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.person_3_fill,
-                        color: CupertinoColors.systemBlue,
-                        title: context.l10n.collaborators,
-                        onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
-                      ),
-
-                    // Dispositivos - Admin/Supervisor podem gerenciar, outros podem visualizar
-                    if (canViewDevices)
-                      _buildSettingsTile(
-                        icon: config.deviceIcon,
-                        color: CupertinoColors.systemGreen,
-                        title: config.devicePlural,
-                        onTap: () => Navigator.pushNamed(context, '/device_list'),
-                      ),
-
-                    // Serviços - Admin/Supervisor podem gerenciar
-                    if (canViewServices)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.wrench_fill,
-                        color: CupertinoColors.systemIndigo,
-                        title: context.l10n.services,
-                        onTap: () => Navigator.pushNamed(context, '/service_list'),
-                      ),
-
-                    // Produtos - Admin/Supervisor podem gerenciar
-                    if (canViewProducts)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.cube_box_fill,
-                        color: CupertinoColors.systemPink,
-                        title: context.l10n.products,
-                        onTap: () => Navigator.pushNamed(context, '/product_list'),
-                      ),
-
-                    // Formulários - Admin/Supervisor podem gerenciar
-                    if (canManageForms)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.doc_text_fill,
-                        color: CupertinoColors.systemTeal,
-                        title: context.l10n.procedures,
-                        onTap: () => Navigator.pushNamed(context, '/form_template_list'),
-                      ),
-
-                    // Contracts - visible when useContracts is active
-                    if (config.useContracts && canManageCompany)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.repeat,
-                        color: CupertinoColors.systemOrange,
-                        title: context.l10n.contracts,
-                        onTap: () => Navigator.pushNamed(context, '/contract_list'),
-                      ),
-
-                    // Avaliações - Admin/Manager podem visualizar
-                    if (canManageCompany)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.star_fill,
-                        color: const Color(0xFFFFD700),
-                        title: context.l10n.ratings,
-                        onTap: () => Navigator.pushNamed(context, '/ratings'),
-                      ),
-
-                    // Integrações (MCP) - apenas owner/admin, mesmo guard de Colaboradores
-                    if (canManageUsers)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.link,
-                        color: CupertinoColors.systemBlue,
-                        title: context.l10n.integrations,
-                        onTap: () => Navigator.pushNamed(context, '/integrations'),
-                      ),
-                  ],
-                );
-              }),
-
-              // Interface Section
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.interface_.toUpperCase()),
-                children: [
-                  Observer(builder: (_) {
-                    final localeStore = Provider.of<LocaleStore>(context, listen: false);
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemBlue,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.globe, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.language),
-                      additionalInfo: Text(localeStore.currentLocaleDisplayName),
-                      trailing: const CupertinoListTileChevron(),
-                      onTap: () => _showLanguageSelectionDialog(context, localeStore),
-                    );
-                  }),
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.nightMode),
-                    additionalInfo: Text(_getThemeModeText(context, themeStore.themeMode)),
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: () => _showThemeSelectionDialog(context, themeStore, config),
-                  ),
-                  // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
-                  Observer(builder: (_) {
-                    if (_authService.hasPermission(PermissionType.manageCompany)) {
-                      return Semantics(
-                        identifier: 'reopen_onboarding_button',
-                        button: true,
-                        label: context.l10n.reopenOnboarding,
-                        child: CupertinoListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.systemPurple,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(CupertinoIcons.refresh_bold, color: CupertinoColors.white, size: 20),
-                          ),
-                          title: Text(context.l10n.reopenOnboarding),
-                          subtitle: Text(context.l10n.reconfigureCompanySetup),
-                          trailing: const CupertinoListTileChevron(),
-                          onTap: () => _reopenOnboarding(context),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                ],
-              ),
-
-              // Reminders Section
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.engagementReminders.toUpperCase()),
-                children: [
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemYellow,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.scheduleReminder),
-                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
-                      trailing: const CupertinoListTileChevron(),
-                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
-                    );
-                  }),
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemOrange,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.clock_fill, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.dailyReminderTitle),
-                      subtitle: Text(context.l10n.dailyReminderDescription),
-                      trailing: CupertinoSwitch(
-                        value: engagementStore.dailyEnabled,
-                        onChanged: (value) {
-                          engagementStore.setDailyEnabled(value);
-                          if (!value) {
-                            NotificationService.instance.cancelDailyReminder();
-                          }
-                        },
-                      ),
-                    );
-                  }),
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemPurple,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.inactivityReminderTitle),
-                      subtitle: Text(context.l10n.inactivityReminderDescription),
-                      trailing: CupertinoSwitch(
-                        value: engagementStore.inactivityEnabled,
-                        onChanged: (value) {
-                          engagementStore.setInactivityEnabled(value);
-                          if (!value) {
-                            NotificationService.instance.cancelInactivityReminders();
-                          }
-                        },
-                      ),
-                    );
-                  }),
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemRed,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.exclamationmark_circle_fill, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.pendingOsReminderTitle),
-                      subtitle: Text(context.l10n.pendingOsReminderDescription),
-                      trailing: CupertinoSwitch(
-                        value: engagementStore.pendingOsEnabled,
-                        onChanged: (value) {
-                          engagementStore.setPendingOsEnabled(value);
-                          if (!value) {
-                            NotificationService.instance.cancelPendingOsReminders();
-                          }
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              ),
-
-              // Subscription Section: paid plans via In-App Purchase.
-              // Hidden when the build has no real RevenueCat key.
-              if (SubscriptionService.paidPlansEnabled)
-                Observer(builder: (_) => _buildSubscriptionSection(context)),
-
-              // Account Section
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.account.toUpperCase()),
-                children: [
-                  if (kWhatsAppBotEnabled) ...[
-                    // WhatsApp link
-                    Observer(
-                      builder: (_) {
-                        final isLinked = _whatsappStore.isLinked;
-                        final isLoading = _whatsappStore.isLoading;
-
-                        return CupertinoListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: isLinked
-                                  ? CupertinoColors.systemGreen
-                                  : CupertinoColors.systemGrey,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.chat_bubble_2_fill,
-                              color: CupertinoColors.white,
-                              size: 20,
-                            ),
-                          ),
-                          title: const Text('WhatsApp'),
-                          subtitle: Text(
-                            isLoading
-                                ? context.l10n.loading
-                                : isLinked
-                                    ? _whatsappStore.linkedNumber ?? context.l10n.linked
-                                    : context.l10n.notLinked,
-                          ),
-                          trailing: isLoading
-                              ? const CupertinoActivityIndicator()
-                              : isLinked
-                                  ? Icon(
-                                      CupertinoIcons.checkmark_circle_fill,
-                                      color: CupertinoColors.systemGreen.resolveFrom(context),
-                                    )
-                                  : const CupertinoListTileChevron(),
-                          onTap: isLoading
-                              ? null
-                              : isLinked
-                                  ? () => _showUnlinkWhatsAppDialog(context)
-                                  : () => _showLinkWhatsAppSheet(context),
-                        );
-                      },
-                    ),
-                  ],
-                  // Accept Invite - join another company
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBlue,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.ticket_fill, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.acceptInvite),
-                    subtitle: Text(context.l10n.joinAnotherCompany),
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: () => _openAcceptInviteScreen(context),
-                  ),
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemRed,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.arrow_right_square_fill, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.logout, style: const TextStyle(color: CupertinoColors.systemRed)),
-                    onTap: () => _showLogoutConfirmation(context, config),
-                  ),
-                ],
-              ),
-
-              // Version
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'PraticOS ${Global.version}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-              
-              ]),
-              
-            ),
-              
-          ),
-              
-        ],
-              
-      ),
-              
-      ),
-              
-    );
-              
-  }
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return CupertinoListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(6),
+    return Observer(builder: (_) {
+      final canViewServices =
+          _authService.hasPermission(PermissionType.viewServices);
+      final canViewProducts =
+          _authService.hasPermission(PermissionType.viewProducts);
+      final visibility = MoreVisibility(
+        company: _authService.hasPermission(PermissionType.manageCompany),
+        team: _authService.hasPermission(PermissionType.manageUsers),
+        catalog: canViewServices || canViewProducts,
+        checklists: _authService.hasPermission(PermissionType.manageForms),
+        ratings: _authService.hasPermission(PermissionType.manageCompany),
+        advanced: AdvancedScreen.hasEntries(
+          showIntegrations: _showIntegrations,
+          showDevices: _showDevices(config),
         ),
-        child: Icon(icon, color: CupertinoColors.white, size: 20),
-      ),
-      title: Text(title),
-      trailing: const CupertinoListTileChevron(),
-      onTap: onTap,
-    );
-  }
+      );
+      final userName =
+          _userStore.user?.value?.name ?? Global.currentUser?.displayName;
+      final companyName = authStore.companyAggr?.name;
+      final subtitle = [
+        if (userName != null && userName.isNotEmpty) userName,
+        if (companyName != null)
+          '$companyName · ${_authService.getRoleLabelLocalized(context.l10n)}',
+      ].join('\n');
 
-  String _getThemeModeText(BuildContext context, ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system: return context.l10n.automatic;
-      case ThemeMode.light: return context.l10n.light;
-      case ThemeMode.dark: return context.l10n.dark;
-    }
-  }
-
-  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore, SegmentConfigProvider config) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext dialogContext) => CupertinoActionSheet(
-        title: Text(context.l10n.chooseTheme),
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.automaticSystem),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.system); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.light),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.light); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.dark),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(dialogContext); },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(dialogContext),
-        ),
-      ),
-    );
-  }
-
-  void _showLanguageSelectionDialog(BuildContext context, LocaleStore localeStore) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext dialogContext) => CupertinoActionSheet(
-        title: Text(context.l10n.selectLanguage),
-        actions: localeStore.availableLocales.map((locale) {
-          return CupertinoActionSheetAction(
-            child: Text('${locale['flag']} ${locale['name']}'),
-            onPressed: () {
-              localeStore.setLocale(locale['code']!);
-              Navigator.pop(dialogContext);
-            },
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(dialogContext),
-        ),
-      ),
-    );
-  }
-
-  String _getReminderText(BuildContext context, int minutes) {
-    if (minutes == 0) return context.l10n.reminderDisabled;
-    if (minutes == 60) return context.l10n.reminderHourBefore;
-    if (minutes == 120) return context.l10n.reminderHoursBefore(2);
-    return context.l10n.reminderMinutesBefore(minutes);
-  }
-
-  void _showReminderSelectionDialog(BuildContext context, ReminderStore reminderStore) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext dialogContext) => CupertinoActionSheet(
-        title: Text(context.l10n.scheduleReminder),
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.reminderDisabled),
-            onPressed: () { reminderStore.setReminderMinutes(0); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.reminderMinutesBefore(15)),
-            onPressed: () { reminderStore.setReminderMinutes(15); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.reminderMinutesBefore(30)),
-            onPressed: () { reminderStore.setReminderMinutes(30); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.reminderHourBefore),
-            onPressed: () { reminderStore.setReminderMinutes(60); Navigator.pop(dialogContext); },
-          ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.reminderHoursBefore(2)),
-            onPressed: () { reminderStore.setReminderMinutes(120); Navigator.pop(dialogContext); },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(dialogContext),
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutConfirmation(BuildContext context, SegmentConfigProvider config) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.logout),
-        content: Text(context.l10n.logoutConfirm),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await _authStore.signOutGoogle();
-            },
-            child: Text(context.l10n.logout),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCompanySelectionModal(BuildContext context, SegmentConfigProvider config) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (dialogContext) => CupertinoActionSheet(
-        title: Text(context.l10n.selectCompany),
-        actions: _userStore.user?.value?.companies?.map((companyRole) {
-          return CupertinoActionSheetAction(
-            child: Text(companyRole.company?.name ?? context.l10n.companyNoName),
-            onPressed: () async {
-              if (companyRole.company?.id != null) {
-                Navigator.pop(dialogContext);
-                await _authStore.switchCompany(companyRole.company!.id!);
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-              }
-            },
-          );
-        }).toList() ?? [],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(dialogContext),
-        ),
-      ),
-    );
-  }
-
-  /// Reopen onboarding to reconfigure company setup
-  Future<void> _reopenOnboarding(BuildContext context) async {
-    final companyAggr = _authStore.companyAggr;
-
-    if (companyAggr?.id == null) {
-      return;
-    }
-
-    try {
-      // Fetch full company data
-      final companyRepo = CompanyRepository();
-      final company = await companyRepo.getSingle(companyAggr!.id);
-
-      // Navigate directly to company info screen (skip welcome screen)
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => CompanyInfoScreen(
-              authStore: _authStore,
-              companyId: company?.id,
-              initialName: company?.name,
-              initialAddress: company?.address,
-              initialPhone: company?.phone,
-              initialEmail: company?.email,
-              initialSite: company?.site,
-              initialLogoUrl: company?.logo,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      // Show error
-      if (context.mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.error),
-            content: Text('${context.l10n.couldNotLoadCompanyData}\n\n$e'),
-            actions: [
-              CupertinoDialogAction(
-                child: Text(context.l10n.ok),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
-  /// Open Accept Invite screen to join another company
-  void _openAcceptInviteScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => AcceptInviteScreen(
-          onInviteAccepted: () {
-            Navigator.pop(context);
-            // Refresh to show new company option
-            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-          },
-          onCancel: () => Navigator.pop(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _subscriptionIcon(IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Icon(icon, color: CupertinoColors.white, size: 20),
-    );
-  }
-
-  /// Renewal, end or courtesy date of the current plan; null on Free.
-  Widget? _planPeriodText(BuildContext context, Subscription subscription, DateTime now) {
-    final expiresAt = subscription.expiresAt;
-    final date = expiresAt == null ? null : FormatService().formatDate(expiresAt.toLocal());
-    switch (subscription.periodState(now)) {
-      case SubscriptionPeriodState.free:
-        return null;
-      case SubscriptionPeriodState.paymentIssue:
-        return Text(
-          context.l10n.planPaymentIssue,
-          style: const TextStyle(color: CupertinoColors.systemRed),
-        );
-      case SubscriptionPeriodState.courtesy:
-        return date == null ? null : Text(context.l10n.planCourtesyUntil(date));
-      case SubscriptionPeriodState.renewsOn:
-        return date == null ? null : Text(context.l10n.planRenewsOn(date));
-      case SubscriptionPeriodState.endsOn:
-        return date == null ? null : Text(context.l10n.planValidUntil(date));
-    }
-  }
-
-  /// Current plan + paywall, Customer Center and restore (owner/admin only).
-  Widget _buildSubscriptionSection(BuildContext context) {
-    final subscription = context.read<SubscriptionStore>().subscription ?? Subscription();
-    final now = DateTime.now();
-    final plan = subscription.effectivePlan(now);
-    final canPurchase = PaywallLauncher.currentUserCanPurchase;
-
-    return CupertinoListSection.insetGrouped(
-      header: Text(context.l10n.subscription.toUpperCase()),
-      children: [
-        CupertinoListTile(
-          leading: _subscriptionIcon(CupertinoIcons.star_fill, CupertinoColors.systemPurple),
-          title: Text(context.l10n.currentPlan),
-          subtitle: _planPeriodText(context, subscription, now),
-          additionalInfo: Text(plan.displayName),
-        ),
-        if (canPurchase) ...[
-          CupertinoListTile(
-            leading: _subscriptionIcon(CupertinoIcons.cart_fill, CupertinoColors.activeBlue),
-            title: Text(subscription.hasStoreSubscription(now)
-                ? context.l10n.changePlan
-                : context.l10n.viewPlans),
-            trailing: const CupertinoListTileChevron(),
-            onTap: () => PaywallLauncher.showPaywall(context),
-          ),
-          CupertinoListTile(
-            leading: _subscriptionIcon(CupertinoIcons.creditcard_fill, CupertinoColors.systemIndigo),
-            title: Text(context.l10n.manageSubscription),
-            trailing: const CupertinoListTileChevron(),
-            onTap: () => PaywallLauncher.showCustomerCenter(context),
-          ),
-          CupertinoListTile(
-            leading: _subscriptionIcon(CupertinoIcons.arrow_counterclockwise, CupertinoColors.systemGreen),
-            title: Text(context.l10n.restorePurchases),
-            subtitle: Text(context.l10n.restorePreviousPurchases),
-            trailing: const CupertinoListTileChevron(),
-            onTap: () => PaywallLauncher.restore(context),
-          ),
-        ] else
-          CupertinoListTile(
-            leading: _subscriptionIcon(CupertinoIcons.info_circle_fill, CupertinoColors.systemGrey.resolveFrom(context)),
-            title: Text(context.l10n.askAdminToChangePlan, maxLines: 2),
-          ),
-      ],
-    );
-  }
-
-  /// Show bottom sheet to link WhatsApp
-  void _showLinkWhatsAppSheet(BuildContext context) {
-    LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
-      // Refresh status after closing the sheet
-      _whatsappStore.loadStatus();
+      return MoreView(
+        visibility: visibility,
+        planName: subscription.effectivePlan(DateTime.now()).displayName,
+        accountSubtitle: subtitle.isEmpty ? null : subtitle,
+        version: Global.version,
+        onOpen: (destination) => _open(context, destination, config),
+      );
     });
   }
 
-  /// Show dialog to confirm unlinking WhatsApp
-  void _showUnlinkWhatsAppDialog(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.unlinkWhatsApp),
-        content: Text(context.l10n.unlinkWhatsAppConfirm),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
+  bool get _showIntegrations =>
+      _authService.hasPermission(PermissionType.manageUsers);
+
+  bool _showDevices(SegmentConfigProvider config) =>
+      config.useDeviceManagement &&
+      _authService.hasPermission(PermissionType.viewDevices);
+
+  void _push(BuildContext context, Widget screen) {
+    Navigator.push(context, CupertinoPageRoute<void>(builder: (_) => screen));
+  }
+
+  void _open(
+    BuildContext context,
+    MoreDestination destination,
+    SegmentConfigProvider config,
+  ) {
+    switch (destination) {
+      case MoreDestination.account:
+        _push(context, const AccountScreen());
+      case MoreDestination.company:
+        _push(
+          context,
+          MyCompanyScreen(
+            onOpenCompanyData: () =>
+                Navigator.pushNamed(context, '/company_form'),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final success = await _whatsappStore.unlink();
-              if (context.mounted && success) {
-                // Show success message
-                showCupertinoDialog(
-                  context: context,
-                  builder: (ctx) => CupertinoAlertDialog(
-                    title: Text(context.l10n.whatsAppUnlinked),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(context.l10n.ok),
-                        onPressed: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            },
-            child: Text(context.l10n.unlinkWhatsApp),
+        );
+      case MoreDestination.team:
+        Navigator.pushNamed(context, '/collaborator_list');
+      case MoreDestination.plan:
+        _push(context, const PlanScreen());
+      case MoreDestination.catalog:
+        _openCatalog(context);
+      case MoreDestination.checklists:
+        Navigator.pushNamed(context, '/form_template_list');
+      case MoreDestination.ratings:
+        Navigator.pushNamed(context, '/ratings');
+      case MoreDestination.reminders:
+        _push(context, const RemindersScreen());
+      case MoreDestination.advanced:
+        _push(
+          context,
+          AdvancedScreen(
+            devicesLabel: config.devicePlural,
+            showIntegrations: _showIntegrations,
+            showDevices: _showDevices(config),
+            onOpenIntegrations: () =>
+                Navigator.pushNamed(context, '/integrations'),
+            onOpenDevices: () => Navigator.pushNamed(context, '/device_list'),
           ),
-        ],
-      ),
-    );
+        );
+    }
+  }
+
+  /// Catalog entry point. The unified "Serviços | Produtos" screen comes in
+  /// a parallel change; until then this opens the existing list (asking
+  /// which one when the role can see both).
+  void _openCatalog(BuildContext context) {
+    final canServices = _authService.hasPermission(PermissionType.viewServices);
+    final canProducts = _authService.hasPermission(PermissionType.viewProducts);
+    if (canServices && canProducts) {
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (sheetContext) => CupertinoActionSheet(
+          title: Text(sheetContext.l10n.catalog),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                Navigator.pushNamed(context, '/service_list');
+              },
+              child: Text(sheetContext.l10n.services),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                Navigator.pushNamed(context, '/product_list');
+              },
+              child: Text(sheetContext.l10n.products),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(sheetContext),
+            child: Text(sheetContext.l10n.cancel),
+          ),
+        ),
+      );
+      return;
+    }
+    Navigator.pushNamed(
+        context, canServices ? '/service_list' : '/product_list');
   }
 }

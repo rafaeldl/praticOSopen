@@ -4060,4 +4060,81 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get customerLookupError =>
       'No se pudo cargar los clientes. Inténtalo de nuevo.';
+
+  @override
+  String get yourAccount => 'Tu cuenta';
+
+  @override
+  String get yourCompany => 'Tu empresa';
+
+  @override
+  String get catalog => 'Catálogo';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get advancedTitle => 'Avanzado';
+
+  @override
+  String get deleteMyAccount => 'Eliminar mi cuenta';
+
+  @override
+  String get howYouWork => 'Cómo trabajas';
+
+  @override
+  String get valuesAndBilling => 'Valores y cobros';
+
+  @override
+  String get valuesAndBillingHint =>
+      'Precios en la OS, cobros y pestaña Finanzas';
+
+  @override
+  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
+
+  @override
+  String get nameAndPhoto => 'Nombre y foto';
+
+  @override
+  String get joinWithInviteCode => 'Entrar con código de invitación';
+
+  @override
+  String get followsPhoneSettings =>
+      'El idioma y la apariencia siguen los ajustes del iPhone.';
+
+  @override
+  String get invitePerson => 'Invitar persona';
+
+  @override
+  String get inviteWhoLabel => 'Nombre (opcional)';
+
+  @override
+  String get inviteWhoPlaceholder => 'Ej.: Lucas Silva';
+
+  @override
+  String get inviteEmailLabel => 'Correo electrónico';
+
+  @override
+  String get inviteEmailHint =>
+      'La persona entra con este correo y la invitación aparece sola.';
+
+  @override
+  String get inviteWhatsAppLabel => 'WhatsApp (opcional)';
+
+  @override
+  String get inviteRoleLabel => 'Qué puede hacer';
+
+  @override
+  String get createInvite => 'Crear invitación';
+
+  @override
+  String get cancelAndInviteAgain => 'Cancelar e invitar de nuevo';
+
+  @override
+  String get inviteExpiredMessage =>
+      'Esta invitación venció. Cancélala e invita de nuevo.';
+
+  @override
+  String get userWillReceiveInviteByWhatsAppHint =>
+      'Después envías el código a este número o por otra app.';
 }

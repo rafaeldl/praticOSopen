@@ -7509,6 +7509,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar os clientes. Tente de novo.'**
   String get customerLookupError;
+
+  /// No description provided for @yourAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua conta'**
+  String get yourAccount;
+
+  /// No description provided for @yourCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua empresa'**
+  String get yourCompany;
+
+  /// No description provided for @catalog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo'**
+  String get catalog;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano'**
+  String get planTitle;
+
+  /// No description provided for @advancedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avançado'**
+  String get advancedTitle;
+
+  /// No description provided for @deleteMyAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar minha conta'**
+  String get deleteMyAccount;
+
+  /// No description provided for @howYouWork.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você trabalha'**
+  String get howYouWork;
+
+  /// No description provided for @valuesAndBilling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valores e cobrança'**
+  String get valuesAndBilling;
+
+  /// No description provided for @valuesAndBillingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços na OS, receber e aba Financeiro'**
+  String get valuesAndBillingHint;
+
+  /// No description provided for @valuesAndBillingSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado. Em breve você poderá desligar.'**
+  String get valuesAndBillingSoon;
+
+  /// No description provided for @nameAndPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome e foto'**
+  String get nameAndPhoto;
+
+  /// No description provided for @joinWithInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com código de convite'**
+  String get joinWithInviteCode;
+
+  /// No description provided for @followsPhoneSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'O idioma e a aparência seguem o ajuste do iPhone.'**
+  String get followsPhoneSettings;
+
+  /// No description provided for @invitePerson.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar pessoa'**
+  String get invitePerson;
+
+  /// No description provided for @inviteWhoLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome (opcional)'**
+  String get inviteWhoLabel;
+
+  /// No description provided for @inviteWhoPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Lucas Silva'**
+  String get inviteWhoPlaceholder;
+
+  /// No description provided for @inviteEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
+  String get inviteEmailLabel;
+
+  /// No description provided for @inviteEmailHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A pessoa entra com este e-mail e o convite aparece sozinho.'**
+  String get inviteEmailHint;
+
+  /// No description provided for @inviteWhatsAppLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp (opcional)'**
+  String get inviteWhatsAppLabel;
+
+  /// No description provided for @inviteRoleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode fazer'**
+  String get inviteRoleLabel;
+
+  /// No description provided for @createInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar convite'**
+  String get createInvite;
+
+  /// No description provided for @cancelAndInviteAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar e convidar de novo'**
+  String get cancelAndInviteAgain;
+
+  /// No description provided for @inviteExpiredMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite venceu. Cancele e convide de novo.'**
+  String get inviteExpiredMessage;
+
+  /// No description provided for @userWillReceiveInviteByWhatsAppHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois você manda o código por esse número ou por outro app.'**
+  String get userWillReceiveInviteByWhatsAppHint;
 }
 
 class _AppLocalizationsDelegate

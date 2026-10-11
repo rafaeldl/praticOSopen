@@ -1,12 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/mobx/user_store.dart';
-import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/services/subscription_service.dart';
-import 'package:praticos/utils/store_subscription.dart';
 
 class UserProfileEditScreen extends StatefulWidget {
   const UserProfileEditScreen({super.key});
@@ -19,7 +14,6 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   User? _user;
   final UserStore _userStore = UserStore();
-  late AuthStore _authStore;
   bool _isLoading = false;
   bool _isLoadingUser = true;
 
@@ -27,12 +21,6 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   void initState() {
     super.initState();
     _loadCurrentUser();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _authStore = context.read<AuthStore>();
   }
 
   Future<void> _loadCurrentUser() async {
@@ -246,27 +234,6 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
                 ],
               ),
 
-              // Delete Account Section (HIG Pattern)
-              CupertinoListSection.insetGrouped(
-                children: [
-                  CupertinoListTile(
-                    title: Text(
-                      context.l10n.deleteAccount,
-                      style: const TextStyle(
-                        color: CupertinoColors.systemRed,
-                      ),
-                    ),
-                    subtitle: Text(
-                      context.l10n.permanentlyRemoveAllData,
-                      style: TextStyle(
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      ),
-                    ),
-                    onTap: () => _showDeleteAccountConfirmation(context),
-                  ),
-                ],
-              ),
-
               const SizedBox(height: 40),
             ],
           ),
@@ -303,236 +270,5 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
         ),
       ),
     );
-  }
-
-  void _showDeleteAccountConfirmation(BuildContext context) {
-    final paidPlansEnabled = SubscriptionService.paidPlansEnabled;
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.deleteAccount),
-        content: Text(
-          deleteAccountDialogMessage(
-            context.l10n,
-            paidPlansEnabled: paidPlansEnabled,
-          ),
-        ),
-        actions: [
-          if (paidPlansEnabled)
-            CupertinoDialogAction(
-              child: Text(context.l10n.manageInStore),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                openStoreSubscriptionSettings();
-              },
-            ),
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              _showDeleteAccountFinalConfirmation(context);
-            },
-            child: Text(context.l10n.continue_),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAccountFinalConfirmation(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.finalConfirmation),
-        content: Text(context.l10n.lastChanceCancel),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              // Close confirmation dialog
-              Navigator.pop(dialogContext);
-
-              // Save the navigator state before showing dialog
-              final navigatorState = Navigator.of(context);
-
-              // Show loading indicator
-              showCupertinoDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (loadingContext) => const Center(
-                  child: CupertinoActivityIndicator(radius: 20),
-                ),
-              );
-
-              try {
-                await _authStore.deleteAccount();
-
-                // Close loading dialog - use try-catch to prevent crash if widget unmounted
-                try {
-                  navigatorState.pop();
-                } catch (e) {
-                  print('⚠️  Could not close loading dialog (widget may be unmounted): $e');
-                }
-
-                // Auth state change will automatically redirect to login
-              } catch (e) {
-                // Close loading dialog - use try-catch to prevent crash if widget unmounted
-                try {
-                  navigatorState.pop();
-                } catch (popError) {
-                  print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
-                }
-
-                // Check if re-authentication is required
-                if (e.toString().contains('REQUIRES_RECENT_LOGIN')) {
-                  print('🔐 Re-authentication required, prompting user...');
-                  _showReauthenticationDialog(context);
-                  return;
-                }
-
-                // Show error dialog
-                try {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (errorContext) => CupertinoAlertDialog(
-                      title: Text(context.l10n.errorDeletingAccount),
-                      content: Text(
-                        '${context.l10n.couldNotDeleteAccount}\n\n'
-                        '${_formatErrorMessage(context, e.toString())}',
-                      ),
-                      actions: [
-                        CupertinoDialogAction(
-                          child: Text(context.l10n.ok),
-                          onPressed: () {
-                            try {
-                              Navigator.pop(errorContext);
-                            } catch (e) {
-                              print('⚠️  Could not close error dialog: $e');
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                } catch (dialogError) {
-                  print('⚠️  Could not show error dialog (widget may be unmounted): $dialogError');
-                }
-              }
-            },
-            child: Text(context.l10n.permanentlyDelete),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showReauthenticationDialog(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.reauthenticationRequired),
-        content: Text(context.l10n.pleaseSignInAgainToDelete),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-
-              // Show loading indicator
-              showCupertinoDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (loadingContext) => const Center(
-                  child: CupertinoActivityIndicator(radius: 20),
-                ),
-              );
-
-              try {
-                // Re-authenticate the user
-                await _authStore.reauthenticate();
-
-                // Close loading dialog
-                Navigator.pop(context);
-
-                // Show success message and retry deletion
-                showCupertinoDialog(
-                  context: context,
-                  builder: (successContext) => CupertinoAlertDialog(
-                    title: Text(context.l10n.authenticated),
-                    content: Text(context.l10n.nowDeletingAccount),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(context.l10n.ok),
-                        onPressed: () async {
-                          Navigator.pop(successContext);
-                          // Retry deletion after re-authentication
-                          _showDeleteAccountFinalConfirmation(context);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              } catch (e) {
-                // Close loading dialog
-                Navigator.pop(context);
-
-                // Show error
-                showCupertinoDialog(
-                  context: context,
-                  builder: (errorContext) => CupertinoAlertDialog(
-                    title: Text(context.l10n.reauthenticationFailed),
-                    content: Text(
-                      '${context.l10n.couldNotReauthenticate}\n\n'
-                      '${_formatErrorMessage(context, e.toString())}',
-                    ),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(context.l10n.ok),
-                        onPressed: () => Navigator.pop(errorContext),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            },
-            child: Text(context.l10n.signInAgain),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Format error messages to be user-friendly
-  String _formatErrorMessage(BuildContext context, String error) {
-    // Check for business logic errors
-    if (error.contains('proprietário de uma empresa com outros membros')) {
-      return error.replaceAll('Exception: ', '');
-    }
-
-    // Check for Firebase Auth errors
-    if (error.contains('requires-recent-login')) {
-      return context.l10n.requiresRecentLogin;
-    }
-    if (error.contains('permission-denied')) {
-      return context.l10n.noPermissionDelete;
-    }
-    if (error.contains('network')) {
-      return context.l10n.networkError;
-    }
-
-    // Generic error
-    return '${context.l10n.error}: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
   }
 }

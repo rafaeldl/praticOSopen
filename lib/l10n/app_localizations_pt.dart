@@ -4053,4 +4053,80 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get customerLookupError =>
       'Não deu para carregar os clientes. Tente de novo.';
+
+  @override
+  String get yourAccount => 'Sua conta';
+
+  @override
+  String get yourCompany => 'Sua empresa';
+
+  @override
+  String get catalog => 'Catálogo';
+
+  @override
+  String get planTitle => 'Plano';
+
+  @override
+  String get advancedTitle => 'Avançado';
+
+  @override
+  String get deleteMyAccount => 'Apagar minha conta';
+
+  @override
+  String get howYouWork => 'Como você trabalha';
+
+  @override
+  String get valuesAndBilling => 'Valores e cobrança';
+
+  @override
+  String get valuesAndBillingHint => 'Preços na OS, receber e aba Financeiro';
+
+  @override
+  String get valuesAndBillingSoon => 'Ligado. Em breve você poderá desligar.';
+
+  @override
+  String get nameAndPhoto => 'Nome e foto';
+
+  @override
+  String get joinWithInviteCode => 'Entrar com código de convite';
+
+  @override
+  String get followsPhoneSettings =>
+      'O idioma e a aparência seguem o ajuste do iPhone.';
+
+  @override
+  String get invitePerson => 'Convidar pessoa';
+
+  @override
+  String get inviteWhoLabel => 'Nome (opcional)';
+
+  @override
+  String get inviteWhoPlaceholder => 'Ex.: Lucas Silva';
+
+  @override
+  String get inviteEmailLabel => 'E-mail';
+
+  @override
+  String get inviteEmailHint =>
+      'A pessoa entra com este e-mail e o convite aparece sozinho.';
+
+  @override
+  String get inviteWhatsAppLabel => 'WhatsApp (opcional)';
+
+  @override
+  String get inviteRoleLabel => 'O que pode fazer';
+
+  @override
+  String get createInvite => 'Criar convite';
+
+  @override
+  String get cancelAndInviteAgain => 'Cancelar e convidar de novo';
+
+  @override
+  String get inviteExpiredMessage =>
+      'Este convite venceu. Cancele e convide de novo.';
+
+  @override
+  String get userWillReceiveInviteByWhatsAppHint =>
+      'Depois você manda o código por esse número ou por outro app.';
 }

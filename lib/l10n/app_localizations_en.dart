@@ -4039,4 +4039,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerLookupError => 'Could not load customers. Try again.';
+
+  @override
+  String get yourAccount => 'Your account';
+
+  @override
+  String get yourCompany => 'Your company';
+
+  @override
+  String get catalog => 'Catalog';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get advancedTitle => 'Advanced';
+
+  @override
+  String get deleteMyAccount => 'Delete my account';
+
+  @override
+  String get howYouWork => 'How you work';
+
+  @override
+  String get valuesAndBilling => 'Prices and billing';
+
+  @override
+  String get valuesAndBillingHint =>
+      'Prices on orders, receiving payments and the Financial tab';
+
+  @override
+  String get valuesAndBillingSoon =>
+      'On. You will be able to turn it off soon.';
+
+  @override
+  String get nameAndPhoto => 'Name and photo';
+
+  @override
+  String get joinWithInviteCode => 'Join with an invite code';
+
+  @override
+  String get followsPhoneSettings =>
+      'Language and appearance follow your iPhone settings.';
+
+  @override
+  String get invitePerson => 'Invite someone';
+
+  @override
+  String get inviteWhoLabel => 'Name (optional)';
+
+  @override
+  String get inviteWhoPlaceholder => 'E.g. Lucas Silva';
+
+  @override
+  String get inviteEmailLabel => 'Email';
+
+  @override
+  String get inviteEmailHint =>
+      'They sign in with this email and the invite shows up on its own.';
+
+  @override
+  String get inviteWhatsAppLabel => 'WhatsApp (optional)';
+
+  @override
+  String get inviteRoleLabel => 'What they can do';
+
+  @override
+  String get createInvite => 'Create invite';
+
+  @override
+  String get cancelAndInviteAgain => 'Cancel and invite again';
+
+  @override
+  String get inviteExpiredMessage =>
+      'This invite has expired. Cancel it and invite again.';
+
+  @override
+  String get userWillReceiveInviteByWhatsAppHint =>
+      'Then you send the code to this number or through another app.';
 }
