@@ -82,8 +82,8 @@ lib/
 O sistema usa isolamento por empresa (tenant). **Toda operação deve considerar o companyId**.
 
 ### Estrutura de Permissões
-- **Path**: `/companies/{companyId}/roles/{roleId}`
-- **Gerenciamento**: `CollaboratorStore` + `RoleRepositoryV2`
+- **Path**: `/companies/{companyId}/memberships/{userId}` (o papel do colaborador fica no membership)
+- **Gerenciamento**: `CollaboratorStore` + `TenantMembershipRepository`
 
 ### Onde aplicar `companyId`:
 1. **Models**: Herdar de `BaseAuditCompany` (campo `company`)
@@ -218,35 +218,39 @@ class CustomerRepository extends TenantRepository<Customer> {
 
 ### App (iOS/Cupertino-first)
 
-**Widgets obrigatórios:**
-- `CupertinoPageScaffold` + `CupertinoSliverNavigationBar`
+O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou redesenhar tela) e as specs de telas em `docs/superpowers/specs/`. Quando divergir do `docs/UX_GUIDELINES.md`, vale o design system.
+
+**Regras de tela** (público não técnico, então clareza primeiro):
+- Uma pergunta por tela ("o que eu faço agora?"), respondida no topo em uma frase
+- Um botão azul (`accent`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`)
+- Português do dia a dia ("Falta receber R$ 166"), sem siglas nem jargão
+- Mostrar só o que o registro tem; recurso ocasional entra pelo menu "…"/"+" ou pelo assistente
+- Cadastro novo abre em sheet grande ("Cancelar" à esquerda, botão grande embaixo); edição do que já existe abre empurrada
+- Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco
+- Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44
+- Abas sempre na ordem Início, Clientes, Agenda, Financeiro, Mais (`visibleAppTabs()`)
+
+**Widgets:**
+- `CupertinoPageScaffold` + `CupertinoSliverNavigationBar` (título grande)
 - `CupertinoListSection.insetGrouped` para formulários
-- `CupertinoAlertDialog` para confirmações
-- `CupertinoActionSheet` para menus/opções
-- `CupertinoSearchTextField` para busca
+- Listas com `AppListRow`, `SectionLabel`, `EmptyState`, `ErrorState`, `LoadingState` (`lib/screens/widgets/`)
+- `CupertinoAlertDialog` para confirmações, `CupertinoActionSheet` para menus, `CupertinoSearchTextField` para busca
+- Componente nativo do iPhone quando existe (interruptor, menu "…", "Continuar com Apple"); não desenhar uma versão própria
 
-**Dark Mode - Cores dinâmicas:**
+**Cores:** usar os papéis de `AppColors` (`lib/theme/app_colors.dart`), nunca hex, sempre com `.resolveFrom(context)` (é assim que funcionam o modo escuro e o "Aumentar contraste"):
 ```dart
-// CORRETO - usar .resolveFrom(context)
-color: CupertinoColors.label.resolveFrom(context)
+// CORRETO
+color: AppColors.accent.resolveFrom(context)
 
-// ERRADO - não adapta ao dark mode
-color: CupertinoColors.label
+// ERRADO - não adapta ao modo escuro
+color: AppColors.accent
+color: Color(0xFF116BB5)
 ```
+`CupertinoColors` direto e `lib/theme/app_theme.dart` são o padrão antigo, que só continua nas telas ainda não redesenhadas. Ao mudar uma cor, rodar `fvm flutter test test/theme/`.
 
-**Cores que REQUEREM `.resolveFrom(context)`:**
-- `CupertinoColors.label`, `secondaryLabel`
-- `CupertinoColors.systemBackground`, `systemGroupedBackground`
-- `CupertinoColors.systemGrey`, `systemGrey5`
-- `CupertinoColors.separator`
+**Texto:** `AppTypography` (corpo 19, título 34). O texto cresce com o tamanho do texto do iPhone: nunca travar o `textScaler`, nunca usar altura fixa em linha com texto, nunca reticências em nome, título ou valor (a linha quebra).
 
-**Cores estáticas (não precisam de resolução):**
-- `CupertinoColors.white`, `black`
-- `CupertinoColors.activeBlue`, `systemRed`, `systemGreen`
-
-**Status Indicators:**
-- Usar dots coloridos (8-10px) em vez de badges pesados
-- Azul = Novo/Aprovado, Verde = Concluído, Vermelho = Problema
+**Status:** ponto colorido + texto em `textSecondary`, nunca selo colorido. Orçamento cinza, aprovada azul (`accentText`), em andamento âmbar (`warning`), concluída verde (`success`), cancelada cinza. Atrasada é problema: ponto e texto em `danger`, texto em negrito.
 
 ### Web (tema "Ordem de Serviço")
 
@@ -552,119 +556,11 @@ bundle exec fastlane beta               # TestFlight (manual)
 
 ## Bot (OpenClaw)
 
-Bot WhatsApp rodando em GCE VM `praticos-bot` (zona `southamerica-east1-b`). Todos os comandos em `backend/bot/`.
+Bot WhatsApp em `backend/bot/`. **Desligado:** a VM `praticos-bot` e o disco foram apagados, e as conversas estão arquivadas em `gs://praticos-bot-archive`. Para recriar, ver `backend/bot/README.md`, `docs/praticos-bot-central.md` e `docs/BOT_WORKSPACE_CONFIG.md`.
 
-> **Status (2026-10-04):** bot desligado. A VM `praticos-bot` e o disco foram **apagados**; as conversas estão arquivadas em `gs://praticos-bot-archive`. Os comandos abaixo só valem se o bot for recriado.
+## Anúncios (Google Ads e Meta Ads)
 
-### Comandos Essenciais
-
-```bash
-make dev              # Dev local (Docker)
-make deploy           # Build + deploy produção
-make sync             # Atualiza configs/skills sem rebuild
-make logs             # Logs produção
-make restart          # Reinicia VM
-make clear-sessions   # Limpa sessões e reinicia
-```
-
-### Memória (Produção)
-
-Paths na VM: `/var/openclaw/memory/`
-- Global: `MEMORY.md`
-- Por usuário: `users/+55XXXXXXXXXXX.md`
-
-```bash
-# SSH usa --ssh-key-file=~/.ssh/id_ed25519
-# Listar memórias
-gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'ls -la /var/openclaw/memory/users/'
-
-# Ler memória de usuário
-gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'cat /var/openclaw/memory/users/+55XXXXXXXXXXX.md'
-
-# Apagar memória (reset do usuário)
-gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'sudo rm /var/openclaw/memory/users/+55XXXXXXXXXXX.md'
-
-# Reiniciar container
-gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'sudo docker restart $(sudo docker ps -q)'
-```
-
-### Documentação Completa
-
-- `docs/praticos-bot-central.md` - Arquitetura, features e segurança
-- `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
-- `backend/bot/README.md` - Setup, deploy e referência completa
-
-## Google Ads API
-
-Acesso direto ao Google Ads para gerenciamento de campanhas via Python.
-
-### Configuracao
-
-- **Credenciais**: `~/.google-ads.yaml` (NAO vai para o git)
-- **Lib Python**: `google-ads` (pip3 install google-ads)
-- **Manager ID**: `1569666691` (PraticOS Manager)
-- **Customer ID**: `6735014760` (PraticOS - conta de anuncios)
-
-### Uso rapido
-
-```python
-import warnings
-warnings.filterwarnings('ignore')
-from google.ads.googleads.client import GoogleAdsClient
-
-client = GoogleAdsClient.load_from_storage('/Users/rafaeldl/.google-ads.yaml')
-ga_service = client.get_service('GoogleAdsService')
-CUSTOMER_ID = '6735014760'
-```
-
-### Operacoes disponiveis
-
-- Listar e analisar campanhas, ad groups, keywords, anuncios
-- Metricas de performance (impressoes, clicks, CTR, custo, conversoes)
-- Consultas GAQL customizadas
-
-### Limitacoes
-
-- **Nivel atual**: Acesso as Analises (somente leitura)
-- Para criar/editar campanhas via API, solicitar **Acesso Padrao** no Centro de API
-
-Ver `docs/GOOGLE_ADS_API.md` para documentacao completa, exemplos de queries e instrucoes de renovacao de token.
-
-## Meta Ads API
-
-Acesso ao Meta Ads (Facebook/Instagram) para campanhas via Python.
-
-### Configuracao
-
-- **Credenciais**: `~/.meta-ads.yaml` (NAO vai para o git)
-- **Lib Python**: `facebook-business` (pip3 install facebook-business)
-- **App ID**: `2156455528501761` (PraticOS Ads)
-- **Ad Account ID**: `act_521666357871300`
-
-### Uso rapido
-
-```python
-import warnings
-warnings.filterwarnings('ignore')
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
-
-APP_ID = '2156455528501761'
-APP_SECRET = 'ver ~/.meta-ads.yaml'
-ACCESS_TOKEN = 'ver ~/.meta-ads.yaml'
-
-FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
-account = AdAccount('act_521666357871300')
-```
-
-### Limitacoes
-
-- **Token expira**: Access token do Graph API expira em ~1h. Necessario regerar ou usar token de longa duracao.
-- **Escrita disponivel**: Diferente do Google Ads, ja temos permissao de escrita (ads_management).
-
-### Progresso das campanhas
-
-Ver `docs/ADS_CAMPAIGNS.md` para status completo de todas as campanhas, pendencias e historico.
+Acesso às campanhas via Python, com credenciais em `~/.google-ads.yaml` e `~/.meta-ads.yaml` (fora do git). Google Ads (IDs, exemplos, renovação de token): `docs/GOOGLE_ADS_API.md`. Meta Ads (IDs da conta) e status das campanhas: `docs/ADS_CAMPAIGNS.md`.
 
 ## Modo Autônomo (agentes)
 

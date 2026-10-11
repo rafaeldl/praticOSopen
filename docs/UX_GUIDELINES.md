@@ -2,6 +2,8 @@
 
 This document outlines the design principles and coding standards for the PraticOS application, focusing on a strict adoption of Apple's **Human Interface Guidelines (HIG)** to ensure a native, high-quality iOS experience.
 
+> **Colors, typography, screen structure, list components and status colors live in [`APP_DESIGN_SYSTEM.md`](APP_DESIGN_SYSTEM.md).** When this document and the design system differ, the design system wins. This document covers widget choice and interaction patterns.
+
 ## 1. Core Philosophy
 
 *   **Native First:** Prioritize `Cupertino` widgets over Material Design widgets. The app should feel indistinguishable from a native iOS app.
@@ -13,7 +15,7 @@ This document outlines the design principles and coding standards for the Pratic
 ### Scaffold & Bars
 *   **Scaffold:** Always use `CupertinoPageScaffold`.
 *   **Navigation Bar:** Use `CupertinoSliverNavigationBar` with `largeTitle` for main screens (Home, Lists) to enable the collapsing title effect. Use `CupertinoNavigationBar` for modal or detail screens.
-*   **Tab Bar:** Use `CupertinoTabScaffold` with `CupertinoTabBar`.
+*   **Tab Bar:** Use `CupertinoTabScaffold` with the `GlassTabBar` (tab order and visibility: `visibleAppTabs()`, see `APP_DESIGN_SYSTEM.md`).
     *   **Icons:** Use `CupertinoIcons` (SF Symbols style).
     *   **Behavior:** Each tab maintains its own navigation stack (`CupertinoTabView`).
 
@@ -25,18 +27,8 @@ This document outlines the design principles and coding standards for the Pratic
 ## 3. Lists & Data Presentation
 
 ### List Style
-*   **Appearance:** Use a flat list design on `CupertinoColors.systemBackground`.
-*   **Separators:** Use `Divider` with an indentation (`indent`) matching the text alignment (e.g., `indent: 76` if there is a leading icon/thumbnail).
-*   **Selection:** Use `InkWell` (wrapped in `Material` with `type: MaterialType.transparency`) or `GestureDetector` to provide touch feedback.
-
-### Row Layout (Mail Style)
-*   **Compactness:** Prefer 2-line layouts for density.
-    *   **Line 1:** Primary Info (Bold) ---------- Secondary Info/Value (Regular/Gray).
-    *   **Line 2:** Status Indicator + Details (Gray).
-*   **Status Indicators:**
-    *   Avoid heavy colored badges/labels.
-    *   Use **Status Dots** (small colored circles, e.g., `CupertinoIcons.circle_fill`, size 8-10) to indicate state (Blue=New/Approved, Green=Done, Red=Issue).
-    *   Status text should be secondary (gray).
+*   **Components:** Use `AppListRow`, `SectionLabel`, `EmptyState`, `ErrorState` and `LoadingState` (`lib/screens/widgets/`). Layout, colors and status dots: see "Componentes de lista" and "Cores" in `APP_DESIGN_SYSTEM.md`.
+*   **Status Indicators:** A colored dot plus status text in `textSecondary`. Never a colored badge.
 
 ### Swipe Actions
 *   **Pattern:** Use `Dismissible` or similar swipe widgets.
@@ -63,13 +55,11 @@ Screens used to select an entity (e.g., Selecting a Customer for an Order) shoul
 ### Layout & Structure
 *   **Grouping:** Use `CupertinoListSection.insetGrouped` for the main form container.
     *   This provides the standard iOS grouped table view look with rounded corners.
-    *   **Background:** The page scaffold should use `CupertinoColors.systemGroupedBackground`.
+    *   **Background:** The page scaffold uses `AppColors.background.resolveFrom(context)`.
 *   **Structure:**
     1.  **Header/Photo:** If the entity has an image (Product, Service, etc.), place the photo picker at the very top, centered, outside the grouped section.
     2.  **Fields:** Group related fields inside `CupertinoListSection.insetGrouped`.
-*   **Navigation Bar:**
-    *   **Middle:** "Novo [Entidade]" or "Editar [Entidade]".
-    *   **Trailing:** "Salvar" button (Text only, bold). Show a `CupertinoActivityIndicator` in place of the text while saving.
+*   **Presentation:** Creating something new ("Novo cliente", "Novo serviço") opens as a large sheet with "Cancelar" on the left and the full-width primary button at the bottom as confirmation. Editing something that already exists opens pushed, with "Voltar". See rule 9 in `APP_DESIGN_SYSTEM.md`.
 
 ### Photo Input (Entity Avatar)
 *   **Placement:** Top center of the scroll view.
@@ -100,190 +90,6 @@ Screens used to select an entity (e.g., Selecting a Customer for an Order) shoul
 *   **Search:** Use `CupertinoSearchTextField`.
 *   **Text Fields:** Use `CupertinoTextField` with `BoxDecoration` removed (borderless) inside list items, or standard rounded style for search.
 
-## 6. Typography & Colors
+## 6. Typography, Colors & Dark Mode
 
-### Fonts
-*   Use the system font stack (San Francisco).
-*   **Hierarchy:**
-    *   **Large Title:** 34pt, Bold.
-    *   **Headline:** 17pt, Semibold (List Titles).
-    *   **Body:** 17pt, Regular.
-    *   **Subhead/Caption:** 15pt, Regular, Gray (`secondaryLabel`).
-
-### Colors
-*   **System Colors:** Always use `CupertinoColors` constants (e.g., `systemBlue`, `systemRed`, `label`, `secondaryLabel`, `systemGroupedBackground`).
-*   **Dark Mode:** Rely on system colors which adapt automatically to dark mode.
-
-## 7. Dark Mode & Dynamic Colors
-
-### CupertinoTheme Configuration
-When using `MaterialApp` with Cupertino widgets, wrap the app content with `CupertinoTheme` to ensure dynamic colors resolve correctly:
-
-```dart
-MaterialApp(
-  // ... other properties
-  builder: (context, child) {
-    final brightness = Theme.of(context).brightness;
-    return CupertinoTheme(
-      data: CupertinoThemeData(
-        brightness: brightness,
-        primaryColor: CupertinoColors.activeBlue,
-      ),
-      child: child!,
-    );
-  },
-)
-```
-
-### Dynamic Color Resolution
-**Critical:** Most `CupertinoColors` are dynamic and require `.resolveFrom(context)` to adapt to light/dark mode.
-
-#### Colors That Require `.resolveFrom(context)`
-| Color | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `CupertinoColors.label` | Black | White | Primary text |
-| `CupertinoColors.secondaryLabel` | Gray | Light Gray | Secondary text, subtitles |
-| `CupertinoColors.systemBackground` | White | Black | List backgrounds, cards |
-| `CupertinoColors.systemGroupedBackground` | Light Gray | Black | Scaffold background |
-| `CupertinoColors.secondarySystemGroupedBackground` | White | Dark Gray | Grouped section backgrounds |
-| `CupertinoColors.systemGrey` | Gray | Gray | Icons, placeholders |
-| `CupertinoColors.systemGrey5` | Very Light Gray | Very Dark Gray | Avatar placeholders |
-| `CupertinoColors.separator` | Light Gray | Dark Gray | Dividers |
-
-#### Colors That Do NOT Require Resolution (Static)
-*   `CupertinoColors.white`
-*   `CupertinoColors.black`
-*   `CupertinoColors.activeBlue`
-*   `CupertinoColors.systemRed`
-*   `CupertinoColors.systemGreen`
-
-### Implementation Pattern
-
-```dart
-// ✅ CORRECT - Dynamic color with resolution
-Text(
-  'Title',
-  style: TextStyle(
-    color: CupertinoColors.label.resolveFrom(context),
-  ),
-)
-
-// ❌ WRONG - Dynamic color without resolution (won't adapt to dark mode)
-Text(
-  'Title',
-  style: TextStyle(
-    color: CupertinoColors.label, // Always resolves to light mode value
-  ),
-)
-```
-
-### Avoiding `const` with Dynamic Colors
-Dynamic colors cannot be used inside `const` widgets because `.resolveFrom(context)` is a method call.
-
-```dart
-// ❌ WRONG - Will cause compilation error
-const Icon(
-  CupertinoIcons.person,
-  color: CupertinoColors.systemGrey.resolveFrom(context), // ERROR!
-)
-
-// ✅ CORRECT - Remove const when using dynamic colors
-Icon(
-  CupertinoIcons.person,
-  color: CupertinoColors.systemGrey.resolveFrom(context),
-)
-
-// ✅ ALSO CORRECT - Use Builder to get context
-Builder(
-  builder: (context) => Icon(
-    CupertinoIcons.person,
-    color: CupertinoColors.systemGrey.resolveFrom(context),
-  ),
-)
-```
-
-### Background Color Choices
-
-| Context | Color to Use | Result |
-|---------|--------------|--------|
-| Page scaffold | `systemGroupedBackground` | Gray (light) / Black (dark) |
-| List container | `systemBackground` | White (light) / Black (dark) |
-| Grouped sections | `secondarySystemGroupedBackground` | White (light) / Dark Gray (dark) |
-| Cards on gray background | `systemBackground` | White (light) / Black (dark) |
-
-### Form Field Styling for Dark Mode
-When using `CupertinoTextFormFieldRow` or custom form fields:
-
-```dart
-CupertinoTextFormFieldRow(
-  // ... other properties
-  style: TextStyle(
-    color: CupertinoColors.label.resolveFrom(context),
-  ),
-)
-```
-
-### Avatar/Placeholder Icons
-
-```dart
-Container(
-  decoration: BoxDecoration(
-    color: CupertinoColors.systemGrey5.resolveFrom(context),
-    shape: BoxShape.circle,
-  ),
-  child: Icon(
-    CupertinoIcons.person,
-    color: CupertinoColors.systemGrey.resolveFrom(context),
-  ),
-)
-```
-
-## 8. Implementation Example (Order List Item)
-
-```dart
-// Example of a compliant list item
-Container(
-  color: CupertinoColors.systemBackground,
-  child: Material(
-    type: MaterialType.transparency,
-    child: InkWell(
-      onTap: () { ... },
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                _buildThumbnail(order), // Left
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    children: [
-                      // Top: Customer --- Value
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(customerName, style: ...fontWeight: FontWeight.w600...),
-                          Text(value, style: ...color: CupertinoColors.secondaryLabel...),
-                        ],
-                      ),
-                      // Bottom: Dot + Status + Details
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.circle_fill, size: 8, color: statusColor),
-                          Text("Status • Details", style: ...color: CupertinoColors.secondaryLabel...),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(indent: 76, height: 1, color: CupertinoColors.separator),
-        ],
-      ),
-    ),
-  ),
-)
-```
+See [`APP_DESIGN_SYSTEM.md`](APP_DESIGN_SYSTEM.md): `AppColors` roles resolved with `.resolveFrom(context)` (light, dark and Increase Contrast), `AppTypography` with Dynamic Type, and `AppSpacing`/`AppSizes`/`AppRadii`. Raw `CupertinoColors` and `lib/theme/app_theme.dart` are the old pattern, kept only on screens not yet redesigned.
