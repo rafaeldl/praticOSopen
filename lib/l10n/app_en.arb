@@ -2372,5 +2372,44 @@
     }
   },
   "receivedSaveFailed": "Could not save. Try again.",
-  "receivedOpenOrder": "Open the order"
+  "receivedOpenOrder": "Open the order",
+  "valuesAndBillingOffTitle": "Turn off prices and billing?",
+  "valuesAndBillingOffMessage": "Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.",
+  "valuesAndBillingOffAction": "Turn off",
+  "valuesAndBillingSaveError": "Could not save. Check your connection and try again.",
+  "inviteGenericError": "Could not finish. Check your internet and try again.",
+  "inviteLoadError": "Could not load the invites. Check your internet.",
+  "inviteTitleOne": "{company} invited you to the team",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Invited by {name} · you join as {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "You join as {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Join the team",
+  "inviteDecline": "Decline invite",
+  "inviteHaveAnotherCode": "I have another code",
+  "inviteCreateOwnCompany": "Create my own company",
+  "inviteCodePlaceholder": "E.g. 7K2P9QXA",
+  "segmentLoadError": "Could not open your company. Check your internet and try again."
 }

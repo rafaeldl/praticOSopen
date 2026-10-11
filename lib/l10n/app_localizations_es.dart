@@ -4880,4 +4880,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir la OS';
+
+  @override
+  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desactivar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get inviteGenericError =>
+      'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
+
+  @override
+  String get inviteLoadError =>
+      'No se pudieron cargar las invitaciones. Revisa tu internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company te invitó al equipo';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invitado por $name · entras como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Entras como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar al equipo';
+
+  @override
+  String get inviteDecline => 'Rechazar invitación';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tengo otro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
 }
