@@ -77,6 +77,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   final TextEditingController _valueController = TextEditingController();
   _PickedReceipt? _receipt;
 
+  /// Opened from the order screen: "‹ OS 183" just goes back to it.
+  bool _fromOrder = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -88,6 +91,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         if (args != null && args.containsKey('orderStore')) {
           _store = args['orderStore'];
         }
+        _fromOrder = args?['fromOrder'] == true;
       }
       _prefillValue();
       _initialized = true;
@@ -163,7 +167,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  /// "OS 183": opens the order this screen belongs to.
+  /// "‹ OS 183", the back button: back to the order when it opened this
+  /// screen; otherwise (Financeiro) this screen is replaced by the order, so
+  /// the stack never piles up Receber → OS → Receber.
   Widget _buildOrderLink() {
     final order = _store?.order;
     if (order == null || order.number == null) return const SizedBox.shrink();
@@ -172,13 +178,25 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       padding: EdgeInsets.zero,
       minimumSize:
           const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
-      onPressed: () => Navigator.of(context)
-          .pushNamed('/order', arguments: {'order': order}),
-      child: Text(
-        context.l10n.receiveOrderLink(order.number!),
-        style: AppTypography.callout.copyWith(
-          color: AppColors.accentText.resolveFrom(context),
-        ),
+      onPressed: () => _fromOrder
+          ? Navigator.of(context).pop()
+          : Navigator.of(context)
+              .pushReplacementNamed('/order', arguments: {'order': order}),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CupertinoIcons.chevron_back,
+            size: 22,
+            color: AppColors.accentText.resolveFrom(context),
+          ),
+          Text(
+            context.l10n.receiveOrderLink(order.number!),
+            style: AppTypography.body.copyWith(
+              color: AppColors.accentText.resolveFrom(context),
+            ),
+          ),
+        ],
       ),
     );
   }

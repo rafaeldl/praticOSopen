@@ -239,11 +239,44 @@ void main() {
     expect(find.text('Recebeu só uma parte? Mude o valor.'), findsOneWidget);
   });
 
-  testWidgets('"OS 42" link opens the order', (tester) async {
+  testWidgets('from Financeiro, "‹ OS 42" replaces Receber with the order',
+      (tester) async {
     await pumpScreen(tester, storeWith());
     expect(find.text('OS 42'), findsOneWidget);
     await tester.tap(find.byKey(const Key('receiveOrderLink')));
     await tester.pumpAndSettle();
     expect(find.text('order route 42'), findsOneWidget);
+    // Receber is gone: no stack Receber → OS → Receber.
+    expect(find.byType(PaymentManagementScreen), findsNothing);
+  });
+
+  testWidgets('from the order, "‹ OS 42" goes back to it', (tester) async {
+    final store = storeWith();
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => CupertinoButton(
+            child: const Text('order screen'),
+            onPressed: () => Navigator.of(context).push(
+              CupertinoPageRoute(
+                settings: RouteSettings(
+                  arguments: {'orderStore': store, 'fromOrder': true},
+                ),
+                builder: (_) => PaymentManagementScreen(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('order screen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('receiveOrderLink')));
+    await tester.pumpAndSettle();
+    expect(find.byType(PaymentManagementScreen), findsNothing);
+    expect(find.text('order screen'), findsOneWidget);
   });
 }
