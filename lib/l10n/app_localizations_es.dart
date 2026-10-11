@@ -4893,6 +4893,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get receivedOpenOrder => 'Abrir la OS';
 
   @override
+  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desactivar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
   String get inviteGenericError =>
       'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
 
