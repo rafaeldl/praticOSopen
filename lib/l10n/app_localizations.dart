@@ -7335,6 +7335,216 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
+
+  /// No description provided for @filterOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em aberto'**
+  String get filterOpen;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get filterAll;
+
+  /// No description provided for @sectionLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasadas'**
+  String get sectionLate;
+
+  /// No description provided for @sectionDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para hoje'**
+  String get sectionDueToday;
+
+  /// No description provided for @sectionInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em andamento'**
+  String get sectionInProgress;
+
+  /// No description provided for @sectionWaitingApproval.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando aprovação'**
+  String get sectionWaitingApproval;
+
+  /// No description provided for @sectionApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovadas'**
+  String get sectionApproved;
+
+  /// No description provided for @moreShowCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver canceladas'**
+  String get moreShowCanceled;
+
+  /// No description provided for @viewCanceledTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Canceladas'**
+  String get viewCanceledTitle;
+
+  /// No description provided for @backToOpenOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar para em aberto'**
+  String get backToOpenOrders;
+
+  /// No description provided for @homeMoreMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get homeMoreMenu;
+
+  /// No description provided for @homeOpenCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} em aberto'**
+  String homeOpenCount(int count);
+
+  /// No description provided for @nextStepLabelToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get nextStepLabelToday;
+
+  /// No description provided for @nextStepLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS passou do prazo de entrega.} other{{count} OS passaram do prazo de entrega.}}'**
+  String nextStepLate(int count);
+
+  /// No description provided for @nextStepDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS para entregar hoje.} other{{count} OS para entregar hoje.}}'**
+  String nextStepDueToday(int count);
+
+  /// No description provided for @nextStepQuotesWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 orçamento esperando resposta do cliente.} other{{count} orçamentos esperando resposta do cliente.}}'**
+  String nextStepQuotesWaiting(int count);
+
+  /// No description provided for @seeLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver as atrasadas'**
+  String get seeLate;
+
+  /// No description provided for @seeThem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver'**
+  String get seeThem;
+
+  /// No description provided for @seeAllOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todas'**
+  String get seeAllOrders;
+
+  /// No description provided for @notificationsA11y.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos, {count} novos'**
+  String notificationsA11y(int count);
+
+  /// No description provided for @firstOrderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie sua primeira ordem de serviço e mande para o cliente aprovar.'**
+  String get firstOrderTitle;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como funciona'**
+  String get howItWorks;
+
+  /// No description provided for @howItWorksStep1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o cliente e o que vai ser feito.'**
+  String get howItWorksStep1;
+
+  /// No description provided for @howItWorksStep2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mande o orçamento para o cliente aprovar.'**
+  String get howItWorksStep2;
+
+  /// No description provided for @howItWorksStep3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhe o serviço e receba.'**
+  String get howItWorksStep3;
+
+  /// No description provided for @searchNotFoundLoaded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achei nas OS carregadas.'**
+  String get searchNotFoundLoaded;
+
+  /// No description provided for @searchOlder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar nas mais antigas'**
+  String get searchOlder;
+
+  /// No description provided for @noOpenOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS em aberto.'**
+  String get noOpenOrders;
+
+  /// No description provided for @noOrdersInView.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada por aqui.'**
+  String get noOrdersInView;
+
+  /// No description provided for @loadOrdersError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar as OS.'**
+  String get loadOrdersError;
+
+  /// No description provided for @orderLateDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada 1 dia} other{Atrasada {count} dias}}'**
+  String orderLateDays(int count);
+
+  /// No description provided for @orderStatusDue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{status} · entrega {date}'**
+  String orderStatusDue(String status, String date);
+
+  /// No description provided for @orderRowNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String orderRowNumber(String number);
+
+  /// No description provided for @orderRowNumberDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {device}'**
+  String orderRowNumberDevice(String number, String device);
+
+  /// No description provided for @homeNewOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get homeNewOrder;
 }
 
 class _AppLocalizationsDelegate

@@ -3927,4 +3927,152 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get listLoadError =>
       'Não deu para carregar. Verifique a internet e tente de novo.';
+
+  @override
+  String get filterOpen => 'Em aberto';
+
+  @override
+  String get filterAll => 'Todas';
+
+  @override
+  String get sectionLate => 'Atrasadas';
+
+  @override
+  String get sectionDueToday => 'Para hoje';
+
+  @override
+  String get sectionInProgress => 'Em andamento';
+
+  @override
+  String get sectionWaitingApproval => 'Esperando aprovação';
+
+  @override
+  String get sectionApproved => 'Aprovadas';
+
+  @override
+  String get moreShowCanceled => 'Ver canceladas';
+
+  @override
+  String get viewCanceledTitle => 'Canceladas';
+
+  @override
+  String get backToOpenOrders => 'Voltar para em aberto';
+
+  @override
+  String get homeMoreMenu => 'Mais opções';
+
+  @override
+  String homeOpenCount(int count) {
+    return '$count em aberto';
+  }
+
+  @override
+  String get nextStepLabelToday => 'Hoje';
+
+  @override
+  String nextStepLate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS passaram do prazo de entrega.',
+      one: '1 OS passou do prazo de entrega.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepDueToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS para entregar hoje.',
+      one: '1 OS para entregar hoje.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepQuotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orçamentos esperando resposta do cliente.',
+      one: '1 orçamento esperando resposta do cliente.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeLate => 'Ver as atrasadas';
+
+  @override
+  String get seeThem => 'Ver';
+
+  @override
+  String get seeAllOrders => 'Ver todas';
+
+  @override
+  String notificationsA11y(int count) {
+    return 'Avisos, $count novos';
+  }
+
+  @override
+  String get firstOrderTitle =>
+      'Crie sua primeira ordem de serviço e mande para o cliente aprovar.';
+
+  @override
+  String get howItWorks => 'Como funciona';
+
+  @override
+  String get howItWorksStep1 => 'Escolha o cliente e o que vai ser feito.';
+
+  @override
+  String get howItWorksStep2 => 'Mande o orçamento para o cliente aprovar.';
+
+  @override
+  String get howItWorksStep3 => 'Acompanhe o serviço e receba.';
+
+  @override
+  String get searchNotFoundLoaded => 'Não achei nas OS carregadas.';
+
+  @override
+  String get searchOlder => 'Buscar nas mais antigas';
+
+  @override
+  String get noOpenOrders => 'Nenhuma OS em aberto.';
+
+  @override
+  String get noOrdersInView => 'Nada por aqui.';
+
+  @override
+  String get loadOrdersError => 'Não deu para carregar as OS.';
+
+  @override
+  String orderLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Atrasada $count dias',
+      one: 'Atrasada 1 dia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderStatusDue(String status, String date) {
+    return '$status · entrega $date';
+  }
+
+  @override
+  String orderRowNumber(String number) {
+    return 'OS $number';
+  }
+
+  @override
+  String orderRowNumberDevice(String number, String device) {
+    return 'OS $number · $device';
+  }
+
+  @override
+  String get homeNewOrder => 'Nova OS';
 }

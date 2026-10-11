@@ -3914,4 +3914,152 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listLoadError =>
       'Could not load this. Check your connection and try again.';
+
+  @override
+  String get filterOpen => 'Open';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get sectionLate => 'Overdue';
+
+  @override
+  String get sectionDueToday => 'Due today';
+
+  @override
+  String get sectionInProgress => 'In progress';
+
+  @override
+  String get sectionWaitingApproval => 'Waiting for approval';
+
+  @override
+  String get sectionApproved => 'Approved';
+
+  @override
+  String get moreShowCanceled => 'View canceled';
+
+  @override
+  String get viewCanceledTitle => 'Canceled';
+
+  @override
+  String get backToOpenOrders => 'Back to open';
+
+  @override
+  String get homeMoreMenu => 'More options';
+
+  @override
+  String homeOpenCount(int count) {
+    return '$count open';
+  }
+
+  @override
+  String get nextStepLabelToday => 'Today';
+
+  @override
+  String nextStepLate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders are past their due date.',
+      one: '1 order is past its due date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepDueToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders due today.',
+      one: '1 order due today.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepQuotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quotes waiting for the customer\'s answer.',
+      one: '1 quote waiting for the customer\'s answer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeLate => 'See the overdue ones';
+
+  @override
+  String get seeThem => 'See';
+
+  @override
+  String get seeAllOrders => 'See all';
+
+  @override
+  String notificationsA11y(int count) {
+    return 'Notifications, $count new';
+  }
+
+  @override
+  String get firstOrderTitle =>
+      'Create your first service order and send it to the customer for approval.';
+
+  @override
+  String get howItWorks => 'How it works';
+
+  @override
+  String get howItWorksStep1 => 'Pick the customer and what will be done.';
+
+  @override
+  String get howItWorksStep2 => 'Send the quote for the customer to approve.';
+
+  @override
+  String get howItWorksStep3 => 'Follow the work and get paid.';
+
+  @override
+  String get searchNotFoundLoaded => 'Not found in the loaded orders.';
+
+  @override
+  String get searchOlder => 'Search older ones';
+
+  @override
+  String get noOpenOrders => 'No open orders.';
+
+  @override
+  String get noOrdersInView => 'Nothing here.';
+
+  @override
+  String get loadOrdersError => 'Could not load the orders.';
+
+  @override
+  String orderLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Overdue $count days',
+      one: 'Overdue 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderStatusDue(String status, String date) {
+    return '$status · due $date';
+  }
+
+  @override
+  String orderRowNumber(String number) {
+    return 'Order $number';
+  }
+
+  @override
+  String orderRowNumberDevice(String number, String device) {
+    return 'Order $number · $device';
+  }
+
+  @override
+  String get homeNewOrder => 'New order';
 }
