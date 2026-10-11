@@ -4039,4 +4039,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerLookupError => 'Could not load customers. Try again.';
+
+  @override
+  String get catalogTitle => 'Catalog';
+
+  @override
+  String get catalogNewService => 'New service';
+
+  @override
+  String get catalogNewProduct => 'New product';
+
+  @override
+  String get saveServiceButton => 'Save service';
+
+  @override
+  String get saveProductButton => 'Save product';
+
+  @override
+  String get serviceNameHint => 'E.g.: Oil change';
+
+  @override
+  String get productNameHint => 'E.g.: Oil filter';
+
+  @override
+  String get serviceNameRequired => 'Enter the service name';
+
+  @override
+  String get productNameRequired => 'Enter the product name';
+
+  @override
+  String get catalogPriceLabel => 'Price';
+
+  @override
+  String get catalogPriceHint =>
+      'You can leave it blank and set the price on each order.';
+
+  @override
+  String get addServicePhoto => 'Service photo';
+
+  @override
+  String get addProductPhoto => 'Product photo';
+
+  @override
+  String get catalogNoPrice => 'no price';
+
+  @override
+  String get catalogEmptyServices => 'You don\'t have any services yet';
+
+  @override
+  String get catalogEmptyServicesHint =>
+      'Add the ones you do most to build orders faster.';
+
+  @override
+  String get catalogEmptyProducts => 'You don\'t have any products yet';
+
+  @override
+  String get catalogEmptyProductsHint =>
+      'Add the ones you use most to build orders faster.';
+
+  @override
+  String catalogNoMatch(String query) {
+    return 'Nothing matching “$query”';
+  }
+
+  @override
+  String catalogDeleteTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get catalogDeleteMessage =>
+      'It leaves the catalog. Orders that already use it stay saved.';
+
+  @override
+  String get deleteServiceAction => 'Delete service';
+
+  @override
+  String get deleteProductAction => 'Delete product';
+
+  @override
+  String get catalogItemActions => 'More item actions';
+
+  @override
+  String get pickServiceTitle => 'Which service?';
+
+  @override
+  String get pickProductTitle => 'Which product?';
+
+  @override
+  String get catalogLoadError => 'Could not load the catalog. Try again.';
 }

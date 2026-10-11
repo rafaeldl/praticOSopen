@@ -203,22 +203,16 @@ class _SettingsState extends State<Settings> {
                         onTap: () => Navigator.pushNamed(context, '/device_list'),
                       ),
 
-                    // Serviços - Admin/Supervisor podem gerenciar
-                    if (canViewServices)
+                    // Catálogo (serviços e produtos) - quem pode ver um dos dois
+                    if (canViewServices || canViewProducts)
                       _buildSettingsTile(
                         icon: CupertinoIcons.wrench_fill,
                         color: CupertinoColors.systemIndigo,
-                        title: context.l10n.services,
-                        onTap: () => Navigator.pushNamed(context, '/service_list'),
-                      ),
-
-                    // Produtos - Admin/Supervisor podem gerenciar
-                    if (canViewProducts)
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.cube_box_fill,
-                        color: CupertinoColors.systemPink,
-                        title: context.l10n.products,
-                        onTap: () => Navigator.pushNamed(context, '/product_list'),
+                        title: context.l10n.catalogTitle,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/catalog',
+                        ),
                       ),
 
                     // Formulários - Admin/Supervisor podem gerenciar

@@ -7509,6 +7509,168 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar os clientes. Tente de novo.'**
   String get customerLookupError;
+
+  /// No description provided for @catalogTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo'**
+  String get catalogTitle;
+
+  /// No description provided for @catalogNewService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo serviço'**
+  String get catalogNewService;
+
+  /// No description provided for @catalogNewProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo produto'**
+  String get catalogNewProduct;
+
+  /// No description provided for @saveServiceButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar serviço'**
+  String get saveServiceButton;
+
+  /// No description provided for @saveProductButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar produto'**
+  String get saveProductButton;
+
+  /// No description provided for @serviceNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Troca de óleo'**
+  String get serviceNameHint;
+
+  /// No description provided for @productNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Filtro de óleo'**
+  String get productNameHint;
+
+  /// No description provided for @serviceNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do serviço'**
+  String get serviceNameRequired;
+
+  /// No description provided for @productNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do produto'**
+  String get productNameRequired;
+
+  /// No description provided for @catalogPriceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço'**
+  String get catalogPriceLabel;
+
+  /// No description provided for @catalogPriceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode deixar em branco e combinar o preço em cada OS.'**
+  String get catalogPriceHint;
+
+  /// No description provided for @addServicePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do serviço'**
+  String get addServicePhoto;
+
+  /// No description provided for @addProductPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do produto'**
+  String get addProductPhoto;
+
+  /// No description provided for @catalogNoPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'sem valor'**
+  String get catalogNoPrice;
+
+  /// No description provided for @catalogEmptyServices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem serviços'**
+  String get catalogEmptyServices;
+
+  /// No description provided for @catalogEmptyServicesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre os que você mais faz para montar a OS mais rápido.'**
+  String get catalogEmptyServicesHint;
+
+  /// No description provided for @catalogEmptyProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem produtos'**
+  String get catalogEmptyProducts;
+
+  /// No description provided for @catalogEmptyProductsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre os que você mais usa para montar a OS mais rápido.'**
+  String get catalogEmptyProductsHint;
+
+  /// No description provided for @catalogNoMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada com “{query}”'**
+  String catalogNoMatch(String query);
+
+  /// No description provided for @catalogDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String catalogDeleteTitle(String name);
+
+  /// No description provided for @catalogDeleteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ele sai do catálogo. As OS que já usam continuam salvas.'**
+  String get catalogDeleteMessage;
+
+  /// No description provided for @deleteServiceAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar serviço'**
+  String get deleteServiceAction;
+
+  /// No description provided for @deleteProductAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar produto'**
+  String get deleteProductAction;
+
+  /// No description provided for @catalogItemActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações do item'**
+  String get catalogItemActions;
+
+  /// No description provided for @pickServiceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual serviço?'**
+  String get pickServiceTitle;
+
+  /// No description provided for @pickProductTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual produto?'**
+  String get pickProductTitle;
+
+  /// No description provided for @catalogLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar o catálogo. Tente de novo.'**
+  String get catalogLoadError;
 }
 
 class _AppLocalizationsDelegate

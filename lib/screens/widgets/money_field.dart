@@ -54,6 +54,7 @@ class MoneyField extends StatefulWidget {
     this.hint,
     this.onChanged,
     this.onSaved,
+    this.onSavedNullable,
     this.validator,
   });
 
@@ -63,6 +64,10 @@ class MoneyField extends StatefulWidget {
   final String? hint;
   final ValueChanged<double>? onChanged;
   final ValueChanged<double>? onSaved;
+
+  /// Like [onSaved] but receives null when the field is blank (price left
+  /// empty), instead of 0.
+  final ValueChanged<double?>? onSavedNullable;
   final String? Function(double value)? validator;
 
   @override
@@ -109,9 +114,14 @@ class _MoneyFieldState extends State<MoneyField> {
       validator: widget.validator == null
           ? null
           : (text) => widget.validator!(formatter.valueOf(text)),
-      onSaved: widget.onSaved == null
+      onSaved: (widget.onSaved == null && widget.onSavedNullable == null)
           ? null
-          : (text) => widget.onSaved!(formatter.valueOf(text)),
+          : (text) {
+              widget.onSaved?.call(formatter.valueOf(text));
+              widget.onSavedNullable?.call(
+                text.trim().isEmpty ? null : formatter.valueOf(text),
+              );
+            },
       onChanged: widget.onChanged == null
           ? null
           : (text) => widget.onChanged!(formatter.valueOf(text)),
