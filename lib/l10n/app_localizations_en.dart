@@ -4039,4 +4039,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerLookupError => 'Could not load customers. Try again.';
+
+  @override
+  String newEntity(String entity) {
+    return 'New $entity';
+  }
+
+  @override
+  String get photoAndMoreData => 'Photo and more details';
+
+  @override
+  String fieldRequiredHint(String field) {
+    return 'Fill in the $field field';
+  }
+
+  @override
+  String useValue(String value) {
+    return 'Use “$value”';
+  }
+
+  @override
+  String get newOrderAction => 'New order';
+
+  @override
+  String get deviceActions => 'More actions';
+
+  @override
+  String deleteDeviceTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get deleteDeviceKeepsOrders => 'The orders stay saved.';
+
+  @override
+  String get deviceDetailsLabel => 'Details';
 }

@@ -1697,5 +1697,18 @@
   "lateOrdersCount": "{count, plural, =1{1 orden atrasada} other{{count} órdenes atrasadas}}",
   "@lateOrdersCount": {"placeholders": {"count": {"type": "int"}}},
   "customerActions": "Más acciones del cliente",
-  "customerLookupError": "No se pudo cargar los clientes. Inténtalo de nuevo."
+  "customerLookupError": "No se pudo cargar los clientes. Inténtalo de nuevo.",
+  "newEntity": "Nuevo {entity}",
+  "@newEntity": {"placeholders": {"entity": {"type": "String"}}},
+  "photoAndMoreData": "Foto y más datos",
+  "fieldRequiredHint": "Completa el campo {field}",
+  "@fieldRequiredHint": {"placeholders": {"field": {"type": "String"}}},
+  "useValue": "Usar “{value}”",
+  "@useValue": {"placeholders": {"value": {"type": "String"}}},
+  "newOrderAction": "Nueva OS",
+  "deviceActions": "Más acciones",
+  "deleteDeviceTitle": "¿Eliminar {name}?",
+  "@deleteDeviceTitle": {"placeholders": {"name": {"type": "String"}}},
+  "deleteDeviceKeepsOrders": "Las OS siguen guardadas.",
+  "deviceDetailsLabel": "Datos"
 }

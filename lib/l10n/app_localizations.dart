@@ -7509,6 +7509,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar os clientes. Tente de novo.'**
   String get customerLookupError;
+
+  /// No description provided for @newEntity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo {entity}'**
+  String newEntity(String entity);
+
+  /// No description provided for @photoAndMoreData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto e mais dados'**
+  String get photoAndMoreData;
+
+  /// No description provided for @fieldRequiredHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o campo {field}'**
+  String fieldRequiredHint(String field);
+
+  /// No description provided for @useValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar “{value}”'**
+  String useValue(String value);
+
+  /// No description provided for @newOrderAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get newOrderAction;
+
+  /// No description provided for @deviceActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações'**
+  String get deviceActions;
+
+  /// No description provided for @deleteDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String deleteDeviceTitle(String name);
+
+  /// No description provided for @deleteDeviceKeepsOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'As OS continuam salvas.'**
+  String get deleteDeviceKeepsOrders;
+
+  /// No description provided for @deviceDetailsLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados'**
+  String get deviceDetailsLabel;
 }
 
 class _AppLocalizationsDelegate

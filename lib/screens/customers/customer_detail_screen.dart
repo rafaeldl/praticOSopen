@@ -290,7 +290,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       onTap: () => Navigator.pushNamed(
         context,
         '/device_detail',
-        arguments: {'device': Device.fromJson(vehicle.toJson())},
+        arguments: {
+          'device': Device.fromJson(vehicle.toJson()),
+          'customer': _customer,
+        },
       ),
     );
   }

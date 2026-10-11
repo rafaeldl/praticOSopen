@@ -1697,5 +1697,18 @@
   "lateOrdersCount": "{count, plural, =1{1 late order} other{{count} late orders}}",
   "@lateOrdersCount": {"placeholders": {"count": {"type": "int"}}},
   "customerActions": "More customer actions",
-  "customerLookupError": "Could not load customers. Try again."
+  "customerLookupError": "Could not load customers. Try again.",
+  "newEntity": "New {entity}",
+  "@newEntity": {"placeholders": {"entity": {"type": "String"}}},
+  "photoAndMoreData": "Photo and more details",
+  "fieldRequiredHint": "Fill in the {field} field",
+  "@fieldRequiredHint": {"placeholders": {"field": {"type": "String"}}},
+  "useValue": "Use “{value}”",
+  "@useValue": {"placeholders": {"value": {"type": "String"}}},
+  "newOrderAction": "New order",
+  "deviceActions": "More actions",
+  "deleteDeviceTitle": "Delete {name}?",
+  "@deleteDeviceTitle": {"placeholders": {"name": {"type": "String"}}},
+  "deleteDeviceKeepsOrders": "The orders stay saved.",
+  "deviceDetailsLabel": "Details"
 }

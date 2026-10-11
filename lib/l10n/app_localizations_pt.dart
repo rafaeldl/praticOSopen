@@ -4053,4 +4053,39 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get customerLookupError =>
       'Não deu para carregar os clientes. Tente de novo.';
+
+  @override
+  String newEntity(String entity) {
+    return 'Novo $entity';
+  }
+
+  @override
+  String get photoAndMoreData => 'Foto e mais dados';
+
+  @override
+  String fieldRequiredHint(String field) {
+    return 'Preencha o campo $field';
+  }
+
+  @override
+  String useValue(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get newOrderAction => 'Nova OS';
+
+  @override
+  String get deviceActions => 'Mais ações';
+
+  @override
+  String deleteDeviceTitle(String name) {
+    return 'Apagar $name?';
+  }
+
+  @override
+  String get deleteDeviceKeepsOrders => 'As OS continuam salvas.';
+
+  @override
+  String get deviceDetailsLabel => 'Dados';
 }
