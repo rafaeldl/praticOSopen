@@ -237,6 +237,7 @@
 
   "order": "Orden de Servicio",
   "orderShort": "OS",
+  "orderOverdue": "Atrasada",
   "newOrder": "Nueva Orden",
   "editOrder": "Editar Orden",
   "orderDetails": "Detalles de la Orden",

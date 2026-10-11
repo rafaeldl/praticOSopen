@@ -237,6 +237,7 @@
 
   "order": "Work Order",
   "orderShort": "WO",
+  "orderOverdue": "Overdue",
   "newOrder": "New Order",
   "editOrder": "Edit Order",
   "orderDetails": "Order Details",

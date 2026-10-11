@@ -657,6 +657,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderShort => 'WO';
 
   @override
+  String get orderOverdue => 'Overdue';
+
+  @override
   String get newOrder => 'NEW';
 
   @override

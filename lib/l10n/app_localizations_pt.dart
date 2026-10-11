@@ -659,6 +659,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderShort => 'OS';
 
   @override
+  String get orderOverdue => 'Atrasada';
+
+  @override
   String get newOrder => 'NOVA';
 
   @override
