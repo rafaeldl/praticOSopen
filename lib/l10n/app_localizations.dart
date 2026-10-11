@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentCustomers.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes Recentes'**
+  /// **'Usados por último'**
   String get recentCustomers;
 
   /// No description provided for @role.
@@ -7335,6 +7335,1374 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
+
+  /// No description provided for @pickCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é o cliente?'**
+  String get pickCustomerTitle;
+
+  /// No description provided for @pickCustomerSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para escolher ou digite o nome, telefone ou placa'**
+  String get pickCustomerSubtitle;
+
+  /// No description provided for @searchCustomerPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar por nome, telefone ou placa'**
+  String get searchCustomerPlaceholder;
+
+  /// No description provided for @searchCustomerNoPlatePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar por nome ou telefone'**
+  String get searchCustomerNoPlatePlaceholder;
+
+  /// No description provided for @addNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar cliente novo'**
+  String get addNewCustomer;
+
+  /// No description provided for @allCustomers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get allCustomers;
+
+  /// No description provided for @plateValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Placa {plate}'**
+  String plateValue(String plate);
+
+  /// No description provided for @customerNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Ana Ribeiro'**
+  String get customerNamePlaceholder;
+
+  /// No description provided for @customerNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do cliente'**
+  String get customerNameRequired;
+
+  /// No description provided for @customerPhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone ou WhatsApp'**
+  String get customerPhoneLabel;
+
+  /// No description provided for @customerPhoneHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usado para mandar o orçamento e o aviso de pronto.'**
+  String get customerPhoneHint;
+
+  /// No description provided for @moreCustomerData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais dados (e-mail, CPF ou CNPJ, endereço)'**
+  String get moreCustomerData;
+
+  /// No description provided for @openInMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir no mapa'**
+  String get openInMap;
+
+  /// No description provided for @callAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar'**
+  String get callAction;
+
+  /// No description provided for @newOrderFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS para {name}'**
+  String newOrderFor(String name);
+
+  /// No description provided for @ordersOfCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS de {name}'**
+  String ordersOfCustomer(String name);
+
+  /// No description provided for @devicesOfCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'{devices} de {name}'**
+  String devicesOfCustomer(String devices, String name);
+
+  /// No description provided for @totalSpent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total gasto'**
+  String get totalSpent;
+
+  /// No description provided for @deleteCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String deleteCustomerTitle(String name);
+
+  /// No description provided for @deleteCustomerKeepsOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'As OS continuam salvas.'**
+  String get deleteCustomerKeepsOrders;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar'**
+  String get deleteAction;
+
+  /// No description provided for @noCustomersYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem clientes'**
+  String get noCustomersYet;
+
+  /// No description provided for @addFirstCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar o primeiro cliente'**
+  String get addFirstCustomer;
+
+  /// No description provided for @noCustomerMatching.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum cliente com “{query}”'**
+  String noCustomerMatching(String query);
+
+  /// No description provided for @customersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String customersCount(int count);
+
+  /// No description provided for @openOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}'**
+  String openOrdersCount(int count);
+
+  /// No description provided for @lateOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS atrasada} other{{count} OS atrasadas}}'**
+  String lateOrdersCount(int count);
+
+  /// No description provided for @customerActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações do cliente'**
+  String get customerActions;
+
+  /// No description provided for @customerLookupError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os clientes. Tente de novo.'**
+  String get customerLookupError;
+
+  /// No description provided for @catalogTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo'**
+  String get catalogTitle;
+
+  /// No description provided for @catalogNewService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo serviço'**
+  String get catalogNewService;
+
+  /// No description provided for @catalogNewProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo produto'**
+  String get catalogNewProduct;
+
+  /// No description provided for @saveServiceButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar serviço'**
+  String get saveServiceButton;
+
+  /// No description provided for @saveProductButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar produto'**
+  String get saveProductButton;
+
+  /// No description provided for @serviceNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Troca de óleo'**
+  String get serviceNameHint;
+
+  /// No description provided for @productNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Filtro de óleo'**
+  String get productNameHint;
+
+  /// No description provided for @serviceNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do serviço'**
+  String get serviceNameRequired;
+
+  /// No description provided for @productNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o nome do produto'**
+  String get productNameRequired;
+
+  /// No description provided for @catalogPriceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço'**
+  String get catalogPriceLabel;
+
+  /// No description provided for @catalogPriceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode deixar em branco e combinar o preço em cada OS.'**
+  String get catalogPriceHint;
+
+  /// No description provided for @addServicePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do serviço'**
+  String get addServicePhoto;
+
+  /// No description provided for @addProductPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do produto'**
+  String get addProductPhoto;
+
+  /// No description provided for @catalogNoPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'sem valor'**
+  String get catalogNoPrice;
+
+  /// No description provided for @catalogEmptyServices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem serviços'**
+  String get catalogEmptyServices;
+
+  /// No description provided for @catalogEmptyServicesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre os que você mais faz para montar a OS mais rápido.'**
+  String get catalogEmptyServicesHint;
+
+  /// No description provided for @catalogEmptyProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem produtos'**
+  String get catalogEmptyProducts;
+
+  /// No description provided for @catalogEmptyProductsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre os que você mais usa para montar a OS mais rápido.'**
+  String get catalogEmptyProductsHint;
+
+  /// No description provided for @catalogNoMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada com “{query}”'**
+  String catalogNoMatch(String query);
+
+  /// No description provided for @catalogDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String catalogDeleteTitle(String name);
+
+  /// No description provided for @catalogDeleteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ele sai do catálogo. As OS que já usam continuam salvas.'**
+  String get catalogDeleteMessage;
+
+  /// No description provided for @deleteServiceAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar serviço'**
+  String get deleteServiceAction;
+
+  /// No description provided for @deleteProductAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar produto'**
+  String get deleteProductAction;
+
+  /// No description provided for @catalogItemActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações do item'**
+  String get catalogItemActions;
+
+  /// No description provided for @pickServiceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual serviço?'**
+  String get pickServiceTitle;
+
+  /// No description provided for @pickProductTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual produto?'**
+  String get pickProductTitle;
+
+  /// No description provided for @catalogLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar o catálogo. Tente de novo.'**
+  String get catalogLoadError;
+
+  /// No description provided for @newEntity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo {entity}'**
+  String newEntity(String entity);
+
+  /// No description provided for @photoAndMoreData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto e mais dados'**
+  String get photoAndMoreData;
+
+  /// No description provided for @fieldRequiredHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o campo {field}'**
+  String fieldRequiredHint(String field);
+
+  /// No description provided for @useValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar “{value}”'**
+  String useValue(String value);
+
+  /// No description provided for @newOrderAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get newOrderAction;
+
+  /// No description provided for @deviceActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações'**
+  String get deviceActions;
+
+  /// No description provided for @deleteDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {name}?'**
+  String deleteDeviceTitle(String name);
+
+  /// No description provided for @deleteDeviceKeepsOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'As OS continuam salvas.'**
+  String get deleteDeviceKeepsOrders;
+
+  /// No description provided for @deviceDetailsLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados'**
+  String get deviceDetailsLabel;
+
+  /// No description provided for @newOrderScreenSetting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova tela da OS'**
+  String get newOrderScreenSetting;
+
+  /// No description provided for @newOrderScreenSettingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Teste a OS redesenhada. Dá para voltar quando quiser.'**
+  String get newOrderScreenSettingHint;
+
+  /// No description provided for @orderNewTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova {order}'**
+  String orderNewTitle(String order);
+
+  /// No description provided for @orderNumberTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{order} {number}'**
+  String orderNumberTitle(String order, String number);
+
+  /// No description provided for @orderChangeStatusLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar'**
+  String get orderChangeStatusLink;
+
+  /// No description provided for @orderItemsSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai ser feito'**
+  String get orderItemsSection;
+
+  /// No description provided for @orderWhatGoesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai na OS?'**
+  String get orderWhatGoesTitle;
+
+  /// No description provided for @orderItemSearchPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar serviço ou peça'**
+  String get orderItemSearchPlaceholder;
+
+  /// No description provided for @orderCreateAndAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar “{name}” e pôr na OS'**
+  String orderCreateAndAdd(String name);
+
+  /// No description provided for @orderCreateItemHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'O preço você coloca na própria OS. Fica salvo para as próximas.'**
+  String get orderCreateItemHint;
+
+  /// No description provided for @orderCreateItemError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para criar. Tente de novo.'**
+  String get orderCreateItemError;
+
+  /// No description provided for @orderCatalogEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu catálogo está vazio. Digite o nome na busca para criar.'**
+  String get orderCatalogEmpty;
+
+  /// No description provided for @orderMostUsed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais usados'**
+  String get orderMostUsed;
+
+  /// No description provided for @orderAllItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get orderAllItems;
+
+  /// No description provided for @orderItemKindService.
+  ///
+  /// In pt, this message translates to:
+  /// **'serviço'**
+  String get orderItemKindService;
+
+  /// No description provided for @orderItemKindProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'produto'**
+  String get orderItemKindProduct;
+
+  /// No description provided for @orderItemQuantityValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} unidades'**
+  String orderItemQuantityValue(String count);
+
+  /// No description provided for @orderItemPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preço'**
+  String get orderItemPrice;
+
+  /// No description provided for @orderItemPriceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode deixar em branco: o item fica sem valor e fora do total.'**
+  String get orderItemPriceHint;
+
+  /// No description provided for @orderItemQuantity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade'**
+  String get orderItemQuantity;
+
+  /// No description provided for @orderItemLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menos um'**
+  String get orderItemLess;
+
+  /// No description provided for @orderItemMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais um'**
+  String get orderItemMore;
+
+  /// No description provided for @orderItemRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar da OS'**
+  String get orderItemRemove;
+
+  /// No description provided for @orderTotalLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total'**
+  String get orderTotalLabel;
+
+  /// No description provided for @orderRemainingToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {amount}'**
+  String orderRemainingToReceive(String amount);
+
+  /// No description provided for @orderFullyPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo pago'**
+  String get orderFullyPaid;
+
+  /// No description provided for @orderSaveButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar {order}'**
+  String orderSaveButton(String order);
+
+  /// No description provided for @orderSaveNeedsCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o cliente para salvar.'**
+  String get orderSaveNeedsCustomer;
+
+  /// No description provided for @orderDiscardTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair sem salvar?'**
+  String get orderDiscardTitle;
+
+  /// No description provided for @orderDiscardMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você preencheu vai ser perdido.'**
+  String get orderDiscardMessage;
+
+  /// No description provided for @orderKeepEditing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar'**
+  String get orderKeepEditing;
+
+  /// No description provided for @orderPickDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher {device}'**
+  String orderPickDevice(String device);
+
+  /// No description provided for @orderPhotoAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto'**
+  String get orderPhotoAction;
+
+  /// No description provided for @orderTalkAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar o que fazer'**
+  String get orderTalkAction;
+
+  /// No description provided for @orderAssistantSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em breve'**
+  String get orderAssistantSoon;
+
+  /// No description provided for @orderNextStepQuote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento pronto para o cliente'**
+  String get orderNextStepQuote;
+
+  /// No description provided for @orderNextStepQuoteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente aprovou'**
+  String get orderNextStepQuoteAction;
+
+  /// No description provided for @orderNextStepApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovada pelo cliente'**
+  String get orderNextStepApproved;
+
+  /// No description provided for @orderNextStepApprovedAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar o serviço'**
+  String get orderNextStepApprovedAction;
+
+  /// No description provided for @orderNextStepProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço em andamento'**
+  String get orderNextStepProgress;
+
+  /// No description provided for @orderNextStepProgressAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como pronto'**
+  String get orderNextStepProgressAction;
+
+  /// No description provided for @orderNextStepDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderNextStepDone;
+
+  /// No description provided for @orderNextStepDoneUnpaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto. Falta receber {amount}'**
+  String orderNextStepDoneUnpaid(String amount);
+
+  /// No description provided for @orderNextStepReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber {amount}'**
+  String orderNextStepReceive(String amount);
+
+  /// No description provided for @orderNextStepDonePaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo certo: pronto e pago'**
+  String get orderNextStepDonePaid;
+
+  /// No description provided for @orderNextStepSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar para o cliente'**
+  String get orderNextStepSend;
+
+  /// No description provided for @orderNextStepCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'{order} cancelada'**
+  String orderNextStepCanceled(String order);
+
+  /// No description provided for @orderNextStepReopen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reabrir'**
+  String get orderNextStepReopen;
+
+  /// No description provided for @orderMenuAddTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar à {order}'**
+  String orderMenuAddTo(String order);
+
+  /// No description provided for @orderMenuSendToCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar para o cliente'**
+  String get orderMenuSendToCustomer;
+
+  /// No description provided for @orderMenuPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF'**
+  String get orderMenuPdf;
+
+  /// No description provided for @orderMenuCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar {order}'**
+  String orderMenuCancel(String order);
+
+  /// No description provided for @orderMenuDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {order}'**
+  String orderMenuDelete(String order);
+
+  /// No description provided for @orderAddDueDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prazo de entrega'**
+  String get orderAddDueDate;
+
+  /// No description provided for @orderAddAnotherDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro {device}'**
+  String orderAddAnotherDevice(String device);
+
+  /// No description provided for @orderAddMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist, fotos, comentário e mais'**
+  String get orderAddMore;
+
+  /// No description provided for @orderCancelConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar {order}?'**
+  String orderCancelConfirmTitle(String order);
+
+  /// No description provided for @orderCancelConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ela vai para as canceladas e pode ser reaberta.'**
+  String get orderCancelConfirmMessage;
+
+  /// No description provided for @orderDeleteConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar {order}?'**
+  String orderDeleteConfirmTitle(String order);
+
+  /// No description provided for @orderDeleteConfirmMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não dá para desfazer.'**
+  String get orderDeleteConfirmMessage;
+
+  /// No description provided for @orderPhotosSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos'**
+  String get orderPhotosSection;
+
+  /// No description provided for @orderDeviceActionChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar'**
+  String get orderDeviceActionChange;
+
+  /// No description provided for @orderDeviceActionRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar da OS'**
+  String get orderDeviceActionRemove;
+
+  /// No description provided for @orderUnpricedCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 item sem valor, fora do total} other{{count} itens sem valor, fora do total}}'**
+  String orderUnpricedCount(int count);
+
+  /// No description provided for @orderPendingChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Falta terminar 1 checklist} other{Faltam terminar {count} checklists}}'**
+  String orderPendingChecklists(int count);
+
+  /// No description provided for @orderMoreActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ações'**
+  String get orderMoreActions;
+
+  /// No description provided for @filterOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em aberto'**
+  String get filterOpen;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get filterAll;
+
+  /// No description provided for @sectionLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasadas'**
+  String get sectionLate;
+
+  /// No description provided for @sectionDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para hoje'**
+  String get sectionDueToday;
+
+  /// No description provided for @sectionInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em andamento'**
+  String get sectionInProgress;
+
+  /// No description provided for @sectionWaitingApproval.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando aprovação'**
+  String get sectionWaitingApproval;
+
+  /// No description provided for @sectionApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovadas'**
+  String get sectionApproved;
+
+  /// No description provided for @moreShowCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver canceladas'**
+  String get moreShowCanceled;
+
+  /// No description provided for @viewCanceledTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Canceladas'**
+  String get viewCanceledTitle;
+
+  /// No description provided for @backToOpenOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar para em aberto'**
+  String get backToOpenOrders;
+
+  /// No description provided for @homeMoreMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get homeMoreMenu;
+
+  /// No description provided for @homeOpenCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} em aberto'**
+  String homeOpenCount(int count);
+
+  /// No description provided for @nextStepLabelToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get nextStepLabelToday;
+
+  /// No description provided for @nextStepLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS passou do prazo de entrega.} other{{count} OS passaram do prazo de entrega.}}'**
+  String nextStepLate(int count);
+
+  /// No description provided for @nextStepDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS para entregar hoje.} other{{count} OS para entregar hoje.}}'**
+  String nextStepDueToday(int count);
+
+  /// No description provided for @nextStepQuotesWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 orçamento esperando resposta do cliente.} other{{count} orçamentos esperando resposta do cliente.}}'**
+  String nextStepQuotesWaiting(int count);
+
+  /// No description provided for @seeLate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver as atrasadas'**
+  String get seeLate;
+
+  /// No description provided for @seeThem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver'**
+  String get seeThem;
+
+  /// No description provided for @seeAllOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todas'**
+  String get seeAllOrders;
+
+  /// No description provided for @notificationsA11y.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos, {count} novos'**
+  String notificationsA11y(int count);
+
+  /// No description provided for @firstOrderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie sua primeira ordem de serviço e mande para o cliente aprovar.'**
+  String get firstOrderTitle;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como funciona'**
+  String get howItWorks;
+
+  /// No description provided for @howItWorksStep1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o cliente e o que vai ser feito.'**
+  String get howItWorksStep1;
+
+  /// No description provided for @howItWorksStep2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mande o orçamento para o cliente aprovar.'**
+  String get howItWorksStep2;
+
+  /// No description provided for @howItWorksStep3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhe o serviço e receba.'**
+  String get howItWorksStep3;
+
+  /// No description provided for @searchNotFoundLoaded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achei nas OS carregadas.'**
+  String get searchNotFoundLoaded;
+
+  /// No description provided for @searchOlder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar nas mais antigas'**
+  String get searchOlder;
+
+  /// No description provided for @noOpenOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS em aberto.'**
+  String get noOpenOrders;
+
+  /// No description provided for @noOrdersInView.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada por aqui.'**
+  String get noOrdersInView;
+
+  /// No description provided for @loadOrdersError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar as OS.'**
+  String get loadOrdersError;
+
+  /// No description provided for @orderLateDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada 1 dia} other{Atrasada {count} dias}}'**
+  String orderLateDays(int count);
+
+  /// No description provided for @orderStatusDue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{status} · entrega {date}'**
+  String orderStatusDue(String status, String date);
+
+  /// No description provided for @orderRowNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String orderRowNumber(String number);
+
+  /// No description provided for @orderRowNumberDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {device}'**
+  String orderRowNumberDevice(String number, String device);
+
+  /// No description provided for @homeNewOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get homeNewOrder;
+
+  /// No description provided for @yourAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua conta'**
+  String get yourAccount;
+
+  /// No description provided for @yourCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua empresa'**
+  String get yourCompany;
+
+  /// No description provided for @catalog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo'**
+  String get catalog;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano'**
+  String get planTitle;
+
+  /// No description provided for @advancedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avançado'**
+  String get advancedTitle;
+
+  /// No description provided for @deleteMyAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar minha conta'**
+  String get deleteMyAccount;
+
+  /// No description provided for @howYouWork.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você trabalha'**
+  String get howYouWork;
+
+  /// No description provided for @valuesAndBilling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valores e cobrança'**
+  String get valuesAndBilling;
+
+  /// No description provided for @valuesAndBillingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços na OS, receber e aba Financeiro'**
+  String get valuesAndBillingHint;
+
+  /// No description provided for @valuesAndBillingSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado. Em breve você poderá desligar.'**
+  String get valuesAndBillingSoon;
+
+  /// No description provided for @nameAndPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome e foto'**
+  String get nameAndPhoto;
+
+  /// No description provided for @joinWithInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com código de convite'**
+  String get joinWithInviteCode;
+
+  /// No description provided for @followsPhoneSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'O idioma e a aparência seguem o ajuste do iPhone.'**
+  String get followsPhoneSettings;
+
+  /// No description provided for @invitePerson.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar pessoa'**
+  String get invitePerson;
+
+  /// No description provided for @inviteWhoLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome (opcional)'**
+  String get inviteWhoLabel;
+
+  /// No description provided for @inviteWhoPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Lucas Silva'**
+  String get inviteWhoPlaceholder;
+
+  /// No description provided for @inviteEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
+  String get inviteEmailLabel;
+
+  /// No description provided for @inviteEmailHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A pessoa entra com este e-mail e o convite aparece sozinho.'**
+  String get inviteEmailHint;
+
+  /// No description provided for @inviteWhatsAppLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp (opcional)'**
+  String get inviteWhatsAppLabel;
+
+  /// No description provided for @inviteRoleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode fazer'**
+  String get inviteRoleLabel;
+
+  /// No description provided for @createInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar convite'**
+  String get createInvite;
+
+  /// No description provided for @cancelAndInviteAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar e convidar de novo'**
+  String get cancelAndInviteAgain;
+
+  /// No description provided for @inviteExpiredMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite venceu. Cancele e convide de novo.'**
+  String get inviteExpiredMessage;
+
+  /// No description provided for @userWillReceiveInviteByWhatsAppHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois você manda o código por esse número ou por outro app.'**
+  String get userWillReceiveInviteByWhatsAppHint;
+
+  /// No description provided for @financialLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar o financeiro.'**
+  String get financialLoadError;
+
+  /// No description provided for @financialEmptyMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS em {month}.'**
+  String financialEmptyMonth(String month);
+
+  /// No description provided for @financialToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber'**
+  String get financialToReceive;
+
+  /// No description provided for @financialReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido'**
+  String get financialReceived;
+
+  /// No description provided for @financialSummaryLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrou {entered} · Falta {owed}'**
+  String financialSummaryLine(String entered, String owed);
+
+  /// No description provided for @financialOrderSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · desde {date}'**
+  String financialOrderSince(int number, String date);
+
+  /// No description provided for @financialOrdersSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} OS · desde {date}'**
+  String financialOrdersSince(int count, String date);
+
+  /// No description provided for @financialPaidOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · pago {date}'**
+  String financialPaidOn(int number, String date);
+
+  /// No description provided for @financialOtherPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro período'**
+  String get financialOtherPeriod;
+
+  /// No description provided for @financialPreviousMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês anterior'**
+  String get financialPreviousMonth;
+
+  /// No description provided for @financialNextMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo mês'**
+  String get financialNextMonth;
+
+  /// No description provided for @financialNextStep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String financialNextStep(String amount, int count);
+
+  /// No description provided for @financialOldestDebt.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} deve há mais tempo: {amount} desde {date}.'**
+  String financialOldestDebt(String name, String amount, String date);
+
+  /// No description provided for @financialSendChargeTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar cobrança para {name}'**
+  String financialSendChargeTo(String name);
+
+  /// No description provided for @financialPickOrderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS em aberto de {name}'**
+  String financialPickOrderTitle(String name);
+
+  /// No description provided for @financialOrderOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {amount} · desde {date}'**
+  String financialOrderOption(int number, String amount, String date);
+
+  /// No description provided for @receiveTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber'**
+  String get receiveTitle;
+
+  /// No description provided for @receiveMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber'**
+  String get receiveMissing;
+
+  /// No description provided for @receiveAllDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo recebido'**
+  String get receiveAllDone;
+
+  /// No description provided for @receiveButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebi {amount}'**
+  String receiveButton(String amount);
+
+  /// No description provided for @receiveAttachReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexar comprovante'**
+  String get receiveAttachReceipt;
+
+  /// No description provided for @receiveAlreadyReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já recebido'**
+  String get receiveAlreadyReceived;
+
+  /// No description provided for @receiveWithReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'com comprovante'**
+  String get receiveWithReceipt;
+
+  /// No description provided for @receiveNoReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'sem comprovante'**
+  String get receiveNoReceipt;
+
+  /// No description provided for @receiveViaPix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pix pelo link'**
+  String get receiveViaPix;
+
+  /// No description provided for @receiveViaBoleto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Boleto pelo link'**
+  String get receiveViaBoleto;
+
+  /// No description provided for @receiveViaCard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cartão pelo link'**
+  String get receiveViaCard;
+
+  /// No description provided for @receiveViaLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pelo link'**
+  String get receiveViaLink;
+
+  /// No description provided for @receiveGiveDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dar desconto'**
+  String get receiveGiveDiscount;
+
+  /// No description provided for @receiveUndoPayments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer pagamentos'**
+  String get receiveUndoPayments;
+
+  /// No description provided for @receiveDiscountNewTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'O total passa de {from} para {to}'**
+  String receiveDiscountNewTotal(String from, String to);
+
+  /// No description provided for @receiveDiscountButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dar {amount} de desconto'**
+  String receiveDiscountButton(String amount);
+
+  /// No description provided for @receiveViewReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver comprovante'**
+  String get receiveViewReceipt;
+
+  /// No description provided for @receiveRemovePayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover este pagamento'**
+  String get receiveRemovePayment;
+
+  /// No description provided for @receiveRecordedBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anotado por {name} em {date}'**
+  String receiveRecordedBy(String name, String date);
+
+  /// No description provided for @receiveRecordedAuto.
+  ///
+  /// In pt, this message translates to:
+  /// **'O app anotou sozinho em {date}'**
+  String receiveRecordedAuto(String date);
+
+  /// No description provided for @receiveMoreOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get receiveMoreOptions;
+
+  /// No description provided for @receiveRemoveReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar comprovante'**
+  String get receiveRemoveReceipt;
 
   /// No description provided for @loginTitle.
   ///
