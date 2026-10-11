@@ -2260,5 +2260,68 @@
         "type": "String"
       }
     }
-  }
+  },
+  "receiveTitle": "Receive",
+  "receiveMissing": "Left to receive",
+  "receiveAllDone": "All received",
+  "receiveButton": "Received {amount}",
+  "@receiveButton": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveAttachReceipt": "Attach receipt",
+  "receiveAlreadyReceived": "Already received",
+  "receiveWithReceipt": "with receipt",
+  "receiveNoReceipt": "no receipt",
+  "receiveViaPix": "Pix via link",
+  "receiveViaBoleto": "Boleto via link",
+  "receiveViaCard": "Card via link",
+  "receiveViaLink": "Via link",
+  "receiveGiveDiscount": "Give a discount",
+  "receiveUndoPayments": "Undo payments",
+  "receiveDiscountNewTotal": "The total goes from {from} to {to}",
+  "@receiveDiscountNewTotal": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveDiscountButton": "Give {amount} discount",
+  "@receiveDiscountButton": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveViewReceipt": "View receipt",
+  "receiveRemovePayment": "Remove this payment",
+  "receiveRecordedBy": "Recorded by {name} on {date}",
+  "@receiveRecordedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveRecordedAuto": "Recorded automatically by the app on {date}",
+  "@receiveRecordedAuto": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveMoreOptions": "More options",
+  "receiveRemoveReceipt": "Remove receipt"
 }

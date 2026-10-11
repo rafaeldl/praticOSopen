@@ -7431,6 +7431,138 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS {number} · {amount} · desde {date}'**
   String financialOrderOption(int number, String amount, String date);
+
+  /// No description provided for @receiveTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber'**
+  String get receiveTitle;
+
+  /// No description provided for @receiveMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber'**
+  String get receiveMissing;
+
+  /// No description provided for @receiveAllDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo recebido'**
+  String get receiveAllDone;
+
+  /// No description provided for @receiveButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebi {amount}'**
+  String receiveButton(String amount);
+
+  /// No description provided for @receiveAttachReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexar comprovante'**
+  String get receiveAttachReceipt;
+
+  /// No description provided for @receiveAlreadyReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já recebido'**
+  String get receiveAlreadyReceived;
+
+  /// No description provided for @receiveWithReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'com comprovante'**
+  String get receiveWithReceipt;
+
+  /// No description provided for @receiveNoReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'sem comprovante'**
+  String get receiveNoReceipt;
+
+  /// No description provided for @receiveViaPix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pix pelo link'**
+  String get receiveViaPix;
+
+  /// No description provided for @receiveViaBoleto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Boleto pelo link'**
+  String get receiveViaBoleto;
+
+  /// No description provided for @receiveViaCard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cartão pelo link'**
+  String get receiveViaCard;
+
+  /// No description provided for @receiveViaLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pelo link'**
+  String get receiveViaLink;
+
+  /// No description provided for @receiveGiveDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dar desconto'**
+  String get receiveGiveDiscount;
+
+  /// No description provided for @receiveUndoPayments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer pagamentos'**
+  String get receiveUndoPayments;
+
+  /// No description provided for @receiveDiscountNewTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'O total passa de {from} para {to}'**
+  String receiveDiscountNewTotal(String from, String to);
+
+  /// No description provided for @receiveDiscountButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dar {amount} de desconto'**
+  String receiveDiscountButton(String amount);
+
+  /// No description provided for @receiveViewReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver comprovante'**
+  String get receiveViewReceipt;
+
+  /// No description provided for @receiveRemovePayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover este pagamento'**
+  String get receiveRemovePayment;
+
+  /// No description provided for @receiveRecordedBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anotado por {name} em {date}'**
+  String receiveRecordedBy(String name, String date);
+
+  /// No description provided for @receiveRecordedAuto.
+  ///
+  /// In pt, this message translates to:
+  /// **'O app anotou sozinho em {date}'**
+  String receiveRecordedAuto(String date);
+
+  /// No description provided for @receiveMoreOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get receiveMoreOptions;
+
+  /// No description provided for @receiveRemoveReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar comprovante'**
+  String get receiveRemoveReceipt;
 }
 
 class _AppLocalizationsDelegate

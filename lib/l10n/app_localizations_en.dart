@@ -3988,4 +3988,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String financialOrderOption(int number, String amount, String date) {
     return 'Order $number · $amount · since $date';
   }
+
+  @override
+  String get receiveTitle => 'Receive';
+
+  @override
+  String get receiveMissing => 'Left to receive';
+
+  @override
+  String get receiveAllDone => 'All received';
+
+  @override
+  String receiveButton(String amount) {
+    return 'Received $amount';
+  }
+
+  @override
+  String get receiveAttachReceipt => 'Attach receipt';
+
+  @override
+  String get receiveAlreadyReceived => 'Already received';
+
+  @override
+  String get receiveWithReceipt => 'with receipt';
+
+  @override
+  String get receiveNoReceipt => 'no receipt';
+
+  @override
+  String get receiveViaPix => 'Pix via link';
+
+  @override
+  String get receiveViaBoleto => 'Boleto via link';
+
+  @override
+  String get receiveViaCard => 'Card via link';
+
+  @override
+  String get receiveViaLink => 'Via link';
+
+  @override
+  String get receiveGiveDiscount => 'Give a discount';
+
+  @override
+  String get receiveUndoPayments => 'Undo payments';
+
+  @override
+  String receiveDiscountNewTotal(String from, String to) {
+    return 'The total goes from $from to $to';
+  }
+
+  @override
+  String receiveDiscountButton(String amount) {
+    return 'Give $amount discount';
+  }
+
+  @override
+  String get receiveViewReceipt => 'View receipt';
+
+  @override
+  String get receiveRemovePayment => 'Remove this payment';
+
+  @override
+  String receiveRecordedBy(String name, String date) {
+    return 'Recorded by $name on $date';
+  }
+
+  @override
+  String receiveRecordedAuto(String date) {
+    return 'Recorded automatically by the app on $date';
+  }
+
+  @override
+  String get receiveMoreOptions => 'More options';
+
+  @override
+  String get receiveRemoveReceipt => 'Remove receipt';
 }
