@@ -253,6 +253,10 @@ abstract class _OrderStore with Store {
   @observable
   bool hasMoreOrders = true;
 
+  /// True when the last Home list fetch failed (shows the retry state).
+  @observable
+  bool ordersLoadFailed = false;
+
   firestore.DocumentSnapshot? _lastDocument;
   final int _limit = 10;
 
@@ -2084,6 +2088,7 @@ abstract class _OrderStore with Store {
     isLoading = true;
     _lastDocument = null;
     hasMoreOrders = true;
+    ordersLoadFailed = false;
     orders.clear();
 
     await _fetchOrdersInfinite(status);
@@ -2136,6 +2141,8 @@ abstract class _OrderStore with Store {
       }
     } catch (e) {
       print('Erro ao buscar ordens: $e');
+      ordersLoadFailed = true;
+      hasMoreOrders = false;
     }
   }
 }

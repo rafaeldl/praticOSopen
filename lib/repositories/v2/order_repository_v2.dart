@@ -151,6 +151,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     if (status != null) {
       if (['paid', 'unpaid'].contains(status)) {
         query = query.where('payment', isEqualTo: status);
+      } else if (status == 'open') {
+        // "Em aberto": everything not done/canceled. Uses the existing
+        // (status, createdAt) index.
+        query = query.where('status', whereIn: ['quote', 'approved', 'progress']);
       } else if (status == 'due_date') {
         query = query.where('status', whereIn: ['approved', 'progress']);
         query = query.orderBy('dueDate');

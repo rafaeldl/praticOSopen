@@ -1262,7 +1262,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get recentOrders => 'Órdenes Recientes';
 
   @override
-  String get recentCustomers => 'Usados por último';
+  String get recentCustomers => 'Clientes Recientes';
 
   @override
   String get role => 'Rol';
@@ -3936,504 +3936,151 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo cargar. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get pickCustomerTitle => '¿Quién es el cliente?';
+  String get filterOpen => 'Abiertas';
 
   @override
-  String get pickCustomerSubtitle =>
-      'Toca para elegir o escribe nombre, teléfono o placa';
+  String get filterAll => 'Todas';
 
   @override
-  String get searchCustomerPlaceholder => 'Buscar por nombre, teléfono o placa';
+  String get sectionLate => 'Atrasadas';
 
   @override
-  String get searchCustomerNoPlatePlaceholder => 'Buscar por nombre o teléfono';
+  String get sectionDueToday => 'Para hoy';
 
   @override
-  String get addNewCustomer => 'Registrar cliente nuevo';
+  String get sectionInProgress => 'En curso';
 
   @override
-  String get allCustomers => 'Todos';
+  String get sectionWaitingApproval => 'Esperando aprobación';
 
   @override
-  String plateValue(String plate) {
-    return 'Placa $plate';
+  String get sectionApproved => 'Aprobadas';
+
+  @override
+  String get moreShowCanceled => 'Ver canceladas';
+
+  @override
+  String get viewCanceledTitle => 'Canceladas';
+
+  @override
+  String get backToOpenOrders => 'Volver a abiertas';
+
+  @override
+  String get homeMoreMenu => 'Más opciones';
+
+  @override
+  String homeOpenCount(int count) {
+    return '$count abiertas';
   }
 
   @override
-  String get customerNamePlaceholder => 'Ej.: Ana Ribeiro';
+  String get nextStepLabelToday => 'Hoy';
 
   @override
-  String get customerNameRequired => 'Escribe el nombre del cliente';
-
-  @override
-  String get customerPhoneLabel => 'Teléfono o WhatsApp';
-
-  @override
-  String get customerPhoneHint =>
-      'Se usa para enviar el presupuesto y el aviso de listo.';
-
-  @override
-  String get moreCustomerData => 'Más datos (correo, documento, dirección)';
-
-  @override
-  String get openInMap => 'Abrir en el mapa';
-
-  @override
-  String get callAction => 'Llamar';
-
-  @override
-  String newOrderFor(String name) {
-    return 'Nueva orden para $name';
-  }
-
-  @override
-  String ordersOfCustomer(String name) {
-    return 'Órdenes de $name';
-  }
-
-  @override
-  String devicesOfCustomer(String devices, String name) {
-    return '$devices de $name';
-  }
-
-  @override
-  String get totalSpent => 'Total gastado';
-
-  @override
-  String deleteCustomerTitle(String name) {
-    return '¿Borrar a $name?';
-  }
-
-  @override
-  String get deleteCustomerKeepsOrders => 'Las órdenes siguen guardadas.';
-
-  @override
-  String get deleteAction => 'Borrar';
-
-  @override
-  String get noCustomersYet => 'Aún no tienes clientes';
-
-  @override
-  String get addFirstCustomer => 'Registrar el primer cliente';
-
-  @override
-  String noCustomerMatching(String query) {
-    return 'Ningún cliente con “$query”';
-  }
-
-  @override
-  String customersCount(int count) {
+  String nextStepLate(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count clientes',
-      one: '1 cliente',
+      other: '$count OS pasaron la fecha de entrega.',
+      one: '1 OS pasó la fecha de entrega.',
     );
     return '$_temp0';
   }
 
   @override
-  String openOrdersCount(int count) {
+  String nextStepDueToday(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count órdenes abiertas',
-      one: '1 orden abierta',
+      other: '$count OS para entregar hoy.',
+      one: '1 OS para entregar hoy.',
     );
     return '$_temp0';
   }
 
   @override
-  String lateOrdersCount(int count) {
+  String nextStepQuotesWaiting(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count órdenes atrasadas',
-      one: '1 orden atrasada',
+      other: '$count presupuestos esperando respuesta del cliente.',
+      one: '1 presupuesto esperando respuesta del cliente.',
     );
     return '$_temp0';
   }
 
   @override
-  String get customerActions => 'Más acciones del cliente';
+  String get seeLate => 'Ver las atrasadas';
 
   @override
-  String get customerLookupError =>
-      'No se pudo cargar los clientes. Inténtalo de nuevo.';
+  String get seeThem => 'Ver';
 
   @override
-  String get catalogTitle => 'Catálogo';
+  String get seeAllOrders => 'Ver todas';
 
   @override
-  String get catalogNewService => 'Nuevo servicio';
-
-  @override
-  String get catalogNewProduct => 'Nuevo producto';
-
-  @override
-  String get saveServiceButton => 'Guardar servicio';
-
-  @override
-  String get saveProductButton => 'Guardar producto';
-
-  @override
-  String get serviceNameHint => 'Ej.: Cambio de aceite';
-
-  @override
-  String get productNameHint => 'Ej.: Filtro de aceite';
-
-  @override
-  String get serviceNameRequired => 'Escribe el nombre del servicio';
-
-  @override
-  String get productNameRequired => 'Escribe el nombre del producto';
-
-  @override
-  String get catalogPriceLabel => 'Precio';
-
-  @override
-  String get catalogPriceHint =>
-      'Puedes dejarlo en blanco y acordar el precio en cada OS.';
-
-  @override
-  String get addServicePhoto => 'Foto del servicio';
-
-  @override
-  String get addProductPhoto => 'Foto del producto';
-
-  @override
-  String get catalogNoPrice => 'sin valor';
-
-  @override
-  String get catalogEmptyServices => 'Aún no tienes servicios';
-
-  @override
-  String get catalogEmptyServicesHint =>
-      'Registra los que más haces para armar la OS más rápido.';
-
-  @override
-  String get catalogEmptyProducts => 'Aún no tienes productos';
-
-  @override
-  String get catalogEmptyProductsHint =>
-      'Registra los que más usas para armar la OS más rápido.';
-
-  @override
-  String catalogNoMatch(String query) {
-    return 'Nada con “$query”';
+  String notificationsA11y(int count) {
+    return 'Avisos, $count nuevos';
   }
 
   @override
-  String catalogDeleteTitle(String name) {
-    return '¿Borrar $name?';
-  }
+  String get firstOrderTitle =>
+      'Crea tu primera orden de servicio y envíala al cliente para que la apruebe.';
 
   @override
-  String get catalogDeleteMessage =>
-      'Sale del catálogo. Las OS que ya lo usan siguen guardadas.';
+  String get howItWorks => 'Cómo funciona';
 
   @override
-  String get deleteServiceAction => 'Borrar servicio';
+  String get howItWorksStep1 => 'Elige al cliente y lo que se va a hacer.';
 
   @override
-  String get deleteProductAction => 'Borrar producto';
+  String get howItWorksStep2 =>
+      'Envía el presupuesto para que el cliente lo apruebe.';
 
   @override
-  String get catalogItemActions => 'Más acciones del ítem';
+  String get howItWorksStep3 => 'Sigue el trabajo y cobra.';
 
   @override
-  String get pickServiceTitle => '¿Qué servicio?';
+  String get searchNotFoundLoaded => 'No lo encontré en las OS cargadas.';
 
   @override
-  String get pickProductTitle => '¿Qué producto?';
+  String get searchOlder => 'Buscar en las más antiguas';
 
   @override
-  String get catalogLoadError =>
-      'No se pudo cargar el catálogo. Inténtalo de nuevo.';
+  String get noOpenOrders => 'Ninguna OS abierta.';
 
   @override
-  String newEntity(String entity) {
-    return 'Nuevo $entity';
-  }
+  String get noOrdersInView => 'Nada por aquí.';
 
   @override
-  String get photoAndMoreData => 'Foto y más datos';
+  String get loadOrdersError => 'No se pudieron cargar las OS.';
 
   @override
-  String fieldRequiredHint(String field) {
-    return 'Completa el campo $field';
-  }
-
-  @override
-  String useValue(String value) {
-    return 'Usar “$value”';
-  }
-
-  @override
-  String get newOrderAction => 'Nueva OS';
-
-  @override
-  String get deviceActions => 'Más acciones';
-
-  @override
-  String deleteDeviceTitle(String name) {
-    return '¿Eliminar $name?';
-  }
-
-  @override
-  String get deleteDeviceKeepsOrders => 'Las OS siguen guardadas.';
-
-  @override
-  String get deviceDetailsLabel => 'Datos';
-
-  @override
-  String get newOrderScreenSetting => 'Nueva pantalla de la OS';
-
-  @override
-  String get newOrderScreenSettingHint =>
-      'Pruebe la OS rediseñada. Puede volver cuando quiera.';
-
-  @override
-  String orderNewTitle(String order) {
-    return 'Nueva $order';
-  }
-
-  @override
-  String orderNumberTitle(String order, String number) {
-    return '$order $number';
-  }
-
-  @override
-  String get orderChangeStatusLink => 'Cambiar';
-
-  @override
-  String get orderItemsSection => 'Qué se va a hacer';
-
-  @override
-  String get orderWhatGoesTitle => '¿Qué va en la OS?';
-
-  @override
-  String get orderItemSearchPlaceholder => 'Buscar servicio o pieza';
-
-  @override
-  String orderCreateAndAdd(String name) {
-    return 'Crear “$name” y ponerlo en la OS';
-  }
-
-  @override
-  String get orderCreateItemHint =>
-      'El precio lo pone en la propia OS. Queda guardado para las próximas.';
-
-  @override
-  String get orderCreateItemError => 'No se pudo crear. Inténtelo de nuevo.';
-
-  @override
-  String get orderCatalogEmpty =>
-      'Su catálogo está vacío. Escriba el nombre en la búsqueda para crear.';
-
-  @override
-  String get orderMostUsed => 'Más usados';
-
-  @override
-  String get orderAllItems => 'Todos';
-
-  @override
-  String get orderItemKindService => 'servicio';
-
-  @override
-  String get orderItemKindProduct => 'producto';
-
-  @override
-  String orderItemQuantityValue(String count) {
-    return '$count unidades';
-  }
-
-  @override
-  String get orderItemPrice => 'Precio';
-
-  @override
-  String get orderItemPriceHint =>
-      'Puede dejarlo en blanco: el ítem queda sin valor y fuera del total.';
-
-  @override
-  String get orderItemQuantity => 'Cantidad';
-
-  @override
-  String get orderItemLess => 'Uno menos';
-
-  @override
-  String get orderItemMore => 'Uno más';
-
-  @override
-  String get orderItemRemove => 'Quitar de la OS';
-
-  @override
-  String get orderTotalLabel => 'Total';
-
-  @override
-  String orderRemainingToReceive(String amount) {
-    return 'Falta cobrar $amount';
-  }
-
-  @override
-  String get orderFullyPaid => 'Todo pagado';
-
-  @override
-  String orderSaveButton(String order) {
-    return 'Guardar $order';
-  }
-
-  @override
-  String get orderSaveNeedsCustomer => 'Elija el cliente para guardar.';
-
-  @override
-  String get orderDiscardTitle => '¿Salir sin guardar?';
-
-  @override
-  String get orderDiscardMessage => 'Lo que completó se perderá.';
-
-  @override
-  String get orderKeepEditing => 'Seguir editando';
-
-  @override
-  String orderPickDevice(String device) {
-    return 'Elegir $device';
-  }
-
-  @override
-  String get orderPhotoAction => 'Foto';
-
-  @override
-  String get orderTalkAction => 'Decir qué hacer';
-
-  @override
-  String get orderAssistantSoon => 'Próximamente';
-
-  @override
-  String get orderNextStepQuote => 'Presupuesto listo para el cliente';
-
-  @override
-  String get orderNextStepQuoteAction => 'El cliente aprobó';
-
-  @override
-  String get orderNextStepApproved => 'Aprobada por el cliente';
-
-  @override
-  String get orderNextStepApprovedAction => 'Empezar el servicio';
-
-  @override
-  String get orderNextStepProgress => 'Servicio en curso';
-
-  @override
-  String get orderNextStepProgressAction => 'Marcar como listo';
-
-  @override
-  String get orderNextStepDone => 'Listo';
-
-  @override
-  String orderNextStepDoneUnpaid(String amount) {
-    return 'Listo. Falta cobrar $amount';
-  }
-
-  @override
-  String orderNextStepReceive(String amount) {
-    return 'Cobrar $amount';
-  }
-
-  @override
-  String get orderNextStepDonePaid => 'Todo bien: listo y pagado';
-
-  @override
-  String get orderNextStepSend => 'Enviar al cliente';
-
-  @override
-  String orderNextStepCanceled(String order) {
-    return '$order cancelada';
-  }
-
-  @override
-  String get orderNextStepReopen => 'Reabrir';
-
-  @override
-  String orderMenuAddTo(String order) {
-    return 'Agregar a la $order';
-  }
-
-  @override
-  String get orderMenuSendToCustomer => 'Enviar al cliente';
-
-  @override
-  String get orderMenuPdf => 'PDF';
-
-  @override
-  String orderMenuCancel(String order) {
-    return 'Cancelar $order';
-  }
-
-  @override
-  String orderMenuDelete(String order) {
-    return 'Eliminar $order';
-  }
-
-  @override
-  String get orderAddDueDate => 'Fecha de entrega';
-
-  @override
-  String orderAddAnotherDevice(String device) {
-    return 'Otro $device';
-  }
-
-  @override
-  String get orderAddMore => 'Checklist, fotos, comentario y más';
-
-  @override
-  String orderCancelConfirmTitle(String order) {
-    return '¿Cancelar $order?';
-  }
-
-  @override
-  String get orderCancelConfirmMessage =>
-      'Pasa a las canceladas y se puede reabrir.';
-
-  @override
-  String orderDeleteConfirmTitle(String order) {
-    return '¿Eliminar $order?';
-  }
-
-  @override
-  String get orderDeleteConfirmMessage => 'No se puede deshacer.';
-
-  @override
-  String get orderPhotosSection => 'Fotos';
-
-  @override
-  String get orderDeviceActionChange => 'Cambiar';
-
-  @override
-  String get orderDeviceActionRemove => 'Quitar de la OS';
-
-  @override
-  String orderUnpricedCount(int count) {
+  String orderLateDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ítems sin valor, fuera del total',
-      one: '1 ítem sin valor, fuera del total',
+      other: 'Atrasada $count días',
+      one: 'Atrasada 1 día',
     );
     return '$_temp0';
   }
 
   @override
-  String orderPendingChecklists(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Faltan terminar $count checklists',
-      one: 'Falta terminar 1 checklist',
-    );
-    return '$_temp0';
+  String orderStatusDue(String status, String date) {
+    return '$status · entrega $date';
   }
 
   @override
-  String get orderMoreActions => 'Más acciones';
+  String orderRowNumber(String number) {
+    return 'OS $number';
+  }
+
+  @override
+  String orderRowNumberDevice(String number, String device) {
+    return 'OS $number · $device';
+  }
+
+  @override
+  String get homeNewOrder => 'Nueva OS';
 }
