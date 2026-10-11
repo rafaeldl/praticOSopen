@@ -215,6 +215,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
             useScheduling: _company!.useScheduling ?? true,
             useDeviceManagement: _company!.useDeviceManagement ?? false,
             useContracts: _company!.useContracts ?? false,
+            useFinancial: _company!.useFinancial ?? provider.useFinancial,
           );
         }
       }

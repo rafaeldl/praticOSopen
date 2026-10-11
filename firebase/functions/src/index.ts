@@ -310,6 +310,7 @@ import appInviteRoutes from './routes/v1/invite.routes';
 import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
+import aiRoutes from './routes/v1/ai.routes';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -505,6 +506,8 @@ app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, de
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
 app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
 app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
+// AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
+app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);

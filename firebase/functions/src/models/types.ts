@@ -353,6 +353,11 @@ export interface Company {
   owner: UserAggr;
   users?: UserRoleAggr[];
   termsOfService?: string;
+  /**
+   * "Valores e cobrança" option. `false` hides prices, totals, payments and
+   * charges everywhere (app, magic link, PDF). Absent = true.
+   */
+  useFinancial?: boolean;
   createdAt: DateValue;
   createdBy: UserAggr;
   updatedAt?: DateValue;

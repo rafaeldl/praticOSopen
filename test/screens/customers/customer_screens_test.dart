@@ -342,15 +342,18 @@ void main() {
   group('customer detail', () {
     final ana = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001');
 
-    Future<Harness> pumpDetail(WidgetTester tester, FakeDirectory dir,
-        {bool prices = true}) async {
+    Future<Harness> pumpDetail(
+      WidgetTester tester,
+      FakeDirectory dir, {
+      bool showPrices = true,
+    }) async {
       final h = Harness();
       await h.pump(
         tester,
         CustomerDetailScreen(
           customer: ana,
           directory: dir,
-          canViewPrices: () => prices,
+          showPrices: showPrices,
         ),
         direct: true,
       );
@@ -402,19 +405,6 @@ void main() {
       expect(find.text('R\$ 110,00'.replaceAll(' ', '\u00a0')), findsOneWidget);
     });
 
-    testWidgets('"Falta receber" is hidden without the view-prices permission',
-        (tester) async {
-      await pumpDetail(
-        tester,
-        FakeDirectory(orders: {
-          'c1': [order(1, 'progress', 50)],
-        }),
-        prices: false,
-      );
-      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
-      expect(find.text('Falta receber'), findsNothing);
-    });
-
     testWidgets('"Falta receber" is hidden when nothing is open',
         (tester) async {
       await pumpDetail(
@@ -425,6 +415,23 @@ void main() {
       );
       await tester.scrollUntilVisible(find.text('Total gasto'), 300);
       expect(find.text('Falta receber'), findsNothing);
+    });
+
+    testWidgets('without values and billing hides totals and Total gasto',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [
+            order(1, 'done', 100, devices: [aggr('d1', 'Fiat Uno')]),
+          ],
+        }),
+        showPrices: false,
+      );
+      expect(find.text('Total gasto'), findsNothing);
+      expect(find.text('Falta receber'), findsNothing);
+      expect(find.textContaining('100,00'), findsNothing);
+      expect(find.textContaining('#1'), findsWidgets);
     });
 
     testWidgets('customer without orders has no list and no total',

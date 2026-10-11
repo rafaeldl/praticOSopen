@@ -3,7 +3,6 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
@@ -29,7 +28,7 @@ class CustomerDetailScreen extends StatefulWidget {
     super.key,
     this.customer,
     this.directory,
-    this.canViewPrices,
+    this.showPrices,
   });
 
   /// Falls back to the `customer` route argument.
@@ -38,8 +37,10 @@ class CustomerDetailScreen extends StatefulWidget {
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
 
-  /// Injected in tests; defaults to the `viewPrices` permission.
-  final bool Function()? canViewPrices;
+  /// Order totals and "Total gasto". Defaults to the `viewPrices`
+  /// permission, which is off for everyone when the company does not use
+  /// values and billing (`Company.useFinancial == false`).
+  final bool? showPrices;
 
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
@@ -50,6 +51,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       widget.directory ?? FirestoreCustomerDirectory();
   Customer? _customer;
   Stream<List<Order>>? _orders;
+
+  bool get _showPrices =>
+      widget.showPrices ?? AuthorizationService.instance.canViewPrices;
 
   @override
   void didChangeDependencies() {
@@ -67,10 +71,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       _orders = id == null ? Stream.value(const <Order>[]) : _directory.watchOrdersOf(id);
     });
   }
-
-  bool get _showMoney =>
-      widget.canViewPrices?.call() ??
-      AuthorizationService.instance.hasPermission(PermissionType.viewPrices);
 
   String get _firstName =>
       (_customer?.name ?? '').trim().split(RegExp(r'\s+')).first;
@@ -286,15 +286,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ],
       SectionLabel(l10n.ordersOfCustomer(name)),
       for (final o in orders) _orderRow(o, format),
-      if (_showMoney && customerOwed(orders) > 0)
+      if (_showPrices && customerOwed(orders) > 0)
         _TotalLine(
           label: l10n.financialToReceive,
           value: format.formatCurrency(customerOwed(orders)),
         ),
-      _TotalLine(
-        label: l10n.totalSpent,
-        value: format.formatCurrency(totalSpent(orders)),
-      ),
+      if (_showPrices)
+        _TotalLine(
+          label: l10n.totalSpent,
+          value: format.formatCurrency(totalSpent(orders)),
+        ),
     ];
   }
 
@@ -344,7 +345,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         statusText,
         if (order.createdAt != null) format.formatDate(order.createdAt),
       ].join(' · '),
-      trailing: order.total == null ? null : format.formatCurrency(order.total),
+      trailing: !_showPrices || order.total == null
+          ? null
+          : format.formatCurrency(order.total),
       onTap: () => Navigator.pushNamed(
         context,
         '/order',

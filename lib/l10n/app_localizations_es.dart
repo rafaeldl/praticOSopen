@@ -4908,4 +4908,128 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accumulatedLeaveBlank => 'Dejar en blanco';
+
+  @override
+  String get orderAssistantHint =>
+      'Saca una foto de la matrícula y di el servicio';
+
+  @override
+  String get orderAssistantPlaceholder =>
+      'Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450';
+
+  @override
+  String get orderAssistantDone => 'Listo';
+
+  @override
+  String get orderAssistantAddPhoto => 'Sacar otra foto';
+
+  @override
+  String orderAssistantPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderAssistantReading => 'Leyendo lo que enviaste…';
+
+  @override
+  String get orderAssistantFilledNote =>
+      'Revisa lo que está marcado en amarillo antes de guardar.';
+
+  @override
+  String orderAssistantCustomerGuess(String name) {
+    return 'Escuché “$name”. Toca para elegir el cliente';
+  }
+
+  @override
+  String orderAssistantDeviceGuess(String device) {
+    return '“$device” no está registrado';
+  }
+
+  @override
+  String get orderAssistantErrorTitle => 'Asistente';
+
+  @override
+  String get orderAssistantErrorDisabled =>
+      'El asistente aún no está disponible para tu empresa.';
+
+  @override
+  String orderAssistantErrorQuota(String limit) {
+    return 'Ya usaste las $limit solicitudes del asistente de este mes. Puedes seguir completando a mano.';
+  }
+
+  @override
+  String get orderAssistantErrorUnavailable =>
+      'No se pudo leer ahora. Intenta de nuevo o completa a mano.';
+
+  @override
+  String get orderAssistantNothingFound =>
+      'No encontré qué agregar. Intenta de nuevo o completa a mano.';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Período siguiente';
+
+  @override
+  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desactivar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get inviteGenericError =>
+      'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
+
+  @override
+  String get inviteLoadError =>
+      'No se pudieron cargar las invitaciones. Revisa tu internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company te invitó al equipo';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invitado por $name · entras como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Entras como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar al equipo';
+
+  @override
+  String get inviteDecline => 'Rechazar invitación';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tengo otro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
 }

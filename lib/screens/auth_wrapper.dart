@@ -16,6 +16,8 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/theme/app_colors.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
@@ -153,62 +155,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
     );
   }
 
-  /// Tela de erro com botão de retry
+  /// Tela de erro com botão de retry (frase fixa, sem exceção crua)
   Widget _buildErrorRetryScreen(BuildContext context, {String? error}) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.exclamationmark_triangle_fill,
-                size: 48,
-                color: CupertinoColors.systemOrange.resolveFrom(context),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.l10n.errorLoadingData,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.networkError,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  error,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: 24),
-              CupertinoButton.filled(
-                onPressed: _retryLoad,
-                child: Text(context.l10n.tryAgain),
-              ),
-            ],
-          ),
-        ),
-      ),
+    if (error != null) {
+      debugPrint('[AuthWrapper] load error: $error');
+    }
+    return AuthLoadErrorView(
+      message: context.l10n.networkError,
+      onRetry: _retryLoad,
     );
   }
 
@@ -373,6 +327,29 @@ class _CompanyCheckResult {
 }
 
 /// Widget que carrega a configuração do segmento antes de mostrar o app
+/// Full-screen load failure of the startup flow: one fixed sentence and a
+/// retry link. Never shows the exception text.
+class AuthLoadErrorView extends StatelessWidget {
+  const AuthLoadErrorView({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: SafeArea(
+        child: ErrorState(message: message, onRetry: onRetry),
+      ),
+    );
+  }
+}
+
 class _SegmentLoader extends StatefulWidget {
   final String companyId;
 
@@ -390,6 +367,14 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
   @override
   void initState() {
     super.initState();
+    _loadSegmentConfig();
+  }
+
+  void _retry() {
+    setState(() {
+      _error = null;
+      _isLoading = true;
+    });
     _loadSegmentConfig();
   }
 
@@ -436,6 +421,10 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       final bool useScheduling = companyData?['useScheduling'] as bool? ?? true;
       final bool useDeviceManagement = companyData?['useDeviceManagement'] as bool? ?? false;
       final bool useContracts = companyData?['useContracts'] as bool? ?? false;
+      // Not backfilled: absent stays absent, so clients that predate the
+      // field keep their current behavior.
+      final bool useFinancial = companyData?['useFinancial'] as bool?
+          ?? segmentProvider.segmentUseFinancialDefault;
 
       // Backfill: persist resolved values on first access
       final needsUpdate = companyData?['fieldService'] == null
@@ -457,6 +446,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useScheduling: useScheduling,
         useDeviceManagement: useDeviceManagement,
         useContracts: useContracts,
+        useFinancial: useFinancial,
       );
 
       // Wire push taps before initialize(), which replays the tap that
@@ -483,6 +473,8 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         _shouldShowSegmentationOnboarding = shouldShowSegmentationOnboarding;
       });
     } catch (e) {
+      // The technical error is logged, never shown to the user.
+      debugPrint('[SegmentLoader] failed to load segment config: $e');
       if (!mounted) return;
       setState(() {
         _error = e.toString();
@@ -514,23 +506,9 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
     }
 
     if (_error != null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(context.l10n.errorLoadingConfig),
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+      return AuthLoadErrorView(
+        message: context.l10n.segmentLoadError,
+        onRetry: _retry,
       );
     }
 

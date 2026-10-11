@@ -8829,6 +8829,192 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Deixar em branco'**
   String get accumulatedLeaveBlank;
+
+  /// No description provided for @orderAssistantHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tire foto da placa e fale o serviço'**
+  String get orderAssistantHint;
+
+  /// No description provided for @orderAssistantPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450'**
+  String get orderAssistantPlaceholder;
+
+  /// No description provided for @orderAssistantDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderAssistantDone;
+
+  /// No description provided for @orderAssistantAddPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar outra foto'**
+  String get orderAssistantAddPhoto;
+
+  /// No description provided for @orderAssistantPhotoCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String orderAssistantPhotoCount(int count);
+
+  /// No description provided for @orderAssistantReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o que você mandou…'**
+  String get orderAssistantReading;
+
+  /// No description provided for @orderAssistantFilledNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira o que está marcado em amarelo antes de salvar.'**
+  String get orderAssistantFilledNote;
+
+  /// No description provided for @orderAssistantCustomerGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvi “{name}”. Toque para escolher o cliente'**
+  String orderAssistantCustomerGuess(String name);
+
+  /// No description provided for @orderAssistantDeviceGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{device}” não está no cadastro'**
+  String orderAssistantDeviceGuess(String device);
+
+  /// No description provided for @orderAssistantErrorTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistente'**
+  String get orderAssistantErrorTitle;
+
+  /// No description provided for @orderAssistantErrorDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'O assistente ainda não está liberado para a sua empresa.'**
+  String get orderAssistantErrorDisabled;
+
+  /// No description provided for @orderAssistantErrorQuota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.'**
+  String orderAssistantErrorQuota(String limit);
+
+  /// No description provided for @orderAssistantErrorUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para ler agora. Tente de novo ou preencha à mão.'**
+  String get orderAssistantErrorUnavailable;
+
+  /// No description provided for @orderAssistantNothingFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
+  String get orderAssistantNothingFound;
+
+  /// No description provided for @reportPreviousPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Período anterior'**
+  String get reportPreviousPeriod;
+
+  /// No description provided for @reportNextPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo período'**
+  String get reportNextPeriod;
+
+  /// No description provided for @valuesAndBillingOffTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar valores e cobrança?'**
+  String get valuesAndBillingOffTitle;
+
+  /// No description provided for @valuesAndBillingOffMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.'**
+  String get valuesAndBillingOffMessage;
+
+  /// No description provided for @valuesAndBillingOffAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar'**
+  String get valuesAndBillingOffAction;
+
+  /// No description provided for @valuesAndBillingSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
+  String get valuesAndBillingSaveError;
+
+  /// No description provided for @inviteGenericError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para concluir. Confira a internet e tente de novo.'**
+  String get inviteGenericError;
+
+  /// No description provided for @inviteLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os convites. Confira a internet.'**
+  String get inviteLoadError;
+
+  /// No description provided for @inviteTitleOne.
+  ///
+  /// In pt, this message translates to:
+  /// **'{company} chamou você para a equipe'**
+  String inviteTitleOne(String company);
+
+  /// No description provided for @inviteInvitedByAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidado por {name} · você entra como {role}'**
+  String inviteInvitedByAs(String name, String role);
+
+  /// No description provided for @inviteEntersAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você entra como {role}'**
+  String inviteEntersAs(String role);
+
+  /// No description provided for @inviteJoinTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar na equipe'**
+  String get inviteJoinTeam;
+
+  /// No description provided for @inviteDecline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recusar convite'**
+  String get inviteDecline;
+
+  /// No description provided for @inviteHaveAnotherCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho outro código'**
+  String get inviteHaveAnotherCode;
+
+  /// No description provided for @inviteCreateOwnCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar minha própria empresa'**
+  String get inviteCreateOwnCompany;
+
+  /// No description provided for @inviteCodePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 7K2P9QXA'**
+  String get inviteCodePlaceholder;
+
+  /// No description provided for @segmentLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
+  String get segmentLoadError;
 }
 
 class _AppLocalizationsDelegate
