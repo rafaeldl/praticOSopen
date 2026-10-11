@@ -3,6 +3,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/services/segment_config_service.dart';
 
 /// Serviço de autorização centralizado para o PraticOS.
 ///
@@ -96,12 +97,23 @@ class AuthorizationService {
   // PERMISSION CHECKS
   // ═══════════════════════════════════════════════════════════════════
 
+  /// Whether the current company uses values and billing
+  /// (`Company.useFinancial`, absent = true).
+  bool get _useFinancial => SegmentConfigService().useFinancial;
+
   /// Verifica se o usuário atual possui uma determinada permissão.
+  ///
+  /// With `Company.useFinancial == false` the financial permissions
+  /// ([RolePermissions.financialPermissions]) are denied for every role.
   bool hasPermission(PermissionType permission) {
     final role = normalizedRole;
     if (role == null) return false;
 
-    return RolePermissions.hasPermission(role, permission);
+    return RolePermissions.hasPermissionInCompany(
+      role,
+      permission,
+      useFinancial: _useFinancial,
+    );
   }
 
   /// Verifica se o usuário atual possui todas as permissões especificadas.
@@ -119,7 +131,9 @@ class AuthorizationService {
     final role = normalizedRole;
     if (role == null) return {};
 
-    return RolePermissions.getPermissions(role);
+    final permissions = RolePermissions.getPermissions(role);
+    if (_useFinancial) return permissions;
+    return permissions.difference(RolePermissions.financialPermissions);
   }
 
   // ═══════════════════════════════════════════════════════════════════

@@ -23,6 +23,9 @@ class Company extends BaseAudit {
   String? termsOfService;
   bool? useDeviceManagement; // Gestão avançada de dispositivos/ativos
   bool? useContracts; // Recurring maintenance contracts
+  /// Prices, totals, receiving payments and the Financial tab.
+  /// Null/absent means true (every company created before this field).
+  bool? useFinancial;
   UserAggr? owner;
   List<UserRoleAggr>? users;
   /// Server-owned (RevenueCat webhook). Read-only on the client: never sent

@@ -439,6 +439,20 @@ void main() {
       expect(find.text('Polimento'), findsOneWidget);
     });
 
+    testWidgets(
+        'without values and billing a done order has no "Receber" nor '
+        '"Falta receber"', (tester) async {
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions, prices: false),
+        args: {'order': order()..status = 'done'},
+      );
+      expect(find.textContaining('Receber'), findsNothing);
+      expect(find.textContaining('Falta receber'), findsNothing);
+      expect(find.text(_money(500)), findsNothing);
+    });
+
     testWidgets('next step by status is the only blue button', (tester) async {
       await _pump(tester, screen(OrderStore()), args: {'order': order()});
       expect(find.text('Orçamento pronto para o cliente'), findsOneWidget);
