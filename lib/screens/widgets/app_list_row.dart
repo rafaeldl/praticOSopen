@@ -25,6 +25,7 @@ class AppListRow extends StatelessWidget {
     this.showChevron,
     this.titleStyle,
     this.trailingStyle,
+    this.marked = false,
   });
 
   final String title;
@@ -40,10 +41,18 @@ class AppListRow extends StatelessWidget {
   final TextStyle? titleStyle;
   final TextStyle? trailingStyle;
 
+  /// Highlighter (marca-texto): the assistant filled this row. Yellow
+  /// [AppColors.marker] background with [AppColors.onMarker] text, in both
+  /// modes.
+  final bool marked;
+
   @override
   Widget build(BuildContext context) {
-    final textColor = AppColors.text.resolveFrom(context);
-    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final onMarker = AppColors.onMarker.resolveFrom(context);
+    final textColor = marked ? onMarker : AppColors.text.resolveFrom(context);
+    final secondary = marked
+        ? onMarker.withValues(alpha: 0.75)
+        : AppColors.textSecondary.resolveFrom(context);
     final stacked = MediaQuery.textScalerOf(context).scale(100) / 100 >=
         kAppListRowStackScale;
     final chevron = showChevron ?? onTap != null;
@@ -108,7 +117,7 @@ class AppListRow extends StatelessWidget {
               Icon(
                 CupertinoIcons.chevron_forward,
                 size: 18,
-                color: AppColors.textSecondary.resolveFrom(context),
+                color: secondary,
               ),
             ],
           ],
@@ -116,11 +125,15 @@ class AppListRow extends StatelessWidget {
       ),
     );
 
-    if (onTap == null) return row;
+    final content = marked
+        ? ColoredBox(color: AppColors.marker.resolveFrom(context), child: row)
+        : row;
+
+    if (onTap == null) return content;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: row,
+      child: content,
     );
   }
 }

@@ -4842,6 +4842,67 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hidePassword => 'Ocultar senha';
 
   @override
+  String get orderAssistantHint => 'Tire foto da placa e fale o serviço';
+
+  @override
+  String get orderAssistantPlaceholder =>
+      'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450';
+
+  @override
+  String get orderAssistantDone => 'Pronto';
+
+  @override
+  String get orderAssistantAddPhoto => 'Tirar outra foto';
+
+  @override
+  String orderAssistantPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderAssistantReading => 'Lendo o que você mandou…';
+
+  @override
+  String get orderAssistantFilledNote =>
+      'Confira o que está marcado em amarelo antes de salvar.';
+
+  @override
+  String orderAssistantCustomerGuess(String name) {
+    return 'Ouvi “$name”. Toque para escolher o cliente';
+  }
+
+  @override
+  String orderAssistantDeviceGuess(String device) {
+    return '“$device” não está no cadastro';
+  }
+
+  @override
+  String get orderAssistantErrorTitle => 'Assistente';
+
+  @override
+  String get orderAssistantErrorDisabled =>
+      'O assistente ainda não está liberado para a sua empresa.';
+
+  @override
+  String orderAssistantErrorQuota(String limit) {
+    return 'Você já usou os $limit pedidos do assistente deste mês. Dá para continuar preenchendo à mão.';
+  }
+
+  @override
+  String get orderAssistantErrorUnavailable =>
+      'Não deu para ler agora. Tente de novo ou preencha à mão.';
+
+  @override
+  String get orderAssistantNothingFound =>
+      'Não achei o que pôr. Tente de novo ou preencha à mão.';
+
+  @override
   String get receivedWhichOrder => 'Em qual OS?';
 
   @override
