@@ -5,6 +5,8 @@ import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divi
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
+import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -54,12 +56,14 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/device_form').then((device) {
-                    if (isSelectionMode && device != null) {
-                      Navigator.pop(context, device);
-                    }
-                  });
+                onPressed: () async {
+                  final device = await AppSheet.show<Device>(
+                    context,
+                    (_) => const DeviceFormScreen(asSheet: true),
+                  );
+                  if (isSelectionMode && device != null && mounted) {
+                    Navigator.pop(context, device);
+                  }
                 },
               ),
             ),
@@ -368,7 +372,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      child: Icon(CupertinoIcons.car_detailed, color: CupertinoColors.systemGrey.resolveFrom(context)),
+      child: Icon(context.read<SegmentConfigProvider>().deviceIcon, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 }

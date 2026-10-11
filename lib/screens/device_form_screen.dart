@@ -1,16 +1,60 @@
+import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
-import 'package:praticos/mobx/device_store.dart';
-import 'package:praticos/models/device.dart';
-import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/widgets/dynamic_text_field.dart';
-import 'package:praticos/widgets/dynamic_field_builder.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/mobx/device_store.dart';
+import 'package:praticos/models/device.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/more_fields_link.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/suggest_field.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/utils/device_suggestions.dart';
+import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
+import 'package:provider/provider.dart';
 
+/// New / edit vehicle (device) in a single screen.
+///
+/// A new one opens as an [AppSheet] (`asSheet: true`, "Cancelar" on the left,
+/// "Salvar" on the right); editing stays a pushed screen. Only the model
+/// (with suggestions taken from the company's own devices, which also fill
+/// brand and category) and the plate/serial show at first; photo, brand,
+/// category, status (editing, with device management) and the segment fields
+/// sit behind a [MoreFieldsLink].
+///
+/// Pops with the saved [Device].
 class DeviceFormScreen extends StatefulWidget {
-  const DeviceFormScreen({super.key});
+  const DeviceFormScreen({
+    super.key,
+    this.device,
+    this.asSheet = false,
+    this.onSave,
+    this.loadDevices,
+  });
+
+  /// Device to edit. Falls back to the `device` route argument; a new one is
+  /// created when neither is given.
+  final Device? device;
+
+  /// Present as the content of an [AppSheet].
+  final bool asSheet;
+
+  /// Saves the device. Defaults to [DeviceStore.saveDevice].
+  final Future<void> Function(Device device)? onSave;
+
+  /// Devices the model suggestions come from. Defaults to the company's.
+  final Future<List<Device>> Function()? loadDevices;
 
   @override
   State<DeviceFormScreen> createState() => _DeviceFormScreenState();
@@ -18,145 +62,168 @@ class DeviceFormScreen extends StatefulWidget {
 
 class _DeviceFormScreenState extends State<DeviceFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _model = TextEditingController();
+  final TextEditingController _serial = TextEditingController();
+  final TextEditingController _brand = TextEditingController();
+  final TextEditingController _category = TextEditingController();
+  DeviceStore? _store;
   Device? _device;
-  final DeviceStore _deviceStore = DeviceStore();
+  List<Device> _known = const [];
   bool _isLoading = false;
   bool _initialized = false;
+
+  DeviceStore get _deviceStore => _store ??= DeviceStore();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadKnownDevices();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_initialized) {
-      final args =
-          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null && args.containsKey('device')) {
-        _device = args['device'];
-      } else {
-        _device = Device();
-      }
-      _device!.customData ??= {};
-      _initialized = true;
+    if (_initialized) return;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _device = widget.device ?? (args?['device'] as Device?) ?? Device();
+    _device!.customData ??= {};
+    _model.text = _device!.name ?? '';
+    _serial.text = _device!.serial ?? '';
+    _brand.text = _device!.manufacturer ?? '';
+    _category.text = _device!.category ?? '';
+    _initialized = true;
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+    _serial.dispose();
+    _brand.dispose();
+    _category.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadKnownDevices() async {
+    try {
+      final loader = widget.loadDevices ?? _defaultLoader;
+      final devices = await loader();
+      if (mounted) setState(() => _known = devices);
+    } catch (_) {
+      // Suggestions are a convenience; the form works without them.
     }
+  }
+
+  Future<List<Device>> _defaultLoader() async {
+    final id = Global.companyAggr?.id;
+    if (id == null) return const [];
+    final list = await TenantDeviceRepository()
+        .getQueryList(id, orderBy: [OrderBy('name')]);
+    return list.whereType<Device>().toList();
   }
 
   bool get _isEditing => _device?.id != null;
 
+  bool get _hasMoreData {
+    final d = _device!;
+    bool filled(String? v) => v != null && v.isNotEmpty;
+    return filled(d.photo) ||
+        filled(d.manufacturer) ||
+        filled(d.category) ||
+        (d.customData?.isNotEmpty ?? false);
+  }
+
   Future<void> _saveDevice() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      _formKey.currentState!.save();
-      // Clean up empty customData to avoid storing empty map in Firestore
-      if (_device!.customData != null && _device!.customData!.isEmpty) {
-        _device!.customData = null;
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    _formKey.currentState!.save();
+    final device = _device!;
+    String? orNull(String v) => v.trim().isEmpty ? null : v.trim();
+    device.name = orNull(_model.text);
+    device.manufacturer = orNull(_brand.text);
+    device.category = orNull(_category.text);
+    // Avoid storing an empty map in Firestore.
+    if (device.customData != null && device.customData!.isEmpty) {
+      device.customData = null;
+    }
+    try {
+      final onSave = widget.onSave;
+      if (onSave != null) {
+        await onSave(device);
+      } else {
+        await _deviceStore.saveDevice(device);
       }
-      await _deviceStore.saveDevice(_device!);
-      setState(() => _isLoading = false);
-      if (mounted) {
-        Navigator.pop(context, _device);
-      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
+    if (mounted) Navigator.pop(context, device);
   }
 
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'active':
-        return CupertinoColors.systemGreen;
-      case 'maintenance':
-        return CupertinoColors.systemOrange;
-      case 'inactive':
-        return CupertinoColors.systemGrey;
-      case 'decommissioned':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.systemGreen;
-    }
-  }
-
-  String _statusLabel(BuildContext context, String? status) {
-    switch (status) {
-      case 'active':
-        return context.l10n.deviceStatusActive;
-      case 'maintenance':
-        return context.l10n.deviceStatusMaintenance;
-      case 'inactive':
-        return context.l10n.deviceStatusInactive;
-      case 'decommissioned':
-        return context.l10n.deviceStatusDecommissioned;
-      default:
-        return context.l10n.deviceStatusActive;
-    }
-  }
-
-  void _pickStatus(BuildContext context) {
-    final statuses = ['active', 'maintenance', 'inactive', 'decommissioned'];
-    showCupertinoModalPopup(
+  void _pickStatus() {
+    final l10n = context.l10n;
+    const statuses = ['active', 'maintenance', 'inactive', 'decommissioned'];
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext ctx) => CupertinoActionSheet(
-        title: Text(context.l10n.status),
-        actions: statuses.map((status) {
-          return CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: _statusColor(status),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(_statusLabel(context, status)),
-              ],
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.status),
+        actions: [
+          for (final status in statuses)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                setState(() => _device?.status = status);
+                Navigator.pop(ctx);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StatusDot(color: DeviceStatusStyle.dotColor(status), size: 10),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(DeviceStatusStyle.label(l10n, status)),
+                ],
+              ),
             ),
-            onPressed: () {
-              setState(() => _device?.status = status);
-              Navigator.pop(ctx);
-            },
-          );
-        }).toList(),
+        ],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
         ),
       ),
     );
   }
 
-  Future<void> _pickImage() async {
-    final config = context.read<SegmentConfigProvider>();
-    showCupertinoModalPopup(
+  Future<void> _pickPhoto() async {
+    final l10n = context.l10n;
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(config.label(LabelKeys.changePhoto)),
-        actions: <CupertinoActionSheetAction>[
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
           CupertinoActionSheetAction(
-            child: Text(context.l10n.takePhoto),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(ctx);
               final file = await _deviceStore.photoService.takePhoto();
               if (file != null) {
                 await _deviceStore.uploadDevicePhoto(file, _device!);
-                setState(() {});
+                if (mounted) setState(() {});
               }
             },
+            child: Text(l10n.takePhoto),
           ),
           CupertinoActionSheetAction(
-            child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
-              Navigator.pop(context);
-              final file = await _deviceStore.photoService.pickImageFromGallery();
+              Navigator.pop(ctx);
+              final file =
+                  await _deviceStore.photoService.pickImageFromGallery();
               if (file != null) {
                 await _deviceStore.uploadDevicePhoto(file, _device!);
-                setState(() {});
+                if (mounted) setState(() {});
               }
             },
+            child: Text(l10n.chooseFromGallery),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -165,227 +232,184 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
+    final l10n = context.l10n;
+    final title = _isEditing
+        ? config.label(LabelKeys.editDevice)
+        : l10n.newEntity(config.device.toLowerCase());
+    final body = Form(
+      key: _formKey,
+      child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.only(
+          top: AppSpacing.sm,
+          bottom: AppSpacing.xxl,
+        ),
+        children: _buildFields(config),
+      ),
+    );
+
+    if (widget.asSheet) {
+      return AppSheet(
+        title: title,
+        actionLabel: l10n.save,
+        onAction: _saveDevice,
+        busy: _isLoading,
+        child: body,
+      );
+    }
 
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: AppColors.background.resolveFrom(context),
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing
-            ? config.label(LabelKeys.editDevice)
-            : config.label(LabelKeys.createDevice)),
+        middle: Text(title),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveDevice,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : Text(config.label(LabelKeys.save), style: const TextStyle(fontWeight: FontWeight.bold)),
+              : Text(
+                  l10n.save,
+                  style: AppTypography.callout.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accentText.resolveFrom(context),
+                  ),
+                ),
         ),
       ),
-      child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              
-              // Photo Section
-              Center(
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Stack(
-                    children: [
-                      if (_device?.photo != null && _device!.photo!.isNotEmpty)
-                        ClipOval(
-                          child: CachedImage(
-                            imageUrl: _device!.photo!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemGrey5.resolveFrom(context),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            config.deviceIcon,
-                            size: 50,
-                            color: CupertinoColors.systemGrey.resolveFrom(context),
-                          ),
-                        ),
-                      if (_deviceStore.isUploading)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: CupertinoColors.black,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: CupertinoActivityIndicator(color: CupertinoColors.white),
-                            ),
-                          ),
-                        ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: CupertinoColors.activeBlue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.camera_fill,
-                            size: 16,
-                            color: CupertinoColors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
+      child: SafeArea(child: body),
+    );
+  }
 
-              // Form Fields
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.basicInfo.toUpperCase()),
-                children: [
-                  // Category Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        config.label(LabelKeys.deviceCategory),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.category ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.category != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
-                      ),
-                    ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectCategory(context, config),
-                  ),
+  List<Widget> _buildFields(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final serialLabel = config.label(LabelKeys.deviceSerialNumber);
+    final serialField = config.getField('device.serial');
+    final modelField = config.getField('device.model');
+    final masks = config.getMasks('device.serial');
 
-                  // Brand/Manufacturer Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        config.label(LabelKeys.deviceBrand),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.manufacturer ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.manufacturer != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
-                      ),
-                    ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectBrand(context, config),
-                  ),
-
-                  // Model Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        config.label(LabelKeys.deviceModel),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.name ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.name != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
-                      ),
-                    ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectModel(context, config),
-                  ),
-
-                  // Serial Number Field
-                  DynamicTextField(
-                    fieldKey: 'device.serial',
-                    initialValue: _device?.serial,
-                    onSaved: (val) => _device?.serial = val?.toUpperCase(),
-                    required: true,
-                  ),
-                ],
-              ),
-
-              // Status Section (only when device management is enabled)
-              if (config.useDeviceManagement)
-                CupertinoListSection.insetGrouped(
-                  header: Text(context.l10n.status.toUpperCase()),
-                  children: [
-                    CupertinoListTile(
-                      title: Text(context.l10n.status),
-                      additionalInfo: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: _statusColor(_device?.status),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(_statusLabel(context, _device?.status)),
-                        ],
-                      ),
-                      trailing: Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 20,
-                        color: CupertinoColors.systemGrey.resolveFrom(context),
-                      ),
-                      onTap: () => _pickStatus(context),
-                    ),
-                  ],
-                ),
-
-              // Dynamic Custom Field Sections (from segment config)
-              ..._buildCustomFieldSections(config),
-            ],
+    return [
+      SuggestField<DeviceSuggestion>(
+        label: config.label(LabelKeys.deviceModel),
+        controller: _model,
+        placeholder: modelField?.placeholder,
+        autofocus: !_isEditing,
+        textInputAction: TextInputAction.next,
+        suggestions: (text) => [
+          for (final s in deviceSuggestions(_known, text))
+            SuggestOption(value: s, title: s.name, subtitle: s.detail),
+        ],
+        onSelected: (s) => setState(() {
+          _brand.text = s.manufacturer ?? '';
+          _category.text = s.category ?? '';
+        }),
+      ),
+      AppFormField(
+        label: serialLabel,
+        controller: _serial,
+        placeholder: serialField?.placeholder,
+        keyboardType: config.getKeyboardType('device.serial'),
+        textCapitalization: TextCapitalization.characters,
+        inputFormatters: masks.isEmpty
+            ? null
+            : [TextInputMask(mask: masks.length == 1 ? masks.first : masks)],
+        onSaved: (v) => _device!.serial = v.trim().toUpperCase(),
+        validator: (v) {
+          final value = v.trim();
+          if (value.isEmpty) return l10n.fieldRequiredHint(serialLabel);
+          final pattern = serialField?.pattern;
+          if (pattern != null && !RegExp(pattern).hasMatch(value)) {
+            return l10n.invalidFormat;
+          }
+          return null;
+        },
+      ),
+      MoreFieldsLink(
+        label: l10n.photoAndMoreData,
+        initiallyExpanded: _hasMoreData,
+        children: [
+          _buildPhotoRow(config),
+          AppFormField(
+            label: config.label(LabelKeys.deviceBrand),
+            controller: _brand,
+            textCapitalization: TextCapitalization.words,
           ),
-        ),
+          AppFormField(
+            label: config.label(LabelKeys.deviceCategory),
+            controller: _category,
+            textCapitalization: TextCapitalization.sentences,
+          ),
+          if (_isEditing && config.useDeviceManagement)
+            AppListRow(
+              leading: StatusDot(
+                color: DeviceStatusStyle.dotColor(_device?.status),
+                size: 10,
+              ),
+              title: l10n.status,
+              trailing: DeviceStatusStyle.label(l10n, _device?.status),
+              onTap: _pickStatus,
+            ),
+          ..._buildCustomFieldSections(config),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildPhotoRow(SegmentConfigProvider config) {
+    final hasPhoto = _device?.photo != null && _device!.photo!.isNotEmpty;
+    final secondary = AppColors.secondaryFill.resolveFrom(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pageMargin,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadii.field),
+            child: SizedBox(
+              width: 64,
+              height: 64,
+              child: hasPhoto
+                  ? CachedImage(
+                      imageUrl: _device!.photo!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                    )
+                  : ColoredBox(
+                      color: secondary,
+                      child: Icon(
+                        config.deviceIcon,
+                        size: 30,
+                        color: AppColors.textSecondary.resolveFrom(context),
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          if (_store?.isUploading ?? false)
+            const CupertinoActivityIndicator()
+          else
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
+              onPressed: _pickPhoto,
+              child: Text(
+                hasPhoto
+                    ? config.label(LabelKeys.changePhoto)
+                    : context.l10n.addPhoto,
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.accentText.resolveFrom(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  /// Keys dos campos hardcoded que já são renderizados acima.
-  /// O segmento pode configurar esses campos (label, mask, validation)
-  /// mas eles não devem aparecer como campos dinâmicos duplicados.
+  /// Keys of hardcoded fields already rendered above.
   static const _builtInFieldKeys = {
     'device.category',
     'device.brand',
@@ -404,22 +428,14 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     final sections = <Widget>[];
 
     for (final entry in grouped.entries) {
-      final sectionName = entry.key;
-      final fields = entry.value;
-
+      sections.add(SectionLabel(entry.key));
       sections.add(
         CupertinoListSection.insetGrouped(
-          header: Text(
-            sectionName.toUpperCase(),
-            style: TextStyle(
-              fontSize: 13,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-          children: fields.map((field) {
+          children: entry.value.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _device?.customData?[field.fieldName] ?? _device?.customData?[field.key],
+              value: _device?.customData?[field.fieldName] ??
+                  _device?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
@@ -439,82 +455,5 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     }
 
     return sections;
-  }
-
-  Future<void> _selectCategory(BuildContext context, SegmentConfigProvider config) async {
-    final value = await Navigator.pushNamed(
-      context,
-      '/accumulated_value_list',
-      arguments: {
-        'fieldType': 'deviceCategory',
-        'title': config.label(LabelKeys.deviceCategory),
-        'currentValue': _device?.category,
-        'allowClear': true,
-      },
-    );
-
-    if (value is String && value != 'clear') {
-      setState(() {
-        _device?.category = value;
-        // Note: We don't clear the model anymore to preserve legacy data
-        // The user can clear it manually if needed
-      });
-    } else if (value == 'clear') {
-      // User explicitly cleared the selection
-      setState(() {
-        _device?.category = null;
-      });
-    }
-  }
-
-  Future<void> _selectBrand(BuildContext context, SegmentConfigProvider config) async {
-    final value = await Navigator.pushNamed(
-      context,
-      '/accumulated_value_list',
-      arguments: {
-        'fieldType': 'deviceBrand',
-        'title': config.label(LabelKeys.deviceBrand),
-        'currentValue': _device?.manufacturer,
-        'allowClear': true,
-      },
-    );
-
-    if (value is String && value != 'clear') {
-      setState(() {
-        _device?.manufacturer = value;
-        // Note: We don't clear the model anymore to preserve legacy data
-        // The user can clear it manually if needed
-      });
-    } else if (value == 'clear') {
-      // User explicitly cleared the selection
-      setState(() {
-        _device?.manufacturer = null;
-      });
-    }
-  }
-
-  Future<void> _selectModel(BuildContext context, SegmentConfigProvider config) async {
-    final value = await Navigator.pushNamed(
-      context,
-      '/accumulated_value_list',
-      arguments: {
-        'fieldType': 'deviceModel',
-        'title': config.label(LabelKeys.deviceModel),
-        'currentValue': _device?.name,
-        'group': [_device?.category, _device?.manufacturer],
-        'allowClear': true,
-      },
-    );
-
-    if (value is String && value != 'clear') {
-      setState(() {
-        _device?.name = value;
-      });
-    } else if (value == 'clear') {
-      // User explicitly cleared the selection
-      setState(() {
-        _device?.name = null;
-      });
-    }
   }
 }

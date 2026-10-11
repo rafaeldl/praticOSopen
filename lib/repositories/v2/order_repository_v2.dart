@@ -51,6 +51,11 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     return await _tenant.getOrdersByDateRange(companyId, startDate, endDate);
   }
 
+  /// Busca todas as orders com pagamento em aberto, de qualquer período.
+  Future<List<Order?>> getUnpaidOrders(String companyId) {
+    return _tenant.getUnpaidOrders(companyId);
+  }
+
   /// Stream de orders com filtros opcionais.
   Stream<List<Order?>> streamOrders(
     String companyId, {
@@ -151,6 +156,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     if (status != null) {
       if (['paid', 'unpaid'].contains(status)) {
         query = query.where('payment', isEqualTo: status);
+      } else if (status == 'open') {
+        // "Em aberto": everything not done/canceled. Uses the existing
+        // (status, createdAt) index.
+        query = query.where('status', whereIn: ['quote', 'approved', 'progress']);
       } else if (status == 'due_date') {
         query = query.where('status', whereIn: ['approved', 'progress']);
         query = query.orderBy('dueDate');

@@ -844,6 +844,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$ordersLoadFailedAtom = Atom(
+    name: '_OrderStore.ordersLoadFailed',
+    context: context,
+  );
+
+  @override
+  bool get ordersLoadFailed {
+    _$ordersLoadFailedAtom.reportRead();
+    return super.ordersLoadFailed;
+  }
+
+  @override
+  set ordersLoadFailed(bool value) {
+    _$ordersLoadFailedAtom.reportWrite(value, super.ordersLoadFailed, () {
+      super.ordersLoadFailed = value;
+    });
+  }
+
   late final _$customerOrderTotalsAtom = Atom(
     name: '_OrderStore.customerOrderTotals',
     context: context,
@@ -1686,6 +1704,7 @@ paymentFilter: ${paymentFilter},
 orders: ${orders},
 isLoading: ${isLoading},
 hasMoreOrders: ${hasMoreOrders},
+ordersLoadFailed: ${ordersLoadFailed},
 customerOrderTotals: ${customerOrderTotals},
 customerUnpaidTotals: ${customerUnpaidTotals},
 customerRanking: ${customerRanking},

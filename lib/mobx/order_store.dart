@@ -14,6 +14,7 @@ import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/models/permission.dart';
@@ -40,6 +41,11 @@ abstract class _OrderStore with Store {
   final AuthorizationService _authService = AuthorizationService.instance;
 
   Order? order;
+
+  /// While true, changes stay local and nothing is written to Firestore.
+  /// The new order screen sets it for a blank order and clears it on
+  /// "Salvar OS" (then calls [createItem]).
+  bool deferSave = false;
 
   @observable
   ObservableStream<List<Order?>>? orderList;
@@ -246,6 +252,10 @@ abstract class _OrderStore with Store {
 
   @observable
   bool hasMoreOrders = true;
+
+  /// True when the last Home list fetch failed (shows the retry state).
+  @observable
+  bool ordersLoadFailed = false;
 
   firestore.DocumentSnapshot? _lastDocument;
   final int _limit = 10;
@@ -1650,13 +1660,14 @@ abstract class _OrderStore with Store {
   }
 
   updateTotal() {
+    // Items without a price (null, "sem valor") are left out of the total.
     double temp = 0.0;
     order?.services?.forEach((s) {
-      temp += s.value!;
+      temp += s.value ?? 0;
     });
 
     order?.products?.forEach((p) {
-      temp += p.total!;
+      temp += productLineTotal(p) ?? 0;
     });
 
     if (order?.discount == null) order!.discount = 0.0;
@@ -1668,7 +1679,7 @@ abstract class _OrderStore with Store {
   }
 
   createItem() {
-    if (order == null || companyId == null) return;
+    if (deferSave || order == null || companyId == null) return;
     order!.syncDeviceIds();
 
     if (order!.id == null) {
@@ -2077,6 +2088,7 @@ abstract class _OrderStore with Store {
     isLoading = true;
     _lastDocument = null;
     hasMoreOrders = true;
+    ordersLoadFailed = false;
     orders.clear();
 
     await _fetchOrdersInfinite(status);
@@ -2129,6 +2141,8 @@ abstract class _OrderStore with Store {
       }
     } catch (e) {
       print('Erro ao buscar ordens: $e');
+      ordersLoadFailed = true;
+      hasMoreOrders = false;
     }
   }
 }

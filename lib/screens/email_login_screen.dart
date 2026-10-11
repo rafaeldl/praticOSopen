@@ -133,7 +133,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
               // Form Fields
               CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.credentials.toUpperCase()),
                 children: [
                   Semantics(
                     identifier: 'email_field',
@@ -185,8 +184,14 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                             },
                           ),
                         ),
-                        CupertinoButton(
+                        Semantics(
+                          button: true,
+                          label: _obscurePassword
+                              ? context.l10n.showPassword
+                              : context.l10n.hidePassword,
+                          child: CupertinoButton(
                           padding: const EdgeInsets.only(right: 8),
+                          minimumSize: const Size(44, 44),
                           onPressed: () {
                             setState(() => _obscurePassword = !_obscurePassword);
                           },
@@ -197,6 +202,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                             size: 22,
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
                           ),
+                        ),
                         ),
                       ],
                     ),
@@ -234,7 +240,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   padding: EdgeInsets.zero,
                   onPressed: () => _showForgotPasswordDialog(),
                   child: Text(
-                    '${context.l10n.forgotPassword}?',
+                    context.l10n.forgotPasswordQuestion,
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoColors.activeBlue.resolveFrom(context),

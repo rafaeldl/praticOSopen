@@ -47,6 +47,12 @@ class FormatService {
     return DateFormat.yMd(_intlLocale).format(date);
   }
 
+  /// Formata mês e ano por extenso (ex: outubro de 2026, October 2026)
+  String formatMonthYear(DateTime? date) {
+    if (date == null) return '';
+    return DateFormat.yMMMM(_intlLocale).format(date);
+  }
+
   /// Formata data com hora (ex: 09/01/2025 14:30, 01/09/2025 2:30 PM)
   String formatDateTime(DateTime? date) {
     if (date == null) return '';
@@ -63,6 +69,14 @@ class FormatService {
   String formatDayMonth(DateTime? date) {
     if (date == null) return '';
     return DateFormat.Md(_intlLocale).format(date);
+  }
+
+  /// Formata mês e ano por extenso, com inicial maiúscula
+  /// (ex: Outubro de 2026, October 2026)
+  String formatMonthYearTitle(DateTime? date) {
+    if (date == null) return '';
+    final text = DateFormat.yMMMM(_intlLocale).format(date);
+    return text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
   }
 
   /// Formata apenas hora (ex: 14:30, 2:30 PM)

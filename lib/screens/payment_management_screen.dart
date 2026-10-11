@@ -1,48 +1,104 @@
 import 'dart:io';
 
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, Divider;
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
-import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_charge.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
-import 'package:praticos/screens/payments/widgets/payment_transaction_icon.dart';
+import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
+import 'package:praticos/screens/payments/widgets/receive_block.dart';
+import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
+import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_glass.dart';
+import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/extensions/context_extensions.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Unified payment management screen that combines:
-/// - Financial summary
-/// - Payment/discount registration form
-/// - Transaction history
+/// "Receber" screen of an order: one block answering "did the customer pay?"
+/// (amount already filled, one "Recebi R$ X" button), the received payments
+/// list and, for Asaas companies, the charge card.
+///
+/// Payment method is not asked: it is shown only for payments that came from
+/// Asaas. Discount and "undo payments" live in the "…" menu. Tapping a payment
+/// opens its sheet (view/attach receipt, remove). No success dialogs: after
+/// "Recebi" the block turns into "Tudo recebido" or shows the new balance.
 class PaymentManagementScreen extends StatefulWidget {
-  const PaymentManagementScreen({super.key});
+  const PaymentManagementScreen({
+    super.key,
+    this.store,
+    this.canAttachReceipt,
+    this.canViewReceipt,
+  });
+
+  /// Order store. When null it comes from the route arguments (`orderStore`).
+  final OrderStore? store;
+
+  /// Test seams; default to the attachPhotos / viewPhotos permission checks.
+  final bool? canAttachReceipt;
+  final bool? canViewReceipt;
 
   @override
   State<PaymentManagementScreen> createState() =>
       _PaymentManagementScreenState();
 }
 
+class _PickedReceipt {
+  _PickedReceipt(this.file, this.contentType, this.name);
+  final File file;
+  final String contentType;
+  final String name;
+}
+
+enum _ReceiptSource { camera, gallery, files }
+
 class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _initialized = false;
+  OrderStore? _store;
 
-  /// True while a payment operation is running: Register/Reset/Remove are
-  /// disabled so the same payment can't be sent twice.
+  /// True while a payment operation is running: the buttons are disabled so
+  /// the same payment can't be sent twice.
   bool _busy = false;
 
-  /// Runs [operation] with the busy flag on (ignored if one is running).
+  final TextEditingController _valueController = TextEditingController();
+  _PickedReceipt? _receipt;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _store = widget.store;
+      if (_store == null) {
+        final args = ModalRoute.of(context)?.settings.arguments
+            as Map<String, dynamic>?;
+        if (args != null && args.containsKey('orderStore')) {
+          _store = args['orderStore'];
+        }
+      }
+      _prefillValue();
+      _initialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
+
   Future<void> _runBusy(Future<void> Function() operation) async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -52,74 +108,48 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       if (mounted) setState(() => _busy = false);
     }
   }
-  OrderStore? _store;
-
-  // Form state
-  int _selectedType = 0; // 0 = payment, 1 = discount
-  final TextEditingController _valueController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
-  // Receipt attachment state
-  File? _receiptFile;
-  String? _receiptContentType;
-  String? _receiptFileName;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final args =
-          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null && args.containsKey('orderStore')) {
-        _store = args['orderStore'];
-        _prefillValue();
-      }
-      _initialized = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _valueController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
 
   void _prefillValue() {
-    if (_store != null && _selectedType == 0) {
-      final remaining = _store!.remainingBalance;
-      if (remaining > 0) {
-        _valueController.text = FormatService().formatCurrency(remaining);
-      }
-    }
+    final remaining = _store?.remainingBalance ?? 0.0;
+    _valueController.text =
+        remaining > 0 ? ReceiveAmountField.textFor(remaining) : '';
   }
+
+  bool get _canAttach =>
+      widget.canAttachReceipt ??
+      AuthorizationService.instance.hasPermission(PermissionType.attachPhotos);
+  bool get _canView =>
+      widget.canViewReceipt ??
+      AuthorizationService.instance.hasPermission(PermissionType.viewPhotos);
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor:
-          CupertinoColors.systemGroupedBackground.resolveFrom(context),
+      backgroundColor: AppColors.background.resolveFrom(context),
       child: Material(
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: Text(context.l10n.payments),
+              largeTitle: Text(context.l10n.receiveTitle),
+              trailing: _buildMoreButton(),
             ),
             SliverSafeArea(
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildSummarySection(),
-                  const SizedBox(height: 20),
-                  _buildFormOrPaidSection(),
+                  _buildBlock(),
                   if (_store != null)
                     OrderChargeSection(
                       store: _store!,
                       onCreateCharge: _openCreateCharge,
                     ),
-                  const SizedBox(height: 20),
-                  _buildHistorySection(),
+                  _buildSummary(),
+                  _buildPayments(),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -130,139 +160,110 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  // ============================================================
-  // SUMMARY SECTION
-  // ============================================================
-
-  Widget _buildSummarySection() {
-    return Observer(
-      builder: (_) {
-        final total = _store?.total ?? 0.0;
-        final paid = _store?.paidAmount ?? 0.0;
-        final discount = _store?.discount ?? 0.0;
-        final remaining = _store?.remainingBalance ?? 0.0;
-        final isFullyPaid = _store?.isFullyPaid ?? false;
-
-        return _buildGroupedSection(
-          header: context.l10n.overview.toUpperCase(),
-          children: [
-            _buildSummaryRow(
-              icon: CupertinoIcons.money_dollar_circle_fill,
-              iconColor: CupertinoColors.systemBlue,
-              label: context.l10n.total,
-              value: FormatService().formatCurrency(total),
-              valueColor: CupertinoColors.label.resolveFrom(context),
-            ),
-            if (discount > 0)
-              _buildSummaryRow(
-                icon: CupertinoIcons.tag_fill,
-                iconColor: CupertinoColors.systemOrange,
-                label: context.l10n.discount,
-                value: '- ${FormatService().formatCurrency(discount)}',
-                valueColor: CupertinoColors.systemOrange,
+  Widget _buildMoreButton() {
+    return Observer(builder: (_) {
+      final status = _store?.status;
+      if (_store == null || status == 'quote' || status == 'canceled') {
+        return const SizedBox.shrink();
+      }
+      return CupertinoButton(
+        key: const Key('receiveMoreButton'),
+        padding: EdgeInsets.zero,
+        minimumSize:
+            const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+        onPressed: _busy ? null : _showMoreMenu,
+        child: Semantics(
+          label: context.l10n.receiveMoreOptions,
+          child: AppGlass(
+            borderRadius: BorderRadius.circular(18),
+            child: SizedBox(
+              width: 36,
+              height: 36,
+              child: Icon(
+                CupertinoIcons.ellipsis,
+                size: 20,
+                color: AppColors.text.resolveFrom(context),
               ),
-            _buildSummaryRow(
-              icon: CupertinoIcons.checkmark_circle_fill,
-              iconColor: CupertinoColors.systemGreen,
-              label: context.l10n.totalPaid,
-              value: FormatService().formatCurrency(paid),
-              valueColor: CupertinoColors.systemGreen,
             ),
-            _buildSummaryRow(
-              icon: isFullyPaid
-                  ? CupertinoIcons.checkmark_seal_fill
-                  : CupertinoIcons.clock_fill,
-              iconColor: isFullyPaid
-                  ? CupertinoColors.systemGreen
-                  : CupertinoColors.systemOrange,
-              label: context.l10n.remaining,
-              value: FormatService().formatCurrency(remaining),
-              valueColor: isFullyPaid
-                  ? CupertinoColors.systemGreen
-                  : CupertinoColors.systemOrange,
-              isBold: true,
-              isLast: true,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildSummaryRow({
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required String value,
-    required Color valueColor,
-    bool isBold = false,
-    bool isLast = false,
-  }) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Icon(icon, color: iconColor, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                ),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                  color: valueColor,
-                ),
-              ),
-            ],
           ),
         ),
-        if (!isLast)
-          Divider(
-            height: 1,
-            indent: 50,
-            color: CupertinoColors.systemGrey5.resolveFrom(context),
+      );
+    });
+  }
+
+  Widget _buildBlock() {
+    return Observer(builder: (_) {
+      final status = _store?.status;
+      String? blocked;
+      // Payments are allowed from 'approved' on; not for quotes or canceled.
+      if (status == 'quote') blocked = context.l10n.statusQuote;
+      if (status == 'canceled') blocked = context.l10n.statusCancelled;
+      return ReceiveBlock(
+        isPaid: _store?.isFullyPaid ?? false,
+        blockedMessage: blocked,
+        controller: _valueController,
+        busy: _busy,
+        onConfirm: _register,
+        receiptName: _receipt?.name,
+        onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
+        onRemoveReceipt: () => setState(() => _receipt = null),
+      );
+    });
+  }
+
+  Widget _buildSummary() {
+    return Observer(builder: (_) {
+      final store = _store;
+      final status = store?.status;
+      if (store == null || status == 'quote' || status == 'canceled') {
+        return const SizedBox.shrink();
+      }
+      final format = FormatService();
+      final discount = store.discount ?? 0.0;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppListRow(
+            title: context.l10n.total,
+            trailing: format.formatCurrency(store.total ?? 0.0),
           ),
-      ],
-    );
+          if (discount > 0)
+            AppListRow(
+              title: context.l10n.discount,
+              trailing: '- ${format.formatCurrency(discount)}',
+            ),
+          AppListRow(
+            title: context.l10n.receiveAlreadyReceived,
+            trailing: format.formatCurrency(store.paidAmount ?? 0.0),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildPayments() {
+    return Observer(builder: (_) {
+      final transactions = _store?.transactions ?? <PaymentTransaction>[];
+      if (transactions.isEmpty) return const SizedBox.shrink();
+      final sorted = List<PaymentTransaction>.from(transactions)
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionLabel(context.l10n.payments),
+          for (final tx in sorted)
+            ReceivePaymentRow(
+              transaction: tx,
+              showReceiptState: _canView,
+              onTap: () => _showPaymentSheet(tx),
+            ),
+        ],
+      );
+    });
   }
 
   // ============================================================
-  // FORM OR PAID BADGE SECTION
-  // ============================================================
-
-  Widget _buildFormOrPaidSection() {
-    return Observer(
-      builder: (_) {
-        final status = _store?.status;
-        final isFullyPaid = _store?.isFullyPaid ?? false;
-
-        // Pagamentos só são permitidos a partir de 'approved'
-        // Não permitir em 'quote' ou 'canceled'
-        if (status == 'quote' || status == 'canceled') {
-          return _buildPaymentNotAllowedSection(status);
-        }
-
-        if (isFullyPaid) {
-          return _buildPaidBadgeSection();
-        }
-
-        return _buildFormSection();
-      },
-    );
-  }
-
-  // ============================================================
-  // ASAAS CHARGE
+  // ASAAS CHARGE (unchanged flow)
   // ============================================================
 
   /// Opens the create-charge screen. Returns the push future so the card
@@ -271,7 +272,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final order = _store?.order;
     if (order?.id == null) return;
 
-    final charge = await Navigator.of(context).push<OrderCharge>(
+    await Navigator.of(context).push<OrderCharge>(
       CupertinoPageRoute(
         builder: (_) => CreateChargeScreen(
           order: order!,
@@ -279,651 +280,54 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
       ),
     );
-    if (charge != null && mounted) {
-      _showSuccess(context.l10n.chargeCreated);
+  }
+
+  // ============================================================
+  // REGISTER PAYMENT
+  // ============================================================
+
+  String? _validateValue(double value) {
+    if (value <= 0) return context.l10n.valueMustBeGreaterThanZero;
+    if (_store != null && value > _store!.remainingBalance) {
+      return context.l10n.paymentCannotExceedBalance;
     }
-  }
-
-  Widget _buildPaymentNotAllowedSection(String? status) {
-    final isQuote = status == 'quote';
-    return _buildGroupedSection(
-      header: '',
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-          child: Column(
-            children: [
-              Icon(
-                isQuote ? CupertinoIcons.doc_text : CupertinoIcons.xmark_circle,
-                color: CupertinoColors.systemGrey,
-                size: 32,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                isQuote
-                    ? context.l10n.payments
-                    : context.l10n.statusCancelled,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                isQuote
-                    ? context.l10n.statusQuote
-                    : context.l10n.statusCancelled,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaidBadgeSection() {
-    return _buildGroupedSection(
-      header: '',
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    CupertinoIcons.checkmark_seal_fill,
-                    color: CupertinoColors.systemGreen,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    context.l10n.paid,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.systemGreen,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _busy ? null : _confirmResetPayment,
-                child: Text(
-                  context.l10n.toReceive,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: CupertinoColors.systemRed,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFormSection() {
-    final remaining = _store?.remainingBalance ?? 0.0;
-    final isPayment = _selectedType == 0;
-
-    return _buildGroupedSection(
-      header: context.l10n.register.toUpperCase(),
-      children: [
-        // Segmented Control
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: SizedBox(
-            width: double.infinity,
-            child: CupertinoSlidingSegmentedControl<int>(
-              groupValue: _selectedType,
-              onValueChanged: (value) {
-                setState(() {
-                  _selectedType = value ?? 0;
-                  if (_selectedType == 0) {
-                    _prefillValue();
-                  } else {
-                    _valueController.clear();
-                  }
-                });
-              },
-              children: {
-                0: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        CupertinoIcons.money_dollar_circle,
-                        size: 18,
-                        color: _selectedType == 0
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                      ),
-                      const SizedBox(width: 6),
-                      Builder(builder: (ctx) {
-                        final segConfig = ctx.read<SegmentConfigProvider>();
-                        final paymentLabel = segConfig.label('financial.payment');
-                        return Text(
-                          paymentLabel.isNotEmpty ? paymentLabel : context.l10n.payment,
-                          style: TextStyle(
-                            color: _selectedType == 0
-                                ? CupertinoColors.label.resolveFrom(context)
-                                : CupertinoColors.secondaryLabel
-                                    .resolveFrom(context),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                1: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        CupertinoIcons.tag,
-                        size: 18,
-                        color: _selectedType == 1
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        context.l10n.discount,
-                        style: TextStyle(
-                          color: _selectedType == 1
-                              ? CupertinoColors.label.resolveFrom(context)
-                              : CupertinoColors.secondaryLabel
-                                  .resolveFrom(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              },
-            ),
-          ),
-        ),
-
-        // Value field
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isPayment ? context.l10n.paymentAmount : context.l10n.discountAmount,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-              const SizedBox(height: 8),
-              CupertinoTextField(
-                controller: _valueController,
-                placeholder: FormatService().formatCurrency(0),
-                prefix: Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Icon(
-                    isPayment
-                        ? CupertinoIcons.money_dollar
-                        : CupertinoIcons.tag,
-                    color: CupertinoColors.systemGrey.resolveFrom(context),
-                  ),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                inputFormatters: [
-                  CurrencyTextInputFormatter.currency(
-                    locale: 'pt_BR',
-                    symbol: 'R\$',
-                    decimalDigits: 2,
-                  ),
-                ],
-                keyboardType: TextInputType.number,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Description field
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${context.l10n.observation} (${context.l10n.optional})',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-              const SizedBox(height: 8),
-              CupertinoTextField(
-                controller: _descriptionController,
-                placeholder: isPayment
-                    ? context.l10n.exampleCashPayment
-                    : context.l10n.exampleLoyaltyDiscount,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: 17,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Attach receipt button (only for payments, requires attachPhotos permission)
-        if (isPayment && AuthorizationService.instance.hasPermission(PermissionType.attachPhotos))
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: _receiptFile != null
-                ? _buildReceiptPreview()
-                : CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: _showAttachReceiptOptions,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          CupertinoIcons.paperclip,
-                          color: CupertinoTheme.of(context).primaryColor,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          context.l10n.attachReceipt,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: CupertinoTheme.of(context).primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-          ),
-
-        // Register button
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: SizedBox(
-            width: double.infinity,
-            child: CupertinoButton.filled(
-              onPressed: _busy ? null : _registerTransaction,
-              child: _busy
-                  ? const CupertinoActivityIndicator(
-                      color: CupertinoColors.white,
-                    )
-                  : Text(isPayment
-                      ? context.l10n.registerPayment
-                      : context.l10n.applyDiscount),
-            ),
-          ),
-        ),
-
-        // Quick action - pay full remaining
-        if (isPayment && remaining > 0)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: _fillRemainingBalance,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    CupertinoIcons.checkmark_circle,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${context.l10n.payTotalAmount}: ${FormatService().formatCurrency(remaining)}',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: CupertinoTheme.of(context).primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // HISTORY SECTION
-  // ============================================================
-
-  Widget _buildHistorySection() {
-    return Observer(
-      builder: (_) {
-        final transactions = _store?.transactions ?? [];
-
-        if (transactions.isEmpty) {
-          return _buildGroupedSection(
-            header: context.l10n.history.toUpperCase(),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(32),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        CupertinoIcons.doc_text,
-                        size: 48,
-                        color: CupertinoColors.systemGrey.resolveFrom(context),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        context.l10n.noTransactionsRecorded,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: CupertinoColors.secondaryLabel
-                              .resolveFrom(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-
-        // Sort by date descending
-        final sortedTransactions = List<PaymentTransaction>.from(transactions);
-        sortedTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-        return _buildGroupedSection(
-          header: context.l10n.history.toUpperCase(),
-          children: sortedTransactions.asMap().entries.map((entry) {
-            final index = transactions.indexOf(entry.value);
-            final transaction = entry.value;
-            final isLast = entry.key == sortedTransactions.length - 1;
-            return _buildTransactionRow(transaction, index, isLast);
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildTransactionRow(
-      PaymentTransaction transaction, int index, bool isLast) {
-    final isPayment = transaction.type == PaymentTransactionType.payment;
-
-    return Dismissible(
-      key: ValueKey(
-          'transaction_${transaction.createdAt.millisecondsSinceEpoch}'),
-      direction:
-          _busy ? DismissDirection.none : DismissDirection.endToStart,
-      confirmDismiss: (direction) async {
-        _confirmDeleteTransaction(index, transaction);
-        return false;
-      },
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: CupertinoColors.systemRed,
-        child: const Icon(
-          CupertinoIcons.trash,
-          color: CupertinoColors.white,
-        ),
-      ),
-      child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  // Icon container
-                  PaymentTransactionIcon(transaction: transaction),
-                  const SizedBox(width: 12),
-                  // Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          transaction.typeLabel(context.l10n),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: CupertinoColors.label.resolveFrom(context),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          transaction.description ??
-                              FormatService().formatDateTime(transaction.createdAt),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (transaction.description != null)
-                          Text(
-                            FormatService().formatDateTime(transaction.createdAt),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: CupertinoColors.tertiaryLabel
-                                  .resolveFrom(context),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Receipt indicator (requires viewPhotos permission)
-                  if (transaction.hasReceipt &&
-                      AuthorizationService.instance.hasPermission(PermissionType.viewPhotos))
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
-                        onTap: () => _openReceipt(transaction),
-                        child: Icon(
-                          CupertinoIcons.paperclip,
-                          color: CupertinoColors.activeBlue,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  // Amount
-                  Text(
-                    isPayment
-                        ? '+ ${FormatService().formatCurrency(transaction.amount)}'
-                        : '- ${FormatService().formatCurrency(transaction.amount)}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: isPayment
-                          ? CupertinoColors.systemGreen
-                          : CupertinoColors.systemOrange,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!isLast)
-              Divider(
-                height: 1,
-                indent: 68,
-                color: CupertinoColors.systemGrey5.resolveFrom(context),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // HELPER WIDGETS
-  // ============================================================
-
-  Widget _buildGroupedSection({
-    required String header,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (header.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
-            child: Text(
-              header,
-              style: TextStyle(
-                fontSize: 13,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: children,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // ACTIONS
-  // ============================================================
-
-  String? _validateValue(String? value) {
-    if (value == null || value.isEmpty) {
-      return context.l10n.fillValue;
-    }
-
-    final valueDouble = parseCurrencyInput(value);
-    if (valueDouble <= 0) {
-      return context.l10n.valueMustBeGreaterThanZero;
-    }
-
-    if (_store != null && valueDouble > _store!.remainingBalance) {
-      return _selectedType == 0
-          ? context.l10n.paymentCannotExceedBalance
-          : context.l10n.discountCannotExceedBalance;
-    }
-
     return null;
   }
 
-  void _registerTransaction() => _runBusy(_doRegisterTransaction);
+  void _register() => _runBusy(_doRegister);
 
-  Future<void> _doRegisterTransaction() async {
-    final error = _validateValue(_valueController.text);
+  Future<void> _doRegister() async {
+    final store = _store;
+    if (store == null) return;
+    final value = parseCurrencyInput(_valueController.text);
+    final error = _validateValue(value);
     if (error != null) {
       _showError(error);
       return;
     }
 
-    final store = _store;
-    if (store == null) return;
-
-    final value = parseCurrencyInput(_valueController.text);
-    final description = _descriptionController.text.isNotEmpty
-        ? _descriptionController.text
-        : null;
-    final isPayment = _selectedType == 0;
-
-    // Payments and discounts are saved offline-safe and update the screen
-    // right away (no wait for the server).
-    bool ok;
+    final transaction = await store.addPayment(value);
     var receiptOk = true;
-    if (isPayment) {
-      final transaction =
-          await store.addPayment(value, description: description);
-      ok = transaction != null;
-
-      // Upload receipt if one was attached (needs connection)
-      if (transaction != null && _receiptFile != null) {
-        final txnIndex =
-            store.transactions.indexWhere((t) => t.id == transaction.id);
-        if (txnIndex >= 0) {
-          receiptOk = await store.attachReceiptToTransaction(
-            txnIndex,
-            _receiptFile!,
-            _receiptContentType ?? 'application/octet-stream',
-            _receiptFileName ?? 'receipt',
-          );
-        }
+    final receipt = _receipt;
+    if (transaction != null && receipt != null) {
+      final index = store.transactions.indexWhere((t) => t.id == transaction.id);
+      if (index >= 0) {
+        receiptOk = await store.attachReceiptToTransaction(
+          index,
+          receipt.file,
+          receipt.contentType,
+          receipt.name,
+        );
       }
-    } else {
-      ok = await store.addDiscountTransaction(value, description: description);
     }
-
     if (!mounted) return;
-    if (!ok) {
+    if (transaction == null) {
       _showError(_paymentFailureMessage(store));
       return;
     }
-
-    // Clear form and refill with new remaining balance
-    _descriptionController.clear();
-    setState(() {
-      _receiptFile = null;
-      _receiptContentType = null;
-      _receiptFileName = null;
-    });
+    setState(() => _receipt = null);
     _prefillValue();
-
-    if (!receiptOk) {
-      // Payment saved, receipt not
-      _showError(_paymentFailureMessage(store));
-      return;
-    }
-
-    // Show feedback
-    _showSuccess(isPayment
-        ? context.l10n.paymentRegistered
-        : context.l10n.discountApplied);
+    if (!receiptOk) _showError(_paymentFailureMessage(store));
   }
 
   /// Localized message for the last failed payment operation of [store].
@@ -939,29 +343,81 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     }
   }
 
-  void _fillRemainingBalance() {
-    final remaining = _store?.remainingBalance ?? 0.0;
-    if (remaining > 0) {
-      _valueController.text = FormatService().formatCurrency(remaining);
-    }
+  // ============================================================
+  // "..." MENU: discount and undo payments
+  // ============================================================
+
+  void _showMoreMenu() {
+    final store = _store;
+    if (store == null) return;
+    final hasManual = store.transactions.any((t) => !t.isAsaas);
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _giveDiscount();
+            },
+            child: Text(context.l10n.receiveGiveDiscount),
+          ),
+          if (hasManual)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmUndoPayments();
+              },
+              child: Text(context.l10n.receiveUndoPayments),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
+        ),
+      ),
+    );
   }
 
-  void _confirmResetPayment() {
-    showCupertinoDialog(
+  Future<void> _giveDiscount() async {
+    final store = _store;
+    if (store == null) return;
+    final remaining = store.remainingBalance;
+    if (remaining <= 0) return;
+    final amount = await showReceiveDiscountSheet(
+      context,
+      currentTotal: store.total ?? 0.0,
+      maxDiscount: remaining,
+    );
+    if (amount == null || !mounted) return;
+    await _runBusy(() async {
+      final ok = await store.addDiscountTransaction(amount);
+      if (!mounted) return;
+      if (!ok) {
+        _showError(_paymentFailureMessage(store));
+        return;
+      }
+      _prefillValue();
+    });
+  }
+
+  void _confirmUndoPayments() {
+    showCupertinoDialog<void>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.markAsToReceive),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.receiveUndoPayments),
         content: Text(context.l10n.thisWillRemoveAllPayments),
         actions: [
           CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
-              _resetPayment();
+              Navigator.pop(dialogContext);
+              _runBusy(_doResetPayments);
             },
             child: Text(context.l10n.confirm),
           ),
@@ -970,9 +426,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  void _resetPayment() => _runBusy(_doResetPayment);
-
-  Future<void> _doResetPayment() async {
+  Future<void> _doResetPayments() async {
     final store = _store;
     if (store == null) return;
     final ok = await store.resetAllPayments();
@@ -984,34 +438,95 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     _prefillValue();
   }
 
-  void _confirmDeleteTransaction(int index, PaymentTransaction transaction) {
-    if (OrderPaymentMath.isAsaasTransaction(transaction)) {
-      _showError(context.l10n.asaasTransactionCannotBeRemoved);
-      return;
-    }
+  // ============================================================
+  // PAYMENT SHEET
+  // ============================================================
 
-    showCupertinoDialog(
+  void _showPaymentSheet(PaymentTransaction tx) {
+    final format = FormatService();
+    final isPayment = tx.type == PaymentTransactionType.payment;
+    final who = tx.isAsaas
+        ? context.l10n.receiveRecordedAuto(format.formatDateTime(tx.createdAt))
+        : context.l10n.receiveRecordedBy(
+            tx.createdBy?.name ?? '-',
+            format.formatDateTime(tx.createdAt),
+          );
+    final billing = receiveBillingLabel(context, tx);
+    final canViewReceipt = tx.hasReceipt && _canView;
+    final canAttachLater = isPayment && !tx.hasReceipt && _canAttach;
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(
+          '${isPayment ? '' : '- '}${format.formatCurrency(tx.amount)}'
+          '${billing != null ? ' · $billing' : ''}',
+        ),
+        message: Text(who),
+        actions: [
+          if (canViewReceipt)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openReceipt(tx);
+              },
+              child: Text(context.l10n.receiveViewReceipt),
+            ),
+          if (canAttachLater)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _attachToSaved(tx);
+              },
+              child: Text(context.l10n.receiveAttachReceipt),
+            ),
+          if (!tx.isAsaas)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmRemove(tx);
+              },
+              child: Text(context.l10n.receiveRemovePayment),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
+        ),
+      ),
+    );
+  }
+
+  int _indexOf(PaymentTransaction tx) {
+    final list = _store?.transactions ?? <PaymentTransaction>[];
+    return list.indexWhere((t) => OrderPaymentMath.sameTransaction(t, tx));
+  }
+
+  void _confirmRemove(PaymentTransaction tx) {
+    showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text('${context.l10n.remove} ${transaction.typeLabel(context.l10n)}'),
+        title: Text(context.l10n.receiveRemovePayment),
         content: Text(
           context.l10n.confirmRemoveTransaction(
-            transaction.typeLabel(context.l10n).toLowerCase(),
-            FormatService().formatCurrency(transaction.amount),
+            tx.typeLabel(context.l10n).toLowerCase(),
+            FormatService().formatCurrency(tx.amount),
           ),
         ),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(dialogContext);
               final store = _store;
-              if (store == null) return;
-              await _runBusy(() async {
+              final index = _indexOf(tx);
+              if (store == null || index < 0) return;
+              _runBusy(() async {
                 final ok = await store.removeTransaction(index);
                 if (!mounted) return;
                 if (!ok) {
@@ -1029,158 +544,94 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   // ============================================================
-  // RECEIPT ACTIONS
+  // RECEIPTS
   // ============================================================
 
-  Widget _buildReceiptPreview() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6.resolveFrom(context),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _receiptContentType?.startsWith('image/') == true
-                ? CupertinoIcons.photo
-                : CupertinoIcons.doc_text,
-            color: CupertinoColors.activeBlue,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _receiptFileName ?? context.l10n.receipt,
-              style: TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.label.resolveFrom(context),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
-            onPressed: () {
-              setState(() {
-                _receiptFile = null;
-                _receiptContentType = null;
-                _receiptFileName = null;
-              });
-            },
-            child: Icon(
-              CupertinoIcons.xmark_circle_fill,
-              color: CupertinoColors.systemGrey,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAttachReceiptOptions() {
-    final photoService = PhotoService();
-    showCupertinoModalPopup(
+  Future<_PickedReceipt?> _pickReceipt() async {
+    final source = await showCupertinoModalPopup<_ReceiptSource>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         actions: [
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.camera, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.takePhoto),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final file = await photoService.takePhoto();
-              if (file != null) {
-                setState(() {
-                  _receiptFile = file;
-                  _receiptContentType = 'image/jpeg';
-                  _receiptFileName =
-                      'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
-                });
-              }
-            },
+            onPressed: () => Navigator.pop(ctx, _ReceiptSource.camera),
+            child: Text(context.l10n.takePhoto),
           ),
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.photo, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.gallery),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final file = await photoService.pickImageFromGallery();
-              if (file != null) {
-                setState(() {
-                  _receiptFile = file;
-                  _receiptContentType = 'image/jpeg';
-                  _receiptFileName =
-                      'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
-                });
-              }
-            },
+            onPressed: () => Navigator.pop(ctx, _ReceiptSource.gallery),
+            child: Text(context.l10n.gallery),
           ),
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.doc, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.fromFiles),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final result = await photoService.pickDocument();
-              if (result != null && result.path != null) {
-                setState(() {
-                  _receiptFile = File(result.path!);
-                  _receiptFileName = result.name;
-                  final ext = result.extension?.toLowerCase() ?? '';
-                  _receiptContentType = _getContentType(ext);
-                });
-              }
-            },
+            onPressed: () => Navigator.pop(ctx, _ReceiptSource.files),
+            child: Text(context.l10n.fromFiles),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
         ),
       ),
     );
+    if (source == null) return null;
+    final photoService = PhotoService();
+    String photoName() => 'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    switch (source) {
+      case _ReceiptSource.camera:
+        final file = await photoService.takePhoto();
+        return file == null ? null : _PickedReceipt(file, 'image/jpeg', photoName());
+      case _ReceiptSource.gallery:
+        final file = await photoService.pickImageFromGallery();
+        return file == null ? null : _PickedReceipt(file, 'image/jpeg', photoName());
+      case _ReceiptSource.files:
+        final result = await photoService.pickDocument();
+        if (result == null || result.path == null) return null;
+        return _PickedReceipt(
+          File(result.path!),
+          _contentTypeOf(result.extension?.toLowerCase() ?? ''),
+          result.name,
+        );
+    }
   }
 
-  void _openReceipt(PaymentTransaction transaction) async {
-    if (transaction.receiptDocumentId == null || _store == null) return;
+  Future<void> _attachBeforeSaving() async {
+    final picked = await _pickReceipt();
+    if (picked != null && mounted) setState(() => _receipt = picked);
+  }
 
+  Future<void> _attachToSaved(PaymentTransaction tx) async {
+    final picked = await _pickReceipt();
+    final store = _store;
+    if (picked == null || store == null || !mounted) return;
+    final index = _indexOf(tx);
+    if (index < 0) return;
+    await _runBusy(() async {
+      final ok = await store.attachReceiptToTransaction(
+        index,
+        picked.file,
+        picked.contentType,
+        picked.name,
+      );
+      if (!ok && mounted) _showError(_paymentFailureMessage(store));
+    });
+  }
+
+  Future<void> _openReceipt(PaymentTransaction transaction) async {
+    if (transaction.receiptDocumentId == null || _store == null) return;
     final doc = _store!.documents.cast<OrderDocument?>().firstWhere(
-      (d) => d?.id == transaction.receiptDocumentId,
-      orElse: () => null,
-    );
+          (d) => d?.id == transaction.receiptDocumentId,
+          orElse: () => null,
+        );
     if (doc == null) return;
 
     // Refresh URL from storagePath to avoid stale tokens
     String? url = doc.url;
     if (doc.storagePath != null) {
-      final freshUrl = await PhotoService().getFreshDownloadUrl(doc.storagePath!);
+      final freshUrl =
+          await PhotoService().getFreshDownloadUrl(doc.storagePath!);
       if (freshUrl != null) {
         url = freshUrl;
         doc.url = freshUrl;
       }
     }
-
     if (url == null || !mounted) return;
 
     if (doc.isImage) {
@@ -1193,13 +644,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
       );
     } else {
-      launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication);
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   }
 
-  String _getContentType(String extension) {
+  String _contentTypeOf(String extension) {
     switch (extension) {
       case 'pdf':
         return 'application/pdf';
@@ -1214,40 +663,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
+    showCupertinoDialog<void>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: Text(context.l10n.attention),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.checkmark_circle_fill,
-              color: CupertinoColors.systemGreen,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
             child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),

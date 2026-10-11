@@ -116,7 +116,9 @@ Seis zonas, sempre nesta ordem. Zonas vazias não aparecem.
 5. **Resumo:** linha forte acima, totais e o que falta.
 6. **Embaixo:** foto + "Falar" (`assistantFill`) nas telas com assistente; ou um botão de largura total nas telas de formulário ("Salvar OS"). Sem faixa opaca com borda: o conteúdo rola por baixo e some num degradê (efeito de borda de rolagem). Nas telas com abas, o botão flutua logo acima da barra de abas (acessório da tab bar), não numa segunda barra.
 
-**Abas:** a ordem é sempre Início, Clientes, Agenda, Financeiro, Mais. Quem não usa uma aba (técnico sem Financeiro, empresa sem agenda) não a vê, mas as outras mantêm a mesma ordem.
+**Abas:** a ordem é sempre Início, Clientes, Agenda, Financeiro, Mais. Quem não usa uma aba (técnico sem Financeiro, empresa sem agenda) não a vê, mas as outras mantêm a mesma ordem. No código: `AppTab` e `visibleAppTabs()` (`lib/screens/menu_navigation/app_tabs.dart`) decidem as abas visíveis (Agenda some com `Company.useScheduling` desligado; Financeiro só com `viewFinancialReports`); a barra é o `GlassTabBar` (vidro do `AppGlass`), e o nome de analytics de cada índice segue as abas visíveis.
+
+**Início:** `Home` liga a store ao `HomeContent` (`lib/screens/menu_navigation/home_content.dart`, só dados e callbacks, testável). Zonas: sino e "…" em vidro, título grande, `NextStepBlock` (atrasadas > prazo hoje > orçamentos parados há mais de 7 dias), `Em aberto | Todas`, busca, lista e `PrimaryButton` "Nova OS" flutuante (`floating`) acima da tab bar. "Em aberto" agrupa por urgência (Atrasadas, Para hoje, Em andamento, Esperando aprovação, Aprovadas); "Todas" é uma lista contínua com seção por mês. O "…" tem só "Ver canceladas" e "Contratos" (com `useContracts`). Regras puras em `home_groups.dart`; linha da OS em `OrderListRow`. Sem nenhuma OS na empresa, a tela vira o estado de primeira vez (botão dentro do bloco, sem botão flutuante).
 
 Margens: texto com `AppSpacing.pageMargin` (24), blocos e botões com `AppSpacing.blockMargin` (16). Cantos: botões 16, blocos 20, campos 12.
 

@@ -8,6 +8,8 @@ import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
@@ -52,8 +54,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                         padding: EdgeInsets.zero,
                         child: const Icon(CupertinoIcons.add),
                         onPressed: () async {
-                          final result = await Navigator.pushNamed(
-                              context, '/collaborator_form');
+                          final result = await AppSheet.show<bool>(
+                              context, (_) => const CollaboratorFormScreen());
                           if (result == true) {
                             _collaboratorStore.loadCollaborators();
                           }
@@ -321,20 +323,48 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
+  Future<void> _cancelAndInviteAgain(Invite invite) async {
+    try {
+      await _collaboratorStore.cancelInvite(invite.id!);
+    } catch (e) {
+      _showError(e.toString());
+      return;
+    }
+    if (!mounted) return;
+    await AppSheet.show<bool>(
+        context, (_) => CollaboratorFormScreen(prefill: invite));
+    // The old invite is gone either way, so refresh the list.
+    if (mounted) _collaboratorStore.loadCollaborators();
+  }
+
   void _showInviteActionSheet(Invite invite) {
+    final expired = invite.expiresAt != null &&
+        invite.expiresAt!.isBefore(DateTime.now());
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
         title: Text('${context.l10n.inviteTo} ${invite.name ?? invite.email}'),
-        message: Text(context.l10n.invitePendingMessage),
+        message: Text(expired
+            ? context.l10n.inviteExpiredMessage
+            : context.l10n.invitePendingMessage),
         actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.shareInviteAction),
-            onPressed: () {
-              Navigator.pop(context);
-              _reshareInvite(invite);
-            },
-          ),
+          if (expired)
+            // Expired: the code no longer works, so cancel and invite again.
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.cancelAndInviteAgain),
+              onPressed: () async {
+                Navigator.pop(context);
+                await _cancelAndInviteAgain(invite);
+              },
+            )
+          else
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.shareInviteAction),
+              onPressed: () {
+                Navigator.pop(context);
+                _reshareInvite(invite);
+              },
+            ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             child: Text(context.l10n.cancelInvite),

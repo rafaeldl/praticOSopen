@@ -1,23 +1,54 @@
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/theme/status_style.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
-import 'package:provider/provider.dart';
+import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/mobx/device_store.dart';
+import 'package:praticos/models/custom_field.dart';
+import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
-import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/models/custom_field.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
-import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/widgets/cached_image.dart';
+import 'package:provider/provider.dart';
 
+/// Vehicle (device) screen (`/device_detail`, arguments `device` and
+/// optionally `customer`): data, owner, "Nova OS" for this vehicle, order
+/// history and active contracts. Edit and delete live in the "…" menu.
+///
+/// The device label ("Veículo", "Aparelho"…) and icon come from the segment.
 class DeviceDetailScreen extends StatefulWidget {
-  const DeviceDetailScreen({super.key, this.orderRepository});
+  const DeviceDetailScreen({
+    super.key,
+    this.device,
+    this.customer,
+    this.orderRepository,
+    this.onDelete,
+  });
+
+  /// Falls back to the `device` route argument.
+  final Device? device;
+
+  /// Owner, when the caller knows it. Otherwise it is taken from the most
+  /// recent order of the vehicle.
+  final Customer? customer;
 
   /// Injected in tests; defaults to [TenantOrderRepository].
   final TenantOrderRepository? orderRepository;
+
+  /// Deletes the device. Defaults to [DeviceStore.deleteDevice].
+  final Future<void> Function(Device device)? onDelete;
 
   @override
   State<DeviceDetailScreen> createState() => _DeviceDetailScreenState();
@@ -25,203 +56,337 @@ class DeviceDetailScreen extends StatefulWidget {
 
 class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   Device? _device;
-  late final TenantOrderRepository _orderRepo =
-      widget.orderRepository ?? TenantOrderRepository();
+  Customer? _customer;
+  TenantOrderRepository? _repo;
   Stream<List<Order?>>? _orderStream;
   Stream<List<Order?>>? _contractStream;
+
+  TenantOrderRepository get _orderRepo =>
+      _repo ??= widget.orderRepository ?? TenantOrderRepository();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_device == null) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      _device = args?['device'] as Device?;
-      if (_device?.id != null && Global.companyAggr?.id != null) {
-        _orderStream = _orderRepo.streamOrdersByDevice(
-          Global.companyAggr!.id!,
-          _device!.id!,
-        );
-        _contractStream = _orderRepo.streamContractsByDevice(
-          Global.companyAggr!.id!,
-          _device!.id!,
-        );
+    if (_device != null) return;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _device = widget.device ?? args?['device'] as Device?;
+    _customer = widget.customer ?? args?['customer'] as Customer?;
+    _loadOrders();
+  }
+
+  void _loadOrders() {
+    final companyId = Global.companyAggr?.id;
+    final deviceId = _device?.id;
+    setState(() {
+      if (deviceId != null && companyId != null) {
+        _orderStream = _orderRepo.streamOrdersByDevice(companyId, deviceId);
+        _contractStream = _orderRepo.streamContractsByDevice(companyId, deviceId);
       }
+    });
+  }
+
+  void _newOrder(Customer? owner) {
+    final aggr = _device!.toAggr();
+    final order = Order()
+      ..customer = owner?.toAggr()
+      ..device = aggr
+      ..devices = [aggr];
+    Navigator.pushNamed(context, '/order', arguments: {'order': order});
+  }
+
+  Future<void> _edit() async {
+    final result = await Navigator.pushNamed(
+      context,
+      '/device_form',
+      arguments: {'device': _device},
+    );
+    if (result is Device && mounted) setState(() => _device = result);
+  }
+
+  Future<void> _confirmDelete() async {
+    final l10n = context.l10n;
+    if (!AuthorizationService.instance
+        .hasPermission(PermissionType.manageDevices)) {
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(l10n.noPermission),
+          content: Text(l10n.noPermissionToRemove),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.ok),
+            ),
+          ],
+        ),
+      );
+      return;
     }
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.deleteDeviceTitle(_device?.name ?? '')),
+        content: Text(l10n.deleteDeviceKeepsOrders),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.back),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.deleteAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final onDelete = widget.onDelete;
+    if (onDelete != null) {
+      await onDelete(_device!);
+    } else {
+      await DeviceStore().deleteDevice(_device!);
+    }
+    if (mounted) Navigator.pop(context);
+  }
+
+  void _showMenu() {
+    final l10n = context.l10n;
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              _edit();
+            },
+            child: Text(l10n.edit),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              _confirmDelete();
+            },
+            child: Text(l10n.deleteAction),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(sheetContext),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+  }
+
+  /// Newest first; orders without a date go last.
+  List<Order> _sorted(List<Order?> raw) {
+    final orders = raw.whereType<Order>().toList();
+    orders.sort((a, b) {
+      final x = a.createdAt, y = b.createdAt;
+      if (x == null && y == null) return 0;
+      if (x == null) return 1;
+      if (y == null) return -1;
+      return y.compareTo(x);
+    });
+    return orders;
+  }
+
+  Customer? _ownerFrom(List<Order> orders) {
+    if (_customer != null) return _customer;
+    for (final o in orders) {
+      final c = o.customer;
+      if (c != null) return Customer.fromJson(c.toJson());
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
-    final formatService = FormatService();
-
-    if (_device == null) {
+    final l10n = context.l10n;
+    final background = AppColors.background.resolveFrom(context);
+    final device = _device;
+    if (device == null) {
       return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text(config.device),
-        ),
-        child: const Center(child: CupertinoActivityIndicator()),
+        backgroundColor: background,
+        navigationBar: CupertinoNavigationBar(middle: Text(config.device)),
+        child: const LoadingState(),
       );
     }
 
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: Text(_device!.name ?? config.device),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.pencil),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/device_form',
-                    arguments: {'device': _device},
-                  ).then((result) {
-                    if (result != null && result is Device) {
-                      setState(() => _device = result);
-                    }
-                  });
-                },
+      backgroundColor: background,
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text(device.name ?? config.device),
+            backgroundColor: background,
+            border: null,
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
+              onPressed: _showMenu,
+              child: Semantics(
+                label: l10n.deviceActions,
+                child: const Icon(CupertinoIcons.ellipsis_circle),
               ),
             ),
-
-            // Header section with photo and key info
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    // Photo
-                    _buildAvatar(config),
-                    const SizedBox(width: 16),
-                    // Key info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_device!.serial != null && _device!.serial!.isNotEmpty)
-                            Text(
-                              _device!.serial!,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                              ),
-                            ),
-                          if (_device!.manufacturer != null && _device!.manufacturer!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              _device!.manufacturer!,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                              ),
-                            ),
-                          ],
-                          if (config.useDeviceManagement) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                StatusDot(
-                                  color: DeviceStatusStyle.dotColor(_device!.status),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  DeviceStatusStyle.label(context.l10n, _device!.status),
-                                  style: OrderStatusStyle.textStyle(context, fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
+          ),
+          if (_orderStream == null)
+            SliverList(
+              delegate: SliverChildListDelegate(
+                _buildContent(config, const <Order>[]),
+              ),
+            )
+          else
+            StreamBuilder<List<Order?>>(
+              stream: _orderStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 200,
+                      child: ErrorState(onRetry: _loadOrders),
                     ),
-                  ],
-                ),
-              ),
+                  );
+                }
+                final data = snapshot.data;
+                if (data == null) {
+                  return const SliverToBoxAdapter(
+                    child: SizedBox(height: 120, child: LoadingState()),
+                  );
+                }
+                return SliverList(
+                  delegate: SliverChildListDelegate(
+                    _buildContent(config, _sorted(data)),
+                  ),
+                );
+              },
             ),
+          if (config.useContracts) _buildContractsSection(),
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
+      ),
+    );
+  }
 
-            // Device info section
-            SliverToBoxAdapter(
-              child: CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.details.toUpperCase()),
-                children: [
-                  if (_device!.category != null)
-                    _buildInfoRow(config.label('device.category'), _device!.category!),
-                  if (_device!.manufacturer != null)
-                    _buildInfoRow(config.label('device.brand'), _device!.manufacturer!),
-                  if (_device!.name != null)
-                    _buildInfoRow(config.label('device.model'), _device!.name!),
-                  if (_device!.serial != null)
-                    _buildInfoRow(config.label('device.serial'), _device!.serial!),
-                  if (_device!.customData != null)
-                    ..._buildCustomDataRows(config),
-                ],
-              ),
-            ),
+  List<Widget> _buildContent(SegmentConfigProvider config, List<Order> orders) {
+    final l10n = context.l10n;
+    final device = _device!;
+    final owner = _ownerFrom(orders);
+    final format = FormatService()..setLocale(l10n.localeName);
+    final serialLabel = config.label(LabelKeys.deviceSerialNumber);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
 
-            // Order history section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20, bottom: 8),
-                child: Text(
-                  context.l10n.orderHistory.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+    final subtitle = [
+      if (device.serial?.isNotEmpty ?? false) '$serialLabel ${device.serial}',
+      if (owner?.name?.isNotEmpty ?? false) owner!.name!,
+    ].join(' · ');
+
+    return [
+      if (subtitle.isNotEmpty || (device.photo?.isNotEmpty ?? false))
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              if (device.photo?.isNotEmpty ?? false) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadii.field),
+                  child: CachedImage(
+                    imageUrl: device.photo!,
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
-            ),
-
-            // Order history list
-            _buildOrderHistory(config, formatService),
-
-            // Contracts section
-            if (config.useContracts)
-              _buildContractsSection(config, formatService),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
-          ],
+                const SizedBox(width: AppSpacing.md),
+              ],
+              if (subtitle.isNotEmpty)
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    style: AppTypography.callout.copyWith(color: secondary),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
+        ),
+        child: _PrimaryButton(
+          label: l10n.newOrderAction,
+          onPressed: () => _newOrder(owner),
         ),
       ),
-    );
+      if (owner != null) ...[
+        SectionLabel(config.customer),
+        AppListRow(
+          title: owner.name ?? '',
+          subtitle: owner.phone,
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/customer_detail',
+            arguments: {'customer': owner},
+          ),
+        ),
+      ],
+      ..._buildInfoRows(config),
+      SectionLabel(l10n.orderHistory),
+      if (orders.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+            vertical: AppSpacing.xl,
+          ),
+          child: Text(
+            l10n.noOrderHistory,
+            style: AppTypography.body.copyWith(color: secondary),
+          ),
+        )
+      else
+        for (final o in orders) _orderRow(o, config, format),
+    ];
   }
 
-  Widget _buildAvatar(SegmentConfigProvider config) {
-    if (_device?.photo != null && _device!.photo!.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: CachedImage(
-          imageUrl: _device!.photo!,
-          width: 72,
-          height: 72,
-          fit: BoxFit.cover,
-        ),
-      );
+  List<Widget> _buildInfoRows(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final device = _device!;
+    final rows = <Widget>[];
+    void add(String label, String? value) {
+      if (value == null || value.isEmpty) return;
+      rows.add(AppListRow(title: label, trailing: value));
     }
-    return Container(
-      width: 72,
-      height: 72,
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey5.resolveFrom(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        config.deviceIcon,
-        size: 36,
-        color: CupertinoColors.systemGrey.resolveFrom(context),
-      ),
-    );
+
+    add(config.label(LabelKeys.deviceBrand), device.manufacturer);
+    add(config.label(LabelKeys.deviceCategory), device.category);
+    rows.addAll(_customDataRows(config));
+    if (config.useDeviceManagement) {
+      rows.add(AppListRow(
+        leading: StatusDot(
+          color: DeviceStatusStyle.dotColor(device.status),
+          size: 10,
+        ),
+        title: l10n.status,
+        trailing: DeviceStatusStyle.label(l10n, device.status),
+      ));
+    }
+    if (rows.isEmpty) return const [];
+    return [SectionLabel(l10n.deviceDetailsLabel), ...rows];
   }
 
-  List<Widget> _buildCustomDataRows(SegmentConfigProvider config) {
+  List<Widget> _customDataRows(SegmentConfigProvider config) {
+    final data = _device!.customData;
+    if (data == null) return const [];
     final locale = context.l10n.localeName;
     final fields = config.fieldsFor('device');
 
-    // Build lookup: both full key (device.year) and short key (year) → label
     final labelMap = <String, String>{};
     for (final f in fields) {
       final label = f.getLabel(locale);
@@ -229,302 +394,129 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       labelMap[f.fieldName] = label;
     }
 
-    return _device!.customData!.entries
+    return data.entries
         .where((e) => e.value != null && e.value.toString().isNotEmpty)
         .map((entry) {
       final label = labelMap[entry.key] ?? entry.key;
       final value = entry.value.toString();
-
-      // Resolve select option labels
       final field = fields.cast<CustomField?>().firstWhere(
-        (f) => f!.key == entry.key || f.fieldName == entry.key,
-        orElse: () => null,
-      );
-      final displayValue = (field != null && field.type == 'select')
+            (f) => f!.key == entry.key || f.fieldName == entry.key,
+            orElse: () => null,
+          );
+      final display = (field != null && field.type == 'select')
           ? field.getOptionLabel(value, locale)
           : value;
-
-      return _buildInfoRow(label, displayValue);
+      return AppListRow(title: label, trailing: display);
     }).toList();
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return CupertinoListTile(
-      title: Text(label, style: const TextStyle(fontSize: 15)),
-      additionalInfo: Text(
-        value,
-        style: TextStyle(
-          fontSize: 15,
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-        ),
+  Widget _orderRow(Order order, SegmentConfigProvider config, FormatService format) {
+    final l10n = context.l10n;
+    final isOpen = order.status == 'approved' || order.status == 'progress';
+    final late = isOpen &&
+        order.dueDate != null &&
+        order.dueDate!.isBefore(DateTime.now());
+    final dotColor =
+        late ? OrderStatusStyle.overdueColor : OrderStatusStyle.dotColor(order.status);
+    final statusText = late ? l10n.orderOverdue : config.getStatus(order.status);
+    final number = order.number == null ? '' : ' #${order.number}';
+
+    return AppListRow(
+      leading: StatusDot(color: dotColor),
+      title: '${l10n.order}$number',
+      subtitle: [
+        statusText,
+        if (order.createdAt != null) format.formatDate(order.createdAt),
+      ].join(' · '),
+      trailing: order.total == null ? null : format.formatCurrency(order.total),
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/order',
+        arguments: {'order': order},
       ),
     );
   }
 
-  Widget _buildOrderHistory(SegmentConfigProvider config, FormatService formatService) {
-    if (_orderStream == null) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-          child: Center(
-            child: Text(
-              context.l10n.noOrderHistory,
-              style: TextStyle(
-                fontSize: 15,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
+  Widget _buildContractsSection() {
+    final stream = _contractStream;
+    if (stream == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
     return StreamBuilder<List<Order?>>(
-      stream: _orderStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CupertinoActivityIndicator()),
-            ),
-          );
-        }
-
-        final orders = snapshot.data?.whereType<Order>().toList() ?? [];
-
-        if (orders.isEmpty) {
-          return SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-              child: Center(
-                child: Text(
-                  context.l10n.noOrderHistory,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final order = orders[index];
-              return _buildOrderItem(order, config, formatService, index == orders.length - 1);
-            },
-            childCount: orders.length,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildOrderItem(Order order, SegmentConfigProvider config, FormatService formatService, bool isLast) {
-    final statusLabel = config.getStatus(order.status);
-    
-    final dateStr = order.createdAt != null
-        ? formatService.formatDate(order.createdAt!)
-        : '';
-
-    return Container(
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, '/order', arguments: {'order': order});
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  // Status dot
-                  StatusDot(
-                    color: OrderStatusStyle.dotColor(order.status),
-                    size: 10,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '#${order.number ?? ''} - $statusLabel',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.label.resolveFrom(context),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${order.customer?.name ?? ''} $dateStr',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (order.total != null)
-                    Text(
-                      formatService.formatCurrency(order.total!),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: CupertinoColors.label.resolveFrom(context),
-                      ),
-                    ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    CupertinoIcons.chevron_right,
-                    size: 16,
-                    color: CupertinoColors.systemGrey3.resolveFrom(context),
-                  ),
-                ],
-              ),
-            ),
-            if (!isLast)
-              Divider(
-                height: 1,
-                indent: 38,
-                color: CupertinoColors.systemGrey5.resolveFrom(context),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContractsSection(SegmentConfigProvider config, FormatService formatService) {
-    if (_contractStream == null) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
-    return StreamBuilder<List<Order?>>(
-      stream: _contractStream,
+      stream: stream,
       builder: (context, snapshot) {
         final contracts = snapshot.data
-            ?.whereType<Order>()
-            .where((o) => o.contract?.active == true)
-            .toList() ?? [];
-
+                ?.whereType<Order>()
+                .where((o) => o.contract?.active == true)
+                .toList() ??
+            [];
         if (contracts.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
-
-        return SliverMainAxisGroup(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-                child: Text(
-                  context.l10n.contracts.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
+        final l10n = context.l10n;
+        final format = FormatService()..setLocale(l10n.localeName);
+        return SliverList(
+          delegate: SliverChildListDelegate([
+            SectionLabel(l10n.contracts),
+            for (final order in contracts)
+              AppListRow(
+                leading: Icon(
+                  CupertinoIcons.repeat,
+                  size: 18,
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+                title:
+                    '${l10n.order}${order.number == null ? '' : ' #${order.number}'} · ${_frequencyLabel(order.contract!.frequency)}',
+                subtitle: order.contract!.nextDueDate == null
+                    ? null
+                    : '${l10n.contractNextDue}: ${format.formatDate(order.contract!.nextDueDate!)}',
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  '/order',
+                  arguments: {'order': order},
                 ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final order = contracts[index];
-                  final contract = order.contract!;
-                  final freq = _contractFrequencyLabel(contract.frequency);
-                  final nextDue = contract.nextDueDate != null
-                      ? formatService.formatDate(contract.nextDueDate!)
-                      : '';
-
-                  return Container(
-                    color: CupertinoColors.systemBackground.resolveFrom(context),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/order', arguments: {'order': order});
-                      },
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.repeat,
-                                  size: 18,
-                                  color: CupertinoColors.systemOrange.resolveFrom(context),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '#${order.number ?? ''} - $freq',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: CupertinoColors.label.resolveFrom(context),
-                                        ),
-                                      ),
-                                      if (nextDue.isNotEmpty) ...[
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${context.l10n.contractNextDue}: $nextDue',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  CupertinoIcons.chevron_right,
-                                  size: 16,
-                                  color: CupertinoColors.systemGrey3.resolveFrom(context),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (index < contracts.length - 1)
-                            Divider(
-                              height: 1,
-                              indent: 46,
-                              color: CupertinoColors.systemGrey5.resolveFrom(context),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                childCount: contracts.length,
-              ),
-            ),
-          ],
+          ]),
         );
       },
     );
   }
 
-  String _contractFrequencyLabel(String? frequency) {
+  String _frequencyLabel(String? frequency) {
+    final l10n = context.l10n;
     switch (frequency) {
       case 'daily':
-        return context.l10n.frequencyDaily;
+        return l10n.frequencyDaily;
       case 'weekly':
-        return context.l10n.frequencyWeekly;
+        return l10n.frequencyWeekly;
       case 'monthly':
-        return context.l10n.frequencyMonthly;
+        return l10n.frequencyMonthly;
       case 'yearly':
-        return context.l10n.frequencyYearly;
+        return l10n.frequencyYearly;
       default:
         return frequency ?? '';
     }
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+      color: AppColors.accent.resolveFrom(context),
+      borderRadius: BorderRadius.circular(AppRadii.button),
+      onPressed: onPressed,
+      child: Text(
+        label,
+        style: AppTypography.bodyStrong.copyWith(
+          color: AppColors.onAccent.resolveFrom(context),
+        ),
+      ),
+    );
   }
 }
