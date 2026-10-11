@@ -32,6 +32,12 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Share Extension ("Compartilhar -> PraticOS"): only needs the search paths to
+  # import receive_sharing_intent; the frameworks are loaded from the app.
+  target 'ShareExtension' do
+    inherit! :search_paths
+  end
 end
 
 target 'RunnerUITests' do
