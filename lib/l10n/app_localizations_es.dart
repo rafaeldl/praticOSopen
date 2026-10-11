@@ -5292,4 +5292,51 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get companySettingSaveError =>
       'No se pudo guardar. Revisa la conexión e intenta de nuevo.';
+
+  @override
+  String customerSpentValue(String value) {
+    return 'gastó $value';
+  }
+
+  @override
+  String customerOwesValue(String value) {
+    return 'Falta cobrar $value';
+  }
+
+  @override
+  String askOrderForCustomer(String name) {
+    return '¿Abrir una OS para $name?';
+  }
+
+  @override
+  String askOrderForDevice(String device) {
+    return '¿Abrir una OS para este $device?';
+  }
+
+  @override
+  String addAnotherDevice(String device) {
+    return 'Agregar otro $device';
+  }
+
+  @override
+  String get latestOrders => 'Últimas OS';
+
+  @override
+  String ordersOfDevice(String device) {
+    return 'OS de este $device';
+  }
+
+  @override
+  String orderCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceOwnerPrefix => 'de ';
 }

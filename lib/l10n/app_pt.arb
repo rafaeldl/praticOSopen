@@ -2672,5 +2672,21 @@
   "deviceControlRow": "Controle de {devices}",
   "@deviceControlRow": {"placeholders": {"devices": {"type": "String"}}},
   "deviceControlRowHint": "Histórico e lista completa",
-  "companySettingSaveError": "Não deu para salvar. Confira a internet e tente de novo."
+  "companySettingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
+  "customerSpentValue": "gastou {value}",
+  "@customerSpentValue": {"placeholders": {"value": {"type": "String"}}},
+  "customerOwesValue": "Falta receber {value}",
+  "@customerOwesValue": {"placeholders": {"value": {"type": "String"}}},
+  "askOrderForCustomer": "Abrir uma OS para {name}?",
+  "@askOrderForCustomer": {"placeholders": {"name": {"type": "String"}}},
+  "askOrderForDevice": "Abrir uma OS para este {device}?",
+  "@askOrderForDevice": {"placeholders": {"device": {"type": "String"}}},
+  "addAnotherDevice": "Cadastrar outro {device}",
+  "@addAnotherDevice": {"placeholders": {"device": {"type": "String"}}},
+  "latestOrders": "Últimas OS",
+  "ordersOfDevice": "OS deste {device}",
+  "@ordersOfDevice": {"placeholders": {"device": {"type": "String"}}},
+  "orderCountShort": "{count, plural, =1{1 OS} other{{count} OS}}",
+  "@orderCountShort": {"placeholders": {"count": {"type": "int"}}},
+  "deviceOwnerPrefix": "da "
 }

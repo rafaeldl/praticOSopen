@@ -10,6 +10,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/routes.dart';
@@ -88,7 +89,7 @@ void main() {
     // initialRoute also generates '/'; only the tap matters.
     pushed.clear();
 
-    final tile = find.textContaining('#42');
+    final tile = find.textContaining('OS 42');
     await tester.scrollUntilVisible(tile, 200);
     await tester.tap(tile);
     await tester.pumpAndSettle();
@@ -164,7 +165,7 @@ void main() {
     expect(find.textContaining('ABC1D23'), findsOneWidget);
     expect(find.text('Ana Ribeiro'), findsWidgets);
     expect(find.text('Nova OS'), findsOneWidget);
-    expect(find.textContaining('#7'), findsOneWidget);
+    expect(find.textContaining('OS 7'), findsOneWidget);
 
     await tester.tap(find.text('Nova OS'));
     await tester.pumpAndSettle();
@@ -207,6 +208,49 @@ void main() {
         'c-new');
   });
 
+  testWidgets('subtitle links the owner, the question precedes Nova OS, '
+      'and there is no Cliente or Dados section', (tester) async {
+    final owner = Customer()
+      ..id = 'c1'
+      ..name = 'Ana Ribeiro';
+    final device = Device()
+      ..id = 'd1'
+      ..name = 'VW Gol 2018'
+      ..serial = 'QXX1G49'
+      ..status = 'active';
+    final orders = [
+      Order()
+        ..id = 'o1'
+        ..number = 183
+        ..status = 'progress'
+        ..total = 1250
+        ..dueDate = DateTime.now().subtract(const Duration(days: 1))
+        ..services = [
+          OrderService()..service = (ServiceAggr()..name = 'Revisão completa'),
+        ],
+    ];
+    final pushed = await pumpDetail(tester, device, orders, customer: owner);
+
+    expect(find.textContaining('QXX1G49 · da '), findsOneWidget);
+    expect(find.textContaining('Abrir uma OS para este'), findsOneWidget);
+    expect(find.text('Cliente'), findsNothing);
+    expect(find.text('Dados'), findsNothing);
+    expect(find.text('Ativo'), findsNothing);
+    expect(find.text('OS 183 · Revisão completa'), findsOneWidget);
+    expect(find.text('Atrasada'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.textContaining('Abrir uma OS para este')).dy,
+      lessThan(tester.getTopLeft(find.text('Nova OS')).dy),
+    );
+
+    await tester.tap(find.text('Ana Ribeiro'));
+    await tester.pumpAndSettle();
+    expect(pushed.single.name, '/customer_detail');
+    final args = pushed.single.arguments as Map;
+    expect((args['customer'] as Customer).id, 'c1');
+    expect(args['previousTitle'], 'VW Gol 2018');
+  });
+
   testWidgets('vehicle without orders shows the empty history',
       (tester) async {
     final device = Device()
@@ -214,7 +258,7 @@ void main() {
       ..name = 'Fiat Uno';
     await pumpDetail(tester, device, const []);
     expect(find.text('Nenhuma ordem de serviço registrada'), findsOneWidget);
-    expect(find.text('Histórico de OS'), findsOneWidget);
+    expect(find.textContaining('OS deste'), findsOneWidget);
     expect(find.text('Nova OS'), findsOneWidget);
   });
 
@@ -231,7 +275,7 @@ void main() {
         ..total = 150,
     ];
     await pumpDetail(tester, device, orders, showPrices: false);
-    expect(find.textContaining('#7'), findsOneWidget);
+    expect(find.textContaining('OS 7'), findsOneWidget);
     expect(find.textContaining('150,00'), findsNothing);
   });
 }

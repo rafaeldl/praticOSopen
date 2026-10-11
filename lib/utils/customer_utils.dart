@@ -154,3 +154,15 @@ String whatsappNumber(String phone) {
   if (digits.length == 10 || digits.length == 11) digits = '55$digits';
   return digits;
 }
+
+/// How many of [orders] include the device [deviceId] (in `devices` or the
+/// legacy single `device`).
+int orderCountForDevice(List<Order> orders, String? deviceId) {
+  if (deviceId == null) return 0;
+  return orders.where((o) {
+    final devices = (o.devices?.isNotEmpty ?? false)
+        ? o.devices!
+        : [if (o.device != null) o.device!];
+    return devices.any((d) => d.id == deviceId);
+  }).length;
+}

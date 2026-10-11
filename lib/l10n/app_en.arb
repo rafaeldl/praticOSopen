@@ -2579,5 +2579,14 @@
   "contractsRowHint": "Orders that repeat by themselves",
   "deviceControlRow": "{devices} tracking",
   "deviceControlRowHint": "History and full list",
-  "companySettingSaveError": "Couldn't save. Check your connection and try again."
+  "companySettingSaveError": "Couldn't save. Check your connection and try again.",
+  "customerSpentValue": "spent {value}",
+  "customerOwesValue": "Owes {value}",
+  "askOrderForCustomer": "Open a work order for {name}?",
+  "askOrderForDevice": "Open a work order for this {device}?",
+  "addAnotherDevice": "Add another {device}",
+  "latestOrders": "Latest work orders",
+  "ordersOfDevice": "Work orders of this {device}",
+  "orderCountShort": "{count, plural, =1{1 WO} other{{count} WO}}",
+  "deviceOwnerPrefix": "owner: "
 }
