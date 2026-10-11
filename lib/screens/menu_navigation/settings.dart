@@ -31,10 +31,18 @@ class _SettingsState extends State<Settings> {
   final AuthorizationService _authService = AuthorizationService.instance;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    // Once: calling this in build replaced the user stream on every rebuild
+    // (coming back from a pushed screen), and while the new stream had no
+    // value yet every permission read as false, hiding Sua empresa, Equipe,
+    // Catálogo, Checklists and Avaliações.
     _userStore.findCurrentUser();
-    // Set the UserStore instance for AuthorizationService to use
     AuthorizationService.setUserStore(_userStore);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
     final authStore = context.watch<AuthStore>();
     final subscription =

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/mobx/order_store.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_tab_store.dart';
@@ -77,9 +78,12 @@ class _FinancialTabState extends State<FinancialTab> {
     if (open != null) {
       open(context, order);
     } else {
-      await Navigator.of(
-        context,
-      ).pushNamed('/order', arguments: {'order': order});
+      // "Receber" of the order, as in the prototype (app-financeiro →
+      // app-receber); the order itself is one tap away from there.
+      await Navigator.of(context).pushNamed(
+        '/payment_management',
+        arguments: {'orderStore': OrderStore()..setOrder(order)},
+      );
     }
     // The order may have been paid there.
     if (mounted) _store.refresh();
