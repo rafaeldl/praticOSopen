@@ -4858,4 +4858,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Open the order';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return 'Which $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Other $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Register new $device';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return 'Delete “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Use “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Leave blank';
 }

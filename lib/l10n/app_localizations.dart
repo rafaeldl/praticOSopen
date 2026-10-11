@@ -8793,6 +8793,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir a OS'**
   String get receivedOpenOrder;
+
+  /// No description provided for @pickDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o {device}?'**
+  String pickDeviceTitle(String device);
+
+  /// No description provided for @otherDevicesSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros {devices}'**
+  String otherDevicesSection(String devices);
+
+  /// No description provided for @registerNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar {device} novo'**
+  String registerNewDevice(String device);
+
+  /// No description provided for @accumulatedDeleteConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar “{value}”?'**
+  String accumulatedDeleteConfirm(String value);
+
+  /// No description provided for @accumulatedUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar “{value}”'**
+  String accumulatedUse(String value);
+
+  /// No description provided for @accumulatedLeaveBlank.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deixar em branco'**
+  String get accumulatedLeaveBlank;
 }
 
 class _AppLocalizationsDelegate

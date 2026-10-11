@@ -4870,4 +4870,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir a OS';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return 'Qual é o $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Outros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Cadastrar $device novo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return 'Apagar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Deixar em branco';
 }

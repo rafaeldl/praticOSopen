@@ -81,6 +81,16 @@ double totalSpent(List<Order> orders) => orders
     .where((o) => o.status == 'done')
     .fold<double>(0, (sum, o) => sum + (o.total ?? 0));
 
+/// What the customer still owes ("Falta receber"): the open amount of every
+/// order that is not a quote, not canceled and not paid, in any month.
+double customerOwed(List<Order> orders) => orders
+    .where((o) =>
+        o.status != 'quote' && o.status != 'canceled' && o.payment != 'paid')
+    .fold<double>(0, (sum, o) {
+  final open = (o.total ?? 0) - (o.paidAmount ?? 0);
+  return open > 0 ? sum + open : sum;
+});
+
 /// Customer ids of the most recent [orders], distinct, newest first.
 List<String> recentCustomerIdsOf(List<Order> orders, {int max = 5}) {
   final sorted = [...orders]..sort(_newestFirst);

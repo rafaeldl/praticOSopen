@@ -2372,5 +2372,46 @@
     }
   },
   "receivedSaveFailed": "Could not save. Try again.",
-  "receivedOpenOrder": "Open the order"
+  "receivedOpenOrder": "Open the order",
+  "pickDeviceTitle": "Which {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Other {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Register new {device}",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Delete “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Use “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Leave blank"
 }

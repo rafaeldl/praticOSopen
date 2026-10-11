@@ -3,11 +3,13 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -20,15 +22,24 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Customer screen (`/customer_detail`, argument `customer`): call / WhatsApp,
 /// "Nova OS para Ana", the customer's vehicles and orders, and "Total gasto"
-/// (sum of the completed orders). Edit and delete live in the "…" menu.
+/// (sum of the completed orders) and, with the view-prices permission, "Falta
+/// receber" (what is still open on the customer's orders). Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
-  const CustomerDetailScreen({super.key, this.customer, this.directory});
+  const CustomerDetailScreen({
+    super.key,
+    this.customer,
+    this.directory,
+    this.canViewPrices,
+  });
 
   /// Falls back to the `customer` route argument.
   final Customer? customer;
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
+
+  /// Injected in tests; defaults to the `viewPrices` permission.
+  final bool Function()? canViewPrices;
 
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
@@ -56,6 +67,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       _orders = id == null ? Stream.value(const <Order>[]) : _directory.watchOrdersOf(id);
     });
   }
+
+  bool get _showMoney =>
+      widget.canViewPrices?.call() ??
+      AuthorizationService.instance.hasPermission(PermissionType.viewPrices);
 
   String get _firstName =>
       (_customer?.name ?? '').trim().split(RegExp(r'\s+')).first;
@@ -271,6 +286,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ],
       SectionLabel(l10n.ordersOfCustomer(name)),
       for (final o in orders) _orderRow(o, format),
+      if (_showMoney && customerOwed(orders) > 0)
+        _TotalLine(
+          label: l10n.financialToReceive,
+          value: format.formatCurrency(customerOwed(orders)),
+        ),
       _TotalLine(
         label: l10n.totalSpent,
         value: format.formatCurrency(totalSpent(orders)),

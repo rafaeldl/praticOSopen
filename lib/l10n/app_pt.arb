@@ -2434,5 +2434,46 @@
     }
   },
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
-  "receivedOpenOrder": "Abrir a OS"
+  "receivedOpenOrder": "Abrir a OS",
+  "pickDeviceTitle": "Qual é o {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Outros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Cadastrar {device} novo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Apagar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Deixar em branco"
 }

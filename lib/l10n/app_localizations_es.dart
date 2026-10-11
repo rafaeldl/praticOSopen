@@ -4880,4 +4880,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir la OS';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return '¿Cuál es el $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Otros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Registrar $device nuevo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return '¿Borrar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Dejar en blanco';
 }

@@ -342,11 +342,16 @@ void main() {
   group('customer detail', () {
     final ana = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001');
 
-    Future<Harness> pumpDetail(WidgetTester tester, FakeDirectory dir) async {
+    Future<Harness> pumpDetail(WidgetTester tester, FakeDirectory dir,
+        {bool prices = true}) async {
       final h = Harness();
       await h.pump(
         tester,
-        CustomerDetailScreen(customer: ana, directory: dir),
+        CustomerDetailScreen(
+          customer: ana,
+          directory: dir,
+          canViewPrices: () => prices,
+        ),
         direct: true,
       );
       return h;
@@ -376,6 +381,50 @@ void main() {
         find.text('R\$ 140,50'.replaceAll(' ', ' ')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('"Falta receber" sums the open amount of unpaid orders',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [
+            order(1, 'done', 100)..paidAmount = 40,
+            order(2, 'progress', 50),
+            order(3, 'done', 80)..payment = 'paid',
+            order(4, 'canceled', 500),
+            order(5, 'quote', 70),
+          ],
+        }),
+      );
+      await tester.scrollUntilVisible(find.text('Falta receber'), 300);
+      // 60 (100 - 40) + 50
+      expect(find.text('R\$ 110,00'.replaceAll(' ', '\u00a0')), findsOneWidget);
+    });
+
+    testWidgets('"Falta receber" is hidden without the view-prices permission',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [order(1, 'progress', 50)],
+        }),
+        prices: false,
+      );
+      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
+      expect(find.text('Falta receber'), findsNothing);
+    });
+
+    testWidgets('"Falta receber" is hidden when nothing is open',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [order(1, 'done', 50)..payment = 'paid'],
+        }),
+      );
+      await tester.scrollUntilVisible(find.text('Total gasto'), 300);
+      expect(find.text('Falta receber'), findsNothing);
     });
 
     testWidgets('customer without orders has no list and no total',
