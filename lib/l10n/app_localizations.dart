@@ -7329,6 +7329,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O Asaas está indisponível no momento. Tente novamente em instantes.'**
   String get asaasErrorUnavailable;
+
+  /// No description provided for @listLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
+  String get listLoadError;
 }
 
 class _AppLocalizationsDelegate

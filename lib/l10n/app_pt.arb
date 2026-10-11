@@ -1723,5 +1723,6 @@
   "asaasErrorInvalidInstallmentCount": "Número de parcelas inválido. Escolha de 2 a 12.",
   "asaasErrorChargeNotOpen": "Esta cobrança não está mais em aberto.",
   "asaasErrorValidation": "O Asaas recusou os dados da cobrança. Confira o CPF/CNPJ e o e-mail do cliente.",
-  "asaasErrorUnavailable": "O Asaas está indisponível no momento. Tente novamente em instantes."
+  "asaasErrorUnavailable": "O Asaas está indisponível no momento. Tente novamente em instantes.",
+  "listLoadError": "Não deu para carregar. Verifique a internet e tente de novo."
 }

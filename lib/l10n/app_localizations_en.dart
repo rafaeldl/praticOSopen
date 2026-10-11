@@ -3910,4 +3910,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get asaasErrorUnavailable =>
       'Asaas is unavailable right now. Please try again shortly.';
+
+  @override
+  String get listLoadError =>
+      'Could not load this. Check your connection and try again.';
 }

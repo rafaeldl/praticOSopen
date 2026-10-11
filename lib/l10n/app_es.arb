@@ -1657,5 +1657,6 @@
   "asaasErrorInvalidInstallmentCount": "Número de cuotas inválido. Elige de 2 a 12.",
   "asaasErrorChargeNotOpen": "Este cobro ya no está abierto.",
   "asaasErrorValidation": "Asaas rechazó los datos del cobro. Revisa el CPF/CNPJ y el correo del cliente.",
-  "asaasErrorUnavailable": "Asaas no está disponible en este momento. Inténtalo de nuevo en unos instantes."
+  "asaasErrorUnavailable": "Asaas no está disponible en este momento. Inténtalo de nuevo en unos instantes.",
+  "listLoadError": "No se pudo cargar. Revisa tu conexión e inténtalo de nuevo."
 }
