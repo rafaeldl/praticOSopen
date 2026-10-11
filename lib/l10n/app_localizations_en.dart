@@ -4969,4 +4969,66 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get segmentLoadError =>
       'Could not open your company. Check your internet and try again.';
+
+  @override
+  String get orderAssistantHint =>
+      'Take a photo of the plate and say the service';
+
+  @override
+  String get orderAssistantPlaceholder =>
+      'Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450';
+
+  @override
+  String get orderAssistantDone => 'Done';
+
+  @override
+  String get orderAssistantAddPhoto => 'Take another photo';
+
+  @override
+  String orderAssistantPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderAssistantReading => 'Reading what you sent…';
+
+  @override
+  String get orderAssistantFilledNote =>
+      'Check what is highlighted in yellow before saving.';
+
+  @override
+  String orderAssistantCustomerGuess(String name) {
+    return 'I heard “$name”. Tap to choose the customer';
+  }
+
+  @override
+  String orderAssistantDeviceGuess(String device) {
+    return '“$device” is not registered';
+  }
+
+  @override
+  String get orderAssistantErrorTitle => 'Assistant';
+
+  @override
+  String get orderAssistantErrorDisabled =>
+      'The assistant is not available for your company yet.';
+
+  @override
+  String orderAssistantErrorQuota(String limit) {
+    return 'You have used this month\'s $limit assistant requests. You can keep filling it in by hand.';
+  }
+
+  @override
+  String get orderAssistantErrorUnavailable =>
+      'Couldn\'t read it now. Try again or fill it in by hand.';
+
+  @override
+  String get orderAssistantNothingFound =>
+      'I found nothing to add. Try again or fill it in by hand.';
 }

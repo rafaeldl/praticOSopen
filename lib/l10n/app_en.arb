@@ -2428,5 +2428,19 @@
   "inviteHaveAnotherCode": "I have another code",
   "inviteCreateOwnCompany": "Create my own company",
   "inviteCodePlaceholder": "E.g. 7K2P9QXA",
-  "segmentLoadError": "Could not open your company. Check your internet and try again."
+  "segmentLoadError": "Could not open your company. Check your internet and try again.",
+  "orderAssistantHint": "Take a photo of the plate and say the service",
+  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
+  "orderAssistantDone": "Done",
+  "orderAssistantAddPhoto": "Take another photo",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "orderAssistantReading": "Reading what you sent…",
+  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
+  "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
+  "orderAssistantDeviceGuess": "“{device}” is not registered",
+  "orderAssistantErrorTitle": "Assistant",
+  "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
+  "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
+  "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
+  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand."
 }

@@ -57,15 +57,20 @@ Próxima abertura: auth_wrapper resolve o campo → setCompanyConfig
 | Onde | Como |
 |---|---|
 | Aba Financeiro | `visibleAppTabs` + `viewFinancialReports` |
-| OS (nova e antiga) | Preço dos itens, total, "Falta receber", "Receber R$ X", PDF (`viewPrices`), cobrança Asaas (`chargeOrder`) |
+| OS (nova e antiga) | Preço dos itens, total, "Falta receber", "Receber R$ X" (`viewPrices`), cobrança Asaas (`chargeOrder`); o PDF continua no menu, sem valores |
 | Catálogo | Preço na lista e campo de preço no formulário (valor salvo é mantido) |
 | Seletor "O que vai na OS?" | Preços nas linhas |
 | Início | Valor nas linhas de OS |
 | Cliente / Veículo | Total das OS e "Total gasto" |
 
+## Fora do app
+
+| Onde | Como |
+|---|---|
+| Link do cliente `/q/{token}` | Functions (`routes/public/orders.routes.ts`) não envia preços, totais, pagamentos nem cobrança; `showValues: false` na resposta. Ver `docs/SHARE_LINK.md` |
+| PDF da OS | Variante sem valores (`OsPdfData.showValues`). Ver `docs/PDF_GENERATION.md` |
+
 ## Pendente (fora deste passo)
 
-- Link do cliente (`/q/{token}`, Functions `routes/public/orders.routes.ts`)
-  ainda mostra valores; o PDF no app fica oculto via `viewPrices`.
 - Painel admin (`firebase/web`) ainda não mostra o campo.
 - Assistente (IA): não perguntar/propor valores.
