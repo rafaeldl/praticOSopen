@@ -9657,6 +9657,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'**
   String get catalogTip;
+
+  /// No description provided for @teamTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipe'**
+  String get teamTitle;
+
+  /// No description provided for @teamSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{people} e {invites}'**
+  String teamSummary(String people, String invites);
+
+  /// No description provided for @teamPeopleCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 pessoa} other{{count} pessoas}}'**
+  String teamPeopleCount(int count);
+
+  /// No description provided for @teamInvitesCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 convite} other{{count} convites}}'**
+  String teamInvitesCount(int count);
+
+  /// No description provided for @teamInviteWaitingLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite esperando'**
+  String get teamInviteWaitingLabel;
+
+  /// No description provided for @teamInviteWaitingText.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} ainda não entrou. {expiry}'**
+  String teamInviteWaitingText(String name, String expiry);
+
+  /// No description provided for @teamInviteExpiresInDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{O convite vence em 1 dia.} other{O convite vence em {count} dias.}}'**
+  String teamInviteExpiresInDays(int count);
+
+  /// No description provided for @teamInviteExpiresToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'O convite vence hoje.'**
+  String get teamInviteExpiresToday;
+
+  /// No description provided for @teamInviteExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'O convite venceu.'**
+  String get teamInviteExpired;
+
+  /// No description provided for @teamResendInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reenviar convite'**
+  String get teamResendInvite;
+
+  /// No description provided for @teamWaitingSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando entrar'**
+  String get teamWaitingSection;
+
+  /// No description provided for @teamMembersSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Na equipe'**
+  String get teamMembersSection;
+
+  /// No description provided for @teamInviteSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite enviado · {expiry}'**
+  String teamInviteSent(String expiry);
+
+  /// No description provided for @teamInviteDueInDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{vence em 1 dia} other{vence em {count} dias}}'**
+  String teamInviteDueInDays(int count);
+
+  /// No description provided for @teamInviteDueToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'vence hoje'**
+  String get teamInviteDueToday;
+
+  /// No description provided for @teamInviteDueExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'venceu'**
+  String get teamInviteDueExpired;
+
+  /// No description provided for @teamYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} (você)'**
+  String teamYou(String name);
+
+  /// No description provided for @teamInviteAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar outra pessoa'**
+  String get teamInviteAnother;
+
+  /// No description provided for @teamInviteFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar uma pessoa'**
+  String get teamInviteFirst;
+
+  /// No description provided for @roleShortAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'vê e muda tudo'**
+  String get roleShortAdmin;
+
+  /// No description provided for @roleShortSupervisor.
+  ///
+  /// In pt, this message translates to:
+  /// **'coordena a equipe, não vê preços'**
+  String get roleShortSupervisor;
+
+  /// No description provided for @roleShortManager.
+  ///
+  /// In pt, this message translates to:
+  /// **'vê faturamento e custos'**
+  String get roleShortManager;
+
+  /// No description provided for @roleShortConsultant.
+  ///
+  /// In pt, this message translates to:
+  /// **'faz orçamentos, vê só as suas OS'**
+  String get roleShortConsultant;
+
+  /// No description provided for @roleShortTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'faz os serviços, não vê preços'**
+  String get roleShortTechnician;
 }
 
 class _AppLocalizationsDelegate

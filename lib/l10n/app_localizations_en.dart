@@ -5428,4 +5428,116 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get catalogTip =>
       'Tip: you can add items right on the order by typing the name in the search.';
+
+  @override
+  String get teamTitle => 'Team';
+
+  @override
+  String teamSummary(String people, String invites) {
+    return '$people and $invites';
+  }
+
+  @override
+  String teamPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String teamInvitesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invites',
+      one: '1 invite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteWaitingLabel => 'Invite waiting';
+
+  @override
+  String teamInviteWaitingText(String name, String expiry) {
+    return '$name hasn\'t joined yet. $expiry';
+  }
+
+  @override
+  String teamInviteExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The invite expires in $count days.',
+      one: 'The invite expires in 1 day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteExpiresToday => 'The invite expires today.';
+
+  @override
+  String get teamInviteExpired => 'The invite has expired.';
+
+  @override
+  String get teamResendInvite => 'Resend invite';
+
+  @override
+  String get teamWaitingSection => 'Waiting to join';
+
+  @override
+  String get teamMembersSection => 'On the team';
+
+  @override
+  String teamInviteSent(String expiry) {
+    return 'Invite sent · $expiry';
+  }
+
+  @override
+  String teamInviteDueInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'expires in $count days',
+      one: 'expires in 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamInviteDueToday => 'expires today';
+
+  @override
+  String get teamInviteDueExpired => 'expired';
+
+  @override
+  String teamYou(String name) {
+    return '$name (you)';
+  }
+
+  @override
+  String get teamInviteAnother => 'Invite someone else';
+
+  @override
+  String get teamInviteFirst => 'Invite someone';
+
+  @override
+  String get roleShortAdmin => 'sees and changes everything';
+
+  @override
+  String get roleShortSupervisor => 'coordinates the team, doesn\'t see prices';
+
+  @override
+  String get roleShortManager => 'sees revenue and costs';
+
+  @override
+  String get roleShortConsultant => 'makes quotes, sees only their orders';
+
+  @override
+  String get roleShortTechnician => 'does the work, doesn\'t see prices';
 }

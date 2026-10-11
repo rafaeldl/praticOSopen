@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/collaborator_exception.dart';
@@ -8,6 +7,8 @@ import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/screens/menu_navigation/team_view.dart';
 import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
@@ -19,8 +20,6 @@ class CollaboratorListScreen extends StatefulWidget {
 
 class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
   // Default invite expiration days (must match collaborator_form_screen)
   static const int _inviteExpirationDays = 7;
@@ -33,294 +32,38 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       final canManage = _collaboratorStore.canManageCollaborators();
-      return CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
-        child: Material(
-          type: MaterialType.transparency,
-          child: CustomScrollView(
-            slivers: [
-              CupertinoSliverNavigationBar(
-                largeTitle: Text(context.l10n.collaborators),
-                trailing: canManage
-                    ? CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        child: const Icon(CupertinoIcons.add),
-                        onPressed: () async {
-                          final result = await AppSheet.show<bool>(
-                              context, (_) => const CollaboratorFormScreen());
-                          if (result == true) {
-                            _collaboratorStore.loadCollaborators();
-                          }
-                        },
-                      )
-                    : null,
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: CupertinoSearchTextField(
-                    controller: _searchController,
-                    placeholder: context.l10n.searchCollaborator,
-                    onChanged: (value) {
-                      setState(() => _searchQuery = value.toLowerCase());
-                    },
-                  ),
-                ),
-              ),
-              if (_collaboratorStore.isLoading)
-                const SliverFillRemaining(
-                  child: Center(child: CupertinoActivityIndicator()),
-                )
-              else if (_collaboratorStore.errorMessage != null)
-                SliverFillRemaining(
-                  child: Center(child: Text(_collaboratorStore.errorMessage!)),
-                )
-              else
-                _buildList(canManage),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
-          ),
-        ),
+      return TeamView(
+        members: _collaboratorStore.collaborators.toList(),
+        invites: _collaboratorStore.pendingInvites.toList(),
+        currentUserId: Global.currentUser?.uid,
+        canManage: canManage,
+        loading: _collaboratorStore.isLoading,
+        error: _collaboratorStore.errorMessage,
+        onRetry: _collaboratorStore.loadCollaborators,
+        onTapMember: _showActionSheet,
+        onTapInvite: _showInviteActionSheet,
+        onResendInvite: _showInviteActionSheet,
+        onInvite: _invite,
       );
     });
   }
 
-  Widget _buildList(bool canManage) {
-    final filteredList = _searchQuery.isEmpty
-        ? _collaboratorStore.collaborators.toList()
-        : _collaboratorStore.collaborators.where((membership) {
-            final name = membership.user?.name?.toLowerCase() ?? '';
-            final email = membership.user?.email?.toLowerCase() ?? '';
-            return name.contains(_searchQuery) || email.contains(_searchQuery);
-          }).toList();
-
-    final filteredInvites = _searchQuery.isEmpty
-        ? _collaboratorStore.pendingInvites.toList()
-        : _collaboratorStore.pendingInvites.where((invite) {
-            final name = invite.name?.toLowerCase() ?? '';
-            final email = invite.email?.toLowerCase() ?? '';
-            final phone = invite.phone?.toLowerCase() ?? '';
-            return name.contains(_searchQuery) ||
-                email.contains(_searchQuery) ||
-                phone.contains(_searchQuery);
-          }).toList();
-
-    if (filteredList.isEmpty && filteredInvites.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(child: Text(context.l10n.noCollaboratorFound)),
-      );
-    }
-
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          // Primeiro mostramos os convites pendentes
-          if (filteredInvites.isNotEmpty) {
-            if (index == 0) {
-              return _buildSectionHeader(context.l10n.pendingInvitations.toUpperCase());
-            }
-            if (index <= filteredInvites.length) {
-              final invite = filteredInvites[index - 1];
-              return _buildInviteRow(invite, canManage, index == filteredInvites.length);
-            }
-            // Depois os colaboradores ativos
-            if (index == filteredInvites.length + 1) {
-              return _buildSectionHeader(context.l10n.collaborators.toUpperCase());
-            }
-            final membershipIndex = index - filteredInvites.length - 2;
-            if (membershipIndex < filteredList.length) {
-              final membership = filteredList[membershipIndex];
-              return _buildMembershipRow(membership, canManage, membershipIndex == filteredList.length - 1);
-            }
-          } else {
-            // Sem convites, mostra só os colaboradores
-            final membership = filteredList[index];
-            return _buildMembershipRow(membership, canManage, index == filteredList.length - 1);
-          }
-          return const SizedBox.shrink();
-        },
-        childCount: filteredInvites.isNotEmpty
-            ? filteredList.length + filteredInvites.length + 2 // +2 para os headers
-            : filteredList.length,
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-        ),
-      ),
-    );
-  }
-
-  /// Returns the expiration label and color for an invite.
-  (String, Color) _getExpirationInfo(Invite invite) {
-    if (invite.expiresAt == null) {
-      return ('', CupertinoColors.secondaryLabel);
-    }
-
-    final now = DateTime.now();
-    final diff = invite.expiresAt!.difference(now);
-
-    if (diff.isNegative) {
-      return (context.l10n.expired, CupertinoColors.systemRed);
-    }
-
-    if (diff.inHours < 1) {
-      return (context.l10n.inviteExpiresSoon, CupertinoColors.systemOrange);
-    }
-
-    if (diff.inDays < 1) {
-      final hours = diff.inHours;
-      return (context.l10n.inviteExpiresInHours(hours), CupertinoColors.systemOrange);
-    }
-
-    final days = diff.inDays;
-    final color = days <= 2 ? CupertinoColors.systemOrange : CupertinoColors.secondaryLabel;
-    return (context.l10n.inviteExpiresInDays(days), color);
-  }
-
-  Widget _buildInviteRow(Invite invite, bool canManage, bool isLast) {
-    final (expirationLabel, expirationColor) = _getExpirationInfo(invite);
-    final primaryText = invite.name ?? invite.email ?? context.l10n.emailNotProvided;
-
-    Widget content = Container(
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      child: InkWell(
-        onTap: canManage ? () => _showInviteActionSheet(invite) : null,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      CupertinoIcons.envelope_badge,
-                      size: 22,
-                      color: CupertinoColors.systemOrange,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          primaryText,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.label.resolveFrom(context),
-                          ),
-                        ),
-                        if (invite.name != null && invite.email != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            invite.email!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                context.l10n.pending,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: CupertinoColors.systemOrange,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${RolePermissions.getRoleIcon(invite.role ?? RolesType.technician)} ${_getRoleLabel(invite.role)}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (expirationLabel.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            expirationLabel,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: expirationColor,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (canManage)
-                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
-                ],
-              ),
-            ),
-            if (!isLast)
-              Divider(
-                height: 1,
-                indent: 72,
-                color: CupertinoColors.systemGrey5.resolveFrom(context),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    if (!canManage) return content;
-
-    return Dismissible(
-      key: Key('invite_${invite.id}'),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: CupertinoColors.systemRed,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(CupertinoIcons.trash, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
-        _showCancelInviteConfirmation(invite);
-        return false;
-      },
-      child: content,
-    );
+  Future<void> _invite() async {
+    final result = await AppSheet.show<bool>(
+        context, (_) => const CollaboratorFormScreen());
+    if (result == true) _collaboratorStore.loadCollaborators();
   }
 
   Future<void> _cancelAndInviteAgain(Invite invite) async {
@@ -421,113 +164,6 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
-  Widget _buildMembershipRow(Membership membership, bool canManage, bool isLast) {
-    Widget content = Container(
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      child: InkWell(
-        onTap: canManage ? () => _showActionSheet(membership) : null,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemGrey5.resolveFrom(context),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      membership.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-                      style: TextStyle(
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          membership.user?.name ?? context.l10n.userWithoutName,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.label.resolveFrom(context),
-                          ),
-                        ),
-                        if (membership.user?.email != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            membership.user!.email!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 4),
-                        Text(
-                          '${RolePermissions.getRoleIcon(membership.role ?? RolesType.technician)} ${_getRoleLabel(membership.role)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (canManage)
-                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
-                ],
-              ),
-            ),
-            if (!isLast)
-              Divider(
-                height: 1,
-                indent: 72,
-                color: CupertinoColors.systemGrey5.resolveFrom(context),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    if (!canManage) return content;
-
-    return Dismissible(
-      key: Key(membership.userId!),
-      direction: DismissDirection.horizontal,
-      background: Container(
-        color: CupertinoColors.systemBlue,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20),
-        child: const Icon(CupertinoIcons.pencil, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        color: CupertinoColors.systemRed,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(CupertinoIcons.trash, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          _showEditRoleDialog(membership);
-          return false;
-        } else {
-          _showRemoveConfirmation(membership);
-          return false;
-        }
-      },
-      child: content,
-    );
-  }
 
   String _getRoleLabel(RolesType? role) {
     if (role == null) return context.l10n.roleTechnician;
@@ -584,7 +220,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${RolePermissions.getRoleIcon(role)} ${_getRoleLabel(role)}',
+                      _getRoleLabel(role),
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
