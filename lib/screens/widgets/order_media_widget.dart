@@ -10,7 +10,6 @@ import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -18,8 +17,7 @@ import 'package:praticos/constants/label_keys.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:praticos/widgets/photo_limit_dialog.dart';
+import 'package:praticos/screens/widgets/order_media_actions.dart';
 
 class OrderMediaWidget extends StatelessWidget {
   final OrderStore store;
@@ -185,7 +183,7 @@ class OrderMediaWidget extends StatelessWidget {
 
   Widget _buildAddButton(BuildContext context, double size) {
     return GestureDetector(
-      onTap: () => _showAddMediaOptions(context),
+      onTap: () => showAddOrderMediaSheet(context, store),
       child: Container(
         width: size,
         height: size,
@@ -227,14 +225,14 @@ class OrderMediaWidget extends StatelessWidget {
             docs: docs,
             onOpen: (doc) {
               Navigator.pop(sheetCtx);
-              _openDocument(context, doc);
+              openOrderDocument(context, doc);
             },
             onConfirmDelete: (index) async {
-              final confirmed = await _showDeleteConfirmation(context);
+              final confirmed = await confirmDeleteOrderDocument(context);
               if (!confirmed) return false;
               final success = await store.deleteDocument(index);
               if (context.mounted) {
-                _showFeedback(
+                showOrderMediaFeedback(
                   context,
                   success
                       ? context.l10n.documentDeleted
@@ -255,34 +253,6 @@ class OrderMediaWidget extends StatelessWidget {
     );
   }
 
-  Future<bool> _showDeleteConfirmation(BuildContext context) async {
-    bool confirmed = false;
-    await showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(context.l10n.deleteDocument),
-        content: Text(context.l10n.confirmDeleteDocument),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () {
-              confirmed = false;
-              Navigator.pop(ctx);
-            },
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text(context.l10n.delete),
-            onPressed: () {
-              confirmed = true;
-              Navigator.pop(ctx);
-            },
-          ),
-        ],
-      ),
-    );
-    return confirmed;
-  }
 
   Widget _buildCoverPhoto(BuildContext context, SegmentConfigProvider config) {
     final OrderPhoto coverPhoto = store.photos.first;
@@ -469,237 +439,11 @@ class OrderMediaWidget extends StatelessWidget {
 
   // --- Add media (unified action sheet) ---
 
-  void _showAddMediaOptions(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          // Add photo (camera)
-          CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.camera, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.takePhoto),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await store.addPhotoFromCamera();
-              if (!success && context.mounted) {
-                final limitResult = store.photoLimitResult;
-                if (limitResult != null && !limitResult.isAllowed) {
-                  showPhotoLimitDialog(context, limitResult);
-                }
-              }
-            },
-          ),
-          // Add photo (gallery)
-          CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.photo, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.gallery),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await store.addPhotoFromGallery();
-              if (!success && context.mounted) {
-                final limitResult = store.photoLimitResult;
-                if (limitResult != null && !limitResult.isAllowed) {
-                  showPhotoLimitDialog(context, limitResult);
-                }
-              }
-            },
-          ),
-          // Add as document (file picker)
-          CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.doc, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.fromFiles),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final photoService = PhotoService();
-              final platformFile = await photoService.pickDocument();
-              if (platformFile != null &&
-                  platformFile.path != null &&
-                  context.mounted) {
-                final file = File(platformFile.path!);
-                final contentType =
-                    _getContentType(platformFile.extension ?? '');
-                _selectDocumentType(
-                  context,
-                  file,
-                  contentType,
-                  platformFile.name,
-                  fileSize: platformFile.size,
-                );
-              }
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(ctx),
-        ),
-      ),
-    );
-  }
 
-  void _selectDocumentType(
-    BuildContext context,
-    File file,
-    String contentType,
-    String fileName, {
-    int? fileSize,
-  }) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(context.l10n.selectDocumentType),
-        actions: [
-          _buildDocTypeAction(ctx, context, file, contentType, fileName,
-              OrderDocumentType.receipt, context.l10n.receipt,
-              fileSize: fileSize),
-          _buildDocTypeAction(ctx, context, file, contentType, fileName,
-              OrderDocumentType.invoice, context.l10n.invoice,
-              fileSize: fileSize),
-          _buildDocTypeAction(ctx, context, file, contentType, fileName,
-              OrderDocumentType.contract, context.l10n.contract,
-              fileSize: fileSize),
-          _buildDocTypeAction(ctx, context, file, contentType, fileName,
-              OrderDocumentType.warranty, context.l10n.warranty,
-              fileSize: fileSize),
-          _buildDocTypeAction(ctx, context, file, contentType, fileName,
-              OrderDocumentType.other, context.l10n.other,
-              fileSize: fileSize),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(ctx),
-        ),
-      ),
-    );
-  }
 
-  CupertinoActionSheetAction _buildDocTypeAction(
-    BuildContext sheetCtx,
-    BuildContext parentCtx,
-    File file,
-    String contentType,
-    String fileName,
-    OrderDocumentType type,
-    String label, {
-    int? fileSize,
-  }) {
-    return CupertinoActionSheetAction(
-      child: Text(label),
-      onPressed: () async {
-        Navigator.pop(sheetCtx);
-        final success = await store.addDocument(
-          file, type, contentType, fileName,
-          fileSize: fileSize,
-        );
-        if (parentCtx.mounted) {
-          if (success) {
-            _showFeedback(parentCtx, parentCtx.l10n.documentAdded);
-          } else {
-            _showFeedback(parentCtx, parentCtx.l10n.errorUploadingDocument,
-                isError: true);
-          }
-        }
-      },
-    );
-  }
 
-  void _openDocument(BuildContext context, OrderDocument doc) async {
-    if (doc.url == null && doc.storagePath == null) return;
 
-    // Refresh URL from storagePath to avoid stale tokens
-    String? url = doc.url;
-    if (doc.storagePath != null) {
-      final freshUrl = await PhotoService().getFreshDownloadUrl(doc.storagePath!);
-      if (freshUrl != null) {
-        url = freshUrl;
-        doc.url = freshUrl;
-      }
-    }
 
-    if (url == null) return;
-    if (!context.mounted) return;
-
-    if (doc.isImage) {
-      Navigator.of(context).push(
-        CupertinoPageRoute(
-          builder: (context) => _DocumentImageViewer(
-            url: url!,
-            title: doc.fileName ?? context.l10n.documents,
-          ),
-        ),
-      );
-    } else {
-      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    }
-  }
-
-  void _showFeedback(BuildContext context, String message,
-      {bool isError = false}) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isError
-                  ? CupertinoIcons.xmark_circle_fill
-                  : CupertinoIcons.checkmark_circle_fill,
-              color: isError
-                  ? CupertinoColors.systemRed
-                  : CupertinoColors.systemGreen,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Flexible(child: Text(message)),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text(context.l10n.ok),
-            onPressed: () => Navigator.pop(ctx),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getContentType(String extension) {
-    switch (extension.toLowerCase()) {
-      case 'pdf':
-        return 'application/pdf';
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'doc':
-        return 'application/msword';
-      case 'docx':
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      default:
-        return 'application/octet-stream';
-    }
-  }
 }
 
 /// Tela de visualização de fotos em tela cheia (Cupertino style)
@@ -905,60 +649,6 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   }
 }
 
-/// Full-screen image viewer for document images
-class _DocumentImageViewer extends StatelessWidget {
-  final String url;
-  final String title;
-
-  const _DocumentImageViewer({
-    required this.url,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.black,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child:
-              const Icon(CupertinoIcons.back, color: CupertinoColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        middle: Text(
-          title,
-          style: const TextStyle(color: CupertinoColors.white),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-      child: SafeArea(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 3.0,
-          child: Center(
-            child: Image.network(
-              url,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const CupertinoActivityIndicator();
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  CupertinoIcons.exclamationmark_triangle,
-                  color: CupertinoColors.systemGrey,
-                  size: 48,
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Bottom sheet that lists attached documents with swipe-to-delete
 class _DocumentsSheet extends StatelessWidget {

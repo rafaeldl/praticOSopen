@@ -4365,6 +4365,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAddMore => 'Checklist, photos, comment and more';
 
   @override
+  String orderInThisOrder(String order) {
+    return 'In this $order';
+  }
+
+  @override
+  String get orderAddChecklist => 'Checklist';
+
+  @override
+  String get orderAddMedia => 'Photos or document';
+
+  @override
+  String get orderAddComment => 'Comment';
+
+  @override
+  String get orderAddAddress => 'Service address';
+
+  @override
+  String get orderAddSchedule => 'Schedule date and time';
+
+  @override
+  String get orderAddDiscount => 'Discount';
+
+  @override
+  String orderAddContract(String order) {
+    return 'Repeat this $order';
+  }
+
+  @override
+  String get orderAddOtherFields => 'Other fields';
+
+  @override
+  String orderChecklistMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions left',
+      one: '1 question left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get orderChecklistDone => 'Done';
+
+  @override
+  String get orderAddressChange => 'Change address';
+
+  @override
+  String get orderAddressRemove => 'Remove address';
+
+  @override
+  String get orderScheduleRemove => 'Remove schedule';
+
+  @override
+  String orderContractSummary(String frequency, String date) {
+    return '$frequency · next on $date';
+  }
+
+  @override
+  String get orderContractChange => 'Change contract';
+
+  @override
+  String get orderUploading => 'Uploading…';
+
+  @override
   String orderCancelConfirmTitle(String order) {
     return 'Cancel $order?';
   }
