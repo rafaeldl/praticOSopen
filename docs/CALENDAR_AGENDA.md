@@ -278,6 +278,8 @@ Future<void> scheduleOrderReminder({
 ### Callback
 
 - `onNotificationTap` — recebe `orderId` e `companyId` ao tocar na notificação, permitindo navegação direta para a OS
+- Ligado em `auth_wrapper.dart` (antes de `NotificationStore.initialize()`, para pegar também o toque que abriu o app fechado) a `NotificationTapHandler.handleTap` (`lib/services/notification_tap_handler.dart`), que abre `/order` com `Order()..id` pelo `navigatorKey` raiz — o mesmo caminho da lista de OS.
+- Se o `companyId` da notificação for de outra empresa do usuário, o toque é **ignorado** (o app só abre na empresa atual). A `OrderForm` carrega a OS da `Global.companyAggr`; abrir com outra empresa leria o tenant errado, e trocar de empresa a partir do toque reconstruiria a sessão inteira. Notificação sem `companyId` abre na empresa atual.
 
 ## Permissões Android
 

@@ -13,6 +13,8 @@ import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
 import 'package:praticos/screens/onboarding/segmentation_onboarding_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
@@ -456,6 +458,11 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useDeviceManagement: useDeviceManagement,
         useContracts: useContracts,
       );
+
+      // Wire push taps before initialize(), which replays the tap that
+      // launched the app from a terminated state.
+      NotificationService.instance.onNotificationTap =
+          NotificationTapHandler.handleTap;
 
       // Initialize notifications after user is fully authenticated
       final notificationStore = context.read<NotificationStore>();
