@@ -5156,4 +5156,142 @@ class AppLocalizationsEn extends AppLocalizations {
   String saveEntityButton(String entity) {
     return 'Save $entity';
   }
+
+  @override
+  String get noticesTitle => 'Notices';
+
+  @override
+  String noticesNewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new',
+      one: '1 new',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noticesMarkAllRead => 'Mark all as read';
+
+  @override
+  String get noticesSectionNew => 'New';
+
+  @override
+  String get noticesSectionBefore => 'Earlier';
+
+  @override
+  String get noticesEmpty => 'No notices yet.';
+
+  @override
+  String get timeAgoNow => 'now';
+
+  @override
+  String timeAgoMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes ago',
+      one: '1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractsSubtitle(String order) {
+    return '$order that repeat on their own';
+  }
+
+  @override
+  String get contractsTabActive => 'Active';
+
+  @override
+  String get contractsTabEnded => 'Ended';
+
+  @override
+  String contractEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count days',
+      one: 'Every day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count weeks',
+      one: 'Every week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count months',
+      one: 'Every month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractEveryYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count years',
+      one: 'Every year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String contractNextOrderOn(String date, String order) {
+    return 'Next $order on $date';
+  }
+
+  @override
+  String contractEndedOn(String date) {
+    return 'Ended on $date';
+  }
+
+  @override
+  String get contractEnded => 'Ended';
+
+  @override
+  String get contractsEmptyEnded => 'No ended contracts.';
+
+  @override
+  String contractsFooterHint(String order) {
+    return 'Contracts start inside a $order: turn on “Repeat this $order”.';
+  }
 }

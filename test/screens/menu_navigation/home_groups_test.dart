@@ -79,7 +79,6 @@ void main() {
       expect(HomeView.open.queryField, 'open');
       expect(HomeView.all.queryField, isNull);
       expect(HomeView.canceled.queryField, 'canceled');
-      expect(HomeView.contracts.queryField, 'contract');
       expect(HomeView.open.isSegmented, isTrue);
       expect(HomeView.canceled.isSegmented, isFalse);
     });

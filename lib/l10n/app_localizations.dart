@@ -9261,6 +9261,138 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar {entity}'**
   String saveEntityButton(String entity);
+
+  /// No description provided for @noticesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos'**
+  String get noticesTitle;
+
+  /// No description provided for @noticesNewCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 novo} other{{count} novos}}'**
+  String noticesNewCount(int count);
+
+  /// No description provided for @noticesMarkAllRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar todos como lidos'**
+  String get noticesMarkAllRead;
+
+  /// No description provided for @noticesSectionNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novos'**
+  String get noticesSectionNew;
+
+  /// No description provided for @noticesSectionBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes'**
+  String get noticesSectionBefore;
+
+  /// No description provided for @noticesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum aviso por enquanto.'**
+  String get noticesEmpty;
+
+  /// No description provided for @timeAgoNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'agora'**
+  String get timeAgoNow;
+
+  /// No description provided for @timeAgoMinutes.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 minuto} other{há {count} minutos}}'**
+  String timeAgoMinutes(int count);
+
+  /// No description provided for @timeAgoHours.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 hora} other{há {count} horas}}'**
+  String timeAgoHours(int count);
+
+  /// No description provided for @timeAgoDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{há 1 dia} other{há {count} dias}}'**
+  String timeAgoDays(int count);
+
+  /// No description provided for @contractsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{order} que se repetem sozinhas'**
+  String contractsSubtitle(String order);
+
+  /// No description provided for @contractsTabActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativos'**
+  String get contractsTabActive;
+
+  /// No description provided for @contractsTabEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrados'**
+  String get contractsTabEnded;
+
+  /// No description provided for @contractEveryDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo dia} other{A cada {count} dias}}'**
+  String contractEveryDays(int count);
+
+  /// No description provided for @contractEveryWeeks.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Toda semana} other{A cada {count} semanas}}'**
+  String contractEveryWeeks(int count);
+
+  /// No description provided for @contractEveryMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo mês} other{A cada {count} meses}}'**
+  String contractEveryMonths(int count);
+
+  /// No description provided for @contractEveryYears.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Todo ano} other{A cada {count} anos}}'**
+  String contractEveryYears(int count);
+
+  /// No description provided for @contractNextOrderOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima {order} em {date}'**
+  String contractNextOrderOn(String date, String order);
+
+  /// No description provided for @contractEndedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrado em {date}'**
+  String contractEndedOn(String date);
+
+  /// No description provided for @contractEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerrado'**
+  String get contractEnded;
+
+  /// No description provided for @contractsEmptyEnded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum contrato encerrado.'**
+  String get contractsEmptyEnded;
+
+  /// No description provided for @contractsFooterHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.'**
+  String contractsFooterHint(String order);
 }
 
 class _AppLocalizationsDelegate
