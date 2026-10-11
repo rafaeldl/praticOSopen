@@ -436,6 +436,10 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       final bool useScheduling = companyData?['useScheduling'] as bool? ?? true;
       final bool useDeviceManagement = companyData?['useDeviceManagement'] as bool? ?? false;
       final bool useContracts = companyData?['useContracts'] as bool? ?? false;
+      // Not backfilled: absent stays absent, so clients that predate the
+      // field keep their current behavior.
+      final bool useFinancial = companyData?['useFinancial'] as bool?
+          ?? segmentProvider.segmentUseFinancialDefault;
 
       // Backfill: persist resolved values on first access
       final needsUpdate = companyData?['fieldService'] == null
@@ -457,6 +461,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useScheduling: useScheduling,
         useDeviceManagement: useDeviceManagement,
         useContracts: useContracts,
+        useFinancial: useFinancial,
       );
 
       // Wire push taps before initialize(), which replays the tap that

@@ -97,7 +97,8 @@ class _SettingsState extends State<Settings> {
       case MoreDestination.company:
         _push(
           context,
-          MyCompanyScreen(
+          MyCompanySettings(
+            companyId: Global.companyAggr?.id,
             onOpenCompanyData: () =>
                 Navigator.pushNamed(context, '/company_form'),
           ),

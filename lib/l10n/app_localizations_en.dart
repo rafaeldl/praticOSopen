@@ -4592,8 +4592,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Prices on orders, receiving payments and the Financial tab';
 
   @override
-  String get valuesAndBillingSoon =>
-      'On. You will be able to turn it off soon.';
+  String get valuesAndBillingOffTitle => 'Turn off prices and billing?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Turn off';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Could not save. Check your connection and try again.';
 
   @override
   String get nameAndPhoto => 'Name and photo';
