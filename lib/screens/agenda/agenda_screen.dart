@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -339,14 +341,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   ),
                   const SizedBox(width: 12),
                   // Status dot
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _getStatusColor(order.status),
-                    ),
-                  ),
+                  StatusDot(color: OrderStatusStyle.dotColor(order.status)),
                   const SizedBox(width: 12),
                   // Order info
                   Expanded(
@@ -482,20 +477,4 @@ class _AgendaScreenState extends State<AgendaScreen> {
     );
   }
 
-  Color _getStatusColor(String? status) {
-    switch (status) {
-      case 'quote':
-        return CupertinoColors.systemOrange;
-      case 'approved':
-        return CupertinoColors.systemBlue;
-      case 'progress':
-        return CupertinoColors.systemPurple;
-      case 'done':
-        return CupertinoColors.systemGreen;
-      case 'canceled':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.systemGrey;
-    }
-  }
 }

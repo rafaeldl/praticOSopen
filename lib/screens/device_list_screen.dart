@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -299,14 +301,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                           Row(
                             children: [
                               if (config.useDeviceManagement) ...[
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: _statusColor(device.status),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
+                                StatusDot(color: DeviceStatusStyle.dotColor(device.status)),
                                 const SizedBox(width: 6),
                               ],
                               Expanded(
@@ -350,21 +345,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         ),
       ),
     );
-  }
-
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'active':
-        return CupertinoColors.systemGreen;
-      case 'maintenance':
-        return CupertinoColors.systemOrange;
-      case 'inactive':
-        return CupertinoColors.systemGrey;
-      case 'decommissioned':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.systemGreen;
-    }
   }
 
   Widget _buildDeviceAvatar(Device device) {

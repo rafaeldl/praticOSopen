@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
 import 'package:provider/provider.dart';
 import 'package:praticos/global.dart';
@@ -44,53 +46,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           _device!.id!,
         );
       }
-    }
-  }
-
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'active':
-        return CupertinoColors.systemGreen;
-      case 'maintenance':
-        return CupertinoColors.systemOrange;
-      case 'inactive':
-        return CupertinoColors.systemGrey;
-      case 'decommissioned':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.systemGreen;
-    }
-  }
-
-  String _statusLabel(BuildContext context, String? status) {
-    switch (status) {
-      case 'active':
-        return context.l10n.deviceStatusActive;
-      case 'maintenance':
-        return context.l10n.deviceStatusMaintenance;
-      case 'inactive':
-        return context.l10n.deviceStatusInactive;
-      case 'decommissioned':
-        return context.l10n.deviceStatusDecommissioned;
-      default:
-        return context.l10n.deviceStatusActive;
-    }
-  }
-
-  Color _orderStatusColor(String? status) {
-    switch (status) {
-      case 'quote':
-        return CupertinoColors.systemBlue;
-      case 'approved':
-        return CupertinoColors.activeBlue;
-      case 'progress':
-        return CupertinoColors.systemOrange;
-      case 'done':
-        return CupertinoColors.systemGreen;
-      case 'canceled':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.systemGrey;
     }
   }
 
@@ -169,22 +124,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: _statusColor(_device!.status),
-                                    shape: BoxShape.circle,
-                                  ),
+                                StatusDot(
+                                  color: DeviceStatusStyle.dotColor(_device!.status),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  _statusLabel(context, _device!.status),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: CupertinoColors.label.resolveFrom(context),
-                                  ),
+                                  DeviceStatusStyle.label(context.l10n, _device!.status),
+                                  style: OrderStatusStyle.textStyle(context, fontSize: 14),
                                 ),
                               ],
                             ),
@@ -379,7 +325,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Widget _buildOrderItem(Order order, SegmentConfigProvider config, FormatService formatService, bool isLast) {
     final statusLabel = config.getStatus(order.status);
-    final statusColor = _orderStatusColor(order.status);
+    
     final dateStr = order.createdAt != null
         ? formatService.formatDate(order.createdAt!)
         : '';
@@ -397,13 +343,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               child: Row(
                 children: [
                   // Status dot
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      shape: BoxShape.circle,
-                    ),
+                  StatusDot(
+                    color: OrderStatusStyle.dotColor(order.status),
+                    size: 10,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
