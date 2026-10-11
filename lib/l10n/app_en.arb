@@ -2516,5 +2516,15 @@
   "inviteHaveAnotherCode": "I have another code",
   "inviteCreateOwnCompany": "Create my own company",
   "inviteCodePlaceholder": "E.g. 7K2P9QXA",
-  "segmentLoadError": "Could not open your company. Check your internet and try again."
+  "segmentLoadError": "Could not open your company. Check your internet and try again.",
+  "noCompanyTitle": "Your account isn't linked to a company yet",
+  "noCompanyMessage": "To use PraticOS, ask your company administrator for an invite. With the invite code, you can join the team here.",
+  "noCompanySignedInAs": "Signed in as {email}",
+  "@noCompanySignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

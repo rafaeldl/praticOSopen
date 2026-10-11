@@ -9117,6 +9117,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
   String get segmentLoadError;
+
+  /// No description provided for @noCompanyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua conta ainda não está ligada a uma empresa'**
+  String get noCompanyTitle;
+
+  /// No description provided for @noCompanyMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para usar o PraticOS, peça um convite ao administrador da sua empresa. Com o código do convite, você entra na equipe por aqui.'**
+  String get noCompanyMessage;
+
+  /// No description provided for @noCompanySignedInAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conectado como {email}'**
+  String noCompanySignedInAs(String email);
 }
 
 class _AppLocalizationsDelegate

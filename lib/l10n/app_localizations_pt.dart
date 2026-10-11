@@ -5086,4 +5086,16 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get segmentLoadError =>
       'Não deu para abrir a sua empresa. Confira a internet e tente de novo.';
+
+  @override
+  String get noCompanyTitle => 'Sua conta ainda não está ligada a uma empresa';
+
+  @override
+  String get noCompanyMessage =>
+      'Para usar o PraticOS, peça um convite ao administrador da sua empresa. Com o código do convite, você entra na equipe por aqui.';
+
+  @override
+  String noCompanySignedInAs(String email) {
+    return 'Conectado como $email';
+  }
 }

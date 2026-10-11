@@ -8,6 +8,7 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/auth_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/platform_policy.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 
@@ -79,7 +80,12 @@ abstract class _UserStore with Store {
   }
 
   /// Cria uma empresa para o usuário atual (usado no onboarding).
+  ///
+  /// Never on iOS (App Store 3.1.1): throws
+  /// [CompanyCreationNotAllowedException] where [PlatformPolicy] forbids it.
   Future<void> createCompanyForUser(Company company) async {
+    PlatformPolicy.ensureCanCreateCompany();
+
     final userId = Global.currentUser?.uid;
     if (userId == null) {
       throw Exception('Usuário não autenticado');

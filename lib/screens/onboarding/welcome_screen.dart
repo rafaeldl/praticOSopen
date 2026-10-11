@@ -9,6 +9,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/claims_service.dart';
+import 'package:praticos/utils/platform_policy.dart';
 import 'company_info_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -40,7 +41,12 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isCreatingDefaultCompany = false;
 
+  /// Where company creation is forbidden (iOS) this screen only completes
+  /// the setup of an existing company ([WelcomeScreen.companyId] set).
+  bool get _canCreateCompany => PlatformPolicy.canCreateCompanyInApp;
+
   void _startSetup(BuildContext context) {
+    if (widget.companyId == null && !_canCreateCompany) return;
     AnalyticsService.instance.logTutorialBegin(variant: 'setup');
     Navigator.push(
       context,
@@ -61,7 +67,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   /// Cria uma empresa padrão e pula o onboarding
   Future<void> _skipOnboarding() async {
-    if (_isCreatingDefaultCompany) return;
+    if (_isCreatingDefaultCompany || !_canCreateCompany) return;
 
     setState(() => _isCreatingDefaultCompany = true);
     AnalyticsService.instance.logTutorialBegin(variant: 'skip');
@@ -87,7 +93,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       final company = Company()
         ..id = companyId
         ..name = "Minha Empresa"
-        ..segment = "other" // segmento padrão
+        ..segment =
+            "other" // segmento padrão
         ..fieldService = true
         ..useScheduling = true
         ..owner = userAggr
@@ -108,7 +115,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       while ((updatedUser == null ||
               updatedUser.companies == null ||
               !updatedUser.companies!.any((c) => c.company?.id == companyId)) &&
-             retryCount < maxRetries) {
+          retryCount < maxRetries) {
         await Future.delayed(const Duration(milliseconds: 500));
         updatedUser = await userStore.findUserById(user.uid);
         retryCount++;
@@ -141,10 +148,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (mounted) {
         // Navega E força rebuild completo removendo todas as rotas
         // Isso garante que o AuthWrapper reconstrua com o novo companyAggr
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
-          (route) => false,
-        );
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
     } catch (e, stack) {
       debugPrint('❌ Error creating default company: $e');
@@ -208,7 +212,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const SizedBox(height: 24),
               Text(
                 context.l10n.professionalizeYourBusiness,
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                style: CupertinoTheme.of(
+                  context,
+                ).textTheme.navLargeTitleTextStyle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -242,27 +248,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               SizedBox(
                 width: double.infinity,
                 child: CupertinoButton.filled(
-                  onPressed: _isCreatingDefaultCompany ? null : () => _startSetup(context),
+                  onPressed: _isCreatingDefaultCompany
+                      ? null
+                      : () => _startSetup(context),
                   child: Text(context.l10n.configureMyBusiness),
                 ),
               ),
-              const SizedBox(height: 12),
-
-              // Botão secundário - Pular
-              SizedBox(
-                width: double.infinity,
-                child: CupertinoButton(
-                  onPressed: _isCreatingDefaultCompany ? null : _skipOnboarding,
-                  child: _isCreatingDefaultCompany
-                      ? const CupertinoActivityIndicator()
-                      : Text(
-                          context.l10n.configureLater,
-                          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              // Botão secundário - Pular (cria uma empresa nova; não no iOS)
+              if (_canCreateCompany) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton(
+                    onPressed: _isCreatingDefaultCompany
+                        ? null
+                        : _skipOnboarding,
+                    child: _isCreatingDefaultCompany
+                        ? const CupertinoActivityIndicator()
+                        : Text(
+                            context.l10n.configureLater,
+                            style: CupertinoTheme.of(context)
+                                .textTheme
+                                .textStyle
+                                .copyWith(
+                                  color: CupertinoColors.secondaryLabel
+                                      .resolveFrom(context),
+                                ),
                           ),
-                        ),
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 20),
             ],
           ),
@@ -271,7 +286,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildFeatureItem(BuildContext context, {required IconData icon, required String title, required String description}) {
+  Widget _buildFeatureItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 32, color: CupertinoColors.activeBlue),
