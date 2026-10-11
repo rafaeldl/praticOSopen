@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -17,7 +22,11 @@ import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/screens/widgets/device_picker_sheet.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
 
@@ -76,6 +85,27 @@ class FakeActions extends OrderScreenActions {
   @override
   Future<void> shareWithCustomer(BuildContext context, Order order) async =>
       calls.add('send');
+}
+
+class FakeAssistant implements AiOrderAssistClient {
+  FakeAssistant(this.draft, {this.error});
+
+  final AiOrderDraft draft;
+  final AiOrderAssistException? error;
+  final List<String?> texts = [];
+  final List<int> photoCounts = [];
+
+  @override
+  Future<AiOrderDraft> assist({
+    String? text,
+    List<AiPhoto> photos = const [],
+    String? locale,
+  }) async {
+    texts.add(text);
+    photoCounts.add(photos.length);
+    if (error != null) throw error!;
+    return draft;
+  }
 }
 
 String _money(double v) => (FormatService()..setLocale('pt')).formatCurrency(v);
@@ -238,20 +268,158 @@ void main() {
       await tester.pumpAndSettle();
       expect(store.status, 'approved');
     });
+  });
 
-    testWidgets('assistant placeholders are disabled when shown',
+  group('assistant (aiOrderAssist)', () {
+    // 1x1 transparent PNG.
+    final png = Uint8List.fromList(base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='));
+
+    const draft = AiOrderDraft(
+      customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+      deviceGuessName: 'Classic',
+      deviceGuessSerial: 'NXS8620',
+      items: [
+        AiDraftItem(kind: 'service', name: 'Troca de óleo', value: 120, catalogId: 's1'),
+        AiDraftItem(kind: 'service', name: 'Polimento'),
+        AiDraftItem(kind: 'product', name: 'Filtro de óleo', value: 35.5, quantity: 2, catalogId: 'p1'),
+      ],
+      used: 1,
+      limit: 10,
+    );
+
+    OrderScreenV2 assistantScreen(OrderStore store, FakeAssistant assistant,
+            {Future<AiPhoto?> Function()? capture}) =>
+        OrderScreenV2(
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          showAssistant: true,
+          assistant: assistant,
+          capturePhoto: capture ?? () async => AiPhoto(png),
+        );
+
+    AppListRow rowOf(WidgetTester tester, String text) =>
+        tester.widget<AppListRow>(find.ancestor(
+          of: find.text(text),
+          matching: find.byType(AppListRow),
+        ));
+
+    testWidgets('flag is off by default and hides Foto / Falar',
         (tester) async {
+      expect(kAiOrderAssistEnabled, isFalse);
       await _pump(
         tester,
         OrderScreenV2(
           store: OrderStore(),
           permissions: _permissions(),
           actions: FakeActions(),
-          showAssistant: true,
         ),
       );
+      expect(find.text('Foto'), findsNothing);
+      expect(find.text('Falar o que fazer'), findsNothing);
+      expect(find.text('Tire foto da placa e fale o serviço'), findsNothing);
+    });
+
+    testWidgets('with the flag: shown on the blank new order only',
+        (tester) async {
+      await _pump(tester, assistantScreen(OrderStore(), FakeAssistant(draft)));
       expect(find.text('Foto'), findsOneWidget);
       expect(find.text('Falar o que fazer'), findsOneWidget);
+      expect(find.text('Tire foto da placa e fale o serviço'), findsOneWidget);
+    });
+
+    testWidgets(
+        'Falar fills the same blank order and highlights what the AI put',
+        (tester) async {
+      final store = OrderStore();
+      final assistant = FakeAssistant(draft);
+      await _pump(tester, assistantScreen(store, assistant));
+
+      await tester.tap(find.text('Falar o que fazer'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+          find.byType(CupertinoTextField), 'Revenda Sul, troca de óleo');
+      await tester.pump();
+      await tester.tap(find.text('Pronto'));
+      await tester.pumpAndSettle();
+
+      expect(assistant.texts, ['Revenda Sul, troca de óleo']);
+      expect(assistant.photoCounts, [0]);
+
+      // Same screen, still not saved.
+      expect(store.deferSave, isTrue);
+      expect(store.order!.id, isNull);
+      expect(find.text('Confira o que está marcado em amarelo antes de salvar.'),
+          findsOneWidget);
+
+      expect(rowOf(tester, 'Revenda Sul').marked, isTrue);
+      expect(rowOf(tester, 'Troca de óleo').marked, isTrue);
+      expect(rowOf(tester, 'Polimento').marked, isTrue);
+      expect(rowOf(tester, 'Filtro de óleo').marked, isTrue);
+      expect(rowOf(tester, '“Classic · NXS8620” não está no cadastro').marked,
+          isTrue);
+      expect(store.services!.map((s) => s.service?.id), ['s1', null]);
+      expect(store.services![1].value, isNull); // "sem valor"
+      expect(store.products!.single.quantity, 2);
+      expect(find.text('sem valor'), findsOneWidget);
+
+      // Button stays "Salvar OS"; saving clears the highlighter.
+      await tester.tap(find.textContaining('Salvar'));
+      await tester.pumpAndSettle();
+      expect(store.deferSave, isFalse);
+      expect(rowOf(tester, 'Polimento').marked, isFalse);
+    });
+
+    testWidgets('the camera opens only when Foto is tapped', (tester) async {
+      var cameraOpened = 0;
+      final assistant = FakeAssistant(draft);
+      await _pump(
+        tester,
+        assistantScreen(OrderStore(), assistant, capture: () async {
+          cameraOpened++;
+          return AiPhoto(png);
+        }),
+      );
+      expect(cameraOpened, 0);
+
+      await tester.tap(find.text('Foto'));
+      await tester.pumpAndSettle();
+      expect(cameraOpened, 1);
+      expect(find.text('1 foto'), findsOneWidget);
+
+      await tester.tap(find.text('Pronto'));
+      await tester.pumpAndSettle();
+      expect(assistant.photoCounts, [1]);
+      expect(rowOf(tester, 'Polimento').marked, isTrue);
+    });
+
+    testWidgets('quota exceeded shows a clear message and keeps manual flow',
+        (tester) async {
+      final store = OrderStore();
+      final assistant = FakeAssistant(draft,
+          error: const AiOrderAssistException(AiAssistError.quotaExceeded,
+              used: 10, limit: 10));
+      await _pump(tester, assistantScreen(store, assistant));
+
+      await tester.tap(find.text('Falar o que fazer'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(CupertinoTextField), 'polimento');
+      await tester.pump();
+      await tester.tap(find.text('Pronto'));
+      await tester.pumpAndSettle();
+
+      expect(
+          find.text('Você já usou os 10 pedidos do assistente deste mês. '
+              'Dá para continuar preenchendo à mão.'),
+          findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(store.services, isEmpty);
+      expect(find.text('Quem é o cliente?'), findsOneWidget);
     });
   });
 
@@ -490,6 +658,212 @@ void main() {
       expect(labels[2], 'PDF');
       expect(labels[3], startsWith('Cancelar '));
       expect(labels[4], startsWith('Apagar '));
+    });
+  });
+
+  group('segment custom fields', () {
+    const brand = CustomField(
+      key: 'service_order.brand',
+      type: 'text',
+      labels: {'pt-BR': 'Marca do lacre'},
+      section: 'Lacre',
+      sectionI18n: {'pt-BR': 'Lacre'},
+    );
+    const builtIn = CustomField(
+      key: 'service_order.status',
+      type: 'text',
+      labels: {'pt-BR': 'Status custom'},
+    );
+
+    setUp(() => SegmentConfigService()
+        .debugSetCustomFields(const [brand, builtIn]));
+    tearDown(() => SegmentConfigService().debugSetCustomFields(const []));
+
+    Order saved() => Order()
+      ..id = 'o1'
+      ..number = 7
+      ..status = 'quote'
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..customData = {'brand': 'ABC-123'}
+      ..services = []
+      ..products = []
+      ..discount = 0
+      ..paidAmount = 0
+      ..transactions = [];
+
+    testWidgets('shows the segment fields with the saved value; built-ins '
+        'are not duplicated', (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': saved()});
+      expect(find.text('Marca do lacre'), findsOneWidget);
+      expect(find.text('ABC-123'), findsOneWidget);
+      expect(find.text('Status custom'), findsNothing);
+    });
+
+    testWidgets('editing saves into order.customData; clearing removes it',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(tester, screen(store), args: {'order': saved()});
+
+      await tester.enterText(find.byType(EditableText).first, 'XYZ-9');
+      await tester.pump();
+      expect(store.order!.customData, {'brand': 'XYZ-9'});
+
+      await tester.enterText(find.byType(EditableText).first, '');
+      await tester.pump();
+      expect(store.order!.customData, isNull);
+    });
+
+    testWidgets('no fields configured, no section', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const []);
+      await _pump(tester, screen(OrderStore()), args: {'order': saved()});
+      expect(find.text('Marca do lacre'), findsNothing);
+      expect(find.byType(EditableText), findsNothing);
+    });
+  });
+
+  group('two or more vehicles', () {
+    Order twoCars() => Order()
+      ..id = 'o2'
+      ..number = 9
+      ..status = 'quote'
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..devices = [
+        DeviceAggr()
+          ..id = 'd1'
+          ..name = 'Gol'
+          ..serial = 'AAA1A11',
+        DeviceAggr()
+          ..id = 'd2'
+          ..name = 'Uno',
+      ]
+      ..services = [
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Polimento')
+          ..value = 100
+          ..deviceId = 'd1',
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Revisão')
+          ..value = 300
+          ..deviceId = 'd2',
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Taxa de busca')
+          ..value = 20,
+      ]
+      ..products = [
+        OrderProduct()
+          ..product = (ProductAggr()..name = 'Cera')
+          ..value = 25
+          ..quantity = 2
+          ..total = 50
+          ..deviceId = 'd1',
+      ]
+      ..discount = 0
+      ..paidAmount = 0
+      ..transactions = [];
+
+    testWidgets('items are grouped per vehicle with a subtotal each',
+        (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': twoCars()});
+
+      expect(find.text('Gol - AAA1A11'), findsWidgets);
+      expect(find.text('Geral'), findsOneWidget);
+      expect(find.text('Subtotal'), findsNWidgets(3));
+      expect(find.text(_money(150)), findsOneWidget); // Gol: 100 + 2 × 25
+      expect(find.text(_money(300)), findsNWidgets(2)); // Uno + its row
+      expect(find.text(_money(20)), findsNWidgets(2)); // Geral + its row
+      expect(find.text(_money(470)), findsOneWidget); // Total
+      // Order of the blocks: Gol, Uno, Geral.
+      final gol = tester.getTopLeft(find.text('Polimento')).dy;
+      final uno = tester.getTopLeft(find.text('Revisão')).dy;
+      final general = tester.getTopLeft(find.text('Taxa de busca')).dy;
+      expect(gol, lessThan(uno));
+      expect(uno, lessThan(general));
+    });
+
+    testWidgets('without viewPrices no subtotals', (tester) async {
+      await _pump(tester, screen(OrderStore(), prices: false),
+          args: {'order': twoCars()});
+      expect(find.text('Subtotal'), findsNothing);
+      expect(find.text('Revisão'), findsOneWidget);
+    });
+
+    testWidgets('one vehicle keeps the flat list', (tester) async {
+      final order = twoCars()..devices = [twoCars().devices!.first];
+      await _pump(tester, screen(OrderStore()), args: {'order': order});
+      expect(find.text('Subtotal'), findsNothing);
+      expect(find.text('Geral'), findsNothing);
+    });
+
+    testWidgets('adding an item asks which vehicle and files it there',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          devicePicker: (_, devices) async => DevicePickerResult(
+              DevicePickerAction.specific, devices.last),
+        ),
+        args: {'order': twoCars()},
+      );
+
+      await tester.ensureVisible(find.text('O que vai na OS?'));
+      await tester.pump();
+      await tester.tap(find.text('O que vai na OS?'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+
+      final added = store.services!.last;
+      expect(added.service!.name, 'Alinhamento');
+      expect(added.deviceId, 'd2');
+      expect(store.pendingDeviceId, isNull);
+    });
+
+    testWidgets('cancelling the vehicle question adds nothing',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          devicePicker: (_, _) async => null,
+        ),
+        args: {'order': twoCars()},
+      );
+      await tester.ensureVisible(find.text('O que vai na OS?'));
+      await tester.pump();
+      await tester.tap(find.text('O que vai na OS?'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      expect(store.services, hasLength(3));
+    });
+
+    test('applyDevicePick maps each answer to the store', () {
+      final store = OrderStore();
+      applyDevicePick(store, DevicePickerResult.multi(['d1', 'd2']));
+      expect(store.pendingDeviceIds, ['d1', 'd2']);
+      applyDevicePick(store, DevicePickerResult(DevicePickerAction.all));
+      expect(store.pendingDuplicateAll, isTrue);
+      expect(store.pendingDeviceIds, isNull);
+      applyDevicePick(store, DevicePickerResult(DevicePickerAction.general));
+      expect(store.pendingDuplicateAll, isFalse);
+      expect(store.pendingDeviceId, isNull);
     });
   });
 }

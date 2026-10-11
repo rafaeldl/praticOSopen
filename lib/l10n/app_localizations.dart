@@ -8770,6 +8770,114 @@ abstract class AppLocalizations {
   /// **'Ocultar senha'**
   String get hidePassword;
 
+  /// No description provided for @onboardingSegmentTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu ramo'**
+  String get onboardingSegmentTitle;
+
+  /// No description provided for @onboardingSegmentSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o seu ramo? Assim o app já vem com os serviços e checklists do seu trabalho.'**
+  String get onboardingSegmentSubtitle;
+
+  /// No description provided for @onboardingInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebi um código de convite'**
+  String get onboardingInviteCode;
+
+  /// No description provided for @onboardingSegmentsError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os ramos. Confira a internet.'**
+  String get onboardingSegmentsError;
+
+  /// No description provided for @onboardingSpecialtiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Especialidades'**
+  String get onboardingSpecialtiesTitle;
+
+  /// No description provided for @onboardingSpecialtiesSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você atende? Marque o que fizer sentido. Dá para mudar depois.'**
+  String get onboardingSpecialtiesSubtitle;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingBusinessTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu negócio'**
+  String get onboardingBusinessTitle;
+
+  /// No description provided for @onboardingBusinessName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como se chama o seu negócio?'**
+  String get onboardingBusinessName;
+
+  /// No description provided for @onboardingBusinessNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Oficina do Zé'**
+  String get onboardingBusinessNamePlaceholder;
+
+  /// No description provided for @onboardingBusinessNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diga o nome do seu negócio.'**
+  String get onboardingBusinessNameRequired;
+
+  /// No description provided for @onboardingPhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone (opcional)'**
+  String get onboardingPhoneLabel;
+
+  /// No description provided for @onboardingPhoneHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aparece no orçamento que o cliente recebe.'**
+  String get onboardingPhoneHint;
+
+  /// No description provided for @onboardingSamplesInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos colocar umas OS de exemplo para você ver como fica. Você apaga quando quiser.'**
+  String get onboardingSamplesInfo;
+
+  /// No description provided for @onboardingCreate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar meu PraticOS'**
+  String get onboardingCreate;
+
+  /// No description provided for @onboardingStartWithoutSamples.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar sem exemplos'**
+  String get onboardingStartWithoutSamples;
+
+  /// No description provided for @onboardingPreparing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando seu PraticOS…'**
+  String get onboardingPreparing;
+
+  /// No description provided for @onboardingCreateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para terminar. Confira a internet e tente de novo.'**
+  String get onboardingCreateError;
+
   /// No description provided for @receivedWhichOrder.
   ///
   /// In pt, this message translates to:
@@ -8811,30 +8919,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir a OS'**
   String get receivedOpenOrder;
-
-  /// No description provided for @valuesAndBillingOffTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desligar valores e cobrança?'**
-  String get valuesAndBillingOffTitle;
-
-  /// No description provided for @valuesAndBillingOffMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.'**
-  String get valuesAndBillingOffMessage;
-
-  /// No description provided for @valuesAndBillingOffAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desligar'**
-  String get valuesAndBillingOffAction;
-
-  /// No description provided for @valuesAndBillingSaveError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
-  String get valuesAndBillingSaveError;
 
   /// No description provided for @inviteGenericError.
   ///
@@ -8901,6 +8985,246 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
   String get segmentLoadError;
+
+  /// No description provided for @orderAssistantHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tire foto da placa e fale o serviço'**
+  String get orderAssistantHint;
+
+  /// No description provided for @orderAssistantPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450'**
+  String get orderAssistantPlaceholder;
+
+  /// No description provided for @orderAssistantDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderAssistantDone;
+
+  /// No description provided for @orderAssistantAddPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar outra foto'**
+  String get orderAssistantAddPhoto;
+
+  /// No description provided for @orderAssistantPhotoCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String orderAssistantPhotoCount(int count);
+
+  /// No description provided for @orderAssistantReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o que você mandou…'**
+  String get orderAssistantReading;
+
+  /// No description provided for @orderAssistantFilledNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira o que está marcado em amarelo antes de salvar.'**
+  String get orderAssistantFilledNote;
+
+  /// No description provided for @orderAssistantCustomerGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvi “{name}”. Toque para escolher o cliente'**
+  String orderAssistantCustomerGuess(String name);
+
+  /// No description provided for @orderAssistantDeviceGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{device}” não está no cadastro'**
+  String orderAssistantDeviceGuess(String device);
+
+  /// No description provided for @orderAssistantErrorTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistente'**
+  String get orderAssistantErrorTitle;
+
+  /// No description provided for @orderAssistantErrorDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'O assistente ainda não está liberado para a sua empresa.'**
+  String get orderAssistantErrorDisabled;
+
+  /// No description provided for @orderAssistantErrorQuota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.'**
+  String orderAssistantErrorQuota(String limit);
+
+  /// No description provided for @orderAssistantErrorUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para ler agora. Tente de novo ou preencha à mão.'**
+  String get orderAssistantErrorUnavailable;
+
+  /// No description provided for @orderAssistantNothingFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
+  String get orderAssistantNothingFound;
+
+  /// No description provided for @valuesAndBillingSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado. Em breve você poderá desligar.'**
+  String get valuesAndBillingSoon;
+
+  /// No description provided for @reportPreviousPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Período anterior'**
+  String get reportPreviousPeriod;
+
+  /// No description provided for @reportNextPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo período'**
+  String get reportNextPeriod;
+
+  /// No description provided for @orderInThisOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nesta {order}'**
+  String orderInThisOrder(String order);
+
+  /// No description provided for @orderAddChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist'**
+  String get orderAddChecklist;
+
+  /// No description provided for @orderAddMedia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos ou documento'**
+  String get orderAddMedia;
+
+  /// No description provided for @orderAddComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comentário'**
+  String get orderAddComment;
+
+  /// No description provided for @orderAddAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço do atendimento'**
+  String get orderAddAddress;
+
+  /// No description provided for @orderAddSchedule.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendar dia e hora'**
+  String get orderAddSchedule;
+
+  /// No description provided for @orderAddDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto'**
+  String get orderAddDiscount;
+
+  /// No description provided for @orderAddContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir esta {order}'**
+  String orderAddContract(String order);
+
+  /// No description provided for @orderAddOtherFields.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros campos'**
+  String get orderAddOtherFields;
+
+  /// No description provided for @orderChecklistMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}'**
+  String orderChecklistMissing(int count);
+
+  /// No description provided for @orderChecklistDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderChecklistDone;
+
+  /// No description provided for @orderAddressChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar endereço'**
+  String get orderAddressChange;
+
+  /// No description provided for @orderAddressRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar endereço'**
+  String get orderAddressRemove;
+
+  /// No description provided for @orderScheduleRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar agendamento'**
+  String get orderScheduleRemove;
+
+  /// No description provided for @orderContractSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{frequency} · próxima em {date}'**
+  String orderContractSummary(String frequency, String date);
+
+  /// No description provided for @orderContractChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar contrato'**
+  String get orderContractChange;
+
+  /// No description provided for @orderUploading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando…'**
+  String get orderUploading;
+
+  /// No description provided for @pickDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o {device}?'**
+  String pickDeviceTitle(String device);
+
+  /// No description provided for @otherDevicesSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros {devices}'**
+  String otherDevicesSection(String devices);
+
+  /// No description provided for @registerNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar {device} novo'**
+  String registerNewDevice(String device);
+
+  /// No description provided for @accumulatedDeleteConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar “{value}”?'**
+  String accumulatedDeleteConfirm(String value);
+
+  /// No description provided for @accumulatedUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar “{value}”'**
+  String accumulatedUse(String value);
+
+  /// No description provided for @accumulatedLeaveBlank.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deixar em branco'**
+  String get accumulatedLeaveBlank;
 }
 
 class _AppLocalizationsDelegate

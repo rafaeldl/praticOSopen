@@ -1,257 +1,125 @@
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:praticos/mobx/auth_store.dart';
-import 'package:praticos/screens/onboarding/select_subspecialties_screen.dart';
-import 'package:praticos/screens/onboarding/confirm_bootstrap_screen.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/menu_navigation/more/more_page.dart';
+import 'package:praticos/screens/onboarding/onboarding_flow.dart';
+import 'package:praticos/screens/onboarding/select_subspecialties_screen.dart';
+import 'package:praticos/screens/onboarding/your_business_screen.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/onboarding_service.dart';
+import 'package:praticos/theme/app_spacing.dart';
 
+/// First step of the first access: "Seu ramo". Tapping a segment picks it
+/// (✓) and goes on; there is no button on this screen.
 class SelectSegmentScreen extends StatefulWidget {
-  final AuthStore authStore;
-  final String? companyId;
-  final String companyName;
-  final String address;
-  final String phone;
-  final String email;
-  final String? site;
-  final XFile? logoFile;
+  const SelectSegmentScreen({super.key, required this.session});
 
-  const SelectSegmentScreen({
-    super.key,
-    required this.authStore,
-    this.companyId,
-    required this.companyName,
-    required this.address,
-    required this.phone,
-    required this.email,
-    this.site,
-    this.logoFile,
-  });
+  final OnboardingSession session;
 
   @override
   State<SelectSegmentScreen> createState() => _SelectSegmentScreenState();
 }
 
 class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
-  /// Obtém o nome localizado do segmento baseado no locale do dispositivo
-  String _getLocalizedName(Map<String, dynamic> segmentData) {
-    final locale = Localizations.localeOf(context);
-    final localeTag = '${locale.languageCode}-${locale.countryCode ?? locale.languageCode.toUpperCase()}';
+  late Stream<List<OnboardingSegment>> _segments =
+      widget.session.deps.segments();
+  String? _selectedId;
 
-    final nameI18n = segmentData['nameI18n'] as Map<String, dynamic>?;
-    if (nameI18n != null) {
-      // Tenta o locale completo (ex: pt-BR)
-      if (nameI18n.containsKey(localeTag)) {
-        return nameI18n[localeTag] as String;
-      }
-      // Tenta só o idioma (ex: pt)
-      final languageOnly = locale.languageCode;
-      final fallbackKey = nameI18n.keys.firstWhere(
-        (key) => key.startsWith(languageOnly),
-        orElse: () => 'en-US',
-      );
-      return nameI18n[fallbackKey] as String? ?? segmentData['name'] as String? ?? 'No name';
-    }
-
-    return segmentData['name'] as String? ?? 'No name';
+  void _retry() {
+    setState(() => _segments = widget.session.deps.segments());
   }
 
-  void _onSegmentTap(String segmentId, Map<String, dynamic> segmentData) {
-    final subspecialties = segmentData['subspecialties'] as List?;
-    final segmentName = _getLocalizedName(segmentData);
-
-    if (subspecialties != null && subspecialties.isNotEmpty) {
-      // Segmento tem subspecialties -> navegar para seleção de subspecialties
-      Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => SelectSubspecialtiesScreen(
-            authStore: widget.authStore,
-            companyId: widget.companyId,
-            companyName: widget.companyName,
-            address: widget.address,
-            phone: widget.phone,
-            email: widget.email,
-            site: widget.site,
-            logoFile: widget.logoFile,
-            segmentId: segmentId,
-            segmentName: segmentName,
-            subspecialties: subspecialties
-                .map((s) => Map<String, dynamic>.from(s as Map))
-                .toList(),
-          ),
-        ),
-      );
-    } else {
-      // Segmento não tem subspecialties -> ir direto para confirmação de bootstrap
-      Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => ConfirmBootstrapScreen(
-            authStore: widget.authStore,
-            companyId: widget.companyId,
-            companyName: widget.companyName,
-            address: widget.address,
-            phone: widget.phone,
-            email: widget.email,
-            site: widget.site,
-            logoFile: widget.logoFile,
-            segmentId: segmentId,
-            subspecialties: const [], // Sem subspecialties
-          ),
-        ),
-      );
-    }
+  void _pick(OnboardingSegment segment) {
+    widget.session.markStarted();
+    setState(() => _selectedId = segment.id);
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (_) => segment.hasSubspecialties
+            ? SelectSubspecialtiesScreen(
+                session: widget.session,
+                segment: segment,
+              )
+            : YourBusinessScreen(
+                session: widget.session,
+                segment: segment,
+                subspecialties: const [],
+              ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(context.l10n.chooseSegment),
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
+
+    return OnboardingPage(
+      title: l10n.onboardingSegmentTitle,
+      subtitle: l10n.onboardingSegmentSubtitle,
+      leading: OnboardingTopButton(
+        key: const ValueKey('onboarding_sign_out'),
+        label: l10n.logout,
+        onPressed: () => widget.session.deps.onSignOut(context),
       ),
-      child: SafeArea(
-        child: DefaultTextStyle(
-          style: CupertinoTheme.of(context).textTheme.textStyle,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('segments')
-                .where('active', isEqualTo: true)
-                .orderBy('name')
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      '${context.l10n.errorLoadingSegments}: ${snapshot.error}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: CupertinoColors.systemRed),
-                    ),
-                  ),
-                );
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-
-              final segments = snapshot.data?.docs ?? [];
-
-              if (segments.isEmpty) {
-                return Center(
-                  child: Text(context.l10n.noSegmentsAvailable),
-                );
-              }
-
-              return Column(
-                children: [
-                  // Cabeçalho explicativo
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          CupertinoIcons.briefcase,
-                          size: 48,
-                          color: CupertinoColors.activeBlue,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          widget.companyName,
-                          style: CupertinoTheme.of(context)
-                              .textTheme
-                              .navLargeTitleTextStyle,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.l10n.selectSegmentPrompt,
-                          textAlign: TextAlign.center,
-                          style: CupertinoTheme.of(context)
-                              .textTheme
-                              .textStyle
-                              .copyWith(
-                                color: CupertinoColors.secondaryLabel
-                                    .resolveFrom(context),
-                                fontSize: 16,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Lista de Segmentos estilo iOS
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: CupertinoListSection.insetGrouped(
-                        header: Text(context.l10n.availableSegments.toUpperCase()),
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        children: segments.map((doc) {
-                          final segment = doc.data() as Map<String, dynamic>;
-                          final segmentId = doc.id;
-                          final subspecialties =
-                              segment['subspecialties'] as List?;
-                          final hasSubspecialties =
-                              subspecialties != null && subspecialties.isNotEmpty;
-
-                          return Semantics(
-                            identifier: 'segment_$segmentId',
-                            button: true,
-                            label: _getLocalizedName(segment),
-                            child: CupertinoListTile.notched(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              leading: Text(
-                                segment['icon'] ?? '🔧',
-                                style: CupertinoTheme.of(context)
-                                    .textTheme
-                                    .textStyle
-                                    .copyWith(fontSize: 24),
-                              ),
-                              title: Text(
-                                _getLocalizedName(segment),
-                                style: CupertinoTheme.of(context)
-                                    .textTheme
-                                    .textStyle
-                                    .copyWith(fontWeight: FontWeight.w500),
-                              ),
-                              subtitle: hasSubspecialties
-                                  ? Text(
-                                      '${subspecialties.length} ${context.l10n.specialties}',
-                                      style: CupertinoTheme.of(context)
-                                          .textTheme
-                                          .textStyle
-                                          .copyWith(
-                                            fontSize: 13,
-                                            color: CupertinoColors.secondaryLabel
-                                                .resolveFrom(context),
-                                          ),
-                                    )
-                                  : null,
-                              trailing: const Icon(
-                                CupertinoIcons.chevron_forward,
-                                color: CupertinoColors.systemGrey3,
-                                size: 18,
-                              ),
-                              onTap: () => _onSegmentTap(segmentId, segment),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ],
+      slivers: [
+        StreamBuilder<List<OnboardingSegment>>(
+          stream: _segments,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              debugPrint('Onboarding: segments failed: ${snapshot.error}');
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorState(
+                  message: l10n.onboardingSegmentsError,
+                  onRetry: _retry,
+                ),
               );
-            },
+            }
+            final segments = snapshot.data;
+            if (segments == null) {
+              return const SliverFillRemaining(
+                hasScrollBody: false,
+                child: LoadingState(),
+              );
+            }
+            if (segments.isEmpty) {
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  title: l10n.noSegmentsAvailable,
+                  actionLabel: l10n.tryAgain,
+                  onAction: _retry,
+                ),
+              );
+            }
+            return SliverToBoxAdapter(
+              child: MoreRows(rows: [
+                for (final segment in segments)
+                  OnboardingChoiceRow(
+                    key: ValueKey('segment_${segment.id}'),
+                    emoji: segment.icon,
+                    title: segment.nameFor(locale),
+                    selected: segment.id == _selectedId,
+                    opensNext: true,
+                    onTap: () => _pick(segment),
+                  ),
+              ]),
+            );
+          },
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xl),
+            child: Center(
+              child: TextLink(
+                key: const ValueKey('onboarding_invite_code'),
+                label: l10n.onboardingInviteCode,
+                onPressed: () => widget.session.deps.onInviteCode(context),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -840,6 +840,8 @@ Antes de finalizar uma feature, verificar:
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
+- `docs/AI_ORDER_ASSIST.md` - Assistente de IA na Nova OS (`aiOrderAssist`, cota mensal, piloto por empresa, flag)
+- `docs/ONBOARDING.md` - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
