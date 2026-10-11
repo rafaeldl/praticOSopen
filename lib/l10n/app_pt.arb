@@ -2209,5 +2209,118 @@
   "createInvite": "Criar convite",
   "cancelAndInviteAgain": "Cancelar e convidar de novo",
   "inviteExpiredMessage": "Este convite venceu. Cancele e convide de novo.",
-  "userWillReceiveInviteByWhatsAppHint": "Depois você manda o código por esse número ou por outro app."
+  "userWillReceiveInviteByWhatsAppHint": "Depois você manda o código por esse número ou por outro app.",
+  "financialLoadError": "Não deu para carregar o financeiro.",
+  "financialEmptyMonth": "Nenhuma OS em {month}.",
+  "@financialEmptyMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "financialToReceive": "Falta receber",
+  "financialReceived": "Recebido",
+  "financialSummaryLine": "Entrou {entered} · Falta {owed}",
+  "@financialSummaryLine": {
+    "placeholders": {
+      "entered": {
+        "type": "String"
+      },
+      "owed": {
+        "type": "String"
+      }
+    }
+  },
+  "financialOrderSince": "OS {number} · desde {date}",
+  "@financialOrderSince": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialOrdersSince": "{count} OS · desde {date}",
+  "@financialOrdersSince": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialPaidOn": "OS {number} · pago {date}",
+  "@financialPaidOn": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialOtherPeriod": "Outro período",
+  "financialPreviousMonth": "Mês anterior",
+  "financialNextMonth": "Próximo mês",
+  "financialNextStep": "Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}",
+  "@financialNextStep": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financialOldestDebt": "{name} deve há mais tempo: {amount} desde {date}.",
+  "@financialOldestDebt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialSendChargeTo": "Mandar cobrança para {name}",
+  "@financialSendChargeTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "financialPickOrderTitle": "OS em aberto de {name}",
+  "@financialPickOrderTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "financialOrderOption": "OS {number} · {amount} · desde {date}",
+  "@financialOrderOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

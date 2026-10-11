@@ -8,7 +8,9 @@ import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
-import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/screens/dashboard/financial_tab.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -43,7 +45,11 @@ class _NavigationControllerState extends State<NavigationController>
       AppTab.home => Home(),
       AppTab.customers => HomeCustomerList(),
       AppTab.agenda => const AgendaScreen(),
-      AppTab.financial => FinancialDashboardSimple(),
+      AppTab.financial => ProtectedRoute(
+        permission: PermissionType.viewFinancialReports,
+        accessDeniedMessage: context.l10n.financialAccessDenied,
+        child: const FinancialTab(),
+      ),
       AppTab.more => Settings(),
     };
   }

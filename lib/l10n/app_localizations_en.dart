@@ -1261,7 +1261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentOrders => 'Recent Orders';
 
   @override
-  String get recentCustomers => 'Used last';
+  String get recentCustomers => 'Recent Customers';
 
   @override
   String get role => 'Role';
@@ -3916,205 +3916,76 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not load this. Check your connection and try again.';
 
   @override
-  String get pickCustomerTitle => 'Who is the customer?';
+  String get financialLoadError => 'Could not load your finances.';
 
   @override
-  String get pickCustomerSubtitle =>
-      'Tap to choose, or type a name, phone or plate';
-
-  @override
-  String get searchCustomerPlaceholder => 'Search by name, phone or plate';
-
-  @override
-  String get searchCustomerNoPlatePlaceholder => 'Search by name or phone';
-
-  @override
-  String get addNewCustomer => 'Add a new customer';
-
-  @override
-  String get allCustomers => 'All';
-
-  @override
-  String plateValue(String plate) {
-    return 'Plate $plate';
+  String financialEmptyMonth(String month) {
+    return 'No orders in $month.';
   }
 
   @override
-  String get customerNamePlaceholder => 'E.g.: Ana Ribeiro';
+  String get financialToReceive => 'To collect';
 
   @override
-  String get customerNameRequired => 'Enter the customer name';
+  String get financialReceived => 'Received';
 
   @override
-  String get customerPhoneLabel => 'Phone or WhatsApp';
-
-  @override
-  String get customerPhoneHint =>
-      'Used to send the quote and the ready notice.';
-
-  @override
-  String get moreCustomerData => 'More details (email, tax ID, address)';
-
-  @override
-  String get openInMap => 'Open in maps';
-
-  @override
-  String get callAction => 'Call';
-
-  @override
-  String newOrderFor(String name) {
-    return 'New order for $name';
+  String financialSummaryLine(String entered, String owed) {
+    return 'In $entered · Owed $owed';
   }
 
   @override
-  String ordersOfCustomer(String name) {
-    return 'Orders of $name';
+  String financialOrderSince(int number, String date) {
+    return 'Order $number · since $date';
   }
 
   @override
-  String devicesOfCustomer(String devices, String name) {
-    return '$name\'s $devices';
+  String financialOrdersSince(int count, String date) {
+    return '$count orders · since $date';
   }
 
   @override
-  String get totalSpent => 'Total spent';
-
-  @override
-  String deleteCustomerTitle(String name) {
-    return 'Delete $name?';
+  String financialPaidOn(int number, String date) {
+    return 'Order $number · paid $date';
   }
 
   @override
-  String get deleteCustomerKeepsOrders => 'The orders stay saved.';
+  String get financialOtherPeriod => 'Other period';
 
   @override
-  String get deleteAction => 'Delete';
+  String get financialPreviousMonth => 'Previous month';
 
   @override
-  String get noCustomersYet => 'You have no customers yet';
+  String get financialNextMonth => 'Next month';
 
   @override
-  String get addFirstCustomer => 'Add your first customer';
-
-  @override
-  String noCustomerMatching(String query) {
-    return 'No customer matching “$query”';
-  }
-
-  @override
-  String customersCount(int count) {
+  String financialNextStep(String amount, int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count customers',
       one: '1 customer',
     );
-    return '$_temp0';
+    return '$amount to collect from $_temp0';
   }
 
   @override
-  String openOrdersCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count open orders',
-      one: '1 open order',
-    );
-    return '$_temp0';
+  String financialOldestDebt(String name, String amount, String date) {
+    return '$name has owed the longest: $amount since $date.';
   }
 
   @override
-  String lateOrdersCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count late orders',
-      one: '1 late order',
-    );
-    return '$_temp0';
+  String financialSendChargeTo(String name) {
+    return 'Send payment request to $name';
   }
 
   @override
-  String get customerActions => 'More customer actions';
+  String financialPickOrderTitle(String name) {
+    return 'Open orders of $name';
+  }
 
   @override
-  String get customerLookupError => 'Could not load customers. Try again.';
-
-  @override
-  String get yourAccount => 'Your account';
-
-  @override
-  String get yourCompany => 'Your company';
-
-  @override
-  String get catalog => 'Catalog';
-
-  @override
-  String get planTitle => 'Plan';
-
-  @override
-  String get advancedTitle => 'Advanced';
-
-  @override
-  String get deleteMyAccount => 'Delete my account';
-
-  @override
-  String get howYouWork => 'How you work';
-
-  @override
-  String get valuesAndBilling => 'Prices and billing';
-
-  @override
-  String get valuesAndBillingHint =>
-      'Prices on orders, receiving payments and the Financial tab';
-
-  @override
-  String get valuesAndBillingSoon =>
-      'On. You will be able to turn it off soon.';
-
-  @override
-  String get nameAndPhoto => 'Name and photo';
-
-  @override
-  String get joinWithInviteCode => 'Join with an invite code';
-
-  @override
-  String get followsPhoneSettings =>
-      'Language and appearance follow your iPhone settings.';
-
-  @override
-  String get invitePerson => 'Invite someone';
-
-  @override
-  String get inviteWhoLabel => 'Name (optional)';
-
-  @override
-  String get inviteWhoPlaceholder => 'E.g. Lucas Silva';
-
-  @override
-  String get inviteEmailLabel => 'Email';
-
-  @override
-  String get inviteEmailHint =>
-      'They sign in with this email and the invite shows up on its own.';
-
-  @override
-  String get inviteWhatsAppLabel => 'WhatsApp (optional)';
-
-  @override
-  String get inviteRoleLabel => 'What they can do';
-
-  @override
-  String get createInvite => 'Create invite';
-
-  @override
-  String get cancelAndInviteAgain => 'Cancel and invite again';
-
-  @override
-  String get inviteExpiredMessage =>
-      'This invite has expired. Cancel it and invite again.';
-
-  @override
-  String get userWillReceiveInviteByWhatsAppHint =>
-      'Then you send the code to this number or through another app.';
+  String financialOrderOption(int number, String amount, String date) {
+    return 'Order $number · $amount · since $date';
+  }
 }

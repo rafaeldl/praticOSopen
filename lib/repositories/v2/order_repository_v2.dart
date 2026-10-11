@@ -51,6 +51,11 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     return await _tenant.getOrdersByDateRange(companyId, startDate, endDate);
   }
 
+  /// Busca todas as orders com pagamento em aberto, de qualquer período.
+  Future<List<Order?>> getUnpaidOrders(String companyId) {
+    return _tenant.getUnpaidOrders(companyId);
+  }
+
   /// Stream de orders com filtros opcionais.
   Stream<List<Order?>> streamOrders(
     String companyId, {

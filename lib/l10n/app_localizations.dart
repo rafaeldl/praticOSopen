@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentCustomers.
   ///
   /// In pt, this message translates to:
-  /// **'Usados por último'**
+  /// **'Clientes Recentes'**
   String get recentCustomers;
 
   /// No description provided for @role.
@@ -7336,323 +7336,101 @@ abstract class AppLocalizations {
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
 
-  /// No description provided for @pickCustomerTitle.
+  /// No description provided for @financialLoadError.
   ///
   /// In pt, this message translates to:
-  /// **'Quem é o cliente?'**
-  String get pickCustomerTitle;
+  /// **'Não deu para carregar o financeiro.'**
+  String get financialLoadError;
 
-  /// No description provided for @pickCustomerSubtitle.
+  /// No description provided for @financialEmptyMonth.
   ///
   /// In pt, this message translates to:
-  /// **'Toque para escolher ou digite o nome, telefone ou placa'**
-  String get pickCustomerSubtitle;
+  /// **'Nenhuma OS em {month}.'**
+  String financialEmptyMonth(String month);
 
-  /// No description provided for @searchCustomerPlaceholder.
+  /// No description provided for @financialToReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar por nome, telefone ou placa'**
-  String get searchCustomerPlaceholder;
+  /// **'Falta receber'**
+  String get financialToReceive;
 
-  /// No description provided for @searchCustomerNoPlatePlaceholder.
+  /// No description provided for @financialReceived.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar por nome ou telefone'**
-  String get searchCustomerNoPlatePlaceholder;
+  /// **'Recebido'**
+  String get financialReceived;
 
-  /// No description provided for @addNewCustomer.
+  /// No description provided for @financialSummaryLine.
   ///
   /// In pt, this message translates to:
-  /// **'Cadastrar cliente novo'**
-  String get addNewCustomer;
+  /// **'Entrou {entered} · Falta {owed}'**
+  String financialSummaryLine(String entered, String owed);
 
-  /// No description provided for @allCustomers.
+  /// No description provided for @financialOrderSince.
   ///
   /// In pt, this message translates to:
-  /// **'Todos'**
-  String get allCustomers;
+  /// **'OS {number} · desde {date}'**
+  String financialOrderSince(int number, String date);
 
-  /// No description provided for @plateValue.
+  /// No description provided for @financialOrdersSince.
   ///
   /// In pt, this message translates to:
-  /// **'Placa {plate}'**
-  String plateValue(String plate);
+  /// **'{count} OS · desde {date}'**
+  String financialOrdersSince(int count, String date);
 
-  /// No description provided for @customerNamePlaceholder.
+  /// No description provided for @financialPaidOn.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: Ana Ribeiro'**
-  String get customerNamePlaceholder;
+  /// **'OS {number} · pago {date}'**
+  String financialPaidOn(int number, String date);
 
-  /// No description provided for @customerNameRequired.
+  /// No description provided for @financialOtherPeriod.
   ///
   /// In pt, this message translates to:
-  /// **'Digite o nome do cliente'**
-  String get customerNameRequired;
+  /// **'Outro período'**
+  String get financialOtherPeriod;
 
-  /// No description provided for @customerPhoneLabel.
+  /// No description provided for @financialPreviousMonth.
   ///
   /// In pt, this message translates to:
-  /// **'Telefone ou WhatsApp'**
-  String get customerPhoneLabel;
+  /// **'Mês anterior'**
+  String get financialPreviousMonth;
 
-  /// No description provided for @customerPhoneHint.
+  /// No description provided for @financialNextMonth.
   ///
   /// In pt, this message translates to:
-  /// **'Usado para mandar o orçamento e o aviso de pronto.'**
-  String get customerPhoneHint;
+  /// **'Próximo mês'**
+  String get financialNextMonth;
 
-  /// No description provided for @moreCustomerData.
+  /// No description provided for @financialNextStep.
   ///
   /// In pt, this message translates to:
-  /// **'Mais dados (e-mail, CPF ou CNPJ, endereço)'**
-  String get moreCustomerData;
+  /// **'Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String financialNextStep(String amount, int count);
 
-  /// No description provided for @openInMap.
+  /// No description provided for @financialOldestDebt.
   ///
   /// In pt, this message translates to:
-  /// **'Abrir no mapa'**
-  String get openInMap;
+  /// **'{name} deve há mais tempo: {amount} desde {date}.'**
+  String financialOldestDebt(String name, String amount, String date);
 
-  /// No description provided for @callAction.
+  /// No description provided for @financialSendChargeTo.
   ///
   /// In pt, this message translates to:
-  /// **'Ligar'**
-  String get callAction;
+  /// **'Mandar cobrança para {name}'**
+  String financialSendChargeTo(String name);
 
-  /// No description provided for @newOrderFor.
+  /// No description provided for @financialPickOrderTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Nova OS para {name}'**
-  String newOrderFor(String name);
+  /// **'OS em aberto de {name}'**
+  String financialPickOrderTitle(String name);
 
-  /// No description provided for @ordersOfCustomer.
+  /// No description provided for @financialOrderOption.
   ///
   /// In pt, this message translates to:
-  /// **'OS de {name}'**
-  String ordersOfCustomer(String name);
-
-  /// No description provided for @devicesOfCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'{devices} de {name}'**
-  String devicesOfCustomer(String devices, String name);
-
-  /// No description provided for @totalSpent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total gasto'**
-  String get totalSpent;
-
-  /// No description provided for @deleteCustomerTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Apagar {name}?'**
-  String deleteCustomerTitle(String name);
-
-  /// No description provided for @deleteCustomerKeepsOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'As OS continuam salvas.'**
-  String get deleteCustomerKeepsOrders;
-
-  /// No description provided for @deleteAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Apagar'**
-  String get deleteAction;
-
-  /// No description provided for @noCustomersYet.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você ainda não tem clientes'**
-  String get noCustomersYet;
-
-  /// No description provided for @addFirstCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cadastrar o primeiro cliente'**
-  String get addFirstCustomer;
-
-  /// No description provided for @noCustomerMatching.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum cliente com “{query}”'**
-  String noCustomerMatching(String query);
-
-  /// No description provided for @customersCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
-  String customersCount(int count);
-
-  /// No description provided for @openOrdersCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}'**
-  String openOrdersCount(int count);
-
-  /// No description provided for @lateOrdersCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS atrasada} other{{count} OS atrasadas}}'**
-  String lateOrdersCount(int count);
-
-  /// No description provided for @customerActions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mais ações do cliente'**
-  String get customerActions;
-
-  /// No description provided for @customerLookupError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não deu para carregar os clientes. Tente de novo.'**
-  String get customerLookupError;
-
-  /// No description provided for @yourAccount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sua conta'**
-  String get yourAccount;
-
-  /// No description provided for @yourCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sua empresa'**
-  String get yourCompany;
-
-  /// No description provided for @catalog.
-  ///
-  /// In pt, this message translates to:
-  /// **'Catálogo'**
-  String get catalog;
-
-  /// No description provided for @planTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Plano'**
-  String get planTitle;
-
-  /// No description provided for @advancedTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Avançado'**
-  String get advancedTitle;
-
-  /// No description provided for @deleteMyAccount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Apagar minha conta'**
-  String get deleteMyAccount;
-
-  /// No description provided for @howYouWork.
-  ///
-  /// In pt, this message translates to:
-  /// **'Como você trabalha'**
-  String get howYouWork;
-
-  /// No description provided for @valuesAndBilling.
-  ///
-  /// In pt, this message translates to:
-  /// **'Valores e cobrança'**
-  String get valuesAndBilling;
-
-  /// No description provided for @valuesAndBillingHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preços na OS, receber e aba Financeiro'**
-  String get valuesAndBillingHint;
-
-  /// No description provided for @valuesAndBillingSoon.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligado. Em breve você poderá desligar.'**
-  String get valuesAndBillingSoon;
-
-  /// No description provided for @nameAndPhoto.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nome e foto'**
-  String get nameAndPhoto;
-
-  /// No description provided for @joinWithInviteCode.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrar com código de convite'**
-  String get joinWithInviteCode;
-
-  /// No description provided for @followsPhoneSettings.
-  ///
-  /// In pt, this message translates to:
-  /// **'O idioma e a aparência seguem o ajuste do iPhone.'**
-  String get followsPhoneSettings;
-
-  /// No description provided for @invitePerson.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convidar pessoa'**
-  String get invitePerson;
-
-  /// No description provided for @inviteWhoLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nome (opcional)'**
-  String get inviteWhoLabel;
-
-  /// No description provided for @inviteWhoPlaceholder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex.: Lucas Silva'**
-  String get inviteWhoPlaceholder;
-
-  /// No description provided for @inviteEmailLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'E-mail'**
-  String get inviteEmailLabel;
-
-  /// No description provided for @inviteEmailHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'A pessoa entra com este e-mail e o convite aparece sozinho.'**
-  String get inviteEmailHint;
-
-  /// No description provided for @inviteWhatsAppLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'WhatsApp (opcional)'**
-  String get inviteWhatsAppLabel;
-
-  /// No description provided for @inviteRoleLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que pode fazer'**
-  String get inviteRoleLabel;
-
-  /// No description provided for @createInvite.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criar convite'**
-  String get createInvite;
-
-  /// No description provided for @cancelAndInviteAgain.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cancelar e convidar de novo'**
-  String get cancelAndInviteAgain;
-
-  /// No description provided for @inviteExpiredMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este convite venceu. Cancele e convide de novo.'**
-  String get inviteExpiredMessage;
-
-  /// No description provided for @userWillReceiveInviteByWhatsAppHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Depois você manda o código por esse número ou por outro app.'**
-  String get userWillReceiveInviteByWhatsAppHint;
+  /// **'OS {number} · {amount} · desde {date}'**
+  String financialOrderOption(int number, String amount, String date);
 }
 
 class _AppLocalizationsDelegate

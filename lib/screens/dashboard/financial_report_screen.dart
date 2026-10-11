@@ -6,9 +6,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
-import 'package:praticos/models/permission.dart';
 import 'package:praticos/global.dart';
-import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
@@ -18,19 +16,23 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:praticos/extensions/context_extensions.dart';
 
-/// Dashboard financeiro protegido por permissões RBAC.
+/// Relatório financeiro (gráficos, ranking de clientes/serviços/produtos e
+/// escolha de outro período), aberto a partir da aba Financeiro.
 ///
-/// Apenas usuários com permissão [PermissionType.viewFinancialReports]
-/// podem acessar esta tela (Admin e Gerente).
-class FinancialDashboardSimple extends StatefulWidget {
-  const FinancialDashboardSimple({super.key});
+/// Quem abre esta tela deve garantir a permissão `viewFinancialReports`
+/// (Admin e Gerente): a aba e a rota `/financial_report` a protegem com
+/// `ProtectedRoute`.
+class FinancialReportScreen extends StatefulWidget {
+  const FinancialReportScreen({super.key, this.openCustomPeriod = false});
+
+  /// Abre o seletor de "Outro período" assim que a tela carrega.
+  final bool openCustomPeriod;
 
   @override
-  State<FinancialDashboardSimple> createState() =>
-      _FinancialDashboardSimpleState();
+  State<FinancialReportScreen> createState() => _FinancialReportScreenState();
 }
 
-class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
+class _FinancialReportScreenState extends State<FinancialReportScreen> {
   String selectedPeriod = 'mês';
   int _periodOffset = 0;
   bool _isRankingExpanded = false;
@@ -55,6 +57,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       _initialLoadDone = true;
       final orderStore = Provider.of<OrderStore>(context, listen: false);
       orderStore.setCustomPeriod(selectedPeriod, _periodOffset);
+      if (widget.openCustomPeriod) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showCustomPeriodPicker();
+        });
+      }
     }
   }
 
@@ -118,41 +125,36 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   Widget build(BuildContext context) {
     final orderStore = Provider.of<OrderStore>(context);
 
-    // Protege a tela com verificação de permissão RBAC
-    return ProtectedRoute(
-      permission: PermissionType.viewFinancialReports,
-      accessDeniedMessage: context.l10n.financialAccessDenied,
-      child: CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
-        child: Material(
-          type: MaterialType.transparency,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              CupertinoSliverNavigationBar(
-                largeTitle: Text(context.l10n.financialDashboard),
-                trailing: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  child: Icon(
-                    CupertinoIcons.square_arrow_up,
-                    color: CupertinoColors.activeBlue.resolveFrom(context),
-                  ),
-                  onPressed: () => _shareReport(orderStore),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(context.l10n.financialReport),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Icon(
+                  CupertinoIcons.square_arrow_up,
+                  color: CupertinoColors.activeBlue.resolveFrom(context),
                 ),
+                onPressed: () => _shareReport(orderStore),
               ),
-              CupertinoSliverRefreshControl(
-                onRefresh: () => orderStore.loadOrdersForDashboard(),
-              ),
-              _buildPeriodSelector(),
-              Observer(builder: (_) => _buildKpiCards(orderStore)),
-              Observer(builder: (_) => _buildRevenueBreakdown(orderStore)),
-              Observer(builder: (_) => _buildCustomerRanking(orderStore)),
-              Observer(builder: (_) => _buildServicesRanking(orderStore)),
-              Observer(builder: (_) => _buildProductsRanking(orderStore)),
-              Observer(builder: (_) => _buildRecentOrders(orderStore)),
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
-            ],
-          ),
+            ),
+            CupertinoSliverRefreshControl(
+              onRefresh: () => orderStore.loadOrdersForDashboard(),
+            ),
+            _buildPeriodSelector(),
+            Observer(builder: (_) => _buildKpiCards(orderStore)),
+            Observer(builder: (_) => _buildRevenueBreakdown(orderStore)),
+            Observer(builder: (_) => _buildCustomerRanking(orderStore)),
+            Observer(builder: (_) => _buildServicesRanking(orderStore)),
+            Observer(builder: (_) => _buildProductsRanking(orderStore)),
+            Observer(builder: (_) => _buildRecentOrders(orderStore)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          ],
         ),
       ),
     );
@@ -620,12 +622,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: secondaryColor,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: secondaryColor,
+                    ),
                   ),
                 ),
                 if (isSelected) ...[
