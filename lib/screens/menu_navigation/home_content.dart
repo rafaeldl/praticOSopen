@@ -178,7 +178,8 @@ class _HomeContentState extends State<HomeContent> {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.of(sheetContext).pop();
-                widget.onViewChanged(HomeView.contracts);
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamed('/contract_list');
               },
               child: Text(l10n.contracts),
             ),
@@ -575,9 +576,7 @@ class _HomeContentState extends State<HomeContent> {
         ),
       );
     }
-    final title = widget.view == HomeView.canceled
-        ? l10n.viewCanceledTitle
-        : l10n.contracts;
+    final title = l10n.viewCanceledTitle;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
       child: Row(

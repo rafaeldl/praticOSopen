@@ -86,7 +86,7 @@ void main() {
       expect(find.text('R'), findsOneWidget);
       expect(find.text('Dados na OS, ramo e recursos'), findsOneWidget);
       expect(find.text('Serviços e peças'), findsOneWidget);
-      final y = (String t) => tester.getTopLeft(find.text(t)).dy;
+      double y(String t) => tester.getTopLeft(find.text(t)).dy;
       expect(y('Empresa'), lessThan(y('Sua empresa')));
       expect(y('Plano'), lessThan(y('Cadastros')));
       expect(y('Cadastros'), lessThan(y('Catálogo')));
