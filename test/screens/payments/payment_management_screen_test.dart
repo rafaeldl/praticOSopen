@@ -16,18 +16,18 @@ import 'package:praticos/services/format_service.dart';
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
-        CoreInitializeResponse(
-          name: defaultFirebaseAppName,
-          options: CoreFirebaseOptions(
-            apiKey: '123',
-            projectId: '123',
-            appId: '123',
-            messagingSenderId: '123',
-            storageBucket: 'test.appspot.com',
-          ),
-          pluginConstants: {},
-        ),
-      ];
+    CoreInitializeResponse(
+      name: defaultFirebaseAppName,
+      options: CoreFirebaseOptions(
+        apiKey: '123',
+        projectId: '123',
+        appId: '123',
+        messagingSenderId: '123',
+        storageBucket: 'test.appspot.com',
+      ),
+      pluginConstants: {},
+    ),
+  ];
 }
 
 void main() {
@@ -90,18 +90,19 @@ void main() {
         ),
         routes: {
           '/order': (context) => CupertinoPageScaffold(
-                child: Text(
-                  'order route ${(ModalRoute.of(context)!.settings.arguments as Map)['order'].number}',
-                ),
-              ),
+            child: Text(
+              'order route ${(ModalRoute.of(context)!.settings.arguments as Map)['order'].number}',
+            ),
+          ),
         },
       ),
     );
     await tester.pump();
   }
 
-  testWidgets('manual receive: amount filled, no payment method asked',
-      (tester) async {
+  testWidgets('manual receive: amount filled, no payment method asked', (
+    tester,
+  ) async {
     await pumpScreen(
       tester,
       storeWith(
@@ -131,8 +132,9 @@ void main() {
     expect(find.textContaining('Pagar valor total'), findsNothing);
   });
 
-  testWidgets('Asaas paid: shows billing type and "Tudo recebido"',
-      (tester) async {
+  testWidgets('Asaas paid: shows billing type and "Tudo recebido"', (
+    tester,
+  ) async {
     await pumpScreen(
       tester,
       storeWith(
@@ -180,29 +182,31 @@ void main() {
     expect(find.text('Anexar comprovante'), findsNothing);
   });
 
-  testWidgets('payment without receipt offers to attach later; Asaas cannot be removed',
-      (tester) async {
-    await pumpScreen(
-      tester,
-      storeWith(
-        total: 500,
-        paid: 500,
-        transactions: [
-          PaymentTransaction(
-            id: 'asaas_pay_9',
-            type: PaymentTransactionType.payment,
-            amount: 500,
-            description: 'Asaas • Boleto',
-          ),
-        ],
-      ),
-    );
+  testWidgets(
+    'payment without receipt offers to attach later; Asaas cannot be removed',
+    (tester) async {
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 500,
+          paid: 500,
+          transactions: [
+            PaymentTransaction(
+              id: 'asaas_pay_9',
+              type: PaymentTransactionType.payment,
+              amount: 500,
+              description: 'Asaas • Boleto',
+            ),
+          ],
+        ),
+      );
 
-    await tester.tap(find.text('Boleto pelo link'));
-    await tester.pumpAndSettle();
-    expect(find.text('Anexar comprovante'), findsOneWidget);
-    expect(find.text('Remover este pagamento'), findsNothing);
-  });
+      await tester.tap(find.text('Boleto pelo link'));
+      await tester.pumpAndSettle();
+      expect(find.text('Anexar comprovante'), findsOneWidget);
+      expect(find.text('Remover este pagamento'), findsNothing);
+    },
+  );
 
   testWidgets('"..." menu offers discount and undo payments', (tester) async {
     await pumpScreen(
@@ -233,16 +237,20 @@ void main() {
     expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
   });
 
-  testWidgets('shows customer and total under the title, and the amount hint',
-      (tester) async {
+  testWidgets('shows customer and total under the title, and the amount hint', (
+    tester,
+  ) async {
     await pumpScreen(tester, storeWith(total: 1250));
-    expect(find.text('Ana Ribeiro · total ${FormatService().formatCurrency(1250)}'),
-        findsOneWidget);
+    expect(
+      find.text('Ana Ribeiro · total ${FormatService().formatCurrency(1250)}'),
+      findsOneWidget,
+    );
     expect(find.text('Recebeu só uma parte? Mude o valor.'), findsOneWidget);
   });
 
-  testWidgets('from Financeiro, "‹ OS 42" replaces Receber with the order',
-      (tester) async {
+  testWidgets('from Financeiro, "‹ OS 42" replaces Receber with the order', (
+    tester,
+  ) async {
     await pumpScreen(tester, storeWith());
     expect(find.text('OS 42'), findsOneWidget);
     await tester.tap(find.byKey(const Key('receiveOrderLink')));
@@ -282,45 +290,48 @@ void main() {
     expect(find.text('order screen'), findsOneWidget);
   });
 
-  testWidgets('Asaas receipt from the webhook: row says "com comprovante" and sheet opens it',
-      (tester) async {
-    final opened = <Uri>[];
-    await pumpScreen(
-      tester,
-      storeWith(
-        total: 500,
-        paid: 500,
-        transactions: [
-          PaymentTransaction(
-            id: 'asaas_pay_7',
-            type: PaymentTransactionType.payment,
-            amount: 500,
-            description: 'Asaas',
-            billingType: 'CREDIT_CARD',
-            receiptUrl: 'https://www.asaas.com/comprovantes/7',
-          ),
-        ],
-      ),
-      opened: opened,
-    );
+  testWidgets(
+    'Asaas receipt from the webhook: row says "com comprovante" and sheet opens it',
+    (tester) async {
+      final opened = <Uri>[];
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 500,
+          paid: 500,
+          transactions: [
+            PaymentTransaction(
+              id: 'asaas_pay_7',
+              type: PaymentTransactionType.payment,
+              amount: 500,
+              description: 'Asaas',
+              billingType: 'CREDIT_CARD',
+              receiptUrl: 'https://www.asaas.com/comprovantes/7',
+            ),
+          ],
+        ),
+        opened: opened,
+      );
 
-    // Billing type comes from the new field, not the description.
-    expect(find.text('Cartão pelo link'), findsOneWidget);
-    expect(find.textContaining('com comprovante'), findsOneWidget);
+      // Billing type comes from the new field, not the description.
+      expect(find.text('Cartão pelo link'), findsOneWidget);
+      expect(find.textContaining('com comprovante'), findsOneWidget);
 
-    await tester.tap(find.text('Cartão pelo link'));
-    await tester.pumpAndSettle();
-    expect(find.text('Ver comprovante'), findsOneWidget);
-    expect(find.text('Anexar comprovante'), findsNothing);
-    expect(find.text('Remover este pagamento'), findsNothing);
+      await tester.tap(find.text('Cartão pelo link'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ver comprovante'), findsOneWidget);
+      expect(find.text('Anexar comprovante'), findsNothing);
+      expect(find.text('Remover este pagamento'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('receiveAsaasReceipt')));
-    await tester.pumpAndSettle();
-    expect(opened, [Uri.parse('https://www.asaas.com/comprovantes/7')]);
-  });
+      await tester.tap(find.byKey(const Key('receiveAsaasReceipt')));
+      await tester.pumpAndSettle();
+      expect(opened, [Uri.parse('https://www.asaas.com/comprovantes/7')]);
+    },
+  );
 
-  testWidgets('Asaas receipt link outside asaas.com is never offered',
-      (tester) async {
+  testWidgets('Asaas receipt link outside asaas.com is never offered', (
+    tester,
+  ) async {
     await pumpScreen(
       tester,
       storeWith(
@@ -343,5 +354,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('receiveAsaasReceipt')), findsNothing);
     expect(find.text('Anexar comprovante'), findsOneWidget);
+  });
+
+  testWidgets('with discount: subtotal, discount, then the net total', (
+    tester,
+  ) async {
+    final store = storeWith(total: 700)..discount = 22.22;
+    await pumpScreen(tester, store);
+    final format = FormatService();
+    expect(find.byKey(const Key('receiveSubtotal')), findsOneWidget);
+    expect(find.text(format.formatCurrency(722.22)), findsOneWidget);
+    expect(find.text('- ${format.formatCurrency(22.22)}'), findsOneWidget);
+    final subtotalY = tester.getTopLeft(find.text('Subtotal')).dy;
+    final discountY = tester.getTopLeft(find.text('Desconto')).dy;
+    final totalY = tester.getTopLeft(find.text('Total')).dy;
+    expect(subtotalY < discountY && discountY < totalY, isTrue);
+  });
+
+  testWidgets('without discount: no subtotal row', (tester) async {
+    await pumpScreen(tester, storeWith(total: 700));
+    expect(find.byKey(const Key('receiveSubtotal')), findsNothing);
+    expect(find.text('Desconto'), findsNothing);
   });
 }

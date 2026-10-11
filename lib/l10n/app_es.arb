@@ -2433,6 +2433,7 @@
   "orderAssistantPlaceholder": "Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450",
   "orderAssistantDone": "Listo",
   "orderAssistantAddPhoto": "Sacar otra foto",
+  "orderAssistantTakePhoto": "Sacar una foto",
   "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
   "orderAssistantReading": "Leyendo lo que enviaste…",
   "orderAssistantFilledNote": "Revisa lo que está marcado en amarillo antes de guardar.",

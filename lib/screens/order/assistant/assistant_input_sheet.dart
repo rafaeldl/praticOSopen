@@ -79,7 +79,8 @@ class _AssistantInputSheetState extends State<AssistantInputSheet> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: _photos.length,
-                separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.sm),
                 itemBuilder: (_, i) => ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadii.field),
                   child: Image.memory(
@@ -131,7 +132,11 @@ class _AssistantInputSheetState extends State<AssistantInputSheet> {
                   children: [
                     const Icon(CupertinoIcons.camera),
                     const SizedBox(width: AppSpacing.sm),
-                    Text(l10n.orderAssistantAddPhoto),
+                    Text(
+                      _photos.isEmpty
+                          ? l10n.orderAssistantTakePhoto
+                          : l10n.orderAssistantAddPhoto,
+                    ),
                   ],
                 ),
               ),

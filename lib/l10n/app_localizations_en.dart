@@ -4985,6 +4985,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAssistantAddPhoto => 'Take another photo';
 
   @override
+  String get orderAssistantTakePhoto => 'Take a photo';
+
+  @override
   String orderAssistantPhotoCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
