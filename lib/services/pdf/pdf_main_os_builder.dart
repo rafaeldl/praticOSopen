@@ -19,6 +19,10 @@ class PdfMainOsBuilder {
   final PdfLocalizations localizations;
   final bool showWatermark;
 
+  /// `false` when the company turned off "Valores e cobrança"
+  /// (`Company.useFinancial == false`): no prices, totals or payments.
+  final bool showValues;
+
   PdfMainOsBuilder({
     required this.baseFont,
     required this.boldFont,
@@ -26,6 +30,7 @@ class PdfMainOsBuilder {
     required this.config,
     required this.localizations,
     this.showWatermark = false,
+    this.showValues = true,
   });
 
   // ============================================
@@ -252,13 +257,84 @@ class PdfMainOsBuilder {
   // CLIENT + FINANCIAL (side by side)
   // ============================================
 
-  pw.Widget buildClientAndFinancial(Customer? customer, Order order) {
+  pw.Widget _buildClientCard(Customer? customer, Order order) {
     final customerParts = <String>[];
     if (customer?.phone != null && customer!.phone!.isNotEmpty) {
       customerParts.add(customer.phone!);
     }
     if (customer?.email != null && customer!.email!.isNotEmpty) {
       customerParts.add(customer.email!);
+    }
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: pw.BoxDecoration(
+        borderRadius: pw.BorderRadius.circular(4),
+        border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            customer?.name ?? localizations.notInformed,
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: 10,
+              color: PdfStyles.textPrimary,
+            ),
+          ),
+          if (customerParts.isNotEmpty) ...[
+            pw.SizedBox(height: 3),
+            pw.Text(
+              customerParts.join(' · '),
+              style: pw.TextStyle(
+                font: baseFont,
+                fontSize: 8,
+                color: PdfStyles.textSecondary,
+              ),
+              maxLines: 2,
+            ),
+          ],
+          // Service Location inside client card
+          if (order.address != null && order.address!.isNotEmpty) ...[
+            pw.SizedBox(height: 6),
+            pw.Text(
+              localizations.serviceLocation.toUpperCase(),
+              style: pw.TextStyle(
+                font: boldFont,
+                fontSize: 7,
+                color: PdfStyles.textMuted,
+                letterSpacing: 0.5,
+              ),
+            ),
+            pw.SizedBox(height: 2),
+            pw.Text(
+              order.address!,
+              style: pw.TextStyle(
+                font: baseFont,
+                fontSize: 8.5,
+                color: PdfStyles.textPrimary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  pw.Widget buildClientAndFinancial(Customer? customer, Order order) {
+    // Without values the client card takes the full width (no summary).
+    if (!showValues) {
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(config.customer),
+          pw.SizedBox(
+            width: double.infinity,
+            child: _buildClientCard(customer, order),
+          ),
+        ],
+      );
     }
 
     // Use Table so both cells share the same row height
@@ -284,60 +360,7 @@ class PdfMainOsBuilder {
               verticalAlignment: pw.TableCellVerticalAlignment.full,
               children: [
                 // Client card
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: pw.BoxDecoration(
-                    borderRadius: pw.BorderRadius.circular(4),
-                    border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        customer?.name ?? localizations.notInformed,
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 10,
-                          color: PdfStyles.textPrimary,
-                        ),
-                      ),
-                      if (customerParts.isNotEmpty) ...[
-                        pw.SizedBox(height: 3),
-                        pw.Text(
-                          customerParts.join(' · '),
-                          style: pw.TextStyle(
-                            font: baseFont,
-                            fontSize: 8,
-                            color: PdfStyles.textSecondary,
-                          ),
-                          maxLines: 2,
-                        ),
-                      ],
-                      // Service Location inside client card
-                      if (order.address != null && order.address!.isNotEmpty) ...[
-                        pw.SizedBox(height: 6),
-                        pw.Text(
-                          localizations.serviceLocation.toUpperCase(),
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 7,
-                            color: PdfStyles.textMuted,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        pw.SizedBox(height: 2),
-                        pw.Text(
-                          order.address!,
-                          style: pw.TextStyle(
-                            font: baseFont,
-                            fontSize: 8.5,
-                            color: PdfStyles.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                _buildClientCard(customer, order),
                 // Spacer column
                 pw.SizedBox(),
                 // Financial summary
@@ -584,7 +607,7 @@ class PdfMainOsBuilder {
                     ],
                   ),
                 ),
-                if (hasItems)
+                if (hasItems && showValues)
                   pw.Text(
                     _formatCurrency(subtotal),
                     style: pw.TextStyle(
@@ -610,8 +633,8 @@ class PdfMainOsBuilder {
                 0: const pw.FixedColumnWidth(45),
                 1: const pw.FlexColumnWidth(),
                 2: const pw.FixedColumnWidth(28),
-                3: const pw.FixedColumnWidth(70),
-                4: const pw.FixedColumnWidth(70),
+                if (showValues) 3: const pw.FixedColumnWidth(70),
+                if (showValues) 4: const pw.FixedColumnWidth(70),
               },
               children: [
                 // Header row
@@ -621,8 +644,10 @@ class PdfMainOsBuilder {
                     _buildCompactTableHeader(localizations.itemType),
                     _buildCompactTableHeader(localizations.descriptionColumn),
                     _buildCompactTableHeader(localizations.quantityShort, align: pw.TextAlign.center),
-                    _buildCompactTableHeader(localizations.unitValue, align: pw.TextAlign.right),
-                    _buildCompactTableHeader(localizations.total, align: pw.TextAlign.right),
+                    if (showValues) ...[
+                      _buildCompactTableHeader(localizations.unitValue, align: pw.TextAlign.right),
+                      _buildCompactTableHeader(localizations.total, align: pw.TextAlign.right),
+                    ],
                   ],
                 ),
                 // Service rows
@@ -635,8 +660,10 @@ class PdfMainOsBuilder {
                       _buildTypeBadge(localizations.serviceType, PdfStyles.serviceTypeColor),
                       _buildCompactTableCell(description),
                       _buildCompactTableCell('1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
-                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
-                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, isBold: true),
+                      if (showValues) ...[
+                        _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                        _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, isBold: true),
+                      ],
                     ],
                   );
                 }),
@@ -650,8 +677,10 @@ class PdfMainOsBuilder {
                       _buildTypeBadge(localizations.productType, PdfStyles.productTypeColor),
                       _buildCompactTableCell(description),
                       _buildCompactTableCell(p.quantity?.toString() ?? '1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
-                      _buildCompactTableCell(_formatCurrency(p.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
-                      _buildCompactTableCell(_formatCurrency(p.total), align: pw.TextAlign.right, isBold: true),
+                      if (showValues) ...[
+                        _buildCompactTableCell(_formatCurrency(p.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                        _buildCompactTableCell(_formatCurrency(p.total), align: pw.TextAlign.right, isBold: true),
+                      ],
                     ],
                   );
                 }),
