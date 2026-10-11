@@ -659,6 +659,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderShort => 'OS';
 
   @override
+  String get orderOverdue => 'Atrasada';
+
+  @override
   String get newOrder => 'NOVA';
 
   @override
@@ -3920,4 +3923,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get asaasErrorUnavailable =>
       'O Asaas está indisponível no momento. Tente novamente em instantes.';
+
+  @override
+  String get listLoadError =>
+      'Não deu para carregar. Verifique a internet e tente de novo.';
 }
