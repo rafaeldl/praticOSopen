@@ -38,6 +38,18 @@ class PaymentTransaction {
   /// Reference to the OrderDocument that stores the receipt
   String? receiptDocumentId;
 
+  /// Asaas only: receipt page of the payment, written by the webhook from
+  /// `transactionReceiptUrl`. Absent on manual payments and on Asaas payments
+  /// booked before this field existed.
+  @JsonKey(includeIfNull: false)
+  String? receiptUrl;
+
+  /// Asaas only: how the customer paid (`PIX`, `BOLETO`, `CREDIT_CARD`,
+  /// `DEBIT_CARD`...), written by the webhook. Older Asaas payments only have
+  /// it inside [description] (see `asaasBillingTypeOf`).
+  @JsonKey(includeIfNull: false)
+  String? billingType;
+
   PaymentTransaction({
     this.id,
     required this.type,
@@ -46,6 +58,8 @@ class PaymentTransaction {
     DateTime? createdAt,
     this.createdBy,
     this.receiptDocumentId,
+    this.receiptUrl,
+    this.billingType,
   }) : createdAt = createdAt ?? DateTime.now();
 
   /// Whether this transaction has a receipt attached
