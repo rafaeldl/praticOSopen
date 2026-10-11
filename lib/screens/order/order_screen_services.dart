@@ -12,7 +12,6 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
-import 'package:praticos/screens/order_form.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
@@ -90,18 +89,6 @@ class OrderScreenActions {
   /// "Mandar para o cliente": the share link sheet (approve, comment, ...).
   Future<void> shareWithCustomer(BuildContext context, Order order) {
     return ShareLinkSheet.show(context, order);
-  }
-
-  /// What is not rebuilt yet (segment custom fields, items per vehicle)
-  /// opens the complete legacy screen.
-  Future<void> openCompleteScreen(BuildContext context, Order order) {
-    return Navigator.of(context).push(
-      CupertinoPageRoute<void>(
-        // Named '/order' so the legacy item screens can popUntil it.
-        settings: RouteSettings(name: '/order', arguments: {'order': order}),
-        builder: (_) => OrderForm(),
-      ),
-    );
   }
 
   /// Generates the order PDF and opens the share sheet (same as the legacy

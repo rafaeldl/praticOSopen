@@ -9,6 +9,7 @@ import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -21,6 +22,8 @@ import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/screens/widgets/device_picker_sheet.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
@@ -655,6 +658,212 @@ void main() {
       expect(labels[2], 'PDF');
       expect(labels[3], startsWith('Cancelar '));
       expect(labels[4], startsWith('Apagar '));
+    });
+  });
+
+  group('segment custom fields', () {
+    const brand = CustomField(
+      key: 'service_order.brand',
+      type: 'text',
+      labels: {'pt-BR': 'Marca do lacre'},
+      section: 'Lacre',
+      sectionI18n: {'pt-BR': 'Lacre'},
+    );
+    const builtIn = CustomField(
+      key: 'service_order.status',
+      type: 'text',
+      labels: {'pt-BR': 'Status custom'},
+    );
+
+    setUp(() => SegmentConfigService()
+        .debugSetCustomFields(const [brand, builtIn]));
+    tearDown(() => SegmentConfigService().debugSetCustomFields(const []));
+
+    Order saved() => Order()
+      ..id = 'o1'
+      ..number = 7
+      ..status = 'quote'
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..customData = {'brand': 'ABC-123'}
+      ..services = []
+      ..products = []
+      ..discount = 0
+      ..paidAmount = 0
+      ..transactions = [];
+
+    testWidgets('shows the segment fields with the saved value; built-ins '
+        'are not duplicated', (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': saved()});
+      expect(find.text('Marca do lacre'), findsOneWidget);
+      expect(find.text('ABC-123'), findsOneWidget);
+      expect(find.text('Status custom'), findsNothing);
+    });
+
+    testWidgets('editing saves into order.customData; clearing removes it',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(tester, screen(store), args: {'order': saved()});
+
+      await tester.enterText(find.byType(EditableText).first, 'XYZ-9');
+      await tester.pump();
+      expect(store.order!.customData, {'brand': 'XYZ-9'});
+
+      await tester.enterText(find.byType(EditableText).first, '');
+      await tester.pump();
+      expect(store.order!.customData, isNull);
+    });
+
+    testWidgets('no fields configured, no section', (tester) async {
+      SegmentConfigService().debugSetCustomFields(const []);
+      await _pump(tester, screen(OrderStore()), args: {'order': saved()});
+      expect(find.text('Marca do lacre'), findsNothing);
+      expect(find.byType(EditableText), findsNothing);
+    });
+  });
+
+  group('two or more vehicles', () {
+    Order twoCars() => Order()
+      ..id = 'o2'
+      ..number = 9
+      ..status = 'quote'
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..devices = [
+        DeviceAggr()
+          ..id = 'd1'
+          ..name = 'Gol'
+          ..serial = 'AAA1A11',
+        DeviceAggr()
+          ..id = 'd2'
+          ..name = 'Uno',
+      ]
+      ..services = [
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Polimento')
+          ..value = 100
+          ..deviceId = 'd1',
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Revisão')
+          ..value = 300
+          ..deviceId = 'd2',
+        OrderService()
+          ..service = (ServiceAggr()..name = 'Taxa de busca')
+          ..value = 20,
+      ]
+      ..products = [
+        OrderProduct()
+          ..product = (ProductAggr()..name = 'Cera')
+          ..value = 25
+          ..quantity = 2
+          ..total = 50
+          ..deviceId = 'd1',
+      ]
+      ..discount = 0
+      ..paidAmount = 0
+      ..transactions = [];
+
+    testWidgets('items are grouped per vehicle with a subtotal each',
+        (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': twoCars()});
+
+      expect(find.text('Gol - AAA1A11'), findsWidgets);
+      expect(find.text('Geral'), findsOneWidget);
+      expect(find.text('Subtotal'), findsNWidgets(3));
+      expect(find.text(_money(150)), findsOneWidget); // Gol: 100 + 2 × 25
+      expect(find.text(_money(300)), findsNWidgets(2)); // Uno + its row
+      expect(find.text(_money(20)), findsNWidgets(2)); // Geral + its row
+      expect(find.text(_money(470)), findsOneWidget); // Total
+      // Order of the blocks: Gol, Uno, Geral.
+      final gol = tester.getTopLeft(find.text('Polimento')).dy;
+      final uno = tester.getTopLeft(find.text('Revisão')).dy;
+      final general = tester.getTopLeft(find.text('Taxa de busca')).dy;
+      expect(gol, lessThan(uno));
+      expect(uno, lessThan(general));
+    });
+
+    testWidgets('without viewPrices no subtotals', (tester) async {
+      await _pump(tester, screen(OrderStore(), prices: false),
+          args: {'order': twoCars()});
+      expect(find.text('Subtotal'), findsNothing);
+      expect(find.text('Revisão'), findsOneWidget);
+    });
+
+    testWidgets('one vehicle keeps the flat list', (tester) async {
+      final order = twoCars()..devices = [twoCars().devices!.first];
+      await _pump(tester, screen(OrderStore()), args: {'order': order});
+      expect(find.text('Subtotal'), findsNothing);
+      expect(find.text('Geral'), findsNothing);
+    });
+
+    testWidgets('adding an item asks which vehicle and files it there',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          devicePicker: (_, devices) async => DevicePickerResult(
+              DevicePickerAction.specific, devices.last),
+        ),
+        args: {'order': twoCars()},
+      );
+
+      await tester.ensureVisible(find.text('O que vai na OS?'));
+      await tester.pump();
+      await tester.tap(find.text('O que vai na OS?'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+
+      final added = store.services!.last;
+      expect(added.service!.name, 'Alinhamento');
+      expect(added.deviceId, 'd2');
+      expect(store.pendingDeviceId, isNull);
+    });
+
+    testWidgets('cancelling the vehicle question adds nothing',
+        (tester) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: store,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          catalogSource: source,
+          catalogPermissions: _allCatalog,
+          mostUsed: () async => const [],
+          devicePicker: (_, _) async => null,
+        ),
+        args: {'order': twoCars()},
+      );
+      await tester.ensureVisible(find.text('O que vai na OS?'));
+      await tester.pump();
+      await tester.tap(find.text('O que vai na OS?'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      expect(store.services, hasLength(3));
+    });
+
+    test('applyDevicePick maps each answer to the store', () {
+      final store = OrderStore();
+      applyDevicePick(store, DevicePickerResult.multi(['d1', 'd2']));
+      expect(store.pendingDeviceIds, ['d1', 'd2']);
+      applyDevicePick(store, DevicePickerResult(DevicePickerAction.all));
+      expect(store.pendingDuplicateAll, isTrue);
+      expect(store.pendingDeviceIds, isNull);
+      applyDevicePick(store, DevicePickerResult(DevicePickerAction.general));
+      expect(store.pendingDuplicateAll, isFalse);
+      expect(store.pendingDeviceId, isNull);
     });
   });
 }

@@ -54,10 +54,6 @@ class FakeActions extends OrderScreenActions {
       calls.add('send');
 
   @override
-  Future<void> openCompleteScreen(BuildContext context, Order order) async =>
-      calls.add('complete');
-
-  @override
   Future<void> addMedia(BuildContext context, OrderStore store) async =>
       calls.add('media');
 
@@ -259,7 +255,7 @@ void main() {
         'Repetir esta Ordem de Serviço',
         'Outro Equipamento',
       ]);
-      // Discount only after approval; the complete screen only when needed.
+      // Discount only after approval; no escape to the legacy screen.
       expect(find.text('Desconto'), findsNothing);
       expect(find.text('Outros campos'), findsNothing);
       expect(find.text('Checklist, fotos, comentário e mais'), findsNothing);
@@ -287,9 +283,8 @@ void main() {
       expect(_sheetLabels(tester), ['Comentário']);
     });
 
-    testWidgets('"Outros campos" opens the complete screen with 2 vehicles',
+    testWidgets('no "Outros campos" escape even with 2 vehicles',
         (tester) async {
-      final actions = FakeActions();
       final order = _order()
         ..devices = [
           DeviceAggr()
@@ -299,12 +294,10 @@ void main() {
             ..id = 'd2'
             ..name = 'Uno',
         ];
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': order});
+      await _pump(tester, screen(OrderStore()), args: {'order': order});
       await _openAddTo(tester);
-      await tester.tap(find.text('Outros campos'));
-      await tester.pumpAndSettle();
-      expect(actions.calls, contains('complete'));
+      expect(find.text('Outros campos'), findsNothing);
+      expect(find.text('Checklist, fotos, comentário e mais'), findsNothing);
     });
   });
 

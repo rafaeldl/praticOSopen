@@ -15,8 +15,9 @@ Specs: `docs/superpowers/specs/2026-10-11-telas-os-ia-design.md` (vale sobre) `2
 | `lib/screens/order/order_screen_v2.dart` | A tela: status, próximo passo, cliente/veículo, itens, totais, "…" |
 | `lib/screens/order/order_item_search_screen.dart` | "O que vai na OS?": uma busca em serviços e produtos; "Criar “X” e pôr na OS"; "Mais usados" |
 | `lib/screens/order/order_item_sheet.dart` | Sheet do item: preço (em branco = sem valor), quantidade (produto), "Tirar da OS" |
-| `lib/screens/order/order_screen_services.dart` | `OrderPermissions` (preços, status, apagar, campos principais, checklists, fotos) e `OrderScreenActions` (PDF, link do cliente, pagamentos, fotos e documentos, checklists, comentários, mapa, desconto, contrato, tela completa), injetáveis nos testes |
-| `lib/screens/order/order_extras.dart` | Sheets de data (agendar, prazo) e de endereço; `checklistMissing`; `orderBuiltInFieldKeys` (também usado pela tela antiga) |
+| `lib/screens/order/order_screen_services.dart` | `OrderPermissions` (preços, status, apagar, campos principais, checklists, fotos) e `OrderScreenActions` (PDF, link do cliente, pagamentos, fotos e documentos, checklists, comentários, mapa, desconto, contrato), injetáveis nos testes |
+| `lib/screens/order/order_extras.dart` | Sheets de data (agendar, prazo) e de endereço; `checklistMissing` |
+| `lib/screens/widgets/order_custom_fields.dart` | Campos do segmento (`service_order.*`): `orderBuiltInFieldKeys`, `orderCustomFieldsFor`, `OrderCustomFieldSections`, `applyCustomFieldValue`; compartilhado com o `OrderForm` antigo |
 | `lib/screens/widgets/order_media_actions.dart` | Adicionar foto/documento, abrir e apagar documento: compartilhado com `OrderMediaWidget` e `OrderForm` |
 | `lib/screens/widgets/order_status_share.dart` | "Avisar o cliente?" depois de mudar o status (regras + diálogo + compartilhar o link): compartilhado com `OrderForm` |
 | `lib/screens/widgets/contract_config_sheet.dart` | Sheet do contrato recorrente (saiu de dentro do `order_form.dart`) |
@@ -39,12 +40,14 @@ Sem modelo novo e sem campo novo (nada muda no Firestore nem nas Functions). Est
 4. Próximo passo (único botão azul da OS salva): Orçamento → "Cliente aprovou"; Aprovada → "Começar o serviço"; Em andamento → "Marcar como pronto"; Pronta com saldo → "Receber R$ X"; Pronta e paga → "Mandar para o cliente"; Cancelada → "Reabrir". Sem permissão para a mudança, só a frase aparece.
 5. "Pronta" bloqueia com checklist pendente; "Cancelar OS" pede confirmação.
 6. "…" com 3 grupos: "Adicionar à OS ›"; "Mandar para o cliente" · "PDF"; "Cancelar OS" / "Apagar OS" em vermelho.
-7. "Adicionar à OS ›" mostra só o que a OS ainda não tem: Checklist, Fotos ou documento, Comentário, Endereço do atendimento (com atendimento fora), Agendar dia e hora (com agenda), Prazo de entrega, Desconto (com `viewPrices`, depois de aprovada e com saldo), Repetir esta OS (com contratos), Outro veículo e, só quando a OS tem campos do ramo ou 2+ veículos, "Outros campos" (abre a tela completa). Sem `canEditOrderMainFields`/`canManageOrderForms`/`attachPhotos` as opções somem.
+7. "Adicionar à OS ›" mostra só o que a OS ainda não tem: Checklist, Fotos ou documento, Comentário, Endereço do atendimento (com atendimento fora), Agendar dia e hora (com agenda), Prazo de entrega, Desconto (com `viewPrices`, depois de aprovada e com saldo), Repetir esta OS (com contratos) e Outro veículo. Sem `canEditOrderMainFields`/`canManageOrderForms`/`attachPhotos` as opções somem. Não há mais atalho para a tela antiga ("Outros campos"): campos do ramo e vários veículos já aparecem aqui.
 8. "Nesta OS" mostra só o que existe: agendado, prazo, endereço (tocar: abrir no mapa, mudar, tirar), contrato (frequência e próxima data; tocar: mudar ou desativar; OS gerada leva à OS do contrato), checklists (ponto âmbar/verde e "Faltam N perguntas"; deslizar apaga depois de confirmar). Depois "OS geradas", "Fotos" (tocar abre o visualizador), "Documentos" (tocar abre; deslizar apaga) e os comentários no fim da OS salva.
 9. Depois de mudar para Aprovada, Em andamento ou Pronta, "Avisar o cliente?" (mesma regra da tela antiga: cliente com telefone, sem link ativo, sem "Agora não" nesta sessão). "Enviar via WhatsApp" abre o compartilhar com o link.
 10. Desconto entra como transação (`addDiscountTransaction`, o mesmo do Receber) e aparece acima do total.
 11. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
-12. Foto e "Falar o que fazer" só aparecem na Nova OS com `kAiOrderAssistEnabled` (desligado por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
+12. Campos do segmento (`customData`) aparecem na OS logo depois dos itens, agrupados por seção, com as mesmas regras do `OrderForm` (campos já fixos da tela ficam de fora; esvaziar o último apaga `customData`). Gravam na hora numa OS salva e só em memória até "Salvar OS" numa nova.
+13. Com 2 ou mais veículos os itens se agrupam por veículo (e "Geral" para os sem veículo), cada bloco com o seu "Subtotal" (só com `viewPrices`). Ao pôr um item, a mesma pergunta da tela antiga (`DevicePickerSheet`): um veículo, vários, todos ou geral.
+14. Foto e "Falar o que fazer" só aparecem na Nova OS com `kAiOrderAssistEnabled` (desligado por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
 
 ## Exemplos de Uso
 

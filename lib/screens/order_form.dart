@@ -20,6 +20,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_media_widget.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
+import 'package:praticos/screens/widgets/order_custom_fields.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -36,13 +37,11 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
-import 'package:praticos/screens/order/order_extras.dart' show orderBuiltInFieldKeys;
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/order_media_actions.dart';
 import 'package:praticos/screens/widgets/order_status_share.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
-import 'package:praticos/widgets/dynamic_field_builder.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -506,56 +505,30 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
-    final grouped = config.fieldsGroupedBySectionLocalized(
-      'service_order',
-      exclude: orderBuiltInFieldKeys,
-    );
+    final grouped = orderCustomFieldsFor(config);
     if (grouped.isEmpty) return [];
 
-    final locale = config.locale;
-    final sections = <Widget>[];
-
-    for (final entry in grouped.entries) {
-      final sectionName = entry.key;
-      final fields = entry.value;
-
-      sections.add(
-        CupertinoListSection.insetGrouped(
+    return [
+      OrderCustomFieldSections(
+        grouped: grouped,
+        customData: _store.order?.customData,
+        locale: config.locale,
+        onChanged: (data) {
+          setState(() => _store.order?.customData = data);
+          _store.createItem();
+        },
+        sectionBuilder: (context, name, rows) => CupertinoListSection.insetGrouped(
           header: Text(
-            sectionName.toUpperCase(),
+            name.toUpperCase(),
             style: TextStyle(
               fontSize: 13,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
           ),
-          children: fields.map((field) {
-            return DynamicFieldBuilder(
-              field: field,
-              value: _store.order?.customData?[field.fieldName] ?? _store.order?.customData?[field.key],
-              locale: locale,
-              onChanged: (newValue) {
-                setState(() {
-                  _store.order?.customData ??= {};
-                  if (newValue == null) {
-                    _store.order!.customData!.remove(field.fieldName);
-                  } else {
-                    _store.order!.customData![field.fieldName] = newValue;
-                  }
-                  _store.order!.customData!.remove(field.key); // migrate old key
-                  // Clean up empty customData
-                  if (_store.order!.customData!.isEmpty) {
-                    _store.order!.customData = null;
-                  }
-                });
-                _store.createItem();
-              },
-            );
-          }).toList(),
+          children: rows,
         ),
-      );
-    }
-
-    return sections;
+      ),
+    ];
   }
 
   Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {

@@ -7,17 +7,6 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// Order fields drawn by the order screens themselves. The segment may
-/// configure them (label, mask), but they never show again as custom fields.
-const orderBuiltInFieldKeys = {
-  'service_order.status',
-  'service_order.scheduledDate',
-  'service_order.dueDate',
-  'service_order.total',
-  'service_order.payment',
-  'service_order.address',
-};
-
 /// Questions of a checklist still without an answer.
 int checklistMissing(of_model.OrderForm form) {
   final missing = form.items.length - form.responses.length;
