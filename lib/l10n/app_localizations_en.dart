@@ -1261,7 +1261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentOrders => 'Recent Orders';
 
   @override
-  String get recentCustomers => 'Recent Customers';
+  String get recentCustomers => 'Used last';
 
   @override
   String get role => 'Role';
@@ -3916,150 +3916,205 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not load this. Check your connection and try again.';
 
   @override
-  String get filterOpen => 'Open';
+  String get pickCustomerTitle => 'Who is the customer?';
 
   @override
-  String get filterAll => 'All';
+  String get pickCustomerSubtitle =>
+      'Tap to choose, or type a name, phone or plate';
 
   @override
-  String get sectionLate => 'Overdue';
+  String get searchCustomerPlaceholder => 'Search by name, phone or plate';
 
   @override
-  String get sectionDueToday => 'Due today';
+  String get searchCustomerNoPlatePlaceholder => 'Search by name or phone';
 
   @override
-  String get sectionInProgress => 'In progress';
+  String get addNewCustomer => 'Add a new customer';
 
   @override
-  String get sectionWaitingApproval => 'Waiting for approval';
+  String get allCustomers => 'All';
 
   @override
-  String get sectionApproved => 'Approved';
-
-  @override
-  String get moreShowCanceled => 'View canceled';
-
-  @override
-  String get viewCanceledTitle => 'Canceled';
-
-  @override
-  String get backToOpenOrders => 'Back to open';
-
-  @override
-  String get homeMoreMenu => 'More options';
-
-  @override
-  String homeOpenCount(int count) {
-    return '$count open';
+  String plateValue(String plate) {
+    return 'Plate $plate';
   }
 
   @override
-  String get nextStepLabelToday => 'Today';
+  String get customerNamePlaceholder => 'E.g.: Ana Ribeiro';
 
   @override
-  String nextStepLate(int count) {
+  String get customerNameRequired => 'Enter the customer name';
+
+  @override
+  String get customerPhoneLabel => 'Phone or WhatsApp';
+
+  @override
+  String get customerPhoneHint =>
+      'Used to send the quote and the ready notice.';
+
+  @override
+  String get moreCustomerData => 'More details (email, tax ID, address)';
+
+  @override
+  String get openInMap => 'Open in maps';
+
+  @override
+  String get callAction => 'Call';
+
+  @override
+  String newOrderFor(String name) {
+    return 'New order for $name';
+  }
+
+  @override
+  String ordersOfCustomer(String name) {
+    return 'Orders of $name';
+  }
+
+  @override
+  String devicesOfCustomer(String devices, String name) {
+    return '$name\'s $devices';
+  }
+
+  @override
+  String get totalSpent => 'Total spent';
+
+  @override
+  String deleteCustomerTitle(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get deleteCustomerKeepsOrders => 'The orders stay saved.';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get noCustomersYet => 'You have no customers yet';
+
+  @override
+  String get addFirstCustomer => 'Add your first customer';
+
+  @override
+  String noCustomerMatching(String query) {
+    return 'No customer matching “$query”';
+  }
+
+  @override
+  String customersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count orders are past their due date.',
-      one: '1 order is past its due date.',
+      other: '$count customers',
+      one: '1 customer',
     );
     return '$_temp0';
   }
 
   @override
-  String nextStepDueToday(int count) {
+  String openOrdersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count orders due today.',
-      one: '1 order due today.',
+      other: '$count open orders',
+      one: '1 open order',
     );
     return '$_temp0';
   }
 
   @override
-  String nextStepQuotesWaiting(int count) {
+  String lateOrdersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count quotes waiting for the customer\'s answer.',
-      one: '1 quote waiting for the customer\'s answer.',
+      other: '$count late orders',
+      one: '1 late order',
     );
     return '$_temp0';
   }
 
   @override
-  String get seeLate => 'See the overdue ones';
+  String get customerActions => 'More customer actions';
 
   @override
-  String get seeThem => 'See';
+  String get customerLookupError => 'Could not load customers. Try again.';
 
   @override
-  String get seeAllOrders => 'See all';
+  String get yourAccount => 'Your account';
 
   @override
-  String notificationsA11y(int count) {
-    return 'Notifications, $count new';
-  }
+  String get yourCompany => 'Your company';
 
   @override
-  String get firstOrderTitle =>
-      'Create your first service order and send it to the customer for approval.';
+  String get catalog => 'Catalog';
 
   @override
-  String get howItWorks => 'How it works';
+  String get planTitle => 'Plan';
 
   @override
-  String get howItWorksStep1 => 'Pick the customer and what will be done.';
+  String get advancedTitle => 'Advanced';
 
   @override
-  String get howItWorksStep2 => 'Send the quote for the customer to approve.';
+  String get deleteMyAccount => 'Delete my account';
 
   @override
-  String get howItWorksStep3 => 'Follow the work and get paid.';
+  String get howYouWork => 'How you work';
 
   @override
-  String get searchNotFoundLoaded => 'Not found in the loaded orders.';
+  String get valuesAndBilling => 'Prices and billing';
 
   @override
-  String get searchOlder => 'Search older ones';
+  String get valuesAndBillingHint =>
+      'Prices on orders, receiving payments and the Financial tab';
 
   @override
-  String get noOpenOrders => 'No open orders.';
+  String get valuesAndBillingSoon =>
+      'On. You will be able to turn it off soon.';
 
   @override
-  String get noOrdersInView => 'Nothing here.';
+  String get nameAndPhoto => 'Name and photo';
 
   @override
-  String get loadOrdersError => 'Could not load the orders.';
+  String get joinWithInviteCode => 'Join with an invite code';
 
   @override
-  String orderLateDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Overdue $count days',
-      one: 'Overdue 1 day',
-    );
-    return '$_temp0';
-  }
+  String get followsPhoneSettings =>
+      'Language and appearance follow your iPhone settings.';
 
   @override
-  String orderStatusDue(String status, String date) {
-    return '$status · due $date';
-  }
+  String get invitePerson => 'Invite someone';
 
   @override
-  String orderRowNumber(String number) {
-    return 'Order $number';
-  }
+  String get inviteWhoLabel => 'Name (optional)';
 
   @override
-  String orderRowNumberDevice(String number, String device) {
-    return 'Order $number · $device';
-  }
+  String get inviteWhoPlaceholder => 'E.g. Lucas Silva';
 
   @override
-  String get homeNewOrder => 'New order';
+  String get inviteEmailLabel => 'Email';
+
+  @override
+  String get inviteEmailHint =>
+      'They sign in with this email and the invite shows up on its own.';
+
+  @override
+  String get inviteWhatsAppLabel => 'WhatsApp (optional)';
+
+  @override
+  String get inviteRoleLabel => 'What they can do';
+
+  @override
+  String get createInvite => 'Create invite';
+
+  @override
+  String get cancelAndInviteAgain => 'Cancel and invite again';
+
+  @override
+  String get inviteExpiredMessage =>
+      'This invite has expired. Cancel it and invite again.';
+
+  @override
+  String get userWillReceiveInviteByWhatsAppHint =>
+      'Then you send the code to this number or through another app.';
 }

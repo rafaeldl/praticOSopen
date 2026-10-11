@@ -1262,7 +1262,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get recentOrders => 'Órdenes Recientes';
 
   @override
-  String get recentCustomers => 'Clientes Recientes';
+  String get recentCustomers => 'Usados por último';
 
   @override
   String get role => 'Rol';
@@ -3936,151 +3936,205 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo cargar. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
-  String get filterOpen => 'Abiertas';
+  String get pickCustomerTitle => '¿Quién es el cliente?';
 
   @override
-  String get filterAll => 'Todas';
+  String get pickCustomerSubtitle =>
+      'Toca para elegir o escribe nombre, teléfono o placa';
 
   @override
-  String get sectionLate => 'Atrasadas';
+  String get searchCustomerPlaceholder => 'Buscar por nombre, teléfono o placa';
 
   @override
-  String get sectionDueToday => 'Para hoy';
+  String get searchCustomerNoPlatePlaceholder => 'Buscar por nombre o teléfono';
 
   @override
-  String get sectionInProgress => 'En curso';
+  String get addNewCustomer => 'Registrar cliente nuevo';
 
   @override
-  String get sectionWaitingApproval => 'Esperando aprobación';
+  String get allCustomers => 'Todos';
 
   @override
-  String get sectionApproved => 'Aprobadas';
-
-  @override
-  String get moreShowCanceled => 'Ver canceladas';
-
-  @override
-  String get viewCanceledTitle => 'Canceladas';
-
-  @override
-  String get backToOpenOrders => 'Volver a abiertas';
-
-  @override
-  String get homeMoreMenu => 'Más opciones';
-
-  @override
-  String homeOpenCount(int count) {
-    return '$count abiertas';
+  String plateValue(String plate) {
+    return 'Placa $plate';
   }
 
   @override
-  String get nextStepLabelToday => 'Hoy';
+  String get customerNamePlaceholder => 'Ej.: Ana Ribeiro';
 
   @override
-  String nextStepLate(int count) {
+  String get customerNameRequired => 'Escribe el nombre del cliente';
+
+  @override
+  String get customerPhoneLabel => 'Teléfono o WhatsApp';
+
+  @override
+  String get customerPhoneHint =>
+      'Se usa para enviar el presupuesto y el aviso de listo.';
+
+  @override
+  String get moreCustomerData => 'Más datos (correo, documento, dirección)';
+
+  @override
+  String get openInMap => 'Abrir en el mapa';
+
+  @override
+  String get callAction => 'Llamar';
+
+  @override
+  String newOrderFor(String name) {
+    return 'Nueva orden para $name';
+  }
+
+  @override
+  String ordersOfCustomer(String name) {
+    return 'Órdenes de $name';
+  }
+
+  @override
+  String devicesOfCustomer(String devices, String name) {
+    return '$devices de $name';
+  }
+
+  @override
+  String get totalSpent => 'Total gastado';
+
+  @override
+  String deleteCustomerTitle(String name) {
+    return '¿Borrar a $name?';
+  }
+
+  @override
+  String get deleteCustomerKeepsOrders => 'Las órdenes siguen guardadas.';
+
+  @override
+  String get deleteAction => 'Borrar';
+
+  @override
+  String get noCustomersYet => 'Aún no tienes clientes';
+
+  @override
+  String get addFirstCustomer => 'Registrar el primer cliente';
+
+  @override
+  String noCustomerMatching(String query) {
+    return 'Ningún cliente con “$query”';
+  }
+
+  @override
+  String customersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count OS pasaron la fecha de entrega.',
-      one: '1 OS pasó la fecha de entrega.',
+      other: '$count clientes',
+      one: '1 cliente',
     );
     return '$_temp0';
   }
 
   @override
-  String nextStepDueToday(int count) {
+  String openOrdersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count OS para entregar hoy.',
-      one: '1 OS para entregar hoy.',
+      other: '$count órdenes abiertas',
+      one: '1 orden abierta',
     );
     return '$_temp0';
   }
 
   @override
-  String nextStepQuotesWaiting(int count) {
+  String lateOrdersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count presupuestos esperando respuesta del cliente.',
-      one: '1 presupuesto esperando respuesta del cliente.',
+      other: '$count órdenes atrasadas',
+      one: '1 orden atrasada',
     );
     return '$_temp0';
   }
 
   @override
-  String get seeLate => 'Ver las atrasadas';
+  String get customerActions => 'Más acciones del cliente';
 
   @override
-  String get seeThem => 'Ver';
+  String get customerLookupError =>
+      'No se pudo cargar los clientes. Inténtalo de nuevo.';
 
   @override
-  String get seeAllOrders => 'Ver todas';
+  String get yourAccount => 'Tu cuenta';
 
   @override
-  String notificationsA11y(int count) {
-    return 'Avisos, $count nuevos';
-  }
+  String get yourCompany => 'Tu empresa';
 
   @override
-  String get firstOrderTitle =>
-      'Crea tu primera orden de servicio y envíala al cliente para que la apruebe.';
+  String get catalog => 'Catálogo';
 
   @override
-  String get howItWorks => 'Cómo funciona';
+  String get planTitle => 'Plan';
 
   @override
-  String get howItWorksStep1 => 'Elige al cliente y lo que se va a hacer.';
+  String get advancedTitle => 'Avanzado';
 
   @override
-  String get howItWorksStep2 =>
-      'Envía el presupuesto para que el cliente lo apruebe.';
+  String get deleteMyAccount => 'Eliminar mi cuenta';
 
   @override
-  String get howItWorksStep3 => 'Sigue el trabajo y cobra.';
+  String get howYouWork => 'Cómo trabajas';
 
   @override
-  String get searchNotFoundLoaded => 'No lo encontré en las OS cargadas.';
+  String get valuesAndBilling => 'Valores y cobros';
 
   @override
-  String get searchOlder => 'Buscar en las más antiguas';
+  String get valuesAndBillingHint =>
+      'Precios en la OS, cobros y pestaña Finanzas';
 
   @override
-  String get noOpenOrders => 'Ninguna OS abierta.';
+  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
 
   @override
-  String get noOrdersInView => 'Nada por aquí.';
+  String get nameAndPhoto => 'Nombre y foto';
 
   @override
-  String get loadOrdersError => 'No se pudieron cargar las OS.';
+  String get joinWithInviteCode => 'Entrar con código de invitación';
 
   @override
-  String orderLateDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Atrasada $count días',
-      one: 'Atrasada 1 día',
-    );
-    return '$_temp0';
-  }
+  String get followsPhoneSettings =>
+      'El idioma y la apariencia siguen los ajustes del iPhone.';
 
   @override
-  String orderStatusDue(String status, String date) {
-    return '$status · entrega $date';
-  }
+  String get invitePerson => 'Invitar persona';
 
   @override
-  String orderRowNumber(String number) {
-    return 'OS $number';
-  }
+  String get inviteWhoLabel => 'Nombre (opcional)';
 
   @override
-  String orderRowNumberDevice(String number, String device) {
-    return 'OS $number · $device';
-  }
+  String get inviteWhoPlaceholder => 'Ej.: Lucas Silva';
 
   @override
-  String get homeNewOrder => 'Nueva OS';
+  String get inviteEmailLabel => 'Correo electrónico';
+
+  @override
+  String get inviteEmailHint =>
+      'La persona entra con este correo y la invitación aparece sola.';
+
+  @override
+  String get inviteWhatsAppLabel => 'WhatsApp (opcional)';
+
+  @override
+  String get inviteRoleLabel => 'Qué puede hacer';
+
+  @override
+  String get createInvite => 'Crear invitación';
+
+  @override
+  String get cancelAndInviteAgain => 'Cancelar e invitar de nuevo';
+
+  @override
+  String get inviteExpiredMessage =>
+      'Esta invitación venció. Cancélala e invita de nuevo.';
+
+  @override
+  String get userWillReceiveInviteByWhatsAppHint =>
+      'Después envías el código a este número o por otra app.';
 }

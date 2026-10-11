@@ -2123,5 +2123,29 @@
       }
     }
   },
-  "homeNewOrder": "New order"
+  "homeNewOrder": "New order",
+  "yourAccount": "Your account",
+  "yourCompany": "Your company",
+  "catalog": "Catalog",
+  "planTitle": "Plan",
+  "advancedTitle": "Advanced",
+  "deleteMyAccount": "Delete my account",
+  "howYouWork": "How you work",
+  "valuesAndBilling": "Prices and billing",
+  "valuesAndBillingHint": "Prices on orders, receiving payments and the Financial tab",
+  "valuesAndBillingSoon": "On. You will be able to turn it off soon.",
+  "nameAndPhoto": "Name and photo",
+  "joinWithInviteCode": "Join with an invite code",
+  "followsPhoneSettings": "Language and appearance follow your iPhone settings.",
+  "invitePerson": "Invite someone",
+  "inviteWhoLabel": "Name (optional)",
+  "inviteWhoPlaceholder": "E.g. Lucas Silva",
+  "inviteEmailLabel": "Email",
+  "inviteEmailHint": "They sign in with this email and the invite shows up on its own.",
+  "inviteWhatsAppLabel": "WhatsApp (optional)",
+  "inviteRoleLabel": "What they can do",
+  "createInvite": "Create invite",
+  "cancelAndInviteAgain": "Cancel and invite again",
+  "inviteExpiredMessage": "This invite has expired. Cancel it and invite again.",
+  "userWillReceiveInviteByWhatsAppHint": "Then you send the code to this number or through another app."
 }

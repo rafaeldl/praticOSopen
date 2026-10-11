@@ -2185,5 +2185,29 @@
       }
     }
   },
-  "homeNewOrder": "Nova OS"
+  "homeNewOrder": "Nova OS",
+  "yourAccount": "Sua conta",
+  "yourCompany": "Sua empresa",
+  "catalog": "Catálogo",
+  "planTitle": "Plano",
+  "advancedTitle": "Avançado",
+  "deleteMyAccount": "Apagar minha conta",
+  "howYouWork": "Como você trabalha",
+  "valuesAndBilling": "Valores e cobrança",
+  "valuesAndBillingHint": "Preços na OS, receber e aba Financeiro",
+  "valuesAndBillingSoon": "Ligado. Em breve você poderá desligar.",
+  "nameAndPhoto": "Nome e foto",
+  "joinWithInviteCode": "Entrar com código de convite",
+  "followsPhoneSettings": "O idioma e a aparência seguem o ajuste do iPhone.",
+  "invitePerson": "Convidar pessoa",
+  "inviteWhoLabel": "Nome (opcional)",
+  "inviteWhoPlaceholder": "Ex.: Lucas Silva",
+  "inviteEmailLabel": "E-mail",
+  "inviteEmailHint": "A pessoa entra com este e-mail e o convite aparece sozinho.",
+  "inviteWhatsAppLabel": "WhatsApp (opcional)",
+  "inviteRoleLabel": "O que pode fazer",
+  "createInvite": "Criar convite",
+  "cancelAndInviteAgain": "Cancelar e convidar de novo",
+  "inviteExpiredMessage": "Este convite venceu. Cancele e convide de novo.",
+  "userWillReceiveInviteByWhatsAppHint": "Depois você manda o código por esse número ou por outro app."
 }

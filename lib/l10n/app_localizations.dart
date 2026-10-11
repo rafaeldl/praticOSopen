@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentCustomers.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes Recentes'**
+  /// **'Usados por último'**
   String get recentCustomers;
 
   /// No description provided for @role.
@@ -7336,215 +7336,323 @@ abstract class AppLocalizations {
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
 
-  /// No description provided for @filterOpen.
+  /// No description provided for @pickCustomerTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Em aberto'**
-  String get filterOpen;
+  /// **'Quem é o cliente?'**
+  String get pickCustomerTitle;
 
-  /// No description provided for @filterAll.
+  /// No description provided for @pickCustomerSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Todas'**
-  String get filterAll;
+  /// **'Toque para escolher ou digite o nome, telefone ou placa'**
+  String get pickCustomerSubtitle;
 
-  /// No description provided for @sectionLate.
+  /// No description provided for @searchCustomerPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Atrasadas'**
-  String get sectionLate;
+  /// **'Buscar por nome, telefone ou placa'**
+  String get searchCustomerPlaceholder;
 
-  /// No description provided for @sectionDueToday.
+  /// No description provided for @searchCustomerNoPlatePlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Para hoje'**
-  String get sectionDueToday;
+  /// **'Buscar por nome ou telefone'**
+  String get searchCustomerNoPlatePlaceholder;
 
-  /// No description provided for @sectionInProgress.
+  /// No description provided for @addNewCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Em andamento'**
-  String get sectionInProgress;
+  /// **'Cadastrar cliente novo'**
+  String get addNewCustomer;
 
-  /// No description provided for @sectionWaitingApproval.
+  /// No description provided for @allCustomers.
   ///
   /// In pt, this message translates to:
-  /// **'Esperando aprovação'**
-  String get sectionWaitingApproval;
+  /// **'Todos'**
+  String get allCustomers;
 
-  /// No description provided for @sectionApproved.
+  /// No description provided for @plateValue.
   ///
   /// In pt, this message translates to:
-  /// **'Aprovadas'**
-  String get sectionApproved;
+  /// **'Placa {plate}'**
+  String plateValue(String plate);
 
-  /// No description provided for @moreShowCanceled.
+  /// No description provided for @customerNamePlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ver canceladas'**
-  String get moreShowCanceled;
+  /// **'Ex.: Ana Ribeiro'**
+  String get customerNamePlaceholder;
 
-  /// No description provided for @viewCanceledTitle.
+  /// No description provided for @customerNameRequired.
   ///
   /// In pt, this message translates to:
-  /// **'Canceladas'**
-  String get viewCanceledTitle;
+  /// **'Digite o nome do cliente'**
+  String get customerNameRequired;
 
-  /// No description provided for @backToOpenOrders.
+  /// No description provided for @customerPhoneLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Voltar para em aberto'**
-  String get backToOpenOrders;
+  /// **'Telefone ou WhatsApp'**
+  String get customerPhoneLabel;
 
-  /// No description provided for @homeMoreMenu.
+  /// No description provided for @customerPhoneHint.
   ///
   /// In pt, this message translates to:
-  /// **'Mais opções'**
-  String get homeMoreMenu;
+  /// **'Usado para mandar o orçamento e o aviso de pronto.'**
+  String get customerPhoneHint;
 
-  /// No description provided for @homeOpenCount.
+  /// No description provided for @moreCustomerData.
   ///
   /// In pt, this message translates to:
-  /// **'{count} em aberto'**
-  String homeOpenCount(int count);
+  /// **'Mais dados (e-mail, CPF ou CNPJ, endereço)'**
+  String get moreCustomerData;
 
-  /// No description provided for @nextStepLabelToday.
+  /// No description provided for @openInMap.
   ///
   /// In pt, this message translates to:
-  /// **'Hoje'**
-  String get nextStepLabelToday;
+  /// **'Abrir no mapa'**
+  String get openInMap;
 
-  /// No description provided for @nextStepLate.
+  /// No description provided for @callAction.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS passou do prazo de entrega.} other{{count} OS passaram do prazo de entrega.}}'**
-  String nextStepLate(int count);
+  /// **'Ligar'**
+  String get callAction;
 
-  /// No description provided for @nextStepDueToday.
+  /// No description provided for @newOrderFor.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS para entregar hoje.} other{{count} OS para entregar hoje.}}'**
-  String nextStepDueToday(int count);
+  /// **'Nova OS para {name}'**
+  String newOrderFor(String name);
 
-  /// No description provided for @nextStepQuotesWaiting.
+  /// No description provided for @ordersOfCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 orçamento esperando resposta do cliente.} other{{count} orçamentos esperando resposta do cliente.}}'**
-  String nextStepQuotesWaiting(int count);
+  /// **'OS de {name}'**
+  String ordersOfCustomer(String name);
 
-  /// No description provided for @seeLate.
+  /// No description provided for @devicesOfCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Ver as atrasadas'**
-  String get seeLate;
+  /// **'{devices} de {name}'**
+  String devicesOfCustomer(String devices, String name);
 
-  /// No description provided for @seeThem.
+  /// No description provided for @totalSpent.
   ///
   /// In pt, this message translates to:
-  /// **'Ver'**
-  String get seeThem;
+  /// **'Total gasto'**
+  String get totalSpent;
 
-  /// No description provided for @seeAllOrders.
+  /// No description provided for @deleteCustomerTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Ver todas'**
-  String get seeAllOrders;
+  /// **'Apagar {name}?'**
+  String deleteCustomerTitle(String name);
 
-  /// No description provided for @notificationsA11y.
+  /// No description provided for @deleteCustomerKeepsOrders.
   ///
   /// In pt, this message translates to:
-  /// **'Avisos, {count} novos'**
-  String notificationsA11y(int count);
+  /// **'As OS continuam salvas.'**
+  String get deleteCustomerKeepsOrders;
 
-  /// No description provided for @firstOrderTitle.
+  /// No description provided for @deleteAction.
   ///
   /// In pt, this message translates to:
-  /// **'Crie sua primeira ordem de serviço e mande para o cliente aprovar.'**
-  String get firstOrderTitle;
+  /// **'Apagar'**
+  String get deleteAction;
 
-  /// No description provided for @howItWorks.
+  /// No description provided for @noCustomersYet.
   ///
   /// In pt, this message translates to:
-  /// **'Como funciona'**
-  String get howItWorks;
+  /// **'Você ainda não tem clientes'**
+  String get noCustomersYet;
 
-  /// No description provided for @howItWorksStep1.
+  /// No description provided for @addFirstCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha o cliente e o que vai ser feito.'**
-  String get howItWorksStep1;
+  /// **'Cadastrar o primeiro cliente'**
+  String get addFirstCustomer;
 
-  /// No description provided for @howItWorksStep2.
+  /// No description provided for @noCustomerMatching.
   ///
   /// In pt, this message translates to:
-  /// **'Mande o orçamento para o cliente aprovar.'**
-  String get howItWorksStep2;
+  /// **'Nenhum cliente com “{query}”'**
+  String noCustomerMatching(String query);
 
-  /// No description provided for @howItWorksStep3.
+  /// No description provided for @customersCount.
   ///
   /// In pt, this message translates to:
-  /// **'Acompanhe o serviço e receba.'**
-  String get howItWorksStep3;
+  /// **'{count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String customersCount(int count);
 
-  /// No description provided for @searchNotFoundLoaded.
+  /// No description provided for @openOrdersCount.
   ///
   /// In pt, this message translates to:
-  /// **'Não achei nas OS carregadas.'**
-  String get searchNotFoundLoaded;
+  /// **'{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}'**
+  String openOrdersCount(int count);
 
-  /// No description provided for @searchOlder.
+  /// No description provided for @lateOrdersCount.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar nas mais antigas'**
-  String get searchOlder;
+  /// **'{count, plural, =1{1 OS atrasada} other{{count} OS atrasadas}}'**
+  String lateOrdersCount(int count);
 
-  /// No description provided for @noOpenOrders.
+  /// No description provided for @customerActions.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhuma OS em aberto.'**
-  String get noOpenOrders;
+  /// **'Mais ações do cliente'**
+  String get customerActions;
 
-  /// No description provided for @noOrdersInView.
+  /// No description provided for @customerLookupError.
   ///
   /// In pt, this message translates to:
-  /// **'Nada por aqui.'**
-  String get noOrdersInView;
+  /// **'Não deu para carregar os clientes. Tente de novo.'**
+  String get customerLookupError;
 
-  /// No description provided for @loadOrdersError.
+  /// No description provided for @yourAccount.
   ///
   /// In pt, this message translates to:
-  /// **'Não deu para carregar as OS.'**
-  String get loadOrdersError;
+  /// **'Sua conta'**
+  String get yourAccount;
 
-  /// No description provided for @orderLateDays.
+  /// No description provided for @yourCompany.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{Atrasada 1 dia} other{Atrasada {count} dias}}'**
-  String orderLateDays(int count);
+  /// **'Sua empresa'**
+  String get yourCompany;
 
-  /// No description provided for @orderStatusDue.
+  /// No description provided for @catalog.
   ///
   /// In pt, this message translates to:
-  /// **'{status} · entrega {date}'**
-  String orderStatusDue(String status, String date);
+  /// **'Catálogo'**
+  String get catalog;
 
-  /// No description provided for @orderRowNumber.
+  /// No description provided for @planTitle.
   ///
   /// In pt, this message translates to:
-  /// **'OS {number}'**
-  String orderRowNumber(String number);
+  /// **'Plano'**
+  String get planTitle;
 
-  /// No description provided for @orderRowNumberDevice.
+  /// No description provided for @advancedTitle.
   ///
   /// In pt, this message translates to:
-  /// **'OS {number} · {device}'**
-  String orderRowNumberDevice(String number, String device);
+  /// **'Avançado'**
+  String get advancedTitle;
 
-  /// No description provided for @homeNewOrder.
+  /// No description provided for @deleteMyAccount.
   ///
   /// In pt, this message translates to:
-  /// **'Nova OS'**
-  String get homeNewOrder;
+  /// **'Apagar minha conta'**
+  String get deleteMyAccount;
+
+  /// No description provided for @howYouWork.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você trabalha'**
+  String get howYouWork;
+
+  /// No description provided for @valuesAndBilling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valores e cobrança'**
+  String get valuesAndBilling;
+
+  /// No description provided for @valuesAndBillingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preços na OS, receber e aba Financeiro'**
+  String get valuesAndBillingHint;
+
+  /// No description provided for @valuesAndBillingSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado. Em breve você poderá desligar.'**
+  String get valuesAndBillingSoon;
+
+  /// No description provided for @nameAndPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome e foto'**
+  String get nameAndPhoto;
+
+  /// No description provided for @joinWithInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com código de convite'**
+  String get joinWithInviteCode;
+
+  /// No description provided for @followsPhoneSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'O idioma e a aparência seguem o ajuste do iPhone.'**
+  String get followsPhoneSettings;
+
+  /// No description provided for @invitePerson.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar pessoa'**
+  String get invitePerson;
+
+  /// No description provided for @inviteWhoLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome (opcional)'**
+  String get inviteWhoLabel;
+
+  /// No description provided for @inviteWhoPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Lucas Silva'**
+  String get inviteWhoPlaceholder;
+
+  /// No description provided for @inviteEmailLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail'**
+  String get inviteEmailLabel;
+
+  /// No description provided for @inviteEmailHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A pessoa entra com este e-mail e o convite aparece sozinho.'**
+  String get inviteEmailHint;
+
+  /// No description provided for @inviteWhatsAppLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp (opcional)'**
+  String get inviteWhatsAppLabel;
+
+  /// No description provided for @inviteRoleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode fazer'**
+  String get inviteRoleLabel;
+
+  /// No description provided for @createInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar convite'**
+  String get createInvite;
+
+  /// No description provided for @cancelAndInviteAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar e convidar de novo'**
+  String get cancelAndInviteAgain;
+
+  /// No description provided for @inviteExpiredMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite venceu. Cancele e convide de novo.'**
+  String get inviteExpiredMessage;
+
+  /// No description provided for @userWillReceiveInviteByWhatsAppHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois você manda o código por esse número ou por outro app.'**
+  String get userWillReceiveInviteByWhatsAppHint;
 }
 
 class _AppLocalizationsDelegate
