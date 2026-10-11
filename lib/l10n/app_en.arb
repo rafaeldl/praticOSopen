@@ -1982,54 +1982,6 @@
     }
   },
   "orderAddMore": "Checklist, photos, comment and more",
-  "orderInThisOrder": "In this {order}",
-  "@orderInThisOrder": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddChecklist": "Checklist",
-  "orderAddMedia": "Photos or document",
-  "orderAddComment": "Comment",
-  "orderAddAddress": "Service address",
-  "orderAddSchedule": "Schedule date and time",
-  "orderAddDiscount": "Discount",
-  "orderAddContract": "Repeat this {order}",
-  "@orderAddContract": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddOtherFields": "Other fields",
-  "orderChecklistMissing": "{count, plural, =1{1 question left} other{{count} questions left}}",
-  "@orderChecklistMissing": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "orderChecklistDone": "Done",
-  "orderAddressChange": "Change address",
-  "orderAddressRemove": "Remove address",
-  "orderScheduleRemove": "Remove schedule",
-  "orderContractSummary": "{frequency} · next on {date}",
-  "@orderContractSummary": {
-    "placeholders": {
-      "frequency": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "orderContractChange": "Change contract",
-  "orderUploading": "Uploading…",
   "orderCancelConfirmTitle": "Cancel {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2181,7 +2133,10 @@
   "howYouWork": "How you work",
   "valuesAndBilling": "Prices and billing",
   "valuesAndBillingHint": "Prices on orders, receiving payments and the Financial tab",
-  "valuesAndBillingSoon": "On. You will be able to turn it off soon.",
+  "valuesAndBillingOffTitle": "Turn off prices and billing?",
+  "valuesAndBillingOffMessage": "Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.",
+  "valuesAndBillingOffAction": "Turn off",
+  "valuesAndBillingSaveError": "Could not save. Check your connection and try again.",
   "nameAndPhoto": "Name and photo",
   "joinWithInviteCode": "Join with an invite code",
   "followsPhoneSettings": "Language and appearance follow your iPhone settings.",
@@ -2380,6 +2335,24 @@
   "forgotPasswordQuestion": "Forgot your password?",
   "showPassword": "Show password",
   "hidePassword": "Hide password",
+  "onboardingSegmentTitle": "Your trade",
+  "onboardingSegmentSubtitle": "What kind of work do you do? The app comes ready with the services and checklists of your trade.",
+  "onboardingInviteCode": "I got an invite code",
+  "onboardingSegmentsError": "Couldn't load the trades. Check your connection.",
+  "onboardingSpecialtiesTitle": "Specialties",
+  "onboardingSpecialtiesSubtitle": "What do you work on? Check what fits. You can change it later.",
+  "onboardingContinue": "Continue",
+  "onboardingBusinessTitle": "Your business",
+  "onboardingBusinessName": "What's your business called?",
+  "onboardingBusinessNamePlaceholder": "E.g. Joe's Repair Shop",
+  "onboardingBusinessNameRequired": "Enter your business name.",
+  "onboardingPhoneLabel": "Phone (optional)",
+  "onboardingPhoneHint": "Shown on the quotes your customers get.",
+  "onboardingSamplesInfo": "We'll add a few sample orders so you can see how it works. Delete them anytime.",
+  "onboardingCreate": "Create my PraticOS",
+  "onboardingStartWithoutSamples": "Start without samples",
+  "onboardingPreparing": "Setting up your PraticOS…",
+  "onboardingCreateError": "Couldn't finish. Check your connection and try again.",
   "receivedWhichOrder": "Which order?",
   "receivedPhotosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
   "@receivedPhotosCount": {
@@ -2421,6 +2394,106 @@
   },
   "receivedSaveFailed": "Could not save. Try again.",
   "receivedOpenOrder": "Open the order",
+  "inviteGenericError": "Could not finish. Check your internet and try again.",
+  "inviteLoadError": "Could not load the invites. Check your internet.",
+  "inviteTitleOne": "{company} invited you to the team",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Invited by {name} · you join as {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "You join as {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Join the team",
+  "inviteDecline": "Decline invite",
+  "inviteHaveAnotherCode": "I have another code",
+  "inviteCreateOwnCompany": "Create my own company",
+  "inviteCodePlaceholder": "E.g. 7K2P9QXA",
+  "segmentLoadError": "Could not open your company. Check your internet and try again.",
+  "orderAssistantHint": "Take a photo of the plate and say the service",
+  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
+  "orderAssistantDone": "Done",
+  "orderAssistantAddPhoto": "Take another photo",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "orderAssistantReading": "Reading what you sent…",
+  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
+  "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
+  "orderAssistantDeviceGuess": "“{device}” is not registered",
+  "orderAssistantErrorTitle": "Assistant",
+  "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
+  "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
+  "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
+  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
+  "valuesAndBillingSoon": "On. You will be able to turn it off soon.",
+  "reportPreviousPeriod": "Previous period",
+  "reportNextPeriod": "Next period",
+  "orderInThisOrder": "In this {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Photos or document",
+  "orderAddComment": "Comment",
+  "orderAddAddress": "Service address",
+  "orderAddSchedule": "Schedule date and time",
+  "orderAddDiscount": "Discount",
+  "orderAddContract": "Repeat this {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Other fields",
+  "orderChecklistMissing": "{count, plural, =1{1 question left} other{{count} questions left}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Done",
+  "orderAddressChange": "Change address",
+  "orderAddressRemove": "Remove address",
+  "orderScheduleRemove": "Remove schedule",
+  "orderContractSummary": "{frequency} · next on {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Change contract",
+  "orderUploading": "Uploading…",
   "pickDeviceTitle": "Which {device}?",
   "@pickDeviceTitle": {
     "placeholders": {
@@ -2461,60 +2534,5 @@
       }
     }
   },
-  "accumulatedLeaveBlank": "Leave blank",
-  "orderAssistantHint": "Take a photo of the plate and say the service",
-  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
-  "orderAssistantDone": "Done",
-  "orderAssistantAddPhoto": "Take another photo",
-  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
-  "orderAssistantReading": "Reading what you sent…",
-  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
-  "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
-  "orderAssistantDeviceGuess": "“{device}” is not registered",
-  "orderAssistantErrorTitle": "Assistant",
-  "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
-  "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
-  "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
-  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
-  "reportPreviousPeriod": "Previous period",
-  "reportNextPeriod": "Next period",
-  "valuesAndBillingOffTitle": "Turn off prices and billing?",
-  "valuesAndBillingOffMessage": "Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.",
-  "valuesAndBillingOffAction": "Turn off",
-  "valuesAndBillingSaveError": "Could not save. Check your connection and try again.",
-  "inviteGenericError": "Could not finish. Check your internet and try again.",
-  "inviteLoadError": "Could not load the invites. Check your internet.",
-  "inviteTitleOne": "{company} invited you to the team",
-  "@inviteTitleOne": {
-    "placeholders": {
-      "company": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteInvitedByAs": "Invited by {name} · you join as {role}",
-  "@inviteInvitedByAs": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteEntersAs": "You join as {role}",
-  "@inviteEntersAs": {
-    "placeholders": {
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteJoinTeam": "Join the team",
-  "inviteDecline": "Decline invite",
-  "inviteHaveAnotherCode": "I have another code",
-  "inviteCreateOwnCompany": "Create my own company",
-  "inviteCodePlaceholder": "E.g. 7K2P9QXA",
-  "segmentLoadError": "Could not open your company. Check your internet and try again."
+  "accumulatedLeaveBlank": "Leave blank"
 }

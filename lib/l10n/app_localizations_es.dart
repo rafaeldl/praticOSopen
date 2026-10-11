@@ -4387,71 +4387,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderAddMore => 'Checklist, fotos, comentario y más';
 
   @override
-  String orderInThisOrder(String order) {
-    return 'En esta $order';
-  }
-
-  @override
-  String get orderAddChecklist => 'Checklist';
-
-  @override
-  String get orderAddMedia => 'Fotos o documento';
-
-  @override
-  String get orderAddComment => 'Comentario';
-
-  @override
-  String get orderAddAddress => 'Dirección del servicio';
-
-  @override
-  String get orderAddSchedule => 'Agendar día y hora';
-
-  @override
-  String get orderAddDiscount => 'Descuento';
-
-  @override
-  String orderAddContract(String order) {
-    return 'Repetir esta $order';
-  }
-
-  @override
-  String get orderAddOtherFields => 'Otros campos';
-
-  @override
-  String orderChecklistMissing(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Faltan $count preguntas',
-      one: 'Falta 1 pregunta',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get orderChecklistDone => 'Listo';
-
-  @override
-  String get orderAddressChange => 'Cambiar dirección';
-
-  @override
-  String get orderAddressRemove => 'Quitar dirección';
-
-  @override
-  String get orderScheduleRemove => 'Quitar agenda';
-
-  @override
-  String orderContractSummary(String frequency, String date) {
-    return '$frequency · próxima el $date';
-  }
-
-  @override
-  String get orderContractChange => 'Cambiar contrato';
-
-  @override
-  String get orderUploading => 'Enviando…';
-
-  @override
   String orderCancelConfirmTitle(String order) {
     return '¿Cancelar $order?';
   }
@@ -4680,7 +4615,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Precios en la OS, cobros y pestaña Finanzas';
 
   @override
-  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
+  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desactivar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
   String get nameAndPhoto => 'Nombre y foto';
@@ -4906,6 +4852,67 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hidePassword => 'Ocultar contraseña';
 
   @override
+  String get onboardingSegmentTitle => 'Tu rubro';
+
+  @override
+  String get onboardingSegmentSubtitle =>
+      '¿A qué te dedicas? Así la app ya viene con los servicios y checklists de tu trabajo.';
+
+  @override
+  String get onboardingInviteCode => 'Recibí un código de invitación';
+
+  @override
+  String get onboardingSegmentsError =>
+      'No se pudieron cargar los rubros. Revisa la conexión.';
+
+  @override
+  String get onboardingSpecialtiesTitle => 'Especialidades';
+
+  @override
+  String get onboardingSpecialtiesSubtitle =>
+      '¿Qué atiendes? Marca lo que tenga sentido. Puedes cambiarlo después.';
+
+  @override
+  String get onboardingContinue => 'Continuar';
+
+  @override
+  String get onboardingBusinessTitle => 'Tu negocio';
+
+  @override
+  String get onboardingBusinessName => '¿Cómo se llama tu negocio?';
+
+  @override
+  String get onboardingBusinessNamePlaceholder => 'Ej.: Taller de Pepe';
+
+  @override
+  String get onboardingBusinessNameRequired =>
+      'Escribe el nombre de tu negocio.';
+
+  @override
+  String get onboardingPhoneLabel => 'Teléfono (opcional)';
+
+  @override
+  String get onboardingPhoneHint =>
+      'Aparece en el presupuesto que recibe el cliente.';
+
+  @override
+  String get onboardingSamplesInfo =>
+      'Pondremos algunas órdenes de ejemplo para que veas cómo queda. Las borras cuando quieras.';
+
+  @override
+  String get onboardingCreate => 'Crear mi PraticOS';
+
+  @override
+  String get onboardingStartWithoutSamples => 'Empezar sin ejemplos';
+
+  @override
+  String get onboardingPreparing => 'Preparando tu PraticOS…';
+
+  @override
+  String get onboardingCreateError =>
+      'No se pudo terminar. Revisa la conexión e inténtalo de nuevo.';
+
+  @override
   String get receivedWhichOrder => '¿En qué OS?';
 
   @override
@@ -4947,32 +4954,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String get receivedOpenOrder => 'Abrir la OS';
 
   @override
-  String pickDeviceTitle(String device) {
-    return '¿Cuál es el $device?';
+  String get inviteGenericError =>
+      'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
+
+  @override
+  String get inviteLoadError =>
+      'No se pudieron cargar las invitaciones. Revisa tu internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company te invitó al equipo';
   }
 
   @override
-  String otherDevicesSection(String devices) {
-    return 'Otros $devices';
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invitado por $name · entras como $role';
   }
 
   @override
-  String registerNewDevice(String device) {
-    return 'Registrar $device nuevo';
+  String inviteEntersAs(String role) {
+    return 'Entras como $role';
   }
 
   @override
-  String accumulatedDeleteConfirm(String value) {
-    return '¿Borrar “$value”?';
-  }
+  String get inviteJoinTeam => 'Entrar al equipo';
 
   @override
-  String accumulatedUse(String value) {
-    return 'Usar “$value”';
-  }
+  String get inviteDecline => 'Rechazar invitación';
 
   @override
-  String get accumulatedLeaveBlank => 'Dejar en blanco';
+  String get inviteHaveAnotherCode => 'Tengo otro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
 
   @override
   String get orderAssistantHint =>
@@ -5037,64 +5058,104 @@ class AppLocalizationsEs extends AppLocalizations {
       'No encontré qué agregar. Intenta de nuevo o completa a mano.';
 
   @override
+  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
+
+  @override
   String get reportPreviousPeriod => 'Período anterior';
 
   @override
   String get reportNextPeriod => 'Período siguiente';
 
   @override
-  String get valuesAndBillingOffTitle => '¿Desactivar valores y cobros?';
-
-  @override
-  String get valuesAndBillingOffMessage =>
-      'Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.';
-
-  @override
-  String get valuesAndBillingOffAction => 'Desactivar';
-
-  @override
-  String get valuesAndBillingSaveError =>
-      'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
-
-  @override
-  String get inviteGenericError =>
-      'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
-
-  @override
-  String get inviteLoadError =>
-      'No se pudieron cargar las invitaciones. Revisa tu internet.';
-
-  @override
-  String inviteTitleOne(String company) {
-    return '$company te invitó al equipo';
+  String orderInThisOrder(String order) {
+    return 'En esta $order';
   }
 
   @override
-  String inviteInvitedByAs(String name, String role) {
-    return 'Invitado por $name · entras como $role';
+  String get orderAddChecklist => 'Checklist';
+
+  @override
+  String get orderAddMedia => 'Fotos o documento';
+
+  @override
+  String get orderAddComment => 'Comentario';
+
+  @override
+  String get orderAddAddress => 'Dirección del servicio';
+
+  @override
+  String get orderAddSchedule => 'Agendar día y hora';
+
+  @override
+  String get orderAddDiscount => 'Descuento';
+
+  @override
+  String orderAddContract(String order) {
+    return 'Repetir esta $order';
   }
 
   @override
-  String inviteEntersAs(String role) {
-    return 'Entras como $role';
+  String get orderAddOtherFields => 'Otros campos';
+
+  @override
+  String orderChecklistMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Faltan $count preguntas',
+      one: 'Falta 1 pregunta',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get inviteJoinTeam => 'Entrar al equipo';
+  String get orderChecklistDone => 'Listo';
 
   @override
-  String get inviteDecline => 'Rechazar invitación';
+  String get orderAddressChange => 'Cambiar dirección';
 
   @override
-  String get inviteHaveAnotherCode => 'Tengo otro código';
+  String get orderAddressRemove => 'Quitar dirección';
 
   @override
-  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+  String get orderScheduleRemove => 'Quitar agenda';
 
   @override
-  String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
+  String orderContractSummary(String frequency, String date) {
+    return '$frequency · próxima el $date';
+  }
 
   @override
-  String get segmentLoadError =>
-      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
+  String get orderContractChange => 'Cambiar contrato';
+
+  @override
+  String get orderUploading => 'Enviando…';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return '¿Cuál es el $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Otros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Registrar $device nuevo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return '¿Borrar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Dejar en blanco';
 }

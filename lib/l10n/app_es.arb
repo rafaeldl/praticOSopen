@@ -1982,54 +1982,6 @@
     }
   },
   "orderAddMore": "Checklist, fotos, comentario y más",
-  "orderInThisOrder": "En esta {order}",
-  "@orderInThisOrder": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddChecklist": "Checklist",
-  "orderAddMedia": "Fotos o documento",
-  "orderAddComment": "Comentario",
-  "orderAddAddress": "Dirección del servicio",
-  "orderAddSchedule": "Agendar día y hora",
-  "orderAddDiscount": "Descuento",
-  "orderAddContract": "Repetir esta {order}",
-  "@orderAddContract": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddOtherFields": "Otros campos",
-  "orderChecklistMissing": "{count, plural, =1{Falta 1 pregunta} other{Faltan {count} preguntas}}",
-  "@orderChecklistMissing": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "orderChecklistDone": "Listo",
-  "orderAddressChange": "Cambiar dirección",
-  "orderAddressRemove": "Quitar dirección",
-  "orderScheduleRemove": "Quitar agenda",
-  "orderContractSummary": "{frequency} · próxima el {date}",
-  "@orderContractSummary": {
-    "placeholders": {
-      "frequency": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "orderContractChange": "Cambiar contrato",
-  "orderUploading": "Enviando…",
   "orderCancelConfirmTitle": "¿Cancelar {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2181,7 +2133,10 @@
   "howYouWork": "Cómo trabajas",
   "valuesAndBilling": "Valores y cobros",
   "valuesAndBillingHint": "Precios en la OS, cobros y pestaña Finanzas",
-  "valuesAndBillingSoon": "Activado. Pronto podrás desactivarlo.",
+  "valuesAndBillingOffTitle": "¿Desactivar valores y cobros?",
+  "valuesAndBillingOffMessage": "Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.",
+  "valuesAndBillingOffAction": "Desactivar",
+  "valuesAndBillingSaveError": "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.",
   "nameAndPhoto": "Nombre y foto",
   "joinWithInviteCode": "Entrar con código de invitación",
   "followsPhoneSettings": "El idioma y la apariencia siguen los ajustes del iPhone.",
@@ -2380,6 +2335,24 @@
   "forgotPasswordQuestion": "¿Olvidaste tu contraseña?",
   "showPassword": "Mostrar contraseña",
   "hidePassword": "Ocultar contraseña",
+  "onboardingSegmentTitle": "Tu rubro",
+  "onboardingSegmentSubtitle": "¿A qué te dedicas? Así la app ya viene con los servicios y checklists de tu trabajo.",
+  "onboardingInviteCode": "Recibí un código de invitación",
+  "onboardingSegmentsError": "No se pudieron cargar los rubros. Revisa la conexión.",
+  "onboardingSpecialtiesTitle": "Especialidades",
+  "onboardingSpecialtiesSubtitle": "¿Qué atiendes? Marca lo que tenga sentido. Puedes cambiarlo después.",
+  "onboardingContinue": "Continuar",
+  "onboardingBusinessTitle": "Tu negocio",
+  "onboardingBusinessName": "¿Cómo se llama tu negocio?",
+  "onboardingBusinessNamePlaceholder": "Ej.: Taller de Pepe",
+  "onboardingBusinessNameRequired": "Escribe el nombre de tu negocio.",
+  "onboardingPhoneLabel": "Teléfono (opcional)",
+  "onboardingPhoneHint": "Aparece en el presupuesto que recibe el cliente.",
+  "onboardingSamplesInfo": "Pondremos algunas órdenes de ejemplo para que veas cómo queda. Las borras cuando quieras.",
+  "onboardingCreate": "Crear mi PraticOS",
+  "onboardingStartWithoutSamples": "Empezar sin ejemplos",
+  "onboardingPreparing": "Preparando tu PraticOS…",
+  "onboardingCreateError": "No se pudo terminar. Revisa la conexión e inténtalo de nuevo.",
   "receivedWhichOrder": "¿En qué OS?",
   "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
   "@receivedPhotosCount": {
@@ -2421,6 +2394,106 @@
   },
   "receivedSaveFailed": "No se pudo guardar. Inténtalo de nuevo.",
   "receivedOpenOrder": "Abrir la OS",
+  "inviteGenericError": "No se pudo completar. Revisa tu internet e inténtalo de nuevo.",
+  "inviteLoadError": "No se pudieron cargar las invitaciones. Revisa tu internet.",
+  "inviteTitleOne": "{company} te invitó al equipo",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Invitado por {name} · entras como {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "Entras como {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Entrar al equipo",
+  "inviteDecline": "Rechazar invitación",
+  "inviteHaveAnotherCode": "Tengo otro código",
+  "inviteCreateOwnCompany": "Crear mi propia empresa",
+  "inviteCodePlaceholder": "Ej.: 7K2P9QXA",
+  "segmentLoadError": "No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.",
+  "orderAssistantHint": "Saca una foto de la matrícula y di el servicio",
+  "orderAssistantPlaceholder": "Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450",
+  "orderAssistantDone": "Listo",
+  "orderAssistantAddPhoto": "Sacar otra foto",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "orderAssistantReading": "Leyendo lo que enviaste…",
+  "orderAssistantFilledNote": "Revisa lo que está marcado en amarillo antes de guardar.",
+  "orderAssistantCustomerGuess": "Escuché “{name}”. Toca para elegir el cliente",
+  "orderAssistantDeviceGuess": "“{device}” no está registrado",
+  "orderAssistantErrorTitle": "Asistente",
+  "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
+  "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
+  "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
+  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
+  "valuesAndBillingSoon": "Activado. Pronto podrás desactivarlo.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Período siguiente",
+  "orderInThisOrder": "En esta {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos o documento",
+  "orderAddComment": "Comentario",
+  "orderAddAddress": "Dirección del servicio",
+  "orderAddSchedule": "Agendar día y hora",
+  "orderAddDiscount": "Descuento",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Otros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pregunta} other{Faltan {count} preguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Listo",
+  "orderAddressChange": "Cambiar dirección",
+  "orderAddressRemove": "Quitar dirección",
+  "orderScheduleRemove": "Quitar agenda",
+  "orderContractSummary": "{frequency} · próxima el {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Cambiar contrato",
+  "orderUploading": "Enviando…",
   "pickDeviceTitle": "¿Cuál es el {device}?",
   "@pickDeviceTitle": {
     "placeholders": {
@@ -2461,60 +2534,5 @@
       }
     }
   },
-  "accumulatedLeaveBlank": "Dejar en blanco",
-  "orderAssistantHint": "Saca una foto de la matrícula y di el servicio",
-  "orderAssistantPlaceholder": "Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450",
-  "orderAssistantDone": "Listo",
-  "orderAssistantAddPhoto": "Sacar otra foto",
-  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
-  "orderAssistantReading": "Leyendo lo que enviaste…",
-  "orderAssistantFilledNote": "Revisa lo que está marcado en amarillo antes de guardar.",
-  "orderAssistantCustomerGuess": "Escuché “{name}”. Toca para elegir el cliente",
-  "orderAssistantDeviceGuess": "“{device}” no está registrado",
-  "orderAssistantErrorTitle": "Asistente",
-  "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
-  "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
-  "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
-  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
-  "reportPreviousPeriod": "Período anterior",
-  "reportNextPeriod": "Período siguiente",
-  "valuesAndBillingOffTitle": "¿Desactivar valores y cobros?",
-  "valuesAndBillingOffMessage": "Precios, totales, cobros y la pestaña Finanzas desaparecen para todo el equipo. No se borra nada: los valores vuelven si lo activas de nuevo. Los enlaces de pago ya enviados siguen siendo válidos.",
-  "valuesAndBillingOffAction": "Desactivar",
-  "valuesAndBillingSaveError": "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.",
-  "inviteGenericError": "No se pudo completar. Revisa tu internet e inténtalo de nuevo.",
-  "inviteLoadError": "No se pudieron cargar las invitaciones. Revisa tu internet.",
-  "inviteTitleOne": "{company} te invitó al equipo",
-  "@inviteTitleOne": {
-    "placeholders": {
-      "company": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteInvitedByAs": "Invitado por {name} · entras como {role}",
-  "@inviteInvitedByAs": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteEntersAs": "Entras como {role}",
-  "@inviteEntersAs": {
-    "placeholders": {
-      "role": {
-        "type": "String"
-      }
-    }
-  },
-  "inviteJoinTeam": "Entrar al equipo",
-  "inviteDecline": "Rechazar invitación",
-  "inviteHaveAnotherCode": "Tengo otro código",
-  "inviteCreateOwnCompany": "Crear mi propia empresa",
-  "inviteCodePlaceholder": "Ej.: 7K2P9QXA",
-  "segmentLoadError": "No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo."
+  "accumulatedLeaveBlank": "Dejar en blanco"
 }

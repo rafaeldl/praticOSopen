@@ -2044,54 +2044,6 @@
     }
   },
   "orderAddMore": "Checklist, fotos, comentário e mais",
-  "orderInThisOrder": "Nesta {order}",
-  "@orderInThisOrder": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddChecklist": "Checklist",
-  "orderAddMedia": "Fotos ou documento",
-  "orderAddComment": "Comentário",
-  "orderAddAddress": "Endereço do atendimento",
-  "orderAddSchedule": "Agendar dia e hora",
-  "orderAddDiscount": "Desconto",
-  "orderAddContract": "Repetir esta {order}",
-  "@orderAddContract": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddOtherFields": "Outros campos",
-  "orderChecklistMissing": "{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}",
-  "@orderChecklistMissing": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "orderChecklistDone": "Pronto",
-  "orderAddressChange": "Mudar endereço",
-  "orderAddressRemove": "Tirar endereço",
-  "orderScheduleRemove": "Tirar agendamento",
-  "orderContractSummary": "{frequency} · próxima em {date}",
-  "@orderContractSummary": {
-    "placeholders": {
-      "frequency": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "orderContractChange": "Mudar contrato",
-  "orderUploading": "Enviando…",
   "orderCancelConfirmTitle": "Cancelar {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2243,7 +2195,10 @@
   "howYouWork": "Como você trabalha",
   "valuesAndBilling": "Valores e cobrança",
   "valuesAndBillingHint": "Preços na OS, receber e aba Financeiro",
-  "valuesAndBillingSoon": "Ligado. Em breve você poderá desligar.",
+  "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
+  "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
+  "valuesAndBillingOffAction": "Desligar",
+  "valuesAndBillingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
   "nameAndPhoto": "Nome e foto",
   "joinWithInviteCode": "Entrar com código de convite",
   "followsPhoneSettings": "O idioma e a aparência seguem o ajuste do iPhone.",
@@ -2442,6 +2397,24 @@
   "forgotPasswordQuestion": "Esqueceu a senha?",
   "showPassword": "Mostrar senha",
   "hidePassword": "Ocultar senha",
+  "onboardingSegmentTitle": "Seu ramo",
+  "onboardingSegmentSubtitle": "Qual é o seu ramo? Assim o app já vem com os serviços e checklists do seu trabalho.",
+  "onboardingInviteCode": "Recebi um código de convite",
+  "onboardingSegmentsError": "Não deu para carregar os ramos. Confira a internet.",
+  "onboardingSpecialtiesTitle": "Especialidades",
+  "onboardingSpecialtiesSubtitle": "O que você atende? Marque o que fizer sentido. Dá para mudar depois.",
+  "onboardingContinue": "Continuar",
+  "onboardingBusinessTitle": "Seu negócio",
+  "onboardingBusinessName": "Como se chama o seu negócio?",
+  "onboardingBusinessNamePlaceholder": "Ex.: Oficina do Zé",
+  "onboardingBusinessNameRequired": "Diga o nome do seu negócio.",
+  "onboardingPhoneLabel": "Telefone (opcional)",
+  "onboardingPhoneHint": "Aparece no orçamento que o cliente recebe.",
+  "onboardingSamplesInfo": "Vamos colocar umas OS de exemplo para você ver como fica. Você apaga quando quiser.",
+  "onboardingCreate": "Criar meu PraticOS",
+  "onboardingStartWithoutSamples": "Começar sem exemplos",
+  "onboardingPreparing": "Preparando seu PraticOS…",
+  "onboardingCreateError": "Não deu para terminar. Confira a internet e tente de novo.",
   "receivedWhichOrder": "Em qual OS?",
   "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
   "@receivedPhotosCount": {
@@ -2483,47 +2456,41 @@
   },
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
   "receivedOpenOrder": "Abrir a OS",
-  "pickDeviceTitle": "Qual é o {device}?",
-  "@pickDeviceTitle": {
+  "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
+  "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
+  "inviteTitleOne": "{company} chamou você para a equipe",
+  "@inviteTitleOne": {
     "placeholders": {
-      "device": {
+      "company": {
         "type": "String"
       }
     }
   },
-  "otherDevicesSection": "Outros {devices}",
-  "@otherDevicesSection": {
+  "inviteInvitedByAs": "Convidado por {name} · você entra como {role}",
+  "@inviteInvitedByAs": {
     "placeholders": {
-      "devices": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
         "type": "String"
       }
     }
   },
-  "registerNewDevice": "Cadastrar {device} novo",
-  "@registerNewDevice": {
+  "inviteEntersAs": "Você entra como {role}",
+  "@inviteEntersAs": {
     "placeholders": {
-      "device": {
+      "role": {
         "type": "String"
       }
     }
   },
-  "accumulatedDeleteConfirm": "Apagar “{value}”?",
-  "@accumulatedDeleteConfirm": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "accumulatedUse": "Usar “{value}”",
-  "@accumulatedUse": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "accumulatedLeaveBlank": "Deixar em branco",
+  "inviteJoinTeam": "Entrar na equipe",
+  "inviteDecline": "Recusar convite",
+  "inviteHaveAnotherCode": "Tenho outro código",
+  "inviteCreateOwnCompany": "Criar minha própria empresa",
+  "inviteCodePlaceholder": "Ex.: 7K2P9QXA",
+  "segmentLoadError": "Não deu para abrir a sua empresa. Confira a internet e tente de novo.",
   "orderAssistantHint": "Tire foto da placa e fale o serviço",
   "orderAssistantPlaceholder": "Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450",
   "orderAssistantDone": "Pronto",
@@ -2566,45 +2533,96 @@
   },
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
   "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
+  "valuesAndBillingSoon": "Ligado. Em breve você poderá desligar.",
   "reportPreviousPeriod": "Período anterior",
   "reportNextPeriod": "Próximo período",
-  "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
-  "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
-  "valuesAndBillingOffAction": "Desligar",
-  "valuesAndBillingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
-  "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
-  "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
-  "inviteTitleOne": "{company} chamou você para a equipe",
-  "@inviteTitleOne": {
+  "orderInThisOrder": "Nesta {order}",
+  "@orderInThisOrder": {
     "placeholders": {
-      "company": {
+      "order": {
         "type": "String"
       }
     }
   },
-  "inviteInvitedByAs": "Convidado por {name} · você entra como {role}",
-  "@inviteInvitedByAs": {
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos ou documento",
+  "orderAddComment": "Comentário",
+  "orderAddAddress": "Endereço do atendimento",
+  "orderAddSchedule": "Agendar dia e hora",
+  "orderAddDiscount": "Desconto",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
     "placeholders": {
-      "name": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Outros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Pronto",
+  "orderAddressChange": "Mudar endereço",
+  "orderAddressRemove": "Tirar endereço",
+  "orderScheduleRemove": "Tirar agendamento",
+  "orderContractSummary": "{frequency} · próxima em {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
         "type": "String"
       },
-      "role": {
+      "date": {
         "type": "String"
       }
     }
   },
-  "inviteEntersAs": "Você entra como {role}",
-  "@inviteEntersAs": {
+  "orderContractChange": "Mudar contrato",
+  "orderUploading": "Enviando…",
+  "pickDeviceTitle": "Qual é o {device}?",
+  "@pickDeviceTitle": {
     "placeholders": {
-      "role": {
+      "device": {
         "type": "String"
       }
     }
   },
-  "inviteJoinTeam": "Entrar na equipe",
-  "inviteDecline": "Recusar convite",
-  "inviteHaveAnotherCode": "Tenho outro código",
-  "inviteCreateOwnCompany": "Criar minha própria empresa",
-  "inviteCodePlaceholder": "Ex.: 7K2P9QXA",
-  "segmentLoadError": "Não deu para abrir a sua empresa. Confira a internet e tente de novo."
+  "otherDevicesSection": "Outros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Cadastrar {device} novo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Apagar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Deixar em branco"
 }
