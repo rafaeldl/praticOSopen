@@ -2399,17 +2399,82 @@
   "orderAssistantDone": "Pronto",
   "orderAssistantAddPhoto": "Tirar outra foto",
   "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
-  "@orderAssistantPhotoCount": {"placeholders": {"count": {"type": "int"}}},
+  "@orderAssistantPhotoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "orderAssistantReading": "Lendo o que você mandou…",
   "orderAssistantFilledNote": "Confira o que está marcado em amarelo antes de salvar.",
   "orderAssistantCustomerGuess": "Ouvi “{name}”. Toque para escolher o cliente",
-  "@orderAssistantCustomerGuess": {"placeholders": {"name": {"type": "String"}}},
+  "@orderAssistantCustomerGuess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "orderAssistantDeviceGuess": "“{device}” não está no cadastro",
-  "@orderAssistantDeviceGuess": {"placeholders": {"device": {"type": "String"}}},
+  "@orderAssistantDeviceGuess": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "orderAssistantErrorTitle": "Assistente",
   "orderAssistantErrorDisabled": "O assistente ainda não está liberado para a sua empresa.",
   "orderAssistantErrorQuota": "Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.",
-  "@orderAssistantErrorQuota": {"placeholders": {"limit": {"type": "String"}}},
+  "@orderAssistantErrorQuota": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
-  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão."
+  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
+  "receivedWhichOrder": "Em qual OS?",
+  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} e {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Guardado na OS {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
+  "receivedOpenOrder": "Abrir a OS"
 }

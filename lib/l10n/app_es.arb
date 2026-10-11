@@ -2345,5 +2345,46 @@
   "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
   "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
   "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
-  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano."
+  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
+  "receivedWhichOrder": "¿En qué OS?",
+  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} y {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Guardado en la OS {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+  "receivedOpenOrder": "Abrir la OS"
 }

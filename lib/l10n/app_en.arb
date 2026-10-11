@@ -2345,5 +2345,46 @@
   "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
   "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
   "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
-  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand."
+  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
+  "receivedWhichOrder": "Which order?",
+  "receivedPhotosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} and {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Saved to order {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Could not save. Try again.",
+  "receivedOpenOrder": "Open the order"
 }
