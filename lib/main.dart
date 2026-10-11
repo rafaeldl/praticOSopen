@@ -27,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
@@ -148,7 +149,7 @@ class MyApp extends StatelessWidget {
             return CupertinoTheme(
               data: CupertinoThemeData(
                 brightness: brightness,
-                primaryColor: CupertinoColors.activeBlue,
+                primaryColor: AppColors.accent,
               ),
               child: child!,
             );

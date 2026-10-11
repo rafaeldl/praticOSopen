@@ -261,6 +261,7 @@
 
   "order": "Ordem de Serviço",
   "orderShort": "OS",
+  "orderOverdue": "Atrasada",
   "newOrder": "Nova OS",
   "editOrder": "Editar OS",
   "orderDetails": "Detalhes da OS",

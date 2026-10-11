@@ -1372,6 +1372,12 @@ abstract class AppLocalizations {
   /// **'OS'**
   String get orderShort;
 
+  /// No description provided for @orderOverdue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasada'**
+  String get orderOverdue;
+
   /// No description provided for @newOrder.
   ///
   /// In pt, this message translates to:

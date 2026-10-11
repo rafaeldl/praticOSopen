@@ -1,5 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/theme/status_style.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider, LinearProgressIndicator, AlwaysStoppedAnimation;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
 
@@ -726,7 +728,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildOrderItem(Order order, int index, bool isLast, SegmentConfigProvider config) {
-    final statusColor = _getCupertinoStatusColor(order.status);
+    final statusColor = OrderStatusStyle.dotColor(order.status).resolveFrom(context);
 
     // Build services line: First service (+N more)
     String servicesText = '';
@@ -869,10 +871,11 @@ class _HomeState extends State<Home> {
                             // Indicators at the end
                             if (_isOverdue(order)) ...[
                               const SizedBox(width: 6),
-                              Icon(
-                                CupertinoIcons.clock_fill,
-                                size: 14,
-                                color: CupertinoColors.systemRed,
+                              const StatusDot(color: OrderStatusStyle.overdueColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                context.l10n.orderOverdue,
+                                style: OrderStatusStyle.overdueTextStyle(context),
                               ),
                             ],
                             if (_authService.hasPermission(PermissionType.viewPrices) && order.payment == 'paid') ...[
@@ -1063,23 +1066,6 @@ class _HomeState extends State<Home> {
         ),
       ],
     );
-  }
-
-  Color _getCupertinoStatusColor(String? status) {
-    switch (status) {
-      case 'approved':
-        return CupertinoColors.systemBlue;
-      case 'done':
-        return CupertinoColors.systemGreen;
-      case 'canceled':
-        return CupertinoColors.systemRed;
-      case 'quote':
-        return CupertinoColors.systemOrange;
-      case 'progress':
-        return CupertinoColors.systemPurple;
-      default:
-        return CupertinoColors.systemGrey;
-    }
   }
 
   bool _isOverdue(Order order) {
