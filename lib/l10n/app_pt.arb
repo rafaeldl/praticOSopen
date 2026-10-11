@@ -2532,5 +2532,8 @@
     }
   },
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
-  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão."
+  "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
+  "valuesAndBillingSoon": "Ligado. Em breve você poderá desligar.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Próximo período"
 }

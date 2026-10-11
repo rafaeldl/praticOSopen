@@ -2442,5 +2442,8 @@
   "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
   "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
   "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
-  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano."
+  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano.",
+  "valuesAndBillingSoon": "Activado. Pronto podrás desactivarlo.",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Período siguiente"
 }

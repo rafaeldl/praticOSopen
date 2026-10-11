@@ -5044,4 +5044,13 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get orderAssistantNothingFound =>
       'Não achei o que pôr. Tente de novo ou preencha à mão.';
+
+  @override
+  String get valuesAndBillingSoon => 'Ligado. Em breve você poderá desligar.';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Próximo período';
 }

@@ -5056,4 +5056,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get orderAssistantNothingFound =>
       'No encontré qué agregar. Intenta de nuevo o completa a mano.';
+
+  @override
+  String get valuesAndBillingSoon => 'Activado. Pronto podrás desactivarlo.';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Período siguiente';
 }

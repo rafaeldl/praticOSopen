@@ -9069,6 +9069,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
   String get orderAssistantNothingFound;
+
+  /// No description provided for @valuesAndBillingSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado. Em breve você poderá desligar.'**
+  String get valuesAndBillingSoon;
+
+  /// No description provided for @reportPreviousPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Período anterior'**
+  String get reportPreviousPeriod;
+
+  /// No description provided for @reportNextPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo período'**
+  String get reportNextPeriod;
 }
 
 class _AppLocalizationsDelegate

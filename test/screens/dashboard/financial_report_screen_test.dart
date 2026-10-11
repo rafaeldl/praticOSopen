@@ -11,6 +11,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 /// Firebase core mock whose default app has a storage bucket.
@@ -34,10 +35,25 @@ class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
 /// Dashboard store that fills its totals from memory instead of Firestore.
 class _FakeOrderStore extends OrderStore {
   final List<String> loads = [];
+  bool empty = false;
+
+  @override
+  Future<void> loadOrdersForDashboardCustomRange(
+      DateTime start, DateTime end) async {
+    loads.add('custom');
+  }
 
   @override
   Future<void> loadOrdersForDashboard() async {
     loads.add('$selectedDashboardPeriod/$periodOffset');
+    if (empty) {
+      totalRevenue = 0;
+      totalPaidAmount = 0;
+      totalUnpaidAmount = 0;
+      recentOrders.clear();
+      customerRanking.clear();
+      return;
+    }
     totalRevenue = 1500;
     totalPaidAmount = 1000;
     totalUnpaidAmount = 500;
@@ -86,12 +102,13 @@ void main() {
     bool openCustomPeriod = false,
     Brightness brightness = Brightness.light,
     double width = 800,
+    bool empty = false,
   }) async {
     tester.view.physicalSize = Size(width, 3000);
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
 
-    final store = _FakeOrderStore();
+    final store = _FakeOrderStore()..empty = empty;
     await tester.pumpWidget(
       MultiProvider(
         providers: [
@@ -136,7 +153,7 @@ void main() {
       l10n.week,
       l10n.month,
       l10n.year,
-      l10n.period,
+      l10n.financialOtherPeriod,
     ]) {
       expect(find.text(label), findsWidgets, reason: label);
     }
@@ -162,10 +179,89 @@ void main() {
     expect(find.byType(CupertinoDatePicker), findsOneWidget);
   });
 
-  testWidgets('renders in dark mode without exceptions', (tester) async {
+  testWidgets('week and previous period reload the dashboard', (tester) async {
+    final store = await pumpReport(tester);
+
+    await tester.tap(find.text(l10n.week).first);
+    await tester.pump();
+    await tester.pump();
+    expect(store.loads.last, 'semana/0');
+
+    await tester.tap(find.bySemanticsLabel(l10n.reportPreviousPeriod));
+    await tester.pump();
+    await tester.pump();
+    expect(store.loads.last, 'semana/-1');
+  });
+
+  testWidgets('"Outro período" opens a sheet and applies the range',
+      (tester) async {
+    final store = await pumpReport(tester, width: 2400);
+
+    await tester.tap(find.text(l10n.financialOtherPeriod));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text(l10n.selectPeriod), findsOneWidget);
+
+    await tester.tap(find.text(l10n.ok));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(store.loads.last, 'custom');
+    expect(find.text(l10n.selectPeriod), findsNothing);
+  });
+
+  testWidgets('section labels are sentence case, not uppercase',
+      (tester) async {
+    await pumpReport(tester);
+
+    expect(find.text(l10n.billing), findsOneWidget);
+    expect(find.text(l10n.billing.toUpperCase()), findsNothing);
+    expect(find.text(l10n.customers.toUpperCase()), findsNothing);
+  });
+
+  testWidgets('tapping Recebido filters the rankings and shows a check',
+      (tester) async {
+    await pumpReport(tester);
+
+    await tester.tap(find.text(l10n.received).first);
+    await tester.pump();
+
+    expect(find.text(l10n.customersReceived), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
+  });
+
+  testWidgets('empty period shows a single sentence and no sections',
+      (tester) async {
+    await pumpReport(tester, empty: true);
+
+    expect(find.text(l10n.noOrdersInPeriod), findsOneWidget);
+    expect(find.text(l10n.billing), findsNothing);
+    expect(find.text(l10n.customers), findsNothing);
+    // The period selector stays so the person can change the period.
+    expect(find.text(l10n.week), findsWidgets);
+  });
+
+  testWidgets('renders in dark mode with dark role colors', (tester) async {
     await pumpReport(tester, brightness: Brightness.dark);
 
     expect(find.text(l10n.financialReport), findsWidgets);
+    final ana = tester.widget<Text>(find.text('Ana Ribeiro').first);
+    expect(ana.style!.color!.toARGB32(), AppColors.text.darkColor.toARGB32());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty state renders in dark mode', (tester) async {
+    await pumpReport(tester, brightness: Brightness.dark, empty: true);
+
+    final empty = tester.widget<Text>(find.text(l10n.noOrdersInPeriod));
+    expect(empty.style!.color!.toARGB32(), AppColors.text.darkColor.toARGB32());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('large Dynamic Type does not overflow', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    await pumpReport(tester, width: 1200);
+
     expect(tester.takeException(), isNull);
   });
 }
