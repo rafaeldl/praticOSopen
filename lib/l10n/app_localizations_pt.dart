@@ -5168,4 +5168,71 @@ class AppLocalizationsPt extends AppLocalizations {
   String saveEntityButton(String entity) {
     return 'Salvar $entity';
   }
+
+  @override
+  String planHeaderRenews(String plan, String date) {
+    return '$plan · renova em $date';
+  }
+
+  @override
+  String planHeaderValidUntil(String plan, String date) {
+    return '$plan · válido até $date';
+  }
+
+  @override
+  String planHeaderCourtesy(String plan, String date) {
+    return '$plan · cortesia até $date';
+  }
+
+  @override
+  String planHeaderPaymentIssue(String plan) {
+    return '$plan · problema no pagamento';
+  }
+
+  @override
+  String get planLimitLabel => 'Limite do plano';
+
+  @override
+  String planLimitTeam(String used, String limit) {
+    return 'A equipe já tem $used de $limit pessoas. Para chamar mais alguém, mude de plano.';
+  }
+
+  @override
+  String planLimitPhotos(String used, String limit) {
+    return 'Já foram $used de $limit fotos este mês. Para tirar mais, mude de plano.';
+  }
+
+  @override
+  String planLimitChecklists(String used, String limit) {
+    return 'Você já tem $used de $limit checklists. Para criar outro, mude de plano.';
+  }
+
+  @override
+  String get planUsageSection => 'O que você está usando';
+
+  @override
+  String get planUsageTeam => 'Pessoas na equipe';
+
+  @override
+  String get planUsagePhotos => 'Fotos este mês';
+
+  @override
+  String get planUsageChecklists => 'Checklists';
+
+  @override
+  String planUsageOf(String used, String limit) {
+    return '$used de $limit';
+  }
+
+  @override
+  String get planUsageAtLimit => 'No limite';
+
+  @override
+  String get planUsageAtLimitInvites => 'No limite · conta o convite';
+
+  @override
+  String get planUsageNearLimit => 'Quase no limite';
+
+  @override
+  String get planUsageUnlimited => 'Sem limite';
 }

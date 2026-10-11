@@ -9261,6 +9261,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar {entity}'**
   String saveEntityButton(String entity);
+
+  /// No description provided for @planHeaderRenews.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · renova em {date}'**
+  String planHeaderRenews(String plan, String date);
+
+  /// No description provided for @planHeaderValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · válido até {date}'**
+  String planHeaderValidUntil(String plan, String date);
+
+  /// No description provided for @planHeaderCourtesy.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · cortesia até {date}'**
+  String planHeaderCourtesy(String plan, String date);
+
+  /// No description provided for @planHeaderPaymentIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{plan} · problema no pagamento'**
+  String planHeaderPaymentIssue(String plan);
+
+  /// No description provided for @planLimitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite do plano'**
+  String get planLimitLabel;
+
+  /// No description provided for @planLimitTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'A equipe já tem {used} de {limit} pessoas. Para chamar mais alguém, mude de plano.'**
+  String planLimitTeam(String used, String limit);
+
+  /// No description provided for @planLimitPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já foram {used} de {limit} fotos este mês. Para tirar mais, mude de plano.'**
+  String planLimitPhotos(String used, String limit);
+
+  /// No description provided for @planLimitChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já tem {used} de {limit} checklists. Para criar outro, mude de plano.'**
+  String planLimitChecklists(String used, String limit);
+
+  /// No description provided for @planUsageSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você está usando'**
+  String get planUsageSection;
+
+  /// No description provided for @planUsageTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pessoas na equipe'**
+  String get planUsageTeam;
+
+  /// No description provided for @planUsagePhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos este mês'**
+  String get planUsagePhotos;
+
+  /// No description provided for @planUsageChecklists.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklists'**
+  String get planUsageChecklists;
+
+  /// No description provided for @planUsageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{used} de {limit}'**
+  String planUsageOf(String used, String limit);
+
+  /// No description provided for @planUsageAtLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'No limite'**
+  String get planUsageAtLimit;
+
+  /// No description provided for @planUsageAtLimitInvites.
+  ///
+  /// In pt, this message translates to:
+  /// **'No limite · conta o convite'**
+  String get planUsageAtLimitInvites;
+
+  /// No description provided for @planUsageNearLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quase no limite'**
+  String get planUsageNearLimit;
+
+  /// No description provided for @planUsageUnlimited.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem limite'**
+  String get planUsageUnlimited;
 }
 
 class _AppLocalizationsDelegate

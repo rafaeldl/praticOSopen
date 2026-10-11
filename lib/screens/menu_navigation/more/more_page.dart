@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -7,9 +8,18 @@ import 'package:praticos/theme/app_typography.dart';
 /// Page of the "Mais" area: native large title that collapses on scroll,
 /// followed by [children] (rows, section labels, footnotes).
 class MorePage extends StatelessWidget {
-  const MorePage({super.key, required this.title, required this.children});
+  const MorePage({
+    super.key,
+    required this.title,
+    required this.children,
+    this.previousPageTitle,
+  });
 
   final String title;
+
+  /// Back button label; defaults to "Mais", where every page of this kind
+  /// is opened from.
+  final String? previousPageTitle;
   final List<Widget> children;
 
   @override
@@ -22,6 +32,7 @@ class MorePage extends StatelessWidget {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(title),
+              previousPageTitle: previousPageTitle ?? context.l10n.more,
               backgroundColor: AppColors.background.resolveFrom(context),
               border: null,
             ),
