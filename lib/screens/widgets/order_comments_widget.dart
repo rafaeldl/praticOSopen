@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:flutter/material.dart' show Divider;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
@@ -122,18 +123,8 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header - same style as other sections
-        Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 8),
-          child: Text(
-            context.l10n.comments.toUpperCase(),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-        ),
+        // Same header as the other sections (sentence case).
+        SectionLabel(context.l10n.comments),
 
         // Comments list in grouped card
         _buildCommentsList(),
