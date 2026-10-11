@@ -130,3 +130,16 @@ O que isso muda:
 2. Empresas que usam controle de veículos (`useDeviceManagement`) mantêm a lista de todos os veículos em **Mais › Avançado › Veículos**.
 3. O técnico continua vendo a aba Clientes (precisa achar o telefone do cliente).
 4. A prioridade não muda: o catálogo é usado como seletor dentro da OS, não pelo menu.
+
+## Revisão 2026-10-11: aba Mais com 8 linhas
+
+Aprovado pelo Rafael depois da revisão de paridade (`2026-10-11-telas-paridade-design.md`, simplificações 9 a 12). Nenhuma função sai:
+
+| Antes | Depois |
+|---|---|
+| "Dados da empresa" + "O que usar no app" (2 linhas) | **"Sua empresa"**: seção "Aparece na OS do cliente" (nome, logo e contato · termos) e seção "Como você trabalha" (ramo, especialidades e os interruptores de recursos). Nome, logo e contato abrem a tela de edição. Pranchas `app-sua-empresa`, `app-empresa` |
+| "Preferências" (idioma + lembretes) | **"Lembretes"**. No iOS o idioma e a aparência seguem o iPhone (Ajustes › PraticOS, idioma por app). **No Android a linha "Idioma" continua** dentro de Lembretes. Prancha `app-lembretes` |
+| Contratos também a partir da Mais | Só no "…" do Início (e na OS/veículo). Voltar de Contratos leva ao Início |
+| "Refazer a configuração inicial" no Avançado | Sai: ramo e especialidades ficam em "Sua empresa" |
+
+Aba Mais final: Sua conta · Sua empresa · Equipe · Plano · Catálogo · Checklists · Avaliações · Lembretes · Avançado.
