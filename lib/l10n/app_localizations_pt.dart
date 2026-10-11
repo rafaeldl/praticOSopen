@@ -5232,4 +5232,41 @@ class AppLocalizationsPt extends AppLocalizations {
   String ratingNoCommentOrder(int number) {
     return 'Sem comentário · OS $number';
   }
+
+  @override
+  String get remindersSubtitle => 'Valem só neste celular';
+
+  @override
+  String get reminderBeforeTitle => 'Antes do horário marcado';
+
+  @override
+  String get reminderDailyTitle => 'Resumo do dia às 9h';
+
+  @override
+  String get reminderDailySubtitle => 'O que tem para hoje';
+
+  @override
+  String get reminderPendingTitle => 'OS paradas';
+
+  @override
+  String get reminderPendingSubtitle => 'Orçamentos sem resposta há 7 dias';
+
+  @override
+  String get reminderInactivityTitle => 'Se eu ficar dias sem abrir o app';
+
+  @override
+  String reminderMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String reminderHoursValue(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'horas',
+      one: 'hora',
+    );
+    return '$hours $_temp0';
+  }
 }

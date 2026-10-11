@@ -9345,6 +9345,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sem comentário · OS {number}'**
   String ratingNoCommentOrder(int number);
+
+  /// No description provided for @remindersSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valem só neste celular'**
+  String get remindersSubtitle;
+
+  /// No description provided for @reminderBeforeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes do horário marcado'**
+  String get reminderBeforeTitle;
+
+  /// No description provided for @reminderDailyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do dia às 9h'**
+  String get reminderDailyTitle;
+
+  /// No description provided for @reminderDailySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que tem para hoje'**
+  String get reminderDailySubtitle;
+
+  /// No description provided for @reminderPendingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS paradas'**
+  String get reminderPendingTitle;
+
+  /// No description provided for @reminderPendingSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamentos sem resposta há 7 dias'**
+  String get reminderPendingSubtitle;
+
+  /// No description provided for @reminderInactivityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se eu ficar dias sem abrir o app'**
+  String get reminderInactivityTitle;
+
+  /// No description provided for @reminderMinutesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min'**
+  String reminderMinutesValue(int minutes);
+
+  /// No description provided for @reminderHoursValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{hours} {hours, plural, =1{hora} other{horas}}'**
+  String reminderHoursValue(int hours);
 }
 
 class _AppLocalizationsDelegate

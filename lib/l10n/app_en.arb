@@ -2562,5 +2562,16 @@
   "ratingCommentOrder": "“{comment}” · Order {number}",
   "@ratingCommentOrder": {"placeholders": {"comment": {"type": "String"}, "number": {"type": "int"}}},
   "ratingNoCommentOrder": "No comment · Order {number}",
-  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}}
+  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}},
+  "remindersSubtitle": "They only apply on this phone",
+  "reminderBeforeTitle": "Before the scheduled time",
+  "reminderDailyTitle": "Daily summary at 9am",
+  "reminderDailySubtitle": "What is on for today",
+  "reminderPendingTitle": "Stalled orders",
+  "reminderPendingSubtitle": "Quotes with no answer for 7 days",
+  "reminderInactivityTitle": "If I go days without opening the app",
+  "reminderMinutesValue": "{minutes} min",
+  "@reminderMinutesValue": {"placeholders": {"minutes": {"type": "int"}}},
+  "reminderHoursValue": "{hours} {hours, plural, =1{hour} other{hours}}",
+  "@reminderHoursValue": {"placeholders": {"hours": {"type": "int"}}}
 }

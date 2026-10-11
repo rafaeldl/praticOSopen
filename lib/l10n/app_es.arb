@@ -2562,5 +2562,16 @@
   "ratingCommentOrder": "“{comment}” · Orden {number}",
   "@ratingCommentOrder": {"placeholders": {"comment": {"type": "String"}, "number": {"type": "int"}}},
   "ratingNoCommentOrder": "Sin comentario · Orden {number}",
-  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}}
+  "@ratingNoCommentOrder": {"placeholders": {"number": {"type": "int"}}},
+  "remindersSubtitle": "Valen solo en este celular",
+  "reminderBeforeTitle": "Antes de la hora marcada",
+  "reminderDailyTitle": "Resumen del día a las 9h",
+  "reminderDailySubtitle": "Qué hay para hoy",
+  "reminderPendingTitle": "OS paradas",
+  "reminderPendingSubtitle": "Presupuestos sin respuesta hace 7 días",
+  "reminderInactivityTitle": "Si paso días sin abrir la app",
+  "reminderMinutesValue": "{minutes} min",
+  "@reminderMinutesValue": {"placeholders": {"minutes": {"type": "int"}}},
+  "reminderHoursValue": "{hours} {hours, plural, =1{hora} other{horas}}",
+  "@reminderHoursValue": {"placeholders": {"hours": {"type": "int"}}}
 }

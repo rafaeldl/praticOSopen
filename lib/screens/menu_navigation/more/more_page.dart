@@ -7,9 +7,17 @@ import 'package:praticos/theme/app_typography.dart';
 /// Page of the "Mais" area: native large title that collapses on scroll,
 /// followed by [children] (rows, section labels, footnotes).
 class MorePage extends StatelessWidget {
-  const MorePage({super.key, required this.title, required this.children});
+  const MorePage({
+    super.key,
+    required this.title,
+    required this.children,
+    this.subtitle,
+  });
 
   final String title;
+
+  /// One line under the large title.
+  final String? subtitle;
   final List<Widget> children;
 
   @override
@@ -29,6 +37,22 @@ class MorePage extends StatelessWidget {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.pageMargin,
+                        0,
+                        AppSpacing.pageMargin,
+                        AppSpacing.sm,
+                      ),
+                      child: Text(
+                        subtitle!,
+                        key: const Key('morePageSubtitle'),
+                        style: AppTypography.callout.copyWith(
+                          color: AppColors.textSecondary.resolveFrom(context),
+                        ),
+                      ),
+                    ),
                   ...children,
                   const SizedBox(height: AppSpacing.xxl),
                 ]),
