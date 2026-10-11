@@ -9,7 +9,7 @@
  * Model and region come from environment variables, so they can change without
  * a new app release:
  * - AI_GEMINI_MODEL   (default gemini-2.5-flash)
- * - AI_VERTEX_LOCATION (default us-central1)
+ * - AI_VERTEX_LOCATION (default southamerica-east1, São Paulo — dados ficam no Brasil)
  *
  * Tests inject a fake [LlmClient]; nothing here runs in unit tests.
  */
@@ -43,7 +43,7 @@ export class LlmUnavailableError extends Error {
 }
 
 const DEFAULT_MODEL = 'gemini-2.5-flash';
-const DEFAULT_LOCATION = 'us-central1';
+const DEFAULT_LOCATION = 'southamerica-east1';
 const TIMEOUT_MS = 45_000;
 
 function projectId(): string | undefined {

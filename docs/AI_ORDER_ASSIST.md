@@ -90,8 +90,8 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 
 ## Passos manuais (needs-human)
 
-- Ativar a **Vertex AI API** (`aiplatform.googleapis.com`) no projeto `praticos` e garantir `roles/aiplatform.user` para a conta de serviço de runtime das Functions (a padrão do Compute costuma ter Editor). Não há chave/segredo para cadastrar.
-- Opcional: `AI_GEMINI_MODEL` / `AI_VERTEX_LOCATION` (padrão `gemini-2.5-flash` / `us-central1`) em `firebase/functions/.env` se quiser outro modelo/região.
+- ~~Ativar a **Vertex AI API** (`aiplatform.googleapis.com`) no projeto `praticos`~~ feito em 2026-10-11. A conta de serviço de runtime (`…-compute@developer`) tem Editor, que cobre `aiplatform.user`. Não há chave/segredo para cadastrar.
+- Opcional: `AI_GEMINI_MODEL` / `AI_VERTEX_LOCATION` (padrão `gemini-2.5-flash` / `southamerica-east1`, São Paulo, para os dados ficarem no Brasil — LGPD) em `firebase/functions/.env` se quiser outro modelo/região.
 - Ligar o piloto por empresa (`settings/ai`).
 - Antes de abrir para todos: política de privacidade (fotos/texto processados pelo Google Vertex AI) e, quando houver gravação de áudio, `NSMicrophoneUsageDescription`/`RECORD_AUDIO` e rótulos de privacidade das lojas.
 
