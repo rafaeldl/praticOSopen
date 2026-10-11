@@ -4831,6 +4831,75 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hidePassword => 'Ocultar senha';
 
   @override
+  String get receivedWhichOrder => 'Em qual OS?';
+
+  @override
+  String receivedPhotosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedPdfsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count PDFs',
+      one: '1 PDF',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedSummaryBoth(String photos, String pdfs) {
+    return '$photos e $pdfs';
+  }
+
+  @override
+  String receivedSavedInOrder(String number, String summary) {
+    return 'Guardado na OS $number · $summary';
+  }
+
+  @override
+  String get receivedSaveFailed => 'Não deu para guardar. Tente de novo.';
+
+  @override
+  String get receivedOpenOrder => 'Abrir a OS';
+
+  @override
+  String pickDeviceTitle(String device) {
+    return 'Qual é o $device?';
+  }
+
+  @override
+  String otherDevicesSection(String devices) {
+    return 'Outros $devices';
+  }
+
+  @override
+  String registerNewDevice(String device) {
+    return 'Cadastrar $device novo';
+  }
+
+  @override
+  String accumulatedDeleteConfirm(String value) {
+    return 'Apagar “$value”?';
+  }
+
+  @override
+  String accumulatedUse(String value) {
+    return 'Usar “$value”';
+  }
+
+  @override
+  String get accumulatedLeaveBlank => 'Deixar em branco';
+
+  @override
   String get orderAssistantHint => 'Tire foto da placa e fale o serviço';
 
   @override
@@ -4890,47 +4959,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get orderAssistantNothingFound =>
       'Não achei o que pôr. Tente de novo ou preencha à mão.';
-
-  @override
-  String get receivedWhichOrder => 'Em qual OS?';
-
-  @override
-  String receivedPhotosCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count fotos',
-      one: '1 foto',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String receivedPdfsCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count PDFs',
-      one: '1 PDF',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String receivedSummaryBoth(String photos, String pdfs) {
-    return '$photos e $pdfs';
-  }
-
-  @override
-  String receivedSavedInOrder(String number, String summary) {
-    return 'Guardado na OS $number · $summary';
-  }
-
-  @override
-  String get receivedSaveFailed => 'Não deu para guardar. Tente de novo.';
-
-  @override
-  String get receivedOpenOrder => 'Abrir a OS';
 
   @override
   String get reportPreviousPeriod => 'Período anterior';

@@ -2332,20 +2332,6 @@
   "forgotPasswordQuestion": "Forgot your password?",
   "showPassword": "Show password",
   "hidePassword": "Hide password",
-  "orderAssistantHint": "Take a photo of the plate and say the service",
-  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
-  "orderAssistantDone": "Done",
-  "orderAssistantAddPhoto": "Take another photo",
-  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
-  "orderAssistantReading": "Reading what you sent…",
-  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
-  "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
-  "orderAssistantDeviceGuess": "“{device}” is not registered",
-  "orderAssistantErrorTitle": "Assistant",
-  "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
-  "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
-  "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
-  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
   "receivedWhichOrder": "Which order?",
   "receivedPhotosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
   "@receivedPhotosCount": {
@@ -2387,6 +2373,61 @@
   },
   "receivedSaveFailed": "Could not save. Try again.",
   "receivedOpenOrder": "Open the order",
+  "pickDeviceTitle": "Which {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Other {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Register new {device}",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Delete “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Use “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Leave blank",
+  "orderAssistantHint": "Take a photo of the plate and say the service",
+  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
+  "orderAssistantDone": "Done",
+  "orderAssistantAddPhoto": "Take another photo",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "orderAssistantReading": "Reading what you sent…",
+  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
+  "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
+  "orderAssistantDeviceGuess": "“{device}” is not registered",
+  "orderAssistantErrorTitle": "Assistant",
+  "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
+  "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
+  "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
+  "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
   "reportPreviousPeriod": "Previous period",
   "reportNextPeriod": "Next period",
   "valuesAndBillingOffTitle": "Turn off prices and billing?",

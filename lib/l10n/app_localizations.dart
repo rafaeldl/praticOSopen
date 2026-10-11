@@ -8752,6 +8752,84 @@ abstract class AppLocalizations {
   /// **'Ocultar senha'**
   String get hidePassword;
 
+  /// No description provided for @receivedWhichOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em qual OS?'**
+  String get receivedWhichOrder;
+
+  /// No description provided for @receivedPhotosCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String receivedPhotosCount(int count);
+
+  /// No description provided for @receivedPdfsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 PDF} other{{count} PDFs}}'**
+  String receivedPdfsCount(int count);
+
+  /// No description provided for @receivedSummaryBoth.
+  ///
+  /// In pt, this message translates to:
+  /// **'{photos} e {pdfs}'**
+  String receivedSummaryBoth(String photos, String pdfs);
+
+  /// No description provided for @receivedSavedInOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardado na OS {number} · {summary}'**
+  String receivedSavedInOrder(String number, String summary);
+
+  /// No description provided for @receivedSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar. Tente de novo.'**
+  String get receivedSaveFailed;
+
+  /// No description provided for @receivedOpenOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir a OS'**
+  String get receivedOpenOrder;
+
+  /// No description provided for @pickDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o {device}?'**
+  String pickDeviceTitle(String device);
+
+  /// No description provided for @otherDevicesSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros {devices}'**
+  String otherDevicesSection(String devices);
+
+  /// No description provided for @registerNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar {device} novo'**
+  String registerNewDevice(String device);
+
+  /// No description provided for @accumulatedDeleteConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar “{value}”?'**
+  String accumulatedDeleteConfirm(String value);
+
+  /// No description provided for @accumulatedUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar “{value}”'**
+  String accumulatedUse(String value);
+
+  /// No description provided for @accumulatedLeaveBlank.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deixar em branco'**
+  String get accumulatedLeaveBlank;
+
   /// No description provided for @orderAssistantHint.
   ///
   /// In pt, this message translates to:
@@ -8835,48 +8913,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
   String get orderAssistantNothingFound;
-
-  /// No description provided for @receivedWhichOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em qual OS?'**
-  String get receivedWhichOrder;
-
-  /// No description provided for @receivedPhotosCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
-  String receivedPhotosCount(int count);
-
-  /// No description provided for @receivedPdfsCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 PDF} other{{count} PDFs}}'**
-  String receivedPdfsCount(int count);
-
-  /// No description provided for @receivedSummaryBoth.
-  ///
-  /// In pt, this message translates to:
-  /// **'{photos} e {pdfs}'**
-  String receivedSummaryBoth(String photos, String pdfs);
-
-  /// No description provided for @receivedSavedInOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Guardado na OS {number} · {summary}'**
-  String receivedSavedInOrder(String number, String summary);
-
-  /// No description provided for @receivedSaveFailed.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não deu para guardar. Tente de novo.'**
-  String get receivedSaveFailed;
-
-  /// No description provided for @receivedOpenOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Abrir a OS'**
-  String get receivedOpenOrder;
 
   /// No description provided for @reportPreviousPeriod.
   ///

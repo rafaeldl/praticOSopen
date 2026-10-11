@@ -2394,6 +2394,88 @@
   "forgotPasswordQuestion": "Esqueceu a senha?",
   "showPassword": "Mostrar senha",
   "hidePassword": "Ocultar senha",
+  "receivedWhichOrder": "Em qual OS?",
+  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} e {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Guardado na OS {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
+  "receivedOpenOrder": "Abrir a OS",
+  "pickDeviceTitle": "Qual é o {device}?",
+  "@pickDeviceTitle": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "otherDevicesSection": "Outros {devices}",
+  "@otherDevicesSection": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNewDevice": "Cadastrar {device} novo",
+  "@registerNewDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedDeleteConfirm": "Apagar “{value}”?",
+  "@accumulatedDeleteConfirm": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedUse": "Usar “{value}”",
+  "@accumulatedUse": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accumulatedLeaveBlank": "Deixar em branco",
   "orderAssistantHint": "Tire foto da placa e fale o serviço",
   "orderAssistantPlaceholder": "Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450",
   "orderAssistantDone": "Pronto",
@@ -2436,47 +2518,6 @@
   },
   "orderAssistantErrorUnavailable": "Não deu para ler agora. Tente de novo ou preencha à mão.",
   "orderAssistantNothingFound": "Não achei o que pôr. Tente de novo ou preencha à mão.",
-  "receivedWhichOrder": "Em qual OS?",
-  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
-  "@receivedPhotosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
-  "@receivedPdfsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "receivedSummaryBoth": "{photos} e {pdfs}",
-  "@receivedSummaryBoth": {
-    "placeholders": {
-      "photos": {
-        "type": "String"
-      },
-      "pdfs": {
-        "type": "String"
-      }
-    }
-  },
-  "receivedSavedInOrder": "Guardado na OS {number} · {summary}",
-  "@receivedSavedInOrder": {
-    "placeholders": {
-      "number": {
-        "type": "String"
-      },
-      "summary": {
-        "type": "String"
-      }
-    }
-  },
-  "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
-  "receivedOpenOrder": "Abrir a OS",
   "reportPreviousPeriod": "Período anterior",
   "reportNextPeriod": "Próximo período",
   "valuesAndBillingOffTitle": "Desligar valores e cobrança?",

@@ -21,7 +21,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Customer screen (`/customer_detail`, argument `customer`): call / WhatsApp,
 /// "Nova OS para Ana", the customer's vehicles and orders, and "Total gasto"
-/// (sum of the completed orders). Edit and delete live in the "…" menu.
+/// (sum of the completed orders) and, with the view-prices permission, "Falta
+/// receber" (what is still open on the customer's orders). Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
   const CustomerDetailScreen({
     super.key,
@@ -285,6 +286,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       ],
       SectionLabel(l10n.ordersOfCustomer(name)),
       for (final o in orders) _orderRow(o, format),
+      if (_showPrices && customerOwed(orders) > 0)
+        _TotalLine(
+          label: l10n.financialToReceive,
+          value: format.formatCurrency(customerOwed(orders)),
+        ),
       if (_showPrices)
         _TotalLine(
           label: l10n.totalSpent,

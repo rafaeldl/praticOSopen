@@ -4,12 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/screens/order/order_item_search_screen.dart'
+    show loadMostUsedItemKeys;
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/utils/order_items.dart' show catalogItemKey;
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -33,6 +37,7 @@ class CatalogListScreen extends StatefulWidget {
     this.initialKind = CatalogKind.service,
     this.source,
     this.permissions,
+    this.mostUsed,
   });
 
   final CatalogKind initialKind;
@@ -42,6 +47,9 @@ class CatalogListScreen extends StatefulWidget {
 
   /// Injected in tests; defaults to the current user's role.
   final CatalogPermissions? permissions;
+
+  /// Injected in tests; defaults to [loadMostUsedItemKeys] (last ~50 orders).
+  final Future<List<String>> Function()? mostUsed;
 
   @override
   State<CatalogListScreen> createState() => _CatalogListScreenState();
@@ -61,6 +69,9 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
   final Map<CatalogKind, bool> _errors = {};
   final Map<CatalogKind, StreamSubscription<List<CatalogItem>>> _subs = {};
   String _query = '';
+
+  /// `service:<id>` / `product:<id>` of the items most used in recent orders.
+  List<String> _mostUsedKeys = const [];
 
   bool get _selecting => _orderStore != null;
 
@@ -83,6 +94,11 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
       _kind = kinds.first;
     }
     _listen(_kind);
+    (widget.mostUsed ?? loadMostUsedItemKeys)().then((keys) {
+      if (mounted) setState(() => _mostUsedKeys = keys);
+    }).catchError((_) {
+      // "Mais usados" is a shortcut; the plain list still works without it.
+    });
   }
 
   void _listen(CatalogKind kind) {
@@ -342,24 +358,46 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
     final showPrices = _permissions.canViewPrices;
     final format = FormatService()..setLocale(l10n.localeName);
     final tappable = _selecting || _canManage;
+
+    Widget row(CatalogItem item, String keyPrefix) {
+      return AppListRow(
+        key: ValueKey('$keyPrefix${item.id ?? item.name}'),
+        leading: _avatar(item),
+        title: item.name ?? '',
+        trailing: showPrices
+            ? (item.value == null
+                ? l10n.catalogNoPrice
+                : format.formatCurrency(item.value!))
+            : null,
+        showChevron: !_selecting && _canManage,
+        onTap: tappable ? () => _open(item) : null,
+      );
+    }
+
+    // "Mais usados" on top, only without a search.
+    final byKey = {
+      for (final i in all)
+        if (i.id != null) catalogItemKey(_kind.name, i.id!): i,
+    };
+    final mostUsed = query.isEmpty
+        ? _mostUsedKeys.map((k) => byKey[k]).whereType<CatalogItem>().toList()
+        : const <CatalogItem>[];
+    if (mostUsed.isNotEmpty) {
+      slivers.add(
+        SliverList(
+          delegate: SliverChildListDelegate([
+            SectionLabel(l10n.orderMostUsed),
+            for (final item in mostUsed) row(item, 'used-'),
+            SectionLabel(l10n.orderAllItems),
+          ]),
+        ),
+      );
+    }
+
     slivers.add(
       SliverList(
         delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final item = matches[index];
-            return AppListRow(
-              key: ValueKey(item.id ?? index),
-              leading: _avatar(item),
-              title: item.name ?? '',
-              trailing: showPrices
-                  ? (item.value == null
-                      ? l10n.catalogNoPrice
-                      : format.formatCurrency(item.value!))
-                  : null,
-              showChevron: !_selecting && _canManage,
-              onTap: tappable ? () => _open(item) : null,
-            );
-          },
+          (context, index) => row(matches[index], ''),
           childCount: matches.length,
         ),
       ),
