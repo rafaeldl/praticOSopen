@@ -109,6 +109,14 @@ async function getPublicCharge(companyId: string, orderId: string): Promise<Publ
 }
 
 /**
+ * Whether the magic link may show prices, totals, payments and charges.
+ * Only an explicit `useFinancial: false` hides them (absent = show, as before).
+ */
+export function companyShowsValues(company: Pick<Company, 'useFinancial'> | null | undefined): boolean {
+  return company?.useFinancial !== false;
+}
+
+/**
  * GET /public/orders/:token
  * View order details via share token
  */
@@ -130,13 +138,22 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
     const companyDoc = await db.collection('companies').doc(companyId).get();
     const company = companyDoc.exists ? companyDoc.data() as Company : null;
 
+    // With "Valores e cobrança" off the page becomes a service report:
+    // no prices, totals, payments or charges leave the server.
+    const showValues = companyShowsValues(company);
+
     // Get customer-visible comments
     const [comments, charge] = await Promise.all([
       commentService.getCustomerVisibleComments(companyId, orderId),
-      getPublicCharge(companyId, orderId),
+      showValues ? getPublicCharge(companyId, orderId) : Promise.resolve(null),
     ]);
 
-    const remainingBalance = orderService.calculateRemainingBalance(order);
+    const values = showValues ? {
+      total: order.total,
+      discount: order.discount,
+      paidAmount: order.paidAmount,
+      remainingBalance: orderService.calculateRemainingBalance(order),
+    } : {};
 
     // Prepare masked customer data (LGPD compliance)
     const maskedCustomer = {
@@ -168,22 +185,19 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           })(),
           services: order.services?.map((s) => ({
             name: s.service.name,
-            value: s.value,
+            ...(showValues ? { value: s.value } : {}),
             description: s.description,
             deviceId: s.deviceId || null,
           })),
           products: order.products?.map((p) => ({
             name: p.product.name,
-            value: p.value,
+            ...(showValues ? { value: p.value } : {}),
             quantity: p.quantity,
             description: p.description,
             deviceId: p.deviceId || null,
           })),
           status: order.status,
-          total: order.total,
-          discount: order.discount,
-          paidAmount: order.paidAmount,
-          remainingBalance,
+          ...values,
           dueDate: timestampToDate(order.dueDate)?.toISOString(),
           createdAt: timestampToDate(order.createdAt)?.toISOString(),
           photos: order.photos?.map((p) => ({
@@ -221,6 +235,8 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
         permissions: req.shareTokenAuth!.permissions,
         customer: maskedCustomer,
         charge,
+        // Additive: older pages ignore it and render missing values as before.
+        showValues,
       },
     });
   } catch (error) {

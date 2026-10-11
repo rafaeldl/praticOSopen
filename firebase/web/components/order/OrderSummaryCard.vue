@@ -1,5 +1,6 @@
 <template>
   <div v-if="hasContent" class="card-stagger card-v2 rounded-2xl bg-white p-5 shadow-[0_2px_10px_rgba(27,94,123,0.03)] lg:p-6">
+    <template v-if="showValues">
     <!-- Total header -->
     <div class="flex items-center justify-between">
       <span class="text-sm font-semibold text-[#5A7184]">Total</span>
@@ -29,16 +30,17 @@
 
     <!-- Asaas charge: pay button / overdue / paid -->
     <OrderChargeAction :charge="charge" />
+    </template>
 
     <!-- Services -->
     <template v-if="order?.services?.length">
-      <div class="my-4 h-px bg-[#EDF2F7]" />
+      <div v-if="showValues" class="my-4 h-px bg-[#EDF2F7]" />
       <h4 class="mb-3 text-[11px] font-semibold uppercase tracking-[0.5px] text-[#5A7184]">{{ t.services }}</h4>
       <div class="flex flex-col gap-3.5">
         <div v-for="(service, i) in order.services" :key="'s-' + i">
           <div class="flex items-start justify-between gap-3">
             <span class="text-[13px] font-medium text-[#1A2B3C]">{{ service.name || t.serviceDefault }}</span>
-            <span class="flex-shrink-0 text-[13px] font-semibold text-[#1A2B3C] tabular-nums">{{ formatCurrency(service.value, country) }}</span>
+            <span v-if="showValues" class="flex-shrink-0 text-[13px] font-semibold text-[#1A2B3C] tabular-nums">{{ formatCurrency(service.value, country) }}</span>
           </div>
           <div class="mt-1 flex items-center gap-1.5">
             <span v-if="serviceDeviceName(service)" class="inline-block rounded bg-[#EBF4FA] px-1.5 py-0.5 text-[10px] font-medium text-[#1B5E7B]">
@@ -52,13 +54,13 @@
 
     <!-- Products -->
     <template v-if="order?.products?.length">
-      <div class="my-4 h-px bg-[#EDF2F7]" />
+      <div v-if="showValues || order?.services?.length" class="my-4 h-px bg-[#EDF2F7]" />
       <h4 class="mb-3 text-[11px] font-semibold uppercase tracking-[0.5px] text-[#5A7184]">{{ t.products }}</h4>
       <div class="flex flex-col gap-3.5">
         <div v-for="(product, i) in order.products" :key="'p-' + i">
           <div class="flex items-start justify-between gap-3">
             <span class="text-[13px] font-medium text-[#1A2B3C]">{{ product.name || t.productDefault }}</span>
-            <span class="flex-shrink-0 text-[13px] font-semibold text-[#1A2B3C] tabular-nums">{{ formatCurrency((product.value || 0) * (product.quantity || 1), country) }}</span>
+            <span v-if="showValues" class="flex-shrink-0 text-[13px] font-semibold text-[#1A2B3C] tabular-nums">{{ formatCurrency((product.value || 0) * (product.quantity || 1), country) }}</span>
           </div>
           <div class="mt-1 flex items-center gap-1.5">
             <span class="inline-block rounded bg-[#FFF3E0] px-1.5 py-0.5 text-[10px] font-medium text-[#E67E22]">{{ t.productDefault }}</span>
@@ -74,16 +76,18 @@
 import { formatCurrency } from '~/utils/format'
 import type { PublicOrderCharge } from '~/utils/charge'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   order: any
   country?: string
   charge?: PublicOrderCharge | null
-}>()
+  /** false when the company turned off "Valores e cobrança" */
+  showValues?: boolean
+}>(), { charge: null, showValues: true })
 
 const { t } = useOrderI18n()
 
 const hasContent = computed(() => {
-  return props.order?.services?.length || props.order?.products?.length || props.order?.total
+  return props.order?.services?.length || props.order?.products?.length || (props.showValues && props.order?.total)
 })
 
 const total = computed(() => props.order?.total || 0)

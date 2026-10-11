@@ -15,17 +15,17 @@
           </div>
         </div>
         <!-- Total: hidden on mobile, shown on desktop -->
-        <div class="hidden text-right lg:block">
+        <div v-if="showValues" class="hidden text-right lg:block">
           <span class="block text-[13px] text-[#5A7184]">{{ t.quoteTotalLabel }}</span>
           <span class="text-[26px] font-bold text-[#1A2B3C] tabular-nums">{{ formattedTotal }}</span>
         </div>
       </div>
 
       <!-- Divider (mobile only, before total row) -->
-      <div class="h-px bg-[#EDF2F7] lg:hidden" />
+      <div v-if="showValues" class="h-px bg-[#EDF2F7] lg:hidden" />
 
       <!-- Total row (mobile only) -->
-      <div class="flex items-center justify-between lg:hidden">
+      <div v-if="showValues" class="flex items-center justify-between lg:hidden">
         <span class="text-[13px] text-[#5A7184]">{{ t.quoteTotalLabel }}</span>
         <span class="text-[22px] font-bold text-[#1A2B3C] tabular-nums">{{ formattedTotal }}</span>
       </div>
@@ -39,8 +39,8 @@
           <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
         </svg>
         <p class="text-[12px] leading-relaxed text-[#3B6DAA] lg:text-[13px]">
-          <span class="lg:hidden">{{ t.quoteInfoText }}</span>
-          <span class="hidden lg:inline">{{ t.quoteInfoTextLong }}</span>
+          <span class="lg:hidden">{{ showValues ? t.quoteInfoText : t.quoteInfoTextNoValues }}</span>
+          <span class="hidden lg:inline">{{ showValues ? t.quoteInfoTextLong : t.quoteInfoTextLongNoValues }}</span>
         </p>
       </div>
 
@@ -115,11 +115,13 @@
 <script setup lang="ts">
 import { formatCurrency } from '~/utils/format'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   order: any
   country?: string
   termsOfService?: string | null
-}>()
+  /** false when the company turned off "Valores e cobrança" */
+  showValues?: boolean
+}>(), { termsOfService: null, showValues: true })
 
 const emit = defineEmits<{
   approve: []

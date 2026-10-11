@@ -22,6 +22,7 @@ import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -414,7 +415,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               onPressed: () => Navigator.pop(ctx, 'send'),
               child: Text(l10n.orderMenuSendToCustomer),
             ),
-          if (_permissions.canViewPrices())
+          if (canShareOrderPdf(
+            canViewPrices: _permissions.canViewPrices(),
+            useFinancial: config.useFinancial,
+          ))
             CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(ctx, 'pdf'),
               child: Text(l10n.orderMenuPdf),
