@@ -2372,5 +2372,7 @@
     }
   },
   "receivedSaveFailed": "No se pudo guardar. Inténtalo de nuevo.",
-  "receivedOpenOrder": "Abrir la OS"
+  "receivedOpenOrder": "Abrir la OS",
+  "reportPreviousPeriod": "Período anterior",
+  "reportNextPeriod": "Período siguiente"
 }

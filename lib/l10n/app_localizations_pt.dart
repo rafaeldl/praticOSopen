@@ -4870,4 +4870,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir a OS';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Próximo período';
 }

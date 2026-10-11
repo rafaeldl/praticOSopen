@@ -8793,6 +8793,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir a OS'**
   String get receivedOpenOrder;
+
+  /// No description provided for @reportPreviousPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Período anterior'**
+  String get reportPreviousPeriod;
+
+  /// No description provided for @reportNextPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo período'**
+  String get reportNextPeriod;
 }
 
 class _AppLocalizationsDelegate

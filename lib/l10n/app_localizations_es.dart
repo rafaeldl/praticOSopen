@@ -4880,4 +4880,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Abrir la OS';
+
+  @override
+  String get reportPreviousPeriod => 'Período anterior';
+
+  @override
+  String get reportNextPeriod => 'Período siguiente';
 }

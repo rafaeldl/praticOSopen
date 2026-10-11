@@ -4858,4 +4858,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receivedOpenOrder => 'Open the order';
+
+  @override
+  String get reportPreviousPeriod => 'Previous period';
+
+  @override
+  String get reportNextPeriod => 'Next period';
 }

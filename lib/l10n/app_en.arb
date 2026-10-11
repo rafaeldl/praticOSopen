@@ -2372,5 +2372,7 @@
     }
   },
   "receivedSaveFailed": "Could not save. Try again.",
-  "receivedOpenOrder": "Open the order"
+  "receivedOpenOrder": "Open the order",
+  "reportPreviousPeriod": "Previous period",
+  "reportNextPeriod": "Next period"
 }

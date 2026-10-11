@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/services/format_service.dart';
@@ -15,6 +14,16 @@ import 'package:printing/printing.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/period_stepper.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
 /// Relatório financeiro (gráficos, ranking de clientes/serviços/produtos e
 /// escolha de outro período), aberto a partir da aba Financeiro.
@@ -113,50 +122,113 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     }
   }
 
-  Map<String, String> get periodLabelsMap => {
-    'hoje': context.l10n.today,
-    'semana': context.l10n.week,
-    'mês': context.l10n.month,
-    'ano': context.l10n.year,
-    'custom': context.l10n.period,
-  };
+  /// Period label shown on screen (locale aware). The PDF keeps using
+  /// [periodLabel].
+  String get _displayPeriodLabel {
+    final format = FormatService();
+    if (selectedPeriod == 'custom' &&
+        _customStartDate != null &&
+        _customEndDate != null) {
+      return '${format.formatDate(_customStartDate)} - ${format.formatDate(_customEndDate)}';
+    }
+
+    final now = DateTime.now();
+    switch (selectedPeriod) {
+      case 'hoje':
+        if (_periodOffset == 0) return context.l10n.today;
+        return format.formatDate(now.add(Duration(days: _periodOffset)));
+      case 'semana':
+        final date = now.add(Duration(days: 7 * _periodOffset));
+        final start = date.subtract(Duration(days: date.weekday % 7));
+        final end = start.add(const Duration(days: 6));
+        return '${format.formatDayMonth(start)} - ${format.formatDayMonth(end)}';
+      case 'mês':
+        if (_periodOffset == 0) return context.l10n.currentMonth;
+        return format.formatMonthYearTitle(
+            DateTime(now.year, now.month + _periodOffset, 1));
+      case 'ano':
+        if (_periodOffset == 0) return context.l10n.currentYear;
+        return '${now.year + _periodOffset}';
+      default:
+        return selectedPeriod;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final orderStore = Provider.of<OrderStore>(context);
 
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: Text(context.l10n.financialReport),
-              trailing: CupertinoButton(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text(context.l10n.financialReport),
+            backgroundColor: AppColors.background.resolveFrom(context),
+            border: null,
+            trailing: Semantics(
+              button: true,
+              label: context.l10n.share,
+              excludeSemantics: true,
+              child: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size.square(AppSizes.minTouchTarget),
+                onPressed: () => _shareReport(orderStore),
                 child: Icon(
                   CupertinoIcons.square_arrow_up,
-                  color: CupertinoColors.activeBlue.resolveFrom(context),
+                  color: AppColors.accentText.resolveFrom(context),
                 ),
-                onPressed: () => _shareReport(orderStore),
               ),
             ),
-            CupertinoSliverRefreshControl(
-              onRefresh: () => orderStore.loadOrdersForDashboard(),
-            ),
-            _buildPeriodSelector(),
-            Observer(builder: (_) => _buildKpiCards(orderStore)),
-            Observer(builder: (_) => _buildRevenueBreakdown(orderStore)),
-            Observer(builder: (_) => _buildCustomerRanking(orderStore)),
-            Observer(builder: (_) => _buildServicesRanking(orderStore)),
-            Observer(builder: (_) => _buildProductsRanking(orderStore)),
-            Observer(builder: (_) => _buildRecentOrders(orderStore)),
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          ],
-        ),
+          ),
+          CupertinoSliverRefreshControl(
+            onRefresh: () => orderStore.loadOrdersForDashboard(),
+          ),
+          SliverToBoxAdapter(child: _buildPeriodSelector()),
+          Observer(builder: (_) => _buildBody(orderStore)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+        ],
       ),
+    );
+  }
+
+  /// Everything below the period selector, as one sliver list. Sections with
+  /// no data are left out; a period with no orders shows a single sentence.
+  Widget _buildBody(OrderStore orderStore) {
+    if (orderStore.recentOrders.isEmpty && orderStore.customerRanking.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xxl),
+          child: EmptyState(
+            icon: CupertinoIcons.doc_text,
+            title: context.l10n.noOrdersInPeriod,
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        _buildSummary(orderStore),
+        _buildComposition(orderStore),
+        _buildCustomerRanking(orderStore),
+        _buildItemRanking(
+          title: context.l10n.services,
+          ranking: _calculateServicesRanking(orderStore),
+          expanded: _isServicesExpanded,
+          onToggle: () =>
+              setState(() => _isServicesExpanded = !_isServicesExpanded),
+        ),
+        _buildItemRanking(
+          title: context.l10n.products,
+          ranking: _calculateProductsRanking(orderStore),
+          expanded: _isProductsExpanded,
+          onToggle: () =>
+              setState(() => _isProductsExpanded = !_isProductsExpanded),
+        ),
+        _buildRecentOrders(orderStore),
+      ]),
     );
   }
 
@@ -165,128 +237,74 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
   // ============================================================
 
   Widget _buildPeriodSelector() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Column(
-          children: [
-            // Segmented Control for Period Type
-            SizedBox(
-              width: double.infinity,
-              child: CupertinoSlidingSegmentedControl<String>(
-                groupValue: selectedPeriod,
-                children: {
-                  'hoje': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(context.l10n.today, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
-                  ),
-                  'semana': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(context.l10n.week, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
-                  ),
-                  'mês': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(context.l10n.month, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
-                  ),
-                  'ano': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(context.l10n.year, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
-                  ),
-                  'custom': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(context.l10n.period, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
-                  ),
-                },
-                onValueChanged: (value) {
-                  if (value == 'custom') {
-                    _showCustomPeriodPicker();
-                  } else {
-                    setState(() {
-                      selectedPeriod = value!;
-                      _periodOffset = 0;
-                      _customStartDate = null;
-                      _customEndDate = null;
-                    });
-                    _updateDashboardPeriod();
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Period Navigation Row
-            _buildPeriodNavigationRow(),
-          ],
-        ),
-      ),
-    );
-  }
+    final text = AppColors.text.resolveFrom(context);
 
-  Widget _buildPeriodNavigationRow() {
-    if (selectedPeriod == 'custom') {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.calendar,
-              size: 20,
-              color: CupertinoColors.activeBlue.resolveFrom(context),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              periodLabel,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.none,
-                color: CupertinoColors.label.resolveFrom(context),
-              ),
-            ),
-            const SizedBox(width: 8),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size.square(28),
-              child: Icon(
-                CupertinoIcons.pencil,
-                size: 18,
-                color: CupertinoColors.activeBlue.resolveFrom(context),
-              ),
-              onPressed: () => _showCustomPeriodPicker(),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size.square(32),
-            child: Icon(
-              CupertinoIcons.chevron_left,
-              color: CupertinoColors.activeBlue.resolveFrom(context),
-            ),
-            onPressed: () {
-              setState(() => _periodOffset--);
-              _updateDashboardPeriod();
-            },
+    Widget segment(String label) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: Text(
+            label,
+            style: AppTypography.label.copyWith(color: text),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: _periodOffset != 0
+        );
+
+    final isCustom = selectedPeriod == 'custom';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: CupertinoSlidingSegmentedControl<String>(
+              groupValue: isCustom ? null : selectedPeriod,
+              backgroundColor: AppColors.secondaryFill.resolveFrom(context),
+              thumbColor: AppColors.surface.resolveFrom(context),
+              children: {
+                'hoje': segment(context.l10n.today),
+                'semana': segment(context.l10n.week),
+                'mês': segment(context.l10n.month),
+                'ano': segment(context.l10n.year),
+              },
+              onValueChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  selectedPeriod = value;
+                  _periodOffset = 0;
+                  _customStartDate = null;
+                  _customEndDate = null;
+                });
+                _updateDashboardPeriod();
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (isCustom)
+            AppListRow(
+              leading: Icon(
+                CupertinoIcons.calendar,
+                size: 22,
+                color: AppColors.accentText.resolveFrom(context),
+              ),
+              title: _displayPeriodLabel,
+              onTap: _showCustomPeriodPicker,
+            )
+          else
+            PeriodStepper(
+              label: _displayPeriodLabel,
+              previousLabel: context.l10n.reportPreviousPeriod,
+              nextLabel: context.l10n.reportNextPeriod,
+              onPrevious: () {
+                setState(() => _periodOffset--);
+                _updateDashboardPeriod();
+              },
+              onNext: _periodOffset < 0
+                  ? () {
+                      setState(() => _periodOffset++);
+                      _updateDashboardPeriod();
+                    }
+                  : null,
+              onTapLabel: _periodOffset != 0
                   ? () {
                       setState(() => _periodOffset = 0);
                       final orderStore =
@@ -296,45 +314,15 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
                       _updateDashboardPeriod();
                     }
                   : null,
-              child: Column(
-                children: [
-                  Text(
-                    periodLabel,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.none,
-                      color: CupertinoColors.label.resolveFrom(context),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_periodOffset != 0)
-                    Text(
-                      context.l10n.tapToReturnToCurrent,
-                      style: TextStyle(
-                        fontSize: 12,
-                        decoration: TextDecoration.none,
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
-                      ),
-                    ),
-                ],
-              ),
             ),
-          ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size.square(32),
-            onPressed: _periodOffset < 0
-                ? () {
-                    setState(() => _periodOffset++);
-                    _updateDashboardPeriod();
-                  }
-                : null,
-            child: Icon(
-              CupertinoIcons.chevron_right,
-              color: _periodOffset < 0
-                  ? CupertinoColors.activeBlue.resolveFrom(context)
-                  : CupertinoColors.tertiaryLabel.resolveFrom(context),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: TextLink(
+                label: context.l10n.financialOtherPeriod,
+                onPressed: _showCustomPeriodPicker,
+              ),
             ),
           ),
         ],
@@ -342,119 +330,31 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     );
   }
 
+  /// "Outro período": start and end dates in a sheet.
   Future<void> _showCustomPeriodPicker() async {
-    DateTime tempStartDate =
-        _customStartDate ?? DateTime.now().subtract(const Duration(days: 30));
-    DateTime tempEndDate = _customEndDate ?? DateTime.now();
-    bool isSelectingStart = true;
-
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          height: 380,
-          padding: const EdgeInsets.only(top: 6.0),
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CupertinoButton(
-                        child: Text(context.l10n.cancel),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Text(
-                        context.l10n.selectPeriod,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.none,
-                          color: CupertinoColors.label.resolveFrom(context),
-                        ),
-                      ),
-                      CupertinoButton(
-                        child: Text(context.l10n.ok),
-                        onPressed: () {
-                          setState(() {
-                            selectedPeriod = 'custom';
-                            _customStartDate = tempStartDate;
-                            _customEndDate = tempEndDate;
-                            _periodOffset = 0;
-                          });
-                          _updateDashboardPeriodCustom(
-                              tempStartDate, tempEndDate);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Start/End Toggle
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: CupertinoSlidingSegmentedControl<bool>(
-                    groupValue: isSelectingStart,
-                    children: {
-                      true: Text(
-                        '${context.l10n.start}: ${FormatService().formatDate(tempStartDate)}',
-                        style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
-                      ),
-                      false: Text(
-                        '${context.l10n.end}: ${FormatService().formatDate(tempEndDate)}',
-                        style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
-                      ),
-                    },
-                    onValueChanged: (value) {
-                      setModalState(() => isSelectingStart = value!);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Date Picker
-                Expanded(
-                  child: CupertinoDatePicker(
-                    mode: CupertinoDatePickerMode.date,
-                    initialDateTime:
-                        isSelectingStart ? tempStartDate : tempEndDate,
-                    maximumDate: DateTime.now(),
-                    minimumDate: DateTime(2020),
-                    onDateTimeChanged: (date) {
-                      setModalState(() {
-                        if (isSelectingStart) {
-                          tempStartDate = date;
-                          if (date.isAfter(tempEndDate)) {
-                            tempEndDate = date;
-                          }
-                        } else {
-                          tempEndDate = date;
-                          if (date.isBefore(tempStartDate)) {
-                            tempStartDate = date;
-                          }
-                        }
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    final range = await AppSheet.show<({DateTime start, DateTime end})>(
+      context,
+      (_) => _CustomPeriodSheet(
+        start: _customStartDate ??
+            DateTime.now().subtract(const Duration(days: 30)),
+        end: _customEndDate ?? DateTime.now(),
       ),
     );
+    if (range == null || !mounted) return;
+    setState(() {
+      selectedPeriod = 'custom';
+      _customStartDate = range.start;
+      _customEndDate = range.end;
+      _periodOffset = 0;
+    });
+    _updateDashboardPeriodCustom(range.start, range.end);
   }
 
   // ============================================================
-  // HERO SECTION (Health App Style)
+  // SUMMARY (billing, paid vs to receive)
   // ============================================================
 
-  Widget _buildKpiCards(OrderStore orderStore) {
+  Widget _buildSummary(OrderStore orderStore) {
     final totalOrders = orderStore.recentOrders.length;
     final paidOrders =
         orderStore.recentOrders.where((o) => o?.payment == 'paid').length;
@@ -462,207 +362,79 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     final avgTicket =
         totalOrders > 0 ? orderStore.totalRevenue / totalOrders : 0.0;
 
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final tertiaryColor = CupertinoColors.tertiaryLabel.resolveFrom(context);
-    final greenColor = CupertinoColors.systemGreen.resolveFrom(context);
-    final orangeColor = CupertinoColors.systemOrange.resolveFrom(context);
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final segConfig = context.read<SegmentConfigProvider>();
+    // Segment labels fall back to the i18n text when the key is not set.
+    String segmentLabel(String key, String fallback) {
+      final value = segConfig.label(key);
+      return value.isEmpty || value == key ? fallback : value;
+    }
 
-    final paidPercent = orderStore.totalRevenue > 0
-        ? orderStore.totalPaidAmount / orderStore.totalRevenue
-        : 0.0;
+    final paidLabel =
+        segmentLabel('financial.total_paid', context.l10n.received);
+    final remainingLabel =
+        segmentLabel('financial.remaining', context.l10n.toReceive);
 
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero: Large Revenue Number
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemGroupedBackground
-                    .resolveFrom(context),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.billing.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      color: secondaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _convertToCurrency(orderStore.totalRevenue),
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: labelColor,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$totalOrders ordens • Média ${_convertToCurrency(avgTicket)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: secondaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+    final paidAmount = orderStore.totalPaidAmount;
+    final unpaidAmount = orderStore.totalUnpaidAmount;
 
-                  // Horizontal Stacked Bar (Health app style)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      height: 8,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: (paidPercent * 100).round().clamp(1, 100),
-                            child: Container(color: greenColor),
-                          ),
-                          if (paidPercent < 1)
-                            Expanded(
-                              flex: ((1 - paidPercent) * 100).round().clamp(1, 100),
-                              child: Container(color: orangeColor),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Legend Row
-                  Builder(builder: (context) {
-                    final segConfig = context.read<SegmentConfigProvider>();
-                    final paidLabel = segConfig.label('financial.total_paid');
-                    final remainingLabel = segConfig.label('financial.remaining');
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: _buildHealthLegendItem(
-                            label: paidLabel.isNotEmpty ? paidLabel : context.l10n.received,
-                            value: _convertToCurrency(orderStore.totalPaidAmount),
-                            count: paidOrders,
-                            color: greenColor,
-                            isSelected: orderStore.paymentFilter == 'paid',
-                            onTap: () => _togglePaymentFilter(orderStore, 'paid'),
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: tertiaryColor,
-                        ),
-                        Expanded(
-                          child: _buildHealthLegendItem(
-                            label: remainingLabel.isNotEmpty ? remainingLabel : context.l10n.toReceive,
-                            value: _convertToCurrency(orderStore.totalUnpaidAmount),
-                            count: unpaidOrders,
-                            color: orangeColor,
-                            isSelected: orderStore.paymentFilter == 'unpaid',
-                            onTap: () => _togglePaymentFilter(orderStore, 'unpaid'),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHealthLegendItem({
-    required String label,
-    required String value,
-    required int count,
-    required Color color,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(context.l10n.billing),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _convertToCurrency(orderStore.totalRevenue),
+                style: AppTypography.title.copyWith(
+                  color: text,
+                  fontFeatures: AppTypography.tabular,
                 ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: secondaryColor,
-                    ),
-                  ),
-                ),
-                if (isSelected) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    CupertinoIcons.checkmark,
-                    size: 10,
-                    color: color,
-                  ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '${context.l10n.nOrdersCount(totalOrders)} · '
+                '${context.l10n.averageTicket} ${_convertToCurrency(avgTicket)}',
+                style: AppTypography.label.copyWith(color: secondary),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _StackedBar(
+                semanticsLabel:
+                    '${context.l10n.received} ${_convertToCurrency(paidAmount)}, '
+                    '${context.l10n.toReceive} ${_convertToCurrency(unpaidAmount)}',
+                segments: [
+                  _BarSegment(
+                      paidAmount, AppColors.success.resolveFrom(context)),
+                  _BarSegment(
+                      unpaidAmount, AppColors.warning.resolveFrom(context)),
                 ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: labelColor,
+                emptyColor: AppColors.secondaryFill.resolveFrom(context),
               ),
-            ),
-            Text(
-              '$count ordens',
-              style: TextStyle(
-                fontSize: 11,
-                color: secondaryColor,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        _LegendRow(
+          color: AppColors.success,
+          label: paidLabel,
+          value: _convertToCurrency(paidAmount),
+          count: context.l10n.nOrdersCount(paidOrders),
+          selected: orderStore.paymentFilter == 'paid',
+          onTap: () => _togglePaymentFilter(orderStore, 'paid'),
+        ),
+        _LegendRow(
+          color: AppColors.warning,
+          label: remainingLabel,
+          value: _convertToCurrency(unpaidAmount),
+          count: context.l10n.nOrdersCount(unpaidOrders),
+          selected: orderStore.paymentFilter == 'unpaid',
+          onTap: () => _togglePaymentFilter(orderStore, 'unpaid'),
+        ),
+      ],
     );
   }
 
@@ -675,329 +447,184 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
   }
 
   // ============================================================
-  // REVENUE COMPOSITION (Services vs Products - Health App Style)
+  // COMPOSITION (services vs products)
   // ============================================================
 
-  Widget _buildRevenueBreakdown(OrderStore orderStore) {
-    final servicesRanking = _calculateServicesRanking(orderStore);
-    final productsRanking = _calculateProductsRanking(orderStore);
+  Widget _buildComposition(OrderStore orderStore) {
+    final totalServices = _calculateServicesRanking(orderStore)
+        .fold<double>(0, (sum, item) => sum + (item['total'] as double));
+    final totalProducts = _calculateProductsRanking(orderStore)
+        .fold<double>(0, (sum, item) => sum + (item['total'] as double));
+    if (totalServices + totalProducts == 0) return const SizedBox.shrink();
 
-    final totalServices = servicesRanking.fold<double>(
-        0, (sum, item) => sum + (item['total'] as double));
-    final totalProducts = productsRanking.fold<double>(
-        0, (sum, item) => sum + (item['total'] as double));
-    final totalComposition = totalServices + totalProducts;
+    final servicesColor = AppColors.accent.resolveFrom(context);
+    final productsColor = AppColors.textSecondary.resolveFrom(context);
 
-    if (totalComposition == 0) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final blueColor = CupertinoColors.systemBlue.resolveFrom(context);
-    final purpleColor = CupertinoColors.systemPurple.resolveFrom(context);
-
-    final servicesPercent = totalComposition > 0 ? totalServices / totalComposition : 0.0;
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground
-                .resolveFrom(context),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.composition.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: secondaryColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Horizontal stacked bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: SizedBox(
-                  height: 8,
-                  child: Row(
-                    children: [
-                      if (totalServices > 0)
-                        Expanded(
-                          flex: (servicesPercent * 100).round().clamp(1, 100),
-                          child: Container(color: blueColor),
-                        ),
-                      if (totalProducts > 0)
-                        Expanded(
-                          flex: ((1 - servicesPercent) * 100).round().clamp(1, 100),
-                          child: Container(color: purpleColor),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Two columns
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: blueColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              context.l10n.services,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: secondaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _convertToCurrency(totalServices),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: labelColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: purpleColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              context.l10n.products,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: secondaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _convertToCurrency(totalProducts),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: labelColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(context.l10n.composition),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+          child: _StackedBar(
+            semanticsLabel:
+                '${context.l10n.services} ${_convertToCurrency(totalServices)}, '
+                '${context.l10n.products} ${_convertToCurrency(totalProducts)}',
+            segments: [
+              _BarSegment(totalServices, servicesColor),
+              _BarSegment(totalProducts, productsColor),
             ],
+            emptyColor: AppColors.secondaryFill.resolveFrom(context),
           ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _LegendRow(
+          color: AppColors.accent,
+          label: context.l10n.services,
+          value: _convertToCurrency(totalServices),
+        ),
+        _LegendRow(
+          color: AppColors.textSecondary,
+          label: context.l10n.products,
+          value: _convertToCurrency(totalProducts),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // RANKINGS
+  // ============================================================
+
+  /// Section header: label on the left, total on the right.
+  Widget _sectionHeader(String title, String total) {
+    return Row(
+      children: [
+        Expanded(child: SectionLabel(title)),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.xl,
+            right: AppSpacing.pageMargin,
+          ),
+          child: Text(
+            total,
+            style: AppTypography.label.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _seeAllLink({
+    required int total,
+    required bool expanded,
+    required VoidCallback onToggle,
+  }) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: TextLink(
+          label: expanded
+              ? context.l10n.seeLess
+              : context.l10n.seeAllCount(total),
+          onPressed: onToggle,
         ),
       ),
     );
   }
 
-  // ============================================================
-  // CUSTOMER RANKING
-  // ============================================================
-
   Widget _buildCustomerRanking(OrderStore orderStore) {
-    if (orderStore.customerRanking.isEmpty) {
-      return _buildEmptyState(
-        icon: CupertinoIcons.person_2,
-        message: context.l10n.noCustomerDataInPeriod,
-      );
-    }
+    if (orderStore.customerRanking.isEmpty) return const SizedBox.shrink();
 
-    var filteredRanking = _filterRankingByPayment(orderStore);
+    final filteredRanking = _filterRankingByPayment(orderStore);
     final itemCount = _isRankingExpanded
         ? filteredRanking.length
         : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
 
-    String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? context.l10n.customersReceived.toUpperCase()
+    final sectionTitle = orderStore.paymentFilter == 'paid'
+        ? context.l10n.customersReceived
         : orderStore.paymentFilter == 'unpaid'
-            ? context.l10n.customersToReceive.toUpperCase()
-            : context.l10n.customers.toUpperCase();
+            ? context.l10n.customersToReceive
+            : context.l10n.customers;
 
-    // Calculate total for header
-    final totalValue = filteredRanking.fold<double>(0, (sum, customer) {
-      final double totalAmount = customer['total'] ?? 0.0;
-      final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
-      final double paidAmount = totalAmount - unpaidAmount;
+    final totalValue = filteredRanking.fold<double>(
+        0, (sum, customer) => sum + _customerDisplayValue(orderStore, customer));
 
-      return sum + (orderStore.paymentFilter == 'paid'
-          ? paidAmount
-          : orderStore.paymentFilter == 'unpaid'
-              ? unpaidAmount
-              : totalAmount);
-    });
-
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(sectionTitle, _convertToCurrency(totalValue)),
+        for (int i = 0; i < itemCount; i++)
+          _buildCustomerRow(filteredRanking[i], orderStore),
+        if (filteredRanking.length > 5)
+          _seeAllLink(
+            total: filteredRanking.length,
+            expanded: _isRankingExpanded,
+            onToggle: () =>
+                setState(() => _isRankingExpanded = !_isRankingExpanded),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      sectionTitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
-                        color: secondaryColor,
-                      ),
-                    ),
-                    Text(
-                      _convertToCurrency(totalValue),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              for (int i = 0; i < itemCount; i++)
-                _buildRankingListTile(
-                  rank: i + 1,
-                  customer: filteredRanking[i],
-                  orderStore: orderStore,
-                ),
-              if (filteredRanking.length > 5)
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  onPressed: () => setState(() => _isRankingExpanded = !_isRankingExpanded),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isRankingExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredRanking.length),
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _isRankingExpanded
-                            ? CupertinoIcons.chevron_up
-                            : CupertinoIcons.chevron_down,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 
+  double _customerDisplayValue(
+      OrderStore orderStore, Map<String, dynamic> customer) {
+    final double total = customer['total'] ?? 0.0;
+    final double unpaid = customer['unpaidTotal'] ?? 0.0;
+    return orderStore.paymentFilter == 'paid'
+        ? total - unpaid
+        : orderStore.paymentFilter == 'unpaid'
+            ? unpaid
+            : total;
+  }
+
   List<Map<String, dynamic>> _filterRankingByPayment(OrderStore orderStore) {
-    var filteredRanking = List<Map<String, dynamic>>.from(orderStore.customerRanking);
+    var filteredRanking =
+        List<Map<String, dynamic>>.from(orderStore.customerRanking);
 
     if (orderStore.paymentFilter != null) {
-      filteredRanking = filteredRanking.where((customer) {
-        final double total = customer['total'] ?? 0.0;
-        final double unpaidTotal = customer['unpaidTotal'] ?? 0.0;
-        final double paidTotal = total - unpaidTotal;
+      double paidOf(Map<String, dynamic> c) =>
+          ((c['total'] ?? 0.0) as double) - ((c['unpaidTotal'] ?? 0.0) as double);
+      double unpaidOf(Map<String, dynamic> c) =>
+          (c['unpaidTotal'] ?? 0.0) as double;
 
-        if (orderStore.paymentFilter == 'paid') {
-          return paidTotal > 0;
-        } else if (orderStore.paymentFilter == 'unpaid') {
-          return unpaidTotal > 0;
-        }
-        return true;
-      }).toList();
-
-      filteredRanking.sort((a, b) {
-        final double totalA = a['total'] ?? 0.0;
-        final double unpaidTotalA = a['unpaidTotal'] ?? 0.0;
-        final double paidTotalA = totalA - unpaidTotalA;
-
-        final double totalB = b['total'] ?? 0.0;
-        final double unpaidTotalB = b['unpaidTotal'] ?? 0.0;
-        final double paidTotalB = totalB - unpaidTotalB;
-
-        if (orderStore.paymentFilter == 'paid') {
-          return paidTotalB.compareTo(paidTotalA);
-        }
-        return unpaidTotalB.compareTo(unpaidTotalA);
-      });
+      final isPaid = orderStore.paymentFilter == 'paid';
+      filteredRanking = filteredRanking
+          .where((c) => isPaid ? paidOf(c) > 0 : unpaidOf(c) > 0)
+          .toList();
+      filteredRanking.sort((a, b) => isPaid
+          ? paidOf(b).compareTo(paidOf(a))
+          : unpaidOf(b).compareTo(unpaidOf(a)));
     }
 
     return filteredRanking;
   }
 
-  Widget _buildRankingListTile({
-    required int rank,
-    required Map<String, dynamic> customer,
-    required OrderStore orderStore,
-  }) {
+  Widget _buildCustomerRow(
+      Map<String, dynamic> customer, OrderStore orderStore) {
     final isSelected =
         orderStore.selectedCustomerInRanking?['id'] == customer['id'];
-
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final selectedBgColor = CupertinoColors.systemGrey5.resolveFrom(context);
-
-    final double totalAmount = customer['total'] ?? 0.0;
     final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
-    final double paidAmount = totalAmount - unpaidAmount;
 
-    final displayValue = orderStore.paymentFilter == 'paid'
-        ? paidAmount
-        : orderStore.paymentFilter == 'unpaid'
-            ? unpaidAmount
-            : totalAmount;
-
-    return GestureDetector(
+    final row = AppListRow(
+      title: customer['name'] ?? context.l10n.customerWithoutName,
+      titleStyle: isSelected ? AppTypography.bodyStrong : null,
+      subtitle: unpaidAmount > 0 && orderStore.paymentFilter == null
+          ? '${context.l10n.toReceive}: ${_convertToCurrency(unpaidAmount)}'
+          : null,
+      trailing: _convertToCurrency(_customerDisplayValue(orderStore, customer)),
+      leading: isSelected
+          ? Icon(
+              CupertinoIcons.checkmark_alt,
+              size: 20,
+              color: AppColors.accentText.resolveFrom(context),
+            )
+          : null,
+      showChevron: false,
       onTap: () {
         if (isSelected) {
           orderStore.clearCustomerRankingSelection();
@@ -1005,59 +632,18 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
           orderStore.selectCustomerInRanking(customer);
         }
       },
-      child: Container(
-        color: isSelected ? selectedBgColor : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    customer['name'] ?? context.l10n.customerWithoutName,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: labelColor,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (unpaidAmount > 0 && orderStore.paymentFilter == null)
-                    Text(
-                      '${context.l10n.toReceive}: ${_convertToCurrency(unpaidAmount)}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: CupertinoColors.systemOrange,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              _convertToCurrency(displayValue),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: labelColor,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              CupertinoIcons.chevron_right,
-              size: 14,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-            ),
-          ],
-        ),
+    );
+
+    return Semantics(
+      selected: isSelected,
+      child: ColoredBox(
+        color: isSelected
+            ? AppColors.secondaryFill.resolveFrom(context)
+            : const Color(0x00000000),
+        child: row,
       ),
     );
   }
-
-  // ============================================================
-  // SERVICES RANKING
-  // ============================================================
 
   List<Map<String, dynamic>> _calculateServicesRanking(OrderStore orderStore) {
     final Map<String, Map<String, dynamic>> servicesMap = {};
@@ -1065,8 +651,9 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     for (final order in orderStore.recentOrders) {
       if (order?.services != null) {
         for (final service in order!.services!) {
-          final name =
-              service.service?.name ?? service.description ?? context.l10n.serviceWithoutName;
+          final name = service.service?.name ??
+              service.description ??
+              context.l10n.serviceWithoutName;
           final value = service.value ?? 0.0;
 
           if (servicesMap.containsKey(name)) {
@@ -1086,104 +673,10 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     }
 
     final ranking = servicesMap.values.toList();
-    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    ranking.sort(
+        (a, b) => (b['total'] as double).compareTo(a['total'] as double));
     return ranking;
   }
-
-  Widget _buildServicesRanking(OrderStore orderStore) {
-    final servicesRanking = _calculateServicesRanking(orderStore);
-
-    if (servicesRanking.isEmpty) {
-      return _buildEmptyState(
-        icon: CupertinoIcons.wrench,
-        message: context.l10n.noServiceDataInPeriod,
-      );
-    }
-
-    final itemCount = _isServicesExpanded
-        ? servicesRanking.length
-        : (servicesRanking.length > 5 ? 5 : servicesRanking.length);
-
-    final totalServicesValue = servicesRanking.fold<double>(
-        0, (sum, item) => sum + (item['total'] as double));
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      context.l10n.services.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
-                        color: secondaryColor,
-                      ),
-                    ),
-                    Text(
-                      _convertToCurrency(totalServicesValue),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              for (int i = 0; i < itemCount; i++)
-                _buildRankingItemWithQty(
-                  rank: i + 1,
-                  name: servicesRanking[i]['name'] as String,
-                  value: servicesRanking[i]['total'] as double,
-                  quantity: servicesRanking[i]['quantity'] as int,
-                ),
-              if (servicesRanking.length > 5)
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  onPressed: () => setState(() => _isServicesExpanded = !_isServicesExpanded),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isServicesExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(servicesRanking.length),
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _isServicesExpanded
-                            ? CupertinoIcons.chevron_up
-                            : CupertinoIcons.chevron_down,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // PRODUCTS RANKING
-  // ============================================================
 
   List<Map<String, dynamic>> _calculateProductsRanking(OrderStore orderStore) {
     final Map<String, Map<String, dynamic>> productsMap = {};
@@ -1191,8 +684,9 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     for (final order in orderStore.recentOrders) {
       if (order?.products != null) {
         for (final product in order!.products!) {
-          final name =
-              product.product?.name ?? product.description ?? context.l10n.productWithoutName;
+          final name = product.product?.name ??
+              product.description ??
+              context.l10n.productWithoutName;
           final total =
               product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
           final quantity = product.quantity ?? 1;
@@ -1214,148 +708,39 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     }
 
     final ranking = productsMap.values.toList();
-    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    ranking.sort(
+        (a, b) => (b['total'] as double).compareTo(a['total'] as double));
     return ranking;
   }
 
-  Widget _buildProductsRanking(OrderStore orderStore) {
-    final productsRanking = _calculateProductsRanking(orderStore);
-
-    if (productsRanking.isEmpty) {
-      return _buildEmptyState(
-        icon: CupertinoIcons.cube_box,
-        message: context.l10n.noProductDataInPeriod,
-      );
-    }
-
-    final itemCount = _isProductsExpanded
-        ? productsRanking.length
-        : (productsRanking.length > 5 ? 5 : productsRanking.length);
-
-    final totalProductsValue = productsRanking.fold<double>(
-        0, (sum, item) => sum + (item['total'] as double));
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      context.l10n.products.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
-                        color: secondaryColor,
-                      ),
-                    ),
-                    Text(
-                      _convertToCurrency(totalProductsValue),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              for (int i = 0; i < itemCount; i++)
-                _buildRankingItemWithQty(
-                  rank: i + 1,
-                  name: productsRanking[i]['name'] as String,
-                  value: productsRanking[i]['total'] as double,
-                  quantity: productsRanking[i]['quantity'] as int,
-                ),
-              if (productsRanking.length > 5)
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  onPressed: () => setState(() => _isProductsExpanded = !_isProductsExpanded),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isProductsExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(productsRanking.length),
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _isProductsExpanded
-                            ? CupertinoIcons.chevron_up
-                            : CupertinoIcons.chevron_down,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRankingItemWithQty({
-    required int rank,
-    required String name,
-    required double value,
-    required int quantity,
+  /// Ranking of services or products. Left out when empty.
+  Widget _buildItemRanking({
+    required String title,
+    required List<Map<String, dynamic>> ranking,
+    required bool expanded,
+    required VoidCallback onToggle,
   }) {
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    if (ranking.isEmpty) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: labelColor,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  context.l10n.nItemsCount(quantity),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: secondaryColor,
-                  ),
-                ),
-              ],
-            ),
+    final itemCount =
+        expanded ? ranking.length : (ranking.length > 5 ? 5 : ranking.length);
+    final total = ranking.fold<double>(
+        0, (sum, item) => sum + (item['total'] as double));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(title, _convertToCurrency(total)),
+        for (int i = 0; i < itemCount; i++)
+          AppListRow(
+            title: ranking[i]['name'] as String,
+            subtitle: context.l10n.nItemsCount(ranking[i]['quantity'] as int),
+            trailing: _convertToCurrency(ranking[i]['total'] as double),
           ),
-          const SizedBox(width: 8),
-          Text(
-            _convertToCurrency(value),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: labelColor,
-            ),
-          ),
-        ],
-      ),
+        if (ranking.length > 5)
+          _seeAllLink(
+              total: ranking.length, expanded: expanded, onToggle: onToggle),
+      ],
     );
   }
 
@@ -1364,11 +749,11 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
   // ============================================================
 
   Widget _buildRecentOrders(OrderStore orderStore) {
-    String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? context.l10n.paidOrders.toUpperCase()
+    final sectionTitle = orderStore.paymentFilter == 'paid'
+        ? context.l10n.paidOrders
         : orderStore.paymentFilter == 'unpaid'
-            ? context.l10n.ordersToReceive.toUpperCase()
-            : context.l10n.recentOrders.toUpperCase();
+            ? context.l10n.ordersToReceive
+            : context.l10n.recentOrders;
 
     final filteredOrders = orderStore.paymentFilter == null
         ? orderStore.recentOrders
@@ -1376,216 +761,53 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
             .where((order) => order?.payment == orderStore.paymentFilter)
             .toList();
 
-    if (filteredOrders.isEmpty) {
-      return _buildEmptyState(
-        icon: CupertinoIcons.doc_text,
-        message: context.l10n.noOrdersInPeriod,
-      );
-    }
+    if (filteredOrders.isEmpty) return const SizedBox.shrink();
 
     final itemCount = _isRecentOrdersExpanded
         ? filteredOrders.length
         : (filteredOrders.length > 5 ? 5 : filteredOrders.length);
 
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(10),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+            sectionTitle, context.l10n.nOrdersCount(filteredOrders.length)),
+        for (int i = 0; i < itemCount; i++)
+          _buildOrderRow(filteredOrders[i]),
+        if (filteredOrders.length > 5)
+          _seeAllLink(
+            total: filteredOrders.length,
+            expanded: _isRecentOrdersExpanded,
+            onToggle: () => setState(
+                () => _isRecentOrdersExpanded = !_isRecentOrdersExpanded),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      sectionTitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
-                        color: secondaryColor,
-                      ),
-                    ),
-                    Text(
-                      '${filteredOrders.length} ordens',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              for (int i = 0; i < itemCount; i++)
-                _buildOrderListTile(filteredOrders[i]),
-              if (filteredOrders.length > 5)
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  onPressed: () => setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isRecentOrdersExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredOrders.length),
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _isRecentOrdersExpanded
-                            ? CupertinoIcons.chevron_up
-                            : CupertinoIcons.chevron_down,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 
-  Widget _buildOrderListTile(dynamic order) {
-    final dateFormat = DateFormat('dd/MM/yy');
-    final dateStr =
-        order?.createdAt != null ? dateFormat.format(order!.createdAt!) : '';
+  Widget _buildOrderRow(dynamic order) {
+    final dateStr = order?.createdAt != null
+        ? FormatService().formatDate(order!.createdAt!)
+        : '';
     final isPaid = order?.payment == 'paid';
+    final status = isPaid ? context.l10n.paid : context.l10n.pendingPayment;
 
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
-
-    return GestureDetector(
+    return AppListRow(
+      leading: StatusDot(
+        color: isPaid ? AppColors.success : AppColors.warning,
+        size: 10,
+      ),
+      title: order?.customer?.name ?? context.l10n.customer,
+      subtitle: [
+        '${context.l10n.orderShort} ${order?.number}',
+        if (dateStr.isNotEmpty) dateStr,
+        status,
+      ].join(' · '),
+      trailing: _convertToCurrency(order?.total),
       onTap: () => Navigator.pushNamed(
         context,
         '/order',
         arguments: {'order': order},
-      ),
-      child: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    order?.customer?.name ?? context.l10n.customer,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: labelColor,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    '${context.l10n.orderShort} #${order?.number} • $dateStr',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: secondaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  _convertToCurrency(order?.total),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: labelColor,
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isPaid
-                            ? CupertinoColors.systemGreen
-                            : CupertinoColors.systemOrange,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      isPaid ? context.l10n.paid : context.l10n.pendingPayment,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: secondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              CupertinoIcons.chevron_right,
-              size: 14,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // EMPTY STATE
-  // ============================================================
-
-  Widget _buildEmptyState({
-    required IconData icon,
-    required String message,
-  }) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground
-                .resolveFrom(context),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -2861,5 +2083,202 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     } catch (e) {
       return 'texto';
     }
+  }
+}
+
+class _BarSegment {
+  const _BarSegment(this.value, this.color);
+  final double value;
+  final Color color;
+}
+
+/// Horizontal stacked bar (8pt). Segment widths follow [segments] values;
+/// colors come from the caller (already resolved for light/dark).
+class _StackedBar extends StatelessWidget {
+  const _StackedBar({
+    required this.segments,
+    required this.emptyColor,
+    required this.semanticsLabel,
+  });
+
+  final List<_BarSegment> segments;
+  final Color emptyColor;
+  final String semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = segments.where((s) => s.value > 0).toList();
+    return Semantics(
+      label: semanticsLabel,
+      child: ExcludeSemantics(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: SizedBox(
+            height: 8,
+            child: visible.isEmpty
+                ? ColoredBox(color: emptyColor)
+                : Row(
+                    children: [
+                      for (final s in visible)
+                        Expanded(
+                          flex: (s.value * 1000).round().clamp(1, 1000000),
+                          child: ColoredBox(color: s.color),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Legend line of a chart: dot, label, optional count and value. Tappable
+/// (with a check on the trailing edge when selected) when [onTap] is set.
+class _LegendRow extends StatelessWidget {
+  const _LegendRow({
+    required this.color,
+    required this.label,
+    required this.value,
+    this.count,
+    this.selected = false,
+    this.onTap,
+  });
+
+  final CupertinoDynamicColor color;
+  final String label;
+  final String value;
+  final String? count;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final row = AppListRow(
+      leading: StatusDot(color: color, size: 10),
+      title: label,
+      subtitle: count,
+      trailing: selected ? null : value,
+      showChevron: false,
+    );
+
+    final content = selected
+        ? Stack(
+            alignment: AlignmentDirectional.centerEnd,
+            children: [
+              row,
+              PositionedDirectional(
+                end: AppSpacing.pageMargin,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      value,
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary.resolveFrom(context),
+                        fontFeatures: AppTypography.tabular,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      CupertinoIcons.checkmark_alt,
+                      size: 20,
+                      color: AppColors.accentText.resolveFrom(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          )
+        : row;
+
+    if (onTap == null) return content;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: content,
+      ),
+    );
+  }
+}
+
+/// Start/end date picker, presented as a sheet by "Outro período". Pops a
+/// record on "OK".
+class _CustomPeriodSheet extends StatefulWidget {
+  const _CustomPeriodSheet({required this.start, required this.end});
+
+  final DateTime start;
+  final DateTime end;
+
+  @override
+  State<_CustomPeriodSheet> createState() => _CustomPeriodSheetState();
+}
+
+class _CustomPeriodSheetState extends State<_CustomPeriodSheet> {
+  late DateTime _start = widget.start;
+  late DateTime _end = widget.end;
+  bool _selectingStart = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppColors.text.resolveFrom(context);
+    final format = FormatService();
+    Widget segment(String label) => Text(
+          label,
+          style: AppTypography.label.copyWith(color: text),
+        );
+
+    return AppSheet(
+      title: context.l10n.selectPeriod,
+      actionLabel: context.l10n.ok,
+      onAction: () =>
+          Navigator.of(context).pop((start: _start, end: _end)),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.blockMargin),
+            child: SizedBox(
+              width: double.infinity,
+              child: CupertinoSlidingSegmentedControl<bool>(
+                groupValue: _selectingStart,
+                backgroundColor: AppColors.secondaryFill.resolveFrom(context),
+                thumbColor: AppColors.surface.resolveFrom(context),
+                children: {
+                  true: segment(
+                      '${context.l10n.start}: ${format.formatDate(_start)}'),
+                  false:
+                      segment('${context.l10n.end}: ${format.formatDate(_end)}'),
+                },
+                onValueChanged: (value) =>
+                    setState(() => _selectingStart = value!),
+              ),
+            ),
+          ),
+          Expanded(
+            child: CupertinoDatePicker(
+              key: ValueKey(_selectingStart),
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: _selectingStart ? _start : _end,
+              maximumDate: DateTime.now(),
+              minimumDate: DateTime(2020),
+              onDateTimeChanged: (date) {
+                setState(() {
+                  if (_selectingStart) {
+                    _start = date;
+                    if (date.isAfter(_end)) _end = date;
+                  } else {
+                    _end = date;
+                    if (date.isBefore(_start)) _start = date;
+                  }
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
