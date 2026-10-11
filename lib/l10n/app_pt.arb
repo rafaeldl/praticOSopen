@@ -2414,5 +2414,81 @@
   "onboardingCreate": "Criar meu PraticOS",
   "onboardingStartWithoutSamples": "Começar sem exemplos",
   "onboardingPreparing": "Preparando seu PraticOS…",
-  "onboardingCreateError": "Não deu para terminar. Confira a internet e tente de novo."
+  "onboardingCreateError": "Não deu para terminar. Confira a internet e tente de novo.",
+  "receivedWhichOrder": "Em qual OS?",
+  "receivedPhotosCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} e {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Guardado na OS {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
+  "receivedOpenOrder": "Abrir a OS",
+  "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
+  "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
+  "inviteTitleOne": "{company} chamou você para a equipe",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Convidado por {name} · você entra como {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "Você entra como {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Entrar na equipe",
+  "inviteDecline": "Recusar convite",
+  "inviteHaveAnotherCode": "Tenho outro código",
+  "inviteCreateOwnCompany": "Criar minha própria empresa",
+  "inviteCodePlaceholder": "Ex.: 7K2P9QXA",
+  "segmentLoadError": "Não deu para abrir a sua empresa. Confira a internet e tente de novo."
 }

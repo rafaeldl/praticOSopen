@@ -8877,6 +8877,114 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para terminar. Confira a internet e tente de novo.'**
   String get onboardingCreateError;
+
+  /// No description provided for @receivedWhichOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em qual OS?'**
+  String get receivedWhichOrder;
+
+  /// No description provided for @receivedPhotosCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String receivedPhotosCount(int count);
+
+  /// No description provided for @receivedPdfsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 PDF} other{{count} PDFs}}'**
+  String receivedPdfsCount(int count);
+
+  /// No description provided for @receivedSummaryBoth.
+  ///
+  /// In pt, this message translates to:
+  /// **'{photos} e {pdfs}'**
+  String receivedSummaryBoth(String photos, String pdfs);
+
+  /// No description provided for @receivedSavedInOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardado na OS {number} · {summary}'**
+  String receivedSavedInOrder(String number, String summary);
+
+  /// No description provided for @receivedSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para guardar. Tente de novo.'**
+  String get receivedSaveFailed;
+
+  /// No description provided for @receivedOpenOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir a OS'**
+  String get receivedOpenOrder;
+
+  /// No description provided for @inviteGenericError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para concluir. Confira a internet e tente de novo.'**
+  String get inviteGenericError;
+
+  /// No description provided for @inviteLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os convites. Confira a internet.'**
+  String get inviteLoadError;
+
+  /// No description provided for @inviteTitleOne.
+  ///
+  /// In pt, this message translates to:
+  /// **'{company} chamou você para a equipe'**
+  String inviteTitleOne(String company);
+
+  /// No description provided for @inviteInvitedByAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidado por {name} · você entra como {role}'**
+  String inviteInvitedByAs(String name, String role);
+
+  /// No description provided for @inviteEntersAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você entra como {role}'**
+  String inviteEntersAs(String role);
+
+  /// No description provided for @inviteJoinTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar na equipe'**
+  String get inviteJoinTeam;
+
+  /// No description provided for @inviteDecline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recusar convite'**
+  String get inviteDecline;
+
+  /// No description provided for @inviteHaveAnotherCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho outro código'**
+  String get inviteHaveAnotherCode;
+
+  /// No description provided for @inviteCreateOwnCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar minha própria empresa'**
+  String get inviteCreateOwnCompany;
+
+  /// No description provided for @inviteCodePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 7K2P9QXA'**
+  String get inviteCodePlaceholder;
+
+  /// No description provided for @segmentLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
+  String get segmentLoadError;
 }
 
 class _AppLocalizationsDelegate

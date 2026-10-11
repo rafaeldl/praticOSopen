@@ -4886,4 +4886,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingCreateError =>
       'Couldn\'t finish. Check your connection and try again.';
+
+  @override
+  String get receivedWhichOrder => 'Which order?';
+
+  @override
+  String receivedPhotosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedPdfsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count PDFs',
+      one: '1 PDF',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedSummaryBoth(String photos, String pdfs) {
+    return '$photos and $pdfs';
+  }
+
+  @override
+  String receivedSavedInOrder(String number, String summary) {
+    return 'Saved to order $number · $summary';
+  }
+
+  @override
+  String get receivedSaveFailed => 'Could not save. Try again.';
+
+  @override
+  String get receivedOpenOrder => 'Open the order';
+
+  @override
+  String get inviteGenericError =>
+      'Could not finish. Check your internet and try again.';
+
+  @override
+  String get inviteLoadError =>
+      'Could not load the invites. Check your internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company invited you to the team';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invited by $name · you join as $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'You join as $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Join the team';
+
+  @override
+  String get inviteDecline => 'Decline invite';
+
+  @override
+  String get inviteHaveAnotherCode => 'I have another code';
+
+  @override
+  String get inviteCreateOwnCompany => 'Create my own company';
+
+  @override
+  String get inviteCodePlaceholder => 'E.g. 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Could not open your company. Check your internet and try again.';
 }

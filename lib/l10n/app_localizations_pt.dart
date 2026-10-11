@@ -4900,4 +4900,87 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get onboardingCreateError =>
       'Não deu para terminar. Confira a internet e tente de novo.';
+
+  @override
+  String get receivedWhichOrder => 'Em qual OS?';
+
+  @override
+  String receivedPhotosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedPdfsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count PDFs',
+      one: '1 PDF',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedSummaryBoth(String photos, String pdfs) {
+    return '$photos e $pdfs';
+  }
+
+  @override
+  String receivedSavedInOrder(String number, String summary) {
+    return 'Guardado na OS $number · $summary';
+  }
+
+  @override
+  String get receivedSaveFailed => 'Não deu para guardar. Tente de novo.';
+
+  @override
+  String get receivedOpenOrder => 'Abrir a OS';
+
+  @override
+  String get inviteGenericError =>
+      'Não deu para concluir. Confira a internet e tente de novo.';
+
+  @override
+  String get inviteLoadError =>
+      'Não deu para carregar os convites. Confira a internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company chamou você para a equipe';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Convidado por $name · você entra como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Você entra como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar na equipe';
+
+  @override
+  String get inviteDecline => 'Recusar convite';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tenho outro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Criar minha própria empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ex.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Não deu para abrir a sua empresa. Confira a internet e tente de novo.';
 }

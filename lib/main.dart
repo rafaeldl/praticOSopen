@@ -32,6 +32,7 @@ import 'package:praticos/routes.dart';
 import 'package:praticos/services/order_screen_preference.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
+import 'package:praticos/services/receive_share_service.dart';
 
 LocaleStore _localeStore = LocaleStore();
 AuthStore _authStore = AuthStore();
@@ -92,6 +93,9 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+
+  // Receives photos/PDFs shared from other apps (Android only; no-op elsewhere)
+  ReceiveShareService.instance.start();
 
   // Pedido de rastreamento (ATT) no inicio do app, antes do login: a Apple
   // exige o alerta antes de qualquer coleta. O servico espera o app ficar

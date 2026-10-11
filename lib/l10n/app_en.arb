@@ -2352,5 +2352,81 @@
   "onboardingCreate": "Create my PraticOS",
   "onboardingStartWithoutSamples": "Start without samples",
   "onboardingPreparing": "Setting up your PraticOS…",
-  "onboardingCreateError": "Couldn't finish. Check your connection and try again."
+  "onboardingCreateError": "Couldn't finish. Check your connection and try again.",
+  "receivedWhichOrder": "Which order?",
+  "receivedPhotosCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@receivedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedPdfsCount": "{count, plural, =1{1 PDF} other{{count} PDFs}}",
+  "@receivedPdfsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receivedSummaryBoth": "{photos} and {pdfs}",
+  "@receivedSummaryBoth": {
+    "placeholders": {
+      "photos": {
+        "type": "String"
+      },
+      "pdfs": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSavedInOrder": "Saved to order {number} · {summary}",
+  "@receivedSavedInOrder": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "receivedSaveFailed": "Could not save. Try again.",
+  "receivedOpenOrder": "Open the order",
+  "inviteGenericError": "Could not finish. Check your internet and try again.",
+  "inviteLoadError": "Could not load the invites. Check your internet.",
+  "inviteTitleOne": "{company} invited you to the team",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Invited by {name} · you join as {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "You join as {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Join the team",
+  "inviteDecline": "Decline invite",
+  "inviteHaveAnotherCode": "I have another code",
+  "inviteCreateOwnCompany": "Create my own company",
+  "inviteCodePlaceholder": "E.g. 7K2P9QXA",
+  "segmentLoadError": "Could not open your company. Check your internet and try again."
 }

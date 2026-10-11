@@ -4911,4 +4911,87 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingCreateError =>
       'No se pudo terminar. Revisa la conexión e inténtalo de nuevo.';
+
+  @override
+  String get receivedWhichOrder => '¿En qué OS?';
+
+  @override
+  String receivedPhotosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedPdfsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count PDFs',
+      one: '1 PDF',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedSummaryBoth(String photos, String pdfs) {
+    return '$photos y $pdfs';
+  }
+
+  @override
+  String receivedSavedInOrder(String number, String summary) {
+    return 'Guardado en la OS $number · $summary';
+  }
+
+  @override
+  String get receivedSaveFailed => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get receivedOpenOrder => 'Abrir la OS';
+
+  @override
+  String get inviteGenericError =>
+      'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
+
+  @override
+  String get inviteLoadError =>
+      'No se pudieron cargar las invitaciones. Revisa tu internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company te invitó al equipo';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invitado por $name · entras como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Entras como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar al equipo';
+
+  @override
+  String get inviteDecline => 'Rechazar invitación';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tengo otro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
 }
