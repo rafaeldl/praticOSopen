@@ -2433,6 +2433,7 @@
   "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
   "orderAssistantDone": "Done",
   "orderAssistantAddPhoto": "Take another photo",
+  "orderAssistantTakePhoto": "Take a photo",
   "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
   "orderAssistantReading": "Reading what you sent…",
   "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",

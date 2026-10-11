@@ -9010,6 +9010,12 @@ abstract class AppLocalizations {
   /// **'Tirar outra foto'**
   String get orderAssistantAddPhoto;
 
+  /// No description provided for @orderAssistantTakePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar foto'**
+  String get orderAssistantTakePhoto;
+
   /// No description provided for @orderAssistantPhotoCount.
   ///
   /// In pt, this message translates to:

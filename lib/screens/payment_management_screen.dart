@@ -91,8 +91,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     if (!_initialized) {
       _store = widget.store;
       if (_store == null) {
-        final args = ModalRoute.of(context)?.settings.arguments
-            as Map<String, dynamic>?;
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
         if (args != null && args.containsKey('orderStore')) {
           _store = args['orderStore'];
         }
@@ -121,8 +121,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
   void _prefillValue() {
     final remaining = _store?.remainingBalance ?? 0.0;
-    _valueController.text =
-        remaining > 0 ? ReceiveAmountField.textFor(remaining) : '';
+    _valueController.text = remaining > 0
+        ? ReceiveAmountField.textFor(remaining)
+        : '';
   }
 
   bool get _canAttach =>
@@ -181,12 +182,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return CupertinoButton(
       key: const Key('receiveOrderLink'),
       padding: EdgeInsets.zero,
-      minimumSize:
-          const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+      minimumSize: const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
       onPressed: () => _fromOrder
           ? Navigator.of(context).pop()
-          : Navigator.of(context)
-              .pushReplacementNamed('/order', arguments: {'order': order}),
+          : Navigator.of(
+              context,
+            ).pushReplacementNamed('/order', arguments: {'order': order}),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -208,133 +209,155 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
   /// "Ana Ribeiro · total R$ 1.250" under the title.
   Widget _buildSubtitle() {
-    return Observer(builder: (_) {
-      final store = _store;
-      if (store == null) return const SizedBox.shrink();
-      final total = FormatService().formatCurrency(store.total ?? 0.0);
-      final name = store.customerName;
-      final text = name == null || name.isEmpty
-          ? context.l10n.receiveSubtitleNoCustomer(total)
-          : context.l10n.receiveSubtitle(name, total);
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pageMargin,
-          0,
-          AppSpacing.pageMargin,
-          AppSpacing.sm,
-        ),
-        child: Text(
-          text,
-          key: const Key('receiveSubtitle'),
-          style: AppTypography.callout.copyWith(
-            color: AppColors.textSecondary.resolveFrom(context),
-            fontFeatures: AppTypography.tabular,
+    return Observer(
+      builder: (_) {
+        final store = _store;
+        if (store == null) return const SizedBox.shrink();
+        final total = FormatService().formatCurrency(store.total ?? 0.0);
+        final name = store.customerName;
+        final text = name == null || name.isEmpty
+            ? context.l10n.receiveSubtitleNoCustomer(total)
+            : context.l10n.receiveSubtitle(name, total);
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.sm,
           ),
-        ),
-      );
-    });
+          child: Text(
+            text,
+            key: const Key('receiveSubtitle'),
+            style: AppTypography.callout.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildMoreButton() {
-    return Observer(builder: (_) {
-      final status = _store?.status;
-      if (_store == null || status == 'quote' || status == 'canceled') {
-        return const SizedBox.shrink();
-      }
-      return CupertinoButton(
-        key: const Key('receiveMoreButton'),
-        padding: EdgeInsets.zero,
-        minimumSize:
-            const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
-        onPressed: _busy ? null : _showMoreMenu,
-        child: Semantics(
-          label: context.l10n.receiveMoreOptions,
-          child: AppGlass(
-            borderRadius: BorderRadius.circular(18),
-            child: SizedBox(
-              width: 36,
-              height: 36,
-              child: Icon(
-                CupertinoIcons.ellipsis,
-                size: 20,
-                color: AppColors.text.resolveFrom(context),
+    return Observer(
+      builder: (_) {
+        final status = _store?.status;
+        if (_store == null || status == 'quote' || status == 'canceled') {
+          return const SizedBox.shrink();
+        }
+        return CupertinoButton(
+          key: const Key('receiveMoreButton'),
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(
+            AppSizes.minTouchTarget,
+            AppSizes.minTouchTarget,
+          ),
+          onPressed: _busy ? null : _showMoreMenu,
+          child: Semantics(
+            label: context.l10n.receiveMoreOptions,
+            child: AppGlass(
+              borderRadius: BorderRadius.circular(18),
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: Icon(
+                  CupertinoIcons.ellipsis,
+                  size: 20,
+                  color: AppColors.text.resolveFrom(context),
+                ),
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Widget _buildBlock() {
-    return Observer(builder: (_) {
-      final status = _store?.status;
-      String? blocked;
-      // Payments are allowed from 'approved' on; not for quotes or canceled.
-      if (status == 'quote') blocked = context.l10n.statusQuote;
-      if (status == 'canceled') blocked = context.l10n.statusCancelled;
-      return ReceiveBlock(
-        isPaid: _store?.isFullyPaid ?? false,
-        blockedMessage: blocked,
-        controller: _valueController,
-        busy: _busy,
-        onConfirm: _register,
-        receiptName: _receipt?.name,
-        onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
-        onRemoveReceipt: () => setState(() => _receipt = null),
-      );
-    });
+    return Observer(
+      builder: (_) {
+        final status = _store?.status;
+        String? blocked;
+        // Payments are allowed from 'approved' on; not for quotes or canceled.
+        if (status == 'quote') blocked = context.l10n.statusQuote;
+        if (status == 'canceled') blocked = context.l10n.statusCancelled;
+        return ReceiveBlock(
+          isPaid: _store?.isFullyPaid ?? false,
+          blockedMessage: blocked,
+          controller: _valueController,
+          busy: _busy,
+          onConfirm: _register,
+          receiptName: _receipt?.name,
+          onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
+          onRemoveReceipt: () => setState(() => _receipt = null),
+        );
+      },
+    );
   }
 
   Widget _buildSummary() {
-    return Observer(builder: (_) {
-      final store = _store;
-      final status = store?.status;
-      if (store == null || status == 'quote' || status == 'canceled') {
-        return const SizedBox.shrink();
-      }
-      final format = FormatService();
-      final discount = store.discount ?? 0.0;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppListRow(
-            title: context.l10n.total,
-            trailing: format.formatCurrency(store.total ?? 0.0),
-          ),
-          if (discount > 0)
+    return Observer(
+      builder: (_) {
+        final store = _store;
+        final status = store?.status;
+        if (store == null || status == 'quote' || status == 'canceled') {
+          return const SizedBox.shrink();
+        }
+        final format = FormatService();
+        final discount = store.discount ?? 0.0;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // The order total is already net of the discount: show the items
+            // subtotal first so the discount isn't read as taken twice.
+            if (discount > 0) ...[
+              AppListRow(
+                key: const Key('receiveSubtotal'),
+                title: context.l10n.subtotal,
+                trailing: format.formatCurrency(
+                  (store.total ?? 0.0) + discount,
+                ),
+              ),
+              AppListRow(
+                title: context.l10n.discount,
+                trailing: '- ${format.formatCurrency(discount)}',
+              ),
+            ],
             AppListRow(
-              title: context.l10n.discount,
-              trailing: '- ${format.formatCurrency(discount)}',
+              title: context.l10n.total,
+              trailing: format.formatCurrency(store.total ?? 0.0),
             ),
-          AppListRow(
-            title: context.l10n.receiveAlreadyReceived,
-            trailing: format.formatCurrency(store.paidAmount ?? 0.0),
-          ),
-        ],
-      );
-    });
+            AppListRow(
+              title: context.l10n.receiveAlreadyReceived,
+              trailing: format.formatCurrency(store.paidAmount ?? 0.0),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildPayments() {
-    return Observer(builder: (_) {
-      final transactions = _store?.transactions ?? <PaymentTransaction>[];
-      if (transactions.isEmpty) return const SizedBox.shrink();
-      final sorted = List<PaymentTransaction>.from(transactions)
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionLabel(context.l10n.payments),
-          for (final tx in sorted)
-            ReceivePaymentRow(
-              transaction: tx,
-              showReceiptState: _canView,
-              onTap: () => _showPaymentSheet(tx),
-            ),
-        ],
-      );
-    });
+    return Observer(
+      builder: (_) {
+        final transactions = _store?.transactions ?? <PaymentTransaction>[];
+        if (transactions.isEmpty) return const SizedBox.shrink();
+        final sorted = List<PaymentTransaction>.from(transactions)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionLabel(context.l10n.payments),
+            for (final tx in sorted)
+              ReceivePaymentRow(
+                transaction: tx,
+                showReceiptState: _canView,
+                onTap: () => _showPaymentSheet(tx),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   // ============================================================
@@ -349,10 +372,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     await Navigator.of(context).push<OrderCharge>(
       CupertinoPageRoute(
-        builder: (_) => CreateChargeScreen(
-          order: order!,
-          remainingBalance: remaining,
-        ),
+        builder: (_) =>
+            CreateChargeScreen(order: order!, remainingBalance: remaining),
       ),
     );
   }
@@ -385,7 +406,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     var receiptOk = true;
     final receipt = _receipt;
     if (transaction != null && receipt != null) {
-      final index = store.transactions.indexWhere((t) => t.id == transaction.id);
+      final index = store.transactions.indexWhere(
+        (t) => t.id == transaction.id,
+      );
       if (index >= 0) {
         receiptOk = await store.attachReceiptToTransaction(
           index,
@@ -674,10 +697,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     switch (source) {
       case _ReceiptSource.camera:
         final file = await photoService.takePhoto();
-        return file == null ? null : _PickedReceipt(file, 'image/jpeg', photoName());
+        return file == null
+            ? null
+            : _PickedReceipt(file, 'image/jpeg', photoName());
       case _ReceiptSource.gallery:
         final file = await photoService.pickImageFromGallery();
-        return file == null ? null : _PickedReceipt(file, 'image/jpeg', photoName());
+        return file == null
+            ? null
+            : _PickedReceipt(file, 'image/jpeg', photoName());
       case _ReceiptSource.files:
         final result = await photoService.pickDocument();
         if (result == null || result.path == null) return null;
@@ -714,16 +741,17 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Future<void> _openReceipt(PaymentTransaction transaction) async {
     if (transaction.receiptDocumentId == null || _store == null) return;
     final doc = _store!.documents.cast<OrderDocument?>().firstWhere(
-          (d) => d?.id == transaction.receiptDocumentId,
-          orElse: () => null,
-        );
+      (d) => d?.id == transaction.receiptDocumentId,
+      orElse: () => null,
+    );
     if (doc == null) return;
 
     // Refresh URL from storagePath to avoid stale tokens
     String? url = doc.url;
     if (doc.storagePath != null) {
-      final freshUrl =
-          await PhotoService().getFreshDownloadUrl(doc.storagePath!);
+      final freshUrl = await PhotoService().getFreshDownloadUrl(
+        doc.storagePath!,
+      );
       if (freshUrl != null) {
         url = freshUrl;
         doc.url = freshUrl;
@@ -781,10 +809,7 @@ class _ReceiptImageViewer extends StatelessWidget {
   final String url;
   final String title;
 
-  const _ReceiptImageViewer({
-    required this.url,
-    required this.title,
-  });
+  const _ReceiptImageViewer({required this.url, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -794,8 +819,7 @@ class _ReceiptImageViewer extends StatelessWidget {
         backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
-          child:
-              const Icon(CupertinoIcons.back, color: CupertinoColors.white),
+          child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
           onPressed: () => Navigator.pop(context),
         ),
         middle: Text(

@@ -2495,6 +2495,7 @@
   "orderAssistantPlaceholder": "Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450",
   "orderAssistantDone": "Pronto",
   "orderAssistantAddPhoto": "Tirar outra foto",
+  "orderAssistantTakePhoto": "Tirar foto",
   "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
   "@orderAssistantPhotoCount": {
     "placeholders": {
