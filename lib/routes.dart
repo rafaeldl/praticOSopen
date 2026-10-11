@@ -12,7 +12,6 @@ import 'package:praticos/screens/product_form_screen.dart';
 import 'package:praticos/screens/product_list_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
-import 'package:praticos/screens/info_form_screen.dart';
 import 'package:praticos/screens/service_form_screen.dart';
 import 'package:praticos/screens/service_list_screen.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
@@ -38,7 +37,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/device_list': (context) => DeviceListScreen(),
   '/device_detail': (context) => const DeviceDetailScreen(),
   '/accumulated_value_list': (context) => AccumulatedValueListScreen(),
-  '/info_form': (context) => InfoFormScreen(),
   '/order': (context) => OrderForm(),
   '/order_service': (context) => OrderServiceScreen(),
   '/order_product': (context) => OrderProductScreen(),
