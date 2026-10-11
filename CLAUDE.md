@@ -840,6 +840,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
+- `docs/AI_ORDER_ASSIST.md` - Assistente de IA na Nova OS (`aiOrderAssist`, cota mensal, piloto por empresa, flag)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)

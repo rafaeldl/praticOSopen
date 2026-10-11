@@ -2331,5 +2331,19 @@
   "errorSignInGoogleFriendly": "No se pudo entrar con Google. Inténtalo de nuevo.",
   "forgotPasswordQuestion": "¿Olvidaste tu contraseña?",
   "showPassword": "Mostrar contraseña",
-  "hidePassword": "Ocultar contraseña"
+  "hidePassword": "Ocultar contraseña",
+  "orderAssistantHint": "Saca una foto de la matrícula y di el servicio",
+  "orderAssistantPlaceholder": "Toca el micrófono del teclado y habla. Ej.: Taller Sur, capó 500 y pulido 450",
+  "orderAssistantDone": "Listo",
+  "orderAssistantAddPhoto": "Sacar otra foto",
+  "orderAssistantPhotoCount": "{count, plural, =1{1 foto} other{{count} fotos}}",
+  "orderAssistantReading": "Leyendo lo que enviaste…",
+  "orderAssistantFilledNote": "Revisa lo que está marcado en amarillo antes de guardar.",
+  "orderAssistantCustomerGuess": "Escuché “{name}”. Toca para elegir el cliente",
+  "orderAssistantDeviceGuess": "“{device}” no está registrado",
+  "orderAssistantErrorTitle": "Asistente",
+  "orderAssistantErrorDisabled": "El asistente aún no está disponible para tu empresa.",
+  "orderAssistantErrorQuota": "Ya usaste las {limit} solicitudes del asistente de este mes. Puedes seguir completando a mano.",
+  "orderAssistantErrorUnavailable": "No se pudo leer ahora. Intenta de nuevo o completa a mano.",
+  "orderAssistantNothingFound": "No encontré qué agregar. Intenta de nuevo o completa a mano."
 }

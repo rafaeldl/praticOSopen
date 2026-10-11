@@ -8751,6 +8751,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ocultar senha'**
   String get hidePassword;
+
+  /// No description provided for @orderAssistantHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tire foto da placa e fale o serviço'**
+  String get orderAssistantHint;
+
+  /// No description provided for @orderAssistantPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450'**
+  String get orderAssistantPlaceholder;
+
+  /// No description provided for @orderAssistantDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderAssistantDone;
+
+  /// No description provided for @orderAssistantAddPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar outra foto'**
+  String get orderAssistantAddPhoto;
+
+  /// No description provided for @orderAssistantPhotoCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
+  String orderAssistantPhotoCount(int count);
+
+  /// No description provided for @orderAssistantReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o que você mandou…'**
+  String get orderAssistantReading;
+
+  /// No description provided for @orderAssistantFilledNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira o que está marcado em amarelo antes de salvar.'**
+  String get orderAssistantFilledNote;
+
+  /// No description provided for @orderAssistantCustomerGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvi “{name}”. Toque para escolher o cliente'**
+  String orderAssistantCustomerGuess(String name);
+
+  /// No description provided for @orderAssistantDeviceGuess.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{device}” não está no cadastro'**
+  String orderAssistantDeviceGuess(String device);
+
+  /// No description provided for @orderAssistantErrorTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistente'**
+  String get orderAssistantErrorTitle;
+
+  /// No description provided for @orderAssistantErrorDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'O assistente ainda não está liberado para a sua empresa.'**
+  String get orderAssistantErrorDisabled;
+
+  /// No description provided for @orderAssistantErrorQuota.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você já usou os {limit} pedidos do assistente deste mês. Dá para continuar preenchendo à mão.'**
+  String orderAssistantErrorQuota(String limit);
+
+  /// No description provided for @orderAssistantErrorUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para ler agora. Tente de novo ou preencha à mão.'**
+  String get orderAssistantErrorUnavailable;
+
+  /// No description provided for @orderAssistantNothingFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
+  String get orderAssistantNothingFound;
 }
 
 class _AppLocalizationsDelegate
