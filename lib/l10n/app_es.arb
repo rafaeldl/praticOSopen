@@ -1982,6 +1982,54 @@
     }
   },
   "orderAddMore": "Checklist, fotos, comentario y más",
+  "orderInThisOrder": "En esta {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Fotos o documento",
+  "orderAddComment": "Comentario",
+  "orderAddAddress": "Dirección del servicio",
+  "orderAddSchedule": "Agendar día y hora",
+  "orderAddDiscount": "Descuento",
+  "orderAddContract": "Repetir esta {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Otros campos",
+  "orderChecklistMissing": "{count, plural, =1{Falta 1 pregunta} other{Faltan {count} preguntas}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Listo",
+  "orderAddressChange": "Cambiar dirección",
+  "orderAddressRemove": "Quitar dirección",
+  "orderScheduleRemove": "Quitar agenda",
+  "orderContractSummary": "{frequency} · próxima el {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Cambiar contrato",
+  "orderUploading": "Enviando…",
   "orderCancelConfirmTitle": "¿Cancelar {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {

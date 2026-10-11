@@ -36,11 +36,11 @@ void main() {
       expect(find.text('new screen'), findsOneWidget);
     });
 
-    testWidgets('comments from a notification stay on the legacy screen',
+    testWidgets('comments from a notification open on the new screen',
         (tester) async {
       OrderScreenPreference.useNewScreen.value = true;
       await _pump(tester, args: {'scrollToComments': true});
-      expect(find.text('legacy screen'), findsOneWidget);
+      expect(find.text('new screen'), findsOneWidget);
     });
 
     testWidgets('an open screen is not swapped when the switch flips',

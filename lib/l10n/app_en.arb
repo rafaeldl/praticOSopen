@@ -1982,6 +1982,54 @@
     }
   },
   "orderAddMore": "Checklist, photos, comment and more",
+  "orderInThisOrder": "In this {order}",
+  "@orderInThisOrder": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddChecklist": "Checklist",
+  "orderAddMedia": "Photos or document",
+  "orderAddComment": "Comment",
+  "orderAddAddress": "Service address",
+  "orderAddSchedule": "Schedule date and time",
+  "orderAddDiscount": "Discount",
+  "orderAddContract": "Repeat this {order}",
+  "@orderAddContract": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderAddOtherFields": "Other fields",
+  "orderChecklistMissing": "{count, plural, =1{1 question left} other{{count} questions left}}",
+  "@orderChecklistMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderChecklistDone": "Done",
+  "orderAddressChange": "Change address",
+  "orderAddressRemove": "Remove address",
+  "orderScheduleRemove": "Remove schedule",
+  "orderContractSummary": "{frequency} · next on {date}",
+  "@orderContractSummary": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderContractChange": "Change contract",
+  "orderUploading": "Uploading…",
   "orderCancelConfirmTitle": "Cancel {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {

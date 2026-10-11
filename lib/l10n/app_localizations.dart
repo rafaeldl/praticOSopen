@@ -8062,6 +8062,108 @@ abstract class AppLocalizations {
   /// **'Checklist, fotos, comentário e mais'**
   String get orderAddMore;
 
+  /// No description provided for @orderInThisOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nesta {order}'**
+  String orderInThisOrder(String order);
+
+  /// No description provided for @orderAddChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist'**
+  String get orderAddChecklist;
+
+  /// No description provided for @orderAddMedia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos ou documento'**
+  String get orderAddMedia;
+
+  /// No description provided for @orderAddComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comentário'**
+  String get orderAddComment;
+
+  /// No description provided for @orderAddAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço do atendimento'**
+  String get orderAddAddress;
+
+  /// No description provided for @orderAddSchedule.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendar dia e hora'**
+  String get orderAddSchedule;
+
+  /// No description provided for @orderAddDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto'**
+  String get orderAddDiscount;
+
+  /// No description provided for @orderAddContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir esta {order}'**
+  String orderAddContract(String order);
+
+  /// No description provided for @orderAddOtherFields.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros campos'**
+  String get orderAddOtherFields;
+
+  /// No description provided for @orderChecklistMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}'**
+  String orderChecklistMissing(int count);
+
+  /// No description provided for @orderChecklistDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get orderChecklistDone;
+
+  /// No description provided for @orderAddressChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar endereço'**
+  String get orderAddressChange;
+
+  /// No description provided for @orderAddressRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar endereço'**
+  String get orderAddressRemove;
+
+  /// No description provided for @orderScheduleRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar agendamento'**
+  String get orderScheduleRemove;
+
+  /// No description provided for @orderContractSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{frequency} · próxima em {date}'**
+  String orderContractSummary(String frequency, String date);
+
+  /// No description provided for @orderContractChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar contrato'**
+  String get orderContractChange;
+
+  /// No description provided for @orderUploading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando…'**
+  String get orderUploading;
+
   /// No description provided for @orderCancelConfirmTitle.
   ///
   /// In pt, this message translates to:
