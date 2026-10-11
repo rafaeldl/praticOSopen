@@ -4,15 +4,21 @@ import 'package:flutter/cupertino.dart';
 ///
 /// Styles carry size and weight only; apply a color from AppColors at the
 /// call site with `.copyWith(color: AppColors.text.resolveFrom(context))`.
+///
+/// Dynamic Type: sizes are the iPhone default ("Large") sizes. `Text` scales
+/// them with `MediaQuery.textScalerOf(context)`; never clamp or override the
+/// text scaler. `height` is always a multiplier of the font size (never a
+/// fixed pixel line height), so lines grow with the text.
 class AppTypography {
   AppTypography._();
 
-  /// Screen title.
+  /// Screen title: the iOS Large Title (34 bold). Use it through the native
+  /// `CupertinoSliverNavigationBar.largeTitle`, which collapses on scroll.
+  /// No `height`, so the system font metrics apply at every text size.
   static const title = TextStyle(
-    fontSize: 30,
-    height: 1.15,
+    fontSize: 34,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.6,
+    letterSpacing: 0.37,
   );
 
   /// "Next step" sentence, the assistant transcript.
