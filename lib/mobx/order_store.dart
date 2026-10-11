@@ -2085,61 +2085,98 @@ abstract class _OrderStore with Store {
   // Métodos para scroll infinito na Home
   @action
   Future<void> loadOrdersInfinite(String? status) async {
+    final generation = ++_ordersGeneration;
     isLoading = true;
     _lastDocument = null;
     hasMoreOrders = true;
     ordersLoadFailed = false;
     orders.clear();
 
-    await _fetchOrdersInfinite(status);
+    await _fetchOrdersInfinite(status, generation);
 
-    isLoading = false;
+    if (generation == _ordersGeneration) isLoading = false;
   }
 
   @action
   Future<void> loadMoreOrdersInfinite(String? status) async {
     if (isLoading || !hasMoreOrders) return;
 
+    final generation = _ordersGeneration;
     isLoading = true;
-    await _fetchOrdersInfinite(status);
-    isLoading = false;
+    await _fetchOrdersInfinite(status, generation);
+    if (generation == _ordersGeneration) isLoading = false;
   }
 
-  Future<void> _fetchOrdersInfinite(String? status) async {
+  /// Bumped by every fresh [loadOrdersInfinite]. A fetch that started under
+  /// an older generation is dropped, so two loads in flight (the Início
+  /// reloads on every dependency change) can't both append their page.
+  int _ordersGeneration = 0;
+
+  /// One page of the Início list; replaceable in tests.
+  Future<({List<Order> orders, firestore.DocumentSnapshot? last})> Function(
+    String companyId,
+    String? status,
+    String? customerId,
+    int limit,
+    firestore.DocumentSnapshot? startAfter,
+  ) fetchOrdersPage = _fetchOrdersPageFromFirestore;
+
+  static Future<({List<Order> orders, firestore.DocumentSnapshot? last})>
+      _fetchOrdersPageFromFirestore(
+    String companyId,
+    String? status,
+    String? customerId,
+    int limit,
+    firestore.DocumentSnapshot? startAfter,
+  ) async {
+    final snapshot = await OrderRepositoryV2().getOrdersWithPagination(
+      companyId,
+      status: status,
+      customerId: customerId,
+      limit: limit,
+      startAfterDocument: startAfter,
+    );
+    final orders = snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return Order.fromJson(data);
+    }).toList();
+    return (
+      orders: orders,
+      last: snapshot.docs.isEmpty ? null : snapshot.docs.last,
+    );
+  }
+
+  Future<void> _fetchOrdersInfinite(String? status, int generation) async {
     if (companyId == null) return;
 
     try {
-      final snapshot = await repository.getOrdersWithPagination(
+      final page = await fetchOrdersPage(
         companyId!,
-        status: status,
-        customerId: customerFilter?.id,
-        limit: _limit,
-        startAfterDocument: _lastDocument,
+        status,
+        customerFilter?.id,
+        _limit,
+        _lastDocument,
       );
+      if (generation != _ordersGeneration) return;
 
-      if (snapshot.docs.isEmpty) {
+      if (page.orders.isEmpty) {
         hasMoreOrders = false;
         return;
       }
 
-      _lastDocument = snapshot.docs.last;
+      _lastDocument = page.last;
+      final newOrders = page.orders;
 
-      // Converter para objetos Order e adicionar à lista
-      final newOrders = snapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return Order.fromJson(data);
-          })
-          .toList();
-
-      orders.addAll(newOrders);
+      final known = orders.map((o) => o?.id).toSet();
+      orders.addAll(newOrders.where((o) => !known.contains(o.id)));
 
       // Verificar se há mais resultados
-      if (snapshot.docs.length < _limit) {
+      if (newOrders.length < _limit) {
         hasMoreOrders = false;
       }
     } catch (e) {
+      if (generation != _ordersGeneration) return;
       print('Erro ao buscar ordens: $e');
       ordersLoadFailed = true;
       hasMoreOrders = false;

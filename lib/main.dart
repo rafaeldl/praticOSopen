@@ -11,6 +11,7 @@ import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/agenda_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/theme/app_default_text_style.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/mobx/subscription_store.dart';
@@ -159,7 +160,7 @@ class MyApp extends StatelessWidget {
                 brightness: brightness,
                 primaryColor: AppColors.accent,
               ),
-              child: child!,
+              child: AppDefaultTextStyle(child: child!),
             );
           },
           home: Observer(
