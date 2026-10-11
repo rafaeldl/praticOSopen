@@ -4864,4 +4864,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportNextPeriod => 'Next period';
+
+  @override
+  String get valuesAndBillingOffTitle => 'Turn off prices and billing?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Turn off';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Could not save. Check your connection and try again.';
+
+  @override
+  String get inviteGenericError =>
+      'Could not finish. Check your internet and try again.';
+
+  @override
+  String get inviteLoadError =>
+      'Could not load the invites. Check your internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company invited you to the team';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Invited by $name · you join as $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'You join as $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Join the team';
+
+  @override
+  String get inviteDecline => 'Decline invite';
+
+  @override
+  String get inviteHaveAnotherCode => 'I have another code';
+
+  @override
+  String get inviteCreateOwnCompany => 'Create my own company';
+
+  @override
+  String get inviteCodePlaceholder => 'E.g. 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Could not open your company. Check your internet and try again.';
 }

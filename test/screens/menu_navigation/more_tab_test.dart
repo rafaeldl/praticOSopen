@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/l10n/app_localizations_pt.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/menu_navigation/invite_form.dart';
 import 'package:praticos/screens/menu_navigation/more/account_deletion.dart';
 import 'package:praticos/screens/menu_navigation/more/account_screen.dart';
@@ -10,6 +11,8 @@ import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/my_company_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/more_view.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/services/segment_config_service.dart';
+import 'package:provider/provider.dart';
 
 final pt = AppLocalizationsPt();
 
@@ -179,12 +182,13 @@ void main() {
   });
 
   group('Sua empresa', () {
-    testWidgets('financial switch is disabled until useFinancial exists',
+    testWidgets('financial switch is disabled when not wired',
         (tester) async {
       await tester.pumpWidget(app(MyCompanyScreen(onOpenCompanyData: () {})));
       expect(find.text('Dados da Empresa'), findsOneWidget);
       expect(find.text('Como você trabalha'), findsOneWidget);
       expect(find.text('Valores e cobrança'), findsOneWidget);
+      expect(find.text(pt.valuesAndBillingHint), findsOneWidget);
       final toggle = tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch));
       expect(toggle.onChanged, isNull);
       expect(toggle.value, isTrue);
@@ -198,6 +202,111 @@ void main() {
       )));
       await tester.tap(find.byType(CupertinoSwitch));
       expect(changed, isFalse);
+    });
+  });
+
+  group('Sua empresa › Valores e cobrança (useFinancial)', () {
+    late SegmentConfigProvider provider;
+    late List<(String, Map<String, dynamic>)> writes;
+
+    setUp(() {
+      provider = SegmentConfigProvider();
+      provider.setCompanyConfig(
+        fieldService: true,
+        useScheduling: true,
+        useDeviceManagement: false,
+        useContracts: false,
+      );
+      writes = [];
+    });
+
+    tearDown(() => SegmentConfigService().clear());
+
+    Future<void> pumpSettings(
+      WidgetTester tester, {
+      String? companyId = 'c1',
+      bool fail = false,
+    }) {
+      return tester.pumpWidget(
+        ChangeNotifierProvider<SegmentConfigProvider>.value(
+          value: provider,
+          child: app(MyCompanySettings(
+            companyId: companyId,
+            onOpenCompanyData: () {},
+            writer: (id, fields) async {
+              if (fail) throw Exception('offline');
+              writes.add((id, fields));
+            },
+          )),
+        ),
+      );
+    }
+
+    bool switchValue(WidgetTester tester) =>
+        tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value;
+
+    testWidgets('starts on: absent field resolves to true', (tester) async {
+      await pumpSettings(tester);
+      expect(switchValue(tester), isTrue);
+      expect(provider.useFinancial, isTrue);
+    });
+
+    testWidgets('turning off asks first; cancel writes nothing',
+        (tester) async {
+      await pumpSettings(tester);
+      await tester.tap(find.byType(CupertinoSwitch));
+      await tester.pumpAndSettle();
+      expect(find.text(pt.valuesAndBillingOffTitle), findsOneWidget);
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(writes, isEmpty);
+      expect(switchValue(tester), isTrue);
+      expect(provider.useFinancial, isTrue);
+    });
+
+    testWidgets('confirming writes useFinancial=false and applies it',
+        (tester) async {
+      await pumpSettings(tester);
+      await tester.tap(find.byType(CupertinoSwitch));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.valuesAndBillingOffAction));
+      await tester.pumpAndSettle();
+      expect(writes, hasLength(1));
+      expect(writes.single.$1, 'c1');
+      expect(writes.single.$2, {'useFinancial': false});
+      expect(provider.useFinancial, isFalse);
+      expect(SegmentConfigService().useFinancial, isFalse);
+      expect(switchValue(tester), isFalse);
+    });
+
+    testWidgets('turning back on writes true without asking', (tester) async {
+      provider.setUseFinancial(false);
+      await pumpSettings(tester);
+      expect(switchValue(tester), isFalse);
+      await tester.tap(find.byType(CupertinoSwitch));
+      await tester.pumpAndSettle();
+      expect(find.text(pt.valuesAndBillingOffTitle), findsNothing);
+      expect(writes, hasLength(1));
+      expect(writes.single.$1, 'c1');
+      expect(writes.single.$2, {'useFinancial': true});
+      expect(provider.useFinancial, isTrue);
+    });
+
+    testWidgets('a failed write goes back and tells the user',
+        (tester) async {
+      provider.setUseFinancial(false);
+      await pumpSettings(tester, fail: true);
+      await tester.tap(find.byType(CupertinoSwitch));
+      await tester.pumpAndSettle();
+      expect(provider.useFinancial, isFalse);
+      expect(find.text(pt.valuesAndBillingSaveError), findsOneWidget);
+    });
+
+    testWidgets('without a company the switch is disabled', (tester) async {
+      await pumpSettings(tester, companyId: null);
+      final toggle =
+          tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch));
+      expect(toggle.onChanged, isNull);
     });
   });
 

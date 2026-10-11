@@ -2069,6 +2069,12 @@ async function seedSegments() {
         data.defaultTermsOfService = DEFAULT_TERMS[id];
       }
 
+      // Default for Company.useFinancial (prices, receiving, Financial tab).
+      // Every current segment uses it; a segment may set false explicitly.
+      if (id !== 'global' && data.useFinancial === undefined) {
+        data.useFinancial = true;
+      }
+
       // Verifica se já existe
       const doc = await segmentRef.get();
 

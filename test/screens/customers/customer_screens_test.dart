@@ -342,11 +342,19 @@ void main() {
   group('customer detail', () {
     final ana = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001');
 
-    Future<Harness> pumpDetail(WidgetTester tester, FakeDirectory dir) async {
+    Future<Harness> pumpDetail(
+      WidgetTester tester,
+      FakeDirectory dir, {
+      bool showPrices = true,
+    }) async {
       final h = Harness();
       await h.pump(
         tester,
-        CustomerDetailScreen(customer: ana, directory: dir),
+        CustomerDetailScreen(
+          customer: ana,
+          directory: dir,
+          showPrices: showPrices,
+        ),
         direct: true,
       );
       return h;
@@ -376,6 +384,22 @@ void main() {
         find.text('R\$ 140,50'.replaceAll(' ', ' ')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('without values and billing hides totals and Total gasto',
+        (tester) async {
+      await pumpDetail(
+        tester,
+        FakeDirectory(orders: {
+          'c1': [
+            order(1, 'done', 100, devices: [aggr('d1', 'Fiat Uno')]),
+          ],
+        }),
+        showPrices: false,
+      );
+      expect(find.text('Total gasto'), findsNothing);
+      expect(find.textContaining('100,00'), findsNothing);
+      expect(find.textContaining('#1'), findsWidgets);
     });
 
     testWidgets('customer without orders has no list and no total',

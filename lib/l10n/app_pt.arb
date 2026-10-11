@@ -2436,5 +2436,44 @@
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
   "receivedOpenOrder": "Abrir a OS",
   "reportPreviousPeriod": "Período anterior",
-  "reportNextPeriod": "Próximo período"
+  "reportNextPeriod": "Próximo período",
+  "valuesAndBillingOffTitle": "Desligar valores e cobrança?",
+  "valuesAndBillingOffMessage": "Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.",
+  "valuesAndBillingOffAction": "Desligar",
+  "valuesAndBillingSaveError": "Não deu para salvar. Confira a internet e tente de novo.",
+  "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
+  "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
+  "inviteTitleOne": "{company} chamou você para a equipe",
+  "@inviteTitleOne": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteInvitedByAs": "Convidado por {name} · você entra como {role}",
+  "@inviteInvitedByAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEntersAs": "Você entra como {role}",
+  "@inviteEntersAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteJoinTeam": "Entrar na equipe",
+  "inviteDecline": "Recusar convite",
+  "inviteHaveAnotherCode": "Tenho outro código",
+  "inviteCreateOwnCompany": "Criar minha própria empresa",
+  "inviteCodePlaceholder": "Ex.: 7K2P9QXA",
+  "segmentLoadError": "Não deu para abrir a sua empresa. Confira a internet e tente de novo."
 }

@@ -25,16 +25,18 @@ enum AppTab {
 ///
 /// - Agenda is hidden when the company does not use scheduling
 ///   (`Company.useScheduling`).
-/// - Financeiro is shown only with the `viewFinancialReports` permission.
+/// - Financeiro is shown only with the `viewFinancialReports` permission and
+///   when the company uses values and billing (`Company.useFinancial`).
 List<AppTab> visibleAppTabs({
   required bool useScheduling,
   required bool canViewFinancialReports,
+  bool useFinancial = true,
 }) {
   return AppTab.values
       .where(
         (tab) => switch (tab) {
           AppTab.agenda => useScheduling,
-          AppTab.financial => canViewFinancialReports,
+          AppTab.financial => useFinancial && canViewFinancialReports,
           _ => true,
         },
       )

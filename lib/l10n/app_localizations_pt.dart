@@ -4876,4 +4876,60 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reportNextPeriod => 'Próximo período';
+
+  @override
+  String get valuesAndBillingOffTitle => 'Desligar valores e cobrança?';
+
+  @override
+  String get valuesAndBillingOffMessage =>
+      'Preços, total, receber e a aba Financeiro somem para toda a equipe. Nada é apagado: os valores voltam se você religar. Links de pagamento já enviados continuam valendo.';
+
+  @override
+  String get valuesAndBillingOffAction => 'Desligar';
+
+  @override
+  String get valuesAndBillingSaveError =>
+      'Não deu para salvar. Confira a internet e tente de novo.';
+
+  @override
+  String get inviteGenericError =>
+      'Não deu para concluir. Confira a internet e tente de novo.';
+
+  @override
+  String get inviteLoadError =>
+      'Não deu para carregar os convites. Confira a internet.';
+
+  @override
+  String inviteTitleOne(String company) {
+    return '$company chamou você para a equipe';
+  }
+
+  @override
+  String inviteInvitedByAs(String name, String role) {
+    return 'Convidado por $name · você entra como $role';
+  }
+
+  @override
+  String inviteEntersAs(String role) {
+    return 'Você entra como $role';
+  }
+
+  @override
+  String get inviteJoinTeam => 'Entrar na equipe';
+
+  @override
+  String get inviteDecline => 'Recusar convite';
+
+  @override
+  String get inviteHaveAnotherCode => 'Tenho outro código';
+
+  @override
+  String get inviteCreateOwnCompany => 'Criar minha própria empresa';
+
+  @override
+  String get inviteCodePlaceholder => 'Ex.: 7K2P9QXA';
+
+  @override
+  String get segmentLoadError =>
+      'Não deu para abrir a sua empresa. Confira a internet e tente de novo.';
 }
