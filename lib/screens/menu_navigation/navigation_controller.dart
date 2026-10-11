@@ -1,5 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart'; // Import for reaction
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
@@ -9,12 +11,16 @@ import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
 import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/engagement_scheduler.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 
 import 'home.dart';
+import 'app_tabs.dart';
 import 'tab_routes.dart';
+import 'widgets/glass_tab_bar.dart';
 
 class NavigationController extends StatefulWidget {
   const NavigationController({super.key});
@@ -25,26 +31,26 @@ class NavigationController extends StatefulWidget {
 
 class _NavigationControllerState extends State<NavigationController>
     with WidgetsBindingObserver {
-  final CupertinoTabController _tabController = CupertinoTabController();
+  CupertinoTabController _tabController = CupertinoTabController();
   ReactionDisposer? _disposer;
   EngagementScheduler? _engagementScheduler;
 
-  /// Build page options - Financial tab is always included
-  /// Permission check is handled inside FinancialDashboardSimple
-  List<Widget> _buildPageOptions() {
-    return <Widget>[
-      Home(),
-      HomeCustomerList(),
-      const AgendaScreen(),
-      FinancialDashboardSimple(),
-      Settings(),
-    ];
+  /// Tabs currently shown, in the fixed [AppTab] order.
+  List<AppTab> _tabs = AppTab.values;
+
+  Widget _buildPage(AppTab tab) {
+    return switch (tab) {
+      AppTab.home => Home(),
+      AppTab.customers => HomeCustomerList(),
+      AppTab.agenda => const AgendaScreen(),
+      AppTab.financial => FinancialDashboardSimple(),
+      AppTab.more => Settings(),
+    };
   }
 
-  /// Build tab items - Financial tab is always included
-  List<BottomNavigationBarItem> _buildTabItems(BuildContext context) {
-    return <BottomNavigationBarItem>[
-      BottomNavigationBarItem(
+  BottomNavigationBarItem _buildTabItem(BuildContext context, AppTab tab) {
+    return switch (tab) {
+      AppTab.home => BottomNavigationBarItem(
         icon: Semantics(
           identifier: 'tab_home',
           child: const Icon(CupertinoIcons.house),
@@ -52,7 +58,7 @@ class _NavigationControllerState extends State<NavigationController>
         activeIcon: const Icon(CupertinoIcons.house_fill),
         label: context.l10n.home,
       ),
-      BottomNavigationBarItem(
+      AppTab.customers => BottomNavigationBarItem(
         icon: Semantics(
           identifier: 'tab_customers',
           child: const Icon(CupertinoIcons.person_2),
@@ -60,7 +66,7 @@ class _NavigationControllerState extends State<NavigationController>
         activeIcon: const Icon(CupertinoIcons.person_2_fill),
         label: context.l10n.customers,
       ),
-      BottomNavigationBarItem(
+      AppTab.agenda => BottomNavigationBarItem(
         icon: Semantics(
           identifier: 'tab_agenda',
           child: const Icon(CupertinoIcons.calendar),
@@ -68,7 +74,7 @@ class _NavigationControllerState extends State<NavigationController>
         activeIcon: const Icon(CupertinoIcons.calendar_today),
         label: context.l10n.agenda,
       ),
-      BottomNavigationBarItem(
+      AppTab.financial => BottomNavigationBarItem(
         icon: Semantics(
           identifier: 'tab_financial',
           child: const Icon(CupertinoIcons.chart_pie),
@@ -76,18 +82,45 @@ class _NavigationControllerState extends State<NavigationController>
         activeIcon: const Icon(CupertinoIcons.chart_pie_fill),
         label: context.l10n.financial,
       ),
-      BottomNavigationBarItem(
+      AppTab.more => BottomNavigationBarItem(
         icon: Semantics(
           identifier: 'tab_settings',
           child: const Icon(CupertinoIcons.ellipsis),
         ),
         label: context.l10n.more,
       ),
-    ];
+    };
   }
 
+  /// Applies a new set of visible tabs, keeping the selected tab when it is
+  /// still visible (otherwise falls back to Início).
+  void _syncTabs(List<AppTab> tabs) {
+    if (listEquals(tabs, _tabs)) return;
+    final oldIndex = _tabController.index;
+    final selected = oldIndex < _tabs.length ? _tabs[oldIndex] : AppTab.home;
+    final newIndex = tabs.contains(selected) ? tabs.indexOf(selected) : 0;
+    _tabs = tabs;
+
+    final oldController = _tabController;
+    _tabController = CupertinoTabController(initialIndex: newIndex)
+      ..addListener(_onTabChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      oldController.dispose();
+      if (!mounted) return;
+      Provider.of<BottomNavigationBarStore>(
+        context,
+        listen: false,
+      ).setCurrentIndex(newIndex);
+    });
+  }
+
+  void _onTabChanged() => _logTabScreen(_tabController.index);
+
   void _logTabScreen(int index) {
-    final name = TabRoutes.nameForIndex(index);
+    final name = TabRoutes.nameForIndex(
+      index,
+      routes: [for (final tab in _tabs) tab.routeName],
+    );
     if (name == null) return;
     try {
       FirebaseAnalytics.instance
@@ -101,7 +134,7 @@ class _NavigationControllerState extends State<NavigationController>
   @override
   void initState() {
     super.initState();
-    _tabController.addListener(() => _logTabScreen(_tabController.index));
+    _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _logTabScreen(0));
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -121,7 +154,9 @@ class _NavigationControllerState extends State<NavigationController>
     _disposer = reaction(
       (_) => navigationStore.currentIndex,
       (dynamic index) {
-        if (_tabController.index != index) {
+        if (index is int &&
+            index < _tabs.length &&
+            _tabController.index != index) {
           _tabController.index = index;
         }
       },
@@ -166,23 +201,38 @@ class _NavigationControllerState extends State<NavigationController>
   @override
   Widget build(BuildContext context) {
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
-    final pageOptions = _buildPageOptions();
-    final tabItems = _buildTabItems(context);
+    final useScheduling = context.watch<SegmentConfigProvider>().useScheduling;
 
-    return CupertinoTabScaffold(
-      controller: _tabController,
-      tabBar: CupertinoTabBar(
-        // currentIndex is handled by the controller
-        onTap: (index) {
-          navigationStore.setCurrentIndex(index);
-        },
-        items: tabItems,
-      ),
-      tabBuilder: (BuildContext context, int index) {
-        return CupertinoTabView(
-          routes: appRoutes,
-          builder: (BuildContext context) {
-            return pageOptions[index];
+    return Observer(
+      builder: (context) {
+        _syncTabs(
+          visibleAppTabs(
+            useScheduling: useScheduling,
+            canViewFinancialReports:
+                AuthorizationService.instance.canViewFinancialReports,
+          ),
+        );
+        final tabs = _tabs;
+
+        return CupertinoTabScaffold(
+          // A new tab set rebuilds the tab views, so a navigator never moves
+          // to a different tab when one is hidden or shown.
+          key: ValueKey(tabs.map((t) => t.name).join(',')),
+          controller: _tabController,
+          tabBar: GlassTabBar(
+            // currentIndex is handled by the controller
+            onTap: (index) {
+              navigationStore.setCurrentIndex(index);
+            },
+            items: [for (final tab in tabs) _buildTabItem(context, tab)],
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTabView(
+              routes: appRoutes,
+              builder: (BuildContext context) {
+                return _buildPage(tabs[index]);
+              },
+            );
           },
         );
       },

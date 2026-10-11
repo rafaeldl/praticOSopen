@@ -12,10 +12,13 @@ class TabRoutes {
   static const financial = '/financial';
   static const more = '/more';
 
-  /// Same order as the tab bar items.
+  /// Every tab, in the fixed tab bar order.
   static const List<String> all = [home, customers, agenda, financial, more];
 
   /// Returns the route name for a tab [index], or null when out of range.
-  static String? nameForIndex(int index) =>
-      index >= 0 && index < all.length ? all[index] : null;
+  ///
+  /// Some tabs can be hidden, so pass the [routes] of the visible tabs (in
+  /// tab bar order) to map the index the tab bar reports.
+  static String? nameForIndex(int index, {List<String> routes = all}) =>
+      index >= 0 && index < routes.length ? routes[index] : null;
 }
