@@ -2565,5 +2565,19 @@
   "planUsageAtLimit": "At the limit",
   "planUsageAtLimitInvites": "At the limit · invites count",
   "planUsageNearLimit": "Almost at the limit",
-  "planUsageUnlimited": "No limit"
+  "planUsageUnlimited": "No limit",
+  "companyShownOnOrder": "Shown on the customer's order",
+  "companyNameLogoContact": "Name, logo and contact",
+  "customerTerms": "Terms for the customer",
+  "customerTermsHint": "Warranty and conditions",
+  "segmentRow": "Line of business",
+  "segmentRowHint": "Changes the ready-made services and checklists",
+  "schedulingRow": "Schedule",
+  "schedulingRowHint": "Set the day and time of orders",
+  "fieldServiceRow": "Service at the customer's place",
+  "fieldServiceRowHint": "Customer address on the order",
+  "contractsRowHint": "Orders that repeat by themselves",
+  "deviceControlRow": "{devices} tracking",
+  "deviceControlRowHint": "History and full list",
+  "companySettingSaveError": "Couldn't save. Check your connection and try again."
 }

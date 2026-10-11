@@ -2565,5 +2565,19 @@
   "planUsageAtLimit": "En el límite",
   "planUsageAtLimitInvites": "En el límite · cuenta la invitación",
   "planUsageNearLimit": "Casi en el límite",
-  "planUsageUnlimited": "Sin límite"
+  "planUsageUnlimited": "Sin límite",
+  "companyShownOnOrder": "Aparece en la orden del cliente",
+  "companyNameLogoContact": "Nombre, logo y contacto",
+  "customerTerms": "Términos para el cliente",
+  "customerTermsHint": "Garantía y condiciones",
+  "segmentRow": "Rubro",
+  "segmentRowHint": "Cambia los servicios y checklists listos",
+  "schedulingRow": "Agenda",
+  "schedulingRowHint": "Marcar día y hora de las órdenes",
+  "fieldServiceRow": "Atención en el lugar del cliente",
+  "fieldServiceRowHint": "Dirección del cliente en la orden",
+  "contractsRowHint": "Órdenes que se repiten solas",
+  "deviceControlRow": "Control de {devices}",
+  "deviceControlRowHint": "Historial y lista completa",
+  "companySettingSaveError": "No se pudo guardar. Revisa la conexión e intenta de nuevo."
 }

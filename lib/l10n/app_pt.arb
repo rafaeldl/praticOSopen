@@ -2657,5 +2657,20 @@
   "planUsageAtLimit": "No limite",
   "planUsageAtLimitInvites": "No limite · conta o convite",
   "planUsageNearLimit": "Quase no limite",
-  "planUsageUnlimited": "Sem limite"
+  "planUsageUnlimited": "Sem limite",
+  "companyShownOnOrder": "Aparece na OS do cliente",
+  "companyNameLogoContact": "Nome, logo e contato",
+  "customerTerms": "Termos para o cliente",
+  "customerTermsHint": "Garantia e condições",
+  "segmentRow": "Ramo",
+  "segmentRowHint": "Muda serviços e checklists prontos",
+  "schedulingRow": "Agenda",
+  "schedulingRowHint": "Marcar dia e hora das OS",
+  "fieldServiceRow": "Atendimento no local do cliente",
+  "fieldServiceRowHint": "Endereço do cliente na OS",
+  "contractsRowHint": "OS que se repetem sozinhas",
+  "deviceControlRow": "Controle de {devices}",
+  "@deviceControlRow": {"placeholders": {"devices": {"type": "String"}}},
+  "deviceControlRowHint": "Histórico e lista completa",
+  "companySettingSaveError": "Não deu para salvar. Confira a internet e tente de novo."
 }

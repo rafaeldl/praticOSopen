@@ -5223,4 +5223,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planUsageUnlimited => 'No limit';
+
+  @override
+  String get companyShownOnOrder => 'Shown on the customer\'s order';
+
+  @override
+  String get companyNameLogoContact => 'Name, logo and contact';
+
+  @override
+  String get customerTerms => 'Terms for the customer';
+
+  @override
+  String get customerTermsHint => 'Warranty and conditions';
+
+  @override
+  String get segmentRow => 'Line of business';
+
+  @override
+  String get segmentRowHint => 'Changes the ready-made services and checklists';
+
+  @override
+  String get schedulingRow => 'Schedule';
+
+  @override
+  String get schedulingRowHint => 'Set the day and time of orders';
+
+  @override
+  String get fieldServiceRow => 'Service at the customer\'s place';
+
+  @override
+  String get fieldServiceRowHint => 'Customer address on the order';
+
+  @override
+  String get contractsRowHint => 'Orders that repeat by themselves';
+
+  @override
+  String deviceControlRow(String devices) {
+    return '$devices tracking';
+  }
+
+  @override
+  String get deviceControlRowHint => 'History and full list';
+
+  @override
+  String get companySettingSaveError =>
+      'Couldn\'t save. Check your connection and try again.';
 }

@@ -5235,4 +5235,49 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get planUsageUnlimited => 'Sem limite';
+
+  @override
+  String get companyShownOnOrder => 'Aparece na OS do cliente';
+
+  @override
+  String get companyNameLogoContact => 'Nome, logo e contato';
+
+  @override
+  String get customerTerms => 'Termos para o cliente';
+
+  @override
+  String get customerTermsHint => 'Garantia e condições';
+
+  @override
+  String get segmentRow => 'Ramo';
+
+  @override
+  String get segmentRowHint => 'Muda serviços e checklists prontos';
+
+  @override
+  String get schedulingRow => 'Agenda';
+
+  @override
+  String get schedulingRowHint => 'Marcar dia e hora das OS';
+
+  @override
+  String get fieldServiceRow => 'Atendimento no local do cliente';
+
+  @override
+  String get fieldServiceRowHint => 'Endereço do cliente na OS';
+
+  @override
+  String get contractsRowHint => 'OS que se repetem sozinhas';
+
+  @override
+  String deviceControlRow(String devices) {
+    return 'Controle de $devices';
+  }
+
+  @override
+  String get deviceControlRowHint => 'Histórico e lista completa';
+
+  @override
+  String get companySettingSaveError =>
+      'Não deu para salvar. Confira a internet e tente de novo.';
 }

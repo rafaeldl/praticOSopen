@@ -9363,6 +9363,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sem limite'**
   String get planUsageUnlimited;
+
+  /// No description provided for @companyShownOnOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aparece na OS do cliente'**
+  String get companyShownOnOrder;
+
+  /// No description provided for @companyNameLogoContact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome, logo e contato'**
+  String get companyNameLogoContact;
+
+  /// No description provided for @customerTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos para o cliente'**
+  String get customerTerms;
+
+  /// No description provided for @customerTermsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Garantia e condições'**
+  String get customerTermsHint;
+
+  /// No description provided for @segmentRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ramo'**
+  String get segmentRow;
+
+  /// No description provided for @segmentRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muda serviços e checklists prontos'**
+  String get segmentRowHint;
+
+  /// No description provided for @schedulingRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda'**
+  String get schedulingRow;
+
+  /// No description provided for @schedulingRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar dia e hora das OS'**
+  String get schedulingRowHint;
+
+  /// No description provided for @fieldServiceRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atendimento no local do cliente'**
+  String get fieldServiceRow;
+
+  /// No description provided for @fieldServiceRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço do cliente na OS'**
+  String get fieldServiceRowHint;
+
+  /// No description provided for @contractsRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS que se repetem sozinhas'**
+  String get contractsRowHint;
+
+  /// No description provided for @deviceControlRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de {devices}'**
+  String deviceControlRow(String devices);
+
+  /// No description provided for @deviceControlRowHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico e lista completa'**
+  String get deviceControlRowHint;
+
+  /// No description provided for @companySettingSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Confira a internet e tente de novo.'**
+  String get companySettingSaveError;
 }
 
 class _AppLocalizationsDelegate
