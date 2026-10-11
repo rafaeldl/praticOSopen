@@ -2540,5 +2540,13 @@
   "moreSectionYou": "You",
   "moreCompanySubtitle": "Order details, business type and features",
   "moreCatalogSubtitle": "Services and {products}",
-  "saveEntityButton": "Save {entity}"
+  "saveEntityButton": "Save {entity}",
+  "financialReportShort": "Report",
+  "receiveSubtitle": "{customer} · total {total}",
+  "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},
+  "receiveSubtitleNoCustomer": "total {total}",
+  "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
+  "receiveOrderLink": "Order {number}",
+  "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
+  "receiveAmountHint": "Got only part of it? Change the amount."
 }

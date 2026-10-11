@@ -5156,4 +5156,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String saveEntityButton(String entity) {
     return 'Save $entity';
   }
+
+  @override
+  String get financialReportShort => 'Report';
+
+  @override
+  String receiveSubtitle(String customer, String total) {
+    return '$customer · total $total';
+  }
+
+  @override
+  String receiveSubtitleNoCustomer(String total) {
+    return 'total $total';
+  }
+
+  @override
+  String receiveOrderLink(int number) {
+    return 'Order $number';
+  }
+
+  @override
+  String get receiveAmountHint => 'Got only part of it? Change the amount.';
 }

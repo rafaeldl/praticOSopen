@@ -9261,6 +9261,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Salvar {entity}'**
   String saveEntityButton(String entity);
+
+  /// No description provided for @financialReportShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório'**
+  String get financialReportShort;
+
+  /// No description provided for @receiveSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{customer} · total {total}'**
+  String receiveSubtitle(String customer, String total);
+
+  /// No description provided for @receiveSubtitleNoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {total}'**
+  String receiveSubtitleNoCustomer(String total);
+
+  /// No description provided for @receiveOrderLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String receiveOrderLink(int number);
+
+  /// No description provided for @receiveAmountHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebeu só uma parte? Mude o valor.'**
+  String get receiveAmountHint;
 }
 
 class _AppLocalizationsDelegate

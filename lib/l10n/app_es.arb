@@ -2540,5 +2540,13 @@
   "moreSectionYou": "Tú",
   "moreCompanySubtitle": "Datos en la OS, rubro y funciones",
   "moreCatalogSubtitle": "Servicios y {products}",
-  "saveEntityButton": "Guardar {entity}"
+  "saveEntityButton": "Guardar {entity}",
+  "financialReportShort": "Informe",
+  "receiveSubtitle": "{customer} · total {total}",
+  "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},
+  "receiveSubtitleNoCustomer": "total {total}",
+  "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
+  "receiveOrderLink": "Orden {number}",
+  "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
+  "receiveAmountHint": "¿Recibió solo una parte? Cambie el valor."
 }

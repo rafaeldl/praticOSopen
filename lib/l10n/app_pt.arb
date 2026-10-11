@@ -2632,5 +2632,13 @@
   "moreCatalogSubtitle": "Serviços e {products}",
   "@moreCatalogSubtitle": {"placeholders": {"products": {"type": "String"}}},
   "saveEntityButton": "Salvar {entity}",
-  "@saveEntityButton": {"placeholders": {"entity": {"type": "String"}}}
+  "@saveEntityButton": {"placeholders": {"entity": {"type": "String"}}},
+  "financialReportShort": "Relatório",
+  "receiveSubtitle": "{customer} · total {total}",
+  "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},
+  "receiveSubtitleNoCustomer": "total {total}",
+  "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
+  "receiveOrderLink": "OS {number}",
+  "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
+  "receiveAmountHint": "Recebeu só uma parte? Mude o valor."
 }

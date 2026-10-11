@@ -96,6 +96,12 @@ class ReceiveBlock extends StatelessWidget {
             controller: controller,
             onChanged: onAmountChanged,
           ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.l10n.receiveAmountHint,
+            key: const Key('receiveAmountHint'),
+            style: AppTypography.label.copyWith(color: onSoft),
+          ),
           const SizedBox(height: AppSpacing.md),
           if (receiptName != null)
             _ReceiptChip(

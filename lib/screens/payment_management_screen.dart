@@ -23,6 +23,7 @@ import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
@@ -136,8 +137,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.receiveTitle),
+              leading: _buildOrderLink(),
               trailing: _buildMoreButton(),
             ),
+            SliverToBoxAdapter(child: _buildSubtitle()),
             SliverSafeArea(
               top: false,
               sliver: SliverList(
@@ -158,6 +161,55 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
       ),
     );
+  }
+
+  /// "OS 183": opens the order this screen belongs to.
+  Widget _buildOrderLink() {
+    final order = _store?.order;
+    if (order == null || order.number == null) return const SizedBox.shrink();
+    return CupertinoButton(
+      key: const Key('receiveOrderLink'),
+      padding: EdgeInsets.zero,
+      minimumSize:
+          const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+      onPressed: () => Navigator.of(context)
+          .pushNamed('/order', arguments: {'order': order}),
+      child: Text(
+        context.l10n.receiveOrderLink(order.number!),
+        style: AppTypography.callout.copyWith(
+          color: AppColors.accentText.resolveFrom(context),
+        ),
+      ),
+    );
+  }
+
+  /// "Ana Ribeiro · total R$ 1.250" under the title.
+  Widget _buildSubtitle() {
+    return Observer(builder: (_) {
+      final store = _store;
+      if (store == null) return const SizedBox.shrink();
+      final total = FormatService().formatCurrency(store.total ?? 0.0);
+      final name = store.customerName;
+      final text = name == null || name.isEmpty
+          ? context.l10n.receiveSubtitleNoCustomer(total)
+          : context.l10n.receiveSubtitle(name, total);
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pageMargin,
+          0,
+          AppSpacing.pageMargin,
+          AppSpacing.sm,
+        ),
+        child: Text(
+          text,
+          key: const Key('receiveSubtitle'),
+          style: AppTypography.callout.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
+            fontFeatures: AppTypography.tabular,
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildMoreButton() {

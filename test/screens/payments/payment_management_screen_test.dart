@@ -6,6 +6,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/company.dart';
+import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/payment_management_screen.dart';
@@ -55,9 +56,13 @@ void main() {
       ..number = 42
       ..status = status
       ..total = total
-      ..paidAmount = paid;
+      ..paidAmount = paid
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Ribeiro');
     final store = OrderStore()
       ..order = order
+      ..customer = order.customer
       ..status = status
       ..total = total
       ..paidAmount = paid;
@@ -81,6 +86,13 @@ void main() {
           canAttachReceipt: canAttach,
           canViewReceipt: canView,
         ),
+        routes: {
+          '/order': (context) => CupertinoPageScaffold(
+                child: Text(
+                  'order route ${(ModalRoute.of(context)!.settings.arguments as Map)['order'].number}',
+                ),
+              ),
+        },
       ),
     );
     await tester.pump();
@@ -217,5 +229,21 @@ void main() {
     expect(find.byKey(const Key('receiveBlocked')), findsOneWidget);
     expect(find.byKey(const Key('receiveConfirm')), findsNothing);
     expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
+  });
+
+  testWidgets('shows customer and total under the title, and the amount hint',
+      (tester) async {
+    await pumpScreen(tester, storeWith(total: 1250));
+    expect(find.text('Ana Ribeiro · total ${FormatService().formatCurrency(1250)}'),
+        findsOneWidget);
+    expect(find.text('Recebeu só uma parte? Mude o valor.'), findsOneWidget);
+  });
+
+  testWidgets('"OS 42" link opens the order', (tester) async {
+    await pumpScreen(tester, storeWith());
+    expect(find.text('OS 42'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('receiveOrderLink')));
+    await tester.pumpAndSettle();
+    expect(find.text('order route 42'), findsOneWidget);
   });
 }
