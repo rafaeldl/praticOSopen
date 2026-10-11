@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "018fe27fbb45685bd12bbee9a1afdf18c325ee6ccc17c4916f55e291af1be638",
+      "sha": "617dec62ab0194ed713015cf523611ccb3f99b27e3a6d735fe261e69f28d664e",
       "scope": "**/*"
     },
     {
@@ -25,7 +25,7 @@
       "text": "SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco",
       "source": {
         "path": "CLAUDE.md",
-        "line": 700
+        "line": 596
       },
       "scope": [
         "lib/**/*.dart",
@@ -36,20 +36,20 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Does this change add a class, variable, method, constant, enum value, JSON/Firestore key or stored string value whose name or value is a Portuguese word (e.g. pendente, statusDaOS, cliente)? Portuguese inside user-visible text or comments does not count.",
+          "instructions": "Among the added lines, is there at least one declared identifier (class, variable, field, method, enum or constant name) or quoted map/JSON key spelled as a Portuguese word, such as cliente, valor, pendente or statusDaOS? Text inside Text(...), l10n strings and comments never counts.",
           "criteria": {
-            "true": "class StatusOS { static const pendente = 'pendente'; }",
-            "false": "class OrderStatus { static const pending = 'pending'; }"
+            "true": "final valorTotal = 0; map['cliente'] = c; static const pendente = 'pendente';",
+            "false": "final total = 0; Text('Cliente'); // calcula o total"
           }
         }
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 9,
-        "median": 0.21,
-        "min": 0.05,
-        "max": 0.72,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 11,
+        "median": 0.19,
+        "min": 0.06,
+        "max": 0.37,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -59,7 +59,7 @@
       "text": "SEMPRE usar `context.l10n` para strings visíveis ao usuário, NUNCA hardcoded",
       "source": {
         "path": "CLAUDE.md",
-        "line": 701
+        "line": 597
       },
       "scope": [
         "lib/screens/**/*.dart",
@@ -79,10 +79,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 1,
-        "median": 0.06,
-        "min": 0.06,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 2,
+        "median": 0.05,
+        "min": 0.04,
         "max": 0.06,
         "fired": 0,
         "verdict": "skipped"
@@ -108,11 +108,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 1,
-        "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -122,7 +122,7 @@
       "text": "SEMPRE usar `FormatService` para datas, números e moedas, NUNCA formatar manualmente. NUNCA usar `toStringAsFixed()` direto",
       "source": {
         "path": "CLAUDE.md",
-        "line": 702
+        "line": 598
       },
       "scope": [
         "lib/**/*.dart"
@@ -141,13 +141,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 9,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 3,
         "median": 0.04,
-        "min": 0.02,
-        "max": 0.16,
+        "min": 0.03,
+        "max": 0.04,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -155,7 +155,7 @@
       "text": "Labels customizáveis DEVEM ter fallback com `context.l10n`",
       "source": {
         "path": "CLAUDE.md",
-        "line": 703
+        "line": 599
       },
       "scope": [
         "lib/**/*.dart"
@@ -174,13 +174,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 9,
-        "median": 0.03,
-        "min": 0.03,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 3,
+        "median": 0.04,
+        "min": 0.04,
         "max": 0.05,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -203,11 +203,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 1,
-        "median": 0.04,
-        "min": 0.04,
-        "max": 0.04,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
+        "at": "2026-10-11T18:53:54.433Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -259,10 +259,10 @@
     },
     {
       "id": "cupertino-widgets",
-      "text": "Widgets obrigatórios: CupertinoPageScaffold + CupertinoSliverNavigationBar, CupertinoListSection.insetGrouped, CupertinoAlertDialog, CupertinoActionSheet, CupertinoSearchTextField",
+      "text": "Widgets: CupertinoPageScaffold + CupertinoSliverNavigationBar, CupertinoListSection.insetGrouped para formulários, CupertinoAlertDialog, CupertinoActionSheet, CupertinoSearchTextField",
       "source": {
         "path": "CLAUDE.md",
-        "line": 222
+        "line": 234
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -281,11 +281,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 1,
-        "median": 0.03,
-        "min": 0.03,
-        "max": 0.03,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 2,
+        "median": 0.04,
+        "min": 0.04,
+        "max": 0.04,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -295,24 +295,24 @@
       "text": "Sempre usar `.resolveFrom(context)` para cores dinâmicas",
       "source": {
         "path": "CLAUDE.md",
-        "line": 710
+        "line": 606
       },
       "scope": [
         "lib/**/*.dart"
       ],
       "check": {
         "type": "lint",
-        "how": "grep for CupertinoColors dynamic color not followed by .resolveFrom",
-        "pattern": "CupertinoColors\\.(label|secondaryLabel|tertiaryLabel|systemBackground|systemGroupedBackground|secondarySystemGroupedBackground|systemGrey[0-9]?|separator)(?!\\.resolveFrom)\\b(?!\\s*\\.resolveFrom)"
+        "how": "grep for CupertinoColors dynamic colors or AppColors roles not followed by .resolveFrom",
+        "pattern": "(CupertinoColors\\.(label|secondaryLabel|tertiaryLabel|systemBackground|systemGroupedBackground|secondarySystemGroupedBackground|systemGrey[0-9]?|separator)|AppColors\\.[a-zA-Z]+)\\b(?!\\s*\\.resolveFrom)"
       },
       "status": "active"
     },
     {
       "id": "status-dots-not-badges",
-      "text": "Usar dots coloridos (8-10px) em vez de badges pesados",
+      "text": "Status: ponto colorido + texto em `textSecondary`, nunca selo colorido.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 248
+        "line": 253
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -327,11 +327,127 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 1,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 2,
         "median": 0.04,
         "min": 0.04,
         "max": 0.04,
+        "fired": 0,
+        "verdict": "skipped"
+      }
+    },
+    {
+      "id": "no-hex-colors",
+      "text": "Cores: usar os papéis de `AppColors`, nunca hex, sempre com `.resolveFrom(context)`.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 240
+      },
+      "scope": [
+        "lib/screens/**/*.dart"
+      ],
+      "check": {
+        "type": "lint",
+        "how": "grep for Color(0x...) literals in screens",
+        "pattern": "Color\\(0x[0-9A-Fa-f]{8}\\)"
+      },
+      "status": "active"
+    },
+    {
+      "id": "one-accent-button",
+      "text": "Um botão azul (`accent`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`).",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 225
+      },
+      "scope": [
+        "lib/screens/**/*.dart"
+      ],
+      "when": "turn",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change leave a single screen with two or more buttons filled with AppColors.accent (or PrimaryButton), instead of one accent button and the rest in secondaryFill or as accentText links?",
+          "criteria": {
+            "true": "two CupertinoButton(color: AppColors.accent.resolveFrom(context)) in the same build method",
+            "false": "one accent button plus CupertinoButton(color: AppColors.secondaryFill.resolveFrom(context))"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "fired": 0,
+        "verdict": "skipped"
+      }
+    },
+    {
+      "id": "glass-only-in-navigation",
+      "text": "Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 229
+      },
+      "scope": [
+        "lib/screens/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change wrap content (a list row, the next-step block, a form field, a card or the page background) in AppGlass, BackdropFilter or a translucent blurred fill?",
+          "criteria": {
+            "true": "AppGlass(child: AppListRow(...))",
+            "false": "AppGlass around the tab bar or a top-bar button"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 2,
+        "median": 0.025,
+        "min": 0.02,
+        "max": 0.03,
+        "fired": 0,
+        "verdict": "skipped"
+      }
+    },
+    {
+      "id": "text-wraps-no-ellipsis",
+      "text": "O texto cresce com o tamanho do texto do iPhone: nunca travar o `textScaler`, nunca usar altura fixa em linha com texto, nunca reticências em nome, título ou valor.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 251
+      },
+      "scope": [
+        "lib/screens/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add TextOverflow.ellipsis or maxLines: 1 to a name, title or money value, fix the height of a box holding text, or clamp or override the textScaler?",
+          "criteria": {
+            "true": "Text(customer.name!, maxLines: 1, overflow: TextOverflow.ellipsis)",
+            "false": "Text(customer.name!) inside a row that wraps"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 2,
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -341,7 +457,7 @@
       "text": "Site Eleventy: Editar APENAS em `src/`, nunca em `public/`.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 712
+        "line": 608
       },
       "scope": [
         "firebase/hosting/public/**/*"
@@ -356,7 +472,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
+        "at": "2026-10-11T18:53:54.433Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -370,7 +486,7 @@
       "text": "Azul da marca como acento, amarelo do logo só como marca-texto; sem gradientes, glassmorphism ou cards com ícone",
       "source": {
         "path": "CLAUDE.md",
-        "line": 285
+        "line": 289
       },
       "scope": [
         "firebase/hosting/src/**/*"
@@ -385,13 +501,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 5,
-        "median": 0.01,
-        "min": 0.01,
-        "max": 0.01,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -399,7 +515,7 @@
       "text": "Nada de números inventados (usuários, notas, depoimentos)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 286
+        "line": 290
       },
       "scope": [
         "firebase/hosting/src/**/*"
@@ -414,13 +530,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 5,
-        "median": 0.01,
-        "min": 0.01,
-        "max": 0.02,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -428,7 +544,7 @@
       "text": "Dados de clientes (nomes, telefones, conversas) nunca entram no repositório — ele é público. Só números agregados.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 684
+        "line": 580
       },
       "when": "edit",
       "check": {
@@ -444,10 +560,10 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
+        "at": "2026-10-11T18:53:54.433Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.01,
+        "min": 0.02,
         "max": 0.02,
         "fired": 0,
         "verdict": "decisive"
@@ -458,7 +574,7 @@
       "text": "Implementar com **teste novo** para o que mudou.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 676
+        "line": 572
       },
       "scope": [
         "lib/**/*.dart",
@@ -474,11 +590,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 3,
-        "median": 0.25,
-        "min": 0.1,
-        "max": 0.33,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 0,
+        "median": 0,
+        "min": 0,
+        "max": 0,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -488,7 +604,7 @@
       "text": "Build Runner: Executar após alterar Stores/Models, e `fvm flutter gen-l10n` após alterar .arb",
       "source": {
         "path": "CLAUDE.md",
-        "line": 706
+        "line": 602
       },
       "check": {
         "type": "unenforceable",
@@ -501,7 +617,7 @@
       "text": "AuthService: Usar para criar novos usuários (não gravar direto no banco)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 707
+        "line": 603
       },
       "scope": [
         "lib/**/*.dart"
@@ -516,13 +632,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 9,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 3,
         "median": 0.01,
         "min": 0.01,
         "max": 0.01,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -530,7 +646,7 @@
       "text": "CollaboratorStore: Usar para gerenciar membros da equipe (não usar CompanyStore)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 708
+        "line": 604
       },
       "scope": [
         "lib/**/*.dart"
@@ -545,13 +661,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-09T22:44:00.878Z",
-        "hunks": 9,
+        "at": "2026-10-11T18:53:54.433Z",
+        "hunks": 3,
         "median": 0.01,
         "min": 0.01,
-        "max": 0.01,
+        "max": 0.02,
         "fired": 0,
-        "verdict": "decisive"
+        "verdict": "skipped"
       }
     },
     {
@@ -559,7 +675,7 @@
       "text": "Documentação Obrigatória: Documentar toda nova funcionalidade",
       "source": {
         "path": "CLAUDE.md",
-        "line": 711
+        "line": 607
       },
       "check": {
         "type": "deferred",
@@ -572,7 +688,7 @@
       "text": "Multi-Tenancy é Prioridade: Sempre verificar estrutura de company/roles",
       "source": {
         "path": "CLAUDE.md",
-        "line": 705
+        "line": 601
       },
       "check": {
         "type": "deferred",
@@ -585,7 +701,7 @@
       "text": "Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 704
+        "line": 600
       },
       "check": {
         "type": "unenforceable",
@@ -598,7 +714,7 @@
       "text": "Sempre criar branch `tipo/descricao-curta` a partir da master antes de implementar. Nunca commitar direto na master.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 713
+        "line": 609
       },
       "check": {
         "type": "unenforceable",
@@ -611,7 +727,7 @@
       "text": "Issues no GitHub devem ser escritas em português",
       "source": {
         "path": "CLAUDE.md",
-        "line": 714
+        "line": 610
       },
       "check": {
         "type": "unenforceable",
@@ -624,7 +740,7 @@
       "text": "WIP: no máximo 2 PRs de agente abertos.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 681
+        "line": 577
       },
       "check": {
         "type": "unenforceable",
@@ -637,7 +753,7 @@
       "text": "Não mergear PR `risk:high`. Não fazer deploy nem promover release fora do fluxo de CI.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 682
+        "line": 578
       },
       "check": {
         "type": "unenforceable",
@@ -650,7 +766,7 @@
       "text": "Não criar docs de planejamento sem pedido.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 685
+        "line": 581
       },
       "check": {
         "type": "unenforceable",
