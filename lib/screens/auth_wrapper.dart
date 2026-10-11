@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,10 +7,10 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
-import 'package:praticos/screens/onboarding/welcome_screen.dart';
+import 'package:praticos/screens/onboarding/onboarding_flow.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
-import 'package:praticos/screens/onboarding/segmentation_onboarding_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
@@ -21,7 +20,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 /// Se sim → NavigationController (Home)
 /// Se não tem empresa → Verifica convites pendentes
 /// Se tem convites → PendingInvitesScreen
-/// Se não tem convites → WelcomeScreen (criar empresa)
+/// Se não tem convites → OnboardingFlow (Ramo → Seu negócio → Início)
 class AuthWrapper extends StatefulWidget {
   final AuthStore authStore;
 
@@ -87,16 +86,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 }
 
                 // Tem empresa mas precisa onboarding → Onboarding com dados
-                return WelcomeScreen(
-                  authStore: widget.authStore,
-                  companyId: result.companyId,
-                  initialName: result.companyName,
-                  initialAddress: result.companyAddress,
-                  initialLogoUrl: result.companyLogo,
-                  initialPhone: result.companyPhone,
-                  initialEmail: result.companyEmail,
-                  initialSite: result.companySite,
-                );
+                return _onboarding(result);
               }
 
               // Fallback: verifica convites
@@ -129,16 +119,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
               if (result.needsOnboarding) {
                 // Empresa existe mas não tem segmento → Onboarding com dados
-                return WelcomeScreen(
-                  authStore: widget.authStore,
-                  companyId: result.companyId,
-                  initialName: result.companyName,
-                  initialAddress: result.companyAddress,
-                  initialLogoUrl: result.companyLogo,
-                  initialPhone: result.companyPhone,
-                  initialEmail: result.companyEmail,
-                  initialSite: result.companySite,
-                );
+                return _onboarding(result);
               }
             }
 
@@ -153,8 +134,21 @@ class _AuthWrapperState extends State<AuthWrapper> {
     );
   }
 
-  /// Tela de erro com botão de retry
+  /// First access without a company (or with a company that has no segment
+  /// yet): Ramo → [Especialidades] → Seu negócio → Início.
+  Widget _onboarding(_CompanyCheckResult result) {
+    return OnboardingFlow(
+      deps: OnboardingDeps.firebase(widget.authStore),
+      companyId: result.companyId,
+      initialName: result.companyName,
+      initialPhone: result.companyPhone,
+    );
+  }
+
+  /// Tela de erro com botão de retry. The exception is only logged: the user
+  /// sees a fixed sentence.
   Widget _buildErrorRetryScreen(BuildContext context, {String? error}) {
+    if (error != null) debugPrint('AuthWrapper: $error');
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       child: Center(
@@ -187,19 +181,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  error,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
               const SizedBox(height: 24),
               CupertinoButton.filled(
                 onPressed: _retryLoad,
@@ -229,17 +210,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
             onCreateCompany: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => WelcomeScreen(
-                    authStore: widget.authStore,
-                    companyId: result.companyId,
-                    initialName: result.companyName,
-                    initialAddress: result.companyAddress,
-                    initialLogoUrl: result.companyLogo,
-                    initialPhone: result.companyPhone,
-                    initialEmail: result.companyEmail,
-                    initialSite: result.companySite,
-                  ),
+                CupertinoPageRoute(
+                  builder: (context) => _onboarding(result),
                 ),
               );
             },
@@ -251,16 +223,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         }
 
         // Sem convites → Onboarding normal
-        return WelcomeScreen(
-          authStore: widget.authStore,
-          companyId: result.companyId,
-          initialName: result.companyName,
-          initialAddress: result.companyAddress,
-          initialLogoUrl: result.companyLogo,
-          initialPhone: result.companyPhone,
-          initialEmail: result.companyEmail,
-          initialSite: result.companySite,
-        );
+        return _onboarding(result);
       },
     );
   }
@@ -384,7 +347,6 @@ class _SegmentLoader extends StatefulWidget {
 
 class _SegmentLoaderState extends State<_SegmentLoader> {
   bool _isLoading = true;
-  bool _shouldShowSegmentationOnboarding = false;
   String? _error;
 
   @override
@@ -478,15 +440,9 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         OrderStore().checkAndGenerateDueOrders();
       }
 
-      final shouldShowSegmentationOnboarding =
-          await _checkSegmentationOnboardingNeeded();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = false;
-        _shouldShowSegmentationOnboarding = shouldShowSegmentationOnboarding;
-      });
+      // The segmentation questionnaire (users/{uid}.onboardingSegment) left
+      // the first access: nothing read it (spec telas-mapa, decision 1).
+      setState(() => _isLoading = false);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -496,20 +452,12 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
     }
   }
 
-  Future<bool> _checkSegmentationOnboardingNeeded() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return false;
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-
-    if (!userDoc.exists) return true;
-
-    final onboardingSegment =
-        userDoc.data()?['onboardingSegment'] as Map<String, dynamic>?;
-    return onboardingSegment == null || onboardingSegment.isEmpty;
+  void _retry() {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    _loadSegmentConfig();
   }
 
   @override
@@ -519,34 +467,12 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
     }
 
     if (_error != null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(context.l10n.errorLoadingConfig),
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+      debugPrint('SegmentLoader: $_error');
+      return CupertinoPageScaffold(
+        child: ErrorState(
+          message: context.l10n.errorLoadingConfig,
+          onRetry: _retry,
         ),
-      );
-    }
-
-    if (_shouldShowSegmentationOnboarding) {
-      return SegmentationOnboardingScreen(
-        onCompleted: () {
-          if (!mounted) return;
-          setState(() {
-            _shouldShowSegmentationOnboarding = false;
-          });
-        },
       );
     }
 

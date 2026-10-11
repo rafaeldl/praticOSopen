@@ -4827,4 +4827,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hidePassword => 'Hide password';
+
+  @override
+  String get onboardingSegmentTitle => 'Your trade';
+
+  @override
+  String get onboardingSegmentSubtitle =>
+      'What kind of work do you do? The app comes ready with the services and checklists of your trade.';
+
+  @override
+  String get onboardingInviteCode => 'I got an invite code';
+
+  @override
+  String get onboardingSegmentsError =>
+      'Couldn\'t load the trades. Check your connection.';
+
+  @override
+  String get onboardingSpecialtiesTitle => 'Specialties';
+
+  @override
+  String get onboardingSpecialtiesSubtitle =>
+      'What do you work on? Check what fits. You can change it later.';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingBusinessTitle => 'Your business';
+
+  @override
+  String get onboardingBusinessName => 'What\'s your business called?';
+
+  @override
+  String get onboardingBusinessNamePlaceholder => 'E.g. Joe\'s Repair Shop';
+
+  @override
+  String get onboardingBusinessNameRequired => 'Enter your business name.';
+
+  @override
+  String get onboardingPhoneLabel => 'Phone (optional)';
+
+  @override
+  String get onboardingPhoneHint => 'Shown on the quotes your customers get.';
+
+  @override
+  String get onboardingSamplesInfo =>
+      'We\'ll add a few sample orders so you can see how it works. Delete them anytime.';
+
+  @override
+  String get onboardingCreate => 'Create my PraticOS';
+
+  @override
+  String get onboardingStartWithoutSamples => 'Start without samples';
+
+  @override
+  String get onboardingPreparing => 'Setting up your PraticOS…';
+
+  @override
+  String get onboardingCreateError =>
+      'Couldn\'t finish. Check your connection and try again.';
 }

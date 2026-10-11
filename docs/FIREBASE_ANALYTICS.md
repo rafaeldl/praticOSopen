@@ -36,9 +36,9 @@ Detects auth provider from `FirebaseAuth.instance.currentUser.providerData`:
 | `login` | built-in | `auth_store.dart` | After company loaded (with `has_company` param) |
 | `login` | built-in | `auth_store.dart` | After auth without company (goes to onboarding) |
 | `sign_up` | built-in | `user_store.dart` | After creating new user document in Firestore |
-| `tutorial_begin` | built-in | `welcome_screen.dart` | When user taps "Configure" (`variant: setup`) or "Skip" (`variant: skip`) |
-| `company_created` | custom | `confirm_bootstrap_screen.dart` | After `createCompanyForUser()` in the CREATE branch |
-| `tutorial_complete` | built-in | `confirm_bootstrap_screen.dart` | Before navigating away from onboarding |
+| `tutorial_begin` | built-in | `onboarding_service.dart` | First segment tapped in the first access (`variant: setup`; the old `skip` variant is gone with "Configurar depois") |
+| `company_created` | custom | `onboarding_service.dart` | After `createCompanyForUser()` in the CREATE branch |
+| `tutorial_complete` | built-in | `onboarding_service.dart` | Before navigating away from onboarding |
 
 ### P2 — Engagement & Activation
 
@@ -115,5 +115,4 @@ adb shell setprop debug.firebase.analytics.app .none.
 - `lib/mobx/collaborator_store.dart` — collaborator_invited
 - `lib/mobx/invite_store.dart` — invite_accepted
 - `lib/services/share_link_service.dart` — share (3 variants)
-- `lib/screens/onboarding/welcome_screen.dart` — tutorial_begin
-- `lib/screens/onboarding/confirm_bootstrap_screen.dart` — company_created, tutorial_complete
+- `lib/services/onboarding_service.dart` — tutorial_begin, company_created, tutorial_complete

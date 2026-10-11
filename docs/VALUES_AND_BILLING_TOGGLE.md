@@ -28,6 +28,9 @@ Spec: `docs/superpowers/specs/2026-10-11-financeiro-opcional-design.md`.
 - **Escrita:** `MyCompanySettings` (`more/my_company_screen.dart`) faz
   `update({'useFinancial': bool})` em `/companies/{companyId}`. Regras do
   Firestore não mudam (owner/admin já podem atualizar a empresa).
+- **Primeiro acesso:** a tela "Seu negócio" (`onboarding/your_business_screen.dart`)
+  mostra a mesma linha em "Como você trabalha", começando no padrão do ramo,
+  e grava `useFinancial` na criação da empresa (ver `docs/ONBOARDING.md`).
 - **Seed:** `firebase/scripts/seed_segments.js` grava `useFinancial: true` nos
   segmentos que não definem o campo.
 

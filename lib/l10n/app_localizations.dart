@@ -8769,6 +8769,114 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ocultar senha'**
   String get hidePassword;
+
+  /// No description provided for @onboardingSegmentTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu ramo'**
+  String get onboardingSegmentTitle;
+
+  /// No description provided for @onboardingSegmentSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o seu ramo? Assim o app já vem com os serviços e checklists do seu trabalho.'**
+  String get onboardingSegmentSubtitle;
+
+  /// No description provided for @onboardingInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebi um código de convite'**
+  String get onboardingInviteCode;
+
+  /// No description provided for @onboardingSegmentsError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para carregar os ramos. Confira a internet.'**
+  String get onboardingSegmentsError;
+
+  /// No description provided for @onboardingSpecialtiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Especialidades'**
+  String get onboardingSpecialtiesTitle;
+
+  /// No description provided for @onboardingSpecialtiesSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você atende? Marque o que fizer sentido. Dá para mudar depois.'**
+  String get onboardingSpecialtiesSubtitle;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingBusinessTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu negócio'**
+  String get onboardingBusinessTitle;
+
+  /// No description provided for @onboardingBusinessName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como se chama o seu negócio?'**
+  String get onboardingBusinessName;
+
+  /// No description provided for @onboardingBusinessNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Oficina do Zé'**
+  String get onboardingBusinessNamePlaceholder;
+
+  /// No description provided for @onboardingBusinessNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diga o nome do seu negócio.'**
+  String get onboardingBusinessNameRequired;
+
+  /// No description provided for @onboardingPhoneLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone (opcional)'**
+  String get onboardingPhoneLabel;
+
+  /// No description provided for @onboardingPhoneHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aparece no orçamento que o cliente recebe.'**
+  String get onboardingPhoneHint;
+
+  /// No description provided for @onboardingSamplesInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos colocar umas OS de exemplo para você ver como fica. Você apaga quando quiser.'**
+  String get onboardingSamplesInfo;
+
+  /// No description provided for @onboardingCreate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar meu PraticOS'**
+  String get onboardingCreate;
+
+  /// No description provided for @onboardingStartWithoutSamples.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar sem exemplos'**
+  String get onboardingStartWithoutSamples;
+
+  /// No description provided for @onboardingPreparing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando seu PraticOS…'**
+  String get onboardingPreparing;
+
+  /// No description provided for @onboardingCreateError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para terminar. Confira a internet e tente de novo.'**
+  String get onboardingCreateError;
 }
 
 class _AppLocalizationsDelegate

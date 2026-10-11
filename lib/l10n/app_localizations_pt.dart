@@ -4840,4 +4840,64 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get hidePassword => 'Ocultar senha';
+
+  @override
+  String get onboardingSegmentTitle => 'Seu ramo';
+
+  @override
+  String get onboardingSegmentSubtitle =>
+      'Qual é o seu ramo? Assim o app já vem com os serviços e checklists do seu trabalho.';
+
+  @override
+  String get onboardingInviteCode => 'Recebi um código de convite';
+
+  @override
+  String get onboardingSegmentsError =>
+      'Não deu para carregar os ramos. Confira a internet.';
+
+  @override
+  String get onboardingSpecialtiesTitle => 'Especialidades';
+
+  @override
+  String get onboardingSpecialtiesSubtitle =>
+      'O que você atende? Marque o que fizer sentido. Dá para mudar depois.';
+
+  @override
+  String get onboardingContinue => 'Continuar';
+
+  @override
+  String get onboardingBusinessTitle => 'Seu negócio';
+
+  @override
+  String get onboardingBusinessName => 'Como se chama o seu negócio?';
+
+  @override
+  String get onboardingBusinessNamePlaceholder => 'Ex.: Oficina do Zé';
+
+  @override
+  String get onboardingBusinessNameRequired => 'Diga o nome do seu negócio.';
+
+  @override
+  String get onboardingPhoneLabel => 'Telefone (opcional)';
+
+  @override
+  String get onboardingPhoneHint =>
+      'Aparece no orçamento que o cliente recebe.';
+
+  @override
+  String get onboardingSamplesInfo =>
+      'Vamos colocar umas OS de exemplo para você ver como fica. Você apaga quando quiser.';
+
+  @override
+  String get onboardingCreate => 'Criar meu PraticOS';
+
+  @override
+  String get onboardingStartWithoutSamples => 'Começar sem exemplos';
+
+  @override
+  String get onboardingPreparing => 'Preparando seu PraticOS…';
+
+  @override
+  String get onboardingCreateError =>
+      'Não deu para terminar. Confira a internet e tente de novo.';
 }
