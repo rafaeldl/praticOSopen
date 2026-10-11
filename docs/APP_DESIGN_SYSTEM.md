@@ -19,6 +19,8 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 | `test/theme/app_colors_contrast_test.dart` | Mede o contraste WCAG AA de cada par: claro, escuro e as duas variantes de "Aumentar contraste" |
 | `test/theme/app_typography_test.dart` | Título 34 e texto que cresce com o `textScaler` |
 | `test/theme/app_glass_test.dart` | Vidro translúcido e a volta para fundo opaco |
+| `lib/screens/widgets/app_list_row.dart`, `section_label.dart`, `list_states.dart` | Componentes de lista (ver "Componentes de lista") |
+| `test/widgets/list_base_components_test.dart` | Chevron, quebra de texto e empilhamento em texto grande |
 
 `lib/theme/app_theme.dart` (azul `#2563EB`) e o `primaryColor: CupertinoColors.activeBlue` de `lib/main.dart` são o padrão antigo. Telas migram para os tokens novos à medida que forem redesenhadas; a troca do `primaryColor` global entra junto com a primeira tela redesenhada (a OS).
 
@@ -81,6 +83,27 @@ Fonte do sistema (SF Pro). Rótulos em sentence case, nunca em caixa alta.
 Valores em dinheiro usam `AppTypography.tabular` e sempre `FormatService`.
 
 **Dynamic Type.** Os tamanhos acima são os do tamanho padrão do iPhone. O corpo é 19 (e não 17 como no iOS) porque o público tem a vista cansada; 19 equivale ao Body no tamanho "xL". Todos crescem proporcionalmente com o `MediaQuery.textScaler`, que o Flutter já aplica: **nunca** travar ou limitar o `textScaler`, nem usar altura fixa em linha com texto. O `height` dos estilos é sempre multiplicador do tamanho da fonte (nunca altura em pixels), então a linha cresce junto. Em tamanhos de acessibilidade, a linha de lista empilha o valor embaixo do nome. Protótipo: prancha "Início · texto grande (Dynamic Type)".
+
+## Componentes de lista
+
+Entram nas telas à medida que elas são redesenhadas. Todos usam `AppColors`/`AppTypography` com `.resolveFrom(context)`.
+
+| Widget | Uso |
+|---|---|
+| `AppListRow` | Linha de lista: `leading` opcional, `title` (quebra, sem reticências), `subtitle`, valor à direita (`trailing`, com números tabulares). O chevron aparece só quando há `onTap`, ou seja, quando a linha abre outra tela (`showChevron` força). Altura mínima 44. Com `textScaler` a partir de 1,35 (tamanhos de acessibilidade) o valor desce para baixo do título |
+| `SectionLabel` | Rótulo de seção acima da lista: `label` em `textSecondary`, sentence case (nunca caixa alta), anunciado como cabeçalho pelo leitor de tela |
+| `EmptyState` | Lista vazia: frase, dica opcional e uma ação em texto opcional |
+| `ErrorState` | Falha ao carregar, com "Tentar novamente" (`onRetry`) e mensagem padrão localizada (`listLoadError`) |
+| `LoadingState` | `CupertinoActivityIndicator` com rótulo opcional e `Semantics` de "Carregando..." |
+
+```dart
+AppListRow(
+  title: customer.name!,
+  subtitle: order.deviceName,
+  trailing: FormatService().formatCurrency(order.total),
+  onTap: () => openOrder(order),
+)
+```
 
 ## Estrutura de toda tela
 

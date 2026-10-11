@@ -1656,5 +1656,6 @@
   "asaasErrorInvalidInstallmentCount": "Invalid number of installments. Choose from 2 to 12.",
   "asaasErrorChargeNotOpen": "This charge is no longer open.",
   "asaasErrorValidation": "Asaas rejected the charge data. Check the customer's CPF/CNPJ and email.",
-  "asaasErrorUnavailable": "Asaas is unavailable right now. Please try again shortly."
+  "asaasErrorUnavailable": "Asaas is unavailable right now. Please try again shortly.",
+  "listLoadError": "Could not load this. Check your connection and try again."
 }
