@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/screens/menu_navigation/app_tabs.dart';
@@ -29,8 +28,9 @@ void main() {
     );
 
     for (final label in ['Início', 'Clientes', 'Agenda', 'Financeiro', 'Mais']) {
-      final node = tester.getSemantics(find.text(label));
-      expect(node.hasFlag(SemanticsFlag.isButton), isTrue, reason: label);
+      expect(tester.getSemantics(find.text(label)),
+          containsSemantics(isButton: true),
+          reason: label);
     }
     handle.dispose();
   });

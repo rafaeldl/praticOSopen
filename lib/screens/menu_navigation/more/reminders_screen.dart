@@ -19,9 +19,8 @@ class RemindersScreen extends StatelessWidget {
   String _beforeText(BuildContext context, int minutes) {
     final l10n = context.l10n;
     if (minutes == 0) return l10n.reminderDisabled;
-    if (minutes == 60) return l10n.reminderHourBefore;
-    if (minutes == 120) return l10n.reminderHoursBefore(2);
-    return l10n.reminderMinutesBefore(minutes);
+    if (minutes % 60 == 0) return l10n.reminderHoursValue(minutes ~/ 60);
+    return l10n.reminderMinutesValue(minutes);
   }
 
   void _pickBefore(BuildContext context, ReminderStore store) {
@@ -88,19 +87,20 @@ class RemindersScreen extends StatelessWidget {
 
     return MorePage(
       title: l10n.engagementReminders,
+      subtitle: l10n.remindersSubtitle,
       children: [
         Observer(
           builder: (_) => MoreRows(rows: [
             AppListRow(
               key: const ValueKey('reminder_before'),
-              title: l10n.scheduleReminder,
+              title: l10n.reminderBeforeTitle,
               trailing: _beforeText(context, reminderStore.reminderMinutes),
               onTap: () => _pickBefore(context, reminderStore),
             ),
             MoreSwitchRow(
               key: const ValueKey('reminder_daily'),
-              title: l10n.dailyReminderTitle,
-              subtitle: l10n.dailyReminderDescription,
+              title: l10n.reminderDailyTitle,
+              subtitle: l10n.reminderDailySubtitle,
               value: engagement.dailyEnabled,
               onChanged: (value) {
                 engagement.setDailyEnabled(value);
@@ -109,8 +109,7 @@ class RemindersScreen extends StatelessWidget {
             ),
             MoreSwitchRow(
               key: const ValueKey('reminder_inactivity'),
-              title: l10n.inactivityReminderTitle,
-              subtitle: l10n.inactivityReminderDescription,
+              title: l10n.reminderInactivityTitle,
               value: engagement.inactivityEnabled,
               onChanged: (value) {
                 engagement.setInactivityEnabled(value);
@@ -121,8 +120,8 @@ class RemindersScreen extends StatelessWidget {
             ),
             MoreSwitchRow(
               key: const ValueKey('reminder_pending_os'),
-              title: l10n.pendingOsReminderTitle,
-              subtitle: l10n.pendingOsReminderDescription,
+              title: l10n.reminderPendingTitle,
+              subtitle: l10n.reminderPendingSubtitle,
               value: engagement.pendingOsEnabled,
               onChanged: (value) {
                 engagement.setPendingOsEnabled(value);

@@ -8047,7 +8047,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderAddDueDate.
   ///
   /// In pt, this message translates to:
-  /// **'Prazo de entrega'**
+  /// **'Data de entrega'**
   String get orderAddDueDate;
 
   /// No description provided for @orderAddAnotherDevice.
@@ -9501,6 +9501,162 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'da '**
   String get deviceOwnerPrefix;
+
+  /// No description provided for @financialReportShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório'**
+  String get financialReportShort;
+
+  /// No description provided for @receiveSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{customer} · total {total}'**
+  String receiveSubtitle(String customer, String total);
+
+  /// No description provided for @receiveSubtitleNoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {total}'**
+  String receiveSubtitleNoCustomer(String total);
+
+  /// No description provided for @receiveOrderLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String receiveOrderLink(int number);
+
+  /// No description provided for @receiveAmountHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebeu só uma parte? Mude o valor.'**
+  String get receiveAmountHint;
+
+  /// No description provided for @orderMenuPdfOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF da {order}'**
+  String orderMenuPdfOf(String order);
+
+  /// No description provided for @orderAddItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço ou peça'**
+  String get orderAddItem;
+
+  /// No description provided for @orderAddContractMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir todo mês (contrato)'**
+  String get orderAddContractMonthly;
+
+  /// No description provided for @ratingsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que os clientes acharam'**
+  String get ratingsSubtitle;
+
+  /// No description provided for @ratingsLatest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimas'**
+  String get ratingsLatest;
+
+  /// No description provided for @ratingScoreOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{score} de 5'**
+  String ratingScoreOf(String score);
+
+  /// No description provided for @ratingsAverageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'média de {count} {count, plural, =1{avaliação} other{avaliações}}'**
+  String ratingsAverageOf(int count);
+
+  /// No description provided for @ratingCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{comment}” · OS {number}'**
+  String ratingCommentOrder(String comment, int number);
+
+  /// No description provided for @ratingNoCommentOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem comentário · OS {number}'**
+  String ratingNoCommentOrder(int number);
+
+  /// No description provided for @remindersSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valem só neste celular'**
+  String get remindersSubtitle;
+
+  /// No description provided for @reminderBeforeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes do horário marcado'**
+  String get reminderBeforeTitle;
+
+  /// No description provided for @reminderDailyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do dia às 9h'**
+  String get reminderDailyTitle;
+
+  /// No description provided for @reminderDailySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que tem para hoje'**
+  String get reminderDailySubtitle;
+
+  /// No description provided for @reminderPendingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS paradas'**
+  String get reminderPendingTitle;
+
+  /// No description provided for @reminderPendingSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamentos sem resposta há 7 dias'**
+  String get reminderPendingSubtitle;
+
+  /// No description provided for @reminderInactivityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se eu ficar dias sem abrir o app'**
+  String get reminderInactivityTitle;
+
+  /// No description provided for @reminderMinutesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min'**
+  String reminderMinutesValue(int minutes);
+
+  /// No description provided for @reminderHoursValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{hours} {hours, plural, =1{hora} other{horas}}'**
+  String reminderHoursValue(int hours);
+
+  /// No description provided for @catalogSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você coloca nas OS'**
+  String get catalogSubtitle;
+
+  /// No description provided for @catalogKindWithCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{kind} ({count})'**
+  String catalogKindWithCount(String kind, int count);
+
+  /// No description provided for @catalogTip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'**
+  String get catalogTip;
 }
 
 class _AppLocalizationsDelegate

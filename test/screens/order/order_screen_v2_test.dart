@@ -641,6 +641,18 @@ void main() {
       expect(actions.calls, ['payments']);
     });
 
+    testWidgets('"Adicionar à OS" > "Serviço ou peça" opens the item picker',
+        (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': order()});
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Adicionar à OS ›'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Serviço ou peça'));
+      await tester.pumpAndSettle();
+      expect(find.text('Troca de óleo'), findsOneWidget);
+    });
+
     testWidgets('"…" has 3 groups: add, send · PDF, cancel / delete',
         (tester) async {
       await _pump(tester, screen(OrderStore()), args: {'order': order()});
@@ -653,11 +665,11 @@ void main() {
           .map((a) => ((a.child as Text).data ?? ''))
           .toList();
       expect(labels, hasLength(6)); // 5 actions + "Cancelar" button
-      expect(labels[0], endsWith('›'));
+      expect(labels[0], 'Adicionar à OS ›');
       expect(labels[1], 'Mandar para o cliente');
-      expect(labels[2], 'PDF');
-      expect(labels[3], startsWith('Cancelar '));
-      expect(labels[4], startsWith('Apagar '));
+      expect(labels[2], 'PDF da OS');
+      expect(labels[3], 'Cancelar OS');
+      expect(labels[4], 'Apagar OS');
     });
   });
 

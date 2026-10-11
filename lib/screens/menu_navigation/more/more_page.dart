@@ -13,6 +13,7 @@ class MorePage extends StatelessWidget {
     required this.title,
     required this.children,
     this.previousPageTitle,
+    this.subtitle,
   });
 
   final String title;
@@ -20,6 +21,9 @@ class MorePage extends StatelessWidget {
   /// Back button label; defaults to "Mais", where every page of this kind
   /// is opened from.
   final String? previousPageTitle;
+
+  /// One line under the large title.
+  final String? subtitle;
   final List<Widget> children;
 
   @override
@@ -40,6 +44,23 @@ class MorePage extends StatelessWidget {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  if (subtitle != null)
+                    Padding(
+                      // Lined up with the large title (16 from the edge).
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.blockMargin,
+                        0,
+                        AppSpacing.pageMargin,
+                        AppSpacing.sm,
+                      ),
+                      child: Text(
+                        subtitle!,
+                        key: const Key('morePageSubtitle'),
+                        style: AppTypography.callout.copyWith(
+                          color: AppColors.textSecondary.resolveFrom(context),
+                        ),
+                      ),
+                    ),
                   ...children,
                   const SizedBox(height: AppSpacing.xxl),
                 ]),

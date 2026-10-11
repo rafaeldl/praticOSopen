@@ -5315,4 +5315,117 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceOwnerPrefix => 'owner: ';
+
+  @override
+  String get financialReportShort => 'Report';
+
+  @override
+  String receiveSubtitle(String customer, String total) {
+    return '$customer · total $total';
+  }
+
+  @override
+  String receiveSubtitleNoCustomer(String total) {
+    return 'total $total';
+  }
+
+  @override
+  String receiveOrderLink(int number) {
+    return 'Order $number';
+  }
+
+  @override
+  String get receiveAmountHint => 'Got only part of it? Change the amount.';
+
+  @override
+  String orderMenuPdfOf(String order) {
+    return '$order PDF';
+  }
+
+  @override
+  String get orderAddItem => 'Service or part';
+
+  @override
+  String get orderAddContractMonthly => 'Repeat every month (contract)';
+
+  @override
+  String get ratingsSubtitle => 'What customers thought';
+
+  @override
+  String get ratingsLatest => 'Latest';
+
+  @override
+  String ratingScoreOf(String score) {
+    return '$score of 5';
+  }
+
+  @override
+  String ratingsAverageOf(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ratings',
+      one: 'rating',
+    );
+    return 'average of $count $_temp0';
+  }
+
+  @override
+  String ratingCommentOrder(String comment, int number) {
+    return '“$comment” · Order $number';
+  }
+
+  @override
+  String ratingNoCommentOrder(int number) {
+    return 'No comment · Order $number';
+  }
+
+  @override
+  String get remindersSubtitle => 'They only apply on this phone';
+
+  @override
+  String get reminderBeforeTitle => 'Before the scheduled time';
+
+  @override
+  String get reminderDailyTitle => 'Daily summary at 9am';
+
+  @override
+  String get reminderDailySubtitle => 'What is on for today';
+
+  @override
+  String get reminderPendingTitle => 'Stalled orders';
+
+  @override
+  String get reminderPendingSubtitle => 'Quotes with no answer for 7 days';
+
+  @override
+  String get reminderInactivityTitle => 'If I go days without opening the app';
+
+  @override
+  String reminderMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String reminderHoursValue(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'hours',
+      one: 'hour',
+    );
+    return '$hours $_temp0';
+  }
+
+  @override
+  String get catalogSubtitle => 'What you put on your orders';
+
+  @override
+  String catalogKindWithCount(String kind, int count) {
+    return '$kind ($count)';
+  }
+
+  @override
+  String get catalogTip =>
+      'Tip: you can add items right on the order by typing the name in the search.';
 }

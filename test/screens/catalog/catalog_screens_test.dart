@@ -182,10 +182,28 @@ void main() {
       expect(find.text('Troca de óleo'), findsOneWidget);
       expect(find.text('Filtro de óleo'), findsNothing);
 
-      await tester.tap(find.text('Produtos'));
+      await tester.tap(find.text('Produtos (1)'));
       await tester.pumpAndSettle();
       expect(find.text('Filtro de óleo'), findsOneWidget);
       expect(find.text('Troca de óleo'), findsNothing);
+    });
+
+    testWidgets('subtitle, segment counts and the footer tip', (tester) async {
+      await pump(tester,
+          CatalogListScreen(source: source, permissions: allPermissions));
+      expect(find.text('O que você coloca nas OS'), findsOneWidget);
+      expect(find.text('Serviços (2)'), findsOneWidget);
+      expect(find.text('Produtos (1)'), findsOneWidget);
+      expect(
+        find.text(
+            'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'),
+        findsOneWidget,
+      );
+
+      // No tip while searching.
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'alinh');
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('catalogTip')), findsNothing);
     });
 
     testWidgets('item without price shows "sem valor"; priced one shows money',
@@ -261,7 +279,7 @@ void main() {
       await pump(tester,
           CatalogListScreen(source: source, permissions: allPermissions));
       expect(find.text('Novo serviço'), findsOneWidget);
-      await tester.tap(find.text('Produtos'));
+      await tester.tap(find.text('Produtos (1)'));
       await tester.pumpAndSettle();
       expect(find.text('Novo produto'), findsOneWidget);
     });
@@ -299,7 +317,7 @@ void main() {
         ),
       );
       expect(find.text('Novo serviço'), findsOneWidget);
-      await tester.tap(find.text('Produtos'));
+      await tester.tap(find.text('Produtos (1)'));
       await tester.pumpAndSettle();
       expect(find.text('Novo produto'), findsNothing);
     });

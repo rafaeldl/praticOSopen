@@ -5339,4 +5339,118 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deviceOwnerPrefix => 'de ';
+
+  @override
+  String get financialReportShort => 'Informe';
+
+  @override
+  String receiveSubtitle(String customer, String total) {
+    return '$customer · total $total';
+  }
+
+  @override
+  String receiveSubtitleNoCustomer(String total) {
+    return 'total $total';
+  }
+
+  @override
+  String receiveOrderLink(int number) {
+    return 'Orden $number';
+  }
+
+  @override
+  String get receiveAmountHint => '¿Recibió solo una parte? Cambie el valor.';
+
+  @override
+  String orderMenuPdfOf(String order) {
+    return 'PDF de la $order';
+  }
+
+  @override
+  String get orderAddItem => 'Servicio o repuesto';
+
+  @override
+  String get orderAddContractMonthly => 'Repetir cada mes (contrato)';
+
+  @override
+  String get ratingsSubtitle => 'Lo que opinaron los clientes';
+
+  @override
+  String get ratingsLatest => 'Últimas';
+
+  @override
+  String ratingScoreOf(String score) {
+    return '$score de 5';
+  }
+
+  @override
+  String ratingsAverageOf(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'valoraciones',
+      one: 'valoración',
+    );
+    return 'promedio de $count $_temp0';
+  }
+
+  @override
+  String ratingCommentOrder(String comment, int number) {
+    return '“$comment” · Orden $number';
+  }
+
+  @override
+  String ratingNoCommentOrder(int number) {
+    return 'Sin comentario · Orden $number';
+  }
+
+  @override
+  String get remindersSubtitle => 'Valen solo en este celular';
+
+  @override
+  String get reminderBeforeTitle => 'Antes de la hora marcada';
+
+  @override
+  String get reminderDailyTitle => 'Resumen del día a las 9h';
+
+  @override
+  String get reminderDailySubtitle => 'Qué hay para hoy';
+
+  @override
+  String get reminderPendingTitle => 'OS paradas';
+
+  @override
+  String get reminderPendingSubtitle =>
+      'Presupuestos sin respuesta hace 7 días';
+
+  @override
+  String get reminderInactivityTitle => 'Si paso días sin abrir la app';
+
+  @override
+  String reminderMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String reminderHoursValue(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'horas',
+      one: 'hora',
+    );
+    return '$hours $_temp0';
+  }
+
+  @override
+  String get catalogSubtitle => 'Lo que pones en las OS';
+
+  @override
+  String catalogKindWithCount(String kind, int count) {
+    return '$kind ($count)';
+  }
+
+  @override
+  String get catalogTip =>
+      'Consejo: puedes registrar directo en la OS, escribiendo el nombre en la búsqueda.';
 }

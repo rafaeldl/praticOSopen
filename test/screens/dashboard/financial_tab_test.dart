@@ -278,7 +278,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(CupertinoActionSheet),
-        matching: find.text('Relatório Financeiro'),
+        matching: find.text('Relatório'),
       ),
     );
     await tester.pumpAndSettle();
@@ -291,8 +291,23 @@ void main() {
     final reports = <bool>[];
     await pumpTab(tester, storeWith(open: [ana]), reports: reports);
 
-    await tester.tap(find.text('Relatório Financeiro'));
+    await tester.tap(find.text('Relatório'));
     expect(reports, [false]);
+  });
+
+  testWidgets('dates from other years show the year', (tester) async {
+    final old = _order('o1', 90, customer: 'Dora', total: 500, createdAt: DateTime(2025, 10, 24));
+    final old2 = _order('o2', 91, customer: 'Dora', total: 100, createdAt: DateTime(2025, 11, 7));
+    await pumpTab(tester, storeWith(open: [old, old2, ana]));
+
+    expect(find.text('2 OS · desde 24/10/2025'), findsOneWidget);
+    expect(find.text('OS 183 · desde 02/10'), findsOneWidget);
+    expect(find.textContaining('Dora deve há mais tempo'), findsOneWidget);
+    expect(find.textContaining('desde 24/10/2025'), findsWidgets);
+
+    await tester.tap(find.text('Dora'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('07/11/2025'), findsOneWidget);
   });
 
   testWidgets('english: no Portuguese text and US date format', (tester) async {

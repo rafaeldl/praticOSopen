@@ -493,6 +493,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return ok ?? false;
   }
 
+  /// "OS" for the default label; a segment that renames the order keeps it.
+  String _shortOrderLabel(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    return config.serviceOrder == l10n.order
+        ? l10n.orderShort
+        : config.serviceOrder;
+  }
+
   // ─── "…" menu ────────────────────────────────────────────────────────────
 
   Future<void> _showMenu() async {
@@ -500,7 +508,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (order == null) return;
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
-    final orderLabel = config.serviceOrder;
+    final orderLabel = _shortOrderLabel(config);
     final canCancel = _store.status != 'canceled' &&
         _permissions.canChangeStatus(order, 'canceled');
     final canDelete = order.id != null && _permissions.canDelete(order);
@@ -525,7 +533,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ))
             CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(ctx, 'pdf'),
-              child: Text(l10n.orderMenuPdf),
+              child: Text(l10n.orderMenuPdfOf(orderLabel)),
             ),
           // 3. Cancelar OS / Apagar OS
           if (canCancel)
@@ -576,25 +584,27 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (order == null) return;
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
-    final orderLabel = config.serviceOrder;
+    final orderLabel = _shortOrderLabel(config);
     final saved = order.id != null;
     final canEdit = _permissions.canEditMainFields(order);
     final options = <(String, String)>[
+      if (canEdit) ('item', l10n.orderAddItem),
       if (saved && _permissions.canManageForms(order))
         ('checklist', l10n.orderAddChecklist),
-      if (saved && _permissions.canAttachMedia())
-        ('media', l10n.orderAddMedia),
-      if (saved && order.company?.id != null)
-        ('comment', l10n.orderAddComment),
-      if (canEdit && config.fieldService && !_hasAddress)
-        ('address', l10n.orderAddAddress),
+      if (canEdit && order.dueDate == null) ('due', l10n.orderAddDueDate),
       if (canEdit && config.useScheduling && order.scheduledDate == null)
         ('schedule', l10n.orderAddSchedule),
-      if (canEdit && order.dueDate == null) ('due', l10n.orderAddDueDate),
+      if (canEdit && config.fieldService && !_hasAddress)
+        ('address', l10n.orderAddAddress),
+      if (canEdit)
+        ('device', l10n.orderAddAnotherDevice(config.device.toLowerCase())),
       if (_canGiveDiscount) ('discount', l10n.orderAddDiscount),
+      if (saved && order.company?.id != null)
+        ('comment', l10n.orderAddComment),
+      if (saved && _permissions.canAttachMedia())
+        ('media', l10n.orderAddMedia),
       if (canEdit && saved && config.useContracts && !_store.hasContract)
-        ('contract', l10n.orderAddContract(orderLabel)),
-      if (canEdit) ('device', l10n.orderAddAnotherDevice(config.device)),
+        ('contract', l10n.orderAddContractMonthly),
     ];
     final choice = await showCupertinoModalPopup<String>(
       context: context,
@@ -615,6 +625,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (!mounted || choice == null) return;
     switch (choice) {
+      case 'item':
+        await _addItem();
       case 'checklist':
         await _actions.addChecklist(context, _store);
       case 'media':
@@ -1146,7 +1158,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           AppListRow(
             title: device.name ?? '',
             subtitle: (device.serial?.isNotEmpty ?? false) ? device.serial : null,
-            showChevron: false,
             marked: _marked.contains('device:${device.id}'),
             onTap: () => _changeDevice(device),
           ),
