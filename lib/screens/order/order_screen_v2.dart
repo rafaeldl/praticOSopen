@@ -18,6 +18,8 @@ import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/device_picker_sheet.dart';
+import 'package:praticos/screens/widgets/order_custom_fields.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -54,6 +56,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.catalogSource,
     this.catalogPermissions,
     this.mostUsed,
+    this.devicePicker,
     this.showAssistant = false,
   });
 
@@ -66,6 +69,13 @@ class OrderScreenV2 extends StatefulWidget {
   final CatalogSource? catalogSource;
   final CatalogPermissions? catalogPermissions;
   final Future<List<String>> Function()? mostUsed;
+
+  /// Which vehicle(s) a new item is for when the order has 2 or more
+  /// (tests); defaults to [DevicePickerSheet.show].
+  final Future<DevicePickerResult?> Function(
+    BuildContext context,
+    List<DeviceAggr> devices,
+  )? devicePicker;
 
   /// Shows the disabled Foto / Falar placeholders (assistant comes later).
   final bool showAssistant;
@@ -241,6 +251,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (!mounted || pick == null) return;
+    // 2+ vehicles: same question as the legacy screen (which vehicle, all of
+    // them, several, or general). Set only now so cancelling leaves no state.
+    if (_store.devices.length >= 2) {
+      final result = await (widget.devicePicker ?? DevicePickerSheet.show)(
+        context,
+        _store.devices.toList(),
+      );
+      if (!mounted || result == null) return;
+      applyDevicePick(_store, result);
+    }
     addPickToOrder(_store, pick);
   }
 
@@ -705,27 +725,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           AddRow(label: l10n.orderPickDevice(config.device), onTap: _addDevice),
 
         // What will be done
-        SectionLabel(l10n.orderItemsSection),
-        for (var i = 0; i < services.length; i++)
-          AppListRow(
-            title: _serviceName(services[i]),
-            subtitle: l10n.orderItemKindService,
-            trailing: canViewPrices ? _price(services[i].value) : null,
-            showChevron: false,
-            onTap: () => _editService(i),
-          ),
-        for (var i = 0; i < products.length; i++)
-          AppListRow(
-            title: _productName(products[i]),
-            subtitle: (products[i].quantity ?? 1) > 1
-                ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
-                : l10n.orderItemKindProduct,
-            trailing:
-                canViewPrices ? _price(productLineTotal(products[i])) : null,
-            showChevron: false,
-            onTap: () => _editProduct(i),
-          ),
+        if (_store.devices.length >= 2)
+          ..._buildItemsByDevice(services, products, canViewPrices)
+        else ...[
+          SectionLabel(l10n.orderItemsSection),
+          for (var i = 0; i < services.length; i++) _serviceRow(services, i, canViewPrices),
+          for (var i = 0; i < products.length; i++) _productRow(products, i, canViewPrices),
+        ],
         AddRow(label: l10n.orderWhatGoesTitle, onTap: _addItem),
+
+        ..._buildCustomFields(config),
 
         if (dueDate != null)
           AppListRow(
@@ -773,6 +782,115 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ),
       ],
     );
+  }
+
+  Widget _serviceRow(List<OrderService> services, int i, bool canViewPrices) =>
+      AppListRow(
+        title: _serviceName(services[i]),
+        subtitle: context.l10n.orderItemKindService,
+        trailing: canViewPrices ? _price(services[i].value) : null,
+        showChevron: false,
+        onTap: () => _editService(i),
+      );
+
+  Widget _productRow(List<OrderProduct> products, int i, bool canViewPrices) {
+    final l10n = context.l10n;
+    return AppListRow(
+      title: _productName(products[i]),
+      subtitle: (products[i].quantity ?? 1) > 1
+          ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
+          : l10n.orderItemKindProduct,
+      trailing: canViewPrices ? _price(productLineTotal(products[i])) : null,
+      showChevron: false,
+      onTap: () => _editProduct(i),
+    );
+  }
+
+  /// 2+ vehicles: one block per vehicle (then "Geral" for items without
+  /// one), each with its subtotal, like the legacy screen groups them.
+  List<Widget> _buildItemsByDevice(
+    List<OrderService> services,
+    List<OrderProduct> products,
+    bool canViewPrices,
+  ) {
+    final l10n = context.l10n;
+    final groups = <(String? id, String name)>[
+      for (final d in _store.devices)
+        (
+          d.id,
+          (d.serial?.trim().isNotEmpty ?? false)
+              ? '${d.name} - ${d.serial}'
+              : d.name ?? '',
+        ),
+      (null, l10n.generalNoDevice),
+    ];
+    final widgets = <Widget>[];
+    for (final (id, name) in groups) {
+      // Items of a removed vehicle (stale id) fall into "Geral" too.
+      bool inGroup(String? deviceId) => id == null
+          ? deviceId == null || !_store.devices.any((d) => d.id == deviceId)
+          : deviceId == id;
+      final groupServices = [
+        for (var i = 0; i < services.length; i++)
+          if (inGroup(services[i].deviceId)) i,
+      ];
+      final groupProducts = [
+        for (var i = 0; i < products.length; i++)
+          if (inGroup(products[i].deviceId)) i,
+      ];
+      if (groupServices.isEmpty && groupProducts.isEmpty) continue;
+      widgets.add(SectionLabel(name));
+      for (final i in groupServices) {
+        widgets.add(_serviceRow(services, i, canViewPrices));
+      }
+      for (final i in groupProducts) {
+        widgets.add(_productRow(products, i, canViewPrices));
+      }
+      if (canViewPrices) {
+        final subtotal = summarizeOrderItems(
+          [for (final i in groupServices) services[i]],
+          [for (final i in groupProducts) products[i]],
+        );
+        widgets.add(AppListRow(
+          title: l10n.subtotal,
+          titleStyle: AppTypography.callout,
+          trailing: _format.formatCurrency(subtotal.total),
+          showChevron: false,
+        ));
+      }
+    }
+    if (widgets.isEmpty) widgets.add(SectionLabel(l10n.orderItemsSection));
+    return widgets;
+  }
+
+  /// Segment custom fields of the order (same fields and save as the legacy
+  /// screen, see `order_custom_fields.dart`).
+  List<Widget> _buildCustomFields(SegmentConfigProvider config) {
+    final grouped = orderCustomFieldsFor(config);
+    if (grouped.isEmpty) return const [];
+    return [
+      OrderCustomFieldSections(
+        grouped: grouped,
+        customData: _store.order?.customData,
+        locale: config.locale,
+        onChanged: (data) {
+          setState(() => _store.order?.customData = data);
+          _store.createItem();
+        },
+        sectionBuilder: (context, name, rows) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionLabel(name),
+            CupertinoListSection.insetGrouped(
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.blockMargin,
+              ),
+              children: rows,
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   String _price(double? value) =>
@@ -1024,6 +1142,26 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         ),
       ),
     );
+  }
+}
+
+/// Applies the answer of [DevicePickerSheet] to the store so the next
+/// `addService`/`addProduct` goes to the chosen vehicle(s): one, several,
+/// all (a copy each) or general (none).
+void applyDevicePick(OrderStore store, DevicePickerResult result) {
+  store
+    ..pendingDeviceId = null
+    ..pendingDuplicateAll = false
+    ..pendingDeviceIds = null;
+  switch (result.action) {
+    case DevicePickerAction.specific:
+      store.pendingDeviceId = result.device?.id;
+    case DevicePickerAction.all:
+      store.pendingDuplicateAll = true;
+    case DevicePickerAction.multiSpecific:
+      store.pendingDeviceIds = result.deviceIds;
+    case DevicePickerAction.general:
+      break;
   }
 }
 

@@ -16,6 +16,7 @@ Specs: `docs/superpowers/specs/2026-10-11-telas-os-ia-design.md` (vale sobre) `2
 | `lib/screens/order/order_item_search_screen.dart` | "O que vai na OS?": uma busca em serviços e produtos; "Criar “X” e pôr na OS"; "Mais usados" |
 | `lib/screens/order/order_item_sheet.dart` | Sheet do item: preço (em branco = sem valor), quantidade (produto), "Tirar da OS" |
 | `lib/screens/order/order_screen_services.dart` | `OrderPermissions` e `OrderScreenActions` (PDF, link do cliente, pagamentos, tela completa), injetáveis nos testes |
+| `lib/screens/widgets/order_custom_fields.dart` | Campos do segmento (`service_order.*`): `OrderCustomFieldSections`, `applyCustomFieldValue`; compartilhado com o `OrderForm` antigo |
 | `lib/utils/order_items.dart` | Soma sem os itens sem valor; "Mais usados" derivado das últimas ~50 OS |
 
 Sem modelo novo e sem campo novo. Estado continua no `OrderStore`; repositórios os mesmos.
@@ -36,7 +37,9 @@ Sem modelo novo e sem campo novo. Estado continua no `OrderStore`; repositórios
 5. "Pronta" bloqueia com checklist pendente; "Cancelar OS" pede confirmação.
 6. "…" com 3 grupos: "Adicionar à OS ›" (prazo de entrega, outro veículo, e "Checklist, fotos, comentário e mais", que abre a tela completa); "Mandar para o cliente" · "PDF"; "Cancelar OS" / "Apagar OS" em vermelho.
 7. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
-8. Foto e "Falar o que fazer" ficam escondidos (`showAssistant`) até a fase 2 (IA).
+8. Campos do segmento (`customData`) aparecem na OS, agrupados por seção, com as mesmas regras do `OrderForm` (campos já fixos da tela ficam de fora; esvaziar o último apaga `customData`). Gravam na hora numa OS salva e só em memória até "Salvar OS" numa nova.
+9. Com 2 ou mais veículos os itens se agrupam por veículo (e "Geral" para os sem veículo), cada bloco com o seu "Subtotal" (só com `viewPrices`). Ao pôr um item, a mesma pergunta da tela antiga (`DevicePickerSheet`): um veículo, vários, todos ou geral.
+10. Foto e "Falar o que fazer" ficam escondidos (`showAssistant`) até a fase 2 (IA).
 
 ## Exemplos de Uso
 
