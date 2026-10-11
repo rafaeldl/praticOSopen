@@ -1,11 +1,9 @@
 {
   "@@locale": "pt",
-
   "appName": "PraticOS",
   "@appName": {
     "description": "Nome do aplicativo"
   },
-
   "home": "Início",
   "orders": "Ordens de Serviço",
   "customers": "Clientes",
@@ -18,7 +16,6 @@
   "company": "Empresa",
   "team": "Equipe",
   "collaborators": "Colaboradores",
-
   "save": "Salvar",
   "cancel": "Cancelar",
   "delete": "Excluir",
@@ -57,12 +54,11 @@
   "no": "Não",
   "more": "Mais",
   "less": "Menos",
-  "seeAll": "Ver Todos",
+  "seeAll": "Ver todos",
   "seeMore": "Ver Mais",
   "details": "Detalhes",
   "options": "Opções",
   "actions": "Ações",
-
   "status": "Status",
   "statusAll": "Todos",
   "statusPending": "Pendente",
@@ -77,7 +73,6 @@
   "statusRejected": "Rejeitado",
   "statusOpen": "Aberto",
   "statusClosed": "Fechado",
-
   "payments": "Pagamentos",
   "payment": "Pagamento",
   "paid": "Pago",
@@ -131,9 +126,8 @@
       }
     }
   },
-
   "requiredField": "Campo obrigatório",
-  "invalidEmail": "E-mail inválido",
+  "invalidEmail": "Email inválido",
   "invalidPhone": "Telefone inválido",
   "invalidValue": "Valor inválido",
   "invalidDate": "Data inválida",
@@ -164,21 +158,19 @@
       }
     }
   },
-
   "takePhoto": "Tirar Foto",
   "chooseFromGallery": "Escolher da Galeria",
   "changePhoto": "Alterar Foto",
   "removePhoto": "Remover Foto",
   "addPhoto": "Adicionar Foto",
   "addPhotoOrAttachment": "Foto / Anexo",
-  "photos": "Fotos",
+  "photos": "fotos",
   "photo": "Foto",
   "camera": "Câmera",
   "gallery": "Galeria",
   "noPhotos": "Nenhuma foto",
   "photoAdded": "Foto adicionada",
   "photoRemoved": "Foto removida",
-
   "today": "Hoje",
   "yesterday": "Ontem",
   "tomorrow": "Amanhã",
@@ -193,10 +185,9 @@
   "date": "Data",
   "time": "Hora",
   "dateTime": "Data e Hora",
-  "startDate": "Data Inicial",
-  "endDate": "Data Final",
+  "startDate": "Data de início",
+  "endDate": "Data de término",
   "period": "Período",
-
   "confirmDelete": "Confirmar Exclusão",
   "confirmDeleteMessage": "Deseja realmente excluir este item?",
   "confirmDeleteMessageNamed": "Deseja realmente excluir \"{name}\"?",
@@ -218,7 +209,6 @@
   "keepEditing": "Continuar Editando",
   "leave": "Sair",
   "stay": "Ficar",
-
   "customer": "Cliente",
   "newCustomer": "Novo Cliente",
   "editCustomer": "Editar Cliente",
@@ -229,7 +219,6 @@
   "selectCustomer": "Selecionar Cliente",
   "noCustomers": "Nenhum cliente cadastrado",
   "addCustomer": "Adicionar Cliente",
-
   "name": "Nome",
   "namePlaceholder": "Ex: João Silva",
   "fullName": "Nome Completo",
@@ -258,11 +247,10 @@
   "cpf": "CPF",
   "cnpj": "CNPJ",
   "cpfCnpj": "CPF/CNPJ",
-
   "order": "Ordem de Serviço",
   "orderShort": "OS",
   "orderOverdue": "Atrasada",
-  "newOrder": "Nova OS",
+  "newOrder": "NOVA",
   "editOrder": "Editar OS",
   "orderDetails": "Detalhes da OS",
   "orderNumber": "Número da OS",
@@ -295,7 +283,6 @@
   "priorityMedium": "Média",
   "priorityHigh": "Alta",
   "priorityUrgent": "Urgente",
-
   "device": "Equipamento",
   "deviceCategory": "Categoria",
   "newDevice": "Novo Equipamento",
@@ -319,7 +306,6 @@
   "accessory": "Acessório",
   "defects": "Defeitos",
   "defect": "Defeito",
-
   "service": "Serviço",
   "newService": "Novo Serviço",
   "editService": "Editar Serviço",
@@ -331,7 +317,6 @@
   "addService": "Adicionar Serviço",
   "serviceValue": "Valor do Serviço",
   "laborCost": "Mão de Obra",
-
   "product": "Produto",
   "newProduct": "Novo Produto",
   "editProduct": "Editar Produto",
@@ -351,7 +336,6 @@
   "unit": "Unidade",
   "category": "Categoria",
   "categories": "Categorias",
-
   "total": "Total",
   "subtotal": "Subtotal",
   "discount": "Desconto",
@@ -373,7 +357,6 @@
   "totalPaid": "Total Pago",
   "remaining": "Restante",
   "change": "Troco",
-
   "savedSuccessfully": "Salvo com sucesso",
   "deletedSuccessfully": "Excluído com sucesso",
   "updatedSuccessfully": "Atualizado com sucesso",
@@ -381,7 +364,7 @@
   "copiedSuccessfully": "Copiado com sucesso",
   "sentSuccessfully": "Enviado com sucesso",
   "errorOccurred": "Ocorreu um erro",
-  "tryAgain": "Tente novamente",
+  "tryAgain": "Tentar novamente",
   "operationFailed": "Operação falhou",
   "noInternetConnection": "Sem conexão com a internet",
   "connectionError": "Erro de conexão",
@@ -391,7 +374,6 @@
   "notFound": "Não encontrado",
   "timeout": "Tempo esgotado",
   "sessionExpired": "Sessão expirada",
-
   "login": "Entrar",
   "logout": "Sair",
   "logoutConfirm": "Deseja realmente sair?",
@@ -418,12 +400,11 @@
   "termsAndConditions": "Termos e Condições",
   "privacyPolicy": "Política de Privacidade",
   "agreeToTerms": "Eu concordo com os Termos e Condições",
-
   "welcome": "Bem-vindo",
   "welcomeBack": "Bem-vindo de volta",
   "getStarted": "Começar",
   "letsStart": "Vamos Começar",
-  "selectSegment": "Selecione seu Segmento",
+  "selectSegment": "Selecionar Segmento",
   "selectSpecialties": "Selecione suas Especialidades",
   "companyName": "Nome da Empresa",
   "setupComplete": "Configuração Concluída",
@@ -431,8 +412,6 @@
   "startUsing": "Comece a usar o PraticOS",
   "skip": "Pular",
   "continue_": "Continuar",
-  "finish": "Finalizar",
-
   "language": "Idioma",
   "selectLanguage": "Selecionar Idioma",
   "portuguese": "Português",
@@ -456,7 +435,6 @@
   "contactUs": "Fale Conosco",
   "rateApp": "Avaliar App",
   "shareApp": "Compartilhar App",
-
   "dashboard": "Painel",
   "overview": "Visão Geral",
   "statistics": "Estatísticas",
@@ -472,8 +450,7 @@
   "topServices": "Serviços Mais Realizados",
   "topProducts": "Produtos Mais Vendidos",
   "recentOrders": "OS Recentes",
-  "recentCustomers": "Clientes Recentes",
-
+  "recentCustomers": "Usados por último",
   "role": "Função",
   "noRole": "Sem perfil",
   "roles": "Funções",
@@ -494,7 +471,6 @@
   "pendingInvitations": "Convites Pendentes",
   "acceptInvitation": "Aceitar Convite",
   "declineInvitation": "Recusar Convite",
-
   "form": "Formulário",
   "forms": "Formulários",
   "checklist": "Checklist",
@@ -508,11 +484,10 @@
   "clearSignature": "Limpar Assinatura",
   "required": "Obrigatório",
   "optional": "Opcional",
-  "complete": "Completo",
+  "complete": "Concluir",
   "incomplete": "Incompleto",
   "answered": "Respondido",
   "notAnswered": "Não Respondido",
-
   "quote": "Orçamento",
   "quotes": "Orçamentos",
   "newQuote": "Novo Orçamento",
@@ -534,7 +509,6 @@
     }
   },
   "expired": "Expirado",
-
   "active": "Ativo",
   "inactive": "Inativo",
   "enabled": "Habilitado",
@@ -559,7 +533,6 @@
   "popular": "Popular",
   "featured": "Destaque",
   "recommended": "Recomendado",
-
   "welcomeToApp": "Bem-vindo ao PraticOS",
   "appSubtitle": "Gerencie suas ordens de serviço\nde forma simples e eficiente",
   "signInWithEmail": "Entrar com email",
@@ -597,10 +570,22 @@
   "integrationsRevoke": "Revogar",
   "integrationsRevokeConfirm": "Revogar esta conexão? Quem estiver usando esta URL perde o acesso.",
   "integrationsCreatedAt": "Criada em {date}",
-  "@integrationsCreatedAt": { "placeholders": { "date": { "type": "String" } } },
+  "@integrationsCreatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "integrationsNeverUsed": "Nunca usada",
   "integrationsLastUsed": "Último uso em {date}",
-  "@integrationsLastUsed": { "placeholders": { "date": { "type": "String" } } },
+  "@integrationsLastUsed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "integrationsErrorForbidden": "Apenas o dono ou administradores podem gerenciar integrações.",
   "integrationsErrorNotFound": "Esta conexão não existe mais.",
   "integrationsErrorGeneric": "Não foi possível concluir. Tente novamente.",
@@ -635,14 +620,12 @@
   "nowDeletingAccount": "Agora você pode prosseguir com a exclusão da conta.",
   "reauthenticationFailed": "Falha na Re-autenticação",
   "couldNotReauthenticate": "Não foi possível autenticar novamente.",
-
   "errorLoadingData": "Erro ao carregar dados",
   "tapToAddFirst": "Toque em + para adicionar",
   "confirmRemove": "Deseja remover",
   "remove": "Remover",
   "noPermission": "Sem Permissão",
   "noPermissionToRemove": "Você não tem permissão para remover este item.",
-
   "professionalizeYourBusiness": "Profissionalize seu negócio",
   "configureCompanyProfile": "Configure o perfil da sua empresa para emitir ordens de serviço profissionais agora mesmo.",
   "professionalOrders": "Ordens Profissionais",
@@ -663,7 +646,6 @@
   "noResultsFound": "Nenhum resultado encontrado",
   "unitValue": "Valor unitário",
   "setAsCover": "Definir como capa",
-
   "roleDescAdmin": "Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.",
   "roleAdmin": "Administrador",
   "roleDescSupervisor": "Coordena equipes e equipamentos. Não visualiza valores financeiros.",
@@ -674,8 +656,6 @@
   "roleConsultant": "Consultor",
   "roleDescTechnician": "Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.",
   "roleTechnician": "Técnico",
-
-  "no": "Nenhum",
   "noFeminine": "Nenhuma",
   "registered": "cadastrado",
   "registeredFeminine": "cadastrada",
@@ -684,7 +664,6 @@
   "tapPlusToAddYourFirstFeminine": "Toque em + para adicionar sua primeira",
   "doYouWantToRemoveThe": "Deseja remover o",
   "doYouWantToRemoveTheFeminine": "Deseja remover a",
-
   "searchCollaborator": "Buscar colaborador",
   "noCollaboratorFound": "Nenhum colaborador encontrado",
   "pending": "Pendente",
@@ -708,30 +687,21 @@
       }
     }
   },
-  "ok": "OK",
   "emailNotProvided": "Email não informado",
-
   "newCollaborator": "Novo Colaborador",
   "userInformation": "Informações do Usuário",
   "userWillReceiveInviteByEmail": "O usuário receberá um convite por email.",
   "emailPlaceholder": "email@exemplo.com",
-  "profile": "Perfil",
   "collaboratorAdded": "Colaborador Adicionado",
   "collaboratorAddedSuccess": "O colaborador foi adicionado à empresa com sucesso.",
   "inviteSent": "Convite Enviado",
   "inviteCreatedMessage": "O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.",
-  "required": "Obrigatório",
-  "invalidEmail": "Email inválido",
-  "no": "Não",
-
   "financialDashboard": "Painel Financeiro",
   "financial": "Financeiro",
   "financialAccessDenied": "Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.",
-  "today": "Hoje",
   "week": "Semana",
   "month": "Mês",
   "year": "Ano",
-  "period": "Período",
   "currentMonth": "Mês atual",
   "currentYear": "Ano atual",
   "tapToReturnToCurrent": "Toque para voltar ao atual",
@@ -739,12 +709,7 @@
   "start": "Início",
   "end": "Fim",
   "billing": "Faturamento",
-  "received": "Recebido",
-  "toReceive": "A Receber",
   "composition": "Composição",
-  "services": "Serviços",
-  "products": "Produtos",
-  "customers": "Clientes",
   "customersReceived": "Clientes - Recebido",
   "customersToReceive": "Clientes - A Receber",
   "customerWithoutName": "Cliente sem nome",
@@ -754,7 +719,6 @@
   "noServiceDataInPeriod": "Sem dados de serviços neste período",
   "noProductDataInPeriod": "Sem dados de produtos neste período",
   "seeLess": "Ver menos",
-  "seeAll": "Ver todos",
   "seeAllCount": "Ver todos ({count})",
   "@seeAllCount": {
     "placeholders": {
@@ -765,22 +729,17 @@
   },
   "toReceiveLowerCase": "A receber",
   "errorGeneratingReport": "Erro ao gerar relatório",
-  "paid": "Pago",
   "pendingPayment": "Pendente",
-
-  "selectSegment": "Selecionar Segmento",
   "selectCountry": "Selecionar País",
   "chooseCompanySegment": "Escolha o ramo de atuação da empresa",
   "contacts": "Contatos",
   "contactMethods": "Meios de Contato",
   "howCustomersCanReachYou": "Como seus clientes podem falar com você?",
-
   "preparing": "Preparando...",
   "uploadingLogo": "Enviando logo...",
   "creatingCompany": "Criando empresa...",
   "importingForms": "Importando formulários...",
   "creatingSampleData": "Criando dados de exemplo...",
-
   "createSampleDataQuestion": "Deseja criar dados de exemplo?",
   "sampleDataDescription": "Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:",
   "commonServicesForSegment": "Serviços comuns do seu segmento",
@@ -790,10 +749,7 @@
   "demoCustomer": "Cliente de demonstração",
   "canEditOrDeleteAnytime": "Você poderá editar ou excluir esses dados a qualquer momento.",
   "noStartFromScratch": "Não, começar do zero",
-
   "changeLogo": "Alterar Logo",
-  "takePhoto": "Tirar Foto",
-  "chooseFromGallery": "Escolher da Galeria",
   "companyNamePlaceholder": "Nome da Empresa",
   "companyEmailPlaceholder": "contato@empresa.com",
   "phonePlaceholder": "(00) 00000-0000",
@@ -802,7 +758,6 @@
   "segment": "Segmento",
   "website": "Site",
   "noName": "Sem nome",
-
   "errorSendingPhoto": "Erro ao Enviar Foto",
   "couldNotSendPhoto": "Não foi possível enviar a foto. Tente novamente.",
   "errorSendingPhotos": "Erro ao Enviar Fotos",
@@ -818,8 +773,6 @@
   "type": "Digitar",
   "errorLoadingPhoto": "Erro ao carregar foto",
   "reopen": "Reabrir",
-  "complete": "Concluir",
-
   "addItems": "Adicione itens",
   "pleaseAddAtLeastOneItem": "Por favor, adicione pelo menos um item ao procedimento.",
   "couldNotSaveForm": "Não foi possível salvar o procedimento.",
@@ -836,15 +789,8 @@
   "itemType": "Tipo",
   "optionsHeader": "OPÇÕES",
   "typeOneOptionPerLine": "Digite uma opção por linha",
-  "required": "Obrigatório",
   "allowPhotos": "Permitir fotos",
   "userCanAttachPhotos": "Usuário pode anexar fotos a este item",
-  "active": "Ativo",
-  "save": "Salvar",
-  "optional": "Opcional",
-  "editOrder": "Editar OS",
-  "newOrder": "Nova OS",
-
   "procedures": "Procedimentos",
   "searchProcedure": "Buscar procedimento",
   "myProcedures": "Meus Procedimentos",
@@ -875,17 +821,13 @@
     }
   },
   "errorLoadingProcedures": "Erro ao carregar procedimentos",
-  "tryAgain": "Tentar novamente",
   "importProcedure": "Importar Procedimento",
   "importForMyCompany": "Importar para Minha Empresa",
   "couldNotImportProcedure": "Não foi possível importar o procedimento. Tente novamente.",
   "procedureImportedSuccessfully": "Procedimento importado com sucesso!",
   "closeDialog": "Fechar",
-
   "companyLogo": "Logo da Empresa",
   "information": "INFORMAÇÕES",
-  "address": "Endereço",
-
   "pendingInvites": "Convites Pendentes",
   "youHaveBeenInvited": "Você foi convidado para fazer parte de empresas no PraticOS!",
   "noPendingInvites": "Nenhum convite pendente",
@@ -949,18 +891,14 @@
       }
     }
   },
-
   "markAsToReceive": "Marcar como A Receber",
   "thisWillRemoveAllPayments": "Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?",
   "attention": "Atenção",
-
   "almostThere": "Quase lá!",
   "yesCreateSampleData": "Sim, criar dados de exemplo",
-
   "availableSpecialties": "ESPECIALIDADES DISPONÍVEIS",
   "pleaseSelectAtLeastOneSpecialty": "Por favor, selecione pelo menos uma especialidade para continuar.",
   "selectSpecialtiesDescription": "Selecione as especialidades da sua empresa.\nVocê pode escolher mais de uma.",
-  "noName": "Sem nome",
   "selectAtLeastOneOption": "Selecione ao menos uma opção",
   "continueWithCount": "Continuar ({count} {count, plural, =1{selecionada} other{selecionadas}})",
   "@continueWithCount": {
@@ -970,7 +908,6 @@
       }
     }
   },
-
   "financialReport": "Relatório Financeiro",
   "totalBilling": "Faturamento Total",
   "financialSummary": "Resumo Financeiro",
@@ -980,14 +917,12 @@
   "productRanking": "Ranking de Produtos",
   "paidOrders": "Ordens Pagas",
   "ordersToReceive": "Ordens a Receber",
-  "date": "Data",
   "vehicle": "Veículo",
   "valueColumn": "Valor",
   "statusColumn": "Status",
   "quantityShort": "Qtd",
   "noOrdersInPeriod": "Nenhuma ordem neste período",
   "notInformed": "Não informado",
-  "company": "Empresa",
   "nOrdersCount": "{count} {count, plural, =1{ordem} other{ordens}}",
   "@nOrdersCount": {
     "placeholders": {
@@ -1043,16 +978,13 @@
       }
     }
   },
-  "newOrder": "NOVA",
   "generatedByPraticos": "Gerado por PraticOS",
   "serviceDescriptionColumn": "DESCRICAO DO SERVICO",
   "descriptionColumn": "DESCRICAO",
   "unitShort": "UNIT.",
-  "subtotal": "Subtotal",
   "alreadyPaid": "Ja pago",
   "remainingBalance": "SALDO RESTANTE",
   "totalToPay": "TOTAL A PAGAR",
-  "customerSignature": "Assinatura do Cliente",
   "photosAvailableDigitally": "Fotos disponiveis no sistema digital",
   "attachedPhotosCount": "Fotos Anexadas ({count})",
   "@attachedPhotosCount": {
@@ -1081,7 +1013,6 @@
       }
     }
   },
-
   "connectedChannels": "Canais Conectados",
   "linked": "Vinculado",
   "notLinked": "Não vinculado",
@@ -1107,7 +1038,6 @@
   "scanQRCodeOrTapButton": "Escaneie o QR code ou toque no botão abaixo",
   "linkYourWhatsApp": "Vincule seu WhatsApp",
   "linkWhatsAppBenefit": "Receba notificações e gerencie suas OS pelo WhatsApp",
-
   "shareWithCustomer": "Compartilhar com Cliente",
   "shareLinkTitle": "Link de Acompanhamento",
   "shareLinkDescription": "Envie este link para o cliente acompanhar a OS",
@@ -1145,8 +1075,6 @@
   "linkRevoked": "Link revogado",
   "activeLinks": "Links Ativos",
   "noActiveLinks": "Nenhum link ativo",
-
-  "comments": "Comentários",
   "noComments": "Nenhum comentário",
   "addComment": "Adicionar comentário",
   "commentPlaceholder": "Digite seu comentário...",
@@ -1159,13 +1087,11 @@
   "publicCommentHint": "Visível para o cliente",
   "markAsInternal": "Marcar como interno",
   "sendComment": "Enviar",
-
   "approveQuoteAction": "Aprovar Orçamento",
   "rejectQuoteAction": "Rejeitar Orçamento",
   "quoteApprovedByCustomer": "Orçamento aprovado pelo cliente",
   "quoteRejectedByCustomer": "Orçamento rejeitado pelo cliente",
   "rejectionReason": "Motivo da rejeição",
-
   "linkValidity": "Validade do Link",
   "validFor": "Válido por",
   "days": "dias",
@@ -1175,7 +1101,6 @@
   "loadingExistingLinks": "Verificando links existentes...",
   "advancedOptions": "Opções avançadas",
   "sendToCustomer": "Enviar para o cliente",
-
   "rating": "Avaliação",
   "ratings": "Avaliações",
   "averageRating": "Média das avaliações",
@@ -1201,7 +1126,6 @@
       }
     }
   },
-
   "notifyCustomerQuestion": "Notificar cliente?",
   "notifyCustomerDescription": "Deseja enviar a atualização para {customerName} via WhatsApp?",
   "@notifyCustomerDescription": {
@@ -1215,10 +1139,8 @@
   "statusUpdateApproved": "Orçamento aprovado!",
   "statusUpdateProgress": "Serviço em andamento!",
   "statusUpdateDone": "Serviço concluído!",
-
   "connectWhatsApp": "Conecte seu WhatsApp",
   "connectWhatsAppBannerDescription": "Receba notificações, gerencie OS e envie atualizações para clientes pelo WhatsApp.",
-
   "whatsappOnboardingTitle": "Conecte seu WhatsApp",
   "whatsappOnboardingSubtitle": "Aproveite ao máximo o PraticOS conectando seu WhatsApp",
   "whatsappBenefitNotifications": "Receba notificações de novas OS",
@@ -1226,7 +1148,6 @@
   "whatsappBenefitClients": "Envie atualizações para clientes",
   "linkNow": "Vincular agora",
   "maybeLater": "Talvez depois",
-
   "inviteWhatsAppMessage": "Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: {code}\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
   "@inviteWhatsAppMessage": {
     "placeholders": {
@@ -1236,14 +1157,11 @@
     }
   },
   "downloadApp": "Baixe o app",
-
   "cannotRemoveOnlyAdmin": "Não é possível remover o único administrador da empresa. Promova outro colaborador a administrador antes de remover este.",
   "cannotChangeOnlyAdminRole": "Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.",
   "cannotRemoveSelf": "Você não pode remover a si mesmo da empresa.",
   "invalidInviteCompanyNotFound": "Convite inválido: empresa não encontrada.",
-
   "shareInviteAction": "Compartilhar Convite",
-
   "inviteExpiresInDays": "{count, plural, =1{Expira em 1 dia} other{Expira em {count} dias}}",
   "@inviteExpiresInDays": {
     "placeholders": {
@@ -1261,43 +1179,47 @@
     }
   },
   "inviteExpiresSoon": "Expira em breve",
-
   "duplicateInviteTitle": "Convite Existente",
   "duplicateInviteMessage": "Já existe um convite pendente para este email/telefone.",
   "resendExistingInvite": "Reenviar Existente",
   "cancelAndCreateNew": "Cancelar e Criar Novo",
-
   "agenda": "Agenda",
   "noScheduledOrders": "Nenhuma OS agendada para este dia",
   "allTeam": "Toda a Equipe",
   "filterByTechnician": "Filtrar por técnico",
   "allDay": "Dia todo",
   "clearSchedule": "Remover agendamento",
-
   "scheduleReminder": "Lembrete de agendamento",
   "reminderDisabled": "Desativado",
   "reminderMinutesBefore": "{minutes} min antes",
   "@reminderMinutesBefore": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "reminderHourBefore": "1 hora antes",
   "reminderHoursBefore": "{hours} horas antes",
   "@reminderHoursBefore": {
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "reminderTitle": "Agendamento em breve",
   "reminderBodyOrder": "OS #{orderNumber} - {customerName}",
   "@reminderBodyOrder": {
     "placeholders": {
-      "orderNumber": { "type": "String" },
-      "customerName": { "type": "String" }
+      "orderNumber": {
+        "type": "String"
+      },
+      "customerName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteWhatsAppSuccessTitle": "Colaborador Convidado",
   "inviteWhatsAppSuccessMessage": "{name} receberá o convite automaticamente ao entrar em contato com o bot PraticOS no WhatsApp.",
   "@inviteWhatsAppSuccessMessage": {
@@ -1353,7 +1275,6 @@
       }
     }
   },
-
   "features": "Funcionalidades",
   "fieldServiceLabel": "Atendimento externo",
   "fieldServiceDescription": "Exibir campo de local do atendimento",
@@ -1387,8 +1308,6 @@
   "frequencyWeekly": "Semanal",
   "frequencyMonthly": "Mensal",
   "frequencyYearly": "Anual",
-  "startDate": "Data de início",
-  "endDate": "Data de término",
   "selectDate": "Selecionar data",
   "deviceStatusActive": "Ativo",
   "deviceStatusMaintenance": "Em manutenção",
@@ -1403,7 +1322,6 @@
   "noOrdersDueOnDate": "Nenhuma OS com vencimento neste dia",
   "companyFeatures": "Funcionalidades da empresa",
   "youCanChangeThisLater": "Pode alterar depois nas configurações",
-
   "documents": "Documentos",
   "addDocument": "Adicionar Documento",
   "receipt": "Comprovante",
@@ -1427,7 +1345,6 @@
   "fromFiles": "Arquivos",
   "selectDocumentType": "Selecione o tipo de documento",
   "errorUploadingDocument": "Erro ao enviar documento",
-
   "engagementReminders": "Lembretes",
   "dailyReminderTitle": "Lembrete diário",
   "dailyReminderDescription": "Receba um lembrete todo dia às 9h",
@@ -1447,10 +1364,11 @@
   "pendingOsNotificationBody": "Você tem {count} OS paradas há mais de 7 dias.",
   "@pendingOsNotificationBody": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "legalSection": "Jurídico",
   "termsOfService": "Termos e Condições",
   "termsOfServicePlaceholder": "Ex: Equipamentos não retirados em 90 dias poderão ser descartados...",
@@ -1475,68 +1393,92 @@
   "pdfTrackOnline": "Acompanhe online",
   "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
   "pdfEquipment": "Equipamento",
-
   "upgrade": "Fazer upgrade",
-  "photos": "fotos",
   "formTemplates": "formulários",
-
   "featureGateNearLimit": "Restam {count} {feature}",
   "@featureGateNearLimit": {
     "placeholders": {
-      "count": { "type": "int" },
-      "feature": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "featureGateLimitReached": "Limite de {feature} atingido",
   "@featureGateLimitReached": {
     "placeholders": {
-      "feature": { "type": "String" }
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "featureGateUpgradeSuggestion": "Faça upgrade para o plano {plan} para mais",
   "@featureGateUpgradeSuggestion": {
     "placeholders": {
-      "plan": { "type": "String" }
+      "plan": {
+        "type": "String"
+      }
     }
   },
   "featureGateUsageInfo": "Usado {current} de {limit}",
   "@featureGateUsageInfo": {
     "placeholders": {
-      "current": { "type": "int" },
-      "limit": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
     }
   },
   "featureGateLimitModalTitle": "Limite atingido",
   "featureGateLimitModalMessage": "Você atingiu o limite de {feature} do seu plano {plan}.",
   "@featureGateLimitModalMessage": {
     "placeholders": {
-      "feature": { "type": "String" },
-      "plan": { "type": "String" }
+      "feature": {
+        "type": "String"
+      },
+      "plan": {
+        "type": "String"
+      }
     }
   },
   "featureGateLimitModalUsage": "{current} de {limit} {feature}",
   "@featureGateLimitModalUsage": {
     "placeholders": {
-      "current": { "type": "int" },
-      "limit": { "type": "int" },
-      "feature": { "type": "String" }
+      "current": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      },
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "featureGateUpgradeButton": "Fazer upgrade para {plan}",
   "@featureGateUpgradeButton": {
     "placeholders": {
-      "plan": { "type": "String" }
+      "plan": {
+        "type": "String"
+      }
     }
   },
   "featureGateUpgradeNewLimit": "Novo limite: {limit} {feature}",
   "@featureGateUpgradeNewLimit": {
     "placeholders": {
-      "limit": { "type": "String" },
-      "feature": { "type": "String" }
+      "limit": {
+        "type": "String"
+      },
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "unlimitedLabel": "ilimitado",
-
   "subscription": "Assinatura",
   "manageSubscription": "Gerenciar assinatura",
   "viewPlanAndBilling": "Ver plano e cobrança",
@@ -1552,7 +1494,9 @@
   "renewsOn": "Renova em {date}",
   "@renewsOn": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionCancelled": "Assinatura cancelada",
@@ -1572,19 +1516,25 @@
   "planFeatureUsers": "{count} usuários inclusos",
   "@planFeatureUsers": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "planFeaturePhotos": "{count} fotos/mês",
   "@planFeaturePhotos": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "planFeatureForms": "{count} formulários",
   "@planFeatureForms": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "planFeatureCleanPdf": "PDF sem marca d'água",
@@ -1597,28 +1547,25 @@
   "featureLimitReached": "Você atingiu o limite de {feature}",
   "@featureLimitReached": {
     "placeholders": {
-      "feature": { "type": "String" }
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "withUpgrade": "Com upgrade",
   "upgradeNow": "Fazer upgrade",
-  "maybeLater": "Talvez depois",
-
   "segmentationOnboardingTitle": "Nos conte sobre seu negócio",
   "segmentationOnboardingSubtitle": "Ajude-nos a personalizar sua experiência (30 segundos)",
-
   "segmentationServiceTypeQuestion": "Qual tipo de serviço você faz?",
   "serviceTypeTechnicalAssistance": "Assistência técnica (celular, eletrônico)",
   "serviceTypeHvac": "Ar condicionado / Refrigeração",
   "serviceTypeElectricalPlumbing": "Elétrica / Hidráulica",
   "serviceTypeAutomotive": "Oficina mecânica",
-
   "segmentationMonthlyVolumeQuestion": "Quantos serviços você faz por mês?",
   "monthlyVolumeLt10": "Menos de 10",
   "monthlyVolume10To30": "10 a 30",
   "monthlyVolume30To60": "30 a 60",
   "monthlyVolumeGt60": "Mais de 60",
-
   "segmentationTeamSizeQuestion": "Você trabalha...",
   "teamSizeSolo": "Sozinho",
   "teamSize1To3": "Com 1-3 funcionários",
@@ -1630,20 +1577,26 @@
   "planCourtesyUntil": "Cortesia até {date}",
   "@planCourtesyUntil": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "planRenewsOn": "Renova em {date}",
   "@planRenewsOn": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "planPaymentIssue": "Problema no pagamento",
   "planValidUntil": "Válido até {date}",
   "@planValidUntil": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "askAdminToChangePlanTitle": "Fale com o administrador",
@@ -1684,14 +1637,29 @@
   "createChargeTitle": "Nova cobrança",
   "chargeValue": "Valor",
   "chargeBalanceHint": "Saldo da OS: {value}",
-  "@chargeBalanceHint": {"placeholders": {"value": {"type": "String"}}},
+  "@chargeBalanceHint": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "chargeModeSingle": "À vista",
   "chargeModeInstallments": "Parcelado no cartão",
   "chargeSingleHint": "O cliente escolhe Pix, boleto ou cartão.",
   "chargeInstallmentsHint": "O cliente paga no cartão de crédito, nas parcelas escolhidas.",
   "chargeInstallments": "Parcelas",
   "chargeInstallmentOption": "{count}x de {value}",
-  "@chargeInstallmentOption": {"placeholders": {"count": {"type": "int"}, "value": {"type": "String"}}},
+  "@chargeInstallmentOption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "chargeDueDate": "Vencimento",
   "chargeTaxIdHint": "O Asaas exige CPF ou CNPJ. Ele fica salvo no cadastro do cliente.",
   "chargeGenerate": "Gerar cobrança",
@@ -1702,9 +1670,21 @@
   "chargeStatusCanceled": "Cancelada",
   "chargeStatusRefunded": "Estornada",
   "chargeDueOn": "Vence em {date}",
-  "@chargeDueOn": {"placeholders": {"date": {"type": "String"}}},
+  "@chargeDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "chargeInstallmentsSummary": "{count}x no cartão",
-  "@chargeInstallmentsSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@chargeInstallmentsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chargeShareOrderLink": "Compartilhar link da OS",
   "chargeCopyInvoiceLink": "Copiar link da fatura",
   "chargeInvoiceLinkCopied": "Link da fatura copiado",
@@ -1715,7 +1695,16 @@
   "chargeReplaceConfirm": "Gerar uma nova cobrança cancela a anterior no Asaas.",
   "chargeReplace": "Gerar nova",
   "chargeTotalChanged": "O saldo da OS ({balance}) está diferente do valor da cobrança ({value}).",
-  "@chargeTotalChanged": {"placeholders": {"balance": {"type": "String"}, "value": {"type": "String"}}},
+  "@chargeTotalChanged": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "chargeRegenerate": "Gerar nova cobrança",
   "asaasErrorInstallmentsInProgress": "Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.",
   "asaasErrorOrderCanceled": "Esta OS está cancelada e não pode receber cobrança.",
@@ -1730,10 +1719,15 @@
   "searchCustomerPlaceholder": "Buscar por nome, telefone ou placa",
   "searchCustomerNoPlatePlaceholder": "Buscar por nome ou telefone",
   "addNewCustomer": "Cadastrar cliente novo",
-  "recentCustomers": "Usados por último",
   "allCustomers": "Todos",
   "plateValue": "Placa {plate}",
-  "@plateValue": {"placeholders": {"plate": {"type": "String"}}},
+  "@plateValue": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
   "customerNamePlaceholder": "Ex.: Ana Ribeiro",
   "customerNameRequired": "Digite o nome do cliente",
   "customerPhoneLabel": "Telefone ou WhatsApp",
@@ -1742,26 +1736,77 @@
   "openInMap": "Abrir no mapa",
   "callAction": "Ligar",
   "newOrderFor": "Nova OS para {name}",
-  "@newOrderFor": {"placeholders": {"name": {"type": "String"}}},
+  "@newOrderFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ordersOfCustomer": "OS de {name}",
-  "@ordersOfCustomer": {"placeholders": {"name": {"type": "String"}}},
+  "@ordersOfCustomer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "devicesOfCustomer": "{devices} de {name}",
-  "@devicesOfCustomer": {"placeholders": {"devices": {"type": "String"}, "name": {"type": "String"}}},
+  "@devicesOfCustomer": {
+    "placeholders": {
+      "devices": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "totalSpent": "Total gasto",
   "deleteCustomerTitle": "Apagar {name}?",
-  "@deleteCustomerTitle": {"placeholders": {"name": {"type": "String"}}},
+  "@deleteCustomerTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "deleteCustomerKeepsOrders": "As OS continuam salvas.",
   "deleteAction": "Apagar",
   "noCustomersYet": "Você ainda não tem clientes",
   "addFirstCustomer": "Cadastrar o primeiro cliente",
   "noCustomerMatching": "Nenhum cliente com “{query}”",
-  "@noCustomerMatching": {"placeholders": {"query": {"type": "String"}}},
+  "@noCustomerMatching": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "customersCount": "{count, plural, =1{1 cliente} other{{count} clientes}}",
-  "@customersCount": {"placeholders": {"count": {"type": "int"}}},
+  "@customersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "openOrdersCount": "{count, plural, =1{1 OS em aberto} other{{count} OS em aberto}}",
-  "@openOrdersCount": {"placeholders": {"count": {"type": "int"}}},
+  "@openOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "lateOrdersCount": "{count, plural, =1{1 OS atrasada} other{{count} OS atrasadas}}",
-  "@lateOrdersCount": {"placeholders": {"count": {"type": "int"}}},
+  "@lateOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "customerActions": "Mais ações do cliente",
   "customerLookupError": "Não deu para carregar os clientes. Tente de novo.",
   "catalogTitle": "Catálogo",
@@ -1783,14 +1828,63 @@
   "catalogEmptyProducts": "Você ainda não tem produtos",
   "catalogEmptyProductsHint": "Cadastre os que você mais usa para montar a OS mais rápido.",
   "catalogNoMatch": "Nada com “{query}”",
-  "@catalogNoMatch": {"placeholders": {"query": {"type": "String"}}},
+  "@catalogNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "catalogDeleteTitle": "Apagar {name}?",
-  "@catalogDeleteTitle": {"placeholders": {"name": {"type": "String"}}},
+  "@catalogDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "catalogDeleteMessage": "Ele sai do catálogo. As OS que já usam continuam salvas.",
   "deleteServiceAction": "Apagar serviço",
   "deleteProductAction": "Apagar produto",
   "catalogItemActions": "Mais ações do item",
   "pickServiceTitle": "Qual serviço?",
   "pickProductTitle": "Qual produto?",
-  "catalogLoadError": "Não deu para carregar o catálogo. Tente de novo."
+  "catalogLoadError": "Não deu para carregar o catálogo. Tente de novo.",
+  "newEntity": "Novo {entity}",
+  "@newEntity": {
+    "placeholders": {
+      "entity": {
+        "type": "String"
+      }
+    }
+  },
+  "photoAndMoreData": "Foto e mais dados",
+  "fieldRequiredHint": "Preencha o campo {field}",
+  "@fieldRequiredHint": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "useValue": "Usar “{value}”",
+  "@useValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "newOrderAction": "Nova OS",
+  "deviceActions": "Mais ações",
+  "deleteDeviceTitle": "Apagar {name}?",
+  "@deleteDeviceTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteDeviceKeepsOrders": "As OS continuam salvas.",
+  "deviceDetailsLabel": "Dados"
 }
