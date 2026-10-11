@@ -52,4 +52,33 @@ void main() {
       );
     });
   });
+
+  group('resolveAppApiBaseUrl', () {
+    const prod = 'https://southamerica-east1-praticos.cloudfunctions.net/api';
+
+    test('override (API_BASE_URL) tem prioridade, mesmo em debug', () {
+      expect(
+        resolveAppApiBaseUrl(override: prod, debug: true, android: false),
+        prod,
+      );
+    });
+
+    test('sem override: release usa produção', () {
+      expect(
+        resolveAppApiBaseUrl(override: '', debug: false, android: false),
+        prod,
+      );
+    });
+
+    test('sem override: debug usa emulador no Android e túnel no iOS', () {
+      expect(
+        resolveAppApiBaseUrl(override: '', debug: true, android: true),
+        startsWith('http://10.0.2.2:5000'),
+      );
+      expect(
+        resolveAppApiBaseUrl(override: '', debug: true, android: false),
+        contains('ngrok'),
+      );
+    });
+  });
 }
