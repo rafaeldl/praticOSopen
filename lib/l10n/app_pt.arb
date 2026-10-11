@@ -1724,5 +1724,13 @@
   "asaasErrorChargeNotOpen": "Esta cobrança não está mais em aberto.",
   "asaasErrorValidation": "O Asaas recusou os dados da cobrança. Confira o CPF/CNPJ e o e-mail do cliente.",
   "asaasErrorUnavailable": "O Asaas está indisponível no momento. Tente novamente em instantes.",
-  "listLoadError": "Não deu para carregar. Verifique a internet e tente de novo."
+  "listLoadError": "Não deu para carregar. Verifique a internet e tente de novo.",
+  "loginTitle": "Entre para começar",
+  "loginSubtitle": "Suas OS ficam salvas e a equipe vê as mesmas.",
+  "loginWithEmailLink": "Entrar com e-mail e senha",
+  "errorSignInAppleFriendly": "Não deu para entrar com a Apple. Tente de novo.",
+  "errorSignInGoogleFriendly": "Não deu para entrar com o Google. Tente de novo.",
+  "forgotPasswordQuestion": "Esqueceu a senha?",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Ocultar senha"
 }

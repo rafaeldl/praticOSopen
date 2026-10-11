@@ -3927,4 +3927,30 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get listLoadError =>
       'Não deu para carregar. Verifique a internet e tente de novo.';
+
+  @override
+  String get loginTitle => 'Entre para começar';
+
+  @override
+  String get loginSubtitle => 'Suas OS ficam salvas e a equipe vê as mesmas.';
+
+  @override
+  String get loginWithEmailLink => 'Entrar com e-mail e senha';
+
+  @override
+  String get errorSignInAppleFriendly =>
+      'Não deu para entrar com a Apple. Tente de novo.';
+
+  @override
+  String get errorSignInGoogleFriendly =>
+      'Não deu para entrar com o Google. Tente de novo.';
+
+  @override
+  String get forgotPasswordQuestion => 'Esqueceu a senha?';
+
+  @override
+  String get showPassword => 'Mostrar senha';
+
+  @override
+  String get hidePassword => 'Ocultar senha';
 }

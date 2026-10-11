@@ -3934,4 +3934,31 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get listLoadError =>
       'No se pudo cargar. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get loginTitle => 'Entra para empezar';
+
+  @override
+  String get loginSubtitle =>
+      'Tus órdenes quedan guardadas y tu equipo ve las mismas.';
+
+  @override
+  String get loginWithEmailLink => 'Entrar con correo y contraseña';
+
+  @override
+  String get errorSignInAppleFriendly =>
+      'No se pudo entrar con Apple. Inténtalo de nuevo.';
+
+  @override
+  String get errorSignInGoogleFriendly =>
+      'No se pudo entrar con Google. Inténtalo de nuevo.';
+
+  @override
+  String get forgotPasswordQuestion => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get showPassword => 'Mostrar contraseña';
+
+  @override
+  String get hidePassword => 'Ocultar contraseña';
 }

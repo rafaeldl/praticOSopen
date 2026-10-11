@@ -1658,5 +1658,13 @@
   "asaasErrorChargeNotOpen": "Este cobro ya no está abierto.",
   "asaasErrorValidation": "Asaas rechazó los datos del cobro. Revisa el CPF/CNPJ y el correo del cliente.",
   "asaasErrorUnavailable": "Asaas no está disponible en este momento. Inténtalo de nuevo en unos instantes.",
-  "listLoadError": "No se pudo cargar. Revisa tu conexión e inténtalo de nuevo."
+  "listLoadError": "No se pudo cargar. Revisa tu conexión e inténtalo de nuevo.",
+  "loginTitle": "Entra para empezar",
+  "loginSubtitle": "Tus órdenes quedan guardadas y tu equipo ve las mismas.",
+  "loginWithEmailLink": "Entrar con correo y contraseña",
+  "errorSignInAppleFriendly": "No se pudo entrar con Apple. Inténtalo de nuevo.",
+  "errorSignInGoogleFriendly": "No se pudo entrar con Google. Inténtalo de nuevo.",
+  "forgotPasswordQuestion": "¿Olvidaste tu contraseña?",
+  "showPassword": "Mostrar contraseña",
+  "hidePassword": "Ocultar contraseña"
 }

@@ -7335,6 +7335,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar. Verifique a internet e tente de novo.'**
   String get listLoadError;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entre para começar'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Suas OS ficam salvas e a equipe vê as mesmas.'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginWithEmailLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com e-mail e senha'**
+  String get loginWithEmailLink;
+
+  /// No description provided for @errorSignInAppleFriendly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para entrar com a Apple. Tente de novo.'**
+  String get errorSignInAppleFriendly;
+
+  /// No description provided for @errorSignInGoogleFriendly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para entrar com o Google. Tente de novo.'**
+  String get errorSignInGoogleFriendly;
+
+  /// No description provided for @forgotPasswordQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu a senha?'**
+  String get forgotPasswordQuestion;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar senha'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ocultar senha'**
+  String get hidePassword;
 }
 
 class _AppLocalizationsDelegate
