@@ -110,7 +110,12 @@ class AppListRow extends StatelessWidget {
             Expanded(child: main),
             if (!stacked && valueText != null) ...[
               const SizedBox(width: AppSpacing.md),
-              Flexible(child: valueText),
+              Flexible(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: valueText,
+                ),
+              ),
             ],
             if (chevron) ...[
               const SizedBox(width: AppSpacing.sm),
@@ -130,10 +135,13 @@ class AppListRow extends StatelessWidget {
         : row;
 
     if (onTap == null) return content;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: content,
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: content,
+      ),
     );
   }
 }

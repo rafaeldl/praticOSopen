@@ -5158,4 +5158,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accumulatedLeaveBlank => 'Dejar en blanco';
+
+  @override
+  String get moreSectionCompany => 'Empresa';
+
+  @override
+  String get moreSectionRecords => 'Registros';
+
+  @override
+  String get moreSectionYou => 'Tú';
+
+  @override
+  String get moreCompanySubtitle => 'Datos en la OS, rubro y funciones';
+
+  @override
+  String moreCatalogSubtitle(String products) {
+    return 'Servicios y $products';
+  }
+
+  @override
+  String saveEntityButton(String entity) {
+    return 'Guardar $entity';
+  }
 }

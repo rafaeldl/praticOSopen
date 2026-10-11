@@ -2534,5 +2534,11 @@
       }
     }
   },
-  "accumulatedLeaveBlank": "Leave blank"
+  "accumulatedLeaveBlank": "Leave blank",
+  "moreSectionCompany": "Company",
+  "moreSectionRecords": "Records",
+  "moreSectionYou": "You",
+  "moreCompanySubtitle": "Order details, business type and features",
+  "moreCatalogSubtitle": "Services and {products}",
+  "saveEntityButton": "Save {entity}"
 }

@@ -542,10 +542,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get customer => 'Cliente';
 
   @override
-  String get newCustomer => 'Novo Cliente';
+  String get newCustomer => 'Novo cliente';
 
   @override
-  String get editCustomer => 'Editar Cliente';
+  String get editCustomer => 'Editar cliente';
 
   @override
   String get customerDetails => 'Detalhes do Cliente';
@@ -5146,4 +5146,26 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get accumulatedLeaveBlank => 'Deixar em branco';
+
+  @override
+  String get moreSectionCompany => 'Empresa';
+
+  @override
+  String get moreSectionRecords => 'Cadastros';
+
+  @override
+  String get moreSectionYou => 'Você';
+
+  @override
+  String get moreCompanySubtitle => 'Dados na OS, ramo e recursos';
+
+  @override
+  String moreCatalogSubtitle(String products) {
+    return 'Serviços e $products';
+  }
+
+  @override
+  String saveEntityButton(String entity) {
+    return 'Salvar $entity';
+  }
 }

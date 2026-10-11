@@ -210,8 +210,8 @@
   "leave": "Sair",
   "stay": "Ficar",
   "customer": "Cliente",
-  "newCustomer": "Novo Cliente",
-  "editCustomer": "Editar Cliente",
+  "newCustomer": "Novo cliente",
+  "editCustomer": "Editar cliente",
   "customerDetails": "Detalhes do Cliente",
   "customerName": "Nome do Cliente",
   "customerList": "Lista de Clientes",
@@ -2624,5 +2624,13 @@
       }
     }
   },
-  "accumulatedLeaveBlank": "Deixar em branco"
+  "accumulatedLeaveBlank": "Deixar em branco",
+  "moreSectionCompany": "Empresa",
+  "moreSectionRecords": "Cadastros",
+  "moreSectionYou": "Você",
+  "moreCompanySubtitle": "Dados na OS, ramo e recursos",
+  "moreCatalogSubtitle": "Serviços e {products}",
+  "@moreCatalogSubtitle": {"placeholders": {"products": {"type": "String"}}},
+  "saveEntityButton": "Salvar {entity}",
+  "@saveEntityButton": {"placeholders": {"entity": {"type": "String"}}}
 }

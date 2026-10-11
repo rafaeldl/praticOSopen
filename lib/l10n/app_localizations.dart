@@ -1141,13 +1141,13 @@ abstract class AppLocalizations {
   /// No description provided for @newCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Novo Cliente'**
+  /// **'Novo cliente'**
   String get newCustomer;
 
   /// No description provided for @editCustomer.
   ///
   /// In pt, this message translates to:
-  /// **'Editar Cliente'**
+  /// **'Editar cliente'**
   String get editCustomer;
 
   /// No description provided for @customerDetails.
@@ -9225,6 +9225,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Deixar em branco'**
   String get accumulatedLeaveBlank;
+
+  /// No description provided for @moreSectionCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empresa'**
+  String get moreSectionCompany;
+
+  /// No description provided for @moreSectionRecords.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastros'**
+  String get moreSectionRecords;
+
+  /// No description provided for @moreSectionYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você'**
+  String get moreSectionYou;
+
+  /// No description provided for @moreCompanySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados na OS, ramo e recursos'**
+  String get moreCompanySubtitle;
+
+  /// No description provided for @moreCatalogSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços e {products}'**
+  String moreCatalogSubtitle(String products);
+
+  /// No description provided for @saveEntityButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar {entity}'**
+  String saveEntityButton(String entity);
 }
 
 class _AppLocalizationsDelegate

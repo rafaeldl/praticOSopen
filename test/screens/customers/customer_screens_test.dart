@@ -274,7 +274,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AppSheet), findsOneWidget);
       expect(find.text('Cancelar'), findsOneWidget);
-      expect(find.text('Salvar'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^Salvar')), findsOneWidget);
       // Cancel returns to the picker without choosing anyone.
       await tester.tap(find.text('Cancelar'));
       await tester.pumpAndSettle();
@@ -307,7 +307,7 @@ void main() {
       final c = customer('c1', 'Ana')..email = 'ana@example.com';
       await pumpForm(tester, CustomerFormScreen(customer: c));
       expect(find.text('E-mail'), findsOneWidget);
-      expect(find.text('Editar Cliente'), findsOneWidget);
+      expect(find.text('Editar cliente'), findsOneWidget);
     });
 
     testWidgets('empty name shows the hint and does not save',
@@ -317,7 +317,7 @@ void main() {
         tester,
         CustomerFormScreen(asSheet: true, onSave: (_) async => saves++),
       );
-      await tester.tap(find.text('Salvar'));
+      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
       await tester.pumpAndSettle();
       expect(find.text('Digite o nome do cliente'), findsOneWidget);
       expect(saves, 0);
@@ -331,7 +331,7 @@ void main() {
       );
       await tester.enterText(
           find.byType(CupertinoTextField).first, 'Ana Ribeiro');
-      await tester.tap(find.text('Salvar'));
+      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
       await tester.pumpAndSettle();
       expect(saved?.name, 'Ana Ribeiro');
       expect((h.result as Customer).name, 'Ana Ribeiro');

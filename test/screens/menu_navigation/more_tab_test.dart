@@ -23,10 +23,17 @@ Widget app(Widget home) => CupertinoApp(
       home: home,
     );
 
+void tallScreen(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1170, 5000);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   group('MoreView', () {
     testWidgets('shows the 9 rows in order, each opening a screen',
         (tester) async {
+      tallScreen(tester);
       final opened = <MoreDestination>[];
       await tester.pumpWidget(app(MoreView(
         onOpen: opened.add,
@@ -56,6 +63,44 @@ void main() {
 
       await tester.tap(find.text('Equipe'));
       expect(opened, [MoreDestination.team]);
+    });
+
+    testWidgets('groups rows under Empresa, Cadastros and Você like the '
+        'prototype, with the user as the account row', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(app(MoreView(
+        onOpen: (_) {},
+        accountName: 'Rafael',
+        companyName: 'Oficina Exemplo',
+        catalogSubtitle: 'Serviços e peças',
+        planName: 'Pro',
+      )));
+
+      expect(find.text('Rafael'), findsOneWidget);
+      expect(find.text('Sua conta · Oficina Exemplo'), findsOneWidget);
+      expect(find.text('R'), findsOneWidget);
+      expect(find.text('Dados na OS, ramo e recursos'), findsOneWidget);
+      expect(find.text('Serviços e peças'), findsOneWidget);
+      final y = (String t) => tester.getTopLeft(find.text(t)).dy;
+      expect(y('Empresa'), lessThan(y('Sua empresa')));
+      expect(y('Plano'), lessThan(y('Cadastros')));
+      expect(y('Cadastros'), lessThan(y('Catálogo')));
+      expect(y('Avaliações'), lessThan(y('Você')));
+      expect(y('Você'), lessThan(y('Lembretes')));
+    });
+
+    testWidgets('hides empty sections', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(app(MoreView(
+        onOpen: (_) {},
+        visibility: const MoreVisibility(
+          catalog: false,
+          checklists: false,
+          ratings: false,
+        ),
+      )));
+      expect(find.text('Cadastros'), findsNothing);
+      expect(find.text('Empresa'), findsOneWidget);
     });
 
     testWidgets('hides rows the role cannot see', (tester) async {

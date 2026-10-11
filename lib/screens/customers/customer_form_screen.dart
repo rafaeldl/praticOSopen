@@ -120,7 +120,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     if (widget.asSheet) {
       return AppSheet(
         title: title,
-        actionLabel: l10n.save,
+        primaryLabel: l10n.saveEntityButton(config.customer.toLowerCase()),
         onAction: _saveCustomer,
         busy: _isLoading,
         child: body,

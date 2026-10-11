@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -68,16 +69,19 @@ class MoreVisibility {
   }
 }
 
-/// The "Mais" tab: one flat list, in this order, each row opening a screen
-/// (chevron): Sua conta, Sua empresa, Equipe, Plano, Catálogo, Checklists,
-/// Avaliações, Lembretes, Avançado. No colored icons.
+/// The "Mais" tab, in this order, each row opening a screen (chevron): the
+/// account row (avatar + name), then "Empresa" (Sua empresa, Equipe, Plano),
+/// "Cadastros" (Catálogo, Checklists, Avaliações) and "Você" (Lembretes,
+/// Avançado). No colored icons.
 class MoreView extends StatelessWidget {
   const MoreView({
     super.key,
     required this.onOpen,
     this.visibility = const MoreVisibility(),
     this.planName,
-    this.accountSubtitle,
+    this.accountName,
+    this.companyName,
+    this.catalogSubtitle,
     this.version,
   });
 
@@ -87,8 +91,15 @@ class MoreView extends StatelessWidget {
   /// Plan name shown at the end of the "Plano" row.
   final String? planName;
 
-  /// Second line of "Sua conta" (user name and role).
-  final String? accountSubtitle;
+  /// User name: the title of the account row ("Rafael"), with "Sua conta ·
+  /// company" under it. Without it the row is titled "Sua conta".
+  final String? accountName;
+
+  /// Company shown on the account row.
+  final String? companyName;
+
+  /// Second line of "Catálogo" ("Serviços e peças").
+  final String? catalogSubtitle;
 
   /// App version shown in the footer; hidden when null.
   final String? version;
@@ -117,25 +128,72 @@ class MoreView extends StatelessWidget {
     }
   }
 
+  String? _subtitle(BuildContext context, MoreDestination destination) {
+    switch (destination) {
+      case MoreDestination.account:
+        final name = accountName;
+        if (name == null || name.isEmpty) return companyName;
+        return [context.l10n.yourAccount, if (companyName != null) companyName]
+            .join(' · ');
+      case MoreDestination.company:
+        return context.l10n.moreCompanySubtitle;
+      case MoreDestination.catalog:
+        return catalogSubtitle;
+      default:
+        return null;
+    }
+  }
+
+  AppListRow _row(BuildContext context, MoreDestination destination) {
+    final name = accountName;
+    final isAccount = destination == MoreDestination.account;
+    final hasName = isAccount && name != null && name.isNotEmpty;
+    return AppListRow(
+      key: ValueKey('more_row_${destination.name}'),
+      leading: hasName ? _Avatar(name) : null,
+      title: hasName ? name : _title(context, destination),
+      subtitle: _subtitle(context, destination),
+      trailing: destination == MoreDestination.plan ? planName : null,
+      onTap: () => onOpen(destination),
+    );
+  }
+
+  /// Rows under their section label, in the fixed order. The account row
+  /// has no label; empty sections are left out.
+  static const sections = <List<MoreDestination>>[
+    [MoreDestination.account],
+    [MoreDestination.company, MoreDestination.team, MoreDestination.plan],
+    [
+      MoreDestination.catalog,
+      MoreDestination.checklists,
+      MoreDestination.ratings,
+    ],
+    [MoreDestination.reminders, MoreDestination.advanced],
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final rows = <Widget>[
-      for (final destination in MoreDestination.values)
-        if (visibility.isVisible(destination))
-          AppListRow(
-            key: ValueKey('more_row_${destination.name}'),
-            title: _title(context, destination),
-            subtitle:
-                destination == MoreDestination.account ? accountSubtitle : null,
-            trailing: destination == MoreDestination.plan ? planName : null,
-            onTap: () => onOpen(destination),
-          ),
+    final l10n = context.l10n;
+    final labels = [
+      null,
+      l10n.moreSectionCompany,
+      l10n.moreSectionRecords,
+      l10n.moreSectionYou,
     ];
+    final children = <Widget>[];
+    for (var i = 0; i < sections.length; i++) {
+      final visible = sections[i].where(visibility.isVisible).toList();
+      if (visible.isEmpty) continue;
+      if (labels[i] != null) children.add(SectionLabel(labels[i]!));
+      children.add(MoreRows(rows: [
+        for (final d in visible) _row(context, d),
+      ]));
+    }
 
     return MorePage(
       title: context.l10n.more,
       children: [
-        MoreRows(rows: rows),
+        ...children,
         if (version != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
@@ -149,6 +207,34 @@ class MoreView extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Initial of the user in a grey circle, at the start of the account row.
+class _Avatar extends StatelessWidget {
+  const _Avatar(this.name);
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.secondaryFill.resolveFrom(context),
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          name.characters.first.toUpperCase(),
+          style: AppTypography.bodyStrong.copyWith(
+            color: AppColors.onSecondaryFill.resolveFrom(context),
+          ),
+        ),
+      ),
     );
   }
 }

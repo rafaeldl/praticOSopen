@@ -5134,4 +5134,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accumulatedLeaveBlank => 'Leave blank';
+
+  @override
+  String get moreSectionCompany => 'Company';
+
+  @override
+  String get moreSectionRecords => 'Records';
+
+  @override
+  String get moreSectionYou => 'You';
+
+  @override
+  String get moreCompanySubtitle => 'Order details, business type and features';
+
+  @override
+  String moreCatalogSubtitle(String products) {
+    return 'Services and $products';
+  }
+
+  @override
+  String saveEntityButton(String entity) {
+    return 'Save $entity';
+  }
 }

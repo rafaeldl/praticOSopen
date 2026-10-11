@@ -251,7 +251,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     if (widget.asSheet) {
       return AppSheet(
         title: title,
-        actionLabel: l10n.save,
+        primaryLabel: l10n.saveEntityButton(config.device.toLowerCase()),
         onAction: _saveDevice,
         busy: _isLoading,
         child: body,

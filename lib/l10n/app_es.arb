@@ -2534,5 +2534,11 @@
       }
     }
   },
-  "accumulatedLeaveBlank": "Dejar en blanco"
+  "accumulatedLeaveBlank": "Dejar en blanco",
+  "moreSectionCompany": "Empresa",
+  "moreSectionRecords": "Registros",
+  "moreSectionYou": "Tú",
+  "moreCompanySubtitle": "Datos en la OS, rubro y funciones",
+  "moreCatalogSubtitle": "Servicios y {products}",
+  "saveEntityButton": "Guardar {entity}"
 }
