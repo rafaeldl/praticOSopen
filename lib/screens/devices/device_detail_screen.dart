@@ -12,7 +12,10 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
-  const DeviceDetailScreen({super.key});
+  const DeviceDetailScreen({super.key, this.orderRepository});
+
+  /// Injected in tests; defaults to [TenantOrderRepository].
+  final TenantOrderRepository? orderRepository;
 
   @override
   State<DeviceDetailScreen> createState() => _DeviceDetailScreenState();
@@ -20,7 +23,8 @@ class DeviceDetailScreen extends StatefulWidget {
 
 class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   Device? _device;
-  final TenantOrderRepository _orderRepo = TenantOrderRepository();
+  late final TenantOrderRepository _orderRepo =
+      widget.orderRepository ?? TenantOrderRepository();
   Stream<List<Order?>>? _orderStream;
   Stream<List<Order?>>? _contractStream;
 
@@ -384,7 +388,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, '/order_detail', arguments: {'order': order});
+          Navigator.pushNamed(context, '/order', arguments: {'order': order});
         },
         child: Column(
           children: [
