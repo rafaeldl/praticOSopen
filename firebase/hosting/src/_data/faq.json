@@ -22,7 +22,7 @@
           },
           {
             "question": "Como excluo minha conta?",
-            "answer": "No app, vá em Ajustes › Conta › Excluir conta. A exclusão é permanente e apaga seus dados, inclusive ordens de serviço, clientes e configurações. Se você for o único administrador da empresa, os dados da empresa também são apagados."
+            "answer": "No app, vá em Mais › Sua conta › Apagar minha conta. A exclusão é permanente e apaga seus dados, inclusive ordens de serviço, clientes e configurações. Se você for o único dono da empresa, a empresa também é apagada."
           }
         ]
       },
@@ -107,7 +107,7 @@
           },
           {
             "question": "How do I delete my account?",
-            "answer": "In the app, go to Settings › Account › Delete account. Deletion is permanent and removes your data, including work orders, customers and settings. If you’re the only admin of a company, the company’s data is deleted too."
+            "answer": "In the app, go to More › Your account › Delete my account. Deletion is permanent and removes your data, including work orders, customers and settings. If you’re the company’s only owner, the company is deleted too."
           }
         ]
       },
@@ -192,7 +192,7 @@
           },
           {
             "question": "¿Cómo elimino mi cuenta?",
-            "answer": "En la app, ve a Ajustes › Cuenta › Eliminar cuenta. La eliminación es permanente y borra tus datos, incluidas órdenes de servicio, clientes y configuraciones. Si eres el único administrador de la empresa, los datos de la empresa también se borran."
+            "answer": "En la app, ve a Más › Tu cuenta › Eliminar mi cuenta. La eliminación es permanente y borra tus datos, incluidas órdenes de servicio, clientes y configuraciones. Si eres el único dueño de la empresa, la empresa también se borra."
           }
         ]
       },
