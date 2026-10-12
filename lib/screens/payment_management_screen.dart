@@ -843,7 +843,7 @@ class _ReceiptImageViewer extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
                   CupertinoIcons.exclamationmark_triangle,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.textSecondary.resolveFrom(context),
                   size: 48,
                 );
               },

@@ -19,7 +19,11 @@ import 'package:praticos/theme/app_spacing.dart';
 /// permission of the field's area (`manageDevices` for device fields,
 /// `manageServices` / `manageProducts` for catalog fields).
 class AccumulatedValueListScreen extends StatefulWidget {
-  const AccumulatedValueListScreen({super.key, this.repository, this.canDelete});
+  const AccumulatedValueListScreen({
+    super.key,
+    this.repository,
+    this.canDelete,
+  });
 
   /// Injected in tests; defaults to [AccumulatedValueRepository].
   final AccumulatedValueRepository? repository;
@@ -50,7 +54,8 @@ class _AccumulatedValueListScreenState
   String? _group;
   bool _multiSelect = false;
   bool _allowClear = false; // Allow clearing the selection
-  Set<String> _selectedValues = {}; // Track selected values in multi-select mode
+  Set<String> _selectedValues =
+      {}; // Track selected values in multi-select mode
   bool _argumentsLoaded = false;
 
   @override
@@ -63,7 +68,9 @@ class _AccumulatedValueListScreenState
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    debugPrint('AccumulatedValueListScreen.didChangeDependencies: _argumentsLoaded=$_argumentsLoaded');
+    debugPrint(
+      'AccumulatedValueListScreen.didChangeDependencies: _argumentsLoaded=$_argumentsLoaded',
+    );
 
     // Get arguments once
     if (!_argumentsLoaded) {
@@ -94,7 +101,10 @@ class _AccumulatedValueListScreenState
         final groupArg = args['group'];
         if (groupArg is List) {
           // Filter out null values and join with '-'
-          final nonNullValues = groupArg.whereType<String>().where((s) => s.isNotEmpty).toList();
+          final nonNullValues = groupArg
+              .whereType<String>()
+              .where((s) => s.isNotEmpty)
+              .toList();
           _group = nonNullValues.isNotEmpty ? nonNullValues.join('-') : null;
         } else if (groupArg is String) {
           _group = groupArg;
@@ -105,7 +115,9 @@ class _AccumulatedValueListScreenState
         // Get companyId from Global automatically
         _companyId = Global.companyAggr?.id;
 
-        debugPrint('AccumulatedValueListScreen: Arguments loaded - companyId=$_companyId, fieldType=$_fieldType, group=$_group, multiSelect=$_multiSelect, currentValue=$_currentValue, selectedValues=$_selectedValues');
+        debugPrint(
+          'AccumulatedValueListScreen: Arguments loaded - companyId=$_companyId, fieldType=$_fieldType, group=$_group, multiSelect=$_multiSelect, currentValue=$_currentValue, selectedValues=$_selectedValues',
+        );
 
         _argumentsLoaded = true;
       }
@@ -124,13 +136,11 @@ class _AccumulatedValueListScreenState
     setState(() => _isLoading = true);
 
     try {
-      _allValues = await _repo.getAll(
-        _companyId!,
-        _fieldType!,
-        group: _group,
-      );
+      _allValues = await _repo.getAll(_companyId!, _fieldType!, group: _group);
       _filteredValues = _allValues;
-      debugPrint('AccumulatedValueListScreen: Loaded ${_allValues.length} values');
+      debugPrint(
+        'AccumulatedValueListScreen: Loaded ${_allValues.length} values',
+      );
     } catch (e) {
       debugPrint('Error loading accumulated values: $e');
     }
@@ -241,9 +251,7 @@ class _AccumulatedValueListScreenState
                 placeholder: context.l10n.searchOrAddNew,
               ),
             ),
-            Expanded(
-              child: _isLoading ? const LoadingState() : _buildList(),
-            ),
+            Expanded(child: _isLoading ? const LoadingState() : _buildList()),
           ],
         ),
       ),
@@ -269,10 +277,7 @@ class _AccumulatedValueListScreenState
     final showClear = _allowClear && !_multiSelect && hasCurrent;
     final children = <Widget>[
       if (showClear)
-        AppListRow(
-          title: l10n.accumulatedLeaveBlank,
-          onTap: _clearSelection,
-        ),
+        AppListRow(title: l10n.accumulatedLeaveBlank, onTap: _clearSelection),
       if (toAdd != null)
         AddRow(
           label: l10n.accumulatedUse(toAdd),
@@ -315,10 +320,13 @@ class _AccumulatedValueListScreenState
       key: Key(value.id ?? value.value),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: CupertinoColors.systemRed,
+        color: AppColors.danger.resolveFrom(context),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white),
+        child: Icon(
+          CupertinoIcons.delete,
+          color: AppColors.onAccent.resolveFrom(context),
+        ),
       ),
       confirmDismiss: (direction) async {
         final confirmed = await showCupertinoDialog<bool>(
