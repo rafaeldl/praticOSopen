@@ -47,7 +47,7 @@ A auditoria (ver `2026-10-09-telas-inventario-design.md`) achou o mesmo problema
 | Componente | O que é | Regras |
 |---|---|---|
 | `SectionLabel` | Rótulo de seção `label` 15 em `textSecondary`, sentence case | Nunca `toUpperCase()`. Seção vazia não aparece |
-| `AppListRow` | Linha sem cartão: título `bodyStrong` 19; linha 2 `callout` 17 `textSecondary`; linha 3 `label` 15; valor à direita em `body` com `AppTypography.tabular`; miniatura 44 opcional; seta opcional | Separador `separator` entre linhas. Altura mínima 60. A seta só aparece quando o toque abre outra tela (no modo escolher não tem seta) |
+| `AppListRow` | Linha sem cartão: título `bodyStrong` 19; linha 2 `callout` 17 `textSecondary`; linha 3 `label` 15; valor à direita em `body` com `AppTypography.tabular`; `leading` opcional (a linha de OS não usa foto); seta opcional | Separador `separator` entre linhas. Altura mínima 60. A seta só aparece quando o toque abre outra tela (no modo escolher não tem seta) |
 | `AddRow` | Primeira linha da lista em modo escolher: círculo `secondaryFill` com "+" e texto `accentText` ("Cadastrar cliente novo") | Substitui o "+" solto da barra no modo escolher |
 | `StatusDot` | Ponto de 9 + texto, na mesma cor de papel | **Nunca ponto sem texto** (R7). Nunca selo preenchido |
 | `OrderStatusStyle` | Mapa único `status da OS → (papel de cor, texto l10n)` | `quote` → `textSecondary` "Orçamento"; `approved` → `accentText` "Aprovada"; `progress` → `warning` "Em andamento"; `done` → `success` "Concluída"; `canceled` → `danger` "Cancelada". Atraso é um estado à parte: `warning` em negrito, "Atrasada 2 dias". Usado por home, agenda, cliente, aparelho, financeiro |

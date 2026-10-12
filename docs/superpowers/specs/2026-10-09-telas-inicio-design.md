@@ -55,7 +55,7 @@ Protótipos: canvas https://claude.ai/artifact/NfHsv1Ge52LXGdpd9ZYihz, página "
    - linha 1: "Ana Ribeiro" ……… "R$ 1.250" (`tabular`; valor só com `viewPrices`, como hoje em `home.dart:838`);
    - linha 2: `StatusDot` + "Atrasada 2 dias" (ou "Em andamento · entrega 12/10"); "Pago" em `success` quando pago;
    - linha 3: "OS 184 · Fiat Uno 2015" (rótulo do aparelho pelo segmento);
-   - miniatura 44 só se houver foto; seta (abre a OS).
+   - sem foto (com e sem foto as linhas começariam em pontos diferentes; a foto fica dentro da OS); seta (abre a OS).
    "Ver Mais" (`:194-224`) sai: a rolagem infinita já existe (`:135-149`).
 5. **Resumo:** não tem (o dinheiro fica na aba Financeiro).
 6. **Barra fixa (`AppBottomBar`, acima da tab bar):** `PrimaryButton` "Nova OS" (abre `/order`, como `:302`). É o único botão preenchido da tela. Quando o assistente chegar à home, esta barra vira foto + "Falar" e "Nova OS" passa a ser o caminho do assistente; o desenho fica igual ao da tela da OS (alinhar com a sessão da OS).
@@ -105,7 +105,7 @@ Cada passo é um PR com teste de widget; textos novos nos 3 `.arb` + `fvm flutte
 2. **Loading no escuro.** Teste de widget em escuro conferindo a cor de fundo. risk:low. l10n: nenhum.
 3. **Aba Financeiro só com permissão.** Lista de abas visíveis + índice por enum; teste com usuário sem `viewFinancialReports` (4 abas, "Mais" abre certo; `setCurrentIndex(0)` continua abrindo Início). risk:low (UI; não mexe em regra de permissão). l10n: nenhum.
 4. **`OrderStatusStyle` + `StatusDot` na home e na agenda** (+ troca de `main.dart:149` para `accent`). Teste: cada status gera o texto e o papel certos. risk:low. l10n: `orderLateDays` ("Atrasada {n} dias", plural).
-5. **Linha nova da lista** (`AppListRow`: cliente + valor, status, "OS 184 · aparelho"; miniatura só com foto; "Pago" com texto). risk:low. l10n: `orderRowNumberDevice` ("OS {number} · {device}").
+5. **Linha nova da lista** (`AppListRow`: cliente + valor, status, "OS 184 · aparelho"; sem foto na lista, que fica dentro da OS; "Pago" com texto). risk:low. l10n: `orderRowNumberDevice` ("OS {number} · {device}").
 6. **Filtros:** `SegmentToggle` "Em aberto | Todas" (padrão "Em aberto"), seções por grupo, resto no `MoreMenu`; saem os chips e `_PtLabels/_EnLabels/_EsLabels`. Teste: grupos vazios não aparecem; "…" lista "Contratos" só com `useContracts`. risk:low. l10n: `filterOpen`, `filterAll`, `sectionLate`, `sectionDueToday`, `sectionInProgress`, `sectionWaitingApproval`, `sectionApproved`, `moreShowDone`, `moreShowCanceled`, `moreToReceive`, `moreFilterByCustomer`.
 7. **Topo + título + `NextStepBlock` + `AppBottomBar` "Nova OS"** e estados (vazio, primeira vez, busca, erro). Teste: prioridade das frases; primeira vez sem barra fixa; sino com rótulo acessível. risk:low. l10n: `homeOpenCount` ("{n} em aberto"), `nextStepLate` ("{n} OS passaram do prazo de entrega."), `nextStepDueToday`, `nextStepQuotesWaiting`, `seeLate` ("Ver as atrasadas"), `notificationsA11y` ("Avisos, {n} novos"), `firstOrderTitle`, `howItWorksSteps` (3 chaves), `searchNotFoundLoaded`, `searchOlder`, `noOpenOrders`, `loadOrdersError`, `newOrder`.
 8. **Agenda (correções).** risk:low. l10n: `agendaEmptyDay`, `agendaScheduleHere`, `agendaWholeTeam`.

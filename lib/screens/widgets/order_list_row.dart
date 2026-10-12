@@ -3,11 +3,12 @@ import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/widgets/cached_image.dart';
 
 /// Row of an order in a list: customer + value, status line with its dot,
 /// and a third line ("OS 184 · Fiat Uno 2015"). The status color lives only
-/// on the dot; the text is neutral, except overdue (danger, bold).
+/// on the dot; the text is neutral, except overdue (danger, bold). No photo:
+/// rows with and without one would start at different points; the photo
+/// lives inside the order.
 class OrderListRow extends StatelessWidget {
   const OrderListRow({
     super.key,
@@ -18,7 +19,6 @@ class OrderListRow extends StatelessWidget {
     this.overdue = false,
     this.paidText,
     this.detailText,
-    this.thumbnailUrl,
     this.progress,
     this.onTap,
   });
@@ -35,14 +35,9 @@ class OrderListRow extends StatelessWidget {
   final String? paidText;
   final String? detailText;
 
-  /// Shown only when the order has a photo (no empty placeholder box).
-  final String? thumbnailUrl;
-
   /// Execution percentage (0..100) for segments that track it.
   final double? progress;
   final VoidCallback? onTap;
-
-  static const double thumbnailSize = 44;
 
   @override
   Widget build(BuildContext context) {
@@ -121,18 +116,6 @@ class OrderListRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            if (thumbnailUrl != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedImage(
-                  imageUrl: thumbnailUrl!,
-                  width: thumbnailSize,
-                  height: thumbnailSize,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-            ],
             Expanded(child: main),
             if (onTap != null) ...[
               const SizedBox(width: AppSpacing.sm),

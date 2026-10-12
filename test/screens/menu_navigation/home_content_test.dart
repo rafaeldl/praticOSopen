@@ -5,11 +5,13 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/next_step_block.dart';
 import 'package:praticos/screens/widgets/order_list_row.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/widgets/cached_image.dart';
 
 final _now = DateTime(2026, 10, 12, 10);
 
@@ -294,5 +296,23 @@ void main() {
     ));
     expect(find.byType(NextStepBlock), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rows never show a photo, so every row starts at the margin',
+      (tester) async {
+    await tester.pumpWidget(_app(_Host(
+      orders: [
+        _order('Ana Ribeiro', 'progress', number: 184)
+          ..photos = [OrderPhoto()..url = 'https://example.com/a.jpg'],
+        _order('Bruno', 'progress', number: 185),
+      ],
+    )));
+
+    expect(find.byType(OrderListRow), findsNWidgets(2));
+    expect(find.byType(CachedImage), findsNothing);
+    expect(
+      tester.getTopLeft(find.text('Ana Ribeiro')).dx,
+      tester.getTopLeft(find.text('Bruno')).dx,
+    );
   });
 }
