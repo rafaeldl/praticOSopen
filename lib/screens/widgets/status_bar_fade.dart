@@ -11,7 +11,10 @@ class StatusBarFade extends StatelessWidget {
   final Widget child;
 
   /// How far the fade reaches below the status bar.
-  static const double fadeExtent = 16;
+  static const double fadeExtent = 28;
+
+  static const _fadeStops = [0.0, 0.25, 0.5, 0.75, 1.0];
+  static const _alphas = [0.94, 0.94, 0.7, 0.4, 0.15, 0.0];
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +36,17 @@ class StatusBarFade extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
+                  // Eased fade, so there is no visible edge where it ends.
                   colors: [
-                    background.withValues(alpha: 0.92),
-                    background.withValues(alpha: 0.92),
-                    background.withValues(alpha: 0),
+                    for (final alpha in _alphas)
+                      background.withValues(alpha: alpha),
                   ],
-                  stops: [0, top / (top + fadeExtent), 1],
+                  stops: [
+                    0,
+                    for (final t in _fadeStops)
+                      (top + fadeExtent * t) / (top + fadeExtent) -
+                          (t == 0 ? 0.0001 : 0),
+                  ],
                 ),
               ),
             ),

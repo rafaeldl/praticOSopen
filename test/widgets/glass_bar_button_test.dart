@@ -138,4 +138,23 @@ void main() {
     // Scrolled: the title collapses away instead of sitting over the list.
     expect(find.text('Início').hitTestable(), findsNothing);
   });
+
+  testWidgets('glass is smaller than the touch target, so the shadow fits',
+      (tester) async {
+    await tester.pumpWidget(app(CupertinoPageScaffold(
+      child: Center(
+        child: GlassBarButton(
+          label: 'Mais opções',
+          icon: CupertinoIcons.ellipsis,
+          onPressed: () {},
+        ),
+      ),
+    )));
+
+    final glass = tester.getSize(find.byType(AppGlass));
+    final target = tester.getSize(find.byType(CupertinoButton));
+    expect(glass.height, 40);
+    expect(target.height, greaterThanOrEqualTo(44));
+    expect(target.width, greaterThanOrEqualTo(44));
+  });
 }

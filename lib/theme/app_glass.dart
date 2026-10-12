@@ -72,9 +72,13 @@ class AppGlass extends StatelessWidget {
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF000000).withValues(alpha: dark ? 0.4 : 0.10),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+            // Short shadow: it must fade out inside the navigation bar,
+            // which clips anything drawn past its edge.
+            color: const Color(
+              0xFF000000,
+            ).withValues(alpha: dark ? 0.35 : 0.10),
+            blurRadius: 3,
+            offset: const Offset(0, 0.5),
           ),
         ],
       ),

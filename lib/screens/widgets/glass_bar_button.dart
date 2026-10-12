@@ -34,18 +34,24 @@ class GlassBarButton extends StatelessWidget {
       button: true,
       label: label,
       excludeSemantics: true,
-      child: AppGlass(
-        elevated: true,
-        borderRadius: BorderRadius.circular(AppSizes.minTouchTarget / 2),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(
-            AppSizes.minTouchTarget,
-            AppSizes.minTouchTarget,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(
+          AppSizes.minTouchTarget,
+          AppSizes.minTouchTarget,
+        ),
+        onPressed: onPressed,
+        child: AppGlass(
+          elevated: true,
+          borderRadius: BorderRadius.circular(AppSizes.glassBarButton / 2),
+          child: SizedBox.square(
+            dimension: AppSizes.glassBarButton,
+            child: Center(
+              child:
+                  child ??
+                  Icon(icon, color: AppColors.text.resolveFrom(context)),
+            ),
           ),
-          onPressed: onPressed,
-          child:
-              child ?? Icon(icon, color: AppColors.text.resolveFrom(context)),
         ),
       ),
     );
@@ -76,27 +82,33 @@ class GlassBackButton extends StatelessWidget {
       button: true,
       label: title,
       excludeSemantics: true,
-      child: AppGlass(
-        elevated: true,
-        borderRadius: BorderRadius.circular(AppSizes.minTouchTarget / 2),
-        child: CupertinoButton(
-          padding: const EdgeInsets.only(left: 8, right: 14),
-          minimumSize: const Size(
-            AppSizes.minTouchTarget,
-            AppSizes.minTouchTarget,
-          ),
-          onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(CupertinoIcons.chevron_back, size: 22, color: color),
-              Flexible(
-                child: Text(
-                  title,
-                  style: AppTypography.body.copyWith(color: color),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(
+          AppSizes.minTouchTarget,
+          AppSizes.minTouchTarget,
+        ),
+        onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
+        child: AppGlass(
+          elevated: true,
+          borderRadius: BorderRadius.circular(AppSizes.glassBarButton / 2),
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: AppSizes.glassBarButton,
+            ),
+            padding: const EdgeInsets.only(left: 8, right: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(CupertinoIcons.chevron_back, size: 22, color: color),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: AppTypography.body.copyWith(color: color),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

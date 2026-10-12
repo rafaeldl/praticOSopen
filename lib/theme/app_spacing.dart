@@ -24,6 +24,11 @@ class AppSizes {
 
   /// Minimum height of any other touch target.
   static const double minTouchTarget = 44;
+
+  /// Visible size of the glass buttons in the top bar. The touch target
+  /// stays [minTouchTarget]; the 2pt left on each side holds the shadow,
+  /// which the navigation bar would otherwise clip.
+  static const double glassBarButton = 40;
 }
 
 class AppRadii {
