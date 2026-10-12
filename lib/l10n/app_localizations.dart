@@ -3412,6 +3412,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível excluir sua conta.'**
   String get couldNotDeleteAccount;
 
+  /// No description provided for @accountDeletionTakingLong.
+  ///
+  /// In pt, this message translates to:
+  /// **'A exclusão pode levar alguns minutos. Tente de novo em instantes.'**
+  String get accountDeletionTakingLong;
+
   /// No description provided for @requiresRecentLogin.
   ///
   /// In pt, this message translates to:

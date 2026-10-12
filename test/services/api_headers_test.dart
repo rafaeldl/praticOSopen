@@ -81,4 +81,24 @@ void main() {
       );
     });
   });
+
+  group('resolveAccountApiBaseUrl', () {
+    test('troca o /api final por /accountApi', () {
+      expect(
+        resolveAccountApiBaseUrl(
+            'https://southamerica-east1-praticos.cloudfunctions.net/api'),
+        'https://southamerica-east1-praticos.cloudfunctions.net/accountApi',
+      );
+      expect(
+        resolveAccountApiBaseUrl(
+            'http://10.0.2.2:5000/praticos/southamerica-east1/api'),
+        'http://10.0.2.2:5000/praticos/southamerica-east1/accountApi',
+      );
+    });
+
+    test('URL sem /api final fica igual', () {
+      expect(resolveAccountApiBaseUrl('https://example.test/apix'),
+          'https://example.test/apix');
+    });
+  });
 }

@@ -1692,6 +1692,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotDeleteAccount => 'Could not delete your account.';
 
   @override
+  String get accountDeletionTakingLong =>
+      'Deleting your account can take a few minutes. Try again in a moment.';
+
+  @override
   String get requiresRecentLogin =>
       'For security, Firebase requires a recent login before deleting the account.\n\nPlease:\n1. Log out of your account\n2. Log in again\n3. Try to delete the account immediately after logging in';
 

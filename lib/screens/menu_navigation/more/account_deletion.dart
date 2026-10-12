@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/account_deletion_api_service.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/utils/store_subscription.dart';
 
@@ -191,8 +192,12 @@ class AccountDeletionFlow {
   /// Turns raw errors into a short user-facing sentence.
   @visibleForTesting
   static String formatError(BuildContext context, String error) {
-    if (error.contains('proprietário de uma empresa com outros membros')) {
+    if (error.contains('proprietário de uma empresa com outros membros') ||
+        error.contains('Fale com o suporte')) {
       return error.replaceAll('Exception: ', '');
+    }
+    if (error.contains(AccountDeletionApiService.timeoutCode)) {
+      return context.l10n.accountDeletionTakingLong;
     }
     if (error.contains('requires-recent-login')) {
       return context.l10n.requiresRecentLogin;

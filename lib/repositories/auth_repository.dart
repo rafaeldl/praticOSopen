@@ -115,12 +115,30 @@ class AuthRepository {
     return firebaseUser;
   }
 
-  void signOutGoogle() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+  /// Signs out of Google and Firebase. Firebase sign-out runs even if the
+  /// Google one fails (e.g. the user never used Google).
+  Future<void> signOutGoogle() async {
+    await signOutAll(
+      google: () => _googleSignIn.signOut(),
+      firebase: () => _auth.signOut(),
+    );
     currentUser = null;
 
     print("User Sign Out");
+  }
+
+  /// Runs [google] then [firebase]; a [google] failure is ignored, a
+  /// [firebase] failure propagates.
+  static Future<void> signOutAll({
+    required Future<void> Function() google,
+    required Future<void> Function() firebase,
+  }) async {
+    try {
+      await google();
+    } catch (e) {
+      print('Google sign-out failed: $e');
+    }
+    await firebase();
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
@@ -194,25 +212,6 @@ class AuthRepository {
       print('❌ Re-authentication failed: $e');
       rethrow;
     }
-  }
-
-  /// Deletes the current user's account from Firebase Auth.
-  /// Note: Firestore data cleanup should be handled separately via Cloud Functions
-  /// or before calling this method, as this only deletes the authentication account.
-  Future<void> deleteAccount() async {
-    final User? user = _auth.currentUser;
-    if (user == null) {
-      throw Exception('No authenticated user to delete');
-    }
-
-    // Delete the Firebase Auth account
-    await user.delete();
-
-    // Sign out from Google if applicable
-    await _googleSignIn.signOut();
-
-    currentUser = null;
-    print("User account deleted");
   }
 
   String _generateNonce([int length = 32]) {

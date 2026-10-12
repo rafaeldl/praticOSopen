@@ -1699,6 +1699,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get couldNotDeleteAccount => 'Não foi possível excluir sua conta.';
 
   @override
+  String get accountDeletionTakingLong =>
+      'A exclusão pode levar alguns minutos. Tente de novo em instantes.';
+
+  @override
   String get requiresRecentLogin =>
       'Por segurança, o Firebase exige login recente antes de deletar a conta.\n\nPor favor:\n1. Faça logout da sua conta\n2. Faça login novamente\n3. Tente deletar a conta imediatamente após o login';
 

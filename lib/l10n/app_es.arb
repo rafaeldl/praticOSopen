@@ -579,6 +579,7 @@
   "permanentlyDelete": "Eliminar Permanentemente",
   "errorDeletingAccount": "Error al Eliminar Cuenta",
   "couldNotDeleteAccount": "No se pudo eliminar su cuenta.",
+  "accountDeletionTakingLong": "La eliminación puede tardar unos minutos. Inténtalo de nuevo en un momento.",
   "requiresRecentLogin": "Por seguridad, Firebase requiere un inicio de sesión reciente antes de eliminar la cuenta.\n\nPor favor:\n1. Cierre sesión de su cuenta\n2. Inicie sesión nuevamente\n3. Intente eliminar la cuenta inmediatamente después de iniciar sesión",
   "noPermissionDelete": "No tiene permiso para eliminar su cuenta. Intente de nuevo más tarde.",
   "networkError": "Error de conexión. Verifique su internet e intente de nuevo.",

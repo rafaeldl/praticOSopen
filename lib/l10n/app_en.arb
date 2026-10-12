@@ -579,6 +579,7 @@
   "permanentlyDelete": "Permanently Delete",
   "errorDeletingAccount": "Error Deleting Account",
   "couldNotDeleteAccount": "Could not delete your account.",
+  "accountDeletionTakingLong": "Deleting your account can take a few minutes. Try again in a moment.",
   "requiresRecentLogin": "For security, Firebase requires a recent login before deleting the account.\n\nPlease:\n1. Log out of your account\n2. Log in again\n3. Try to delete the account immediately after logging in",
   "noPermissionDelete": "You don't have permission to delete your account. Please try again later.",
   "networkError": "Connection error. Check your internet and try again.",

@@ -11,6 +11,7 @@ import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/my_company_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/more_view.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/services/account_deletion_api_service.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:provider/provider.dart';
 
@@ -236,6 +237,25 @@ void main() {
       // after re-authenticating the final confirmation comes back
       expect(calls, ['delete', 'reauth']);
       expect(find.text(pt.finalConfirmation), findsOneWidget);
+    });
+
+    testWidgets('client timeout shows the "can take a few minutes" message',
+        (tester) async {
+      await pumpAccount(
+        tester,
+        onDelete: () async => throw AccountDeletionApiException(
+          AccountDeletionApiService.timeoutCode,
+          AccountDeletionApiService.timeoutCode,
+        ),
+      );
+      await tester.tap(find.text('Apagar minha conta'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.continue_));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.permanentlyDelete));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(pt.accountDeletionTakingLong), findsOneWidget);
     });
 
     testWidgets('sign out confirms first', (tester) async {

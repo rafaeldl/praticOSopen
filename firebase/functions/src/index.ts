@@ -81,7 +81,13 @@ export const updateUserClaims = functionsV1
     // If user was deleted, remove claims
     if (!change.after.exists) {
       console.log(`User ${userId} deleted, removing claims.`);
-      return admin.auth().setCustomUserClaims(userId, null);
+      try {
+        await admin.auth().setCustomUserClaims(userId, null);
+      } catch (error) {
+        // Account deletion removes the Auth user right after users/{uid}.
+        if ((error as { code?: string })?.code !== 'auth/user-not-found') throw error;
+      }
+      return;
     }
 
     const userData = change.after.data();
@@ -311,6 +317,9 @@ import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
 import aiRoutes from './routes/v1/ai.routes';
+import { createAccountRouter } from './routes/v1/account.routes';
+import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
+import { auth as adminAuth } from './services/firestore.service';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -560,4 +569,42 @@ export const api = onRequest(
     secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],
   },
   app
+);
+
+// ============================================================================
+// ACCOUNT API (account deletion — docs/ACCOUNT_DELETION.md)
+// ============================================================================
+
+/**
+ * Separate function so deleting a whole company (Storage + Firestore) fits in
+ * one request without raising the `api` timeout. The app derives its URL from
+ * the `api` one (…/api → …/accountApi). Same invocation policy as `api`.
+ */
+const accountApp = express();
+configureTrustProxy(accountApp);
+accountApp.use(cors({
+  origin: true,
+  methods: ['DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+accountApp.use(express.json({ limit: '10kb' }));
+accountApp.use('/v1/app/account', apiCoreLimiter, createAccountRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token, true),
+  depsFactory: defaultAccountDeletionDeps,
+}));
+accountApp.use((_req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not found' } });
+});
+accountApp.use(globalErrorHandler);
+
+export const accountApi = onRequest(
+  {
+    region: 'southamerica-east1',
+    memory: '512MiB',
+    timeoutSeconds: 540,
+    minInstances: 0,
+    maxInstances: 10,
+  },
+  accountApp
 );

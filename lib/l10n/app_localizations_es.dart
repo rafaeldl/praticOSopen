@@ -1698,6 +1698,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get couldNotDeleteAccount => 'No se pudo eliminar su cuenta.';
 
   @override
+  String get accountDeletionTakingLong =>
+      'La eliminación puede tardar unos minutos. Inténtalo de nuevo en un momento.';
+
+  @override
   String get requiresRecentLogin =>
       'Por seguridad, Firebase requiere un inicio de sesión reciente antes de eliminar la cuenta.\n\nPor favor:\n1. Cierre sesión de su cuenta\n2. Inicie sesión nuevamente\n3. Intente eliminar la cuenta inmediatamente después de iniciar sesión';
 
