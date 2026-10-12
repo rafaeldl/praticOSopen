@@ -8,13 +8,13 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
 import 'package:praticos/screens/payments/send_charge_flow.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/financial_summary.dart';
@@ -464,7 +464,7 @@ class _SeeAllLink extends StatelessWidget {
   }
 }
 
-/// "…" in a glass circle (opaque fallback with Reduce Transparency).
+/// "…" as the shared glass top button.
 class _MoreButton extends StatelessWidget {
   const _MoreButton({required this.onPressed});
 
@@ -472,32 +472,11 @@ class _MoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
+    return GlassBarButton(
+      key: const Key('financialMore'),
       label: context.l10n.more,
-      excludeSemantics: true,
-      child: GestureDetector(
-        key: const Key('financialMore'),
-        behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
-        child: SizedBox.square(
-          dimension: AppSizes.minTouchTarget,
-          child: Center(
-            child: AppGlass(
-              tint: AppColors.secondaryFill,
-              borderRadius: BorderRadius.circular(18),
-              child: SizedBox.square(
-                dimension: 36,
-                child: Icon(
-                  CupertinoIcons.ellipsis,
-                  size: 20,
-                  color: AppColors.accentText.resolveFrom(context),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      icon: CupertinoIcons.ellipsis,
+      onPressed: onPressed,
     );
   }
 }
