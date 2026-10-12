@@ -27,6 +27,7 @@ class AppGlass extends StatelessWidget {
     this.reduceTransparency = false,
     this.blurSigma = defaultBlurSigma,
     this.opacity = defaultOpacity,
+    this.elevated = false,
   });
 
   final Widget child;
@@ -42,6 +43,10 @@ class AppGlass extends StatelessWidget {
 
   /// Alpha of the fill while translucent (0..1).
   final double opacity;
+
+  /// Floating controls (top bar buttons): soft shadow and a hairline edge, so
+  /// the glass stays visible over a background of the same color.
+  final bool elevated;
 
   static const double defaultBlurSigma = 20;
   static const double defaultOpacity = 0.72;
@@ -59,6 +64,36 @@ class AppGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = _buildGlass(context);
+    if (!elevated) return glass;
+    final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF000000).withValues(alpha: dark ? 0.4 : 0.10),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      position: DecorationPosition.background,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: Border.all(
+            width: 0.5,
+            color: AppColors.separator.resolveFrom(context),
+          ),
+        ),
+        child: glass,
+      ),
+    );
+  }
+
+  Widget _buildGlass(BuildContext context) {
     final fill = (tint ?? AppColors.surface).resolveFrom(context);
     final opaque = isOpaque(
       context,

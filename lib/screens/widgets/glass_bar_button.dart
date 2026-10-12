@@ -35,6 +35,7 @@ class GlassBarButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: AppGlass(
+        elevated: true,
         borderRadius: BorderRadius.circular(AppSizes.minTouchTarget / 2),
         child: CupertinoButton(
           padding: EdgeInsets.zero,
@@ -68,6 +69,7 @@ class GlassBackButton extends StatelessWidget {
       label: title,
       excludeSemantics: true,
       child: AppGlass(
+        elevated: true,
         borderRadius: BorderRadius.circular(AppSizes.minTouchTarget / 2),
         child: CupertinoButton(
           padding: const EdgeInsets.only(left: 8, right: 14),
