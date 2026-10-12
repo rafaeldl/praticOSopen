@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/payment_settings.dart';
@@ -219,7 +220,7 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
           CupertinoColors.systemGroupedBackground.resolveFrom(context),
       child: CustomScrollView(
         slivers: [
-          const CupertinoSliverNavigationBar(largeTitle: Text('Asaas')),
+          const AppNavBar(largeTitle: Text('Asaas')),
           if (settings == null)
             const SliverFillRemaining(
               hasScrollBody: false,

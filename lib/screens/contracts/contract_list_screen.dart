@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -82,10 +83,8 @@ class _ContractListScreenState extends State<ContractListScreen> {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
+          AppNavBar(
             largeTitle: Text(l10n.contracts),
-            backgroundColor: AppColors.background.resolveFrom(context),
-            border: null,
           ),
           SliverToBoxAdapter(
             child: Padding(

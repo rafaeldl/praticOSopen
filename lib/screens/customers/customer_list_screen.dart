@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -151,10 +152,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       child: CustomScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
-          CupertinoSliverNavigationBar(
+          AppNavBar(
             largeTitle: Text(l10n.pickCustomerTitle),
-            backgroundColor: AppColors.background.resolveFrom(context),
-            border: null,
           ),
           SliverToBoxAdapter(
             child: Padding(
