@@ -5733,4 +5733,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String orderChangeDevice(String device) {
     return 'Change $device';
   }
+
+  @override
+  String get orderAddResponsible => 'Responsible';
+
+  @override
+  String get orderResponsibleRemove => 'Remove responsible';
 }

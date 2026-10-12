@@ -2697,5 +2697,7 @@
   "contractsFooterHint": "Los contratos nacen dentro de una {order}: activa “Repetir esta {order}”.",
   "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
   "orderChangeCustomer": "Cambiar cliente",
-  "orderChangeDevice": "Cambiar {device}"
+  "orderChangeDevice": "Cambiar {device}",
+  "orderAddResponsible": "Responsable",
+  "orderResponsibleRemove": "Quitar responsable"
 }

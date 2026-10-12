@@ -5758,4 +5758,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String orderChangeDevice(String device) {
     return 'Cambiar $device';
   }
+
+  @override
+  String get orderAddResponsible => 'Responsable';
+
+  @override
+  String get orderResponsibleRemove => 'Quitar responsable';
 }

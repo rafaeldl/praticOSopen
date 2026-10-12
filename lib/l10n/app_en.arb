@@ -2697,5 +2697,7 @@
   "contractsFooterHint": "Contracts start inside a {order}: turn on “Repeat this {order}”.",
   "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
   "orderChangeCustomer": "Change customer",
-  "orderChangeDevice": "Change {device}"
+  "orderChangeDevice": "Change {device}",
+  "orderAddResponsible": "Responsible",
+  "orderResponsibleRemove": "Remove responsible"
 }

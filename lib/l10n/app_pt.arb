@@ -2811,5 +2811,7 @@
     "placeholders": {
       "device": {"type": "String"}
     }
-  }
+  },
+  "orderAddResponsible": "Responsável",
+  "orderResponsibleRemove": "Tirar responsável"
 }

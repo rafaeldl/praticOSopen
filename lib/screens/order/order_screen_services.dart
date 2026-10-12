@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -9,6 +10,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
@@ -77,6 +79,16 @@ class OrderPermissions {
 class OrderScreenActions {
   const OrderScreenActions();
 
+  /// People of the company, to pick the "Responsável" of an order.
+  Future<List<UserAggr>> teamMembers() async {
+    final store = CollaboratorStore();
+    await store.loadCollaborators();
+    return [
+      for (final m in store.collaborators)
+        if (m.user?.id != null) m.user!,
+    ];
+  }
+
   /// "Receber" / payments of the order.
   Future<void> openPayments(BuildContext context, OrderStore store) {
     return Navigator.pushNamed(
@@ -107,9 +119,8 @@ class OrderScreenActions {
     showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const CupertinoAlertDialog(
-        content: CupertinoActivityIndicator(),
-      ),
+      builder: (_) =>
+          const CupertinoAlertDialog(content: CupertinoActivityIndicator()),
     );
 
     try {
@@ -134,14 +145,16 @@ class OrderScreenActions {
       if (order.id != null) {
         forms = await FormsService().getOrderForms(companyId, order.id!).first;
       }
-      await PdfService().shareOsPdf(OsPdfData(
-        order: order,
-        customer: customer,
-        company: company,
-        forms: forms,
-        config: config,
-        localizations: pdfLocalizations,
-      ));
+      await PdfService().shareOsPdf(
+        OsPdfData(
+          order: order,
+          customer: customer,
+          company: company,
+          forms: forms,
+          config: config,
+          localizations: pdfLocalizations,
+        ),
+      );
       navigator.pop();
     } catch (_) {
       navigator.pop();
@@ -207,7 +220,10 @@ class OrderScreenActions {
     if (companyId == null || orderId == null) return;
     String? deviceId;
     if (store.devices.length >= 2) {
-      final result = await DevicePickerSheet.show(context, store.devices.toList());
+      final result = await DevicePickerSheet.show(
+        context,
+        store.devices.toList(),
+      );
       if (result == null) return;
       if (result.action == DevicePickerAction.specific) {
         deviceId = result.device?.id;
@@ -223,8 +239,12 @@ class OrderScreenActions {
       ),
     );
     if (template == null || !context.mounted) return;
-    final form = await FormsService()
-        .addFormToOrder(companyId, orderId, template, deviceId: deviceId);
+    final form = await FormsService().addFormToOrder(
+      companyId,
+      orderId,
+      template,
+      deviceId: deviceId,
+    );
     if (!context.mounted) return;
     await openChecklist(context, store, form);
   }
@@ -319,7 +339,9 @@ class OrderScreenActions {
 
   /// Another order (contract parent or generated child).
   Future<void> openOrder(BuildContext context, Order order) {
-    return Navigator.of(context, rootNavigator: true)
-        .pushNamed('/order', arguments: {'order': order});
+    return Navigator.of(
+      context,
+      rootNavigator: true,
+    ).pushNamed('/order', arguments: {'order': order});
   }
 }

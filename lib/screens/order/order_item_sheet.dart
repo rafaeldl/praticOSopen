@@ -51,10 +51,7 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
 
   void _done() {
     _formKey.currentState?.save();
-    Navigator.pop(
-      context,
-      OrderItemEdit(value: _value, quantity: _quantity),
-    );
+    Navigator.pop(context, OrderItemEdit(value: _value, quantity: _quantity));
   }
 
   @override
@@ -128,10 +125,8 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
             ],
             const SizedBox(height: AppSpacing.xl),
             CupertinoButton(
-              onPressed: () => Navigator.pop(
-                context,
-                const OrderItemEdit(remove: true),
-              ),
+              onPressed: () =>
+                  Navigator.pop(context, const OrderItemEdit(remove: true)),
               child: Text(
                 l10n.orderItemRemove,
                 style: AppTypography.callout.copyWith(

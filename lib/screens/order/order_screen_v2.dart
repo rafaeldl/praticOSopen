@@ -9,6 +9,7 @@ import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
@@ -641,6 +642,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (_canGiveDiscount) ('discount', l10n.orderAddDiscount),
       if (saved && order.company?.id != null) ('comment', l10n.orderAddComment),
       if (saved && _permissions.canAttachMedia()) ('media', l10n.orderAddMedia),
+      if (canEdit && saved && order.assignedTo == null)
+        ('responsible', l10n.orderAddResponsible),
       if (canEdit && saved && config.useContracts && !_store.hasContract)
         ('contract', l10n.orderAddContractMonthly),
     ];
@@ -684,8 +687,43 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         await _actions.editContract(context, _store);
       case 'device':
         await _addDevice();
+      case 'responsible':
+        await _pickResponsible();
     }
     if (mounted) setState(() {});
+  }
+
+  /// "Responsável": who of the team takes care of this order.
+  Future<void> _pickResponsible() async {
+    final l10n = context.l10n;
+    final team = await _actions.teamMembers();
+    if (!mounted || team.isEmpty) return;
+    final current = _store.order?.assignedTo;
+    final picked = await showCupertinoModalPopup<Object>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.orderAddResponsible),
+        actions: [
+          for (final user in team)
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(ctx, user),
+              child: Text(user.name ?? user.email ?? ''),
+            ),
+          if (current != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.orderResponsibleRemove),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (!mounted || picked == null) return;
+    setState(() => _store.setAssignedTo(picked is UserAggr ? picked : null));
   }
 
   Future<void> _pickDueDate() async {
@@ -1473,6 +1511,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           trailing: _format.formatDateTime(scheduled),
           showChevron: false,
           onTap: canEdit ? _pickSchedule : null,
+        ),
+      if (order.assignedTo != null)
+        AppListRow(
+          title: l10n.orderAddResponsible,
+          trailing: order.assignedTo!.name ?? order.assignedTo!.email,
+          showChevron: false,
+          onTap: canEdit ? _pickResponsible : null,
         ),
       if (dueDate != null)
         AppListRow(

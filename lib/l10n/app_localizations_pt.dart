@@ -5744,4 +5744,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String orderChangeDevice(String device) {
     return 'Trocar $device';
   }
+
+  @override
+  String get orderAddResponsible => 'Responsável';
+
+  @override
+  String get orderResponsibleRemove => 'Tirar responsável';
 }

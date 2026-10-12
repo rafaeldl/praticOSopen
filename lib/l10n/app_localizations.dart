@@ -10017,6 +10017,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Trocar {device}'**
   String orderChangeDevice(String device);
+
+  /// No description provided for @orderAddResponsible.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responsável'**
+  String get orderAddResponsible;
+
+  /// No description provided for @orderResponsibleRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar responsável'**
+  String get orderResponsibleRemove;
 }
 
 class _AppLocalizationsDelegate

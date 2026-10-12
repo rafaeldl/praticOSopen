@@ -16,9 +16,7 @@ int checklistMissing(of_model.OrderForm form) {
 /// Result of [OrderDateSheet]: a new date, or [remove].
 class OrderDatePick {
   const OrderDatePick.date(DateTime this.date) : remove = false;
-  const OrderDatePick.remove()
-      : date = null,
-        remove = true;
+  const OrderDatePick.remove() : date = null, remove = true;
 
   final DateTime? date;
   final bool remove;
@@ -27,11 +25,7 @@ class OrderDatePick {
 /// Date and time picker for the order (schedule, due date): "Salvar" on the
 /// right; optional [removeLabel] in red to clear the date.
 class OrderDateSheet extends StatefulWidget {
-  const OrderDateSheet({
-    super.key,
-    required this.initial,
-    this.removeLabel,
-  });
+  const OrderDateSheet({super.key, required this.initial, this.removeLabel});
 
   final DateTime initial;
   final String? removeLabel;
@@ -44,7 +38,8 @@ class OrderDateSheet extends StatefulWidget {
   }) {
     return showCupertinoModalPopup<OrderDatePick>(
       context: context,
-      builder: (_) => OrderDateSheet(initial: initial, removeLabel: removeLabel),
+      builder: (_) =>
+          OrderDateSheet(initial: initial, removeLabel: removeLabel),
     );
   }
 
@@ -120,8 +115,9 @@ class OrderAddressSheet extends StatefulWidget {
 }
 
 class _OrderAddressSheetState extends State<OrderAddressSheet> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initial ?? '');
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial ?? '',
+  );
 
   @override
   void dispose() {
