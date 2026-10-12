@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -152,17 +153,15 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         child: CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
-            CupertinoSliverNavigationBar(
+            AppNavBar(
               largeTitle: Text(title),
               backgroundColor: background,
-              border: null,
               trailing: _selecting
                   ? null
-                  : CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(44, 44),
+                  : GlassBarButton(
+                      label: l10n.add,
+                      icon: CupertinoIcons.add,
                       onPressed: _create,
-                      child: const Icon(CupertinoIcons.add),
                     ),
             ),
             SliverToBoxAdapter(

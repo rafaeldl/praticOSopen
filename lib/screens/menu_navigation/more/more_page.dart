@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -39,11 +40,9 @@ class MorePage extends StatelessWidget {
         type: MaterialType.transparency,
         child: _withFloatingButton(context, CustomScrollView(
           slivers: [
-            CupertinoSliverNavigationBar(
+            AppNavBar(
               largeTitle: Text(title),
-              previousPageTitle: previousPageTitle ?? context.l10n.more,
-              backgroundColor: AppColors.background.resolveFrom(context),
-              border: null,
+              previousTitle: previousPageTitle ?? context.l10n.more,
             ),
             SliverSafeArea(
               top: false,

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -107,10 +108,8 @@ class NotificationListView extends StatelessWidget {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
+          AppNavBar(
             largeTitle: Text(l10n.noticesTitle),
-            backgroundColor: AppColors.background.resolveFrom(context),
-            border: null,
           ),
           if (isLoading)
             const SliverFillRemaining(
