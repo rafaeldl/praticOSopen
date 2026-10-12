@@ -29,10 +29,17 @@ typedef AccountDeletionHeadersProvider = Future<Map<String, String>> Function();
 /// Errors the account deletion screen already handles:
 /// - 401 `REQUIRES_RECENT_LOGIN` → `Exception('REQUIRES_RECENT_LOGIN')`
 ///   (the screen re-authenticates and tries again);
-/// - 409 `COMPANY_HAS_MEMBERS` → `Exception(<pt message from the server>)`.
+/// - 409 `COMPANY_HAS_MEMBERS` → `Exception(<pt message from the server>)`;
+/// - 409 `OWNERSHIP_MISMATCH` → `Exception(<pt message: contact support>)`;
+/// - client timeout → [AccountDeletionApiException] with [timeoutCode].
 class AccountDeletionApiService {
   static const requiresRecentLogin = 'REQUIRES_RECENT_LOGIN';
   static const companyHasMembers = 'COMPANY_HAS_MEMBERS';
+  static const ownershipMismatch = 'OWNERSHIP_MISMATCH';
+
+  /// Code (and [toString]) of a client-side timeout; the screen shows
+  /// `l10n.accountDeletionTakingLong` for it.
+  static const timeoutCode = 'ACCOUNT_DELETION_TIMEOUT';
 
   /// Fallback when the 409 body has no message (same text as the server).
   static const companyHasMembersMessage =
@@ -55,7 +62,7 @@ class AccountDeletionApiService {
     http.Client(),
     () => appApiHeaders(),
     const Duration(seconds: 120),
-    () => appApiBaseUrl,
+    () => accountApiBaseUrl,
   );
 
   /// Test seam: lets a test inject a mock client and fake headers.
@@ -83,7 +90,8 @@ class AccountDeletionApiService {
           .delete(Uri.parse('${_baseUrl()}/v1/app/account'), headers: headers)
           .timeout(_timeout);
     } on TimeoutException {
-      throw AccountDeletionApiException('NETWORK_ERROR', 'network timeout');
+      // The server keeps going; a later retry finishes or returns 200.
+      throw AccountDeletionApiException(timeoutCode, timeoutCode);
     } on http.ClientException {
       throw AccountDeletionApiException('NETWORK_ERROR', 'network error');
     } on SocketException {
@@ -109,6 +117,10 @@ class AccountDeletionApiService {
 
     if (statusCode == 401 && code == requiresRecentLogin) {
       return Exception(requiresRecentLogin);
+    }
+    if (statusCode == 409 && code == ownershipMismatch) {
+      // Server message (pt) asks the user to contact support.
+      return Exception(message ?? ownershipMismatch);
     }
     if (statusCode == 409 || code == companyHasMembers) {
       return Exception(

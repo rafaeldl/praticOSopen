@@ -115,12 +115,30 @@ class AuthRepository {
     return firebaseUser;
   }
 
-  void signOutGoogle() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+  /// Signs out of Google and Firebase. Firebase sign-out runs even if the
+  /// Google one fails (e.g. the user never used Google).
+  Future<void> signOutGoogle() async {
+    await signOutAll(
+      google: () => _googleSignIn.signOut(),
+      firebase: () => _auth.signOut(),
+    );
     currentUser = null;
 
     print("User Sign Out");
+  }
+
+  /// Runs [google] then [firebase]; a [google] failure is ignored, a
+  /// [firebase] failure propagates.
+  static Future<void> signOutAll({
+    required Future<void> Function() google,
+    required Future<void> Function() firebase,
+  }) async {
+    try {
+      await google();
+    } catch (e) {
+      print('Google sign-out failed: $e');
+    }
+    await firebase();
   }
 
   Future<void> sendPasswordResetEmail(String email) async {

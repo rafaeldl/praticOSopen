@@ -610,6 +610,7 @@
   "permanentlyDelete": "Excluir Permanentemente",
   "errorDeletingAccount": "Erro ao Excluir Conta",
   "couldNotDeleteAccount": "Não foi possível excluir sua conta.",
+  "accountDeletionTakingLong": "A exclusão pode levar alguns minutos. Tente de novo em instantes.",
   "requiresRecentLogin": "Por segurança, o Firebase exige login recente antes de deletar a conta.\n\nPor favor:\n1. Faça logout da sua conta\n2. Faça login novamente\n3. Tente deletar a conta imediatamente após o login",
   "noPermissionDelete": "Você não tem permissão para deletar sua conta. Tente novamente mais tarde.",
   "networkError": "Erro de conexão. Verifique sua internet e tente novamente.",

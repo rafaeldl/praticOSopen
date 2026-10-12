@@ -1,15 +1,20 @@
 /**
- * Account routes (Flutter app). Mounted at /v1/app/account — docs/ACCOUNT_DELETION.md
+ * Account routes (Flutter app). Mounted at /v1/app/account of the dedicated
+ * `accountApi` function (540 s) — docs/ACCOUNT_DELETION.md
  *
  * DELETE /  →  deletes the signed-in user's account
  * Header: Authorization: Bearer {Firebase ID token}. No X-Company-Id: the
  * deletion is per user, so this route does its own token check instead of
  * bearerAuth + resolveCompanyContext (which require a company).
- * The uid comes only from the verified token, never from the body.
+ * The uid comes only from the verified token (checked for revocation), never
+ * from the body.
  *
  * 200  { success: true, data: { deletedCompanies, leftCompanies } }
+ * 200  { success: true, data: { alreadyDeleted: true } } when the Auth user is
+ *      already gone (retry after a timeout); no recent sign-in required
  * 401  UNAUTHORIZED | TOKEN_EXPIRED | REQUIRES_RECENT_LOGIN (auth_time > 5 min)
  * 409  COMPANY_HAS_MEMBERS (owner of a company with other members; nothing deleted)
+ * 409  OWNERSHIP_MISMATCH (owner field and member map disagree; nothing deleted)
  * 500  INTERNAL_ERROR (safe to retry: every step is idempotent)
  */
 
@@ -28,6 +33,7 @@ export interface VerifiedIdToken {
 }
 
 export interface AccountRouterOptions {
+  /** Must check revocation (Admin SDK: verifyIdToken(token, true)). */
   verifyIdToken: (token: string) => Promise<VerifiedIdToken>;
   depsFactory: () => AccountDeletionDeps;
   now?: () => number;
@@ -52,7 +58,15 @@ export function createAccountRouter(options: AccountRouterOptions): Router {
     try {
       decoded = await options.verifyIdToken(header.slice('Bearer '.length).trim());
     } catch (error) {
-      if ((error as { code?: string })?.code === 'auth/id-token-expired') {
+      const code = (error as { code?: string })?.code;
+      if (code === 'auth/user-not-found') {
+        // Valid signature, but the Auth user is gone: an earlier attempt
+        // already finished (Auth is deleted last). Idempotent success.
+        console.log('[accountDeletion] auth user already deleted');
+        res.json({ success: true, data: { alreadyDeleted: true } });
+        return;
+      }
+      if (code === 'auth/id-token-expired') {
         sendError(res, 401, 'TOKEN_EXPIRED', 'Token has expired');
       } else {
         sendError(res, 401, 'UNAUTHORIZED', 'Invalid token');

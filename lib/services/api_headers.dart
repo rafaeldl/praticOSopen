@@ -67,3 +67,15 @@ String resolveAppApiBaseUrl({
   }
   return 'https://southamerica-east1-praticos.cloudfunctions.net/api';
 }
+
+/// Base URL of the `accountApi` function (account deletion, long timeout):
+/// the [appApiBaseUrl] with its trailing `/api` swapped for `/accountApi`.
+String get accountApiBaseUrl => resolveAccountApiBaseUrl(appApiBaseUrl);
+
+/// Every known [apiBaseUrl] (production, emulator, ngrok) ends with the
+/// function name `/api`; an override without it is returned unchanged.
+String resolveAccountApiBaseUrl(String apiBaseUrl) {
+  const suffix = '/api';
+  if (!apiBaseUrl.endsWith(suffix)) return apiBaseUrl;
+  return '${apiBaseUrl.substring(0, apiBaseUrl.length - suffix.length)}/accountApi';
+}

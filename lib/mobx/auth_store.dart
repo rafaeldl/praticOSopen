@@ -285,7 +285,7 @@ abstract class _AuthStore with Store {
 
       // 4. Sign out locally (Google + Firebase); the auth state change sends
       //    the user back to the login screen.
-      _auth.signOutGoogle();
+      await _auth.signOutGoogle();
     } catch (e) {
       debugPrint('Error deleting account: $e');
       rethrow;

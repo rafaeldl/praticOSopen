@@ -517,11 +517,6 @@ app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContex
 app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
-// Account deletion (per user, no company context) — docs/ACCOUNT_DELETION.md
-app.use('/v1/app/account', apiCoreLimiter, createAccountRouter({
-  verifyIdToken: (token) => adminAuth.verifyIdToken(token),
-  depsFactory: defaultAccountDeletionDeps,
-}));
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
@@ -568,12 +563,48 @@ export const api = onRequest(
   {
     region: 'southamerica-east1',
     memory: '256MiB',
-    // 300s (was 60s): DELETE /v1/app/account removes a whole company
-    // (Storage + Firestore) in one request — docs/ACCOUNT_DELETION.md.
-    timeoutSeconds: 300,
+    timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
     secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],
   },
   app
+);
+
+// ============================================================================
+// ACCOUNT API (account deletion — docs/ACCOUNT_DELETION.md)
+// ============================================================================
+
+/**
+ * Separate function so deleting a whole company (Storage + Firestore) fits in
+ * one request without raising the `api` timeout. The app derives its URL from
+ * the `api` one (…/api → …/accountApi). Same invocation policy as `api`.
+ */
+const accountApp = express();
+configureTrustProxy(accountApp);
+accountApp.use(cors({
+  origin: true,
+  methods: ['DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+accountApp.use(express.json({ limit: '10kb' }));
+accountApp.use('/v1/app/account', apiCoreLimiter, createAccountRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token, true),
+  depsFactory: defaultAccountDeletionDeps,
+}));
+accountApp.use((_req: Request, res: Response) => {
+  res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Endpoint not found' } });
+});
+accountApp.use(globalErrorHandler);
+
+export const accountApi = onRequest(
+  {
+    region: 'southamerica-east1',
+    memory: '512MiB',
+    timeoutSeconds: 540,
+    minInstances: 0,
+    maxInstances: 10,
+  },
+  accountApp
 );

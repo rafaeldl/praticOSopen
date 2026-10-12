@@ -2,14 +2,19 @@ import {
   AccountDeletionDeps,
   AccountDeletionError,
   COMPANY_HAS_MEMBERS_MESSAGE,
+  OWNERSHIP_MISMATCH_MESSAGE,
   RECENT_LOGIN_MAX_AGE_SECONDS,
   assertRecentLogin,
   deleteAccount,
 } from '../account-deletion.service';
 
 interface FakeCompany {
+  /** `owner` field of the company doc. */
   ownerId: string;
+  /** memberships/* ids. */
   members: string[];
+  /** private/membership.members; defaults to {} (app-created companies). */
+  privateMap?: Record<string, string>;
 }
 
 /** In-memory world: users, companies, storage prefixes and auth users. */
@@ -25,11 +30,33 @@ function fakeWorld(init: {
 
   const deps: AccountDeletionDeps = {
     getUserCompanyIds: jest.fn(async (uid) => users.get(uid) ?? null),
-    getCompany: jest.fn(async (id) => {
+    getOwnedCompanyIds: jest.fn(async (uid) =>
+      [...companies.entries()].filter(([, c]) => c.ownerId === uid).map(([id]) => id),
+    ),
+    getCompany: jest.fn(async (id, uid) => {
       const c = companies.get(id);
-      return { exists: !!c, ownerId: c?.ownerId ?? null };
+      if (!c) {
+        return {
+          exists: false,
+          ownerId: null,
+          privateRole: null,
+          otherOwnerInPrivateMap: false,
+          hasOtherMembers: false,
+          isMember: false,
+        };
+      }
+      const map = c.privateMap ?? {};
+      const others = new Set([...c.members, ...Object.keys(map)]);
+      others.delete(uid);
+      return {
+        exists: true,
+        ownerId: c.ownerId,
+        privateRole: map[uid] ?? null,
+        otherOwnerInPrivateMap: Object.entries(map).some(([m, role]) => m !== uid && role === 'owner'),
+        hasOtherMembers: others.size > 0,
+        isMember: c.members.includes(uid) || uid in map,
+      };
     }),
-    hasOtherMembers: jest.fn(async (id, uid) => (companies.get(id)?.members ?? []).some((m) => m !== uid)),
     deleteStoragePrefix: jest.fn(async (prefix) => {
       calls.push(`storage:${prefix}`);
     }),
@@ -117,10 +144,84 @@ describe('deleteAccount', () => {
     const result = await deleteAccount('u2', w.deps);
 
     expect(result).toEqual({ deletedCompanies: 0, leftCompanies: 1, authUserDeleted: true });
-    expect(w.calls).toEqual(['leave:c1', 'links:u2', 'user:u2', 'auth:u2']);
+    expect(w.calls).toEqual(['storage:tenants/c1/users/u2/', 'leave:c1', 'links:u2', 'user:u2', 'auth:u2']);
     expect(w.companies.get('c1')?.members).toEqual(['u1']);
-    expect(w.deps.deleteStoragePrefix).not.toHaveBeenCalled();
     expect(w.deps.deleteCompanyTree).not.toHaveBeenCalled();
+  });
+
+  it('admin who rewrote the owner field: OWNERSHIP_MISMATCH and nothing deleted', async () => {
+    const w = fakeWorld({
+      users: { admin: ['solo', 'c1'] },
+      companies: {
+        solo: { ownerId: 'admin', members: ['admin'] },
+        c1: { ownerId: 'admin', members: ['admin'], privateMap: { admin: 'admin' } },
+      },
+      authUsers: ['admin'],
+    });
+
+    const error = await deleteAccount('admin', w.deps).catch((e) => e);
+
+    expect(error).toBeInstanceOf(AccountDeletionError);
+    expect(error.code).toBe('OWNERSHIP_MISMATCH');
+    expect(error.message).toBe(OWNERSHIP_MISMATCH_MESSAGE);
+    expect(w.calls).toEqual([]);
+  });
+
+  it('owner field points elsewhere but the map says owner: OWNERSHIP_MISMATCH', async () => {
+    const w = fakeWorld({
+      users: { u1: ['c1'] },
+      companies: { c1: { ownerId: 'u9', members: ['u1'], privateMap: { u1: 'owner' } } },
+      authUsers: ['u1'],
+    });
+
+    await expect(deleteAccount('u1', w.deps)).rejects.toMatchObject({ code: 'OWNERSHIP_MISMATCH' });
+    expect(w.calls).toEqual([]);
+  });
+
+  it('another uid is owner in the map: OWNERSHIP_MISMATCH', async () => {
+    const w = fakeWorld({
+      users: { u1: ['c1'] },
+      companies: { c1: { ownerId: 'u1', members: [], privateMap: { u9: 'owner' } } },
+    });
+
+    await expect(deleteAccount('u1', w.deps)).rejects.toMatchObject({ code: 'OWNERSHIP_MISMATCH' });
+  });
+
+  it('owner confirmed by the map (bot-created company) is deleted', async () => {
+    const w = fakeWorld({
+      users: { u1: ['c1'] },
+      companies: { c1: { ownerId: 'u1', members: ['u1'], privateMap: { u1: 'owner' } } },
+      authUsers: ['u1'],
+    });
+
+    await expect(deleteAccount('u1', w.deps)).resolves.toMatchObject({ deletedCompanies: 1 });
+  });
+
+  it('also deletes owned companies missing from users.companies', async () => {
+    const w = fakeWorld({
+      users: { u1: [] },
+      companies: { hidden: { ownerId: 'u1', members: ['u1'] } },
+      authUsers: ['u1'],
+    });
+
+    const result = await deleteAccount('u1', w.deps);
+
+    expect(result.deletedCompanies).toBe(1);
+    expect(w.deps.deleteCompanyTree).toHaveBeenCalledWith('hidden');
+  });
+
+  it('forged users.companies entry (not a member): ignored, nothing removed', async () => {
+    const w = fakeWorld({
+      users: { u2: ['c1'] },
+      companies: { c1: { ownerId: 'u1', members: ['u1'] } },
+      authUsers: ['u2'],
+    });
+
+    const result = await deleteAccount('u2', w.deps);
+
+    expect(result.leftCompanies).toBe(0);
+    expect(w.deps.leaveCompany).not.toHaveBeenCalled();
+    expect(w.deps.deleteStoragePrefix).not.toHaveBeenCalled();
   });
 
   it('is idempotent: a second run (no user doc, no auth user) succeeds', async () => {
