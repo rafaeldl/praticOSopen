@@ -198,9 +198,7 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               CupertinoSliverNavigationBar(
-                backgroundColor: AppNavBar.clearBackground(context),
-                enableBackgroundFilterBlur: false,
-                middle: AppNavBar.collapsedMiddle(context),
+                backgroundColor: AppNavBar.barBackground(context),
                 alwaysShowMiddle: false,
                 largeTitle: Text(title),
                 border: null,

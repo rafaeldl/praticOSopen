@@ -110,7 +110,7 @@ void main() {
     expect(find.text('Clientes'), findsOneWidget);
   });
 
-  testWidgets('AppNavBar has no background and no collapsed title',
+  testWidgets('AppNavBar turns to frosted glass with the small title on scroll',
       (tester) async {
     tester.view.physicalSize = const Size(1206, 2622); // iPhone, portrait
     tester.view.devicePixelRatio = 3;
@@ -129,14 +129,17 @@ void main() {
     final bar = tester.widget<CupertinoSliverNavigationBar>(
       find.byType(CupertinoSliverNavigationBar),
     );
-    expect(bar.backgroundColor!.a, 0);
-    expect(bar.enableBackgroundFilterBlur, isFalse);
+    // Translucent, so it blurs what is under it; shown only once content
+    // scrolls under the bar (clear at the top of the page).
+    expect(bar.backgroundColor!.a, inInclusiveRange(0.5, 0.95));
+    expect(bar.enableBackgroundFilterBlur, isTrue);
+    expect(bar.automaticBackgroundVisibility, isTrue);
     expect(bar.alwaysShowMiddle, isFalse);
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
     await tester.pumpAndSettle();
-    // Scrolled: the title collapses away instead of sitting over the list.
-    expect(find.text('Início').hitTestable(), findsNothing);
+    // Scrolled: the small title sits between the glass buttons.
+    expect(find.text('Início').hitTestable(), findsOneWidget);
   });
 
   testWidgets('glass is smaller than the touch target, so the shadow fits',

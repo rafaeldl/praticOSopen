@@ -140,18 +140,13 @@ class AppNavBar extends StatelessWidget {
   /// Replaces the automatic back button.
   final Widget? leading;
 
-  /// Fully transparent bar color: screens that build their own
-  /// [CupertinoSliverNavigationBar] use it with [collapsedMiddle],
-  /// `alwaysShowMiddle: false` and no background blur to match [AppNavBar].
-  static Color clearBackground(BuildContext context) =>
-      AppColors.background.resolveFrom(context).withValues(alpha: 0);
-
-  /// Hides the collapsed title in portrait, where the large title is shown.
-  /// In landscape the bar has no large title, so the title stays.
-  static Widget? collapsedMiddle(BuildContext context) =>
-      MediaQuery.orientationOf(context) == Orientation.portrait
-      ? const SizedBox.shrink()
-      : null;
+  /// Bar background, as in iOS 26: the bar is clear while the page is at the
+  /// top (only the glass buttons show) and turns into frosted glass, with the
+  /// small title, once content scrolls under it (`automaticBackgroundVisibility`).
+  /// Screens that build their own [CupertinoSliverNavigationBar] use it with
+  /// `alwaysShowMiddle: false` to match [AppNavBar].
+  static Color barBackground(BuildContext context) =>
+      AppColors.background.resolveFrom(context).withValues(alpha: 0.8);
 
   @override
   Widget build(BuildContext context) {
@@ -162,13 +157,8 @@ class AppNavBar extends StatelessWidget {
           leading ??
           (canPop ? GlassBackButton(previousTitle: previousTitle) : null),
       largeTitle: largeTitle,
-      // As in the prototype, the bar has no background: only the glass
-      // buttons float over the content. The collapsed title is hidden so it
-      // never sits on top of the list.
-      middle: collapsedMiddle(context),
       alwaysShowMiddle: false,
-      backgroundColor: clearBackground(context),
-      enableBackgroundFilterBlur: false,
+      backgroundColor: barBackground(context),
       border: null,
       trailing: trailing,
     );

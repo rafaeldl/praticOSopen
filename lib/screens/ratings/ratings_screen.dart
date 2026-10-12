@@ -95,9 +95,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
-            backgroundColor: AppNavBar.clearBackground(context),
-            enableBackgroundFilterBlur: false,
-            middle: AppNavBar.collapsedMiddle(context),
+            backgroundColor: AppNavBar.barBackground(context),
             alwaysShowMiddle: false,
             largeTitle: Text(l10n.ratings),
             border: null,

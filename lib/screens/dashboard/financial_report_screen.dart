@@ -167,9 +167,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           CupertinoSliverNavigationBar(
-            backgroundColor: AppNavBar.clearBackground(context),
-            enableBackgroundFilterBlur: false,
-            middle: AppNavBar.collapsedMiddle(context),
+            backgroundColor: AppNavBar.barBackground(context),
             alwaysShowMiddle: false,
             largeTitle: Text(context.l10n.financialReport),
             border: null,

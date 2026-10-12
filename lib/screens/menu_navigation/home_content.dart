@@ -237,9 +237,7 @@ class _HomeContentState extends State<HomeContent> {
     final l10n = context.l10n;
     final count = widget.unreadCount;
     return CupertinoSliverNavigationBar(
-      backgroundColor: AppNavBar.clearBackground(context),
-      enableBackgroundFilterBlur: false,
-      middle: AppNavBar.collapsedMiddle(context),
+      backgroundColor: AppNavBar.barBackground(context),
       alwaysShowMiddle: false,
       automaticallyImplyLeading: false,
       leading: widget.leading,
