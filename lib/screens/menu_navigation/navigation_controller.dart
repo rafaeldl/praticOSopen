@@ -113,16 +113,13 @@ class _NavigationControllerState extends State<NavigationController>
     _disposer?.call();
 
     // React to store changes to update the tab controller
-    _disposer = reaction(
-      (_) => navigationStore.currentIndex,
-      (dynamic index) {
-        if (index is int &&
-            index < _tabs.length &&
-            _tabController.index != index) {
-          _tabController.index = index;
-        }
-      },
-    );
+    _disposer = reaction((_) => navigationStore.currentIndex, (dynamic index) {
+      if (index is int &&
+          index < _tabs.length &&
+          _tabController.index != index) {
+        _tabController.index = index;
+      }
+    });
 
     // Set up engagement scheduler with l10n strings
     final l10n = context.l10n;
@@ -205,31 +202,37 @@ class _NavigationControllerState extends State<NavigationController>
   }
 }
 
-/// Tab bar item for [tab]: icon, filled icon when selected and label.
+/// Tab bar item for [tab]: icon and label.
 BottomNavigationBarItem buildAppTabItem(BuildContext context, AppTab tab) {
-  final (id, icon, activeIcon, label) = switch (tab) {
-    AppTab.home => ('tab_home', CupertinoIcons.house,
-        CupertinoIcons.house_fill, context.l10n.home),
-    AppTab.customers => ('tab_customers', CupertinoIcons.person_2,
-        CupertinoIcons.person_2_fill, context.l10n.customers),
-    AppTab.agenda => ('tab_agenda', CupertinoIcons.calendar,
-        CupertinoIcons.calendar_today, context.l10n.agenda),
-    AppTab.financial => ('tab_financial', CupertinoIcons.chart_pie,
-        CupertinoIcons.chart_pie_fill, context.l10n.financial),
-    AppTab.more => ('tab_settings', CupertinoIcons.ellipsis,
-        CupertinoIcons.ellipsis, context.l10n.more),
+  // Same outline icon on both states, as in the prototype: the selected tab
+  // is told apart by its capsule and accent color.
+  final (id, icon, label) = switch (tab) {
+    AppTab.home => ('tab_home', CupertinoIcons.doc_text, context.l10n.home),
+    AppTab.customers => (
+      'tab_customers',
+      CupertinoIcons.person,
+      context.l10n.customers,
+    ),
+    AppTab.agenda => (
+      'tab_agenda',
+      CupertinoIcons.calendar,
+      context.l10n.agenda,
+    ),
+    AppTab.financial => (
+      'tab_financial',
+      CupertinoIcons.money_dollar_circle,
+      context.l10n.financial,
+    ),
+    AppTab.more => ('tab_settings', CupertinoIcons.ellipsis, context.l10n.more),
   };
-  // The button flag merges into the tab item (CupertinoTabBar merges each
+  // The button flag merges into the tab item (GlassTabBar merges each
   // item's semantics), so VoiceOver and UI tests see every tab as a button,
   // selected or not.
-  Widget wrap(IconData data) => Semantics(
-        identifier: id,
-        button: true,
-        child: Icon(data),
-      );
+  Widget wrap(IconData data) =>
+      Semantics(identifier: id, button: true, child: Icon(data));
   return BottomNavigationBarItem(
     icon: wrap(icon),
-    activeIcon: wrap(activeIcon),
+    activeIcon: wrap(icon),
     label: label,
   );
 }

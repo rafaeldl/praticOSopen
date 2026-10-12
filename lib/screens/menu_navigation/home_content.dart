@@ -196,7 +196,9 @@ class _HomeContentState extends State<HomeContent> {
   Widget build(BuildContext context) {
     final firstTime = _isFirstTime;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final buttonBottom = bottomInset + AppSpacing.md;
+    // The tab bar inset already leaves a gap above its floating capsule, so
+    // the button sits right on it (prototype: 12pt above the tabs).
+    final buttonBottom = bottomInset;
     final listBottomPadding =
         buttonBottom + AppSizes.primaryButtonHeight + AppSpacing.xl;
 
