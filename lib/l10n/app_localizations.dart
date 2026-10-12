@@ -9520,6 +9520,24 @@ abstract class AppLocalizations {
   /// **'Relatório'**
   String get financialReportShort;
 
+  /// No description provided for @financialReceivedIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido em {month}'**
+  String financialReceivedIn(String month);
+
+  /// No description provided for @financialReceivedSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} OS · ver todas'**
+  String financialReceivedSub(int count);
+
+  /// No description provided for @financialSendReportPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar relatório em PDF'**
+  String get financialSendReportPdf;
+
   /// No description provided for @receiveSubtitle.
   ///
   /// In pt, this message translates to:

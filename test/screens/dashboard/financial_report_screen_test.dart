@@ -12,6 +12,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
 import 'package:provider/provider.dart';
 
 /// Firebase core mock whose default app has a storage bucket.
@@ -142,6 +143,23 @@ void main() {
     expect(find.text('Bia Souza'), findsWidgets);
     // Starts on the current month, as the tab does.
     expect(store.loads.first, 'mês/0');
+  });
+
+  testWidgets('has the "Mandar relatório em PDF" button at the bottom',
+      (tester) async {
+    await pumpReport(tester);
+
+    final button = find.byKey(const Key('financialSendReportPdf'));
+    expect(button, findsOneWidget);
+    expect(
+      find.descendant(
+        of: button,
+        matching: find.text('Mandar relatório em PDF'),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.getSize(button).height,
+        greaterThanOrEqualTo(AppSizes.primaryButtonHeight));
   });
 
   testWidgets('keeps the period choices (day, week, month, year, other)',

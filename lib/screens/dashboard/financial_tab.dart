@@ -12,7 +12,6 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
@@ -22,9 +21,6 @@ import 'package:praticos/utils/financial_summary.dart';
 
 /// How many customers/orders each list shows before "See all".
 const int kFinancialPreviewCount = 5;
-
-/// Height of the fixed summary line above the tab bar.
-const double _kSummaryHeight = 56;
 
 /// Financeiro tab: answers "who owes me?".
 ///
@@ -70,7 +66,6 @@ class FinancialTab extends StatefulWidget {
 class _FinancialTabState extends State<FinancialTab> {
   late final FinancialTabStore _store = widget.store ?? FinancialTabStore();
   bool _showAllDebtors = false;
-  bool _showAllReceived = false;
 
   /// True while "Mandar cobrança" runs (reads Asaas state, charge screen,
   /// share sheet): a second tap is ignored so no duplicate charge is made.
@@ -216,40 +211,23 @@ class _FinancialTabState extends State<FinancialTab> {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: Observer(
         builder: (_) {
-          final ready = _store.status == FinancialTabStatus.ready;
           final summary = _store.summary;
-          final showSummary = ready && !summary.isEmpty;
 
-          return Stack(
-            children: [
-              CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  CupertinoSliverNavigationBar(
-                    largeTitle: Text(context.l10n.financial),
-                    backgroundColor: AppColors.background.resolveFrom(context),
-                    border: null,
-                    trailing: _MoreButton(onPressed: _showMoreMenu),
-                  ),
-                  CupertinoSliverRefreshControl(onRefresh: _store.refresh),
-                  SliverToBoxAdapter(child: _buildStepper(context)),
-                  ..._buildBody(context, summary),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height:
-                          AppSpacing.xxl +
-                          (showSummary ? _kSummaryHeight + bottomInset : 0),
-                    ),
-                  ),
-                ],
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              CupertinoSliverNavigationBar(
+                largeTitle: Text(context.l10n.financial),
+                backgroundColor: AppColors.background.resolveFrom(context),
+                border: null,
+                trailing: _MoreButton(onPressed: _showMoreMenu),
               ),
-              if (showSummary)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: bottomInset,
-                  child: _SummaryLine(summary: summary),
-                ),
+              CupertinoSliverRefreshControl(onRefresh: _store.refresh),
+              SliverToBoxAdapter(child: _buildStepper(context)),
+              ..._buildBody(context, summary),
+              SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xxl + bottomInset),
+              ),
             ],
           );
         },
@@ -318,13 +296,16 @@ class _FinancialTabState extends State<FinancialTab> {
               SectionLabel(l10n.financialToReceive),
               ..._debtorRows(context, summary),
             ],
-            if (summary.receivedOrders.isNotEmpty) ...[
-              SectionLabel(l10n.financialReceived),
-              ..._receivedRows(context, summary),
-            ],
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.md),
             AppListRow(
-              title: l10n.financialReportShort,
+              key: const ValueKey('financialReceivedRow'),
+              title: l10n.financialReceivedIn(
+                FormatService().formatMonthName(_store.month),
+              ),
+              trailing: FormatService().formatCurrency(summary.entered),
+              subtitle: l10n.financialReceivedSub(
+                summary.receivedOrders.length,
+              ),
               onTap: () => _openReport(),
             ),
           ],
@@ -364,37 +345,6 @@ class _FinancialTabState extends State<FinancialTab> {
               ? l10n.seeLess
               : l10n.seeAllCount(debtors.length),
           onPressed: () => setState(() => _showAllDebtors = !_showAllDebtors),
-        ),
-    ];
-  }
-
-  List<Widget> _receivedRows(BuildContext context, FinancialSummary summary) {
-    final l10n = context.l10n;
-    final format = FormatService();
-    final received = summary.receivedOrders;
-    final shown = _showAllReceived
-        ? received
-        : received.take(kFinancialPreviewCount).toList();
-
-    return [
-      for (final order in shown)
-        AppListRow(
-          key: ValueKey('received-${order.id}'),
-          leading: StatusDot(color: AppColors.success),
-          title: order.customer?.name ?? l10n.customerWithoutName,
-          trailing: format.formatCurrency(order.paidAmount ?? order.total ?? 0),
-          subtitle: l10n.financialPaidOn(
-            order.number ?? 0,
-            format.formatDayMonth(FinancialSummary.paidDate(order)),
-          ),
-          onTap: () => _openOrder(order),
-        ),
-      if (received.length > kFinancialPreviewCount)
-        _SeeAllLink(
-          label: _showAllReceived
-              ? l10n.seeLess
-              : l10n.seeAllCount(received.length),
-          onPressed: () => setState(() => _showAllReceived = !_showAllReceived),
         ),
     ];
   }
@@ -459,7 +409,9 @@ class _NextStepBlock extends StatelessWidget {
               CupertinoButton(
                 key: const Key('financialSendCharge'),
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+                minimumSize: const Size.fromHeight(
+                  AppSizes.primaryButtonHeight,
+                ),
                 color: AppColors.accent.resolveFrom(context),
                 borderRadius: BorderRadius.circular(AppRadii.button),
                 onPressed: busy ? null : onSend,
@@ -480,66 +432,6 @@ class _NextStepBlock extends StatelessWidget {
                       ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// "Entrou R$ 8.300 · Falta R$ 1.730", fixed above the tab bar.
-class _SummaryLine extends StatelessWidget {
-  const _SummaryLine({required this.summary});
-
-  final FinancialSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final format = FormatService();
-    final owed = format.formatCurrency(summary.owed);
-    final text = context.l10n.financialSummaryLine(
-      format.formatCurrency(summary.entered),
-      owed,
-    );
-    final color = AppColors.text.resolveFrom(context);
-    final style = AppTypography.callout.copyWith(
-      color: color,
-      fontFeatures: AppTypography.tabular,
-    );
-
-    // "Falta" amount gets the warning color (only when something is owed).
-    final split = text.lastIndexOf(owed);
-    final spans = split <= 0 || summary.owed <= 0
-        ? [TextSpan(text: text)]
-        : [
-            TextSpan(text: text.substring(0, split)),
-            TextSpan(
-              text: owed,
-              style: TextStyle(
-                color: AppColors.warning.resolveFrom(context),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextSpan(text: text.substring(split + owed.length)),
-          ];
-
-    return AppGlass(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppColors.separator.resolveFrom(context)),
-          ),
-        ),
-        child: SizedBox(
-          height: _kSummaryHeight,
-          child: Center(
-            child: Semantics(
-              container: true,
-              child: Text.rich(
-                TextSpan(style: style, children: spans),
-                textAlign: TextAlign.center,
-              ),
-            ),
           ),
         ),
       ),
