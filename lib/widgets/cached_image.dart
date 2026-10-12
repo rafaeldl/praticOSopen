@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:praticos/services/storage_url_resolver.dart';
 
 /// Cache manager customizado para imagens do PraticOS
 /// Configura limites de cache para melhor performance
@@ -100,8 +101,25 @@ class CachedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (StorageUrlResolver.needsResolve(imageUrl)) {
+      return FutureBuilder<String?>(
+        future: StorageUrlResolver.resolve(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return placeholder ?? _buildPlaceholder();
+          }
+          final url = snapshot.data;
+          if (url == null) return errorWidget ?? _buildErrorWidget();
+          return _buildImage(url);
+        },
+      );
+    }
+    return _buildImage(imageUrl);
+  }
+
+  Widget _buildImage(String url) {
     Widget image = CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: url,
       cacheManager: PraticOSCacheManager.instance,
       fit: fit,
       width: width,
