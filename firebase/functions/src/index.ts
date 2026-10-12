@@ -81,7 +81,13 @@ export const updateUserClaims = functionsV1
     // If user was deleted, remove claims
     if (!change.after.exists) {
       console.log(`User ${userId} deleted, removing claims.`);
-      return admin.auth().setCustomUserClaims(userId, null);
+      try {
+        await admin.auth().setCustomUserClaims(userId, null);
+      } catch (error) {
+        // Account deletion removes the Auth user right after users/{uid}.
+        if ((error as { code?: string })?.code !== 'auth/user-not-found') throw error;
+      }
+      return;
     }
 
     const userData = change.after.data();
@@ -311,6 +317,9 @@ import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
 import aiRoutes from './routes/v1/ai.routes';
+import { createAccountRouter } from './routes/v1/account.routes';
+import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
+import { auth as adminAuth } from './services/firestore.service';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -508,6 +517,11 @@ app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContex
 app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
+// Account deletion (per user, no company context) — docs/ACCOUNT_DELETION.md
+app.use('/v1/app/account', apiCoreLimiter, createAccountRouter({
+  verifyIdToken: (token) => adminAuth.verifyIdToken(token),
+  depsFactory: defaultAccountDeletionDeps,
+}));
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
@@ -554,7 +568,9 @@ export const api = onRequest(
   {
     region: 'southamerica-east1',
     memory: '256MiB',
-    timeoutSeconds: 60,
+    // 300s (was 60s): DELETE /v1/app/account removes a whole company
+    // (Storage + Firestore) in one request — docs/ACCOUNT_DELETION.md.
+    timeoutSeconds: 300,
     minInstances: 0,
     maxInstances: 100,
     secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],

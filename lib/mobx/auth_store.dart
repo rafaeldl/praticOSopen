@@ -6,7 +6,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
 import 'package:praticos/services/analytics_service.dart';
-import 'package:praticos/services/auth_service.dart';
+import 'package:praticos/services/account_deletion_api_service.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
@@ -19,7 +19,6 @@ class AuthStore = _AuthStore with _$AuthStore;
 
 abstract class _AuthStore with Store {
   final AuthRepository _auth = AuthRepository();
-  final AuthService _authService = AuthService();
 
   CompanyStore companyStore = CompanyStore();
   UserStore userStore = UserStore();
@@ -258,21 +257,13 @@ abstract class _AuthStore with Store {
     }
 
     try {
-      // 1. Delete all Firestore data (company, user document, everything)
-      await _authService.deleteUserData(user.uid);
+      // 1. The server deletes the companies the user owns alone, leaves the
+      //    others, and deletes users/{uid} and the Firebase Auth user
+      //    (docs/ACCOUNT_DELETION.md). REQUIRES_RECENT_LOGIN and the
+      //    "owner with members" message are mapped by the service.
+      await AccountDeletionApiService.instance.deleteAccount();
 
-      // 2. Delete Firebase Auth account
-      try {
-        await _auth.deleteAccount();
-      } on FirebaseAuthException catch (e) {
-        // If requires recent login, throw a specific error to handle in UI
-        if (e.code == 'requires-recent-login') {
-          throw Exception('REQUIRES_RECENT_LOGIN');
-        }
-        rethrow;
-      }
-
-      // 3. Clear local preferences
+      // 2. Clear local preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove("userId");
       await prefs.remove("userDisplayName");
@@ -281,7 +272,7 @@ abstract class _AuthStore with Store {
       await prefs.remove("companyId");
       await prefs.remove("companyName");
 
-      // 4. Clear global state
+      // 3. Clear global state
       await subscriptionStore?.unbind();
       Global.currentUser = null;
       Global.companyAggr = null;
@@ -291,6 +282,10 @@ abstract class _AuthStore with Store {
       logout = true;
       _isCompanyLoaded = false;
       hasCompanyLoadError = false;
+
+      // 4. Sign out locally (Google + Firebase); the auth state change sends
+      //    the user back to the login screen.
+      _auth.signOutGoogle();
     } catch (e) {
       debugPrint('Error deleting account: $e');
       rethrow;
