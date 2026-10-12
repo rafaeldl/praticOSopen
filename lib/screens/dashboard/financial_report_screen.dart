@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/services/format_service.dart';
@@ -166,8 +167,11 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           CupertinoSliverNavigationBar(
+            backgroundColor: AppNavBar.clearBackground(context),
+            enableBackgroundFilterBlur: false,
+            middle: AppNavBar.collapsedMiddle(context),
+            alwaysShowMiddle: false,
             largeTitle: Text(context.l10n.financialReport),
-            backgroundColor: AppColors.background.resolveFrom(context),
             border: null,
           ),
           CupertinoSliverRefreshControl(

@@ -40,6 +40,10 @@ class GlassTabBar extends CupertinoTabBar {
   /// [CupertinoTabScaffold] to inset the tab content.
   static const double barHeight = 72;
 
+  /// Clear glass, like the iOS 26 tab bar: content shows through softly.
+  static const double glassOpacity = 0.4;
+  static const double glassBlur = 12;
+
   /// The most the tab labels grow with the iPhone text size.
   static const double maxLabelScale = 1.3;
 
@@ -79,7 +83,8 @@ class GlassTabBar extends CupertinoTabBar {
             child: AppGlass(
               reduceTransparency: reduceTransparency,
               borderRadius: BorderRadius.circular(capsuleHeight / 2),
-              opacity: 0.88,
+              opacity: GlassTabBar.glassOpacity,
+              blurSigma: GlassTabBar.glassBlur,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: capsuleHeight),
                 child: Padding(

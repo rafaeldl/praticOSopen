@@ -146,6 +146,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
+              backgroundColor: AppNavBar.clearBackground(context),
+              enableBackgroundFilterBlur: false,
+              middle: AppNavBar.collapsedMiddle(context),
+              alwaysShowMiddle: false,
               largeTitle: Text(context.l10n.receiveTitle),
               leading: _buildOrderLink(),
               trailing: _buildMoreButton(),

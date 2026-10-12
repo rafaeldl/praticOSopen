@@ -234,7 +234,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           AppNavBar(
             largeTitle: Text(device.name ?? config.device),
             previousTitle: _previousTitle ?? config.devicePlural,
-            backgroundColor: background,
             trailing: GlassBarButton(
               label: l10n.deviceActions,
               icon: CupertinoIcons.ellipsis,

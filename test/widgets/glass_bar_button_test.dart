@@ -109,4 +109,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Clientes'), findsOneWidget);
   });
+
+  testWidgets('AppNavBar has no background and no collapsed title',
+      (tester) async {
+    tester.view.physicalSize = const Size(1206, 2622); // iPhone, portrait
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(CupertinoPageScaffold(
+      child: CustomScrollView(slivers: [
+        const AppNavBar(largeTitle: Text('Início')),
+        SliverList(
+          delegate: SliverChildListDelegate(
+            [for (var i = 0; i < 40; i++) SizedBox(height: 60, child: Text('row $i'))],
+          ),
+        ),
+      ]),
+    )));
+
+    final bar = tester.widget<CupertinoSliverNavigationBar>(
+      find.byType(CupertinoSliverNavigationBar),
+    );
+    expect(bar.backgroundColor!.a, 0);
+    expect(bar.enableBackgroundFilterBlur, isFalse);
+    expect(bar.alwaysShowMiddle, isFalse);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    // Scrolled: the title collapses away instead of sitting over the list.
+    expect(find.text('Início').hitTestable(), findsNothing);
+  });
 }

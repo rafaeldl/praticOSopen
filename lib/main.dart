@@ -21,6 +21,7 @@ import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/auth_wrapper.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/status_bar_fade.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -160,7 +161,7 @@ class MyApp extends StatelessWidget {
                 brightness: brightness,
                 primaryColor: AppColors.accent,
               ),
-              child: AppDefaultTextStyle(child: child!),
+              child: StatusBarFade(child: AppDefaultTextStyle(child: child!)),
             );
           },
           home: Observer(

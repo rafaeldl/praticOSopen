@@ -1163,9 +1163,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   slivers: [
                     if (_isNew)
                       CupertinoSliverNavigationBar(
+                        backgroundColor: AppNavBar.clearBackground(context),
+                        enableBackgroundFilterBlur: false,
+                        middle: AppNavBar.collapsedMiddle(context),
+                        alwaysShowMiddle: false,
                         largeTitle: Text(_title(config)),
-                        backgroundColor:
-                            AppColors.background.resolveFrom(context),
                         border: null,
                       )
                     else

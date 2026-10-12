@@ -64,9 +64,11 @@ class GlassBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final route = ModalRoute.of(context);
-    final routeTitle =
-        route is CupertinoRouteTransitionMixin ? route.previousTitle.value : null;
-    final title = previousTitle ??
+    final routeTitle = route is CupertinoRouteTransitionMixin
+        ? route.previousTitle.value
+        : null;
+    final title =
+        previousTitle ??
         ((routeTitle?.isNotEmpty ?? false) ? routeTitle! : context.l10n.back);
     // Prototype: label color on glass, not the accent.
     final color = AppColors.text.resolveFrom(context);
@@ -111,7 +113,6 @@ class AppNavBar extends StatelessWidget {
     this.previousTitle,
     this.trailing,
     this.leading,
-    this.backgroundColor,
   });
 
   final Widget largeTitle;
@@ -120,7 +121,19 @@ class AppNavBar extends StatelessWidget {
 
   /// Replaces the automatic back button.
   final Widget? leading;
-  final Color? backgroundColor;
+
+  /// Fully transparent bar color: screens that build their own
+  /// [CupertinoSliverNavigationBar] use it with [collapsedMiddle],
+  /// `alwaysShowMiddle: false` and no background blur to match [AppNavBar].
+  static Color clearBackground(BuildContext context) =>
+      AppColors.background.resolveFrom(context).withValues(alpha: 0);
+
+  /// Hides the collapsed title in portrait, where the large title is shown.
+  /// In landscape the bar has no large title, so the title stays.
+  static Widget? collapsedMiddle(BuildContext context) =>
+      MediaQuery.orientationOf(context) == Orientation.portrait
+      ? const SizedBox.shrink()
+      : null;
 
   @override
   Widget build(BuildContext context) {
@@ -131,8 +144,13 @@ class AppNavBar extends StatelessWidget {
           leading ??
           (canPop ? GlassBackButton(previousTitle: previousTitle) : null),
       largeTitle: largeTitle,
-      backgroundColor:
-          backgroundColor ?? AppColors.background.resolveFrom(context),
+      // As in the prototype, the bar has no background: only the glass
+      // buttons float over the content. The collapsed title is hidden so it
+      // never sits on top of the list.
+      middle: collapsedMiddle(context),
+      alwaysShowMiddle: false,
+      backgroundColor: clearBackground(context),
+      enableBackgroundFilterBlur: false,
       border: null,
       trailing: trailing,
     );

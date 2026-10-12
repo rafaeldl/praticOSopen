@@ -161,7 +161,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           slivers: [
             AppNavBar(
               largeTitle: Text(title),
-              backgroundColor: background,
               trailing: _selecting
                   ? null
                   : GlassBarButton(

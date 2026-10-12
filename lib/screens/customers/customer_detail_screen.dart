@@ -206,7 +206,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               AppNavBar(
                 largeTitle: Text(customer.name ?? ''),
                 previousTitle: _previousTitle ?? config.customerPlural,
-                backgroundColor: background,
                 trailing: GlassBarButton(
                   label: l10n.customerActions,
                   icon: CupertinoIcons.ellipsis,

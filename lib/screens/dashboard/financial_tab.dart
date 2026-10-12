@@ -217,8 +217,11 @@ class _FinancialTabState extends State<FinancialTab> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               CupertinoSliverNavigationBar(
+                backgroundColor: AppNavBar.clearBackground(context),
+                enableBackgroundFilterBlur: false,
+                middle: AppNavBar.collapsedMiddle(context),
+                alwaysShowMiddle: false,
                 largeTitle: Text(context.l10n.financial),
-                backgroundColor: AppColors.background.resolveFrom(context),
                 border: null,
                 trailing: _MoreButton(onPressed: _showMoreMenu),
               ),
