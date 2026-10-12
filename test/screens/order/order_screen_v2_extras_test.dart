@@ -194,7 +194,7 @@ List<String> _sheetLabels(WidgetTester tester) => tester
     .toList();
 
 Future<void> _openAddTo(WidgetTester tester) async {
-  await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+  await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
   await tester.pumpAndSettle();
   await tester.tap(find.textContaining('Adicionar à'));
   await tester.pumpAndSettle();

@@ -26,6 +26,7 @@ import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
@@ -226,7 +227,7 @@ void main() {
       expect(find.byType(StatusDot), findsOneWidget);
       expect(find.text('Orçamento'), findsOneWidget);
       // No "…" before saving, no cover photo, no assistant yet.
-      expect(find.byIcon(CupertinoIcons.ellipsis_circle), findsNothing);
+      expect(find.byIcon(CupertinoIcons.ellipsis), findsNothing);
       expect(find.text('Falar o que fazer'), findsNothing);
       expect(store.deferSave, isTrue);
       expect(store.order!.id, isNull);
@@ -262,7 +263,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(store.deferSave, isFalse);
       expect(find.textContaining('Salvar'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.ellipsis_circle), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.ellipsis), findsOneWidget);
     });
 
     testWidgets('status row changes the status with a dot and neutral text', (
@@ -713,6 +714,14 @@ void main() {
       expect(find.text('Trocar cliente'), findsOneWidget);
     });
 
+    testWidgets('back button reads the screen that opened the OS',
+        (tester) async {
+      await _pump(tester, screen(OrderStore()),
+          args: {'order': order(), 'previousTitle': 'Início'});
+      expect(tester.widget<AppNavBar>(find.byType(AppNavBar)).previousTitle,
+          'Início');
+    });
+
     testWidgets('done with balance: "Receber" opens payments', (tester) async {
       final actions = FakeActions();
       await _pump(
@@ -730,7 +739,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester, screen(OrderStore()), args: {'order': order()});
-      await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Adicionar à OS ›'));
       await tester.pumpAndSettle();
@@ -743,7 +752,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester, screen(OrderStore()), args: {'order': order()});
-      await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
       await tester.pumpAndSettle();
 
       final labels = tester

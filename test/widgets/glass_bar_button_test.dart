@@ -85,4 +85,28 @@ void main() {
     )));
     expect(find.byType(GlassBackButton), findsNothing);
   });
+
+  testWidgets('GlassBackButton falls back to the previous route title',
+      (tester) async {
+    final nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(CupertinoApp(
+      navigatorKey: nav,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('pt'),
+      home: const SizedBox(),
+    ));
+    nav.currentState!.push(CupertinoPageRoute<void>(
+      title: 'Clientes',
+      builder: (_) => const SizedBox(),
+    ));
+    await tester.pumpAndSettle();
+    nav.currentState!.push(CupertinoPageRoute<void>(
+      builder: (_) => const CupertinoPageScaffold(
+        child: Center(child: GlassBackButton()),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Clientes'), findsOneWidget);
+  });
 }

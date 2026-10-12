@@ -190,6 +190,8 @@ class _NavigationControllerState extends State<NavigationController>
           ),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTabView(
+              // Back buttons one level down read the tab name ("Início").
+              defaultTitle: buildAppTabItem(context, tabs[index]).label,
               routes: appRoutes,
               builder: (BuildContext context) {
                 return _buildPage(tabs[index]);

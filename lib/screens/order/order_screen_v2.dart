@@ -24,6 +24,7 @@ import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
@@ -162,6 +163,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   FormatService get _format =>
       FormatService()..setLocale(context.l10n.localeName);
 
+  /// Name of the screen that opened this OS, for the back button.
+  String? _previousTitle;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -172,6 +176,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final order = args?['order'] as Order?;
     _scrollToComments = args?['scrollToComments'] == true;
     _highlightCommentId = args?['commentId'] as String?;
+    _previousTitle = args?['previousTitle'] as String?;
     if (order != null && (order.id != null || order.number != null)) {
       _isNew = false;
       _loadExisting(order);
@@ -1156,26 +1161,23 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 CustomScrollView(
                   controller: _scroll,
                   slivers: [
-                    CupertinoSliverNavigationBar(
-                      largeTitle: Text(_title(config)),
-                      backgroundColor: AppColors.background.resolveFrom(
-                        context,
+                    if (_isNew)
+                      CupertinoSliverNavigationBar(
+                        largeTitle: Text(_title(config)),
+                        backgroundColor:
+                            AppColors.background.resolveFrom(context),
+                        border: null,
+                      )
+                    else
+                      AppNavBar(
+                        largeTitle: Text(_title(config)),
+                        previousTitle: _previousTitle,
+                        trailing: GlassBarButton(
+                          label: l10n.orderMoreActions,
+                          icon: CupertinoIcons.ellipsis,
+                          onPressed: _showMenu,
+                        ),
                       ),
-                      border: null,
-                      trailing: _isNew
-                          ? null
-                          : CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(44, 44),
-                              onPressed: _showMenu,
-                              child: Semantics(
-                                label: l10n.orderMoreActions,
-                                child: const Icon(
-                                  CupertinoIcons.ellipsis_circle,
-                                ),
-                              ),
-                            ),
-                    ),
                     SliverToBoxAdapter(child: _buildContent(config)),
                     const SliverToBoxAdapter(child: SizedBox(height: 140)),
                   ],

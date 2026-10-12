@@ -377,7 +377,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       onTap: () => Navigator.pushNamed(
         context,
         '/order',
-        arguments: {'order': order},
+        arguments: {'order': order, 'previousTitle': _customer?.name},
       ),
     );
   }

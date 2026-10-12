@@ -56,14 +56,20 @@ class GlassBarButton extends StatelessWidget {
 class GlassBackButton extends StatelessWidget {
   const GlassBackButton({super.key, this.previousTitle, this.onPressed});
 
-  /// Name of the screen we came from; falls back to "Voltar".
+  /// Name of the screen we came from; falls back to the previous route's
+  /// title, then to "Voltar".
   final String? previousTitle;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final title = previousTitle ?? context.l10n.back;
-    final color = AppColors.accentText.resolveFrom(context);
+    final route = ModalRoute.of(context);
+    final routeTitle =
+        route is CupertinoRouteTransitionMixin ? route.previousTitle.value : null;
+    final title = previousTitle ??
+        ((routeTitle?.isNotEmpty ?? false) ? routeTitle! : context.l10n.back);
+    // Prototype: label color on glass, not the accent.
+    final color = AppColors.text.resolveFrom(context);
     return Semantics(
       button: true,
       label: title,

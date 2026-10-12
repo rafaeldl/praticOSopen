@@ -310,7 +310,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
       onTap: () {
         Navigator.of(context, rootNavigator: true).pushNamed(
           '/order',
-          arguments: {'order': order},
+          arguments: {'order': order, 'previousTitle': context.l10n.agenda},
         );
       },
       child: Container(
