@@ -5725,4 +5725,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String contractsFooterHint(String order) {
     return 'Contracts start inside a $order: turn on “Repeat this $order”.';
   }
+
+  @override
+  String get orderChangeCustomer => 'Change customer';
+
+  @override
+  String orderChangeDevice(String device) {
+    return 'Change $device';
+  }
 }

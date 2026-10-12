@@ -2695,5 +2695,7 @@
   "contractEnded": "Terminado",
   "contractsEmptyEnded": "No hay contratos terminados.",
   "contractsFooterHint": "Los contratos nacen dentro de una {order}: activa “Repetir esta {order}”.",
-  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}}
+  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
+  "orderChangeCustomer": "Cambiar cliente",
+  "orderChangeDevice": "Cambiar {device}"
 }

@@ -5750,4 +5750,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String contractsFooterHint(String order) {
     return 'Los contratos nacen dentro de una $order: activa “Repetir esta $order”.';
   }
+
+  @override
+  String get orderChangeCustomer => 'Cambiar cliente';
+
+  @override
+  String orderChangeDevice(String device) {
+    return 'Cambiar $device';
+  }
 }

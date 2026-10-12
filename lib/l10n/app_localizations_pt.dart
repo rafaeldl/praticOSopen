@@ -5736,4 +5736,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String contractsFooterHint(String order) {
     return 'Contratos nascem dentro de uma $order: ligue “Repetir esta $order”.';
   }
+
+  @override
+  String get orderChangeCustomer => 'Trocar cliente';
+
+  @override
+  String orderChangeDevice(String device) {
+    return 'Trocar $device';
+  }
 }

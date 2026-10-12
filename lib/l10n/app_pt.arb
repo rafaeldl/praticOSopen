@@ -2804,5 +2804,12 @@
   "contractEnded": "Encerrado",
   "contractsEmptyEnded": "Nenhum contrato encerrado.",
   "contractsFooterHint": "Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.",
-  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}}
+  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
+  "orderChangeCustomer": "Trocar cliente",
+  "orderChangeDevice": "Trocar {device}",
+  "@orderChangeDevice": {
+    "placeholders": {
+      "device": {"type": "String"}
+    }
+  }
 }

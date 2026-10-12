@@ -628,6 +628,33 @@ void main() {
       expect(find.textContaining('Salvar'), findsNothing);
     });
 
+    testWidgets('status sits in the top block; no customer section (app-os)',
+        (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': order()});
+
+      final block = find
+          .ancestor(
+            of: find.text('Orçamento pronto para o cliente'),
+            matching: find.byType(Container),
+          )
+          .first;
+      expect(
+        find.descendant(of: block, matching: find.text('Orçamento')),
+        findsOneWidget,
+      );
+      // Customer only in the header, not as its own row.
+      expect(find.widgetWithText(AppListRow, 'Ana Souza'), findsNothing);
+      // Total closes the list of items.
+      expect(
+        tester.getTopLeft(find.text('Total')).dy,
+        greaterThan(tester.getTopLeft(find.text('Lixa')).dy),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('order_header_subtitle')));
+      await tester.pumpAndSettle();
+      expect(find.text('Trocar cliente'), findsOneWidget);
+    });
+
     testWidgets('done with balance: "Receber" opens payments', (tester) async {
       final actions = FakeActions();
       await _pump(

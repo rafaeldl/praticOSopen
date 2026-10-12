@@ -97,7 +97,8 @@ class OrderScreenV2 extends StatefulWidget {
   final Future<DevicePickerResult?> Function(
     BuildContext context,
     List<DeviceAggr> devices,
-  )? devicePicker;
+  )?
+  devicePicker;
 
   /// Shows Foto / "Falar o que fazer" on a new order. Defaults to the
   /// compile-time flag [kAiOrderAssistEnabled] (off).
@@ -206,7 +207,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       try {
         fresh = order.id != null
             ? await _store.repository.getSingle(companyId, order.id!)
-            : await _store.repository.getOrderByNumber(companyId, order.number!);
+            : await _store.repository.getOrderByNumber(
+                companyId,
+                order.number!,
+              );
       } catch (_) {
         // Shows what came in the arguments.
       }
@@ -239,6 +243,38 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       (_store.products?.isNotEmpty ?? false);
 
   // ─── Customer and vehicle ────────────────────────────────────────────────
+
+  /// Header tap (saved OS): change the customer or a vehicle, which no
+  /// longer have their own section (app-os).
+  Future<void> _showPeopleMenu() async {
+    final l10n = context.l10n;
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              _pickCustomer();
+            },
+            child: Text(l10n.orderChangeCustomer),
+          ),
+          for (final device in _store.devices)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                _changeDevice(device);
+              },
+              child: Text(l10n.orderChangeDevice(device.name ?? '')),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(sheetContext),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+  }
 
   Future<void> _pickCustomer() async {
     final result = await Navigator.pushNamed(
@@ -373,11 +409,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _store.updateOrder();
   }
 
-  String _serviceName(OrderService s) =>
-      s.service?.name ?? s.description ?? '';
+  String _serviceName(OrderService s) => s.service?.name ?? s.description ?? '';
 
-  String _productName(OrderProduct p) =>
-      p.product?.name ?? p.description ?? '';
+  String _productName(OrderProduct p) => p.product?.name ?? p.description ?? '';
 
   // ─── Status ──────────────────────────────────────────────────────────────
 
@@ -440,8 +474,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
     if (status == 'done') {
       final forms = _store.formsStream?.value ?? const <of_model.OrderForm>[];
-      final pending =
-          forms.where((f) => f.status != of_model.FormStatus.completed).length;
+      final pending = forms
+          .where((f) => f.status != of_model.FormStatus.completed)
+          .length;
       if (pending > 0) {
         await _alert(l10n.orderPendingChecklists(pending));
         return;
@@ -457,8 +492,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final order = _store.order;
     if (order == null ||
         !mounted ||
-        !shouldOfferStatusShare(order, status,
-            dismissedOrderIds: _dismissedSharePrompts)) {
+        !shouldOfferStatusShare(
+          order,
+          status,
+          dismissedOrderIds: _dismissedSharePrompts,
+        )) {
       return;
     }
     final send = await askNotifyCustomer(context, order: order, status: status);
@@ -510,7 +548,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
     final orderLabel = _shortOrderLabel(config);
-    final canCancel = _store.status != 'canceled' &&
+    final canCancel =
+        _store.status != 'canceled' &&
         _permissions.canChangeStatus(order, 'canceled');
     final canDelete = order.id != null && _permissions.canDelete(order);
     final choice = await showCupertinoModalPopup<String>(
@@ -600,10 +639,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (canEdit)
         ('device', l10n.orderAddAnotherDevice(config.device.toLowerCase())),
       if (_canGiveDiscount) ('discount', l10n.orderAddDiscount),
-      if (saved && order.company?.id != null)
-        ('comment', l10n.orderAddComment),
-      if (saved && _permissions.canAttachMedia())
-        ('media', l10n.orderAddMedia),
+      if (saved && order.company?.id != null) ('comment', l10n.orderAddComment),
+      if (saved && _permissions.canAttachMedia()) ('media', l10n.orderAddMedia),
       if (canEdit && saved && config.useContracts && !_store.hasContract)
         ('contract', l10n.orderAddContractMonthly),
     ];
@@ -812,9 +849,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: Text('${l10n.delete} ${l10n.checklist}'),
-        content: Text(l10n.confirmDeleteMessageNamed(
-          form.getLocalizedTitle(l10n.localeName),
-        )),
+        content: Text(
+          l10n.confirmDeleteMessageNamed(
+            form.getLocalizedTitle(l10n.localeName),
+          ),
+        ),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
@@ -957,8 +996,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     } on AiOrderAssistException catch (e) {
       error = switch (e.error) {
         AiAssistError.disabled => l10n.orderAssistantErrorDisabled,
-        AiAssistError.quotaExceeded =>
-          l10n.orderAssistantErrorQuota('${e.limit ?? ''}'.trim()),
+        AiAssistError.quotaExceeded => l10n.orderAssistantErrorQuota(
+          '${e.limit ?? ''}'.trim(),
+        ),
         _ => l10n.orderAssistantErrorUnavailable,
       };
     } catch (_) {
@@ -971,7 +1011,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       await _alert(l10n.orderAssistantErrorTitle, error);
     } else if (!_applyDraft(draft!)) {
       await _alert(
-          l10n.orderAssistantErrorTitle, l10n.orderAssistantNothingFound);
+        l10n.orderAssistantErrorTitle,
+        l10n.orderAssistantNothingFound,
+      );
     }
   }
 
@@ -982,10 +1024,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     var used = false;
     if (_store.customer == null) {
       if (draft.customer != null) {
-        _store.setCustomer(Customer()
-          ..id = draft.customer!.id
-          ..name = draft.customer!.name
-          ..phone = draft.customer!.phone);
+        _store.setCustomer(
+          Customer()
+            ..id = draft.customer!.id
+            ..name = draft.customer!.name
+            ..phone = draft.customer!.phone,
+        );
         _marked.add('customer');
         _customerGuess = null;
         used = true;
@@ -996,18 +1040,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
     if (draft.device != null) {
       final d = draft.device!;
-      _store.addDevice(Device()
-        ..id = d.id
-        ..name = d.name
-        ..serial = d.serial
-        ..manufacturer = d.manufacturer);
+      _store.addDevice(
+        Device()
+          ..id = d.id
+          ..name = d.name
+          ..serial = d.serial
+          ..manufacturer = d.manufacturer,
+      );
       _marked.add('device:${d.id}');
       _deviceGuess = null;
       used = true;
     } else {
-      final guess = [draft.deviceGuessName, draft.deviceGuessSerial]
-          .where((v) => v != null && v.isNotEmpty)
-          .join(' · ');
+      final guess = [
+        draft.deviceGuessName,
+        draft.deviceGuessSerial,
+      ].where((v) => v != null && v.isNotEmpty).join(' · ');
       if (guess.isNotEmpty) {
         _deviceGuess = guess;
         used = true;
@@ -1073,8 +1120,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   slivers: [
                     CupertinoSliverNavigationBar(
                       largeTitle: Text(_title(config)),
-                      backgroundColor:
-                          AppColors.background.resolveFrom(context),
+                      backgroundColor: AppColors.background.resolveFrom(
+                        context,
+                      ),
                       border: null,
                       trailing: _isNew
                           ? null
@@ -1084,7 +1132,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                               onPressed: _showMenu,
                               child: Semantics(
                                 label: l10n.orderMoreActions,
-                                child: const Icon(CupertinoIcons.ellipsis_circle),
+                                child: const Icon(
+                                  CupertinoIcons.ellipsis_circle,
+                                ),
                               ),
                             ),
                     ),
@@ -1133,25 +1183,43 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (subtitle != null)
-          Padding(
-            // Lined up with the large title (16 from the edge).
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.blockMargin, 0, AppSpacing.pageMargin, AppSpacing.xs,
-            ),
-            child: Text(
-              subtitle,
-              key: const ValueKey('order_header_subtitle'),
-              style: AppTypography.callout.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
+          Semantics(
+            button: true,
+            hint: l10n.orderChangeCustomer,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _showPeopleMenu,
+              child: Padding(
+                // Lined up with the large title (16 from the edge).
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.blockMargin,
+                  0,
+                  AppSpacing.pageMargin,
+                  AppSpacing.xs,
+                ),
+                child: Text(
+                  subtitle,
+                  key: const ValueKey('order_header_subtitle'),
+                  style: AppTypography.callout.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
+                  ),
+                ),
               ),
             ),
           ),
-        _buildStatusRow(config),
-        if (nextStep != null) _buildNextStep(nextStep),
+        // Saved OS: status lives in the top block, above the next step
+        // (app-os). New OS has no next step yet, so it keeps the status row.
+        if (nextStep != null)
+          _buildNextStep(nextStep, config)
+        else
+          _buildStatusRow(config),
         if (_isNew && _marked.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin, AppSpacing.xs, AppSpacing.pageMargin, 0,
+              AppSpacing.pageMargin,
+              AppSpacing.xs,
+              AppSpacing.pageMargin,
+              0,
             ),
             child: Text(
               l10n.orderAssistantFilledNote,
@@ -1161,40 +1229,58 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
           ),
 
-        // Customer and vehicle
-        SectionLabel(config.customer),
-        if (_store.customer == null && _customerGuess != null)
-          AppListRow(
-            title: l10n.orderAssistantCustomerGuess(_customerGuess!),
-            marked: true,
-            onTap: _pickCustomer,
-          )
-        else if (_store.customer == null)
-          AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
-        else
-          AppListRow(
-            title: _store.customer!.name ?? '',
-            subtitle: (_store.customer!.phone?.isNotEmpty ?? false)
-                ? formatPhone(_store.customer!.phone)
-                : null,
-            marked: _marked.contains('customer'),
-            onTap: _pickCustomer,
-          ),
-        for (final device in _store.devices)
-          AppListRow(
-            title: device.name ?? '',
-            subtitle: (device.serial?.isNotEmpty ?? false) ? device.serial : null,
-            marked: _marked.contains('device:${device.id}'),
-            onTap: () => _changeDevice(device),
-          ),
-        if (_deviceGuess != null)
-          AppListRow(
-            title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
-            marked: true,
-            onTap: _addDevice,
-          ),
-        if (_store.customer != null && _store.devices.isEmpty)
-          AddRow(label: l10n.orderPickDevice(config.device), onTap: _addDevice),
+        // Customer and vehicle: picked here on a new OS. A saved OS shows
+        // them in the header (app-os) and only asks for what is missing.
+        if (_isNew) ...[
+          SectionLabel(config.customer),
+          if (_store.customer == null && _customerGuess != null)
+            AppListRow(
+              title: l10n.orderAssistantCustomerGuess(_customerGuess!),
+              marked: true,
+              onTap: _pickCustomer,
+            )
+          else if (_store.customer == null)
+            AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
+          else
+            AppListRow(
+              title: _store.customer!.name ?? '',
+              subtitle: (_store.customer!.phone?.isNotEmpty ?? false)
+                  ? formatPhone(_store.customer!.phone)
+                  : null,
+              marked: _marked.contains('customer'),
+              onTap: _pickCustomer,
+            ),
+          for (final device in _store.devices)
+            AppListRow(
+              title: device.name ?? '',
+              subtitle: (device.serial?.isNotEmpty ?? false)
+                  ? device.serial
+                  : null,
+              marked: _marked.contains('device:${device.id}'),
+              onTap: () => _changeDevice(device),
+            ),
+          if (_deviceGuess != null)
+            AppListRow(
+              title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
+              marked: true,
+              onTap: _addDevice,
+            ),
+          if (_store.customer != null && _store.devices.isEmpty)
+            AddRow(
+              label: l10n.orderPickDevice(config.device),
+              onTap: _addDevice,
+            ),
+        ] else ...[
+          if (_store.customer == null || _store.devices.isEmpty)
+            SectionLabel(config.customer),
+          if (_store.customer == null)
+            AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
+          else if (_store.devices.isEmpty)
+            AddRow(
+              label: l10n.orderPickDevice(config.device),
+              onTap: _addDevice,
+            ),
+        ],
 
         // What will be done
         if (_store.devices.length >= 2)
@@ -1208,17 +1294,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         ],
         AddRow(label: l10n.orderWhatGoesTitle, onTap: _addItem),
 
+        // Total closes the list of items, before "Nesta OS" (app-os).
+        if (canViewPrices && (services.isNotEmpty || products.isNotEmpty))
+          _buildSummary(summary),
+
         ..._buildCustomFields(config),
 
         ..._buildExtras(config),
 
-        if (canViewPrices && (services.isNotEmpty || products.isNotEmpty))
-          _buildSummary(summary),
-
         if (_isNew && _store.customer == null)
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin, AppSpacing.xl, AppSpacing.pageMargin, 0,
+              AppSpacing.pageMargin,
+              AppSpacing.xl,
+              AppSpacing.pageMargin,
+              0,
             ),
             child: Text(
               l10n.orderSaveNeedsCustomer,
@@ -1306,12 +1396,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           [for (final i in groupServices) services[i]],
           [for (final i in groupProducts) products[i]],
         );
-        widgets.add(AppListRow(
-          title: l10n.subtotal,
-          titleStyle: AppTypography.callout,
-          trailing: _format.formatCurrency(subtotal.total),
-          showChevron: false,
-        ));
+        widgets.add(
+          AppListRow(
+            title: l10n.subtotal,
+            titleStyle: AppTypography.callout,
+            trailing: _format.formatCurrency(subtotal.total),
+            showChevron: false,
+          ),
+        );
       }
     }
     if (widgets.isEmpty) widgets.add(SectionLabel(l10n.orderItemsSection));
@@ -1367,11 +1459,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final canAttach = _permissions.canAttachMedia();
     final uploading = _store.isUploadingPhoto || _store.isUploadingDocument;
     final children = contract != null && contract.parentOrderId == null
-        ? (_store.childOrders?.value?.whereType<Order>().toList() ??
-            <Order>[])
+        ? (_store.childOrders?.value?.whereType<Order>().toList() ?? <Order>[])
         : <Order>[];
-    children.sort((a, b) =>
-        (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+    children.sort(
+      (a, b) =>
+          (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+    );
 
     final rows = <Widget>[
       if (scheduled != null)
@@ -1401,11 +1494,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           trailing: contract.parentOrderNumber == null
               ? null
               : l10n.orderNumberTitle(
-                  config.serviceOrder, '${contract.parentOrderNumber}'),
-          onTap: () => _actions.openOrder(
-            context,
-            Order()..id = contract.parentOrderId,
-          ),
+                  config.serviceOrder,
+                  '${contract.parentOrderNumber}',
+                ),
+          onTap: () =>
+              _actions.openOrder(context, Order()..id = contract.parentOrderId),
         )
       else if (contract != null)
         AppListRow(
@@ -1432,7 +1525,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         for (final child in children)
           AppListRow(
             title: l10n.orderNumberTitle(
-                config.serviceOrder, '${child.number ?? ''}'),
+              config.serviceOrder,
+              '${child.number ?? ''}',
+            ),
             leading: StatusDot(color: OrderStatusStyle.dotColor(child.status)),
             trailing: child.createdAt == null
                 ? null
@@ -1515,9 +1610,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       enabled: canManage,
       onDelete: () => _confirmDeleteChecklist(form),
       child: AppListRow(
-        leading: StatusDot(
-          color: done ? AppColors.success : AppColors.warning,
-        ),
+        leading: StatusDot(color: done ? AppColors.success : AppColors.warning),
         title: form.getLocalizedTitle(l10n.localeName),
         subtitle: done || missing == 0
             ? l10n.orderChecklistDone
@@ -1545,7 +1638,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         color: AppColors.danger.resolveFrom(context),
         child: Semantics(
           label: context.l10n.delete,
-          child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white),
+          child: const Icon(
+            CupertinoIcons.delete,
+            color: CupertinoColors.white,
+          ),
         ),
       ),
       confirmDismiss: (_) => onDelete(),
@@ -1576,14 +1672,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return _actions.comments(order!, highlightCommentId: _highlightCommentId);
   }
 
-  String _price(double? value) =>
-      value == null ? context.l10n.catalogNoPrice : _format.formatCurrency(value);
+  String _price(double? value) => value == null
+      ? context.l10n.catalogNoPrice
+      : _format.formatCurrency(value);
 
-  Widget _buildStatusRow(SegmentConfigProvider config) {
+  Widget _buildStatusRow(SegmentConfigProvider config, {bool inBlock = false}) {
     final l10n = context.l10n;
     final status = _store.status;
     final due = _store.order?.dueDate;
-    final overdue = due != null &&
+    final overdue =
+        due != null &&
         due.isBefore(DateTime.now()) &&
         const ['quote', 'approved', 'progress'].contains(status);
     return Semantics(
@@ -1594,10 +1692,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pageMargin,
-              vertical: AppSpacing.sm,
-            ),
+            padding: inBlock
+                ? EdgeInsets.zero
+                : const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pageMargin,
+                    vertical: AppSpacing.sm,
+                  ),
             child: Row(
               children: [
                 StatusDot(
@@ -1612,7 +1712,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     TextSpan(
                       text: config.getStatus(status),
                       style: AppTypography.callout.copyWith(
-                        color: AppColors.textSecondary.resolveFrom(context),
+                        color: inBlock
+                            ? AppColors.onAccentSoft.resolveFrom(context)
+                            : AppColors.textSecondary.resolveFrom(context),
+                        fontWeight: inBlock ? FontWeight.w600 : null,
                       ),
                       children: [
                         if (overdue)
@@ -1620,8 +1723,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                             text: ' · ${l10n.orderOverdue}',
                             style: AppTypography.callout.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: OrderStatusStyle.overdueColor
-                                  .resolveFrom(context),
+                              color: OrderStatusStyle.overdueColor.resolveFrom(
+                                context,
+                              ),
                             ),
                           ),
                       ],
@@ -1631,7 +1735,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 Text(
                   l10n.orderChangeStatusLink,
                   style: AppTypography.callout.copyWith(
-                    color: AppColors.accentText.resolveFrom(context),
+                    color: inBlock
+                        ? AppColors.onAccentSoft.resolveFrom(context)
+                        : AppColors.accentText.resolveFrom(context),
+                    decoration: inBlock ? TextDecoration.underline : null,
+                    decorationColor: AppColors.onAccentSoft.resolveFrom(
+                      context,
+                    ),
                   ),
                 ),
               ],
@@ -1648,19 +1758,28 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final l10n = context.l10n;
     _NextStep toStatus(String sentence, String label, String target) =>
         _permissions.canChangeStatus(order, target)
-            ? _NextStep(sentence, label, () => _trySetStatus(target))
-            : _NextStep(sentence);
+        ? _NextStep(sentence, label, () => _trySetStatus(target))
+        : _NextStep(sentence);
 
     switch (_store.status) {
       case 'quote':
-        return toStatus(l10n.orderNextStepQuote, l10n.orderNextStepQuoteAction,
-            'approved');
+        return toStatus(
+          l10n.orderNextStepQuote,
+          l10n.orderNextStepQuoteAction,
+          'approved',
+        );
       case 'approved':
-        return toStatus(l10n.orderNextStepApproved,
-            l10n.orderNextStepApprovedAction, 'progress');
+        return toStatus(
+          l10n.orderNextStepApproved,
+          l10n.orderNextStepApprovedAction,
+          'progress',
+        );
       case 'progress':
-        return toStatus(l10n.orderNextStepProgress,
-            l10n.orderNextStepProgressAction, 'done');
+        return toStatus(
+          l10n.orderNextStepProgress,
+          l10n.orderNextStepProgressAction,
+          'done',
+        );
       case 'done':
         final remaining = _store.remainingBalance;
         if (canViewPrices && remaining > 0) {
@@ -1678,16 +1797,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           () => _actions.shareWithCustomer(context, order),
         );
       case 'canceled':
-        return toStatus(l10n.orderNextStepCanceled(config.serviceOrder),
-            l10n.orderNextStepReopen, 'quote');
+        return toStatus(
+          l10n.orderNextStepCanceled(config.serviceOrder),
+          l10n.orderNextStepReopen,
+          'quote',
+        );
     }
     return null;
   }
 
-  Widget _buildNextStep(_NextStep step) {
+  Widget _buildNextStep(_NextStep step, SegmentConfigProvider config) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
+        AppSpacing.blockMargin,
+        AppSpacing.sm,
+        AppSpacing.blockMargin,
+        0,
       ),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -1698,6 +1823,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildStatusRow(config, inBlock: true),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               step.sentence,
               style: AppTypography.highlight.copyWith(
@@ -1739,8 +1866,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final text = AppColors.text.resolveFrom(context);
     final secondary = AppColors.textSecondary.resolveFrom(context);
     final total = _store.total ?? summary.total;
-    final showPayment = !_isNew &&
-        !const ['quote', 'canceled'].contains(_store.status);
+    final showPayment =
+        !_isNew && !const ['quote', 'canceled'].contains(_store.status);
     final remaining = _store.remainingBalance;
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xl),
@@ -1749,12 +1876,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         children: [
           Container(
             height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
             color: AppColors.separator.resolveFrom(context),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin, AppSpacing.md, AppSpacing.pageMargin, 0,
+              AppSpacing.pageMargin,
+              AppSpacing.md,
+              AppSpacing.pageMargin,
+              0,
             ),
             child: Row(
               children: [
@@ -1777,7 +1909,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           if ((_store.discount ?? 0) > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pageMargin, AppSpacing.xs, AppSpacing.pageMargin, 0,
+                AppSpacing.pageMargin,
+                AppSpacing.xs,
+                AppSpacing.pageMargin,
+                0,
               ),
               child: Row(
                 children: [
@@ -1800,7 +1935,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           if (summary.hasUnpriced)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pageMargin, AppSpacing.xs, AppSpacing.pageMargin, 0,
+                AppSpacing.pageMargin,
+                AppSpacing.xs,
+                AppSpacing.pageMargin,
+                0,
               ),
               child: Text(
                 l10n.orderUnpricedCount(summary.unpricedCount),
@@ -1811,7 +1949,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             AppListRow(
               title: remaining > 0
                   ? l10n.orderRemainingToReceive(
-                      _format.formatCurrency(remaining))
+                      _format.formatCurrency(remaining),
+                    )
                   : l10n.orderFullyPaid,
               titleStyle: AppTypography.callout,
               onTap: () => _actions.openPayments(context, _store),
@@ -1887,27 +2026,31 @@ void addPickToOrder(OrderStore store, OrderItemPick pick) {
     final aggr = origin is Service
         ? origin.toAggr()
         : (ServiceAggr()
-          ..id = item.id
-          ..name = item.name
-          ..value = item.value
-          ..photo = item.photo);
-    store.addService(OrderService()
-      ..service = aggr
-      ..value = item.value);
+            ..id = item.id
+            ..name = item.name
+            ..value = item.value
+            ..photo = item.photo);
+    store.addService(
+      OrderService()
+        ..service = aggr
+        ..value = item.value,
+    );
   } else {
     final origin = item.origin;
     final aggr = origin is Product
         ? origin.toAggr()
         : (ProductAggr()
-          ..id = item.id
-          ..name = item.name
-          ..value = item.value
-          ..photo = item.photo);
-    store.addProduct(OrderProduct()
-      ..product = aggr
-      ..value = item.value
-      ..quantity = 1
-      ..total = item.value);
+            ..id = item.id
+            ..name = item.name
+            ..value = item.value
+            ..photo = item.photo);
+    store.addProduct(
+      OrderProduct()
+        ..product = aggr
+        ..value = item.value
+        ..quantity = 1
+        ..total = item.value,
+    );
   }
 }
 
@@ -1933,21 +2076,21 @@ class _AssistantButtons extends StatelessWidget {
     final onAssistant = AppColors.onAssistantFill.resolveFrom(context);
     final radius = BorderRadius.circular(AppRadii.button);
     Widget label(IconData icon, String value, Color color) => Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                value,
-                style: AppTypography.callout.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            value,
+            style: AppTypography.callout.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        );
+          ),
+        ),
+      ],
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1969,11 +2112,17 @@ class _AssistantButtons extends StatelessWidget {
               child: AppGlass(
                 borderRadius: radius,
                 child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
                   minimumSize: const Size.fromHeight(52),
                   borderRadius: radius,
                   onPressed: onPhoto,
-                  child: label(CupertinoIcons.camera, l10n.orderPhotoAction, text),
+                  child: label(
+                    CupertinoIcons.camera,
+                    l10n.orderPhotoAction,
+                    text,
+                  ),
                 ),
               ),
             ),
@@ -1986,7 +2135,11 @@ class _AssistantButtons extends StatelessWidget {
                 color: AppColors.assistantFill.resolveFrom(context),
                 borderRadius: radius,
                 onPressed: onTalk,
-                child: label(CupertinoIcons.mic, l10n.orderTalkAction, onAssistant),
+                child: label(
+                  CupertinoIcons.mic,
+                  l10n.orderTalkAction,
+                  onAssistant,
+                ),
               ),
             ),
           ],

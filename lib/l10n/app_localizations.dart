@@ -10005,6 +10005,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.'**
   String contractsFooterHint(String order);
+
+  /// No description provided for @orderChangeCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar cliente'**
+  String get orderChangeCustomer;
+
+  /// No description provided for @orderChangeDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar {device}'**
+  String orderChangeDevice(String device);
 }
 
 class _AppLocalizationsDelegate
