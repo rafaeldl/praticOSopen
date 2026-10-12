@@ -40,8 +40,9 @@
         },
         {
           "title": "Conta e privacidade",
-          "text": "Para excluir a conta, vá no app em Ajustes › Conta › Excluir conta.",
+          "text": "Para excluir a conta, vá no app em Mais › Sua conta › Apagar minha conta.",
           "links": [
+            { "text": "Como excluir a conta", "href": "delete-account.html", "ga": "support_delete_account" },
             { "text": "Política de Privacidade", "href": "privacy.html", "ga": "support_privacy" },
             { "text": "Termos de uso", "href": "terms.html", "ga": "support_terms" }
           ]
@@ -57,7 +58,7 @@
         },
         {
           "question": "Como excluo minha conta?",
-          "answer": "No app, vá em Ajustes › Conta › Excluir conta. A exclusão é permanente e apaga todos os seus dados."
+          "answer": "No app, vá em Mais › Sua conta › Apagar minha conta. A exclusão é permanente e apaga todos os seus dados."
         },
         {
           "question": "Meus dados estão seguros?",
@@ -112,8 +113,9 @@
         },
         {
           "title": "Account and privacy",
-          "text": "To delete your account, go to Settings › Account › Delete account in the app.",
+          "text": "To delete your account, go to More › Your account › Delete my account in the app.",
           "links": [
+            { "text": "How to delete your account", "href": "delete-account-en.html", "ga": "support_delete_account" },
             { "text": "Privacy Policy", "href": "privacy-en.html", "ga": "support_privacy" },
             { "text": "Terms of Use", "href": "terms-en.html", "ga": "support_terms" }
           ]
@@ -129,7 +131,7 @@
         },
         {
           "question": "How do I delete my account?",
-          "answer": "In the app, go to Settings › Account › Delete account. Deletion is permanent and removes all your data."
+          "answer": "In the app, go to More › Your account › Delete my account. Deletion is permanent and removes all your data."
         },
         {
           "question": "Is my data safe?",
@@ -184,8 +186,9 @@
         },
         {
           "title": "Cuenta y privacidad",
-          "text": "Para eliminar la cuenta, ve en la app a Ajustes › Cuenta › Eliminar cuenta.",
+          "text": "Para eliminar la cuenta, ve en la app a Más › Tu cuenta › Eliminar mi cuenta.",
           "links": [
+            { "text": "Cómo eliminar la cuenta", "href": "delete-account-es.html", "ga": "support_delete_account" },
             { "text": "Política de Privacidad", "href": "privacy-es.html", "ga": "support_privacy" },
             { "text": "Términos de uso", "href": "terms-es.html", "ga": "support_terms" }
           ]
@@ -201,7 +204,7 @@
         },
         {
           "question": "¿Cómo elimino mi cuenta?",
-          "answer": "En la app, ve a Ajustes › Cuenta › Eliminar cuenta. La eliminación es permanente y borra todos tus datos."
+          "answer": "En la app, ve a Más › Tu cuenta › Eliminar mi cuenta. La eliminación es permanente y borra todos tus datos."
         },
         {
           "question": "¿Mis datos están seguros?",
