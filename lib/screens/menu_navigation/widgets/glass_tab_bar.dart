@@ -40,6 +40,9 @@ class GlassTabBar extends CupertinoTabBar {
   /// [CupertinoTabScaffold] to inset the tab content.
   static const double barHeight = 72;
 
+  /// The most the tab labels grow with the iPhone text size.
+  static const double maxLabelScale = 1.3;
+
   @override
   Size get preferredSize => const Size.fromHeight(barHeight);
 
@@ -181,15 +184,21 @@ class _TabItem extends StatelessWidget {
                   selected ? item.activeIcon : item.icon,
                   const SizedBox(height: 1),
                   if (item.label != null)
-                    Text(
-                      item.label!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 11,
-                        fontWeight: selected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                    // Like the native iOS tab bar, the label grows only a
+                    // little with the iPhone text size, so the bar keeps
+                    // its height (iOS shows the Large Content Viewer).
+                    MediaQuery.withClampedTextScaling(
+                      maxScaleFactor: GlassTabBar.maxLabelScale,
+                      child: Text(
+                        item.label!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 11,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                        ),
                       ),
                     ),
                 ],

@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 
-typedef DownloadUrlGetter = Future<String> Function(String storagePath);
+typedef DownloadUrlGetter =
+    Future<String> Function(String bucket, String storagePath);
 
 /// Turns photo URLs that the app cannot open into Firebase download URLs.
 ///
@@ -11,8 +12,10 @@ typedef DownloadUrlGetter = Future<String> Function(String storagePath);
 class StorageUrlResolver {
   StorageUrlResolver._();
 
-  static DownloadUrlGetter getDownloadUrl =
-      (path) => FirebaseStorage.instance.ref(path).getDownloadURL();
+  static DownloadUrlGetter getDownloadUrl = (bucket, path) =>
+      FirebaseStorage.instanceFor(
+        bucket: 'gs://$bucket',
+      ).ref(path).getDownloadURL();
 
   static final Map<String, Future<String?>> _cache = {};
 
@@ -32,14 +35,25 @@ class StorageUrlResolver {
   static Future<String?> resolve(String url) {
     final path = storagePathFromUrl(url);
     if (path == null) return Future.value(url);
-    return _cache.putIfAbsent(path, () async {
-      try {
-        return await getDownloadUrl(path);
-      } catch (_) {
-        _cache.remove(path);
-        return null;
-      }
+    final bucket = Uri.parse(url).pathSegments.firstWhere((s) => s.isNotEmpty);
+    final key = '$bucket/$path';
+    final cached = _cache[key];
+    if (cached != null) return cached;
+    final future = _load(bucket, path);
+    _cache[key] = future;
+    // Failures are not cached, so the photo is retried on the next build.
+    future.then((value) {
+      if (value == null) _cache.remove(key);
     });
+    return future;
+  }
+
+  static Future<String?> _load(String bucket, String path) async {
+    try {
+      return await getDownloadUrl(bucket, path);
+    } catch (_) {
+      return null;
+    }
   }
 
   static void clearCache() => _cache.clear();

@@ -115,4 +115,21 @@ void main() {
       tester.view.physicalSize.width / tester.view.devicePixelRatio - 16,
     );
   });
+
+  testWidgets('keeps its height with the largest iPhone text size', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(750, 1334); // iPhone SE
+    tester.view.devicePixelRatio = 2;
+    tester.platformDispatcher.textScaleFactorTestValue = 3;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await _pump(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Clientes'), findsOneWidget);
+    final label = tester.widget<Text>(find.text('Clientes'));
+    expect(label.overflow, isNot(TextOverflow.ellipsis));
+  });
 }
