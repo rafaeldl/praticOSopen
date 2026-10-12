@@ -5339,6 +5339,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialReportShort => 'Relatório';
 
   @override
+  String financialReceivedIn(String month) {
+    return 'Recebido em $month';
+  }
+
+  @override
+  String financialReceivedSub(int count) {
+    return '$count OS · ver todas';
+  }
+
+  @override
+  String get financialSendReportPdf => 'Mandar relatório em PDF';
+
+  @override
   String receiveSubtitle(String customer, String total) {
     return '$customer · total $total';
   }
@@ -5736,4 +5749,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String contractsFooterHint(String order) {
     return 'Contratos nascem dentro de uma $order: ligue “Repetir esta $order”.';
   }
+
+  @override
+  String get orderChangeCustomer => 'Trocar cliente';
+
+  @override
+  String orderChangeDevice(String device) {
+    return 'Trocar $device';
+  }
+
+  @override
+  String get orderAddResponsible => 'Responsável';
+
+  @override
+  String get orderResponsibleRemove => 'Tirar responsável';
 }

@@ -15,13 +15,13 @@ import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/asaas_billing.dart';
@@ -146,6 +146,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
+              backgroundColor: AppNavBar.barBackground(context),
+              alwaysShowMiddle: false,
               largeTitle: Text(context.l10n.receiveTitle),
               leading: _buildOrderLink(),
               trailing: _buildMoreButton(),
@@ -179,31 +181,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Widget _buildOrderLink() {
     final order = _store?.order;
     if (order == null || order.number == null) return const SizedBox.shrink();
-    return CupertinoButton(
+    return GlassBackButton(
       key: const Key('receiveOrderLink'),
-      padding: EdgeInsets.zero,
-      minimumSize: const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+      previousTitle: context.l10n.receiveOrderLink(order.number!),
       onPressed: () => _fromOrder
           ? Navigator.of(context).pop()
           : Navigator.of(
               context,
             ).pushReplacementNamed('/order', arguments: {'order': order}),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            CupertinoIcons.chevron_back,
-            size: 22,
-            color: AppColors.accentText.resolveFrom(context),
-          ),
-          Text(
-            context.l10n.receiveOrderLink(order.number!),
-            style: AppTypography.body.copyWith(
-              color: AppColors.accentText.resolveFrom(context),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -245,29 +230,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         if (_store == null || status == 'quote' || status == 'canceled') {
           return const SizedBox.shrink();
         }
-        return CupertinoButton(
+        return GlassBarButton(
           key: const Key('receiveMoreButton'),
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(
-            AppSizes.minTouchTarget,
-            AppSizes.minTouchTarget,
-          ),
-          onPressed: _busy ? null : _showMoreMenu,
-          child: Semantics(
-            label: context.l10n.receiveMoreOptions,
-            child: AppGlass(
-              borderRadius: BorderRadius.circular(18),
-              child: SizedBox(
-                width: 36,
-                height: 36,
-                child: Icon(
-                  CupertinoIcons.ellipsis,
-                  size: 20,
-                  color: AppColors.text.resolveFrom(context),
-                ),
-              ),
-            ),
-          ),
+          label: context.l10n.receiveMoreOptions,
+          icon: CupertinoIcons.ellipsis,
+          onPressed: () {
+            if (!_busy) _showMoreMenu();
+          },
         );
       },
     );
@@ -843,7 +812,7 @@ class _ReceiptImageViewer extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
                   CupertinoIcons.exclamationmark_triangle,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.textSecondary.resolveFrom(context),
                   size: 48,
                 );
               },

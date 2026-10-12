@@ -2692,6 +2692,11 @@
   "@orderCountShort": {"placeholders": {"count": {"type": "int"}}},
   "deviceOwnerPrefix": "da ",
   "financialReportShort": "Relatório",
+  "financialReceivedIn": "Recebido em {month}",
+  "@financialReceivedIn": {"placeholders": {"month": {"type": "String"}}},
+  "financialReceivedSub": "{count} OS · ver todas",
+  "@financialReceivedSub": {"placeholders": {"count": {"type": "int"}}},
+  "financialSendReportPdf": "Mandar relatório em PDF",
   "receiveSubtitle": "{customer} · total {total}",
   "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},
   "receiveSubtitleNoCustomer": "total {total}",
@@ -2804,5 +2809,14 @@
   "contractEnded": "Encerrado",
   "contractsEmptyEnded": "Nenhum contrato encerrado.",
   "contractsFooterHint": "Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.",
-  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}}
+  "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
+  "orderChangeCustomer": "Trocar cliente",
+  "orderChangeDevice": "Trocar {device}",
+  "@orderChangeDevice": {
+    "placeholders": {
+      "device": {"type": "String"}
+    }
+  },
+  "orderAddResponsible": "Responsável",
+  "orderResponsibleRemove": "Tirar responsável"
 }

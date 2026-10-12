@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
@@ -10,7 +11,6 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
@@ -196,7 +196,9 @@ class _HomeContentState extends State<HomeContent> {
   Widget build(BuildContext context) {
     final firstTime = _isFirstTime;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final buttonBottom = bottomInset + AppSpacing.md;
+    // The tab bar inset already leaves a gap above its floating capsule, so
+    // the button sits right on it (prototype: 12pt above the tabs).
+    final buttonBottom = bottomInset;
     final listBottomPadding =
         buttonBottom + AppSizes.primaryButtonHeight + AppSpacing.xl;
 
@@ -235,6 +237,8 @@ class _HomeContentState extends State<HomeContent> {
     final l10n = context.l10n;
     final count = widget.unreadCount;
     return CupertinoSliverNavigationBar(
+      backgroundColor: AppNavBar.barBackground(context),
+      alwaysShowMiddle: false,
       automaticallyImplyLeading: false,
       leading: widget.leading,
       largeTitle: Semantics(
@@ -244,15 +248,12 @@ class _HomeContentState extends State<HomeContent> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Semantics(
+          GlassBarButton(
             identifier: 'notifications_button',
-            button: true,
             label: count > 0
                 ? l10n.notificationsA11y(count)
                 : l10n.notifications,
-            excludeSemantics: true,
-            child: _GlassIconButton(
-              onPressed: widget.onOpenNotifications,
+            onPressed: widget.onOpenNotifications,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -287,21 +288,13 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                 ],
               ),
-            ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Semantics(
+          GlassBarButton(
             identifier: 'home_more_button',
-            button: true,
             label: l10n.homeMoreMenu,
-            excludeSemantics: true,
-            child: _GlassIconButton(
-              onPressed: _showMoreMenu,
-              child: Icon(
-                CupertinoIcons.ellipsis,
-                color: AppColors.text.resolveFrom(context),
-              ),
-            ),
+            onPressed: _showMoreMenu,
+            icon: CupertinoIcons.ellipsis,
           ),
         ],
       ),
@@ -737,26 +730,3 @@ class _HomeContentState extends State<HomeContent> {
   }
 }
 
-/// Round 44pt button on glass, for the top bar (design system rule 11).
-class _GlassIconButton extends StatelessWidget {
-  const _GlassIconButton({required this.child, required this.onPressed});
-
-  final Widget child;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppGlass(
-      borderRadius: BorderRadius.circular(AppSizes.minTouchTarget / 2),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        minimumSize: const Size(
-          AppSizes.minTouchTarget,
-          AppSizes.minTouchTarget,
-        ),
-        onPressed: onPressed,
-        child: child,
-      ),
-    );
-  }
-}

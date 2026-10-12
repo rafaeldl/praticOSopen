@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
@@ -230,19 +231,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       backgroundColor: background,
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
+          AppNavBar(
             largeTitle: Text(device.name ?? config.device),
-            previousPageTitle: _previousTitle ?? config.devicePlural,
-            backgroundColor: background,
-            border: null,
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(44, 44),
+            previousTitle: _previousTitle ?? config.devicePlural,
+            trailing: GlassBarButton(
+              label: l10n.deviceActions,
+              icon: CupertinoIcons.ellipsis,
               onPressed: _showMenu,
-              child: Semantics(
-                label: l10n.deviceActions,
-                child: const Icon(CupertinoIcons.ellipsis_circle),
-              ),
             ),
           ),
           if (_orderStream == null)

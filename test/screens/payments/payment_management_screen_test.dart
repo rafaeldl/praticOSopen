@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/theme/app_glass.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -228,6 +230,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Dar desconto'), findsOneWidget);
     expect(find.text('Desfazer pagamentos'), findsOneWidget);
+  });
+
+  testWidgets('top buttons are the shared glass buttons', (tester) async {
+    await pumpScreen(tester, storeWith(total: 1000, paid: 100));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('receiveMoreButton')),
+        matching: find.byType(AppGlass),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(GlassBarButton), findsOneWidget);
   });
 
   testWidgets('canceled order does not accept payments', (tester) async {

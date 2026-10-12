@@ -1,0 +1,163 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/theme/app_glass.dart';
+
+Widget app(Widget home) => CupertinoApp(
+      locale: const Locale('pt'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+      ],
+      home: home,
+    );
+
+void main() {
+  testWidgets('GlassBarButton is a 44pt glass circle with a label',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    var taps = 0;
+    await tester.pumpWidget(app(CupertinoPageScaffold(
+      child: Center(
+        child: GlassBarButton(
+          label: 'Mais opções',
+          icon: CupertinoIcons.ellipsis,
+          onPressed: () => taps++,
+        ),
+      ),
+    )));
+    expect(find.byType(AppGlass), findsOneWidget);
+    // Lifted off the page: soft shadow so white glass shows on white.
+    expect(tester.widget<AppGlass>(find.byType(AppGlass)).elevated, isTrue);
+    final shadow = find.descendant(
+      of: find.byType(AppGlass),
+      matching: find.byWidgetPredicate((w) =>
+          w is DecoratedBox &&
+          w.decoration is BoxDecoration &&
+          ((w.decoration as BoxDecoration).boxShadow?.isNotEmpty ?? false)),
+    );
+    expect(shadow, findsOneWidget);
+    expect(find.bySemanticsLabel('Mais opções'), findsOneWidget);
+    expect(tester.getSize(find.byType(GlassBarButton)), const Size(44, 44));
+    await tester.tap(find.byType(GlassBarButton));
+    expect(taps, 1);
+    handle.dispose();
+  });
+
+  testWidgets('AppNavBar shows glass back with previous title and pops',
+      (tester) async {
+    await tester.pumpWidget(app(Builder(
+      builder: (context) => CupertinoPageScaffold(
+        child: Center(
+          child: CupertinoButton(
+            child: const Text('abrir'),
+            onPressed: () => Navigator.of(context).push(CupertinoPageRoute(
+              builder: (_) => const CupertinoPageScaffold(
+                child: CustomScrollView(slivers: [
+                  AppNavBar(
+                    largeTitle: Text('Detalhe'),
+                    previousTitle: 'Clientes',
+                  ),
+                ]),
+              ),
+            )),
+          ),
+        ),
+      ),
+    )));
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+    expect(find.byType(GlassBackButton), findsOneWidget);
+    expect(find.text('Clientes'), findsWidgets);
+    await tester.tap(find.byType(GlassBackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Detalhe'), findsNothing);
+  });
+
+  testWidgets('AppNavBar has no back button on a root screen', (tester) async {
+    await tester.pumpWidget(app(const CupertinoPageScaffold(
+      child: CustomScrollView(slivers: [AppNavBar(largeTitle: Text('Início'))]),
+    )));
+    expect(find.byType(GlassBackButton), findsNothing);
+  });
+
+  testWidgets('GlassBackButton falls back to the previous route title',
+      (tester) async {
+    final nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(CupertinoApp(
+      navigatorKey: nav,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('pt'),
+      home: const SizedBox(),
+    ));
+    nav.currentState!.push(CupertinoPageRoute<void>(
+      title: 'Clientes',
+      builder: (_) => const SizedBox(),
+    ));
+    await tester.pumpAndSettle();
+    nav.currentState!.push(CupertinoPageRoute<void>(
+      builder: (_) => const CupertinoPageScaffold(
+        child: Center(child: GlassBackButton()),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Clientes'), findsOneWidget);
+  });
+
+  testWidgets('AppNavBar turns to frosted glass with the small title on scroll',
+      (tester) async {
+    tester.view.physicalSize = const Size(1206, 2622); // iPhone, portrait
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(CupertinoPageScaffold(
+      child: CustomScrollView(slivers: [
+        const AppNavBar(largeTitle: Text('Início')),
+        SliverList(
+          delegate: SliverChildListDelegate(
+            [for (var i = 0; i < 40; i++) SizedBox(height: 60, child: Text('row $i'))],
+          ),
+        ),
+      ]),
+    )));
+
+    final bar = tester.widget<CupertinoSliverNavigationBar>(
+      find.byType(CupertinoSliverNavigationBar),
+    );
+    // Translucent, so it blurs what is under it; shown only once content
+    // scrolls under the bar (clear at the top of the page).
+    expect(bar.backgroundColor!.a, inInclusiveRange(0.5, 0.95));
+    expect(bar.enableBackgroundFilterBlur, isTrue);
+    expect(bar.automaticBackgroundVisibility, isTrue);
+    expect(bar.alwaysShowMiddle, isFalse);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    // Scrolled: the small title sits between the glass buttons.
+    expect(find.text('Início').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('glass is smaller than the touch target, so the shadow fits',
+      (tester) async {
+    await tester.pumpWidget(app(CupertinoPageScaffold(
+      child: Center(
+        child: GlassBarButton(
+          label: 'Mais opções',
+          icon: CupertinoIcons.ellipsis,
+          onPressed: () {},
+        ),
+      ),
+    )));
+
+    final glass = tester.getSize(find.byType(AppGlass));
+    final target = tester.getSize(find.byType(CupertinoButton));
+    expect(glass.height, 40);
+    expect(target.height, greaterThanOrEqualTo(44));
+    expect(target.width, greaterThanOrEqualTo(44));
+  });
+}

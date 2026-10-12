@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType;
@@ -79,25 +80,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   Widget _buildNavigationBar(BuildContext context) {
-    return CupertinoSliverNavigationBar(
+    return AppNavBar(
       largeTitle: Text(context.l10n.agenda),
       trailing: _canFilterByTechnician
-          ? CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => _showTechnicianFilter(context),
-              child: Observer(
-                builder: (_) {
-                  final hasFilter = _agendaStore.selectedTechnicianId != null;
-                  return Icon(
-                    hasFilter
-                        ? CupertinoIcons.person_crop_circle_fill
-                        : CupertinoIcons.person_crop_circle,
-                    color: hasFilter
-                        ? CupertinoColors.activeBlue
-                        : null,
-                  );
-                },
-              ),
+          ? Observer(
+              builder: (_) {
+                final hasFilter = _agendaStore.selectedTechnicianId != null;
+                return GlassBarButton(
+                  label: context.l10n.filter,
+                  onPressed: () => _showTechnicianFilter(context),
+                  icon: hasFilter
+                      ? CupertinoIcons.person_crop_circle_fill
+                      : CupertinoIcons.person_crop_circle,
+                );
+              },
             )
           : null,
     );
@@ -314,7 +310,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
       onTap: () {
         Navigator.of(context, rootNavigator: true).pushNamed(
           '/order',
-          arguments: {'order': order},
+          arguments: {'order': order, 'previousTitle': context.l10n.agenda},
         );
       },
       child: Container(

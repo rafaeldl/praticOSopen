@@ -5327,6 +5327,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialReportShort => 'Report';
 
   @override
+  String financialReceivedIn(String month) {
+    return 'Received in $month';
+  }
+
+  @override
+  String financialReceivedSub(int count) {
+    return '$count orders · see all';
+  }
+
+  @override
+  String get financialSendReportPdf => 'Send report as PDF';
+
+  @override
   String receiveSubtitle(String customer, String total) {
     return '$customer · total $total';
   }
@@ -5725,4 +5738,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String contractsFooterHint(String order) {
     return 'Contracts start inside a $order: turn on “Repeat this $order”.';
   }
+
+  @override
+  String get orderChangeCustomer => 'Change customer';
+
+  @override
+  String orderChangeDevice(String device) {
+    return 'Change $device';
+  }
+
+  @override
+  String get orderAddResponsible => 'Responsible';
+
+  @override
+  String get orderResponsibleRemove => 'Remove responsible';
 }

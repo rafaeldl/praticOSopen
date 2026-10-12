@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -100,7 +101,10 @@ class _HomeState extends State<Home> {
 
   void _openOrder(Order order) {
     Navigator.of(context, rootNavigator: true)
-        .pushNamed('/order', arguments: {'order': order})
+        .pushNamed('/order', arguments: {
+          'order': order,
+          'previousTitle': context.l10n.home,
+        })
         .then((_) => _loadOrders());
   }
 

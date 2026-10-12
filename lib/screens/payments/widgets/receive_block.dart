@@ -104,22 +104,24 @@ class ReceiveBlock extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           if (receiptName != null)
-            _ReceiptChip(
-              name: receiptName!,
-              onRemove: onRemoveReceipt,
-            )
+            _ReceiptChip(name: receiptName!, onRemove: onRemoveReceipt)
           else if (onAttachReceipt != null)
             CupertinoButton(
               key: const Key('receiveAttachReceipt'),
               padding: EdgeInsets.zero,
-              minimumSize: const Size(AppSizes.minTouchTarget,
-                  AppSizes.minTouchTarget),
+              minimumSize: const Size(
+                AppSizes.minTouchTarget,
+                AppSizes.minTouchTarget,
+              ),
               onPressed: onAttachReceipt,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(CupertinoIcons.paperclip,
-                      size: 20, color: AppColors.accentText.resolveFrom(context)),
+                  Icon(
+                    CupertinoIcons.paperclip,
+                    size: 20,
+                    color: AppColors.accentText.resolveFrom(context),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(
                     child: Text(
@@ -145,7 +147,9 @@ class ReceiveBlock extends StatelessWidget {
                 height: AppSizes.primaryButtonHeight,
                 child: CupertinoButton(
                   key: const Key('receiveConfirm'),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   color: AppColors.accent.resolveFrom(context),
                   disabledColor: AppColors.accent
                       .resolveFrom(context)
@@ -153,8 +157,9 @@ class ReceiveBlock extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.button),
                   onPressed: busy || amount <= 0 ? null : onConfirm,
                   child: busy
-                      ? const CupertinoActivityIndicator(
-                          color: CupertinoColors.white)
+                      ? CupertinoActivityIndicator(
+                          color: AppColors.onAccent.resolveFrom(context),
+                        )
                       : Text(
                           label,
                           style: AppTypography.bodyStrong.copyWith(
@@ -212,21 +217,24 @@ class _ReceiptChip extends StatelessWidget {
         Expanded(
           child: Text(
             name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: AppTypography.callout.copyWith(color: onSoft),
           ),
         ),
         CupertinoButton(
           key: const Key('receiveRemoveReceipt'),
           padding: EdgeInsets.zero,
-          minimumSize:
-              const Size(AppSizes.minTouchTarget, AppSizes.minTouchTarget),
+          minimumSize: const Size(
+            AppSizes.minTouchTarget,
+            AppSizes.minTouchTarget,
+          ),
           onPressed: onRemove,
           child: Semantics(
             label: context.l10n.receiveRemoveReceipt,
-            child: Icon(CupertinoIcons.xmark_circle_fill,
-                size: 22, color: onSoft),
+            child: Icon(
+              CupertinoIcons.xmark_circle_fill,
+              size: 22,
+              color: onSoft,
+            ),
           ),
         ),
       ],

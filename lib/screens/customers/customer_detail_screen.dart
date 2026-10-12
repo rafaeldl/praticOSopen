@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -202,19 +203,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           final orders = snapshot.data;
           return CustomScrollView(
             slivers: [
-              CupertinoSliverNavigationBar(
+              AppNavBar(
                 largeTitle: Text(customer.name ?? ''),
-                previousPageTitle: _previousTitle ?? config.customerPlural,
-                backgroundColor: background,
-                border: null,
-                trailing: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(44, 44),
+                previousTitle: _previousTitle ?? config.customerPlural,
+                trailing: GlassBarButton(
+                  label: l10n.customerActions,
+                  icon: CupertinoIcons.ellipsis,
                   onPressed: _showMenu,
-                  child: Semantics(
-                    label: l10n.customerActions,
-                    child: const Icon(CupertinoIcons.ellipsis_circle),
-                  ),
                 ),
               ),
               ..._buildHeader(customer, orders),
@@ -381,7 +376,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       onTap: () => Navigator.pushNamed(
         context,
         '/order',
-        arguments: {'order': order},
+        arguments: {'order': order, 'previousTitle': _customer?.name},
       ),
     );
   }

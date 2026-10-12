@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show SelectableText;
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -241,12 +242,13 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
           CupertinoColors.systemGroupedBackground.resolveFrom(context),
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
+          AppNavBar(
             largeTitle: Text(context.l10n.integrations),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
+            previousTitle: context.l10n.advancedTitle,
+            trailing: GlassBarButton(
+              label: context.l10n.add,
+              icon: CupertinoIcons.add,
               onPressed: _create,
-              child: const Icon(CupertinoIcons.add),
             ),
           ),
           SliverToBoxAdapter(child: _buildBody(context)),

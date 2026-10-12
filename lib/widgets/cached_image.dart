@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:praticos/services/storage_url_resolver.dart';
+import 'package:praticos/theme/app_colors.dart';
 
 /// Cache manager customizado para imagens do PraticOS
 /// Configura limites de cache para melhor performance
@@ -86,10 +88,7 @@ class CachedImage extends StatelessWidget {
   }
 
   /// Factory para visualização em tela cheia
-  factory CachedImage.fullScreen({
-    Key? key,
-    required String imageUrl,
-  }) {
+  factory CachedImage.fullScreen({Key? key, required String imageUrl}) {
     return CachedImage(
       key: key,
       imageUrl: imageUrl,
@@ -100,53 +99,68 @@ class CachedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (StorageUrlResolver.needsResolve(imageUrl)) {
+      return FutureBuilder<String?>(
+        future: StorageUrlResolver.resolve(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return placeholder ?? _buildPlaceholder(context);
+          }
+          final url = snapshot.data;
+          if (url == null) return errorWidget ?? _buildErrorWidget(context);
+          return _buildImage(url);
+        },
+      );
+    }
+    return _buildImage(imageUrl);
+  }
+
+  Widget _buildImage(String url) {
     Widget image = CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: url,
       cacheManager: PraticOSCacheManager.instance,
       fit: fit,
       width: width,
       height: height,
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
-      placeholder: (context, url) => placeholder ?? _buildPlaceholder(),
-      errorWidget: (context, url, error) => errorWidget ?? _buildErrorWidget(),
+      placeholder: (context, url) => placeholder ?? _buildPlaceholder(context),
+      errorWidget: (context, url, error) =>
+          errorWidget ?? _buildErrorWidget(context),
       fadeInDuration: const Duration(milliseconds: 200),
       fadeOutDuration: const Duration(milliseconds: 200),
     );
 
     if (borderRadius != null) {
-      image = ClipRRect(
-        borderRadius: borderRadius!,
-        child: image,
-      );
+      image = ClipRRect(borderRadius: borderRadius!, child: image);
     }
 
     return image;
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
       width: width,
       height: height,
-      color: placeholderColor ?? Colors.grey[200],
+      color: placeholderColor ?? AppColors.secondaryFill.resolveFrom(context),
       child: Center(
         child: SizedBox(
           width: 24,
           height: 24,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: Colors.grey[400],
+            color: AppColors.textSecondary.resolveFrom(context),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildErrorWidget() {
+  Widget _buildErrorWidget(BuildContext context) {
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[200],
+      color: AppColors.secondaryFill.resolveFrom(context),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -155,14 +169,14 @@ class CachedImage extends StatelessWidget {
             Icon(
               Icons.broken_image,
               size: (height != null && height! < 100) ? 24 : 48,
-              color: Colors.grey[400],
+              color: AppColors.textSecondary.resolveFrom(context),
             ),
             if (height == null || height! >= 100) ...[
               SizedBox(height: 8),
               Text(
                 'Falha ao carregar',
                 style: TextStyle(
-                  color: Colors.grey[500],
+                  color: AppColors.textSecondary.resolveFrom(context),
                   fontSize: 12,
                 ),
               ),

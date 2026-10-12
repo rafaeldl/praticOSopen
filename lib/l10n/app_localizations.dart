@@ -9520,6 +9520,24 @@ abstract class AppLocalizations {
   /// **'Relatório'**
   String get financialReportShort;
 
+  /// No description provided for @financialReceivedIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido em {month}'**
+  String financialReceivedIn(String month);
+
+  /// No description provided for @financialReceivedSub.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} OS · ver todas'**
+  String financialReceivedSub(int count);
+
+  /// No description provided for @financialSendReportPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar relatório em PDF'**
+  String get financialSendReportPdf;
+
   /// No description provided for @receiveSubtitle.
   ///
   /// In pt, this message translates to:
@@ -10005,6 +10023,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.'**
   String contractsFooterHint(String order);
+
+  /// No description provided for @orderChangeCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar cliente'**
+  String get orderChangeCustomer;
+
+  /// No description provided for @orderChangeDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar {device}'**
+  String orderChangeDevice(String device);
+
+  /// No description provided for @orderAddResponsible.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responsável'**
+  String get orderAddResponsible;
+
+  /// No description provided for @orderResponsibleRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar responsável'**
+  String get orderResponsibleRemove;
 }
 
 class _AppLocalizationsDelegate

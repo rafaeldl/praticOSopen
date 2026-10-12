@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
@@ -197,8 +198,9 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               CupertinoSliverNavigationBar(
+                backgroundColor: AppNavBar.barBackground(context),
+                alwaysShowMiddle: false,
                 largeTitle: Text(title),
-                backgroundColor: AppColors.background.resolveFrom(context),
                 border: null,
               ),
               if (!_selecting)

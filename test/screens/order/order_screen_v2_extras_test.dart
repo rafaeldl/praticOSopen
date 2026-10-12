@@ -11,6 +11,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/order_photo.dart';
@@ -27,18 +28,18 @@ import 'package:provider/provider.dart';
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
-        CoreInitializeResponse(
-          name: defaultFirebaseAppName,
-          options: CoreFirebaseOptions(
-            apiKey: '123',
-            projectId: '123',
-            appId: '123',
-            messagingSenderId: '123',
-            storageBucket: 'test.appspot.com',
-          ),
-          pluginConstants: {},
-        ),
-      ];
+    CoreInitializeResponse(
+      name: defaultFirebaseAppName,
+      options: CoreFirebaseOptions(
+        apiKey: '123',
+        projectId: '123',
+        appId: '123',
+        messagingSenderId: '123',
+        storageBucket: 'test.appspot.com',
+      ),
+      pluginConstants: {},
+    ),
+  ];
 }
 
 /// Records what the screen asked for instead of leaving it.
@@ -58,9 +59,19 @@ class FakeActions extends OrderScreenActions {
       calls.add('media');
 
   @override
-  Future<void> viewPhoto(BuildContext context, OrderStore store, int index,
-          SegmentConfigProvider config) async =>
-      calls.add('photo:$index');
+  Future<List<UserAggr>> teamMembers() async => [
+    UserAggr()
+      ..id = 'u1'
+      ..name = 'Rafa Técnico',
+  ];
+
+  @override
+  Future<void> viewPhoto(
+    BuildContext context,
+    OrderStore store,
+    int index,
+    SegmentConfigProvider config,
+  ) async => calls.add('photo:$index');
 
   @override
   Widget photoThumb(String url, double size, BorderRadius radius) =>
@@ -75,13 +86,17 @@ class FakeActions extends OrderScreenActions {
       calls.add('addChecklist');
 
   @override
-  Future<void> openChecklist(BuildContext context, OrderStore store,
-          of_model.OrderForm form) async =>
-      calls.add('checklist:${form.id}');
+  Future<void> openChecklist(
+    BuildContext context,
+    OrderStore store,
+    of_model.OrderForm form,
+  ) async => calls.add('checklist:${form.id}');
 
   @override
-  Future<void> deleteChecklist(OrderStore store, of_model.OrderForm form) async =>
-      calls.add('deleteChecklist:${form.id}');
+  Future<void> deleteChecklist(
+    OrderStore store,
+    of_model.OrderForm form,
+  ) async => calls.add('deleteChecklist:${form.id}');
 
   @override
   Widget comments(Order order, {String? highlightCommentId}) =>
@@ -89,15 +104,20 @@ class FakeActions extends OrderScreenActions {
 
   @override
   Future<void> notifyCustomer(
-          BuildContext context, Order order, String status) async =>
-      calls.add('notify:$status');
+    BuildContext context,
+    Order order,
+    String status,
+  ) async => calls.add('notify:$status');
 
   @override
   Future<void> openInMaps(OrderStore store) async => calls.add('maps');
 
   @override
-  Future<double?> askDiscount(BuildContext context,
-      {required double currentTotal, required double maxDiscount}) async {
+  Future<double?> askDiscount(
+    BuildContext context, {
+    required double currentTotal,
+    required double maxDiscount,
+  }) async {
     calls.add('discount:$currentTotal/$maxDiscount');
     return null;
   }
@@ -165,7 +185,8 @@ Future<SegmentConfigProvider> _pump(
 /// Labels of the open action sheet, without "Cancelar".
 List<String> _sheetLabels(WidgetTester tester) => tester
     .widgetList<CupertinoActionSheetAction>(
-        find.byType(CupertinoActionSheetAction))
+      find.byType(CupertinoActionSheetAction),
+    )
     .map((a) => a.child)
     .whereType<Text>()
     .map((t) => t.data ?? '')
@@ -173,7 +194,7 @@ List<String> _sheetLabels(WidgetTester tester) => tester
     .toList();
 
 Future<void> _openAddTo(WidgetTester tester) async {
-  await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+  await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
   await tester.pumpAndSettle();
   await tester.tap(find.textContaining('Adicionar à'));
   await tester.pumpAndSettle();
@@ -231,14 +252,17 @@ void main() {
   // No company: OrderStore.createItem never reaches Firestore in tests.
   setUp(() => Global.companyAggr = null);
 
-  OrderScreenV2 screen(OrderStore store,
-          {FakeActions? actions, bool edit = true, bool prices = true}) =>
-      OrderScreenV2(
-        store: store,
-        permissions: _permissions(edit: edit, prices: prices),
-        actions: actions ?? FakeActions(),
-        mostUsed: () async => const [],
-      );
+  OrderScreenV2 screen(
+    OrderStore store, {
+    FakeActions? actions,
+    bool edit = true,
+    bool prices = true,
+  }) => OrderScreenV2(
+    store: store,
+    permissions: _permissions(edit: edit, prices: prices),
+    actions: actions ?? FakeActions(),
+    mostUsed: () async => const [],
+  );
 
   group('"Adicionar à OS ›"', () {
     testWidgets('lists only what the order does not have yet', (tester) async {
@@ -254,6 +278,7 @@ void main() {
         'Outro equipamento',
         'Comentário',
         'Fotos ou documento',
+        'Responsável',
         'Repetir todo mês (contrato)',
       ]);
       expect(find.text('Adicionar à OS'), findsOneWidget); // sheet title
@@ -263,13 +288,17 @@ void main() {
       expect(find.text('Checklist, fotos, comentário e mais'), findsNothing);
     });
 
-    testWidgets('without field service, scheduling or contracts they hide',
-        (tester) async {
-      await _pump(tester, screen(OrderStore()),
-          args: {'order': _order()},
-          fieldService: false,
-          useScheduling: false,
-          useContracts: false);
+    testWidgets('without field service, scheduling or contracts they hide', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': _order()},
+        fieldService: false,
+        useScheduling: false,
+        useContracts: false,
+      );
       await _openAddTo(tester);
 
       final labels = _sheetLabels(tester);
@@ -279,14 +308,18 @@ void main() {
     });
 
     testWidgets('without permission only comment is left', (tester) async {
-      await _pump(tester, screen(OrderStore(), edit: false),
-          args: {'order': _order()});
+      await _pump(
+        tester,
+        screen(OrderStore(), edit: false),
+        args: {'order': _order()},
+      );
       await _openAddTo(tester);
       expect(_sheetLabels(tester), ['Comentário']);
     });
 
-    testWidgets('no "Outros campos" escape even with 2 vehicles',
-        (tester) async {
+    testWidgets('no "Outros campos" escape even with 2 vehicles', (
+      tester,
+    ) async {
       final order = _order()
         ..devices = [
           DeviceAggr()
@@ -306,45 +339,57 @@ void main() {
   group('checklists', () {
     testWidgets('"Checklist" adds one', (tester) async {
       final actions = FakeActions();
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': _order()});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': _order()},
+      );
       await _openAddTo(tester);
       await tester.tap(find.text('Checklist'));
       await tester.pumpAndSettle();
       expect(actions.calls, ['addChecklist']);
     });
 
-    testWidgets('show in "Nesta OS" with a dot and what is missing; tap opens',
-        (tester) async {
-      final actions = FakeActions();
-      final store = OrderStore()
-        ..formsStream = ObservableStream(Stream.value(
-            [_form('f1'), _form('f2', items: 2, answered: 2)]));
-      await _pump(tester, screen(store, actions: actions),
-          args: {'order': _order()});
+    testWidgets(
+      'show in "Nesta OS" with a dot and what is missing; tap opens',
+      (tester) async {
+        final actions = FakeActions();
+        final store = OrderStore()
+          ..formsStream = ObservableStream(
+            Stream.value([_form('f1'), _form('f2', items: 2, answered: 2)]),
+          );
+        await _pump(
+          tester,
+          screen(store, actions: actions),
+          args: {'order': _order()},
+        );
 
-      expect(find.text('Nesta Ordem de Serviço'), findsOneWidget);
-      expect(find.text('Faltam 2 perguntas'), findsOneWidget);
-      expect(find.text('Pronto'), findsOneWidget);
-      expect(
-        find.ancestor(
-          of: find.byType(StatusDot),
-          matching: find.byType(Dismissible),
-        ),
-        findsNWidgets(2),
-      );
+        expect(find.text('Nesta Ordem de Serviço'), findsOneWidget);
+        expect(find.text('Faltam 2 perguntas'), findsOneWidget);
+        expect(find.text('Pronto'), findsOneWidget);
+        expect(
+          find.ancestor(
+            of: find.byType(StatusDot),
+            matching: find.byType(Dismissible),
+          ),
+          findsNWidgets(2),
+        );
 
-      await tester.tap(find.text('Faltam 2 perguntas'));
-      await tester.pumpAndSettle();
-      expect(actions.calls, ['checklist:f1']);
-    });
+        await tester.tap(find.text('Faltam 2 perguntas'));
+        await tester.pumpAndSettle();
+        expect(actions.calls, ['checklist:f1']);
+      },
+    );
 
     testWidgets('swipe asks before removing', (tester) async {
       final actions = FakeActions();
       final store = OrderStore()
         ..formsStream = ObservableStream(Stream.value([_form('f1')]));
-      await _pump(tester, screen(store, actions: actions),
-          args: {'order': _order()});
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': _order()},
+      );
 
       await tester.drag(find.text('Faltam 2 perguntas'), const Offset(-500, 0));
       await tester.pumpAndSettle();
@@ -357,10 +402,7 @@ void main() {
 
   group('photos and documents', () {
     Order withMedia() => _order()
-      ..photos = [
-        OrderPhoto()..url = 'p1',
-        OrderPhoto()..url = 'p2',
-      ]
+      ..photos = [OrderPhoto()..url = 'p1', OrderPhoto()..url = 'p2']
       ..documents = [
         OrderDocument()
           ..id = 'doc1'
@@ -372,16 +414,20 @@ void main() {
 
     testWidgets('"Fotos ou documento" adds media', (tester) async {
       final actions = FakeActions();
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': _order()});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': _order()},
+      );
       await _openAddTo(tester);
       await tester.tap(find.text('Fotos ou documento'));
       await tester.pumpAndSettle();
       expect(actions.calls, ['media']);
     });
 
-    testWidgets('photos and documents show only when they exist',
-        (tester) async {
+    testWidgets('photos and documents show only when they exist', (
+      tester,
+    ) async {
       await _pump(tester, screen(OrderStore()), args: {'order': _order()});
       expect(find.text('Fotos'), findsNothing);
       expect(find.text('Documentos'), findsNothing);
@@ -389,8 +435,11 @@ void main() {
 
     testWidgets('tapping a photo or a document opens it', (tester) async {
       final actions = FakeActions();
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': withMedia()});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': withMedia()},
+      );
 
       expect(find.text('Fotos'), findsOneWidget);
       await tester.tap(find.text('thumb p2'));
@@ -417,8 +466,11 @@ void main() {
 
   group('comments', () {
     testWidgets('show at the end of a saved order', (tester) async {
-      await _pump(tester, screen(OrderStore()),
-          args: {'order': _order(), 'scrollToComments': true, 'commentId': 'k9'});
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': _order(), 'scrollToComments': true, 'commentId': 'k9'},
+      );
       expect(find.text('comments of o1 k9'), findsOneWidget);
     });
 
@@ -429,17 +481,23 @@ void main() {
   });
 
   group('address, schedule and due date', () {
-    testWidgets('address is added in a sheet and shows in "Nesta OS"',
-        (tester) async {
+    testWidgets('address is added in a sheet and shows in "Nesta OS"', (
+      tester,
+    ) async {
       final store = OrderStore();
       await _pump(tester, screen(store), args: {'order': _order()});
       await _openAddTo(tester);
       await tester.tap(find.text('Endereço do atendimento'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Cancelar'), findsOneWidget); // sheet, Cancelar on the left
+      expect(
+        find.text('Cancelar'),
+        findsOneWidget,
+      ); // sheet, Cancelar on the left
       await tester.enterText(
-          find.byType(CupertinoTextField), '  Rua das Flores, 10  ');
+        find.byType(CupertinoTextField),
+        '  Rua das Flores, 10  ',
+      );
       await tester.tap(find.text('Salvar'));
       await tester.pumpAndSettle();
 
@@ -451,8 +509,11 @@ void main() {
     testWidgets('address row opens maps, changes or removes', (tester) async {
       final actions = FakeActions();
       final store = OrderStore();
-      await _pump(tester, screen(store, actions: actions),
-          args: {'order': _order()..address = 'Rua A, 1'});
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': _order()..address = 'Rua A, 1'},
+      );
 
       await tester.tap(find.text('Rua A, 1'));
       await tester.pumpAndSettle();
@@ -482,12 +543,16 @@ void main() {
       expect(find.text('Agendado'), findsOneWidget);
     });
 
-    testWidgets('due date is picked and shows "Data de entrega"',
-        (tester) async {
+    testWidgets('due date is picked and shows "Data de entrega"', (
+      tester,
+    ) async {
       final store = OrderStore();
       final due = DateTime(2026, 10, 20, 14, 30);
-      await _pump(tester, screen(store),
-          args: {'order': _order()..dueDate = due});
+      await _pump(
+        tester,
+        screen(store),
+        args: {'order': _order()..dueDate = due},
+      );
       expect(find.text('Data de entrega'), findsOneWidget);
       expect(
         find.text((FormatService()..setLocale('pt')).formatDateTime(due)),
@@ -496,12 +561,38 @@ void main() {
     });
   });
 
+  group('responsible', () {
+    testWidgets('"Responsável" picks someone of the team and shows the row', (
+      tester,
+    ) async {
+      final order = _order(status: 'approved');
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: FakeActions()),
+        args: {'order': order},
+      );
+      await _openAddTo(tester);
+      await tester.tap(find.text('Responsável'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rafa Técnico'));
+      await tester.pumpAndSettle();
+
+      expect(order.assignedTo?.id, 'u1');
+      expect(find.text('Responsável'), findsOneWidget);
+      expect(find.text('Rafa Técnico'), findsOneWidget);
+    });
+  });
+
   group('discount', () {
-    testWidgets('after approval "Desconto" opens the discount sheet',
-        (tester) async {
+    testWidgets('after approval "Desconto" opens the discount sheet', (
+      tester,
+    ) async {
       final actions = FakeActions();
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': _order(status: 'approved')});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': _order(status: 'approved')},
+      );
       await _openAddTo(tester);
       await tester.tap(find.text('Desconto'));
       await tester.pumpAndSettle();
@@ -517,20 +608,27 @@ void main() {
     });
 
     testWidgets('no discount without viewPrices', (tester) async {
-      await _pump(tester, screen(OrderStore(), prices: false),
-          args: {'order': _order(status: 'approved')});
+      await _pump(
+        tester,
+        screen(OrderStore(), prices: false),
+        args: {'order': _order(status: 'approved')},
+      );
       await _openAddTo(tester);
       expect(find.text('Desconto'), findsNothing);
     });
   });
 
   group('recurring contract', () {
-    testWidgets('"Repetir esta OS" turns the contract on and opens it',
-        (tester) async {
+    testWidgets('"Repetir esta OS" turns the contract on and opens it', (
+      tester,
+    ) async {
       final actions = FakeActions();
       final store = OrderStore();
-      await _pump(tester, screen(store, actions: actions),
-          args: {'order': _order()});
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': _order()},
+      );
       await _openAddTo(tester);
       await tester.tap(find.text('Repetir todo mês (contrato)'));
       await tester.pumpAndSettle();
@@ -540,16 +638,20 @@ void main() {
       expect(find.text('Contrato recorrente'), findsOneWidget);
     });
 
-    testWidgets('contract row shows frequency and next date; can be changed',
-        (tester) async {
+    testWidgets('contract row shows frequency and next date; can be changed', (
+      tester,
+    ) async {
       final actions = FakeActions();
       final next = DateTime(2026, 11, 10);
       final order = _order()
         ..contract = (OrderContract()
           ..frequency = 'monthly'
           ..nextDueDate = next);
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': order});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': order},
+      );
 
       final date = (FormatService()..setLocale('pt')).formatDate(next);
       expect(find.text('Mensal · próxima em $date'), findsOneWidget);
@@ -560,15 +662,17 @@ void main() {
       expect(actions.calls, ['editContract']);
     });
 
-    testWidgets('an order generated by a contract links to it',
-        (tester) async {
+    testWidgets('an order generated by a contract links to it', (tester) async {
       final actions = FakeActions();
       final order = _order()
         ..contract = (OrderContract()
           ..parentOrderId = 'parent'
           ..parentOrderNumber = 100);
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': order});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': order},
+      );
       await tester.tap(find.text('Ordem de Serviço 100'));
       await tester.pumpAndSettle();
       expect(actions.calls, ['order:parent']);
@@ -581,11 +685,15 @@ void main() {
     Order approved({String? phone}) =>
         _order(status: 'approved', phone: phone)..payment = 'unpaid';
 
-    testWidgets('after a status change, offers to send to the customer',
-        (tester) async {
+    testWidgets('after a status change, offers to send to the customer', (
+      tester,
+    ) async {
       final actions = FakeActions();
-      await _pump(tester, screen(OrderStore(), actions: actions),
-          args: {'order': approved(phone: '11999990000')});
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': approved(phone: '11999990000')},
+      );
 
       await tester.tap(find.text('Começar o serviço'));
       await tester.pumpAndSettle();
@@ -595,12 +703,16 @@ void main() {
       expect(actions.calls, ['notify:progress']);
     });
 
-    testWidgets('"Agora não" is not asked again for this order',
-        (tester) async {
+    testWidgets('"Agora não" is not asked again for this order', (
+      tester,
+    ) async {
       final actions = FakeActions();
       final store = OrderStore();
-      await _pump(tester, screen(store, actions: actions),
-          args: {'order': approved(phone: '11999990000')});
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': approved(phone: '11999990000')},
+      );
 
       await tester.tap(find.text('Começar o serviço'));
       await tester.pumpAndSettle();

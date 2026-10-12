@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
+import 'package:praticos/services/storage_url_resolver.dart';
 
 /// Assinatura da funcao usada para buscar uma imagem por HTTP
 typedef PdfHttpGet = Future<http.Response> Function(Uri url);
@@ -147,7 +148,9 @@ class PdfImageLoader {
   /// Executa o download efetivo e popula o cache
   Future<pw.MemoryImage?> _download(String url, String cacheKey) async {
     try {
-      final response = await _httpGet(Uri.parse(url));
+      final resolved = await StorageUrlResolver.resolve(url);
+      if (resolved == null) return null;
+      final response = await _httpGet(Uri.parse(resolved));
       if (response.statusCode == 200) {
         final image = pw.MemoryImage(response.bodyBytes);
         _cache[cacheKey] = image;

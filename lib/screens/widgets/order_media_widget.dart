@@ -11,6 +11,7 @@ import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/storage_url_resolver.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -494,7 +495,9 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
     try {
       final photo = widget.photos[_currentIndex];
-      final url = photo.url;
+      final url = photo.url == null
+          ? null
+          : await StorageUrlResolver.resolve(photo.url!);
 
       if (url == null || url.isEmpty) {
         throw Exception('URL da imagem inválida');

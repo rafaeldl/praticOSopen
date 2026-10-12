@@ -508,7 +508,7 @@ void main() {
         (tester) async {
       final dir = FakeDirectory();
       await pumpDetail(tester, dir);
-      await tester.tap(find.byIcon(CupertinoIcons.ellipsis_circle));
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Apagar'));
       await tester.pumpAndSettle();

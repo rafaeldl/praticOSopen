@@ -37,15 +37,17 @@ void main() {
       expect(find.text('legacy screen'), findsOneWidget);
     });
 
-    testWidgets('comments from a notification open on the new screen',
-        (tester) async {
+    testWidgets('comments from a notification open on the new screen', (
+      tester,
+    ) async {
       OrderScreenPreference.useNewScreen.value = true;
       await _pump(tester, args: {'scrollToComments': true});
       expect(find.text('new screen'), findsOneWidget);
     });
 
-    testWidgets('an open screen is not swapped when the switch flips',
-        (tester) async {
+    testWidgets('an open screen is not swapped when the switch flips', (
+      tester,
+    ) async {
       await _pump(tester);
       OrderScreenPreference.useNewScreen.value = false;
       await tester.pump();
@@ -73,11 +75,13 @@ void main() {
       expect(OrderScreenPreference.useNewScreen.value, isTrue);
     });
 
-    test('a choice saved during the pilot does not keep the old screen',
-        () async {
-      SharedPreferences.setMockInitialValues({'useNewOrderScreen': false});
-      await OrderScreenPreference.load();
-      expect(OrderScreenPreference.useNewScreen.value, isTrue);
-    });
+    test(
+      'a choice saved during the pilot does not keep the old screen',
+      () async {
+        SharedPreferences.setMockInitialValues({'useNewOrderScreen': false});
+        await OrderScreenPreference.load();
+        expect(OrderScreenPreference.useNewScreen.value, isTrue);
+      },
+    );
   });
 }

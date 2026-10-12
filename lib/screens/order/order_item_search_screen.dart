@@ -94,9 +94,9 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   List<String> _mostUsed = const [];
 
   List<CatalogKind> get _kinds => [
-        for (final k in CatalogKind.values)
-          if (_permissions.canView(k)) k,
-      ];
+    for (final k in CatalogKind.values)
+      if (_permissions.canView(k)) k,
+  ];
 
   /// Kind created by "Criar “X” e pôr na OS": service first.
   CatalogKind? get _createKind {
@@ -110,9 +110,11 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   void initState() {
     super.initState();
     _listen();
-    (widget.mostUsed ?? loadMostUsedItemKeys)().then((keys) {
-      if (mounted) setState(() => _mostUsed = keys);
-    }).catchError((_) {});
+    (widget.mostUsed ?? loadMostUsedItemKeys)()
+        .then((keys) {
+          if (mounted) setState(() => _mostUsed = keys);
+        })
+        .catchError((_) {});
   }
 
   void _listen() {
@@ -125,14 +127,18 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       _items.clear();
     });
     for (final kind in _kinds) {
-      _subs.add(_source.watch(kind).listen(
-        (list) {
-          if (mounted) setState(() => _items[kind] = list);
-        },
-        onError: (_) {
-          if (mounted) setState(() => _hasError = true);
-        },
-      ));
+      _subs.add(
+        _source
+            .watch(kind)
+            .listen(
+              (list) {
+                if (mounted) setState(() => _items[kind] = list);
+              },
+              onError: (_) {
+                if (mounted) setState(() => _hasError = true);
+              },
+            ),
+      );
     }
   }
 
@@ -264,7 +270,10 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       children.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.md,
           ),
           child: Text(
             l10n.orderCreateItemHint,
@@ -300,8 +309,10 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       );
     } else if (query.isEmpty) {
       final byKey = {for (final e in entries) e.key: e};
-      final mostUsed =
-          _mostUsed.map((k) => byKey[k]).whereType<_Entry>().toList();
+      final mostUsed = _mostUsed
+          .map((k) => byKey[k])
+          .whereType<_Entry>()
+          .toList();
       if (mostUsed.isNotEmpty) {
         children.add(SectionLabel(l10n.orderMostUsed));
         children.addAll(mostUsed.map(_row));
@@ -325,8 +336,9 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
     if (_permissions.canViewPrices) {
       price = item.value == null
           ? l10n.catalogNoPrice
-          : (FormatService()..setLocale(l10n.localeName))
-              .formatCurrency(item.value!);
+          : (FormatService()..setLocale(l10n.localeName)).formatCurrency(
+              item.value!,
+            );
     }
     return AppListRow(
       title: item.name ?? '',

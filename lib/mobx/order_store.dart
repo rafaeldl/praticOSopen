@@ -228,9 +228,9 @@ abstract class _OrderStore with Store {
   @computed
   List<Order?> get filteredOrders {
     final ordersList = orders.toList();
-    return _authService.filterOrdersByPermission(
-      ordersList.whereType<Order>().toList(),
-    ).cast<Order?>();
+    return _authService
+        .filterOrdersByPermission(ordersList.whereType<Order>().toList())
+        .cast<Order?>();
   }
 
   /// Verifica se o usuário pode visualizar valores financeiros.
@@ -239,9 +239,8 @@ abstract class _OrderStore with Store {
 
   /// Verifica se o usuário pode criar novas OS.
   @computed
-  bool get canCreateOrder => _authService.hasPermission(
-    PermissionType.createOrder,
-  );
+  bool get canCreateOrder =>
+      _authService.hasPermission(PermissionType.createOrder);
 
   /// Verifica se o usuário pode visualizar o dashboard financeiro.
   @computed
@@ -281,9 +280,7 @@ abstract class _OrderStore with Store {
   _OrderStore() {
     autorun((_) {
       // Protege contra valores nulos
-      if (orderStream == null ||
-          orderStream!.data == null ||
-          order == null) {
+      if (orderStream == null || orderStream!.data == null || order == null) {
         return;
       }
 
@@ -359,7 +356,9 @@ abstract class _OrderStore with Store {
     if (orderId != null && companyId != null) {
       this.order!.id = orderId;
       orderStream = repository.streamSingle(companyId!, orderId).asObservable();
-      formsStream = formsService.getOrderForms(companyId!, orderId).asObservable();
+      formsStream = formsService
+          .getOrderForms(companyId!, orderId)
+          .asObservable();
     }
 
     customer = order.customer;
@@ -368,8 +367,11 @@ abstract class _OrderStore with Store {
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
-    documents = order.documents?.asObservable() ?? ObservableList<OrderDocument>();
-    transactions = order.transactions?.asObservable() ?? ObservableList<PaymentTransaction>();
+    documents =
+        order.documents?.asObservable() ?? ObservableList<OrderDocument>();
+    transactions =
+        order.transactions?.asObservable() ??
+        ObservableList<PaymentTransaction>();
     paidAmount = order.paidAmount ?? 0.0;
     dueDate = order.dueDate != null
         ? FormatService().formatDateTime(order.dueDate!)
@@ -394,7 +396,9 @@ abstract class _OrderStore with Store {
       return;
     }
     final tenantRepo = TenantOrderRepository();
-    childOrders = tenantRepo.streamChildOrders(companyId!, order!.id!).asObservable();
+    childOrders = tenantRepo
+        .streamChildOrders(companyId!, order!.id!)
+        .asObservable();
   }
 
   @action
@@ -408,7 +412,9 @@ abstract class _OrderStore with Store {
     customer = order!.customer;
 
     // Auto-fill address from customer if OS has no address yet
-    if ((address == null || address!.isEmpty) && c.address != null && c.address!.isNotEmpty) {
+    if ((address == null || address!.isEmpty) &&
+        c.address != null &&
+        c.address!.isNotEmpty) {
       setAddress(c.address, lat: c.latitude, lng: c.longitude);
     }
 
@@ -456,8 +462,9 @@ abstract class _OrderStore with Store {
     devices.removeWhere((d) => d.id == deviceId);
 
     // Sync backward compat
-    order!.device =
-        order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
+    order!.device = order!.devices?.isNotEmpty == true
+        ? order!.devices!.first
+        : null;
     device = order!.device;
     order!.syncDeviceIds();
 
@@ -481,8 +488,9 @@ abstract class _OrderStore with Store {
     devices.removeWhere((d) => d.id == deviceId);
 
     // Sync backward compat
-    order!.device =
-        order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
+    order!.device = order!.devices?.isNotEmpty == true
+        ? order!.devices!.first
+        : null;
     device = order!.device;
     order!.syncDeviceIds();
 
@@ -493,6 +501,12 @@ abstract class _OrderStore with Store {
     products = order!.products?.asObservable() ?? ObservableList();
 
     updateTotal();
+    createItem();
+  }
+
+  /// "Responsável" of the order; null removes it.
+  setAssignedTo(UserAggr? user) {
+    order!.assignedTo = user;
     createItem();
   }
 
@@ -566,8 +580,8 @@ abstract class _OrderStore with Store {
     if (order?.contract == null) return;
     order!.contract!.frequency = frequency;
     // Recompute nextDueDate based on new frequency
-    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
-        ?? order!.contract!.startDate;
+    order!.contract!.nextDueDate =
+        order!.contract!.computeNextDueDate() ?? order!.contract!.startDate;
     createItem();
   }
 
@@ -575,8 +589,8 @@ abstract class _OrderStore with Store {
   void setContractInterval(int interval) {
     if (order?.contract == null) return;
     order!.contract!.interval = interval;
-    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
-        ?? order!.contract!.startDate;
+    order!.contract!.nextDueDate =
+        order!.contract!.computeNextDueDate() ?? order!.contract!.startDate;
     createItem();
   }
 
@@ -584,7 +598,8 @@ abstract class _OrderStore with Store {
   void setContractStartDate(DateTime date) {
     if (order?.contract == null) return;
     order!.contract!.startDate = date;
-    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate() ?? date;
+    order!.contract!.nextDueDate =
+        order!.contract!.computeNextDueDate() ?? date;
     createItem();
   }
 
@@ -624,18 +639,24 @@ abstract class _OrderStore with Store {
       ..customer = template.customer
       ..devices = template.devices != null ? List.from(template.devices!) : null
       ..device = template.device
-      ..services = template.services?.map((s) => OrderService()
-        ..service = s.service
-        ..description = s.description
-        ..value = s.value
-      ).toList()
-      ..products = template.products?.map((p) => OrderProduct()
-        ..product = p.product
-        ..description = p.description
-        ..value = p.value
-        ..quantity = p.quantity
-        ..total = p.total
-      ).toList()
+      ..services = template.services
+          ?.map(
+            (s) => OrderService()
+              ..service = s.service
+              ..description = s.description
+              ..value = s.value,
+          )
+          .toList()
+      ..products = template.products
+          ?.map(
+            (p) => OrderProduct()
+              ..product = p.product
+              ..description = p.description
+              ..value = p.value
+              ..quantity = p.quantity
+              ..total = p.total,
+          )
+          .toList()
       ..assignedTo = template.assignedTo
       ..contract = (OrderContract()
         ..parentOrderId = template.id
@@ -660,8 +681,7 @@ abstract class _OrderStore with Store {
     template.contract!.lastGeneratedDate = DateTime.now();
     template.contract!.generatedCount =
         (template.contract!.generatedCount ?? 0) + 1;
-    template.contract!.nextDueDate =
-        template.contract!.computeNextDueDate();
+    template.contract!.nextDueDate = template.contract!.computeNextDueDate();
 
     // Deactivate if expired
     if (template.contract!.isExpired) {
@@ -686,14 +706,17 @@ abstract class _OrderStore with Store {
       print('[Contracts] Found ${orders.length} contract orders');
 
       for (final o in orders.whereType<Order>()) {
-        print('[Contracts] Order #${o.number}: isDue=${o.contract?.isDue}, autoGenerate=${o.contract?.autoGenerate}, nextDueDate=${o.contract?.nextDueDate}, active=${o.contract?.active}');
+        print(
+          '[Contracts] Order #${o.number}: isDue=${o.contract?.isDue}, autoGenerate=${o.contract?.autoGenerate}, nextDueDate=${o.contract?.nextDueDate}, active=${o.contract?.active}',
+        );
       }
 
       final dueOrders = orders
           .whereType<Order>()
-          .where((o) =>
-              o.contract?.isDue == true &&
-              o.contract?.autoGenerate == true)
+          .where(
+            (o) =>
+                o.contract?.isDue == true && o.contract?.autoGenerate == true,
+          )
           .toList();
 
       print('[Contracts] ${dueOrders.length} due orders to generate');
@@ -968,7 +991,8 @@ abstract class _OrderStore with Store {
 
     // Verificar se quantidade selecionada ultrapassa limite
     if (photoLimitResult != null && !photoLimitResult!.isUnlimited) {
-      final remaining = photoLimitResult!.limit - photoLimitResult!.currentUsage;
+      final remaining =
+          photoLimitResult!.limit - photoLimitResult!.currentUsage;
       if (files.length > remaining) {
         // Atualizar resultado com mensagem especifica
         photoLimitResult = FeatureGateResult(
@@ -977,7 +1001,8 @@ abstract class _OrderStore with Store {
           limit: photoLimitResult!.limit,
           featureType: photoLimitResult!.featureType,
           currentPlan: photoLimitResult!.currentPlan,
-          message: 'Voce selecionou ${files.length} fotos, mas so pode adicionar mais $remaining este mes.',
+          message:
+              'Voce selecionou ${files.length} fotos, mas so pode adicionar mais $remaining este mes.',
           suggestedPlan: photoLimitResult!.suggestedPlan,
         );
         return false;
@@ -1104,7 +1129,9 @@ abstract class _OrderStore with Store {
   /// Remove uma foto pelo índice
   @action
   Future<bool> deletePhoto(int index) async {
-    if (order == null || order!.photos == null || index >= order!.photos!.length) {
+    if (order == null ||
+        order!.photos == null ||
+        index >= order!.photos!.length) {
       return false;
     }
 
@@ -1124,7 +1151,9 @@ abstract class _OrderStore with Store {
   /// Reordena as fotos (move uma foto para a posição de capa)
   @action
   void setPhotoCover(int index) {
-    if (order == null || order!.photos == null || index >= order!.photos!.length) {
+    if (order == null ||
+        order!.photos == null ||
+        index >= order!.photos!.length) {
       return;
     }
 
@@ -1233,8 +1262,12 @@ abstract class _OrderStore with Store {
 
   /// Attaches a receipt to a payment transaction as an OrderDocument
   @action
-  Future<bool> attachReceiptToTransaction(int index, File file,
-      String contentType, String fileName) async {
+  Future<bool> attachReceiptToTransaction(
+    int index,
+    File file,
+    String contentType,
+    String fileName,
+  ) async {
     lastPaymentFailure = null;
     if (order == null ||
         companyId == null ||
@@ -1390,10 +1423,11 @@ abstract class _OrderStore with Store {
       final write = repository
           .applyPaymentFieldUpdate(companyId!, orderId, update, actor: actor)
           .catchError((Object e, StackTrace stack) {
-        _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
-      }).whenComplete(() {
-        if (pendingId != null) _pendingTransactions.remove(pendingId);
-      });
+            _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
+          })
+          .whenComplete(() {
+            if (pendingId != null) _pendingTransactions.remove(pendingId);
+          });
       _pendingPaymentFieldWrite = write;
       return true;
     } catch (e, stack) {
@@ -1421,8 +1455,9 @@ abstract class _OrderStore with Store {
 
       // An offline write not acknowledged in time means no connection:
       // stop here instead of reading a server state without it.
-      final notAcked =
-          await waitForPendingPaymentWrite(_pendingPaymentFieldWrite);
+      final notAcked = await waitForPendingPaymentWrite(
+        _pendingPaymentFieldWrite,
+      );
       if (notAcked != null) {
         lastPaymentFailure = notAcked;
         return false;
@@ -1449,7 +1484,7 @@ abstract class _OrderStore with Store {
 
   /// Reads the order from the server. Test seam for [reloadPayments].
   late Future<Order?> Function(String companyId, String orderId)
-      fetchOrderFromServer = repository.getFromServer;
+  fetchOrderFromServer = repository.getFromServer;
 
   /// Re-reads the order from the server and refreshes the local payment
   /// state (transactions, paidAmount, paid, payment, discount and total).
@@ -1467,8 +1502,7 @@ abstract class _OrderStore with Store {
       // Same wait as _runPaymentUpdate: reading before an offline write is
       // acknowledged would revert it locally. Not acknowledged in time →
       // skip this reload (the local state already has the write).
-      if (await waitForPendingPaymentWrite(_pendingPaymentFieldWrite) !=
-          null) {
+      if (await waitForPendingPaymentWrite(_pendingPaymentFieldWrite) != null) {
         return false;
       }
       final fresh = await fetchOrderFromServer(company, orderId);
@@ -1487,7 +1521,9 @@ abstract class _OrderStore with Store {
   void _applyPaymentState(Order fresh) {
     if (order == null) return;
     OrderPaymentMath.mergePendingTransactions(
-        fresh, _pendingTransactions.values.toList());
+      fresh,
+      _pendingTransactions.values.toList(),
+    );
     order!.transactions = fresh.transactions ?? [];
     order!.paidAmount = fresh.paidAmount ?? 0.0;
     order!.paid = fresh.paid;
@@ -1501,7 +1537,8 @@ abstract class _OrderStore with Store {
     runInAction(() {
       if (order == null) return;
       transactions = ObservableList<PaymentTransaction>.of(
-          order!.transactions ?? const <PaymentTransaction>[]);
+        order!.transactions ?? const <PaymentTransaction>[],
+      );
       paidAmount = order!.paidAmount ?? 0.0;
       updateTotal();
       updatePayment();
@@ -1512,8 +1549,10 @@ abstract class _OrderStore with Store {
   /// arrayUnion/increment e atualiza o estado local na hora. Retorna a
   /// transação criada, ou null se não foi possível registrar.
   @action
-  Future<PaymentTransaction?> addPayment(double amount,
-      {String? description}) async {
+  Future<PaymentTransaction?> addPayment(
+    double amount, {
+    String? description,
+  }) async {
     lastPaymentFailure = null;
     if (order == null || companyId == null || amount <= 0) return null;
 
@@ -1532,8 +1571,12 @@ abstract class _OrderStore with Store {
         current: order!,
         tx: transaction,
       );
-      if (!_queuePaymentFieldUpdate(orderId, update, actor,
-          transaction: transaction)) {
+      if (!_queuePaymentFieldUpdate(
+        orderId,
+        update,
+        actor,
+        transaction: transaction,
+      )) {
         return null;
       }
     }
@@ -1550,8 +1593,10 @@ abstract class _OrderStore with Store {
   /// Adiciona um desconto como transação (reduz o total da OS).
   /// Funciona offline, como [addPayment].
   @action
-  Future<bool> addDiscountTransaction(double amount,
-      {String? description}) async {
+  Future<bool> addDiscountTransaction(
+    double amount, {
+    String? description,
+  }) async {
     lastPaymentFailure = null;
     if (order == null || companyId == null || amount <= 0) return false;
 
@@ -1569,8 +1614,12 @@ abstract class _OrderStore with Store {
         current: order!,
         tx: transaction,
       );
-      if (!_queuePaymentFieldUpdate(orderId, update, actor,
-          transaction: transaction)) {
+      if (!_queuePaymentFieldUpdate(
+        orderId,
+        update,
+        actor,
+        transaction: transaction,
+      )) {
         return false;
       }
     }
@@ -1686,19 +1735,23 @@ abstract class _OrderStore with Store {
       // Para nova OS, verifica duplicação pelo número
       if (order!.number != null) {
         // Verifica se existe OS com o mesmo número
-        repository.getOrderByNumber(companyId!, order!.number!).then((existingOrder) {
+        repository.getOrderByNumber(companyId!, order!.number!).then((
+          existingOrder,
+        ) {
           if (existingOrder != null) {
             // Se encontrou, usa o ID da existente
             order!.id = existingOrder.id;
             repository.updateItem(companyId!, order);
-            orderStream =
-                repository.streamSingle(companyId!, order!.id).asObservable();
+            orderStream = repository
+                .streamSingle(companyId!, order!.id)
+                .asObservable();
           } else {
             // Cria nova se não encontrou
             repository.createItem(companyId!, order).then((_) {
               if (order!.id != null) {
-                orderStream =
-                    repository.streamSingle(companyId!, order!.id).asObservable();
+                orderStream = repository
+                    .streamSingle(companyId!, order!.id)
+                    .asObservable();
                 _logOrderCreated();
               }
             });
@@ -1708,8 +1761,9 @@ abstract class _OrderStore with Store {
         // Cria nova OS sem número
         repository.createItem(companyId!, order).then((_) {
           if (order!.id != null) {
-            orderStream =
-                repository.streamSingle(companyId!, order!.id).asObservable();
+            orderStream = repository
+                .streamSingle(companyId!, order!.id)
+                .asObservable();
             _logOrderCreated();
           }
         });
@@ -1717,9 +1771,10 @@ abstract class _OrderStore with Store {
     } else {
       // Atualiza OS existente
       repository.updateItem(companyId!, order).then((_) {
-        if (orderStream == null ||
-            orderStream!.value?.id != order!.id) {
-          orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
+        if (orderStream == null || orderStream!.value?.id != order!.id) {
+          orderStream = repository
+              .streamSingle(companyId!, order!.id)
+              .asObservable();
         }
       });
     }
@@ -1730,7 +1785,8 @@ abstract class _OrderStore with Store {
       orderId: order?.id,
       customerId: order?.customer?.id,
       deviceCount: order?.devices?.length ?? 0,
-      itemCount: (order?.services?.length ?? 0) + (order?.products?.length ?? 0),
+      itemCount:
+          (order?.services?.length ?? 0) + (order?.products?.length ?? 0),
       totalValue: order?.total,
     );
   }
@@ -1772,14 +1828,22 @@ abstract class _OrderStore with Store {
   }
 
   @action
-  Future<void> loadOrdersForDashboardCustomRange(DateTime start, DateTime end) async {
+  Future<void> loadOrdersForDashboardCustomRange(
+    DateTime start,
+    DateTime end,
+  ) async {
     if (companyId == null) return;
     try {
-      final orders = await repository.getOrdersByDateRange(companyId!, start, end);
+      final orders = await repository.getOrdersByDateRange(
+        companyId!,
+        start,
+        end,
+      );
 
       // Filtrar ordens que não são orçamentos
-      var filteredOrders =
-          orders.where((order) => order?.status != 'quote').toList();
+      var filteredOrders = orders
+          .where((order) => order?.status != 'quote')
+          .toList();
 
       // Aplicar filtro por cliente selecionado no ranking
       if (selectedCustomerInRanking != null) {
@@ -1797,12 +1861,15 @@ abstract class _OrderStore with Store {
 
       // Calcular totais baseados nas ordens filtradas
       totalOrdersCount = filteredOrders.length;
-      paidOrdersCount =
-          filteredOrders.where((order) => order?.payment == 'paid').length;
+      paidOrdersCount = filteredOrders
+          .where((order) => order?.payment == 'paid')
+          .length;
 
       // Calcular o faturamento total (soma de todos os valores)
-      totalRevenue =
-          filteredOrders.fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+      totalRevenue = filteredOrders.fold(
+        0.0,
+        (sum, order) => sum + (order?.total ?? 0.0),
+      );
 
       // Calcular valores pagos e a receber (considerando pagamentos parciais)
       // Retrocompatibilidade: OSs antigas com payment='paid' mas sem paidAmount
@@ -1838,7 +1905,9 @@ abstract class _OrderStore with Store {
         if (order?.total != null) {
           final orderTotal = order!.total!;
           final orderPaid = order.paidAmount ?? 0.0;
-          final orderUnpaid = order.payment != 'paid' ? (orderTotal - orderPaid) : 0.0;
+          final orderUnpaid = order.payment != 'paid'
+              ? (orderTotal - orderPaid)
+              : 0.0;
 
           if (order.customer?.id != null) {
             String customerId = order.customer!.id!;
@@ -1872,9 +1941,12 @@ abstract class _OrderStore with Store {
 
       customerOrderTotals.forEach((customerId, total) {
         if (total > 0) {
-          var customerName = filteredOrders
-                  .firstWhere((order) => order?.customer?.id == customerId,
-                      orElse: () => null)
+          var customerName =
+              filteredOrders
+                  .firstWhere(
+                    (order) => order?.customer?.id == customerId,
+                    orElse: () => null,
+                  )
                   ?.customer
                   ?.name ??
               'Cliente sem nome';
@@ -1921,11 +1993,15 @@ abstract class _OrderStore with Store {
     if (companyId == null) return;
     try {
       final orders = await repository.getOrdersByCustomPeriod(
-          companyId!, selectedDashboardPeriod, periodOffset);
+        companyId!,
+        selectedDashboardPeriod,
+        periodOffset,
+      );
 
       // Filtrar ordens que não são orçamentos
-      var filteredOrders =
-          orders.where((order) => order?.status != 'quote').toList();
+      var filteredOrders = orders
+          .where((order) => order?.status != 'quote')
+          .toList();
 
       // Aplicar filtro por cliente selecionado no ranking
       if (selectedCustomerInRanking != null) {
@@ -1943,12 +2019,15 @@ abstract class _OrderStore with Store {
 
       // Calcular totais baseados nas ordens filtradas
       totalOrdersCount = filteredOrders.length;
-      paidOrdersCount =
-          filteredOrders.where((order) => order?.payment == 'paid').length;
+      paidOrdersCount = filteredOrders
+          .where((order) => order?.payment == 'paid')
+          .length;
 
       // Calcular o faturamento total (soma de todos os valores)
-      totalRevenue =
-          filteredOrders.fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+      totalRevenue = filteredOrders.fold(
+        0.0,
+        (sum, order) => sum + (order?.total ?? 0.0),
+      );
 
       // Calcular valores pagos e a receber (considerando pagamentos parciais)
       // Retrocompatibilidade: OSs antigas com payment='paid' mas sem paidAmount
@@ -1985,7 +2064,9 @@ abstract class _OrderStore with Store {
         if (order?.total != null) {
           final orderTotal = order!.total!;
           final orderPaid = order.paidAmount ?? 0.0;
-          final orderUnpaid = order.payment != 'paid' ? (orderTotal - orderPaid) : 0.0;
+          final orderUnpaid = order.payment != 'paid'
+              ? (orderTotal - orderPaid)
+              : 0.0;
 
           if (order.customer?.id != null) {
             String customerId = order.customer!.id!;
@@ -2019,9 +2100,12 @@ abstract class _OrderStore with Store {
 
       customerOrderTotals.forEach((customerId, total) {
         if (total > 0) {
-          var customerName = filteredOrders
-                  .firstWhere((order) => order?.customer?.id == customerId,
-                      orElse: () => null)
+          var customerName =
+              filteredOrders
+                  .firstWhere(
+                    (order) => order?.customer?.id == customerId,
+                    orElse: () => null,
+                  )
                   ?.customer
                   ?.name ??
               'Cliente sem nome';
@@ -2060,8 +2144,9 @@ abstract class _OrderStore with Store {
   @action
   void sortCustomerRanking() {
     // Sempre ordenar por valor total, independente do rankingSortType
-    customerRanking
-        .sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    customerRanking.sort(
+      (a, b) => (b['total'] as double).compareTo(a['total'] as double),
+    );
   }
 
   @action
@@ -2119,10 +2204,11 @@ abstract class _OrderStore with Store {
     String? customerId,
     int limit,
     firestore.DocumentSnapshot? startAfter,
-  ) fetchOrdersPage = _fetchOrdersPageFromFirestore;
+  )
+  fetchOrdersPage = _fetchOrdersPageFromFirestore;
 
   static Future<({List<Order> orders, firestore.DocumentSnapshot? last})>
-      _fetchOrdersPageFromFirestore(
+  _fetchOrdersPageFromFirestore(
     String companyId,
     String? status,
     String? customerId,

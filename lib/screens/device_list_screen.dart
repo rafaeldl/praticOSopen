@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -45,7 +46,8 @@ class DeviceListScreen extends StatefulWidget {
   final Stream<List<Device?>> Function()? devices;
 
   /// Injected in tests; defaults to the vehicles of the customer's orders.
-  final Future<List<DeviceAggr>> Function(String customerId)? vehiclesOfCustomer;
+  final Future<List<DeviceAggr>> Function(String customerId)?
+  vehiclesOfCustomer;
 
   /// Injected in tests; defaults to the `manageDevices` permission.
   final bool Function()? canManage;
@@ -93,11 +95,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           : DeviceRepositoryV2().streamDevices(companyId);
     }
     if (_selecting && _customerId != null) {
-      final load = widget.vehiclesOfCustomer ??
-          FirestoreCustomerDirectory().vehiclesOf;
+      final load =
+          widget.vehiclesOfCustomer ?? FirestoreCustomerDirectory().vehiclesOf;
       // A failure only hides the customer section.
-      _customerVehicles =
-          load(_customerId!).catchError((_) => <DeviceAggr>[]);
+      _customerVehicles = load(_customerId!).catchError((_) => <DeviceAggr>[]);
     }
   }
 
@@ -121,11 +122,17 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     if (_selecting) {
       Navigator.pop(context, device);
     } else if (config.useDeviceManagement) {
-      Navigator.pushNamed(context, '/device_detail',
-          arguments: {'device': device});
+      Navigator.pushNamed(
+        context,
+        '/device_detail',
+        arguments: {'device': device},
+      );
     } else {
-      Navigator.pushNamed(context, '/device_form',
-          arguments: {'device': device});
+      Navigator.pushNamed(
+        context,
+        '/device_form',
+        arguments: {'device': device},
+      );
     }
   }
 
@@ -152,27 +159,25 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         child: CustomScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
-            CupertinoSliverNavigationBar(
+            AppNavBar(
               largeTitle: Text(title),
-              backgroundColor: background,
-              border: null,
               trailing: _selecting
                   ? null
-                  : CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(44, 44),
+                  : GlassBarButton(
+                      label: l10n.add,
+                      icon: CupertinoIcons.add,
                       onPressed: _create,
-                      child: const Icon(CupertinoIcons.add),
                     ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder:
-                      '${l10n.search} ${config.device.toLowerCase()}',
+                  placeholder: '${l10n.search} ${config.device.toLowerCase()}',
                   onChanged: (value) =>
                       setState(() => _searchQuery = value.toLowerCase()),
                 ),
@@ -311,21 +316,30 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       key: Key(device.id!),
       direction: DismissDirection.horizontal,
       background: Container(
-        color: CupertinoColors.systemBlue,
+        color: AppColors.accent.resolveFrom(context),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 20),
-        child: const Icon(CupertinoIcons.pencil, color: CupertinoColors.white),
+        child: Icon(
+          CupertinoIcons.pencil,
+          color: AppColors.onAccent.resolveFrom(context),
+        ),
       ),
       secondaryBackground: Container(
-        color: CupertinoColors.systemRed,
+        color: AppColors.danger.resolveFrom(context),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
+        child: Icon(
+          CupertinoIcons.trash,
+          color: AppColors.onAccent.resolveFrom(context),
+        ),
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          Navigator.pushNamed(context, '/device_form',
-              arguments: {'device': device});
+          Navigator.pushNamed(
+            context,
+            '/device_form',
+            arguments: {'device': device},
+          );
           return false;
         }
         if (!_canManage) {

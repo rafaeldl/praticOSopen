@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
@@ -94,8 +95,9 @@ class _RatingsScreenState extends State<RatingsScreen> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
+            backgroundColor: AppNavBar.barBackground(context),
+            alwaysShowMiddle: false,
             largeTitle: Text(l10n.ratings),
-            backgroundColor: AppColors.background.resolveFrom(context),
             border: null,
           ),
           CupertinoSliverRefreshControl(onRefresh: _load),
