@@ -44,9 +44,15 @@ class GlassBarButton extends StatelessWidget {
         child: AppGlass(
           elevated: true,
           borderRadius: BorderRadius.circular(AppSizes.glassBarButton / 2),
-          child: SizedBox.square(
-            dimension: AppSizes.glassBarButton,
+          // Minimum size, not a fixed one: the content may grow.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: AppSizes.glassBarButton,
+              minHeight: AppSizes.glassBarButton,
+            ),
             child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
               child:
                   child ??
                   Icon(icon, color: AppColors.text.resolveFrom(context)),
