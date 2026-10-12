@@ -720,7 +720,6 @@ class _HomeContentState extends State<HomeContent> {
             ? l10n.paid
             : null,
         detailText: detail,
-        thumbnailUrl: order.coverPhotoUrl,
         progress: _executionPercentage(order),
         onTap: () => widget.onOpenOrder(order),
       ),
