@@ -53,6 +53,12 @@ class FormatService {
     return DateFormat.yMMMM(_intlLocale).format(date);
   }
 
+  /// Nome do mês por extenso, minúsculo no pt/es (ex: outubro, October)
+  String formatMonthName(DateTime? date) {
+    if (date == null) return '';
+    return DateFormat.MMMM(_intlLocale).format(date);
+  }
+
   /// Formata data com hora (ex: 09/01/2025 14:30, 01/09/2025 2:30 PM)
   String formatDateTime(DateTime? date) {
     if (date == null) return '';

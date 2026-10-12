@@ -160,34 +160,32 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background.resolveFrom(context),
-      child: CustomScrollView(
+      child: Stack(
+        children: [
+      CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           CupertinoSliverNavigationBar(
             largeTitle: Text(context.l10n.financialReport),
             backgroundColor: AppColors.background.resolveFrom(context),
             border: null,
-            trailing: Semantics(
-              button: true,
-              label: context.l10n.share,
-              excludeSemantics: true,
-              child: CupertinoButton(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size.square(AppSizes.minTouchTarget),
-                onPressed: () => _shareReport(orderStore),
-                child: Icon(
-                  CupertinoIcons.square_arrow_up,
-                  color: AppColors.accentText.resolveFrom(context),
-                ),
-              ),
-            ),
           ),
           CupertinoSliverRefreshControl(
             onRefresh: () => orderStore.loadOrdersForDashboard(),
           ),
           SliverToBoxAdapter(child: _buildPeriodSelector()),
           Observer(builder: (_) => _buildBody(orderStore)),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSizes.primaryButtonHeight + 64),
+          ),
+        ],
+      ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _SendPdfBar(onPressed: () => _shareReport(orderStore)),
+          ),
         ],
       ),
     );
@@ -2278,6 +2276,54 @@ class _CustomPeriodSheetState extends State<_CustomPeriodSheet> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Mandar relatório em PDF": the single filled button, fixed at the bottom.
+class _SendPdfBar extends StatelessWidget {
+  const _SendPdfBar({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = AppColors.background.resolveFrom(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          stops: const [0.72, 1],
+          colors: [bg, bg.withValues(alpha: 0)],
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.blockMargin,
+            AppSpacing.xl,
+            AppSpacing.blockMargin,
+            AppSpacing.md,
+          ),
+          child: CupertinoButton(
+            key: const Key('financialSendReportPdf'),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
+            color: AppColors.accent.resolveFrom(context),
+            borderRadius: BorderRadius.circular(AppRadii.button),
+            onPressed: onPressed,
+            child: Text(
+              context.l10n.financialSendReportPdf,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyStrong.copyWith(
+                color: AppColors.onAccent.resolveFrom(context),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

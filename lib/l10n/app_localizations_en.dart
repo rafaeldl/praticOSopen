@@ -5327,6 +5327,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialReportShort => 'Report';
 
   @override
+  String financialReceivedIn(String month) {
+    return 'Received in $month';
+  }
+
+  @override
+  String financialReceivedSub(int count) {
+    return '$count orders · see all';
+  }
+
+  @override
+  String get financialSendReportPdf => 'Send report as PDF';
+
+  @override
   String receiveSubtitle(String customer, String total) {
     return '$customer · total $total';
   }

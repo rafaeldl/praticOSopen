@@ -113,11 +113,14 @@ void main() {
     expect(find.textContaining('Ana deve há mais tempo'), findsOneWidget);
     expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
     expect(find.text('Falta receber'), findsOneWidget); // section label
-    expect(find.text('Recebido'), findsOneWidget);
     expect(find.text('OS 183 · desde 02/10'), findsOneWidget);
     expect(find.text('2 OS · desde 05/10'), findsOneWidget);
-    expect(find.text('OS 186 · pago 08/10'), findsOneWidget);
-    expect(find.textContaining('Entrou'), findsOneWidget);
+    // One "Recebido em <mês>" row (prototype), not the list of receipts.
+    expect(find.text('Recebido em outubro'), findsOneWidget);
+    expect(find.text(FormatService().formatCurrency(8300)), findsOneWidget);
+    expect(find.text('1 OS · ver todas'), findsOneWidget);
+    expect(find.text('OS 186 · pago 08/10'), findsNothing);
+    expect(find.textContaining('Entrou'), findsNothing);
 
     // Debtors: oldest first (Ana 02/10 before Bia 05/10).
     final ya = tester.getTopLeft(find.text('Ana').first).dy;
@@ -142,11 +145,7 @@ void main() {
     await pumpTab(tester, storeWith(month: [paid]));
 
     expect(find.byKey(const Key('financialSendCharge')), findsNothing);
-    expect(find.text('Recebido'), findsOneWidget);
-    expect(
-      find.textContaining('Falta ${FormatService().formatCurrency(0)}'),
-      findsOneWidget,
-    );
+    expect(find.text('Recebido em outubro'), findsOneWidget);
   });
 
   testWidgets('a debtor with one order opens it', (tester) async {
@@ -203,7 +202,8 @@ void main() {
 
     expect(find.text('Nenhuma OS em outubro de 2026.'), findsNothing);
     expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
-    expect(find.text('Recebido'), findsNothing);
+    expect(find.textContaining('Recebido em'), findsOneWidget);
+    expect(find.text('0 OS · ver todas'), findsOneWidget);
   });
 
   testWidgets('loading shows an indicator under the title and month',
@@ -289,12 +289,11 @@ void main() {
     expect(reports, [true, false]);
   });
 
-  testWidgets('the report row at the end of the list opens the report',
-      (tester) async {
+  testWidgets('the "Recebido em <mês>" row opens the report', (tester) async {
     final reports = <bool>[];
     await pumpTab(tester, storeWith(open: [ana]), reports: reports);
 
-    await tester.tap(find.text('Relatório'));
+    await tester.tap(find.text('Recebido em outubro'));
     expect(reports, [false]);
   });
 
@@ -322,7 +321,8 @@ void main() {
 
     expect(find.text('October 2026'), findsOneWidget);
     expect(find.text('Order 183 · since 10/2'), findsOneWidget);
-    expect(find.text('Order 186 · paid 10/8'), findsOneWidget);
+    expect(find.text('Received in October'), findsOneWidget);
+    expect(find.text('1 orders · see all'), findsOneWidget);
     expect(find.text('Send payment request to Ana'), findsOneWidget);
     expect(find.textContaining('ordens'), findsNothing);
     expect(find.textContaining('Falta'), findsNothing);
