@@ -21,7 +21,7 @@ import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/order_screen_services.dart';
-import 'package:praticos/screens/order/assistant/speech_input_sheet.dart';
+import 'package:praticos/screens/order/assistant/speech_listener.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
@@ -207,10 +207,14 @@ Future<void> _pump(
 }
 
 class FakeSpeech implements SpeechListener {
-  FakeSpeech(this.words, {this.allowed = true});
+  FakeSpeech(this.words, {this.allowed = true, this.hold = false});
 
   final String words;
   final bool allowed;
+
+  /// Keeps listening until stopped (otherwise it ends right away).
+  final bool hold;
+  int stops = 0;
 
   @override
   Future<bool> start({
@@ -220,12 +224,12 @@ class FakeSpeech implements SpeechListener {
   }) async {
     if (!allowed) return false;
     onWords(words);
-    onDone();
+    if (!hold) onDone();
     return true;
   }
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async => stops++;
 }
 
 void main() {
@@ -445,8 +449,10 @@ void main() {
     );
 
     FormRow rowOf(WidgetTester tester, String text) => tester.widget<FormRow>(
-      find.ancestor(of: find.text(text), matching: find.byType(FormRow)),
+      find.byWidgetPredicate((w) => w is FormRow && w.title == text),
     );
+
+    const filledNote = 'Preenchi o que está marcado. Confira e salve.';
 
     testWidgets('flag is off by default: Foto stays, Falar is hidden', (
       tester,
@@ -506,28 +512,30 @@ void main() {
       tester,
     ) async {
       await _pump(tester, assistantScreen(OrderStore(), FakeAssistant(draft)));
-      expect(find.byType(AssistantToolbar), findsOneWidget);
+      expect(find.byType(AssistantBar), findsOneWidget);
       expect(find.byKey(const ValueKey('assistant_photo')), findsOneWidget);
       expect(find.byKey(const ValueKey('assistant_talk')), findsOneWidget);
     });
 
-    testWidgets('Falar listens, fills the same order and marks what it put', (
+    testWidgets('Falar listens in the bar, fills the order and marks it', (
       tester,
     ) async {
       final store = OrderStore();
       final assistant = FakeAssistant(draft);
       await _pump(tester, assistantScreen(store, assistant));
 
+      // Ends by itself (a pause): fills with what was heard.
       await tester.tap(find.byKey(const ValueKey('assistant_talk')));
-      await tester.pumpAndSettle();
-      expect(find.text('Revenda Sul, troca de óleo'), findsOneWidget);
-      await tester.tap(find.text('Preencher a OS'));
       await tester.pumpAndSettle();
 
       expect(assistant.texts, ['Revenda Sul, troca de óleo']);
       expect(assistant.photoCounts, [0]);
       expect(store.deferSave, isTrue);
       expect(store.order!.id, isNull);
+      // No other screen opened; the note says what happened.
+      expect(find.byType(CupertinoActionSheet), findsNothing);
+      expect(find.text(filledNote), findsOneWidget);
+      expect(find.text('Desfazer'), findsOneWidget);
 
       expect(rowOf(tester, 'Revenda Sul').marked, isTrue);
       expect(rowOf(tester, 'Troca de óleo').marked, isTrue);
@@ -539,7 +547,71 @@ void main() {
       expect(find.text('sem valor'), findsOneWidget);
     });
 
-    testWidgets('no microphone: the sheet turns into a text field', (
+    testWidgets('while listening the bar shows what was heard; stop fills', (
+      tester,
+    ) async {
+      final speech = FakeSpeech('Revenda Sul, troca de óleo', hold: true);
+      final assistant = FakeAssistant(draft);
+      await _pump(
+        tester,
+        assistantScreen(OrderStore(), assistant, speech: speech),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      // The wave keeps moving: no pumpAndSettle while listening.
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('Ouvindo…'), findsOneWidget);
+      expect(find.text('“Revenda Sul, troca de óleo”'), findsOneWidget);
+      expect(find.byKey(const ValueKey('assistant_photo')), findsNothing);
+      expect(assistant.texts, isEmpty);
+
+      await tester.tap(find.byKey(const ValueKey('assistant_stop')));
+      await tester.pumpAndSettle();
+      expect(speech.stops, 1);
+      expect(assistant.texts, ['Revenda Sul, troca de óleo']);
+      expect(find.text('Ouvindo…'), findsNothing);
+      expect(find.byKey(const ValueKey('assistant_talk')), findsOneWidget);
+    });
+
+    testWidgets('"X" while listening sends nothing', (tester) async {
+      final speech = FakeSpeech('Revenda Sul', hold: true);
+      final assistant = FakeAssistant(draft);
+      await _pump(
+        tester,
+        assistantScreen(OrderStore(), assistant, speech: speech),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const ValueKey('assistant_cancel')));
+      await tester.pumpAndSettle();
+      expect(speech.stops, 1);
+      expect(assistant.texts, isEmpty);
+      expect(find.text('Ouvindo…'), findsNothing);
+      expect(find.byKey(const ValueKey('assistant_talk')), findsOneWidget);
+    });
+
+    testWidgets('"Desfazer" takes out what the assistant put', (tester) async {
+      final store = OrderStore();
+      await _pump(tester, assistantScreen(store, FakeAssistant(draft)));
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(store.services, hasLength(2));
+
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+      expect(store.customer, isNull);
+      expect(store.services, isEmpty);
+      expect(store.products, isEmpty);
+      expect(find.text(filledNote), findsNothing);
+      expect(
+        find.byKey(const ValueKey('new_order_pick_customer')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no microphone: the bar turns into a text field', (
       tester,
     ) async {
       final assistant = FakeAssistant(draft);
@@ -559,14 +631,19 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.enterText(find.byType(CupertinoTextField).last, 'polimento');
+      await tester.enterText(
+        find.byKey(const ValueKey('assistant_text_field')),
+        'polimento',
+      );
       await tester.pump();
-      await tester.tap(find.text('Preencher a OS'));
+      await tester.tap(find.byKey(const ValueKey('assistant_send')));
       await tester.pumpAndSettle();
       expect(assistant.texts, ['polimento']);
     });
 
-    testWidgets('the camera opens only when Foto is tapped', (tester) async {
+    testWidgets('Foto: the photo goes to "Fotos" and the assistant reads it', (
+      tester,
+    ) async {
       var cameraOpened = 0;
       final assistant = FakeAssistant(draft);
       await _pump(
@@ -588,15 +665,20 @@ void main() {
       await tester.tap(find.text('Tirar Foto'));
       await tester.pumpAndSettle();
       expect(cameraOpened, 1);
-      expect(find.text('1 foto'), findsOneWidget);
 
-      await tester.tap(find.text('Pronto'));
-      await tester.pumpAndSettle();
+      // No screen in between: read right away.
       expect(assistant.photoCounts, [1]);
       expect(rowOf(tester, 'Polimento').marked, isTrue);
+      expect(find.text(filledNote), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('new_order_photo_0')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.byKey(const ValueKey('new_order_photo_0')), findsOneWidget);
     });
 
-    testWidgets('quota exceeded shows a clear message and keeps manual flow', (
+    testWidgets('quota exceeded: a note, not an alert, and manual flow stays', (
       tester,
     ) async {
       final store = OrderStore();
@@ -612,23 +694,21 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('assistant_talk')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Preencher a OS'));
-      await tester.pumpAndSettle();
 
-      expect(
-        find.text(
+      const message =
           'Você já usou os 10 pedidos do assistente deste mês. '
-          'Dá para continuar preenchendo à mão.',
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
+          'Dá para continuar preenchendo à mão.';
+      expect(find.text(message), findsOneWidget);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
       expect(store.services, isEmpty);
       expect(
         find.byKey(const ValueKey('new_order_pick_customer')),
         findsOneWidget,
       );
+
+      await tester.tap(find.text('Fechar'));
+      await tester.pumpAndSettle();
+      expect(find.text(message), findsNothing);
     });
   });
 

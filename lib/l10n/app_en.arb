@@ -2841,5 +2841,14 @@
   "speechUnavailable": "The microphone is not allowed. Allow it in Settings or type the job.",
   "orderAddItemRow": "Add service or part",
   "orderPickCustomerRow": "Choose customer",
-  "newOrderButton": "New order"
+  "newOrderButton": "New order",
+  "orderAssistantFilled": "I filled in what's marked. Check it and save.",
+  "orderAssistantUndo": "Undo",
+  "orderAssistantReadingPhotos": "Reading the photos…",
+  "orderAssistantReadingSpeech": "Reading what you said…",
+  "orderAssistantMarked": "Filled in by AI",
+  "speechCancel": "Cancel",
+  "speechStopAndFill": "Stop and fill in the order",
+  "speechTypeHint": "Type the customer, the vehicle and what will be done",
+  "speechNothingHeard": "I didn't hear anything. Tap Speak and try again."
 }

@@ -2959,5 +2959,14 @@
   "speechUnavailable": "O microfone não está liberado. Libere em Ajustes ou digite o serviço.",
   "orderAddItemRow": "Adicionar serviço ou peça",
   "orderPickCustomerRow": "Escolher cliente",
-  "newOrderButton": "Nova OS"
+  "newOrderButton": "Nova OS",
+  "orderAssistantFilled": "Preenchi o que está marcado. Confira e salve.",
+  "orderAssistantUndo": "Desfazer",
+  "orderAssistantReadingPhotos": "Lendo as fotos…",
+  "orderAssistantReadingSpeech": "Lendo o que você falou…",
+  "orderAssistantMarked": "Preenchido pela IA",
+  "speechCancel": "Cancelar fala",
+  "speechStopAndFill": "Parar e preencher a OS",
+  "speechTypeHint": "Escreva o cliente, o veículo e o que vai ser feito",
+  "speechNothingHeard": "Não ouvi nada. Toque em Falar e tente de novo."
 }

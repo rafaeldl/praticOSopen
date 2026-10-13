@@ -5986,4 +5986,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newOrderButton => 'New order';
+
+  @override
+  String get orderAssistantFilled =>
+      'I filled in what\'s marked. Check it and save.';
+
+  @override
+  String get orderAssistantUndo => 'Undo';
+
+  @override
+  String get orderAssistantReadingPhotos => 'Reading the photos…';
+
+  @override
+  String get orderAssistantReadingSpeech => 'Reading what you said…';
+
+  @override
+  String get orderAssistantMarked => 'Filled in by AI';
+
+  @override
+  String get speechCancel => 'Cancel';
+
+  @override
+  String get speechStopAndFill => 'Stop and fill in the order';
+
+  @override
+  String get speechTypeHint =>
+      'Type the customer, the vehicle and what will be done';
+
+  @override
+  String get speechNothingHeard =>
+      'I didn\'t hear anything. Tap Speak and try again.';
 }

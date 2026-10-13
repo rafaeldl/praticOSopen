@@ -10353,6 +10353,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nova OS'**
   String get newOrderButton;
+
+  /// No description provided for @orderAssistantFilled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchi o que está marcado. Confira e salve.'**
+  String get orderAssistantFilled;
+
+  /// No description provided for @orderAssistantUndo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer'**
+  String get orderAssistantUndo;
+
+  /// No description provided for @orderAssistantReadingPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo as fotos…'**
+  String get orderAssistantReadingPhotos;
+
+  /// No description provided for @orderAssistantReadingSpeech.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o que você falou…'**
+  String get orderAssistantReadingSpeech;
+
+  /// No description provided for @orderAssistantMarked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchido pela IA'**
+  String get orderAssistantMarked;
+
+  /// No description provided for @speechCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar fala'**
+  String get speechCancel;
+
+  /// No description provided for @speechStopAndFill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar e preencher a OS'**
+  String get speechStopAndFill;
+
+  /// No description provided for @speechTypeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o cliente, o veículo e o que vai ser feito'**
+  String get speechTypeHint;
+
+  /// No description provided for @speechNothingHeard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não ouvi nada. Toque em Falar e tente de novo.'**
+  String get speechNothingHeard;
 }
 
 class _AppLocalizationsDelegate

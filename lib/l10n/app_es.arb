@@ -2841,5 +2841,14 @@
   "speechUnavailable": "El micrófono no está permitido. Permítelo en Ajustes o escribe el servicio.",
   "orderAddItemRow": "Agregar servicio o pieza",
   "orderPickCustomerRow": "Elegir cliente",
-  "newOrderButton": "Nueva OS"
+  "newOrderButton": "Nueva OS",
+  "orderAssistantFilled": "Completé lo marcado. Revísalo y guarda.",
+  "orderAssistantUndo": "Deshacer",
+  "orderAssistantReadingPhotos": "Leyendo las fotos…",
+  "orderAssistantReadingSpeech": "Leyendo lo que dijiste…",
+  "orderAssistantMarked": "Completado por la IA",
+  "speechCancel": "Cancelar",
+  "speechStopAndFill": "Detener y completar la OS",
+  "speechTypeHint": "Escribe el cliente, el vehículo y lo que se hará",
+  "speechNothingHeard": "No escuché nada. Toca Hablar e inténtalo de nuevo."
 }

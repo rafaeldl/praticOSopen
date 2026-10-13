@@ -6009,4 +6009,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get newOrderButton => 'Nueva OS';
+
+  @override
+  String get orderAssistantFilled => 'Completé lo marcado. Revísalo y guarda.';
+
+  @override
+  String get orderAssistantUndo => 'Deshacer';
+
+  @override
+  String get orderAssistantReadingPhotos => 'Leyendo las fotos…';
+
+  @override
+  String get orderAssistantReadingSpeech => 'Leyendo lo que dijiste…';
+
+  @override
+  String get orderAssistantMarked => 'Completado por la IA';
+
+  @override
+  String get speechCancel => 'Cancelar';
+
+  @override
+  String get speechStopAndFill => 'Detener y completar la OS';
+
+  @override
+  String get speechTypeHint =>
+      'Escribe el cliente, el vehículo y lo que se hará';
+
+  @override
+  String get speechNothingHeard =>
+      'No escuché nada. Toca Hablar e inténtalo de nuevo.';
 }

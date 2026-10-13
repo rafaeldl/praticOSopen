@@ -5996,4 +5996,34 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newOrderButton => 'Nova OS';
+
+  @override
+  String get orderAssistantFilled =>
+      'Preenchi o que está marcado. Confira e salve.';
+
+  @override
+  String get orderAssistantUndo => 'Desfazer';
+
+  @override
+  String get orderAssistantReadingPhotos => 'Lendo as fotos…';
+
+  @override
+  String get orderAssistantReadingSpeech => 'Lendo o que você falou…';
+
+  @override
+  String get orderAssistantMarked => 'Preenchido pela IA';
+
+  @override
+  String get speechCancel => 'Cancelar fala';
+
+  @override
+  String get speechStopAndFill => 'Parar e preencher a OS';
+
+  @override
+  String get speechTypeHint =>
+      'Escreva o cliente, o veículo e o que vai ser feito';
+
+  @override
+  String get speechNothingHeard =>
+      'Não ouvi nada. Toque em Falar e tente de novo.';
 }

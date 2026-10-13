@@ -20,8 +20,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
-import 'package:praticos/screens/order/assistant/assistant_input_sheet.dart';
-import 'package:praticos/screens/order/assistant/speech_input_sheet.dart';
+import 'package:praticos/screens/order/assistant/speech_listener.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
@@ -48,7 +47,6 @@ import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
@@ -74,10 +72,11 @@ import 'package:provider/provider.dart';
 ///   (same rules as the legacy screen, see `order_status_share.dart`).
 /// - Items without price are `null`: they show "sem valor" and are not summed.
 /// - No cover photo; photos show in "Fotos" only when the order has them.
-/// - Foto / "Falar o que fazer" (new order only, behind [kAiOrderAssistEnabled],
-///   off by default): the camera opens only on Foto; Falar opens a text sheet
-///   (keyboard dictation). The assistant's draft fills this same blank order
-///   and what it filled is highlighted (marca-texto) until "Salvar OS".
+/// - Foto / Falar (new order only; Falar behind [kAiOrderAssistEnabled], off
+///   by default): everything happens in the glass bar of the sheet, without
+///   another screen. Falar listens right there and the stop fills the order;
+///   Foto puts the photos in "Fotos" and the assistant reads them. What it
+///   filled gets a blue sparkle, with "Desfazer" in a note above the bar.
 class OrderScreenV2 extends StatefulWidget {
   const OrderScreenV2({
     super.key,
@@ -133,6 +132,18 @@ class OrderScreenV2 extends StatefulWidget {
   State<OrderScreenV2> createState() => _OrderScreenV2State();
 }
 
+/// What one assistant draft put in the order, for "Desfazer".
+class _DraftUndo {
+  _DraftUndo(this.customerGuess, this.deviceGuess);
+
+  /// Guesses before the draft (restored on undo).
+  final String? customerGuess;
+  final String? deviceGuess;
+  bool customer = false;
+  final List<String> devices = [];
+  final List<Object> lines = [];
+}
+
 class _NextStep {
   const _NextStep(this.sentence, [this.actionLabel, this.onAction]);
 
@@ -170,6 +181,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   @override
   void dispose() {
+    if (_barMode == AssistantBarMode.listening) _speech.stop();
+    _typedController.dispose();
     _requestController.dispose();
     _scroll.dispose();
     super.dispose();
@@ -180,7 +193,24 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   final Set<Object> _marked = Set<Object>.identity();
   String? _customerGuess;
   String? _deviceGuess;
-  bool _assistantBusy = false;
+  bool get _assistantBusy => _barMode == AssistantBarMode.reading;
+
+  /// What the bar at the bottom of the sheet is doing.
+  AssistantBarMode _barMode = AssistantBarMode.idle;
+  String? _readingLabel;
+
+  /// Heard so far while listening; typed when there is no microphone.
+  String _heard = '';
+  final TextEditingController _typedController = TextEditingController();
+  late final SpeechListener _speech =
+      widget.speechListener ?? DeviceSpeechListener();
+
+  /// Note above the bar (what the assistant did, or why it could not).
+  String? _note;
+  bool _noteFilled = false;
+
+  /// What the last draft added, for "Desfazer".
+  _DraftUndo? _undo;
 
   /// Photos attached in the "Nova OS" sheet; uploaded once the order has
   /// its id (an order is not created just to hold them).
@@ -975,19 +1005,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   // ─── Save / leave ────────────────────────────────────────────────────────
 
-  void _save() {
-    if (_store.customer == null) return;
-    _store.deferSave = false;
-    _store.updateTotal();
-    _store.createItem();
-    setState(() {
-      _isNew = false;
-      _marked.clear();
-      _customerGuess = null;
-      _deviceGuess = null;
-    });
-  }
-
   Future<void> _confirmDiscard() async {
     final l10n = context.l10n;
     final leave = await showCupertinoDialog<bool>(
@@ -1084,7 +1101,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (!mounted || picked.isEmpty) return;
     if (picked.length > 1 && !_photoAllowed(picked.length)) return;
     setState(() => _photos.addAll(picked));
-    if (widget.showAssistant) await _openAssistant(photos: picked);
+    if (widget.showAssistant) await _runAssistant(photos: picked);
   }
 
   Future<void> _onPhotoTapped(int index) async {
@@ -1134,28 +1151,28 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     await _store.uploadPhotoFiles(files);
   }
 
-  Future<void> _openAssistant({List<AiPhoto> photos = const []}) async {
-    final input = await AppSheet.show<AssistantInput>(
-      context,
-      (_) => AssistantInputSheet(
-        initialPhotos: photos,
-        capturePhoto: _capturePhoto,
-      ),
-    );
-    if (!mounted || input == null || input.isEmpty) return;
-    await _runAssistant(input);
-  }
-
-  Future<void> _runAssistant(AssistantInput input) async {
+  /// Sends what was said and/or the photos to the assistant and fills this
+  /// same order. The bar shows what it is reading; the result (or why it
+  /// could not) shows in the note above the bar, never in an alert.
+  Future<void> _runAssistant({
+    String? text,
+    List<AiPhoto> photos = const [],
+  }) async {
     final l10n = context.l10n;
-    setState(() => _assistantBusy = true);
+    setState(() {
+      _barMode = AssistantBarMode.reading;
+      _readingLabel = photos.isNotEmpty
+          ? l10n.orderAssistantReadingPhotos
+          : l10n.orderAssistantReadingSpeech;
+      _note = null;
+    });
     AiOrderDraft? draft;
     String? error;
     try {
       final client = widget.assistant ?? AiOrderAssistService();
       draft = await client.assist(
-        text: input.text,
-        photos: input.photos,
+        text: text,
+        photos: photos,
         locale: l10n.localeName.split('_').first,
       );
     } on AiOrderAssistException catch (e) {
@@ -1170,16 +1187,118 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       error = l10n.orderAssistantErrorUnavailable;
     }
     if (!mounted) return;
-    // Stop the spinner before any dialog.
-    setState(() => _assistantBusy = false);
-    if (error != null) {
-      await _alert(l10n.orderAssistantErrorTitle, error);
-    } else if (!_applyDraft(draft!)) {
-      await _alert(
-        l10n.orderAssistantErrorTitle,
-        l10n.orderAssistantNothingFound,
-      );
+    final filled = error == null && _applyDraft(draft!);
+    setState(() {
+      _barMode = AssistantBarMode.idle;
+      _noteFilled = filled;
+      _note = filled
+          ? l10n.orderAssistantFilled
+          : error ?? l10n.orderAssistantNothingFound;
+    });
+    if (filled) HapticFeedback.lightImpact();
+  }
+
+  void _dismissNote() => setState(() {
+    _note = null;
+    _undo = null;
+  });
+
+  /// "Desfazer": takes out what the last draft put in the order.
+  void _undoDraft() {
+    final undo = _undo;
+    if (undo != null) {
+      if (undo.customer) {
+        runInAction(() {
+          _store.order!.customer = null;
+          _store.customer = null;
+        });
+        _marked.remove('customer');
+      }
+      for (final id in undo.devices) {
+        _store.removeDevice(id);
+        _marked.remove('device:$id');
+      }
+      for (final line in undo.lines) {
+        final services = _store.services ?? const <OrderService>[];
+        final products = _store.products ?? const <OrderProduct>[];
+        final s = services.indexWhere((e) => identical(e, line));
+        if (s >= 0) _store.deleteService(s);
+        final p = products.indexWhere((e) => identical(e, line));
+        if (p >= 0) _store.deleteProduct(p);
+        _marked.remove(line);
+      }
+      _customerGuess = undo.customerGuess;
+      _deviceGuess = undo.deviceGuess;
     }
+    _dismissNote();
+  }
+
+  // ─── Falar, right in the bar ───
+
+  /// Falar: the bar turns into "Ouvindo…" and what is heard shows above it.
+  /// No microphone (not allowed or not available): the bar turns into a
+  /// field.
+  Future<void> _onTalk() async {
+    setState(() {
+      _barMode = AssistantBarMode.listening;
+      _heard = '';
+      _note = null;
+      _undo = null;
+    });
+    final ok = await _speech.start(
+      localeId: context.l10n.localeName,
+      onWords: (words) {
+        if (mounted && _barMode == AssistantBarMode.listening) {
+          setState(() => _heard = words.trim());
+        }
+      },
+      // Ended by itself (a long pause): fill with what was heard.
+      onDone: () {
+        if (mounted && _barMode == AssistantBarMode.listening) _stopAndFill();
+      },
+    );
+    if (!ok && mounted && _barMode == AssistantBarMode.listening) {
+      setState(() {
+        _barMode = AssistantBarMode.typing;
+        _note = context.l10n.speechUnavailable;
+        _noteFilled = false;
+      });
+    }
+  }
+
+  /// Blue stop: stops listening and fills the order with what was heard.
+  Future<void> _stopAndFill() async {
+    final heard = _heard;
+    setState(() => _barMode = AssistantBarMode.idle);
+    await _speech.stop();
+    if (!mounted) return;
+    if (heard.isEmpty) {
+      setState(() {
+        _note = context.l10n.speechNothingHeard;
+        _noteFilled = false;
+      });
+      return;
+    }
+    await _runAssistant(text: heard);
+  }
+
+  Future<void> _sendTyped() async {
+    final text = _typedController.text.trim();
+    if (text.isEmpty) return;
+    _typedController.clear();
+    await _runAssistant(text: text);
+  }
+
+  /// "X": nothing is sent.
+  Future<void> _cancelTalk() async {
+    final wasListening = _barMode == AssistantBarMode.listening;
+    setState(() {
+      _barMode = AssistantBarMode.idle;
+      _heard = '';
+      _note = null;
+    });
+    _typedController.clear();
+    if (wasListening) await _speech.stop();
   }
 
   /// Fills the blank order with the draft, without saving (deferSave). Never
@@ -1187,8 +1306,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// when the draft had nothing to use.
   bool _applyDraft(AiOrderDraft draft) {
     var used = false;
+    final undo = _DraftUndo(_customerGuess, _deviceGuess);
     if (_store.customer == null) {
       if (draft.customer != null) {
+        undo.customer = true;
         _store.setCustomer(
           Customer()
             ..id = draft.customer!.id
@@ -1213,6 +1334,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..manufacturer = d.manufacturer,
       );
       _marked.add('device:${d.id}');
+      undo.devices.add(d.id);
       _deviceGuess = null;
       used = true;
     } else {
@@ -1236,6 +1358,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..total = item.value == null ? null : item.value! * item.quantity;
         _store.addProduct(line);
         _marked.add(line);
+        undo.lines.add(line);
       } else {
         final line = OrderService()
           ..service = (ServiceAggr()
@@ -1244,9 +1367,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..value = item.value;
         _store.addService(line);
         _marked.add(line);
+        undo.lines.add(line);
       }
       used = true;
     }
+    if (used) _undo = undo;
     setState(() {});
     return used;
   }
@@ -1306,7 +1431,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     const SliverToBoxAdapter(child: SizedBox(height: 140)),
                   ],
                 ),
-                if (_isNew) _buildBottom(config),
               ],
             ),
           ),
@@ -1357,24 +1481,80 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 ),
               ],
             ),
+            // Fade so the cards pass under the glass bar.
             Positioned(
-                left: AppSpacing.blockMargin,
-                right: AppSpacing.blockMargin,
-                bottom: 0,
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: AssistantToolbar(
-                      busyLabel: _assistantBusy
-                          ? l10n.orderAssistantReading
-                          : null,
-                      onPhoto: _onPhoto,
-                      onTalk: widget.showAssistant ? _onTalk : null,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 160,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0, 0.55],
+                      colors: [
+                        AppColors.groupedBackground
+                            .resolveFrom(context)
+                            .withValues(alpha: 0),
+                        AppColors.groupedBackground.resolveFrom(context),
+                      ],
                     ),
                   ),
                 ),
               ),
+            ),
+            Positioned(
+              left: AppSpacing.blockMargin,
+              right: AppSpacing.blockMargin,
+              bottom: 0,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_barMode == AssistantBarMode.listening)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppSpacing.md,
+                          ),
+                          child: AssistantTranscript(heard: _heard),
+                        )
+                      else if (_note != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppSpacing.md,
+                          ),
+                          child: AssistantNote(
+                            message: _note!,
+                            filled: _noteFilled,
+                            actionLabel: _noteFilled && _undo != null
+                                ? l10n.orderAssistantUndo
+                                : l10n.close,
+                            onAction: _noteFilled && _undo != null
+                                ? _undoDraft
+                                : _dismissNote,
+                          ),
+                        ),
+                      AssistantBar(
+                        mode: _barMode,
+                        readingLabel: _readingLabel,
+                        onPhoto: _onPhoto,
+                        onTalk: widget.showAssistant ? _onTalk : null,
+                        onCancel: _cancelTalk,
+                        onStop: _stopAndFill,
+                        onSend: _sendTyped,
+                        textController: _typedController,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1716,15 +1896,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// "Falar": speech to text, then the assistant fills the order.
-  Future<void> _onTalk() async {
-    final text = await AppSheet.show<String>(
-      context,
-      (_) => SpeechInputSheet(listener: widget.speechListener),
-    );
-    if (!mounted || text == null || text.trim().isEmpty) return;
-    await _runAssistant(AssistantInput(text: text));
-  }
-
   String _title(SegmentConfigProvider config) {
     final l10n = context.l10n;
     if (_isNew) return l10n.orderNewTitle(config.serviceOrder);
@@ -2546,42 +2717,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
   }
-
-  Widget _buildBottom(SegmentConfigProvider config) {
-    final l10n = context.l10n;
-    return Positioned(
-      left: AppSpacing.blockMargin,
-      right: AppSpacing.blockMargin,
-      bottom: 0,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.showAssistant) ...[
-                if (_assistantBusy)
-                  _AssistantBusy(label: l10n.orderAssistantReading)
-                else
-                  _AssistantButtons(
-                    hint: _hasContent ? null : l10n.orderAssistantHint,
-                    onPhoto: _onPhoto,
-                    onTalk: () => _openAssistant(),
-                  ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              _primaryButton(
-                l10n.orderSaveButton(config.serviceOrder),
-                _store.customer == null ? null : _save,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Applies the answer of [DevicePickerSheet] to the store so the next
@@ -2637,132 +2772,6 @@ void addPickToOrder(OrderStore store, OrderItemPick pick) {
         ..value = item.value
         ..quantity = 1
         ..total = item.value,
-    );
-  }
-}
-
-/// Foto (glass) and "Falar o que fazer" (graphite), floating above
-/// "Salvar OS". The camera opens only when Foto is tapped.
-class _AssistantButtons extends StatelessWidget {
-  const _AssistantButtons({
-    required this.onPhoto,
-    required this.onTalk,
-    this.hint,
-  });
-
-  final VoidCallback onPhoto;
-  final VoidCallback onTalk;
-
-  /// "Tire foto da placa e fale o serviço" while the order is blank.
-  final String? hint;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final text = AppColors.text.resolveFrom(context);
-    final onAssistant = AppColors.onAssistantFill.resolveFrom(context);
-    final radius = BorderRadius.circular(AppRadii.button);
-    Widget label(IconData icon, String value, Color color) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            value,
-            style: AppTypography.callout.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (hint != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Text(
-              hint!,
-              textAlign: TextAlign.center,
-              style: AppTypography.label.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
-          ),
-        Row(
-          children: [
-            Expanded(
-              child: AppGlass(
-                borderRadius: radius,
-                child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                  ),
-                  minimumSize: const Size.fromHeight(52),
-                  borderRadius: radius,
-                  onPressed: onPhoto,
-                  child: label(
-                    CupertinoIcons.camera,
-                    l10n.orderPhotoAction,
-                    text,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              flex: 2,
-              child: CupertinoButton(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                minimumSize: const Size.fromHeight(52),
-                color: AppColors.assistantFill.resolveFrom(context),
-                borderRadius: radius,
-                onPressed: onTalk,
-                child: label(
-                  CupertinoIcons.mic,
-                  l10n.orderTalkAction,
-                  onAssistant,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _AssistantBusy extends StatelessWidget {
-  const _AssistantBusy({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppGlass(
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                label,
-                style: AppTypography.callout.copyWith(
-                  color: AppColors.text.resolveFrom(context),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

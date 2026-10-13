@@ -234,7 +234,7 @@ class FormRow extends StatelessWidget {
   final VoidCallback? onTap;
   final bool accent;
 
-  /// Filled by the assistant: title on the marca-texto until touched.
+  /// Filled by the assistant: a blue sparkle after the title.
   final bool marked;
   final bool showChevron;
 
@@ -246,7 +246,6 @@ class FormRow extends StatelessWidget {
     final titleStyle = AppTypography.body.copyWith(
       color: accent ? accentText : text,
       fontWeight: accent ? FontWeight.w600 : null,
-      backgroundColor: marked ? AppColors.marker.resolveFrom(context) : null,
     );
     final content = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 54),
@@ -268,7 +267,28 @@ class FormRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: titleStyle),
+                  if (marked)
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: '$title '),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Semantics(
+                              label: context.l10n.orderAssistantMarked,
+                              child: Icon(
+                                CupertinoIcons.sparkles,
+                                size: 16,
+                                color: accentText,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: titleStyle,
+                    )
+                  else
+                    Text(title, style: titleStyle),
                   if (subtitle != null && subtitle!.isNotEmpty)
                     Text(
                       subtitle!,
@@ -428,54 +448,132 @@ class FormPhotos extends StatelessWidget {
   }
 }
 
-/// Assistant tools at the bottom of the sheet, as in the prototype: "Foto"
-/// on glass and "Falar o que fazer" filled in graphite (the bigger one).
-/// Without the AI assistant only "Foto" (attach) shows, full width.
-/// While the assistant reads, it shows what it is doing instead.
-class AssistantToolbar extends StatelessWidget {
-  const AssistantToolbar({
+/// What the assistant bar at the bottom of the sheet is doing.
+enum AssistantBarMode {
+  /// "Foto" and "Falar" (only "Foto" without the AI assistant).
+  idle,
+
+  /// The microphone is on: "X", wave, "Ouvindo…" and the blue stop.
+  listening,
+
+  /// No microphone: "X", a text field and the blue send.
+  typing,
+
+  /// The assistant is reading what was said or the photos.
+  reading,
+}
+
+/// Radius of the glass capsules of the assistant bar (half their height).
+const double _kCapsuleRadius = AppSizes.primaryButtonHeight / 2;
+
+/// Glass capsule of the assistant bar: the material of the navigation layer
+/// (Liquid Glass), at least as tall as the main button.
+class _GlassCapsule extends StatelessWidget {
+  const _GlassCapsule({required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppGlass(
+      elevated: true,
+      borderRadius: BorderRadius.circular(_kCapsuleRadius),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: AppSizes.primaryButtonHeight,
+        ),
+        child: Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Assistant tools at the bottom of the "Nova OS" sheet (prototype "Nova OS
+/// · campos por ordem", "ouve ali mesmo" and "a IA lê ali mesmo"). Everything
+/// happens here, without another screen:
+/// - idle: "Foto" and "Falar" as glass capsules ("Falar" in blue);
+/// - listening: "X" to cancel, a wave with "Ouvindo…" and a blue stop that
+///   fills the order;
+/// - typing (no microphone): "X", a field and a blue send;
+/// - reading: a spinner with what the assistant is reading.
+class AssistantBar extends StatelessWidget {
+  const AssistantBar({
     super.key,
+    required this.mode,
     required this.onPhoto,
     this.onTalk,
-    this.busyLabel,
+    this.onCancel,
+    this.onStop,
+    this.onSend,
+    this.textController,
+    this.readingLabel,
   });
 
+  final AssistantBarMode mode;
   final VoidCallback onPhoto;
 
   /// Null without the AI assistant: only "Foto" (attach) shows.
   final VoidCallback? onTalk;
 
-  /// Shown with a spinner while the assistant reads; hides the tools.
-  final String? busyLabel;
+  /// "X" while listening or typing.
+  final VoidCallback? onCancel;
+
+  /// Blue stop while listening: stops and fills the order.
+  final VoidCallback? onStop;
+
+  /// Blue send while typing.
+  final VoidCallback? onSend;
+  final TextEditingController? textController;
+
+  /// What the assistant is reading (mode [AssistantBarMode.reading]).
+  final String? readingLabel;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final text = AppColors.text.resolveFrom(context);
-    final radius = BorderRadius.circular(AppRadii.button);
-    const height = AppSizes.primaryButtonHeight;
+    return switch (mode) {
+      AssistantBarMode.idle => _idle(context),
+      AssistantBarMode.listening => _withCancel(context, _listening(context)),
+      AssistantBarMode.typing => _withCancel(context, _typing(context)),
+      AssistantBarMode.reading => _reading(context),
+    };
+  }
 
-    if (busyLabel != null) {
-      return AppGlass(
-        elevated: true,
-        borderRadius: radius,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: height),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
+  Widget _idle(BuildContext context) {
+    final l10n = context.l10n;
+    Widget capsule({
+      required Key key,
+      required IconData icon,
+      required String label,
+      required String semantics,
+      required Color color,
+      required VoidCallback onPressed,
+    }) {
+      return Semantics(
+        button: true,
+        label: semantics,
+        excludeSemantics: true,
+        child: GestureDetector(
+          key: key,
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed,
+          child: _GlassCapsule(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const CupertinoActivityIndicator(),
+                Icon(icon, color: color, size: 24),
                 const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
-                    busyLabel!,
-                    key: const ValueKey('assistant_busy'),
-                    style: AppTypography.callout.copyWith(color: text),
+                    label,
+                    style: AppTypography.body.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -485,70 +583,397 @@ class AssistantToolbar extends StatelessWidget {
       );
     }
 
-    Widget label(IconData icon, String value, Color color) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.sm,
       children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            value,
-            style: AppTypography.body.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        capsule(
+          key: const ValueKey('assistant_photo'),
+          icon: CupertinoIcons.camera,
+          label: l10n.orderAssistantPhoto,
+          semantics: l10n.orderAssistantPhoto,
+          color: AppColors.text.resolveFrom(context),
+          onPressed: onPhoto,
         ),
+        if (onTalk != null)
+          capsule(
+            key: const ValueKey('assistant_talk'),
+            icon: CupertinoIcons.mic,
+            label: l10n.orderAssistantTalkShort,
+            semantics: l10n.orderTalkAction,
+            color: AppColors.accentText.resolveFrom(context),
+            onPressed: onTalk!,
+          ),
       ],
     );
+  }
 
-    final photo = AppGlass(
-      elevated: true,
-      borderRadius: radius,
-      child: Semantics(
-        button: true,
-        label: l10n.orderAssistantPhoto,
-        excludeSemantics: true,
-        child: CupertinoButton(
-          key: const ValueKey('assistant_photo'),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          minimumSize: const Size.fromHeight(height),
-          borderRadius: radius,
-          onPressed: onPhoto,
-          child: label(CupertinoIcons.camera, l10n.orderAssistantPhoto, text),
-        ),
-      ),
-    );
-
-    if (onTalk == null) return photo;
-
-    final onAssistant = AppColors.onAssistantFill.resolveFrom(context);
+  Widget _withCancel(BuildContext context, Widget main) {
     return Row(
       children: [
-        Expanded(child: photo),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          flex: 2,
-          child: Semantics(
-            button: true,
-            label: l10n.orderTalkAction,
-            excludeSemantics: true,
-            child: CupertinoButton(
-              key: const ValueKey('assistant_talk'),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              minimumSize: const Size.fromHeight(height),
-              color: AppColors.assistantFill.resolveFrom(context),
-              borderRadius: radius,
-              onPressed: onTalk,
-              child: label(
-                CupertinoIcons.mic_fill,
-                l10n.orderTalkAction,
-                onAssistant,
+        Semantics(
+          button: true,
+          label: context.l10n.speechCancel,
+          excludeSemantics: true,
+          child: GestureDetector(
+            key: const ValueKey('assistant_cancel'),
+            behavior: HitTestBehavior.opaque,
+            onTap: onCancel,
+            child: AppGlass(
+              elevated: true,
+              borderRadius: BorderRadius.circular(_kCapsuleRadius),
+              child: SizedBox.square(
+                dimension: AppSizes.primaryButtonHeight,
+                child: Icon(
+                  CupertinoIcons.xmark,
+                  size: 20,
+                  color: AppColors.text.resolveFrom(context),
+                ),
               ),
             ),
           ),
         ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(child: main),
       ],
+    );
+  }
+
+  /// Round blue button inside a capsule (stop or send).
+  Widget _roundButton(
+    BuildContext context, {
+    required Key key,
+    required String label,
+    required Widget child,
+    VoidCallback? onPressed,
+  }) {
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: key,
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Container(
+          width: AppSizes.minTouchTarget,
+          height: AppSizes.minTouchTarget,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: enabled
+                ? AppColors.accent.resolveFrom(context)
+                : AppColors.secondaryFill.resolveFrom(context),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _listening(BuildContext context) {
+    final l10n = context.l10n;
+    final onAccent = AppColors.onAccent.resolveFrom(context);
+    return _GlassCapsule(
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: 7,
+        top: 7,
+        bottom: 7,
+      ),
+      child: Row(
+        children: [
+          const _Wave(),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              l10n.speechListening,
+              style: AppTypography.body.copyWith(
+                color: AppColors.text.resolveFrom(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          _roundButton(
+            context,
+            key: const ValueKey('assistant_stop'),
+            label: l10n.speechStopAndFill,
+            onPressed: onStop,
+            child: Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: onAccent,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _typing(BuildContext context) {
+    final l10n = context.l10n;
+    final controller = textController!;
+    return _GlassCapsule(
+      padding: const EdgeInsets.only(left: AppSpacing.md, right: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: CupertinoTextField(
+              key: const ValueKey('assistant_text_field'),
+              controller: controller,
+              autofocus: true,
+              minLines: 1,
+              maxLines: 4,
+              maxLength: 2000,
+              textCapitalization: TextCapitalization.sentences,
+              placeholder: l10n.speechTypeHint,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              style: AppTypography.body.copyWith(
+                color: AppColors.text.resolveFrom(context),
+              ),
+              decoration: null,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            child: ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => _roundButton(
+                context,
+                key: const ValueKey('assistant_send'),
+                label: l10n.speechFill,
+                onPressed: controller.text.trim().isEmpty ? null : onSend,
+                child: Icon(
+                  CupertinoIcons.arrow_up,
+                  size: 20,
+                  color: controller.text.trim().isEmpty
+                      ? AppColors.textSecondary.resolveFrom(context)
+                      : AppColors.onAccent.resolveFrom(context),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _reading(BuildContext context) {
+    return Center(
+      child: _GlassCapsule(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CupertinoActivityIndicator(),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(
+                readingLabel ?? '',
+                key: const ValueKey('assistant_busy'),
+                style: AppTypography.body.copyWith(
+                  color: AppColors.text.resolveFrom(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Five blue bars that pulse while the microphone is on. Still when the
+/// iPhone asks for less motion.
+class _Wave extends StatefulWidget {
+  const _Wave();
+
+  @override
+  State<_Wave> createState() => _WaveState();
+}
+
+class _WaveState extends State<_Wave> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1000),
+  );
+
+  static const _delays = [0.0, 0.2, 0.4, 0.1, 0.3];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppColors.accent.resolveFrom(context);
+    return ExcludeSemantics(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final delay in _delays)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Container(
+                  width: 4,
+                  height: 26 * _scale(delay),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 0.35..1, like the CSS pulse of the prototype.
+  double _scale(double delay) {
+    if (!_controller.isAnimating) return 0.7;
+    final t = (_controller.value + 1 - delay) % 1;
+    return 0.35 + 0.65 * (1 - (2 * t - 1).abs());
+  }
+}
+
+/// What was heard so far, on glass above the bar while listening.
+class AssistantTranscript extends StatelessWidget {
+  const AssistantTranscript({super.key, required this.heard});
+
+  final String heard;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return AppGlass(
+      elevated: true,
+      borderRadius: BorderRadius.circular(kFormCardRadius),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.speechHint,
+              style: AppTypography.label.copyWith(color: secondary),
+            ),
+            if (heard.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  '“$heard”',
+                  key: const ValueKey('assistant_heard'),
+                  style: AppTypography.title.copyWith(
+                    color: AppColors.text.resolveFrom(context),
+                    fontSize: 22,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Glass note above the bar: what the assistant did ("Preenchi o que está
+/// marcado…" with "Desfazer") or why it could not (with "Fechar"). Takes
+/// the place of an alert, so nothing interrupts the form.
+class AssistantNote extends StatelessWidget {
+  const AssistantNote({
+    super.key,
+    required this.message,
+    required this.actionLabel,
+    required this.onAction,
+    this.filled = false,
+  });
+
+  final String message;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  /// The assistant filled the order: blue sparkle; otherwise a warning.
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: _GlassCapsule(
+        padding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.xs,
+          top: AppSpacing.xs,
+          bottom: AppSpacing.xs,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              filled
+                  ? CupertinoIcons.sparkles
+                  : CupertinoIcons.exclamationmark_circle,
+              size: 20,
+              color: filled
+                  ? AppColors.accentText.resolveFrom(context)
+                  : AppColors.textSecondary.resolveFrom(context),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                message,
+                key: const ValueKey('assistant_note'),
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.text.resolveFrom(context),
+                ),
+              ),
+            ),
+            CupertinoButton(
+              key: const ValueKey('assistant_note_action'),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              minimumSize: const Size.square(AppSizes.minTouchTarget),
+              onPressed: onAction,
+              child: Text(
+                actionLabel,
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.accentText.resolveFrom(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
