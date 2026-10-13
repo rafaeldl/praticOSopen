@@ -846,7 +846,7 @@ void main() {
       expect(find.text(_money(35.5)), findsNWidgets(2)); // row + total
     });
 
-    testWidgets('"Criar “X” e pôr na OS" creates without price and adds', (
+    testWidgets('"Cadastrar “X”" creates without price and adds', (
       tester,
     ) async {
       final catalog = FakeSource(services: [_item('s1', 'Troca de óleo', 120)]);
@@ -861,7 +861,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Criar “Troca de embreagem” e pôr na OS'));
+      await tester.tap(find.text('Cadastrar “Troca de embreagem”'));
       await tester.pumpAndSettle();
 
       expect(catalog.saved.single.$1, CatalogKind.service);
@@ -889,7 +889,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(CupertinoSearchTextField), 'Nova');
       await tester.pumpAndSettle();
-      expect(find.textContaining('Criar “Nova”'), findsNothing);
+      expect(find.textContaining('Cadastrar “Nova”'), findsNothing);
     });
 
     testWidgets('"Mais usados" comes first, from the last orders', (
@@ -958,7 +958,7 @@ void main() {
         'alinhamento',
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('Criar “'), findsNothing);
+      expect(find.textContaining('Cadastrar “'), findsNothing);
       expect(find.text('Alinhamento'), findsOneWidget);
     });
   });

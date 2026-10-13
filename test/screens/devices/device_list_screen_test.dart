@@ -95,15 +95,31 @@ void main() {
       devices: [uno, gol],
       customerVehicles: [aggr('d2')],
     );
-    expect(find.textContaining('Qual é o'), findsOneWidget);
-    expect(find.textContaining('de Ana'), findsOneWidget);
+    expect(find.textContaining('Qual '), findsOneWidget);
+    // Subtitle with the customer, then the section of the customer.
+    expect(find.text('de Ana Ribeiro'), findsOneWidget);
+    expect(find.textContaining(RegExp(r' de Ana$')), findsOneWidget);
     expect(find.textContaining('Outros'), findsOneWidget);
     // Customer's vehicle (Gol) is listed before the other one (Uno).
     final gol1 = tester.getTopLeft(find.text('VW Gol')).dy;
     final uno1 = tester.getTopLeft(find.text('Fiat Uno 2015')).dy;
     expect(gol1, lessThan(uno1));
-    expect(find.textContaining('Cadastrar'), findsOneWidget);
+    expect(find.textContaining('Novo '), findsOneWidget);
     expect(find.byType(AppListRow), findsNWidgets(2));
+  });
+
+  testWidgets('selection mode marks the vehicle already on the order',
+      (tester) async {
+    await pumpList(
+      tester,
+      args: {'order': orderOf('c1')..devices = [aggr('d1')]},
+      devices: [uno, gol],
+    );
+    final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+    expect(
+      {for (final r in rows) r.title: r.selected},
+      {'Fiat Uno 2015': true, 'VW Gol': false},
+    );
   });
 
   testWidgets('selection mode has no swipe and no chevron, tap pops the device',
@@ -128,7 +144,7 @@ void main() {
       args: {'order': orderOf('c1')},
       devices: [uno, gol],
     );
-    expect(find.textContaining('de Ana'), findsNothing);
+    expect(find.textContaining(RegExp(r' de Ana$')), findsNothing);
     expect(find.textContaining('Outros'), findsNothing);
     expect(find.byType(AppListRow), findsNWidgets(2));
   });

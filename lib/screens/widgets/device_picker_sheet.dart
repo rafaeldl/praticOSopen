@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/services/segment_config_service.dart';
 
 enum DevicePickerAction { specific, general, all, multiSpecific }
 
@@ -16,16 +18,22 @@ class DevicePickerResult {
         device = null;
 }
 
+/// "Em quais veículos?": which vehicles of the order an item goes to.
+///
+/// Multiple choice on [PickerScaffold]: tapping marks / unmarks (✓), "Geral"
+/// (no vehicle) and "Selecionar tudo" stay on top, and the round ✓ in the top
+/// bar (gray until something is marked) confirms. Back cancels (null).
 class DevicePickerSheet {
   static Future<DevicePickerResult?> show(
     BuildContext context,
-    List<DeviceAggr> devices,
-  ) async {
+    List<DeviceAggr> devices, {
+    String? subtitle,
+  }) async {
     return Navigator.push<DevicePickerResult>(
       context,
       CupertinoPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => DeviceMultiPickerScreen(devices: devices),
+        builder: (_) =>
+            DeviceMultiPickerScreen(devices: devices, subtitle: subtitle),
       ),
     );
   }
@@ -34,12 +42,22 @@ class DevicePickerSheet {
 class DeviceMultiPickerScreen extends StatefulWidget {
   final List<DeviceAggr> devices;
 
-  const DeviceMultiPickerScreen({super.key, required this.devices});
+  /// Under the question, e.g. the item ("Alinhamento · R$ 150 cada").
+  final String? subtitle;
+
+  const DeviceMultiPickerScreen({
+    super.key,
+    required this.devices,
+    this.subtitle,
+  });
 
   @override
   State<DeviceMultiPickerScreen> createState() =>
       _DeviceMultiPickerScreenState();
 }
+
+const _general = '\u0000general';
+const _all = '\u0000all';
 
 class _DeviceMultiPickerScreenState extends State<DeviceMultiPickerScreen> {
   bool _isGeneral = false;
@@ -112,96 +130,64 @@ class _DeviceMultiPickerScreenState extends State<DeviceMultiPickerScreen> {
     );
   }
 
+  void _onTap(String key) {
+    if (key == _general) {
+      _toggleGeneral();
+    } else if (key == _all) {
+      _toggleSelectAll();
+    } else {
+      _toggleDevice(widget.devices.firstWhere((d) => d.id == key));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
-        ),
-        middle: Text(context.l10n.selectDeviceFor),
+    final l10n = context.l10n;
+    final devices = widget.devices.where((d) => d.id != null).toList();
+    return PickerScaffold<String>(
+      title: l10n.pickerDevicesTitle(
+        SegmentConfigService().devicePlural.toLowerCase(),
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  const SizedBox(height: 16),
-                  CupertinoListSection.insetGrouped(
-                    children: [
-                      // "Geral" option
-                      CupertinoListTile(
-                        title: Text(context.l10n.generalNoDevice),
-                        trailing: _isGeneral
-                            ? Icon(
-                                CupertinoIcons.checkmark,
-                                color: CupertinoTheme.of(context).primaryColor,
-                              )
-                            : null,
-                        onTap: _toggleGeneral,
-                      ),
-                    ],
-                  ),
-                  CupertinoListSection.insetGrouped(
-                    children: [
-                      // "Select All" toggle
-                      CupertinoListTile(
-                        title: Text(
-                          context.l10n.selectAll,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.label.resolveFrom(context),
-                          ),
-                        ),
-                        trailing: _allSelected
-                            ? Icon(
-                                CupertinoIcons.checkmark,
-                                color: CupertinoTheme.of(context).primaryColor,
-                              )
-                            : null,
-                        onTap: _toggleSelectAll,
-                      ),
-                      // Individual devices
-                      ...widget.devices.map((device) {
-                        final displayName =
-                            device.serial != null && device.serial!.trim().isNotEmpty
-                                ? '${device.name} - ${device.serial}'
-                                : device.name ?? '';
-                        final isSelected = _selectedDeviceIds.contains(device.id);
-
-                        return CupertinoListTile(
-                          title: Text(displayName),
-                          trailing: isSelected
-                              ? Icon(
-                                  CupertinoIcons.checkmark,
-                                  color: CupertinoTheme.of(context).primaryColor,
-                                )
-                              : null,
-                          onTap: () => _toggleDevice(device),
-                        );
-                      }),
-                    ],
-                  ),
-                ],
+      subtitle: widget.subtitle,
+      itemCount: devices.length,
+      multiple: true,
+      onConfirm: _hasSelection ? _confirm : null,
+      onSelect: _onTap,
+      sections: (query) => [
+        if (query.isEmpty)
+          PickerSection(
+            items: [
+              PickerItem(
+                key: const ValueKey('device_picker_general'),
+                value: _general,
+                title: l10n.generalNoDevice,
+                selected: _isGeneral,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: CupertinoButton.filled(
-                  onPressed: _hasSelection ? _confirm : null,
-                  child: Text(context.l10n.confirm),
+              if (devices.length > 1)
+                PickerItem(
+                  key: const ValueKey('device_picker_all'),
+                  value: _all,
+                  title: l10n.selectAll,
+                  selected: _allSelected,
                 ),
-              ),
-            ),
+            ],
+          ),
+        PickerSection(
+          items: [
+            for (final d in devices)
+              if (pickerMatches(d.name, query) || pickerMatches(d.serial, query))
+                PickerItem(
+                  key: ValueKey('device_picker_${d.id}'),
+                  value: d.id!,
+                  title: d.name ?? '',
+                  subtitle: (d.serial?.trim().isNotEmpty ?? false)
+                      ? d.serial
+                      : null,
+                  selected: _selectedDeviceIds.contains(d.id),
+                ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

@@ -27,6 +27,7 @@ class AppListRow extends StatelessWidget {
     this.titleStyle,
     this.trailingStyle,
     this.marked = false,
+    this.selected = false,
   });
 
   final String title;
@@ -50,6 +51,10 @@ class AppListRow extends StatelessWidget {
   /// [AppColors.marker] background with [AppColors.onMarker] text, in both
   /// modes.
   final bool marked;
+
+  /// The current choice of a picker: blue check mark at the end of the row,
+  /// after the [trailing] value. Announced as selected to screen readers.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +132,14 @@ class AppListRow extends StatelessWidget {
                 ),
               ),
             ],
+            if (selected) ...[
+              const SizedBox(width: AppSpacing.md),
+              Icon(
+                CupertinoIcons.checkmark_alt,
+                size: 26,
+                color: AppColors.accent.resolveFrom(context),
+              ),
+            ],
             if (chevron) ...[
               const SizedBox(width: AppSpacing.sm),
               Icon(
@@ -144,9 +157,12 @@ class AppListRow extends StatelessWidget {
         ? ColoredBox(color: AppColors.marker.resolveFrom(context), child: row)
         : row;
 
-    if (onTap == null) return content;
+    if (onTap == null) {
+      return selected ? Semantics(selected: true, child: content) : content;
+    }
     return Semantics(
       button: true,
+      selected: selected ? true : null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,

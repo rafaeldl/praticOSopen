@@ -6080,4 +6080,80 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get orderAssistantApplied =>
       'Coloquei na OS o que está marcado. Confira.';
+
+  @override
+  String get pickerCustomerTitle => 'Qual cliente?';
+
+  @override
+  String pickerDeviceTitle(String device) {
+    return 'Qual $device?';
+  }
+
+  @override
+  String pickerDeviceSubtitle(String name) {
+    return 'de $name';
+  }
+
+  @override
+  String get pickerItemTitle => 'O que vai ser feito?';
+
+  @override
+  String get pickerChecklistTitle => 'Qual checklist?';
+
+  @override
+  String get pickerStatusTitle => 'Qual a situação?';
+
+  @override
+  String get pickerAssigneeTitle => 'Quem é o responsável?';
+
+  @override
+  String pickerDevicesTitle(String devices) {
+    return 'Em quais $devices?';
+  }
+
+  @override
+  String get pickerNewCustomer => 'Novo cliente';
+
+  @override
+  String pickerNewDevice(String device) {
+    return 'Novo $device';
+  }
+
+  @override
+  String get pickerNewItem => 'Novo serviço ou peça';
+
+  @override
+  String get pickerNewChecklist => 'Novo checklist';
+
+  @override
+  String get pickerTypeAnother => 'Digitar outro';
+
+  @override
+  String pickerRegister(String query) {
+    return 'Cadastrar “$query”';
+  }
+
+  @override
+  String pickerNoDeviceWith(String device, String query) {
+    return 'Nenhum $device com “$query”.';
+  }
+
+  @override
+  String pickerNoItemWith(String query) {
+    return 'Nenhum serviço ou peça com “$query”. Cadastre e ele já entra na OS.';
+  }
+
+  @override
+  String pickerNoMatch(String query) {
+    return 'Nada com “$query”.';
+  }
+
+  @override
+  String get pickerRecent => 'Recentes';
+
+  @override
+  String get pickerAll => 'Todos';
+
+  @override
+  String get pickerSearch => 'Buscar';
 }

@@ -10497,6 +10497,126 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Coloquei na OS o que está marcado. Confira.'**
   String get orderAssistantApplied;
+
+  /// No description provided for @pickerCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual cliente?'**
+  String get pickerCustomerTitle;
+
+  /// No description provided for @pickerDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual {device}?'**
+  String pickerDeviceTitle(String device);
+
+  /// No description provided for @pickerDeviceSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'de {name}'**
+  String pickerDeviceSubtitle(String name);
+
+  /// No description provided for @pickerItemTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai ser feito?'**
+  String get pickerItemTitle;
+
+  /// No description provided for @pickerChecklistTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual checklist?'**
+  String get pickerChecklistTitle;
+
+  /// No description provided for @pickerStatusTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual a situação?'**
+  String get pickerStatusTitle;
+
+  /// No description provided for @pickerAssigneeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é o responsável?'**
+  String get pickerAssigneeTitle;
+
+  /// No description provided for @pickerDevicesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em quais {devices}?'**
+  String pickerDevicesTitle(String devices);
+
+  /// No description provided for @pickerNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo cliente'**
+  String get pickerNewCustomer;
+
+  /// No description provided for @pickerNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo {device}'**
+  String pickerNewDevice(String device);
+
+  /// No description provided for @pickerNewItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo serviço ou peça'**
+  String get pickerNewItem;
+
+  /// No description provided for @pickerNewChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo checklist'**
+  String get pickerNewChecklist;
+
+  /// No description provided for @pickerTypeAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar outro'**
+  String get pickerTypeAnother;
+
+  /// No description provided for @pickerRegister.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar “{query}”'**
+  String pickerRegister(String query);
+
+  /// No description provided for @pickerNoDeviceWith.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum {device} com “{query}”.'**
+  String pickerNoDeviceWith(String device, String query);
+
+  /// No description provided for @pickerNoItemWith.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum serviço ou peça com “{query}”. Cadastre e ele já entra na OS.'**
+  String pickerNoItemWith(String query);
+
+  /// No description provided for @pickerNoMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada com “{query}”.'**
+  String pickerNoMatch(String query);
+
+  /// No description provided for @pickerRecent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recentes'**
+  String get pickerRecent;
+
+  /// No description provided for @pickerAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get pickerAll;
+
+  /// No description provided for @pickerSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar'**
+  String get pickerSearch;
 }
 
 class _AppLocalizationsDelegate

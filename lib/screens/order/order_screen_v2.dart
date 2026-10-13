@@ -4,6 +4,7 @@ import 'dart:math' show max;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
 import 'package:praticos/config/feature_flags.dart';
@@ -521,23 +522,18 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       await _alert(l10n.permissionDenied);
       return;
     }
-    final picked = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.changeStatus),
-        actions: [
-          for (final key in statuses)
-            CupertinoActionSheetAction(
-              isDestructiveAction: key == 'canceled',
-              onPressed: () => Navigator.pop(ctx, key),
-              child: Text(config.getStatus(key)),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+    final picked = await pickOne<String>(
+      context,
+      title: l10n.pickerStatusTitle,
+      selected: order.status,
+      options: [
+        for (final key in statuses)
+          PickerItem<String>(
+            value: key,
+            title: config.getStatus(key),
+            leading: StatusDot(color: OrderStatusStyle.dotColor(key)),
+          ),
+      ],
     );
     if (picked != null && mounted) await _trySetStatus(picked);
   }
@@ -797,28 +793,19 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final team = await _actions.teamMembers();
     if (!mounted || team.isEmpty) return;
     final current = _store.order?.assignedTo;
-    final picked = await showCupertinoModalPopup<Object>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.orderAddResponsible),
-        actions: [
-          for (final user in team)
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, user),
-              child: Text(user.name ?? user.email ?? ''),
-            ),
-          if (current != null)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.orderResponsibleRemove),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+    final picked = await pickOne<Object>(
+      context,
+      title: l10n.pickerAssigneeTitle,
+      options: [
+        for (final user in team)
+          PickerItem<Object>(
+            value: user,
+            title: user.name ?? user.email ?? '',
+            selected: user.id != null && user.id == current?.id,
+          ),
+        if (current != null)
+          PickerItem<Object>(value: false, title: l10n.orderResponsibleRemove),
+      ],
     );
     if (!mounted || picked == null) return;
     setState(() => _store.setAssignedTo(picked is UserAggr ? picked : null));
