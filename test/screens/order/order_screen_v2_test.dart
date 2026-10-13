@@ -611,6 +611,42 @@ void main() {
       );
     });
 
+    testWidgets('notes fill "O que o cliente pediu"; "Desfazer" clears', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(const AiOrderDraft(notes: 'Barulho ao frear')),
+        ),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      final field = find.byKey(const ValueKey('new_order_request'));
+      expect(
+        tester.widget<CupertinoTextField>(field).controller!.text,
+        'Barulho ao frear',
+      );
+      expect(
+        find.byKey(const ValueKey('new_order_request_marked')),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<CupertinoTextField>(field).controller!.text,
+        isEmpty,
+      );
+      expect(
+        find.byKey(const ValueKey('new_order_request_marked')),
+        findsNothing,
+      );
+    });
+
     testWidgets('no microphone: the bar turns into a text field', (
       tester,
     ) async {
@@ -956,12 +992,18 @@ void main() {
       expect(find.text('Trocar cliente'), findsOneWidget);
     });
 
-    testWidgets('back button reads the screen that opened the OS',
-        (tester) async {
-      await _pump(tester, screen(OrderStore()),
-          args: {'order': order(), 'previousTitle': 'Início'});
-      expect(tester.widget<AppNavBar>(find.byType(AppNavBar)).previousTitle,
-          'Início');
+    testWidgets('back button reads the screen that opened the OS', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {'order': order(), 'previousTitle': 'Início'},
+      );
+      expect(
+        tester.widget<AppNavBar>(find.byType(AppNavBar)).previousTitle,
+        'Início',
+      );
     });
 
     testWidgets('done with balance: "Receber" opens payments', (tester) async {

@@ -140,6 +140,7 @@ class _DraftUndo {
   final String? customerGuess;
   final String? deviceGuess;
   bool customer = false;
+  bool request = false;
   final List<String> devices = [];
   final List<Object> lines = [];
 }
@@ -1095,9 +1096,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (!mounted || fromCamera == null) return;
-    final picked = fromCamera
-        ? [?await _capturePhoto()]
-        : await _pickGallery();
+    final picked = fromCamera ? [?await _capturePhoto()] : await _pickGallery();
     if (!mounted || picked.isEmpty) return;
     if (picked.length > 1 && !_photoAllowed(picked.length)) return;
     setState(() => _photos.addAll(picked));
@@ -1226,6 +1225,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         final p = products.indexWhere((e) => identical(e, line));
         if (p >= 0) _store.deleteProduct(p);
         _marked.remove(line);
+      }
+      if (undo.request) {
+        _requestController.clear();
+        _marked.remove('request');
       }
       _customerGuess = undo.customerGuess;
       _deviceGuess = undo.deviceGuess;
@@ -1371,6 +1374,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
       used = true;
     }
+    // What the customer asked (defects, requests): only into a blank field.
+    final notes = draft.notes?.trim() ?? '';
+    if (notes.isNotEmpty && _requestController.text.trim().isEmpty) {
+      _requestController.text = notes;
+      _marked.add('request');
+      undo.request = true;
+      used = true;
+    }
     if (used) _undo = undo;
     setState(() {});
     return used;
@@ -1404,36 +1415,38 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           child: _isNew
               ? _buildNewSheet(config)
               : CupertinoPageScaffold(
-            backgroundColor: AppColors.background.resolveFrom(context),
-            child: Stack(
-              children: [
-                CustomScrollView(
-                  controller: _scroll,
-                  slivers: [
-                    if (_isNew)
-                      CupertinoSliverNavigationBar(
-                        backgroundColor: AppNavBar.barBackground(context),
-                        alwaysShowMiddle: false,
-                        largeTitle: Text(_title(config)),
-                        border: null,
-                      )
-                    else
-                      AppNavBar(
-                        largeTitle: Text(_title(config)),
-                        previousTitle: _previousTitle,
-                        trailing: GlassBarButton(
-                          label: l10n.orderMoreActions,
-                          icon: CupertinoIcons.ellipsis,
-                          onPressed: _showMenu,
-                        ),
+                  backgroundColor: AppColors.background.resolveFrom(context),
+                  child: Stack(
+                    children: [
+                      CustomScrollView(
+                        controller: _scroll,
+                        slivers: [
+                          if (_isNew)
+                            CupertinoSliverNavigationBar(
+                              backgroundColor: AppNavBar.barBackground(context),
+                              alwaysShowMiddle: false,
+                              largeTitle: Text(_title(config)),
+                              border: null,
+                            )
+                          else
+                            AppNavBar(
+                              largeTitle: Text(_title(config)),
+                              previousTitle: _previousTitle,
+                              trailing: GlassBarButton(
+                                label: l10n.orderMoreActions,
+                                icon: CupertinoIcons.ellipsis,
+                                onPressed: _showMenu,
+                              ),
+                            ),
+                          SliverToBoxAdapter(child: _buildContent(config)),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: 140),
+                          ),
+                        ],
                       ),
-                    SliverToBoxAdapter(child: _buildContent(config)),
-                    const SliverToBoxAdapter(child: SizedBox(height: 140)),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -1519,16 +1532,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     children: [
                       if (_barMode == AssistantBarMode.listening)
                         Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppSpacing.md,
-                          ),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: AssistantTranscript(heard: _heard),
                         )
                       else if (_note != null)
                         Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppSpacing.md,
-                          ),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: AssistantNote(
                             message: _note!,
                             filled: _noteFilled,
@@ -1705,6 +1714,18 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ),
           child: CupertinoTextField(
             key: const ValueKey('new_order_request'),
+            suffix: _marked.contains('request')
+                ? Semantics(
+                    label: l10n.orderAssistantMarked,
+                    child: Icon(
+                      CupertinoIcons.sparkles,
+                      key: const ValueKey('new_order_request_marked'),
+                      size: 16,
+                      color: AppColors.accentText.resolveFrom(context),
+                    ),
+                  )
+                : null,
+            suffixMode: OverlayVisibilityMode.always,
             controller: _requestController,
             placeholder: l10n.orderCustomerRequestPlaceholder,
             minLines: 2,
@@ -1785,14 +1806,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           title: l10n.orderMoreOptions,
           subtitle: _moreOpen
               ? null
-              : (parts.isEmpty
-                  ? l10n.orderMoreOptionsHint
-                  : parts.join(' · ')),
+              : (parts.isEmpty ? l10n.orderMoreOptionsHint : parts.join(' · ')),
           showChevron: false,
           trailing: Icon(
-            _moreOpen
-                ? CupertinoIcons.chevron_up
-                : CupertinoIcons.chevron_down,
+            _moreOpen ? CupertinoIcons.chevron_up : CupertinoIcons.chevron_down,
             size: 18,
             color: secondary,
           ),
