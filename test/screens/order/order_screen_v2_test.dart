@@ -346,7 +346,10 @@ void main() {
       // Closed, the fields stay hidden.
       expect(find.byKey(const ValueKey('new_order_more_status')), findsNothing);
 
-      // Opens inside the same card, no other sheet.
+      // Opens inside the same card, no other sheet. Scroll it out from
+      // under the assistant bar first.
+      await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('new_order_more')));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoActionSheet), findsNothing);

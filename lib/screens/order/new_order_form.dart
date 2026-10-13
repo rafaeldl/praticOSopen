@@ -428,8 +428,9 @@ class FormPhotos extends StatelessWidget {
   }
 }
 
-/// Glass bar at the bottom of the sheet: "Foto" (always) and "Falar" (with
-/// the AI assistant). HIG: a toolbar acts on the content of the screen.
+/// Assistant tools at the bottom of the sheet, as in the prototype: "Foto"
+/// on glass and "Falar o que fazer" filled in graphite (the bigger one).
+/// Without the AI assistant only "Foto" (attach) shows, full width.
 /// While the assistant reads, it shows what it is doing instead.
 class AssistantToolbar extends StatelessWidget {
   const AssistantToolbar({
@@ -451,32 +452,30 @@ class AssistantToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final text = AppColors.text.resolveFrom(context);
-    Widget tool(Key key, IconData icon, String label, VoidCallback onTap) {
-      return Expanded(
-        child: Semantics(
-          button: true,
-          label: label,
-          excludeSemantics: true,
-          child: CupertinoButton(
-            key: key,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            minimumSize: const Size(
-              AppSizes.minTouchTarget,
-              AppSizes.minTouchTarget,
+    final radius = BorderRadius.circular(AppRadii.button);
+    const height = AppSizes.primaryButtonHeight;
+
+    if (busyLabel != null) {
+      return AppGlass(
+        elevated: true,
+        borderRadius: radius,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: height),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
-            onPressed: onTap,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: text),
+                const CupertinoActivityIndicator(),
                 const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
-                    label,
-                    style: AppTypography.callout.copyWith(
-                      color: text,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    busyLabel!,
+                    key: const ValueKey('assistant_busy'),
+                    style: AppTypography.callout.copyWith(color: text),
                   ),
                 ),
               ],
@@ -486,47 +485,70 @@ class AssistantToolbar extends StatelessWidget {
       );
     }
 
-    return AppGlass(
+    Widget label(IconData icon, String value, Color color) => Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            value,
+            style: AppTypography.body.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    final photo = AppGlass(
       elevated: true,
-      borderRadius: BorderRadius.circular(30),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        child: busyLabel != null
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CupertinoActivityIndicator(),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: Text(
-                        busyLabel!,
-                        key: const ValueKey('assistant_busy'),
-                        style: AppTypography.callout.copyWith(color: text),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : Row(
-                children: [
-                  tool(
-                    const ValueKey('assistant_photo'),
-                    CupertinoIcons.camera,
-                    l10n.orderAssistantPhoto,
-                    onPhoto,
-                  ),
-                  if (onTalk != null)
-                    tool(
-                      const ValueKey('assistant_talk'),
-                      CupertinoIcons.mic,
-                      l10n.orderAssistantTalkShort,
-                      onTalk!,
-                    ),
-                ],
-              ),
+      borderRadius: radius,
+      child: Semantics(
+        button: true,
+        label: l10n.orderAssistantPhoto,
+        excludeSemantics: true,
+        child: CupertinoButton(
+          key: const ValueKey('assistant_photo'),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          minimumSize: const Size.fromHeight(height),
+          borderRadius: radius,
+          onPressed: onPhoto,
+          child: label(CupertinoIcons.camera, l10n.orderAssistantPhoto, text),
+        ),
       ),
+    );
+
+    if (onTalk == null) return photo;
+
+    final onAssistant = AppColors.onAssistantFill.resolveFrom(context);
+    return Row(
+      children: [
+        Expanded(child: photo),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          flex: 2,
+          child: Semantics(
+            button: true,
+            label: l10n.orderTalkAction,
+            excludeSemantics: true,
+            child: CupertinoButton(
+              key: const ValueKey('assistant_talk'),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              minimumSize: const Size.fromHeight(height),
+              color: AppColors.assistantFill.resolveFrom(context),
+              borderRadius: radius,
+              onPressed: onTalk,
+              child: label(
+                CupertinoIcons.mic_fill,
+                l10n.orderTalkAction,
+                onAssistant,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
