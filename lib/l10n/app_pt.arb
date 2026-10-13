@@ -2968,5 +2968,54 @@
   "speechCancel": "Cancelar fala",
   "speechStopAndFill": "Parar e preencher a OS",
   "speechTypeHint": "Escreva o cliente, o veículo e o que vai ser feito",
-  "speechNothingHeard": "Não ouvi nada. Toque em Falar e tente de novo."
+  "speechNothingHeard": "Não ouvi nada. Toque em Falar e tente de novo.",
+  "orderServicesAndParts": "Serviços e peças",
+  "orderItemKindPart": "peça",
+  "orderActionApproveQuote": "Aprovar orçamento",
+  "orderActionStartService": "Começar serviço",
+  "orderActionMarkReady": "Marcar como pronta",
+  "orderDuePhrase": "Fica pronto {when}",
+  "@orderDuePhrase": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDueLatePhrase": "Era para ficar pronto {when}",
+  "@orderDueLatePhrase": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "orderDayAtTime": "{day}, {time}",
+  "@orderDayAtTime": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orderChecklistProgress": "{answered} de {total} respondidas",
+  "@orderChecklistProgress": {
+    "placeholders": {
+      "answered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "orderCommentYou": "Você",
+  "orderMenuChangeStatus": "Mudar a situação",
+  "orderMenuViewPdf": "Ver PDF",
+  "orderMenuCopyLink": "Copiar link",
+  "orderPlaceOfService": "Local do atendimento",
+  "orderAssistantApplied": "Coloquei na OS o que está marcado. Confira."
 }

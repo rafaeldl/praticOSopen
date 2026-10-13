@@ -6038,4 +6038,58 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get speechNothingHeard =>
       'No escuché nada. Toca Hablar e inténtalo de nuevo.';
+
+  @override
+  String get orderServicesAndParts => 'Servicios y piezas';
+
+  @override
+  String get orderItemKindPart => 'pieza';
+
+  @override
+  String get orderActionApproveQuote => 'Aprobar presupuesto';
+
+  @override
+  String get orderActionStartService => 'Empezar el servicio';
+
+  @override
+  String get orderActionMarkReady => 'Marcar como lista';
+
+  @override
+  String orderDuePhrase(String when) {
+    return 'Lista $when';
+  }
+
+  @override
+  String orderDueLatePhrase(String when) {
+    return 'Debía estar lista $when';
+  }
+
+  @override
+  String orderDayAtTime(String day, String time) {
+    return '$day, $time';
+  }
+
+  @override
+  String orderChecklistProgress(int answered, int total) {
+    return '$answered de $total respondidas';
+  }
+
+  @override
+  String get orderCommentYou => 'Tú';
+
+  @override
+  String get orderMenuChangeStatus => 'Cambiar el estado';
+
+  @override
+  String get orderMenuViewPdf => 'Ver PDF';
+
+  @override
+  String get orderMenuCopyLink => 'Copiar enlace';
+
+  @override
+  String get orderPlaceOfService => 'Lugar de atención';
+
+  @override
+  String get orderAssistantApplied =>
+      'Agregué a la OS lo que está marcado. Revísalo.';
 }

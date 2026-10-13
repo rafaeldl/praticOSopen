@@ -2850,5 +2850,20 @@
   "speechCancel": "Cancelar",
   "speechStopAndFill": "Detener y completar la OS",
   "speechTypeHint": "Escribe el cliente, el vehículo y lo que se hará",
-  "speechNothingHeard": "No escuché nada. Toca Hablar e inténtalo de nuevo."
+  "speechNothingHeard": "No escuché nada. Toca Hablar e inténtalo de nuevo.",
+  "orderServicesAndParts": "Servicios y piezas",
+  "orderItemKindPart": "pieza",
+  "orderActionApproveQuote": "Aprobar presupuesto",
+  "orderActionStartService": "Empezar el servicio",
+  "orderActionMarkReady": "Marcar como lista",
+  "orderDuePhrase": "Lista {when}",
+  "orderDueLatePhrase": "Debía estar lista {when}",
+  "orderDayAtTime": "{day}, {time}",
+  "orderChecklistProgress": "{answered} de {total} respondidas",
+  "orderCommentYou": "Tú",
+  "orderMenuChangeStatus": "Cambiar el estado",
+  "orderMenuViewPdf": "Ver PDF",
+  "orderMenuCopyLink": "Copiar enlace",
+  "orderPlaceOfService": "Lugar de atención",
+  "orderAssistantApplied": "Agregué a la OS lo que está marcado. Revísalo."
 }

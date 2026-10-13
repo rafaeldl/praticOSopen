@@ -154,3 +154,51 @@ class _OrderAddressSheetState extends State<OrderAddressSheet> {
     );
   }
 }
+
+/// One text of the order (e.g. "O que o cliente pediu"). Pops with the
+/// trimmed text (empty clears it), or null when cancelled.
+class OrderTextSheet extends StatefulWidget {
+  const OrderTextSheet({super.key, required this.title, this.initial});
+
+  final String title;
+  final String? initial;
+
+  @override
+  State<OrderTextSheet> createState() => _OrderTextSheetState();
+}
+
+class _OrderTextSheetState extends State<OrderTextSheet> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial ?? '',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSheet(
+      title: widget.title,
+      actionLabel: context.l10n.save,
+      onAction: () => Navigator.pop(context, _controller.text.trim()),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.blockMargin,
+          vertical: AppSpacing.lg,
+        ),
+        children: [
+          AppFormField(
+            label: widget.title,
+            controller: _controller,
+            textCapitalization: TextCapitalization.sentences,
+            autofocus: true,
+            maxLines: 5,
+          ),
+        ],
+      ),
+    );
+  }
+}

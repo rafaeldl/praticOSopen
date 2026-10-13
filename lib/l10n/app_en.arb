@@ -2850,5 +2850,20 @@
   "speechCancel": "Cancel",
   "speechStopAndFill": "Stop and fill in the order",
   "speechTypeHint": "Type the customer, the vehicle and what will be done",
-  "speechNothingHeard": "I didn't hear anything. Tap Speak and try again."
+  "speechNothingHeard": "I didn't hear anything. Tap Speak and try again.",
+  "orderServicesAndParts": "Services and parts",
+  "orderItemKindPart": "part",
+  "orderActionApproveQuote": "Approve quote",
+  "orderActionStartService": "Start the job",
+  "orderActionMarkReady": "Mark as ready",
+  "orderDuePhrase": "Ready {when}",
+  "orderDueLatePhrase": "Was due {when}",
+  "orderDayAtTime": "{day} at {time}",
+  "orderChecklistProgress": "{answered} of {total} answered",
+  "orderCommentYou": "You",
+  "orderMenuChangeStatus": "Change status",
+  "orderMenuViewPdf": "View PDF",
+  "orderMenuCopyLink": "Copy link",
+  "orderPlaceOfService": "Service location",
+  "orderAssistantApplied": "I added what's marked to the order. Check it."
 }

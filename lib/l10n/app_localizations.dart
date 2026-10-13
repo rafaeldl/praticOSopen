@@ -10407,6 +10407,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não ouvi nada. Toque em Falar e tente de novo.'**
   String get speechNothingHeard;
+
+  /// No description provided for @orderServicesAndParts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços e peças'**
+  String get orderServicesAndParts;
+
+  /// No description provided for @orderItemKindPart.
+  ///
+  /// In pt, this message translates to:
+  /// **'peça'**
+  String get orderItemKindPart;
+
+  /// No description provided for @orderActionApproveQuote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar orçamento'**
+  String get orderActionApproveQuote;
+
+  /// No description provided for @orderActionStartService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar serviço'**
+  String get orderActionStartService;
+
+  /// No description provided for @orderActionMarkReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como pronta'**
+  String get orderActionMarkReady;
+
+  /// No description provided for @orderDuePhrase.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica pronto {when}'**
+  String orderDuePhrase(String when);
+
+  /// No description provided for @orderDueLatePhrase.
+  ///
+  /// In pt, this message translates to:
+  /// **'Era para ficar pronto {when}'**
+  String orderDueLatePhrase(String when);
+
+  /// No description provided for @orderDayAtTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'{day}, {time}'**
+  String orderDayAtTime(String day, String time);
+
+  /// No description provided for @orderChecklistProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'{answered} de {total} respondidas'**
+  String orderChecklistProgress(int answered, int total);
+
+  /// No description provided for @orderCommentYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você'**
+  String get orderCommentYou;
+
+  /// No description provided for @orderMenuChangeStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar a situação'**
+  String get orderMenuChangeStatus;
+
+  /// No description provided for @orderMenuViewPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver PDF'**
+  String get orderMenuViewPdf;
+
+  /// No description provided for @orderMenuCopyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar link'**
+  String get orderMenuCopyLink;
+
+  /// No description provided for @orderPlaceOfService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local do atendimento'**
+  String get orderPlaceOfService;
+
+  /// No description provided for @orderAssistantApplied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coloquei na OS o que está marcado. Confira.'**
+  String get orderAssistantApplied;
 }
 
 class _AppLocalizationsDelegate

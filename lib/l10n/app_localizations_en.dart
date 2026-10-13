@@ -6016,4 +6016,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get speechNothingHeard =>
       'I didn\'t hear anything. Tap Speak and try again.';
+
+  @override
+  String get orderServicesAndParts => 'Services and parts';
+
+  @override
+  String get orderItemKindPart => 'part';
+
+  @override
+  String get orderActionApproveQuote => 'Approve quote';
+
+  @override
+  String get orderActionStartService => 'Start the job';
+
+  @override
+  String get orderActionMarkReady => 'Mark as ready';
+
+  @override
+  String orderDuePhrase(String when) {
+    return 'Ready $when';
+  }
+
+  @override
+  String orderDueLatePhrase(String when) {
+    return 'Was due $when';
+  }
+
+  @override
+  String orderDayAtTime(String day, String time) {
+    return '$day at $time';
+  }
+
+  @override
+  String orderChecklistProgress(int answered, int total) {
+    return '$answered of $total answered';
+  }
+
+  @override
+  String get orderCommentYou => 'You';
+
+  @override
+  String get orderMenuChangeStatus => 'Change status';
+
+  @override
+  String get orderMenuViewPdf => 'View PDF';
+
+  @override
+  String get orderMenuCopyLink => 'Copy link';
+
+  @override
+  String get orderPlaceOfService => 'Service location';
+
+  @override
+  String get orderAssistantApplied =>
+      'I added what\'s marked to the order. Check it.';
 }
