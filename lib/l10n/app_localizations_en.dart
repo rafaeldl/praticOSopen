@@ -5912,4 +5912,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileButtonA11y(String company) {
     return '$company: customers, catalog, team and settings';
   }
+
+  @override
+  String get orderAssistantPhoto => 'Photo';
+
+  @override
+  String get orderAssistantTalkShort => 'Speak';
+
+  @override
+  String get orderCustomerRequestTitle => 'What the customer asked';
+
+  @override
+  String get orderCustomerRequestPlaceholder => 'E.g.: noise when braking';
+
+  @override
+  String get orderDeliverySection => 'Delivery';
+
+  @override
+  String get orderDueLabel => 'Ready by';
+
+  @override
+  String get orderDueNone => 'No date';
+
+  @override
+  String get orderMoreOptions => 'More options';
+
+  @override
+  String get orderMoreOptionsHint => 'Status, visit, assignee, location';
+
+  @override
+  String get orderStatusLabel => 'Status';
+
+  @override
+  String get orderScheduleLabel => 'Visit';
+
+  @override
+  String get orderAddressLabel => 'Location';
+
+  @override
+  String get orderNotSet => 'None';
+
+  @override
+  String get speechTitle => 'Speak the job';
+
+  @override
+  String get speechHint =>
+      'Say the customer, the vehicle and what will be done.';
+
+  @override
+  String get speechListening => 'Listening…';
+
+  @override
+  String get speechStop => 'Stop';
+
+  @override
+  String get speechStart => 'Speak again';
+
+  @override
+  String get speechFill => 'Fill in the order';
+
+  @override
+  String get speechType => 'Type instead';
+
+  @override
+  String get speechUnavailable =>
+      'The microphone is not allowed. Allow it in Settings or type the job.';
+
+  @override
+  String get orderAddItemRow => 'Add service or part';
+
+  @override
+  String get orderPickCustomerRow => 'Choose customer';
+
+  @override
+  String get newOrderButton => 'New order';
 }

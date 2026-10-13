@@ -21,10 +21,11 @@ import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/order_screen_services.dart';
+import 'package:praticos/screens/order/assistant/speech_input_sheet.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/services/segment_config_service.dart';
-import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
@@ -130,6 +131,7 @@ Future<void> _pump(
   WidgetTester tester,
   Widget screen, {
   Map<String, dynamic>? args,
+  bool hosted = false,
 }) async {
   await tester.pumpWidget(
     ChangeNotifierProvider<SegmentConfigProvider>(
@@ -141,6 +143,23 @@ Future<void> _pump(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         onGenerateRoute: (settings) {
+          if (settings.name == '/' && hosted) {
+            // A page under the sheet, so "X" and "✓" can close it.
+            return CupertinoPageRoute(
+              settings: settings,
+              builder: (context) => CupertinoPageScaffold(
+                child: Center(
+                  child: CupertinoButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (_) => screen),
+                    ),
+                    child: const Text('abrir'),
+                  ),
+                ),
+              ),
+            );
+          }
           if (settings.name == '/') {
             return CupertinoPageRoute(
               settings: RouteSettings(name: '/', arguments: args),
@@ -181,6 +200,32 @@ Future<void> _pump(
     ),
   );
   await tester.pumpAndSettle();
+  if (hosted) {
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+  }
+}
+
+class FakeSpeech implements SpeechListener {
+  FakeSpeech(this.words, {this.allowed = true});
+
+  final String words;
+  final bool allowed;
+
+  @override
+  Future<bool> start({
+    required String localeId,
+    required void Function(String words) onWords,
+    required void Function() onDone,
+  }) async {
+    if (!allowed) return false;
+    onWords(words);
+    onDone();
+    return true;
+  }
+
+  @override
+  Future<void> stop() async {}
 }
 
 void main() {
@@ -214,42 +259,48 @@ void main() {
     mostUsed: () async => const [],
   );
 
-  group('new order', () {
-    testWidgets('opens the order itself, blank, with nothing saved', (
+  group('new order (sheet)', () {
+    Finder save() => find.byKey(const ValueKey('new_order_save'));
+    CupertinoButton saveButton(WidgetTester tester) =>
+        tester.widget<CupertinoButton>(save());
+
+    testWidgets('opens blank: X, gray ✓, cards in order, nothing saved', (
       tester,
     ) async {
       final store = OrderStore();
-      await _pump(tester, screen(store));
+      await _pump(tester, screen(store), hosted: true);
 
-      expect(find.text('Quem é o cliente?'), findsOneWidget);
-      expect(find.text('O que vai na OS?'), findsOneWidget);
+      expect(find.text('Nova OS'), findsOneWidget);
+      expect(find.byKey(const ValueKey('new_order_close')), findsOneWidget);
+      expect(saveButton(tester).onPressed, isNull);
       expect(find.text('Escolha o cliente para salvar.'), findsOneWidget);
-      expect(find.byType(StatusDot), findsOneWidget);
-      expect(find.text('Orçamento'), findsOneWidget);
-      // No "…" before saving, no cover photo, no assistant yet.
-      expect(find.byIcon(CupertinoIcons.ellipsis), findsNothing);
-      expect(find.text('Falar o que fazer'), findsNothing);
+
+      // Order of importance: customer, items, request, delivery, more.
+      double y(Finder f) => tester.getTopLeft(f).dy;
+      final customer = y(find.byKey(const ValueKey('new_order_pick_customer')));
+      final items = y(find.byKey(const ValueKey('new_order_add_item')));
+      final request = y(find.byKey(const ValueKey('new_order_request')));
+      final due = y(find.byKey(const ValueKey('new_order_due')));
+      final more = y(find.byKey(const ValueKey('new_order_more')));
+      expect(customer < items && items < request, isTrue);
+      expect(request < due && due < more, isTrue);
+
+      expect(find.text('Sem data'), findsOneWidget);
+      expect(find.text('Mais opções'), findsOneWidget);
+      // No big blue button at the bottom any more.
+      expect(find.text('Salvar OS'), findsNothing);
       expect(store.deferSave, isTrue);
       expect(store.order!.id, isNull);
       expect(store.status, 'quote');
-
-      // "Salvar OS" is disabled until there is a customer.
-      final save = tester.widget<CupertinoButton>(
-        find.ancestor(
-          of: find.textContaining('Salvar'),
-          matching: find.byType(CupertinoButton),
-        ),
-      );
-      expect(save.onPressed, isNull);
     });
 
-    testWidgets('customer picker fills customer and vehicle; Salvar OS saves', (
+    testWidgets('picking the customer lights the ✓; ✓ saves and closes', (
       tester,
     ) async {
       final store = OrderStore();
-      await _pump(tester, screen(store));
+      await _pump(tester, screen(store), hosted: true);
 
-      await tester.tap(find.text('Quem é o cliente?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_pick_customer')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('pick ABC1D23'));
       await tester.pumpAndSettle();
@@ -258,25 +309,48 @@ void main() {
       expect(find.text('Gol 2018'), findsOneWidget);
       expect(store.devices.single.id, 'd1');
       expect(find.text('Escolha o cliente para salvar.'), findsNothing);
+      expect(saveButton(tester).onPressed, isNotNull);
 
-      await tester.tap(find.textContaining('Salvar'));
+      await tester.tap(save());
       await tester.pumpAndSettle();
       expect(store.deferSave, isFalse);
-      expect(find.textContaining('Salvar'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.ellipsis), findsOneWidget);
+      // Back on the page under the sheet.
+      expect(find.text('abrir'), findsOneWidget);
     });
 
-    testWidgets('status row changes the status with a dot and neutral text', (
+    testWidgets('X closes at once when nothing was filled', (tester) async {
+      await _pump(tester, screen(OrderStore()), hosted: true);
+      await tester.tap(find.byKey(const ValueKey('new_order_close')));
+      await tester.pumpAndSettle();
+      expect(find.text('abrir'), findsOneWidget);
+    });
+
+    testWidgets('X asks before throwing away what was filled', (tester) async {
+      await _pump(tester, screen(OrderStore()), hosted: true);
+      await tester.enterText(
+        find.byKey(const ValueKey('new_order_request')),
+        'Barulho ao frear',
+      );
+      await tester.tap(find.byKey(const ValueKey('new_order_close')));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(find.text('abrir'), findsNothing);
+    });
+
+    testWidgets('"Mais opções" changes the status and shows it under it', (
       tester,
     ) async {
       final store = OrderStore();
-      await _pump(tester, screen(store));
+      await _pump(tester, screen(store), hosted: true);
 
-      await tester.tap(find.text('Mudar'));
+      await tester.tap(find.byKey(const ValueKey('new_order_more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Situação: Orçamento'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Aprovado').last);
       await tester.pumpAndSettle();
       expect(store.status, 'approved');
+      expect(find.text('Aprovado'), findsOneWidget); // summary under the row
     });
   });
 
@@ -316,6 +390,7 @@ void main() {
       OrderStore store,
       FakeAssistant assistant, {
       Future<AiPhoto?> Function()? capture,
+      SpeechListener? speech,
     }) => OrderScreenV2(
       store: store,
       permissions: _permissions(),
@@ -326,14 +401,14 @@ void main() {
       showAssistant: true,
       assistant: assistant,
       capturePhoto: capture ?? () async => AiPhoto(png),
+      speechListener: speech ?? FakeSpeech('Revenda Sul, troca de óleo'),
     );
 
-    AppListRow rowOf(WidgetTester tester, String text) =>
-        tester.widget<AppListRow>(
-          find.ancestor(of: find.text(text), matching: find.byType(AppListRow)),
-        );
+    FormRow rowOf(WidgetTester tester, String text) => tester.widget<FormRow>(
+      find.ancestor(of: find.text(text), matching: find.byType(FormRow)),
+    );
 
-    testWidgets('flag is off by default and hides Foto / Falar', (
+    testWidgets('flag is off by default and hides the Foto / Falar bar', (
       tester,
     ) async {
       expect(kAiOrderAssistEnabled, isFalse);
@@ -345,68 +420,72 @@ void main() {
           actions: FakeActions(),
         ),
       );
-      expect(find.text('Foto'), findsNothing);
-      expect(find.text('Falar o que fazer'), findsNothing);
-      expect(find.text('Tire foto da placa e fale o serviço'), findsNothing);
+      expect(find.byType(AssistantToolbar), findsNothing);
     });
 
-    testWidgets('with the flag: shown on the blank new order only', (
+    testWidgets('with the flag: Foto and Falar sit in the bottom bar', (
       tester,
     ) async {
       await _pump(tester, assistantScreen(OrderStore(), FakeAssistant(draft)));
-      expect(find.text('Foto'), findsOneWidget);
-      expect(find.text('Falar o que fazer'), findsOneWidget);
-      expect(find.text('Tire foto da placa e fale o serviço'), findsOneWidget);
+      expect(find.byType(AssistantToolbar), findsOneWidget);
+      expect(find.byKey(const ValueKey('assistant_photo')), findsOneWidget);
+      expect(find.byKey(const ValueKey('assistant_talk')), findsOneWidget);
     });
 
-    testWidgets(
-      'Falar fills the same blank order and highlights what the AI put',
-      (tester) async {
-        final store = OrderStore();
-        final assistant = FakeAssistant(draft);
-        await _pump(tester, assistantScreen(store, assistant));
+    testWidgets('Falar listens, fills the same order and marks what it put', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final assistant = FakeAssistant(draft);
+      await _pump(tester, assistantScreen(store, assistant));
 
-        await tester.tap(find.text('Falar o que fazer'));
-        await tester.pumpAndSettle();
-        await tester.enterText(
-          find.byType(CupertinoTextField),
-          'Revenda Sul, troca de óleo',
-        );
-        await tester.pump();
-        await tester.tap(find.text('Pronto'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(find.text('Revenda Sul, troca de óleo'), findsOneWidget);
+      await tester.tap(find.text('Preencher a OS'));
+      await tester.pumpAndSettle();
 
-        expect(assistant.texts, ['Revenda Sul, troca de óleo']);
-        expect(assistant.photoCounts, [0]);
+      expect(assistant.texts, ['Revenda Sul, troca de óleo']);
+      expect(assistant.photoCounts, [0]);
+      expect(store.deferSave, isTrue);
+      expect(store.order!.id, isNull);
 
-        // Same screen, still not saved.
-        expect(store.deferSave, isTrue);
-        expect(store.order!.id, isNull);
-        expect(
-          find.text('Confira o que está marcado em amarelo antes de salvar.'),
-          findsOneWidget,
-        );
+      expect(rowOf(tester, 'Revenda Sul').marked, isTrue);
+      expect(rowOf(tester, 'Troca de óleo').marked, isTrue);
+      expect(rowOf(tester, 'Polimento').marked, isTrue);
+      expect(rowOf(tester, 'Filtro de óleo').marked, isTrue);
+      expect(store.services!.map((s) => s.service?.id), ['s1', null]);
+      expect(store.services![1].value, isNull);
+      expect(store.products!.single.quantity, 2);
+      expect(find.text('sem valor'), findsOneWidget);
+    });
 
-        expect(rowOf(tester, 'Revenda Sul').marked, isTrue);
-        expect(rowOf(tester, 'Troca de óleo').marked, isTrue);
-        expect(rowOf(tester, 'Polimento').marked, isTrue);
-        expect(rowOf(tester, 'Filtro de óleo').marked, isTrue);
-        expect(
-          rowOf(tester, '“Classic · NXS8620” não está no cadastro').marked,
-          isTrue,
-        );
-        expect(store.services!.map((s) => s.service?.id), ['s1', null]);
-        expect(store.services![1].value, isNull); // "sem valor"
-        expect(store.products!.single.quantity, 2);
-        expect(find.text('sem valor'), findsOneWidget);
-
-        // Button stays "Salvar OS"; saving clears the highlighter.
-        await tester.tap(find.textContaining('Salvar'));
-        await tester.pumpAndSettle();
-        expect(store.deferSave, isFalse);
-        expect(rowOf(tester, 'Polimento').marked, isFalse);
-      },
-    );
+    testWidgets('no microphone: the sheet turns into a text field', (
+      tester,
+    ) async {
+      final assistant = FakeAssistant(draft);
+      await _pump(
+        tester,
+        assistantScreen(
+          OrderStore(),
+          assistant,
+          speech: FakeSpeech('', allowed: false),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'O microfone não está liberado. Libere em Ajustes ou digite o serviço.',
+        ),
+        findsOneWidget,
+      );
+      await tester.enterText(find.byType(CupertinoTextField).last, 'polimento');
+      await tester.pump();
+      await tester.tap(find.text('Preencher a OS'));
+      await tester.pumpAndSettle();
+      expect(assistant.texts, ['polimento']);
+    });
 
     testWidgets('the camera opens only when Foto is tapped', (tester) async {
       var cameraOpened = 0;
@@ -424,7 +503,7 @@ void main() {
       );
       expect(cameraOpened, 0);
 
-      await tester.tap(find.text('Foto'));
+      await tester.tap(find.byKey(const ValueKey('assistant_photo')));
       await tester.pumpAndSettle();
       expect(cameraOpened, 1);
       expect(find.text('1 foto'), findsOneWidget);
@@ -449,11 +528,9 @@ void main() {
       );
       await _pump(tester, assistantScreen(store, assistant));
 
-      await tester.tap(find.text('Falar o que fazer'));
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(CupertinoTextField), 'polimento');
-      await tester.pump();
-      await tester.tap(find.text('Pronto'));
+      await tester.tap(find.text('Preencher a OS'));
       await tester.pumpAndSettle();
 
       expect(
@@ -466,7 +543,10 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
       expect(store.services, isEmpty);
-      expect(find.text('Quem é o cliente?'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('new_order_pick_customer')),
+        findsOneWidget,
+      );
     });
   });
 
@@ -477,7 +557,7 @@ void main() {
       final store = OrderStore();
       await _pump(tester, screen(store));
 
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       expect(find.text('Troca de óleo'), findsOneWidget);
       expect(find.text('Filtro de óleo'), findsOneWidget);
@@ -503,7 +583,7 @@ void main() {
       final store = OrderStore();
       await _pump(tester, screen(store, catalog: catalog));
 
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byType(CupertinoSearchTextField),
@@ -535,7 +615,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(CupertinoSearchTextField), 'Nova');
       await tester.pumpAndSettle();
@@ -556,7 +636,7 @@ void main() {
           mostUsed: () async => const ['product:p1'],
         ),
       );
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       expect(find.text('Mais usados'), findsOneWidget);
       expect(find.text('Filtro de óleo'), findsNWidgets(2));
@@ -567,7 +647,7 @@ void main() {
     testWidgets('an item without price gets one in its sheet', (tester) async {
       final store = OrderStore();
       await _pump(tester, screen(store));
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
@@ -575,7 +655,7 @@ void main() {
 
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(CupertinoTextField), '8000');
+      await tester.enterText(find.byType(CupertinoTextField).last, '8000');
       await tester.tap(find.text('Salvar'));
       await tester.pumpAndSettle();
 
@@ -587,7 +667,7 @@ void main() {
     testWidgets('"Tirar da OS" removes the item', (tester) async {
       final store = OrderStore();
       await _pump(tester, screen(store));
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Troca de óleo'));
       await tester.pumpAndSettle();
@@ -601,7 +681,7 @@ void main() {
 
     testWidgets('exact name match hides the create row', (tester) async {
       await _pump(tester, screen(OrderStore()));
-      await tester.tap(find.text('O que vai na OS?'));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byType(CupertinoSearchTextField),
@@ -802,6 +882,34 @@ void main() {
       ..discount = 0
       ..paidAmount = 0
       ..transactions = [];
+
+    testWidgets('new order: "O que o cliente pediu" is the segment\'s '
+        '"Observação" (one field, not two)', (tester) async {
+      const observation = CustomField(
+        key: 'service_order.observation',
+        type: 'textarea',
+        labels: {'pt-BR': 'Observação'},
+        section: 'Detalhes',
+        sectionI18n: {'pt-BR': 'Detalhes'},
+      );
+      SegmentConfigService().debugSetCustomFields(const [observation]);
+      final store = OrderStore();
+      await _pump(tester, screen(store), hosted: true);
+      expect(find.text('Detalhes'), findsNothing);
+      expect(find.text('Observação'), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_pick_customer')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('pick ABC1D23'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('new_order_request')),
+        'Barulho ao frear',
+      );
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(store.order!.customData, {'observation': 'Barulho ao frear'});
+    });
 
     testWidgets('shows the segment fields with the saved value; built-ins '
         'are not duplicated', (tester) async {

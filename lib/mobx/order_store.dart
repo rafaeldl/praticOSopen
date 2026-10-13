@@ -1731,7 +1731,9 @@ abstract class _OrderStore with Store {
     total = temp;
   }
 
-  createItem() {
+  /// [onCreated] runs once a new order has its id (used to add the
+  /// customer's request as the first comment).
+  createItem({void Function(String orderId)? onCreated}) {
     if (deferSave || order == null || companyId == null) return;
     order!.syncDeviceIds();
 
@@ -1746,6 +1748,7 @@ abstract class _OrderStore with Store {
             // Se encontrou, usa o ID da existente
             order!.id = existingOrder.id;
             repository.updateItem(companyId!, order);
+            if (order!.id != null) onCreated?.call(order!.id!);
             orderStream = repository
                 .streamSingle(companyId!, order!.id)
                 .asObservable();
@@ -1757,6 +1760,7 @@ abstract class _OrderStore with Store {
                     .streamSingle(companyId!, order!.id)
                     .asObservable();
                 _logOrderCreated();
+                onCreated?.call(order!.id!);
               }
             });
           }
@@ -1769,6 +1773,7 @@ abstract class _OrderStore with Store {
                 .streamSingle(companyId!, order!.id)
                 .asObservable();
             _logOrderCreated();
+            onCreated?.call(order!.id!);
           }
         });
       }

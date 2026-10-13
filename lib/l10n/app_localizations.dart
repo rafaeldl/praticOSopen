@@ -10209,6 +10209,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{company}: clientes, catálogo, equipe e ajustes'**
   String profileButtonA11y(String company);
+
+  /// No description provided for @orderAssistantPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto'**
+  String get orderAssistantPhoto;
+
+  /// No description provided for @orderAssistantTalkShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar'**
+  String get orderAssistantTalkShort;
+
+  /// No description provided for @orderCustomerRequestTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o cliente pediu'**
+  String get orderCustomerRequestTitle;
+
+  /// No description provided for @orderCustomerRequestPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: barulho ao frear'**
+  String get orderCustomerRequestPlaceholder;
+
+  /// No description provided for @orderDeliverySection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega'**
+  String get orderDeliverySection;
+
+  /// No description provided for @orderDueLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica pronto'**
+  String get orderDueLabel;
+
+  /// No description provided for @orderDueNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem data'**
+  String get orderDueNone;
+
+  /// No description provided for @orderMoreOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get orderMoreOptions;
+
+  /// No description provided for @orderMoreOptionsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Situação, visita, responsável, local'**
+  String get orderMoreOptionsHint;
+
+  /// No description provided for @orderStatusLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Situação'**
+  String get orderStatusLabel;
+
+  /// No description provided for @orderScheduleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visita'**
+  String get orderScheduleLabel;
+
+  /// No description provided for @orderAddressLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local'**
+  String get orderAddressLabel;
+
+  /// No description provided for @orderNotSet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum'**
+  String get orderNotSet;
+
+  /// No description provided for @speechTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar o serviço'**
+  String get speechTitle;
+
+  /// No description provided for @speechHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fale o cliente, o veículo e o que vai ser feito.'**
+  String get speechHint;
+
+  /// No description provided for @speechListening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvindo…'**
+  String get speechListening;
+
+  /// No description provided for @speechStop.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar'**
+  String get speechStop;
+
+  /// No description provided for @speechStart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar de novo'**
+  String get speechStart;
+
+  /// No description provided for @speechFill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencher a OS'**
+  String get speechFill;
+
+  /// No description provided for @speechType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar em vez de falar'**
+  String get speechType;
+
+  /// No description provided for @speechUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'O microfone não está liberado. Libere em Ajustes ou digite o serviço.'**
+  String get speechUnavailable;
+
+  /// No description provided for @orderAddItemRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar serviço ou peça'**
+  String get orderAddItemRow;
+
+  /// No description provided for @orderPickCustomerRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher cliente'**
+  String get orderPickCustomerRow;
+
+  /// No description provided for @newOrderButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get newOrderButton;
 }
 
 class _AppLocalizationsDelegate

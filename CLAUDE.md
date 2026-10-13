@@ -225,7 +225,7 @@ O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou red
 - Um botão azul (`accent`) por tela; as outras ações usam `secondaryFill` ou viram link (`accentText`)
 - Português do dia a dia ("Falta receber R$ 166"), sem siglas nem jargão
 - Mostrar só o que o registro tem; recurso ocasional entra pelo menu "…"/"+" ou pelo assistente
-- Cadastro novo abre em sheet grande ("Cancelar" à esquerda, botão grande embaixo); edição do que já existe abre empurrada
+- Cadastro novo abre em sheet grande: "X" à esquerda e "✓" à direita no topo (cinza até dar para salvar, azul quando dá), formulário em cartões brancos sobre fundo cinza. Edição do que já existe abre empurrada
 - Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco
 - Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44
 - Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o "+" azul (Nova OS) ao lado. Clientes e o que era "Mais" abrem pelo botão do perfil, no topo da Início

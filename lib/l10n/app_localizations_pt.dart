@@ -5923,4 +5923,77 @@ class AppLocalizationsPt extends AppLocalizations {
   String profileButtonA11y(String company) {
     return '$company: clientes, catálogo, equipe e ajustes';
   }
+
+  @override
+  String get orderAssistantPhoto => 'Foto';
+
+  @override
+  String get orderAssistantTalkShort => 'Falar';
+
+  @override
+  String get orderCustomerRequestTitle => 'O que o cliente pediu';
+
+  @override
+  String get orderCustomerRequestPlaceholder => 'Ex.: barulho ao frear';
+
+  @override
+  String get orderDeliverySection => 'Entrega';
+
+  @override
+  String get orderDueLabel => 'Fica pronto';
+
+  @override
+  String get orderDueNone => 'Sem data';
+
+  @override
+  String get orderMoreOptions => 'Mais opções';
+
+  @override
+  String get orderMoreOptionsHint => 'Situação, visita, responsável, local';
+
+  @override
+  String get orderStatusLabel => 'Situação';
+
+  @override
+  String get orderScheduleLabel => 'Visita';
+
+  @override
+  String get orderAddressLabel => 'Local';
+
+  @override
+  String get orderNotSet => 'Nenhum';
+
+  @override
+  String get speechTitle => 'Falar o serviço';
+
+  @override
+  String get speechHint => 'Fale o cliente, o veículo e o que vai ser feito.';
+
+  @override
+  String get speechListening => 'Ouvindo…';
+
+  @override
+  String get speechStop => 'Parar';
+
+  @override
+  String get speechStart => 'Falar de novo';
+
+  @override
+  String get speechFill => 'Preencher a OS';
+
+  @override
+  String get speechType => 'Digitar em vez de falar';
+
+  @override
+  String get speechUnavailable =>
+      'O microfone não está liberado. Libere em Ajustes ou digite o serviço.';
+
+  @override
+  String get orderAddItemRow => 'Adicionar serviço ou peça';
+
+  @override
+  String get orderPickCustomerRow => 'Escolher cliente';
+
+  @override
+  String get newOrderButton => 'Nova OS';
 }

@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "2bb6c5211f2edc8ec40fc284d1a42dff1fb504d010ba820f633cfb306ce37bfa",
+      "sha": "fbf04d27e1bac1e3ad0993444e6195687cdf2d7545b15d66dfbdf70448f7fecb",
       "scope": "**/*"
     },
     {
@@ -45,11 +45,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 15,
-        "median": 0.1,
-        "min": 0.06,
-        "max": 0.39,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
+        "median": 0.15000000000000002,
+        "min": 0.05,
+        "max": 0.31,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -79,11 +79,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 11,
-        "median": 0.05,
-        "min": 0.03,
-        "max": 0.4,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 10,
+        "median": 0.07,
+        "min": 0.04,
+        "max": 0.45,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -108,8 +108,8 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 1,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 2,
         "median": 0.03,
         "min": 0.03,
         "max": 0.03,
@@ -141,11 +141,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 15,
-        "median": 0.03,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
+        "median": 0.04,
         "min": 0.02,
-        "max": 0.09,
+        "max": 0.4,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -174,11 +174,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 15,
-        "median": 0.05,
-        "min": 0.04,
-        "max": 0.07,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
+        "median": 0.045,
+        "min": 0.03,
+        "max": 0.09,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -203,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -281,11 +281,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 11,
-        "median": 0.12,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 10,
+        "median": 0.06,
         "min": 0.02,
-        "max": 0.25,
+        "max": 0.14,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -327,11 +327,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 11,
-        "median": 0.06,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 10,
+        "median": 0.055,
         "min": 0.04,
-        "max": 0.12,
+        "max": 0.15,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -377,14 +377,27 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 2,
-        "median": 0.08499999999999999,
-        "min": 0.06,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 3,
+        "median": 0.07,
+        "min": 0.07,
         "max": 0.11,
         "fired": 0,
         "verdict": "skipped"
       }
+    },
+    {
+      "id": "new-record-sheet",
+      "text": "Cadastro novo abre em sheet grande: \"X\" à esquerda e \"✓\" à direita no topo (cinza até dar para salvar, azul quando dá), formulário em cartões brancos sobre fundo cinza. Edição do que já existe abre empurrada",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 228
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs to know whether the screen creates or edits a record and how it is opened elsewhere"
+      },
+      "status": "active"
     },
     {
       "id": "glass-only-in-navigation",
@@ -410,11 +423,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 11,
-        "median": 0.12,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 10,
+        "median": 0.04,
         "min": 0.02,
-        "max": 0.14,
+        "max": 0.2,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -443,11 +456,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 11,
-        "median": 0.05,
-        "min": 0.03,
-        "max": 0.21,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 10,
+        "median": 0.045,
+        "min": 0.02,
+        "max": 0.14,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -472,7 +485,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -501,7 +514,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -530,7 +543,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -560,11 +573,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
+        "at": "2026-10-13T18:40:37.103Z",
         "hunks": 20,
         "median": 0.02,
         "min": 0.01,
-        "max": 0.04,
+        "max": 0.02,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -590,11 +603,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 2,
-        "median": 0.25,
-        "min": 0.15,
-        "max": 0.35,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 3,
+        "median": 0.21,
+        "min": 0.1,
+        "max": 0.31,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -632,11 +645,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 15,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
         "median": 0.01,
         "min": 0.01,
-        "max": 0.01,
+        "max": 0.02,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -661,11 +674,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-13T13:16:01.691Z",
-        "hunks": 15,
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
         "median": 0.01,
         "min": 0.01,
-        "max": 0.02,
+        "max": 0.03,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -799,6 +812,39 @@
         "reason": "runtime bot behavior, not code"
       },
       "status": "active"
+    },
+    {
+      "id": "app-tab-order",
+      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" azul (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 231
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Agenda, Financeiro in that order, for example adding a Clientes or Mais tab or putting Agenda before Início?",
+          "criteria": {
+            "true": "tabs: [home, customers, agenda, financial, more]",
+            "false": "tabs: [home, agenda, financial] with a separate + button"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-13T18:40:37.103Z",
+        "hunks": 14,
+        "median": 0.04,
+        "min": 0.02,
+        "max": 0.23,
+        "fired": 0,
+        "verdict": "decisive"
+      }
     }
   ]
 }

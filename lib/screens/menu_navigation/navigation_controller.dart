@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:praticos/screens/order/order_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -163,9 +164,7 @@ class _NavigationControllerState extends State<NavigationController>
 
   void _newOrder() {
     HapticFeedback.lightImpact();
-    Navigator.of(context, rootNavigator: true)
-        .pushNamed('/order')
-        .then((_) => ordersChanged.value++);
+    openNewOrder(context).then((_) => ordersChanged.value++);
   }
 
   @override
@@ -200,7 +199,7 @@ class _NavigationControllerState extends State<NavigationController>
             items: [for (final tab in tabs) buildAppTabItem(context, tab)],
             action: _canCreateOrder
                 ? NewOrderTabButton(
-                    label: context.l10n.newOrder,
+                    label: context.l10n.newOrderButton,
                     onPressed: _newOrder,
                   )
                 : null,

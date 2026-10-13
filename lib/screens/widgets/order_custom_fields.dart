@@ -15,14 +15,32 @@ const orderBuiltInFieldKeys = {
   'service_order.address',
 };
 
+/// Segment field that holds what the customer asked for ("Observação").
+/// The new order's "O que o cliente pediu" writes here when the segment has
+/// it, so the same text is not asked twice.
+const orderRequestFieldKey = 'service_order.observation';
+
+/// The segment's request field, or null when the segment has none.
+CustomField? orderRequestField(SegmentConfigProvider config) {
+  for (final field in config.fieldsFor('service_order')) {
+    if (field.key == orderRequestFieldKey) return field;
+  }
+  return null;
+}
+
 /// Segment custom fields of the order (`service_order.*`), grouped by
-/// localized section name, without the built-in ones.
+/// localized section name, without the built-in ones. [withoutRequest]
+/// also hides the request field (the new order shows it as its own card).
 Map<String, List<CustomField>> orderCustomFieldsFor(
-  SegmentConfigProvider config,
-) =>
+  SegmentConfigProvider config, {
+  bool withoutRequest = false,
+}) =>
     config.fieldsGroupedBySectionLocalized(
       'service_order',
-      exclude: orderBuiltInFieldKeys,
+      exclude: {
+        ...orderBuiltInFieldKeys,
+        if (withoutRequest) orderRequestFieldKey,
+      },
     );
 
 /// Returns [data] with [field] set to [value] (removed when null). Also

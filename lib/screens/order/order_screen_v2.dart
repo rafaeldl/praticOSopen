@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
@@ -18,6 +19,9 @@ import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/assistant/assistant_input_sheet.dart';
+import 'package:praticos/screens/order/assistant/speech_input_sheet.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
@@ -82,6 +86,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.showAssistant = kAiOrderAssistEnabled,
     this.assistant,
     this.capturePhoto,
+    this.speechListener,
   });
 
   /// Injected in tests; defaults to a new [OrderStore].
@@ -111,6 +116,9 @@ class OrderScreenV2 extends StatefulWidget {
 
   /// Opens the camera; defaults to image_picker (tests inject).
   final Future<AiPhoto?> Function()? capturePhoto;
+
+  /// Microphone for "Falar" (tests inject); defaults to the device one.
+  final SpeechListener? speechListener;
 
   @override
   State<OrderScreenV2> createState() => _OrderScreenV2State();
@@ -147,8 +155,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   final ScrollController _scroll = ScrollController();
 
+  /// "O que o cliente pediu" (new order only; saved as the first comment).
+  final TextEditingController _requestController = TextEditingController();
+
   @override
   void dispose() {
+    _requestController.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -943,7 +955,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (ok != true || !mounted) return;
     await _store.deleteOrder();
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) _popScreen();
   }
 
   // ─── Save / leave ────────────────────────────────────────────────────────
@@ -985,7 +997,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (leave == true && mounted) {
       setState(() => _leaving = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) _popScreen();
       });
     }
   }
@@ -1154,7 +1166,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _confirmDiscard();
           },
-          child: CupertinoPageScaffold(
+          child: _isNew
+              ? _buildNewSheet(config)
+              : CupertinoPageScaffold(
             backgroundColor: AppColors.background.resolveFrom(context),
             child: Stack(
               children: [
@@ -1189,6 +1203,420 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         );
       },
     );
+  }
+
+  // ─── New order sheet ─────────────────────────────────────────────────────
+
+  /// "Nova OS" (prototype "Nova OS · campos por ordem de importância"):
+  /// gray background with white cards, "X" and "✓" at the top and the
+  /// assistant tools in a glass bar at the bottom. Order of the cards: who
+  /// (customer and vehicle), what will be done, what the customer asked
+  /// (optional), delivery and "Mais opções" for the rest.
+  Widget _buildNewSheet(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final canSave = _store.customer != null && !_assistantBusy;
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.groupedBackground.resolveFrom(context),
+      child: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                NewOrderTopBar(
+                  title: l10n.orderNewTitle(_shortOrderLabel(config)),
+                  onClose: _close,
+                  onSave: canSave ? _saveAndClose : null,
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: _scroll,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.only(
+                      bottom: widget.showAssistant ? 120 : AppSpacing.xxl,
+                    ),
+                    children: [
+                      _buildWhoCard(config),
+                      _buildItemsCard(),
+                      _buildRequestCard(),
+                      _buildDeliveryCard(),
+                      ..._buildCustomFields(config, withoutRequest: true),
+                      _buildMoreOptionsCard(config),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (widget.showAssistant)
+              Positioned(
+                left: AppSpacing.blockMargin,
+                right: AppSpacing.blockMargin,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: AssistantToolbar(
+                      busyLabel: _assistantBusy
+                          ? l10n.orderAssistantReading
+                          : null,
+                      onPhoto: _onPhoto,
+                      onTalk: _onTalk,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWhoCard(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final customer = _store.customer;
+    return FormCard(
+      note: customer == null ? l10n.orderSaveNeedsCustomer : null,
+      children: [
+        if (customer == null && _customerGuess != null)
+          FormRow(
+            icon: CupertinoIcons.person,
+            title: l10n.orderAssistantCustomerGuess(_customerGuess!),
+            marked: true,
+            onTap: _pickCustomer,
+          )
+        else if (customer == null)
+          FormRow(
+            key: const ValueKey('new_order_pick_customer'),
+            icon: CupertinoIcons.person_add,
+            title: l10n.orderPickCustomerRow,
+            accent: true,
+            onTap: _pickCustomer,
+          )
+        else
+          FormRow(
+            icon: CupertinoIcons.person,
+            title: customer.name ?? '',
+            subtitle: (customer.phone?.isNotEmpty ?? false)
+                ? formatPhone(customer.phone)
+                : null,
+            marked: _marked.contains('customer'),
+            onTap: _pickCustomer,
+          ),
+        for (final device in _store.devices)
+          FormRow(
+            icon: CupertinoIcons.car_detailed,
+            title: device.name ?? '',
+            subtitle: (device.serial?.isNotEmpty ?? false)
+                ? device.serial
+                : null,
+            marked: _marked.contains('device:${device.id}'),
+            onTap: () => _changeDevice(device),
+          ),
+        if (_deviceGuess != null)
+          FormRow(
+            icon: CupertinoIcons.car_detailed,
+            title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
+            marked: true,
+            onTap: _addDevice,
+          ),
+        if (customer != null && _store.devices.isEmpty && _deviceGuess == null)
+          FormRow(
+            icon: CupertinoIcons.add_circled,
+            title: l10n.orderPickDevice(config.device),
+            accent: true,
+            onTap: _addDevice,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildItemsCard() {
+    final l10n = context.l10n;
+    final canViewPrices = _permissions.canViewPrices();
+    final services = _store.services?.toList() ?? const <OrderService>[];
+    final products = _store.products?.toList() ?? const <OrderProduct>[];
+    String? price(double? value) =>
+        canViewPrices && value != null ? _format.formatCurrency(value) : null;
+    // Prototype: an item without price shows an amber dot + "sem valor" and
+    // stays out of the total.
+    Widget? noPrice(double? value) => canViewPrices && value == null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatusDot(color: AppColors.warning.resolveFrom(context)),
+              const SizedBox(width: AppSpacing.xs + 2),
+              Text(
+                l10n.catalogNoPrice,
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+              ),
+            ],
+          )
+        : null;
+    final summary = summarizeOrderItems(services, products);
+    return FormCard(
+      title: l10n.orderItemsSection,
+      note: canViewPrices && summary.unpricedCount > 0
+          ? l10n.orderUnpricedCount(summary.unpricedCount)
+          : null,
+      children: [
+        for (var i = 0; i < services.length; i++)
+          FormRow(
+            icon: CupertinoIcons.wrench,
+            title: _serviceName(services[i]),
+            subtitle: l10n.orderItemKindService,
+            value: price(services[i].value),
+            trailing: noPrice(services[i].value),
+            marked: _marked.contains(services[i]),
+            showChevron: false,
+            onTap: () => _editService(i),
+          ),
+        for (var i = 0; i < products.length; i++)
+          FormRow(
+            icon: CupertinoIcons.cube_box,
+            title: _productName(products[i]),
+            subtitle: (products[i].quantity ?? 1) > 1
+                ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
+                : l10n.orderItemKindProduct,
+            value: price(productLineTotal(products[i])),
+            trailing: noPrice(products[i].value),
+            marked: _marked.contains(products[i]),
+            showChevron: false,
+            onTap: () => _editProduct(i),
+          ),
+        FormRow(
+          key: const ValueKey('new_order_add_item'),
+          icon: CupertinoIcons.add_circled,
+          title: l10n.orderAddItemRow,
+          accent: true,
+          onTap: _addItem,
+        ),
+        if (canViewPrices && (services.isNotEmpty || products.isNotEmpty))
+          FormRow(
+            title: l10n.total,
+            value: _format.formatCurrency(summary.total),
+          ),
+      ],
+    );
+  }
+
+  /// Optional: many jobs (a tyre change) have nothing to write here. Saved
+  /// in the segment's "Observação" field, or as the first comment.
+  Widget _buildRequestCard() {
+    final l10n = context.l10n;
+    return FormCard(
+      title: l10n.orderCustomerRequestTitle,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          child: CupertinoTextField(
+            key: const ValueKey('new_order_request'),
+            controller: _requestController,
+            placeholder: l10n.orderCustomerRequestPlaceholder,
+            minLines: 2,
+            maxLines: null,
+            textCapitalization: TextCapitalization.sentences,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            decoration: null,
+            style: AppTypography.body.copyWith(
+              color: AppColors.text.resolveFrom(context),
+            ),
+            placeholderStyle: AppTypography.body.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryCard() {
+    final l10n = context.l10n;
+    final due = _store.order?.dueDate;
+    return FormCard(
+      title: l10n.orderDeliverySection,
+      children: [
+        FormRow(
+          key: const ValueKey('new_order_due'),
+          icon: CupertinoIcons.calendar,
+          title: l10n.orderDueLabel,
+          showChevron: false,
+          onTap: _pickDueDate,
+          trailing: due == null
+              ? Text(
+                  l10n.orderDueNone,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
+                  ),
+                )
+              : Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  alignment: WrapAlignment.end,
+                  children: [
+                    FormPill(_format.formatDayMonthOrDate(due)),
+                    FormPill(_format.formatTime(due)),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  /// Everything else in one line, with what is already set under it.
+  Widget _buildMoreOptionsCard(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final order = _store.order;
+    final parts = <String>[
+      if (_store.status != null && _store.status != 'quote')
+        config.getStatus(_store.status),
+      if (order?.scheduledDate != null)
+        _format.formatDateTime(order!.scheduledDate),
+      if (order?.assignedTo?.name?.isNotEmpty ?? false)
+        order!.assignedTo!.name!,
+      if (_hasAddress) _store.address!.trim(),
+    ];
+    return FormCard(
+      children: [
+        FormRow(
+          key: const ValueKey('new_order_more'),
+          icon: CupertinoIcons.ellipsis_circle,
+          title: l10n.orderMoreOptions,
+          subtitle: parts.isEmpty
+              ? l10n.orderMoreOptionsHint
+              : parts.join(' · '),
+          onTap: () => _showMoreOptions(config),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showMoreOptions(SegmentConfigProvider config) async {
+    final l10n = context.l10n;
+    final order = _store.order;
+    final choice = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.orderMoreOptions),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'status'),
+            child: Text(
+              '${l10n.orderStatusLabel}: ${config.getStatus(_store.status)}',
+            ),
+          ),
+          if (config.useScheduling)
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(ctx, 'schedule'),
+              child: Text(
+                order?.scheduledDate == null
+                    ? l10n.orderScheduleLabel
+                    : '${l10n.orderScheduleLabel}: ${_format.formatDateTime(order!.scheduledDate)}',
+              ),
+            ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'responsible'),
+            child: Text(l10n.orderAddResponsible),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'address'),
+            child: Text(l10n.orderAddressLabel),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'status':
+        await _selectStatus();
+      case 'schedule':
+        await _pickSchedule();
+      case 'responsible':
+        await _pickResponsible();
+      case 'address':
+        await _editAddress();
+    }
+    if (mounted) setState(() {});
+  }
+
+  /// Leaves this screen. Inside the "Nova OS" sheet it is the sheet's first
+  /// page, so the sheet itself closes.
+  void _popScreen([Object? result]) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(result);
+    } else {
+      Navigator.of(context, rootNavigator: true).pop(result);
+    }
+  }
+
+  /// "X": closes at once when nothing was filled; asks first otherwise.
+  void _close() {
+    if (_hasContent || _requestController.text.trim().isNotEmpty) {
+      _confirmDiscard();
+    } else {
+      setState(() => _leaving = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _popScreen();
+      });
+    }
+  }
+
+  /// "✓": saves and closes, like Lembretes. Does not wait for the server
+  /// (works offline). The request goes into the segment's "Observação" field
+  /// when there is one; otherwise it becomes the first comment once the
+  /// order has its id.
+  void _saveAndClose() {
+    if (_store.customer == null) return;
+    HapticFeedback.mediumImpact();
+    var request = _requestController.text.trim();
+    final requestField = orderRequestField(
+      context.read<SegmentConfigProvider>(),
+    );
+    if (requestField != null && request.isNotEmpty) {
+      _store.order?.customData = applyCustomFieldValue(
+        _store.order?.customData,
+        requestField,
+        request,
+      );
+      request = '';
+    }
+    final companyId = _store.companyId;
+    _store.deferSave = false;
+    _store.updateTotal();
+    _store.createItem(
+      onCreated: request.isEmpty || companyId == null
+          ? null
+          : (orderId) => addOrderComment(
+              companyId: companyId,
+              orderId: orderId,
+              text: request,
+            ),
+    );
+    setState(() => _leaving = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _popScreen(true);
+    });
+  }
+
+  /// "Falar": speech to text, then the assistant fills the order.
+  Future<void> _onTalk() async {
+    final text = await AppSheet.show<String>(
+      context,
+      (_) => SpeechInputSheet(listener: widget.speechListener),
+    );
+    if (!mounted || text == null || text.trim().isEmpty) return;
+    await _runAssistant(AssistantInput(text: text));
   }
 
   String _title(SegmentConfigProvider config) {
@@ -1452,8 +1880,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// Segment custom fields of the order (same fields and save as the legacy
   /// screen, see `order_custom_fields.dart`).
-  List<Widget> _buildCustomFields(SegmentConfigProvider config) {
-    final grouped = orderCustomFieldsFor(config);
+  List<Widget> _buildCustomFields(
+    SegmentConfigProvider config, {
+    bool withoutRequest = false,
+  }) {
+    final grouped = orderCustomFieldsFor(
+      config,
+      withoutRequest: withoutRequest,
+    );
     if (grouped.isEmpty) return const [];
     return [
       OrderCustomFieldSections(
