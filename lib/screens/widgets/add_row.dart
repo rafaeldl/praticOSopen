@@ -14,14 +14,24 @@ class AddRow extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.plain = false,
+    this.icon = CupertinoIcons.add,
+    this.destructive = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final bool plain;
 
+  /// Leading symbol; "+" by default.
+  final IconData icon;
+
+  /// Red (`danger`) instead of blue, for "Tirar … da OS".
+  final bool destructive;
+
   @override
   Widget build(BuildContext context) {
+    final color = (destructive ? AppColors.danger : AppColors.accentText)
+        .resolveFrom(context);
     return Semantics(
       button: true,
       label: label,
@@ -39,32 +49,22 @@ class AddRow extends StatelessWidget {
             child: Row(
               children: [
                 if (plain)
-                  Icon(
-                    CupertinoIcons.add,
-                    size: 24,
-                    color: AppColors.accentText.resolveFrom(context),
-                  )
+                  Icon(icon, size: 24, color: color)
                 else
                   Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryFill.resolveFrom(context),
-                    shape: BoxShape.circle,
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryFill.resolveFrom(context),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: 20, color: color),
                   ),
-                  child: Icon(
-                    CupertinoIcons.add,
-                    size: 20,
-                    color: AppColors.accentText.resolveFrom(context),
-                  ),
-                ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     label,
-                    style: AppTypography.bodyStrong.copyWith(
-                      color: AppColors.accentText.resolveFrom(context),
-                    ),
+                    style: AppTypography.bodyStrong.copyWith(color: color),
                   ),
                 ),
               ],

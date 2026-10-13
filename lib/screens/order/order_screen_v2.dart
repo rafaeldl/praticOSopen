@@ -4,6 +4,8 @@ import 'dart:math' show max;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/screens/device_list_screen.dart'
+    show kRemoveDeviceResult;
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
@@ -352,14 +354,20 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// Tapping a vehicle opens "Qual veículo?" straight away; the pick
-  /// replaces it. Removing it lives in the "…" menu.
+  /// replaces it; its "Tirar … da OS" row takes it out.
   Future<void> _changeDevice(DeviceAggr device) async {
     final result = await Navigator.pushNamed(
       context,
       '/device_list',
-      arguments: {'order': _store.order},
+      arguments: {'order': _store.order, 'current': device},
     );
-    if (!mounted || result is! Device || device.id == null) return;
+    if (!mounted || device.id == null) return;
+    if (result == kRemoveDeviceResult) {
+      _store.removeDevice(device.id!);
+      setState(() {});
+      return;
+    }
+    if (result is! Device) return;
     if (result.id == device.id) return;
     _store.removeDevice(device.id!);
     _store.addDevice(result);
@@ -678,15 +686,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
         ]),
         PullDownGroup([
-          if (canEdit)
-            for (final device in _store.devices)
-              if (device.id != null)
-                PullDownItem(
-                  value: 'remove-device:${device.id}',
-                  label: l10n.orderMenuRemoveDevice(device.name ?? ''),
-                  icon: CupertinoIcons.minus_circle,
-                  destructive: true,
-                ),
           if (canCancel)
             PullDownItem(
               value: 'cancel',
@@ -705,11 +704,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ],
     );
     if (!mounted || choice == null) return;
-    if (choice.startsWith('remove-device:')) {
-      _store.removeDevice(choice.substring('remove-device:'.length));
-      setState(() {});
-      return;
-    }
     switch (choice) {
       case 'status':
         await _selectStatus();

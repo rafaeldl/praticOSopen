@@ -24,6 +24,8 @@ import 'package:praticos/screens/customers/customer_list_screen.dart'
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/assistant/speech_listener.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/device_list_screen.dart'
+    show kRemoveDeviceResult;
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/services/segment_config_service.dart';
@@ -203,6 +205,22 @@ Future<void> _pump(
                       ),
                     ),
                     child: const Text('pick ABC1D23'),
+                  ),
+                ),
+              ),
+            );
+          }
+          if (settings.name == '/device_list' &&
+              (settings.arguments as Map?)?['current'] != null) {
+            // Fake "Qual veículo?": only its "Tirar … da OS" row.
+            return CupertinoPageRoute(
+              settings: settings,
+              builder: (context) => CupertinoPageScaffold(
+                child: Center(
+                  child: CupertinoButton(
+                    onPressed: () =>
+                        Navigator.pop(context, kRemoveDeviceResult),
+                    child: const Text('remove device'),
                   ),
                 ),
               ),
@@ -1361,10 +1379,12 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('order_header_device_d2')));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoActionSheet), findsNothing);
-      expect(find.text('pushed'), findsOneWidget);
+      expect(find.text('remove device'), findsOneWidget);
     });
 
-    testWidgets('"…" removes a vehicle from the order', (tester) async {
+    testWidgets('"Tirar … da OS" lives in the vehicle picker, not in "…"', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 2400);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -1372,8 +1392,12 @@ void main() {
       await _pump(tester, screen(store), args: {'order': twoCars()});
       await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
       await tester.pumpAndSettle();
-      expect(find.text('Tirar Gol da OS'), findsOneWidget);
-      await tester.tap(find.text('Tirar Uno da OS'));
+      expect(find.textContaining('da OS'), findsNothing);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('order_header_device_d2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('remove device'));
       await tester.pumpAndSettle();
       expect(store.devices.map((d) => d.id), ['d1']);
     });

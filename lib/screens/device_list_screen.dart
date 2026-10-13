@@ -14,6 +14,7 @@ import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -35,6 +36,9 @@ import 'package:provider/provider.dart';
 ///   [Device]; no swipe, no chevron.
 /// - **Settings mode** (from "Mais"): title "Veículos", chevron on every row
 ///   and swipe to edit / delete (delete needs `manageDevices`).
+/// Popped by "Qual veículo?" when "Tirar … da OS" is tapped.
+const kRemoveDeviceResult = 'remove-device';
+
 class DeviceListScreen extends StatefulWidget {
   const DeviceListScreen({
     super.key,
@@ -63,6 +67,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
 
   bool _argsRead = false;
   bool _selecting = false;
+
+  /// The order's vehicle being changed: offers "Tirar … da OS".
+  DeviceAggr? _current;
   String? _customerId;
   String? _customerName;
 
@@ -85,6 +92,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     _selecting = args != null && args.containsKey('order');
+    final current = args?['current'];
+    _current = current is DeviceAggr ? current : null;
     final order = args?['order'];
     if (order is Order) {
       _customerId = order.customer?.id;
@@ -250,11 +259,26 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             noMatchText: (q) => l10n.pickerNoDeviceWith(device, q),
             emptyIcon: config.deviceIcon,
             emptyTitle: '${l10n.no} $device ${l10n.registered}',
+            headerRows: (query) => [
+              if (query.isEmpty && _current != null) ...[
+                AddRow(
+                  key: const ValueKey('device-remove'),
+                  plain: true,
+                  destructive: true,
+                  icon: CupertinoIcons.minus_circle,
+                  label: l10n.orderMenuRemoveDevice(_current!.name ?? device),
+                  onTap: () => Navigator.pop(context, kRemoveDeviceResult),
+                ),
+                const PickerSeparator(),
+              ],
+            ],
             sections: (query) {
               final filtered = all.where((d) => _matchesQuery(d, query));
               final mine = filtered.where((d) => mineIds.contains(d.id));
               if (mine.isEmpty) {
-                return [PickerSection(items: filtered.map(_pickerItem).toList())];
+                return [
+                  PickerSection(items: filtered.map(_pickerItem).toList()),
+                ];
               }
               return [
                 PickerSection(
@@ -360,8 +384,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     final subtitleParts = [
       if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
       if (device.manufacturer?.isNotEmpty ?? false) device.manufacturer!,
-      if (management)
-        DeviceStatusStyle.label(l10n, device.status),
+      if (management) DeviceStatusStyle.label(l10n, device.status),
     ];
     final row = AppListRow(
       key: ValueKey('device-${device.id}'),

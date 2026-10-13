@@ -73,8 +73,8 @@ Order orderOf(String? customerId) => Order()
   ..customer = customerId == null
       ? null
       : (CustomerAggr()
-        ..id = customerId
-        ..name = 'Ana Ribeiro');
+          ..id = customerId
+          ..name = 'Ana Ribeiro');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -87,8 +87,9 @@ void main() {
   final uno = dev('d1', 'Fiat Uno 2015', 'ABC1D23');
   final gol = dev('d2', 'VW Gol', 'XYZ9K88');
 
-  testWidgets('selection mode asks which one, customer section first',
-      (tester) async {
+  testWidgets('selection mode asks which one, customer section first', (
+    tester,
+  ) async {
     await pumpList(
       tester,
       args: {'order': orderOf('c1')},
@@ -108,11 +109,14 @@ void main() {
     expect(find.byType(AppListRow), findsNWidgets(2));
   });
 
-  testWidgets('selection mode marks the vehicle already on the order',
-      (tester) async {
+  testWidgets('selection mode marks the vehicle already on the order', (
+    tester,
+  ) async {
     await pumpList(
       tester,
-      args: {'order': orderOf('c1')..devices = [aggr('d1')]},
+      args: {
+        'order': orderOf('c1')..devices = [aggr('d1')],
+      },
       devices: [uno, gol],
     );
     final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
@@ -122,28 +126,27 @@ void main() {
     );
   });
 
-  testWidgets('selection mode has no swipe and no chevron, tap pops the device',
-      (tester) async {
-    final get = await pumpList(
-      tester,
-      args: {'order': orderOf(null)},
-      devices: [uno],
-    );
-    expect(find.byType(Dismissible), findsNothing);
-    expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
-    expect(find.textContaining('de Ana'), findsNothing);
-    await tester.tap(find.text('Fiat Uno 2015'));
-    await tester.pumpAndSettle();
-    expect(get(), uno);
-  });
+  testWidgets(
+    'selection mode has no swipe and no chevron, tap pops the device',
+    (tester) async {
+      final get = await pumpList(
+        tester,
+        args: {'order': orderOf(null)},
+        devices: [uno],
+      );
+      expect(find.byType(Dismissible), findsNothing);
+      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
+      expect(find.textContaining('de Ana'), findsNothing);
+      await tester.tap(find.text('Fiat Uno 2015'));
+      await tester.pumpAndSettle();
+      expect(get(), uno);
+    },
+  );
 
-  testWidgets('without vehicles of the customer there is no extra section',
-      (tester) async {
-    await pumpList(
-      tester,
-      args: {'order': orderOf('c1')},
-      devices: [uno, gol],
-    );
+  testWidgets('without vehicles of the customer there is no extra section', (
+    tester,
+  ) async {
+    await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno, gol]);
     expect(find.textContaining(RegExp(r' de Ana$')), findsNothing);
     expect(find.textContaining('Outros'), findsNothing);
     expect(find.byType(AppListRow), findsNWidgets(2));
@@ -160,12 +163,37 @@ void main() {
     expect(pushed.last.name, '/device_form');
   });
 
-  testWidgets('swipe to delete without permission shows the warning',
-      (tester) async {
+  testWidgets('swipe to delete without permission shows the warning', (
+    tester,
+  ) async {
     await pumpList(tester, devices: [uno], canManage: false);
     await tester.drag(find.byType(Dismissible), const Offset(-600, 0));
     await tester.pumpAndSettle();
     expect(find.text('Sem Permissão'), findsOneWidget);
     expect(find.byType(Dismissible), findsOneWidget);
+  });
+
+  testWidgets('changing the order vehicle offers "Tirar … da OS" at the top', (
+    tester,
+  ) async {
+    final get = await pumpList(
+      tester,
+      args: {
+        'order': orderOf('c1'),
+        'current': DeviceAggr()
+          ..id = 'd1'
+          ..name = 'Uno',
+      },
+      devices: [uno, gol],
+    );
+    expect(find.text('Tirar Uno da OS'), findsOneWidget);
+    await tester.tap(find.text('Tirar Uno da OS'));
+    await tester.pumpAndSettle();
+    expect(get(), kRemoveDeviceResult);
+  });
+
+  testWidgets('adding a vehicle has no "Tirar … da OS" row', (tester) async {
+    await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno]);
+    expect(find.textContaining('da OS'), findsNothing);
   });
 }
