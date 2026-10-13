@@ -54,13 +54,13 @@ POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio
   3. catálogo da empresa (até 300 serviços e 300 produtos, nome + preço)
   4. Gemini (responseSchema JSON) — falhou → devolve a cota, 503 AI_UNAVAILABLE
   5. casa itens com o catálogo; cliente por nome (searchCustomers); veículo por placa/série
-  ◀── rascunho {transcript, customer, device, items[], notes, usage}
-App: preenche a OS em memória (deferSave), marca-texto no que veio da IA → "Salvar OS"
+  ◀── rascunho {transcript, customer, device, items[], notes, dueDate, usage}
+App: preenche a OS em memória (deferSave), ✦ azul no que veio da IA, aviso "Preenchi… · Desfazer" → ✓ no topo
 ```
 
 ## Regras de Negócio
 
-1. **A IA propõe, o usuário salva.** Nada é gravado até "Salvar OS"; as marcas somem ao salvar.
+1. **A IA propõe, o usuário salva.** Nada é gravado até o ✓ do topo; as marcas somem ao salvar. "Desfazer" tira o que a última leitura colocou.
 2. **Cada chamada conta**, aplicada ou não. Chamada que falha antes de o modelo responder é devolvida.
 3. **Limite por plano** (spec 2026-10-09 §4.2): Free 10, Starter 150, Pro 400, Business 1.000 por mês. `settings/ai.monthlyLimit` sobrepõe (piloto; `-1` = ilimitado). Mês = mês UTC; mês novo = documento novo, sem job de reset.
 4. **Cota esgotada** → mensagem clara e o fluxo manual continua livre.
@@ -68,9 +68,10 @@ App: preenche a OS em memória (deferSave), marca-texto no que veio da IA → "S
 6. **Cliente:** só é escolhido quando o nome bate com um cadastrado (exato, ou único resultado). Sem cadastro, aparece "Ouvi “X”. Toque para escolher o cliente". Nunca troca um cliente já escolhido.
 7. **Veículo:** só pela placa/série cadastrada (variações `ABC1234`/`ABC-1234`). Placa lida que não existe → "“Classic · NXS8620” não está no cadastro" (toque para escolher). Nome sozinho não escolhe veículo.
 8. **Isolamento:** a empresa vem do token + `X-Company-Id` validado pela membership; o corpo não aceita `companyId` (schema `strict`). Toda busca recebe esse `companyId`.
-9. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor). Logs só têm empresa, contagem de itens, código de erro e latência — nunca texto, transcrição ou imagem.
-10. **Permissão:** `write:orders` (técnico não usa).
-11. **Câmera** só abre ao tocar em Foto. **Microfone:** nesta versão o "Falar" usa o ditado do teclado do sistema, então o app não pede permissão de microfone. A Function já aceita `audio` (m4a/aac, ≤3 MB) para quando o app gravar áudio.
+9. **Relato e prazo:** `notes` (o que o cliente pediu ou o defeito) vai para "O que o cliente pediu" se estiver vazio. `dueDate` ("pronto sexta", "amanhã") vem como `YYYY-MM-DD` (ou `YYYY-MM-DDTHH:MM` quando a hora foi dita) e preenche "Fica pronto" se não houver data; sem hora, fica às 18:00. O modelo recebe a data de hoje no fuso de São Paulo para resolver dias da semana.
+10. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor). Logs só têm empresa, contagem de itens, código de erro e latência — nunca texto, transcrição ou imagem.
+11. **Permissão:** `write:orders` (técnico não usa).
+12. **Câmera** só abre ao tocar em Foto. **Microfone:** o "Falar" ouve na própria barra (reconhecimento de fala do aparelho, `speech_to_text`) e manda o texto; sem permissão, a barra vira um campo para digitar. A Function já aceita `audio` (m4a/aac, ≤3 MB) para quando o app gravar áudio.
 
 ## Exemplos de Uso
 

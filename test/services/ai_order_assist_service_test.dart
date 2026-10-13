@@ -33,7 +33,13 @@ void main() {
                   {'id': 's3', 'name': 'Pintura', 'value': 300},
                 ],
               },
-              {'kind': 'product', 'name': 'Massa', 'value': null, 'quantity': 2, 'catalogId': null},
+              {
+                'kind': 'product',
+                'name': 'Massa',
+                'value': null,
+                'quantity': 2,
+                'catalogId': null,
+              },
             ],
             'notes': null,
             'usage': {'used': 3, 'limit': 10},
@@ -64,7 +70,10 @@ void main() {
 
     test('maps the error codes', () {
       expect(
-        errorOf(403, {'success': false, 'error': {'code': 'AI_DISABLED'}}).error,
+        errorOf(403, {
+          'success': false,
+          'error': {'code': 'AI_DISABLED'},
+        }).error,
         AiAssistError.disabled,
       );
       final quota = errorOf(429, {
@@ -77,7 +86,10 @@ void main() {
       expect(quota.error, AiAssistError.quotaExceeded);
       expect(quota.limit, 10);
       expect(
-        errorOf(503, {'success': false, 'error': {'code': 'AI_UNAVAILABLE'}}).error,
+        errorOf(503, {
+          'success': false,
+          'error': {'code': 'AI_UNAVAILABLE'},
+        }).error,
         AiAssistError.unavailable,
       );
       expect(errorOf(500, {'oops': true}).error, AiAssistError.other);
@@ -86,9 +98,27 @@ void main() {
     test('non-JSON body is "other"', () {
       expect(
         () => parseAiOrderAssistResponse(502, '<html>'),
-        throwsA(isA<AiOrderAssistException>()
-            .having((e) => e.error, 'error', AiAssistError.other)),
+        throwsA(
+          isA<AiOrderAssistException>().having(
+            (e) => e.error,
+            'error',
+            AiAssistError.other,
+          ),
+        ),
       );
+    });
+  });
+
+  group('parseDueDate', () {
+    test('date only is ready at 18:00; date and time keep the time', () {
+      expect(parseDueDate('2026-10-16'), DateTime(2026, 10, 16, 18));
+      expect(parseDueDate('2026-10-16T09:30'), DateTime(2026, 10, 16, 9, 30));
+    });
+
+    test('anything else is no date', () {
+      expect(parseDueDate(null), isNull);
+      expect(parseDueDate('sexta'), isNull);
+      expect(parseDueDate(20261016), isNull);
     });
   });
 }

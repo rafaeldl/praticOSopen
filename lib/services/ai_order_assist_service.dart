@@ -55,16 +55,16 @@ class AiDraftItem {
   bool get isProduct => kind == 'product';
 
   factory AiDraftItem.fromJson(Map<String, dynamic> json) => AiDraftItem(
-        kind: json['kind'] == 'product' ? 'product' : 'service',
-        name: json['name'] as String? ?? '',
-        value: (json['value'] as num?)?.toDouble(),
-        quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-        catalogId: json['catalogId'] as String?,
-        alternatives: [
-          for (final a in (json['alternatives'] as List? ?? const []))
-            AiCatalogOption.fromJson(Map<String, dynamic>.from(a as Map)),
-        ],
-      );
+    kind: json['kind'] == 'product' ? 'product' : 'service',
+    name: json['name'] as String? ?? '',
+    value: (json['value'] as num?)?.toDouble(),
+    quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+    catalogId: json['catalogId'] as String?,
+    alternatives: [
+      for (final a in (json['alternatives'] as List? ?? const []))
+        AiCatalogOption.fromJson(Map<String, dynamic>.from(a as Map)),
+    ],
+  );
 }
 
 /// Customer registered in the company that the assistant matched.
@@ -76,10 +76,10 @@ class AiCustomerHit {
   final String? phone;
 
   factory AiCustomerHit.fromJson(Map<String, dynamic> json) => AiCustomerHit(
-        id: json['id'] as String,
-        name: json['name'] as String? ?? '',
-        phone: json['phone'] as String?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String? ?? '',
+    phone: json['phone'] as String?,
+  );
 }
 
 /// Device registered in the company that the assistant matched.
@@ -97,11 +97,11 @@ class AiDeviceHit {
   final String? manufacturer;
 
   factory AiDeviceHit.fromJson(Map<String, dynamic> json) => AiDeviceHit(
-        id: json['id'] as String,
-        name: json['name'] as String? ?? '',
-        serial: json['serial'] as String?,
-        manufacturer: json['manufacturer'] as String?,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String? ?? '',
+    serial: json['serial'] as String?,
+    manufacturer: json['manufacturer'] as String?,
+  );
 }
 
 /// Structured draft of a new order returned by `aiOrderAssist`. Nothing is
@@ -116,6 +116,7 @@ class AiOrderDraft {
     this.deviceGuessSerial,
     this.items = const [],
     this.notes,
+    this.dueDate,
     this.used,
     this.limit,
   });
@@ -130,6 +131,9 @@ class AiOrderDraft {
   final String? deviceGuessSerial;
   final List<AiDraftItem> items;
   final String? notes;
+
+  /// When the customer wants it ready. Without a spoken time it is 18:00.
+  final DateTime? dueDate;
   final int? used;
 
   /// -1 = unlimited.
@@ -146,8 +150,9 @@ class AiOrderDraft {
     final deviceGuess = map(device?['guess']);
     return AiOrderDraft(
       transcript: json['transcript'] as String?,
-      customer:
-          customerMatch == null ? null : AiCustomerHit.fromJson(customerMatch),
+      customer: customerMatch == null
+          ? null
+          : AiCustomerHit.fromJson(customerMatch),
       customerGuess: map(customer?['guess'])?['name'] as String?,
       device: deviceMatch == null ? null : AiDeviceHit.fromJson(deviceMatch),
       deviceGuessName: deviceGuess?['name'] as String?,
@@ -157,10 +162,29 @@ class AiOrderDraft {
           AiDraftItem.fromJson(Map<String, dynamic>.from(i as Map)),
       ],
       notes: json['notes'] as String?,
+      dueDate: parseDueDate(json['dueDate']),
       used: (usage?['used'] as num?)?.toInt(),
       limit: (usage?['limit'] as num?)?.toInt(),
     );
   }
+}
+
+/// "YYYY-MM-DD" (ready at 18:00) or "YYYY-MM-DDTHH:MM", in local time.
+DateTime? parseDueDate(Object? value) {
+  if (value is! String) return null;
+  final match = RegExp(
+    r'^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$',
+  ).firstMatch(value.trim());
+  if (match == null) return null;
+  int at(int i) => int.parse(match.group(i)!);
+  final hasTime = match.group(4) != null;
+  return DateTime(
+    at(1),
+    at(2),
+    at(3),
+    hasTime ? at(4) : 18,
+    hasTime ? at(5) : 0,
+  );
 }
 
 /// Error codes from the server (docs/AI_ORDER_ASSIST.md).
@@ -187,7 +211,8 @@ abstract class AiOrderAssistClient {
 }
 
 class AiOrderAssistService implements AiOrderAssistClient {
-  AiOrderAssistService({http.Client? client}) : _client = client ?? http.Client();
+  AiOrderAssistService({http.Client? client})
+    : _client = client ?? http.Client();
 
   final http.Client _client;
 

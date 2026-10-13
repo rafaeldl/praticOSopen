@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show max;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
@@ -141,6 +142,7 @@ class _DraftUndo {
   final String? deviceGuess;
   bool customer = false;
   bool request = false;
+  bool due = false;
   final List<String> devices = [];
   final List<Object> lines = [];
 }
@@ -212,6 +214,20 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// What the last draft added, for "Desfazer".
   _DraftUndo? _undo;
+
+  /// Height of what floats at the bottom (bar plus note or transcript), so
+  /// the last card can always scroll above it.
+  final GlobalKey _floatingKey = GlobalKey();
+  double _floatingHeight = 0;
+
+  void _measureFloating() {
+    final box = _floatingKey.currentContext?.findRenderObject() as RenderBox?;
+    if (!mounted || box == null || !box.hasSize) return;
+    final height = box.size.height;
+    if ((height - _floatingHeight).abs() > 1) {
+      setState(() => _floatingHeight = height);
+    }
+  }
 
   /// Photos attached in the "Nova OS" sheet; uploaded once the order has
   /// its id (an order is not created just to hold them).
@@ -1230,6 +1246,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _requestController.clear();
         _marked.remove('request');
       }
+      if (undo.due) {
+        runInAction(() {
+          _store.order!.dueDate = null;
+          _store.dueDate = null;
+        });
+        _marked.remove('due');
+      }
       _customerGuess = undo.customerGuess;
       _deviceGuess = undo.deviceGuess;
     }
@@ -1382,6 +1405,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       undo.request = true;
       used = true;
     }
+    // Deadline ("pronto sexta"): only when none was picked yet.
+    if (draft.dueDate != null && _store.order?.dueDate == null) {
+      _store.setDueDate(draft.dueDate!);
+      _marked.add('due');
+      undo.due = true;
+      used = true;
+    }
     if (used) _undo = undo;
     setState(() {});
     return used;
@@ -1462,6 +1492,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   Widget _buildNewSheet(SegmentConfigProvider config) {
     final l10n = context.l10n;
     final canSave = _store.customer != null && !_assistantBusy;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloating());
     return CupertinoPageScaffold(
       backgroundColor: AppColors.groupedBackground.resolveFrom(context),
       child: SafeArea(
@@ -1480,7 +1511,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     controller: _scroll,
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.only(bottom: 120),
+                    padding: EdgeInsets.only(
+                      bottom: max(120, _floatingHeight + AppSpacing.lg),
+                    ),
                     children: [
                       _buildWhoCard(config),
                       _buildItemsCard(),
@@ -1523,6 +1556,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               right: AppSpacing.blockMargin,
               bottom: 0,
               child: SafeArea(
+                key: _floatingKey,
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -1756,6 +1790,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           icon: CupertinoIcons.calendar,
           title: l10n.orderDueLabel,
           showChevron: false,
+          marked: _marked.contains('due'),
           onTap: _pickDueDate,
           trailing: due == null
               ? Text(

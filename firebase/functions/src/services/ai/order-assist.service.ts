@@ -96,6 +96,9 @@ export const llmDraftSchema = z.object({
     .catch(undefined),
   items: z.array(draftItemSchema).max(30).catch([]).default([]),
   notes: optionalText,
+  /** When the customer wants it ready: "YYYY-MM-DD", "HH:MM" only when said. */
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().catch(undefined),
+  dueTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional().catch(undefined),
 });
 
 export type LlmDraft = z.infer<typeof llmDraftSchema>;
@@ -124,6 +127,8 @@ export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
       },
     },
     notes: { type: 'STRING' },
+    dueDate: { type: 'STRING' },
+    dueTime: { type: 'STRING' },
   },
   required: ['items'],
 };
@@ -176,7 +181,14 @@ export interface CompanyCatalog {
 const LANGUAGE: Record<string, string> = { pt: 'Brazilian Portuguese', en: 'English', es: 'Spanish' };
 const PROMPT_CATALOG_LIMIT = 150;
 
-export function buildSystemPrompt(locale: string, deviceLabel?: string): string {
+/** Today in Brazil (the app's main market), e.g. "2026-10-13 (Tuesday)". */
+export function todayLabel(now: Date = new Date(), timeZone = 'America/Sao_Paulo'): string {
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'long' }).format(now);
+  return `${date} (${weekday})`;
+}
+
+export function buildSystemPrompt(locale: string, deviceLabel?: string, today: string = todayLabel()): string {
   const device = deviceLabel || 'device (vehicle, appliance, equipment)';
   return [
     'You help a small service business open a service order (OS) from a photo, a short audio or a text.',
@@ -189,7 +201,10 @@ export function buildSystemPrompt(locale: string, deviceLabel?: string): string 
     '  one clearly matches; otherwise use a short name. "value" is the unit price in the currency, as a number',
     '  ("500" → 500, "1,5 mil" → 1500), or null when no price was said. "200 cada" means unit value 200 with',
     '  quantity. "garantia" means value 0. Parts/materials are kind "product"; labor is kind "service".',
-    '- notes: anything else useful for the order (defects seen in the photo, requests), short.',
+    `- dueDate: when the order must be ready ("pronto sexta", "entregar amanhã", "dia 20"), as YYYY-MM-DD.`,
+    `  Today is ${today}; a weekday means the next one after today. dueTime as HH:MM only when a time was said.`,
+    '  Leave both out when no deadline was said, and do not repeat the deadline in notes.',
+    '- notes: what the customer asked or the defect (seen in the photo or said), short. Not the deadline.',
     `Write names and notes in ${LANGUAGE[locale] ?? LANGUAGE.pt}.`,
   ].join('\n');
 }
@@ -314,6 +329,8 @@ export interface OrderDraft {
   } | null;
   items: DraftItem[];
   notes: string | null;
+  /** "YYYY-MM-DD", or "YYYY-MM-DDTHH:MM" when a time was said. */
+  dueDate: string | null;
   usage: { used: number; limit: number };
 }
 
@@ -440,6 +457,7 @@ export async function runOrderAssist(
     device,
     items: draft.items.map((item) => toItem(item, catalog)),
     notes: draft.notes ?? null,
+    dueDate: draft.dueDate ? (draft.dueTime ? `${draft.dueDate}T${draft.dueTime}` : draft.dueDate) : null,
     usage: { used: reservation.used, limit: reservation.limit },
   };
 }

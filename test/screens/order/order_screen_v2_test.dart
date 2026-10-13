@@ -647,6 +647,62 @@ void main() {
       );
     });
 
+    testWidgets('the deadline fills "Fica pronto"; "Desfazer" clears it', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(AiOrderDraft(dueDate: DateTime(2026, 10, 16, 18))),
+        ),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(store.order!.dueDate, DateTime(2026, 10, 16, 18));
+      final due = find.byKey(const ValueKey('new_order_due'));
+      expect(
+        find.descendant(
+          of: due,
+          matching: find.byIcon(CupertinoIcons.sparkles),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+      expect(store.order!.dueDate, isNull);
+      expect(
+        find.descendant(
+          of: due,
+          matching: find.byIcon(CupertinoIcons.sparkles),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('the last card scrolls above the note and the bar', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        assistantScreen(
+          OrderStore(),
+          FakeAssistant(const AiOrderDraft(notes: 'Barulho ao frear')),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      final last = tester.getRect(find.byKey(const ValueKey('new_order_more')));
+      final note = tester.getRect(find.text('Desfazer'));
+      expect(last.bottom, lessThan(note.top));
+    });
+
     testWidgets('no microphone: the bar turns into a text field', (
       tester,
     ) async {
