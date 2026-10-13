@@ -4426,6 +4426,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAll => 'All';
 
   @override
+  String get filterMine => 'Mine';
+
+  @override
+  String get sectionScheduledToday => 'Today';
+
+  @override
+  String get nextVisitLabel => 'Now';
+
+  @override
+  String homeWithYouToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count with you today',
+      one: '1 with you today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeWithYou(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count with you',
+      one: '1 with you',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextVisit(String customer, String time) {
+    return 'Next: $customer, at $time.';
+  }
+
+  @override
+  String nextVisitDevice(String customer, String device, String time) {
+    return 'Next: $customer, $device, at $time.';
+  }
+
+  @override
+  String openOrderNumber(String number) {
+    return 'Open order $number';
+  }
+
+  @override
+  String get noOrdersWithYou => 'No orders with you.';
+
+  @override
   String get sectionLate => 'Overdue';
 
   @override
@@ -4509,19 +4558,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstOrderTitle =>
-      'Create your first service order and send it to the customer for approval.';
+      'Create your first service order. It takes less than a minute.';
 
   @override
   String get howItWorks => 'How it works';
 
   @override
-  String get howItWorksStep1 => 'Pick the customer and what will be done.';
+  String get firstOrderLabel => 'Start here';
 
   @override
-  String get howItWorksStep2 => 'Send the quote for the customer to approve.';
+  String get homeNoOrdersYet => 'None yet';
 
   @override
-  String get howItWorksStep3 => 'Follow the work and get paid.';
+  String get howItWorksStep1 => '1. Write down the job';
+
+  @override
+  String get howItWorksStep1Detail => 'customer and services';
+
+  @override
+  String howItWorksStep1DetailDevice(String device) {
+    return 'customer, $device and services';
+  }
+
+  @override
+  String get howItWorksStep2 => '2. Send the quote';
+
+  @override
+  String get howItWorksStep2Detail => 'over WhatsApp, with a link';
+
+  @override
+  String get howItWorksStep3 => '3. Get paid and deliver';
+
+  @override
+  String get howItWorksStep3Detail => 'the app reminds you who still owes';
+
+  @override
+  String nextStepLateShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders are past due.',
+      one: '1 order is past due.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepDueTodayShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders due today.',
+      one: '1 order due today.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepQuotesWaitingShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quotes without an answer.',
+      one: '1 quote without an answer.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get searchNotFoundLoaded => 'Not found in the loaded orders.';

@@ -68,7 +68,7 @@ class OrderListRow extends StatelessWidget {
               Text(
                 valueText!,
                 style: AppTypography.body.copyWith(
-                  color: secondary,
+                  color: text,
                   fontFeatures: AppTypography.tabular,
                 ),
               ),

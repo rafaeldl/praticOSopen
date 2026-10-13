@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "617dec62ab0194ed713015cf523611ccb3f99b27e3a6d735fe261e69f28d664e",
+      "sha": "2bb6c5211f2edc8ec40fc284d1a42dff1fb504d010ba820f633cfb306ce37bfa",
       "scope": "**/*"
     },
     {
@@ -36,20 +36,20 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Among the added lines, is there at least one declared identifier (class, variable, field, method, enum or constant name) or quoted map/JSON key spelled as a Portuguese word, such as cliente, valor, pendente or statusDaOS? Text inside Text(...), l10n strings and comments never counts.",
+          "instructions": "Is any name declared on an added line (after class, enum, final, var, const, static, a type, or in a parameter list) a Portuguese word like cliente, valor, pendente, servico, statusDaOS? Answer only about declared names; strings, Text(...), l10n keys and comments never count.",
           "criteria": {
-            "true": "final valorTotal = 0; map['cliente'] = c; static const pendente = 'pendente';",
-            "false": "final total = 0; Text('Cliente'); // calcula o total"
+            "true": "final valorTotal = 0; class StatusOS {} static const pendente = 'pendente';",
+            "false": "final total = 0; Text('Cliente'); // calcula o total; context.l10n.cliente"
           }
         }
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 11,
-        "median": 0.19,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 15,
+        "median": 0.1,
         "min": 0.06,
-        "max": 0.37,
+        "max": 0.39,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -79,13 +79,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 11,
         "median": 0.05,
-        "min": 0.04,
-        "max": 0.06,
+        "min": 0.03,
+        "max": 0.4,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -108,11 +108,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 1,
+        "median": 0.03,
+        "min": 0.03,
+        "max": 0.03,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -141,13 +141,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
-        "median": 0.04,
-        "min": 0.03,
-        "max": 0.04,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 15,
+        "median": 0.03,
+        "min": 0.02,
+        "max": 0.09,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -174,13 +174,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
-        "median": 0.04,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 15,
+        "median": 0.05,
         "min": 0.04,
-        "max": 0.05,
+        "max": 0.07,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -203,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -281,13 +281,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.04,
-        "min": 0.04,
-        "max": 0.04,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 11,
+        "median": 0.12,
+        "min": 0.02,
+        "max": 0.25,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -327,13 +327,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.04,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 11,
+        "median": 0.06,
         "min": 0.04,
-        "max": 0.04,
+        "max": 0.12,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -377,11 +377,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 2,
+        "median": 0.08499999999999999,
+        "min": 0.06,
+        "max": 0.11,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -410,13 +410,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.025,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 11,
+        "median": 0.12,
         "min": 0.02,
-        "max": 0.03,
+        "max": 0.14,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -443,13 +443,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.03,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 11,
+        "median": 0.05,
         "min": 0.03,
-        "max": 0.03,
+        "max": 0.21,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -472,7 +472,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -501,7 +501,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -530,7 +530,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -560,11 +560,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-13T13:16:01.691Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "min": 0.01,
+        "max": 0.04,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -590,11 +590,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 2,
+        "median": 0.25,
+        "min": 0.15,
+        "max": 0.35,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -632,13 +632,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 15,
         "median": 0.01,
         "min": 0.01,
         "max": 0.01,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -661,13 +661,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
+        "at": "2026-10-13T13:16:01.691Z",
+        "hunks": 15,
         "median": 0.01,
         "min": 0.01,
         "max": 0.02,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {

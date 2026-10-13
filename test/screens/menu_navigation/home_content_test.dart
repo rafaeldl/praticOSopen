@@ -6,6 +6,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/next_step_block.dart';
@@ -47,7 +48,12 @@ class _Host extends StatefulWidget {
     this.onRetry,
     this.onLoadMore,
     this.onViewReported,
+    this.technician = false,
+    this.onOpenOrder,
   });
+
+  final bool technician;
+  final ValueChanged<Order>? onOpenOrder;
 
   final List<Order> orders;
   final bool isLoading;
@@ -66,7 +72,7 @@ class _Host extends StatefulWidget {
 }
 
 class _HostState extends State<_Host> {
-  HomeView view = HomeView.open;
+  late HomeView view = widget.technician ? HomeView.mine : HomeView.open;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +99,10 @@ class _HostState extends State<_Host> {
         'done' => 'Concluído',
         _ => 'Cancelado',
       },
-      onOpenOrder: (_) {},
+      onOpenOrder: widget.onOpenOrder ?? (_) {},
+      technician: widget.technician,
+      currentUserId: 'u1',
+      deviceLabel: 'Veículo',
       onNewOrder: widget.onNewOrder ?? () {},
       onRetry: widget.onRetry ?? () {},
       onLoadMore: widget.onLoadMore ?? () {},
@@ -241,6 +250,9 @@ void main() {
       onLoadMore: () => loadMore++,
       orders: [_order('Ana', 'progress')],
     )));
+    expect(find.byType(CupertinoSearchTextField), findsNothing);
+    await tester.tap(find.byIcon(CupertinoIcons.search));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(CupertinoSearchTextField), 'zzz');
     await tester.pump();
     expect(find.text('Não achei nas OS carregadas.'), findsOneWidget);
@@ -314,5 +326,118 @@ void main() {
       tester.getTopLeft(find.text('Ana Ribeiro')).dx,
       tester.getTopLeft(find.text('Bruno')).dx,
     );
+  });
+
+  testWidgets('search closes with Cancelar and clears the query',
+      (tester) async {
+    await tester.pumpWidget(_app(_Host(
+      orders: [_order('Ana', 'progress'), _order('Bia', 'progress', number: 2)],
+    )));
+    await tester.tap(find.byIcon(CupertinoIcons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(CupertinoSearchTextField), 'ana');
+    await tester.pump();
+    expect(find.text('Bia'), findsNothing);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoSearchTextField), findsNothing);
+    expect(find.text('Bia'), findsOneWidget);
+  });
+
+  testWidgets('"…" menu is titled with the screen name', (tester) async {
+    await tester.pumpWidget(_app(_Host(orders: [_order('Ana', 'progress')])));
+    await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(CupertinoActionSheet),
+        matching: find.text('Ordens de serviço'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('floating Nova OS has no icon', (tester) async {
+    await tester.pumpWidget(_app(_Host(orders: [_order('Ana', 'progress')])));
+    expect(
+      find.descendant(
+        of: find.byType(PrimaryButton),
+        matching: find.byIcon(CupertinoIcons.add),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('first time: label, subtitle and steps with detail',
+      (tester) async {
+    await tester.pumpWidget(_app(const _Host(
+      orders: [],
+      hasAnyOrders: false,
+    )));
+    expect(find.text('Nenhuma ainda'), findsOneWidget);
+    expect(find.text('Comece por aqui'), findsOneWidget);
+    expect(find.text('1. Anote o que vai ser feito'), findsOneWidget);
+    expect(find.text('pelo WhatsApp, com um link'), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.search), findsNothing);
+  });
+
+  testWidgets('large text: short sentence and no "Hoje" label',
+      (tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+      child: _app(_Host(orders: [
+        _order('Carlos', 'progress', due: DateTime(2026, 10, 10)),
+      ])),
+    ));
+    expect(find.text('1 OS passou do prazo.'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NextStepBlock),
+        matching: find.text('Hoje'),
+      ),
+      findsNothing,
+    );
+  });
+
+  group('technician', () {
+    Order visit(String customer, int number, int hour, {String user = 'u1'}) =>
+        _order(customer, 'approved', number: number)
+          ..scheduledDate = DateTime(2026, 10, 12, hour, 30)
+          ..assignedTo = (UserAggr()..id = user);
+
+    testWidgets('"Agora" block opens the next visit, no floating button',
+        (tester) async {
+      Order? opened;
+      await tester.pumpWidget(_app(_Host(
+        technician: true,
+        onOpenOrder: (o) => opened = o,
+        orders: [
+          visit('Ana Ribeiro', 183, 11),
+          visit('Bia', 190, 12, user: 'u2'),
+        ],
+      )));
+      expect(find.text('Agora'), findsOneWidget);
+      expect(find.text('Próximo: Ana, às 11:30.'), findsOneWidget);
+      expect(find.text('1 com você hoje'), findsOneWidget);
+      expect(find.text('Minhas'), findsOneWidget);
+      expect(find.text('Bia'), findsNothing);
+      expect(find.byIcon(CupertinoIcons.ellipsis), findsNothing);
+      // Only the block's button: no floating "Nova OS".
+      expect(find.byType(PrimaryButton), findsOneWidget);
+      await tester.tap(find.text('Abrir OS 183'));
+      expect(opened?.number, 183);
+    });
+
+    testWidgets('nothing assigned: empty state offers every order',
+        (tester) async {
+      await tester.pumpWidget(_app(_Host(
+        technician: true,
+        orders: [visit('Bia', 190, 12, user: 'u2')],
+      )));
+      expect(find.text('Nenhuma OS com você.'), findsOneWidget);
+      await tester.tap(find.text('Ver todas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Bia'), findsOneWidget);
+    });
   });
 }

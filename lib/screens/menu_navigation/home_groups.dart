@@ -9,17 +9,24 @@ enum HomeView {
   all,
 
   /// Canceled orders ("…" menu).
-  canceled;
+  canceled,
+
+  /// Technician: the open orders assigned to them ("Minhas").
+  mine;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
     HomeView.open => 'open',
     HomeView.all => null,
     HomeView.canceled => 'canceled',
+    HomeView.mine => 'open',
   };
 
-  /// Whether the "Em aberto | Todas" toggle is shown in this view.
-  bool get isSegmented => this == HomeView.open || this == HomeView.all;
+  /// Whether the "Em aberto | Todas" (or "Minhas | Todas") toggle is shown.
+  bool get isSegmented => this != HomeView.canceled;
+
+  /// Views whose list is grouped by urgency (every open order is loaded).
+  bool get isOpenList => this == HomeView.open || this == HomeView.mine;
 }
 
 /// Urgency sections of the "Em aberto" list, in display order.
@@ -84,7 +91,10 @@ class HomeRules {
 
   /// Groups open orders; empty groups are absent. Late and due-today sections
   /// are ordered by due date, the rest keeps the incoming order.
-  static Map<HomeGroup, List<Order>> groupOpen(List<Order> orders, DateTime now) {
+  static Map<HomeGroup, List<Order>> groupOpen(
+    List<Order> orders,
+    DateTime now,
+  ) {
     final result = <HomeGroup, List<Order>>{};
     for (final group in HomeGroup.values) {
       final items = orders.where((o) => groupOf(o, now) == group).toList();
@@ -104,7 +114,9 @@ class HomeRules {
     final result = <MapEntry<DateTime?, List<Order>>>[];
     for (final o in orders) {
       final created = o.createdAt;
-      final key = created == null ? null : DateTime(created.year, created.month);
+      final key = created == null
+          ? null
+          : DateTime(created.year, created.month);
       if (result.isNotEmpty && result.last.key == key) {
         result.last.value.add(o);
       } else {
@@ -134,11 +146,42 @@ class HomeRules {
         )
         .toList();
     if (stale.isNotEmpty) {
-      final target = stale.any((o) => groupOf(o, now) == HomeGroup.waitingApproval)
+      final target =
+          stale.any((o) => groupOf(o, now) == HomeGroup.waitingApproval)
           ? HomeGroup.waitingApproval
           : HomeGroup.approved;
       return NextStep(NextStepKind.quotesWaiting, stale.length, target);
     }
     return null;
+  }
+
+  /// Orders assigned to [userId] ("Minhas").
+  static List<Order> assignedTo(List<Order> orders, String? userId) {
+    if (userId == null) return const [];
+    return orders.where((o) => o.assignedTo?.id == userId).toList();
+  }
+
+  static bool isScheduledToday(Order o, DateTime now) {
+    final at = o.scheduledDate;
+    if (at == null || isFinished(o)) return false;
+    return _day(at) == _day(now);
+  }
+
+  /// Unfinished orders scheduled for today, by time.
+  static List<Order> scheduledToday(List<Order> orders, DateTime now) {
+    final items = orders.where((o) => isScheduledToday(o, now)).toList()
+      ..sort((a, b) => a.scheduledDate!.compareTo(b.scheduledDate!));
+    return items;
+  }
+
+  /// The technician's "Agora" order: today's first visit not started yet,
+  /// else the first one still running. Null when nothing is scheduled today.
+  static Order? nextVisit(List<Order> orders, DateTime now) {
+    final today = scheduledToday(orders, now);
+    if (today.isEmpty) return null;
+    return today.firstWhere(
+      (o) => o.status != 'progress',
+      orElse: () => today.first,
+    );
   }
 }

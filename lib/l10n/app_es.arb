@@ -2023,6 +2023,59 @@
   "orderMoreActions": "Más acciones",
   "filterOpen": "Abiertas",
   "filterAll": "Todas",
+  "filterMine": "Mías",
+  "sectionScheduledToday": "Hoy",
+  "nextVisitLabel": "Ahora",
+  "homeWithYouToday": "{count, plural, =1{1 contigo hoy} other{{count} contigo hoy}}",
+  "@homeWithYouToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWithYou": "{count, plural, =1{1 contigo} other{{count} contigo}}",
+  "@homeWithYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextVisit": "Siguiente: {customer}, a las {time}.",
+  "@nextVisit": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "nextVisitDevice": "Siguiente: {customer}, {device}, a las {time}.",
+  "@nextVisitDevice": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "device": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openOrderNumber": "Abrir OS {number}",
+  "@openOrderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "noOrdersWithYou": "Ninguna OS contigo.",
   "sectionLate": "Atrasadas",
   "sectionDueToday": "Para hoy",
   "sectionInProgress": "En curso",
@@ -2076,11 +2129,48 @@
       }
     }
   },
-  "firstOrderTitle": "Crea tu primera orden de servicio y envíala al cliente para que la apruebe.",
+  "firstOrderTitle": "Crea tu primera orden de servicio. Toma menos de un minuto.",
   "howItWorks": "Cómo funciona",
-  "howItWorksStep1": "Elige al cliente y lo que se va a hacer.",
-  "howItWorksStep2": "Envía el presupuesto para que el cliente lo apruebe.",
-  "howItWorksStep3": "Sigue el trabajo y cobra.",
+  "firstOrderLabel": "Empieza aquí",
+  "homeNoOrdersYet": "Ninguna todavía",
+  "howItWorksStep1": "1. Anota lo que se va a hacer",
+  "howItWorksStep1Detail": "cliente y servicios",
+  "howItWorksStep1DetailDevice": "cliente, {device} y servicios",
+  "@howItWorksStep1DetailDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "howItWorksStep2": "2. Envía el presupuesto",
+  "howItWorksStep2Detail": "por WhatsApp, con un enlace",
+  "howItWorksStep3": "3. Cobra y entrega",
+  "howItWorksStep3Detail": "la app recuerda quién falta pagar",
+  "nextStepLateShort": "{count, plural, =1{1 OS pasó el plazo.} other{{count} OS pasaron el plazo.}}",
+  "@nextStepLateShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepDueTodayShort": "{count, plural, =1{1 OS para hoy.} other{{count} OS para hoy.}}",
+  "@nextStepDueTodayShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepQuotesWaitingShort": "{count, plural, =1{1 presupuesto sin respuesta.} other{{count} presupuestos sin respuesta.}}",
+  "@nextStepQuotesWaitingShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "searchNotFoundLoaded": "No lo encontré en las OS cargadas.",
   "searchOlder": "Buscar en las más antiguas",
   "noOpenOrders": "Ninguna OS abierta.",

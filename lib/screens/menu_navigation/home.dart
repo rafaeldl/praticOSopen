@@ -34,7 +34,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
-  HomeView _view = HomeView.open;
+  /// Technicians start on "Minhas" (prototype "Início · técnico").
+  late HomeView _view =
+      _authService.isTechnician ? HomeView.mine : HomeView.open;
   bool? _companyHasOrders;
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
@@ -133,6 +135,9 @@ class _HomeState extends State<Home> {
         hasAnyOrders: _companyHasOrders,
         showPrices: _authService.hasPermission(PermissionType.viewPrices),
         showDevice: config.showDeviceInOrderList,
+        deviceLabel: config.showDeviceInOrderList ? config.device : null,
+        technician: _authService.isTechnician,
+        currentUserId: Global.currentUser?.uid,
         useContracts: config.useContracts,
         unreadCount: notificationStore.unreadCount?.value ?? 0,
         statusLabel: (status) => config.getStatus(status ?? ''),

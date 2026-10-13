@@ -8140,6 +8140,60 @@ abstract class AppLocalizations {
   /// **'Todas'**
   String get filterAll;
 
+  /// No description provided for @filterMine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas'**
+  String get filterMine;
+
+  /// No description provided for @sectionScheduledToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get sectionScheduledToday;
+
+  /// No description provided for @nextVisitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora'**
+  String get nextVisitLabel;
+
+  /// No description provided for @homeWithYouToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 com você hoje} other{{count} com você hoje}}'**
+  String homeWithYouToday(int count);
+
+  /// No description provided for @homeWithYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 com você} other{{count} com você}}'**
+  String homeWithYou(int count);
+
+  /// No description provided for @nextVisit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {customer}, às {time}.'**
+  String nextVisit(String customer, String time);
+
+  /// No description provided for @nextVisitDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {customer}, {device}, às {time}.'**
+  String nextVisitDevice(String customer, String device, String time);
+
+  /// No description provided for @openOrderNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir OS {number}'**
+  String openOrderNumber(String number);
+
+  /// No description provided for @noOrdersWithYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS com você.'**
+  String get noOrdersWithYou;
+
   /// No description provided for @sectionLate.
   ///
   /// In pt, this message translates to:
@@ -8251,7 +8305,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstOrderTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Crie sua primeira ordem de serviço e mande para o cliente aprovar.'**
+  /// **'Crie sua primeira ordem de serviço. Leva menos de um minuto.'**
   String get firstOrderTitle;
 
   /// No description provided for @howItWorks.
@@ -8260,23 +8314,77 @@ abstract class AppLocalizations {
   /// **'Como funciona'**
   String get howItWorks;
 
+  /// No description provided for @firstOrderLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece por aqui'**
+  String get firstOrderLabel;
+
+  /// No description provided for @homeNoOrdersYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma ainda'**
+  String get homeNoOrdersYet;
+
   /// No description provided for @howItWorksStep1.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha o cliente e o que vai ser feito.'**
+  /// **'1. Anote o que vai ser feito'**
   String get howItWorksStep1;
+
+  /// No description provided for @howItWorksStep1Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'cliente e serviços'**
+  String get howItWorksStep1Detail;
+
+  /// No description provided for @howItWorksStep1DetailDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'cliente, {device} e serviços'**
+  String howItWorksStep1DetailDevice(String device);
 
   /// No description provided for @howItWorksStep2.
   ///
   /// In pt, this message translates to:
-  /// **'Mande o orçamento para o cliente aprovar.'**
+  /// **'2. Mande o orçamento'**
   String get howItWorksStep2;
+
+  /// No description provided for @howItWorksStep2Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'pelo WhatsApp, com um link'**
+  String get howItWorksStep2Detail;
 
   /// No description provided for @howItWorksStep3.
   ///
   /// In pt, this message translates to:
-  /// **'Acompanhe o serviço e receba.'**
+  /// **'3. Receba e entregue'**
   String get howItWorksStep3;
+
+  /// No description provided for @howItWorksStep3Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'o app lembra quem falta pagar'**
+  String get howItWorksStep3Detail;
+
+  /// No description provided for @nextStepLateShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS passou do prazo.} other{{count} OS passaram do prazo.}}'**
+  String nextStepLateShort(int count);
+
+  /// No description provided for @nextStepDueTodayShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS para hoje.} other{{count} OS para hoje.}}'**
+  String nextStepDueTodayShort(int count);
+
+  /// No description provided for @nextStepQuotesWaitingShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 orçamento sem resposta.} other{{count} orçamentos sem resposta.}}'**
+  String nextStepQuotesWaitingShort(int count);
 
   /// No description provided for @searchNotFoundLoaded.
   ///

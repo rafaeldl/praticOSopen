@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 
 Order order(String status, {DateTime? due, DateTime? created, int? number}) {
@@ -81,6 +82,42 @@ void main() {
       expect(HomeView.canceled.queryField, 'canceled');
       expect(HomeView.open.isSegmented, isTrue);
       expect(HomeView.canceled.isSegmented, isFalse);
+    });
+  });
+
+  group('technician rules', () {
+    final now = DateTime(2026, 10, 12, 9);
+    Order visit(String status, int hour, {String user = 'u1'}) => Order()
+      ..status = status
+      ..scheduledDate = DateTime(2026, 10, 12, hour)
+      ..assignedTo = (UserAggr()..id = user);
+
+    test('assignedTo keeps only the user orders', () {
+      final mine = visit('approved', 8);
+      final other = visit('approved', 9, user: 'u2');
+      expect(HomeRules.assignedTo([mine, other], 'u1'), [mine]);
+      expect(HomeRules.assignedTo([mine], null), isEmpty);
+    });
+
+    test('scheduledToday sorts by time and skips finished or other days', () {
+      final late = visit('approved', 14);
+      final early = visit('progress', 8);
+      final done = visit('done', 7);
+      final tomorrow = Order()
+        ..status = 'approved'
+        ..scheduledDate = DateTime(2026, 10, 13, 8);
+      expect(
+        HomeRules.scheduledToday([late, done, tomorrow, early], now),
+        [early, late],
+      );
+    });
+
+    test('nextVisit is the first visit not started yet', () {
+      final running = visit('progress', 8);
+      final next = visit('approved', 10);
+      expect(HomeRules.nextVisit([next, running], now), next);
+      expect(HomeRules.nextVisit([running], now), running);
+      expect(HomeRules.nextVisit([], now), isNull);
     });
   });
 }

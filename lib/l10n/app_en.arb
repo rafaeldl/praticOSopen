@@ -2023,6 +2023,59 @@
   "orderMoreActions": "More actions",
   "filterOpen": "Open",
   "filterAll": "All",
+  "filterMine": "Mine",
+  "sectionScheduledToday": "Today",
+  "nextVisitLabel": "Now",
+  "homeWithYouToday": "{count, plural, =1{1 with you today} other{{count} with you today}}",
+  "@homeWithYouToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWithYou": "{count, plural, =1{1 with you} other{{count} with you}}",
+  "@homeWithYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextVisit": "Next: {customer}, at {time}.",
+  "@nextVisit": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "nextVisitDevice": "Next: {customer}, {device}, at {time}.",
+  "@nextVisitDevice": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "device": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openOrderNumber": "Open order {number}",
+  "@openOrderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "noOrdersWithYou": "No orders with you.",
   "sectionLate": "Overdue",
   "sectionDueToday": "Due today",
   "sectionInProgress": "In progress",
@@ -2076,11 +2129,48 @@
       }
     }
   },
-  "firstOrderTitle": "Create your first service order and send it to the customer for approval.",
+  "firstOrderTitle": "Create your first service order. It takes less than a minute.",
   "howItWorks": "How it works",
-  "howItWorksStep1": "Pick the customer and what will be done.",
-  "howItWorksStep2": "Send the quote for the customer to approve.",
-  "howItWorksStep3": "Follow the work and get paid.",
+  "firstOrderLabel": "Start here",
+  "homeNoOrdersYet": "None yet",
+  "howItWorksStep1": "1. Write down the job",
+  "howItWorksStep1Detail": "customer and services",
+  "howItWorksStep1DetailDevice": "customer, {device} and services",
+  "@howItWorksStep1DetailDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "howItWorksStep2": "2. Send the quote",
+  "howItWorksStep2Detail": "over WhatsApp, with a link",
+  "howItWorksStep3": "3. Get paid and deliver",
+  "howItWorksStep3Detail": "the app reminds you who still owes",
+  "nextStepLateShort": "{count, plural, =1{1 order is past due.} other{{count} orders are past due.}}",
+  "@nextStepLateShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepDueTodayShort": "{count, plural, =1{1 order due today.} other{{count} orders due today.}}",
+  "@nextStepDueTodayShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepQuotesWaitingShort": "{count, plural, =1{1 quote without an answer.} other{{count} quotes without an answer.}}",
+  "@nextStepQuotesWaitingShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "searchNotFoundLoaded": "Not found in the loaded orders.",
   "searchOlder": "Search older ones",
   "noOpenOrders": "No open orders.",
