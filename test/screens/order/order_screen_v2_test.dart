@@ -373,6 +373,9 @@ void main() {
         ),
       );
       expect(row.right - value.right, lessThan(60));
+      // Clear of the Foto bar at the bottom.
+      await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('new_order_more_status')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Aprovado').last);
@@ -442,7 +445,7 @@ void main() {
       find.ancestor(of: find.text(text), matching: find.byType(FormRow)),
     );
 
-    testWidgets('flag is off by default and hides the Foto / Falar bar', (
+    testWidgets('flag is off by default: Foto stays, Falar is hidden', (
       tester,
     ) async {
       expect(kAiOrderAssistEnabled, isFalse);
@@ -454,7 +457,46 @@ void main() {
           actions: FakeActions(),
         ),
       );
-      expect(find.byType(AssistantToolbar), findsNothing);
+      expect(find.byKey(const ValueKey('assistant_photo')), findsOneWidget);
+      expect(find.byKey(const ValueKey('assistant_talk')), findsNothing);
+    });
+
+    testWidgets('without the flag Foto attaches photos in a "Fotos" card', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: OrderStore(),
+          permissions: _permissions(),
+          actions: FakeActions(),
+          capturePhoto: () async => AiPhoto(png),
+          pickGalleryPhotos: () async => [AiPhoto(png), AiPhoto(png)],
+        ),
+      );
+      expect(find.byKey(const ValueKey('new_order_photos')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('assistant_photo')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tirar Foto'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('new_order_photos')), findsOneWidget);
+      expect(find.byKey(const ValueKey('new_order_photo_0')), findsOneWidget);
+      // No assistant sheet without the flag.
+      expect(find.text('Pronto'), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_photo_add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Escolher da Galeria'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('new_order_photo_2')), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_photo_0')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remover Foto'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('new_order_photo_2')), findsNothing);
+      expect(find.byKey(const ValueKey('new_order_photo_1')), findsOneWidget);
     });
 
     testWidgets('with the flag: Foto and Falar sit in the bottom bar', (
@@ -538,6 +580,9 @@ void main() {
       expect(cameraOpened, 0);
 
       await tester.tap(find.byKey(const ValueKey('assistant_photo')));
+      await tester.pumpAndSettle();
+      expect(cameraOpened, 0);
+      await tester.tap(find.text('Tirar Foto'));
       await tester.pumpAndSettle();
       expect(cameraOpened, 1);
       expect(find.text('1 foto'), findsOneWidget);

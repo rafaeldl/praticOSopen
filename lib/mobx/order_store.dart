@@ -1038,6 +1038,11 @@ abstract class _OrderStore with Store {
     return false;
   }
 
+  /// Uploads the photos picked in the "Nova OS" sheet before the order
+  /// existed. Called once the order has its id.
+  Future<bool> uploadPhotoFiles(List<File> files) =>
+      _uploadMultiplePhotos(files);
+
   /// Faz o upload de uma foto
   Future<bool> _uploadPhoto(File file, {String source = 'unknown'}) async {
     if (order == null || companyId == null) return false;

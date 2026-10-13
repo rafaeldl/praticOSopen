@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
@@ -39,7 +41,10 @@ import 'package:praticos/screens/widgets/order_media_actions.dart'
     show confirmDeleteOrderDocument;
 import 'package:praticos/screens/widgets/order_status_share.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -86,6 +91,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.showAssistant = kAiOrderAssistEnabled,
     this.assistant,
     this.capturePhoto,
+    this.pickGalleryPhotos,
     this.speechListener,
   });
 
@@ -116,6 +122,9 @@ class OrderScreenV2 extends StatefulWidget {
 
   /// Opens the camera; defaults to image_picker (tests inject).
   final Future<AiPhoto?> Function()? capturePhoto;
+
+  /// Opens the photo library; defaults to image_picker (tests inject).
+  final Future<List<AiPhoto>> Function()? pickGalleryPhotos;
 
   /// Microphone for "Falar" (tests inject); defaults to the device one.
   final SpeechListener? speechListener;
@@ -172,6 +181,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String? _customerGuess;
   String? _deviceGuess;
   bool _assistantBusy = false;
+
+  /// Photos attached in the "Nova OS" sheet; uploaded once the order has
+  /// its id (an order is not created just to hold them).
+  final List<AiPhoto> _photos = [];
 
   FormatService get _format =>
       FormatService()..setLocale(context.l10n.localeName);
@@ -256,6 +269,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   bool get _hasContent =>
+      _photos.isNotEmpty ||
       _store.customer != null ||
       _store.devices.isNotEmpty ||
       (_store.services?.isNotEmpty ?? false) ||
@@ -1018,11 +1032,106 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return AiPhoto(await file.readAsBytes());
   }
 
-  /// Foto: camera first, then the same sheet to add what to do (optional).
+  Future<List<AiPhoto>> _pickGallery() async {
+    if (widget.pickGalleryPhotos != null) return widget.pickGalleryPhotos!();
+    final files = await ImagePicker().pickMultiImage(
+      maxWidth: 1600,
+      maxHeight: 1600,
+      imageQuality: 70,
+      requestFullMetadata: false,
+    );
+    return [for (final f in files) AiPhoto(await f.readAsBytes())];
+  }
+
+  /// Plan photo quota for [adding] more, counting those already attached.
+  bool _photoAllowed(int adding) {
+    final result = FeatureGateService.canAddPhotos(
+      Global.subscription,
+      _photos.length + adding,
+    );
+    if (!result.isAllowed) showPhotoLimitDialog(context, result);
+    return result.isAllowed;
+  }
+
+  /// Foto: camera or library; the photos go into the "Fotos" card. With the
+  /// assistant, the same sheet then opens to add what to do (optional).
   Future<void> _onPhoto() async {
-    final photo = await _capturePhoto();
-    if (!mounted || photo == null) return;
-    await _openAssistant(photos: [photo]);
+    final l10n = context.l10n;
+    if (!_photoAllowed(1)) return;
+    final fromCamera = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.takePhoto),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.chooseFromGallery),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (!mounted || fromCamera == null) return;
+    final picked = fromCamera
+        ? [?await _capturePhoto()]
+        : await _pickGallery();
+    if (!mounted || picked.isEmpty) return;
+    if (picked.length > 1 && !_photoAllowed(picked.length)) return;
+    setState(() => _photos.addAll(picked));
+    if (widget.showAssistant) await _openAssistant(photos: picked);
+  }
+
+  Future<void> _onPhotoTapped(int index) async {
+    final l10n = context.l10n;
+    final remove = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.removePhoto),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (remove == true && mounted) setState(() => _photos.removeAt(index));
+  }
+
+  Widget _buildPhotosCard() {
+    return FormCard(
+      key: const ValueKey('new_order_photos'),
+      title: context.l10n.orderPhotosSection,
+      children: [
+        FormPhotos(
+          photos: [for (final p in _photos) p.bytes],
+          onAdd: _onPhoto,
+          onTapPhoto: _onPhotoTapped,
+        ),
+      ],
+    );
+  }
+
+  /// Writes the attached photos to temp files and uploads them.
+  Future<void> _uploadPhotos(List<AiPhoto> photos) async {
+    final dir = await Directory.systemTemp.createTemp('new_order_photos');
+    final files = <File>[];
+    for (var i = 0; i < photos.length; i++) {
+      final file = File('${dir.path}/photo_$i.jpg');
+      await file.writeAsBytes(photos[i].bytes);
+      files.add(file);
+    }
+    await _store.uploadPhotoFiles(files);
   }
 
   Future<void> _openAssistant({List<AiPhoto> photos = const []}) async {
@@ -1234,13 +1343,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     controller: _scroll,
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.only(
-                      bottom: widget.showAssistant ? 120 : AppSpacing.xxl,
-                    ),
+                    padding: const EdgeInsets.only(bottom: 120),
                     children: [
                       _buildWhoCard(config),
                       _buildItemsCard(),
                       _buildRequestCard(),
+                      if (_photos.isNotEmpty) _buildPhotosCard(),
                       _buildDeliveryCard(),
                       ..._buildCustomFields(config, withoutRequest: true),
                       _buildMoreOptionsCard(config),
@@ -1249,8 +1357,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 ),
               ],
             ),
-            if (widget.showAssistant)
-              Positioned(
+            Positioned(
                 left: AppSpacing.blockMargin,
                 right: AppSpacing.blockMargin,
                 bottom: 0,
@@ -1263,7 +1370,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                           ? l10n.orderAssistantReading
                           : null,
                       onPhoto: _onPhoto,
-                      onTalk: _onTalk,
+                      onTalk: widget.showAssistant ? _onTalk : null,
                     ),
                   ),
                 ),
@@ -1587,16 +1694,20 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       request = '';
     }
     final companyId = _store.companyId;
+    final photos = List<AiPhoto>.of(_photos);
     _store.deferSave = false;
     _store.updateTotal();
     _store.createItem(
-      onCreated: request.isEmpty || companyId == null
-          ? null
-          : (orderId) => addOrderComment(
-              companyId: companyId,
-              orderId: orderId,
-              text: request,
-            ),
+      onCreated: (orderId) {
+        if (request.isNotEmpty && companyId != null) {
+          addOrderComment(
+            companyId: companyId,
+            orderId: orderId,
+            text: request,
+          );
+        }
+        if (photos.isNotEmpty) _uploadPhotos(photos);
+      },
     );
     setState(() => _leaving = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {

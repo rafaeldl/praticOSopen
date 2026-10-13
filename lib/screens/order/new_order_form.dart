@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -349,19 +351,98 @@ class FormPill extends StatelessWidget {
   }
 }
 
-/// Glass bar at the bottom of the sheet with the assistant tools: "Foto"
-/// and "Falar" (HIG: a toolbar acts on the content of the screen). While the
-/// assistant reads, it shows what it is doing instead.
+/// Photos attached in the sheet, as thumbnails in a row that wraps, with a
+/// last tile to add more. Tapping a photo offers to remove it.
+class FormPhotos extends StatelessWidget {
+  const FormPhotos({
+    super.key,
+    required this.photos,
+    required this.onAdd,
+    required this.onTapPhoto,
+  });
+
+  final List<Uint8List> photos;
+  final VoidCallback onAdd;
+  final void Function(int index) onTapPhoto;
+
+  static const double _size = 76;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final radius = BorderRadius.circular(14);
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          for (var i = 0; i < photos.length; i++)
+            Semantics(
+              button: true,
+              label: l10n.removePhoto,
+              child: GestureDetector(
+                key: ValueKey('new_order_photo_$i'),
+                onTap: () => onTapPhoto(i),
+                child: ClipRRect(
+                  borderRadius: radius,
+                  child: Image.memory(
+                    photos[i],
+                    width: _size,
+                    height: _size,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, _, _) => Container(
+                      width: _size,
+                      height: _size,
+                      color: AppColors.secondaryFill.resolveFrom(context),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          Semantics(
+            button: true,
+            label: l10n.orderAssistantPhoto,
+            excludeSemantics: true,
+            child: GestureDetector(
+              key: const ValueKey('new_order_photo_add'),
+              onTap: onAdd,
+              child: Container(
+                width: _size,
+                height: _size,
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryFill.resolveFrom(context),
+                  borderRadius: radius,
+                ),
+                child: Icon(
+                  CupertinoIcons.camera,
+                  color: AppColors.accentText.resolveFrom(context),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Glass bar at the bottom of the sheet: "Foto" (always) and "Falar" (with
+/// the AI assistant). HIG: a toolbar acts on the content of the screen.
+/// While the assistant reads, it shows what it is doing instead.
 class AssistantToolbar extends StatelessWidget {
   const AssistantToolbar({
     super.key,
     required this.onPhoto,
-    required this.onTalk,
+    this.onTalk,
     this.busyLabel,
   });
 
   final VoidCallback onPhoto;
-  final VoidCallback onTalk;
+
+  /// Null without the AI assistant: only "Foto" (attach) shows.
+  final VoidCallback? onTalk;
 
   /// Shown with a spinner while the assistant reads; hides the tools.
   final String? busyLabel;
@@ -436,12 +517,13 @@ class AssistantToolbar extends StatelessWidget {
                     l10n.orderAssistantPhoto,
                     onPhoto,
                   ),
-                  tool(
-                    const ValueKey('assistant_talk'),
-                    CupertinoIcons.mic,
-                    l10n.orderAssistantTalkShort,
-                    onTalk,
-                  ),
+                  if (onTalk != null)
+                    tool(
+                      const ValueKey('assistant_talk'),
+                      CupertinoIcons.mic,
+                      l10n.orderAssistantTalkShort,
+                      onTalk!,
+                    ),
                 ],
               ),
       ),
