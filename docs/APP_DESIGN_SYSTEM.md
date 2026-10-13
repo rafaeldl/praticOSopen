@@ -105,6 +105,37 @@ AppListRow(
 )
 ```
 
+## Telas de escolher
+
+Toda tela que escolhe algo (cliente, veículo, serviço/peça, checklist, situação, responsável, valor acumulado, vários veículos) usa `PickerScaffold<T>` (`lib/screens/widgets/picker_screen.dart`):
+
+- Abre empurrada; na Nova OS empilha no Navigator interno da sheet (rotas nomeadas de sempre).
+- Título grande = a pergunta ("Qual cliente?", "Qual veículo?", "O que vai ser feito?", "Qual checklist?", "Qual a situação?", "Quem é o responsável?"), `subtitle` opcional ("de Paulo Nunes").
+- Busca (`AppSearchField`) só com **mais de 10 itens** (`kPickerSearchThreshold`); depois de digitar ela fica. `alwaysShowSearch` só onde digitar é o jeito de criar (serviço/peça, valor acumulado).
+- Primeira linha "+ Novo …" (`addLabel`/`onAdd`, `AddRow(plain: true)`). Buscou e não achou: vira "+ Cadastrar “texto”" (`onCreate`, já com o texto no cadastro) e uma frase curta em `textSecondary`.
+- Linhas planas sem chevron (`PickerItem`); tocar escolhe e volta. O escolhido tem ✓ azul (`AppListRow.selected`), depois do valor quando houver.
+- Seções com `SectionLabel` (Recentes/Todos, Mais usados, Do cliente/Outros).
+- Múltipla escolha (`multiple: true`): tocar marca/desmarca; o ✓ redondo do topo (`PickerConfirmButton`, cinza enquanto `onConfirm` é null, azul quando dá) confirma. Sem botão "Confirmar" embaixo.
+- Vazio: `EmptyState` com a ação de criar. Status: `StatusDot` como `leading` e texto em peso normal (`strongTitles: false`).
+
+Lista curta e fixa (situação, responsável): `pickOne`.
+
+```dart
+final status = await pickOne<String>(
+  context,
+  title: context.l10n.pickerStatusTitle,
+  selected: order.status,
+  options: [
+    for (final s in ['quote', 'approved', 'progress', 'done', 'canceled'])
+      PickerItem(
+        value: s,
+        title: OrderStatusStyle.label(context.l10n, s),
+        leading: StatusDot(color: OrderStatusStyle.dotColor(s)),
+      ),
+  ],
+);
+```
+
 ## Estrutura de toda tela
 
 Seis zonas, sempre nesta ordem. Zonas vazias não aparecem.
