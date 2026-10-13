@@ -2261,7 +2261,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Toque + para crear su primer procedimiento.';
 
   @override
-  String get fromCompany => 'De la Empresa';
+  String get fromCompany => 'De la empresa';
 
   @override
   String get global => 'Globales';

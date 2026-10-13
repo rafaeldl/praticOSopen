@@ -4465,7 +4465,7 @@ abstract class AppLocalizations {
   /// No description provided for @fromCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Da Empresa'**
+  /// **'Da empresa'**
   String get fromCompany;
 
   /// No description provided for @global.

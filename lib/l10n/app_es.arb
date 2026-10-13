@@ -736,7 +736,7 @@
   "noProceduresRegistered": "No hay procedimientos registrados",
   "noProceduresAvailable": "No hay procedimientos disponibles",
   "tapPlusToCreateFirst": "Toque + para crear su primer procedimiento.",
-  "fromCompany": "De la Empresa",
+  "fromCompany": "De la empresa",
   "global": "Globales",
   "itemCount": "{count} {count, plural, =1{elemento} other{elementos}}",
   "@itemCount": {

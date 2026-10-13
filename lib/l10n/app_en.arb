@@ -736,7 +736,7 @@
   "noProceduresRegistered": "No procedures registered",
   "noProceduresAvailable": "No procedures available",
   "tapPlusToCreateFirst": "Tap + to create your first procedure.",
-  "fromCompany": "From Company",
+  "fromCompany": "From your company",
   "global": "Global",
   "itemCount": "{count} {count, plural, =1{item} other{items}}",
   "@itemCount": {

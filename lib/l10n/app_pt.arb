@@ -799,7 +799,7 @@
   "noProceduresRegistered": "Nenhum procedimento cadastrado",
   "noProceduresAvailable": "Nenhum procedimento disponível",
   "tapPlusToCreateFirst": "Toque em + para criar seu primeiro procedimento.",
-  "fromCompany": "Da Empresa",
+  "fromCompany": "Da empresa",
   "global": "Globais",
   "itemCount": "{count} {count, plural, =1{item} other{itens}}",
   "@itemCount": {

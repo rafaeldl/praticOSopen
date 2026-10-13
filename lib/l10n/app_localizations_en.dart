@@ -2247,7 +2247,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapPlusToCreateFirst => 'Tap + to create your first procedure.';
 
   @override
-  String get fromCompany => 'From Company';
+  String get fromCompany => 'From your company';
 
   @override
   String get global => 'Global';
