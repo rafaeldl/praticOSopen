@@ -2885,5 +2885,7 @@
   "pickerNoMatch": "Nothing matching “{query}”.",
   "pickerRecent": "Recent",
   "pickerAll": "All",
-  "pickerSearch": "Search"
+  "pickerSearch": "Search",
+  "orderMenuRemoveDevice": "Remove {device} from the order",
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
 }

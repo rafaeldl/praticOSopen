@@ -1111,11 +1111,14 @@ void main() {
       );
     });
 
-    testWidgets('tapping the customer offers to change it', (tester) async {
+    testWidgets('tapping the customer opens "Qual cliente?" directly', (
+      tester,
+    ) async {
       await _pump(tester, screen(OrderStore()), args: {'order': order()});
       await tester.tap(find.byKey(const ValueKey('order_header_customer')));
       await tester.pumpAndSettle();
-      expect(find.text('Trocar cliente'), findsOneWidget);
+      expect(find.byType(CupertinoActionSheet), findsNothing);
+      expect(find.text('pick ABC1D23'), findsOneWidget);
     });
 
     testWidgets('items: services and parts, "peça" only under products', (
@@ -1352,6 +1355,28 @@ void main() {
       ..discount = 0
       ..paidAmount = 0
       ..transactions = [];
+
+    testWidgets('tapping a vehicle opens the picker directly', (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': twoCars()});
+      await tester.tap(find.byKey(const ValueKey('order_header_device_d2')));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoActionSheet), findsNothing);
+      expect(find.text('pushed'), findsOneWidget);
+    });
+
+    testWidgets('"…" removes a vehicle from the order', (tester) async {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final store = OrderStore();
+      await _pump(tester, screen(store), args: {'order': twoCars()});
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      expect(find.text('Tirar Gol da OS'), findsOneWidget);
+      await tester.tap(find.text('Tirar Uno da OS'));
+      await tester.pumpAndSettle();
+      expect(store.devices.map((d) => d.id), ['d1']);
+    });
 
     testWidgets('items are grouped per vehicle with a subtotal each', (
       tester,

@@ -10617,6 +10617,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Buscar'**
   String get pickerSearch;
+
+  /// No description provided for @orderMenuRemoveDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar {device} da OS'**
+  String orderMenuRemoveDevice(String device);
 }
 
 class _AppLocalizationsDelegate

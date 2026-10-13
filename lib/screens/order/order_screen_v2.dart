@@ -325,36 +325,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// Header tap (saved OS): change the customer or a vehicle, which no
   /// longer have their own section (app-os).
-  Future<void> _showPeopleMenu() async {
-    final l10n = context.l10n;
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _pickCustomer();
-            },
-            child: Text(l10n.orderChangeCustomer),
-          ),
-          for (final device in _store.devices)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(sheetContext);
-                _changeDevice(device);
-              },
-              child: Text(l10n.orderChangeDevice(device.name ?? '')),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-  }
-
   Future<void> _pickCustomer() async {
     final result = await Navigator.pushNamed(
       context,
@@ -381,41 +351,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     setState(() => _deviceGuess = null);
   }
 
+  /// Tapping a vehicle opens "Qual veículo?" straight away; the pick
+  /// replaces it. Removing it lives in the "…" menu.
   Future<void> _changeDevice(DeviceAggr device) async {
-    final l10n = context.l10n;
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(device.name ?? ''),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'change'),
-            child: Text(l10n.orderDeviceActionChange),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, 'remove'),
-            child: Text(l10n.orderDeviceActionRemove),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-    if (!mounted || choice == null) return;
-    if (choice == 'remove' && device.id != null) {
-      _store.removeDevice(device.id!);
-      return;
-    }
-    if (choice != 'change') return;
     final result = await Navigator.pushNamed(
       context,
       '/device_list',
       arguments: {'order': _store.order},
     );
     if (!mounted || result is! Device || device.id == null) return;
+    if (result.id == device.id) return;
     _store.removeDevice(device.id!);
     _store.addDevice(result);
   }
@@ -733,6 +678,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
         ]),
         PullDownGroup([
+          if (canEdit)
+            for (final device in _store.devices)
+              if (device.id != null)
+                PullDownItem(
+                  value: 'remove-device:${device.id}',
+                  label: l10n.orderMenuRemoveDevice(device.name ?? ''),
+                  icon: CupertinoIcons.minus_circle,
+                  destructive: true,
+                ),
           if (canCancel)
             PullDownItem(
               value: 'cancel',
@@ -751,6 +705,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ],
     );
     if (!mounted || choice == null) return;
+    if (choice.startsWith('remove-device:')) {
+      _store.removeDevice(choice.substring('remove-device:'.length));
+      setState(() {});
+      return;
+    }
     switch (choice) {
       case 'status':
         await _selectStatus();
@@ -2278,12 +2237,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               ),
             )
           else
-            _tappable(
-              onTap: canEdit ? _showPeopleMenu : null,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _markedText(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _tappable(
+                  key: const ValueKey('order_header_customer_tap'),
+                  onTap: canEdit ? _pickCustomer : null,
+                  child: _markedText(
                     customer.name ?? '',
                     AppTypography.title.copyWith(
                       fontSize: 28,
@@ -2294,8 +2254,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     marked: _marked.contains('customer'),
                     key: const ValueKey('order_header_customer'),
                   ),
-                  for (final device in _store.devices)
-                    Padding(
+                ),
+                for (final device in _store.devices)
+                  _tappable(
+                    key: ValueKey('order_header_device_${device.id}'),
+                    onTap: canEdit ? () => _changeDevice(device) : null,
+                    child: Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: _markedText(
                         [device.name, device.serial]
@@ -2305,8 +2269,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                         marked: _marked.contains('device:${device.id}'),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           if (canEdit && (customer == null || _store.devices.isEmpty))
             Transform.translate(

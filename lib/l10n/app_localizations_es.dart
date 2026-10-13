@@ -6168,4 +6168,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pickerSearch => 'Buscar';
+
+  @override
+  String orderMenuRemoveDevice(String device) {
+    return 'Quitar $device de la OS';
+  }
 }

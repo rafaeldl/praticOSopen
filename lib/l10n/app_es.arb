@@ -2885,5 +2885,7 @@
   "pickerNoMatch": "Nada con “{query}”.",
   "pickerRecent": "Recientes",
   "pickerAll": "Todos",
-  "pickerSearch": "Buscar"
+  "pickerSearch": "Buscar",
+  "orderMenuRemoveDevice": "Quitar {device} de la OS",
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
 }

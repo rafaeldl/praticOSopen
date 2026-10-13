@@ -3045,5 +3045,7 @@
   "@pickerNoMatch": {"placeholders": {"query": {"type": "String"}}},
   "pickerRecent": "Recentes",
   "pickerAll": "Todos",
-  "pickerSearch": "Buscar"
+  "pickerSearch": "Buscar",
+  "orderMenuRemoveDevice": "Tirar {device} da OS",
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
 }
