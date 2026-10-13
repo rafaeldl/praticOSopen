@@ -4641,6 +4641,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadOrdersError => 'Could not load the orders.';
 
   @override
+  String orderLateMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Overdue $count months',
+      one: 'Overdue 1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderLateYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Overdue $count years',
+      one: 'Overdue 1 year',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String orderLateDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

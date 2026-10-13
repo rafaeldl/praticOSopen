@@ -2176,6 +2176,22 @@
   "noOpenOrders": "Ninguna OS abierta.",
   "noOrdersInView": "Nada por aquí.",
   "loadOrdersError": "No se pudieron cargar las OS.",
+  "orderLateMonths": "{count, plural, =1{Atrasada hace 1 mes} other{Atrasada hace {count} meses}}",
+  "@orderLateMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderLateYears": "{count, plural, =1{Atrasada hace 1 año} other{Atrasada hace {count} años}}",
+  "@orderLateYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "orderLateDays": "{count, plural, =1{Atrasada 1 día} other{Atrasada {count} días}}",
   "@orderLateDays": {
     "placeholders": {

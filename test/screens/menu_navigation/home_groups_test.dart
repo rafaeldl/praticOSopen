@@ -16,11 +16,53 @@ void main() {
 
   group('HomeRules', () {
     test('overdue only for unfinished orders past due date', () {
-      expect(HomeRules.isOverdue(order('progress', due: DateTime(2026, 10, 10)), now), isTrue);
-      expect(HomeRules.isOverdue(order('done', due: DateTime(2026, 10, 10)), now), isFalse);
-      expect(HomeRules.isOverdue(order('progress', due: DateTime(2026, 10, 12)), now), isFalse);
+      expect(
+        HomeRules.isOverdue(
+          order('progress', due: DateTime(2026, 10, 10)),
+          now,
+        ),
+        isTrue,
+      );
+      expect(
+        HomeRules.isOverdue(order('done', due: DateTime(2026, 10, 10)), now),
+        isFalse,
+      );
+      expect(
+        HomeRules.isOverdue(
+          order('progress', due: DateTime(2026, 10, 12)),
+          now,
+        ),
+        isFalse,
+      );
       expect(HomeRules.isOverdue(order('progress'), now), isFalse);
-      expect(HomeRules.overdueDays(order('progress', due: DateTime(2026, 10, 10, 23)), now), 2);
+      expect(
+        HomeRules.overdueDays(
+          order('progress', due: DateTime(2026, 10, 10, 23)),
+          now,
+        ),
+        2,
+      );
+      expect(
+        HomeRules.overdueSpan(
+          order('progress', due: DateTime(2026, 9, 13)),
+          now,
+        ),
+        (OverdueUnit.days, 29),
+      );
+      expect(
+        HomeRules.overdueSpan(
+          order('progress', due: DateTime(2026, 3, 1)),
+          now,
+        ),
+        (OverdueUnit.months, 7),
+      );
+      expect(
+        HomeRules.overdueSpan(
+          order('progress', due: DateTime(2020, 10, 1)),
+          now,
+        ),
+        (OverdueUnit.years, 6),
+      );
     });
 
     test('groupOpen puts orders in their sections and omits empty ones', () {
@@ -38,8 +80,9 @@ void main() {
         HomeGroup.waitingApproval,
         HomeGroup.approved,
       ]);
-      expect(HomeRules.groupOpen([order('quote')], now).keys,
-          [HomeGroup.waitingApproval]);
+      expect(HomeRules.groupOpen([order('quote')], now).keys, [
+        HomeGroup.waitingApproval,
+      ]);
       expect(HomeRules.groupOpen([], now), isEmpty);
     });
 
@@ -104,10 +147,10 @@ void main() {
       final tomorrow = Order()
         ..status = 'approved'
         ..scheduledDate = DateTime(2026, 10, 13, 8);
-      expect(
-        HomeRules.scheduledToday([late, done, tomorrow, early], now),
-        [early, late],
-      );
+      expect(HomeRules.scheduledToday([late, done, tomorrow, early], now), [
+        early,
+        late,
+      ]);
     });
 
     test('nextVisit is the first visit not started yet', () {

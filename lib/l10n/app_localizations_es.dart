@@ -4663,6 +4663,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadOrdersError => 'No se pudieron cargar las OS.';
 
   @override
+  String orderLateMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Atrasada hace $count meses',
+      one: 'Atrasada hace 1 mes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderLateYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Atrasada hace $count años',
+      one: 'Atrasada hace 1 año',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String orderLateDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

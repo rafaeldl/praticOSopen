@@ -8416,6 +8416,18 @@ abstract class AppLocalizations {
   /// **'Não deu para carregar as OS.'**
   String get loadOrdersError;
 
+  /// No description provided for @orderLateMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada há 1 mês} other{Atrasada há {count} meses}}'**
+  String orderLateMonths(int count);
+
+  /// No description provided for @orderLateYears.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada há 1 ano} other{Atrasada há {count} anos}}'**
+  String orderLateYears(int count);
+
   /// No description provided for @orderLateDays.
   ///
   /// In pt, this message translates to:

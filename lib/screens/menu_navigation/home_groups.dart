@@ -50,6 +50,16 @@ class HomeRules {
     return _day(now).difference(_day(o.dueDate!)).inDays;
   }
 
+  /// How long an order is overdue, in the unit people say out loud: days up
+  /// to a month, then months, then years ("Atrasada há 6 anos", not
+  /// "Atrasada 2190 dias").
+  static (OverdueUnit, int) overdueSpan(Order o, DateTime now) {
+    final days = overdueDays(o, now);
+    if (days >= 365) return (OverdueUnit.years, days ~/ 365);
+    if (days >= 30) return (OverdueUnit.months, days ~/ 30);
+    return (OverdueUnit.days, days);
+  }
+
   static bool isDueToday(Order o, DateTime now) {
     final due = o.dueDate;
     if (due == null || isFinished(o)) return false;
@@ -149,3 +159,6 @@ class HomeRules {
     );
   }
 }
+
+/// Unit of [HomeRules.overdueSpan].
+enum OverdueUnit { days, months, years }

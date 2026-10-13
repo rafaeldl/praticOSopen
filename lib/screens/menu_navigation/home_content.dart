@@ -695,7 +695,12 @@ class _HomeContentState extends State<HomeContent> {
 
     final String statusText;
     if (overdue) {
-      statusText = l10n.orderLateDays(HomeRules.overdueDays(order, now));
+      final (unit, count) = HomeRules.overdueSpan(order, now);
+      statusText = switch (unit) {
+        OverdueUnit.days => l10n.orderLateDays(count),
+        OverdueUnit.months => l10n.orderLateMonths(count),
+        OverdueUnit.years => l10n.orderLateYears(count),
+      };
     } else {
       final label = widget.statusLabel(order.status);
       final showDue = order.dueDate != null && !HomeRules.isFinished(order);
