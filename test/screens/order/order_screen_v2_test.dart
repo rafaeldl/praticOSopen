@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
@@ -1197,6 +1198,24 @@ void main() {
       expect(labels.sublist(labels.length - 2), ['Cancelar OS', 'Apagar OS']);
       // Unsaved company: no comment / link.
       expect(labels, isNot(contains('Comentário')));
+    });
+
+    testWidgets('"Mudar a situação" lists the current one with a ✓', (
+      tester,
+    ) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': order()});
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Mudar a situação'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Qual a situação?'), findsOneWidget);
+      final current = find.ancestor(
+        of: find.text('Orçamento'),
+        matching: find.byType(AppListRow),
+      );
+      expect(current, findsOneWidget);
+      expect(tester.widget<AppListRow>(current).selected, isTrue);
     });
   });
 

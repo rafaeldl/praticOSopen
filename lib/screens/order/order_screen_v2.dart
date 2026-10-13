@@ -527,15 +527,26 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       title: l10n.pickerStatusTitle,
       selected: order.status,
       options: [
-        for (final key in statuses)
-          PickerItem<String>(
-            value: key,
-            title: config.getStatus(key),
-            leading: StatusDot(color: OrderStatusStyle.dotColor(key)),
-          ),
+        // The current one stays in the list, with the ✓, so the person sees
+        // where the OS is now.
+        for (final key in const [
+          'quote',
+          'approved',
+          'progress',
+          'done',
+          'canceled',
+        ])
+          if (key == order.status || statuses.contains(key))
+            PickerItem<String>(
+              value: key,
+              title: config.getStatus(key),
+              leading: StatusDot(color: OrderStatusStyle.dotColor(key)),
+            ),
       ],
     );
-    if (picked != null && mounted) await _trySetStatus(picked);
+    if (picked != null && picked != order.status && mounted) {
+      await _trySetStatus(picked);
+    }
   }
 
   Future<void> _trySetStatus(String status) async {
@@ -1938,6 +1949,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
       child: Builder(
         builder: (context) => Stack(
+          // Fills the screen, so the bar sits at the bottom even when a short
+          // order would leave the scroll view smaller than the screen.
+          fit: StackFit.expand,
           children: [
             SingleChildScrollView(
               controller: _scroll,
