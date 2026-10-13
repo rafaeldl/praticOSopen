@@ -11,11 +11,10 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/screens/device_form_screen.dart';
-import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
@@ -27,11 +26,13 @@ import 'package:provider/provider.dart';
 
 /// Vehicles / devices (`/device_list`).
 ///
-/// - **Selection mode** (route argument `order`, from the order): title "Qual
-///   é o veículo?", "Cadastrar veículo novo" on top, and, when the order has
-///   a customer, a "Veículos da Ana" section first (distinct devices of the
-///   customer's orders) followed by "Outros veículos". Tapping a row pops with
-///   the [Device]; no swipe, no chevron.
+/// - **Selection mode** (route argument `order`, from the order): the
+///   "Escolher" pattern ([PickerScaffold]): "Qual veículo?" "do Paulo",
+///   "+ Novo veículo" on top (or "Cadastrar “texto”" from the search), and,
+///   when the order has a customer, a "Veículos da Ana" section first
+///   (distinct devices of the customer's orders) followed by "Outros
+///   veículos". The order's vehicles have the ✓. Tapping a row pops with the
+///   [Device]; no swipe, no chevron.
 /// - **Settings mode** (from "Mais"): title "Veículos", chevron on every row
 ///   and swipe to edit / delete (delete needs `manageDevices`).
 class DeviceListScreen extends StatefulWidget {
@@ -65,6 +66,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   String? _customerId;
   String? _customerName;
 
+  /// Devices already on the order: the ✓ in selection mode.
+  Set<String> _selectedIds = const {};
+
   Stream<List<Device?>>? _stream;
   Future<List<DeviceAggr>>? _customerVehicles;
   DeviceStore? _store;
@@ -85,6 +89,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     if (order is Order) {
       _customerId = order.customer?.id;
       _customerName = order.customer?.name;
+      _selectedIds = {
+        for (final d in order.devices ?? const <DeviceAggr>[])
+          if (d.id != null) d.id!,
+      };
     }
     if (widget.devices != null) {
       _stream = widget.devices!();
@@ -108,10 +116,22 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     super.dispose();
   }
 
-  Future<void> _create() async {
+  /// Opens the new-device sheet. [query] (typed in the picker search) fills
+  /// the plate when it looks like one, the name otherwise.
+  Future<void> _create([String query = '']) async {
+    final text = query.trim();
+    Device? draft;
+    if (text.isNotEmpty) {
+      draft = Device();
+      if (RegExp(r'^[A-Za-z]{3}-?\d[A-Za-z0-9]\d{2}$').hasMatch(text)) {
+        draft.serial = text.toUpperCase();
+      } else {
+        draft.name = text;
+      }
+    }
     final device = await AppSheet.show<Device>(
       context,
-      (_) => const DeviceFormScreen(asSheet: true),
+      (_) => DeviceFormScreen(asSheet: true, device: draft),
     );
     if (_selecting && device != null && mounted) {
       Navigator.pop(context, device);
@@ -146,10 +166,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
+    if (_selecting) return _buildPicker(config);
     final l10n = context.l10n;
-    final title = _selecting
-        ? l10n.pickDeviceTitle(config.device.toLowerCase())
-        : config.devicePlural;
+    final title = config.devicePlural;
     final background = AppColors.background.resolveFrom(context);
 
     return CupertinoPageScaffold(
@@ -161,13 +180,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           slivers: [
             AppNavBar(
               largeTitle: Text(title),
-              trailing: _selecting
-                  ? null
-                  : GlassBarButton(
-                      label: l10n.add,
-                      icon: CupertinoIcons.add,
-                      onPressed: _create,
-                    ),
+              trailing: GlassBarButton(
+                label: l10n.add,
+                icon: CupertinoIcons.add,
+                onPressed: _create,
+              ),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -183,13 +200,6 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 ),
               ),
             ),
-            if (_selecting)
-              SliverToBoxAdapter(
-                child: AddRow(
-                  label: l10n.registerNewDevice(config.device.toLowerCase()),
-                  onTap: _create,
-                ),
-              ),
             StreamBuilder<List<Device?>>(
               stream: _stream,
               builder: (context, snapshot) => _buildBody(snapshot, config),
@@ -198,6 +208,93 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _retry() => setState(() {
+    _argsRead = false;
+    didChangeDependencies();
+  });
+
+  /// Selection mode: "Qual veículo?" on [PickerScaffold].
+  Widget _buildPicker(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final device = config.device.toLowerCase();
+    final customerName = (_customerName ?? '').trim();
+    return StreamBuilder<List<Device?>>(
+      stream: _stream,
+      builder: (context, snapshot) => FutureBuilder<List<DeviceAggr>>(
+        future: _customerVehicles,
+        builder: (context, vehicles) {
+          final all = snapshot.data?.whereType<Device>().toList() ?? const [];
+          final mineIds = {
+            for (final v in vehicles.data ?? const <DeviceAggr>[])
+              if (v.id != null) v.id!,
+          };
+          final first = customerName.split(RegExp(r'\s+')).first;
+          return PickerScaffold<Device>(
+            title: l10n.pickerDeviceTitle(device),
+            subtitle: customerName.isEmpty
+                ? null
+                : l10n.pickerDeviceSubtitle(customerName),
+            itemCount: all.length,
+            searchPlaceholder: '${l10n.search} $device',
+            loading: snapshot.data == null && !snapshot.hasError,
+            hasError: snapshot.hasError,
+            errorMessage:
+                '${l10n.errorLoading} ${config.devicePlural.toLowerCase()}',
+            onRetry: _retry,
+            addLabel: l10n.pickerNewDevice(device),
+            onAdd: _create,
+            onCreate: _create,
+            noMatchText: (q) => l10n.pickerNoDeviceWith(device, q),
+            emptyIcon: config.deviceIcon,
+            emptyTitle: '${l10n.no} $device ${l10n.registered}',
+            sections: (query) {
+              final filtered = all.where((d) => _matchesQuery(d, query));
+              final mine = filtered.where((d) => mineIds.contains(d.id));
+              if (mine.isEmpty) {
+                return [PickerSection(items: filtered.map(_pickerItem).toList())];
+              }
+              return [
+                PickerSection(
+                  label: l10n.devicesOfCustomer(config.devicePlural, first),
+                  items: mine.map(_pickerItem).toList(),
+                ),
+                PickerSection(
+                  label: l10n.otherDevicesSection(
+                    config.devicePlural.toLowerCase(),
+                  ),
+                  items: filtered
+                      .where((d) => !mineIds.contains(d.id))
+                      .map(_pickerItem)
+                      .toList(),
+                ),
+              ];
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  bool _matchesQuery(Device d, String query) =>
+      pickerMatches(d.name, query) ||
+      pickerMatches(d.serial, query) ||
+      pickerMatches(d.manufacturer, query);
+
+  PickerItem<Device> _pickerItem(Device device) {
+    final l10n = context.l10n;
+    final parts = [
+      if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
+      if (device.manufacturer?.isNotEmpty ?? false) device.manufacturer!,
+    ];
+    return PickerItem(
+      key: ValueKey('device-${device.id}'),
+      value: device,
+      title: device.name ?? '',
+      subtitle: parts.isEmpty ? null : parts.join(' · '),
+      selected: device.id != null && _selectedIds.contains(device.id),
     );
   }
 
@@ -245,40 +342,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       );
     }
 
-    if (!_selecting || _customerVehicles == null) {
-      return _rows(filtered, config);
-    }
-    return FutureBuilder<List<DeviceAggr>>(
-      future: _customerVehicles,
-      builder: (context, vehicles) {
-        final ids = {
-          for (final v in vehicles.data ?? const <DeviceAggr>[])
-            if (v.id != null) v.id!,
-        };
-        final mine = filtered.where((d) => ids.contains(d.id)).toList();
-        if (mine.isEmpty) return _rows(filtered, config);
-        final others = filtered.where((d) => !ids.contains(d.id)).toList();
-        final name = (_customerName ?? '').trim().split(RegExp(r'\s+')).first;
-        return SliverMainAxisGroup(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SectionLabel(
-                l10n.devicesOfCustomer(config.devicePlural, name),
-              ),
-            ),
-            _rows(mine, config),
-            if (others.isNotEmpty) ...[
-              SliverToBoxAdapter(
-                child: SectionLabel(
-                  l10n.otherDevicesSection(config.devicePlural.toLowerCase()),
-                ),
-              ),
-              _rows(others, config),
-            ],
-          ],
-        );
-      },
-    );
+    return _rows(filtered, config);
   }
 
   Widget _rows(List<Device> devices, SegmentConfigProvider config) {
@@ -296,7 +360,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     final subtitleParts = [
       if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
       if (device.manufacturer?.isNotEmpty ?? false) device.manufacturer!,
-      if (management && !_selecting)
+      if (management)
         DeviceStatusStyle.label(l10n, device.status),
     ];
     final row = AppListRow(
@@ -304,10 +368,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       leading: _buildDeviceAvatar(device, management),
       title: device.name ?? '',
       subtitle: subtitleParts.isEmpty ? null : subtitleParts.join(' · '),
-      showChevron: !_selecting,
       onTap: () => _open(device, config),
     );
-    if (_selecting || device.id == null) return row;
+    if (device.id == null) return row;
     return _swipeable(device, row, config);
   }
 

@@ -6038,4 +6038,80 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get speechNothingHeard =>
       'No escuché nada. Toca Hablar e inténtalo de nuevo.';
+
+  @override
+  String get pickerCustomerTitle => '¿Qué cliente?';
+
+  @override
+  String pickerDeviceTitle(String device) {
+    return '¿Qué $device?';
+  }
+
+  @override
+  String pickerDeviceSubtitle(String name) {
+    return 'de $name';
+  }
+
+  @override
+  String get pickerItemTitle => '¿Qué se va a hacer?';
+
+  @override
+  String get pickerChecklistTitle => '¿Qué checklist?';
+
+  @override
+  String get pickerStatusTitle => '¿Cuál es la situación?';
+
+  @override
+  String get pickerAssigneeTitle => '¿Quién es el responsable?';
+
+  @override
+  String pickerDevicesTitle(String devices) {
+    return '¿En cuáles $devices?';
+  }
+
+  @override
+  String get pickerNewCustomer => 'Nuevo cliente';
+
+  @override
+  String pickerNewDevice(String device) {
+    return 'Nuevo $device';
+  }
+
+  @override
+  String get pickerNewItem => 'Nuevo servicio o pieza';
+
+  @override
+  String get pickerNewChecklist => 'Nuevo checklist';
+
+  @override
+  String get pickerTypeAnother => 'Escribir otro';
+
+  @override
+  String pickerRegister(String query) {
+    return 'Registrar “$query”';
+  }
+
+  @override
+  String pickerNoDeviceWith(String device, String query) {
+    return 'Ningún $device con “$query”.';
+  }
+
+  @override
+  String pickerNoItemWith(String query) {
+    return 'Ningún servicio o pieza con “$query”. Regístrelo y entra directo en la OS.';
+  }
+
+  @override
+  String pickerNoMatch(String query) {
+    return 'Nada con “$query”.';
+  }
+
+  @override
+  String get pickerRecent => 'Recientes';
+
+  @override
+  String get pickerAll => 'Todos';
+
+  @override
+  String get pickerSearch => 'Buscar';
 }

@@ -1,22 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
-import 'package:praticos/screens/widgets/add_row.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
-import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/plate_lookup.dart';
-import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
-import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/utils/phone_format.dart';
 
@@ -31,14 +24,17 @@ class CustomerPick {
   final Device? device;
 }
 
-/// "Quem é o cliente?": the picker used from the order (`/customer_list`, with
-/// the `order` route argument). Pops with a [CustomerPick].
+/// "Qual cliente?": the picker used from the order (`/customer_list`, with
+/// the `order` route argument). Pops with a [CustomerPick]. Built on
+/// [PickerScaffold].
 ///
-/// - Search by name, phone or vehicle plate. A plate hit selects the customer
-///   and the vehicle together.
+/// - Search (above 10 customers) by name, phone or vehicle plate. A plate hit
+///   selects the customer and the vehicle together.
 /// - A customer with a single vehicle selects it too (unless the order
 ///   already has one).
-/// - "Cadastrar cliente novo" opens the new-customer sheet.
+/// - "Novo cliente" opens the new-customer sheet; a search that finds no one
+///   offers "Cadastrar “texto”" with the name (or phone) filled in.
+/// - "Recentes" first, then "Todos". The order's customer has the ✓.
 /// - No swipe actions: this is a choice, not a management list.
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key, this.directory});
@@ -53,7 +49,6 @@ class CustomerListScreen extends StatefulWidget {
 class _CustomerListScreenState extends State<CustomerListScreen> {
   late final CustomerDirectory _directory =
       widget.directory ?? FirestoreCustomerDirectory();
-  final TextEditingController _searchController = TextEditingController();
   late final PlateLookup _plates =
       PlateLookup(_directory, onChanged: () => setState(() {}));
 
@@ -61,7 +56,6 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   List<Customer>? _customers;
   bool _hasError = false;
   List<String> _recentIds = const [];
-  String _query = '';
   bool _picking = false;
   Order? _order;
   bool _argsRead = false;
@@ -106,13 +100,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   void dispose() {
     _subscription?.cancel();
     _plates.dispose();
-    _searchController.dispose();
     super.dispose();
-  }
-
-  void _onQueryChanged(String value) {
-    setState(() => _query = value);
-    _plates.search(value);
   }
 
   Future<void> _pick(Customer customer, {Device? device}) async {
@@ -134,10 +122,22 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     Navigator.pop(context, CustomerPick(customer, selected));
   }
 
-  Future<void> _addCustomer() async {
+  /// Opens the new-customer sheet; [query] (what was typed) fills the phone
+  /// when it is only digits, the name otherwise.
+  Future<void> _addCustomer([String query = '']) async {
+    final text = query.trim();
+    Customer? draft;
+    if (text.isNotEmpty) {
+      draft = Customer();
+      if (RegExp(r'^[\d\s()+-]+$').hasMatch(text)) {
+        draft.phone = text;
+      } else {
+        draft.name = text;
+      }
+    }
     final created = await AppSheet.show<Customer>(
       context,
-      (_) => const CustomerFormScreen(asSheet: true),
+      (_) => CustomerFormScreen(asSheet: true, customer: draft),
     );
     if (created != null && mounted) {
       Navigator.pop(context, CustomerPick(created));
@@ -147,127 +147,80 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return CupertinoPageScaffold(
-      backgroundColor: AppColors.background.resolveFrom(context),
-      child: CustomScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          AppNavBar(
-            largeTitle: Text(l10n.pickCustomerTitle),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.blockMargin,
-                vertical: AppSpacing.sm,
-              ),
-              child: CupertinoSearchTextField(
-                controller: _searchController,
-                autofocus: true,
-                placeholder: l10n.searchCustomerPlaceholder,
-                backgroundColor: AppColors.secondaryFill.resolveFrom(context),
-                style: AppTypography.body.copyWith(
-                  color: AppColors.text.resolveFrom(context),
-                ),
-                onChanged: _onQueryChanged,
-              ),
-            ),
-          ),
-          ..._buildBody(),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
-      ),
+    final customers = _customers ?? const <Customer>[];
+    final selectedId = _order?.customer?.id;
+    return PickerScaffold<CustomerPick>(
+      title: l10n.pickerCustomerTitle,
+      itemCount: customers.length,
+      searchPlaceholder: l10n.searchCustomerPlaceholder,
+      autofocusSearch: true,
+      onQueryChanged: _plates.search,
+      loading: _customers == null && !_hasError,
+      hasError: _hasError,
+      errorMessage: l10n.customerLookupError,
+      onRetry: _listen,
+      addLabel: l10n.pickerNewCustomer,
+      onAdd: _addCustomer,
+      onCreate: _addCustomer,
+      canCreate: (query) =>
+          !customers.any((c) => pickerSameText(c.name, query)),
+      noMatchText: l10n.noCustomerMatching,
+      emptyTitle: l10n.noCustomersYet,
+      onSelect: (pick) => _pick(pick.customer, device: pick.device),
+      sections: (query) => _sections(customers, query, selectedId),
     );
   }
 
-  List<Widget> _buildBody() {
+  List<PickerSection<CustomerPick>> _sections(
+    List<Customer> customers,
+    String query,
+    String? selectedId,
+  ) {
     final l10n = context.l10n;
-    if (_hasError) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: ErrorState(
-            message: l10n.customerLookupError,
-            onRetry: _listen,
-          ),
-        ),
-      ];
-    }
-    final customers = _customers;
-    if (customers == null) {
-      return const [SliverFillRemaining(hasScrollBody: false, child: LoadingState())];
-    }
-
-    final query = _query.trim();
-    if (customers.isEmpty && query.isEmpty) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: EmptyState(
-            title: l10n.noCustomersYet,
-            actionLabel: l10n.addFirstCustomer,
-            onAction: _addCustomer,
-          ),
-        ),
-      ];
-    }
-
-    final hits = query.isEmpty ? const <PlateHit>[] : _plates.hits(query, customers);
+    final hits = query.isEmpty
+        ? const <PlateHit>[]
+        : _plates.hits(query, customers);
     final hitIds = hits.map((h) => h.customer.id).toSet();
-    final matches = filterCustomers(customers, query)
-        .where((c) => !hitIds.contains(c.id))
-        .toList();
+    final matches = filterCustomers(
+      customers,
+      query,
+    ).where((c) => !hitIds.contains(c.id)).toList();
 
-    final slivers = <Widget>[
-      SliverToBoxAdapter(
-        child: AddRow(label: l10n.addNewCustomer, onTap: _addCustomer),
+    PickerItem<CustomerPick> item(Customer c, {Device? device}) => PickerItem(
+      value: CustomerPick(c, device),
+      title: c.name ?? '',
+      subtitle: device == null
+          ? (c.phone?.isNotEmpty ?? false ? formatPhone(c.phone) : null)
+          : '${l10n.plateValue(device.serial ?? '')} · ${device.name ?? ''}',
+      selected: selectedId != null && c.id == selectedId,
+    );
+
+    if (query.isNotEmpty) {
+      return [
+        PickerSection(
+          items: [
+            for (final hit in hits) item(hit.customer, device: hit.device),
+            ...matches.map(item),
+          ],
+        ),
+      ];
+    }
+    final byId = {for (final c in customers) c.id: c};
+    final recents = _recentIds
+        .map((id) => byId[id])
+        .whereType<Customer>()
+        .take(5)
+        .toList();
+    return [
+      if (recents.isNotEmpty)
+        PickerSection(
+          label: l10n.pickerRecent,
+          items: recents.map(item).toList(),
+        ),
+      PickerSection(
+        label: recents.isEmpty ? null : l10n.pickerAll,
+        items: matches.map(item).toList(),
       ),
     ];
-
-    if (hits.isEmpty && matches.isEmpty) {
-      slivers.add(
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: EmptyState(title: l10n.noCustomerMatching(query)),
-        ),
-      );
-      return slivers;
-    }
-
-    Widget row(Customer c, {Device? device}) => AppListRow(
-          title: c.name ?? '',
-          subtitle: device == null
-              ? (c.phone?.isNotEmpty ?? false ? formatPhone(c.phone) : null)
-              : '${l10n.plateValue(device.serial ?? '')} · ${device.name ?? ''}',
-          showChevron: false,
-          onTap: () => _pick(c, device: device),
-        );
-
-    final children = <Widget>[];
-    for (final hit in hits) {
-      children.add(row(hit.customer, device: hit.device));
-    }
-
-    if (query.isEmpty) {
-      final byId = {for (final c in customers) c.id: c};
-      final recents = _recentIds
-          .map((id) => byId[id])
-          .whereType<Customer>()
-          .take(5)
-          .toList();
-      if (recents.isNotEmpty) {
-        children.add(SectionLabel(l10n.recentCustomers));
-        children.addAll(recents.map(row));
-      }
-      for (final entry in groupByInitial(matches).entries) {
-        children.add(SectionLabel(entry.key));
-        children.addAll(entry.value.map(row));
-      }
-    } else {
-      children.addAll(matches.map(row));
-    }
-
-    slivers.add(SliverList(delegate: SliverChildListDelegate(children)));
-    return slivers;
   }
 }

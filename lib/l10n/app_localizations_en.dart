@@ -6016,4 +6016,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get speechNothingHeard =>
       'I didn\'t hear anything. Tap Speak and try again.';
+
+  @override
+  String get pickerCustomerTitle => 'Which customer?';
+
+  @override
+  String pickerDeviceTitle(String device) {
+    return 'Which $device?';
+  }
+
+  @override
+  String pickerDeviceSubtitle(String name) {
+    return 'for $name';
+  }
+
+  @override
+  String get pickerItemTitle => 'What will be done?';
+
+  @override
+  String get pickerChecklistTitle => 'Which checklist?';
+
+  @override
+  String get pickerStatusTitle => 'What is the status?';
+
+  @override
+  String get pickerAssigneeTitle => 'Who is responsible?';
+
+  @override
+  String pickerDevicesTitle(String devices) {
+    return 'On which $devices?';
+  }
+
+  @override
+  String get pickerNewCustomer => 'New customer';
+
+  @override
+  String pickerNewDevice(String device) {
+    return 'New $device';
+  }
+
+  @override
+  String get pickerNewItem => 'New service or part';
+
+  @override
+  String get pickerNewChecklist => 'New checklist';
+
+  @override
+  String get pickerTypeAnother => 'Type another';
+
+  @override
+  String pickerRegister(String query) {
+    return 'Add “$query”';
+  }
+
+  @override
+  String pickerNoDeviceWith(String device, String query) {
+    return 'No $device matching “$query”.';
+  }
+
+  @override
+  String pickerNoItemWith(String query) {
+    return 'No service or part matching “$query”. Add it and it goes straight on the order.';
+  }
+
+  @override
+  String pickerNoMatch(String query) {
+    return 'Nothing matching “$query”.';
+  }
+
+  @override
+  String get pickerRecent => 'Recent';
+
+  @override
+  String get pickerAll => 'All';
+
+  @override
+  String get pickerSearch => 'Search';
 }

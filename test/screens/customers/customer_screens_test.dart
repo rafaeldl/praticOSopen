@@ -15,6 +15,7 @@ import 'package:praticos/screens/customers/customer_detail_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:provider/provider.dart';
@@ -159,14 +160,23 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  group('customer picker "Quem é o cliente?"', () {
+  group('customer picker "Qual cliente?"', () {
     final ana = customer('c1', 'Ana Ribeiro', phone: '(11) 90000-0001');
     final bruno = customer('c2', 'Bruno Lima');
     final uno = device('d1', 'Fiat Uno', 'ABC1D23');
 
-    FakeDirectory directory({Map<String, List<Order>>? orders}) =>
+    // [many] adds fillers so the list passes 10 and the search shows.
+    FakeDirectory directory({
+      Map<String, List<Order>>? orders,
+      bool many = false,
+    }) =>
         FakeDirectory(
-          customers: [ana, bruno],
+          customers: [
+            ana,
+            bruno,
+            if (many)
+              for (var i = 0; i < 9; i++) customer('f$i', 'Zeca $i'),
+          ],
           devices: [uno],
           owners: {'d1': 'c1'},
           orders: orders ?? {},
@@ -176,9 +186,41 @@ void main() {
         (tester) async {
       await Harness().pump(
           tester, CustomerListScreen(directory: directory()));
-      expect(find.text('Quem é o cliente?'), findsOneWidget);
-      expect(find.text('Cadastrar cliente novo'), findsOneWidget);
+      expect(find.text('Qual cliente?'), findsOneWidget);
+      expect(find.text('Novo cliente'), findsOneWidget);
       expect(find.text('Ana Ribeiro'), findsOneWidget);
+      // Two customers: no search (only above 10).
+      expect(find.byType(CupertinoSearchTextField), findsNothing);
+    });
+
+    testWidgets('above 10 customers the search shows', (tester) async {
+      await Harness().pump(
+        tester,
+        CustomerListScreen(
+          directory: FakeDirectory(
+            customers: [
+              for (var i = 0; i < 11; i++) customer('x$i', 'Cliente $i'),
+            ],
+            devices: const [],
+            owners: const {},
+            orders: const {},
+          ),
+        ),
+      );
+      expect(find.byType(CupertinoSearchTextField), findsOneWidget);
+    });
+
+    testWidgets('the order customer has the check mark', (tester) async {
+      await Harness().pump(
+        tester,
+        CustomerListScreen(directory: directory()),
+        args: {'order': Order()..customer = (CustomerAggr()..id = 'c2')},
+      );
+      final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+      expect(
+        {for (final r in rows) r.title: r.selected},
+        {'Ana Ribeiro': false, 'Bruno Lima': true},
+      );
     });
 
     testWidgets('has no swipe actions and no chevron while choosing',
@@ -192,7 +234,8 @@ void main() {
     testWidgets('searching by plate selects the customer and the vehicle',
         (tester) async {
       final h = Harness();
-      await h.pump(tester, CustomerListScreen(directory: directory()));
+      await h.pump(
+          tester, CustomerListScreen(directory: directory(many: true)));
       await tester.enterText(find.byType(CupertinoSearchTextField), 'abc1');
       await tester.pumpAndSettle();
       // Only the plate owner is listed, with the plate on the second line.
@@ -262,17 +305,20 @@ void main() {
 
     testWidgets('empty search shows the no-match sentence', (tester) async {
       await Harness().pump(
-          tester, CustomerListScreen(directory: directory()));
+          tester, CustomerListScreen(directory: directory(many: true)));
       await tester.enterText(find.byType(CupertinoSearchTextField), 'zzzz');
       await tester.pumpAndSettle();
       expect(find.text('Nenhum cliente com “zzzz”'), findsOneWidget);
+      // The add row becomes "Cadastrar “zzzz”".
+      expect(find.text('Cadastrar “zzzz”'), findsOneWidget);
+      expect(find.text('Novo cliente'), findsNothing);
     });
 
-    testWidgets('"Cadastrar cliente novo" opens the sheet with Cancelar',
+    testWidgets('"Novo cliente" opens the sheet with Cancelar',
         (tester) async {
       final h = Harness();
       await h.pump(tester, CustomerListScreen(directory: directory()));
-      await tester.tap(find.text('Cadastrar cliente novo'));
+      await tester.tap(find.text('Novo cliente'));
       await tester.pumpAndSettle();
       expect(find.byType(AppSheet), findsOneWidget);
       expect(find.text('Cancelar'), findsOneWidget);
@@ -281,7 +327,7 @@ void main() {
       await tester.tap(find.text('Cancelar'));
       await tester.pumpAndSettle();
       expect(find.byType(AppSheet), findsNothing);
-      expect(find.text('Quem é o cliente?'), findsOneWidget);
+      expect(find.text('Qual cliente?'), findsOneWidget);
       expect(h.result, 'unset');
     });
   });
