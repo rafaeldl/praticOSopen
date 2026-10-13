@@ -145,6 +145,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// Set after "Sair sem salvar?" so the route can pop.
   bool _leaving = false;
+  bool _moreOpen = false;
 
   /// Opened from a comment notification: scroll to the comments.
   bool _scrollToComments = false;
@@ -1324,7 +1325,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         if (customer != null && _store.devices.isEmpty && _deviceGuess == null)
           FormRow(
             icon: CupertinoIcons.add_circled,
-            title: l10n.orderPickDevice(config.device),
+            title: l10n.orderPickDevice(config.device.toLowerCase()),
             accent: true,
             onTap: _addDevice,
           ),
@@ -1469,10 +1470,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
   }
 
-  /// Everything else in one line, with what is already set under it.
+  /// Everything else, grouped. Closed it is one line with what is already
+  /// set under it; tapping opens the fields inside the same card.
   Widget _buildMoreOptionsCard(SegmentConfigProvider config) {
     final l10n = context.l10n;
     final order = _store.order;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
     final parts = <String>[
       if (_store.status != null && _store.status != 'quote')
         config.getStatus(_store.status),
@@ -1482,71 +1485,63 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         order!.assignedTo!.name!,
       if (_hasAddress) _store.address!.trim(),
     ];
+    Future<void> run(Future<void> Function() action) async {
+      await action();
+      if (mounted) setState(() {});
+    }
+
     return FormCard(
       children: [
         FormRow(
           key: const ValueKey('new_order_more'),
           icon: CupertinoIcons.ellipsis_circle,
           title: l10n.orderMoreOptions,
-          subtitle: parts.isEmpty
-              ? l10n.orderMoreOptionsHint
-              : parts.join(' · '),
-          onTap: () => _showMoreOptions(config),
+          subtitle: _moreOpen
+              ? null
+              : (parts.isEmpty
+                  ? l10n.orderMoreOptionsHint
+                  : parts.join(' · ')),
+          showChevron: false,
+          trailing: Icon(
+            _moreOpen
+                ? CupertinoIcons.chevron_up
+                : CupertinoIcons.chevron_down,
+            size: 18,
+            color: secondary,
+          ),
+          onTap: () => setState(() => _moreOpen = !_moreOpen),
         ),
-      ],
-    );
-  }
-
-  Future<void> _showMoreOptions(SegmentConfigProvider config) async {
-    final l10n = context.l10n;
-    final order = _store.order;
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.orderMoreOptions),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'status'),
-            child: Text(
-              '${l10n.orderStatusLabel}: ${config.getStatus(_store.status)}',
-            ),
+        if (_moreOpen) ...[
+          FormRow(
+            key: const ValueKey('new_order_more_status'),
+            title: l10n.orderStatusLabel,
+            value: config.getStatus(_store.status ?? 'quote'),
+            onTap: () => run(_selectStatus),
           ),
           if (config.useScheduling)
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, 'schedule'),
-              child: Text(
-                order?.scheduledDate == null
-                    ? l10n.orderScheduleLabel
-                    : '${l10n.orderScheduleLabel}: ${_format.formatDateTime(order!.scheduledDate)}',
-              ),
+            FormRow(
+              key: const ValueKey('new_order_more_schedule'),
+              title: l10n.orderScheduleLabel,
+              value: order?.scheduledDate == null
+                  ? l10n.orderDueNone
+                  : _format.formatDateTime(order!.scheduledDate),
+              onTap: () => run(_pickSchedule),
             ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'responsible'),
-            child: Text(l10n.orderAddResponsible),
+          FormRow(
+            key: const ValueKey('new_order_more_responsible'),
+            title: l10n.orderAddResponsible,
+            value: order?.assignedTo?.name,
+            onTap: () => run(_pickResponsible),
           ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'address'),
-            child: Text(l10n.orderAddressLabel),
+          FormRow(
+            key: const ValueKey('new_order_more_address'),
+            title: l10n.orderAddressLabel,
+            value: _hasAddress ? _store.address!.trim() : null,
+            onTap: () => run(_editAddress),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+      ],
     );
-    if (!mounted) return;
-    switch (choice) {
-      case 'status':
-        await _selectStatus();
-      case 'schedule':
-        await _pickSchedule();
-      case 'responsible':
-        await _pickResponsible();
-      case 'address':
-        await _editAddress();
-    }
-    if (mounted) setState(() {});
   }
 
   /// Leaves this screen. Inside the "Nova OS" sheet it is the sheet's first
@@ -1735,7 +1730,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
           if (_store.customer != null && _store.devices.isEmpty)
             AddRow(
-              label: l10n.orderPickDevice(config.device),
+              label: l10n.orderPickDevice(config.device.toLowerCase()),
               onTap: _addDevice,
             ),
         ] else ...[
@@ -1745,7 +1740,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
           else if (_store.devices.isEmpty)
             AddRow(
-              label: l10n.orderPickDevice(config.device),
+              label: l10n.orderPickDevice(config.device.toLowerCase()),
               onTap: _addDevice,
             ),
         ],

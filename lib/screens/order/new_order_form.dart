@@ -281,7 +281,9 @@ class FormRow extends StatelessWidget {
                 child: trailing,
               )
             else if (value != null)
+              // Tight, so the value hugs the right edge next to the chevron.
               Flexible(
+                fit: FlexFit.tight,
                 child: Padding(
                   padding: const EdgeInsets.only(left: AppSpacing.sm),
                   child: Text(

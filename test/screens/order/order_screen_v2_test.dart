@@ -343,14 +343,48 @@ void main() {
       final store = OrderStore();
       await _pump(tester, screen(store), hosted: true);
 
+      // Closed, the fields stay hidden.
+      expect(find.byKey(const ValueKey('new_order_more_status')), findsNothing);
+
+      // Opens inside the same card, no other sheet.
       await tester.tap(find.byKey(const ValueKey('new_order_more')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Situação: Orçamento'));
+      expect(find.byType(CupertinoActionSheet), findsNothing);
+      expect(
+        find.byKey(const ValueKey('new_order_more_responsible')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('new_order_more_address')),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('new_order_more_status')),
+      );
+      // The value hugs the right edge (next to the chevron), not mid-row.
+      final row = tester.getRect(
+        find.byKey(const ValueKey('new_order_more_status')),
+      );
+      final value = tester.getRect(
+        find.descendant(
+          of: find.byKey(const ValueKey('new_order_more_status')),
+          matching: find.text('Orçamento'),
+        ),
+      );
+      expect(row.right - value.right, lessThan(60));
+      await tester.tap(find.byKey(const ValueKey('new_order_more_status')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Aprovado').last);
       await tester.pumpAndSettle();
       expect(store.status, 'approved');
-      expect(find.text('Aprovado'), findsOneWidget); // summary under the row
+
+      // Closed again, the summary shows what was chosen.
+      await tester.ensureVisible(find.byKey(const ValueKey('new_order_more')));
+      await tester.tap(find.byKey(const ValueKey('new_order_more')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('new_order_more_status')), findsNothing);
+      expect(find.text('Aprovado'), findsOneWidget);
     });
   });
 
