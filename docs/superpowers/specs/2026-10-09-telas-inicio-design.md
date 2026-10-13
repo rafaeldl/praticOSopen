@@ -124,3 +124,15 @@ Cada passo é um PR com teste de widget; textos novos nos 3 `.arb` + `fvm flutte
 - **Texto grande** (escala ≥ `kAppListRowStackScale`, 1,35): o bloco "Hoje" perde o rótulo e usa a frase curta ("2 OS passaram do prazo."), e o seletor "Em aberto | Todas" some.
 - **Primeira vez:** subtítulo "Nenhuma ainda", rótulo "Comece por aqui" e passos com título em negrito e linha de apoio em cinza (textos da prancha).
 - **Início do técnico** (`AuthorizationService.isTechnician`): seletor "Minhas | Todas" (`HomeView.mine` filtra por `assignedTo`), bloco "Agora" com a próxima visita de hoje e o botão "Abrir OS N", e nenhum "Nova OS" flutuante. Regras em `HomeRules.assignedTo`, `scheduledToday` e `nowOrder`.
+
+## Revisão 2026-10-13 (rodada 4: padrão HIG)
+
+Comparadas no protótipo as propostas A, B e C, listas L1 a L6; ficou a estrutura abaixo (pranchas da fileira "Início").
+
+- **Abas:** Início (casa), Agenda e Financeiro, com o "+" azul de Nova OS ao lado (`GlassTabBar.action`). A aba Clientes e a aba Mais saem: clientes pertencem à OS e abrem pela busca, pela OS e pelo perfil. Técnico: só Início e Agenda, centralizadas, sem "+".
+- **Topo:** sino e botão do perfil (iniciais da empresa) no canto direito. O "…" sai: canceladas ficam em "Todas", contratos no perfil.
+- **Perfil** (antiga aba Mais): seção Cadastros com Clientes, Catálogo, Contratos e Checklists; depois Empresa e Você.
+- **Subtítulo:** "12 em aberto · 2 atrasadas". O bloco "Hoje" sai para o dono; o técnico mantém o bloco "Agora".
+- **Filtros:** "Em aberto | Concluídas | Todas" (`HomeView.open/done/all`); técnico: "Minhas | Todas". Status separados (orçamento, aprovada) não viram filtro: a linha já diz. A receber/Pago fica no Financeiro.
+- **Lista no estilo do Mail** (`OrderListRow`): cliente e total à direita (o total fica sempre no mesmo lugar), veículo · serviço, status em cinza. Sem grupos nem ponto em toda linha: atrasadas vêm primeiro, com ponto vermelho à esquerda e status em `danger` negrito. Em "Concluídas", "falta receber R$ X" em negrito no status, só quando falta.
+- **Busca:** escondida; aparece ao puxar a lista para baixo (`HomeContent.pullToSearch`) e some ao rolar de novo. Procura OS, cliente e placa.

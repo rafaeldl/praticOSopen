@@ -2908,5 +2908,16 @@
     }
   },
   "orderAddResponsible": "Responsável",
-  "orderResponsibleRemove": "Tirar responsável"
+  "orderResponsibleRemove": "Tirar responsável",
+  "filterDone": "Concluídas",
+  "homeLateCount": "{count, plural, =1{1 atrasada} other{{count} atrasadas}}",
+  "@homeLateCount": {"placeholders": {"count": {"type": "int"}}},
+  "homeSearchHint": "Buscar OS ou cliente",
+  "homeSearchHintDevice": "Buscar OS, cliente ou {device}",
+  "@homeSearchHintDevice": {"placeholders": {"device": {"type": "String"}}},
+  "remainingToReceive": "falta receber {amount}",
+  "@remainingToReceive": {"placeholders": {"amount": {"type": "String"}}},
+  "firstOrderTapPlus": "Toque no + para criar sua primeira OS. Leva menos de um minuto.",
+  "profileButtonA11y": "{company}: clientes, catálogo, equipe e ajustes",
+  "@profileButtonA11y": {"placeholders": {"company": {"type": "String"}}}
 }

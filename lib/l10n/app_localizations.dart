@@ -10155,6 +10155,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tirar responsável'**
   String get orderResponsibleRemove;
+
+  /// No description provided for @filterDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluídas'**
+  String get filterDone;
+
+  /// No description provided for @homeLateCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 atrasada} other{{count} atrasadas}}'**
+  String homeLateCount(int count);
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar OS ou cliente'**
+  String get homeSearchHint;
+
+  /// No description provided for @homeSearchHintDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar OS, cliente ou {device}'**
+  String homeSearchHintDevice(String device);
+
+  /// No description provided for @remainingToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta receber {amount}'**
+  String remainingToReceive(String amount);
+
+  /// No description provided for @firstOrderTapPlus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no + para criar sua primeira OS. Leva menos de um minuto.'**
+  String get firstOrderTapPlus;
+
+  /// No description provided for @profileButtonA11y.
+  ///
+  /// In pt, this message translates to:
+  /// **'{company}: clientes, catálogo, equipe e ajustes'**
+  String profileButtonA11y(String company);
 }
 
 class _AppLocalizationsDelegate

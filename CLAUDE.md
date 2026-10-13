@@ -228,7 +228,7 @@ O padrão do app está em `docs/APP_DESIGN_SYSTEM.md` (ler antes de criar ou red
 - Cadastro novo abre em sheet grande ("Cancelar" à esquerda, botão grande embaixo); edição do que já existe abre empurrada
 - Vidro (`AppGlass`) só na navegação: abas, botões do topo, menus e sheets pequenas. Conteúdo sempre opaco
 - Toque: botão principal com 58 de altura (`AppSizes.primaryButtonHeight`), qualquer outro alvo com pelo menos 44
-- Abas sempre na ordem Início, Clientes, Agenda, Financeiro, Mais (`visibleAppTabs()`)
+- Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o "+" azul (Nova OS) ao lado. Clientes e o que era "Mais" abrem pelo botão do perfil, no topo da Início
 
 **Widgets:**
 - `CupertinoPageScaffold` + `CupertinoSliverNavigationBar` (título grande)

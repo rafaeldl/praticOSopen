@@ -125,7 +125,7 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('back button reads "Mais"', (tester) async {
+  testWidgets('back button reads the screen below', (tester) async {
     final store = SubscriptionStore()..latest = _starter();
     await tester.pumpWidget(
       Provider<SubscriptionStore>.value(
@@ -134,7 +134,8 @@ void main() {
           locale: const Locale('pt'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
+          onGenerateRoute: (_) => CupertinoPageRoute(
+            title: 'Oficina do Zé',
             builder: (context) => CupertinoButton(
               child: const Text('open'),
               onPressed: () => Navigator.of(context).push(
@@ -147,6 +148,6 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(find.text('Mais'), findsOneWidget);
+    expect(find.text('Oficina do Zé'), findsOneWidget);
   });
 }

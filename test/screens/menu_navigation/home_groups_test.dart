@@ -62,26 +62,24 @@ void main() {
       expect(groups[1].key, DateTime(2026, 9));
     });
 
-    test('nextStep priority: late, then due today, then stale quotes', () {
-      final late = order('progress', due: DateTime(2026, 10, 1));
-      final today = order('progress', due: DateTime(2026, 10, 12));
-      final stale = order('quote', created: DateTime(2026, 9, 1));
+    test('sortOpen puts overdue first, then due today, then the rest', () {
+      final fresh = order('quote', number: 1);
+      final today = order('progress', due: DateTime(2026, 10, 12), number: 2);
+      final lateNew = order('approved', due: DateTime(2026, 10, 10), number: 3);
+      final lateOld = order('progress', due: DateTime(2026, 10, 1), number: 4);
 
-      expect(HomeRules.nextStep([late, today, stale], now)!.kind, NextStepKind.late);
-      expect(HomeRules.nextStep([today, stale], now)!.kind, NextStepKind.dueToday);
-      final quotes = HomeRules.nextStep([stale], now)!;
-      expect(quotes.kind, NextStepKind.quotesWaiting);
-      expect(quotes.target, HomeGroup.waitingApproval);
-      expect(HomeRules.nextStep([order('quote', created: DateTime(2026, 10, 10))], now), isNull);
-      expect(HomeRules.nextStep([], now), isNull);
+      final sorted = HomeRules.sortOpen([fresh, today, lateNew, lateOld], now);
+      expect(sorted.map((o) => o.number), [4, 3, 2, 1]);
+      expect(HomeRules.lateCount(sorted, now), 2);
     });
 
     test('views map to store fields', () {
       expect(HomeView.open.queryField, 'open');
+      expect(HomeView.done.queryField, 'done');
       expect(HomeView.all.queryField, isNull);
-      expect(HomeView.canceled.queryField, 'canceled');
-      expect(HomeView.open.isSegmented, isTrue);
-      expect(HomeView.canceled.isSegmented, isFalse);
+      expect(HomeView.mine.queryField, 'open');
+      expect(HomeView.open.isOpenList, isTrue);
+      expect(HomeView.done.isOpenList, isFalse);
     });
   });
 

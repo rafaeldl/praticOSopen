@@ -5878,4 +5878,40 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderResponsibleRemove => 'Quitar responsable';
+
+  @override
+  String get filterDone => 'Terminadas';
+
+  @override
+  String homeLateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count atrasadas',
+      one: '1 atrasada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeSearchHint => 'Buscar OS o cliente';
+
+  @override
+  String homeSearchHintDevice(String device) {
+    return 'Buscar OS, cliente o $device';
+  }
+
+  @override
+  String remainingToReceive(String amount) {
+    return 'falta cobrar $amount';
+  }
+
+  @override
+  String get firstOrderTapPlus =>
+      'Toca + para crear tu primera OS. Toma menos de un minuto.';
+
+  @override
+  String profileButtonA11y(String company) {
+    return '$company: clientes, catálogo, equipo y ajustes';
+  }
 }

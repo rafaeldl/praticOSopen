@@ -37,7 +37,7 @@ final _financialSwitch = find.descendant(
 
 void main() {
   group('MoreView', () {
-    testWidgets('shows the 9 rows in order, each opening a screen',
+    testWidgets('shows the 11 rows in order, each opening a screen',
         (tester) async {
       tallScreen(tester);
       final opened = <MoreDestination>[];
@@ -53,17 +53,19 @@ void main() {
           .toList();
       expect(titles, [
         'Sua conta',
+        'Clientes',
+        'Catálogo',
+        'Contratos',
+        'Checklists',
+        'Avaliações',
         'Sua empresa',
         'Equipe',
         'Plano',
-        'Catálogo',
-        'Checklists',
-        'Avaliações',
         'Lembretes',
         'Avançado',
       ]);
       // every row opens another screen, so every row has a chevron
-      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(9));
+      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(11));
       expect(find.text('Starter'), findsOneWidget);
       expect(find.text('PraticOS 1.0.0'), findsOneWidget);
 
@@ -71,7 +73,7 @@ void main() {
       expect(opened, [MoreDestination.team]);
     });
 
-    testWidgets('groups rows under Empresa, Cadastros and Você like the '
+    testWidgets('groups rows under Cadastros, Empresa and Você like the '
         'prototype, with the user as the account row', (tester) async {
       tallScreen(tester);
       await tester.pumpWidget(app(MoreView(
@@ -88,11 +90,20 @@ void main() {
       expect(find.text('Dados na OS, ramo e recursos'), findsOneWidget);
       expect(find.text('Serviços e peças'), findsOneWidget);
       double y(String t) => tester.getTopLeft(find.text(t)).dy;
+      expect(y('Cadastros'), lessThan(y('Clientes')));
+      expect(y('Avaliações'), lessThan(y('Empresa')));
       expect(y('Empresa'), lessThan(y('Sua empresa')));
-      expect(y('Plano'), lessThan(y('Cadastros')));
-      expect(y('Cadastros'), lessThan(y('Catálogo')));
-      expect(y('Avaliações'), lessThan(y('Você')));
+      expect(y('Plano'), lessThan(y('Você')));
       expect(y('Você'), lessThan(y('Lembretes')));
+    });
+
+    testWidgets('titled with the company name', (tester) async {
+      await tester.pumpWidget(app(MoreView(
+        onOpen: (_) {},
+        title: 'Oficina do Zé',
+      )));
+      expect(find.text('Oficina do Zé'), findsOneWidget);
+      expect(find.text('Mais'), findsNothing);
     });
 
     testWidgets('hides empty sections', (tester) async {
@@ -100,6 +111,8 @@ void main() {
       await tester.pumpWidget(app(MoreView(
         onOpen: (_) {},
         visibility: const MoreVisibility(
+          customers: false,
+          contracts: false,
           catalog: false,
           checklists: false,
           ratings: false,
@@ -113,6 +126,8 @@ void main() {
       await tester.pumpWidget(app(MoreView(
         onOpen: (_) {},
         visibility: const MoreVisibility(
+          customers: false,
+          contracts: false,
           company: false,
           team: false,
           checklists: false,
@@ -124,7 +139,7 @@ void main() {
           .widgetList<AppListRow>(find.byType(AppListRow))
           .map((row) => row.title)
           .toList();
-      expect(titles, ['Sua conta', 'Plano', 'Catálogo', 'Lembretes']);
+      expect(titles, ['Sua conta', 'Catálogo', 'Plano', 'Lembretes']);
     });
   });
 

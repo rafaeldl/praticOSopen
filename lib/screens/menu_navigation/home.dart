@@ -14,6 +14,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
+import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 import 'package:praticos/screens/widgets/whatsapp_setup_banner.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -21,6 +22,10 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../global.dart';
+
+/// Bumped when an order may have changed outside Início (the "+" beside the
+/// tabs creates one), so the list reloads.
+final ValueNotifier<int> ordersChanged = ValueNotifier(0);
 
 /// Início tab: wires [HomeContent] to the order store. The legacy order flow
 /// (`/order`) is still what "Nova OS" opens.
@@ -41,6 +46,18 @@ class _HomeState extends State<Home> {
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
   bool _whatsappStatusLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ordersChanged.addListener(_loadOrders);
+  }
+
+  @override
+  void dispose() {
+    ordersChanged.removeListener(_loadOrders);
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -110,11 +127,14 @@ class _HomeState extends State<Home> {
         .then((_) => _loadOrders());
   }
 
-  void _newOrder() {
+  void _openProfile() {
     HapticFeedback.lightImpact();
-    Navigator.of(context, rootNavigator: true)
-        .pushNamed('/order')
-        .then((_) => _loadOrders());
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        title: Global.companyAggr?.name ?? context.l10n.more,
+        builder: (_) => const Settings(),
+      ),
+    );
   }
 
   @override
@@ -138,7 +158,6 @@ class _HomeState extends State<Home> {
         deviceLabel: config.showDeviceInOrderList ? config.device : null,
         technician: _authService.isTechnician,
         currentUserId: Global.currentUser?.uid,
-        useContracts: config.useContracts,
         unreadCount: notificationStore.unreadCount?.value ?? 0,
         statusLabel: (status) => config.getStatus(status ?? ''),
         customerFilterName: orderStore.customerFilter?.name,
@@ -148,7 +167,8 @@ class _HomeState extends State<Home> {
           _loadOrders();
         },
         onOpenOrder: _openOrder,
-        onNewOrder: _newOrder,
+        onOpenProfile: _openProfile,
+        companyName: Global.companyAggr?.name,
         onRetry: _loadOrders,
         onLoadMore: () =>
             orderStore.loadMoreOrdersInfinite(_view.queryField),

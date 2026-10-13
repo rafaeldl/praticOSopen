@@ -2794,5 +2794,12 @@
   "orderChangeCustomer": "Cambiar cliente",
   "orderChangeDevice": "Cambiar {device}",
   "orderAddResponsible": "Responsable",
-  "orderResponsibleRemove": "Quitar responsable"
+  "orderResponsibleRemove": "Quitar responsable",
+  "filterDone": "Terminadas",
+  "homeLateCount": "{count, plural, =1{1 atrasada} other{{count} atrasadas}}",
+  "homeSearchHint": "Buscar OS o cliente",
+  "homeSearchHintDevice": "Buscar OS, cliente o {device}",
+  "remainingToReceive": "falta cobrar {amount}",
+  "firstOrderTapPlus": "Toca + para crear tu primera OS. Toma menos de un minuto.",
+  "profileButtonA11y": "{company}: clientes, catálogo, equipo y ajustes"
 }

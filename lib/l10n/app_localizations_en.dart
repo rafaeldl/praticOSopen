@@ -5854,4 +5854,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderResponsibleRemove => 'Remove responsible';
+
+  @override
+  String get filterDone => 'Completed';
+
+  @override
+  String homeLateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count late',
+      one: '1 late',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeSearchHint => 'Search orders or customers';
+
+  @override
+  String homeSearchHintDevice(String device) {
+    return 'Search orders, customers or $device';
+  }
+
+  @override
+  String remainingToReceive(String amount) {
+    return '$amount left to receive';
+  }
+
+  @override
+  String get firstOrderTapPlus =>
+      'Tap + to create your first work order. It takes less than a minute.';
+
+  @override
+  String profileButtonA11y(String company) {
+    return '$company: customers, catalog, team and settings';
+  }
 }

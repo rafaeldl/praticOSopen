@@ -1,15 +1,15 @@
 import 'package:praticos/models/order.dart';
 
-/// Which list the Início screen is showing.
+/// Which list the Início screen is showing (the filter buttons).
 enum HomeView {
-  /// Quotes, approved and in progress orders, grouped by urgency.
+  /// Quotes, approved and in progress orders, overdue first.
   open,
 
-  /// Every order, one continuous list with a section per month.
-  all,
+  /// Completed orders, most recent first.
+  done,
 
-  /// Canceled orders ("…" menu).
-  canceled,
+  /// Every order (canceled included), one section per month.
+  all,
 
   /// Technician: the open orders assigned to them ("Minhas").
   mine;
@@ -17,40 +17,21 @@ enum HomeView {
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
     HomeView.open => 'open',
+    HomeView.done => 'done',
     HomeView.all => null,
-    HomeView.canceled => 'canceled',
     HomeView.mine => 'open',
   };
 
-  /// Whether the "Em aberto | Todas" (or "Minhas | Todas") toggle is shown.
-  bool get isSegmented => this != HomeView.canceled;
-
-  /// Views whose list is grouped by urgency (every open order is loaded).
+  /// Views that load every open order (so counts are exact).
   bool get isOpenList => this == HomeView.open || this == HomeView.mine;
 }
 
-/// Urgency sections of the "Em aberto" list, in display order.
+/// Urgency of an open order, in list order.
 enum HomeGroup { late, dueToday, inProgress, waitingApproval, approved }
-
-/// What the "next step" block asks the owner to look at.
-enum NextStepKind { late, dueToday, quotesWaiting }
-
-class NextStep {
-  const NextStep(this.kind, this.count, this.target);
-
-  final NextStepKind kind;
-  final int count;
-
-  /// Section the link scrolls to.
-  final HomeGroup target;
-}
 
 /// Pure rules for the Início list (kept out of the widget for testing).
 class HomeRules {
   HomeRules._();
-
-  /// Quotes/approved orders older than this many days count as "waiting".
-  static const int staleQuoteDays = 7;
 
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -126,34 +107,17 @@ class HomeRules {
     return result;
   }
 
-  /// The one sentence for the next-step block, by priority: late, due today,
-  /// stale quotes. Null when there is nothing to say.
-  static NextStep? nextStep(List<Order> orders, DateTime now) {
-    final open = orders.where((o) => !isFinished(o)).toList();
-    final late = open.where((o) => isOverdue(o, now)).length;
-    if (late > 0) return NextStep(NextStepKind.late, late, HomeGroup.late);
-    final today = open.where((o) => isDueToday(o, now)).length;
-    if (today > 0) {
-      return NextStep(NextStepKind.dueToday, today, HomeGroup.dueToday);
-    }
-    final limit = now.subtract(const Duration(days: staleQuoteDays));
-    final stale = open
-        .where(
-          (o) =>
-              (o.status == 'quote' || o.status == 'approved') &&
-              o.createdAt != null &&
-              o.createdAt!.isBefore(limit),
-        )
-        .toList();
-    if (stale.isNotEmpty) {
-      final target =
-          stale.any((o) => groupOf(o, now) == HomeGroup.waitingApproval)
-          ? HomeGroup.waitingApproval
-          : HomeGroup.approved;
-      return NextStep(NextStepKind.quotesWaiting, stale.length, target);
-    }
-    return null;
+  /// Open orders in list order: overdue first (oldest due date first),
+  /// then due today, then the rest as they came (newest first).
+  static List<Order> sortOpen(List<Order> orders, DateTime now) {
+    final groups = groupOpen(orders, now);
+    final urgent = [...?groups[HomeGroup.late], ...?groups[HomeGroup.dueToday]];
+    return [...urgent, ...orders.where((o) => !urgent.contains(o))];
   }
+
+  /// Overdue orders among [orders].
+  static int lateCount(List<Order> orders, DateTime now) =>
+      orders.where((o) => isOverdue(o, now)).length;
 
   /// Orders assigned to [userId] ("Minhas").
   static List<Order> assignedTo(List<Order> orders, String? userId) {

@@ -6,11 +6,11 @@ import 'package:praticos/theme/app_glass.dart';
 
 final _items = [
   BottomNavigationBarItem(icon: Icon(CupertinoIcons.house), label: 'Início'),
+  BottomNavigationBarItem(icon: Icon(CupertinoIcons.calendar), label: 'Agenda'),
   BottomNavigationBarItem(
-    icon: Icon(CupertinoIcons.person_2),
-    label: 'Clientes',
+    icon: Icon(CupertinoIcons.money_dollar_circle),
+    label: 'Financeiro',
   ),
-  BottomNavigationBarItem(icon: Icon(CupertinoIcons.ellipsis), label: 'Mais'),
 ];
 
 Future<void> _pump(
@@ -18,6 +18,8 @@ Future<void> _pump(
   bool highContrast = false,
   bool reduceTransparency = false,
   ValueChanged<int>? onTap,
+  List<BottomNavigationBarItem>? items,
+  Widget? action,
 }) {
   return tester.pumpWidget(
     MediaQuery(
@@ -25,7 +27,8 @@ Future<void> _pump(
       child: CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: GlassTabBar(
-            items: _items,
+            items: items ?? _items,
+            action: action,
             onTap: onTap,
             reduceTransparency: reduceTransparency,
           ),
@@ -41,8 +44,8 @@ void main() {
     await _pump(tester);
 
     expect(find.text('Início'), findsOneWidget);
-    expect(find.text('Clientes'), findsOneWidget);
-    expect(find.text('Mais'), findsOneWidget);
+    expect(find.text('Agenda'), findsOneWidget);
+    expect(find.text('Financeiro'), findsOneWidget);
     expect(find.byType(AppGlass), findsOneWidget);
     // Only the AppGlass blur: the inner bar must not add its own.
     expect(find.byType(BackdropFilter), findsOneWidget);
@@ -52,7 +55,7 @@ void main() {
     final taps = <int>[];
     await _pump(tester, onTap: taps.add);
 
-    await tester.tap(find.text('Mais'));
+    await tester.tap(find.text('Financeiro'));
     await tester.pump();
 
     expect(taps, [2]);
@@ -83,7 +86,7 @@ void main() {
     await _pump(tester);
 
     final label = tester.widget<Text>(find.text('Início'));
-    final other = tester.widget<Text>(find.text('Clientes'));
+    final other = tester.widget<Text>(find.text('Agenda'));
     expect(
       label.style!.color!.toARGB32(),
       AppColors.accentText.color.toARGB32(),
@@ -128,8 +131,35 @@ void main() {
     await _pump(tester);
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Clientes'), findsOneWidget);
-    final label = tester.widget<Text>(find.text('Clientes'));
+    expect(find.text('Financeiro'), findsOneWidget);
+    final label = tester.widget<Text>(find.text('Financeiro'));
     expect(label.overflow, isNot(TextOverflow.ellipsis));
+  });
+
+  testWidgets('"+" sits right of the capsule and starts a new order', (
+    tester,
+  ) async {
+    var pressed = 0;
+    await _pump(
+      tester,
+      action: NewOrderTabButton(label: 'Nova OS', onPressed: () => pressed++),
+    );
+    final capsule = tester.getRect(find.byType(AppGlass));
+    final plus = tester.getRect(find.byType(NewOrderTabButton));
+    expect(plus.left, greaterThan(capsule.right));
+    expect(plus.height, GlassTabBar.capsuleHeight);
+    expect(find.bySemanticsLabel('Nova OS'), findsOneWidget);
+    await tester.tap(find.byType(NewOrderTabButton));
+    expect(pressed, 1);
+  });
+
+  testWidgets('two tabs and no "+" (technician): centered capsule', (
+    tester,
+  ) async {
+    await _pump(tester, items: _items.take(2).toList());
+    final capsule = tester.getRect(find.byType(AppGlass));
+    final width = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(capsule.center.dx, closeTo(width / 2, 0.5));
+    expect(capsule.left, greaterThan(16));
   });
 }

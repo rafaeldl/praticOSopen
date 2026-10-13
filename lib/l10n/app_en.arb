@@ -2794,5 +2794,12 @@
   "orderChangeCustomer": "Change customer",
   "orderChangeDevice": "Change {device}",
   "orderAddResponsible": "Responsible",
-  "orderResponsibleRemove": "Remove responsible"
+  "orderResponsibleRemove": "Remove responsible",
+  "filterDone": "Completed",
+  "homeLateCount": "{count, plural, =1{1 late} other{{count} late}}",
+  "homeSearchHint": "Search orders or customers",
+  "homeSearchHintDevice": "Search orders, customers or {device}",
+  "remainingToReceive": "{amount} left to receive",
+  "firstOrderTapPlus": "Tap + to create your first work order. It takes less than a minute.",
+  "profileButtonA11y": "{company}: customers, catalog, team and settings"
 }

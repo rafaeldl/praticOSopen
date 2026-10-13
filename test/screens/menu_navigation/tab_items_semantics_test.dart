@@ -27,7 +27,7 @@ void main() {
       ),
     );
 
-    for (final label in ['Início', 'Clientes', 'Agenda', 'Financeiro', 'Mais']) {
+    for (final label in ['Início', 'Agenda', 'Financeiro']) {
       expect(tester.getSemantics(find.text(label)),
           containsSemantics(isButton: true),
           reason: label);

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
-import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -20,8 +19,7 @@ class MorePage extends StatelessWidget {
 
   final String title;
 
-  /// Back button label; defaults to "Mais", where every page of this kind
-  /// is opened from.
+  /// Back button label; defaults to the title of the screen below.
   final String? previousPageTitle;
 
   /// One line under the large title.
@@ -42,7 +40,7 @@ class MorePage extends StatelessWidget {
           slivers: [
             AppNavBar(
               largeTitle: Text(title),
-              previousTitle: previousPageTitle ?? context.l10n.more,
+              previousTitle: previousPageTitle,
             ),
             SliverSafeArea(
               top: false,

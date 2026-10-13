@@ -6,8 +6,7 @@ import 'package:mobx/mobx.dart'; // Import for reaction
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
-import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
-import 'package:praticos/screens/menu_navigation/settings.dart';
+import 'package:flutter/services.dart';
 import 'package:praticos/screens/dashboard/financial_tab.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
@@ -43,14 +42,12 @@ class _NavigationControllerState extends State<NavigationController>
   Widget _buildPage(AppTab tab) {
     return switch (tab) {
       AppTab.home => Home(),
-      AppTab.customers => HomeCustomerList(),
       AppTab.agenda => const AgendaScreen(),
       AppTab.financial => ProtectedRoute(
         permission: PermissionType.viewFinancialReports,
         accessDeniedMessage: context.l10n.financialAccessDenied,
         child: const FinancialTab(),
       ),
-      AppTab.more => Settings(),
     };
   }
 
@@ -157,6 +154,20 @@ class _NavigationControllerState extends State<NavigationController>
     super.dispose();
   }
 
+  /// The "+" beside the tabs. Technicians work on the orders they are given
+  /// (prototype "Início · técnico": no "+").
+  bool get _canCreateOrder {
+    final auth = AuthorizationService.instance;
+    return !auth.isTechnician && auth.hasPermission(PermissionType.createOrder);
+  }
+
+  void _newOrder() {
+    HapticFeedback.lightImpact();
+    Navigator.of(context, rootNavigator: true)
+        .pushNamed('/order')
+        .then((_) => ordersChanged.value++);
+  }
+
   @override
   Widget build(BuildContext context) {
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
@@ -187,6 +198,12 @@ class _NavigationControllerState extends State<NavigationController>
               navigationStore.setCurrentIndex(index);
             },
             items: [for (final tab in tabs) buildAppTabItem(context, tab)],
+            action: _canCreateOrder
+                ? NewOrderTabButton(
+                    label: context.l10n.newOrder,
+                    onPressed: _newOrder,
+                  )
+                : null,
           ),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTabView(
@@ -209,12 +226,7 @@ BottomNavigationBarItem buildAppTabItem(BuildContext context, AppTab tab) {
   // Same outline icon on both states, as in the prototype: the selected tab
   // is told apart by its capsule and accent color.
   final (id, icon, label) = switch (tab) {
-    AppTab.home => ('tab_home', CupertinoIcons.doc_text, context.l10n.home),
-    AppTab.customers => (
-      'tab_customers',
-      CupertinoIcons.person,
-      context.l10n.customers,
-    ),
+    AppTab.home => ('tab_home', CupertinoIcons.house, context.l10n.home),
     AppTab.agenda => (
       'tab_agenda',
       CupertinoIcons.calendar,
@@ -225,7 +237,6 @@ BottomNavigationBarItem buildAppTabItem(BuildContext context, AppTab tab) {
       CupertinoIcons.money_dollar_circle,
       context.l10n.financial,
     ),
-    AppTab.more => ('tab_settings', CupertinoIcons.ellipsis, context.l10n.more),
   };
   // The button flag merges into the tab item (GlassTabBar merges each
   // item's semantics), so VoiceOver and UI tests see every tab as a button,
