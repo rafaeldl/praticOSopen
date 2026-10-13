@@ -492,6 +492,42 @@ class _GlassCapsule extends StatelessWidget {
   }
 }
 
+/// Opaque floating surface for content shown over the form (what was heard,
+/// the assistant's note). Glass stays only on the bar's controls.
+class _OpaqueFloat extends StatelessWidget {
+  const _OpaqueFloat({
+    required this.child,
+    required this.borderRadius,
+    this.padding,
+    this.minHeight = 0,
+  });
+
+  final Widget child;
+  final BorderRadius borderRadius;
+  final EdgeInsetsGeometry? padding;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(minHeight: minHeight),
+      padding: padding,
+      decoration: BoxDecoration(
+        color: AppColors.surface.resolveFrom(context),
+        borderRadius: borderRadius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x26000000),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
 /// Assistant tools at the bottom of the "Nova OS" sheet (prototype "Nova OS
 /// · campos por ordem", "ouve ali mesmo" and "a IA lê ali mesmo"). Everything
 /// happens here, without another screen:
@@ -859,7 +895,8 @@ class _WaveState extends State<_Wave> with SingleTickerProviderStateMixin {
   }
 }
 
-/// What was heard so far, on glass above the bar while listening.
+/// What was heard so far, on an opaque card above the bar while listening
+/// (it is content, so it is not glass).
 class AssistantTranscript extends StatelessWidget {
   const AssistantTranscript({super.key, required this.heard});
 
@@ -869,8 +906,7 @@ class AssistantTranscript extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final secondary = AppColors.textSecondary.resolveFrom(context);
-    return AppGlass(
-      elevated: true,
+    return _OpaqueFloat(
       borderRadius: BorderRadius.circular(kFormCardRadius),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -906,7 +942,7 @@ class AssistantTranscript extends StatelessWidget {
   }
 }
 
-/// Glass note above the bar: what the assistant did ("Preenchi o que está
+/// Opaque note above the bar (content, not navigation): what the assistant did ("Preenchi o que está
 /// marcado…" with "Desfazer") or why it could not (with "Fechar"). Takes
 /// the place of an alert, so nothing interrupts the form.
 class AssistantNote extends StatelessWidget {
@@ -930,7 +966,9 @@ class AssistantNote extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       container: true,
-      child: _GlassCapsule(
+      child: _OpaqueFloat(
+        borderRadius: BorderRadius.circular(_kCapsuleRadius),
+        minHeight: AppSizes.primaryButtonHeight,
         padding: const EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.xs,
