@@ -784,7 +784,7 @@ void main() {
     Order approved({String? phone}) =>
         _order(status: 'approved', phone: phone)..payment = 'unpaid';
 
-    testWidgets('after a status change, offers to send to the customer', (
+    testWidgets('after a status change, a note offers to tell the customer', (
       tester,
     ) async {
       final actions = FakeActions();
@@ -796,13 +796,22 @@ void main() {
 
       await tester.tap(find.text('Começar serviço'));
       await tester.pumpAndSettle();
-      expect(find.text('Serviço em andamento!'), findsOneWidget);
-      await tester.tap(find.text('Enviar via WhatsApp'));
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      final note = find.byKey(const ValueKey('notify_note'));
+      expect(note, findsOneWidget);
+      expect(
+        find.descendant(of: note, matching: find.textContaining('. Avisar')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(of: note, matching: find.text('Avisar')),
+      );
       await tester.pumpAndSettle();
       expect(actions.calls, ['notify:progress']);
+      expect(note, findsNothing);
     });
 
-    testWidgets('"Agora não" is not asked again for this order', (
+    testWidgets('the note goes away on its own and is not shown again', (
       tester,
     ) async {
       final actions = FakeActions();
@@ -815,14 +824,40 @@ void main() {
 
       await tester.tap(find.text('Começar serviço'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Agora não'));
+      final note = find.byKey(const ValueKey('notify_note'));
+      expect(note, findsOneWidget);
+      await tester.pump(kNotifyNoteDuration);
       await tester.pumpAndSettle();
+      expect(note, findsNothing);
+
       await tester.tap(find.text('Marcar como pronta'));
       await tester.pumpAndSettle();
-
       expect(store.status, 'done');
+      expect(note, findsNothing);
       expect(find.byType(CupertinoAlertDialog), findsNothing);
       expect(actions.calls, isEmpty);
+    });
+
+    testWidgets('a double tap on the blue button changes one status only', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        screen(store),
+        args: {'order': approved(phone: '11999990000')},
+      );
+
+      await tester.tap(find.text('Começar serviço'));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.text('Marcar como pronta'));
+      await tester.pumpAndSettle();
+      expect(store.status, 'progress');
+
+      await tester.pump(kStatusTapCooldown);
+      await tester.tap(find.text('Marcar como pronta'));
+      await tester.pumpAndSettle();
+      expect(store.status, 'done');
     });
 
     testWidgets('no prompt when the customer has no phone', (tester) async {
@@ -832,6 +867,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(store.status, 'progress');
       expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.byKey(const ValueKey('notify_note')), findsNothing);
     });
   });
 }

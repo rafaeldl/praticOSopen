@@ -4057,6 +4057,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAssistantUndo => 'Undo';
 
   @override
+  String orderNotifyNote(String status, String name) {
+    return '$status. Let $name know?';
+  }
+
+  @override
+  String get orderNotifyFallbackName => 'the customer';
+
+  @override
+  String get orderNotifyAction => 'Let know';
+
+  @override
   String get orderAssistantReadingPhotos => 'Reading the photos…';
 
   @override
