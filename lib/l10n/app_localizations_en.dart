@@ -1796,7 +1796,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specialties => 'Specialties';
 
   @override
-  String get myCompany => 'My Company';
+  String get myCompany => 'My company';
 
   @override
   String get retryAgain => 'Try again';
@@ -5377,6 +5377,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get segmentRowHint => 'Changes the ready-made services and checklists';
 
   @override
+  String get moreCompanyData => 'More details (email, website, country)';
+
+  @override
+  String get addLogo => 'Add logo';
+
+  @override
+  String get changeLogoLink => 'Change logo';
+
+  @override
+  String get pickSegmentTitle => 'What\'s your line of work?';
+
+  @override
+  String get pickSpecialtiesTitle => 'What do you work on?';
+
+  @override
+  String get specialtiesNone => 'None selected';
+
+  @override
+  String get pickCountryTitle => 'Which country?';
+
+  @override
+  String get companyNameRequired => 'Enter the company name';
+
+  @override
   String get schedulingRow => 'Schedule';
 
   @override
@@ -6373,4 +6397,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chargeSplitNo => 'No';
+
+  @override
+  String get profileEditTitle => 'Your profile';
+
+  @override
+  String get profileChangePhoto => 'Change photo';
+
+  @override
+  String profileSignedInAs(String email) {
+    return 'You sign in with $email';
+  }
+
+  @override
+  String get profileNameRequired => 'Type your name';
+
+  @override
+  String get profileNamePlaceholder => 'E.g. John Smith';
 }

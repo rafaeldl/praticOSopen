@@ -1,10 +1,31 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
+/// "Seu perfil": the signed-in person's name and photo. Pushed edit screen
+/// (Salvar at the top right); the e-mail is shown as a plain sentence because
+/// it can't be changed here.
 class UserProfileEditScreen extends StatefulWidget {
-  const UserProfileEditScreen({super.key});
+  const UserProfileEditScreen({
+    super.key,
+    this.loadUser,
+    this.saveUser,
+    this.uploadPhoto,
+  });
+
+  /// Test seams; default to [UserStore].
+  final Future<User?> Function()? loadUser;
+  final Future<void> Function(User user)? saveUser;
+  final Future<String?> Function(File file, User user)? uploadPhoto;
 
   @override
   State<UserProfileEditScreen> createState() => _UserProfileEditScreenState();
@@ -12,261 +33,203 @@ class UserProfileEditScreen extends StatefulWidget {
 
 class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _name = TextEditingController();
+  UserStore? _store;
   User? _user;
-  final UserStore _userStore = UserStore();
-  bool _isLoading = false;
-  bool _isLoadingUser = true;
+  bool _saving = false;
+  bool _uploading = false;
+  bool _loadingUser = true;
+
+  UserStore get _userStore => _store ??= UserStore();
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentUser();
+    _load();
   }
 
-  Future<void> _loadCurrentUser() async {
-    final user = await _userStore.getSingleUserById();
-    if (mounted) {
-      setState(() {
-        _user = user;
-        _isLoadingUser = false;
-      });
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final user = await (widget.loadUser ?? _userStore.getSingleUserById)();
+    if (!mounted) return;
+    setState(() {
+      _user = user;
+      _name.text = user?.name ?? '';
+      _loadingUser = false;
+    });
+  }
+
+  Future<void> _save() async {
+    if (_user == null || !_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+    setState(() => _saving = true);
+    try {
+      await (widget.saveUser ?? _userStore.updateUserProfile)(_user!);
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
+    if (mounted) Navigator.pop(context, _user);
   }
 
-  Future<void> _saveProfile() async {
-    if (_formKey.currentState!.validate() && _user != null) {
-      setState(() => _isLoading = true);
-      _formKey.currentState!.save();
-      await _userStore.updateUserProfile(_user!);
-      setState(() => _isLoading = false);
-      if (mounted) {
-        Navigator.pop(context, _user);
-      }
-    }
-  }
-
-  Future<void> _pickImage() async {
-    showCupertinoModalPopup(
+  Future<void> _pickPhoto() async {
+    final l10n = context.l10n;
+    final fromCamera = await showCupertinoModalPopup<bool>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Alterar Foto'),
-        actions: <CupertinoActionSheetAction>[
+      builder: (sheetContext) => CupertinoActionSheet(
+        actions: [
           CupertinoActionSheetAction(
-            child: const Text('Tirar Foto'),
-            onPressed: () async {
-              Navigator.pop(context);
-              final file = await _userStore.photoService.takePhoto();
-              if (file != null && _user != null) {
-                await _userStore.uploadUserPhoto(file, _user!);
-                setState(() {});
-              }
-            },
+            onPressed: () => Navigator.pop(sheetContext, true),
+            child: Text(l10n.takePhoto),
           ),
           CupertinoActionSheetAction(
-            child: const Text('Escolher da Galeria'),
-            onPressed: () async {
-              Navigator.pop(context);
-              final file = await _userStore.photoService.pickImageFromGallery();
-              if (file != null && _user != null) {
-                await _userStore.uploadUserPhoto(file, _user!);
-                setState(() {});
-              }
-            },
+            onPressed: () => Navigator.pop(sheetContext, false),
+            child: Text(l10n.chooseFromGallery),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(sheetContext),
+          child: Text(l10n.cancel),
         ),
       ),
     );
+    if (fromCamera == null || _user == null) return;
+    final photos = _userStore.photoService;
+    final file = fromCamera
+        ? await photos.takePhoto()
+        : await photos.pickImageFromGallery();
+    if (file == null || !mounted) return;
+    setState(() => _uploading = true);
+    try {
+      await (widget.uploadPhoto ?? _userStore.uploadUserPhoto)(file, _user!);
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingUser) {
-      return CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('Editar Perfil'),
-        ),
-        child: const Center(
-          child: CupertinoActivityIndicator(),
-        ),
-      );
-    }
-
+    final l10n = context.l10n;
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: AppColors.background.resolveFrom(context),
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Editar Perfil'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveProfile,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : const Text('Salvar', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
+        middle: Text(l10n.profileEditTitle),
+        trailing: _loadingUser
+            ? null
+            : CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _saving ? null : _save,
+                child: _saving
+                    ? const CupertinoActivityIndicator()
+                    : Text(
+                        l10n.save,
+                        style: AppTypography.callout.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accentText.resolveFrom(context),
+                        ),
+                      ),
+              ),
       ),
       child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-
-              // Photo Section
-              Center(
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Stack(
-                    children: [
-                      if (_user?.photo != null && _user!.photo!.isNotEmpty)
-                        ClipOval(
-                          child: CachedImage(
-                            imageUrl: _user!.photo!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemGrey5.resolveFrom(context),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            CupertinoIcons.person_fill,
-                            size: 50,
-                            color: CupertinoColors.systemGrey.resolveFrom(context),
-                          ),
+        child: _loadingUser
+            ? const Center(child: CupertinoActivityIndicator())
+            : Form(
+                key: _formKey,
+                child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.lg,
+                    bottom: AppSpacing.xxl,
+                  ),
+                  children: [
+                    Center(child: _avatar(context)),
+                    Center(
+                      child: TextLink(
+                        label: l10n.profileChangePhoto,
+                        onPressed: _uploading ? null : _pickPhoto,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    AppFormField(
+                      label: l10n.name,
+                      controller: _name,
+                      placeholder: l10n.profileNamePlaceholder,
+                      textCapitalization: TextCapitalization.words,
+                      onSaved: (v) => _user?.name = v.trim(),
+                      validator: (v) =>
+                          v.trim().isEmpty ? l10n.profileNameRequired : null,
+                    ),
+                    if ((_user?.email ?? '').isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.pageMargin,
+                          AppSpacing.sm,
+                          AppSpacing.pageMargin,
+                          0,
                         ),
-                      if (_userStore.isUploading)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.black.withValues(alpha: 0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: CupertinoActivityIndicator(color: CupertinoColors.white),
-                            ),
-                          ),
-                        ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: CupertinoColors.activeBlue,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.camera_fill,
-                            size: 16,
-                            color: CupertinoColors.white,
+                        child: Text(
+                          l10n.profileSignedInAs(_user!.email!),
+                          style: AppTypography.label.copyWith(
+                            color: AppColors.textSecondary.resolveFrom(context),
                           ),
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Toque para alterar',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Form Fields
-              CupertinoListSection.insetGrouped(
-                header: Text(
-                  'INFORMAÇÕES PESSOAIS',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-                children: [
-                  _buildCupertinoFormField(
-                    label: 'Nome',
-                    initialValue: _user?.name,
-                    placeholder: 'Seu nome completo',
-                    textCapitalization: TextCapitalization.words,
-                    onSaved: (val) => _user?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
-                  ),
-                ],
-              ),
-
-              CupertinoListSection.insetGrouped(
-                header: Text(
-                  'CONTA',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-                children: [
-                  CupertinoListTile(
-                    title: const SizedBox(
-                      width: 80,
-                      child: Text('Email', style: TextStyle(fontSize: 16)),
-                    ),
-                    additionalInfo: Text(
-                      _user?.email ?? '',
-                      style: TextStyle(
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildCupertinoFormField({
-    required String label,
-    String? initialValue,
-    String? placeholder,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    required FormFieldSetter<String> onSaved,
-    required FormFieldValidator<String> validator,
-  }) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 80,
-        child: Text(label, style: const TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 200,
-        child: CupertinoTextFormFieldRow(
-          initialValue: initialValue,
-          placeholder: placeholder,
-          textCapitalization: textCapitalization,
-          padding: EdgeInsets.zero,
-          textAlign: TextAlign.right,
-          decoration: null,
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          validator: validator,
-          onSaved: onSaved,
+  Widget _avatar(BuildContext context) {
+    const size = 96.0;
+    final photo = _user?.photo;
+    final Widget image = (photo != null && photo.isNotEmpty)
+        ? CachedImage(
+            imageUrl: photo,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          )
+        : Container(
+            width: size,
+            height: size,
+            color: AppColors.secondaryFill.resolveFrom(context),
+            child: Icon(
+              CupertinoIcons.person_fill,
+              size: 48,
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          );
+    return GestureDetector(
+      onTap: _uploading ? null : _pickPhoto,
+      child: ClipOval(
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              image,
+              if (_uploading)
+                ColoredBox(
+                  color: AppColors.text
+                      .resolveFrom(context)
+                      .withValues(alpha: 0.5),
+                  child: const Center(
+                    child: CupertinoActivityIndicator(
+                      color: CupertinoColors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

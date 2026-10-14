@@ -1805,7 +1805,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get specialties => 'Especialidades';
 
   @override
-  String get myCompany => 'Minha Empresa';
+  String get myCompany => 'Minha empresa';
 
   @override
   String get retryAgain => 'Tentar novamente';
@@ -5389,6 +5389,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String get segmentRowHint => 'Muda serviços e checklists prontos';
 
   @override
+  String get moreCompanyData => 'Mais dados (e-mail, site, país)';
+
+  @override
+  String get addLogo => 'Pôr logo';
+
+  @override
+  String get changeLogoLink => 'Trocar logo';
+
+  @override
+  String get pickSegmentTitle => 'Qual é o seu ramo?';
+
+  @override
+  String get pickSpecialtiesTitle => 'O que você atende?';
+
+  @override
+  String get specialtiesNone => 'Nenhuma marcada';
+
+  @override
+  String get pickCountryTitle => 'Qual é o país?';
+
+  @override
+  String get companyNameRequired => 'Escreva o nome da empresa';
+
+  @override
   String get schedulingRow => 'Agenda';
 
   @override
@@ -6384,4 +6408,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get chargeSplitNo => 'Não';
+
+  @override
+  String get profileEditTitle => 'Seu perfil';
+
+  @override
+  String get profileChangePhoto => 'Trocar foto';
+
+  @override
+  String profileSignedInAs(String email) {
+    return 'Você entra com $email';
+  }
+
+  @override
+  String get profileNameRequired => 'Digite seu nome';
+
+  @override
+  String get profileNamePlaceholder => 'Ex.: João da Silva';
 }

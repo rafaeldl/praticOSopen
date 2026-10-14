@@ -183,6 +183,37 @@ void main() {
       expect(find.text(pt.switchCompany), findsNothing);
     });
 
+    testWidgets('switching company opens the choose screen with ✓',
+        (tester) async {
+      final switched = <String>[];
+      await tester.pumpWidget(app(AccountView(
+        name: 'Maria',
+        companyName: 'Oficina',
+        currentCompanyId: 'c1',
+        companies: const [
+          AccountCompany(id: 'c1', name: 'Oficina'),
+          AccountCompany(id: 'c2', name: 'Loja'),
+        ],
+        onSwitchCompany: switched.add,
+        onSignOut: () async {},
+        deletion: AccountDeletionFlow(
+          paidPlansEnabled: false,
+          deleteAccount: () async {},
+          reauthenticate: () async {},
+        ),
+      )));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(pt.switchCompany));
+      await tester.pumpAndSettle();
+      expect(find.byType(PickerScaffold<String>), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
+
+      await tester.tap(find.text('Loja'));
+      await tester.pumpAndSettle();
+      expect(switched, ['c2']);
+    });
+
     testWidgets('photo shows the person icon while loading, no spinner',
         (tester) async {
       await tester.pumpWidget(app(AccountView(
@@ -289,7 +320,11 @@ void main() {
   group('Sua empresa', () {
     testWidgets('financial switch is disabled when not wired',
         (tester) async {
-      await tester.pumpWidget(app(MyCompanyScreen(onOpenCompanyData: () {})));
+      await tester.pumpWidget(app(MyCompanyScreen(
+        onOpenCompanyData: () {},
+        onOpenTerms: () {},
+        onOpenSegment: () {},
+      )));
       expect(find.text('Dados da Empresa'), findsOneWidget);
       expect(find.text('Como você trabalha'), findsOneWidget);
       expect(find.text('Valores e cobrança'), findsOneWidget);
@@ -303,6 +338,8 @@ void main() {
       bool? changed;
       await tester.pumpWidget(app(MyCompanyScreen(
         onOpenCompanyData: () {},
+        onOpenTerms: () {},
+        onOpenSegment: () {},
         onFinancialChanged: (value) => changed = value,
       )));
       await tester.tap(_financialSwitch);
@@ -318,6 +355,8 @@ void main() {
         companyName: 'Oficina Exemplo',
         devicesLabel: 'Veículos',
         onOpenCompanyData: () => opened++,
+        onOpenTerms: () => opened++,
+        onOpenSegment: () => opened++,
       )));
       final order = [
         'Aparece na OS do cliente',
@@ -356,7 +395,8 @@ void main() {
           value: provider,
           child: app(MyCompanySettings(
             companyId: 'c1',
-            onOpenCompanyData: () {},
+            loadCompany: (_) async => null,
+            loadSegments: () async => const [],
             writer: (id, fields) async => writes.add(fields),
           )),
         ),
@@ -404,7 +444,8 @@ void main() {
           value: provider,
           child: app(MyCompanySettings(
             companyId: companyId,
-            onOpenCompanyData: () {},
+            loadCompany: (_) async => null,
+            loadSegments: () async => const [],
             writer: (id, fields) async {
               if (fail) throw Exception('offline');
               writes.add((id, fields));
@@ -492,6 +533,26 @@ void main() {
         AdvancedScreen.hasEntries(showIntegrations: false, showDevices: true),
         isTrue,
       );
+    });
+
+    testWidgets('switch sits in a plain row with the hint below, no grey card',
+        (tester) async {
+      await tester.pumpWidget(app(AdvancedScreen(
+        devicesLabel: 'Veículos',
+        showIntegrations: true,
+        showDevices: true,
+        onOpenIntegrations: () {},
+        onOpenDevices: () {},
+      )));
+      expect(find.byType(CupertinoListSection), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('advanced_new_order_screen')),
+          matching: find.byType(CupertinoSwitch),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(pt.newOrderScreenSettingHint), findsOneWidget);
     });
   });
 

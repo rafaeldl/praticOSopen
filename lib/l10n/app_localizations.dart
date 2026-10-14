@@ -3607,7 +3607,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Minha Empresa'**
+  /// **'Minha empresa'**
   String get myCompany;
 
   /// No description provided for @retryAgain.
@@ -9538,6 +9538,54 @@ abstract class AppLocalizations {
   /// **'Muda serviços e checklists prontos'**
   String get segmentRowHint;
 
+  /// No description provided for @moreCompanyData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais dados (e-mail, site, país)'**
+  String get moreCompanyData;
+
+  /// No description provided for @addLogo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pôr logo'**
+  String get addLogo;
+
+  /// No description provided for @changeLogoLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar logo'**
+  String get changeLogoLink;
+
+  /// No description provided for @pickSegmentTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o seu ramo?'**
+  String get pickSegmentTitle;
+
+  /// No description provided for @pickSpecialtiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você atende?'**
+  String get pickSpecialtiesTitle;
+
+  /// No description provided for @specialtiesNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma marcada'**
+  String get specialtiesNone;
+
+  /// No description provided for @pickCountryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o país?'**
+  String get pickCountryTitle;
+
+  /// No description provided for @companyNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome da empresa'**
+  String get companyNameRequired;
+
   /// No description provided for @schedulingRow.
   ///
   /// In pt, this message translates to:
@@ -10975,6 +11023,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não'**
   String get chargeSplitNo;
+
+  /// No description provided for @profileEditTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu perfil'**
+  String get profileEditTitle;
+
+  /// No description provided for @profileChangePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar foto'**
+  String get profileChangePhoto;
+
+  /// No description provided for @profileSignedInAs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você entra com {email}'**
+  String profileSignedInAs(String email);
+
+  /// No description provided for @profileNameRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite seu nome'**
+  String get profileNameRequired;
+
+  /// No description provided for @profileNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: João da Silva'**
+  String get profileNamePlaceholder;
 }
 
 class _AppLocalizationsDelegate
