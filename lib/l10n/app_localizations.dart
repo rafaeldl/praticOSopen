@@ -11215,6 +11215,516 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Toque em + para criar uma {order} que se repete sozinha.'**
   String contractsEmptyAdd(String order);
+
+  /// No description provided for @contractRepeats.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repete'**
+  String get contractRepeats;
+
+  /// No description provided for @contractRepeatsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com que frequência?'**
+  String get contractRepeatsTitle;
+
+  /// No description provided for @contractStarts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começa'**
+  String get contractStarts;
+
+  /// No description provided for @contractEnds.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termina'**
+  String get contractEnds;
+
+  /// No description provided for @contractNeverEnds.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nunca'**
+  String get contractNeverEnds;
+
+  /// No description provided for @contractNoEndDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem data para terminar'**
+  String get contractNoEndDate;
+
+  /// No description provided for @contractAutoCreate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar a {order} sozinha'**
+  String contractAutoCreate(String order);
+
+  /// No description provided for @contractAutoCreateHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado, a {order} nova aparece sozinha na data. Desligado, você só recebe o aviso.'**
+  String contractAutoCreateHint(String order);
+
+  /// No description provided for @contractRemind.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisar antes'**
+  String get contractRemind;
+
+  /// No description provided for @contractRemindTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisar quanto tempo antes?'**
+  String get contractRemindTitle;
+
+  /// No description provided for @contractRemindDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{No dia} =1{1 dia antes} other{{count} dias antes}}'**
+  String contractRemindDays(int count);
+
+  /// No description provided for @onboardingSegmentHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assim o app já vem com os serviços e checklists do seu trabalho.'**
+  String get onboardingSegmentHint;
+
+  /// No description provided for @onboardingSpecialtiesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marque o que fizer sentido. Dá para mudar depois.'**
+  String get onboardingSpecialtiesHint;
+
+  /// No description provided for @emailLoginTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com e-mail'**
+  String get emailLoginTitle;
+
+  /// No description provided for @emailLoginEmailRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o seu e-mail.'**
+  String get emailLoginEmailRequired;
+
+  /// No description provided for @emailLoginEmailInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esse e-mail não parece certo. Confira.'**
+  String get emailLoginEmailInvalid;
+
+  /// No description provided for @emailLoginPasswordRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva a sua senha.'**
+  String get emailLoginPasswordRequired;
+
+  /// No description provided for @emailLoginWrongCredentials.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail ou senha não conferem. Confira e tente de novo.'**
+  String get emailLoginWrongCredentials;
+
+  /// No description provided for @emailLoginNoInternet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem internet. Confira a conexão e tente de novo.'**
+  String get emailLoginNoInternet;
+
+  /// No description provided for @emailLoginTooManyAttempts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas. Espere um pouco e tente de novo.'**
+  String get emailLoginTooManyAttempts;
+
+  /// No description provided for @emailLoginGenericError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para entrar. Tente de novo.'**
+  String get emailLoginGenericError;
+
+  /// No description provided for @emailLoginSigningIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrando…'**
+  String get emailLoginSigningIn;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trocar a senha'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos mandar um link para o seu e-mail.'**
+  String get resetPasswordMessage;
+
+  /// No description provided for @resetPasswordError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para mandar o e-mail. Confira o endereço e tente de novo.'**
+  String get resetPasswordError;
+
+  /// No description provided for @inviteTitleMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você recebeu convites'**
+  String get inviteTitleMany;
+
+  /// No description provided for @inviteManyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque num convite para ver e entrar na equipe.'**
+  String get inviteManyHint;
+
+  /// No description provided for @inviteCodeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o código do convite?'**
+  String get inviteCodeTitle;
+
+  /// No description provided for @checklistRemaining.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Tudo respondido} =1{Falta 1} other{Faltam {count}}}'**
+  String checklistRemaining(int count);
+
+  /// No description provided for @checklistQuestionNext.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima'**
+  String get checklistQuestionNext;
+
+  /// No description provided for @checklistQuestionDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get checklistQuestionDone;
+
+  /// No description provided for @checklistSkipForNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pular por agora'**
+  String get checklistSkipForNow;
+
+  /// No description provided for @checklistPreviousQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar à anterior'**
+  String get checklistPreviousQuestion;
+
+  /// No description provided for @checklistQuestionRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigatória'**
+  String get checklistQuestionRequired;
+
+  /// No description provided for @checklistPickFromGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher da galeria'**
+  String get checklistPickFromGallery;
+
+  /// No description provided for @checklistTextPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva aqui'**
+  String get checklistTextPlaceholder;
+
+  /// No description provided for @checklistStart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar'**
+  String get checklistStart;
+
+  /// No description provided for @checklistFinish.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir checklist'**
+  String get checklistFinish;
+
+  /// No description provided for @checklistFinishAnyway.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir assim mesmo'**
+  String get checklistFinishAnyway;
+
+  /// No description provided for @checklistStatusDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Completo'**
+  String get checklistStatusDone;
+
+  /// No description provided for @checklistNoAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem resposta'**
+  String get checklistNoAnswer;
+
+  /// No description provided for @checklistPhotoPosition.
+  ///
+  /// In pt, this message translates to:
+  /// **'{current} de {total}'**
+  String checklistPhotoPosition(int current, int total);
+
+  /// No description provided for @shareTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar para o cliente'**
+  String get shareTitle;
+
+  /// No description provided for @shareCanAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} abre a {order} pelo link, aprova e comenta.'**
+  String shareCanAll(String name, String order);
+
+  /// No description provided for @shareCanApprove.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} abre a {order} pelo link e aprova.'**
+  String shareCanApprove(String name, String order);
+
+  /// No description provided for @shareCanComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} abre a {order} pelo link e comenta.'**
+  String shareCanComment(String name, String order);
+
+  /// No description provided for @shareCanView.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} abre a {order} pelo link.'**
+  String shareCanView(String name, String order);
+
+  /// No description provided for @shareTheCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente'**
+  String get shareTheCustomer;
+
+  /// No description provided for @shareValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vale até {date}.'**
+  String shareValidUntil(String date);
+
+  /// No description provided for @shareSendWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar pelo WhatsApp'**
+  String get shareSendWhatsApp;
+
+  /// No description provided for @shareSendLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar o link'**
+  String get shareSendLink;
+
+  /// No description provided for @shareSendOtherWay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar de outro jeito'**
+  String get shareSendOtherWay;
+
+  /// No description provided for @shareCopyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar o link'**
+  String get shareCopyLink;
+
+  /// No description provided for @shareLinkCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link copiado'**
+  String get shareLinkCopied;
+
+  /// No description provided for @sharePreparing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando o link…'**
+  String get sharePreparing;
+
+  /// No description provided for @shareError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para criar o link.'**
+  String get shareError;
+
+  /// No description provided for @shareValidity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar a validade'**
+  String get shareValidity;
+
+  /// No description provided for @shareValidityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vale por quanto tempo?'**
+  String get shareValidityTitle;
+
+  /// No description provided for @shareValidityDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} dias'**
+  String shareValidityDays(int count);
+
+  /// No description provided for @sharePermissionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o cliente pode fazer?'**
+  String get sharePermissionsTitle;
+
+  /// No description provided for @sharePermAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver, aprovar e comentar'**
+  String get sharePermAll;
+
+  /// No description provided for @sharePermApprove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver e aprovar'**
+  String get sharePermApprove;
+
+  /// No description provided for @sharePermComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver e comentar'**
+  String get sharePermComment;
+
+  /// No description provided for @sharePermView.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só ver'**
+  String get sharePermView;
+
+  /// No description provided for @shareNewLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar link novo'**
+  String get shareNewLink;
+
+  /// No description provided for @shareRevoke.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativar o link'**
+  String get shareRevoke;
+
+  /// No description provided for @shareRevokeConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente não vai mais conseguir abrir a {order} por este link.'**
+  String shareRevokeConfirm(String order);
+
+  /// No description provided for @shareMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções do link'**
+  String get shareMenu;
+
+  /// No description provided for @orderItemNotesPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Algo a mais sobre este item'**
+  String get orderItemNotesPlaceholder;
+
+  /// No description provided for @orderItemRemoveTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar da OS?'**
+  String get orderItemRemoveTitle;
+
+  /// No description provided for @orderItemRemoveMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'\"{name}\" sai da OS e do total.'**
+  String orderItemRemoveMessage(String name);
+
+  /// No description provided for @orderItemQuantityInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coloque pelo menos 1.'**
+  String get orderItemQuantityInvalid;
+
+  /// No description provided for @orderPhotoShareText.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto da {order}'**
+  String orderPhotoShareText(String order);
+
+  /// No description provided for @orderPhotoShareError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para compartilhar a foto. Tente de novo.'**
+  String get orderPhotoShareError;
+
+  /// No description provided for @orderPhotoDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar esta foto?'**
+  String get orderPhotoDeleteTitle;
+
+  /// No description provided for @orderPhotoDeleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto apagada'**
+  String get orderPhotoDeleted;
+
+  /// No description provided for @orderPhotoDeleteError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para apagar a foto. Tente de novo.'**
+  String get orderPhotoDeleteError;
+
+  /// No description provided for @orderPhotoCoverSet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto definida como capa'**
+  String get orderPhotoCoverSet;
+
+  /// No description provided for @orderPhotoUploading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando foto...'**
+  String get orderPhotoUploading;
+
+  /// No description provided for @orderDocumentTypeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Que documento é este?'**
+  String get orderDocumentTypeTitle;
+
+  /// No description provided for @shareWhatCanDo.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o cliente pode fazer'**
+  String get shareWhatCanDo;
+
+  /// No description provided for @orderPhotoDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar foto'**
+  String get orderPhotoDelete;
+
+  /// No description provided for @contractStopRepeating.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar de repetir'**
+  String get contractStopRepeating;
+
+  /// No description provided for @contractStopRepeatingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar de repetir?'**
+  String get contractStopRepeatingTitle;
+
+  /// No description provided for @contractStopRepeatingMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'As próximas OS não serão mais criadas. As que já existem continuam.'**
+  String get contractStopRepeatingMessage;
 }
 
 class _AppLocalizationsDelegate

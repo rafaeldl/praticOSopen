@@ -102,21 +102,47 @@ void main() {
       expect(find.byType(CupertinoAlertDialog), findsNothing);
     });
 
-    testWidgets('several invites: rows open join/decline options, no buttons',
+    testWidgets('several invites: a row opens the invite on its own screen',
         (tester) async {
       tall(tester);
       setInvites([_invite('Alfa'), _invite('Beta')]);
       await tester.pumpWidget(
           _app(const PendingInvitesScreen(loadOnInit: false), brightness: Brightness.dark));
 
-      expect(find.text('Convites Pendentes'), findsOneWidget);
+      expect(find.text('Você recebeu convites'), findsOneWidget);
+      expect(find.text('Toque num convite para ver e entrar na equipe.'),
+          findsOneWidget);
       expect(find.text('Entrar na equipe'), findsNothing);
 
       await tester.tap(find.text('Alfa'));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoActionSheet), findsOneWidget);
+      // Never an action sheet for choosing.
+      expect(find.byType(CupertinoActionSheet), findsNothing);
+      expect(find.byKey(const ValueKey('invite_detail_join')), findsOneWidget);
       expect(find.text('Entrar na equipe'), findsOneWidget);
       expect(find.text('Recusar convite'), findsOneWidget);
+      expect(find.text('Alfa chamou você para a equipe'), findsOneWidget);
+    });
+
+    testWidgets('several invites: declining from the detail asks first',
+        (tester) async {
+      tall(tester);
+      setInvites([_invite('Alfa'), _invite('Beta')]);
+      await tester.pumpWidget(
+          _app(const PendingInvitesScreen(loadOnInit: false)));
+
+      await tester.tap(find.text('Alfa'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('invite_detail_decline')));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+
+      await tester.tap(find.descendant(
+          of: find.byType(CupertinoAlertDialog),
+          matching: find.text('Voltar')));
+      await tester.pumpAndSettle();
+      // Still on the invite: nothing was declined.
+      expect(find.byKey(const ValueKey('invite_detail_join')), findsOneWidget);
     });
 
     testWidgets('load failure shows a fixed sentence with retry',
@@ -141,7 +167,9 @@ void main() {
 
       expect(find.text('Ex.: 7K2P9QXA'), findsOneWidget);
       expect(find.text('Buscar'), findsOneWidget);
-      expect(find.text('Cancelar'), findsOneWidget);
+      // Way out: glass back button at the top, no "Cancelar" text button.
+      expect(find.byKey(const ValueKey('invite_code_back')), findsOneWidget);
+      expect(find.text('Cancelar'), findsNothing);
     });
 
     testWidgets('empty code shows a friendly error with icon', (tester) async {

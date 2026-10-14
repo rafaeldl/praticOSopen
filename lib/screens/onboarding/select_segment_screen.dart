@@ -4,13 +4,17 @@ import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/onboarding/onboarding_flow.dart';
 import 'package:praticos/screens/onboarding/select_subspecialties_screen.dart';
 import 'package:praticos/screens/onboarding/your_business_screen.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
-/// First step of the first access: "Seu ramo". Tapping a segment picks it
-/// (✓) and goes on; there is no button on this screen.
+/// First step of the first access: "Qual é o seu ramo?". Same rows as the
+/// segment picker of Ajustes (emoji + name), but tapping a segment picks it
+/// (✓) and goes on to the next step (chevron); there is no button on this
+/// screen.
 class SelectSegmentScreen extends StatefulWidget {
   const SelectSegmentScreen({super.key, required this.session});
 
@@ -54,8 +58,8 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
     final locale = Localizations.localeOf(context);
 
     return OnboardingPage(
-      title: l10n.onboardingSegmentTitle,
-      subtitle: l10n.onboardingSegmentSubtitle,
+      title: l10n.pickSegmentTitle,
+      subtitle: l10n.onboardingSegmentHint,
       leading: OnboardingTopButton(
         key: const ValueKey('onboarding_sign_out'),
         label: l10n.logout,
@@ -95,12 +99,11 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
             return SliverToBoxAdapter(
               child: MoreRows(rows: [
                 for (final segment in segments)
-                  OnboardingChoiceRow(
+                  AppListRow(
                     key: ValueKey('segment_${segment.id}'),
-                    emoji: segment.icon,
+                    leading: _Emoji(segment.icon ?? '🔧'),
                     title: segment.nameFor(locale),
                     selected: segment.id == _selectedId,
-                    opensNext: true,
                     onTap: () => _pick(segment),
                   ),
               ]),
@@ -122,4 +125,15 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
       ],
     );
   }
+}
+
+/// Segment / specialty emoji as the leading of a row.
+class _Emoji extends StatelessWidget {
+  const _Emoji(this.emoji);
+
+  final String emoji;
+
+  @override
+  Widget build(BuildContext context) =>
+      ExcludeSemantics(child: Text(emoji, style: AppTypography.body));
 }

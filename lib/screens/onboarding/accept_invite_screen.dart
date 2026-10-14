@@ -6,6 +6,7 @@ import 'package:praticos/services/claims_service.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -145,37 +146,32 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
     final secondary = AppColors.textSecondary.resolveFrom(context);
     final danger = AppColors.danger.resolveFrom(context);
 
+    final canGoBack = widget.onCancel != null || Navigator.canPop(context);
+
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background.resolveFrom(context),
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: AppColors.background.resolveFrom(context),
-        border: null,
-        middle: Text(context.l10n.acceptInvite),
-        leading: widget.onCancel != null
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(
-                  AppSizes.minTouchTarget,
-                  AppSizes.minTouchTarget,
-                ),
-                onPressed: widget.onCancel,
-                child: Text(
-                  context.l10n.cancel,
-                  style: AppTypography.callout.copyWith(
-                    color: AppColors.accentText.resolveFrom(context),
-                  ),
-                ),
-              )
-            : null,
-      ),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.pageMargin),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.pageMargin,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (canGoBack)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: GlassBackButton(
+                    key: const ValueKey('invite_code_back'),
+                    onPressed: widget.onCancel,
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
               Text(
-                context.l10n.enterInviteCode,
+                context.l10n.inviteCodeTitle,
                 style: AppTypography.title.copyWith(color: textColor),
               ),
               const SizedBox(height: AppSpacing.md),

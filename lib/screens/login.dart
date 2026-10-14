@@ -4,13 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/email_login_screen.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Login screen: light-blue "order form" background with ruler lines, the app
+/// Login screen: `accentSoft` "order form" background with ruler lines, the app
 /// icon and a short phrase on top, and a rounded panel at the bottom with the
 /// native Apple button, the Google button and the e-mail link.
 ///
@@ -39,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final background = _loginBackground.resolveFrom(context);
+    final background = AppColors.accentSoft.resolveFrom(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -162,15 +163,11 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(height: 4),
           Semantics(
             identifier: 'email_login_link',
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              minimumSize: const Size.fromHeight(44),
-              onPressed: _isLoading ? null : _navigateToEmailLogin,
-              child: Text(
-                context.l10n.loginWithEmailLink,
-                style: AppTypography.callout.copyWith(
-                  color: AppColors.accentText.resolveFrom(context),
-                ),
+            child: Center(
+              child: TextLink(
+                key: const Key('login_email_link'),
+                label: context.l10n.loginWithEmailLink,
+                onPressed: _isLoading ? null : _navigateToEmailLogin,
               ),
             ),
           ),
@@ -309,14 +306,6 @@ class _LoginPageState extends State<LoginPage> {
         context.l10n.errorSignInGoogleFriendly,
       );
 }
-
-/// Light blue paper in light mode, dark blue in dark mode.
-const _loginBackground = CupertinoDynamicColor.withBrightnessAndContrast(
-  color: Color(0xFFE0F1FF),
-  darkColor: Color(0xFF0F2742),
-  highContrastColor: Color(0xFFD2E8FB),
-  darkHighContrastColor: Color(0xFF0B1D33),
-);
 
 /// Draws subtle horizontal rules, like the lines of a service-order form.
 class FormRulerPainter extends CustomPainter {

@@ -2,7 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
+/// "Entrar com e-mail": rare path (App Review, old accounts). Glass back,
+/// e-mail and password fields, one blue "Entrar" and the "Esqueceu a senha?"
+/// link. A failed sign-in shows a fixed sentence above the button (never the
+/// exception) and keeps the form, so the user can fix it or reset the
+/// password.
+///
+/// UI only: authentication goes through [AuthStore] untouched.
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
 
@@ -16,7 +30,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscurePassword = true;
+  String? _error;
 
   @override
   void didChangeDependencies() {
@@ -32,20 +46,26 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   }
 
   Future<void> _handleSignIn() async {
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    setState(() => _isLoading = true);
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       await _auth.signInWithEmailPassword(email, password);
       if (mounted) {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
+      debugPrint('Email sign-in failed: $e');
       if (mounted) {
-        _showError(context, _getErrorMessage(context, e.toString()));
+        setState(() => _error = emailLoginErrorMessage(context, e));
       }
     } finally {
       if (mounted) {
@@ -54,24 +74,158 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     }
   }
 
-  String _getErrorMessage(BuildContext context, String error) {
-    if (error.contains('user-not-found')) {
-      return context.l10n.userNotFound;
-    } else if (error.contains('wrong-password')) {
-      return context.l10n.wrongPassword;
-    } else if (error.contains('invalid-email')) {
-      return context.l10n.invalidEmail;
-    } else if (error.contains('invalid-credential')) {
-      return context.l10n.invalidCredentials;
-    }
-    return context.l10n.errorSignIn;
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: Form(
+        key: _formKey,
+        child: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            AppNavBar(largeTitle: Text(l10n.emailLoginTitle)),
+            SliverSafeArea(
+              top: false,
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      identifier: 'email_field',
+                      child: AppFormField(
+                        key: const ValueKey('email_login_email'),
+                        label: l10n.email,
+                        controller: _emailController,
+                        placeholder: l10n.emailPlaceholder,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        validator: (val) {
+                          final text = val.trim();
+                          if (text.isEmpty) {
+                            return l10n.emailLoginEmailRequired;
+                          }
+                          if (!text.contains('@') || !text.contains('.')) {
+                            return l10n.emailLoginEmailInvalid;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    Semantics(
+                      identifier: 'password_field',
+                      child: _PasswordField(
+                        key: const ValueKey('email_login_password'),
+                        controller: _passwordController,
+                        onSubmitted: _handleSignIn,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.pageMargin,
+                          0,
+                          AppSpacing.pageMargin,
+                          AppSpacing.lg,
+                        ),
+                        child: _ErrorLine(message: _error!),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.blockMargin,
+                      ),
+                      child: Semantics(
+                        identifier: 'email_login_button',
+                        child: PrimaryButton(
+                          key: const ValueKey('email_login_submit'),
+                          label: _isLoading
+                              ? l10n.emailLoginSigningIn
+                              : l10n.login,
+                          onPressed: _isLoading ? null : _handleSignIn,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Center(
+                      child: TextLink(
+                        key: const ValueKey('email_login_forgot'),
+                        label: l10n.forgotPasswordQuestion,
+                        onPressed:
+                            _isLoading ? null : _showForgotPasswordDialog,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  void _showError(BuildContext context, String message) {
+  void _showForgotPasswordDialog() {
+    final l10n = context.l10n;
+    final resetEmailController =
+        TextEditingController(text: _emailController.text.trim());
+
     showCupertinoDialog(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.error),
+        title: Text(l10n.resetPasswordTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.resetPasswordMessage),
+            const SizedBox(height: AppSpacing.md),
+            CupertinoTextField(
+              controller: resetEmailController,
+              placeholder: l10n.emailPlaceholder,
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              textCapitalization: TextCapitalization.none,
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text(l10n.send),
+            onPressed: () async {
+              final email = resetEmailController.text.trim();
+              if (email.isEmpty || !email.contains('@')) {
+                return;
+              }
+              Navigator.pop(dialogContext);
+              try {
+                await _auth.sendPasswordResetEmail(email);
+                if (mounted) {
+                  _showMessage(l10n.emailSent, l10n.checkInboxResetPassword);
+                }
+              } catch (e) {
+                debugPrint('Password reset failed: $e');
+                if (mounted) {
+                  _showMessage(null, l10n.resetPasswordError);
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(String? title, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: title == null ? null : Text(title),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
@@ -82,239 +236,158 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       ),
     );
   }
+}
+
+/// Fixed sentence for a failed e-mail sign-in, from the Firebase error code.
+/// Wrong e-mail, wrong password and unknown user share one sentence (plain
+/// language, and it does not tell whether an account exists).
+@visibleForTesting
+String emailLoginErrorMessage(BuildContext context, Object error) {
+  final l10n = context.l10n;
+  final code = error.toString();
+  if (code.contains('user-not-found') ||
+      code.contains('wrong-password') ||
+      code.contains('invalid-credential')) {
+    return l10n.emailLoginWrongCredentials;
+  }
+  if (code.contains('invalid-email')) return l10n.emailLoginEmailInvalid;
+  if (code.contains('too-many-requests')) return l10n.emailLoginTooManyAttempts;
+  if (code.contains('network-request-failed')) return l10n.emailLoginNoInternet;
+  return l10n.emailLoginGenericError;
+}
+
+/// Error line above the button: icon + text in `danger`, announced by
+/// screen readers.
+class _ErrorLine extends StatelessWidget {
+  const _ErrorLine({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(context.l10n.signInWithEmail),
-      ),
-      child: SafeArea(
-        child: DefaultTextStyle(
-          style: CupertinoTheme.of(context).textTheme.textStyle,
-          child: Form(
-            key: _formKey,
-            child: ListView(
-            children: [
-              const SizedBox(height: 20),
-
-              // Header Icon
-              Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey5.resolveFrom(context),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.mail,
-                    size: 40,
-                    color: CupertinoColors.activeBlue.resolveFrom(context),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Description text
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  context.l10n.enterEmailPassword,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Form Fields
-              CupertinoListSection.insetGrouped(
-                children: [
-                  Semantics(
-                    identifier: 'email_field',
-                    child: CupertinoTextFormFieldRow(
-                      controller: _emailController,
-                      prefix: SizedBox(
-                        width: 80,
-                        child: Text(context.l10n.email, style: const TextStyle(fontSize: 16)),
-                      ),
-                      placeholder: context.l10n.emailPlaceholder,
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      textCapitalization: TextCapitalization.none,
-                      textInputAction: TextInputAction.next,
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return context.l10n.requiredField;
-                        }
-                        if (!val.contains('@') || !val.contains('.')) {
-                          return context.l10n.invalidEmail;
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Semantics(
-                    identifier: 'password_field',
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CupertinoTextFormFieldRow(
-                            controller: _passwordController,
-                            prefix: SizedBox(
-                              width: 80,
-                              child: Text(context.l10n.password, style: const TextStyle(fontSize: 16)),
-                            ),
-                            placeholder: context.l10n.enterYourPassword,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _handleSignIn(),
-                            validator: (val) {
-                              if (val == null || val.isEmpty) {
-                                return context.l10n.requiredField;
-                              }
-                              if (val.length < 6) {
-                                return context.l10n.minLength(6);
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        Semantics(
-                          button: true,
-                          label: _obscurePassword
-                              ? context.l10n.showPassword
-                              : context.l10n.hidePassword,
-                          child: CupertinoButton(
-                          padding: const EdgeInsets.only(right: 8),
-                          minimumSize: const Size(44, 44),
-                          onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
-                          },
-                          child: Icon(
-                            _obscurePassword
-                                ? CupertinoIcons.eye
-                                : CupertinoIcons.eye_slash,
-                            size: 22,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          ),
-                        ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Sign In Button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Semantics(
-                  identifier: 'email_login_button',
-                  child: CupertinoButton.filled(
-                    onPressed: _isLoading ? null : _handleSignIn,
-                    child: _isLoading
-                        ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                        : Text(
-                            context.l10n.login,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Forgot password link
-              Center(
-                child: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => _showForgotPasswordDialog(),
-                  child: Text(
-                    context.l10n.forgotPasswordQuestion,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: CupertinoColors.activeBlue.resolveFrom(context),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-            ],
-          ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showForgotPasswordDialog() {
-    final resetEmailController = TextEditingController(text: _emailController.text);
-
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.resetPassword),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: CupertinoTextField(
-            controller: resetEmailController,
-            placeholder: context.l10n.enterYourEmail,
-            keyboardType: TextInputType.emailAddress,
-            autocorrect: false,
-            textCapitalization: TextCapitalization.none,
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            child: Text(context.l10n.send),
-            onPressed: () async {
-              final email = resetEmailController.text.trim();
-              if (email.isEmpty || !email.contains('@')) {
-                return;
-              }
-              Navigator.pop(dialogContext);
-              try {
-                await _auth.sendPasswordResetEmail(email);
-                if (mounted) {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (successContext) => CupertinoAlertDialog(
-                      title: Text(context.l10n.emailSent),
-                      content: Text(context.l10n.checkInboxResetPassword),
-                      actions: [
-                        CupertinoDialogAction(
-                          child: Text(context.l10n.ok),
-                          onPressed: () => Navigator.pop(successContext),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  _showError(context, context.l10n.errorSendingRecoveryEmail);
-                }
-              }
-            },
+    final danger = AppColors.danger.resolveFrom(context);
+    return Semantics(
+      liveRegion: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(CupertinoIcons.exclamationmark_circle, size: 20, color: danger),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              key: const Key('email_login_error'),
+              style: AppTypography.label.copyWith(color: danger),
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Password field in the [AppFormField] style (label above, `secondaryFill`
+/// field, error below) with a 44pt show/hide button that has a spoken label.
+class _PasswordField extends StatefulWidget {
+  const _PasswordField({
+    super.key,
+    required this.controller,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final VoidCallback onSubmitted;
+
+  @override
+  State<_PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<_PasswordField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final danger = AppColors.danger.resolveFrom(context);
+
+    return FormField<String>(
+      validator: (_) => widget.controller.text.isEmpty
+          ? l10n.emailLoginPasswordRequired
+          : null,
+      builder: (state) {
+        final error = state.errorText;
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+            vertical: AppSpacing.sm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Text(
+                  l10n.password,
+                  style: AppTypography.label.copyWith(color: secondary),
+                ),
+              ),
+              CupertinoTextField(
+                controller: widget.controller,
+                obscureText: _obscure,
+                autocorrect: false,
+                enableSuggestions: false,
+                autofillHints: const [AutofillHints.password],
+                textInputAction: TextInputAction.done,
+                style: AppTypography.body.copyWith(color: text),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md + 2,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryFill.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(AppRadii.field),
+                  border: error == null
+                      ? null
+                      : Border.all(color: danger, width: 1.5),
+                ),
+                suffix: Semantics(
+                  // Own node: VoiceOver reaches the eye apart from the field.
+                  container: true,
+                  button: true,
+                  label: _obscure ? l10n.showPassword : l10n.hidePassword,
+                  excludeSemantics: true,
+                  child: CupertinoButton(
+                    key: const ValueKey('email_login_toggle_password'),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(
+                      AppSizes.minTouchTarget,
+                      AppSizes.minTouchTarget,
+                    ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                    child: Icon(
+                      _obscure ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                      size: 22,
+                      color: secondary,
+                    ),
+                  ),
+                ),
+                onChanged: state.didChange,
+                onSubmitted: (_) => widget.onSubmitted(),
+              ),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: Text(
+                    error,
+                    style: AppTypography.label.copyWith(color: danger),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

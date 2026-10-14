@@ -164,13 +164,13 @@ void main() {
       final h = Harness();
       await pumpFlow(tester, h);
 
-      expect(find.text(pt.onboardingSegmentTitle), findsWidgets);
-      expect(find.text(pt.onboardingSegmentSubtitle), findsOneWidget);
+      expect(find.text(pt.pickSegmentTitle), findsWidgets);
+      expect(find.text(pt.onboardingSegmentHint), findsOneWidget);
       expect(find.text('Eletrônica'), findsOneWidget);
       expect(find.text('Mecânica'), findsOneWidget); // nameI18n pt-BR
       // every row opens the next step
       expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(2));
-      expect(find.byIcon(CupertinoIcons.checkmark), findsNothing);
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsNothing);
       expect(find.text(pt.onboardingCreate), findsNothing);
     });
 
@@ -187,7 +187,7 @@ void main() {
       await tester.pumpAndSettle();
       final row = find.byKey(const ValueKey('segment_electronics'));
       expect(
-        find.descendant(of: row, matching: find.byIcon(CupertinoIcons.checkmark)),
+        find.descendant(of: row, matching: find.byIcon(CupertinoIcons.checkmark_alt)),
         findsOneWidget,
       );
     });
@@ -233,13 +233,13 @@ void main() {
       final h = Harness();
       await openBusiness(tester, h, segment: 'automotive');
 
-      expect(find.text(pt.onboardingSpecialtiesTitle), findsWidgets);
-      expect(find.byIcon(CupertinoIcons.checkmark), findsNWidgets(2));
+      expect(find.text(pt.pickSpecialtiesTitle), findsWidgets);
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsNWidgets(2));
 
       // uncheck one
       await tester.tap(find.text('Lava-jato'));
       await tester.pump();
-      expect(find.byIcon(CupertinoIcons.checkmark), findsNWidgets(1));
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsNWidgets(1));
 
       await tapKey(tester, 'subspecialties_continue');
       await tester.pumpAndSettle();
@@ -255,7 +255,7 @@ void main() {
       await tester.tap(find.text('Lava-jato'));
       await tester.tap(find.text('Mecânica geral'));
       await tester.pump();
-      expect(find.byIcon(CupertinoIcons.checkmark), findsNothing);
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsNothing);
 
       await tapKey(tester, 'subspecialties_continue');
       await tester.pumpAndSettle();
@@ -426,5 +426,101 @@ void main() {
     expect(h.setup.seeds.single.subs, ['mechanical', 'carwash']);
     expect(h.setup.startedCount, 1);
     expect(h.finished, 1);
+  });
+
+  group('Design system', () {
+    Future<void> largeText(WidgetTester tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    }
+
+    testWidgets('Ramo: question as title, ✓ only on the picked segment',
+        (tester) async {
+      final h = Harness();
+      await openBusiness(tester, h);
+      Navigator.of(tester.element(find.byType(YourBusinessScreen))).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text(pt.pickSegmentTitle), findsWidgets);
+      expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('segment_automotive')),
+          matching: find.byIcon(CupertinoIcons.checkmark_alt),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('steps name the previous one on the back button',
+        (tester) async {
+      final h = Harness();
+      await pumpFlow(tester, h);
+      await tester.tap(find.byKey(const ValueKey('segment_automotive')));
+      await tester.pumpAndSettle();
+      // Especialidades -> "‹ Seu ramo"
+      expect(find.text(pt.onboardingSegmentTitle), findsOneWidget);
+
+      await tapKey(tester, 'subspecialties_continue');
+      await tester.pumpAndSettle();
+      // Seu negócio -> "‹ Especialidades"
+      expect(find.text(pt.onboardingSpecialtiesTitle), findsOneWidget);
+    });
+
+    testWidgets('Seu negócio: create does nothing until the name is filled',
+        (tester) async {
+      final h = Harness();
+      await openBusiness(tester, h);
+
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+      expect(h.setup.saves, isEmpty);
+
+      await typeName(tester, '   ');
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+      expect(h.setup.saves, isEmpty);
+
+      await typeName(tester, 'Oficina');
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+      expect(h.setup.saves, hasLength(1));
+    });
+
+    testWidgets('Seu negócio error has a way out back to the form',
+        (tester) async {
+      final h = Harness();
+      h.setup.failSeedTimes = 1;
+      await openBusiness(tester, h);
+      await typeName(tester, 'Oficina');
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+
+      expect(find.text(pt.onboardingCreateError), findsOneWidget);
+      await tapKey(tester, 'business_error_back');
+      await tester.pumpAndSettle();
+
+      // Back on the form with the name kept, nothing finished.
+      expect(find.text(pt.onboardingCreateError), findsNothing);
+      expect(find.text('Oficina'), findsOneWidget);
+      expect(h.finished, 0);
+    });
+
+    testWidgets('large text: Ramo, Especialidades and Seu negócio fit',
+        (tester) async {
+      await largeText(tester);
+      final h = Harness();
+      await pumpFlow(tester, h);
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byKey(const ValueKey('segment_automotive')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tapKey(tester, 'subspecialties_continue');
+      await tester.pumpAndSettle();
+      expect(find.byType(YourBusinessScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

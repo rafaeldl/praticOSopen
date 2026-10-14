@@ -1,29 +1,43 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
 
+/// Shown while the app decides where to go (signed in? company?). App icon
+/// and a spinner on the screen background; screen readers hear "Carregando".
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Usamos Scaffold para garantir que preencha a tela corretamente em todos os casos
-    // mas com estilo visual alinhado ao Cupertino
-    return Scaffold(
-      backgroundColor: CupertinoColors.systemBackground, 
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/icon.png',
-              width: 100,
-              height: 100,
-              // Se a imagem não existir ou falhar, mantém o layout estável
-              errorBuilder: (_, __, ___) => const SizedBox(height: 100),
-            ),
-            const SizedBox(height: 24),
-            const CupertinoActivityIndicator(radius: 12),
-          ],
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: Center(
+        child: Semantics(
+          label: context.l10n.loading,
+          liveRegion: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.asset(
+                    'assets/images/icon.png',
+                    width: 88,
+                    height: 88,
+                    cacheWidth: 264,
+                    fit: BoxFit.cover,
+                    // Keeps the layout stable when the image fails.
+                    errorBuilder: (_, __, ___) =>
+                        const SizedBox(width: 88, height: 88),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              const CupertinoActivityIndicator(radius: 14),
+            ],
+          ),
         ),
       ),
     );

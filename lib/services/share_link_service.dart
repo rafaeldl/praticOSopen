@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,10 @@ class ShareLinkService {
   static final ShareLinkService _instance = ShareLinkService._internal();
   static ShareLinkService get instance => _instance;
   ShareLinkService._internal();
+
+  /// Lets tests replace the network and share calls.
+  @visibleForTesting
+  ShareLinkService.forTesting();
 
   // API base URL - always uses production Cloud Functions
   static const String _baseUrl =

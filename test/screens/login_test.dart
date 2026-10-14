@@ -79,7 +79,7 @@ void main() {
       find.byType(CupertinoPageScaffold),
     );
     final bg = scaffold.backgroundColor! as CupertinoDynamicColor;
-    expect(bg.darkColor, const Color(0xFF0F2742));
+    expect(bg.darkColor, const Color(0xFF142F4B));
 
     final panel = tester.widget<Container>(find.byKey(const Key('login_panel')));
     final panelColor =

@@ -737,7 +737,7 @@ void main() {
       expect(find.text('Contrato recorrente'), findsOneWidget);
     });
 
-    testWidgets('contract row shows frequency and next date; can be changed', (
+    testWidgets('contract row shows frequency and next date; opens Repetir', (
       tester,
     ) async {
       final actions = FakeActions();
@@ -756,8 +756,8 @@ void main() {
       expect(find.text('Mensal · próxima em $date'), findsOneWidget);
       await tester.tap(find.text('Contrato recorrente'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Mudar contrato'));
-      await tester.pumpAndSettle();
+      // Opens the Repetir screen directly, no action sheet in between.
+      expect(find.text('Mudar contrato'), findsNothing);
       expect(actions.calls, ['editContract']);
     });
 

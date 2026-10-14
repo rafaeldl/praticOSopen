@@ -18,6 +18,10 @@ e `2026-10-11-financeiro-opcional-design.md`.
 | Seu negócio | `lib/screens/onboarding/your_business_screen.dart` |
 | Criação da empresa (`OnboardingSetup`, `FirebaseOnboardingSetup`) | `lib/services/onboarding_service.dart` |
 | Decisão de rota | `lib/screens/auth_wrapper.dart` |
+| Login (Apple, Google, link para e-mail) | `lib/screens/login.dart` |
+| Entrar com e-mail | `lib/screens/email_login_screen.dart` |
+| Convites recebidos / código de convite | `lib/screens/onboarding/pending_invites_screen.dart`, `accept_invite_screen.dart` |
+| Carregando | `lib/screens/loading_screen.dart` |
 
 `OnboardingDeps.firebase(authStore)` liga o app real; os testes usam fakes
 (`test/screens/onboarding/onboarding_flow_test.dart`).
@@ -62,6 +66,26 @@ empresa" de lá abre o `OnboardingFlow`. "Recebi um código de convite" na tela 
 6. Carregando: uma frase só, "Preparando seu PraticOS…".
 7. "Sair" no topo do ramo, para quem entrou com a conta errada.
 8. O questionário (`users/{uid}.onboardingSegment`) não aparece mais para ninguém.
+9. Erro ao criar a empresa tem saída: botão de voltar no topo devolve ao formulário com o que
+   foi digitado; "Tentar novamente" refaz.
+
+## Padrão visual
+
+Segue `docs/APP_DESIGN_SYSTEM.md`:
+
+- Cada passo usa `OnboardingPage` com `AppNavBar` (título grande, voltar de vidro com o nome do
+  passo anterior: "‹ Seu ramo", "‹ Especialidades").
+- Ramo e especialidades usam as mesmas linhas de `AppListRow` dos seletores de Ajustes
+  (`company_editors.dart`): emoji, nome e ✓ azul no escolhido. Título em pergunta
+  ("Qual é o seu ramo?", "O que você atende?") e uma frase embaixo.
+- Um botão azul por tela (`PrimaryButton`, 58); o resto é `TextLink`. Exceção: o botão preto
+  "Continuar com Apple" no login (padrão exigido pela Apple).
+- Entrar com e-mail: campos `AppFormField`, olho com rótulo falado e alvo de 44, erro numa frase
+  fixa acima do botão (nunca a mensagem do Firebase) e "Esqueceu a senha?" sempre à mão.
+- Vários convites: tocar num convite abre a tela dele (mesmo botão "Entrar na equipe" e link
+  "Recusar convite"), nunca um menu de ações.
+- Código de convite: voltar de vidro no topo, no lugar do botão "Cancelar".
+- Cores só de `AppColors` com `.resolveFrom(context)`; o fundo do login é `accentSoft`.
 
 ## Analytics
 

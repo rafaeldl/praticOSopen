@@ -1,10 +1,10 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/onboarding/onboarding_flow.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/next_step_block.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
@@ -125,21 +125,33 @@ class _YourBusinessScreenState extends State<YourBusinessScreen> {
         },
         child: CupertinoPageScaffold(
           backgroundColor: AppColors.background.resolveFrom(context),
-          navigationBar: saving
-              ? null
-              : CupertinoNavigationBar(
-                  backgroundColor: AppColors.background.resolveFrom(context),
-                  border: null,
-                ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: saving
-                ? LoadingState(label: l10n.onboardingPreparing)
-                : ErrorState(
-                    message: l10n.onboardingCreateError,
-                    onRetry: () => _create(withSamples: _lastWithSamples),
+          child: saving
+              ? LoadingState(label: l10n.onboardingPreparing)
+              : SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.blockMargin,
+                        ),
+                        // Back to the form (keeps what was typed).
+                        child: GlassBackButton(
+                          key: const ValueKey('business_error_back'),
+                          onPressed: () =>
+                              setState(() => _status = _Status.editing),
+                        ),
+                      ),
+                      Expanded(
+                        child: ErrorState(
+                          message: l10n.onboardingCreateError,
+                          onRetry: () =>
+                              _create(withSamples: _lastWithSamples),
+                        ),
+                      ),
+                    ],
                   ),
-          ),
+                ),
         ),
       );
     }
@@ -148,6 +160,9 @@ class _YourBusinessScreenState extends State<YourBusinessScreen> {
       key: _formKey,
       child: OnboardingPage(
         title: l10n.onboardingBusinessTitle,
+        previousTitle: widget.segment.hasSubspecialties
+            ? l10n.onboardingSpecialtiesTitle
+            : l10n.onboardingSegmentTitle,
         slivers: [
           SliverToBoxAdapter(
             child: Column(
