@@ -28,6 +28,7 @@ class AppListRow extends StatelessWidget {
     this.trailingStyle,
     this.marked = false,
     this.selected = false,
+    this.valueBesideTitle = false,
   });
 
   final String title;
@@ -56,6 +57,11 @@ class AppListRow extends StatelessWidget {
   /// after the [trailing] value. Announced as selected to screen readers.
   final bool selected;
 
+  /// Money lists (Financeiro, Relatório): the [trailing] value sits on the
+  /// title line, in the text color, and the [subtitle] takes the full width
+  /// under both ("Ana Ribeiro      R\$ 1.250" / "OS 183 · desde 02/10").
+  final bool valueBesideTitle;
+
   @override
   Widget build(BuildContext context) {
     final onMarker = AppColors.onMarker.resolveFrom(context);
@@ -77,16 +83,27 @@ class AppListRow extends StatelessWidget {
             trailing!,
             textAlign: stacked ? TextAlign.start : TextAlign.end,
             style: (trailingStyle ?? AppTypography.body).copyWith(
-              color: secondary,
+              color: valueBesideTitle ? textColor : secondary,
               fontFeatures: AppTypography.tabular,
             ),
           );
+    final beside = valueBesideTitle && !stacked && valueText != null;
 
     final main = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        titleText,
+        if (beside)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: titleText),
+              const SizedBox(width: AppSpacing.md),
+              valueText,
+            ],
+          )
+        else
+          titleText,
         if (subtitleWidget != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -123,7 +140,7 @@ class AppListRow extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
             ],
             Expanded(child: main),
-            if (!stacked && valueText != null) ...[
+            if (!stacked && !beside && valueText != null) ...[
               const SizedBox(width: AppSpacing.md),
               Flexible(
                 child: Align(

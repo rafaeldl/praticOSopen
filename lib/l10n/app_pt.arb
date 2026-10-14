@@ -78,7 +78,7 @@
   "paid": "Pago",
   "unpaid": "Não Pago",
   "partiallyPaid": "Parcialmente Pago",
-  "toReceive": "A Receber",
+  "toReceive": "Falta receber",
   "toPay": "A Pagar",
   "received": "Recebido",
   "paymentMethod": "Forma de Pagamento",
@@ -909,10 +909,10 @@
       }
     }
   },
-  "financialReport": "Relatório Financeiro",
+  "financialReport": "Relatório financeiro",
   "totalBilling": "Faturamento Total",
   "financialSummary": "Resumo Financeiro",
-  "averageTicket": "Ticket Médio",
+  "averageTicket": "Média por OS",
   "customerRanking": "Ranking de Clientes",
   "serviceRanking": "Ranking de Serviços",
   "productRanking": "Ranking de Produtos",
@@ -924,7 +924,7 @@
   "quantityShort": "Qtd",
   "noOrdersInPeriod": "Nenhuma ordem neste período",
   "notInformed": "Não informado",
-  "nOrdersCount": "{count} {count, plural, =1{ordem} other{ordens}}",
+  "nOrdersCount": "{count} OS",
   "@nOrdersCount": {
     "placeholders": {
       "count": {
@@ -3151,6 +3151,15 @@
   },
   "profileNameRequired": "Digite seu nome",
   "profileNamePlaceholder": "Ex.: João da Silva",
+  "financialWhichOrder": "Qual OS?",
+  "reportThisWeek": "Esta semana",
+  "reportThisMonth": "Este mês",
+  "reportThisYear": "Este ano",
+  "reportPickDates": "Escolher datas",
+  "reportSeeOtherPeriod": "Ver outro período",
+  "reportStarts": "Começa",
+  "reportEnds": "Termina",
+  "reportWhichPeriod": "Que período?",
   "agendaShowMonth": "Ver o mês",
   "agendaShowWeek": "Ver a semana",
   "agendaWhose": "De quem: {name}",

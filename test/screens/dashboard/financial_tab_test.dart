@@ -105,7 +105,7 @@ void main() {
     await pumpTab(tester, storeWith(month: [paid, ana], open: [ana, bia1, bia2]));
 
     expect(find.text('Financeiro'), findsWidgets);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(
       find.text('Falta receber ${FormatService().formatCurrency(1730)} de 2 clientes'),
       findsOneWidget,
@@ -164,7 +164,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('debtor-Bia')));
     await tester.pumpAndSettle();
 
+    // The "Escolher" screen: question as the title, who as the subtitle.
+    expect(find.text('Qual OS?'), findsWidgets);
     expect(find.text('OS em aberto de Bia'), findsOneWidget);
+    expect(find.byType(CupertinoActionSheet), findsNothing);
     await tester.tap(find.textContaining('OS 190'));
     await tester.pumpAndSettle();
     expect(opened.single.id, 'b1');
@@ -212,7 +215,7 @@ void main() {
     await pumpTab(tester, storeWith(openLoader: () => completer.future));
 
     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(find.textContaining('Entrou'), findsNothing);
 
     completer.complete([]);
@@ -255,15 +258,15 @@ void main() {
     await tester.pump();
 
     expect(calls, [0, -1]);
-    expect(find.text('setembro de 2026'), findsOneWidget);
+    expect(find.text('Setembro de 2026'), findsOneWidget);
     expect(find.text('Nenhuma OS em setembro de 2026.'), findsOneWidget);
 
     // Tapping the label goes back to the current month.
-    await tester.tap(find.text('setembro de 2026'));
+    await tester.tap(find.text('Setembro de 2026'));
     await tester.pump();
     await tester.pump();
     expect(calls, [0, -1, 0]);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
   });
 
   testWidgets('"…" opens the report and the period picker', (tester) async {
@@ -278,12 +281,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('financialMore')));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(CupertinoActionSheet),
-        matching: find.text('Relatório'),
-      ),
-    );
+    // Pull-down menu (no action sheet, no "Cancelar").
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+    expect(find.text('Cancelar'), findsNothing);
+    await tester.tap(find.text('Relatório'));
     await tester.pumpAndSettle();
 
     expect(reports, [true, false]);

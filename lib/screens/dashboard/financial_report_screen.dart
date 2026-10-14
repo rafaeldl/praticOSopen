@@ -16,7 +16,8 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
@@ -171,6 +172,12 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
             alwaysShowMiddle: false,
             largeTitle: Text(context.l10n.financialReport),
             border: null,
+            trailing: GlassBarButton(
+              key: const Key('reportMore'),
+              label: context.l10n.more,
+              icon: CupertinoIcons.ellipsis,
+              onPressed: _showPeriodMenu,
+            ),
           ),
           CupertinoSliverRefreshControl(
             onRefresh: () => orderStore.loadOrdersForDashboard(),
@@ -236,51 +243,16 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
   // PERIOD SELECTOR
   // ============================================================
 
+  /// Only the period stepper (or the chosen dates). Other periods come from
+  /// the "…" menu.
   Widget _buildPeriodSelector() {
-    final text = AppColors.text.resolveFrom(context);
-
-    Widget segment(String label) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: Text(
-            label,
-            style: AppTypography.label.copyWith(color: text),
-          ),
-        );
-
     final isCustom = selectedPeriod == 'custom';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0),
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: CupertinoSlidingSegmentedControl<String>(
-              groupValue: isCustom ? null : selectedPeriod,
-              backgroundColor: AppColors.secondaryFill.resolveFrom(context),
-              thumbColor: AppColors.surface.resolveFrom(context),
-              children: {
-                'hoje': segment(context.l10n.today),
-                'semana': segment(context.l10n.week),
-                'mês': segment(context.l10n.month),
-                'ano': segment(context.l10n.year),
-              },
-              onValueChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  selectedPeriod = value;
-                  _periodOffset = 0;
-                  _customStartDate = null;
-                  _customEndDate = null;
-                });
-                _updateDashboardPeriod();
-              },
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (isCustom)
-            AppListRow(
+      child: isCustom
+          ? AppListRow(
               leading: Icon(
                 CupertinoIcons.calendar,
                 size: 22,
@@ -289,8 +261,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
               title: _displayPeriodLabel,
               onTap: _showCustomPeriodPicker,
             )
-          else
-            PeriodStepper(
+          : PeriodStepper(
               label: _displayPeriodLabel,
               previousLabel: context.l10n.reportPreviousPeriod,
               nextLabel: context.l10n.reportNextPeriod,
@@ -315,24 +286,63 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
                     }
                   : null,
             ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: TextLink(
-                label: context.l10n.financialOtherPeriod,
-                onPressed: _showCustomPeriodPicker,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
+  }
+
+  /// "…": "Ver outro período" (today, this week, month, year, dates).
+  Future<void> _showPeriodMenu() async {
+    final l10n = context.l10n;
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup(title: l10n.reportSeeOtherPeriod, [
+          PullDownItem(
+            value: 'hoje',
+            label: l10n.today,
+            icon: CupertinoIcons.sun_max,
+          ),
+          PullDownItem(
+            value: 'semana',
+            label: l10n.reportThisWeek,
+            icon: CupertinoIcons.calendar_today,
+          ),
+          PullDownItem(
+            value: 'mês',
+            label: l10n.reportThisMonth,
+            icon: CupertinoIcons.calendar,
+          ),
+          PullDownItem(
+            value: 'ano',
+            label: l10n.reportThisYear,
+            icon: CupertinoIcons.calendar_circle,
+          ),
+        ]),
+        PullDownGroup([
+          PullDownItem(
+            value: 'custom',
+            label: l10n.reportPickDates,
+            icon: CupertinoIcons.calendar_badge_plus,
+          ),
+        ]),
+      ],
+    );
+    if (picked == null || !mounted) return;
+    if (picked == 'custom') {
+      _showCustomPeriodPicker();
+      return;
+    }
+    setState(() {
+      selectedPeriod = picked;
+      _periodOffset = 0;
+      _customStartDate = null;
+      _customEndDate = null;
+    });
+    _updateDashboardPeriod();
   }
 
   /// "Outro período": start and end dates in a sheet.
   Future<void> _showCustomPeriodPicker() async {
-    final range = await AppSheet.show<({DateTime start, DateTime end})>(
+    final range = await FormSheet.show<({DateTime start, DateTime end})>(
       context,
       (_) => _CustomPeriodSheet(
         start: _customStartDate ??
@@ -612,7 +622,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
 
     final row = AppListRow(
       title: customer['name'] ?? context.l10n.customerWithoutName,
-      titleStyle: isSelected ? AppTypography.bodyStrong : null,
+      titleStyle: AppTypography.bodyStrong,
+      valueBesideTitle: true,
       subtitle: unpaidAmount > 0 && orderStore.paymentFilter == null
           ? '${context.l10n.toReceive}: ${_convertToCurrency(unpaidAmount)}'
           : null,
@@ -734,6 +745,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         for (int i = 0; i < itemCount; i++)
           AppListRow(
             title: ranking[i]['name'] as String,
+            titleStyle: AppTypography.bodyStrong,
+            valueBesideTitle: true,
             subtitle: context.l10n.nItemsCount(ranking[i]['quantity'] as int),
             trailing: _convertToCurrency(ranking[i]['total'] as double),
           ),
@@ -798,6 +811,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         size: 10,
       ),
       title: order?.customer?.name ?? context.l10n.customer,
+      titleStyle: AppTypography.bodyStrong,
+      valueBesideTitle: true,
       subtitle: [
         '${context.l10n.orderShort} ${order?.number}',
         if (dateStr.isNotEmpty) dateStr,
@@ -852,8 +867,8 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
             const SizedBox(width: 16),
             Text(
               currentContext.l10n.preparingReport,
-              style: TextStyle(
-                color: CupertinoColors.label.resolveFrom(context),
+              style: AppTypography.body.copyWith(
+                color: AppColors.text.resolveFrom(context),
               ),
             ),
           ],
@@ -883,7 +898,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
           context: currentContext,
           builder: (context) => CupertinoAlertDialog(
             title: Text(currentContext.l10n.error),
-            content: Text('${currentContext.l10n.errorGeneratingReport}: ${e.toString()}'),
+            content: Text(currentContext.l10n.errorGeneratingReport),
             actions: [
               CupertinoDialogAction(
                 child: Text(currentContext.l10n.ok),
@@ -2205,8 +2220,9 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-/// Start/end date picker, presented as a sheet by "Outro período". Pops a
-/// record on "OK".
+/// "Escolher datas": start and end in a [FormSheet] (X and ✓). The row
+/// being changed is marked in blue and the date wheel below edits it. Pops a
+/// record on ✓.
 class _CustomPeriodSheet extends StatefulWidget {
   const _CustomPeriodSheet({required this.start, required this.end});
 
@@ -2222,42 +2238,72 @@ class _CustomPeriodSheetState extends State<_CustomPeriodSheet> {
   late DateTime _end = widget.end;
   bool _selectingStart = true;
 
-  @override
-  Widget build(BuildContext context) {
-    final text = AppColors.text.resolveFrom(context);
-    final format = FormatService();
-    Widget segment(String label) => Text(
-          label,
-          style: AppTypography.label.copyWith(color: text),
-        );
+  bool get _dirty => _start != widget.start || _end != widget.end;
 
-    return AppSheet(
-      title: context.l10n.selectPeriod,
-      actionLabel: context.l10n.ok,
-      onAction: () =>
-          Navigator.of(context).pop((start: _start, end: _end)),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.blockMargin),
-            child: SizedBox(
-              width: double.infinity,
-              child: CupertinoSlidingSegmentedControl<bool>(
-                groupValue: _selectingStart,
-                backgroundColor: AppColors.secondaryFill.resolveFrom(context),
-                thumbColor: AppColors.surface.resolveFrom(context),
-                children: {
-                  true: segment(
-                      '${context.l10n.start}: ${format.formatDate(_start)}'),
-                  false:
-                      segment('${context.l10n.end}: ${format.formatDate(_end)}'),
-                },
-                onValueChanged: (value) =>
-                    setState(() => _selectingStart = value!),
-              ),
+  Widget _dateRow(String label, DateTime date, {required bool isStart}) {
+    final selecting = _selectingStart == isStart;
+    final format = FormatService();
+    return Semantics(
+      button: true,
+      selected: selecting,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _selectingStart = isStart),
+        child: ConstrainedBox(
+          constraints:
+              const BoxConstraints(minHeight: AppSizes.minTouchTarget + 8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.text.resolveFrom(context),
+                    ),
+                  ),
+                ),
+                Text(
+                  format.formatDate(date),
+                  style: AppTypography.body.copyWith(
+                    color: selecting
+                        ? AppColors.accentText.resolveFrom(context)
+                        : AppColors.textSecondary.resolveFrom(context),
+                    fontWeight: selecting ? FontWeight.w600 : null,
+                    fontFeatures: AppTypography.tabular,
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return FormSheet(
+      title: l10n.reportWhichPeriod,
+      canSave: true,
+      dirty: _dirty,
+      onSave: () => Navigator.of(context).pop((start: _start, end: _end)),
+      children: [
+        FormFieldsCard(
+          children: [
+            _dateRow(l10n.reportStarts, _start, isStart: true),
+            _dateRow(l10n.reportEnds, _end, isStart: false),
+          ],
+        ),
+        FormFieldsCard(
+          children: [
+            SizedBox(
+            height: 216,
             child: CupertinoDatePicker(
               key: ValueKey(_selectingStart),
               mode: CupertinoDatePickerMode.date,
@@ -2276,9 +2322,10 @@ class _CustomPeriodSheetState extends State<_CustomPeriodSheet> {
                 });
               },
             ),
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

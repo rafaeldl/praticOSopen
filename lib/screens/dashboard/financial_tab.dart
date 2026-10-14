@@ -12,6 +12,8 @@ import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/period_stepper.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -135,70 +137,56 @@ class _FinancialTabState extends State<FinancialTab> {
     );
   }
 
-  void _openDebtor(Debtor debtor) {
+  Future<void> _openDebtor(Debtor debtor) async {
     if (debtor.hasSingleOrder) {
       _openOrder(debtor.oldestOrder);
       return;
     }
     final l10n = context.l10n;
     final format = FormatService();
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(
-          l10n.financialPickOrderTitle(debtor.name ?? l10n.customerWithoutName),
-        ),
-        actions: [
-          for (final order in debtor.orders)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.of(sheetContext).pop();
-                _openOrder(order);
-              },
-              child: Text(
-                l10n.financialOrderOption(
-                  order.number ?? 0,
-                  format.formatCurrency(FinancialSummary.openAmount(order)),
-                  format.formatDayMonthOrDate(order.createdAt),
-                ),
-              ),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(sheetContext).pop(),
-          child: Text(l10n.cancel),
-        ),
+    final order = await pickOne<Order>(
+      context,
+      title: l10n.financialWhichOrder,
+      subtitle: l10n.financialPickOrderTitle(
+        debtor.name ?? l10n.customerWithoutName,
       ),
+      options: [
+        for (final order in debtor.orders)
+          PickerItem<Order>(
+            value: order,
+            title: l10n.financialOrderOption(
+              order.number ?? 0,
+              format.formatCurrency(FinancialSummary.openAmount(order)),
+              format.formatDayMonthOrDate(order.createdAt),
+            ),
+          ),
+      ],
     );
+    if (order != null && mounted) _openOrder(order);
   }
 
-  void _showMoreMenu() {
+  Future<void> _showMoreMenu() async {
     final l10n = context.l10n;
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.of(sheetContext).pop();
-              _openReport();
-            },
-            child: Text(l10n.financialReportShort),
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'report',
+            label: l10n.financialReportShort,
+            icon: CupertinoIcons.chart_bar,
           ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.of(sheetContext).pop();
-              _openReport(customPeriod: true);
-            },
-            child: Text(l10n.financialOtherPeriod),
+          PullDownItem(
+            value: 'period',
+            label: l10n.financialOtherPeriod,
+            icon: CupertinoIcons.calendar,
           ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(sheetContext).pop(),
-          child: Text(l10n.cancel),
-        ),
-      ),
+        ]),
+      ],
     );
+    if (!mounted) return;
+    if (picked == 'report') _openReport();
+    if (picked == 'period') _openReport(customPeriod: true);
   }
 
   // ── Build ───────────────────────────────────────────────────────
@@ -239,7 +227,7 @@ class _FinancialTabState extends State<FinancialTab> {
   Widget _buildStepper(BuildContext context) {
     final l10n = context.l10n;
     return PeriodStepper(
-      label: FormatService().formatMonthYear(_store.month),
+      label: FormatService().formatMonthYearTitle(_store.month),
       previousLabel: l10n.financialPreviousMonth,
       nextLabel: l10n.financialNextMonth,
       onPrevious: _store.previousMonth,
@@ -300,6 +288,8 @@ class _FinancialTabState extends State<FinancialTab> {
             const SizedBox(height: AppSpacing.md),
             AppListRow(
               key: const ValueKey('financialReceivedRow'),
+              titleStyle: AppTypography.bodyStrong,
+              valueBesideTitle: true,
               title: l10n.financialReceivedIn(
                 FormatService().formatMonthName(_store.month),
               ),
@@ -328,6 +318,8 @@ class _FinancialTabState extends State<FinancialTab> {
         AppListRow(
           key: ValueKey('debtor-${debtor.key}'),
           title: debtor.name ?? l10n.customerWithoutName,
+          titleStyle: AppTypography.bodyStrong,
+          valueBesideTitle: true,
           trailing: format.formatCurrency(debtor.amount),
           subtitle: debtor.hasSingleOrder
               ? l10n.financialOrderSince(

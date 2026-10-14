@@ -145,6 +145,19 @@ void main() {
     expect(store.loads.first, 'mês/0');
   });
 
+  testWidgets('plain words: sentence case, "OS" count and no "Ticket"',
+      (tester) async {
+    await pumpReport(tester);
+
+    expect(find.text('Relatório financeiro'), findsWidgets);
+    expect(find.text('Falta receber'), findsWidgets);
+    expect(find.textContaining('Média por OS'), findsOneWidget);
+    expect(find.textContaining('Ticket'), findsNothing);
+    expect(find.textContaining(RegExp(r'\bordem\b')), findsNothing);
+    expect(l10n.nOrdersCount(0), '0 OS');
+    expect(l10n.nOrdersCount(3), '3 OS');
+  });
+
   testWidgets('has the "Mandar relatório em PDF" button at the bottom',
       (tester) async {
     await pumpReport(tester);
@@ -162,47 +175,60 @@ void main() {
         greaterThanOrEqualTo(AppSizes.primaryButtonHeight));
   });
 
-  testWidgets('keeps the period choices (day, week, month, year, other)',
+  Future<void> openMenu(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('reportMore')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('no segmented control: other periods come from "…"',
       (tester) async {
     await pumpReport(tester);
 
+    expect(find.byType(CupertinoSlidingSegmentedControl<String>), findsNothing);
+    expect(find.text(l10n.financialOtherPeriod), findsNothing);
+
+    await openMenu(tester);
     for (final label in [
+      l10n.reportSeeOtherPeriod,
       l10n.today,
-      l10n.week,
-      l10n.month,
-      l10n.year,
-      l10n.financialOtherPeriod,
+      l10n.reportThisWeek,
+      l10n.reportThisMonth,
+      l10n.reportThisYear,
+      l10n.reportPickDates,
     ]) {
-      expect(find.text(label), findsWidgets, reason: label);
+      expect(find.text(label), findsOneWidget, reason: label);
     }
   });
 
-  testWidgets('switching the period reloads the dashboard', (tester) async {
+  testWidgets('picking "Este ano" in "…" reloads the dashboard',
+      (tester) async {
     final store = await pumpReport(tester);
 
-    await tester.tap(find.text(l10n.year).first);
-    await tester.pump();
-    await tester.pump();
+    await openMenu(tester);
+    await tester.tap(find.text(l10n.reportThisYear));
+    await tester.pumpAndSettle();
 
     expect(store.loads.last, 'ano/0');
   });
 
-  testWidgets('openCustomPeriod opens the date range picker', (tester) async {
+  testWidgets('openCustomPeriod opens the dates sheet', (tester) async {
     // Wide view: the test font (Ahem) is much wider than the system font.
     await pumpReport(tester, openCustomPeriod: true, width: 2400);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text(l10n.selectPeriod), findsOneWidget);
+    expect(find.text(l10n.reportWhichPeriod), findsOneWidget);
+    expect(find.text(l10n.reportStarts), findsOneWidget);
+    expect(find.text(l10n.reportEnds), findsOneWidget);
     expect(find.byType(CupertinoDatePicker), findsOneWidget);
   });
 
   testWidgets('week and previous period reload the dashboard', (tester) async {
     final store = await pumpReport(tester);
 
-    await tester.tap(find.text(l10n.week).first);
-    await tester.pump();
-    await tester.pump();
+    await openMenu(tester);
+    await tester.tap(find.text(l10n.reportThisWeek));
+    await tester.pumpAndSettle();
     expect(store.loads.last, 'semana/0');
 
     await tester.tap(find.bySemanticsLabel(l10n.reportPreviousPeriod));
@@ -211,20 +237,21 @@ void main() {
     expect(store.loads.last, 'semana/-1');
   });
 
-  testWidgets('"Outro período" opens a sheet and applies the range',
+  testWidgets('"Escolher datas" opens the X/✓ sheet and applies the range',
       (tester) async {
     final store = await pumpReport(tester, width: 2400);
 
-    await tester.tap(find.text(l10n.financialOtherPeriod));
+    await openMenu(tester);
+    await tester.tap(find.text(l10n.reportPickDates));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text(l10n.selectPeriod), findsOneWidget);
+    expect(find.text(l10n.reportWhichPeriod), findsOneWidget);
 
-    await tester.tap(find.text(l10n.ok));
+    await tester.tap(find.byKey(const ValueKey('new_order_save')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(store.loads.last, 'custom');
-    expect(find.text(l10n.selectPeriod), findsNothing);
+    expect(find.text(l10n.reportWhichPeriod), findsNothing);
   });
 
   testWidgets('section labels are sentence case, not uppercase',
@@ -254,8 +281,9 @@ void main() {
     expect(find.text(l10n.noOrdersInPeriod), findsOneWidget);
     expect(find.text(l10n.billing), findsNothing);
     expect(find.text(l10n.customers), findsNothing);
-    // The period selector stays so the person can change the period.
-    expect(find.text(l10n.week), findsWidgets);
+    // The stepper and "…" stay so the person can change the period.
+    expect(find.bySemanticsLabel(l10n.reportPreviousPeriod), findsOneWidget);
+    expect(find.byKey(const Key('reportMore')), findsOneWidget);
   });
 
   testWidgets('renders in dark mode with dark role colors', (tester) async {
