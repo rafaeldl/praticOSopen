@@ -1141,7 +1141,7 @@
   "cancelAndCreateNew": "Cancel and Create New",
   "agenda": "Schedule",
   "noScheduledOrders": "No orders scheduled for this day",
-  "allTeam": "All Team",
+  "allTeam": "Whole team",
   "filterByTechnician": "Filter by technician",
   "allDay": "All day",
   "clearSchedule": "Clear schedule",
@@ -2987,5 +2987,18 @@
   "reportSeeOtherPeriod": "See another period",
   "reportStarts": "Starts",
   "reportEnds": "Ends",
-  "reportWhichPeriod": "Which period?"
+  "reportWhichPeriod": "Which period?",
+  "agendaShowMonth": "Show month",
+  "agendaShowWeek": "Show week",
+  "agendaWhose": "Whose: {name}",
+  "agendaWhoseTitle": "Whose to show?",
+  "agendaOnlyOf": "Only {name}",
+  "agendaShowAll": "Show all",
+  "agendaWithPerson": "with {name}",
+  "agendaDayCount": "{count, plural, =1{1 scheduled} other{{count} scheduled}}",
+  "agendaDayHasOrders": "{day}, has scheduled work",
+  "agendaPreviousWeek": "Previous week",
+  "agendaNextWeek": "Next week",
+  "agendaPreviousMonth": "Previous month",
+  "agendaNextMonth": "Next month"
 }

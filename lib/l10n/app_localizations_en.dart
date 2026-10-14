@@ -2968,7 +2968,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noScheduledOrders => 'No orders scheduled for this day';
 
   @override
-  String get allTeam => 'All Team';
+  String get allTeam => 'Whole team';
 
   @override
   String get filterByTechnician => 'Filter by technician';
@@ -6441,4 +6441,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportWhichPeriod => 'Which period?';
+
+  @override
+  String get agendaShowMonth => 'Show month';
+
+  @override
+  String get agendaShowWeek => 'Show week';
+
+  @override
+  String agendaWhose(String name) {
+    return 'Whose: $name';
+  }
+
+  @override
+  String get agendaWhoseTitle => 'Whose to show?';
+
+  @override
+  String agendaOnlyOf(String name) {
+    return 'Only $name';
+  }
+
+  @override
+  String get agendaShowAll => 'Show all';
+
+  @override
+  String agendaWithPerson(String name) {
+    return 'with $name';
+  }
+
+  @override
+  String agendaDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scheduled',
+      one: '1 scheduled',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agendaDayHasOrders(String day) {
+    return '$day, has scheduled work';
+  }
+
+  @override
+  String get agendaPreviousWeek => 'Previous week';
+
+  @override
+  String get agendaNextWeek => 'Next week';
+
+  @override
+  String get agendaPreviousMonth => 'Previous month';
+
+  @override
+  String get agendaNextMonth => 'Next month';
 }

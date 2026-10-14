@@ -5653,7 +5653,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTeam.
   ///
   /// In pt, this message translates to:
-  /// **'Toda a Equipe'**
+  /// **'Toda a equipe'**
   String get allTeam;
 
   /// No description provided for @filterByTechnician.
@@ -11107,6 +11107,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Que período?'**
   String get reportWhichPeriod;
+
+  /// No description provided for @agendaShowMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver o mês'**
+  String get agendaShowMonth;
+
+  /// No description provided for @agendaShowWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver a semana'**
+  String get agendaShowWeek;
+
+  /// No description provided for @agendaWhose.
+  ///
+  /// In pt, this message translates to:
+  /// **'De quem: {name}'**
+  String agendaWhose(String name);
+
+  /// No description provided for @agendaWhoseTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'De quem mostrar?'**
+  String get agendaWhoseTitle;
+
+  /// No description provided for @agendaOnlyOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só de {name}'**
+  String agendaOnlyOf(String name);
+
+  /// No description provided for @agendaShowAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar todos'**
+  String get agendaShowAll;
+
+  /// No description provided for @agendaWithPerson.
+  ///
+  /// In pt, this message translates to:
+  /// **'com {name}'**
+  String agendaWithPerson(String name);
+
+  /// No description provided for @agendaDayCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 marcado} other{{count} marcados}}'**
+  String agendaDayCount(int count);
+
+  /// No description provided for @agendaDayHasOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'{day}, tem serviço marcado'**
+  String agendaDayHasOrders(String day);
+
+  /// No description provided for @agendaPreviousWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Semana anterior'**
+  String get agendaPreviousWeek;
+
+  /// No description provided for @agendaNextWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima semana'**
+  String get agendaNextWeek;
+
+  /// No description provided for @agendaPreviousMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês anterior'**
+  String get agendaPreviousMonth;
+
+  /// No description provided for @agendaNextMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo mês'**
+  String get agendaNextMonth;
 }
 
 class _AppLocalizationsDelegate

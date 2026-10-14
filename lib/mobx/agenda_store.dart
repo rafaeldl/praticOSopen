@@ -11,11 +11,25 @@ import 'package:praticos/mobx/reminder_store.dart';
 
 part 'agenda_store.g.dart';
 
-class AgendaStore = _AgendaStore with _$AgendaStore;
+class AgendaStore extends _AgendaStore with _$AgendaStore {
+  /// [permissionFilter] replaces the RBAC filter (tests).
+  AgendaStore({super.permissionFilter});
+
+  /// [day] of [month]'s month, clamped to the month's last day.
+  static DateTime dayInMonth(DateTime month, int day) {
+    final last = DateTime(month.year, month.month + 1, 0).day;
+    return DateTime(month.year, month.month, day > last ? last : day);
+  }
+}
 
 abstract class _AgendaStore with Store {
-  final TenantOrderRepository repository = TenantOrderRepository();
-  final AuthorizationService _authService = AuthorizationService.instance;
+  _AgendaStore({this.permissionFilter});
+
+  /// Overrides [AuthorizationService.filterOrdersByPermission] (tests).
+  final List<Order> Function(List<Order>)? permissionFilter;
+
+  late final TenantOrderRepository repository = TenantOrderRepository();
+  AuthorizationService get _authService => AuthorizationService.instance;
   StreamSubscription<List<Order?>>? _monthSubscription;
   ReminderStore? _reminderStore;
 
@@ -41,6 +55,10 @@ abstract class _AgendaStore with Store {
   @observable
   bool isLoading = false;
 
+  /// Calendar shows the whole month (true) or only the selected week.
+  @observable
+  bool showMonth = false;
+
   /// Returns the relevant date for an order based on scheduling mode
   DateTime? _orderDate(Order? order) {
     return _useScheduling ? order?.scheduledDate : order?.dueDate;
@@ -48,14 +66,18 @@ abstract class _AgendaStore with Store {
 
   @computed
   List<Order?> get ordersForSelectedDate {
-    final day = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final day = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
     final nextDay = day.add(const Duration(days: 1));
 
     final dayOrders = filteredOrders.where((order) {
       final date = _orderDate(order);
       if (date == null) return false;
       return date.isAfter(day.subtract(const Duration(seconds: 1))) &&
-             date.isBefore(nextDay);
+          date.isBefore(nextDay);
     }).toList();
 
     // Sort: orders with time (not midnight) first, then midnight ("all day") at end
@@ -90,9 +112,11 @@ abstract class _AgendaStore with Store {
     var result = orders.toList();
 
     // Apply RBAC filter
-    final filtered = _authService.filterOrdersByPermission(
-      result.whereType<Order>().toList(),
-    ).cast<Order?>();
+    final visible = result.whereType<Order>().toList();
+    final filtered =
+        (permissionFilter?.call(visible) ??
+                _authService.filterOrdersByPermission(visible))
+            .cast<Order?>();
 
     // Apply technician filter
     if (selectedTechnicianId != null) {
@@ -119,7 +143,11 @@ abstract class _AgendaStore with Store {
     _monthSubscription?.cancel();
 
     final stream = _useScheduling
-        ? repository.streamOrdersByScheduledDateRange(companyId!, startDate, endDate)
+        ? repository.streamOrdersByScheduledDateRange(
+            companyId!,
+            startDate,
+            endDate,
+          )
         : repository.streamOrdersByDueDateRange(companyId!, startDate, endDate);
 
     _monthSubscription = stream.listen(
@@ -143,7 +171,9 @@ abstract class _AgendaStore with Store {
 
     final now = DateTime.now();
     for (final order in loadedOrders) {
-      if (order == null || order.id == null || order.scheduledDate == null) continue;
+      if (order == null || order.id == null || order.scheduledDate == null) {
+        continue;
+      }
       if (order.scheduledDate!.isBefore(now)) continue;
 
       final orderNumber = order.number?.toString() ?? '';
@@ -177,5 +207,32 @@ abstract class _AgendaStore with Store {
   @action
   void setTechnicianFilter(String? userId) {
     selectedTechnicianId = userId;
+  }
+
+  @action
+  void toggleMonth() {
+    showMonth = !showMonth;
+  }
+
+  @action
+  void goToToday() {
+    selectDate(DateTime.now());
+  }
+
+  /// Moves the selection [delta] weeks (week strip chevrons).
+  @action
+  void moveWeek(int delta) {
+    final d = selectedDate;
+    selectDate(DateTime(d.year, d.month, d.day + 7 * delta));
+  }
+
+  /// Moves the selection [delta] months, keeping the day when the month has
+  /// it (31 Oct -> 30 Nov).
+  @action
+  void moveMonth(int delta) {
+    final d = selectedDate;
+    selectDate(
+      AgendaStore.dayInMonth(DateTime(d.year, d.month + delta), d.day),
+    );
   }
 }
