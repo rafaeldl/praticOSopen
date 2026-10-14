@@ -1,21 +1,100 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/collaborator_exception.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
-import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/global.dart';
-import 'package:praticos/screens/menu_navigation/team_view.dart';
 import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
+import 'package:praticos/screens/menu_navigation/team_view.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/theme/app_colors.dart';
+
+/// What the member screen ([showMemberPicker]) returned.
+sealed class MemberChoice {
+  const MemberChoice();
+}
+
+/// A new role for the member.
+class MemberRoleChoice extends MemberChoice {
+  const MemberRoleChoice(this.role);
+  final RolesType role;
+}
+
+/// "Tirar da equipe".
+class MemberRemoveChoice extends MemberChoice {
+  const MemberRemoveChoice();
+}
+
+/// "O que {nome} pode fazer?": the roles (✓ on the current one, with a short
+/// description) and, at the end, "Tirar da equipe" in red. Picker pattern,
+/// never an action sheet.
+Future<MemberChoice?> showMemberPicker(
+  BuildContext context,
+  Membership membership,
+) {
+  const remove = '__remove__';
+  final l10n = context.l10n;
+  final name = membership.user?.name ?? '';
+  final current = membership.role ?? RolesType.technician;
+  return Navigator.of(context)
+      .push<String>(
+        CupertinoPageRoute<String>(
+          builder: (context) {
+            final danger = AppColors.danger.resolveFrom(context);
+            return PickerScaffold<String>(
+              title: l10n.teamMemberRoleQuestion(name),
+              itemCount: RolePermissions.availableRoles.length + 1,
+              strongTitles: false,
+              sections: (_) => [
+                PickerSection<String>(
+                  items: [
+                    for (final role in RolePermissions.availableRoles)
+                      PickerItem<String>(
+                        key: Key('memberRole_${role.name}'),
+                        value: role.name,
+                        title: RolePermissions.getRoleLabel(role, l10n),
+                        subtitle: roleShortDescription(role, l10n),
+                        selected: role == current,
+                      ),
+                  ],
+                ),
+                PickerSection<String>(
+                  items: [
+                    PickerItem<String>(
+                      key: const Key('memberRemove'),
+                      value: remove,
+                      title: l10n.teamRemoveMember,
+                      leading: Icon(
+                        CupertinoIcons.person_badge_minus,
+                        color: danger,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      )
+      .then((value) {
+        if (value == null) return null;
+        if (value == remove) return const MemberRemoveChoice();
+        return MemberRoleChoice(RolesType.values.byName(value));
+      });
+}
 
 class CollaboratorListScreen extends StatefulWidget {
+  const CollaboratorListScreen({super.key});
+
   @override
-  _CollaboratorListScreenState createState() => _CollaboratorListScreenState();
+  State<CollaboratorListScreen> createState() => _CollaboratorListScreenState();
 }
 
 class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
@@ -31,38 +110,35 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-
-
-
-
-
-  @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      final canManage = _collaboratorStore.canManageCollaborators();
-      return TeamView(
-        members: _collaboratorStore.collaborators.toList(),
-        invites: _collaboratorStore.pendingInvites.toList(),
-        currentUserId: Global.currentUser?.uid,
-        canManage: canManage,
-        loading: _collaboratorStore.isLoading,
-        error: _collaboratorStore.errorMessage,
-        onRetry: _collaboratorStore.loadCollaborators,
-        onTapMember: _showActionSheet,
-        onTapInvite: _showInviteActionSheet,
-        onResendInvite: _showInviteActionSheet,
-        onInvite: _invite,
-      );
-    });
+    return Observer(
+      builder: (_) {
+        final canManage = _collaboratorStore.canManageCollaborators();
+        return TeamView(
+          members: _collaboratorStore.collaborators.toList(),
+          invites: _collaboratorStore.pendingInvites.toList(),
+          currentUserId: Global.currentUser?.uid,
+          canManage: canManage,
+          loading: _collaboratorStore.isLoading,
+          error: _collaboratorStore.errorMessage,
+          onRetry: _collaboratorStore.loadCollaborators,
+          onTapMember: _openMember,
+          onTapInvite: _openInvite,
+          onResendInvite: _openInvite,
+          onInvite: _invite,
+        );
+      },
+    );
   }
+
+  String _inviteName(Invite invite) =>
+      invite.name ?? invite.email ?? invite.phone ?? '';
 
   Future<void> _invite() async {
     final result = await FormSheet.show<bool>(
-        context, (_) => const CollaboratorFormScreen());
+      context,
+      (_) => const CollaboratorFormScreen(),
+    );
     if (result == true) _collaboratorStore.loadCollaborators();
   }
 
@@ -75,220 +151,153 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     }
     if (!mounted) return;
     await FormSheet.show<bool>(
-        context, (_) => CollaboratorFormScreen(prefill: invite));
+      context,
+      (_) => CollaboratorFormScreen(prefill: invite),
+    );
     // The old invite is gone either way, so refresh the list.
     if (mounted) _collaboratorStore.loadCollaborators();
   }
 
-  void _showInviteActionSheet(Invite invite) {
-    final expired = invite.expiresAt != null &&
-        invite.expiresAt!.isBefore(DateTime.now());
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text('${context.l10n.inviteTo} ${invite.name ?? invite.email}'),
-        message: Text(expired
-            ? context.l10n.inviteExpiredMessage
-            : context.l10n.invitePendingMessage),
-        actions: [
-          if (expired)
-            // Expired: the code no longer works, so cancel and invite again.
-            CupertinoActionSheetAction(
-              child: Text(context.l10n.cancelAndInviteAgain),
-              onPressed: () async {
-                Navigator.pop(context);
-                await _cancelAndInviteAgain(invite);
-              },
-            )
-          else
-            CupertinoActionSheetAction(
-              child: Text(context.l10n.shareInviteAction),
-              onPressed: () {
-                Navigator.pop(context);
-                _reshareInvite(invite);
-              },
-            ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            child: Text(context.l10n.cancelInvite),
-            onPressed: () {
-              Navigator.pop(context);
-              _showCancelInviteConfirmation(invite);
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-    );
-  }
-
-  void _reshareInvite(Invite invite) {
-    if (invite.token == null) return;
+  /// Waiting invite: the share sheet (cancel in its "…"). Expired: the code
+  /// no longer works, so the question is whether to invite again.
+  void _openInvite(Invite invite) {
+    final expired =
+        invite.expiresAt != null && invite.expiresAt!.isBefore(DateTime.now());
+    if (expired) {
+      _showExpiredInvite(invite);
+      return;
+    }
+    if (invite.token == null) {
+      _confirmCancelInvite(invite);
+      return;
+    }
     InviteShareSheet.show(
       context,
       token: invite.token!,
       whatsappPhone: invite.phone,
       expirationDays: _inviteExpirationDays,
+      onCancelInvite: () => _confirmCancelInvite(invite),
     );
   }
 
-  void _showCancelInviteConfirmation(Invite invite) {
-    showCupertinoDialog(
+  void _showExpiredInvite(Invite invite) {
+    final l10n = context.l10n;
+    showCupertinoDialog<void>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.cancelInvite),
-        content: Text(
-            '${context.l10n.confirmCancelInvite} ${invite.name ?? invite.email}?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.teamInviteExpiredQuestion(_inviteName(invite))),
+        content: Text(l10n.teamInviteExpiredMessage),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.no),
-            onPressed: () => Navigator.pop(context),
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _cancelAndInviteAgain(invite);
+            },
+            child: Text(l10n.teamInviteAgain),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await _collaboratorStore.cancelInvite(invite.id!);
-              } catch (e) {
-                _showError(e.toString());
-              }
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _cancelInvite(invite);
             },
-            child: Text(context.l10n.yesCancel),
+            child: Text(l10n.teamCancelInvite),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.close),
           ),
         ],
       ),
     );
   }
 
-
-  String _getRoleLabel(RolesType? role) {
-    if (role == null) return context.l10n.roleTechnician;
-    return RolePermissions.getRoleLabel(role, context.l10n);
-  }
-
-  String _getRoleDescription(RolesType role) {
-    return RolePermissions.getRoleDescription(role, context.l10n);
-  }
-
-  void _showActionSheet(Membership membership) {
-    showCupertinoModalPopup(
+  void _confirmCancelInvite(Invite invite) {
+    final l10n = context.l10n;
+    showCupertinoDialog<void>(
       context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text('${context.l10n.actionsFor} ${membership.user?.name}'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.teamCancelInviteQuestion(_inviteName(invite))),
+        content: Text(l10n.teamCancelInviteMessage),
         actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.editPermission),
-            onPressed: () {
-              Navigator.pop(context);
-              _showEditRoleDialog(membership);
-            },
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.teamKeepInvite),
           ),
-          CupertinoActionSheetAction(
+          CupertinoDialogAction(
             isDestructiveAction: true,
-            child: Text(context.l10n.removeFromCompany),
             onPressed: () {
-              Navigator.pop(context);
-              _showRemoveConfirmation(membership);
+              Navigator.pop(dialogContext);
+              _cancelInvite(invite);
             },
+            child: Text(l10n.teamCancelInvite),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
     );
   }
 
-  void _showEditRoleDialog(Membership membership) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text(context.l10n.selectProfile),
-        message: Text(context.l10n.chooseCollaboratorRole),
-        actions: RolePermissions.availableRoles.map((role) {
-          final isSelected = membership.role == role;
-          return CupertinoActionSheetAction(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _getRoleLabel(role),
-                      style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                    if (isSelected) ...[
-                      const SizedBox(width: 8),
-                      const Icon(CupertinoIcons.checkmark, size: 16),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _getRoleDescription(role),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-              if (role != membership.role) {
-                try {
-                  await _collaboratorStore.updateCollaboratorRole(
-                      membership.userId!, role);
-                } on CollaboratorException catch (e) {
-                  _showError(_getLocalizedErrorMessage(e.code));
-                } catch (e) {
-                  _showError(e.toString());
-                }
-              }
-            },
+  Future<void> _cancelInvite(Invite invite) async {
+    try {
+      await _collaboratorStore.cancelInvite(invite.id!);
+      if (mounted) showAppToast(context, context.l10n.teamInviteCanceled);
+    } catch (e) {
+      _showError(e.toString());
+    }
+  }
+
+  Future<void> _openMember(Membership membership) async {
+    final choice = await showMemberPicker(context, membership);
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case MemberRoleChoice(:final role):
+        if (role == membership.role) return;
+        try {
+          await _collaboratorStore.updateCollaboratorRole(
+            membership.userId!,
+            role,
           );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-    );
+          if (mounted) showAppToast(context, context.l10n.teamRoleChanged);
+        } on CollaboratorException catch (e) {
+          _showError(_getLocalizedErrorMessage(e.code));
+        } catch (e) {
+          _showError(e.toString());
+        }
+      case MemberRemoveChoice():
+        _confirmRemove(membership);
+    }
   }
 
-  void _showRemoveConfirmation(Membership membership) {
-    showCupertinoDialog(
+  void _confirmRemove(Membership membership) {
+    final l10n = context.l10n;
+    final name = membership.user?.name ?? '';
+    showCupertinoDialog<void>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.removeCollaborator),
-        content: Text(
-            context.l10n.confirmRemoveFromOrganization(membership.user?.name ?? '')),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.teamRemoveMemberQuestion(name)),
+        content: Text(l10n.teamRemoveMemberMessage),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               try {
                 await _collaboratorStore.removeCollaborator(membership.userId!);
+                if (mounted) {
+                  showAppToast(context, l10n.teamMemberRemoved(name));
+                }
               } on CollaboratorException catch (e) {
                 _showError(_getLocalizedErrorMessage(e.code));
               } catch (e) {
                 _showError(e.toString());
               }
             },
-            child: Text(context.l10n.remove),
+            child: Text(l10n.teamRemoveMember),
           ),
         ],
       ),
@@ -312,18 +321,11 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.error),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
+    if (!mounted) return;
+    showAppToast(
+      context,
+      message,
+      icon: CupertinoIcons.exclamationmark_circle_fill,
     );
   }
 }

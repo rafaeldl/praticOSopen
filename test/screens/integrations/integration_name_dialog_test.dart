@@ -15,10 +15,12 @@ void main() {
           builder: (context) => CupertinoButton(
             child: const Text('open'),
             onPressed: () async {
-              results.add(await showCupertinoDialog<String>(
-                context: context,
-                builder: (_) => const IntegrationNameDialog(),
-              ));
+              results.add(
+                await showCupertinoDialog<String>(
+                  context: context,
+                  builder: (_) => const IntegrationNameDialog(),
+                ),
+              );
             },
           ),
         ),

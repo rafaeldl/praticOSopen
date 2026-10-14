@@ -861,9 +861,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get integrations => 'Integraciones';
 
   @override
-  String get integrationsSubtitle => 'Conecta PraticOS con ChatGPT y Claude';
-
-  @override
   String get integrationsEmpty => 'Aún no hay conexiones';
 
   @override
@@ -880,7 +877,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get integrationsCopy => 'Copiar URL';
 
   @override
-  String get integrationsRevoke => 'Revocar';
+  String get integrationsRevoke => 'Desactivar conexión';
 
   @override
   String get integrationsRevokeConfirm =>
@@ -1066,48 +1063,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pending => 'Pendiente';
 
   @override
-  String get inviteTo => 'Invitación para';
-
-  @override
-  String get invitePendingMessage =>
-      'Esta invitación está pendiente. El usuario verá la invitación cuando se registre.';
-
-  @override
   String get cancelInvite => 'Cancelar Invitación';
-
-  @override
-  String get confirmCancelInvite =>
-      '¿Está seguro de que desea cancelar la invitación para';
-
-  @override
-  String get yesCancel => 'Sí, Cancelar';
 
   @override
   String get userWithoutName => 'Usuario sin nombre';
 
   @override
-  String get actionsFor => 'Acciones para';
-
-  @override
-  String get editPermission => 'Editar Permiso';
-
-  @override
-  String get removeFromCompany => 'Eliminar de la Empresa';
-
-  @override
-  String get selectProfile => 'Seleccionar Perfil';
-
-  @override
-  String get chooseCollaboratorRole =>
-      'Elija el perfil de acceso del colaborador';
-
-  @override
   String get removeCollaborator => 'Eliminar Colaborador';
-
-  @override
-  String confirmRemoveFromOrganization(String name) {
-    return '¿Está seguro de que desea eliminar $name de la organización?';
-  }
 
   @override
   String get emailNotProvided => 'Correo electrónico no proporcionado';
@@ -1379,24 +1341,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get searchAnotherCode => 'Buscar otro código';
 
   @override
-  String get shareInvite => 'Compartir Invitación';
-
-  @override
-  String get copyInviteCode => 'Copiar Código de Invitación';
-
-  @override
-  String get sendViaWhatsAppInvite => 'Enviar invitación vía WhatsApp';
-
-  @override
   String get inviteCodeCopied => '¡Código de invitación copiado!';
 
   @override
   String get emailOrPhone => 'Ingrese email o teléfono';
-
-  @override
-  String inviteExpiresIn(int days) {
-    return 'Invitación válida por $days días';
-  }
 
   @override
   String get thisWillRemoveAllPayments =>
@@ -1607,9 +1555,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get noComments => 'Sin comentarios';
-
-  @override
   String get commentPlaceholder => 'Escribe tu comentario...';
 
   @override
@@ -1617,12 +1562,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commentFromTeam => 'Equipo';
-
-  @override
-  String get internalComment => 'Comentario interno';
-
-  @override
-  String get publicComment => 'Comentario público';
 
   @override
   String get rejectionReason => 'Motivo del rechazo';
@@ -1710,9 +1649,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get invalidInviteCompanyNotFound =>
       'Invitación inválida: empresa no encontrada.';
-
-  @override
-  String get shareInviteAction => 'Compartir Invitación';
 
   @override
   String get duplicateInviteTitle => 'Invitación Existente';
@@ -2136,10 +2072,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get asaasConnectTitle => 'Conectar cuenta Asaas';
-
-  @override
-  String get asaasConnectIntro =>
-      'Cobra por Pix, boleto o tarjeta en la cuenta Asaas de tu empresa. Cuando se confirma el pago, la orden se marca como pagada automáticamente.';
 
   @override
   String get asaasConnectStep1 =>
@@ -2940,13 +2872,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get createInvite => 'Crear invitación';
-
-  @override
-  String get cancelAndInviteAgain => 'Cancelar e invitar de nuevo';
-
-  @override
-  String get inviteExpiredMessage =>
-      'Esta invitación venció. Cancélala e invita de nuevo.';
 
   @override
   String get userWillReceiveInviteByWhatsAppHint =>
@@ -4930,4 +4855,127 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get contractStopRepeatingMessage =>
       'No se crearán más OS. Las que ya existen se mantienen.';
+
+  @override
+  String get commentsEmpty => 'Nadie ha comentado todavía.';
+
+  @override
+  String get commentsTeamOnly => 'Solo el equipo lo ve';
+
+  @override
+  String get commentsCustomerSees =>
+      'El cliente también lo ve, en el enlace de la OS';
+
+  @override
+  String get commentsCustomerHidden => 'El cliente no lo ve';
+
+  @override
+  String get commentTeamOnlyTag => 'solo el equipo';
+
+  @override
+  String get commentSendError => 'No se pudo enviar. Inténtalo de nuevo.';
+
+  @override
+  String get inviteSheetTitle => 'Invitación al equipo';
+
+  @override
+  String inviteShareSentence(int days) {
+    return 'Envía este código para que la persona entre al equipo. Vale por $days días.';
+  }
+
+  @override
+  String get inviteShareButton => 'Compartir invitación';
+
+  @override
+  String get inviteSendWhatsApp => 'Enviar por WhatsApp';
+
+  @override
+  String get inviteCopyCode => 'Copiar código';
+
+  @override
+  String get inviteMenu => 'Más opciones de la invitación';
+
+  @override
+  String get teamCancelInvite => 'Cancelar invitación';
+
+  @override
+  String teamCancelInviteQuestion(String name) {
+    return '¿Cancelar la invitación de $name?';
+  }
+
+  @override
+  String get teamCancelInviteMessage => 'El código dejará de funcionar.';
+
+  @override
+  String get teamKeepInvite => 'Mantener invitación';
+
+  @override
+  String get teamInviteCanceled => 'Invitación cancelada';
+
+  @override
+  String teamInviteExpiredQuestion(String name) {
+    return 'La invitación de $name venció';
+  }
+
+  @override
+  String get teamInviteExpiredMessage =>
+      'El código ya no funciona. Invita de nuevo para enviar un código nuevo.';
+
+  @override
+  String get teamInviteAgain => 'Invitar de nuevo';
+
+  @override
+  String teamMemberRoleQuestion(String name) {
+    return '¿Qué puede hacer $name?';
+  }
+
+  @override
+  String get teamRemoveMember => 'Quitar del equipo';
+
+  @override
+  String teamRemoveMemberQuestion(String name) {
+    return '¿Quitar a $name del equipo?';
+  }
+
+  @override
+  String get teamRemoveMemberMessage =>
+      'La persona pierde el acceso a las OS de la empresa.';
+
+  @override
+  String get teamRoleChanged => 'Rol cambiado';
+
+  @override
+  String teamMemberRemoved(String name) {
+    return '$name salió del equipo';
+  }
+
+  @override
+  String get integrationsAiSection => 'ChatGPT y Claude';
+
+  @override
+  String get integrationsEmptyLine =>
+      'Ninguna conexión todavía. Toca + para conectar PraticOS a ChatGPT o Claude.';
+
+  @override
+  String get integrationsRevoked => 'Conexión revocada';
+
+  @override
+  String get asaasConnectHeadline =>
+      'Conecta la cuenta Asaas para recibir Pix, boleto y tarjeta por la OS.';
+
+  @override
+  String get asaasConnectedHeadline =>
+      'Los pagos por Asaas se registran en la OS solos.';
+
+  @override
+  String get asaasConnecting => 'Conectando…';
+
+  @override
+  String get asaasConnectedToast => 'Cuenta Asaas conectada';
+
+  @override
+  String get asaasDisconnectedToast => 'Cuenta Asaas desconectada';
+
+  @override
+  String get asaasMenu => 'Más opciones de Asaas';
 }

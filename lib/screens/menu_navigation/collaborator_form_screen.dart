@@ -15,10 +15,23 @@ import 'package:praticos/widgets/photo_limit_dialog.dart';
 /// "Convidar pessoa" as a `FormSheet` (open it with `FormSheet.show`).
 /// Optionally prefilled from an expired invite (see [prefill]) when the admin
 /// chose "Cancelar e convidar de novo".
+typedef InviteSender =
+    Future<(bool wasAdded, String? token)> Function(
+      String? name,
+      String? email,
+      String? phone,
+      RolesType role,
+    );
+
 class CollaboratorFormScreen extends StatefulWidget {
-  const CollaboratorFormScreen({super.key, this.prefill});
+  const CollaboratorFormScreen({super.key, this.prefill, this.sendInvite});
 
   final Invite? prefill;
+
+  /// Creates the invite; defaults to [CollaboratorStore.addCollaborator].
+  /// Tests pass a fake so the screen runs without Firebase.
+  @visibleForTesting
+  final InviteSender? sendInvite;
 
   @override
   State<CollaboratorFormScreen> createState() => _CollaboratorFormScreenState();
@@ -26,7 +39,7 @@ class CollaboratorFormScreen extends StatefulWidget {
 
 class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   // Usa singleton para compartilhar estado com a tela de listagem
-  final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
+  late final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   String _phone = '';
 
   // Default invite expiration days
@@ -39,10 +52,12 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     _phone = phone;
 
     // Check for existing pending invite with same email/phone
-    final existingInvite = _collaboratorStore.findExistingPendingInvite(
-      email: email.isNotEmpty ? email : null,
-      phone: phone.isNotEmpty ? phone : null,
-    );
+    final existingInvite = widget.sendInvite != null
+        ? null
+        : _collaboratorStore.findExistingPendingInvite(
+            email: email.isNotEmpty ? email : null,
+            phone: phone.isNotEmpty ? phone : null,
+          );
     final expiresAt = existingInvite?.expiresAt;
     if (existingInvite != null &&
         expiresAt != null &&
@@ -65,7 +80,8 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     }
 
     try {
-      final (wasAddedDirectly, inviteToken) = await _collaboratorStore.addCollaborator(
+      final send = widget.sendInvite ?? _collaboratorStore.addCollaborator;
+      final (wasAddedDirectly, inviteToken) = await send(
         name.isNotEmpty ? name : null,
         email.isNotEmpty ? email : null,
         phone.isNotEmpty ? phone : null,
@@ -96,10 +112,9 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
       }
     } on FeatureGateLimitException catch (e) {
       if (mounted) showFeatureLimitDialog(context, e.result);
-    } catch (e) {
-      if (mounted) {
-        _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
-      }
+    } catch (_) {
+      // Server messages are technical and in English: show a plain notice.
+      if (mounted) showAppToast(context, context.l10n.inviteGenericError);
     }
   }
 
@@ -175,22 +190,6 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
           CupertinoDialogAction(
             child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context, null),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showErrorDialog(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.error),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),

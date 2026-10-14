@@ -1,15 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
+import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Asaas dashboard page where the user creates an API key.
@@ -23,7 +35,9 @@ const asaasSandboxPanelUrl =
 Stream<PaymentSettings>? paymentSettingsStream() {
   final companyId = Global.companyAggr?.id;
   if (companyId == null ||
-      !AuthorizationService.instance.hasPermission(PermissionType.manageUsers)) {
+      !AuthorizationService.instance.hasPermission(
+        PermissionType.manageUsers,
+      )) {
     return null;
   }
   return safePaymentSettings(PaymentSettingsRepository().watch(companyId));
@@ -40,8 +54,9 @@ Stream<PaymentSettings> safePaymentSettings(Stream<PaymentSettings> source) {
   );
 }
 
-/// "Payments" section of the Integrations screen. Hidden until the company
-/// is in the Asaas pilot (`asaasEnabled`).
+/// "Pagamentos" section of the Integrations screen: the Asaas row with a
+/// one-line status (dot + "Conectado"/"Não conectado"). Hidden until the
+/// company is in the Asaas pilot (`asaasEnabled`).
 class PaymentsIntegrationSection extends StatelessWidget {
   const PaymentsIntegrationSection({super.key, required this.settingsStream});
 
@@ -57,17 +72,18 @@ class PaymentsIntegrationSection extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final l10n = context.l10n;
-        return CupertinoListSection.insetGrouped(
-          header: Text(l10n.payments.toUpperCase()),
+        final connected = settings.asaasConnected;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CupertinoListTile(
+            SectionLabel(l10n.payments),
+            AppListRow(
               key: const Key('asaasIntegrationTile'),
-              leading: const Icon(CupertinoIcons.creditcard),
-              title: const Text('Asaas'),
-              additionalInfo: Text(settings.asaasConnected
-                  ? l10n.asaasConnected
-                  : l10n.asaasDisconnected),
-              trailing: const CupertinoListTileChevron(),
+              title: 'Asaas',
+              subtitleWidget: _StatusLine(
+                color: connected ? AppColors.success : AppColors.textSecondary,
+                text: connected ? l10n.asaasConnected : l10n.asaasDisconnected,
+              ),
               onTap: () => Navigator.of(context).push(
                 CupertinoPageRoute(
                   builder: (_) => const AsaasConnectionScreen(),
@@ -77,6 +93,33 @@ class PaymentsIntegrationSection extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Status dot + `textSecondary` text, wrapping when the text is large.
+class _StatusLine extends StatelessWidget {
+  const _StatusLine({required this.color, required this.text});
+
+  final CupertinoDynamicColor color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        StatusDot(color: color.resolveFrom(context)),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            text,
+            style: AppTypography.callout.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -111,11 +154,13 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
     super.initState();
     _subscription =
         safePaymentSettings(
-                widget.settingsStream ?? paymentSettingsStream() ?? Stream.value(PaymentSettings()))
-            .listen((settings) {
-      if (!mounted) return;
-      setState(() => _settings = settings);
-    });
+          widget.settingsStream ??
+              paymentSettingsStream() ??
+              Stream.value(PaymentSettings()),
+        ).listen((settings) {
+          if (!mounted) return;
+          setState(() => _settings = settings);
+        });
   }
 
   @override
@@ -135,6 +180,7 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
       _apiKeyController.clear();
       if (!mounted) return;
       setState(() => _settings = settings);
+      showAppToast(context, context.l10n.asaasConnectedToast);
     } on AsaasApiException catch (e) {
       if (!mounted) return;
       _showMessage(asaasErrorText(context.l10n, e));
@@ -176,10 +222,13 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
     try {
       await _service.disconnect();
       if (!mounted) return;
-      setState(() => _settings = PaymentSettings(
-            asaasEnabled: _settings?.asaasEnabled ?? true,
-            asaasConnected: false,
-          ));
+      setState(
+        () => _settings = PaymentSettings(
+          asaasEnabled: _settings?.asaasEnabled ?? true,
+          asaasConnected: false,
+        ),
+      );
+      showAppToast(context, context.l10n.asaasDisconnectedToast);
     } on AsaasApiException catch (e) {
       if (!mounted) return;
       _showMessage(asaasErrorText(context.l10n, e));
@@ -197,128 +246,132 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
   }
 
   void _showMessage(String message) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.ok),
-          ),
-        ],
-      ),
+    showAppToast(
+      context,
+      message,
+      icon: CupertinoIcons.exclamationmark_circle_fill,
     );
+  }
+
+  Future<void> _openMenu() async {
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'disconnect',
+            label: context.l10n.asaasDisconnect,
+            icon: CupertinoIcons.power,
+            destructive: true,
+          ),
+        ]),
+      ],
+    );
+    if (picked == 'disconnect' && mounted) await _disconnect();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final settings = _settings;
-    return CupertinoPageScaffold(
-      backgroundColor:
-          CupertinoColors.systemGroupedBackground.resolveFrom(context),
-      child: CustomScrollView(
-        slivers: [
-          const AppNavBar(largeTitle: Text('Asaas')),
-          if (settings == null)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: CupertinoActivityIndicator()),
-            )
-          else
-            SliverSafeArea(
-              top: false,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  settings.asaasConnected
-                      ? _buildConnected(context, settings)
-                      : _buildDisconnected(context),
-                ),
+    if (settings == null) {
+      return MorePage(
+        title: 'Asaas',
+        previousPageTitle: l10n.integrations,
+        children: const [LoadingState()],
+      );
+    }
+    if (settings.asaasConnected) {
+      return MorePage(
+        title: 'Asaas',
+        previousPageTitle: l10n.integrations,
+        subtitle: l10n.asaasConnectedHeadline,
+        trailing: _busy
+            ? const CupertinoActivityIndicator()
+            : GlassBarButton(
+                key: const Key('asaasMenuButton'),
+                label: l10n.asaasMenu,
+                icon: CupertinoIcons.ellipsis,
+                onPressed: _openMenu,
               ),
-            ),
-        ],
+        children: _buildConnected(context, settings),
+      );
+    }
+    return MorePage(
+      title: 'Asaas',
+      previousPageTitle: l10n.integrations,
+      subtitle: l10n.asaasConnectHeadline,
+      floatingButton: PrimaryButton(
+        key: const Key('asaasConnectButton'),
+        label: _busy ? l10n.asaasConnecting : l10n.asaasConnect,
+        onPressed: _busy ? null : _connect,
       ),
+      children: _buildDisconnected(context),
     );
   }
 
   List<Widget> _buildDisconnected(BuildContext context) {
     final l10n = context.l10n;
-    final stepStyle = TextStyle(
-      fontSize: 15,
-      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-    );
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final stepStyle = AppTypography.body.copyWith(color: text);
 
     return [
-      CupertinoListSection.insetGrouped(
-        header: Text(l10n.asaasConnectTitle.toUpperCase()),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.asaasConnectIntro,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(l10n.asaasConnectStep1, style: stepStyle),
-                const SizedBox(height: 4),
-                Text(l10n.asaasConnectStep2, style: stepStyle),
-                const SizedBox(height: 4),
-                Text(l10n.asaasConnectStep3, style: stepStyle),
-              ],
+      SectionLabel(l10n.asaasConnectTitle),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.asaasConnectStep1, style: stepStyle),
+            const SizedBox(height: AppSpacing.xs),
+            Text(l10n.asaasConnectStep2, style: stepStyle),
+            const SizedBox(height: AppSpacing.xs),
+            Text(l10n.asaasConnectStep3, style: stepStyle),
+            const SizedBox(height: AppSpacing.sm),
+            TextLink(
+              key: const Key('asaasOpenPanel'),
+              label: l10n.asaasOpenPanel,
+              onPressed: () => _openPanel(asaasPanelUrl),
             ),
-          ),
-          CupertinoListTile(
-            title: Text(l10n.asaasOpenPanel),
-            trailing: const Icon(CupertinoIcons.arrow_up_right_square),
-            onTap: () => _openPanel(asaasPanelUrl),
-          ),
-          CupertinoListTile(
-            title: Text(l10n.asaasOpenSandboxPanel),
-            trailing: const Icon(CupertinoIcons.arrow_up_right_square),
-            onTap: () => _openPanel(asaasSandboxPanelUrl),
-          ),
-        ],
+            TextLink(
+              key: const Key('asaasOpenSandboxPanel'),
+              label: l10n.asaasOpenSandboxPanel,
+              onPressed: () => _openPanel(asaasSandboxPanelUrl),
+            ),
+          ],
+        ),
       ),
-      CupertinoListSection.insetGrouped(
-        header: Text(l10n.asaasApiKey.toUpperCase()),
-        footer: Text(l10n.asaasApiKeyHint),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: CupertinoTextField(
+      SectionLabel(l10n.asaasApiKey),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CupertinoTextField(
               key: const Key('asaasApiKeyField'),
               controller: _apiKeyController,
               obscureText: true,
               autocorrect: false,
               enableSuggestions: false,
               placeholder: l10n.asaasApiKeyPlaceholder,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              style: AppTypography.body.copyWith(color: text),
+              placeholderStyle: AppTypography.body.copyWith(color: secondary),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
+              ),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6.resolveFrom(context),
-                borderRadius: BorderRadius.circular(8),
+                color: AppColors.surface.resolveFrom(context),
+                borderRadius: BorderRadius.circular(AppRadii.field),
               ),
             ),
-          ),
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        child: SizedBox(
-          width: double.infinity,
-          child: CupertinoButton.filled(
-            key: const Key('asaasConnectButton'),
-            onPressed: _busy ? null : _connect,
-            child: _busy
-                ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                : Text(l10n.asaasConnect),
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.asaasApiKeyHint,
+              style: AppTypography.label.copyWith(color: secondary),
+            ),
+          ],
         ),
       ),
     ];
@@ -327,50 +380,23 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
   List<Widget> _buildConnected(BuildContext context, PaymentSettings settings) {
     final l10n = context.l10n;
     final isSandbox = settings.isSandbox;
-    final badgeColor = isSandbox
-        ? CupertinoColors.systemOrange.resolveFrom(context)
-        : CupertinoColors.systemGreen.resolveFrom(context);
 
     return [
-      CupertinoListSection.insetGrouped(
-        children: [
-          CupertinoListTile(
-            title: Text(l10n.asaasAccount),
-            additionalInfo: Text(settings.asaasAccountName ?? ''),
+      MoreRows(
+        rows: [
+          AppListRow(
+            title: l10n.asaasAccount,
+            trailing: settings.asaasAccountName ?? '',
           ),
-          CupertinoListTile(
-            title: Text(l10n.asaasEnvironment),
-            additionalInfo: Container(
-              key: const Key('asaasEnvironmentBadge'),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: badgeColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                isSandbox
-                    ? l10n.asaasEnvironmentSandbox
-                    : l10n.asaasEnvironmentProduction,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: badgeColor,
-                ),
-              ),
+          AppListRow(
+            key: const Key('asaasEnvironmentRow'),
+            title: l10n.asaasEnvironment,
+            subtitleWidget: _StatusLine(
+              color: isSandbox ? AppColors.warning : AppColors.success,
+              text: isSandbox
+                  ? l10n.asaasEnvironmentSandbox
+                  : l10n.asaasEnvironmentProduction,
             ),
-          ),
-        ],
-      ),
-      CupertinoListSection.insetGrouped(
-        children: [
-          CupertinoListTile(
-            key: const Key('asaasDisconnectTile'),
-            title: Text(
-              l10n.asaasDisconnect,
-              style: const TextStyle(color: CupertinoColors.systemRed),
-            ),
-            trailing: _busy ? const CupertinoActivityIndicator() : null,
-            onTap: _busy ? null : _disconnect,
           ),
         ],
       ),

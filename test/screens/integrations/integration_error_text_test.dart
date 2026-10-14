@@ -32,8 +32,10 @@ void main() {
     });
 
     test('an unmapped code (INTERNAL_ERROR) maps to the generic message', () {
-      final e =
-          IntegrationApiException('raw backend text', code: 'INTERNAL_ERROR');
+      final e = IntegrationApiException(
+        'raw backend text',
+        code: 'INTERNAL_ERROR',
+      );
 
       final text = integrationErrorText(l10n, e);
 
