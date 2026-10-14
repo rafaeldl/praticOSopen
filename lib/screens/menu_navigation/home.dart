@@ -131,7 +131,7 @@ class _HomeState extends State<Home> {
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        title: Global.companyAggr?.name ?? context.l10n.more,
+        title: context.l10n.myCompany,
         builder: (_) => const Settings(),
       ),
     );

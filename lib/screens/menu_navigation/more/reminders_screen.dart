@@ -8,6 +8,7 @@ import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/notification_service.dart';
 
 /// "Lembretes" (replaces "Preferências"): reminder before the scheduled
@@ -23,59 +24,37 @@ class RemindersScreen extends StatelessWidget {
     return l10n.reminderMinutesValue(minutes);
   }
 
-  void _pickBefore(BuildContext context, ReminderStore store) {
+  Future<void> _pickBefore(BuildContext context, ReminderStore store) async {
     final l10n = context.l10n;
-    final options = <(int, String)>[
-      (0, l10n.reminderDisabled),
-      (15, l10n.reminderMinutesBefore(15)),
-      (30, l10n.reminderMinutesBefore(30)),
-      (60, l10n.reminderHourBefore),
-      (120, l10n.reminderHoursBefore(2)),
-    ];
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(l10n.scheduleReminder),
-        actions: [
-          for (final (minutes, label) in options)
-            CupertinoActionSheetAction(
-              isDefaultAction: store.reminderMinutes == minutes,
-              onPressed: () {
-                store.setReminderMinutes(minutes);
-                Navigator.pop(sheetContext);
-              },
-              child: Text(label),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(l10n.cancel),
-        ),
-      ),
+    final minutes = await pickOne<int>(
+      context,
+      title: l10n.scheduleReminder,
+      selected: store.reminderMinutes,
+      options: [
+        PickerItem(value: 0, title: l10n.reminderDisabled),
+        PickerItem(value: 15, title: l10n.reminderMinutesBefore(15)),
+        PickerItem(value: 30, title: l10n.reminderMinutesBefore(30)),
+        PickerItem(value: 60, title: l10n.reminderHourBefore),
+        PickerItem(value: 120, title: l10n.reminderHoursBefore(2)),
+      ],
     );
+    if (minutes != null) store.setReminderMinutes(minutes);
   }
 
-  void _pickLanguage(BuildContext context, LocaleStore store) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(sheetContext.l10n.selectLanguage),
-        actions: [
-          for (final locale in store.availableLocales)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                store.setLocale(locale['code']!);
-                Navigator.pop(sheetContext);
-              },
-              child: Text('${locale['flag']} ${locale['name']}'),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(sheetContext.l10n.cancel),
-        ),
-      ),
+  Future<void> _pickLanguage(BuildContext context, LocaleStore store) async {
+    final code = await pickOne<String>(
+      context,
+      title: context.l10n.selectLanguage,
+      selected: store.currentLocaleCode,
+      options: [
+        for (final locale in store.availableLocales)
+          PickerItem(
+            value: locale['code']!,
+            title: '${locale['flag']} ${locale['name']}',
+          ),
+      ],
     );
+    if (code != null) store.setLocale(code);
   }
 
   @override

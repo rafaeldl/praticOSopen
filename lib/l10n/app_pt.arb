@@ -642,7 +642,7 @@
   "noSegmentsAvailable": "Nenhum segmento disponível",
   "errorLoadingSegments": "Erro ao carregar segmentos",
   "specialties": "Especialidades",
-  "myCompany": "Minha Empresa",
+  "myCompany": "Minha empresa",
   "retryAgain": "Tentar novamente",
   "noResultsFound": "Nenhum resultado encontrado",
   "unitValue": "Valor unitário",
@@ -2773,6 +2773,14 @@
   "customerTermsHint": "Garantia e condições",
   "segmentRow": "Ramo",
   "segmentRowHint": "Muda serviços e checklists prontos",
+  "moreCompanyData": "Mais dados (e-mail, site, país)",
+  "addLogo": "Pôr logo",
+  "changeLogoLink": "Trocar logo",
+  "pickSegmentTitle": "Qual é o seu ramo?",
+  "pickSpecialtiesTitle": "O que você atende?",
+  "specialtiesNone": "Nenhuma marcada",
+  "pickCountryTitle": "Qual é o país?",
+  "companyNameRequired": "Escreva o nome da empresa",
   "schedulingRow": "Agenda",
   "schedulingRowHint": "Marcar dia e hora das OS",
   "fieldServiceRow": "Atendimento no local do cliente",
@@ -3132,5 +3140,15 @@
   "chargeLinkIntroNoName": "O cliente recebe o link e paga por Pix, boleto ou cartão.",
   "chargeSplitQuestion": "Parcelar no cartão?",
   "chargeSplitOnCard": "Parcelar no cartão",
-  "chargeSplitNo": "Não"
+  "chargeSplitNo": "Não",
+  "profileEditTitle": "Seu perfil",
+  "profileChangePhoto": "Trocar foto",
+  "profileSignedInAs": "Você entra com {email}",
+  "@profileSignedInAs": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "profileNameRequired": "Digite seu nome",
+  "profileNamePlaceholder": "Ex.: João da Silva"
 }

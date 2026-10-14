@@ -5,6 +5,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/screens/menu_navigation/more/reminders_screen.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -63,6 +64,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1 hora'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('"before" opens the choose screen with ✓ on the current value',
+      (tester) async {
+    await pump(tester);
+
+    await tester.tap(find.byKey(const ValueKey('reminder_before')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PickerScaffold<int>), findsOneWidget);
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+    expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
     debugDefaultTargetPlatformOverride = null;
   });
 }

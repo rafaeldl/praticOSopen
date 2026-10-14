@@ -54,20 +54,16 @@ class AdvancedScreen extends StatelessWidget {
         // "Nova tela da OS": on by default; off goes back to the legacy screen
         ValueListenableBuilder<bool>(
           valueListenable: OrderScreenPreference.useNewScreen,
-          builder: (context, useNew, _) => CupertinoListSection.insetGrouped(
-            footer: Text(context.l10n.newOrderScreenSettingHint),
-            children: [
-              CupertinoListTile(
-                key: const ValueKey('advanced_new_order_screen'),
-                title: Text(context.l10n.newOrderScreenSetting),
-                trailing: CupertinoSwitch(
-                  value: useNew,
-                  onChanged: OrderScreenPreference.set,
-                ),
-              ),
-            ],
-          ),
+          builder: (context, useNew, _) => MoreRows(rows: [
+            MoreSwitchRow(
+              key: const ValueKey('advanced_new_order_screen'),
+              title: context.l10n.newOrderScreenSetting,
+              value: useNew,
+              onChanged: OrderScreenPreference.set,
+            ),
+          ]),
         ),
+        MoreFootnote(context.l10n.newOrderScreenSettingHint),
       ],
     );
   }

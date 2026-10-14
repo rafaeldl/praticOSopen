@@ -9,6 +9,7 @@ import 'package:praticos/screens/menu_navigation/more/account_deletion.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -35,6 +36,7 @@ class AccountView extends StatelessWidget {
     this.email,
     this.photoUrl,
     this.companyName,
+    this.currentCompanyId,
     this.roleLabel,
     this.companies = const [],
     this.onEditProfile,
@@ -46,6 +48,9 @@ class AccountView extends StatelessWidget {
   final String? email;
   final String? photoUrl;
   final String? companyName;
+
+  /// Marked with ✓ in the company switcher.
+  final String? currentCompanyId;
   final String? roleLabel;
   final List<AccountCompany> companies;
   final AccountDeletionFlow deletion;
@@ -78,27 +83,17 @@ class AccountView extends StatelessWidget {
     );
   }
 
-  void _pickCompany(BuildContext context) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(sheetContext.l10n.selectCompany),
-        actions: [
-          for (final company in companies)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(sheetContext);
-                onSwitchCompany?.call(company.id);
-              },
-              child: Text(company.name),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(sheetContext.l10n.cancel),
-        ),
-      ),
+  Future<void> _pickCompany(BuildContext context) async {
+    final id = await pickOne<String>(
+      context,
+      title: context.l10n.selectCompany,
+      selected: currentCompanyId,
+      options: [
+        for (final company in companies)
+          PickerItem(value: company.id, title: company.name),
+      ],
     );
+    if (id != null && id != currentCompanyId) onSwitchCompany?.call(id);
   }
 
   Widget _avatar(BuildContext context) {
@@ -252,6 +247,7 @@ class _AccountScreenState extends State<AccountScreen> {
           email: user?.email ?? Global.currentUser?.email,
           photoUrl: user?.photo ?? Global.currentUser?.photoURL,
           companyName: authStore.companyAggr?.name,
+          currentCompanyId: authStore.companyAggr?.id,
           roleLabel:
               AuthorizationService.instance.getRoleLabelLocalized(context.l10n),
           companies: companies,
