@@ -73,7 +73,7 @@ A funcionalidade de Agenda permite que técnicos e gestores visualizem as OS age
 | **Repository** | `lib/repositories/tenant/tenant_order_repository.dart` | Queries por range de `scheduledDate` |
 | **Screen** | `lib/screens/agenda/agenda_screen.dart` | Tela do calendário com lista de OS |
 | **Navigation** | `lib/screens/menu_navigation/navigation_controller.dart` | Aba 2 (Agenda) |
-| **Form** | `lib/screens/order_form.dart` | Picker de data+hora para `scheduledDate` |
+| **Form** | `lib/screens/order/order_extras.dart` | Sheet de data+hora para `scheduledDate` (aberta pela tela da OS, `order_screen_v2.dart`) |
 | **Provider** | `lib/main.dart` | Registro do `AgendaStore` |
 
 ### Dependências Externas

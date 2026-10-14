@@ -59,12 +59,10 @@
   "statusCompleted": "Completado",
   "statusCancelled": "Cancelado",
   "statusQuote": "Presupuesto",
-  "statusDelivery": "Entrega",
   "payments": "Pagos",
   "payment": "Pago",
   "paid": "Pagado",
   "unpaid": "No Pagado",
-  "partiallyPaid": "Parcialmente Pagado",
   "toReceive": "Por recibir",
   "received": "Recibido",
   "pix": "PIX",
@@ -108,7 +106,6 @@
   "changePhoto": "Cambiar Foto",
   "removePhoto": "Eliminar Foto",
   "addPhoto": "Agregar Foto",
-  "addPhotoOrAttachment": "Foto / Anexo",
   "photos": "fotos",
   "photo": "Foto",
   "camera": "Cámara",
@@ -117,7 +114,6 @@
   "yesterday": "Ayer",
   "tomorrow": "Mañana",
   "scheduledDate": "Programado",
-  "createdAt": "Creado en",
   "updatedAt": "Actualizado en",
   "date": "Fecha",
   "time": "Hora",
@@ -161,8 +157,6 @@
   "orderList": "Lista de Órdenes",
   "addOrder": "Agregar Orden",
   "createOrder": "Crear Orden",
-  "orderStatus": "Estado de la Orden",
-  "changeStatus": "Cambiar Estado",
   "technician": "Técnico",
   "technicians": "Técnicos",
   "problem": "Problema Reportado",
@@ -235,7 +229,6 @@
   "version": "Versión",
   "support": "Soporte",
   "dashboard": "Panel",
-  "overview": "Visión General",
   "analytics": "Análisis",
   "revenue": "Ingresos",
   "recentOrders": "Órdenes recientes",
@@ -251,15 +244,12 @@
   "canEdit": "Puede Editar",
   "canDelete": "Puede Eliminar",
   "canView": "Puede Ver",
-  "form": "Formulario",
-  "forms": "Formularios",
   "checklist": "Checklist",
   "checklists": "Checklists",
   "customerSignature": "Firma del Cliente",
   "required": "Requerido",
   "optional": "Opcional",
   "complete": "Completar",
-  "incomplete": "Incompleto",
   "answered": "Respondido",
   "notAnswered": "No Respondido",
   "quote": "Presupuesto",
@@ -407,7 +397,6 @@
   "type": "Escribir",
   "errorLoadingPhoto": "Error al cargar foto",
   "reopen": "Reabrir",
-  "addItems": "Añadir elementos",
   "typeOneOptionPerLine": "Escriba una opción por línea",
   "searchProcedure": "Buscar procedimiento",
   "noProceduresAvailable": "No hay procedimientos disponibles",
@@ -611,9 +600,7 @@
   },
   "openWhatsApp": "Abrir WhatsApp",
   "errorGeneratingToken": "Error al generar código de vinculación",
-  "shareWithCustomer": "Compartir con Cliente",
   "copyLink": "Copiar Enlace",
-  "sendViaWhatsApp": "Enviar vía WhatsApp",
   "shareLink": "Compartir Enlace",
   "linkCopied": "¡Enlace copiado!",
   "viewCount": "{count} {count, plural, =1{visualización} other{visualizaciones}}",
@@ -632,19 +619,7 @@
   "rating": "Calificación",
   "ratings": "Calificaciones",
   "noRatingsYet": "Sin calificaciones aún",
-  "notifyCustomerQuestion": "¿Notificar al cliente?",
-  "notifyCustomerDescription": "¿Desea enviar la actualización a {customerName} vía WhatsApp?",
-  "@notifyCustomerDescription": {
-    "placeholders": {
-      "customerName": {
-        "type": "String"
-      }
-    }
-  },
   "notNow": "Ahora no",
-  "statusUpdateApproved": "¡Presupuesto aprobado!",
-  "statusUpdateProgress": "¡Servicio en progreso!",
-  "statusUpdateDone": "¡Servicio completado!",
   "connectWhatsApp": "Conecta tu WhatsApp",
   "connectWhatsAppBannerDescription": "Recibe notificaciones, gestiona órdenes de servicio y envía actualizaciones a clientes por WhatsApp.",
   "whatsappOnboardingTitle": "Conecta tu WhatsApp",
@@ -725,35 +700,10 @@
       }
     }
   },
-  "confirmRemoveDevice": "¿Eliminar \"{name}\" de esta OS?",
-  "@confirmRemoveDevice": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "removeDeviceKeepItems": "Mantener elementos",
-  "removeDeviceAndItems": "Eliminar todo",
-  "removeDeviceHasItems": "\"{name}\" tiene {count} elementos asociados. ¿Qué desea hacer?",
-  "@removeDeviceHasItems": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "features": "Funcionalidades",
   "contracts": "Contratos",
   "noContracts": "Ningún contrato",
-  "activateContract": "Activar contrato recurrente",
-  "deactivateContract": "Desactivar contrato recurrente",
-  "deactivateContractConfirm": "La generación automática de OS será detenida.",
   "recurringContract": "Contrato recurrente",
-  "automaticGeneration": "Generación automática",
   "contractNextDue": "Próxima generación",
   "generatedOrdersCount": "OS generadas ({count})",
   "@generatedOrdersCount": {
@@ -770,7 +720,6 @@
   "deviceStatusDecommissioned": "Desactivado",
   "noOrderHistory": "Ninguna orden de servicio registrada",
   "configure": "Configurar",
-  "frequency": "Frecuencia",
   "interval": "Intervalo",
   "indefinite": "Indefinido",
   "noOrdersDueOnDate": "Ninguna OS con vencimiento en este día",
@@ -781,9 +730,7 @@
   "contract": "Contrato",
   "deleteDocument": "Eliminar Documento",
   "confirmDeleteDocument": "¿Está seguro que desea eliminar este documento?",
-  "uploadingDocument": "Enviando documento...",
   "documentAdded": "Documento agregado",
-  "documentDeleted": "Documento eliminado",
   "openDocument": "Abrir",
   "fromFiles": "Archivos",
   "errorUploadingDocument": "Error al enviar documento",
@@ -1131,8 +1078,6 @@
   },
   "deleteDeviceKeepsOrders": "Las OS siguen guardadas.",
   "deviceDetailsLabel": "Datos",
-  "newOrderScreenSetting": "Nueva pantalla de la OS",
-  "newOrderScreenSettingHint": "Desactive para volver a la pantalla anterior de la OS.",
   "orderNewTitle": "Nueva {order}",
   "@orderNewTitle": {
     "placeholders": {
@@ -1692,7 +1637,6 @@
   "reportPreviousPeriod": "Período anterior",
   "reportNextPeriod": "Período siguiente",
   "orderAddChecklist": "Checklist",
-  "orderAddMedia": "Fotos o documento",
   "orderAddComment": "Comentario",
   "orderAddAddress": "Dirección del servicio",
   "orderAddSchedule": "Agendar día y hora",
@@ -2210,7 +2154,6 @@
   "orderPhotoDeleted": "Foto borrada",
   "orderPhotoDeleteError": "No se pudo borrar la foto. Inténtalo de nuevo.",
   "orderPhotoCoverSet": "Foto definida como portada",
-  "orderPhotoUploading": "Subiendo foto...",
   "orderDocumentTypeTitle": "¿Qué documento es este?",
   "shareWhatCanDo": "Qué puede hacer el cliente",
   "orderPhotoDelete": "Borrar foto",

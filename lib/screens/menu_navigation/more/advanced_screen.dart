@@ -2,11 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/services/order_screen_preference.dart';
 
 /// "Avançado": what is left after the daily items. Each entry keeps the
 /// permission rule it had in the old settings screen; the "Avançado" row
-/// itself shows when at least one entry is allowed.
+/// itself shows only when at least one entry is allowed ([hasEntries]).
 class AdvancedScreen extends StatelessWidget {
   const AdvancedScreen({
     super.key,
@@ -24,46 +23,33 @@ class AdvancedScreen extends StatelessWidget {
   final VoidCallback onOpenIntegrations;
   final VoidCallback onOpenDevices;
 
-  /// Whether the "Avançado" row has anything to show. The "Nova tela da OS"
-  /// pilot switch is always there, so the row always shows.
+  /// Whether the "Avançado" row has anything to show.
   static bool hasEntries({
     required bool showIntegrations,
     required bool showDevices,
-  }) =>
-      true;
+  }) => showIntegrations || showDevices;
 
   @override
   Widget build(BuildContext context) {
     return MorePage(
       title: context.l10n.advancedTitle,
       children: [
-        MoreRows(rows: [
-          if (showIntegrations)
-            AppListRow(
-              key: const ValueKey('advanced_integrations'),
-              title: context.l10n.integrations,
-              onTap: onOpenIntegrations,
-            ),
-          if (showDevices)
-            AppListRow(
-              key: const ValueKey('advanced_devices'),
-              title: devicesLabel,
-              onTap: onOpenDevices,
-            ),
-        ]),
-        // "Nova tela da OS": on by default; off goes back to the legacy screen
-        ValueListenableBuilder<bool>(
-          valueListenable: OrderScreenPreference.useNewScreen,
-          builder: (context, useNew, _) => MoreRows(rows: [
-            MoreSwitchRow(
-              key: const ValueKey('advanced_new_order_screen'),
-              title: context.l10n.newOrderScreenSetting,
-              value: useNew,
-              onChanged: OrderScreenPreference.set,
-            ),
-          ]),
+        MoreRows(
+          rows: [
+            if (showIntegrations)
+              AppListRow(
+                key: const ValueKey('advanced_integrations'),
+                title: context.l10n.integrations,
+                onTap: onOpenIntegrations,
+              ),
+            if (showDevices)
+              AppListRow(
+                key: const ValueKey('advanced_devices'),
+                title: devicesLabel,
+                onTap: onOpenDevices,
+              ),
+          ],
         ),
-        MoreFootnote(context.l10n.newOrderScreenSettingHint),
       ],
     );
   }

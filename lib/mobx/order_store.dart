@@ -486,28 +486,6 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
-  @action
-  void removeDeviceAndItems(String deviceId) {
-    order!.devices?.removeWhere((d) => d.id == deviceId);
-    devices.removeWhere((d) => d.id == deviceId);
-
-    // Sync backward compat
-    order!.device = order!.devices?.isNotEmpty == true
-        ? order!.devices!.first
-        : null;
-    device = order!.device;
-    order!.syncDeviceIds();
-
-    // Remove items linked to this device
-    order!.services?.removeWhere((s) => s.deviceId == deviceId);
-    order!.products?.removeWhere((p) => p.deviceId == deviceId);
-    services = order!.services?.asObservable() ?? ObservableList();
-    products = order!.products?.asObservable() ?? ObservableList();
-
-    updateTotal();
-    createItem();
-  }
-
   /// "Responsável" of the order; null removes it.
   setAssignedTo(UserAggr? user) {
     order!.assignedTo = user;
@@ -791,13 +769,6 @@ abstract class _OrderStore with Store {
   String dateToString(DateTime? date) {
     if (date == null) return 'Não definida';
     return FormatService().formatDate(date);
-  }
-
-  @computed
-  String get formattedCreatedDate {
-    if (createdAt == null && order?.createdAt == null) return 'Data criação';
-    DateTime date = createdAt ?? order!.createdAt!;
-    return dateToString(date);
   }
 
   @action

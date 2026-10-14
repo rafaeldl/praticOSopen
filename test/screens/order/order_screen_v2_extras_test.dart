@@ -302,7 +302,7 @@ void main() {
         'Apagar OS',
       ]);
       expect(find.text('Adicionar à OS'), findsOneWidget); // group title
-      // Discount only after approval; no escape to the legacy screen.
+      // Discount only after approval.
       expect(find.text('Desconto'), findsNothing);
       expect(find.text('Outros campos'), findsNothing);
     });

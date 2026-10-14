@@ -24,7 +24,7 @@ import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/screens/widgets/order_media_actions.dart';
-import 'package:praticos/screens/widgets/order_media_widget.dart'
+import 'package:praticos/screens/widgets/photo_viewer_screen.dart'
     show PhotoViewerScreen;
 import 'package:praticos/screens/widgets/order_status_share.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
@@ -109,8 +109,7 @@ class OrderScreenActions {
     return ShareLinkSheet.show(context, order);
   }
 
-  /// Generates the order PDF and opens the share sheet (same as the legacy
-  /// screen).
+  /// Generates the order PDF and opens the share sheet.
   Future<void> sharePdf(
     BuildContext context,
     Order order,

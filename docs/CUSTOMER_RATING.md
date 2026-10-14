@@ -131,7 +131,7 @@ Displays the rating (if exists) in the order detail page:
 - Comment in italic
 - Customer name and date
 
-Location: `lib/screens/order_form.dart` - `_buildRatingSection()`
+Location: `lib/screens/order/order_screen_v2.dart` - `_buildRating()`. A rated order shows an "Avaliação" section (stars, "4 de 5" and the comment) before the comments; nothing shows when there is no rating.
 
 #### Ratings Screen
 

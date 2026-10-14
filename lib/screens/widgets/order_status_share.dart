@@ -5,8 +5,8 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/services/share_link_service.dart';
 
-// "Avisar o cliente?" after a status change, shared by the legacy order
-// screen (OrderForm) and the new one (OrderScreenV2).
+// "Avisar o cliente?" after a status change on the order screen
+// (OrderScreenV2), and the customer link it shares.
 
 /// Statuses that offer to tell the customer.
 const statusesThatNotifyCustomer = {'approved', 'progress', 'done'};
@@ -27,51 +27,6 @@ bool shouldOfferStatusShare(
   if (dismissedOrderIds.contains(order.id)) return false;
   final phone = order.customer?.phone;
   return phone != null && phone.isNotEmpty;
-}
-
-/// Asks "Avisar o cliente?" for [status]. Resolves true for "Enviar via
-/// WhatsApp", false for "Agora não" (or dismissed).
-Future<bool> askNotifyCustomer(
-  BuildContext context, {
-  required Order order,
-  required String status,
-}) async {
-  String title(BuildContext ctx) {
-    switch (status) {
-      case 'approved':
-        return ctx.l10n.statusUpdateApproved;
-      case 'progress':
-        return ctx.l10n.statusUpdateProgress;
-      case 'done':
-        return ctx.l10n.statusUpdateDone;
-      default:
-        return ctx.l10n.notifyCustomerQuestion;
-    }
-  }
-
-  final send = await showCupertinoDialog<bool>(
-    context: context,
-    builder: (ctx) => CupertinoAlertDialog(
-      title: Text(title(ctx)),
-      content: Text(
-        ctx.l10n.notifyCustomerDescription(
-          order.customer?.name ?? ctx.l10n.customer,
-        ),
-      ),
-      actions: [
-        CupertinoDialogAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx, false),
-          child: Text(ctx.l10n.notNow),
-        ),
-        CupertinoDialogAction(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(ctx.l10n.sendViaWhatsApp),
-        ),
-      ],
-    ),
-  );
-  return send ?? false;
 }
 
 /// The order's customer link: the cached one, an active token from the API,

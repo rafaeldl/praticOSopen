@@ -66,8 +66,7 @@ dynamic customFieldValue(Map<String, dynamic>? data, CustomField field) =>
     data?[field.fieldName] ?? data?[field.key];
 
 /// The segment's custom fields of the order, one section per group. How a
-/// section looks (header, container) is up to [sectionBuilder], so the legacy
-/// and the new order screen share the fields and the save logic.
+/// section looks (header, container) is up to [sectionBuilder].
 class OrderCustomFieldSections extends StatelessWidget {
   const OrderCustomFieldSections({
     super.key,

@@ -186,9 +186,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get statusQuote => 'Presupuesto';
 
   @override
-  String get statusDelivery => 'Entrega';
-
-  @override
   String get payments => 'Pagos';
 
   @override
@@ -199,9 +196,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get unpaid => 'No Pagado';
-
-  @override
-  String get partiallyPaid => 'Parcialmente Pagado';
 
   @override
   String get toReceive => 'Por recibir';
@@ -304,9 +298,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addPhoto => 'Agregar Foto';
 
   @override
-  String get addPhotoOrAttachment => 'Foto / Anexo';
-
-  @override
   String get photos => 'fotos';
 
   @override
@@ -329,9 +320,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get scheduledDate => 'Programado';
-
-  @override
-  String get createdAt => 'Creado en';
 
   @override
   String get updatedAt => 'Actualizado en';
@@ -463,12 +451,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get createOrder => 'Crear Orden';
-
-  @override
-  String get orderStatus => 'Estado de la Orden';
-
-  @override
-  String get changeStatus => 'Cambiar Estado';
 
   @override
   String get technician => 'Técnico';
@@ -687,9 +669,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard => 'Panel';
 
   @override
-  String get overview => 'Visión General';
-
-  @override
   String get analytics => 'Análisis';
 
   @override
@@ -735,12 +714,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get canView => 'Puede Ver';
 
   @override
-  String get form => 'Formulario';
-
-  @override
-  String get forms => 'Formularios';
-
-  @override
   String get checklist => 'Checklist';
 
   @override
@@ -757,9 +730,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get complete => 'Completar';
-
-  @override
-  String get incomplete => 'Incompleto';
 
   @override
   String get answered => 'Respondido';
@@ -1218,9 +1188,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reopen => 'Reabrir';
 
   @override
-  String get addItems => 'Añadir elementos';
-
-  @override
   String get typeOneOptionPerLine => 'Escriba una opción por línea';
 
   @override
@@ -1529,13 +1496,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorGeneratingToken => 'Error al generar código de vinculación';
 
   @override
-  String get shareWithCustomer => 'Compartir con Cliente';
-
-  @override
   String get copyLink => 'Copiar Enlace';
-
-  @override
-  String get sendViaWhatsApp => 'Enviar vía WhatsApp';
 
   @override
   String get shareLink => 'Compartir Enlace';
@@ -1579,24 +1540,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noRatingsYet => 'Sin calificaciones aún';
 
   @override
-  String get notifyCustomerQuestion => '¿Notificar al cliente?';
-
-  @override
-  String notifyCustomerDescription(String customerName) {
-    return '¿Desea enviar la actualización a $customerName vía WhatsApp?';
-  }
-
-  @override
   String get notNow => 'Ahora no';
-
-  @override
-  String get statusUpdateApproved => '¡Presupuesto aprobado!';
-
-  @override
-  String get statusUpdateProgress => '¡Servicio en progreso!';
-
-  @override
-  String get statusUpdateDone => '¡Servicio completado!';
 
   @override
   String get connectWhatsApp => 'Conecta tu WhatsApp';
@@ -1734,22 +1678,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String confirmRemoveDevice(String name) {
-    return '¿Eliminar \"$name\" de esta OS?';
-  }
-
-  @override
-  String get removeDeviceKeepItems => 'Mantener elementos';
-
-  @override
-  String get removeDeviceAndItems => 'Eliminar todo';
-
-  @override
-  String removeDeviceHasItems(String name, String count) {
-    return '\"$name\" tiene $count elementos asociados. ¿Qué desea hacer?';
-  }
-
-  @override
   String get features => 'Funcionalidades';
 
   @override
@@ -1759,20 +1687,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noContracts => 'Ningún contrato';
 
   @override
-  String get activateContract => 'Activar contrato recurrente';
-
-  @override
-  String get deactivateContract => 'Desactivar contrato recurrente';
-
-  @override
-  String get deactivateContractConfirm =>
-      'La generación automática de OS será detenida.';
-
-  @override
   String get recurringContract => 'Contrato recurrente';
-
-  @override
-  String get automaticGeneration => 'Generación automática';
 
   @override
   String get contractNextDue => 'Próxima generación';
@@ -1802,9 +1717,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get configure => 'Configurar';
-
-  @override
-  String get frequency => 'Frecuencia';
 
   @override
   String get interval => 'Intervalo';
@@ -1838,13 +1750,7 @@ class AppLocalizationsEs extends AppLocalizations {
       '¿Está seguro que desea eliminar este documento?';
 
   @override
-  String get uploadingDocument => 'Enviando documento...';
-
-  @override
   String get documentAdded => 'Documento agregado';
-
-  @override
-  String get documentDeleted => 'Documento eliminado';
 
   @override
   String get openDocument => 'Abrir';
@@ -2467,13 +2373,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deviceDetailsLabel => 'Datos';
-
-  @override
-  String get newOrderScreenSetting => 'Nueva pantalla de la OS';
-
-  @override
-  String get newOrderScreenSettingHint =>
-      'Desactive para volver a la pantalla anterior de la OS.';
 
   @override
   String orderNewTitle(String order) {
@@ -3213,9 +3112,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderAddChecklist => 'Checklist';
-
-  @override
-  String get orderAddMedia => 'Fotos o documento';
 
   @override
   String get orderAddComment => 'Comentario';
@@ -4844,9 +4740,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderPhotoCoverSet => 'Foto definida como portada';
-
-  @override
-  String get orderPhotoUploading => 'Subiendo foto...';
 
   @override
   String get orderDocumentTypeTitle => '¿Qué documento es este?';

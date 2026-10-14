@@ -380,11 +380,7 @@ void main() {
       tester,
     ) async {
       final store = OrderStore();
-      await _pump(
-        tester,
-        screen(store),
-        args: {'repeat': true},
-      );
+      await _pump(tester, screen(store), args: {'repeat': true});
 
       expect(store.hasContract, isTrue);
       expect(store.order?.contract?.frequency, 'monthly');
@@ -1037,6 +1033,35 @@ void main() {
       ..discount = 0
       ..paidAmount = 0
       ..transactions = [];
+
+    testWidgets('a rated order shows the stars, "4 de 5" and the comment', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore()),
+        args: {
+          'order': order()
+            ..status = 'done'
+            ..rating = (OrderRating()
+              ..score = 4
+              ..comment = 'Atendimento rápido'),
+        },
+      );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('order_rating')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Avaliação'), findsOneWidget);
+      expect(find.text('4 de 5'), findsOneWidget);
+      expect(find.text('Atendimento rápido'), findsOneWidget);
+    });
+
+    testWidgets('an order without rating has no "Avaliação"', (tester) async {
+      await _pump(tester, screen(OrderStore()), args: {'order': order()});
+      expect(find.byKey(const ValueKey('order_rating')), findsNothing);
+    });
 
     testWidgets('items without price show "sem valor" and are not summed', (
       tester,
