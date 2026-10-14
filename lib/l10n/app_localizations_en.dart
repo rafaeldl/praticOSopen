@@ -452,9 +452,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newOrder => 'NEW';
 
   @override
-  String get editOrder => 'Edit Order';
-
-  @override
   String get orderNumber => 'Order Number';
 
   @override
@@ -782,9 +779,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expired => 'Expired';
-
-  @override
-  String get active => 'Active';
 
   @override
   String get inactive => 'Inactive';
@@ -1262,56 +1256,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addItems => 'Add items';
 
   @override
-  String get pleaseAddAtLeastOneItem =>
-      'Please add at least one item to the procedure.';
-
-  @override
-  String get couldNotSaveForm => 'Could not save the procedure.';
-
-  @override
-  String get removeItem => 'Remove item';
-
-  @override
-  String get minOptions => 'Minimum options';
-
-  @override
-  String get pleaseEnterAtLeast2Options => 'Please enter at least 2 options.';
-
-  @override
-  String get selectItemType => 'Item Type';
-
-  @override
-  String get selectResponseType => 'Select the expected response type';
-
-  @override
-  String get itemConfiguration => 'ITEM CONFIGURATION';
-
-  @override
-  String get formInformation => 'INFORMATION';
-
-  @override
-  String get formConfiguration => 'CONFIGURATION';
-
-  @override
-  String get title => 'Title';
-
-  @override
-  String get label => 'Label';
-
-  @override
-  String get itemType => 'Type';
-
-  @override
-  String get optionsHeader => 'OPTIONS';
-
-  @override
   String get typeOneOptionPerLine => 'Type one option per line';
-
-  @override
-  String get allowPhotos => 'Allow photos';
-
-  @override
-  String get userCanAttachPhotos => 'User can attach photos to this item';
 
   @override
   String get searchProcedure => 'Search procedure';
@@ -4308,19 +4253,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistSaveNeedsQuestion => 'Add a question to save.';
 
   @override
+  String get checklistNameLabel => 'Checklist name';
+
+  @override
+  String get checklistSave => 'Save checklist';
+
+  @override
+  String get checklistSaveError => 'Couldn\'t save the checklist. Try again.';
+
+  @override
+  String get checklistStopUsing => 'Stop using in the company';
+
+  @override
+  String get checklistUseAgain => 'Use again';
+
+  @override
+  String get checklistDelete => 'Delete checklist';
+
+  @override
+  String get checklistDeleteTitle => 'Delete this checklist?';
+
+  @override
+  String checklistDeleteMessage(String name) {
+    return '“$name” leaves the list and no longer shows up in new orders.';
+  }
+
+  @override
+  String get checklistQuestionNew => 'New question';
+
+  @override
+  String get checklistQuestion => 'Question';
+
+  @override
+  String get checklistQuestionPlaceholder => 'E.g.: Are the tires OK?';
+
+  @override
+  String get checklistAnswerType => 'Type of answer';
+
+  @override
+  String get checklistOptions => 'Options';
+
+  @override
+  String get checklistOptionsPlaceholder => 'E.g.: Good\nFair\nBad';
+
+  @override
+  String get checklistQuestionRequiredHint => 'Can\'t finish without an answer';
+
+  @override
+  String get checklistQuestionAllowPhotos => 'Can add a photo';
+
+  @override
+  String get checklistQuestionDelete => 'Delete question';
+
+  @override
+  String get checklistQuestionNeedsLabel => 'Write the question to continue.';
+
+  @override
+  String get checklistQuestionNeedsOptions =>
+      'Write at least 2 options, one per line.';
+
+  @override
+  String get checklistQuestionRequiredShort => 'required';
+
+  @override
+  String get checklistQuestionWithPhoto => 'with photo';
+
+  @override
   String get formItemTypeText => 'Text';
 
   @override
   String get formItemTypeNumber => 'Number';
 
   @override
-  String get formItemTypeBoolean => 'Yes/No';
+  String get formItemTypeBoolean => 'Yes or no';
 
   @override
-  String get formItemTypeSelect => 'Single choice';
+  String get formItemTypeSelect => 'Pick one option';
 
   @override
-  String get formItemTypeChecklist => 'Multiple choice';
+  String get formItemTypeChecklist => 'Pick several options';
 
   @override
   String get formItemTypePhoto => 'Photo only';

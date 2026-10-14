@@ -453,9 +453,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newOrder => 'NUEVA';
 
   @override
-  String get editOrder => 'Editar Orden';
-
-  @override
   String get orderNumber => 'Número de Orden';
 
   @override
@@ -783,9 +780,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get expired => 'Expirado';
-
-  @override
-  String get active => 'Activo';
 
   @override
   String get inactive => 'Inactivo';
@@ -1265,57 +1259,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addItems => 'Añadir elementos';
 
   @override
-  String get pleaseAddAtLeastOneItem =>
-      'Por favor añada al menos un elemento al procedimiento.';
-
-  @override
-  String get couldNotSaveForm => 'No se pudo guardar el procedimiento.';
-
-  @override
-  String get removeItem => 'Eliminar elemento';
-
-  @override
-  String get minOptions => 'Opciones mínimas';
-
-  @override
-  String get pleaseEnterAtLeast2Options => 'Ingrese al menos 2 opciones.';
-
-  @override
-  String get selectItemType => 'Tipo de Elemento';
-
-  @override
-  String get selectResponseType => 'Seleccione el tipo de respuesta esperada';
-
-  @override
-  String get itemConfiguration => 'CONFIGURACIÓN DE ELEMENTO';
-
-  @override
-  String get formInformation => 'INFORMACIÓN';
-
-  @override
-  String get formConfiguration => 'CONFIGURACIÓN';
-
-  @override
-  String get title => 'Título';
-
-  @override
-  String get label => 'Etiqueta';
-
-  @override
-  String get itemType => 'Tipo';
-
-  @override
-  String get optionsHeader => 'OPCIONES';
-
-  @override
   String get typeOneOptionPerLine => 'Escriba una opción por línea';
-
-  @override
-  String get allowPhotos => 'Permitir fotos';
-
-  @override
-  String get userCanAttachPhotos =>
-      'El usuario puede adjuntar fotos a este elemento';
 
   @override
   String get searchProcedure => 'Buscar procedimiento';
@@ -4319,19 +4263,87 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checklistSaveNeedsQuestion => 'Agrega una pregunta para guardar.';
 
   @override
+  String get checklistNameLabel => 'Nombre del checklist';
+
+  @override
+  String get checklistSave => 'Guardar checklist';
+
+  @override
+  String get checklistSaveError =>
+      'No se pudo guardar el checklist. Inténtalo de nuevo.';
+
+  @override
+  String get checklistStopUsing => 'No usar en la empresa';
+
+  @override
+  String get checklistUseAgain => 'Volver a usar';
+
+  @override
+  String get checklistDelete => 'Borrar checklist';
+
+  @override
+  String get checklistDeleteTitle => '¿Borrar este checklist?';
+
+  @override
+  String checklistDeleteMessage(String name) {
+    return '“$name” sale de la lista y ya no aparece en las OS nuevas.';
+  }
+
+  @override
+  String get checklistQuestionNew => 'Nueva pregunta';
+
+  @override
+  String get checklistQuestion => 'Pregunta';
+
+  @override
+  String get checklistQuestionPlaceholder => 'Ej.: ¿Los neumáticos están bien?';
+
+  @override
+  String get checklistAnswerType => 'Tipo de respuesta';
+
+  @override
+  String get checklistOptions => 'Opciones';
+
+  @override
+  String get checklistOptionsPlaceholder => 'Ej.: Bueno\nRegular\nMalo';
+
+  @override
+  String get checklistQuestionRequiredHint => 'No deja terminar sin responder';
+
+  @override
+  String get checklistQuestionAllowPhotos => 'Puede poner foto';
+
+  @override
+  String get checklistQuestionDelete => 'Borrar pregunta';
+
+  @override
+  String get checklistQuestionNeedsLabel =>
+      'Escribe la pregunta para continuar.';
+
+  @override
+  String get checklistQuestionNeedsOptions =>
+      'Escribe al menos 2 opciones, una por línea.';
+
+  @override
+  String get checklistQuestionRequiredShort => 'obligatoria';
+
+  @override
+  String get checklistQuestionWithPhoto => 'con foto';
+
+  @override
   String get formItemTypeText => 'Texto';
 
   @override
   String get formItemTypeNumber => 'Número';
 
   @override
-  String get formItemTypeBoolean => 'Sí/No';
+  String get formItemTypeBoolean => 'Sí o no';
 
   @override
-  String get formItemTypeSelect => 'Selección única';
+  String get formItemTypeSelect => 'Elegir una opción';
 
   @override
-  String get formItemTypeChecklist => 'Selección múltiple';
+  String get formItemTypeChecklist => 'Elegir varias opciones';
 
   @override
   String get formItemTypePhoto => 'Solo foto';

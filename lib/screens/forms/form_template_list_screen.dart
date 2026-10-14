@@ -31,39 +31,41 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     super.dispose();
   }
 
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      final companyStream = templateStore.templateList;
-      final globalList = templateStore.globalTemplateList?.value;
-      return ChecklistsView(
-        templates: companyStream?.value?.whereType<FormDefinition>().toList() ??
-            const [],
-        readyTemplates: globalList ?? const [],
-        localeCode: _localeCode,
-        loading: companyStream == null ||
-            (!companyStream.hasError && companyStream.value == null),
-        error: companyStream?.hasError ?? false,
-        onRetry: templateStore.retrieveTemplates,
-        onOpen: (template) => Navigator.pushNamed(
-          context,
-          '/form_template_form',
-          arguments: {'template': template},
-        ).then((_) => templateStore.retrieveTemplates()),
-        onDelete: _confirmDelete,
-        onPreviewReady: _showGlobalTemplateDetails,
-        onUseReady: _importGlobalTemplate,
-        onNew: () => FormSheet.show<FormDefinition>(
-          context,
-          (_) => const FormTemplateFormScreen(asSheet: true),
-        ).then((_) => templateStore.retrieveTemplates()),
-      );
-    });
+    return Observer(
+      builder: (_) {
+        final companyStream = templateStore.templateList;
+        final globalList = templateStore.globalTemplateList?.value;
+        return ChecklistsView(
+          templates:
+              companyStream?.value?.whereType<FormDefinition>().toList() ??
+              const [],
+          readyTemplates: globalList ?? const [],
+          localeCode: _localeCode,
+          loading:
+              companyStream == null ||
+              (!companyStream.hasError && companyStream.value == null),
+          error: companyStream?.hasError ?? false,
+          onRetry: templateStore.retrieveTemplates,
+          // Editing is a focused task: it covers the tab bar, so the screen's
+          // one blue button ("Salvar checklist") is the only one.
+          onOpen: (template) => Navigator.of(context, rootNavigator: true)
+              .pushNamed(
+                '/form_template_form',
+                arguments: {'template': template},
+              )
+              .then((_) => templateStore.retrieveTemplates()),
+          onDelete: _confirmDelete,
+          onPreviewReady: _showGlobalTemplateDetails,
+          onUseReady: _importGlobalTemplate,
+          onNew: () => FormSheet.show<FormDefinition>(
+            context,
+            (_) => const FormTemplateFormScreen(asSheet: true),
+          ).then((_) => templateStore.retrieveTemplates()),
+        );
+      },
+    );
   }
 
   Future<bool> _confirmDelete(FormDefinition template) async {
@@ -105,10 +107,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             if (localizedDescription != null &&
                 localizedDescription.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(
-                localizedDescription,
-                style: const TextStyle(fontSize: 14),
-              ),
+              Text(localizedDescription, style: const TextStyle(fontSize: 14)),
             ],
             const SizedBox(height: 12),
             Text(
@@ -116,13 +115,15 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            ...template.items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• ${item.getLocalizedLabel(_localeCode)}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                )),
+            ...template.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '• ${item.getLocalizedLabel(_localeCode)}',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -149,8 +150,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: Text(context.l10n.importProcedure),
-        content: Text(
-            context.l10n.importConfirmationMessage(localizedTitle)),
+        content: Text(context.l10n.importConfirmationMessage(localizedTitle)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
@@ -204,5 +204,4 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
       }
     }
   }
-
 }

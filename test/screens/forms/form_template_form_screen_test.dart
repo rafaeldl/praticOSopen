@@ -54,7 +54,8 @@ Future<void> _addQuestion(WidgetTester tester, String label) async {
   await tester.tap(find.byKey(const ValueKey('checklist_add_question')));
   await tester.pumpAndSettle();
   await tester.enterText(find.byType(CupertinoTextField).last, label);
-  await tester.tap(find.text('Salvar'));
+  await tester.pump();
+  await tester.tap(find.text('Pronto'));
   await tester.pumpAndSettle();
 }
 
@@ -67,8 +68,9 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  testWidgets('new checklist opens as a sheet; X with nothing typed closes',
-      (tester) async {
+  testWidgets('new checklist opens as a sheet; X with nothing typed closes', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
 
@@ -85,8 +87,9 @@ void main() {
     expect(h.result, isNull);
   });
 
-  testWidgets('✓ is gray with what is missing until name and a question',
-      (tester) async {
+  testWidgets('✓ is gray with what is missing until name and a question', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
 
@@ -102,13 +105,13 @@ void main() {
     expect(find.text('Adicione uma pergunta para salvar.'), findsOneWidget);
 
     await _addQuestion(tester, 'Pneus');
-    expect(find.text('Pneus'), findsOneWidget);
+    expect(find.text('1. Pneus'), findsOneWidget);
+    expect(find.text('Texto · com foto'), findsOneWidget);
     expect(_saveEnabled(tester), isTrue);
     expect(_missing, findsNothing);
   });
 
-  testWidgets('with something typed, X asks before discarding',
-      (tester) async {
+  testWidgets('with something typed, X asks before discarding', (tester) async {
     final h = _Harness();
     await h.open(tester);
     await tester.enterText(find.byType(CupertinoTextField).first, 'Entrada');
@@ -123,8 +126,9 @@ void main() {
     expect(h.saved, isEmpty);
   });
 
-  testWidgets('✓ saves the checklist with its questions and closes',
-      (tester) async {
+  testWidgets('✓ saves the checklist with its questions and closes', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
     await tester.enterText(find.byType(CupertinoTextField).first, 'Entrada');

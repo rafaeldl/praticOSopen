@@ -964,12 +964,6 @@ abstract class AppLocalizations {
   /// **'NOVA'**
   String get newOrder;
 
-  /// No description provided for @editOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Editar OS'**
-  String get editOrder;
-
   /// No description provided for @orderNumber.
   ///
   /// In pt, this message translates to:
@@ -1623,12 +1617,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Expirado'**
   String get expired;
-
-  /// No description provided for @active.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ativo'**
-  String get active;
 
   /// No description provided for @inactive.
   ///
@@ -2518,107 +2506,11 @@ abstract class AppLocalizations {
   /// **'Adicione itens'**
   String get addItems;
 
-  /// No description provided for @pleaseAddAtLeastOneItem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Por favor, adicione pelo menos um item ao procedimento.'**
-  String get pleaseAddAtLeastOneItem;
-
-  /// No description provided for @couldNotSaveForm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível salvar o procedimento.'**
-  String get couldNotSaveForm;
-
-  /// No description provided for @removeItem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover item'**
-  String get removeItem;
-
-  /// No description provided for @minOptions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mínimo de opções'**
-  String get minOptions;
-
-  /// No description provided for @pleaseEnterAtLeast2Options.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informe pelo menos 2 opções.'**
-  String get pleaseEnterAtLeast2Options;
-
-  /// No description provided for @selectItemType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tipo do Item'**
-  String get selectItemType;
-
-  /// No description provided for @selectResponseType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione o tipo de resposta esperada'**
-  String get selectResponseType;
-
-  /// No description provided for @itemConfiguration.
-  ///
-  /// In pt, this message translates to:
-  /// **'CONFIGURAÇÃO DO ITEM'**
-  String get itemConfiguration;
-
-  /// No description provided for @formInformation.
-  ///
-  /// In pt, this message translates to:
-  /// **'INFORMAÇÕES'**
-  String get formInformation;
-
-  /// No description provided for @formConfiguration.
-  ///
-  /// In pt, this message translates to:
-  /// **'CONFIGURAÇÕES'**
-  String get formConfiguration;
-
-  /// No description provided for @title.
-  ///
-  /// In pt, this message translates to:
-  /// **'Título'**
-  String get title;
-
-  /// No description provided for @label.
-  ///
-  /// In pt, this message translates to:
-  /// **'Label'**
-  String get label;
-
-  /// No description provided for @itemType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tipo'**
-  String get itemType;
-
-  /// No description provided for @optionsHeader.
-  ///
-  /// In pt, this message translates to:
-  /// **'OPÇÕES'**
-  String get optionsHeader;
-
   /// No description provided for @typeOneOptionPerLine.
   ///
   /// In pt, this message translates to:
   /// **'Digite uma opção por linha'**
   String get typeOneOptionPerLine;
-
-  /// No description provided for @allowPhotos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Permitir fotos'**
-  String get allowPhotos;
-
-  /// No description provided for @userCanAttachPhotos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Usuário pode anexar fotos a este item'**
-  String get userCanAttachPhotos;
 
   /// No description provided for @searchProcedure.
   ///
@@ -7312,6 +7204,132 @@ abstract class AppLocalizations {
   /// **'Adicione uma pergunta para salvar.'**
   String get checklistSaveNeedsQuestion;
 
+  /// No description provided for @checklistNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do checklist'**
+  String get checklistNameLabel;
+
+  /// No description provided for @checklistSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar checklist'**
+  String get checklistSave;
+
+  /// No description provided for @checklistSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar o checklist. Tente de novo.'**
+  String get checklistSaveError;
+
+  /// No description provided for @checklistStopUsing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não usar na empresa'**
+  String get checklistStopUsing;
+
+  /// No description provided for @checklistUseAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar a usar'**
+  String get checklistUseAgain;
+
+  /// No description provided for @checklistDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar checklist'**
+  String get checklistDelete;
+
+  /// No description provided for @checklistDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar este checklist?'**
+  String get checklistDeleteTitle;
+
+  /// No description provided for @checklistDeleteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'“{name}” sai da lista e não aparece mais nas OS novas.'**
+  String checklistDeleteMessage(String name);
+
+  /// No description provided for @checklistQuestionNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova pergunta'**
+  String get checklistQuestionNew;
+
+  /// No description provided for @checklistQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pergunta'**
+  String get checklistQuestion;
+
+  /// No description provided for @checklistQuestionPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Os pneus estão bons?'**
+  String get checklistQuestionPlaceholder;
+
+  /// No description provided for @checklistAnswerType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo de resposta'**
+  String get checklistAnswerType;
+
+  /// No description provided for @checklistOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções'**
+  String get checklistOptions;
+
+  /// No description provided for @checklistOptionsPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Bom\nRegular\nRuim'**
+  String get checklistOptionsPlaceholder;
+
+  /// No description provided for @checklistQuestionRequiredHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deixa concluir sem responder'**
+  String get checklistQuestionRequiredHint;
+
+  /// No description provided for @checklistQuestionAllowPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode pôr foto'**
+  String get checklistQuestionAllowPhotos;
+
+  /// No description provided for @checklistQuestionDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar pergunta'**
+  String get checklistQuestionDelete;
+
+  /// No description provided for @checklistQuestionNeedsLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva a pergunta para continuar.'**
+  String get checklistQuestionNeedsLabel;
+
+  /// No description provided for @checklistQuestionNeedsOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva pelo menos 2 opções, uma por linha.'**
+  String get checklistQuestionNeedsOptions;
+
+  /// No description provided for @checklistQuestionRequiredShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'obrigatória'**
+  String get checklistQuestionRequiredShort;
+
+  /// No description provided for @checklistQuestionWithPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'com foto'**
+  String get checklistQuestionWithPhoto;
+
   /// No description provided for @formItemTypeText.
   ///
   /// In pt, this message translates to:
@@ -7327,25 +7345,25 @@ abstract class AppLocalizations {
   /// No description provided for @formItemTypeBoolean.
   ///
   /// In pt, this message translates to:
-  /// **'Sim/Não'**
+  /// **'Sim ou não'**
   String get formItemTypeBoolean;
 
   /// No description provided for @formItemTypeSelect.
   ///
   /// In pt, this message translates to:
-  /// **'Seleção única'**
+  /// **'Escolher uma opção'**
   String get formItemTypeSelect;
 
   /// No description provided for @formItemTypeChecklist.
   ///
   /// In pt, this message translates to:
-  /// **'Múltipla escolha'**
+  /// **'Escolher várias opções'**
   String get formItemTypeChecklist;
 
   /// No description provided for @formItemTypePhoto.
   ///
   /// In pt, this message translates to:
-  /// **'Apenas foto'**
+  /// **'Só foto'**
   String get formItemTypePhoto;
 
   /// No description provided for @pickerNewItemKind.
