@@ -6,7 +6,7 @@ import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/more_fields_link.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/location_service.dart';
@@ -18,11 +18,12 @@ import 'package:praticos/widgets/tax_id_form_field.dart';
 
 /// New / edit customer.
 ///
-/// A new customer opens as an [AppSheet] (`asSheet: true`, "Cancelar" on the
-/// left, "Salvar" on the right); editing stays a pushed screen. Only name and
-/// phone show at first; e-mail, CPF/CNPJ, address and the segment fields sit
-/// behind a [MoreFieldsLink] (open right away when editing a customer that
-/// already has any of them).
+/// A new customer opens as a [FormSheet] (`asSheet: true`, open it with
+/// [FormSheet.show]): "X" and "✓" at the top, name and phone in a white card
+/// and e-mail, CPF/CNPJ, address and the segment fields in a "Mais dados"
+/// card that opens in place. The "✓" turns blue once the name is filled.
+/// Editing stays a pushed screen, with those fields behind a
+/// [MoreFieldsLink] (open right away when the customer already has any).
 ///
 /// Pops with the saved [Customer].
 class CustomerFormScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class CustomerFormScreen extends StatefulWidget {
   /// is created when neither is given.
   final Customer? customer;
 
-  /// Present as the content of an [AppSheet].
+  /// Present as a [FormSheet] (new customer).
   final bool asSheet;
 
   /// Saves the customer. Defaults to [CustomerStore.saveCustomer].
@@ -53,6 +54,13 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   CustomerStore? _store;
   bool _isLoading = false;
   bool _initialized = false;
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _address = TextEditingController();
+  String _taxId = '';
+  bool _customTouched = false;
+  late String _initialSnapshot;
 
   @override
   void didChangeDependencies() {
@@ -64,9 +72,46 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
           (args?['customer'] as Customer?) ??
           Customer();
       _customer!.customData ??= {};
+      final c = _customer!;
+      _name.text = c.name ?? '';
+      _phone.text = c.phone ?? '';
+      _email.text = c.email ?? '';
+      _address.text = c.address ?? '';
+      _taxId = c.taxId ?? '';
+      _initialSnapshot = _snapshot;
+      for (final controller in [_name, _phone, _email, _address]) {
+        controller.addListener(_onEdit);
+      }
       _initialized = true;
     }
   }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _phone.dispose();
+    _email.dispose();
+    _address.dispose();
+    super.dispose();
+  }
+
+  void _onEdit() {
+    if (mounted) setState(() {});
+  }
+
+  String get _snapshot => [
+        _name.text.trim(),
+        _phone.text.trim(),
+        _email.text.trim(),
+        _address.text.trim(),
+        _taxId,
+      ].join('\u0000');
+
+  /// The sheet can be saved once the name is filled.
+  bool get _canSave => _name.text.trim().isNotEmpty;
+
+  /// Something was typed since the sheet opened: closing asks first.
+  bool get _dirty => _customTouched || _snapshot != _initialSnapshot;
 
   bool get _isEditing => _customer?.id != null;
 
@@ -105,6 +150,20 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     final config = context.watch<SegmentConfigProvider>();
     final l10n = context.l10n;
     final title = _isEditing ? l10n.editCustomer : l10n.newCustomer;
+    if (widget.asSheet) {
+      return Form(
+        key: _formKey,
+        child: FormSheet(
+          title: title,
+          canSave: _canSave,
+          missingHint: l10n.customerSaveNeedsName,
+          dirty: _dirty,
+          busy: _isLoading,
+          onSave: _saveCustomer,
+          children: _buildSheetCards(config),
+        ),
+      );
+    }
     final body = Form(
       key: _formKey,
       child: ListView(
@@ -116,16 +175,6 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         children: _buildFields(config),
       ),
     );
-
-    if (widget.asSheet) {
-      return AppSheet(
-        title: title,
-        primaryLabel: l10n.saveEntityButton(config.customer.toLowerCase()),
-        onAction: _saveCustomer,
-        busy: _isLoading,
-        child: body,
-      );
-    }
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background.resolveFrom(context),
@@ -149,93 +198,130 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     );
   }
 
+  /// Fields of the pushed edit screen.
   List<Widget> _buildFields(SegmentConfigProvider config) {
+    return [
+      _nameField(),
+      _phoneField(config),
+      MoreFieldsLink(
+        label: context.l10n.moreCustomerData,
+        initiallyExpanded: _hasMoreData,
+        children: _moreFields(config, inCard: false),
+      ),
+    ];
+  }
+
+  /// Cards of the new-customer sheet.
+  List<Widget> _buildSheetCards(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    return [
+      FormFieldsCard(children: [_nameField(), _phoneField(config)]),
+      FormMoreCard(
+        title: l10n.formMoreData,
+        hint: l10n.customerMoreDataHint,
+        initiallyOpen: _hasMoreData,
+        children: _moreFields(config, inCard: true),
+      ),
+    ];
+  }
+
+  Widget _nameField() {
+    final l10n = context.l10n;
+    return AppFormField(
+      label: l10n.name,
+      controller: _name,
+      placeholder: l10n.customerNamePlaceholder,
+      textCapitalization: TextCapitalization.words,
+      textInputAction: TextInputAction.next,
+      autofocus: !_isEditing,
+      onSaved: (v) => _customer!.name = v.trim(),
+      validator: (v) => v.trim().isEmpty ? l10n.customerNameRequired : null,
+    );
+  }
+
+  Widget _phoneField(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final phoneMasks = config.getMasks('customer.phone');
+    return AppFormField(
+      label: l10n.customerPhoneLabel,
+      controller: _phone,
+      hint: l10n.customerPhoneHint,
+      keyboardType: TextInputType.phone,
+      inputFormatters: phoneMasks.isEmpty
+          ? null
+          : [
+              TextInputMask(
+                mask: phoneMasks.length == 1 ? phoneMasks.first : phoneMasks,
+              ),
+            ],
+      onSaved: (v) => _customer!.phone = v.isEmpty ? null : v,
+    );
+  }
+
+  /// E-mail, CPF/CNPJ, address and the segment fields. [inCard]: inside the
+  /// sheet's "Mais dados" card, so no inset sections (no card in a card).
+  List<Widget> _moreFields(
+    SegmentConfigProvider config, {
+    required bool inCard,
+  }) {
     final l10n = context.l10n;
     final customer = _customer!;
-    final phoneMasks = config.getMasks('customer.phone');
     final hasAddress = (customer.address?.isNotEmpty ?? false) ||
         (customer.latitude != null && customer.longitude != null);
-
+    final taxId = TaxIdFormField(
+      initialValue: customer.taxId,
+      onChanged: (v) => setState(() => _taxId = v),
+      onSaved: (val) => customer.taxId = val,
+    );
     return [
       AppFormField(
-        label: l10n.name,
-        initialValue: customer.name,
-        placeholder: l10n.customerNamePlaceholder,
-        textCapitalization: TextCapitalization.words,
-        textInputAction: TextInputAction.next,
-        autofocus: !_isEditing,
-        onSaved: (v) => customer.name = v.trim(),
-        validator: (v) =>
-            v.trim().isEmpty ? l10n.customerNameRequired : null,
+        label: l10n.email,
+        controller: _email,
+        placeholder: l10n.emailPlaceholder,
+        keyboardType: TextInputType.emailAddress,
+        onSaved: (v) => customer.email = v.isEmpty ? null : v,
       ),
-      AppFormField(
-        label: l10n.customerPhoneLabel,
-        initialValue: customer.phone,
-        hint: l10n.customerPhoneHint,
-        keyboardType: TextInputType.phone,
-        inputFormatters: phoneMasks.isEmpty
-            ? null
-            : [
-                TextInputMask(
-                  mask: phoneMasks.length == 1 ? phoneMasks.first : phoneMasks,
-                ),
-              ],
-        onSaved: (v) => customer.phone = v.isEmpty ? null : v,
-      ),
-      MoreFieldsLink(
-        label: l10n.moreCustomerData,
-        initiallyExpanded: _hasMoreData,
-        children: [
-          AppFormField(
-            label: l10n.email,
-            initialValue: customer.email,
-            placeholder: l10n.emailPlaceholder,
-            keyboardType: TextInputType.emailAddress,
-            onSaved: (v) => customer.email = v.isEmpty ? null : v,
-          ),
-          // CPF/CNPJ (Brazil only): required by Asaas to charge
-          if (config.countryCode == null || config.countryCode == 'BR')
-            CupertinoListSection.insetGrouped(
-              children: [
-                TaxIdFormField(
-                  initialValue: customer.taxId,
-                  onSaved: (val) => customer.taxId = val,
-                ),
-              ],
-            ),
-          AppFormField(
-            label: l10n.address,
-            initialValue: customer.address,
-            placeholder: l10n.addressPlaceholder,
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: (v) => customer.address = v,
-            onSaved: (v) => customer.address = v.isEmpty ? null : v,
-          ),
-          if (hasAddress)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: CupertinoButton(
+      // CPF/CNPJ (Brazil only): required by Asaas to charge
+      if (config.countryCode == null || config.countryCode == 'BR')
+        inCard
+            ? Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pageMargin,
+                  horizontal: AppSpacing.sm,
                 ),
-                minimumSize: const Size(44, 44),
-                onPressed: () => LocationService().openInMaps(
-                  lat: customer.latitude,
-                  lng: customer.longitude,
-                  address: customer.address,
-                ),
-                child: Text(
-                  l10n.openInMap,
-                  style: AppTypography.callout.copyWith(
-                    color: AppColors.accentText.resolveFrom(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: taxId,
+              )
+            : CupertinoListSection.insetGrouped(children: [taxId]),
+      AppFormField(
+        label: l10n.address,
+        controller: _address,
+        placeholder: l10n.addressPlaceholder,
+        textCapitalization: TextCapitalization.sentences,
+        onChanged: (v) => customer.address = v,
+        onSaved: (v) => customer.address = v.isEmpty ? null : v,
+      ),
+      if (hasAddress)
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: CupertinoButton(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
+            minimumSize: const Size(44, 44),
+            onPressed: () => LocationService().openInMaps(
+              lat: customer.latitude,
+              lng: customer.longitude,
+              address: customer.address,
+            ),
+            child: Text(
+              l10n.openInMap,
+              style: AppTypography.callout.copyWith(
+                color: AppColors.accentText.resolveFrom(context),
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ..._buildCustomFieldSections(config),
-        ],
-      ),
+          ),
+        ),
+      ..._buildCustomFieldSections(config, inCard: inCard),
     ];
   }
 
@@ -250,7 +336,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     'customer.taxId',
   };
 
-  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+  List<Widget> _buildCustomFieldSections(
+    SegmentConfigProvider config, {
+    required bool inCard,
+  }) {
     final grouped = config.fieldsGroupedBySectionLocalized(
       'customer',
       exclude: _builtInFieldKeys,
@@ -262,28 +351,33 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
     for (final entry in grouped.entries) {
       sections.add(SectionLabel(entry.key));
+      final fields = entry.value.map((field) {
+        return DynamicFieldBuilder(
+          field: field,
+          value: _customer?.customData?[field.fieldName] ??
+              _customer?.customData?[field.key],
+          locale: locale,
+          onChanged: (newValue) {
+            setState(() {
+              _customTouched = true;
+              _customer?.customData ??= {};
+              if (newValue == null) {
+                _customer!.customData!.remove(field.fieldName);
+              } else {
+                _customer!.customData![field.fieldName] = newValue;
+              }
+              _customer!.customData!.remove(field.key); // migrate old key
+            });
+          },
+        );
+      }).toList();
       sections.add(
-        CupertinoListSection.insetGrouped(
-          children: entry.value.map((field) {
-            return DynamicFieldBuilder(
-              field: field,
-              value: _customer?.customData?[field.fieldName] ??
-                  _customer?.customData?[field.key],
-              locale: locale,
-              onChanged: (newValue) {
-                setState(() {
-                  _customer?.customData ??= {};
-                  if (newValue == null) {
-                    _customer!.customData!.remove(field.fieldName);
-                  } else {
-                    _customer!.customData![field.fieldName] = newValue;
-                  }
-                  _customer!.customData!.remove(field.key); // migrate old key
-                });
-              },
-            );
-          }).toList(),
-        ),
+        inCard
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: fields,
+              )
+            : CupertinoListSection.insetGrouped(children: fields),
       );
     }
 

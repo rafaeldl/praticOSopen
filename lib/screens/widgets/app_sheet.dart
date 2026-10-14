@@ -5,14 +5,14 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// Modal sheet for creating a record (new customer, vehicle, service).
+/// Small modal sheet (address, item, period, invite).
 ///
-/// HIG: "Cancelar" on the leading edge, title in the middle. A record form
-/// (new customer, vehicle, service) confirms with the big button at the
-/// bottom ([primaryLabel], design system rule 9, "Salvar cliente"); small
-/// sheets confirm on the trailing edge ([actionLabel]). Never both. Editing an
-/// existing record stays a pushed screen. Open it with [AppSheet.show] and put an [AppSheet] as the
-/// root of the builder.
+/// HIG: "Cancelar" on the leading edge, title in the middle. Small sheets
+/// confirm on the trailing edge ([actionLabel]). [primaryLabel] (big button
+/// at the bottom) is the old pattern for creating a record, still used by
+/// the new catalog item until it moves to `FormSheet` (design system rule
+/// 9), as the new customer and vehicle did. Never both. Open it with
+/// [AppSheet.show] and put an [AppSheet] as the root of the builder.
 class AppSheet extends StatelessWidget {
   const AppSheet({
     super.key,

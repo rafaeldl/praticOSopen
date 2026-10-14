@@ -10629,6 +10629,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nenhum {device}'**
   String pickerNoDevice(String device);
+
+  /// No description provided for @formMoreData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais dados'**
+  String get formMoreData;
+
+  /// No description provided for @customerSaveNeedsName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome para salvar.'**
+  String get customerSaveNeedsName;
+
+  /// No description provided for @customerMoreDataHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail, CPF ou CNPJ, endereço'**
+  String get customerMoreDataHint;
+
+  /// No description provided for @deviceSaveNeedsField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o campo {field} para salvar.'**
+  String deviceSaveNeedsField(String field);
+
+  /// No description provided for @deviceMoreDataHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto, {brand} e {category}'**
+  String deviceMoreDataHint(String brand, String category);
 }
 
 class _AppLocalizationsDelegate

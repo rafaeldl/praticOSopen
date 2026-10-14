@@ -25,6 +25,7 @@ class NewOrderTopBar extends StatelessWidget {
     required this.title,
     required this.onClose,
     required this.onSave,
+    this.busy = false,
   });
 
   final String title;
@@ -32,6 +33,9 @@ class NewOrderTopBar extends StatelessWidget {
 
   /// Null while the order cannot be saved.
   final VoidCallback? onSave;
+
+  /// Saving: a spinner takes the place of the "✓".
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +64,15 @@ class NewOrderTopBar extends StatelessWidget {
               ),
             ),
           ),
-          _SaveButton(onPressed: onSave),
+          if (busy)
+            const SizedBox(
+              key: ValueKey('new_order_saving'),
+              width: AppSizes.minTouchTarget,
+              height: AppSizes.minTouchTarget,
+              child: CupertinoActivityIndicator(),
+            )
+          else
+            _SaveButton(onPressed: onSave),
         ],
       ),
     );

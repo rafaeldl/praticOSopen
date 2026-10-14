@@ -16,7 +16,7 @@ import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:provider/provider.dart';
 
@@ -313,19 +313,20 @@ void main() {
       expect(find.text('Cadastrar “zzzz”'), findsOneWidget);
     });
 
-    testWidgets('"Novo cliente" opens the sheet with Cancelar',
+    testWidgets('"Novo cliente" opens the sheet with X and ✓',
         (tester) async {
       final h = Harness();
       await h.pump(tester, CustomerListScreen(directory: directory()));
       await tester.tap(find.byKey(const ValueKey('picker-add')));
       await tester.pumpAndSettle();
-      expect(find.byType(AppSheet), findsOneWidget);
-      expect(find.text('Cancelar'), findsOneWidget);
-      expect(find.textContaining(RegExp(r'^Salvar')), findsOneWidget);
-      // Cancel returns to the picker without choosing anyone.
-      await tester.tap(find.text('Cancelar'));
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(find.byKey(const ValueKey('new_order_close')), findsOneWidget);
+      expect(find.byKey(const ValueKey('new_order_save')), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^Salvar')), findsNothing);
+      // Nothing typed: "X" returns to the picker without choosing anyone.
+      await tester.tap(find.byKey(const ValueKey('new_order_close')));
       await tester.pumpAndSettle();
-      expect(find.byType(AppSheet), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
       expect(find.text('Qual cliente?'), findsOneWidget);
       expect(h.result, 'unset');
     });
@@ -338,14 +339,37 @@ void main() {
       return h;
     }
 
-    testWidgets('new customer shows only name and phone', (tester) async {
+    final save = find.byKey(const ValueKey('new_order_save'));
+    final close = find.byKey(const ValueKey('new_order_close'));
+
+    bool saveEnabled(WidgetTester tester) =>
+        tester.widget<CupertinoButton>(save).onPressed != null;
+
+    testWidgets('new customer shows name and phone in a card and "Mais '
+        'dados" opens inside it', (tester) async {
       await pumpForm(tester, const CustomerFormScreen(asSheet: true));
+      expect(find.byType(FormFieldsCard), findsOneWidget);
       expect(find.text('Nome'), findsOneWidget);
       expect(find.text('Telefone ou WhatsApp'), findsOneWidget);
+      expect(find.text('Mais dados'), findsOneWidget);
+      expect(find.text('E-mail, CPF ou CNPJ, endereço'), findsOneWidget);
       expect(find.text('E-mail'), findsNothing);
-      expect(find.textContaining('Mais dados'), findsOneWidget);
-      await tester.tap(find.textContaining('Mais dados'));
+      await tester.tap(find.byKey(const ValueKey('form_more')));
       await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(FormMoreCard),
+          matching: find.text('E-mail'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('"Mais dados" starts open when the customer has an e-mail',
+        (tester) async {
+      final draft = Customer()..email = 'ana@example.com';
+      await pumpForm(
+          tester, CustomerFormScreen(asSheet: true, customer: draft));
       expect(find.text('E-mail'), findsOneWidget);
     });
 
@@ -355,22 +379,60 @@ void main() {
       await pumpForm(tester, CustomerFormScreen(customer: c));
       expect(find.text('E-mail'), findsOneWidget);
       expect(find.text('Editar cliente'), findsOneWidget);
+      expect(find.byType(FormSheet), findsNothing);
     });
 
-    testWidgets('empty name shows the hint and does not save',
+    testWidgets('✓ is gray with the hint until the name is filled',
         (tester) async {
       var saves = 0;
       await pumpForm(
         tester,
         CustomerFormScreen(asSheet: true, onSave: (_) async => saves++),
       );
-      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+      expect(saveEnabled(tester), isFalse);
+      expect(find.text('Escreva o nome para salvar.'), findsOneWidget);
+      await tester.tap(save);
       await tester.pumpAndSettle();
-      expect(find.text('Digite o nome do cliente'), findsOneWidget);
       expect(saves, 0);
+
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Ana');
+      await tester.pump();
+      expect(saveEnabled(tester), isTrue);
+      expect(find.text('Escreva o nome para salvar.'), findsNothing);
     });
 
-    testWidgets('saving the sheet pops the new customer', (tester) async {
+    testWidgets('"X" with nothing typed closes at once', (tester) async {
+      final h = await pumpForm(tester, const CustomerFormScreen(asSheet: true));
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text('Sair sem salvar?'), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
+      expect(h.result, isNull);
+    });
+
+    testWidgets('"X" with something typed asks before discarding',
+        (tester) async {
+      final h = await pumpForm(tester, const CustomerFormScreen(asSheet: true));
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Ana');
+      await tester.pump();
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text('Sair sem salvar?'), findsOneWidget);
+
+      await tester.tap(find.text('Continuar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(find.text('Ana'), findsOneWidget);
+
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Descartar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsNothing);
+      expect(h.result, isNull);
+    });
+
+    testWidgets('✓ saves and pops the new customer', (tester) async {
       Customer? saved;
       final h = await pumpForm(
         tester,
@@ -378,11 +440,28 @@ void main() {
       );
       await tester.enterText(
           find.byType(CupertinoTextField).first, 'Ana Ribeiro');
-      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pumpAndSettle();
       expect(saved?.name, 'Ana Ribeiro');
       expect((h.result as Customer).name, 'Ana Ribeiro');
-      expect(find.byType(AppSheet), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
+    });
+
+    testWidgets('✓ shows a spinner while saving', (tester) async {
+      final done = Completer<void>();
+      await pumpForm(
+        tester,
+        CustomerFormScreen(asSheet: true, onSave: (_) => done.future),
+      );
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Ana');
+      await tester.pump();
+      await tester.tap(save);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('new_order_saving')), findsOneWidget);
+      done.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsNothing);
     });
   });
 
@@ -465,7 +544,8 @@ void main() {
       await tester.tap(find.textContaining('Cadastrar outro'));
       await tester.pumpAndSettle();
       expect(find.byType(DeviceFormScreen), findsOneWidget);
-      expect(find.text('Cancelar'), findsOneWidget);
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(find.byKey(const ValueKey('new_order_close')), findsOneWidget);
     });
 
     testWidgets('overdue order shows the status in bold with the order value',

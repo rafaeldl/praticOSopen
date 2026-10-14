@@ -12,7 +12,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -137,7 +137,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         draft.name = text;
       }
     }
-    final device = await AppSheet.show<Device>(
+    final device = await FormSheet.show<Device>(
       context,
       (_) => DeviceFormScreen(asSheet: true, device: draft),
     );

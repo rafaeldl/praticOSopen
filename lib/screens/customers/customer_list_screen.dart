@@ -6,7 +6,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/plate_lookup.dart';
@@ -135,7 +135,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         draft.name = text;
       }
     }
-    final created = await AppSheet.show<Customer>(
+    final created = await FormSheet.show<Customer>(
       context,
       (_) => CustomerFormScreen(asSheet: true, customer: draft),
     );

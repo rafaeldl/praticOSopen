@@ -6178,4 +6178,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String pickerNoDevice(String device) {
     return 'Ningún $device';
   }
+
+  @override
+  String get formMoreData => 'Más datos';
+
+  @override
+  String get customerSaveNeedsName => 'Escribe el nombre para guardar.';
+
+  @override
+  String get customerMoreDataHint => 'Correo, documento fiscal, dirección';
+
+  @override
+  String deviceSaveNeedsField(String field) {
+    return 'Completa el campo $field para guardar.';
+  }
+
+  @override
+  String deviceMoreDataHint(String brand, String category) {
+    return 'Foto, $brand y $category';
+  }
 }

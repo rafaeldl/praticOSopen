@@ -3049,5 +3049,12 @@
   "orderMenuRemoveDevice": "Tirar {device} da OS",
   "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
   "pickerNoDevice": "Nenhum {device}",
-  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}}
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}},
+  "formMoreData": "Mais dados",
+  "customerSaveNeedsName": "Escreva o nome para salvar.",
+  "customerMoreDataHint": "E-mail, CPF ou CNPJ, endereço",
+  "deviceSaveNeedsField": "Preencha o campo {field} para salvar.",
+  "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},
+  "deviceMoreDataHint": "Foto, {brand} e {category}",
+  "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}}
 }

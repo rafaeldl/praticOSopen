@@ -6166,4 +6166,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String pickerNoDevice(String device) {
     return 'Nenhum $device';
   }
+
+  @override
+  String get formMoreData => 'Mais dados';
+
+  @override
+  String get customerSaveNeedsName => 'Escreva o nome para salvar.';
+
+  @override
+  String get customerMoreDataHint => 'E-mail, CPF ou CNPJ, endereço';
+
+  @override
+  String deviceSaveNeedsField(String field) {
+    return 'Preencha o campo $field para salvar.';
+  }
+
+  @override
+  String deviceMoreDataHint(String brand, String category) {
+    return 'Foto, $brand e $category';
+  }
 }

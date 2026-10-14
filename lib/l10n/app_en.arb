@@ -2889,5 +2889,12 @@
   "orderMenuRemoveDevice": "Remove {device} from the order",
   "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
   "pickerNoDevice": "No {device}",
-  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}}
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}},
+  "formMoreData": "More details",
+  "customerSaveNeedsName": "Type the name to save.",
+  "customerMoreDataHint": "E-mail, tax ID, address",
+  "deviceSaveNeedsField": "Fill in {field} to save.",
+  "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},
+  "deviceMoreDataHint": "Photo, {brand} and {category}",
+  "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}}
 }
