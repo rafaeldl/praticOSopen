@@ -21,6 +21,11 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 | `test/theme/app_glass_test.dart` | Vidro translúcido e a volta para fundo opaco |
 | `lib/screens/widgets/app_list_row.dart`, `section_label.dart`, `list_states.dart` | Componentes de lista (ver "Componentes de lista") |
 | `test/widgets/list_base_components_test.dart` | Chevron, quebra de texto e empilhamento em texto grande |
+| `lib/screens/widgets/glass_bar_button.dart` | `AppNavBar` (título grande + botões do topo), `GlassBarButton` ("+", "…", compartilhar), `GlassBackButton` |
+| `lib/screens/widgets/pull_down_menu.dart` | `showPullDownMenu`: menu "…" em vidro, com grupos (`PullDownGroup`) e ações com ícone (`PullDownItem`) |
+| `lib/screens/widgets/picker_screen.dart` | `PickerScaffold<T>`, `pickOne`, `AppSearchField`: telas de escolher (ver "Telas de escolher") |
+| `lib/screens/order/new_order_form.dart` | Peças de cadastro em sheet: `NewOrderTopBar` (X e ✓), `FormCard`, `FormRow`, `FormPill`, `FormPhotos`; e as peças da IA: `AssistantBar` (Foto/Falar), `AssistantTranscript`, `AssistantNote` |
+| `lib/screens/order/speech_listener.dart` | Microfone (`speech_to_text`) usado pela barra Falar |
 
 `lib/theme/app_theme.dart` (azul `#2563EB`) e o `primaryColor: CupertinoColors.activeBlue` de `lib/main.dart` são o padrão antigo. Telas migram para os tokens novos à medida que forem redesenhadas; a troca do `primaryColor` global entra junto com a primeira tela redesenhada (a OS).
 
@@ -30,14 +35,18 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 2. **Um botão azul por tela.** Só a ação principal é preenchida com `accent`. As demais usam `secondaryFill` ou viram link (`accentText`).
 3. **Português do dia a dia.** "Falta receber R$ 166", "Próximo passo: começar o serviço". Nada de "saldo devedor", "etapa 2 de 4" ou siglas.
 4. **Mostrar só o que existe.** Recursos ocasionais (checklist, contrato, endereço, desconto, vários aparelhos) só aparecem na tela quando o registro tem. Para adicionar: menu "…"/"+" ou o assistente.
-5. **A IA sempre pergunta antes.** O que ela vai mudar aparece com marca-texto (`marker`) e o botão de confirmação diz o que acontece ("Está certo, pode fazer").
+5. **A IA faz e mostra o que fez.** Foto e Falar aplicam na hora, sem tela de confirmação. Cada campo que a IA mexeu ganha um ✦ azul (`FormRow.marked`) e aparece o aviso "Preenchi o que está marcado. Confira e salve. · Desfazer"; "Desfazer" volta tudo daquela fala/foto de uma vez. A IA só acrescenta (cliente, veículo, itens, relato, prazo) e não troca o que a pessoa já escolheu. **Nunca** recebe pagamento, cancela ou apaga sozinha. Erros aparecem nesse mesmo aviso, nunca em alerta. Ver "IA na tela".
 6. **Toque fácil.** Botão principal com 58 de altura (`AppSizes.primaryButtonHeight`); qualquer outro alvo com pelo menos 44.
 7. **Cor nunca sozinha.** Todo status tem texto junto. A cor fica no ponto; o texto do status é neutro (`textSecondary`), para não ser confundido com link. Nunca selo colorido (ver `UX_GUIDELINES.md`).
 8. **O texto cresce.** Todo texto acompanha o "Tamanho do texto" do iPhone (Dynamic Type). Nada de altura fixa para texto nem reticências em nome, título de linha ou valor: a linha quebra. Ver "Tipografia".
-9. **Cadastro novo abre por cima.** "Nova OS", "Novo cliente", "Novo veículo", "Novo serviço" abrem como sheet (tamanho grande), como o Lembretes e o Calendário: "X" à esquerda e "✓" à direita no topo, em vidro. O "✓" fica cinza até dar para salvar e azul quando dá; quando ele está cinza, uma linha em `textSecondary` diz o que falta ("Escolha o cliente para salvar"). Com algo preenchido, o "X" pergunta antes de descartar e arrastar a sheet para baixo fica travado. O formulário usa cartões brancos sobre fundo cinza (`AppColors.groupedBackground`); só formulário de criar/editar usa cartões, telas de consulta continuam com lista plana. Ferramentas (Foto, Falar) ficam numa barra de vidro embaixo. A Nova OS é a referência; os outros cadastros migram quando forem revisados. Telas de edição de algo que já existe (Sua conta, Dados da empresa) abrem empurradas, com "Voltar".
+9. **Cadastro novo abre por cima.** "Nova OS", "Novo cliente", "Novo veículo", "Novo serviço" abrem como sheet (tamanho grande), como o Lembretes e o Calendário: "X" à esquerda e "✓" à direita no topo, em vidro. O "✓" fica cinza até dar para salvar e azul quando dá; quando ele está cinza, uma linha em `textSecondary` diz o que falta ("Escolha o cliente para salvar"). Com algo preenchido, o "X" pergunta antes de descartar e arrastar a sheet para baixo fica travado. O formulário usa cartões brancos sobre fundo cinza (`AppColors.groupedBackground`); só formulário de criar/editar usa cartões, telas de consulta continuam com lista plana. Ferramentas (Foto, Falar) ficam numa barra de vidro embaixo. O que é ocasional fica num cartão "Mais opções" que **abre ali mesmo**, mostrando os campos dentro do cartão (sem outra janela); fechado, ele resume o que está marcado. O "✓" salva e fecha; não há botão "Salvar" embaixo. A Nova OS é a referência; os outros cadastros migram quando forem revisados. Telas de edição de algo que já existe (Sua conta, Dados da empresa) abrem empurradas, com "Voltar".
 10. **Componentes do iPhone quando existem.** Abas, interruptor (verde do sistema), escolha com ✓ à direita, menu "…" com o símbolo `ellipsis`, sheet com fechar à esquerda, botão "Continuar com Apple" nativo (`SignInWithAppleButton`, com logo e proporção da Apple). Não desenhar uma versão própria.
-11. **Vidro só na navegação (Liquid Glass).** Barra de abas, botões do topo (voltar, "…", sino), menus "…", sheets pequenas e o botão principal flutuante acima das abas usam vidro: fundo translúcido com desfoque e sombra leve. O botão principal flutuante é vidro tingido com o azul da marca. O conteúdo (listas, bloco do próximo passo, campos, fundo) fica **sempre opaco** ("Don't use Liquid Glass in the content layer", HIG `materials`). Com "Reduzir transparência" ligado no iPhone, o vidro vira fundo opaco (`surface`).
+11. **Vidro só na navegação (Liquid Glass).** Barra de abas, botões do topo (voltar, "…", sino), menus "…", sheets pequenas e o botão principal flutuante acima das abas usam vidro: fundo translúcido com desfoque e sombra leve. O botão principal flutuante é vidro tingido com o azul da marca. Os botões da barra Foto/Falar também são vidro (são controles). O conteúdo (listas, cartões, campos, fundo, o texto ouvido pela IA e o aviso "Preenchi… · Desfazer") fica **sempre opaco** ("Don't use Liquid Glass in the content layer", HIG `materials`). Com "Reduzir transparência" ligado no iPhone, o vidro vira fundo opaco (`surface`).
    - **Implementação no Flutter:** o Flutter ainda não tem o Liquid Glass nativo (issue flutter/flutter#170310 aberta, P3; o pacote oficial `cupertino_ui` 1.1.2 não tem vidro). Até lá, usar o `AppGlass` (`lib/theme/app_glass.dart`: `ClipRRect` + `BackdropFilter` com desfoque + preenchimento translúcido) só na barra de abas, na barra de topo e nas sheets pequenas, medindo o custo de desempenho. Ele vira fundo opaco (sem desfoque) quando "Aumentar contraste" está ligado (`MediaQuery.highContrastOf`), quando recebe `reduceTransparency: true` ou `enabled: false`. O Flutter não expõe "Reduzir transparência" no `MediaQuery`: ler `UIAccessibility.isReduceTransparencyEnabled` por um canal nativo e passar em `reduceTransparency`. Trocar pelo oficial quando o `cupertino_ui` trouxer o material. Barra de abas nativa via pacote de terceiros (ex.: `real_liquid_glass`) fica como teste isolado, risk:high.
+
+12. **Escolher é uma tela, não um menu.** Qualquer escolha numa lista (cliente, veículo, situação, responsável, checklist) abre a tela de escolher (`PickerScaffold`/`pickOne`), nunca um `CupertinoActionSheet`. Tocar no que já está na OS (o nome do cliente, o veículo) abre direto a tela de trocar, sem menu no meio. Ver "Telas de escolher".
+13. **Sem botão "Editar".** Cada linha abre o seu editor: o que já existe abre empurrado ou em sheet pequena; item novo abre em sheet grande (regra 9).
+14. **Menu "…" para o raro.** Fica no topo, em vidro (`showPullDownMenu`), com grupos separados e ícone em cada ação. Ordem: mudar a situação › · "Adicionar à OS" (só o que o registro ainda não tem) · arquivo (Ver PDF, Copiar link) · destrutivas em vermelho no fim (Cancelar, Apagar), sempre com confirmação. O que é frequente sai do menu e ganha lugar próprio (link na seção, botão do topo ou Foto na barra).
 
 ## Cores
 
@@ -47,10 +56,10 @@ Cada cor tem um papel só. Componentes usam o papel, nunca o hex.
 |---|---|---|---|
 | `accent` / `onAccent` | `#116BB5` / branco | `#116BB5` / branco | O único botão preenchido da tela. Azul da marca (mesmo do site) |
 | `accentText` | `#116BB5` | `#67AAED` | Links e ações em texto ("Trocar", "Voltar") |
-| `accentSoft` / `onAccentSoft` | `#E0F1FF` / `#0B3D80` | `#142F4B` / branco | Bloco "próximo passo" |
+| `accentSoft` / `onAccentSoft` | `#E0F1FF` / `#0B3D80` | `#142F4B` / branco | Bloco "próximo passo" (Início, Financeiro, Receber). A tela da OS não usa: lá o próximo passo é o botão azul |
 | `secondaryFill` / `onSecondaryFill` | `#F2F2F7` / texto | `#2C2C2E` / texto | Todas as outras ações |
-| `assistantFill` / `onAssistantFill` | `#1C1C1E` / branco | `#F2F2F7` / `#1C1C1E` | Botão "Falar" do assistente, sempre no mesmo lugar |
-| `marker` / `onMarker` | `#FCF2A2` / `#1C1C1E` | igual | Amarelo do logo: só o que a IA vai mudar |
+| `assistantFill` / `onAssistantFill` | `#1C1C1E` / branco | `#F2F2F7` / `#1C1C1E` | Legado: o "Falar" agora é vidro com ícone e texto em `accentText`. Não usar em tela nova |
+| `marker` / `onMarker` | `#FCF2A2` / `#1C1C1E` | igual | Legado (`AppListRow.marked`). O que a IA preencheu agora leva ✦ em `accent`. Não usar em tela nova |
 | `text` / `textSecondary` | `#1C1C1E` / `#6C6C70` | branco / `#AEAEB2` | Texto principal e de apoio |
 | `background` / `surface` | branco / branco | preto / `#1C1C1E` | Fundo da tela / blocos |
 | `separator` | `#EFEFF4` | `#38383A` | Linhas entre itens |
@@ -64,7 +73,7 @@ Por que o azul da marca e não o do iOS: é a cor da marca (a HIG aceita uma cor
 
 **Interruptor:** usar o `CupertinoSwitch` com o verde padrão do sistema. `success` é para status, não para controle.
 
-Por que não um roxo para a IA: duas cores preenchidas disputam o papel de "ação principal" e confundem. A IA se identifica pelo lugar fixo (barra de baixo) e pelo marca-texto amarelo.
+Por que não um roxo para a IA: duas cores preenchidas disputam o papel de "ação principal" e confundem. A IA se identifica pelo lugar fixo (barra de baixo) e pelo ✦ azul no que ela preencheu.
 
 Status de OS (cor no ponto, texto em `textSecondary`): `quote` cinza, `approved` azul (`accentText`), `progress` âmbar (`warning`), `done` verde (`success`), `canceled` cinza (o texto "Cancelada" diferencia). **Atrasada** não é status, é problema: ponto e texto em `danger`, texto em negrito ("Atrasada 2 dias").
 
@@ -112,6 +121,7 @@ Toda tela que escolhe algo (cliente, veículo, serviço/peça, checklist, situa�
 - Abre empurrada; na Nova OS empilha no Navigator interno da sheet (rotas nomeadas de sempre).
 - Título grande = a pergunta ("Qual cliente?", "Qual veículo?", "O que vai ser feito?", "Qual checklist?", "Qual a situação?", "Quem é o responsável?"), `subtitle` opcional ("de Paulo Nunes").
 - Busca (`AppSearchField`) só com **mais de 10 itens** (`kPickerSearchThreshold`); depois de digitar ela fica. `alwaysShowSearch` só onde digitar é o jeito de criar (serviço/peça, valor acumulado).
+- Abrir pelo registro: tocar no que já está escolhido (cliente, veículo na OS) abre direto esta tela, com o ✓ no atual.
 - Cadastrar novo: botão "+" de vidro no topo, à direita (`addLabel` vira o rótulo de acessibilidade, `onAdd`), como no Contatos. Cadastro abre em sheet e, ao salvar, já volta escolhido. Buscou e não achou: aparece na lista "+ Cadastrar “texto”" (`onCreate`, já com o texto no cadastro) e uma frase curta em `textSecondary`.
 - Tirar o que está escolhido: opção "Nenhum …" como linha comum no topo da lista (padrão do Ajustes/Calendário), nunca botão vermelho nem "Limpar" no topo. Ex.: "Nenhum veículo" ao trocar o veículo da OS.
 - Linhas planas sem chevron (`PickerItem`); tocar escolhe e volta. O escolhido tem ✓ azul (`AppListRow.selected`), depois do valor quando houver.
@@ -119,7 +129,7 @@ Toda tela que escolhe algo (cliente, veículo, serviço/peça, checklist, situa�
 - Múltipla escolha (`multiple: true`): tocar marca/desmarca; o ✓ redondo do topo (`PickerConfirmButton`, cinza enquanto `onConfirm` é null, azul quando dá) confirma. Sem botão "Confirmar" embaixo.
 - Vazio: `EmptyState` com a ação de criar. Status: `StatusDot` como `leading` e texto em peso normal (`strongTitles: false`).
 
-Lista curta e fixa (situação, responsável): `pickOne`.
+Lista curta e fixa (situação, responsável): `pickOne`. Os cadastros que o "+" abre (cliente, veículo, serviço) migram para a sheet da regra 9 quando forem revisados.
 
 ```dart
 final status = await pickOne<String>(
@@ -139,14 +149,24 @@ final status = await pickOne<String>(
 
 ## Estrutura de toda tela
 
-Seis zonas, sempre nesta ordem. Zonas vazias não aparecem.
+Zonas, sempre nesta ordem. Zona vazia não aparece.
 
-1. **Barra de topo:** a barra de navegação do sistema: voltar, nome curto do registro ("OS 186") e "…". No máximo esses três.
-2. **Título:** o título grande do sistema (`title`), com subtítulo em `textSecondary`.
-3. **Próximo passo:** bloco `accentSoft` com uma frase e o único botão `accent`.
-4. **Conteúdo:** listas simples (rótulo + linhas com `separator`). Sem cartão dentro de cartão.
-5. **Resumo:** linha forte acima, totais e o que falta.
-6. **Embaixo:** foto + "Falar" (`assistantFill`) nas telas com assistente; ou um botão de largura total nas telas de formulário ("Salvar OS"). Sem faixa opaca com borda: o conteúdo rola por baixo e some num degradê (efeito de borda de rolagem). Nas telas com abas, o botão flutua logo acima da barra de abas (acessório da tab bar), não numa segunda barra.
+1. **Barra de topo** (vidro): voltar, título curto do registro ("OS 186", menos de 15 letras) e no máximo dois botões à direita (ex.: compartilhar e "…"). Telas de coleção (Início, listas) usam o título grande do sistema; telas de um registro (OS) usam o título pequeno, porque quem identifica o registro é o cabeçalho.
+2. **Cabeçalho** (conteúdo): o nome que identifica o registro em destaque (cliente da OS), o apoio em `textSecondary` (veículo · placa), a situação como ponto + texto e **uma frase** do que falta ("Fica pronto hoje, 17:00", "Falta receber R$ 166"). Atrasada: ponto e texto em `danger`, negrito.
+3. **Ação principal:** o único botão `accent`, 58 de altura, largura total, logo abaixo do cabeçalho, com o próximo passo ("Começar serviço", "Marcar como pronta", "Receber R$ 166"). Fica no conteúdo, não preso embaixo. Sem próximo passo, sem botão. Telas de lista podem usar o bloco `accentSoft` (`NextStepBlock`).
+4. **Conteúdo:** listas planas (`SectionLabel` + linhas com `separator`), seção vazia não aparece. Cartões só em formulário (regra 9). Sem cartão dentro de cartão. Ações frequentes de uma seção viram link no fim dela ("+ Adicionar serviço ou peça").
+5. **Resumo:** junto do que ele resume, como recibo (itens → Total → "Falta receber ›").
+6. **Embaixo:** a barra de vidro Foto/Falar (`AssistantBar`) nas telas com IA, sempre presa ao fundo da tela mesmo com pouco conteúdo. Sem faixa opaca com borda: o conteúdo rola por baixo, e o fim da lista sobe acima da barra e do aviso da IA. Nas telas com abas, o botão flutua logo acima da barra de abas (acessório da tab bar), não numa segunda barra.
+
+**Tela da OS** (`order_screen_v2.dart`, OS salva): topo "OS N" com compartilhar ("Mandar para o cliente") e "…"; cabeçalho com cliente (tocar troca o cliente), veículo · placa (tocar troca o veículo), situação e a frase; botão do próximo passo (Aprovar orçamento → Começar serviço → Marcar como pronta → Receber R$ X); depois "O que o cliente pediu", "Serviços e peças" (com Total e "Falta receber ›" só com "Valores e cobrança" ligado), fotos em faixa, os 2 últimos comentários e "Ver todos (N) ›" (tela própria, `OrderCommentsScreen`), checklists ("7 de 10 respondidas") e "Detalhes" (agendamento, responsável, local, contrato, documentos). "peça" aparece só embaixo de produto.
+
+**Nova OS** (sheet grande, `openNewOrder`): cartões nesta ordem: cliente/veículo → "O que vai ser feito" → "O que o cliente pediu" (opcional; vai para o campo "Observação" do ramo ou vira o 1º comentário) → Fotos → "Fica pronto" → "Mais opções" (Situação, Visita, Responsável, Local, abrindo no cartão). As escolhas empilham no Navigator interno da sheet.
+
+**IA na tela** (Nova OS e OS):
+- **Barra:** dois botões de vidro separados, "Foto" (texto em `text`) e "Falar" (texto em `accentText`), com ícone e rótulo. Sem IA na empresa, só "Foto".
+- **Falar:** a própria barra vira "Ouvindo…", com onda azul, ■ (parar e preencher) e X (cancelar); o texto ouvido aparece num cartão opaco acima. Sem microfone, vira campo de texto. Nada de tela separada.
+- **Foto:** vai direto para as fotos da OS e a barra mostra "Lendo as fotos…".
+- **Resultado:** ✦ nos campos e aviso opaco com "Desfazer" (regra 5).
 
 **Abas:** só os lugares do dia a dia, sempre na ordem Início (ícone da casa), Agenda, Financeiro. Clientes, catálogo, contratos, equipe e ajustes pertencem à OS ou à empresa e abrem pelo botão do perfil, no topo da Início. Ao lado das abas fica o "+" azul (Nova OS), que é uma ação e não uma aba: azul cheio, sem vidro. Quem não usa uma aba (técnico sem Financeiro, empresa sem agenda) não a vê, mas as outras mantêm a mesma ordem. Sem "+" e com menos de 3 abas (técnico), a cápsula fica centralizada. No código: `AppTab` e `visibleAppTabs()` (`lib/screens/menu_navigation/app_tabs.dart`) decidem as abas visíveis (Agenda some com `Company.useScheduling` desligado; Financeiro só com `viewFinancialReports`); a barra é o `GlassTabBar` (vidro do `AppGlass`, parâmetro `action` para o "+"), e o nome de analytics de cada índice segue as abas visíveis.
 
