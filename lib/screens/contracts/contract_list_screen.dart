@@ -6,6 +6,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/services/contract_directory.dart';
 import 'package:praticos/services/format_service.dart';
@@ -65,18 +66,6 @@ class _ContractListScreenState extends State<ContractListScreen> {
   void dispose() {
     _subscription?.cancel();
     super.dispose();
-  }
-
-  String _frequencyText(OrderContract contract) {
-    final l10n = context.l10n;
-    final count = contract.interval ?? 1;
-    return switch (contract.frequency) {
-      'daily' => l10n.contractEveryDays(count),
-      'weekly' => l10n.contractEveryWeeks(count),
-      'monthly' => l10n.contractEveryMonths(count),
-      'yearly' => l10n.contractEveryYears(count),
-      _ => '',
-    };
   }
 
   @override
@@ -215,7 +204,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
     final vehicle = order.device?.name;
 
     final firstLine = [
-      _frequencyText(contract),
+      ContractRepeat.describe(context, contract),
       if (vehicle != null && vehicle.isNotEmpty) vehicle,
     ].where((part) => part.isNotEmpty).join(' · ');
 

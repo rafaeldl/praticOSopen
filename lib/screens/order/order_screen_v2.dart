@@ -35,6 +35,7 @@ import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/utils/phone_format.dart';
@@ -1688,7 +1689,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (order?.assignedTo?.name?.isNotEmpty ?? false)
         order!.assignedTo!.name!,
       if (_hasAddress) _store.address!.trim(),
-      if (_store.hasContract) _frequencyLabel(order?.contract?.frequency),
+      if (_store.hasContract) ContractRepeat.describe(context, order?.contract),
     ];
     Future<void> run(Future<void> Function() action) async {
       await action();
@@ -1744,7 +1745,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             FormRow(
               key: const ValueKey('new_order_more_repeat'),
               title: l10n.orderRepeatRow,
-              value: _frequencyLabel(order?.contract?.frequency),
+              value: ContractRepeat.describe(context, order?.contract),
               onTap: () => run(() => _actions.editContract(context, _store)),
             ),
         ],
@@ -2783,9 +2784,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         AppListRow(
           title: l10n.recurringContract,
           subtitle: contract.nextDueDate == null
-              ? _frequencyLabel(contract.frequency)
+              ? ContractRepeat.describe(context, contract)
               : l10n.orderContractSummary(
-                  _frequencyLabel(contract.frequency),
+                  ContractRepeat.describe(context, contract),
                   _format.formatDate(contract.nextDueDate!),
                 ),
           onTap: _contractActions,
@@ -2966,22 +2967,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       confirmDismiss: (_) => onDelete(),
       child: child,
     );
-  }
-
-  String _frequencyLabel(String? frequency) {
-    final l10n = context.l10n;
-    switch (frequency) {
-      case 'daily':
-        return l10n.frequencyDaily;
-      case 'weekly':
-        return l10n.frequencyWeekly;
-      case 'monthly':
-        return l10n.frequencyMonthly;
-      case 'yearly':
-        return l10n.frequencyYearly;
-      default:
-        return frequency ?? '';
-    }
   }
 
   Widget _primaryButton(String label, VoidCallback? onPressed, {Key? key}) {

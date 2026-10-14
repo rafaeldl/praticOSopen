@@ -405,7 +405,7 @@ class _OrderFormState extends State<OrderForm> {
 
         // Template order — show contract details (frequency, next due, auto-gen)
         final formatService = FormatService();
-        final freqLabel = _contractFrequencyLabel(context, contract.frequency);
+        final freqLabel = ContractRepeat.describe(context, contract);
         final nextDate = contract.nextDueDate != null
             ? formatService.formatDate(contract.nextDueDate!)
             : '';
@@ -445,21 +445,6 @@ class _OrderFormState extends State<OrderForm> {
         );
       },
     );
-  }
-
-  String _contractFrequencyLabel(BuildContext context, String? frequency) {
-    switch (frequency) {
-      case 'daily':
-        return context.l10n.frequencyDaily;
-      case 'weekly':
-        return context.l10n.frequencyWeekly;
-      case 'monthly':
-        return context.l10n.frequencyMonthly;
-      case 'yearly':
-        return context.l10n.frequencyYearly;
-      default:
-        return frequency ?? '';
-    }
   }
 
   void _showContractModal(BuildContext context) {

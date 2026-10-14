@@ -59,6 +59,44 @@ Future<_Changes> _pump(
 }
 
 void main() {
+  group('ContractRepeat.describe', () {
+    Future<List<String>> describeAll(
+      WidgetTester tester,
+      List<OrderContract?> contracts,
+    ) async {
+      late List<String> texts;
+      await tester.pumpWidget(
+        CupertinoApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(builder: (context) {
+            texts = [
+              for (final c in contracts) ContractRepeat.describe(context, c),
+            ];
+            return const SizedBox();
+          }),
+        ),
+      );
+      return texts;
+    }
+
+    testWidgets('uses the same everyday text as the repeat sheet, with the '
+        'interval', (tester) async {
+      final texts = await describeAll(tester, [
+        _contract(),
+        OrderContract()
+          ..frequency = 'monthly'
+          ..interval = 2,
+        OrderContract()..frequency = 'weekly',
+        null,
+      ]);
+
+      expect(texts, ['Todo mês', 'A cada 2 meses', 'Toda semana', '']);
+    });
+  });
+
+
   testWidgets('shows the contract in everyday words', (tester) async {
     await _pump(tester);
 

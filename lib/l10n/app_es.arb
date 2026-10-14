@@ -807,10 +807,6 @@
       }
     }
   },
-  "frequencyDaily": "Diario",
-  "frequencyWeekly": "Semanal",
-  "frequencyMonthly": "Mensual",
-  "frequencyYearly": "Anual",
   "selectDate": "Seleccionar fecha",
   "deviceStatusActive": "Activo",
   "deviceStatusMaintenance": "En mantenimiento",

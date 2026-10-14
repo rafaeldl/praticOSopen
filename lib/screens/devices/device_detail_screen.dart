@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
@@ -484,7 +485,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   color: AppColors.textSecondary.resolveFrom(context),
                 ),
                 title:
-                    '${l10n.order}${order.number == null ? '' : ' #${order.number}'} · ${_frequencyLabel(order.contract!.frequency)}',
+                    '${l10n.order}${order.number == null ? '' : ' #${order.number}'} · ${ContractRepeat.describe(context, order.contract)}',
                 subtitle: order.contract!.nextDueDate == null
                     ? null
                     : '${l10n.contractNextDue}: ${format.formatDate(order.contract!.nextDueDate!)}',
@@ -498,22 +499,6 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         );
       },
     );
-  }
-
-  String _frequencyLabel(String? frequency) {
-    final l10n = context.l10n;
-    switch (frequency) {
-      case 'daily':
-        return l10n.frequencyDaily;
-      case 'weekly':
-        return l10n.frequencyWeekly;
-      case 'monthly':
-        return l10n.frequencyMonthly;
-      case 'yearly':
-        return l10n.frequencyYearly;
-      default:
-        return frequency ?? '';
-    }
   }
 }
 

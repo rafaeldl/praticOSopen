@@ -753,7 +753,7 @@ void main() {
       );
 
       final date = (FormatService()..setLocale('pt')).formatDate(next);
-      expect(find.text('Mensal · próxima em $date'), findsOneWidget);
+      expect(find.text('Todo mês · próxima em $date'), findsOneWidget);
       await tester.tap(find.text('Contrato recorrente'));
       await tester.pumpAndSettle();
       // Opens the Repetir screen directly, no action sheet in between.
