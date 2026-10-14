@@ -245,7 +245,7 @@ class _PickerScaffoldState<T> extends State<PickerScaffold<T>> {
                 ? PickerConfirmButton(
                     onPressed: widget.enabled ? widget.onConfirm : null,
                   )
-                : null,
+                : _addButton(),
           ),
           if (widget.subtitle != null)
             SliverToBoxAdapter(
@@ -285,6 +285,19 @@ class _PickerScaffoldState<T> extends State<PickerScaffold<T>> {
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
+    );
+  }
+
+  /// "+" in the bar for "Novo …" (HIG: adding lives in the top bar).
+  Widget? _addButton() {
+    final addLabel = widget.addLabel;
+    if (addLabel == null) return null;
+    final onAdd = widget.onAdd ?? _focusSearch;
+    return GlassBarButton(
+      key: const ValueKey('picker-add'),
+      icon: CupertinoIcons.add,
+      label: addLabel,
+      onPressed: widget.enabled ? onAdd : null,
     );
   }
 
@@ -349,17 +362,6 @@ class _PickerScaffoldState<T> extends State<PickerScaffold<T>> {
           label: widget.createLabel?.call(query) ?? l10n.pickerRegister(query),
           onTap: () {
             if (widget.enabled) widget.onCreate!(query);
-          },
-        ),
-      );
-      children.add(const PickerSeparator());
-    } else if (addLabel != null && onAdd != null && query.isEmpty) {
-      children.add(
-        AddRow(
-          plain: true,
-          label: addLabel,
-          onTap: () {
-            if (widget.enabled) onAdd();
           },
         ),
       );

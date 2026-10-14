@@ -2887,5 +2887,7 @@
   "pickerAll": "All",
   "pickerSearch": "Search",
   "orderMenuRemoveDevice": "Remove {device} from the order",
-  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
+  "pickerNoDevice": "No {device}",
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}}
 }

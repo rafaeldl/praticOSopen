@@ -3047,5 +3047,7 @@
   "pickerAll": "Todos",
   "pickerSearch": "Buscar",
   "orderMenuRemoveDevice": "Tirar {device} da OS",
-  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
+  "pickerNoDevice": "Nenhum {device}",
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}}
 }

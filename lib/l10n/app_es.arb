@@ -2887,5 +2887,7 @@
   "pickerAll": "Todos",
   "pickerSearch": "Buscar",
   "orderMenuRemoveDevice": "Quitar {device} de la OS",
-  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}}
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
+  "pickerNoDevice": "Ningún {device}",
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}}
 }

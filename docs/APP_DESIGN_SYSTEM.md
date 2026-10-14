@@ -112,7 +112,8 @@ Toda tela que escolhe algo (cliente, veículo, serviço/peça, checklist, situa�
 - Abre empurrada; na Nova OS empilha no Navigator interno da sheet (rotas nomeadas de sempre).
 - Título grande = a pergunta ("Qual cliente?", "Qual veículo?", "O que vai ser feito?", "Qual checklist?", "Qual a situação?", "Quem é o responsável?"), `subtitle` opcional ("de Paulo Nunes").
 - Busca (`AppSearchField`) só com **mais de 10 itens** (`kPickerSearchThreshold`); depois de digitar ela fica. `alwaysShowSearch` só onde digitar é o jeito de criar (serviço/peça, valor acumulado).
-- Primeira linha "+ Novo …" (`addLabel`/`onAdd`, `AddRow(plain: true)`). Buscou e não achou: vira "+ Cadastrar “texto”" (`onCreate`, já com o texto no cadastro) e uma frase curta em `textSecondary`.
+- Cadastrar novo: botão "+" de vidro no topo, à direita (`addLabel` vira o rótulo de acessibilidade, `onAdd`), como no Contatos. Cadastro abre em sheet e, ao salvar, já volta escolhido. Buscou e não achou: aparece na lista "+ Cadastrar “texto”" (`onCreate`, já com o texto no cadastro) e uma frase curta em `textSecondary`.
+- Tirar o que está escolhido: opção "Nenhum …" como linha comum no topo da lista (padrão do Ajustes/Calendário), nunca botão vermelho nem "Limpar" no topo. Ex.: "Nenhum veículo" ao trocar o veículo da OS.
 - Linhas planas sem chevron (`PickerItem`); tocar escolhe e volta. O escolhido tem ✓ azul (`AppListRow.selected`), depois do valor quando houver.
 - Seções com `SectionLabel` (Recentes/Todos, Mais usados, Do cliente/Outros).
 - Múltipla escolha (`multiple: true`): tocar marca/desmarca; o ✓ redondo do topo (`PickerConfirmButton`, cinza enquanto `onConfirm` é null, azul quando dá) confirma. Sem botão "Confirmar" embaixo.

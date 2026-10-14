@@ -10623,6 +10623,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tirar {device} da OS'**
   String orderMenuRemoveDevice(String device);
+
+  /// No description provided for @pickerNoDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum {device}'**
+  String pickerNoDevice(String device);
 }
 
 class _AppLocalizationsDelegate

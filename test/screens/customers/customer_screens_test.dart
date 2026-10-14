@@ -187,7 +187,7 @@ void main() {
       await Harness().pump(
           tester, CustomerListScreen(directory: directory()));
       expect(find.text('Qual cliente?'), findsOneWidget);
-      expect(find.text('Novo cliente'), findsOneWidget);
+      expect(find.byKey(const ValueKey('picker-add')), findsOneWidget);
       expect(find.text('Ana Ribeiro'), findsOneWidget);
       // Two customers: no search (only above 10).
       expect(find.byType(CupertinoSearchTextField), findsNothing);
@@ -311,14 +311,13 @@ void main() {
       expect(find.text('Nenhum cliente com “zzzz”'), findsOneWidget);
       // The add row becomes "Cadastrar “zzzz”".
       expect(find.text('Cadastrar “zzzz”'), findsOneWidget);
-      expect(find.text('Novo cliente'), findsNothing);
     });
 
     testWidgets('"Novo cliente" opens the sheet with Cancelar',
         (tester) async {
       final h = Harness();
       await h.pump(tester, CustomerListScreen(directory: directory()));
-      await tester.tap(find.text('Novo cliente'));
+      await tester.tap(find.byKey(const ValueKey('picker-add')));
       await tester.pumpAndSettle();
       expect(find.byType(AppSheet), findsOneWidget);
       expect(find.text('Cancelar'), findsOneWidget);

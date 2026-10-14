@@ -14,7 +14,6 @@ import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -36,7 +35,7 @@ import 'package:provider/provider.dart';
 ///   [Device]; no swipe, no chevron.
 /// - **Settings mode** (from "Mais"): title "Veículos", chevron on every row
 ///   and swipe to edit / delete (delete needs `manageDevices`).
-/// Popped by "Qual veículo?" when "Tirar … da OS" is tapped.
+/// Popped by "Qual veículo?" when "Nenhum veículo" is tapped.
 const kRemoveDeviceResult = 'remove-device';
 
 class DeviceListScreen extends StatefulWidget {
@@ -68,7 +67,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   bool _argsRead = false;
   bool _selecting = false;
 
-  /// The order's vehicle being changed: offers "Tirar … da OS".
+  /// The order's vehicle being changed: offers "Nenhum veículo".
   DeviceAggr? _current;
   String? _customerId;
   String? _customerName;
@@ -261,12 +260,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             emptyTitle: '${l10n.no} $device ${l10n.registered}',
             headerRows: (query) => [
               if (query.isEmpty && _current != null) ...[
-                AddRow(
-                  key: const ValueKey('device-remove'),
-                  plain: true,
-                  destructive: true,
-                  icon: CupertinoIcons.minus_circle,
-                  label: l10n.orderMenuRemoveDevice(_current!.name ?? device),
+                AppListRow(
+                  key: const ValueKey('device-none'),
+                  title: l10n.pickerNoDevice(device),
                   onTap: () => Navigator.pop(context, kRemoveDeviceResult),
                 ),
                 const PickerSeparator(),

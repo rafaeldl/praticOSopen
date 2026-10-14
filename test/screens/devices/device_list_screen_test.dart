@@ -105,7 +105,7 @@ void main() {
     final gol1 = tester.getTopLeft(find.text('VW Gol')).dy;
     final uno1 = tester.getTopLeft(find.text('Fiat Uno 2015')).dy;
     expect(gol1, lessThan(uno1));
-    expect(find.textContaining('Novo '), findsOneWidget);
+    expect(find.byKey(const ValueKey('picker-add')), findsOneWidget);
     expect(find.byType(AppListRow), findsNWidgets(2));
   });
 
@@ -173,7 +173,7 @@ void main() {
     expect(find.byType(Dismissible), findsOneWidget);
   });
 
-  testWidgets('changing the order vehicle offers "Tirar … da OS" at the top', (
+  testWidgets('changing the order vehicle offers "Nenhum veículo" first', (
     tester,
   ) async {
     final get = await pumpList(
@@ -186,14 +186,16 @@ void main() {
       },
       devices: [uno, gol],
     );
-    expect(find.text('Tirar Uno da OS'), findsOneWidget);
-    await tester.tap(find.text('Tirar Uno da OS'));
+    expect(find.textContaining(RegExp(r'^Nenhum ')), findsOneWidget);
+    final none = tester.getTopLeft(find.textContaining(RegExp(r'^Nenhum '))).dy;
+    expect(none, lessThan(tester.getTopLeft(find.text('Fiat Uno 2015')).dy));
+    await tester.tap(find.textContaining(RegExp(r'^Nenhum ')));
     await tester.pumpAndSettle();
     expect(get(), kRemoveDeviceResult);
   });
 
-  testWidgets('adding a vehicle has no "Tirar … da OS" row', (tester) async {
+  testWidgets('adding a vehicle has no "Nenhum veículo" row', (tester) async {
     await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno]);
-    expect(find.textContaining('da OS'), findsNothing);
+    expect(find.textContaining(RegExp(r'^Nenhum ')), findsNothing);
   });
 }

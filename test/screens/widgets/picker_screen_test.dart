@@ -73,7 +73,7 @@ void main() {
     await openPicker(tester, items: names(10));
     expect(find.text('Qual item?'), findsOneWidget);
     expect(find.byType(CupertinoSearchTextField), findsNothing);
-    expect(find.text('Novo item'), findsOneWidget);
+    expect(find.byKey(const ValueKey('picker-add')), findsOneWidget);
   });
 
   testWidgets('search shows with 11 items and stays while typed', (

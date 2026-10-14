@@ -6151,4 +6151,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String orderMenuRemoveDevice(String device) {
     return 'Remove $device from the order';
   }
+
+  @override
+  String pickerNoDevice(String device) {
+    return 'No $device';
+  }
 }
