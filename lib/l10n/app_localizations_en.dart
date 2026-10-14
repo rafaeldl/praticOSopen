@@ -3865,7 +3865,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chargeCancelConfirm =>
-      'Cancel this charge in Asaas? The customer will no longer be able to pay it.';
+      'The customer will no longer be able to pay with this link.';
 
   @override
   String get chargeKeep => 'Keep';
@@ -6227,4 +6227,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickerNewItemProductHint => 'Part or material you sell';
+
+  @override
+  String receiveSubtitleWithDiscount(
+    String customer,
+    String total,
+    String discount,
+  ) {
+    return '$customer · total $total · discount $discount';
+  }
+
+  @override
+  String receiveSubtitleNoCustomerWithDiscount(String total, String discount) {
+    return 'total $total · discount $discount';
+  }
+
+  @override
+  String chargeSendLinkTo(String customer) {
+    return 'Send $customer a link to pay';
+  }
+
+  @override
+  String get chargeSendLink => 'Send a link to pay';
+
+  @override
+  String chargeLinkSentOn(String date) {
+    return 'Link sent on $date';
+  }
+
+  @override
+  String get chargeLinkSent => 'Link sent';
+
+  @override
+  String chargeLinkExpiredOn(String date) {
+    return 'The link expired on $date';
+  }
+
+  @override
+  String chargeNotPaidYet(String customer, String value) {
+    return '$customer hasn\'t paid the $value yet.';
+  }
+
+  @override
+  String chargeNotPaidYetNoCustomer(String value) {
+    return 'The $value hasn\'t been paid yet.';
+  }
+
+  @override
+  String chargeLinkValidUntil(String date) {
+    return 'The link is valid until $date.';
+  }
+
+  @override
+  String get chargeRemindWhatsApp => 'Also remind on WhatsApp';
+
+  @override
+  String get chargeReceivedOtherWay => 'I got paid another way';
+
+  @override
+  String get chargeLinkSection => 'Payment link';
+
+  @override
+  String get chargePaymentLink => 'Payment link';
+
+  @override
+  String chargeWaitingFor(String customer) {
+    return 'Waiting for $customer to pay';
+  }
+
+  @override
+  String get chargeWaitingPayment => 'Waiting for payment';
+
+  @override
+  String chargeExpiredOn(String date) {
+    return 'Expired on $date';
+  }
+
+  @override
+  String chargeMethodsUntil(String date) {
+    return 'Pix, boleto or card · until $date';
+  }
+
+  @override
+  String chargeInstallmentsUntil(int count, String date) {
+    return '${count}x on card · until $date';
+  }
+
+  @override
+  String chargeInstallmentsPaid(int paid, int count) {
+    return '$paid of $count installments paid';
+  }
+
+  @override
+  String chargeUntilReplaced(String date) {
+    return 'until $date · the new link cancels this one';
+  }
+
+  @override
+  String get chargeOrderChanged => 'The order total changed';
+
+  @override
+  String chargeNowMissing(String remaining, String value) {
+    return 'Now $remaining is due, but the link still charges $value.';
+  }
+
+  @override
+  String chargeGenerateNew(String value) {
+    return 'Create a new $value link';
+  }
+
+  @override
+  String chargeKeepLink(String value) {
+    return 'Keep the $value link';
+  }
+
+  @override
+  String get chargeSendAgainWhatsApp => 'Send again on WhatsApp';
+
+  @override
+  String get chargeCopyLink => 'Copy the link';
+
+  @override
+  String get chargeLinkCopied => 'Link copied';
+
+  @override
+  String get chargeCancelLink => 'Cancel the link';
+
+  @override
+  String get chargeLinkTitle => 'Payment link';
+
+  @override
+  String chargeLinkIntro(String name) {
+    return '$name gets the link and pays by Pix, boleto or card.';
+  }
+
+  @override
+  String get chargeLinkIntroNoName =>
+      'The customer gets the link and pays by Pix, boleto or card.';
+
+  @override
+  String get chargeSplitQuestion => 'Split on the card?';
+
+  @override
+  String get chargeSplitOnCard => 'Split on the card';
+
+  @override
+  String get chargeSplitNo => 'No';
 }

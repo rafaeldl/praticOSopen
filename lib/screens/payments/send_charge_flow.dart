@@ -11,6 +11,7 @@ import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/payments/create_charge_screen.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_payment_math.dart';
@@ -185,12 +186,11 @@ class SendChargeFlow {
     Order order,
     double remainingBalance,
   ) {
-    return Navigator.of(context).push<OrderCharge>(
-      CupertinoPageRoute(
-        builder: (_) => CreateChargeScreen(
-          order: order,
-          remainingBalance: remainingBalance,
-        ),
+    return FormSheet.show<OrderCharge>(
+      context,
+      (_) => CreateChargeScreen(
+        order: order,
+        remainingBalance: remainingBalance,
       ),
     );
   }

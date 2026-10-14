@@ -1,32 +1,29 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
-import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
-import 'package:praticos/repositories/tenant/order_charge_repository.dart';
-import 'package:praticos/screens/payments/asaas_error_text.dart';
-import 'package:praticos/screens/widgets/share_link_sheet.dart';
-import 'package:praticos/services/asaas_api_service.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
-import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
-/// Status dot color: blue pending, red overdue, green paid, grey closed.
+/// Status dot color: amber pending, red overdue, green paid, grey closed.
+/// Returns the dynamic role; callers resolve it (e.g. [StatusDot]).
 Color chargeStatusColor(ChargeStatus? status) {
   switch (status) {
     case ChargeStatus.pending:
-      return CupertinoColors.systemBlue;
+      return AppColors.warning;
     case ChargeStatus.overdue:
-      return CupertinoColors.systemRed;
+      return AppColors.danger;
     case ChargeStatus.paid:
-      return CupertinoColors.systemGreen;
+      return AppColors.success;
     case ChargeStatus.canceled:
     case ChargeStatus.refunded:
     case null:
-      return CupertinoColors.systemGrey;
+      return AppColors.textSecondary;
   }
 }
 
@@ -55,9 +52,9 @@ String chargeStatusLabel(AppLocalizations l10n, ChargeStatus? status) {
 ///   the charge stays pending until the last one.
 ///
 /// [prev] is the same charge (by id) in the previous emission, or null for
-/// a charge not seen before. The card never calls this for the first stream
-/// emission (that is the initial state, not a transition), so opening the
-/// screen doesn't trigger a reload.
+/// a charge not seen before. Never called for the first stream emission
+/// (that is the initial state, not a transition), so opening the screen
+/// doesn't trigger a reload.
 bool chargeSettled(OrderCharge? prev, OrderCharge next) {
   final status = next.status;
   if ((status == ChargeStatus.paid || status == ChargeStatus.refunded) &&
@@ -67,377 +64,282 @@ bool chargeSettled(OrderCharge? prev, OrderCharge next) {
   return _paidCount(prev) != _paidCount(next);
 }
 
-int _paidCount(OrderCharge? charge) =>
-    charge?.paidAsaasPaymentIds?.length ?? 0;
+int _paidCount(OrderCharge? charge) => charge?.paidAsaasPaymentIds?.length ?? 0;
 
 /// Open charge with installments already paid: the server refuses to cancel
 /// or replace it (`INSTALLMENTS_IN_PROGRESS`).
-bool _hasPaidInstallments(OrderCharge charge) =>
+bool chargeHasPaidInstallments(OrderCharge charge) =>
     charge.isOpen && (charge.paidAsaasPaymentIds ?? const []).isNotEmpty;
 
-/// "Charge" card of an order: current Asaas charge, its actions and the
-/// "Charge with Asaas" button.
-///
-/// Only build it for users with `PermissionType.chargeOrder`: Firestore rules
-/// deny reading `charges` to other roles.
-class OrderChargeCard extends StatefulWidget {
-  const OrderChargeCard({
+/// Top block of the Receber screen while a payment link is open: when it was
+/// sent, what is still missing and until when the link is valid, plus a
+/// WhatsApp reminder. No filled button: the customer is the one who acts.
+class ChargeLinkBlock extends StatelessWidget {
+  const ChargeLinkBlock({
     super.key,
-    required this.order,
-    required this.remainingBalance,
-    required this.canCreateCharge,
-    required this.onCreateCharge,
-    this.onChargeSettled,
-    this.chargesStream,
-    this.service,
+    required this.charge,
+    required this.customerName,
+    required this.onRemind,
   });
 
-  final Order order;
-  final double remainingBalance;
-
-  /// Account connected and user allowed to charge.
-  final bool canCreateCharge;
-
-  /// Opens the create charge screen. The card ignores new taps until the
-  /// returned future completes (await the pushed route).
-  final FutureOr<void> Function() onCreateCharge;
-
-  /// Called when a watched charge is paid, refunded or gets an installment
-  /// paid (see [chargeSettled]); the screen reloads the order payments.
-  final VoidCallback? onChargeSettled;
-
-  /// Test seam; defaults to [OrderChargeRepository.watch].
-  final Stream<List<OrderCharge>>? chargesStream;
-
-  /// Test seam; defaults to [AsaasApiService.instance].
-  final AsaasApiService? service;
-
-  @override
-  State<OrderChargeCard> createState() => _OrderChargeCardState();
-}
-
-class _OrderChargeCardState extends State<OrderChargeCard> {
-  final _formatService = FormatService();
-  StreamSubscription<List<OrderCharge>>? _subscription;
-  List<OrderCharge> _charges = const [];
-
-  /// Charges of the last emission by id; null until the first emission.
-  Map<String, OrderCharge>? _previous;
-
-  bool _canceling = false;
-  bool _creating = false;
-
-  /// Replace dialog open (no spinner; just blocks a second dialog).
-  bool _confirmingReplace = false;
-
-  AsaasApiService get _service => widget.service ?? AsaasApiService.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _subscription = (widget.chargesStream ?? _watchCharges()).listen(
-      _onCharges,
-      // E.g. permission denied by the rules: behave as "no charge".
-      onError: (Object _) {
-        if (mounted) setState(() => _charges = const []);
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
-
-  Stream<List<OrderCharge>> _watchCharges() {
-    final companyId = widget.order.company?.id ?? Global.companyAggr?.id;
-    final orderId = widget.order.id;
-    if (companyId == null || orderId == null) {
-      return Stream.value(const <OrderCharge>[]);
-    }
-    return OrderChargeRepository().watch(companyId, orderId);
-  }
-
-  void _onCharges(List<OrderCharge> charges) {
-    final previous = _previous;
-    final settled = previous != null &&
-        charges.any((c) => chargeSettled(previous[c.id], c));
-    _previous = {for (final c in charges) c.id ?? '': c};
-    if (!mounted) return;
-    setState(() => _charges = charges);
-    if (settled) widget.onChargeSettled?.call();
-  }
-
-  bool get _blockedByInstallments => _charges.any(_hasPaidInstallments);
-
-  bool get _showCreateButton =>
-      widget.canCreateCharge &&
-      widget.remainingBalance > 0 &&
-      !_blockedByInstallments;
+  final OrderCharge charge;
+  final String? customerName;
+  final VoidCallback onRemind;
 
   @override
   Widget build(BuildContext context) {
-    final charge = OrderCharge.current(_charges);
-    if (charge == null && !_showCreateButton) {
-      return const SizedBox.shrink();
-    }
-    return CupertinoListSection.insetGrouped(
-      header: Text(context.l10n.chargeSectionTitle.toUpperCase()),
-      children: [
-        if (charge != null) ..._buildChargeRows(context, charge),
-        if (_showCreateButton) _buildCreateTile(context, charge),
-      ],
-    );
-  }
-
-  List<Widget> _buildChargeRows(BuildContext context, OrderCharge charge) {
     final l10n = context.l10n;
-    final value = charge.value ?? 0;
-    final locked = _hasPaidInstallments(charge);
-    // Only when the order became smaller than the charge; a down payment
-    // (charge below the balance) is fine.
-    final balanceBelowCharge = charge.isOpen &&
-        !locked &&
-        value > widget.remainingBalance + OrderPaymentMath.centTolerance;
-    final canShare = charge.isOpen || charge.status == ChargeStatus.paid;
-    final hasInvoice = (charge.invoiceUrl ?? '').isNotEmpty;
+    final format = FormatService();
+    final onSoft = AppColors.onAccentSoft.resolveFrom(context);
+    final value = format.formatCurrency(charge.value ?? 0);
+    final due = format.formatDayMonthOrDate(charge.dueDateValue);
+    final overdue = charge.status == ChargeStatus.overdue;
 
-    return [
-      CupertinoListTile(
-        key: const Key('chargeStatusTile'),
-        leading: Center(
-          child: Container(
-            key: const Key('chargeStatusDot'),
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: CupertinoDynamicColor.resolve(
-                  chargeStatusColor(charge.status), context),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        title: Text(chargeStatusLabel(l10n, charge.status)),
-        subtitle: Text(_subtitle(l10n, charge)),
-        additionalInfo: Text(_formatService.formatBrl(value)),
-      ),
-      if (balanceBelowCharge) _buildBalanceWarning(context, charge),
-      if (canShare)
-        CupertinoListTile(
-          key: const Key('chargeShareTile'),
-          leading: const Icon(CupertinoIcons.square_arrow_up),
-          title: Text(l10n.chargeShareOrderLink),
-          onTap: () => ShareLinkSheet.show(context, widget.order),
-        ),
-      if (canShare && hasInvoice)
-        CupertinoListTile(
-          key: const Key('chargeCopyInvoiceTile'),
-          leading: const Icon(CupertinoIcons.doc_on_doc),
-          title: Text(l10n.chargeCopyInvoiceLink),
-          onTap: () => _copyInvoice(charge),
-        ),
-      if (charge.isOpen && !locked)
-        CupertinoListTile(
-          key: const Key('chargeCancelTile'),
-          leading: const Icon(
-            CupertinoIcons.xmark_circle,
-            color: CupertinoColors.systemRed,
-          ),
-          title: Text(
-            l10n.chargeCancel,
-            style: const TextStyle(color: CupertinoColors.systemRed),
-          ),
-          trailing: _canceling ? const CupertinoActivityIndicator() : null,
-          onTap: _canceling ? null : () => _confirmCancel(charge),
-        ),
-    ];
-  }
-
-  String _subtitle(AppLocalizations l10n, OrderCharge charge) {
-    final due =
-        l10n.chargeDueOn(_formatService.formatDate(charge.dueDateValue));
-    if (charge.mode == ChargeMode.cardInstallments &&
-        charge.installmentCount != null) {
-      return '${l10n.chargeInstallmentsSummary(charge.installmentCount!)} · $due';
+    final String label;
+    if (overdue && due.isNotEmpty) {
+      label = l10n.chargeLinkExpiredOn(due);
+    } else if (charge.createdAt != null) {
+      label = l10n.chargeLinkSentOn(
+        format.formatDayMonthOrDate(charge.createdAt),
+      );
+    } else {
+      label = l10n.chargeLinkSent;
     }
-    return due;
-  }
 
-  Widget _buildBalanceWarning(BuildContext context, OrderCharge charge) {
-    final l10n = context.l10n;
-    return Padding(
-      key: const Key('chargeBalanceWarning'),
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+    final name = customerName;
+    var sentence = name == null || name.isEmpty
+        ? l10n.chargeNotPaidYetNoCustomer(value)
+        : l10n.chargeNotPaidYet(name, value);
+    if (!overdue && due.isNotEmpty) {
+      sentence = '$sentence ${l10n.chargeLinkValidUntil(due)}';
+    }
+
+    return _BlockCard(
+      key: const Key('chargeLinkBlock'),
+      background: AppColors.accentSoft.resolveFrom(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                CupertinoIcons.exclamationmark_triangle_fill,
-                color: CupertinoColors.systemOrange,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.chargeTotalChanged(
-                    _formatService.formatBrl(widget.remainingBalance),
-                    _formatService.formatBrl(charge.value ?? 0),
-                  ),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ),
-            ],
+          Text(label, style: AppTypography.label.copyWith(color: onSoft)),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            sentence,
+            key: const Key('chargeLinkSentence'),
+            style: AppTypography.highlight.copyWith(
+              color: onSoft,
+              fontFeatures: AppTypography.tabular,
+            ),
           ),
-          if (_showCreateButton)
-            Align(
-              alignment: Alignment.centerRight,
-              child: CupertinoButton(
-                key: const Key('chargeRegenerateButton'),
-                padding: const EdgeInsets.only(top: 6),
-                minimumSize: Size.zero,
-                onPressed: _creating ? null : _runCreate,
-                child: Text(
-                  l10n.chargeRegenerate,
-                  style: const TextStyle(fontSize: 15),
-                ),
+          const SizedBox(height: AppSpacing.sm),
+          CupertinoButton(
+            key: const Key('chargeRemindWhatsApp'),
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(
+              AppSizes.minTouchTarget,
+              AppSizes.minTouchTarget,
+            ),
+            onPressed: onRemind,
+            child: Text(
+              l10n.chargeRemindWhatsApp,
+              style: AppTypography.callout.copyWith(
+                color: onSoft,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+                decorationColor: onSoft,
               ),
             ),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCreateTile(BuildContext context, OrderCharge? current) {
-    final primary = CupertinoTheme.of(context).primaryColor;
-    return CupertinoListTile(
-      key: const Key('createChargeTile'),
-      leading: Icon(CupertinoIcons.creditcard, color: primary),
-      title: Text(
-        context.l10n.chargeWithAsaas,
-        style: TextStyle(color: primary),
+/// Top block when the order total changed after the link was sent and the
+/// link now charges more than what is missing. One blue button creates a new
+/// link (the server cancels the open one); null [onGenerate] hides it
+/// (account disconnected).
+class ChargeChangedBlock extends StatelessWidget {
+  const ChargeChangedBlock({
+    super.key,
+    required this.remaining,
+    required this.chargeValue,
+    required this.onGenerate,
+    this.busy = false,
+  });
+
+  final double remaining;
+  final double chargeValue;
+  final VoidCallback? onGenerate;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final format = FormatService();
+    final onSoft = AppColors.onWarningSoft.resolveFrom(context);
+    final remainingText = format.formatCurrency(remaining);
+    return _BlockCard(
+      key: const Key('chargeChangedBlock'),
+      background: AppColors.warningSoft.resolveFrom(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.chargeOrderChanged,
+            style: AppTypography.label.copyWith(color: onSoft),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.chargeNowMissing(
+              remainingText,
+              format.formatCurrency(chargeValue),
+            ),
+            style: AppTypography.highlight.copyWith(
+              color: onSoft,
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+          if (onGenerate != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              key: const Key('chargeRegenerateButton'),
+              label: l10n.chargeGenerateNew(remainingText),
+              onPressed: busy ? null : onGenerate,
+            ),
+          ],
+        ],
       ),
-      trailing: _creating
-          ? const CupertinoActivityIndicator()
-          : const CupertinoListTileChevron(),
-      onTap: _creating ? null : () => _onCreatePressed(current),
     );
   }
+}
 
-  Future<void> _onCreatePressed(OrderCharge? current) async {
-    if (current == null || !current.isOpen) {
-      await _runCreate();
-      return;
-    }
-    if (_confirmingReplace || _creating) return;
-    _confirmingReplace = true;
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(dialogContext.l10n.chargeReplaceTitle),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(dialogContext.l10n.chargeReplaceConfirm),
+/// "Link de pagamento" row under "Link para pagar". Informational only (no
+/// chevron, not tappable): its actions live in the screen's "…" menu.
+class ChargeLinkRow extends StatelessWidget {
+  const ChargeLinkRow({
+    super.key,
+    required this.charge,
+    required this.customerName,
+    this.replacing = false,
+  });
+
+  final OrderCharge charge;
+  final String? customerName;
+
+  /// The "new link" block is showing: say that it cancels this one.
+  final bool replacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final format = FormatService();
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final due = format.formatDayMonthOrDate(charge.dueDateValue);
+    final overdue = charge.status == ChargeStatus.overdue;
+    final name = customerName;
+
+    final Widget status;
+    if (overdue) {
+      final danger = AppColors.danger.resolveFrom(context);
+      status = _DotLine(
+        color: AppColors.danger,
+        text: l10n.chargeExpiredOn(due),
+        style: AppTypography.callout.copyWith(
+          color: danger,
+          fontWeight: FontWeight.w600,
         ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          CupertinoDialogAction(
-            key: const Key('confirmReplaceChargeAction'),
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(dialogContext.l10n.chargeReplace),
+      );
+    } else {
+      status = _DotLine(
+        color: AppColors.warning,
+        text: name == null || name.isEmpty
+            ? l10n.chargeWaitingPayment
+            : l10n.chargeWaitingFor(name),
+        style: AppTypography.callout.copyWith(color: secondary),
+      );
+    }
+
+    final String detail;
+    if (chargeHasPaidInstallments(charge)) {
+      final paid = _paidCount(charge);
+      detail = l10n.chargeInstallmentsPaid(
+        paid,
+        charge.installmentCount ?? paid,
+      );
+    } else if (replacing) {
+      detail = l10n.chargeUntilReplaced(due);
+    } else if (charge.mode == ChargeMode.cardInstallments &&
+        charge.installmentCount != null) {
+      detail = l10n.chargeInstallmentsUntil(charge.installmentCount!, due);
+    } else {
+      detail = l10n.chargeMethodsUntil(due);
+    }
+
+    return AppListRow(
+      key: const Key('chargeLinkRow'),
+      title: l10n.chargePaymentLink,
+      trailing: format.formatCurrency(charge.value ?? 0),
+      subtitleWidget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          status,
+          const SizedBox(height: 2),
+          Text(
+            detail,
+            key: const Key('chargeLinkDetail'),
+            style: AppTypography.label.copyWith(color: secondary),
           ),
         ],
       ),
     );
-    _confirmingReplace = false;
-    if (!mounted) return;
-    if (confirmed == true) await _runCreate();
   }
+}
 
-  /// Runs [OrderChargeCard.onCreateCharge] once at a time (double tap guard).
-  Future<void> _runCreate() async {
-    if (_creating) return;
-    setState(() => _creating = true);
-    try {
-      await widget.onCreateCharge();
-    } finally {
-      if (mounted) setState(() => _creating = false);
-    }
-  }
+/// Status dot followed by its text (which wraps, never ellipsized).
+class _DotLine extends StatelessWidget {
+  const _DotLine({
+    required this.color,
+    required this.text,
+    required this.style,
+  });
 
-  Future<void> _copyInvoice(OrderCharge charge) async {
-    await Clipboard.setData(ClipboardData(text: charge.invoiceUrl!));
-    if (!mounted) return;
-    _showMessage(context.l10n.chargeInvoiceLinkCopied);
-  }
+  final Color color;
+  final String text;
+  final TextStyle style;
 
-  Future<void> _confirmCancel(OrderCharge charge) async {
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(dialogContext.l10n.chargeCancel),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(dialogContext.l10n.chargeCancelConfirm),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(dialogContext.l10n.chargeKeep),
-          ),
-          CupertinoDialogAction(
-            key: const Key('confirmCancelChargeAction'),
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(dialogContext.l10n.chargeCancel),
-          ),
-        ],
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        StatusDot(key: const Key('chargeStatusDot'), color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(child: Text(text, style: style)),
+      ],
     );
-    if (confirmed != true || charge.id == null || widget.order.id == null) {
-      return;
-    }
-    if (!mounted || _canceling) return;
-
-    setState(() => _canceling = true);
-    try {
-      await _service.cancelCharge(widget.order.id!, charge.id!);
-    } on AsaasApiException catch (e) {
-      if (mounted) _showMessage(asaasErrorText(context.l10n, e));
-    } catch (_) {
-      // Unexpected response: generic text, never the raw error.
-      if (mounted) {
-        _showMessage(
-            asaasErrorText(context.l10n, AsaasApiException(null, '')));
-      }
-    } finally {
-      if (mounted) setState(() => _canceling = false);
-    }
   }
+}
 
-  void _showMessage(String message) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.ok),
-          ),
-        ],
+/// Same card look as the Receber block ([AppRadii.block], soft fill).
+class _BlockCard extends StatelessWidget {
+  const _BlockCard({super.key, required this.child, required this.background});
+
+  final Widget child;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.blockMargin,
+        vertical: AppSpacing.sm,
       ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(AppRadii.block),
+      ),
+      child: child,
     );
   }
 }

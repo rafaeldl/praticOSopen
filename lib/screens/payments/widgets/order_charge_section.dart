@@ -1,124 +1,143 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter/widgets.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/repositories/tenant/order_charge_repository.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/utils/order_payment_math.dart';
 
-/// "Cobrança" section of the order payments screen.
+/// Asaas charge state of the Receber screen: payment settings and the
+/// order's charges, watched while the screen is open.
 ///
-/// Shown only when the user has [PermissionType.chargeOrder], the company is
-/// in the Asaas pilot (`asaasEnabled`) and the order accepts payments (not a
-/// quote nor canceled, same rule as manual payments). "Cobrar" needs
-/// `asaasConnected`; an existing charge stays visible after disconnecting.
-class OrderChargeSection extends StatefulWidget {
-  const OrderChargeSection({
-    super.key,
+/// Inactive (no charge shown, no "send link") when the user lacks
+/// [PermissionType.chargeOrder] or the company is not in the Asaas pilot
+/// (`asaasEnabled`). Charges are watched only once the pilot is on: Firestore
+/// rules deny reading `charges` to users without the permission. Creating a
+/// link needs `asaasConnected`; an open charge stays visible after
+/// disconnecting.
+class OrderChargeController extends ChangeNotifier {
+  OrderChargeController({
     required this.store,
-    required this.onCreateCharge,
-    this.canCharge,
-    this.settingsStream,
-    this.chargesStream,
-  });
-
-  final OrderStore store;
-
-  /// Opens the create-charge flow for the given remaining balance. The
-  /// returned future keeps the card's double-tap guard on while it runs.
-  final FutureOr<void> Function(double remainingBalance) onCreateCharge;
-
-  /// Test seam; defaults to the [PermissionType.chargeOrder] check.
-  final bool? canCharge;
-
-  /// Test seam; defaults to [PaymentSettingsRepository.watch].
-  final Stream<PaymentSettings>? settingsStream;
-
-  /// Test seam passed to [OrderChargeCard].
-  final Stream<List<OrderCharge>>? chargesStream;
-
-  @override
-  State<OrderChargeSection> createState() => _OrderChargeSectionState();
-}
-
-class _OrderChargeSectionState extends State<OrderChargeSection> {
-  /// Null when the user cannot charge or there is no company.
-  Stream<PaymentSettings>? _settings;
-
-  /// Whether the payments were already reloaded for this screen.
-  bool _reloadedOnOpen = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final canCharge = widget.canCharge ??
+    bool? canCharge,
+    Stream<PaymentSettings>? settingsStream,
+    Stream<List<OrderCharge>>? chargesStream,
+  }) : _chargesSource = chargesStream {
+    final allowed =
+        canCharge ??
         AuthorizationService.instance.hasPermission(PermissionType.chargeOrder);
-    final companyId = widget.store.companyId;
-    if (!canCharge) return;
-    final source = widget.settingsStream ??
+    if (!allowed) return;
+    final companyId = store.companyId;
+    final source =
+        settingsStream ??
         (companyId == null
             ? null
             : PaymentSettingsRepository().watch(companyId));
-    if (source != null) _settings = safePaymentSettings(source);
+    if (source == null) return;
+    _settingsSubscription = safePaymentSettings(source).listen(_onSettings);
   }
 
-  /// Reloads the payments once, when the section first shows up.
+  final OrderStore store;
+
+  /// Test seam; defaults to [OrderChargeRepository.watch].
+  final Stream<List<OrderCharge>>? _chargesSource;
+
+  StreamSubscription<PaymentSettings>? _settingsSubscription;
+  StreamSubscription<List<OrderCharge>>? _chargesSubscription;
+  PaymentSettings? _settings;
+  List<OrderCharge> _charges = const [];
+
+  /// Charges of the last emission by id; null until the first emission.
+  Map<String, OrderCharge>? _previous;
+
+  /// Whether the payments were already reloaded for this screen.
+  bool _reloadedOnOpen = false;
+  bool _disposed = false;
+
+  /// Company in the Asaas pilot and user allowed to charge.
+  bool get enabled => _settings?.asaasEnabled == true;
+
+  /// Asaas account connected: new links can be created.
+  bool get connected => enabled && _settings!.asaasConnected;
+
+  /// The open (pending/overdue) charge, if any.
+  OrderCharge? get openCharge {
+    if (!enabled) return null;
+    for (final charge in _charges) {
+      if (charge.isOpen) return charge;
+    }
+    return null;
+  }
+
+  /// A charge with paid installments can't be replaced nor canceled.
+  bool get blockedByInstallments =>
+      enabled && _charges.any(chargeHasPaidInstallments);
+
+  void _onSettings(PaymentSettings settings) {
+    _settings = settings;
+    if (settings.asaasEnabled && _chargesSubscription == null) {
+      _chargesSubscription = (_chargesSource ?? _watchCharges()).listen(
+        _onCharges,
+        // E.g. permission denied by the rules: behave as "no charge".
+        onError: (Object _) {
+          _charges = const [];
+          _notify();
+        },
+      );
+    }
+    _notify();
+  }
+
+  Stream<List<OrderCharge>> _watchCharges() {
+    final order = store.order;
+    final companyId = order?.company?.id ?? Global.companyAggr?.id;
+    final orderId = order?.id;
+    if (companyId == null || orderId == null) {
+      return Stream.value(const <OrderCharge>[]);
+    }
+    return OrderChargeRepository().watch(companyId, orderId);
+  }
+
+  void _onCharges(List<OrderCharge> charges) {
+    final previous = _previous;
+    final settled =
+        previous != null &&
+        charges.any((c) => chargeSettled(previous[c.id], c));
+    _previous = {for (final c in charges) c.id ?? '': c};
+    _charges = charges;
+    _notify();
+    // The webhook booked or reverted payments on the order.
+    if (settled && !_disposed) store.reloadPayments();
+  }
+
+  /// Reloads the payments once, when the charge part first shows up.
   ///
   /// [OrderStore.orderStream] doesn't refresh the payment fields, so a charge
   /// paid by the webhook while the order screen was open would leave a stale
   /// balance here (and a manual payment on top of it would double count).
-  void _reloadOnFirstShow() {
+  void reloadOnFirstShow() {
     if (_reloadedOnOpen) return;
     _reloadedOnOpen = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.store.reloadPayments();
+      if (!_disposed) store.reloadPayments();
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final settingsStream = _settings;
-    if (settingsStream == null) return const SizedBox.shrink();
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
 
-    return StreamBuilder<PaymentSettings>(
-      stream: settingsStream,
-      builder: (context, snapshot) {
-        final settings = snapshot.data;
-        if (settings == null || !settings.asaasEnabled) {
-          return const SizedBox.shrink();
-        }
-        return Observer(
-          builder: (_) {
-            final store = widget.store;
-            final status = store.status;
-            // Read the observables so the card follows payment changes.
-            store.remainingBalance;
-            final order = store.order;
-            if (order?.id == null ||
-                status == 'quote' ||
-                status == 'canceled') {
-              return const SizedBox.shrink();
-            }
-            _reloadOnFirstShow();
-            final remaining = OrderPaymentMath.remainingBalance(order!);
-            return OrderChargeCard(
-              order: order,
-              remainingBalance: remaining,
-              canCreateCharge: settings.asaasConnected,
-              onCreateCharge: () => widget.onCreateCharge(remaining),
-              onChargeSettled: () => store.reloadPayments(),
-              chargesStream: widget.chargesStream,
-            );
-          },
-        );
-      },
-    );
+  @override
+  void dispose() {
+    _disposed = true;
+    _settingsSubscription?.cancel();
+    _chargesSubscription?.cancel();
+    super.dispose();
   }
 }

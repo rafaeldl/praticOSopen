@@ -13,6 +13,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
 
@@ -56,14 +57,13 @@ void main() {
           builder: (context) => CupertinoButton(
             child: const Text('open'),
             onPressed: () async {
-              results.add(await Navigator.of(context).push<OrderCharge>(
-                CupertinoPageRoute(
-                  builder: (_) => CreateChargeScreen(
-                    order: order,
-                    remainingBalance: remaining,
-                    service: api,
-                    customerTaxIdLoader: () async => loadedTaxId,
-                  ),
+              results.add(await FormSheet.show<OrderCharge>(
+                context,
+                (_) => CreateChargeScreen(
+                  order: order,
+                  remainingBalance: remaining,
+                  service: api,
+                  customerTaxIdLoader: () async => loadedTaxId,
                 ),
               ));
             },
@@ -82,6 +82,11 @@ void main() {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle();
   }
+
+  bool saveEnabled(WidgetTester tester) => tester
+      .widget<CupertinoButton>(find.byKey(const ValueKey('new_order_save')))
+      .onPressed !=
+      null;
 
   group('validateChargeInput', () {
     ChargeFormError? validate({
@@ -143,12 +148,46 @@ void main() {
           order: order(taxId: '52998224725'),
           api: service((_) async => http.Response('{}', 500)));
 
-      final field = tester
-          .widget<CupertinoTextField>(find.byKey(const Key('chargeValueField')));
+      final field = tester.widget<CupertinoTextField>(find.descendant(
+          of: find.byKey(const Key('chargeValueField')),
+          matching: find.byType(CupertinoTextField)));
       expect(field.controller!.text, format.formatCurrency(1000));
       expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
       expect(find.text(l10n.chargeBalanceHint(format.formatCurrency(1000))),
           findsOneWidget);
+    });
+
+    testWidgets('abre em sheet com título, frase do cliente e ✓ azul',
+        (tester) async {
+      await pumpHost(tester,
+          order: order(taxId: '52998224725'),
+          api: service((_) async => http.Response('{}', 500)));
+
+      expect(find.byKey(const Key('createChargeSheet')), findsOneWidget);
+      expect(find.text(l10n.chargeLinkTitle), findsOneWidget);
+      expect(find.text(l10n.chargeLinkIntro('Maria')), findsOneWidget);
+      expect(find.text(l10n.chargeSplitOnCard), findsOneWidget);
+      expect(saveEnabled(tester), isTrue);
+    });
+
+    testWidgets('"Não" na escolha volta para cobrança única', (tester) async {
+      await pumpHost(tester,
+          order: order(taxId: '52998224725'),
+          api: service((_) async => http.Response('{}', 500)));
+
+      await tapKey(tester, 'chargeInstallmentsTile');
+      await tester.tap(find.text(
+          l10n.chargeInstallmentOption(4, format.formatCurrency(250))));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(l10n.chargeInstallmentOption(4, format.formatCurrency(250))),
+        findsOneWidget,
+      );
+
+      await tapKey(tester, 'chargeInstallmentsTile');
+      await tester.tap(find.byKey(const ValueKey('charge_split_none')));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.chargeSplitNo), findsOneWidget);
     });
 
     testWidgets('usa o CPF do cadastro quando o agregado não tem',
@@ -204,9 +243,10 @@ void main() {
 
       await tester.enterText(
           find.byKey(const Key('chargeValueField')), '150000');
-      await tapKey(tester, 'generateChargeButton');
+      await tester.pumpAndSettle();
 
       expect(find.text(l10n.asaasErrorExceedsBalance), findsOneWidget);
+      expect(saveEnabled(tester), isFalse);
       expect(calls, 0);
     });
 
@@ -216,9 +256,13 @@ void main() {
           api: service((_) async => http.Response('{}', 500)));
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
-      await tapKey(tester, 'generateChargeButton');
-
       expect(find.text(l10n.asaasErrorTaxIdRequired), findsOneWidget);
+      // The document sits in the first card, right under the value.
+      expect(
+        tester.getTopLeft(find.byKey(const Key('chargeTaxIdField'))).dy,
+        lessThan(tester.getTopLeft(find.text(l10n.chargeDueDate)).dy),
+      );
+      expect(saveEnabled(tester), isFalse);
     });
 
     testWidgets('CPF inválido mostra erro', (tester) async {
@@ -229,9 +273,10 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
           find.byKey(const Key('chargeTaxIdField')), '12345678900');
-      await tapKey(tester, 'generateChargeButton');
+      await tester.pumpAndSettle();
 
-      expect(find.text(l10n.invalidTaxId), findsOneWidget);
+      expect(find.text(l10n.invalidTaxId), findsWidgets);
+      expect(saveEnabled(tester), isFalse);
     });
 
     testWidgets('OS sem cliente mostra erro', (tester) async {
@@ -239,9 +284,8 @@ void main() {
           order: order(withCustomer: false),
           api: service((_) async => http.Response('{}', 500)));
 
-      await tapKey(tester, 'generateChargeButton');
-
       expect(find.text(l10n.asaasErrorCustomerRequired), findsOneWidget);
+      expect(saveEnabled(tester), isFalse);
     });
 
     testWidgets('parcelado em 3x envia parcelas, vencimento e CPF e fecha',
@@ -276,14 +320,14 @@ void main() {
             );
           }));
 
-      await tester.tap(find.text(l10n.chargeModeInstallments));
-      await tester.pumpAndSettle();
+      // "Parcelar no cartão" opens the "Escolher" screen: "Não" + 2x..12x.
+      expect(find.text(l10n.chargeSplitNo), findsOneWidget);
+      await tapKey(tester, 'chargeInstallmentsTile');
+      expect(find.text(l10n.chargeSplitQuestion), findsOneWidget);
       expect(
         find.text(l10n.chargeInstallmentOption(2, format.formatCurrency(500))),
         findsOneWidget,
       );
-
-      await tapKey(tester, 'chargeInstallmentsTile');
       await tester.tap(find.text(
           l10n.chargeInstallmentOption(3, format.formatCurrency(1000 / 3))));
       await tester.pumpAndSettle();
@@ -296,7 +340,7 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
           find.byKey(const Key('chargeTaxIdField')), '52998224725');
-      await tapKey(tester, 'generateChargeButton');
+      await tapKey(tester, 'new_order_save');
 
       expect(results, hasLength(1));
       expect(results.single?.id, 'ch1');
@@ -318,7 +362,7 @@ void main() {
                 409,
               )));
 
-      await tapKey(tester, 'generateChargeButton');
+      await tapKey(tester, 'new_order_save');
 
       expect(find.text(l10n.asaasErrorNotConnected), findsOneWidget);
       expect(find.byType(CreateChargeScreen), findsOneWidget);
@@ -342,7 +386,7 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
           find.byKey(const Key('chargeTaxIdField')), '12.abc.345/01de-35');
-      await tapKey(tester, 'generateChargeButton');
+      await tapKey(tester, 'new_order_save');
 
       expect(sent?['customerTaxId'], '12ABC34501DE35');
       expect(sent?['mode'], 'single');
@@ -363,19 +407,14 @@ void main() {
 
       // No pumpAndSettle while in flight: the spinner never settles and the
       // fake clock would hit the service's 30s timeout.
-      await tester.ensureVisible(find.byKey(const Key('generateChargeButton')));
+      await tester.ensureVisible(find.byKey(const ValueKey('new_order_save')));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('generateChargeButton')));
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
       await tester.pump();
 
-      final button = tester.widget<CupertinoButton>(
-          find.byKey(const Key('generateChargeButton')));
-      expect(button.onPressed, isNull);
-      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('generateChargeButton')),
-          warnIfMissed: false);
-      await tester.pump();
+      // Busy: the ✓ turns into a spinner, so there's nothing to tap again.
+      expect(find.byKey(const ValueKey('new_order_save')), findsNothing);
+      expect(find.byKey(const ValueKey('new_order_saving')), findsOneWidget);
       expect(calls, 1);
 
       response.complete(http.Response(
@@ -397,7 +436,7 @@ void main() {
           order: order(taxId: '52998224725'),
           api: service((_) async => throw http.ClientException('offline')));
 
-      await tapKey(tester, 'generateChargeButton');
+      await tapKey(tester, 'new_order_save');
 
       expect(find.text(l10n.noInternetConnection), findsOneWidget);
       expect(find.byType(CreateChargeScreen), findsOneWidget);
@@ -405,9 +444,7 @@ void main() {
 
       await tester.tap(find.text(l10n.ok));
       await tester.pumpAndSettle();
-      final button = tester.widget<CupertinoButton>(
-          find.byKey(const Key('generateChargeButton')));
-      expect(button.onPressed, isNotNull);
+      expect(saveEnabled(tester), isTrue);
     });
 
     testWidgets('resposta inesperada mostra erro genérico e não fecha',
@@ -416,7 +453,7 @@ void main() {
           order: order(taxId: '52998224725'),
           api: service((_) async => http.Response('not json', 201)));
 
-      await tapKey(tester, 'generateChargeButton');
+      await tapKey(tester, 'new_order_save');
 
       expect(find.text(l10n.asaasErrorGeneric), findsOneWidget);
       expect(find.byType(CreateChargeScreen), findsOneWidget);

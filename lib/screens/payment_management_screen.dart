@@ -2,23 +2,30 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/order_document.dart';
+import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
+import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
@@ -33,7 +40,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// "Receber" screen of an order: one block answering "did the customer pay?"
 /// (amount already filled, one "Recebi R$ X" button), the received payments
-/// list and, for Asaas companies, the charge card.
+/// list ("Já recebido") and, for Asaas companies, the payment link: an open
+/// link takes the top block ("Link mandado em…") and gets its own row, and
+/// its actions (copy, send again, cancel) live in the "…" menu.
 ///
 /// Payment method is not asked: it is shown only for payments that came from
 /// Asaas. Discount and "undo payments" live in the "…" menu. Tapping a payment
@@ -46,6 +55,10 @@ class PaymentManagementScreen extends StatefulWidget {
     this.canAttachReceipt,
     this.canViewReceipt,
     this.onOpenExternalUrl,
+    this.canCharge,
+    this.paymentSettingsStream,
+    this.chargesStream,
+    this.chargeService,
   });
 
   /// Order store. When null it comes from the route arguments (`orderStore`).
@@ -57,6 +70,14 @@ class PaymentManagementScreen extends StatefulWidget {
 
   /// Test seam; defaults to opening the link in the browser.
   final Future<void> Function(Uri uri)? onOpenExternalUrl;
+
+  /// Test seams for the Asaas charge part; default to the chargeOrder
+  /// permission, the company payment settings, the order charges and
+  /// [AsaasApiService.instance].
+  final bool? canCharge;
+  final Stream<PaymentSettings>? paymentSettingsStream;
+  final Stream<List<OrderCharge>>? chargesStream;
+  final AsaasApiService? chargeService;
 
   @override
   State<PaymentManagementScreen> createState() =>
@@ -86,6 +107,24 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   /// Opened from the order screen: "‹ OS 183" just goes back to it.
   bool _fromOrder = false;
 
+  /// Asaas charge state; null without an order store.
+  OrderChargeController? _charge;
+
+  /// Double-tap guards of the charge actions.
+  bool _creatingCharge = false;
+  bool _cancelingCharge = false;
+  bool _confirmingReplace = false;
+
+  /// "Recebi de outro jeito": the manual receive block replaces the open
+  /// link block for this visit.
+  bool _receiveOtherWay = false;
+
+  /// Open charge the user chose to keep after the order total changed.
+  String? _keptChargeId;
+
+  AsaasApiService get _chargeService =>
+      widget.chargeService ?? AsaasApiService.instance;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -100,6 +139,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         _fromOrder = args?['fromOrder'] == true;
       }
       _prefillValue();
+      final store = _store;
+      if (store != null) {
+        _charge = OrderChargeController(
+          store: store,
+          canCharge: widget.canCharge,
+          settingsStream: widget.paymentSettingsStream,
+          chargesStream: widget.chargesStream,
+        );
+      }
       _initialized = true;
     }
   }
@@ -107,6 +155,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   @override
   void dispose() {
     _valueController.dispose();
+    _charge?.dispose();
     super.dispose();
   }
 
@@ -158,14 +207,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildBlock(),
-                  if (_store != null)
-                    OrderChargeSection(
-                      store: _store!,
-                      onCreateCharge: _openCreateCharge,
-                    ),
-                  _buildSummary(),
-                  _buildPayments(),
+                  _buildContent(),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -193,7 +235,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  /// "Ana Ribeiro · total R$ 1.250" under the title.
+  /// "Ana Ribeiro · total R$ 1.250" under the title, plus
+  /// " · desconto R$ 50" when the order has a discount.
   Widget _buildSubtitle() {
     return Observer(
       builder: (_) {
@@ -201,9 +244,22 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         if (store == null) return const SizedBox.shrink();
         final total = FormatService().formatCurrency(store.total ?? 0.0);
         final name = store.customerName;
-        final text = name == null || name.isEmpty
-            ? context.l10n.receiveSubtitleNoCustomer(total)
-            : context.l10n.receiveSubtitle(name, total);
+        final discountValue = store.discount ?? 0.0;
+        final discount = FormatService().formatCurrency(discountValue);
+        final hasName = name != null && name.isNotEmpty;
+        final String text;
+        if (discountValue > 0) {
+          text = hasName
+              ? context.l10n.receiveSubtitleWithDiscount(name, total, discount)
+              : context.l10n.receiveSubtitleNoCustomerWithDiscount(
+                  total,
+                  discount,
+                );
+        } else {
+          text = hasName
+              ? context.l10n.receiveSubtitle(name, total)
+              : context.l10n.receiveSubtitleNoCustomer(total);
+        }
         return Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.pageMargin,
@@ -243,109 +299,298 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  Widget _buildBlock() {
-    return Observer(
-      builder: (_) {
-        final status = _store?.status;
-        String? blocked;
-        // Payments are allowed from 'approved' on; not for quotes or canceled.
-        if (status == 'quote') blocked = context.l10n.statusQuote;
-        if (status == 'canceled') blocked = context.l10n.statusCancelled;
-        return ReceiveBlock(
-          isPaid: _store?.isFullyPaid ?? false,
-          blockedMessage: blocked,
-          controller: _valueController,
-          busy: _busy,
-          onConfirm: _register,
-          receiptName: _receipt?.name,
-          onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
-          onRemoveReceipt: () => setState(() => _receipt = null),
-        );
-      },
-    );
+  /// Whether the Asaas charge part applies: pilot on, user allowed, order
+  /// saved and accepting payments (not a quote nor canceled).
+  bool _chargeApplies(OrderStore store) {
+    final status = store.status;
+    return (_charge?.enabled ?? false) &&
+        store.order?.id != null &&
+        status != 'quote' &&
+        status != 'canceled';
   }
 
-  Widget _buildSummary() {
-    return Observer(
-      builder: (_) {
-        final store = _store;
-        final status = store?.status;
-        if (store == null || status == 'quote' || status == 'canceled') {
-          return const SizedBox.shrink();
-        }
-        final format = FormatService();
-        final discount = store.discount ?? 0.0;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // The order total is already net of the discount: show the items
-            // subtotal first so the discount isn't read as taken twice.
-            if (discount > 0) ...[
-              AppListRow(
-                key: const Key('receiveSubtotal'),
-                title: context.l10n.subtotal,
-                trailing: format.formatCurrency(
-                  (store.total ?? 0.0) + discount,
+  /// The open charge this screen shows, or null.
+  OrderCharge? _visibleOpenCharge() {
+    final store = _store;
+    if (store == null || !_chargeApplies(store)) return null;
+    return _charge?.openCharge;
+  }
+
+  /// Everything below the subtitle: the top block (manual receive, open
+  /// link or "the order changed"), the open link row, the payments and the
+  /// "send a link" action.
+  Widget _buildContent() {
+    return ListenableBuilder(
+      listenable: _charge ?? Listenable.merge(const <Listenable>[]),
+      builder: (context, _) => Observer(
+        builder: (_) {
+          final store = _store;
+          // Read the observables so the screen follows payment changes.
+          final remaining = store?.remainingBalance ?? 0.0;
+          final applies = store != null && _chargeApplies(store);
+          if (applies) _charge!.reloadOnFirstShow();
+          final open = applies ? _charge!.openCharge : null;
+          const tolerance = OrderPaymentMath.centTolerance;
+
+          final children = <Widget>[];
+          var replacing = false;
+          if (open == null) {
+            children.add(_buildReceiveBlock());
+          } else {
+            final value = open.value ?? 0.0;
+            final locked = chargeHasPaidInstallments(open);
+            if (remaining <= tolerance) {
+              children.add(_buildReceiveBlock(isPaid: true));
+            } else if (!locked &&
+                value > remaining + tolerance &&
+                _keptChargeId != open.id) {
+              // The order total dropped below the link value.
+              replacing = true;
+              children.addAll([
+                ChargeChangedBlock(
+                  remaining: remaining,
+                  chargeValue: value,
+                  busy: _creatingCharge,
+                  onGenerate: _charge!.connected
+                      ? () => _runCreateCharge(remaining)
+                      : null,
+                ),
+                _linkPadding(
+                  TextLink(
+                    key: const Key('chargeKeepLink'),
+                    label: context.l10n.chargeKeepLink(
+                      FormatService().formatCurrency(value),
+                    ),
+                    onPressed: () => setState(() => _keptChargeId = open.id),
+                  ),
+                ),
+              ]);
+            } else if (_receiveOtherWay) {
+              children.add(_buildReceiveBlock());
+            } else {
+              children.addAll([
+                ChargeLinkBlock(
+                  charge: open,
+                  customerName: store!.customerName,
+                  onRemind: _shareOrderLink,
+                ),
+                _linkPadding(
+                  TextLink(
+                    key: const Key('chargeReceivedOtherWay'),
+                    label: context.l10n.chargeReceivedOtherWay,
+                    onPressed: () => setState(() => _receiveOtherWay = true),
+                  ),
+                ),
+              ]);
+            }
+            children.addAll([
+              SectionLabel(context.l10n.chargeLinkSection),
+              ChargeLinkRow(
+                charge: open,
+                customerName: store!.customerName,
+                replacing: replacing,
+              ),
+            ]);
+          }
+
+          children.add(_buildPayments());
+
+          final canSendLink =
+              applies &&
+              open == null &&
+              _charge!.connected &&
+              remaining > tolerance &&
+              !_charge!.blockedByInstallments;
+          if (canSendLink) {
+            final name = store.customerName;
+            children.add(
+              _linkPadding(
+                TextLink(
+                  key: const Key('chargeSendLink'),
+                  label: name == null || name.isEmpty
+                      ? context.l10n.chargeSendLink
+                      : context.l10n.chargeSendLinkTo(name),
+                  onPressed: _creatingCharge
+                      ? null
+                      : () => _onSendLinkPressed(remaining),
                 ),
               ),
-              AppListRow(
-                title: context.l10n.discount,
-                trailing: '- ${format.formatCurrency(discount)}',
-              ),
-            ],
-            AppListRow(
-              title: context.l10n.total,
-              trailing: format.formatCurrency(store.total ?? 0.0),
-            ),
-            AppListRow(
-              title: context.l10n.receiveAlreadyReceived,
-              trailing: format.formatCurrency(store.paidAmount ?? 0.0),
-            ),
-          ],
-        );
-      },
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          );
+        },
+      ),
     );
   }
 
+  /// Text link aligned with the page margin.
+  Widget _linkPadding(Widget link) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+      child: Align(alignment: AlignmentDirectional.centerStart, child: link),
+    );
+  }
+
+  /// Manual receive block. [isPaid] overrides the store (an open link whose
+  /// value is already covered within the cent tolerance).
+  Widget _buildReceiveBlock({bool? isPaid}) {
+    final status = _store?.status;
+    String? blocked;
+    // Payments are allowed from 'approved' on; not for quotes or canceled.
+    if (status == 'quote') blocked = context.l10n.statusQuote;
+    if (status == 'canceled') blocked = context.l10n.statusCancelled;
+    return ReceiveBlock(
+      isPaid: isPaid ?? _store?.isFullyPaid ?? false,
+      blockedMessage: blocked,
+      controller: _valueController,
+      busy: _busy,
+      onConfirm: _register,
+      receiptName: _receipt?.name,
+      onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
+      onRemoveReceipt: () => setState(() => _receipt = null),
+    );
+  }
+
+  /// "Já recebido": the payments, newest first. Paid charges are not listed
+  /// apart: their money is already here as transactions.
   Widget _buildPayments() {
-    return Observer(
-      builder: (_) {
-        final transactions = _store?.transactions ?? <PaymentTransaction>[];
-        if (transactions.isEmpty) return const SizedBox.shrink();
-        final sorted = List<PaymentTransaction>.from(transactions)
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SectionLabel(context.l10n.payments),
-            for (final tx in sorted)
-              ReceivePaymentRow(
-                transaction: tx,
-                showReceiptState: _canView,
-                onTap: () => _showPaymentSheet(tx),
-              ),
-          ],
-        );
-      },
+    final transactions = _store?.transactions ?? <PaymentTransaction>[];
+    if (transactions.isEmpty) return const SizedBox.shrink();
+    final sorted = List<PaymentTransaction>.from(transactions)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(context.l10n.receiveAlreadyReceived),
+        for (final tx in sorted)
+          ReceivePaymentRow(
+            transaction: tx,
+            showReceiptState: _canView,
+            onTap: () => _showPaymentSheet(tx),
+          ),
+      ],
     );
   }
 
   // ============================================================
-  // ASAAS CHARGE (unchanged flow)
+  // ASAAS CHARGE
   // ============================================================
 
-  /// Opens the create-charge screen. Returns the push future so the card
-  /// keeps "Cobrar" disabled while the screen is open.
+  /// Opens the create-charge sheet and waits for it to close.
   Future<void> _openCreateCharge(double remaining) async {
     final order = _store?.order;
     if (order?.id == null) return;
 
-    await Navigator.of(context).push<OrderCharge>(
-      CupertinoPageRoute(
-        builder: (_) =>
-            CreateChargeScreen(order: order!, remainingBalance: remaining),
+    await FormSheet.show<OrderCharge>(
+      context,
+      (_) => CreateChargeScreen(order: order!, remainingBalance: remaining),
+    );
+  }
+
+  /// Runs the create flow once at a time (double-tap guard while the
+  /// create screen is open).
+  Future<void> _runCreateCharge(double remaining) async {
+    if (_creatingCharge) return;
+    setState(() => _creatingCharge = true);
+    try {
+      await _openCreateCharge(remaining);
+    } finally {
+      if (mounted) setState(() => _creatingCharge = false);
+    }
+  }
+
+  /// "Mandar link para … pagar". If a link is still open, confirm first: the
+  /// new one cancels it on Asaas.
+  Future<void> _onSendLinkPressed(double remaining) async {
+    final open = _charge?.openCharge;
+    if (open == null) {
+      await _runCreateCharge(remaining);
+      return;
+    }
+    if (_confirmingReplace || _creatingCharge) return;
+    _confirmingReplace = true;
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(dialogContext.l10n.chargeReplaceTitle),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(dialogContext.l10n.chargeReplaceConfirm),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            key: const Key('confirmReplaceChargeAction'),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(dialogContext.l10n.chargeReplace),
+          ),
+        ],
       ),
     );
+    _confirmingReplace = false;
+    if (!mounted) return;
+    if (confirmed == true) await _runCreateCharge(remaining);
+  }
+
+  void _shareOrderLink() {
+    final order = _store?.order;
+    if (order != null) ShareLinkSheet.show(context, order);
+  }
+
+  Future<void> _copyChargeLink(OrderCharge charge) async {
+    await Clipboard.setData(ClipboardData(text: charge.invoiceUrl!));
+    if (!mounted) return;
+    _showMessage(context.l10n.chargeLinkCopied);
+  }
+
+  Future<void> _confirmCancelCharge(OrderCharge charge) async {
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(dialogContext.l10n.chargeCancelLink),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(dialogContext.l10n.chargeCancelConfirm),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(dialogContext.l10n.chargeKeep),
+          ),
+          CupertinoDialogAction(
+            key: const Key('confirmCancelChargeAction'),
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(dialogContext.l10n.chargeCancelLink),
+          ),
+        ],
+      ),
+    );
+    final orderId = _store?.order?.id;
+    if (confirmed != true || charge.id == null || orderId == null) return;
+    if (!mounted || _cancelingCharge) return;
+
+    setState(() => _cancelingCharge = true);
+    try {
+      await _chargeService.cancelCharge(orderId, charge.id!);
+    } on AsaasApiException catch (e) {
+      if (mounted) _showMessage(asaasErrorText(context.l10n, e));
+    } catch (_) {
+      // Unexpected response: generic text, never the raw error.
+      if (mounted) {
+        _showMessage(asaasErrorText(context.l10n, AsaasApiException(null, '')));
+      }
+    } finally {
+      if (mounted) setState(() => _cancelingCharge = false);
+    }
   }
 
   // ============================================================
@@ -419,9 +664,27 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final store = _store;
     if (store == null) return;
     final hasManual = store.transactions.any((t) => !t.isAsaas);
+    final open = _visibleOpenCharge();
+    final hasInvoice = (open?.invoiceUrl ?? '').isNotEmpty;
+    final canCancel =
+        open != null && !chargeHasPaidInstallments(open) && !_cancelingCharge;
     final choice = await showPullDownMenu(
       context,
       groups: [
+        if (open != null)
+          PullDownGroup([
+            if (hasInvoice)
+              PullDownItem(
+                value: 'copyLink',
+                label: context.l10n.chargeCopyLink,
+                icon: CupertinoIcons.doc_on_doc,
+              ),
+            PullDownItem(
+              value: 'shareLink',
+              label: context.l10n.chargeSendAgainWhatsApp,
+              icon: CupertinoIcons.square_arrow_up,
+            ),
+          ]),
         PullDownGroup([
           PullDownItem(
             value: 'discount',
@@ -430,6 +693,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           ),
         ]),
         PullDownGroup([
+          if (canCancel)
+            PullDownItem(
+              value: 'cancelLink',
+              label: context.l10n.chargeCancelLink,
+              icon: CupertinoIcons.xmark_circle,
+              destructive: true,
+            ),
           if (hasManual)
             PullDownItem(
               value: 'undo',
@@ -442,6 +712,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
     if (!mounted) return;
     switch (choice) {
+      case 'copyLink':
+        if (open != null) _copyChargeLink(open);
+      case 'shareLink':
+        _shareOrderLink();
+      case 'cancelLink':
+        if (open != null) _confirmCancelCharge(open);
       case 'discount':
         _giveDiscount();
       case 'undo':
@@ -756,6 +1032,23 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       default:
         return 'application/octet-stream';
     }
+  }
+
+  /// Plain message with "OK" (no title).
+  void _showMessage(String message) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(dialogContext.l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showError(String message) {
