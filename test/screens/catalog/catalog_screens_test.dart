@@ -581,6 +581,7 @@ void main() {
       await tester.tap(add);
       await tester.pumpAndSettle();
       expect(find.text('O que vai cadastrar?'), findsOneWidget);
+      expect(find.text('Peça ou material que você vende'), findsOneWidget);
       await tester.tap(find.text('Produto'));
       await tester.pumpAndSettle();
       expect(find.byType(FormSheet), findsOneWidget);

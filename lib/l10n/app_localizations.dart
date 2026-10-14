@@ -8596,6 +8596,12 @@ abstract class AppLocalizations {
   /// **'O que pode fazer'**
   String get inviteRoleLabel;
 
+  /// No description provided for @inviteRoleQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode fazer?'**
+  String get inviteRoleQuestion;
+
   /// No description provided for @createInvite.
   ///
   /// In pt, this message translates to:
@@ -10743,6 +10749,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que vai cadastrar?'**
   String get pickerNewItemKind;
+
+  /// No description provided for @pickerNewItemServiceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mão de obra que você faz'**
+  String get pickerNewItemServiceHint;
+
+  /// No description provided for @pickerNewItemProductHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ou material que você vende'**
+  String get pickerNewItemProductHint;
 }
 
 class _AppLocalizationsDelegate

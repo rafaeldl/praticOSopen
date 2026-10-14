@@ -2254,6 +2254,7 @@
   "inviteEmailHint": "They sign in with this email and the invite shows up on its own.",
   "inviteWhatsAppLabel": "WhatsApp (optional)",
   "inviteRoleLabel": "What they can do",
+  "inviteRoleQuestion": "What can they do?",
   "createInvite": "Create invite",
   "cancelAndInviteAgain": "Cancel and invite again",
   "inviteExpiredMessage": "This invite has expired. Cancel it and invite again.",
@@ -2910,5 +2911,7 @@
   "formItemTypeSelect": "Single choice",
   "formItemTypeChecklist": "Multiple choice",
   "formItemTypePhoto": "Photo only",
-  "pickerNewItemKind": "What are you adding?"
+  "pickerNewItemKind": "What are you adding?",
+  "pickerNewItemServiceHint": "Work you do",
+  "pickerNewItemProductHint": "Part or material you sell"
 }

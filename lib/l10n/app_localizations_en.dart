@@ -4766,6 +4766,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteRoleLabel => 'What they can do';
 
   @override
+  String get inviteRoleQuestion => 'What can they do?';
+
+  @override
   String get createInvite => 'Create invite';
 
   @override
@@ -6218,4 +6221,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickerNewItemKind => 'What are you adding?';
+
+  @override
+  String get pickerNewItemServiceHint => 'Work you do';
+
+  @override
+  String get pickerNewItemProductHint => 'Part or material you sell';
 }

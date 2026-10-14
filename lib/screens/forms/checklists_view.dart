@@ -4,7 +4,7 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -14,7 +14,7 @@ import 'package:praticos/theme/app_typography.dart';
 
 /// "Checklists" (app-checklists): the company's checklists ("Seus
 /// checklists", tap to edit, swipe to delete), the ready ones ("Prontos para
-/// usar", "Usar" copies one) and "Novo checklist" floating at the bottom.
+/// usar", "Usar" copies one) and "+" at the top for a new one.
 ///
 /// Presentational: [FormTemplateListScreen] wires the store.
 class ChecklistsView extends StatelessWidget {
@@ -53,12 +53,12 @@ class ChecklistsView extends StatelessWidget {
     return MorePage(
       title: l10n.checklistsTitle,
       subtitle: l10n.checklistsSubtitle,
-      floatingButton: onNew == null
+      trailing: onNew == null
           ? null
-          : PrimaryButton(
+          : GlassBarButton(
               key: const ValueKey('checklist_new'),
               label: l10n.checklistNew,
-              floating: true,
+              icon: CupertinoIcons.add,
               onPressed: onNew,
             ),
       children: [

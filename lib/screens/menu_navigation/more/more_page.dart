@@ -15,6 +15,7 @@ class MorePage extends StatelessWidget {
     this.previousPageTitle,
     this.subtitle,
     this.floatingButton,
+    this.trailing,
   });
 
   final String title;
@@ -28,6 +29,9 @@ class MorePage extends StatelessWidget {
   /// The screen's single blue button, floating over the bottom of the page
   /// (design system rule 11). The list gets room so nothing hides under it.
   final Widget? floatingButton;
+
+  /// Top-right bar button, e.g. the "+" that adds a new record.
+  final Widget? trailing;
   final List<Widget> children;
 
   @override
@@ -41,6 +45,7 @@ class MorePage extends StatelessWidget {
             AppNavBar(
               largeTitle: Text(title),
               previousTitle: previousPageTitle,
+              trailing: trailing,
             ),
             SliverSafeArea(
               top: false,

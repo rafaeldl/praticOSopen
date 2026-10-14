@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/l10n/app_localizations_pt.dart';
 import 'package:praticos/models/user_role.dart';
@@ -604,11 +605,16 @@ void main() {
       for (final role in RolePermissions5.all) {
         expect(find.byKey(ValueKey('role_${role.name}')), findsOneWidget);
       }
+      // "Escolher" screen with the question as title, not a small sheet.
+      expect(find.byType(PickerScaffold<RolesType>), findsOneWidget);
+      expect(find.text(pt.inviteRoleQuestion), findsWidgets);
       expect(find.text(pt.roleSupervisor), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.checkmark), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('role_supervisor')));
       await tester.pumpAndSettle();
+      expect(find.byType(PickerScaffold<RolesType>), findsNothing);
+      // Role on the row's line, its sentence under the card.
+      expect(find.text(pt.roleSupervisor), findsOneWidget);
       expect(find.text(pt.roleDescSupervisor), findsOneWidget);
 
       await tester.enterText(

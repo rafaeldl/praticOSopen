@@ -4788,6 +4788,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inviteRoleLabel => 'Qué puede hacer';
 
   @override
+  String get inviteRoleQuestion => '¿Qué puede hacer?';
+
+  @override
   String get createInvite => 'Crear invitación';
 
   @override
@@ -6241,4 +6244,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pickerNewItemKind => '¿Qué vas a registrar?';
+
+  @override
+  String get pickerNewItemServiceHint => 'Mano de obra que haces';
+
+  @override
+  String get pickerNewItemProductHint => 'Pieza o material que vendes';
 }

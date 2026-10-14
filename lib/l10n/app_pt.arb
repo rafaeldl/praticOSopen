@@ -2316,6 +2316,7 @@
   "inviteEmailHint": "A pessoa entra com este e-mail e o convite aparece sozinho.",
   "inviteWhatsAppLabel": "WhatsApp (opcional)",
   "inviteRoleLabel": "O que pode fazer",
+  "inviteRoleQuestion": "O que pode fazer?",
   "createInvite": "Criar convite",
   "cancelAndInviteAgain": "Cancelar e convidar de novo",
   "inviteExpiredMessage": "Este convite venceu. Cancele e convide de novo.",
@@ -3070,5 +3071,7 @@
   "formItemTypeSelect": "Seleção única",
   "formItemTypeChecklist": "Múltipla escolha",
   "formItemTypePhoto": "Apenas foto",
-  "pickerNewItemKind": "O que vai cadastrar?"
+  "pickerNewItemKind": "O que vai cadastrar?",
+  "pickerNewItemServiceHint": "Mão de obra que você faz",
+  "pickerNewItemProductHint": "Peça ou material que você vende"
 }

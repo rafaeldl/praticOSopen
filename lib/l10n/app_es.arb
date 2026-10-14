@@ -2254,6 +2254,7 @@
   "inviteEmailHint": "La persona entra con este correo y la invitación aparece sola.",
   "inviteWhatsAppLabel": "WhatsApp (opcional)",
   "inviteRoleLabel": "Qué puede hacer",
+  "inviteRoleQuestion": "¿Qué puede hacer?",
   "createInvite": "Crear invitación",
   "cancelAndInviteAgain": "Cancelar e invitar de nuevo",
   "inviteExpiredMessage": "Esta invitación venció. Cancélala e invita de nuevo.",
@@ -2910,5 +2911,7 @@
   "formItemTypeSelect": "Selección única",
   "formItemTypeChecklist": "Selección múltiple",
   "formItemTypePhoto": "Solo foto",
-  "pickerNewItemKind": "¿Qué vas a registrar?"
+  "pickerNewItemKind": "¿Qué vas a registrar?",
+  "pickerNewItemServiceHint": "Mano de obra que haces",
+  "pickerNewItemProductHint": "Pieza o material que vendes"
 }

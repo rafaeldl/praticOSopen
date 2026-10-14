@@ -180,8 +180,16 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
             context,
             title: l10n.pickerNewItemKind,
             options: [
-              PickerItem(value: CatalogKind.service, title: l10n.service),
-              PickerItem(value: CatalogKind.product, title: l10n.product),
+              PickerItem(
+                value: CatalogKind.service,
+                title: l10n.service,
+                subtitle: l10n.pickerNewItemServiceHint,
+              ),
+              PickerItem(
+                value: CatalogKind.product,
+                title: l10n.product,
+                subtitle: l10n.pickerNewItemProductHint,
+              ),
             ],
           );
     if (kind == null || !mounted) return;

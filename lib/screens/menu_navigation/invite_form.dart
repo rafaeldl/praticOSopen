@@ -4,10 +4,9 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// What the invite form collects. [name] is optional; at least one of
@@ -129,8 +128,24 @@ class _InviteFormState extends State<InviteForm> {
     }
   }
 
+  /// "Escolher" screen: one sentence per role, ✓ on the current one. All
+  /// five roles are offered, Supervisor included.
   Future<void> _pickRole() async {
-    final picked = await RolePickerSheet.show(context, selected: _role);
+    final l10n = context.l10n;
+    final picked = await pickOne<RolesType>(
+      context,
+      title: l10n.inviteRoleQuestion,
+      selected: _role,
+      options: [
+        for (final role in RolePermissions.availableRoles)
+          PickerItem(
+            key: ValueKey('role_${role.name}'),
+            value: role,
+            title: RolePermissions.getRoleLabel(role, l10n),
+            subtitle: RolePermissions.getRoleDescription(role, l10n),
+          ),
+      ],
+    );
     if (picked != null && mounted) setState(() => _role = picked);
   }
 
@@ -181,98 +196,25 @@ class _InviteFormState extends State<InviteForm> {
               ),
             ],
           ),
+          // The role sentence goes under the card, so the row keeps title
+          // and role on one line.
           FormCard(
+            note: RolePermissions.getRoleDescription(_role, l10n),
             children: [
               FormRow(
                 key: const ValueKey('invite_role'),
                 icon: CupertinoIcons.person_crop_circle,
                 title: l10n.inviteRoleLabel,
-                subtitle: RolePermissions.getRoleDescription(_role, l10n),
-                value: RolePermissions.getRoleLabel(_role, l10n),
+                trailing: Text(
+                  RolePermissions.getRoleLabel(_role, l10n),
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
+                  ),
+                ),
                 onTap: _pickRole,
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Role choice with one sentence per role. The selected role shows a check
-/// on the right (no radio buttons). All five roles are offered, Supervisor
-/// included.
-class RolePickerSheet extends StatelessWidget {
-  const RolePickerSheet({super.key, required this.selected});
-
-  final RolesType selected;
-
-  static Future<RolesType?> show(
-    BuildContext context, {
-    required RolesType selected,
-  }) {
-    return AppSheet.show<RolesType>(
-      context,
-      (_) => RolePickerSheet(selected: selected),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AppSheet(
-      title: l10n.inviteRoleLabel,
-      child: ListView(
-        children: [
-          for (final role in RolePermissions.availableRoles)
-            GestureDetector(
-              key: ValueKey('role_${role.name}'),
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.of(context).pop(role),
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.pageMargin,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              RolePermissions.getRoleLabel(role, l10n),
-                              style: AppTypography.body.copyWith(
-                                color: AppColors.text.resolveFrom(context),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                RolePermissions.getRoleDescription(role, l10n),
-                                style: AppTypography.callout.copyWith(
-                                  color: AppColors.textSecondary
-                                      .resolveFrom(context),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (role == selected)
-                        Icon(
-                          CupertinoIcons.checkmark,
-                          size: 20,
-                          color: AppColors.accentText.resolveFrom(context),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
