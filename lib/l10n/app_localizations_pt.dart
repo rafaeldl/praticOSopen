@@ -1260,7 +1260,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get topProducts => 'Produtos Mais Vendidos';
 
   @override
-  String get recentOrders => 'OS Recentes';
+  String get recentOrders => 'OS recentes';
 
   @override
   String get recentCustomers => 'Usados por último';
@@ -6480,4 +6480,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get agendaNextMonth => 'Próximo mês';
+
+  @override
+  String noticeCommented(String name, String text) {
+    return '$name comentou: “$text”';
+  }
+
+  @override
+  String noticePaymentReceived(String amount) {
+    return 'Pagamento de $amount recebido';
+  }
 }

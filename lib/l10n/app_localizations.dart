@@ -2575,7 +2575,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentOrders.
   ///
   /// In pt, this message translates to:
-  /// **'OS Recentes'**
+  /// **'OS recentes'**
   String get recentOrders;
 
   /// No description provided for @recentCustomers.
@@ -11131,6 +11131,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Próximo mês'**
   String get agendaNextMonth;
+
+  /// No description provided for @noticeCommented.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} comentou: “{text}”'**
+  String noticeCommented(String name, String text);
+
+  /// No description provided for @noticePaymentReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento de {amount} recebido'**
+  String noticePaymentReceived(String amount);
 }
 
 class _AppLocalizationsDelegate

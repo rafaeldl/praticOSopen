@@ -449,7 +449,7 @@
   "completedOrders": "OS Concluídas",
   "topServices": "Serviços Mais Realizados",
   "topProducts": "Produtos Mais Vendidos",
-  "recentOrders": "OS Recentes",
+  "recentOrders": "OS recentes",
   "recentCustomers": "Usados por último",
   "role": "Função",
   "noRole": "Sem perfil",
@@ -3168,5 +3168,9 @@
   "agendaPreviousWeek": "Semana anterior",
   "agendaNextWeek": "Próxima semana",
   "agendaPreviousMonth": "Mês anterior",
-  "agendaNextMonth": "Próximo mês"
+  "agendaNextMonth": "Próximo mês",
+  "noticeCommented": "{name} comentou: “{text}”",
+  "@noticeCommented": {"placeholders": {"name": {"type": "String"}, "text": {"type": "String"}}},
+  "noticePaymentReceived": "Pagamento de {amount} recebido",
+  "@noticePaymentReceived": {"placeholders": {"amount": {"type": "String"}}}
 }

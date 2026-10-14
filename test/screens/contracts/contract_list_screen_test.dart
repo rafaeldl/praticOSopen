@@ -131,9 +131,40 @@ void main() {
     await tester.pumpWidget(_app(_FakeDirectory(Stream.value([])), []));
     await tester.pump();
     expect(find.text('Nenhum contrato'), findsOneWidget);
+    // The empty state explains how a contract is born.
+    expect(
+      find.text('Contratos nascem dentro de uma OS: ligue “Repetir esta OS”.'),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Encerrados'));
     await tester.pumpAndSettle();
     expect(find.text('Nenhum contrato encerrado.'), findsOneWidget);
+  });
+
+  testWidgets('back button says "Minha empresa"', (tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('pt', 'BR'),
+        home: Builder(
+          builder: (context) => CupertinoButton(
+            onPressed: () => Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => ContractListScreen(
+                  directory: _FakeDirectory(Stream.value([])),
+                ),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Minha empresa'), findsOneWidget);
   });
 
   testWidgets('loading state', (tester) async {

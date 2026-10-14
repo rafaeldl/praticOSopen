@@ -425,7 +425,7 @@
   "completedOrders": "Órdenes Completadas",
   "topServices": "Servicios Más Realizados",
   "topProducts": "Productos Más Vendidos",
-  "recentOrders": "Órdenes Recientes",
+  "recentOrders": "Órdenes recientes",
   "recentCustomers": "Usados por último",
   "role": "Rol",
   "noRole": "Sin perfil",
@@ -2991,5 +2991,7 @@
   "agendaPreviousWeek": "Semana anterior",
   "agendaNextWeek": "Semana siguiente",
   "agendaPreviousMonth": "Mes anterior",
-  "agendaNextMonth": "Mes siguiente"
+  "agendaNextMonth": "Mes siguiente",
+  "noticeCommented": "{name} comentó: “{text}”",
+  "noticePaymentReceived": "Pago de {amount} recibido"
 }
