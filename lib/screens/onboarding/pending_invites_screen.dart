@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/models/invite.dart';
@@ -29,11 +30,15 @@ class PendingInvitesScreen extends StatefulWidget {
   /// Tests pre-populate [InviteStore] and skip the Firestore load.
   final bool loadOnInit;
 
+  /// Tests replace the accept call (the store talks to the API).
+  final Future<void> Function(Invite invite)? acceptInviteOverride;
+
   const PendingInvitesScreen({
     super.key,
     this.onCreateCompany,
     this.onInviteAccepted,
     @visibleForTesting this.loadOnInit = true,
+    @visibleForTesting this.acceptInviteOverride,
   });
 
   @override
@@ -57,12 +62,14 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
 
   Future<void> _acceptInvite(Invite invite) async {
     try {
-      await _inviteStore.acceptInvite(invite);
+      final accept = widget.acceptInviteOverride ?? _inviteStore.acceptInvite;
+      await accept(invite);
       if (mounted) {
-        _showSuccessDialog(
-          context.l10n.inviteAccepted,
+        showAppToast(
+          context,
           context.l10n.youAreNowPartOf(invite.company?.name ?? ''),
         );
+        widget.onInviteAccepted?.call();
       }
     } catch (e) {
       debugPrint('[PendingInvites] accept failed: $e');
@@ -81,25 +88,6 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
         _showErrorDialog(friendlyInviteError(e, context.l10n));
       }
     }
-  }
-
-  void _showSuccessDialog(String title, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onInviteAccepted?.call();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   void _showErrorDialog(String message) {

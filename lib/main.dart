@@ -22,6 +22,7 @@ import 'package:praticos/screens/auth_wrapper.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:praticos/config/emulators.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +50,7 @@ Future<void> main() async {
   PackageInfo info = await PackageInfo.fromPlatform();
   Global.version = "${info.version} (${info.buildNumber})";
   await Firebase.initializeApp();
+  await FirebaseEmulators.connect();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
 
@@ -149,7 +151,10 @@ class MyApp extends StatelessWidget {
           navigatorObservers: <NavigatorObserver>[observer],
           builder: (context, child) {
             // Inject l10n into SegmentConfigProvider
-            final segmentConfig = Provider.of<SegmentConfigProvider>(context, listen: false);
+            final segmentConfig = Provider.of<SegmentConfigProvider>(
+              context,
+              listen: false,
+            );
             final l10n = AppLocalizations.of(context);
             segmentConfig.injectL10n(l10n);
 

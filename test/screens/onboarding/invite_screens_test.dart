@@ -82,6 +82,27 @@ void main() {
       expect(find.textContaining('Convidado por Ana'), findsOneWidget);
     });
 
+    testWidgets('accepting shows a quick notice and goes on, no alert',
+        (tester) async {
+      tall(tester);
+      setInvites([_invite('Oficina Exemplo', by: 'Ana')]);
+      var accepted = false;
+      await tester.pumpWidget(_app(PendingInvitesScreen(
+        loadOnInit: false,
+        acceptInviteOverride: (_) async {},
+        onInviteAccepted: () => accepted = true,
+      )));
+
+      await tester.tap(find.text('Entrar na equipe'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(accepted, isTrue);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.textContaining('Oficina Exemplo'), findsWidgets);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
     testWidgets('decline asks for confirmation with Recusar / Voltar',
         (tester) async {
       tall(tester);

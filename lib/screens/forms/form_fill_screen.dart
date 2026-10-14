@@ -496,34 +496,50 @@ class _FormFillScreenState extends State<FormFillScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final showMenu = _isCompleted && !_isSaving && _canReopenForm();
+    // A record screen: short title in the bar, the checklist name in the
+    // header, where it wraps instead of being cut (design system rule 8).
     return CupertinoPageScaffold(
       backgroundColor: AppColors.groupedBackground.resolveFrom(context),
+      navigationBar: CupertinoNavigationBar(
+        automaticallyImplyLeading: false,
+        leading: const GlassBackButton(),
+        middle: Text(l10n.checklist),
+        backgroundColor: AppColors.groupedBackground
+            .resolveFrom(context)
+            .withValues(alpha: 0.8),
+        border: null,
+        trailing: _isSaving
+            ? const CupertinoActivityIndicator()
+            : showMenu
+            ? GlassBarButton(
+                key: const ValueKey('form_fill_menu'),
+                label: l10n.orderMoreActions,
+                icon: CupertinoIcons.ellipsis,
+                onPressed: _showMenu,
+              )
+            : null,
+      ),
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
-            automaticallyImplyLeading: false,
-            leading: const GlassBackButton(),
-            largeTitle: Text(_currentForm.getLocalizedTitle(_localeCode)),
-            alwaysShowMiddle: false,
-            backgroundColor: AppColors.groupedBackground
-                .resolveFrom(context)
-                .withValues(alpha: 0.8),
-            border: null,
-            trailing: _isSaving
-                ? const CupertinoActivityIndicator()
-                : showMenu
-                ? GlassBarButton(
-                    key: const ValueKey('form_fill_menu'),
-                    label: l10n.orderMoreActions,
-                    icon: CupertinoIcons.ellipsis,
-                    onPressed: _showMenu,
-                  )
-                : null,
-          ),
           SliverSafeArea(
-            top: false,
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.pageMargin,
+                    AppSpacing.lg,
+                    AppSpacing.pageMargin,
+                    AppSpacing.xs,
+                  ),
+                  child: Text(
+                    _currentForm.getLocalizedTitle(_localeCode),
+                    key: const ValueKey('form_fill_title'),
+                    style: AppTypography.title.copyWith(
+                      fontSize: 28,
+                      color: AppColors.text.resolveFrom(context),
+                    ),
+                  ),
+                ),
                 _buildHeader(context),
                 if (_currentForm.items.isNotEmpty) ...[
                   SectionLabel(l10n.checklistQuestionsTitle),

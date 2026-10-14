@@ -6,7 +6,7 @@ import 'package:praticos/screens/onboarding/onboarding_flow.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/next_step_block.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -205,7 +205,17 @@ class _YourBusinessScreenState extends State<YourBusinessScreen> {
                   onChanged: (value) => setState(() => _useFinancial = value),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                NextStepBlock(text: l10n.onboardingSamplesInfo),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pageMargin,
+                  ),
+                  child: Text(
+                    l10n.onboardingSamplesInfo,
+                    style: AppTypography.callout.copyWith(
+                      color: AppColors.textSecondary.resolveFrom(context),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

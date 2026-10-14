@@ -118,6 +118,8 @@ class _AppFormFieldState extends State<AppFormField> {
                 ),
                 onChanged: (value) {
                   state.didChange(value);
+                  // Once shown, the error follows what is typed.
+                  if (state.hasError) state.validate();
                   widget.onChanged?.call(value);
                 },
               ),
