@@ -227,7 +227,7 @@ class _FinancialTabState extends State<FinancialTab> {
   Widget _buildStepper(BuildContext context) {
     final l10n = context.l10n;
     return PeriodStepper(
-      label: FormatService().formatMonthYear(_store.month),
+      label: FormatService().formatMonthYearTitle(_store.month),
       previousLabel: l10n.financialPreviousMonth,
       nextLabel: l10n.financialNextMonth,
       onPrevious: _store.previousMonth,

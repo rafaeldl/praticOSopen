@@ -105,7 +105,7 @@ void main() {
     await pumpTab(tester, storeWith(month: [paid, ana], open: [ana, bia1, bia2]));
 
     expect(find.text('Financeiro'), findsWidgets);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(
       find.text('Falta receber ${FormatService().formatCurrency(1730)} de 2 clientes'),
       findsOneWidget,
@@ -215,7 +215,7 @@ void main() {
     await pumpTab(tester, storeWith(openLoader: () => completer.future));
 
     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(find.textContaining('Entrou'), findsNothing);
 
     completer.complete([]);
@@ -258,15 +258,15 @@ void main() {
     await tester.pump();
 
     expect(calls, [0, -1]);
-    expect(find.text('setembro de 2026'), findsOneWidget);
+    expect(find.text('Setembro de 2026'), findsOneWidget);
     expect(find.text('Nenhuma OS em setembro de 2026.'), findsOneWidget);
 
     // Tapping the label goes back to the current month.
-    await tester.tap(find.text('setembro de 2026'));
+    await tester.tap(find.text('Setembro de 2026'));
     await tester.pump();
     await tester.pump();
     expect(calls, [0, -1, 0]);
-    expect(find.text('outubro de 2026'), findsOneWidget);
+    expect(find.text('Outubro de 2026'), findsOneWidget);
   });
 
   testWidgets('"…" opens the report and the period picker', (tester) async {
