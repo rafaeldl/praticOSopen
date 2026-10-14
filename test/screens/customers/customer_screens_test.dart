@@ -223,6 +223,25 @@ void main() {
       );
     });
 
+    testWidgets('an order customer without a known id is matched by name',
+        (tester) async {
+      await Harness().pump(
+        tester,
+        CustomerListScreen(directory: directory()),
+        args: {
+          'order': Order()
+            ..customer = (CustomerAggr()
+              ..id = 'migrated-id'
+              ..name = 'Bruno Lima'),
+        },
+      );
+      final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+      expect(
+        {for (final r in rows) r.title: r.selected},
+        {'Ana Ribeiro': false, 'Bruno Lima': true},
+      );
+    });
+
     testWidgets('has no swipe actions and no chevron while choosing',
         (tester) async {
       await Harness().pump(

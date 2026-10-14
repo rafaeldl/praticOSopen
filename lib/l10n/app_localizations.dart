@@ -100,12 +100,6 @@ abstract class AppLocalizations {
     Locale('pt'),
   ];
 
-  /// Nome do aplicativo
-  ///
-  /// In pt, this message translates to:
-  /// **'PraticOS'**
-  String get appName;
-
   /// No description provided for @home.
   ///
   /// In pt, this message translates to:
@@ -364,12 +358,6 @@ abstract class AppLocalizations {
   /// **'Redefinir'**
   String get reset;
 
-  /// No description provided for @basicInfo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informações Básicas'**
-  String get basicInfo;
-
   /// No description provided for @apply.
   ///
   /// In pt, this message translates to:
@@ -406,18 +394,6 @@ abstract class AppLocalizations {
   /// **'Menos'**
   String get less;
 
-  /// No description provided for @seeAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver todos'**
-  String get seeAll;
-
-  /// No description provided for @seeMore.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver Mais'**
-  String get seeMore;
-
   /// No description provided for @details.
   ///
   /// In pt, this message translates to:
@@ -441,12 +417,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Status'**
   String get status;
-
-  /// No description provided for @statusAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todos'**
-  String get statusAll;
 
   /// No description provided for @statusPending.
   ///
@@ -490,36 +460,6 @@ abstract class AppLocalizations {
   /// **'Entrega'**
   String get statusDelivery;
 
-  /// No description provided for @statusScheduled.
-  ///
-  /// In pt, this message translates to:
-  /// **'Agendado'**
-  String get statusScheduled;
-
-  /// No description provided for @statusWaiting.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aguardando'**
-  String get statusWaiting;
-
-  /// No description provided for @statusRejected.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rejeitado'**
-  String get statusRejected;
-
-  /// No description provided for @statusOpen.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aberto'**
-  String get statusOpen;
-
-  /// No description provided for @statusClosed.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fechado'**
-  String get statusClosed;
-
   /// No description provided for @payments.
   ///
   /// In pt, this message translates to:
@@ -556,59 +496,17 @@ abstract class AppLocalizations {
   /// **'Falta receber'**
   String get toReceive;
 
-  /// No description provided for @toPay.
-  ///
-  /// In pt, this message translates to:
-  /// **'A Pagar'**
-  String get toPay;
-
   /// No description provided for @received.
   ///
   /// In pt, this message translates to:
   /// **'Recebido'**
   String get received;
 
-  /// No description provided for @paymentMethod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Forma de Pagamento'**
-  String get paymentMethod;
-
-  /// No description provided for @paymentMethods.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formas de Pagamento'**
-  String get paymentMethods;
-
-  /// No description provided for @cash.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dinheiro'**
-  String get cash;
-
-  /// No description provided for @creditCard.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cartão de Crédito'**
-  String get creditCard;
-
-  /// No description provided for @debitCard.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cartão de Débito'**
-  String get debitCard;
-
   /// No description provided for @pix.
   ///
   /// In pt, this message translates to:
   /// **'PIX'**
   String get pix;
-
-  /// No description provided for @bankTransfer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Transferência'**
-  String get bankTransfer;
 
   /// No description provided for @check.
   ///
@@ -634,48 +532,6 @@ abstract class AppLocalizations {
   /// **'Vencimento'**
   String get dueDate;
 
-  /// No description provided for @paymentDate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Data do Pagamento'**
-  String get paymentDate;
-
-  /// No description provided for @payTotalAmount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pagar valor total'**
-  String get payTotalAmount;
-
-  /// No description provided for @registerPayment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registrar Pagamento'**
-  String get registerPayment;
-
-  /// No description provided for @applyDiscount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aplicar Desconto'**
-  String get applyDiscount;
-
-  /// No description provided for @paymentAmount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Valor do pagamento'**
-  String get paymentAmount;
-
-  /// No description provided for @discountAmount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Valor do desconto'**
-  String get discountAmount;
-
-  /// No description provided for @fillValue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preencha o valor'**
-  String get fillValue;
-
   /// No description provided for @paymentCannotExceedBalance.
   ///
   /// In pt, this message translates to:
@@ -687,18 +543,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Desconto não pode ser maior que o saldo'**
   String get discountCannotExceedBalance;
-
-  /// No description provided for @paymentRegistered.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pagamento registrado'**
-  String get paymentRegistered;
-
-  /// No description provided for @discountApplied.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desconto aplicado'**
-  String get discountApplied;
 
   /// No description provided for @asaasTransactionCannotBeRemoved.
   ///
@@ -718,12 +562,6 @@ abstract class AppLocalizations {
   /// **'Sem conexão. Tente de novo quando estiver online.'**
   String get paymentRequiresConnection;
 
-  /// No description provided for @register.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registrar'**
-  String get register;
-
   /// No description provided for @history.
   ///
   /// In pt, this message translates to:
@@ -736,35 +574,11 @@ abstract class AppLocalizations {
   /// **'O valor deve ser maior que zero'**
   String get valueMustBeGreaterThanZero;
 
-  /// No description provided for @exampleCashPayment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex: Pagamento em dinheiro'**
-  String get exampleCashPayment;
-
-  /// No description provided for @exampleLoyaltyDiscount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex: Desconto de fidelidade'**
-  String get exampleLoyaltyDiscount;
-
-  /// No description provided for @noTransactionsRecorded.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma transação registrada'**
-  String get noTransactionsRecorded;
-
   /// Mensagem de confirmação para remover transação
   ///
   /// In pt, this message translates to:
   /// **'Deseja remover este {type} de {amount}?'**
   String confirmRemoveTransaction(String type, String amount);
-
-  /// No description provided for @requiredField.
-  ///
-  /// In pt, this message translates to:
-  /// **'Campo obrigatório'**
-  String get requiredField;
 
   /// No description provided for @invalidEmail.
   ///
@@ -777,18 +591,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Telefone inválido'**
   String get invalidPhone;
-
-  /// No description provided for @invalidValue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Valor inválido'**
-  String get invalidValue;
-
-  /// No description provided for @invalidDate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Data inválida'**
-  String get invalidDate;
 
   /// No description provided for @invalidFormat.
   ///
@@ -814,24 +616,6 @@ abstract class AppLocalizations {
   /// **'caracteres'**
   String get characters;
 
-  /// No description provided for @selectOption.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione uma opção'**
-  String get selectOption;
-
-  /// No description provided for @noResults.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum resultado encontrado'**
-  String get noResults;
-
-  /// No description provided for @noData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum dado disponível'**
-  String get noData;
-
   /// No description provided for @noValuesRegistered.
   ///
   /// In pt, this message translates to:
@@ -843,18 +627,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Digite no campo acima para adicionar'**
   String get typeAboveToAdd;
-
-  /// No description provided for @addNewValue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Adicionar novo valor'**
-  String get addNewValue;
-
-  /// No description provided for @selectAtLeastOne.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione ao menos uma opção'**
-  String get selectAtLeastOne;
 
   /// No description provided for @minLength.
   ///
@@ -928,24 +700,6 @@ abstract class AppLocalizations {
   /// **'Galeria'**
   String get gallery;
 
-  /// No description provided for @noPhotos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma foto'**
-  String get noPhotos;
-
-  /// No description provided for @photoAdded.
-  ///
-  /// In pt, this message translates to:
-  /// **'Foto adicionada'**
-  String get photoAdded;
-
-  /// No description provided for @photoRemoved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Foto removida'**
-  String get photoRemoved;
-
   /// No description provided for @today.
   ///
   /// In pt, this message translates to:
@@ -963,36 +717,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Amanhã'**
   String get tomorrow;
-
-  /// No description provided for @thisWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esta Semana'**
-  String get thisWeek;
-
-  /// No description provided for @lastWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'Semana Passada'**
-  String get lastWeek;
-
-  /// No description provided for @thisMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este Mês'**
-  String get thisMonth;
-
-  /// No description provided for @lastMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mês Passado'**
-  String get lastMonth;
-
-  /// No description provided for @thisYear.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este Ano'**
-  String get thisYear;
 
   /// No description provided for @scheduledDate.
   ///
@@ -1024,12 +748,6 @@ abstract class AppLocalizations {
   /// **'Hora'**
   String get time;
 
-  /// No description provided for @dateTime.
-  ///
-  /// In pt, this message translates to:
-  /// **'Data e Hora'**
-  String get dateTime;
-
   /// No description provided for @startDate.
   ///
   /// In pt, this message translates to:
@@ -1054,53 +772,17 @@ abstract class AppLocalizations {
   /// **'Confirmar Exclusão'**
   String get confirmDelete;
 
-  /// No description provided for @confirmDeleteMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja realmente excluir este item?'**
-  String get confirmDeleteMessage;
-
   /// No description provided for @confirmDeleteMessageNamed.
   ///
   /// In pt, this message translates to:
   /// **'Deseja realmente excluir \"{name}\"?'**
   String confirmDeleteMessageNamed(String name);
 
-  /// No description provided for @confirmCancel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Confirmar Cancelamento'**
-  String get confirmCancel;
-
-  /// No description provided for @confirmCancelMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja realmente cancelar?'**
-  String get confirmCancelMessage;
-
-  /// No description provided for @unsavedChanges.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alterações não salvas'**
-  String get unsavedChanges;
-
-  /// No description provided for @unsavedChangesMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você tem alterações não salvas. Deseja sair mesmo assim?'**
-  String get unsavedChangesMessage;
-
   /// No description provided for @confirmAction.
   ///
   /// In pt, this message translates to:
   /// **'Confirmar Ação'**
   String get confirmAction;
-
-  /// No description provided for @areYouSure.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza?'**
-  String get areYouSure;
 
   /// No description provided for @cannotUndo.
   ///
@@ -1113,12 +795,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Descartar'**
   String get discard;
-
-  /// No description provided for @keepEditing.
-  ///
-  /// In pt, this message translates to:
-  /// **'Continuar Editando'**
-  String get keepEditing;
 
   /// No description provided for @leave.
   ///
@@ -1150,12 +826,6 @@ abstract class AppLocalizations {
   /// **'Editar cliente'**
   String get editCustomer;
 
-  /// No description provided for @customerDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do Cliente'**
-  String get customerDetails;
-
   /// No description provided for @customerName.
   ///
   /// In pt, this message translates to:
@@ -1167,24 +837,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Lista de Clientes'**
   String get customerList;
-
-  /// No description provided for @searchCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Buscar Cliente'**
-  String get searchCustomer;
-
-  /// No description provided for @selectCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Cliente'**
-  String get selectCustomer;
-
-  /// No description provided for @noCustomers.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum cliente cadastrado'**
-  String get noCustomers;
 
   /// No description provided for @addCustomer.
   ///
@@ -1198,41 +850,17 @@ abstract class AppLocalizations {
   /// **'Nome'**
   String get name;
 
-  /// No description provided for @namePlaceholder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex: João Silva'**
-  String get namePlaceholder;
-
   /// No description provided for @fullName.
   ///
   /// In pt, this message translates to:
   /// **'Nome Completo'**
   String get fullName;
 
-  /// No description provided for @nickname.
-  ///
-  /// In pt, this message translates to:
-  /// **'Apelido'**
-  String get nickname;
-
   /// No description provided for @phone.
   ///
   /// In pt, this message translates to:
   /// **'Telefone'**
   String get phone;
-
-  /// No description provided for @phones.
-  ///
-  /// In pt, this message translates to:
-  /// **'Telefones'**
-  String get phones;
-
-  /// No description provided for @cellphone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Celular'**
-  String get cellphone;
 
   /// No description provided for @whatsapp.
   ///
@@ -1246,47 +874,17 @@ abstract class AppLocalizations {
   /// **'E-mail'**
   String get email;
 
-  /// No description provided for @emails.
-  ///
-  /// In pt, this message translates to:
-  /// **'E-mails'**
-  String get emails;
-
   /// No description provided for @address.
   ///
   /// In pt, this message translates to:
   /// **'Endereço'**
   String get address;
 
-  /// No description provided for @addresses.
-  ///
-  /// In pt, this message translates to:
-  /// **'Endereços'**
-  String get addresses;
-
-  /// No description provided for @street.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rua'**
-  String get street;
-
   /// No description provided for @number.
   ///
   /// In pt, this message translates to:
   /// **'Número'**
   String get number;
-
-  /// No description provided for @complement.
-  ///
-  /// In pt, this message translates to:
-  /// **'Complemento'**
-  String get complement;
-
-  /// No description provided for @neighborhood.
-  ///
-  /// In pt, this message translates to:
-  /// **'Bairro'**
-  String get neighborhood;
 
   /// No description provided for @city.
   ///
@@ -1299,12 +897,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Estado'**
   String get state;
-
-  /// No description provided for @zipCode.
-  ///
-  /// In pt, this message translates to:
-  /// **'CEP'**
-  String get zipCode;
 
   /// No description provided for @country.
   ///
@@ -1342,18 +934,6 @@ abstract class AppLocalizations {
   /// **'Documento'**
   String get document;
 
-  /// No description provided for @cpf.
-  ///
-  /// In pt, this message translates to:
-  /// **'CPF'**
-  String get cpf;
-
-  /// No description provided for @cnpj.
-  ///
-  /// In pt, this message translates to:
-  /// **'CNPJ'**
-  String get cnpj;
-
   /// No description provided for @cpfCnpj.
   ///
   /// In pt, this message translates to:
@@ -1390,12 +970,6 @@ abstract class AppLocalizations {
   /// **'Editar OS'**
   String get editOrder;
 
-  /// No description provided for @orderDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes da OS'**
-  String get orderDetails;
-
   /// No description provided for @orderNumber.
   ///
   /// In pt, this message translates to:
@@ -1408,18 +982,6 @@ abstract class AppLocalizations {
   /// **'Lista de OS'**
   String get orderList;
 
-  /// No description provided for @searchOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Buscar OS'**
-  String get searchOrder;
-
-  /// No description provided for @noOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma OS encontrada'**
-  String get noOrders;
-
   /// No description provided for @addOrder.
   ///
   /// In pt, this message translates to:
@@ -1431,24 +993,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Criar OS'**
   String get createOrder;
-
-  /// No description provided for @orderCreated.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS criada com sucesso'**
-  String get orderCreated;
-
-  /// No description provided for @orderUpdated.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS atualizada com sucesso'**
-  String get orderUpdated;
-
-  /// No description provided for @orderDeleted.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS excluída com sucesso'**
-  String get orderDeleted;
 
   /// No description provided for @orderStatus.
   ///
@@ -1474,41 +1018,11 @@ abstract class AppLocalizations {
   /// **'Técnicos'**
   String get technicians;
 
-  /// No description provided for @assignTechnician.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atribuir Técnico'**
-  String get assignTechnician;
-
   /// No description provided for @problem.
   ///
   /// In pt, this message translates to:
   /// **'Problema Relatado'**
   String get problem;
-
-  /// No description provided for @problemDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Descrição do Problema'**
-  String get problemDescription;
-
-  /// No description provided for @solution.
-  ///
-  /// In pt, this message translates to:
-  /// **'Solução'**
-  String get solution;
-
-  /// No description provided for @solutionDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Descrição da Solução'**
-  String get solutionDescription;
-
-  /// No description provided for @diagnosis.
-  ///
-  /// In pt, this message translates to:
-  /// **'Diagnóstico'**
-  String get diagnosis;
 
   /// No description provided for @warranty.
   ///
@@ -1516,65 +1030,11 @@ abstract class AppLocalizations {
   /// **'Garantia'**
   String get warranty;
 
-  /// No description provided for @warrantyPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Período de Garantia'**
-  String get warrantyPeriod;
-
-  /// No description provided for @hasWarranty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Possui Garantia'**
-  String get hasWarranty;
-
-  /// No description provided for @noWarranty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem Garantia'**
-  String get noWarranty;
-
-  /// No description provided for @warrantyExpired.
-  ///
-  /// In pt, this message translates to:
-  /// **'Garantia Expirada'**
-  String get warrantyExpired;
-
-  /// No description provided for @warrantyValid.
-  ///
-  /// In pt, this message translates to:
-  /// **'Garantia Válida'**
-  String get warrantyValid;
-
   /// No description provided for @priority.
   ///
   /// In pt, this message translates to:
   /// **'Prioridade'**
   String get priority;
-
-  /// No description provided for @priorityLow.
-  ///
-  /// In pt, this message translates to:
-  /// **'Baixa'**
-  String get priorityLow;
-
-  /// No description provided for @priorityMedium.
-  ///
-  /// In pt, this message translates to:
-  /// **'Média'**
-  String get priorityMedium;
-
-  /// No description provided for @priorityHigh.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alta'**
-  String get priorityHigh;
-
-  /// No description provided for @priorityUrgent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Urgente'**
-  String get priorityUrgent;
 
   /// No description provided for @device.
   ///
@@ -1588,47 +1048,17 @@ abstract class AppLocalizations {
   /// **'Categoria'**
   String get deviceCategory;
 
-  /// No description provided for @newDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo Equipamento'**
-  String get newDevice;
-
   /// No description provided for @editDevice.
   ///
   /// In pt, this message translates to:
   /// **'Editar Equipamento'**
   String get editDevice;
 
-  /// No description provided for @deviceDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do Equipamento'**
-  String get deviceDetails;
-
   /// No description provided for @deviceList.
   ///
   /// In pt, this message translates to:
   /// **'Lista de Equipamentos'**
   String get deviceList;
-
-  /// No description provided for @searchDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Buscar Equipamento'**
-  String get searchDevice;
-
-  /// No description provided for @selectDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Equipamento'**
-  String get selectDevice;
-
-  /// No description provided for @noDevices.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum equipamento cadastrado'**
-  String get noDevices;
 
   /// No description provided for @addDevice.
   ///
@@ -1654,12 +1084,6 @@ abstract class AppLocalizations {
   /// **'Número de Série'**
   String get serialNumber;
 
-  /// No description provided for @imei.
-  ///
-  /// In pt, this message translates to:
-  /// **'IMEI'**
-  String get imei;
-
   /// No description provided for @color.
   ///
   /// In pt, this message translates to:
@@ -1672,47 +1096,11 @@ abstract class AppLocalizations {
   /// **'Condição'**
   String get condition;
 
-  /// No description provided for @conditionNew.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo'**
-  String get conditionNew;
-
-  /// No description provided for @conditionUsed.
-  ///
-  /// In pt, this message translates to:
-  /// **'Usado'**
-  String get conditionUsed;
-
-  /// No description provided for @conditionDamaged.
-  ///
-  /// In pt, this message translates to:
-  /// **'Danificado'**
-  String get conditionDamaged;
-
-  /// No description provided for @accessories.
-  ///
-  /// In pt, this message translates to:
-  /// **'Acessórios'**
-  String get accessories;
-
-  /// No description provided for @accessory.
-  ///
-  /// In pt, this message translates to:
-  /// **'Acessório'**
-  String get accessory;
-
   /// No description provided for @defects.
   ///
   /// In pt, this message translates to:
   /// **'Defeitos'**
   String get defects;
-
-  /// No description provided for @defect.
-  ///
-  /// In pt, this message translates to:
-  /// **'Defeito'**
-  String get defect;
 
   /// No description provided for @service.
   ///
@@ -1720,23 +1108,11 @@ abstract class AppLocalizations {
   /// **'Serviço'**
   String get service;
 
-  /// No description provided for @newService.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo Serviço'**
-  String get newService;
-
   /// No description provided for @editService.
   ///
   /// In pt, this message translates to:
   /// **'Editar Serviço'**
   String get editService;
-
-  /// No description provided for @serviceDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do Serviço'**
-  String get serviceDetails;
 
   /// No description provided for @serviceList.
   ///
@@ -1750,35 +1126,11 @@ abstract class AppLocalizations {
   /// **'Buscar Serviço'**
   String get searchService;
 
-  /// No description provided for @selectService.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Serviço'**
-  String get selectService;
-
-  /// No description provided for @noServices.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum serviço cadastrado'**
-  String get noServices;
-
   /// No description provided for @addService.
   ///
   /// In pt, this message translates to:
   /// **'Adicionar Serviço'**
   String get addService;
-
-  /// No description provided for @serviceValue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Valor do Serviço'**
-  String get serviceValue;
-
-  /// No description provided for @laborCost.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mão de Obra'**
-  String get laborCost;
 
   /// No description provided for @product.
   ///
@@ -1786,23 +1138,11 @@ abstract class AppLocalizations {
   /// **'Produto'**
   String get product;
 
-  /// No description provided for @newProduct.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo Produto'**
-  String get newProduct;
-
   /// No description provided for @editProduct.
   ///
   /// In pt, this message translates to:
   /// **'Editar Produto'**
   String get editProduct;
-
-  /// No description provided for @productDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do Produto'**
-  String get productDetails;
 
   /// No description provided for @productList.
   ///
@@ -1816,65 +1156,17 @@ abstract class AppLocalizations {
   /// **'Buscar Produto'**
   String get searchProduct;
 
-  /// No description provided for @selectProduct.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Produto'**
-  String get selectProduct;
-
-  /// No description provided for @noProducts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum produto cadastrado'**
-  String get noProducts;
-
   /// No description provided for @addProduct.
   ///
   /// In pt, this message translates to:
   /// **'Adicionar Produto'**
   String get addProduct;
 
-  /// No description provided for @sku.
-  ///
-  /// In pt, this message translates to:
-  /// **'Código'**
-  String get sku;
-
   /// No description provided for @barcode.
   ///
   /// In pt, this message translates to:
   /// **'Código de Barras'**
   String get barcode;
-
-  /// No description provided for @stock.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estoque'**
-  String get stock;
-
-  /// No description provided for @stockQuantity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quantidade em Estoque'**
-  String get stockQuantity;
-
-  /// No description provided for @lowStock.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estoque Baixo'**
-  String get lowStock;
-
-  /// No description provided for @outOfStock.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem Estoque'**
-  String get outOfStock;
-
-  /// No description provided for @inStock.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em Estoque'**
-  String get inStock;
 
   /// No description provided for @unit.
   ///
@@ -1912,12 +1204,6 @@ abstract class AppLocalizations {
   /// **'Desconto'**
   String get discount;
 
-  /// No description provided for @discountPercent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desconto (%)'**
-  String get discountPercent;
-
   /// No description provided for @discountValue.
   ///
   /// In pt, this message translates to:
@@ -1929,24 +1215,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Preço'**
   String get price;
-
-  /// No description provided for @unitPrice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço Unitário'**
-  String get unitPrice;
-
-  /// No description provided for @costPrice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço de Custo'**
-  String get costPrice;
-
-  /// No description provided for @salePrice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preço de Venda'**
-  String get salePrice;
 
   /// No description provided for @quantity.
   ///
@@ -1972,30 +1240,6 @@ abstract class AppLocalizations {
   /// **'Imposto'**
   String get tax;
 
-  /// No description provided for @taxes.
-  ///
-  /// In pt, this message translates to:
-  /// **'Impostos'**
-  String get taxes;
-
-  /// No description provided for @fee.
-  ///
-  /// In pt, this message translates to:
-  /// **'Taxa'**
-  String get fee;
-
-  /// No description provided for @fees.
-  ///
-  /// In pt, this message translates to:
-  /// **'Taxas'**
-  String get fees;
-
-  /// No description provided for @grandTotal.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total Geral'**
-  String get grandTotal;
-
   /// No description provided for @balance.
   ///
   /// In pt, this message translates to:
@@ -2020,42 +1264,6 @@ abstract class AppLocalizations {
   /// **'Troco'**
   String get change;
 
-  /// No description provided for @savedSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Salvo com sucesso'**
-  String get savedSuccessfully;
-
-  /// No description provided for @deletedSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Excluído com sucesso'**
-  String get deletedSuccessfully;
-
-  /// No description provided for @updatedSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atualizado com sucesso'**
-  String get updatedSuccessfully;
-
-  /// No description provided for @createdSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criado com sucesso'**
-  String get createdSuccessfully;
-
-  /// No description provided for @copiedSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Copiado com sucesso'**
-  String get copiedSuccessfully;
-
-  /// No description provided for @sentSuccessfully.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviado com sucesso'**
-  String get sentSuccessfully;
-
   /// No description provided for @errorOccurred.
   ///
   /// In pt, this message translates to:
@@ -2068,35 +1276,11 @@ abstract class AppLocalizations {
   /// **'Tentar novamente'**
   String get tryAgain;
 
-  /// No description provided for @operationFailed.
-  ///
-  /// In pt, this message translates to:
-  /// **'Operação falhou'**
-  String get operationFailed;
-
   /// No description provided for @noInternetConnection.
   ///
   /// In pt, this message translates to:
   /// **'Sem conexão com a internet'**
   String get noInternetConnection;
-
-  /// No description provided for @connectionError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro de conexão'**
-  String get connectionError;
-
-  /// No description provided for @serverError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro no servidor'**
-  String get serverError;
-
-  /// No description provided for @unknownError.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro desconhecido'**
-  String get unknownError;
 
   /// No description provided for @permissionDenied.
   ///
@@ -2104,23 +1288,11 @@ abstract class AppLocalizations {
   /// **'Permissão negada'**
   String get permissionDenied;
 
-  /// No description provided for @notFound.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não encontrado'**
-  String get notFound;
-
   /// No description provided for @timeout.
   ///
   /// In pt, this message translates to:
   /// **'Tempo esgotado'**
   String get timeout;
-
-  /// No description provided for @sessionExpired.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sessão expirada'**
-  String get sessionExpired;
 
   /// No description provided for @login.
   ///
@@ -2140,35 +1312,11 @@ abstract class AppLocalizations {
   /// **'Deseja realmente sair?'**
   String get logoutConfirm;
 
-  /// No description provided for @signUp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criar Conta'**
-  String get signUp;
-
   /// No description provided for @signIn.
   ///
   /// In pt, this message translates to:
   /// **'Entrar'**
   String get signIn;
-
-  /// No description provided for @forgotPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esqueci a senha'**
-  String get forgotPassword;
-
-  /// No description provided for @resetPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Redefinir Senha'**
-  String get resetPassword;
-
-  /// No description provided for @changePassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alterar Senha'**
-  String get changePassword;
 
   /// No description provided for @password.
   ///
@@ -2176,59 +1324,11 @@ abstract class AppLocalizations {
   /// **'Senha'**
   String get password;
 
-  /// No description provided for @currentPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Senha Atual'**
-  String get currentPassword;
-
-  /// No description provided for @newPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nova Senha'**
-  String get newPassword;
-
-  /// No description provided for @confirmPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Confirmar Senha'**
-  String get confirmPassword;
-
-  /// No description provided for @passwordsDontMatch.
-  ///
-  /// In pt, this message translates to:
-  /// **'As senhas não conferem'**
-  String get passwordsDontMatch;
-
-  /// No description provided for @passwordTooShort.
-  ///
-  /// In pt, this message translates to:
-  /// **'Senha muito curta'**
-  String get passwordTooShort;
-
-  /// No description provided for @invalidCredentials.
-  ///
-  /// In pt, this message translates to:
-  /// **'Credenciais inválidas'**
-  String get invalidCredentials;
-
-  /// No description provided for @accountCreated.
-  ///
-  /// In pt, this message translates to:
-  /// **'Conta criada com sucesso'**
-  String get accountCreated;
-
   /// No description provided for @emailSent.
   ///
   /// In pt, this message translates to:
   /// **'E-mail enviado'**
   String get emailSent;
-
-  /// No description provided for @checkYourEmail.
-  ///
-  /// In pt, this message translates to:
-  /// **'Verifique seu e-mail'**
-  String get checkYourEmail;
 
   /// No description provided for @continueWithGoogle.
   ///
@@ -2242,24 +1342,6 @@ abstract class AppLocalizations {
   /// **'Continuar com Apple'**
   String get continueWithApple;
 
-  /// No description provided for @orContinueWith.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ou continue com'**
-  String get orContinueWith;
-
-  /// No description provided for @alreadyHaveAccount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Já possui uma conta?'**
-  String get alreadyHaveAccount;
-
-  /// No description provided for @dontHaveAccount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não possui uma conta?'**
-  String get dontHaveAccount;
-
   /// No description provided for @termsAndConditions.
   ///
   /// In pt, this message translates to:
@@ -2272,71 +1354,11 @@ abstract class AppLocalizations {
   /// **'Política de Privacidade'**
   String get privacyPolicy;
 
-  /// No description provided for @agreeToTerms.
-  ///
-  /// In pt, this message translates to:
-  /// **'Eu concordo com os Termos e Condições'**
-  String get agreeToTerms;
-
-  /// No description provided for @welcome.
-  ///
-  /// In pt, this message translates to:
-  /// **'Bem-vindo'**
-  String get welcome;
-
-  /// No description provided for @welcomeBack.
-  ///
-  /// In pt, this message translates to:
-  /// **'Bem-vindo de volta'**
-  String get welcomeBack;
-
-  /// No description provided for @getStarted.
-  ///
-  /// In pt, this message translates to:
-  /// **'Começar'**
-  String get getStarted;
-
-  /// No description provided for @letsStart.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vamos Começar'**
-  String get letsStart;
-
-  /// No description provided for @selectSegment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Segmento'**
-  String get selectSegment;
-
-  /// No description provided for @selectSpecialties.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione suas Especialidades'**
-  String get selectSpecialties;
-
   /// No description provided for @companyName.
   ///
   /// In pt, this message translates to:
   /// **'Nome da Empresa'**
   String get companyName;
-
-  /// No description provided for @setupComplete.
-  ///
-  /// In pt, this message translates to:
-  /// **'Configuração Concluída'**
-  String get setupComplete;
-
-  /// No description provided for @allSet.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tudo Pronto!'**
-  String get allSet;
-
-  /// No description provided for @startUsing.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comece a usar o PraticOS'**
-  String get startUsing;
 
   /// No description provided for @skip.
   ///
@@ -2362,23 +1384,11 @@ abstract class AppLocalizations {
   /// **'Selecionar Idioma'**
   String get selectLanguage;
 
-  /// No description provided for @portuguese.
-  ///
-  /// In pt, this message translates to:
-  /// **'Português'**
-  String get portuguese;
-
   /// No description provided for @english.
   ///
   /// In pt, this message translates to:
   /// **'Inglês'**
   String get english;
-
-  /// No description provided for @spanish.
-  ///
-  /// In pt, this message translates to:
-  /// **'Espanhol'**
-  String get spanish;
 
   /// No description provided for @theme.
   ///
@@ -2386,41 +1396,11 @@ abstract class AppLocalizations {
   /// **'Tema'**
   String get theme;
 
-  /// No description provided for @darkMode.
-  ///
-  /// In pt, this message translates to:
-  /// **'Modo Escuro'**
-  String get darkMode;
-
-  /// No description provided for @lightMode.
-  ///
-  /// In pt, this message translates to:
-  /// **'Modo Claro'**
-  String get lightMode;
-
-  /// No description provided for @systemDefault.
-  ///
-  /// In pt, this message translates to:
-  /// **'Padrão do Sistema'**
-  String get systemDefault;
-
   /// No description provided for @notifications.
   ///
   /// In pt, this message translates to:
   /// **'Notificações'**
   String get notifications;
-
-  /// No description provided for @noNotifications.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma notificação'**
-  String get noNotifications;
-
-  /// No description provided for @noNotificationsDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você receberá notificações quando clientes aprovarem, rejeitarem ou avaliarem ordens de serviço.'**
-  String get noNotificationsDescription;
 
   /// No description provided for @markAllAsRead.
   ///
@@ -2428,23 +1408,11 @@ abstract class AppLocalizations {
   /// **'Marcar todas'**
   String get markAllAsRead;
 
-  /// No description provided for @enableNotifications.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ativar Notificações'**
-  String get enableNotifications;
-
   /// No description provided for @sound.
   ///
   /// In pt, this message translates to:
   /// **'Som'**
   String get sound;
-
-  /// No description provided for @vibration.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vibração'**
-  String get vibration;
 
   /// No description provided for @about.
   ///
@@ -2458,35 +1426,11 @@ abstract class AppLocalizations {
   /// **'Versão'**
   String get version;
 
-  /// No description provided for @help.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ajuda'**
-  String get help;
-
   /// No description provided for @support.
   ///
   /// In pt, this message translates to:
   /// **'Suporte'**
   String get support;
-
-  /// No description provided for @contactUs.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fale Conosco'**
-  String get contactUs;
-
-  /// No description provided for @rateApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Avaliar App'**
-  String get rateApp;
-
-  /// No description provided for @shareApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar App'**
-  String get shareApp;
 
   /// No description provided for @dashboard.
   ///
@@ -2500,12 +1444,6 @@ abstract class AppLocalizations {
   /// **'Visão Geral'**
   String get overview;
 
-  /// No description provided for @statistics.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estatísticas'**
-  String get statistics;
-
   /// No description provided for @analytics.
   ///
   /// In pt, this message translates to:
@@ -2518,71 +1456,11 @@ abstract class AppLocalizations {
   /// **'Receita'**
   String get revenue;
 
-  /// No description provided for @expenses.
-  ///
-  /// In pt, this message translates to:
-  /// **'Despesas'**
-  String get expenses;
-
-  /// No description provided for @profit.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lucro'**
-  String get profit;
-
-  /// No description provided for @ordersToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS Hoje'**
-  String get ordersToday;
-
-  /// No description provided for @ordersThisWeek.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS Esta Semana'**
-  String get ordersThisWeek;
-
-  /// No description provided for @ordersThisMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS Este Mês'**
-  String get ordersThisMonth;
-
-  /// No description provided for @pendingOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS Pendentes'**
-  String get pendingOrders;
-
-  /// No description provided for @completedOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS Concluídas'**
-  String get completedOrders;
-
-  /// No description provided for @topServices.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviços Mais Realizados'**
-  String get topServices;
-
-  /// No description provided for @topProducts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Produtos Mais Vendidos'**
-  String get topProducts;
-
   /// No description provided for @recentOrders.
   ///
   /// In pt, this message translates to:
   /// **'OS recentes'**
   String get recentOrders;
-
-  /// No description provided for @recentCustomers.
-  ///
-  /// In pt, this message translates to:
-  /// **'Usados por último'**
-  String get recentCustomers;
 
   /// No description provided for @role.
   ///
@@ -2620,12 +1498,6 @@ abstract class AppLocalizations {
   /// **'Gerente'**
   String get manager;
 
-  /// No description provided for @employee.
-  ///
-  /// In pt, this message translates to:
-  /// **'Funcionário'**
-  String get employee;
-
   /// No description provided for @viewer.
   ///
   /// In pt, this message translates to:
@@ -2662,48 +1534,6 @@ abstract class AppLocalizations {
   /// **'Pode Visualizar'**
   String get canView;
 
-  /// No description provided for @inviteMember.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convidar Membro'**
-  String get inviteMember;
-
-  /// No description provided for @removeMember.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover Membro'**
-  String get removeMember;
-
-  /// No description provided for @memberRemoved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Membro removido'**
-  String get memberRemoved;
-
-  /// No description provided for @invitationSent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convite enviado'**
-  String get invitationSent;
-
-  /// No description provided for @pendingInvitations.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convites Pendentes'**
-  String get pendingInvitations;
-
-  /// No description provided for @acceptInvitation.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aceitar Convite'**
-  String get acceptInvitation;
-
-  /// No description provided for @declineInvitation.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recusar Convite'**
-  String get declineInvitation;
-
   /// No description provided for @form.
   ///
   /// In pt, this message translates to:
@@ -2728,47 +1558,11 @@ abstract class AppLocalizations {
   /// **'Checklists'**
   String get checklists;
 
-  /// No description provided for @inspection.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vistoria'**
-  String get inspection;
-
-  /// No description provided for @inspections.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vistorias'**
-  String get inspections;
-
-  /// No description provided for @signature.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assinatura'**
-  String get signature;
-
   /// No description provided for @customerSignature.
   ///
   /// In pt, this message translates to:
   /// **'Assinatura do Cliente'**
   String get customerSignature;
-
-  /// No description provided for @technicianSignature.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assinatura do Técnico'**
-  String get technicianSignature;
-
-  /// No description provided for @signHere.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assine aqui'**
-  String get signHere;
-
-  /// No description provided for @clearSignature.
-  ///
-  /// In pt, this message translates to:
-  /// **'Limpar Assinatura'**
-  String get clearSignature;
 
   /// No description provided for @required.
   ///
@@ -2817,66 +1611,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Orçamentos'**
   String get quotes;
-
-  /// No description provided for @newQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo Orçamento'**
-  String get newQuote;
-
-  /// No description provided for @editQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Editar Orçamento'**
-  String get editQuote;
-
-  /// No description provided for @quoteDetails.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do Orçamento'**
-  String get quoteDetails;
-
-  /// No description provided for @sendQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar Orçamento'**
-  String get sendQuote;
-
-  /// No description provided for @approveQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovar Orçamento'**
-  String get approveQuote;
-
-  /// No description provided for @rejectQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rejeitar Orçamento'**
-  String get rejectQuote;
-
-  /// No description provided for @quoteApproved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento Aprovado'**
-  String get quoteApproved;
-
-  /// No description provided for @quoteRejected.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento Rejeitado'**
-  String get quoteRejected;
-
-  /// No description provided for @quoteSent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento Enviado'**
-  String get quoteSent;
-
-  /// No description provided for @validUntil.
-  ///
-  /// In pt, this message translates to:
-  /// **'Válido até'**
-  String get validUntil;
 
   /// No description provided for @expiresIn.
   ///
@@ -2944,18 +1678,6 @@ abstract class AppLocalizations {
   /// **'Rascunho'**
   String get draft;
 
-  /// No description provided for @published.
-  ///
-  /// In pt, this message translates to:
-  /// **'Publicado'**
-  String get published;
-
-  /// No description provided for @archived.
-  ///
-  /// In pt, this message translates to:
-  /// **'Arquivado'**
-  String get archived;
-
   /// No description provided for @deleted.
   ///
   /// In pt, this message translates to:
@@ -2986,23 +1708,11 @@ abstract class AppLocalizations {
   /// **'Outros'**
   String get others;
 
-  /// No description provided for @default_.
-  ///
-  /// In pt, this message translates to:
-  /// **'Padrão'**
-  String get default_;
-
   /// No description provided for @custom.
   ///
   /// In pt, this message translates to:
   /// **'Personalizado'**
   String get custom;
-
-  /// No description provided for @new_.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo'**
-  String get new_;
 
   /// No description provided for @old.
   ///
@@ -3016,42 +1726,6 @@ abstract class AppLocalizations {
   /// **'Recente'**
   String get recent;
 
-  /// No description provided for @popular.
-  ///
-  /// In pt, this message translates to:
-  /// **'Popular'**
-  String get popular;
-
-  /// No description provided for @featured.
-  ///
-  /// In pt, this message translates to:
-  /// **'Destaque'**
-  String get featured;
-
-  /// No description provided for @recommended.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recomendado'**
-  String get recommended;
-
-  /// No description provided for @welcomeToApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Bem-vindo ao PraticOS'**
-  String get welcomeToApp;
-
-  /// No description provided for @appSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerencie suas ordens de serviço\nde forma simples e eficiente'**
-  String get appSubtitle;
-
-  /// No description provided for @signInWithEmail.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrar com email'**
-  String get signInWithEmail;
-
   /// No description provided for @byContinuingYouAgree.
   ///
   /// In pt, this message translates to:
@@ -3063,24 +1737,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro'**
   String get error;
-
-  /// No description provided for @couldNotLoadCompanyData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível carregar os dados da empresa'**
-  String get couldNotLoadCompanyData;
-
-  /// No description provided for @errorSignInApple.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao entrar com Apple'**
-  String get errorSignInApple;
-
-  /// No description provided for @errorSignInGoogle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao entrar com Google'**
-  String get errorSignInGoogle;
 
   /// No description provided for @companyNotFound.
   ///
@@ -3094,53 +1750,11 @@ abstract class AppLocalizations {
   /// **'Empresa sem segmento definido'**
   String get companyNoSegment;
 
-  /// No description provided for @errorLoadingConfig.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao carregar configuração'**
-  String get errorLoadingConfig;
-
-  /// No description provided for @enterEmailPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Digite seu email e senha para acessar sua conta'**
-  String get enterEmailPassword;
-
-  /// No description provided for @credentials.
-  ///
-  /// In pt, this message translates to:
-  /// **'Credenciais'**
-  String get credentials;
-
-  /// No description provided for @enterYourPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Digite sua senha'**
-  String get enterYourPassword;
-
   /// No description provided for @userNotFound.
   ///
   /// In pt, this message translates to:
   /// **'Usuário não encontrado'**
   String get userNotFound;
-
-  /// No description provided for @wrongPassword.
-  ///
-  /// In pt, this message translates to:
-  /// **'Senha incorreta'**
-  String get wrongPassword;
-
-  /// No description provided for @errorSignIn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao entrar. Tente novamente.'**
-  String get errorSignIn;
-
-  /// No description provided for @enterYourEmail.
-  ///
-  /// In pt, this message translates to:
-  /// **'Digite seu email'**
-  String get enterYourEmail;
 
   /// No description provided for @checkInboxResetPassword.
   ///
@@ -3148,35 +1762,17 @@ abstract class AppLocalizations {
   /// **'Verifique sua caixa de entrada para redefinir sua senha.'**
   String get checkInboxResetPassword;
 
-  /// No description provided for @errorSendingRecoveryEmail.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao enviar email de recuperação'**
-  String get errorSendingRecoveryEmail;
-
   /// No description provided for @user.
   ///
   /// In pt, this message translates to:
   /// **'Usuário'**
   String get user;
 
-  /// No description provided for @organization.
-  ///
-  /// In pt, this message translates to:
-  /// **'Organização'**
-  String get organization;
-
   /// No description provided for @switchCompany.
   ///
   /// In pt, this message translates to:
   /// **'Trocar Empresa'**
   String get switchCompany;
-
-  /// No description provided for @switchBetweenOrganizations.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alternar entre organizações'**
-  String get switchBetweenOrganizations;
 
   /// No description provided for @management.
   ///
@@ -3208,12 +1804,6 @@ abstract class AppLocalizations {
   /// **'Nova conexão'**
   String get integrationsNew;
 
-  /// No description provided for @integrationsName.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nome da conexão'**
-  String get integrationsName;
-
   /// No description provided for @integrationsNameHint.
   ///
   /// In pt, this message translates to:
@@ -3232,12 +1822,6 @@ abstract class AppLocalizations {
   /// **'Copiar URL'**
   String get integrationsCopy;
 
-  /// No description provided for @integrationsCopied.
-  ///
-  /// In pt, this message translates to:
-  /// **'URL copiada'**
-  String get integrationsCopied;
-
   /// No description provided for @integrationsRevoke.
   ///
   /// In pt, this message translates to:
@@ -3249,12 +1833,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Revogar esta conexão? Quem estiver usando esta URL perde o acesso.'**
   String get integrationsRevokeConfirm;
-
-  /// No description provided for @integrationsCreatedAt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criada em {date}'**
-  String integrationsCreatedAt(String date);
 
   /// No description provided for @integrationsNeverUsed.
   ///
@@ -3292,30 +1870,6 @@ abstract class AppLocalizations {
   /// **'Dados da Empresa'**
   String get companyData;
 
-  /// No description provided for @interface_.
-  ///
-  /// In pt, this message translates to:
-  /// **'Interface'**
-  String get interface_;
-
-  /// No description provided for @nightMode.
-  ///
-  /// In pt, this message translates to:
-  /// **'Modo Noturno'**
-  String get nightMode;
-
-  /// No description provided for @reopenOnboarding.
-  ///
-  /// In pt, this message translates to:
-  /// **'Configurações Iniciais'**
-  String get reopenOnboarding;
-
-  /// No description provided for @reconfigureCompanySetup.
-  ///
-  /// In pt, this message translates to:
-  /// **'Reconfigurar dados e segmento da empresa'**
-  String get reconfigureCompanySetup;
-
   /// No description provided for @account.
   ///
   /// In pt, this message translates to:
@@ -3327,24 +1881,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Excluir Conta'**
   String get deleteAccount;
-
-  /// No description provided for @permanentlyRemoveAllData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover permanentemente todos os dados'**
-  String get permanentlyRemoveAllData;
-
-  /// No description provided for @chooseTheme.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolher tema'**
-  String get chooseTheme;
-
-  /// No description provided for @automaticSystem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Automático (Sistema)'**
-  String get automaticSystem;
 
   /// No description provided for @automatic.
   ///
@@ -3460,12 +1996,6 @@ abstract class AppLocalizations {
   /// **'Autenticado'**
   String get authenticated;
 
-  /// No description provided for @nowDeletingAccount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Agora você pode prosseguir com a exclusão da conta.'**
-  String get nowDeletingAccount;
-
   /// No description provided for @reauthenticationFailed.
   ///
   /// In pt, this message translates to:
@@ -3477,24 +2007,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível autenticar novamente.'**
   String get couldNotReauthenticate;
-
-  /// No description provided for @errorLoadingData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao carregar dados'**
-  String get errorLoadingData;
-
-  /// No description provided for @tapToAddFirst.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque em + para adicionar'**
-  String get tapToAddFirst;
-
-  /// No description provided for @confirmRemove.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja remover'**
-  String get confirmRemove;
 
   /// No description provided for @remove.
   ///
@@ -3514,89 +2026,11 @@ abstract class AppLocalizations {
   /// **'Você não tem permissão para remover este item.'**
   String get noPermissionToRemove;
 
-  /// No description provided for @professionalizeYourBusiness.
-  ///
-  /// In pt, this message translates to:
-  /// **'Profissionalize seu negócio'**
-  String get professionalizeYourBusiness;
-
-  /// No description provided for @configureCompanyProfile.
-  ///
-  /// In pt, this message translates to:
-  /// **'Configure o perfil da sua empresa para emitir ordens de serviço profissionais agora mesmo.'**
-  String get configureCompanyProfile;
-
-  /// No description provided for @professionalOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ordens Profissionais'**
-  String get professionalOrders;
-
-  /// No description provided for @createDigitalOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'Crie OS digitais personalizadas.'**
-  String get createDigitalOrders;
-
-  /// No description provided for @customerManagement.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gestão de Clientes'**
-  String get customerManagement;
-
-  /// No description provided for @keepHistoryOrganized.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mantenha histórico e contatos organizados.'**
-  String get keepHistoryOrganized;
-
-  /// No description provided for @configureMyBusiness.
-  ///
-  /// In pt, this message translates to:
-  /// **'Configurar Meu Negócio'**
-  String get configureMyBusiness;
-
-  /// No description provided for @configureLater.
-  ///
-  /// In pt, this message translates to:
-  /// **'Configurar Depois'**
-  String get configureLater;
-
-  /// No description provided for @errorCreatingCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao criar empresa padrão'**
-  String get errorCreatingCompany;
-
-  /// No description provided for @chooseSegment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolha o Ramo'**
-  String get chooseSegment;
-
-  /// No description provided for @selectSegmentPrompt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione o ramo de atuação para personalizar o sistema para você.'**
-  String get selectSegmentPrompt;
-
-  /// No description provided for @availableSegments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Segmentos Disponíveis'**
-  String get availableSegments;
-
   /// No description provided for @noSegmentsAvailable.
   ///
   /// In pt, this message translates to:
   /// **'Nenhum segmento disponível'**
   String get noSegmentsAvailable;
-
-  /// No description provided for @errorLoadingSegments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao carregar segmentos'**
-  String get errorLoadingSegments;
 
   /// No description provided for @specialties.
   ///
@@ -3694,23 +2128,11 @@ abstract class AppLocalizations {
   /// **'Técnico'**
   String get roleTechnician;
 
-  /// No description provided for @noFeminine.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma'**
-  String get noFeminine;
-
   /// No description provided for @registered.
   ///
   /// In pt, this message translates to:
   /// **'cadastrado'**
   String get registered;
-
-  /// No description provided for @registeredFeminine.
-  ///
-  /// In pt, this message translates to:
-  /// **'cadastrada'**
-  String get registeredFeminine;
 
   /// No description provided for @errorLoading.
   ///
@@ -3724,35 +2146,11 @@ abstract class AppLocalizations {
   /// **'Toque em + para adicionar seu primeiro'**
   String get tapPlusToAddYourFirst;
 
-  /// No description provided for @tapPlusToAddYourFirstFeminine.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque em + para adicionar sua primeira'**
-  String get tapPlusToAddYourFirstFeminine;
-
   /// No description provided for @doYouWantToRemoveThe.
   ///
   /// In pt, this message translates to:
   /// **'Deseja remover o'**
   String get doYouWantToRemoveThe;
-
-  /// No description provided for @doYouWantToRemoveTheFeminine.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja remover a'**
-  String get doYouWantToRemoveTheFeminine;
-
-  /// No description provided for @searchCollaborator.
-  ///
-  /// In pt, this message translates to:
-  /// **'Buscar colaborador'**
-  String get searchCollaborator;
-
-  /// No description provided for @noCollaboratorFound.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum colaborador encontrado'**
-  String get noCollaboratorFound;
 
   /// No description provided for @pending.
   ///
@@ -3844,24 +2242,6 @@ abstract class AppLocalizations {
   /// **'Email não informado'**
   String get emailNotProvided;
 
-  /// No description provided for @newCollaborator.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo Colaborador'**
-  String get newCollaborator;
-
-  /// No description provided for @userInformation.
-  ///
-  /// In pt, this message translates to:
-  /// **'Informações do Usuário'**
-  String get userInformation;
-
-  /// No description provided for @userWillReceiveInviteByEmail.
-  ///
-  /// In pt, this message translates to:
-  /// **'O usuário receberá um convite por email.'**
-  String get userWillReceiveInviteByEmail;
-
   /// No description provided for @emailPlaceholder.
   ///
   /// In pt, this message translates to:
@@ -3873,30 +2253,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Colaborador Adicionado'**
   String get collaboratorAdded;
-
-  /// No description provided for @collaboratorAddedSuccess.
-  ///
-  /// In pt, this message translates to:
-  /// **'O colaborador foi adicionado à empresa com sucesso.'**
-  String get collaboratorAddedSuccess;
-
-  /// No description provided for @inviteSent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convite Enviado'**
-  String get inviteSent;
-
-  /// No description provided for @inviteCreatedMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.'**
-  String get inviteCreatedMessage;
-
-  /// No description provided for @financialDashboard.
-  ///
-  /// In pt, this message translates to:
-  /// **'Painel Financeiro'**
-  String get financialDashboard;
 
   /// No description provided for @financial.
   ///
@@ -3940,18 +2296,6 @@ abstract class AppLocalizations {
   /// **'Ano atual'**
   String get currentYear;
 
-  /// No description provided for @tapToReturnToCurrent.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque para voltar ao atual'**
-  String get tapToReturnToCurrent;
-
-  /// No description provided for @selectPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Período'**
-  String get selectPeriod;
-
   /// No description provided for @start.
   ///
   /// In pt, this message translates to:
@@ -3994,12 +2338,6 @@ abstract class AppLocalizations {
   /// **'Cliente sem nome'**
   String get customerWithoutName;
 
-  /// No description provided for @noCustomerDataInPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem dados de clientes neste período'**
-  String get noCustomerDataInPeriod;
-
   /// No description provided for @serviceWithoutName.
   ///
   /// In pt, this message translates to:
@@ -4011,18 +2349,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Produto sem nome'**
   String get productWithoutName;
-
-  /// No description provided for @noServiceDataInPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem dados de serviços neste período'**
-  String get noServiceDataInPeriod;
-
-  /// No description provided for @noProductDataInPeriod.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem dados de produtos neste período'**
-  String get noProductDataInPeriod;
 
   /// No description provided for @seeLess.
   ///
@@ -4036,12 +2362,6 @@ abstract class AppLocalizations {
   /// **'Ver todos ({count})'**
   String seeAllCount(int count);
 
-  /// No description provided for @toReceiveLowerCase.
-  ///
-  /// In pt, this message translates to:
-  /// **'A receber'**
-  String get toReceiveLowerCase;
-
   /// No description provided for @errorGeneratingReport.
   ///
   /// In pt, this message translates to:
@@ -4054,119 +2374,17 @@ abstract class AppLocalizations {
   /// **'Pendente'**
   String get pendingPayment;
 
-  /// No description provided for @selectCountry.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar País'**
-  String get selectCountry;
-
-  /// No description provided for @chooseCompanySegment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolha o ramo de atuação da empresa'**
-  String get chooseCompanySegment;
-
   /// No description provided for @contacts.
   ///
   /// In pt, this message translates to:
   /// **'Contatos'**
   String get contacts;
 
-  /// No description provided for @contactMethods.
-  ///
-  /// In pt, this message translates to:
-  /// **'Meios de Contato'**
-  String get contactMethods;
-
-  /// No description provided for @howCustomersCanReachYou.
-  ///
-  /// In pt, this message translates to:
-  /// **'Como seus clientes podem falar com você?'**
-  String get howCustomersCanReachYou;
-
   /// No description provided for @preparing.
   ///
   /// In pt, this message translates to:
   /// **'Preparando...'**
   String get preparing;
-
-  /// No description provided for @uploadingLogo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviando logo...'**
-  String get uploadingLogo;
-
-  /// No description provided for @creatingCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criando empresa...'**
-  String get creatingCompany;
-
-  /// No description provided for @importingForms.
-  ///
-  /// In pt, this message translates to:
-  /// **'Importando formulários...'**
-  String get importingForms;
-
-  /// No description provided for @creatingSampleData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criando dados de exemplo...'**
-  String get creatingSampleData;
-
-  /// No description provided for @createSampleDataQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja criar dados de exemplo?'**
-  String get createSampleDataQuestion;
-
-  /// No description provided for @sampleDataDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:'**
-  String get sampleDataDescription;
-
-  /// No description provided for @commonServicesForSegment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviços comuns do seu segmento'**
-  String get commonServicesForSegment;
-
-  /// No description provided for @mostUsedProducts.
-  ///
-  /// In pt, this message translates to:
-  /// **'Produtos e peças mais utilizados'**
-  String get mostUsedProducts;
-
-  /// No description provided for @sampleEquipment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Equipamentos de exemplo'**
-  String get sampleEquipment;
-
-  /// No description provided for @sampleForms.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formulários de vistoria'**
-  String get sampleForms;
-
-  /// No description provided for @demoCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cliente de demonstração'**
-  String get demoCustomer;
-
-  /// No description provided for @canEditOrDeleteAnytime.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você poderá editar ou excluir esses dados a qualquer momento.'**
-  String get canEditOrDeleteAnytime;
-
-  /// No description provided for @noStartFromScratch.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não, começar do zero'**
-  String get noStartFromScratch;
 
   /// No description provided for @changeLogo.
   ///
@@ -4275,24 +2493,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível reabrir o procedimento. Tente novamente.'**
   String get couldNotReopenForm;
-
-  /// No description provided for @formCompleted.
-  ///
-  /// In pt, this message translates to:
-  /// **'Procedimento concluído'**
-  String get formCompleted;
-
-  /// No description provided for @noPhotoAdded.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma foto adicionada'**
-  String get noPhotoAdded;
-
-  /// No description provided for @tapCameraIconToAdd.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque no ícone da câmera para adicionar'**
-  String get tapCameraIconToAdd;
 
   /// No description provided for @type.
   ///
@@ -4420,47 +2620,17 @@ abstract class AppLocalizations {
   /// **'Usuário pode anexar fotos a este item'**
   String get userCanAttachPhotos;
 
-  /// No description provided for @procedures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Procedimentos'**
-  String get procedures;
-
   /// No description provided for @searchProcedure.
   ///
   /// In pt, this message translates to:
   /// **'Buscar procedimento'**
   String get searchProcedure;
 
-  /// No description provided for @myProcedures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Meus Procedimentos'**
-  String get myProcedures;
-
-  /// No description provided for @globalProcedures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Procedimentos Globais'**
-  String get globalProcedures;
-
-  /// No description provided for @noProceduresRegistered.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum procedimento cadastrado'**
-  String get noProceduresRegistered;
-
   /// No description provided for @noProceduresAvailable.
   ///
   /// In pt, this message translates to:
   /// **'Nenhum procedimento disponível'**
   String get noProceduresAvailable;
-
-  /// No description provided for @tapPlusToCreateFirst.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque em + para criar seu primeiro procedimento.'**
-  String get tapPlusToCreateFirst;
 
   /// No description provided for @fromCompany.
   ///
@@ -4540,12 +2710,6 @@ abstract class AppLocalizations {
   /// **'Convites Pendentes'**
   String get pendingInvites;
 
-  /// No description provided for @youHaveBeenInvited.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você foi convidado para fazer parte de empresas no PraticOS!'**
-  String get youHaveBeenInvited;
-
   /// No description provided for @noPendingInvites.
   ///
   /// In pt, this message translates to:
@@ -4587,12 +2751,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'ou'**
   String get or;
-
-  /// No description provided for @createMyCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criar Minha Empresa'**
-  String get createMyCompany;
 
   /// No description provided for @reject.
   ///
@@ -4654,12 +2812,6 @@ abstract class AppLocalizations {
   /// **'Buscar outro código'**
   String get searchAnotherCode;
 
-  /// No description provided for @joinAnotherCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrar em outra empresa'**
-  String get joinAnotherCompany;
-
   /// No description provided for @shareInvite.
   ///
   /// In pt, this message translates to:
@@ -4684,12 +2836,6 @@ abstract class AppLocalizations {
   /// **'Código do convite copiado!'**
   String get inviteCodeCopied;
 
-  /// No description provided for @phoneOptional.
-  ///
-  /// In pt, this message translates to:
-  /// **'Telefone (opcional)'**
-  String get phoneOptional;
-
   /// No description provided for @emailOrPhone.
   ///
   /// In pt, this message translates to:
@@ -4702,12 +2848,6 @@ abstract class AppLocalizations {
   /// **'Convite válido por {days} dias'**
   String inviteExpiresIn(int days);
 
-  /// No description provided for @markAsToReceive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Marcar como A Receber'**
-  String get markAsToReceive;
-
   /// No description provided for @thisWillRemoveAllPayments.
   ///
   /// In pt, this message translates to:
@@ -4719,48 +2859,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Atenção'**
   String get attention;
-
-  /// No description provided for @almostThere.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quase lá!'**
-  String get almostThere;
-
-  /// No description provided for @yesCreateSampleData.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sim, criar dados de exemplo'**
-  String get yesCreateSampleData;
-
-  /// No description provided for @availableSpecialties.
-  ///
-  /// In pt, this message translates to:
-  /// **'ESPECIALIDADES DISPONÍVEIS'**
-  String get availableSpecialties;
-
-  /// No description provided for @pleaseSelectAtLeastOneSpecialty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Por favor, selecione pelo menos uma especialidade para continuar.'**
-  String get pleaseSelectAtLeastOneSpecialty;
-
-  /// No description provided for @selectSpecialtiesDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione as especialidades da sua empresa.\nVocê pode escolher mais de uma.'**
-  String get selectSpecialtiesDescription;
-
-  /// No description provided for @selectAtLeastOneOption.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione ao menos uma opção'**
-  String get selectAtLeastOneOption;
-
-  /// No description provided for @continueWithCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'Continuar ({count} {count, plural, =1{selecionada} other{selecionadas}})'**
-  String continueWithCount(int count);
 
   /// No description provided for @financialReport.
   ///
@@ -4996,23 +3094,11 @@ abstract class AppLocalizations {
   /// **'Formulario: {title}'**
   String formLabelWithTitle(String title);
 
-  /// No description provided for @connectedChannels.
-  ///
-  /// In pt, this message translates to:
-  /// **'Canais Conectados'**
-  String get connectedChannels;
-
   /// No description provided for @linked.
   ///
   /// In pt, this message translates to:
   /// **'Vinculado'**
   String get linked;
-
-  /// No description provided for @notLinked.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não vinculado'**
-  String get notLinked;
 
   /// No description provided for @linkWhatsApp.
   ///
@@ -5038,113 +3124,17 @@ abstract class AppLocalizations {
   /// **'Abrir WhatsApp'**
   String get openWhatsApp;
 
-  /// No description provided for @whatsAppLinked.
-  ///
-  /// In pt, this message translates to:
-  /// **'WhatsApp vinculado'**
-  String get whatsAppLinked;
-
-  /// No description provided for @whatsAppNotLinked.
-  ///
-  /// In pt, this message translates to:
-  /// **'WhatsApp não vinculado'**
-  String get whatsAppNotLinked;
-
-  /// No description provided for @unlinkWhatsApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desvincular WhatsApp'**
-  String get unlinkWhatsApp;
-
-  /// No description provided for @unlinkWhatsAppConfirm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza que deseja desvincular seu WhatsApp?'**
-  String get unlinkWhatsAppConfirm;
-
-  /// No description provided for @whatsAppUnlinked.
-  ///
-  /// In pt, this message translates to:
-  /// **'WhatsApp desvinculado com sucesso'**
-  String get whatsAppUnlinked;
-
   /// No description provided for @errorGeneratingToken.
   ///
   /// In pt, this message translates to:
   /// **'Erro ao gerar código de vinculação'**
   String get errorGeneratingToken;
 
-  /// No description provided for @errorCheckingStatus.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao verificar status'**
-  String get errorCheckingStatus;
-
-  /// No description provided for @errorUnlinking.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao desvincular'**
-  String get errorUnlinking;
-
-  /// No description provided for @scanQRCodeOrTapButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escaneie o QR code ou toque no botão abaixo'**
-  String get scanQRCodeOrTapButton;
-
-  /// No description provided for @linkYourWhatsApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vincule seu WhatsApp'**
-  String get linkYourWhatsApp;
-
-  /// No description provided for @linkWhatsAppBenefit.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receba notificações e gerencie suas OS pelo WhatsApp'**
-  String get linkWhatsAppBenefit;
-
   /// No description provided for @shareWithCustomer.
   ///
   /// In pt, this message translates to:
   /// **'Compartilhar com Cliente'**
   String get shareWithCustomer;
-
-  /// No description provided for @shareLinkTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Link de Acompanhamento'**
-  String get shareLinkTitle;
-
-  /// No description provided for @shareLinkDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Envie este link para o cliente acompanhar a OS'**
-  String get shareLinkDescription;
-
-  /// No description provided for @linkValidFor.
-  ///
-  /// In pt, this message translates to:
-  /// **'Link válido por {days} dias'**
-  String linkValidFor(int days);
-
-  /// No description provided for @canApprove.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pode aprovar'**
-  String get canApprove;
-
-  /// No description provided for @canComment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pode comentar'**
-  String get canComment;
-
-  /// No description provided for @viewOnly.
-  ///
-  /// In pt, this message translates to:
-  /// **'Apenas visualização'**
-  String get viewOnly;
 
   /// No description provided for @copyLink.
   ///
@@ -5170,77 +3160,11 @@ abstract class AppLocalizations {
   /// **'Link copiado!'**
   String get linkCopied;
 
-  /// No description provided for @generatingLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerando link...'**
-  String get generatingLink;
-
-  /// No description provided for @errorGeneratingLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Erro ao gerar link'**
-  String get errorGeneratingLink;
-
-  /// No description provided for @sharePermissions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Permissões do Link'**
-  String get sharePermissions;
-
-  /// No description provided for @shareLinkExpired.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este link expirou'**
-  String get shareLinkExpired;
-
-  /// No description provided for @shareLinkApproved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovado pelo cliente'**
-  String get shareLinkApproved;
-
-  /// No description provided for @shareLinkRejected.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rejeitado pelo cliente'**
-  String get shareLinkRejected;
-
   /// No description provided for @viewCount.
   ///
   /// In pt, this message translates to:
   /// **'{count} {count, plural, =1{visualização} other{visualizações}}'**
   String viewCount(int count);
-
-  /// No description provided for @revokeLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Revogar Link'**
-  String get revokeLink;
-
-  /// No description provided for @revokeLinkConfirm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja revogar este link? O cliente não poderá mais acessar.'**
-  String get revokeLinkConfirm;
-
-  /// No description provided for @linkRevoked.
-  ///
-  /// In pt, this message translates to:
-  /// **'Link revogado'**
-  String get linkRevoked;
-
-  /// No description provided for @activeLinks.
-  ///
-  /// In pt, this message translates to:
-  /// **'Links Ativos'**
-  String get activeLinks;
-
-  /// No description provided for @noActiveLinks.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum link ativo'**
-  String get noActiveLinks;
 
   /// No description provided for @noComments.
   ///
@@ -5248,23 +3172,11 @@ abstract class AppLocalizations {
   /// **'Nenhum comentário'**
   String get noComments;
 
-  /// No description provided for @addComment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Adicionar comentário'**
-  String get addComment;
-
   /// No description provided for @commentPlaceholder.
   ///
   /// In pt, this message translates to:
   /// **'Digite seu comentário...'**
   String get commentPlaceholder;
-
-  /// No description provided for @commentAdded.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comentário adicionado'**
-  String get commentAdded;
 
   /// No description provided for @commentFromCustomer.
   ///
@@ -5284,59 +3196,11 @@ abstract class AppLocalizations {
   /// **'Comentário interno'**
   String get internalComment;
 
-  /// No description provided for @internalCommentHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Visível apenas para a equipe'**
-  String get internalCommentHint;
-
   /// No description provided for @publicComment.
   ///
   /// In pt, this message translates to:
   /// **'Comentário público'**
   String get publicComment;
-
-  /// No description provided for @publicCommentHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Visível para o cliente'**
-  String get publicCommentHint;
-
-  /// No description provided for @markAsInternal.
-  ///
-  /// In pt, this message translates to:
-  /// **'Marcar como interno'**
-  String get markAsInternal;
-
-  /// No description provided for @sendComment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar'**
-  String get sendComment;
-
-  /// No description provided for @approveQuoteAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovar Orçamento'**
-  String get approveQuoteAction;
-
-  /// No description provided for @rejectQuoteAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Rejeitar Orçamento'**
-  String get rejectQuoteAction;
-
-  /// No description provided for @quoteApprovedByCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento aprovado pelo cliente'**
-  String get quoteApprovedByCustomer;
-
-  /// No description provided for @quoteRejectedByCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento rejeitado pelo cliente'**
-  String get quoteRejectedByCustomer;
 
   /// No description provided for @rejectionReason.
   ///
@@ -5344,59 +3208,11 @@ abstract class AppLocalizations {
   /// **'Motivo da rejeição'**
   String get rejectionReason;
 
-  /// No description provided for @linkValidity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Validade do Link'**
-  String get linkValidity;
-
-  /// No description provided for @validFor.
-  ///
-  /// In pt, this message translates to:
-  /// **'Válido por'**
-  String get validFor;
-
   /// No description provided for @days.
   ///
   /// In pt, this message translates to:
   /// **'dias'**
   String get days;
-
-  /// No description provided for @selectValidity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione a validade'**
-  String get selectValidity;
-
-  /// No description provided for @usingExistingLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Link ativo encontrado'**
-  String get usingExistingLink;
-
-  /// No description provided for @generateNewLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerar novo'**
-  String get generateNewLink;
-
-  /// No description provided for @loadingExistingLinks.
-  ///
-  /// In pt, this message translates to:
-  /// **'Verificando links existentes...'**
-  String get loadingExistingLinks;
-
-  /// No description provided for @advancedOptions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Opções avançadas'**
-  String get advancedOptions;
-
-  /// No description provided for @sendToCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar para o cliente'**
-  String get sendToCustomer;
 
   /// No description provided for @rating.
   ///
@@ -5410,59 +3226,11 @@ abstract class AppLocalizations {
   /// **'Avaliações'**
   String get ratings;
 
-  /// No description provided for @averageRating.
-  ///
-  /// In pt, this message translates to:
-  /// **'Média das avaliações'**
-  String get averageRating;
-
-  /// No description provided for @totalRatings.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total de avaliações'**
-  String get totalRatings;
-
   /// No description provided for @noRatingsYet.
   ///
   /// In pt, this message translates to:
   /// **'Nenhuma avaliação ainda'**
   String get noRatingsYet;
-
-  /// No description provided for @rateService.
-  ///
-  /// In pt, this message translates to:
-  /// **'Avalie nosso serviço'**
-  String get rateService;
-
-  /// No description provided for @rateSubmit.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar Avaliação'**
-  String get rateSubmit;
-
-  /// No description provided for @rateSuccess.
-  ///
-  /// In pt, this message translates to:
-  /// **'Obrigado pela sua avaliação!'**
-  String get rateSuccess;
-
-  /// No description provided for @ratingScore.
-  ///
-  /// In pt, this message translates to:
-  /// **'{score}/5'**
-  String ratingScore(int score);
-
-  /// No description provided for @customerRating.
-  ///
-  /// In pt, this message translates to:
-  /// **'Avaliação do Cliente'**
-  String get customerRating;
-
-  /// No description provided for @ratingWithStars.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} {count, plural, =1{estrela} other{estrelas}}'**
-  String ratingWithStars(int count);
 
   /// No description provided for @notifyCustomerQuestion.
   ///
@@ -5560,12 +3328,6 @@ abstract class AppLocalizations {
   /// **'Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: {code}\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos'**
   String inviteWhatsAppMessage(String code);
 
-  /// No description provided for @downloadApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Baixe o app'**
-  String get downloadApp;
-
   /// No description provided for @cannotRemoveOnlyAdmin.
   ///
   /// In pt, this message translates to:
@@ -5595,24 +3357,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Compartilhar Convite'**
   String get shareInviteAction;
-
-  /// No description provided for @inviteExpiresInDays.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{Expira em 1 dia} other{Expira em {count} dias}}'**
-  String inviteExpiresInDays(int count);
-
-  /// No description provided for @inviteExpiresInHours.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{Expira em 1 hora} other{Expira em {count} horas}}'**
-  String inviteExpiresInHours(int count);
-
-  /// No description provided for @inviteExpiresSoon.
-  ///
-  /// In pt, this message translates to:
-  /// **'Expira em breve'**
-  String get inviteExpiresSoon;
 
   /// No description provided for @duplicateInviteTitle.
   ///
@@ -5656,23 +3400,11 @@ abstract class AppLocalizations {
   /// **'Toda a equipe'**
   String get allTeam;
 
-  /// No description provided for @filterByTechnician.
-  ///
-  /// In pt, this message translates to:
-  /// **'Filtrar por técnico'**
-  String get filterByTechnician;
-
   /// No description provided for @allDay.
   ///
   /// In pt, this message translates to:
   /// **'Dia todo'**
   String get allDay;
-
-  /// No description provided for @clearSchedule.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover agendamento'**
-  String get clearSchedule;
 
   /// No description provided for @scheduleReminder.
   ///
@@ -5703,18 +3435,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{hours} horas antes'**
   String reminderHoursBefore(int hours);
-
-  /// No description provided for @reminderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Agendamento em breve'**
-  String get reminderTitle;
-
-  /// No description provided for @reminderBodyOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS #{orderNumber} - {customerName}'**
-  String reminderBodyOrder(String orderNumber, String customerName);
 
   /// No description provided for @inviteWhatsAppSuccessTitle.
   ///
@@ -5764,12 +3484,6 @@ abstract class AppLocalizations {
   /// **'Remover Equipamento'**
   String get removeDevice;
 
-  /// No description provided for @allDevices.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todos os Equipamentos'**
-  String get allDevices;
-
   /// No description provided for @generalNoDevice.
   ///
   /// In pt, this message translates to:
@@ -5787,12 +3501,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count} equipamentos'**
   String deviceCount(int count);
-
-  /// No description provided for @duplicateForAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Duplicar para todos'**
-  String get duplicateForAll;
 
   /// No description provided for @confirmRemoveDevice.
   ///
@@ -5824,65 +3532,17 @@ abstract class AppLocalizations {
   /// **'Funcionalidades'**
   String get features;
 
-  /// No description provided for @fieldServiceLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atendimento externo'**
-  String get fieldServiceLabel;
-
-  /// No description provided for @fieldServiceDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Exibir campo de local do atendimento'**
-  String get fieldServiceDescription;
-
-  /// No description provided for @schedulingLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Agendamento'**
-  String get schedulingLabel;
-
-  /// No description provided for @schedulingDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Usar data agendada nas OS'**
-  String get schedulingDescription;
-
-  /// No description provided for @deviceManagement.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gestão de ativos'**
-  String get deviceManagement;
-
-  /// No description provided for @deviceManagementDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Status, histórico e controle avançado de dispositivos'**
-  String get deviceManagementDescription;
-
   /// No description provided for @contracts.
   ///
   /// In pt, this message translates to:
   /// **'Contratos'**
   String get contracts;
 
-  /// No description provided for @contractsDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Contratos recorrentes de manutenção'**
-  String get contractsDescription;
-
   /// No description provided for @noContracts.
   ///
   /// In pt, this message translates to:
   /// **'Nenhum contrato'**
   String get noContracts;
-
-  /// No description provided for @contractActive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Contrato recorrente'**
-  String get contractActive;
 
   /// No description provided for @activateContract.
   ///
@@ -5914,35 +3574,11 @@ abstract class AppLocalizations {
   /// **'Geração automática'**
   String get automaticGeneration;
 
-  /// No description provided for @contractAutoGenerate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerar OS automaticamente'**
-  String get contractAutoGenerate;
-
-  /// No description provided for @contractAutoGenerateDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quando ativado, cria a OS automaticamente na data prevista'**
-  String get contractAutoGenerateDescription;
-
-  /// No description provided for @contractReminderDays.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lembrete (dias antes)'**
-  String get contractReminderDays;
-
   /// No description provided for @contractNextDue.
   ///
   /// In pt, this message translates to:
   /// **'Próxima geração'**
   String get contractNextDue;
-
-  /// No description provided for @generatedOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS geradas'**
-  String get generatedOrders;
 
   /// No description provided for @generatedOrdersCount.
   ///
@@ -6004,12 +3640,6 @@ abstract class AppLocalizations {
   /// **'Desativado'**
   String get deviceStatusDecommissioned;
 
-  /// No description provided for @orderHistory.
-  ///
-  /// In pt, this message translates to:
-  /// **'Histórico de OS'**
-  String get orderHistory;
-
   /// No description provided for @noOrderHistory.
   ///
   /// In pt, this message translates to:
@@ -6046,18 +3676,6 @@ abstract class AppLocalizations {
   /// **'Nenhuma OS com vencimento neste dia'**
   String get noOrdersDueOnDate;
 
-  /// No description provided for @companyFeatures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Funcionalidades da empresa'**
-  String get companyFeatures;
-
-  /// No description provided for @youCanChangeThisLater.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pode alterar depois nas configurações'**
-  String get youCanChangeThisLater;
-
   /// No description provided for @documents.
   ///
   /// In pt, this message translates to:
@@ -6088,30 +3706,6 @@ abstract class AppLocalizations {
   /// **'Contrato'**
   String get contract;
 
-  /// No description provided for @attachReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Anexar Comprovante'**
-  String get attachReceipt;
-
-  /// No description provided for @chooseFile.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolher Arquivo'**
-  String get chooseFile;
-
-  /// No description provided for @documentType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tipo de Documento'**
-  String get documentType;
-
-  /// No description provided for @viewDocument.
-  ///
-  /// In pt, this message translates to:
-  /// **'Visualizar Documento'**
-  String get viewDocument;
-
   /// No description provided for @deleteDocument.
   ///
   /// In pt, this message translates to:
@@ -6129,12 +3723,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Enviando documento...'**
   String get uploadingDocument;
-
-  /// No description provided for @noDocuments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum documento anexado'**
-  String get noDocuments;
 
   /// No description provided for @documentAdded.
   ///
@@ -6154,41 +3742,11 @@ abstract class AppLocalizations {
   /// **'Abrir'**
   String get openDocument;
 
-  /// No description provided for @receiptAttached.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comprovante anexado'**
-  String get receiptAttached;
-
-  /// No description provided for @receiptRemoved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comprovante removido'**
-  String get receiptRemoved;
-
-  /// No description provided for @removeReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover Comprovante'**
-  String get removeReceipt;
-
-  /// No description provided for @confirmRemoveReceipt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza que deseja remover este comprovante?'**
-  String get confirmRemoveReceipt;
-
   /// No description provided for @fromFiles.
   ///
   /// In pt, this message translates to:
   /// **'Arquivos'**
   String get fromFiles;
-
-  /// No description provided for @selectDocumentType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecione o tipo de documento'**
-  String get selectDocumentType;
 
   /// No description provided for @errorUploadingDocument.
   ///
@@ -6201,42 +3759,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Lembretes'**
   String get engagementReminders;
-
-  /// No description provided for @dailyReminderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lembrete diário'**
-  String get dailyReminderTitle;
-
-  /// No description provided for @dailyReminderDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receba um lembrete todo dia às 9h'**
-  String get dailyReminderDescription;
-
-  /// No description provided for @inactivityReminderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lembrete de inatividade'**
-  String get inactivityReminderTitle;
-
-  /// No description provided for @inactivityReminderDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receba lembretes quando não usar o app'**
-  String get inactivityReminderDescription;
-
-  /// No description provided for @pendingOsReminderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lembrete de OS pendentes'**
-  String get pendingOsReminderTitle;
-
-  /// No description provided for @pendingOsReminderDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receba lembretes sobre OS paradas'**
-  String get pendingOsReminderDescription;
 
   /// No description provided for @dailyNotificationTitle.
   ///
@@ -6298,12 +3820,6 @@ abstract class AppLocalizations {
   /// **'Você tem {count} OS paradas há mais de 7 dias.'**
   String pendingOsNotificationBody(int count);
 
-  /// No description provided for @legalSection.
-  ///
-  /// In pt, this message translates to:
-  /// **'Jurídico'**
-  String get legalSection;
-
   /// No description provided for @termsOfService.
   ///
   /// In pt, this message translates to:
@@ -6315,12 +3831,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ex: Equipamentos não retirados em 90 dias poderão ser descartados...'**
   String get termsOfServicePlaceholder;
-
-  /// No description provided for @termsOfServiceDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estes termos serão exibidos ao cliente antes de aprovar o orçamento.'**
-  String get termsOfServiceDescription;
 
   /// No description provided for @useDefaultTerms.
   ///
@@ -6484,36 +3994,6 @@ abstract class AppLocalizations {
   /// **'Limite atingido'**
   String get featureGateLimitModalTitle;
 
-  /// No description provided for @featureGateLimitModalMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você atingiu o limite de {feature} do seu plano {plan}.'**
-  String featureGateLimitModalMessage(String feature, String plan);
-
-  /// No description provided for @featureGateLimitModalUsage.
-  ///
-  /// In pt, this message translates to:
-  /// **'{current} de {limit} {feature}'**
-  String featureGateLimitModalUsage(int current, int limit, String feature);
-
-  /// No description provided for @featureGateUpgradeButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fazer upgrade para {plan}'**
-  String featureGateUpgradeButton(String plan);
-
-  /// No description provided for @featureGateUpgradeNewLimit.
-  ///
-  /// In pt, this message translates to:
-  /// **'Novo limite: {limit} {feature}'**
-  String featureGateUpgradeNewLimit(String limit, String feature);
-
-  /// No description provided for @unlimitedLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'ilimitado'**
-  String get unlimitedLabel;
-
   /// No description provided for @subscription.
   ///
   /// In pt, this message translates to:
@@ -6526,29 +4006,11 @@ abstract class AppLocalizations {
   /// **'Gerenciar assinatura'**
   String get manageSubscription;
 
-  /// No description provided for @viewPlanAndBilling.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver plano e cobrança'**
-  String get viewPlanAndBilling;
-
   /// No description provided for @restorePurchases.
   ///
   /// In pt, this message translates to:
   /// **'Restaurar compras'**
   String get restorePurchases;
-
-  /// No description provided for @restorePreviousPurchases.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recuperar compras anteriores'**
-  String get restorePreviousPurchases;
-
-  /// No description provided for @restoringPurchases.
-  ///
-  /// In pt, this message translates to:
-  /// **'Restaurando compras...'**
-  String get restoringPurchases;
 
   /// No description provided for @restorePurchasesSuccess.
   ///
@@ -6561,18 +4023,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro ao restaurar compras. Tente novamente.'**
   String get restorePurchasesError;
-
-  /// No description provided for @restorePurchasesDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Restaure suas compras anteriores caso tenha trocado de dispositivo'**
-  String get restorePurchasesDescription;
-
-  /// No description provided for @purchaseHistory.
-  ///
-  /// In pt, this message translates to:
-  /// **'Histórico de Compras'**
-  String get purchaseHistory;
 
   /// No description provided for @success.
   ///
@@ -6592,41 +4042,11 @@ abstract class AppLocalizations {
   /// **'Renova em {date}'**
   String renewsOn(String date);
 
-  /// No description provided for @subscriptionCancelled.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assinatura cancelada'**
-  String get subscriptionCancelled;
-
-  /// No description provided for @changePlan.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alterar plano'**
-  String get changePlan;
-
-  /// No description provided for @viewAvailablePlans.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver planos disponíveis'**
-  String get viewAvailablePlans;
-
-  /// No description provided for @cancelSubscription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cancelar assinatura'**
-  String get cancelSubscription;
-
   /// No description provided for @manageInStore.
   ///
   /// In pt, this message translates to:
   /// **'Gerenciar na loja de aplicativos'**
   String get manageInStore;
-
-  /// No description provided for @choosePlan.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolher plano'**
-  String get choosePlan;
 
   /// No description provided for @restore.
   ///
@@ -6634,227 +4054,17 @@ abstract class AppLocalizations {
   /// **'Restaurar'**
   String get restore;
 
-  /// No description provided for @perMonth.
-  ///
-  /// In pt, this message translates to:
-  /// **'/mês'**
-  String get perMonth;
-
-  /// No description provided for @mostPopular.
-  ///
-  /// In pt, this message translates to:
-  /// **'MAIS POPULAR'**
-  String get mostPopular;
-
   /// No description provided for @currentPlan.
   ///
   /// In pt, this message translates to:
   /// **'Plano atual'**
   String get currentPlan;
 
-  /// No description provided for @yourCurrentPlan.
-  ///
-  /// In pt, this message translates to:
-  /// **'Seu plano atual'**
-  String get yourCurrentPlan;
-
-  /// No description provided for @selectPlan.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar plano'**
-  String get selectPlan;
-
-  /// No description provided for @purchaseSuccessful.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compra realizada com sucesso!'**
-  String get purchaseSuccessful;
-
-  /// No description provided for @plansDisclaimer.
-  ///
-  /// In pt, this message translates to:
-  /// **'As assinaturas são renovadas automaticamente. Você pode cancelar a qualquer momento nas configurações da loja.'**
-  String get plansDisclaimer;
-
-  /// No description provided for @planFeatureUsers.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} usuários inclusos'**
-  String planFeatureUsers(int count);
-
-  /// No description provided for @planFeaturePhotos.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} fotos/mês'**
-  String planFeaturePhotos(int count);
-
-  /// No description provided for @planFeatureForms.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} formulários'**
-  String planFeatureForms(int count);
-
-  /// No description provided for @planFeatureCleanPdf.
-  ///
-  /// In pt, this message translates to:
-  /// **'PDF sem marca d\'água'**
-  String get planFeatureCleanPdf;
-
-  /// No description provided for @planFeaturePriority.
-  ///
-  /// In pt, this message translates to:
-  /// **'Suporte prioritário'**
-  String get planFeaturePriority;
-
-  /// No description provided for @planFeatureUnlimitedPhotos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fotos ilimitadas'**
-  String get planFeatureUnlimitedPhotos;
-
-  /// No description provided for @planFeatureUnlimitedForms.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formulários ilimitados'**
-  String get planFeatureUnlimitedForms;
-
-  /// No description provided for @planFeatureMultiCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Multi-empresa'**
-  String get planFeatureMultiCompany;
-
-  /// No description provided for @planFeatureApi.
-  ///
-  /// In pt, this message translates to:
-  /// **'Acesso à API'**
-  String get planFeatureApi;
-
-  /// No description provided for @upgradePlanTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Faça upgrade'**
-  String get upgradePlanTitle;
-
   /// No description provided for @featureLimitReached.
   ///
   /// In pt, this message translates to:
   /// **'Você atingiu o limite de {feature}'**
   String featureLimitReached(String feature);
-
-  /// No description provided for @withUpgrade.
-  ///
-  /// In pt, this message translates to:
-  /// **'Com upgrade'**
-  String get withUpgrade;
-
-  /// No description provided for @upgradeNow.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fazer upgrade'**
-  String get upgradeNow;
-
-  /// No description provided for @segmentationOnboardingTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nos conte sobre seu negócio'**
-  String get segmentationOnboardingTitle;
-
-  /// No description provided for @segmentationOnboardingSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ajude-nos a personalizar sua experiência (30 segundos)'**
-  String get segmentationOnboardingSubtitle;
-
-  /// No description provided for @segmentationServiceTypeQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'Qual tipo de serviço você faz?'**
-  String get segmentationServiceTypeQuestion;
-
-  /// No description provided for @serviceTypeTechnicalAssistance.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assistência técnica (celular, eletrônico)'**
-  String get serviceTypeTechnicalAssistance;
-
-  /// No description provided for @serviceTypeHvac.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ar condicionado / Refrigeração'**
-  String get serviceTypeHvac;
-
-  /// No description provided for @serviceTypeElectricalPlumbing.
-  ///
-  /// In pt, this message translates to:
-  /// **'Elétrica / Hidráulica'**
-  String get serviceTypeElectricalPlumbing;
-
-  /// No description provided for @serviceTypeAutomotive.
-  ///
-  /// In pt, this message translates to:
-  /// **'Oficina mecânica'**
-  String get serviceTypeAutomotive;
-
-  /// No description provided for @segmentationMonthlyVolumeQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quantos serviços você faz por mês?'**
-  String get segmentationMonthlyVolumeQuestion;
-
-  /// No description provided for @monthlyVolumeLt10.
-  ///
-  /// In pt, this message translates to:
-  /// **'Menos de 10'**
-  String get monthlyVolumeLt10;
-
-  /// No description provided for @monthlyVolume10To30.
-  ///
-  /// In pt, this message translates to:
-  /// **'10 a 30'**
-  String get monthlyVolume10To30;
-
-  /// No description provided for @monthlyVolume30To60.
-  ///
-  /// In pt, this message translates to:
-  /// **'30 a 60'**
-  String get monthlyVolume30To60;
-
-  /// No description provided for @monthlyVolumeGt60.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mais de 60'**
-  String get monthlyVolumeGt60;
-
-  /// No description provided for @segmentationTeamSizeQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você trabalha...'**
-  String get segmentationTeamSizeQuestion;
-
-  /// No description provided for @teamSizeSolo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sozinho'**
-  String get teamSizeSolo;
-
-  /// No description provided for @teamSize1To3.
-  ///
-  /// In pt, this message translates to:
-  /// **'Com 1-3 funcionários'**
-  String get teamSize1To3;
-
-  /// No description provided for @teamSize4To10.
-  ///
-  /// In pt, this message translates to:
-  /// **'Com 4-10 funcionários'**
-  String get teamSize4To10;
-
-  /// No description provided for @teamSizeGt10.
-  ///
-  /// In pt, this message translates to:
-  /// **'Com mais de 10 funcionários'**
-  String get teamSizeGt10;
 
   /// No description provided for @photoLimitReachedMessage.
   ///
@@ -6873,30 +4083,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver planos'**
   String get viewPlans;
-
-  /// No description provided for @planCourtesyUntil.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cortesia até {date}'**
-  String planCourtesyUntil(String date);
-
-  /// No description provided for @planRenewsOn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Renova em {date}'**
-  String planRenewsOn(String date);
-
-  /// No description provided for @planPaymentIssue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Problema no pagamento'**
-  String get planPaymentIssue;
-
-  /// No description provided for @planValidUntil.
-  ///
-  /// In pt, this message translates to:
-  /// **'Válido até {date}'**
-  String planValidUntil(String date);
 
   /// No description provided for @askAdminToChangePlanTitle.
   ///
@@ -7096,24 +4282,6 @@ abstract class AppLocalizations {
   /// **'CPF ou CNPJ inválido'**
   String get invalidTaxId;
 
-  /// No description provided for @chargeWithAsaas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cobrar com Asaas'**
-  String get chargeWithAsaas;
-
-  /// No description provided for @chargeSectionTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cobrança'**
-  String get chargeSectionTitle;
-
-  /// No description provided for @createChargeTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nova cobrança'**
-  String get createChargeTitle;
-
   /// No description provided for @chargeValue.
   ///
   /// In pt, this message translates to:
@@ -7126,35 +4294,11 @@ abstract class AppLocalizations {
   /// **'Saldo da OS: {value}'**
   String chargeBalanceHint(String value);
 
-  /// No description provided for @chargeModeSingle.
-  ///
-  /// In pt, this message translates to:
-  /// **'À vista'**
-  String get chargeModeSingle;
-
-  /// No description provided for @chargeModeInstallments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Parcelado no cartão'**
-  String get chargeModeInstallments;
-
   /// No description provided for @chargeSingleHint.
   ///
   /// In pt, this message translates to:
   /// **'O cliente escolhe Pix, boleto ou cartão.'**
   String get chargeSingleHint;
-
-  /// No description provided for @chargeInstallmentsHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'O cliente paga no cartão de crédito, nas parcelas escolhidas.'**
-  String get chargeInstallmentsHint;
-
-  /// No description provided for @chargeInstallments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Parcelas'**
-  String get chargeInstallments;
 
   /// No description provided for @chargeInstallmentOption.
   ///
@@ -7173,18 +4317,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O Asaas exige CPF ou CNPJ. Ele fica salvo no cadastro do cliente.'**
   String get chargeTaxIdHint;
-
-  /// No description provided for @chargeGenerate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerar cobrança'**
-  String get chargeGenerate;
-
-  /// No description provided for @chargeCreated.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cobrança gerada'**
-  String get chargeCreated;
 
   /// No description provided for @chargeStatusPending.
   ///
@@ -7216,42 +4348,6 @@ abstract class AppLocalizations {
   /// **'Estornada'**
   String get chargeStatusRefunded;
 
-  /// No description provided for @chargeDueOn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vence em {date}'**
-  String chargeDueOn(String date);
-
-  /// No description provided for @chargeInstallmentsSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count}x no cartão'**
-  String chargeInstallmentsSummary(int count);
-
-  /// No description provided for @chargeShareOrderLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar link da OS'**
-  String get chargeShareOrderLink;
-
-  /// No description provided for @chargeCopyInvoiceLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Copiar link da fatura'**
-  String get chargeCopyInvoiceLink;
-
-  /// No description provided for @chargeInvoiceLinkCopied.
-  ///
-  /// In pt, this message translates to:
-  /// **'Link da fatura copiado'**
-  String get chargeInvoiceLinkCopied;
-
-  /// No description provided for @chargeCancel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cancelar cobrança'**
-  String get chargeCancel;
-
   /// No description provided for @chargeCancelConfirm.
   ///
   /// In pt, this message translates to:
@@ -7281,18 +4377,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Gerar nova'**
   String get chargeReplace;
-
-  /// No description provided for @chargeTotalChanged.
-  ///
-  /// In pt, this message translates to:
-  /// **'O saldo da OS ({balance}) está diferente do valor da cobrança ({value}).'**
-  String chargeTotalChanged(String balance, String value);
-
-  /// No description provided for @chargeRegenerate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gerar nova cobrança'**
-  String get chargeRegenerate;
 
   /// No description provided for @asaasErrorInstallmentsInProgress.
   ///
@@ -7348,35 +4432,11 @@ abstract class AppLocalizations {
   /// **'Quem é o cliente?'**
   String get pickCustomerTitle;
 
-  /// No description provided for @pickCustomerSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque para escolher ou digite o nome, telefone ou placa'**
-  String get pickCustomerSubtitle;
-
   /// No description provided for @searchCustomerPlaceholder.
   ///
   /// In pt, this message translates to:
   /// **'Buscar por nome, telefone ou placa'**
   String get searchCustomerPlaceholder;
-
-  /// No description provided for @searchCustomerNoPlatePlaceholder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Buscar por nome ou telefone'**
-  String get searchCustomerNoPlatePlaceholder;
-
-  /// No description provided for @addNewCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cadastrar cliente novo'**
-  String get addNewCustomer;
-
-  /// No description provided for @allCustomers.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todos'**
-  String get allCustomers;
 
   /// No description provided for @plateValue.
   ///
@@ -7431,12 +4491,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nova OS para {name}'**
   String newOrderFor(String name);
-
-  /// No description provided for @ordersOfCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS de {name}'**
-  String ordersOfCustomer(String name);
 
   /// No description provided for @devicesOfCustomer.
   ///
@@ -7756,41 +4810,17 @@ abstract class AppLocalizations {
   /// **'{order} {number}'**
   String orderNumberTitle(String order, String number);
 
-  /// No description provided for @orderChangeStatusLink.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mudar'**
-  String get orderChangeStatusLink;
-
   /// No description provided for @orderItemsSection.
   ///
   /// In pt, this message translates to:
   /// **'O que vai ser feito'**
   String get orderItemsSection;
 
-  /// No description provided for @orderWhatGoesTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que vai na OS?'**
-  String get orderWhatGoesTitle;
-
   /// No description provided for @orderItemSearchPlaceholder.
   ///
   /// In pt, this message translates to:
   /// **'Buscar serviço ou peça'**
   String get orderItemSearchPlaceholder;
-
-  /// No description provided for @orderCreateAndAdd.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criar “{name}” e pôr na OS'**
-  String orderCreateAndAdd(String name);
-
-  /// No description provided for @orderCreateItemHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'O preço você coloca na própria OS. Fica salvo para as próximas.'**
-  String get orderCreateItemHint;
 
   /// No description provided for @orderCreateItemError.
   ///
@@ -7888,12 +4918,6 @@ abstract class AppLocalizations {
   /// **'Tudo pago'**
   String get orderFullyPaid;
 
-  /// No description provided for @orderSaveButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Salvar {order}'**
-  String orderSaveButton(String order);
-
   /// No description provided for @orderSaveNeedsCustomer.
   ///
   /// In pt, this message translates to:
@@ -7924,101 +4948,17 @@ abstract class AppLocalizations {
   /// **'Escolher {device}'**
   String orderPickDevice(String device);
 
-  /// No description provided for @orderPhotoAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Foto'**
-  String get orderPhotoAction;
-
   /// No description provided for @orderTalkAction.
   ///
   /// In pt, this message translates to:
   /// **'Falar o que fazer'**
   String get orderTalkAction;
 
-  /// No description provided for @orderAssistantSoon.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em breve'**
-  String get orderAssistantSoon;
-
-  /// No description provided for @orderNextStepQuote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento pronto para o cliente'**
-  String get orderNextStepQuote;
-
-  /// No description provided for @orderNextStepQuoteAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cliente aprovou'**
-  String get orderNextStepQuoteAction;
-
-  /// No description provided for @orderNextStepApproved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovada pelo cliente'**
-  String get orderNextStepApproved;
-
-  /// No description provided for @orderNextStepApprovedAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Começar o serviço'**
-  String get orderNextStepApprovedAction;
-
-  /// No description provided for @orderNextStepProgress.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviço em andamento'**
-  String get orderNextStepProgress;
-
-  /// No description provided for @orderNextStepProgressAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Marcar como pronto'**
-  String get orderNextStepProgressAction;
-
-  /// No description provided for @orderNextStepDone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pronto'**
-  String get orderNextStepDone;
-
-  /// No description provided for @orderNextStepDoneUnpaid.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pronto. Falta receber {amount}'**
-  String orderNextStepDoneUnpaid(String amount);
-
   /// No description provided for @orderNextStepReceive.
   ///
   /// In pt, this message translates to:
   /// **'Receber {amount}'**
   String orderNextStepReceive(String amount);
-
-  /// No description provided for @orderNextStepDonePaid.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tudo certo: pronto e pago'**
-  String get orderNextStepDonePaid;
-
-  /// No description provided for @orderNextStepSend.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mandar para o cliente'**
-  String get orderNextStepSend;
-
-  /// No description provided for @orderNextStepCanceled.
-  ///
-  /// In pt, this message translates to:
-  /// **'{order} cancelada'**
-  String orderNextStepCanceled(String order);
-
-  /// No description provided for @orderNextStepReopen.
-  ///
-  /// In pt, this message translates to:
-  /// **'Reabrir'**
-  String get orderNextStepReopen;
 
   /// No description provided for @orderMenuAddTo.
   ///
@@ -8031,12 +4971,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mandar para o cliente'**
   String get orderMenuSendToCustomer;
-
-  /// No description provided for @orderMenuPdf.
-  ///
-  /// In pt, this message translates to:
-  /// **'PDF'**
-  String get orderMenuPdf;
 
   /// No description provided for @orderMenuCancel.
   ///
@@ -8061,12 +4995,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Outro {device}'**
   String orderAddAnotherDevice(String device);
-
-  /// No description provided for @orderAddMore.
-  ///
-  /// In pt, this message translates to:
-  /// **'Checklist, fotos, comentário e mais'**
-  String get orderAddMore;
 
   /// No description provided for @orderCancelConfirmTitle.
   ///
@@ -8097,18 +5025,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Fotos'**
   String get orderPhotosSection;
-
-  /// No description provided for @orderDeviceActionChange.
-  ///
-  /// In pt, this message translates to:
-  /// **'Trocar'**
-  String get orderDeviceActionChange;
-
-  /// No description provided for @orderDeviceActionRemove.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tirar da OS'**
-  String get orderDeviceActionRemove;
 
   /// No description provided for @orderUnpricedCount.
   ///
@@ -8145,12 +5061,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Minhas'**
   String get filterMine;
-
-  /// No description provided for @sectionScheduledToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje'**
-  String get sectionScheduledToday;
 
   /// No description provided for @nextVisitLabel.
   ///
@@ -8194,101 +5104,11 @@ abstract class AppLocalizations {
   /// **'Nenhuma OS com você.'**
   String get noOrdersWithYou;
 
-  /// No description provided for @sectionLate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Atrasadas'**
-  String get sectionLate;
-
-  /// No description provided for @sectionDueToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'Para hoje'**
-  String get sectionDueToday;
-
-  /// No description provided for @sectionInProgress.
-  ///
-  /// In pt, this message translates to:
-  /// **'Em andamento'**
-  String get sectionInProgress;
-
-  /// No description provided for @sectionWaitingApproval.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esperando aprovação'**
-  String get sectionWaitingApproval;
-
-  /// No description provided for @sectionApproved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aprovadas'**
-  String get sectionApproved;
-
-  /// No description provided for @moreShowCanceled.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver canceladas'**
-  String get moreShowCanceled;
-
-  /// No description provided for @viewCanceledTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Canceladas'**
-  String get viewCanceledTitle;
-
-  /// No description provided for @backToOpenOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'Voltar para em aberto'**
-  String get backToOpenOrders;
-
-  /// No description provided for @homeMoreMenu.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mais opções'**
-  String get homeMoreMenu;
-
   /// No description provided for @homeOpenCount.
   ///
   /// In pt, this message translates to:
   /// **'{count} em aberto'**
   String homeOpenCount(int count);
-
-  /// No description provided for @nextStepLabelToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje'**
-  String get nextStepLabelToday;
-
-  /// No description provided for @nextStepLate.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS passou do prazo de entrega.} other{{count} OS passaram do prazo de entrega.}}'**
-  String nextStepLate(int count);
-
-  /// No description provided for @nextStepDueToday.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS para entregar hoje.} other{{count} OS para entregar hoje.}}'**
-  String nextStepDueToday(int count);
-
-  /// No description provided for @nextStepQuotesWaiting.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 orçamento esperando resposta do cliente.} other{{count} orçamentos esperando resposta do cliente.}}'**
-  String nextStepQuotesWaiting(int count);
-
-  /// No description provided for @seeLate.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver as atrasadas'**
-  String get seeLate;
-
-  /// No description provided for @seeThem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver'**
-  String get seeThem;
 
   /// No description provided for @seeAllOrders.
   ///
@@ -8301,12 +5121,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Avisos, {count} novos'**
   String notificationsA11y(int count);
-
-  /// No description provided for @firstOrderTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Crie sua primeira ordem de serviço. Leva menos de um minuto.'**
-  String get firstOrderTitle;
 
   /// No description provided for @howItWorks.
   ///
@@ -8368,24 +5182,6 @@ abstract class AppLocalizations {
   /// **'o app lembra quem falta pagar'**
   String get howItWorksStep3Detail;
 
-  /// No description provided for @nextStepLateShort.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS passou do prazo.} other{{count} OS passaram do prazo.}}'**
-  String nextStepLateShort(int count);
-
-  /// No description provided for @nextStepDueTodayShort.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 OS para hoje.} other{{count} OS para hoje.}}'**
-  String nextStepDueTodayShort(int count);
-
-  /// No description provided for @nextStepQuotesWaitingShort.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 orçamento sem resposta.} other{{count} orçamentos sem resposta.}}'**
-  String nextStepQuotesWaitingShort(int count);
-
   /// No description provided for @searchNotFoundLoaded.
   ///
   /// In pt, this message translates to:
@@ -8445,18 +5241,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS {number}'**
   String orderRowNumber(String number);
-
-  /// No description provided for @orderRowNumberDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · {device}'**
-  String orderRowNumberDevice(String number, String device);
-
-  /// No description provided for @homeNewOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nova OS'**
-  String get homeNewOrder;
 
   /// No description provided for @yourAccount.
   ///
@@ -8535,12 +5319,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para salvar. Confira a internet e tente de novo.'**
   String get valuesAndBillingSaveError;
-
-  /// No description provided for @nameAndPhoto.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nome e foto'**
-  String get nameAndPhoto;
 
   /// No description provided for @joinWithInviteCode.
   ///
@@ -8644,18 +5422,6 @@ abstract class AppLocalizations {
   /// **'Falta receber'**
   String get financialToReceive;
 
-  /// No description provided for @financialReceived.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recebido'**
-  String get financialReceived;
-
-  /// No description provided for @financialSummaryLine.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrou {entered} · Falta {owed}'**
-  String financialSummaryLine(String entered, String owed);
-
   /// No description provided for @financialOrderSince.
   ///
   /// In pt, this message translates to:
@@ -8667,12 +5433,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count} OS · desde {date}'**
   String financialOrdersSince(int count, String date);
-
-  /// No description provided for @financialPaidOn.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · pago {date}'**
-  String financialPaidOn(int number, String date);
 
   /// No description provided for @financialOtherPeriod.
   ///
@@ -8812,12 +5572,6 @@ abstract class AppLocalizations {
   /// **'O total passa de {from} para {to}'**
   String receiveDiscountNewTotal(String from, String to);
 
-  /// No description provided for @receiveDiscountButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dar {amount} de desconto'**
-  String receiveDiscountButton(String amount);
-
   /// No description provided for @receiveViewReceipt.
   ///
   /// In pt, this message translates to:
@@ -8908,12 +5662,6 @@ abstract class AppLocalizations {
   /// **'Seu ramo'**
   String get onboardingSegmentTitle;
 
-  /// No description provided for @onboardingSegmentSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Qual é o seu ramo? Assim o app já vem com os serviços e checklists do seu trabalho.'**
-  String get onboardingSegmentSubtitle;
-
   /// No description provided for @onboardingInviteCode.
   ///
   /// In pt, this message translates to:
@@ -8931,12 +5679,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Especialidades'**
   String get onboardingSpecialtiesTitle;
-
-  /// No description provided for @onboardingSpecialtiesSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que você atende? Marque o que fizer sentido. Dá para mudar depois.'**
-  String get onboardingSpecialtiesSubtitle;
 
   /// No description provided for @onboardingContinue.
   ///
@@ -9118,24 +5860,6 @@ abstract class AppLocalizations {
   /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
   String get segmentLoadError;
 
-  /// No description provided for @orderAssistantHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tire foto da placa e fale o serviço'**
-  String get orderAssistantHint;
-
-  /// No description provided for @orderAssistantPlaceholder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque no microfone do teclado e fale. Ex.: Revenda Sul, capô 500 e polimento 450'**
-  String get orderAssistantPlaceholder;
-
-  /// No description provided for @orderAssistantDone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pronto'**
-  String get orderAssistantDone;
-
   /// No description provided for @orderAssistantAddPhoto.
   ///
   /// In pt, this message translates to:
@@ -9148,24 +5872,6 @@ abstract class AppLocalizations {
   /// **'Tirar foto'**
   String get orderAssistantTakePhoto;
 
-  /// No description provided for @orderAssistantPhotoCount.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 foto} other{{count} fotos}}'**
-  String orderAssistantPhotoCount(int count);
-
-  /// No description provided for @orderAssistantReading.
-  ///
-  /// In pt, this message translates to:
-  /// **'Lendo o que você mandou…'**
-  String get orderAssistantReading;
-
-  /// No description provided for @orderAssistantFilledNote.
-  ///
-  /// In pt, this message translates to:
-  /// **'Confira o que está marcado em amarelo antes de salvar.'**
-  String get orderAssistantFilledNote;
-
   /// No description provided for @orderAssistantCustomerGuess.
   ///
   /// In pt, this message translates to:
@@ -9177,12 +5883,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'“{device}” não está no cadastro'**
   String orderAssistantDeviceGuess(String device);
-
-  /// No description provided for @orderAssistantErrorTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Assistente'**
-  String get orderAssistantErrorTitle;
 
   /// No description provided for @orderAssistantErrorDisabled.
   ///
@@ -9208,12 +5908,6 @@ abstract class AppLocalizations {
   /// **'Não achei o que pôr. Tente de novo ou preencha à mão.'**
   String get orderAssistantNothingFound;
 
-  /// No description provided for @valuesAndBillingSoon.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligado. Em breve você poderá desligar.'**
-  String get valuesAndBillingSoon;
-
   /// No description provided for @reportPreviousPeriod.
   ///
   /// In pt, this message translates to:
@@ -9225,12 +5919,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Próximo período'**
   String get reportNextPeriod;
-
-  /// No description provided for @orderInThisOrder.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nesta {order}'**
-  String orderInThisOrder(String order);
 
   /// No description provided for @orderAddChecklist.
   ///
@@ -9268,29 +5956,11 @@ abstract class AppLocalizations {
   /// **'Desconto'**
   String get orderAddDiscount;
 
-  /// No description provided for @orderAddContract.
-  ///
-  /// In pt, this message translates to:
-  /// **'Repetir esta {order}'**
-  String orderAddContract(String order);
-
-  /// No description provided for @orderAddOtherFields.
-  ///
-  /// In pt, this message translates to:
-  /// **'Outros campos'**
-  String get orderAddOtherFields;
-
   /// No description provided for @orderChecklistMissing.
   ///
   /// In pt, this message translates to:
   /// **'{count, plural, =1{Falta 1 pergunta} other{Faltam {count} perguntas}}'**
   String orderChecklistMissing(int count);
-
-  /// No description provided for @orderChecklistDone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pronto'**
-  String get orderChecklistDone;
 
   /// No description provided for @orderAddressChange.
   ///
@@ -9316,35 +5986,17 @@ abstract class AppLocalizations {
   /// **'{frequency} · próxima em {date}'**
   String orderContractSummary(String frequency, String date);
 
-  /// No description provided for @orderContractChange.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mudar contrato'**
-  String get orderContractChange;
-
   /// No description provided for @orderUploading.
   ///
   /// In pt, this message translates to:
   /// **'Enviando…'**
   String get orderUploading;
 
-  /// No description provided for @pickDeviceTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Qual é o {device}?'**
-  String pickDeviceTitle(String device);
-
   /// No description provided for @otherDevicesSection.
   ///
   /// In pt, this message translates to:
   /// **'Outros {devices}'**
   String otherDevicesSection(String devices);
-
-  /// No description provided for @registerNewDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cadastrar {device} novo'**
-  String registerNewDevice(String device);
 
   /// No description provided for @accumulatedDeleteConfirm.
   ///
@@ -9393,12 +6045,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Serviços e {products}'**
   String moreCatalogSubtitle(String products);
-
-  /// No description provided for @saveEntityButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Salvar {entity}'**
-  String saveEntityButton(String entity);
 
   /// No description provided for @planHeaderRenews.
   ///
@@ -9735,18 +6381,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Recebeu só uma parte? Mude o valor.'**
   String get receiveAmountHint;
-
-  /// No description provided for @orderMenuPdfOf.
-  ///
-  /// In pt, this message translates to:
-  /// **'PDF da {order}'**
-  String orderMenuPdfOf(String order);
-
-  /// No description provided for @orderAddItem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviço ou peça'**
-  String get orderAddItem;
 
   /// No description provided for @orderAddContractMonthly.
   ///
@@ -10198,18 +6832,6 @@ abstract class AppLocalizations {
   /// **'Contratos nascem dentro de uma {order}: ligue “Repetir esta {order}”.'**
   String contractsFooterHint(String order);
 
-  /// No description provided for @orderChangeCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Trocar cliente'**
-  String get orderChangeCustomer;
-
-  /// No description provided for @orderChangeDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Trocar {device}'**
-  String orderChangeDevice(String device);
-
   /// No description provided for @orderAddResponsible.
   ///
   /// In pt, this message translates to:
@@ -10336,18 +6958,6 @@ abstract class AppLocalizations {
   /// **'Local'**
   String get orderAddressLabel;
 
-  /// No description provided for @orderNotSet.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum'**
-  String get orderNotSet;
-
-  /// No description provided for @speechTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falar o serviço'**
-  String get speechTitle;
-
   /// No description provided for @speechHint.
   ///
   /// In pt, this message translates to:
@@ -10360,29 +6970,11 @@ abstract class AppLocalizations {
   /// **'Ouvindo…'**
   String get speechListening;
 
-  /// No description provided for @speechStop.
-  ///
-  /// In pt, this message translates to:
-  /// **'Parar'**
-  String get speechStop;
-
-  /// No description provided for @speechStart.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falar de novo'**
-  String get speechStart;
-
   /// No description provided for @speechFill.
   ///
   /// In pt, this message translates to:
   /// **'Preencher a OS'**
   String get speechFill;
-
-  /// No description provided for @speechType.
-  ///
-  /// In pt, this message translates to:
-  /// **'Digitar em vez de falar'**
-  String get speechType;
 
   /// No description provided for @speechUnavailable.
   ///
@@ -10624,12 +7216,6 @@ abstract class AppLocalizations {
   /// **'Novo checklist'**
   String get pickerNewChecklist;
 
-  /// No description provided for @pickerTypeAnother.
-  ///
-  /// In pt, this message translates to:
-  /// **'Digitar outro'**
-  String get pickerTypeAnother;
-
   /// No description provided for @pickerRegister.
   ///
   /// In pt, this message translates to:
@@ -10671,12 +7257,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Buscar'**
   String get pickerSearch;
-
-  /// No description provided for @orderMenuRemoveDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tirar {device} da OS'**
-  String orderMenuRemoveDevice(String device);
 
   /// No description provided for @pickerNoDevice.
   ///

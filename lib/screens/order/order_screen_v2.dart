@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/screens/device_list_screen.dart'
     show kRemoveDeviceResult;
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
@@ -739,7 +740,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       case 'link':
         final copied = await _actions.copyLink(order);
         if (mounted) {
-          await _alert(copied ? l10n.linkCopied : l10n.errorOccurred);
+          if (copied) {
+            showAppToast(context, l10n.linkCopied);
+          } else {
+            await _alert(l10n.errorOccurred);
+          }
         }
       case 'cancel':
         await _trySetStatus('canceled');

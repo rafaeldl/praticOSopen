@@ -18,6 +18,7 @@ import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
@@ -548,7 +549,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Future<void> _copyChargeLink(OrderCharge charge) async {
     await Clipboard.setData(ClipboardData(text: charge.invoiceUrl!));
     if (!mounted) return;
-    _showMessage(context.l10n.chargeLinkCopied);
+    showAppToast(context, context.l10n.chargeLinkCopied);
   }
 
   Future<void> _confirmCancelCharge(OrderCharge charge) async {

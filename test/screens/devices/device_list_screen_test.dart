@@ -126,6 +126,26 @@ void main() {
     );
   });
 
+  testWidgets('selection mode marks a legacy or id-less vehicle by plate', (
+    tester,
+  ) async {
+    await pumpList(
+      tester,
+      args: {
+        'order': orderOf('c1')
+          ..device = (DeviceAggr()
+            ..id = 'old-id'
+            ..serial = 'xyz-9k88'),
+      },
+      devices: [uno, gol],
+    );
+    final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+    expect(
+      {for (final r in rows) r.title: r.selected},
+      {'Fiat Uno 2015': false, 'VW Gol': true},
+    );
+  });
+
   testWidgets(
     'selection mode has no swipe and no chevron, tap pops the device',
     (tester) async {

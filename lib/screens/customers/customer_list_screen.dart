@@ -148,7 +148,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final customers = _customers ?? const <Customer>[];
-    final selectedId = _order?.customer?.id;
+    final selectedId = currentCustomerId(_order?.customer, customers);
     return PickerScaffold<CustomerPick>(
       title: l10n.pickerCustomerTitle,
       itemCount: customers.length,

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_document.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -150,12 +151,17 @@ Future<void> _selectDocumentType(
   );
 }
 
-/// Short alert with a check (or an x) and [message].
+/// Feedback for a photo/document action: a quick notice ([showAppToast]) when
+/// it worked, an alert with an x when it failed.
 void showOrderMediaFeedback(
   BuildContext context,
   String message, {
   bool isError = false,
 }) {
+  if (!isError) {
+    showAppToast(context, message);
+    return;
+  }
   showCupertinoDialog<void>(
     context: context,
     builder: (ctx) => CupertinoAlertDialog(
@@ -163,12 +169,8 @@ void showOrderMediaFeedback(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isError
-                ? CupertinoIcons.xmark_circle_fill
-                : CupertinoIcons.checkmark_circle_fill,
-            color: isError
-                ? AppColors.danger.resolveFrom(ctx)
-                : AppColors.success.resolveFrom(ctx),
+            CupertinoIcons.xmark_circle_fill,
+            color: AppColors.danger.resolveFrom(ctx),
             size: 24,
           ),
           const SizedBox(width: AppSpacing.sm),

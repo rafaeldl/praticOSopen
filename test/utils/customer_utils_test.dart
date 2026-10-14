@@ -137,4 +137,123 @@ void main() {
     expect(whatsappNumber('(11) 90000-0001'), '5511900000001');
     expect(whatsappNumber('+55 11 90000-0001'), '5511900000001');
   });
+
+  group('currentCustomerId', () {
+    CustomerAggr aggr({String? id, String? name, String? phone}) =>
+        CustomerAggr()
+          ..id = id
+          ..name = name
+          ..phone = phone;
+
+    final list = [
+      customer('a', 'Elias Souza', phone: '(11) 90000-0001'),
+      customer('b', 'Maria'),
+      customer('c', 'João', phone: '11 90000-0002'),
+      customer('d', 'João', phone: '11 90000-0003'),
+    ];
+
+    test('matches by id', () {
+      expect(currentCustomerId(aggr(id: 'b', name: 'Other'), list), 'b');
+    });
+
+    test('null order customer has no match', () {
+      expect(currentCustomerId(null, list), isNull);
+      expect(currentCustomerId(aggr(), list), isNull);
+    });
+
+    test('without id falls back to the unique name', () {
+      expect(currentCustomerId(aggr(name: '  elias   souza '), list), 'a');
+      expect(currentCustomerId(aggr(name: 'Maria'), list), 'b');
+    });
+
+    test('unknown id falls back to name and phone', () {
+      expect(
+        currentCustomerId(
+          aggr(id: 'old', name: 'Elias Souza', phone: '+55 11 90000-0001'),
+          list,
+        ),
+        'a',
+      );
+    });
+
+    test('a different phone is a different customer', () {
+      expect(
+        currentCustomerId(
+          aggr(name: 'Elias Souza', phone: '11 98888-7777'),
+          list,
+        ),
+        isNull,
+      );
+    });
+
+    test('same name twice: only the phone tells them apart', () {
+      expect(currentCustomerId(aggr(name: 'João'), list), isNull);
+      expect(
+        currentCustomerId(aggr(id: 'gone', name: 'João'), list),
+        isNull,
+      );
+      expect(
+        currentCustomerId(aggr(name: 'João', phone: '(11) 90000-0003'), list),
+        'd',
+      );
+    });
+
+    test('order phone with a phoneless unique namesake still matches', () {
+      expect(
+        currentCustomerId(aggr(name: 'Maria', phone: '11 90000-0009'), list),
+        'b',
+      );
+    });
+
+    test('no match when the name is not in the list', () {
+      expect(currentCustomerId(aggr(name: 'Pedro'), list), isNull);
+    });
+  });
+
+  group('currentDeviceIds', () {
+    Device device(String id, {String? serial}) => Device()
+      ..id = id
+      ..serial = serial;
+    DeviceAggr aggr({String? id, String? serial}) => DeviceAggr()
+      ..id = id
+      ..serial = serial;
+
+    final list = [
+      device('v1', serial: 'ABC-1D23'),
+      device('v2', serial: 'XYZ9876'),
+      device('v3', serial: 'DUP0001'),
+      device('v4', serial: 'dup-0001'),
+      device('v5'),
+    ];
+
+    test('matches by id', () {
+      expect(currentDeviceIds([aggr(id: 'v5')], list), {'v5'});
+    });
+
+    test('without id, or unknown id, falls back to the plate', () {
+      expect(currentDeviceIds([aggr(serial: 'abc1d23')], list), {'v1'});
+      expect(
+        currentDeviceIds([aggr(id: 'old', serial: 'XYZ 9876')], list),
+        {'v2'},
+      );
+    });
+
+    test('a plate shared by two devices matches none', () {
+      expect(currentDeviceIds([aggr(serial: 'DUP0001')], list), isEmpty);
+    });
+
+    test('no id and no plate matches none', () {
+      expect(currentDeviceIds([aggr()], list), isEmpty);
+    });
+
+    test('orderDevices uses the legacy single device', () {
+      final legacy = Order()..device = (DeviceAggr()..id = 'v1');
+      expect(orderDevices(legacy).map((d) => d.id), ['v1']);
+      final both = Order()
+        ..device = (DeviceAggr()..id = 'v1')
+        ..devices = [DeviceAggr()..id = 'v2'];
+      expect(orderDevices(both).map((d) => d.id), ['v2']);
+      expect(orderDevices(null), isEmpty);
+    });
+  });
 }

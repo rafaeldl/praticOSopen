@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'PraticOS';
-
-  @override
   String get home => 'Home';
 
   @override
@@ -141,9 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reset => 'Reset';
 
   @override
-  String get basicInfo => 'Basic Information';
-
-  @override
   String get apply => 'Apply';
 
   @override
@@ -162,12 +156,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get less => 'Less';
 
   @override
-  String get seeAll => 'See all';
-
-  @override
-  String get seeMore => 'See More';
-
-  @override
   String get details => 'Details';
 
   @override
@@ -178,9 +166,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get status => 'Status';
-
-  @override
-  String get statusAll => 'All';
 
   @override
   String get statusPending => 'Pending';
@@ -204,21 +189,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusDelivery => 'Delivery';
 
   @override
-  String get statusScheduled => 'Scheduled';
-
-  @override
-  String get statusWaiting => 'Waiting';
-
-  @override
-  String get statusRejected => 'Rejected';
-
-  @override
-  String get statusOpen => 'Open';
-
-  @override
-  String get statusClosed => 'Closed';
-
-  @override
   String get payments => 'Payments';
 
   @override
@@ -237,31 +207,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toReceive => 'To receive';
 
   @override
-  String get toPay => 'Payable';
-
-  @override
   String get received => 'Received';
 
   @override
-  String get paymentMethod => 'Payment Method';
-
-  @override
-  String get paymentMethods => 'Payment Methods';
-
-  @override
-  String get cash => 'Cash';
-
-  @override
-  String get creditCard => 'Credit Card';
-
-  @override
-  String get debitCard => 'Debit Card';
-
-  @override
   String get pix => 'PIX';
-
-  @override
-  String get bankTransfer => 'Bank Transfer';
 
   @override
   String get check => 'Check';
@@ -276,37 +225,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dueDate => 'Due Date';
 
   @override
-  String get paymentDate => 'Payment Date';
-
-  @override
-  String get payTotalAmount => 'Pay total amount';
-
-  @override
-  String get registerPayment => 'Register Payment';
-
-  @override
-  String get applyDiscount => 'Apply Discount';
-
-  @override
-  String get paymentAmount => 'Payment amount';
-
-  @override
-  String get discountAmount => 'Discount amount';
-
-  @override
-  String get fillValue => 'Fill in the value';
-
-  @override
   String get paymentCannotExceedBalance => 'Payment cannot exceed balance';
 
   @override
   String get discountCannotExceedBalance => 'Discount cannot exceed balance';
-
-  @override
-  String get paymentRegistered => 'Payment registered';
-
-  @override
-  String get discountApplied => 'Discount applied';
 
   @override
   String get asaasTransactionCannotBeRemoved =>
@@ -321,22 +243,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No connection. Try again when you\'re online.';
 
   @override
-  String get register => 'Register';
-
-  @override
   String get history => 'History';
 
   @override
   String get valueMustBeGreaterThanZero => 'Value must be greater than zero';
-
-  @override
-  String get exampleCashPayment => 'Ex: Cash payment';
-
-  @override
-  String get exampleLoyaltyDiscount => 'Ex: Loyalty discount';
-
-  @override
-  String get noTransactionsRecorded => 'No transactions recorded';
 
   @override
   String confirmRemoveTransaction(String type, String amount) {
@@ -344,19 +254,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get requiredField => 'Required field';
-
-  @override
   String get invalidEmail => 'Invalid email';
 
   @override
   String get invalidPhone => 'Invalid phone';
-
-  @override
-  String get invalidValue => 'Invalid value';
-
-  @override
-  String get invalidDate => 'Invalid date';
 
   @override
   String get invalidFormat => 'Invalid format';
@@ -371,25 +272,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characters => 'characters';
 
   @override
-  String get selectOption => 'Select an option';
-
-  @override
-  String get noResults => 'No results found';
-
-  @override
-  String get noData => 'No data available';
-
-  @override
   String get noValuesRegistered => 'No values registered';
 
   @override
   String get typeAboveToAdd => 'Type above to add';
-
-  @override
-  String get addNewValue => 'Add new value';
-
-  @override
-  String get selectAtLeastOne => 'Select at least one option';
 
   @override
   String minLength(int count) {
@@ -432,15 +318,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gallery => 'Gallery';
 
   @override
-  String get noPhotos => 'No photos';
-
-  @override
-  String get photoAdded => 'Photo added';
-
-  @override
-  String get photoRemoved => 'Photo removed';
-
-  @override
   String get today => 'Today';
 
   @override
@@ -448,21 +325,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tomorrow => 'Tomorrow';
-
-  @override
-  String get thisWeek => 'This Week';
-
-  @override
-  String get lastWeek => 'Last Week';
-
-  @override
-  String get thisMonth => 'This Month';
-
-  @override
-  String get lastMonth => 'Last Month';
-
-  @override
-  String get thisYear => 'This Year';
 
   @override
   String get scheduledDate => 'Scheduled';
@@ -480,9 +342,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time => 'Time';
 
   @override
-  String get dateTime => 'Date and Time';
-
-  @override
   String get startDate => 'Start date';
 
   @override
@@ -495,40 +354,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelete => 'Confirm Deletion';
 
   @override
-  String get confirmDeleteMessage => 'Do you really want to delete this item?';
-
-  @override
   String confirmDeleteMessageNamed(String name) {
     return 'Do you really want to delete \"$name\"?';
   }
 
   @override
-  String get confirmCancel => 'Confirm Cancellation';
-
-  @override
-  String get confirmCancelMessage => 'Do you really want to cancel?';
-
-  @override
-  String get unsavedChanges => 'Unsaved Changes';
-
-  @override
-  String get unsavedChangesMessage =>
-      'You have unsaved changes. Do you want to leave anyway?';
-
-  @override
   String get confirmAction => 'Confirm Action';
-
-  @override
-  String get areYouSure => 'Are you sure?';
 
   @override
   String get cannotUndo => 'This action cannot be undone.';
 
   @override
   String get discard => 'Discard';
-
-  @override
-  String get keepEditing => 'Keep Editing';
 
   @override
   String get leave => 'Leave';
@@ -546,22 +383,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editCustomer => 'Edit Customer';
 
   @override
-  String get customerDetails => 'Customer Details';
-
-  @override
   String get customerName => 'Customer Name';
 
   @override
   String get customerList => 'Customer List';
-
-  @override
-  String get searchCustomer => 'Search Customer';
-
-  @override
-  String get selectCustomer => 'Select Customer';
-
-  @override
-  String get noCustomers => 'No customers registered';
 
   @override
   String get addCustomer => 'Add Customer';
@@ -570,22 +395,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get name => 'Name';
 
   @override
-  String get namePlaceholder => 'E.g.: John Smith';
-
-  @override
   String get fullName => 'Full Name';
 
   @override
-  String get nickname => 'Nickname';
-
-  @override
   String get phone => 'Phone';
-
-  @override
-  String get phones => 'Phones';
-
-  @override
-  String get cellphone => 'Cellphone';
 
   @override
   String get whatsapp => 'WhatsApp';
@@ -594,34 +407,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get emails => 'Emails';
-
-  @override
   String get address => 'Address';
 
   @override
-  String get addresses => 'Addresses';
-
-  @override
-  String get street => 'Street';
-
-  @override
   String get number => 'Number';
-
-  @override
-  String get complement => 'Complement';
-
-  @override
-  String get neighborhood => 'Neighborhood';
 
   @override
   String get city => 'City';
 
   @override
   String get state => 'State';
-
-  @override
-  String get zipCode => 'ZIP Code';
 
   @override
   String get country => 'Country';
@@ -642,12 +437,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get document => 'Document';
 
   @override
-  String get cpf => 'CPF';
-
-  @override
-  String get cnpj => 'CNPJ';
-
-  @override
   String get cpfCnpj => 'CPF/CNPJ';
 
   @override
@@ -666,34 +455,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editOrder => 'Edit Order';
 
   @override
-  String get orderDetails => 'Order Details';
-
-  @override
   String get orderNumber => 'Order Number';
 
   @override
   String get orderList => 'Order List';
 
   @override
-  String get searchOrder => 'Search Order';
-
-  @override
-  String get noOrders => 'No orders found';
-
-  @override
   String get addOrder => 'Add Order';
 
   @override
   String get createOrder => 'Create Order';
-
-  @override
-  String get orderCreated => 'Order created successfully';
-
-  @override
-  String get orderUpdated => 'Order updated successfully';
-
-  @override
-  String get orderDeleted => 'Order deleted successfully';
 
   @override
   String get orderStatus => 'Order Status';
@@ -708,55 +479,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get technicians => 'Technicians';
 
   @override
-  String get assignTechnician => 'Assign Technician';
-
-  @override
   String get problem => 'Reported Problem';
-
-  @override
-  String get problemDescription => 'Problem Description';
-
-  @override
-  String get solution => 'Solution';
-
-  @override
-  String get solutionDescription => 'Solution Description';
-
-  @override
-  String get diagnosis => 'Diagnosis';
 
   @override
   String get warranty => 'Warranty';
 
   @override
-  String get warrantyPeriod => 'Warranty Period';
-
-  @override
-  String get hasWarranty => 'Has Warranty';
-
-  @override
-  String get noWarranty => 'No Warranty';
-
-  @override
-  String get warrantyExpired => 'Warranty Expired';
-
-  @override
-  String get warrantyValid => 'Warranty Valid';
-
-  @override
   String get priority => 'Priority';
-
-  @override
-  String get priorityLow => 'Low';
-
-  @override
-  String get priorityMedium => 'Medium';
-
-  @override
-  String get priorityHigh => 'High';
-
-  @override
-  String get priorityUrgent => 'Urgent';
 
   @override
   String get device => 'Device';
@@ -765,25 +494,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceCategory => 'Category';
 
   @override
-  String get newDevice => 'New Device';
-
-  @override
   String get editDevice => 'Edit Device';
 
   @override
-  String get deviceDetails => 'Device Details';
-
-  @override
   String get deviceList => 'Device List';
-
-  @override
-  String get searchDevice => 'Search Device';
-
-  @override
-  String get selectDevice => 'Select Device';
-
-  @override
-  String get noDevices => 'No devices registered';
 
   @override
   String get addDevice => 'Add Device';
@@ -798,46 +512,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serialNumber => 'Serial Number';
 
   @override
-  String get imei => 'IMEI';
-
-  @override
   String get color => 'Color';
 
   @override
   String get condition => 'Condition';
 
   @override
-  String get conditionNew => 'New';
-
-  @override
-  String get conditionUsed => 'Used';
-
-  @override
-  String get conditionDamaged => 'Damaged';
-
-  @override
-  String get accessories => 'Accessories';
-
-  @override
-  String get accessory => 'Accessory';
-
-  @override
   String get defects => 'Defects';
-
-  @override
-  String get defect => 'Defect';
 
   @override
   String get service => 'Service';
 
   @override
-  String get newService => 'New Service';
-
-  @override
   String get editService => 'Edit Service';
-
-  @override
-  String get serviceDetails => 'Service Details';
 
   @override
   String get serviceList => 'Service List';
@@ -846,31 +533,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchService => 'Search Service';
 
   @override
-  String get selectService => 'Select Service';
-
-  @override
-  String get noServices => 'No services registered';
-
-  @override
   String get addService => 'Add Service';
-
-  @override
-  String get serviceValue => 'Service Value';
-
-  @override
-  String get laborCost => 'Labor Cost';
 
   @override
   String get product => 'Product';
 
   @override
-  String get newProduct => 'New Product';
-
-  @override
   String get editProduct => 'Edit Product';
-
-  @override
-  String get productDetails => 'Product Details';
 
   @override
   String get productList => 'Product List';
@@ -879,34 +548,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchProduct => 'Search Product';
 
   @override
-  String get selectProduct => 'Select Product';
-
-  @override
-  String get noProducts => 'No products registered';
-
-  @override
   String get addProduct => 'Add Product';
 
   @override
-  String get sku => 'Code';
-
-  @override
   String get barcode => 'Barcode';
-
-  @override
-  String get stock => 'Stock';
-
-  @override
-  String get stockQuantity => 'Stock Quantity';
-
-  @override
-  String get lowStock => 'Low Stock';
-
-  @override
-  String get outOfStock => 'Out of Stock';
-
-  @override
-  String get inStock => 'In Stock';
 
   @override
   String get unit => 'Unit';
@@ -927,22 +572,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discount => 'Discount';
 
   @override
-  String get discountPercent => 'Discount (%)';
-
-  @override
   String get discountValue => 'Discount Value';
 
   @override
   String get price => 'Price';
-
-  @override
-  String get unitPrice => 'Unit Price';
-
-  @override
-  String get costPrice => 'Cost Price';
-
-  @override
-  String get salePrice => 'Sale Price';
 
   @override
   String get quantity => 'Quantity';
@@ -957,18 +590,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tax => 'Tax';
 
   @override
-  String get taxes => 'Taxes';
-
-  @override
-  String get fee => 'Fee';
-
-  @override
-  String get fees => 'Fees';
-
-  @override
-  String get grandTotal => 'Grand Total';
-
-  @override
   String get balance => 'Balance';
 
   @override
@@ -981,55 +602,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get change => 'Change';
 
   @override
-  String get savedSuccessfully => 'Saved successfully';
-
-  @override
-  String get deletedSuccessfully => 'Deleted successfully';
-
-  @override
-  String get updatedSuccessfully => 'Updated successfully';
-
-  @override
-  String get createdSuccessfully => 'Created successfully';
-
-  @override
-  String get copiedSuccessfully => 'Copied successfully';
-
-  @override
-  String get sentSuccessfully => 'Sent successfully';
-
-  @override
   String get errorOccurred => 'An error occurred';
 
   @override
   String get tryAgain => 'Try again';
 
   @override
-  String get operationFailed => 'Operation failed';
-
-  @override
   String get noInternetConnection => 'No internet connection';
-
-  @override
-  String get connectionError => 'Connection error';
-
-  @override
-  String get serverError => 'Server error';
-
-  @override
-  String get unknownError => 'Unknown error';
 
   @override
   String get permissionDenied => 'Permission denied';
 
   @override
-  String get notFound => 'Not found';
-
-  @override
   String get timeout => 'Timeout';
-
-  @override
-  String get sessionExpired => 'Session expired';
 
   @override
   String get login => 'Sign In';
@@ -1041,49 +626,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutConfirm => 'Do you really want to sign out?';
 
   @override
-  String get signUp => 'Sign Up';
-
-  @override
   String get signIn => 'Sign In';
-
-  @override
-  String get forgotPassword => 'Forgot Password';
-
-  @override
-  String get resetPassword => 'Reset Password';
-
-  @override
-  String get changePassword => 'Change Password';
 
   @override
   String get password => 'Password';
 
   @override
-  String get currentPassword => 'Current Password';
-
-  @override
-  String get newPassword => 'New Password';
-
-  @override
-  String get confirmPassword => 'Confirm Password';
-
-  @override
-  String get passwordsDontMatch => 'Passwords don\'t match';
-
-  @override
-  String get passwordTooShort => 'Password too short';
-
-  @override
-  String get invalidCredentials => 'Invalid credentials';
-
-  @override
-  String get accountCreated => 'Account created successfully';
-
-  @override
   String get emailSent => 'Email sent';
-
-  @override
-  String get checkYourEmail => 'Check your email';
 
   @override
   String get continueWithGoogle => 'Continue with Google';
@@ -1092,52 +641,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithApple => 'Continue with Apple';
 
   @override
-  String get orContinueWith => 'Or continue with';
-
-  @override
-  String get alreadyHaveAccount => 'Already have an account?';
-
-  @override
-  String get dontHaveAccount => 'Don\'t have an account?';
-
-  @override
   String get termsAndConditions => 'Terms and Conditions';
 
   @override
   String get privacyPolicy => 'Privacy Policy';
 
   @override
-  String get agreeToTerms => 'I agree to the Terms and Conditions';
-
-  @override
-  String get welcome => 'Welcome';
-
-  @override
-  String get welcomeBack => 'Welcome back';
-
-  @override
-  String get getStarted => 'Get Started';
-
-  @override
-  String get letsStart => 'Let\'s Start';
-
-  @override
-  String get selectSegment => 'Select Segment';
-
-  @override
-  String get selectSpecialties => 'Select your Specialties';
-
-  @override
   String get companyName => 'Company Name';
-
-  @override
-  String get setupComplete => 'Setup Complete';
-
-  @override
-  String get allSet => 'All Set!';
-
-  @override
-  String get startUsing => 'Start using PraticOS';
 
   @override
   String get skip => 'Skip';
@@ -1152,47 +662,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectLanguage => 'Select Language';
 
   @override
-  String get portuguese => 'Portuguese';
-
-  @override
   String get english => 'English';
-
-  @override
-  String get spanish => 'Spanish';
 
   @override
   String get theme => 'Theme';
 
   @override
-  String get darkMode => 'Dark Mode';
-
-  @override
-  String get lightMode => 'Light Mode';
-
-  @override
-  String get systemDefault => 'System Default';
-
-  @override
   String get notifications => 'Notifications';
-
-  @override
-  String get noNotifications => 'No notifications';
-
-  @override
-  String get noNotificationsDescription =>
-      'You will receive notifications when customers approve, reject, or rate work orders.';
 
   @override
   String get markAllAsRead => 'Mark all';
 
   @override
-  String get enableNotifications => 'Enable Notifications';
-
-  @override
   String get sound => 'Sound';
-
-  @override
-  String get vibration => 'Vibration';
 
   @override
   String get about => 'About';
@@ -1201,19 +683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version => 'Version';
 
   @override
-  String get help => 'Help';
-
-  @override
   String get support => 'Support';
-
-  @override
-  String get contactUs => 'Contact Us';
-
-  @override
-  String get rateApp => 'Rate App';
-
-  @override
-  String get shareApp => 'Share App';
 
   @override
   String get dashboard => 'Dashboard';
@@ -1222,46 +692,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get overview => 'Overview';
 
   @override
-  String get statistics => 'Statistics';
-
-  @override
   String get analytics => 'Analytics';
 
   @override
   String get revenue => 'Revenue';
 
   @override
-  String get expenses => 'Expenses';
-
-  @override
-  String get profit => 'Profit';
-
-  @override
-  String get ordersToday => 'Orders Today';
-
-  @override
-  String get ordersThisWeek => 'Orders This Week';
-
-  @override
-  String get ordersThisMonth => 'Orders This Month';
-
-  @override
-  String get pendingOrders => 'Pending Orders';
-
-  @override
-  String get completedOrders => 'Completed Orders';
-
-  @override
-  String get topServices => 'Top Services';
-
-  @override
-  String get topProducts => 'Top Products';
-
-  @override
   String get recentOrders => 'Recent orders';
-
-  @override
-  String get recentCustomers => 'Used last';
 
   @override
   String get role => 'Role';
@@ -1282,9 +719,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manager => 'Manager';
 
   @override
-  String get employee => 'Employee';
-
-  @override
   String get viewer => 'Viewer';
 
   @override
@@ -1303,27 +737,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get canView => 'Can View';
 
   @override
-  String get inviteMember => 'Invite Member';
-
-  @override
-  String get removeMember => 'Remove Member';
-
-  @override
-  String get memberRemoved => 'Member removed';
-
-  @override
-  String get invitationSent => 'Invitation sent';
-
-  @override
-  String get pendingInvitations => 'Pending Invitations';
-
-  @override
-  String get acceptInvitation => 'Accept Invitation';
-
-  @override
-  String get declineInvitation => 'Decline Invitation';
-
-  @override
   String get form => 'Form';
 
   @override
@@ -1336,25 +749,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklists => 'Checklists';
 
   @override
-  String get inspection => 'Inspection';
-
-  @override
-  String get inspections => 'Inspections';
-
-  @override
-  String get signature => 'Signature';
-
-  @override
   String get customerSignature => 'Customer Signature';
-
-  @override
-  String get technicianSignature => 'Technician Signature';
-
-  @override
-  String get signHere => 'Sign here';
-
-  @override
-  String get clearSignature => 'Clear Signature';
 
   @override
   String get required => 'Required';
@@ -1379,36 +774,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quotes => 'Quotes';
-
-  @override
-  String get newQuote => 'New Quote';
-
-  @override
-  String get editQuote => 'Edit Quote';
-
-  @override
-  String get quoteDetails => 'Quote Details';
-
-  @override
-  String get sendQuote => 'Send Quote';
-
-  @override
-  String get approveQuote => 'Approve Quote';
-
-  @override
-  String get rejectQuote => 'Reject Quote';
-
-  @override
-  String get quoteApproved => 'Quote Approved';
-
-  @override
-  String get quoteRejected => 'Quote Rejected';
-
-  @override
-  String get quoteSent => 'Quote Sent';
-
-  @override
-  String get validUntil => 'Valid until';
 
   @override
   String expiresIn(int days) {
@@ -1446,12 +811,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get draft => 'Draft';
 
   @override
-  String get published => 'Published';
-
-  @override
-  String get archived => 'Archived';
-
-  @override
   String get deleted => 'Deleted';
 
   @override
@@ -1467,13 +826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get others => 'Others';
 
   @override
-  String get default_ => 'Default';
-
-  @override
   String get custom => 'Custom';
-
-  @override
-  String get new_ => 'New';
 
   @override
   String get old => 'Old';
@@ -1482,37 +835,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recent => 'Recent';
 
   @override
-  String get popular => 'Popular';
-
-  @override
-  String get featured => 'Featured';
-
-  @override
-  String get recommended => 'Recommended';
-
-  @override
-  String get welcomeToApp => 'Welcome to PraticOS';
-
-  @override
-  String get appSubtitle => 'Manage your work orders\nsimply and efficiently';
-
-  @override
-  String get signInWithEmail => 'Sign in with email';
-
-  @override
   String get byContinuingYouAgree => 'By continuing, you agree to our';
 
   @override
   String get error => 'Error';
-
-  @override
-  String get couldNotLoadCompanyData => 'Could not load company data';
-
-  @override
-  String get errorSignInApple => 'Error signing in with Apple';
-
-  @override
-  String get errorSignInGoogle => 'Error signing in with Google';
 
   @override
   String get companyNotFound => 'Company not found';
@@ -1521,48 +847,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get companyNoSegment => 'Company has no segment defined';
 
   @override
-  String get errorLoadingConfig => 'Error loading configuration';
-
-  @override
-  String get enterEmailPassword =>
-      'Enter your email and password to access your account';
-
-  @override
-  String get credentials => 'Credentials';
-
-  @override
-  String get enterYourPassword => 'Enter your password';
-
-  @override
   String get userNotFound => 'User not found';
-
-  @override
-  String get wrongPassword => 'Wrong password';
-
-  @override
-  String get errorSignIn => 'Error signing in. Please try again.';
-
-  @override
-  String get enterYourEmail => 'Enter your email';
 
   @override
   String get checkInboxResetPassword =>
       'Check your inbox to reset your password.';
 
   @override
-  String get errorSendingRecoveryEmail => 'Error sending recovery email';
-
-  @override
   String get user => 'User';
 
   @override
-  String get organization => 'Organization';
-
-  @override
   String get switchCompany => 'Switch Company';
-
-  @override
-  String get switchBetweenOrganizations => 'Switch between organizations';
 
   @override
   String get management => 'Management';
@@ -1580,9 +875,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsNew => 'New connection';
 
   @override
-  String get integrationsName => 'Connection name';
-
-  @override
   String get integrationsNameHint => 'e.g. My ChatGPT';
 
   @override
@@ -1593,19 +885,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationsCopy => 'Copy URL';
 
   @override
-  String get integrationsCopied => 'URL copied';
-
-  @override
   String get integrationsRevoke => 'Revoke';
 
   @override
   String get integrationsRevokeConfirm =>
       'Revoke this connection? Anyone using this URL loses access.';
-
-  @override
-  String integrationsCreatedAt(String date) {
-    return 'Created on $date';
-  }
 
   @override
   String get integrationsNeverUsed => 'Never used';
@@ -1630,31 +914,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get companyData => 'Company Data';
 
   @override
-  String get interface_ => 'Interface';
-
-  @override
-  String get nightMode => 'Night Mode';
-
-  @override
-  String get reopenOnboarding => 'Initial Setup';
-
-  @override
-  String get reconfigureCompanySetup => 'Reconfigure company data and segment';
-
-  @override
   String get account => 'Account';
 
   @override
   String get deleteAccount => 'Delete Account';
-
-  @override
-  String get permanentlyRemoveAllData => 'Permanently remove all data';
-
-  @override
-  String get chooseTheme => 'Choose theme';
-
-  @override
-  String get automaticSystem => 'Automatic (System)';
 
   @override
   String get automatic => 'Automatic';
@@ -1721,22 +984,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authenticated => 'Authenticated';
 
   @override
-  String get nowDeletingAccount => 'You can now proceed with account deletion.';
-
-  @override
   String get reauthenticationFailed => 'Re-authentication Failed';
 
   @override
   String get couldNotReauthenticate => 'Could not re-authenticate.';
-
-  @override
-  String get errorLoadingData => 'Error loading data';
-
-  @override
-  String get tapToAddFirst => 'Tap + to add';
-
-  @override
-  String get confirmRemove => 'Do you want to remove';
 
   @override
   String get remove => 'Remove';
@@ -1749,48 +1000,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You don\'t have permission to remove this item.';
 
   @override
-  String get professionalizeYourBusiness => 'Professionalize your business';
-
-  @override
-  String get configureCompanyProfile =>
-      'Set up your company profile to issue professional work orders right now.';
-
-  @override
-  String get professionalOrders => 'Professional Orders';
-
-  @override
-  String get createDigitalOrders => 'Create customized digital work orders.';
-
-  @override
-  String get customerManagement => 'Customer Management';
-
-  @override
-  String get keepHistoryOrganized => 'Keep history and contacts organized.';
-
-  @override
-  String get configureMyBusiness => 'Configure My Business';
-
-  @override
-  String get configureLater => 'Configure Later';
-
-  @override
-  String get errorCreatingCompany => 'Error creating default company';
-
-  @override
-  String get chooseSegment => 'Choose Segment';
-
-  @override
-  String get selectSegmentPrompt =>
-      'Select your business segment to customize the system for you.';
-
-  @override
-  String get availableSegments => 'Available Segments';
-
-  @override
   String get noSegmentsAvailable => 'No segments available';
-
-  @override
-  String get errorLoadingSegments => 'Error loading segments';
 
   @override
   String get specialties => 'Specialties';
@@ -1846,13 +1056,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleTechnician => 'Technician';
 
   @override
-  String get noFeminine => 'No';
-
-  @override
   String get registered => 'registered';
-
-  @override
-  String get registeredFeminine => 'registered';
 
   @override
   String get errorLoading => 'Error loading';
@@ -1861,19 +1065,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapPlusToAddYourFirst => 'Tap + to add your first';
 
   @override
-  String get tapPlusToAddYourFirstFeminine => 'Tap + to add your first';
-
-  @override
   String get doYouWantToRemoveThe => 'Do you want to remove the';
-
-  @override
-  String get doYouWantToRemoveTheFeminine => 'Do you want to remove the';
-
-  @override
-  String get searchCollaborator => 'Search collaborator';
-
-  @override
-  String get noCollaboratorFound => 'No collaborator found';
 
   @override
   String get pending => 'Pending';
@@ -1926,34 +1118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailNotProvided => 'Email not provided';
 
   @override
-  String get newCollaborator => 'New Collaborator';
-
-  @override
-  String get userInformation => 'User Information';
-
-  @override
-  String get userWillReceiveInviteByEmail =>
-      'The user will receive an invite by email.';
-
-  @override
   String get emailPlaceholder => 'email@example.com';
 
   @override
   String get collaboratorAdded => 'Collaborator Added';
-
-  @override
-  String get collaboratorAddedSuccess =>
-      'The collaborator has been successfully added to the company.';
-
-  @override
-  String get inviteSent => 'Invite Sent';
-
-  @override
-  String get inviteCreatedMessage =>
-      'The user is not yet registered in the system. An invite has been created and will appear when they sign up.';
-
-  @override
-  String get financialDashboard => 'Financial Dashboard';
 
   @override
   String get financial => 'Financial';
@@ -1978,12 +1146,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentYear => 'Current year';
 
   @override
-  String get tapToReturnToCurrent => 'Tap to return to current';
-
-  @override
-  String get selectPeriod => 'Select Period';
-
-  @override
   String get start => 'Start';
 
   @override
@@ -2005,19 +1167,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerWithoutName => 'Customer without name';
 
   @override
-  String get noCustomerDataInPeriod => 'No customer data in this period';
-
-  @override
   String get serviceWithoutName => 'Service without name';
 
   @override
   String get productWithoutName => 'Product without name';
-
-  @override
-  String get noServiceDataInPeriod => 'No service data in this period';
-
-  @override
-  String get noProductDataInPeriod => 'No product data in this period';
 
   @override
   String get seeLess => 'See less';
@@ -2028,72 +1181,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toReceiveLowerCase => 'To receive';
-
-  @override
   String get errorGeneratingReport => 'Error generating report';
 
   @override
   String get pendingPayment => 'Pending';
 
   @override
-  String get selectCountry => 'Select Country';
-
-  @override
-  String get chooseCompanySegment => 'Choose the company\'s line of business';
-
-  @override
   String get contacts => 'Contacts';
 
   @override
-  String get contactMethods => 'Contact Methods';
-
-  @override
-  String get howCustomersCanReachYou => 'How can your customers reach you?';
-
-  @override
   String get preparing => 'Preparing...';
-
-  @override
-  String get uploadingLogo => 'Uploading logo...';
-
-  @override
-  String get creatingCompany => 'Creating company...';
-
-  @override
-  String get importingForms => 'Importing forms...';
-
-  @override
-  String get creatingSampleData => 'Creating sample data...';
-
-  @override
-  String get createSampleDataQuestion => 'Create sample data?';
-
-  @override
-  String get sampleDataDescription =>
-      'We can create some sample data for you to start using the system immediately:';
-
-  @override
-  String get commonServicesForSegment => 'Common services for your segment';
-
-  @override
-  String get mostUsedProducts => 'Most used products and parts';
-
-  @override
-  String get sampleEquipment => 'Sample equipment';
-
-  @override
-  String get sampleForms => 'Inspection forms';
-
-  @override
-  String get demoCustomer => 'Demo customer';
-
-  @override
-  String get canEditOrDeleteAnytime =>
-      'You can edit or delete this data at any time.';
-
-  @override
-  String get noStartFromScratch => 'No, start from scratch';
 
   @override
   String get changeLogo => 'Change Logo';
@@ -2151,15 +1248,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get couldNotReopenForm =>
       'Could not reopen the procedure. Please try again.';
-
-  @override
-  String get formCompleted => 'Procedure completed';
-
-  @override
-  String get noPhotoAdded => 'No photo added';
-
-  @override
-  String get tapCameraIconToAdd => 'Tap the camera icon to add';
 
   @override
   String get type => 'Type';
@@ -2226,25 +1314,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userCanAttachPhotos => 'User can attach photos to this item';
 
   @override
-  String get procedures => 'Procedures';
-
-  @override
   String get searchProcedure => 'Search procedure';
 
   @override
-  String get myProcedures => 'My Procedures';
-
-  @override
-  String get globalProcedures => 'Global Procedures';
-
-  @override
-  String get noProceduresRegistered => 'No procedures registered';
-
-  @override
   String get noProceduresAvailable => 'No procedures available';
-
-  @override
-  String get tapPlusToCreateFirst => 'Tap + to create your first procedure.';
 
   @override
   String get fromCompany => 'From your company';
@@ -2298,10 +1371,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingInvites => 'Pending Invites';
 
   @override
-  String get youHaveBeenInvited =>
-      'You have been invited to join companies on PraticOS!';
-
-  @override
   String get noPendingInvites => 'No pending invites';
 
   @override
@@ -2325,9 +1394,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get or => 'or';
-
-  @override
-  String get createMyCompany => 'Create My Company';
 
   @override
   String get reject => 'Reject';
@@ -2365,9 +1431,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchAnotherCode => 'Search another code';
 
   @override
-  String get joinAnotherCompany => 'Join another company';
-
-  @override
   String get shareInvite => 'Share Invite';
 
   @override
@@ -2380,9 +1443,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteCodeCopied => 'Invite code copied!';
 
   @override
-  String get phoneOptional => 'Phone (optional)';
-
-  @override
   String get emailOrPhone => 'Enter email or phone';
 
   @override
@@ -2391,45 +1451,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get markAsToReceive => 'Mark as To Receive';
-
-  @override
   String get thisWillRemoveAllPayments =>
       'This will remove all recorded payments and discounts. Do you want to continue?';
 
   @override
   String get attention => 'Attention';
-
-  @override
-  String get almostThere => 'Almost there!';
-
-  @override
-  String get yesCreateSampleData => 'Yes, create sample data';
-
-  @override
-  String get availableSpecialties => 'AVAILABLE SPECIALTIES';
-
-  @override
-  String get pleaseSelectAtLeastOneSpecialty =>
-      'Please select at least one specialty to continue.';
-
-  @override
-  String get selectSpecialtiesDescription =>
-      'Select your company\'s specialties.\nYou can choose more than one.';
-
-  @override
-  String get selectAtLeastOneOption => 'Select at least one option';
-
-  @override
-  String continueWithCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'selected',
-      one: 'selected',
-    );
-    return 'Continue ($count $_temp0)';
-  }
 
   @override
   String get financialReport => 'Financial report';
@@ -2586,13 +1612,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get connectedChannels => 'Connected Channels';
-
-  @override
   String get linked => 'Linked';
-
-  @override
-  String get notLinked => 'Not linked';
 
   @override
   String get linkWhatsApp => 'Link WhatsApp';
@@ -2610,64 +1630,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openWhatsApp => 'Open WhatsApp';
 
   @override
-  String get whatsAppLinked => 'WhatsApp linked';
-
-  @override
-  String get whatsAppNotLinked => 'WhatsApp not linked';
-
-  @override
-  String get unlinkWhatsApp => 'Unlink WhatsApp';
-
-  @override
-  String get unlinkWhatsAppConfirm =>
-      'Are you sure you want to unlink your WhatsApp?';
-
-  @override
-  String get whatsAppUnlinked => 'WhatsApp unlinked successfully';
-
-  @override
   String get errorGeneratingToken => 'Error generating linking code';
 
   @override
-  String get errorCheckingStatus => 'Error checking status';
-
-  @override
-  String get errorUnlinking => 'Error unlinking';
-
-  @override
-  String get scanQRCodeOrTapButton =>
-      'Scan the QR code or tap the button below';
-
-  @override
-  String get linkYourWhatsApp => 'Link your WhatsApp';
-
-  @override
-  String get linkWhatsAppBenefit =>
-      'Receive notifications and manage your work orders via WhatsApp';
-
-  @override
   String get shareWithCustomer => 'Share with Customer';
-
-  @override
-  String get shareLinkTitle => 'Tracking Link';
-
-  @override
-  String get shareLinkDescription =>
-      'Send this link to the customer to track the work order';
-
-  @override
-  String linkValidFor(int days) {
-    return 'Link valid for $days days';
-  }
-
-  @override
-  String get canApprove => 'Can approve';
-
-  @override
-  String get canComment => 'Can comment';
-
-  @override
-  String get viewOnly => 'View only';
 
   @override
   String get copyLink => 'Copy Link';
@@ -2682,24 +1648,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkCopied => 'Link copied!';
 
   @override
-  String get generatingLink => 'Generating link...';
-
-  @override
-  String get errorGeneratingLink => 'Error generating link';
-
-  @override
-  String get sharePermissions => 'Link Permissions';
-
-  @override
-  String get shareLinkExpired => 'This link has expired';
-
-  @override
-  String get shareLinkApproved => 'Approved by customer';
-
-  @override
-  String get shareLinkRejected => 'Rejected by customer';
-
-  @override
   String viewCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2711,32 +1659,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get revokeLink => 'Revoke Link';
-
-  @override
-  String get revokeLinkConfirm =>
-      'Do you want to revoke this link? The customer will no longer be able to access it.';
-
-  @override
-  String get linkRevoked => 'Link revoked';
-
-  @override
-  String get activeLinks => 'Active Links';
-
-  @override
-  String get noActiveLinks => 'No active links';
-
-  @override
   String get noComments => 'No comments';
 
   @override
-  String get addComment => 'Add comment';
-
-  @override
   String get commentPlaceholder => 'Type your comment...';
-
-  @override
-  String get commentAdded => 'Comment added';
 
   @override
   String get commentFromCustomer => 'Customer';
@@ -2748,61 +1674,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get internalComment => 'Internal comment';
 
   @override
-  String get internalCommentHint => 'Visible only to the team';
-
-  @override
   String get publicComment => 'Public comment';
-
-  @override
-  String get publicCommentHint => 'Visible to the customer';
-
-  @override
-  String get markAsInternal => 'Mark as internal';
-
-  @override
-  String get sendComment => 'Send';
-
-  @override
-  String get approveQuoteAction => 'Approve Quote';
-
-  @override
-  String get rejectQuoteAction => 'Reject Quote';
-
-  @override
-  String get quoteApprovedByCustomer => 'Quote approved by customer';
-
-  @override
-  String get quoteRejectedByCustomer => 'Quote rejected by customer';
 
   @override
   String get rejectionReason => 'Rejection reason';
 
   @override
-  String get linkValidity => 'Link Validity';
-
-  @override
-  String get validFor => 'Valid for';
-
-  @override
   String get days => 'days';
-
-  @override
-  String get selectValidity => 'Select validity';
-
-  @override
-  String get usingExistingLink => 'Active link found';
-
-  @override
-  String get generateNewLink => 'Generate new';
-
-  @override
-  String get loadingExistingLinks => 'Checking existing links...';
-
-  @override
-  String get advancedOptions => 'Advanced options';
-
-  @override
-  String get sendToCustomer => 'Send to customer';
 
   @override
   String get rating => 'Rating';
@@ -2811,41 +1689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratings => 'Ratings';
 
   @override
-  String get averageRating => 'Average rating';
-
-  @override
-  String get totalRatings => 'Total ratings';
-
-  @override
   String get noRatingsYet => 'No ratings yet';
-
-  @override
-  String get rateService => 'Rate our service';
-
-  @override
-  String get rateSubmit => 'Submit Rating';
-
-  @override
-  String get rateSuccess => 'Thank you for your rating!';
-
-  @override
-  String ratingScore(int score) {
-    return '$score/5';
-  }
-
-  @override
-  String get customerRating => 'Customer Rating';
-
-  @override
-  String ratingWithStars(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'stars',
-      one: 'star',
-    );
-    return '$count $_temp0';
-  }
 
   @override
   String get notifyCustomerQuestion => 'Notify customer?';
@@ -2903,9 +1747,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get downloadApp => 'Download the app';
-
-  @override
   String get cannotRemoveOnlyAdmin =>
       'Cannot remove the only administrator of the company. Promote another collaborator to administrator first.';
 
@@ -2922,31 +1763,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareInviteAction => 'Share Invite';
-
-  @override
-  String inviteExpiresInDays(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Expires in $count days',
-      one: 'Expires in 1 day',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String inviteExpiresInHours(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Expires in $count hours',
-      one: 'Expires in 1 hour',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get inviteExpiresSoon => 'Expires soon';
 
   @override
   String get duplicateInviteTitle => 'Existing Invite';
@@ -2971,13 +1787,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTeam => 'Whole team';
 
   @override
-  String get filterByTechnician => 'Filter by technician';
-
-  @override
   String get allDay => 'All day';
-
-  @override
-  String get clearSchedule => 'Clear schedule';
 
   @override
   String get scheduleReminder => 'Schedule reminder';
@@ -2996,14 +1806,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String reminderHoursBefore(int hours) {
     return '$hours hours before';
-  }
-
-  @override
-  String get reminderTitle => 'Upcoming appointment';
-
-  @override
-  String reminderBodyOrder(String orderNumber, String customerName) {
-    return 'WO #$orderNumber - $customerName';
   }
 
   @override
@@ -3035,9 +1837,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeDevice => 'Remove Device';
 
   @override
-  String get allDevices => 'All Devices';
-
-  @override
   String get generalNoDevice => 'General';
 
   @override
@@ -3047,9 +1846,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String deviceCount(int count) {
     return '$count devices';
   }
-
-  @override
-  String get duplicateForAll => 'Duplicate for all';
 
   @override
   String confirmRemoveDevice(String name) {
@@ -3071,35 +1867,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get features => 'Features';
 
   @override
-  String get fieldServiceLabel => 'Field Service';
-
-  @override
-  String get fieldServiceDescription => 'Show service location field';
-
-  @override
-  String get schedulingLabel => 'Scheduling';
-
-  @override
-  String get schedulingDescription => 'Use scheduled date in orders';
-
-  @override
-  String get deviceManagement => 'Asset management';
-
-  @override
-  String get deviceManagementDescription =>
-      'Status, history and advanced device control';
-
-  @override
   String get contracts => 'Contracts';
 
   @override
-  String get contractsDescription => 'Recurring maintenance contracts';
-
-  @override
   String get noContracts => 'No contracts';
-
-  @override
-  String get contractActive => 'Recurring contract';
 
   @override
   String get activateContract => 'Activate recurring contract';
@@ -3118,20 +1889,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get automaticGeneration => 'Automatic generation';
 
   @override
-  String get contractAutoGenerate => 'Auto-generate work orders';
-
-  @override
-  String get contractAutoGenerateDescription =>
-      'When enabled, automatically creates the order on the due date';
-
-  @override
-  String get contractReminderDays => 'Reminder (days before)';
-
-  @override
   String get contractNextDue => 'Next generation';
-
-  @override
-  String get generatedOrders => 'Generated orders';
 
   @override
   String generatedOrdersCount(int count) {
@@ -3166,9 +1924,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceStatusDecommissioned => 'Decommissioned';
 
   @override
-  String get orderHistory => 'Order History';
-
-  @override
   String get noOrderHistory => 'No work orders recorded';
 
   @override
@@ -3187,12 +1942,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOrdersDueOnDate => 'No orders due on this day';
 
   @override
-  String get companyFeatures => 'Company features';
-
-  @override
-  String get youCanChangeThisLater => 'You can change this later in settings';
-
-  @override
   String get documents => 'Documents';
 
   @override
@@ -3208,18 +1957,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contract => 'Contract';
 
   @override
-  String get attachReceipt => 'Attach Receipt';
-
-  @override
-  String get chooseFile => 'Choose File';
-
-  @override
-  String get documentType => 'Document Type';
-
-  @override
-  String get viewDocument => 'View Document';
-
-  @override
   String get deleteDocument => 'Delete Document';
 
   @override
@@ -3228,9 +1965,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uploadingDocument => 'Uploading document...';
-
-  @override
-  String get noDocuments => 'No documents attached';
 
   @override
   String get documentAdded => 'Document added';
@@ -3242,49 +1976,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openDocument => 'Open';
 
   @override
-  String get receiptAttached => 'Receipt attached';
-
-  @override
-  String get receiptRemoved => 'Receipt removed';
-
-  @override
-  String get removeReceipt => 'Remove Receipt';
-
-  @override
-  String get confirmRemoveReceipt =>
-      'Are you sure you want to remove this receipt?';
-
-  @override
   String get fromFiles => 'Files';
-
-  @override
-  String get selectDocumentType => 'Select document type';
 
   @override
   String get errorUploadingDocument => 'Error uploading document';
 
   @override
   String get engagementReminders => 'Reminders';
-
-  @override
-  String get dailyReminderTitle => 'Daily reminder';
-
-  @override
-  String get dailyReminderDescription => 'Get a reminder every day at 9 AM';
-
-  @override
-  String get inactivityReminderTitle => 'Inactivity reminder';
-
-  @override
-  String get inactivityReminderDescription =>
-      'Get reminders when you haven\'t used the app';
-
-  @override
-  String get pendingOsReminderTitle => 'Pending orders reminder';
-
-  @override
-  String get pendingOsReminderDescription =>
-      'Get reminders about stalled orders';
 
   @override
   String get dailyNotificationTitle => 'Good morning!';
@@ -3322,18 +2020,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get legalSection => 'Legal';
-
-  @override
   String get termsOfService => 'Terms and Conditions';
 
   @override
   String get termsOfServicePlaceholder =>
       'E.g.: Devices not picked up within 90 days may be discarded...';
-
-  @override
-  String get termsOfServiceDescription =>
-      'These terms will be shown to the customer before approving the quote.';
 
   @override
   String get useDefaultTerms => 'Use default terms for this segment';
@@ -3426,45 +2117,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureGateLimitModalTitle => 'Limit reached';
 
   @override
-  String featureGateLimitModalMessage(String feature, String plan) {
-    return 'You\'ve reached the $feature limit of your $plan plan.';
-  }
-
-  @override
-  String featureGateLimitModalUsage(int current, int limit, String feature) {
-    return '$current of $limit $feature';
-  }
-
-  @override
-  String featureGateUpgradeButton(String plan) {
-    return 'Upgrade to $plan';
-  }
-
-  @override
-  String featureGateUpgradeNewLimit(String limit, String feature) {
-    return 'New limit: $limit $feature';
-  }
-
-  @override
-  String get unlimitedLabel => 'unlimited';
-
-  @override
   String get subscription => 'Subscription';
 
   @override
   String get manageSubscription => 'Manage subscription';
 
   @override
-  String get viewPlanAndBilling => 'View plan and billing';
-
-  @override
   String get restorePurchases => 'Restore purchases';
-
-  @override
-  String get restorePreviousPurchases => 'Recover previous purchases';
-
-  @override
-  String get restoringPurchases => 'Restoring purchases...';
 
   @override
   String get restorePurchasesSuccess => 'Purchases restored successfully';
@@ -3472,13 +2131,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get restorePurchasesError =>
       'Error restoring purchases. Please try again.';
-
-  @override
-  String get restorePurchasesDescription =>
-      'Restore your previous purchases if you changed devices';
-
-  @override
-  String get purchaseHistory => 'Purchase History';
 
   @override
   String get success => 'Success';
@@ -3492,149 +2144,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subscriptionCancelled => 'Subscription cancelled';
-
-  @override
-  String get changePlan => 'Change plan';
-
-  @override
-  String get viewAvailablePlans => 'View available plans';
-
-  @override
-  String get cancelSubscription => 'Cancel subscription';
-
-  @override
   String get manageInStore => 'Manage in app store';
-
-  @override
-  String get choosePlan => 'Choose plan';
 
   @override
   String get restore => 'Restore';
 
   @override
-  String get perMonth => '/month';
-
-  @override
-  String get mostPopular => 'MOST POPULAR';
-
-  @override
   String get currentPlan => 'Current plan';
-
-  @override
-  String get yourCurrentPlan => 'Your current plan';
-
-  @override
-  String get selectPlan => 'Select plan';
-
-  @override
-  String get purchaseSuccessful => 'Purchase completed successfully!';
-
-  @override
-  String get plansDisclaimer =>
-      'Subscriptions renew automatically. You can cancel anytime in store settings.';
-
-  @override
-  String planFeatureUsers(int count) {
-    return '$count users included';
-  }
-
-  @override
-  String planFeaturePhotos(int count) {
-    return '$count photos/month';
-  }
-
-  @override
-  String planFeatureForms(int count) {
-    return '$count forms';
-  }
-
-  @override
-  String get planFeatureCleanPdf => 'PDF without watermark';
-
-  @override
-  String get planFeaturePriority => 'Priority support';
-
-  @override
-  String get planFeatureUnlimitedPhotos => 'Unlimited photos';
-
-  @override
-  String get planFeatureUnlimitedForms => 'Unlimited forms';
-
-  @override
-  String get planFeatureMultiCompany => 'Multi-company';
-
-  @override
-  String get planFeatureApi => 'API access';
-
-  @override
-  String get upgradePlanTitle => 'Upgrade';
 
   @override
   String featureLimitReached(String feature) {
     return 'You\'ve reached the limit for $feature';
   }
-
-  @override
-  String get withUpgrade => 'With upgrade';
-
-  @override
-  String get upgradeNow => 'Upgrade now';
-
-  @override
-  String get segmentationOnboardingTitle => 'Nos conte sobre seu negócio';
-
-  @override
-  String get segmentationOnboardingSubtitle =>
-      'Ajude-nos a personalizar sua experiência (30 segundos)';
-
-  @override
-  String get segmentationServiceTypeQuestion =>
-      'Qual tipo de serviço você faz?';
-
-  @override
-  String get serviceTypeTechnicalAssistance =>
-      'Assistência técnica (celular, eletrônico)';
-
-  @override
-  String get serviceTypeHvac => 'Ar condicionado / Refrigeração';
-
-  @override
-  String get serviceTypeElectricalPlumbing => 'Elétrica / Hidráulica';
-
-  @override
-  String get serviceTypeAutomotive => 'Oficina mecânica';
-
-  @override
-  String get segmentationMonthlyVolumeQuestion =>
-      'Quantos serviços você faz por mês?';
-
-  @override
-  String get monthlyVolumeLt10 => 'Menos de 10';
-
-  @override
-  String get monthlyVolume10To30 => '10 a 30';
-
-  @override
-  String get monthlyVolume30To60 => '30 a 60';
-
-  @override
-  String get monthlyVolumeGt60 => 'Mais de 60';
-
-  @override
-  String get segmentationTeamSizeQuestion => 'Você trabalha...';
-
-  @override
-  String get teamSizeSolo => 'Sozinho';
-
-  @override
-  String get teamSize1To3 => 'Com 1-3 funcionários';
-
-  @override
-  String get teamSize4To10 => 'Com 4-10 funcionários';
-
-  @override
-  String get teamSizeGt10 => 'Com mais de 10 funcionários';
 
   @override
   String get photoLimitReachedMessage =>
@@ -3645,24 +2166,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewPlans => 'View plans';
-
-  @override
-  String planCourtesyUntil(String date) {
-    return 'Courtesy until $date';
-  }
-
-  @override
-  String planRenewsOn(String date) {
-    return 'Renews on $date';
-  }
-
-  @override
-  String get planPaymentIssue => 'Payment issue';
-
-  @override
-  String planValidUntil(String date) {
-    return 'Valid until $date';
-  }
 
   @override
   String get askAdminToChangePlanTitle => 'Talk to your admin';
@@ -3776,15 +2279,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidTaxId => 'Invalid CPF or CNPJ';
 
   @override
-  String get chargeWithAsaas => 'Charge with Asaas';
-
-  @override
-  String get chargeSectionTitle => 'Charge';
-
-  @override
-  String get createChargeTitle => 'New charge';
-
-  @override
   String get chargeValue => 'Amount';
 
   @override
@@ -3793,20 +2287,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chargeModeSingle => 'One-time';
-
-  @override
-  String get chargeModeInstallments => 'Card installments';
-
-  @override
   String get chargeSingleHint => 'The customer chooses Pix, boleto or card.';
-
-  @override
-  String get chargeInstallmentsHint =>
-      'The customer pays by credit card in the chosen installments.';
-
-  @override
-  String get chargeInstallments => 'Installments';
 
   @override
   String chargeInstallmentOption(int count, String value) {
@@ -3819,12 +2300,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chargeTaxIdHint =>
       'Asaas requires a CPF or CNPJ. It is saved to the customer record.';
-
-  @override
-  String get chargeGenerate => 'Create charge';
-
-  @override
-  String get chargeCreated => 'Charge created';
 
   @override
   String get chargeStatusPending => 'Awaiting payment';
@@ -3842,28 +2317,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chargeStatusRefunded => 'Refunded';
 
   @override
-  String chargeDueOn(String date) {
-    return 'Due $date';
-  }
-
-  @override
-  String chargeInstallmentsSummary(int count) {
-    return '${count}x on card';
-  }
-
-  @override
-  String get chargeShareOrderLink => 'Share order link';
-
-  @override
-  String get chargeCopyInvoiceLink => 'Copy invoice link';
-
-  @override
-  String get chargeInvoiceLinkCopied => 'Invoice link copied';
-
-  @override
-  String get chargeCancel => 'Cancel charge';
-
-  @override
   String get chargeCancelConfirm =>
       'The customer will no longer be able to pay with this link.';
 
@@ -3879,14 +2332,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chargeReplace => 'Create new';
-
-  @override
-  String chargeTotalChanged(String balance, String value) {
-    return 'The order balance ($balance) differs from the charge amount ($value).';
-  }
-
-  @override
-  String get chargeRegenerate => 'Create new charge';
 
   @override
   String get asaasErrorInstallmentsInProgress =>
@@ -3923,20 +2368,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickCustomerTitle => 'Who is the customer?';
 
   @override
-  String get pickCustomerSubtitle =>
-      'Tap to choose, or type a name, phone or plate';
-
-  @override
   String get searchCustomerPlaceholder => 'Search by name, phone or plate';
-
-  @override
-  String get searchCustomerNoPlatePlaceholder => 'Search by name or phone';
-
-  @override
-  String get addNewCustomer => 'Add a new customer';
-
-  @override
-  String get allCustomers => 'All';
 
   @override
   String plateValue(String plate) {
@@ -3968,11 +2400,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String newOrderFor(String name) {
     return 'New order for $name';
-  }
-
-  @override
-  String ordersOfCustomer(String name) {
-    return 'Orders of $name';
   }
 
   @override
@@ -4186,25 +2613,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get orderChangeStatusLink => 'Change';
-
-  @override
   String get orderItemsSection => 'What will be done';
 
   @override
-  String get orderWhatGoesTitle => 'What goes on the order?';
-
-  @override
   String get orderItemSearchPlaceholder => 'Search service or part';
-
-  @override
-  String orderCreateAndAdd(String name) {
-    return 'Create “$name” and add to the order';
-  }
-
-  @override
-  String get orderCreateItemHint =>
-      'You set the price on the order. It is saved for next time.';
 
   @override
   String get orderCreateItemError => 'Could not create it. Try again.';
@@ -4261,11 +2673,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderFullyPaid => 'Fully paid';
 
   @override
-  String orderSaveButton(String order) {
-    return 'Save $order';
-  }
-
-  @override
   String get orderSaveNeedsCustomer => 'Choose the customer to save.';
 
   @override
@@ -4283,58 +2690,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get orderPhotoAction => 'Photo';
-
-  @override
   String get orderTalkAction => 'Say what to do';
-
-  @override
-  String get orderAssistantSoon => 'Coming soon';
-
-  @override
-  String get orderNextStepQuote => 'Quote ready for the customer';
-
-  @override
-  String get orderNextStepQuoteAction => 'Customer approved';
-
-  @override
-  String get orderNextStepApproved => 'Approved by the customer';
-
-  @override
-  String get orderNextStepApprovedAction => 'Start the service';
-
-  @override
-  String get orderNextStepProgress => 'Service in progress';
-
-  @override
-  String get orderNextStepProgressAction => 'Mark as done';
-
-  @override
-  String get orderNextStepDone => 'Done';
-
-  @override
-  String orderNextStepDoneUnpaid(String amount) {
-    return 'Done. $amount left to receive';
-  }
 
   @override
   String orderNextStepReceive(String amount) {
     return 'Receive $amount';
   }
-
-  @override
-  String get orderNextStepDonePaid => 'All set: done and paid';
-
-  @override
-  String get orderNextStepSend => 'Send to the customer';
-
-  @override
-  String orderNextStepCanceled(String order) {
-    return '$order canceled';
-  }
-
-  @override
-  String get orderNextStepReopen => 'Reopen';
 
   @override
   String orderMenuAddTo(String order) {
@@ -4343,9 +2704,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderMenuSendToCustomer => 'Send to the customer';
-
-  @override
-  String get orderMenuPdf => 'PDF';
 
   @override
   String orderMenuCancel(String order) {
@@ -4366,9 +2724,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get orderAddMore => 'Checklist, photos, comment and more';
-
-  @override
   String orderCancelConfirmTitle(String order) {
     return 'Cancel $order?';
   }
@@ -4387,12 +2742,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderPhotosSection => 'Photos';
-
-  @override
-  String get orderDeviceActionChange => 'Change';
-
-  @override
-  String get orderDeviceActionRemove => 'Remove from the order';
 
   @override
   String orderUnpricedCount(int count) {
@@ -4427,9 +2776,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterMine => 'Mine';
-
-  @override
-  String get sectionScheduledToday => 'Today';
 
   @override
   String get nextVisitLabel => 'Now';
@@ -4475,78 +2821,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOrdersWithYou => 'No orders with you.';
 
   @override
-  String get sectionLate => 'Overdue';
-
-  @override
-  String get sectionDueToday => 'Due today';
-
-  @override
-  String get sectionInProgress => 'In progress';
-
-  @override
-  String get sectionWaitingApproval => 'Waiting for approval';
-
-  @override
-  String get sectionApproved => 'Approved';
-
-  @override
-  String get moreShowCanceled => 'View canceled';
-
-  @override
-  String get viewCanceledTitle => 'Canceled';
-
-  @override
-  String get backToOpenOrders => 'Back to open';
-
-  @override
-  String get homeMoreMenu => 'More options';
-
-  @override
   String homeOpenCount(int count) {
     return '$count open';
   }
-
-  @override
-  String get nextStepLabelToday => 'Today';
-
-  @override
-  String nextStepLate(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count orders are past their due date.',
-      one: '1 order is past its due date.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String nextStepDueToday(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count orders due today.',
-      one: '1 order due today.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String nextStepQuotesWaiting(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count quotes waiting for the customer\'s answer.',
-      one: '1 quote waiting for the customer\'s answer.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get seeLate => 'See the overdue ones';
-
-  @override
-  String get seeThem => 'See';
 
   @override
   String get seeAllOrders => 'See all';
@@ -4555,10 +2832,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationsA11y(int count) {
     return 'Notifications, $count new';
   }
-
-  @override
-  String get firstOrderTitle =>
-      'Create your first service order. It takes less than a minute.';
 
   @override
   String get howItWorks => 'How it works';
@@ -4591,39 +2864,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howItWorksStep3Detail => 'the app reminds you who still owes';
-
-  @override
-  String nextStepLateShort(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count orders are past due.',
-      one: '1 order is past due.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String nextStepDueTodayShort(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count orders due today.',
-      one: '1 order due today.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String nextStepQuotesWaitingShort(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count quotes without an answer.',
-      one: '1 quote without an answer.',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get searchNotFoundLoaded => 'Not found in the loaded orders.';
@@ -4684,14 +2924,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String orderRowNumberDevice(String number, String device) {
-    return 'Order $number · $device';
-  }
-
-  @override
-  String get homeNewOrder => 'New order';
-
-  @override
   String get yourAccount => 'Your account';
 
   @override
@@ -4732,9 +2964,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get valuesAndBillingSaveError =>
       'Could not save. Check your connection and try again.';
-
-  @override
-  String get nameAndPhoto => 'Name and photo';
 
   @override
   String get joinWithInviteCode => 'Join with an invite code';
@@ -4794,14 +3023,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialToReceive => 'To collect';
 
   @override
-  String get financialReceived => 'Received';
-
-  @override
-  String financialSummaryLine(String entered, String owed) {
-    return 'In $entered · Owed $owed';
-  }
-
-  @override
   String financialOrderSince(int number, String date) {
     return 'Order $number · since $date';
   }
@@ -4809,11 +3030,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String financialOrdersSince(int count, String date) {
     return '$count orders · since $date';
-  }
-
-  @override
-  String financialPaidOn(int number, String date) {
-    return 'Order $number · paid $date';
   }
 
   @override
@@ -4906,11 +3122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String receiveDiscountButton(String amount) {
-    return 'Give $amount discount';
-  }
-
-  @override
   String get receiveViewReceipt => 'View receipt';
 
   @override
@@ -4963,10 +3174,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingSegmentTitle => 'Your trade';
 
   @override
-  String get onboardingSegmentSubtitle =>
-      'What kind of work do you do? The app comes ready with the services and checklists of your trade.';
-
-  @override
   String get onboardingInviteCode => 'I got an invite code';
 
   @override
@@ -4975,10 +3182,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSpecialtiesTitle => 'Specialties';
-
-  @override
-  String get onboardingSpecialtiesSubtitle =>
-      'What do you work on? Check what fits. You can change it later.';
 
   @override
   String get onboardingContinue => 'Continue';
@@ -5102,39 +3305,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not open your company. Check your internet and try again.';
 
   @override
-  String get orderAssistantHint =>
-      'Take a photo of the plate and say the service';
-
-  @override
-  String get orderAssistantPlaceholder =>
-      'Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450';
-
-  @override
-  String get orderAssistantDone => 'Done';
-
-  @override
   String get orderAssistantAddPhoto => 'Take another photo';
 
   @override
   String get orderAssistantTakePhoto => 'Take a photo';
-
-  @override
-  String orderAssistantPhotoCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count photos',
-      one: '1 photo',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get orderAssistantReading => 'Reading what you sent…';
-
-  @override
-  String get orderAssistantFilledNote =>
-      'Check what is highlighted in yellow before saving.';
 
   @override
   String orderAssistantCustomerGuess(String name) {
@@ -5145,9 +3319,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String orderAssistantDeviceGuess(String device) {
     return '“$device” is not registered';
   }
-
-  @override
-  String get orderAssistantErrorTitle => 'Assistant';
 
   @override
   String get orderAssistantErrorDisabled =>
@@ -5167,19 +3338,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'I found nothing to add. Try again or fill it in by hand.';
 
   @override
-  String get valuesAndBillingSoon =>
-      'On. You will be able to turn it off soon.';
-
-  @override
   String get reportPreviousPeriod => 'Previous period';
 
   @override
   String get reportNextPeriod => 'Next period';
-
-  @override
-  String orderInThisOrder(String order) {
-    return 'In this $order';
-  }
 
   @override
   String get orderAddChecklist => 'Checklist';
@@ -5200,14 +3362,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAddDiscount => 'Discount';
 
   @override
-  String orderAddContract(String order) {
-    return 'Repeat this $order';
-  }
-
-  @override
-  String get orderAddOtherFields => 'Other fields';
-
-  @override
   String orderChecklistMissing(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -5217,9 +3371,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get orderChecklistDone => 'Done';
 
   @override
   String get orderAddressChange => 'Change address';
@@ -5236,24 +3387,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get orderContractChange => 'Change contract';
-
-  @override
   String get orderUploading => 'Uploading…';
-
-  @override
-  String pickDeviceTitle(String device) {
-    return 'Which $device?';
-  }
 
   @override
   String otherDevicesSection(String devices) {
     return 'Other $devices';
-  }
-
-  @override
-  String registerNewDevice(String device) {
-    return 'Register new $device';
   }
 
   @override
@@ -5284,11 +3422,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String moreCatalogSubtitle(String products) {
     return 'Services and $products';
-  }
-
-  @override
-  String saveEntityButton(String entity) {
-    return 'Save $entity';
   }
 
   @override
@@ -5507,14 +3640,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiveAmountHint => 'Got only part of it? Change the amount.';
-
-  @override
-  String orderMenuPdfOf(String order) {
-    return '$order PDF';
-  }
-
-  @override
-  String get orderAddItem => 'Service or part';
 
   @override
   String get orderAddContractMonthly => 'Repeat every month (contract)';
@@ -5891,14 +4016,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get orderChangeCustomer => 'Change customer';
-
-  @override
-  String orderChangeDevice(String device) {
-    return 'Change $device';
-  }
-
-  @override
   String get orderAddResponsible => 'Responsible';
 
   @override
@@ -5977,12 +4094,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAddressLabel => 'Location';
 
   @override
-  String get orderNotSet => 'None';
-
-  @override
-  String get speechTitle => 'Speak the job';
-
-  @override
   String get speechHint =>
       'Say the customer, the vehicle and what will be done.';
 
@@ -5990,16 +4101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechListening => 'Listening…';
 
   @override
-  String get speechStop => 'Stop';
-
-  @override
-  String get speechStart => 'Speak again';
-
-  @override
   String get speechFill => 'Fill in the order';
-
-  @override
-  String get speechType => 'Type instead';
 
   @override
   String get speechUnavailable =>
@@ -6143,9 +4245,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickerNewChecklist => 'New checklist';
 
   @override
-  String get pickerTypeAnother => 'Type another';
-
-  @override
   String pickerRegister(String query) {
     return 'Add “$query”';
   }
@@ -6173,11 +4272,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickerSearch => 'Search';
-
-  @override
-  String orderMenuRemoveDevice(String device) {
-    return 'Remove $device from the order';
-  }
 
   @override
   String pickerNoDevice(String device) {

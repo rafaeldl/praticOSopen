@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -291,7 +292,8 @@ class InviteShareSheet extends StatelessWidget {
 
   void _copyCode(BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: token));
-    _showCupertinoToast(context, context.l10n.inviteCodeCopied);
+    if (!context.mounted) return;
+    showAppToast(context, context.l10n.inviteCodeCopied);
   }
 
   void _shareCode(BuildContext context) async {
@@ -307,41 +309,6 @@ class InviteShareSheet extends StatelessWidget {
         subject: context.l10n.shareInvite,
         sharePositionOrigin: sharePositionOrigin,
       ),
-    );
-  }
-
-  void _showCupertinoToast(BuildContext context, String message) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (toastContext) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (toastContext.mounted) Navigator.of(toastContext).pop();
-        });
-        return DefaultTextStyle(
-          style: const TextStyle(
-            fontFamily: '.SF Pro Text',
-            decoration: TextDecoration.none,
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 100),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey.darkColor,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
