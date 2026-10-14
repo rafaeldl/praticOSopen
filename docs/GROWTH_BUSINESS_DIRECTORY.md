@@ -451,9 +451,9 @@ Quando o marketplace for implementado, o `ProviderProfile` pode ser criado autom
 
 ## Tela de Configuração no App
 
-### Toggle em CompanyFormScreen
+### Toggle em "Sua empresa" (MyCompanySettings)
 
-**Arquivo:** `lib/screens/menu_navigation/company_form_screen.dart`
+**Arquivo:** `lib/screens/menu_navigation/more/company_editors.dart`
 
 Adicionar seção "Perfil Público" ao formulário de empresa:
 
@@ -655,7 +655,7 @@ O fluxo de auto-cadastro via bot (`registration.md`) pode coletar cidade/estado 
 |---------|-----------|
 | `lib/models/company.dart` | Adicionar: `city`, `state`, `zipCode`, `isPublicProfile`, `publicSlug`, `publicDescription`, `publicPhone`, `publicEmail`, `averageRating`, `totalRatings` |
 | `firebase/functions/src/models/types.ts` | Adicionar mesmos campos à interface `Company` |
-| `lib/screens/menu_navigation/company_form_screen.dart` | Adicionar seção "Perfil Público" + campos cidade/estado |
+| `lib/screens/menu_navigation/more/company_editors.dart` | Adicionar seção "Perfil Público" + campos cidade/estado |
 | `lib/l10n/app_pt.arb` | Adicionar chaves i18n (city, state, zipCode, publicProfile, etc.) |
 | `lib/l10n/app_en.arb` | Adicionar chaves i18n em inglês |
 | `lib/l10n/app_es.arb` | Adicionar chaves i18n em espanhol |
@@ -670,7 +670,7 @@ O fluxo de auto-cadastro via bot (`registration.md`) pode coletar cidade/estado 
 ## Fluxo Completo
 
 ```
-Empresa ativa perfil público no app (CompanyFormScreen)
+Empresa ativa perfil público no app ("Nome, logo e contato", CompanyDataScreen)
     │
     ├── isPublicProfile = true
     ├── publicSlug gerado automaticamente
@@ -707,11 +707,11 @@ Empresa cria OS → cliente recebe link /q/{token} → vê CTA (Fase 1) → novo
 ### Campos estruturados
 - [ ] Company model (Dart + TypeScript) tem `city`, `state`, `zipCode`
 - [ ] `build_runner` e `gen-l10n` executam sem erros
-- [ ] CompanyFormScreen mostra campos de cidade/estado
+- [ ] CompanyDataScreen mostra campos de cidade/estado
 - [ ] Script de migração parseia corretamente endereços no padrão "..., Cidade - UF"
 
 ### Perfil público
-- [ ] Toggle "Ativar perfil público" no CompanyFormScreen funciona
+- [ ] Toggle "Ativar perfil público" em "Sua empresa" funciona
 - [ ] `publicSlug` é gerado automaticamente ao ativar (baseado em nome + cidade)
 - [ ] Campos de descrição, telefone e email públicos aparecem quando toggle está ativo
 - [ ] Slugs são únicos (duplicatas recebem sufixo numérico)
