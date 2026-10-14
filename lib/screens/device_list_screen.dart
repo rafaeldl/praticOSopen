@@ -19,6 +19,7 @@ import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -72,8 +73,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   String? _customerId;
   String? _customerName;
 
-  /// Devices already on the order: the ✓ in selection mode.
-  Set<String> _selectedIds = const {};
+  /// Devices already on the order: the ✓ in selection mode (matched
+  /// against the list by [currentDeviceIds]).
+  List<DeviceAggr> _orderDevices = const [];
 
   Stream<List<Device?>>? _stream;
   Future<List<DeviceAggr>>? _customerVehicles;
@@ -97,10 +99,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     if (order is Order) {
       _customerId = order.customer?.id;
       _customerName = order.customer?.name;
-      _selectedIds = {
-        for (final d in order.devices ?? const <DeviceAggr>[])
-          if (d.id != null) d.id!,
-      };
+      _orderDevices = orderDevices(order);
     }
     if (widget.devices != null) {
       _stream = widget.devices!();
@@ -240,6 +239,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               if (v.id != null) v.id!,
           };
           final first = customerName.split(RegExp(r'\s+')).first;
+          final selectedIds = currentDeviceIds(_orderDevices, all);
+          PickerItem<Device> item(Device d) => _pickerItem(d, selectedIds);
           return PickerScaffold<Device>(
             title: l10n.pickerDeviceTitle(device),
             subtitle: customerName.isEmpty
@@ -274,13 +275,13 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               final mine = filtered.where((d) => mineIds.contains(d.id));
               if (mine.isEmpty) {
                 return [
-                  PickerSection(items: filtered.map(_pickerItem).toList()),
+                  PickerSection(items: filtered.map(item).toList()),
                 ];
               }
               return [
                 PickerSection(
                   label: l10n.devicesOfCustomer(config.devicePlural, first),
-                  items: mine.map(_pickerItem).toList(),
+                  items: mine.map(item).toList(),
                 ),
                 PickerSection(
                   label: l10n.otherDevicesSection(
@@ -288,7 +289,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                   ),
                   items: filtered
                       .where((d) => !mineIds.contains(d.id))
-                      .map(_pickerItem)
+                      .map(item)
                       .toList(),
                 ),
               ];
@@ -304,7 +305,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       pickerMatches(d.serial, query) ||
       pickerMatches(d.manufacturer, query);
 
-  PickerItem<Device> _pickerItem(Device device) {
+  PickerItem<Device> _pickerItem(Device device, Set<String> selectedIds) {
     final l10n = context.l10n;
     final parts = [
       if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
@@ -315,7 +316,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       value: device,
       title: device.name ?? '',
       subtitle: parts.isEmpty ? null : parts.join(' · '),
-      selected: device.id != null && _selectedIds.contains(device.id),
+      selected: device.id != null && selectedIds.contains(device.id),
     );
   }
 
