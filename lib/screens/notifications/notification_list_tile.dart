@@ -15,6 +15,41 @@ String stripEmoji(String text) {
       .replaceAll(RegExp('(?:$emoji|\\s)+\$', unicode: true), '');
 }
 
+/// The sentence a row shows, in everyday words: "Ana aprovou o orçamento".
+///
+/// The backend title is a headline ("Orçamento Aprovado! ✅"), while its body
+/// already says who did what ("Ana aprovou o orçamento da OS #183"). The row
+/// uses the body without the order reference, since the order number is on
+/// the line below. Comments read "Carlos comentou: “…”" and payments
+/// "Pagamento de R\$ 350 recebido". Falls back to the title without emoji.
+String noticeText(BuildContext context, AppNotification notification) {
+  final l10n = context.l10n;
+  final title = stripEmoji(notification.title?.trim() ?? '');
+  final body = notification.body?.trim() ?? '';
+  if (body.isEmpty) return title;
+
+  switch (notification.type) {
+    case NotificationType.newComment:
+      final split = body.indexOf(': ');
+      if (split > 0) {
+        return l10n.noticeCommented(
+          body.substring(0, split),
+          body.substring(split + 2),
+        );
+      }
+      return body;
+    case NotificationType.paymentReceived:
+      final amount = RegExp(r'[–-]\s*(.+)$').firstMatch(body)?.group(1);
+      return amount == null ? title : l10n.noticePaymentReceived(amount.trim());
+  }
+
+  final withoutOrder = body
+      .replaceAll(RegExp(r'\s+(?:da|na|a|de)\s+OS\s*#\d+'), '')
+      .replaceAll(RegExp(r'\s*OS\s*#\d+'), '')
+      .trim();
+  return withoutOrder.isEmpty ? title : withoutOrder;
+}
+
 /// "há 5 minutos", "há 2 dias"; older than a month falls back to the date.
 String relativeTime(BuildContext context, DateTime? time, DateTime now) {
   if (time == null) return '';
@@ -46,9 +81,6 @@ class NotificationListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final unread = notification.read != true;
-    final rawTitle = notification.title?.trim().isNotEmpty == true
-        ? notification.title!
-        : (notification.body ?? '');
     final time = relativeTime(context, notification.createdAt, now);
     final number = notification.orderNumber;
     final subtitle = [
@@ -70,7 +102,7 @@ class NotificationListTile extends StatelessWidget {
               )
             : null,
       ),
-      title: stripEmoji(rawTitle),
+      title: noticeText(context, notification),
       titleStyle: unread
           ? AppTypography.bodyStrong
           : AppTypography.body,

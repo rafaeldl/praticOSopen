@@ -255,6 +255,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _loadExisting(order);
     } else {
       _startNew(order);
+      if (args?['repeat'] == true) {
+        // From Contratos: the order starts as a contract, with the
+        // "Repetir" row in sight.
+        _store.toggleContract(true);
+        _moreOpen = true;
+      }
     }
   }
 
@@ -1722,6 +1728,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (order?.assignedTo?.name?.isNotEmpty ?? false)
         order!.assignedTo!.name!,
       if (_hasAddress) _store.address!.trim(),
+      if (_store.hasContract) _frequencyLabel(order?.contract?.frequency),
     ];
     Future<void> run(Future<void> Function() action) async {
       await action();
@@ -1773,6 +1780,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             value: _hasAddress ? _store.address!.trim() : null,
             onTap: () => run(_editAddress),
           ),
+          if (_store.hasContract)
+            FormRow(
+              key: const ValueKey('new_order_more_repeat'),
+              title: l10n.orderRepeatRow,
+              value: _frequencyLabel(order?.contract?.frequency),
+              onTap: () => run(() => _actions.editContract(context, _store)),
+            ),
         ],
       ],
     );

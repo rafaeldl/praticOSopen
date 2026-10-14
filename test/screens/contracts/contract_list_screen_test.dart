@@ -42,7 +42,11 @@ Order _order(
       ..endDate = end);
 }
 
-Widget _app(ContractDirectory directory, List<Object?> log) {
+Widget _app(
+  ContractDirectory directory,
+  List<Object?> log, {
+  VoidCallback? onNew,
+}) {
   return CupertinoApp(
     locale: const Locale('pt'),
     supportedLocales: AppLocalizations.supportedLocales,
@@ -52,7 +56,7 @@ Widget _app(ContractDirectory directory, List<Object?> log) {
       GlobalWidgetsLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
     ],
-    home: ContractListScreen(directory: directory),
+    home: ContractListScreen(directory: directory, onNew: onNew),
     onGenerateRoute: (settings) {
       log.add(settings);
       return CupertinoPageRoute<void>(
@@ -131,9 +135,50 @@ void main() {
     await tester.pumpWidget(_app(_FakeDirectory(Stream.value([])), []));
     await tester.pump();
     expect(find.text('Nenhum contrato'), findsOneWidget);
+    // The empty state points at the "+".
+    expect(
+      find.text('Toque em + para criar uma OS que se repete sozinha.'),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Encerrados'));
     await tester.pumpAndSettle();
     expect(find.text('Nenhum contrato encerrado.'), findsOneWidget);
+  });
+
+  testWidgets('"+" at the top starts a new contract', (tester) async {
+    var opened = 0;
+    await tester.pumpWidget(
+      _app(_FakeDirectory(Stream.value([])), [], onNew: () => opened++),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('contract_new')));
+    expect(opened, 1);
+  });
+
+  testWidgets('back button says "Minha empresa"', (tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('pt', 'BR'),
+        home: Builder(
+          builder: (context) => CupertinoButton(
+            onPressed: () => Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => ContractListScreen(
+                  directory: _FakeDirectory(Stream.value([])),
+                ),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Minha empresa'), findsOneWidget);
   });
 
   testWidgets('loading state', (tester) async {

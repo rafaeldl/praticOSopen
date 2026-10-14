@@ -18,10 +18,12 @@ AppNotification _n(
   String? number = '183',
   Duration ago = const Duration(minutes: 5),
   Map<String, dynamic>? data,
+  String? body,
 }) {
   return AppNotification()
     ..id = id
     ..title = title
+    ..body = body
     ..type = type
     ..orderId = 'order-$id'
     ..orderNumber = number
@@ -192,5 +194,55 @@ void main() {
       child: _app(_view([_n('1', 'Ana aprovou')])),
     ));
     expect(find.text('Ana aprovou'), findsOneWidget);
+  });
+
+  testWidgets('rows read the body as a sentence, without "OS #N"', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_view([
+      _n('1', 'Orçamento Aprovado! ✅',
+          type: NotificationType.orderApproved,
+          body: 'Ana Ribeiro aprovou o orçamento da OS #183'),
+      _n('2', 'Nova mensagem na OS #184 💬',
+          type: NotificationType.newComment,
+          number: '184',
+          body: 'Carlos Mendes: Pode trocar o filtro de ar também?'),
+      _n('3', 'Pagamento recebido',
+          type: NotificationType.paymentReceived,
+          number: '186',
+          body: 'OS #186 – R\$ 350,00'),
+      _n('4', 'Nova Avaliação! ⭐⭐⭐⭐⭐',
+          type: NotificationType.orderRated,
+          read: true,
+          body: 'Cláudia Lopes avaliou a OS #170 com 5 estrelas'),
+      _n('5', 'Orçamento Aprovado! ✅', read: true),
+    ])));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ana Ribeiro aprovou o orçamento'), findsOneWidget);
+    expect(
+      find.text('Carlos Mendes comentou: “Pode trocar o filtro de ar também?”'),
+      findsOneWidget,
+    );
+    expect(find.text('Pagamento de R\$ 350,00 recebido'), findsOneWidget);
+    expect(find.text('Cláudia Lopes avaliou com 5 estrelas'), findsOneWidget);
+    // No body: falls back to the title without emoji.
+    expect(find.text('Orçamento Aprovado!'), findsOneWidget);
+    expect(find.textContaining('#'), findsNothing);
+  });
+
+  testWidgets('back button says "Início"', (tester) async {
+    await tester.pumpWidget(_app(Builder(
+      builder: (context) => CupertinoButton(
+        onPressed: () => Navigator.of(context).push(
+          CupertinoPageRoute<void>(builder: (_) => _view([])),
+        ),
+        child: const Text('open'),
+      ),
+    )));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Início'), findsOneWidget);
   });
 }

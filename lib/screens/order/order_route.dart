@@ -41,9 +41,15 @@ class _OrderRouteState extends State<OrderRoute> {
 /// vehicle, item) push inside the sheet through its own navigator, which
 /// knows the app's named routes. With the legacy screen turned on, opens
 /// `/order` as before.
-Future<Object?> openNewOrder(BuildContext context) {
+///
+/// [repeat] starts the order with "Repetir" turned on (from Contratos).
+Future<Object?> openNewOrder(BuildContext context, {bool repeat = false}) {
+  final arguments = repeat ? const {'repeat': true} : null;
   if (!OrderScreenPreference.useNewScreen.value) {
-    return Navigator.of(context, rootNavigator: true).pushNamed('/order');
+    return Navigator.of(
+      context,
+      rootNavigator: true,
+    ).pushNamed('/order', arguments: arguments);
   }
   return Navigator.of(context, rootNavigator: true).push<Object?>(
     CupertinoSheetRoute<Object?>(
@@ -52,7 +58,10 @@ Future<Object?> openNewOrder(BuildContext context) {
         onGenerateRoute: (settings) {
           if (settings.name == Navigator.defaultRouteName) {
             return CupertinoPageRoute<Object?>(
-              settings: settings,
+              settings: RouteSettings(
+                name: settings.name,
+                arguments: arguments,
+              ),
               builder: (_) => const OrderScreenV2(),
             );
           }

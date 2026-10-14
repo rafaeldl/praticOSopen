@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/services/contract_directory.dart';
@@ -18,10 +19,13 @@ enum _ContractTab { active, ended }
 /// the next order is born; ended ones show when they stopped. Tapping a row
 /// opens the order that holds the contract.
 class ContractListScreen extends StatefulWidget {
-  const ContractListScreen({super.key, this.directory});
+  const ContractListScreen({super.key, this.directory, this.onNew});
 
   /// Injected in tests; defaults to [FirestoreContractDirectory].
   final ContractDirectory? directory;
+
+  /// "+": defaults to "Nova OS" with "Repetir" turned on.
+  final VoidCallback? onNew;
 
   @override
   State<ContractListScreen> createState() => _ContractListScreenState();
@@ -85,6 +89,14 @@ class _ContractListScreenState extends State<ContractListScreen> {
         slivers: [
           AppNavBar(
             largeTitle: Text(l10n.contracts),
+            previousTitle: l10n.myCompany,
+            trailing: GlassBarButton(
+              key: const ValueKey('contract_new'),
+              label: l10n.contractNew,
+              icon: CupertinoIcons.add,
+              onPressed:
+                  widget.onNew ?? () => openNewOrder(context, repeat: true),
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -110,11 +122,15 @@ class _ContractListScreenState extends State<ContractListScreen> {
                 groupValue: _tab,
                 children: {
                   _ContractTab.active: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Text(l10n.contractsTabActive),
                   ),
                   _ContractTab.ended: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Text(l10n.contractsTabEnded),
                   ),
                 },
@@ -148,8 +164,10 @@ class _ContractListScreenState extends State<ContractListScreen> {
     }
     final showActive = _tab == _ContractTab.active;
     final visible = orders
-        .where((o) =>
-            o.contract != null && (o.contract!.active == true) == showActive)
+        .where(
+          (o) =>
+              o.contract != null && (o.contract!.active == true) == showActive,
+        )
         .toList();
 
     return [
@@ -158,30 +176,34 @@ class _ContractListScreenState extends State<ContractListScreen> {
           hasScrollBody: false,
           child: EmptyState(
             title: showActive ? l10n.noContracts : l10n.contractsEmptyEnded,
+            message: showActive
+                ? l10n.contractsEmptyAdd(l10n.orderShort)
+                : null,
           ),
         )
-      else
+      else ...[
         SliverList(
           delegate: SliverChildListDelegate([
             for (final order in visible) _row(context, order),
           ]),
         ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pageMargin,
-            AppSpacing.xl,
-            AppSpacing.pageMargin,
-            AppSpacing.xxl,
-          ),
-          child: Text(
-            l10n.contractsFooterHint(l10n.orderShort),
-            style: AppTypography.callout.copyWith(
-              color: AppColors.textSecondary.resolveFrom(context),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.xl,
+              AppSpacing.pageMargin,
+              AppSpacing.xxl,
+            ),
+            child: Text(
+              l10n.contractsFooterHint(l10n.orderShort),
+              style: AppTypography.callout.copyWith(
+                color: AppColors.textSecondary.resolveFrom(context),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     ];
   }
 
@@ -215,9 +237,10 @@ class _ContractListScreenState extends State<ContractListScreen> {
     return AppListRow(
       title: order.customer?.name ?? '',
       titleStyle: AppTypography.bodyStrong,
-      subtitle: [firstLine, if (lastLine != null) lastLine]
-          .where((line) => line.isNotEmpty)
-          .join('\n'),
+      subtitle: [
+        firstLine,
+        if (lastLine != null) lastLine,
+      ].where((line) => line.isNotEmpty).join('\n'),
       onTap: () =>
           Navigator.pushNamed(context, '/order', arguments: {'order': order}),
     );

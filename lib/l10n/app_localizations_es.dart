@@ -1259,7 +1259,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get topProducts => 'Productos Más Vendidos';
 
   @override
-  String get recentOrders => 'Órdenes Recientes';
+  String get recentOrders => 'Órdenes recientes';
 
   @override
   String get recentCustomers => 'Usados por último';
@@ -6519,4 +6519,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get agendaNextMonth => 'Mes siguiente';
+
+  @override
+  String noticeCommented(String name, String text) {
+    return '$name comentó: “$text”';
+  }
+
+  @override
+  String noticePaymentReceived(String amount) {
+    return 'Pago de $amount recibido';
+  }
+
+  @override
+  String get contractNew => 'Nuevo contrato';
+
+  @override
+  String get orderRepeatRow => 'Repetir';
+
+  @override
+  String contractsEmptyAdd(String order) {
+    return 'Toca + para crear una $order que se repite sola.';
+  }
 }

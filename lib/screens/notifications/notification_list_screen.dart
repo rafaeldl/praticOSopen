@@ -110,6 +110,8 @@ class NotificationListView extends StatelessWidget {
         slivers: [
           AppNavBar(
             largeTitle: Text(l10n.noticesTitle),
+            // Avisos only opens from the bell on Início.
+            previousTitle: l10n.home,
           ),
           if (isLoading)
             const SliverFillRemaining(
