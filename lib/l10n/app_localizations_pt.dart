@@ -3978,6 +3978,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderAssistantUndo => 'Desfazer';
 
   @override
+  String orderNotifyNote(String status, String name) {
+    return '$status. Avisar $name?';
+  }
+
+  @override
+  String get orderNotifyFallbackName => 'o cliente';
+
+  @override
+  String get orderNotifyAction => 'Avisar';
+
+  @override
   String get orderAssistantReadingPhotos => 'Lendo as fotos…';
 
   @override

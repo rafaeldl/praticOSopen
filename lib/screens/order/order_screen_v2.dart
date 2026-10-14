@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' show max;
 
@@ -85,6 +86,13 @@ import 'package:provider/provider.dart';
 ///   another screen. Falar listens right there and the stop fills the order;
 ///   Foto puts the photos in "Fotos" and the assistant reads them. What it
 ///   filled gets a blue sparkle, with "Desfazer" in a note above the bar.
+
+/// How long the "Pronta. Avisar Ana?" note stays up.
+const Duration kNotifyNoteDuration = Duration(seconds: 8);
+
+/// Taps on the blue button ignored after it changes the status.
+const Duration kStatusTapCooldown = Duration(milliseconds: 800);
+
 class OrderScreenV2 extends StatefulWidget {
   const OrderScreenV2({
     super.key,
@@ -176,8 +184,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// Comments of a saved order (the last two show on the screen).
   Stream<List<OrderComment>>? _commentsStream;
 
-  /// Orders whose "Avisar o cliente?" was answered "Agora não".
+  /// Orders whose "Avisar o cliente?" note was shown and let go.
   final Set<String> _dismissedSharePrompts = {};
+
+  /// Status just set, while the "Pronta. Avisar Ana?" note is up.
+  String? _notifyStatus;
+  Timer? _notifyTimer;
+
+  /// Right after the blue button changes the status it turns into the next
+  /// step under the same finger: a double tap would skip a status.
+  Timer? _statusCooldown;
 
   final ScrollController _scroll = ScrollController();
 
@@ -190,6 +206,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _typedController.dispose();
     _requestController.dispose();
     _scroll.dispose();
+    _notifyTimer?.cancel();
+    _statusCooldown?.cancel();
     super.dispose();
   }
 
@@ -533,7 +551,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     await _offerNotifyCustomer(status);
   }
 
-  /// "Avisar o cliente?" after approved / in progress / done.
+  /// "Avisar o cliente?" after approved / in progress / done: a note above
+  /// the bar ("Pronta. Avisar Ana?") that goes away on its own, never an
+  /// alert. Shown once per order on this screen.
   Future<void> _offerNotifyCustomer(String status) async {
     final order = _store.order;
     if (order == null ||
@@ -545,13 +565,36 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         )) {
       return;
     }
-    final send = await askNotifyCustomer(context, order: order, status: status);
-    if (!mounted) return;
-    if (send) {
-      await _actions.notifyCustomer(context, order, status);
-    } else {
-      _dismissedSharePrompts.add(order.id!);
+    _dismissedSharePrompts.add(order.id!);
+    _notifyTimer?.cancel();
+    _notifyTimer = Timer(kNotifyNoteDuration, _hideNotifyNote);
+    setState(() => _notifyStatus = status);
+  }
+
+  void _hideNotifyNote() {
+    _notifyTimer?.cancel();
+    _notifyTimer = null;
+    if (mounted && _notifyStatus != null) {
+      setState(() => _notifyStatus = null);
     }
+  }
+
+  Future<void> _notifyNow() async {
+    final status = _notifyStatus;
+    final order = _store.order;
+    _hideNotifyNote();
+    if (status == null || order == null) return;
+    await _actions.notifyCustomer(context, order, status);
+  }
+
+  String _notifyMessage(String status) {
+    final l10n = context.l10n;
+    final name = _store.order?.customer?.name;
+    final who = (name == null || name.trim().isEmpty)
+        ? l10n.orderNotifyFallbackName
+        : name.trim();
+    final label = context.read<SegmentConfigProvider>().getStatus(status);
+    return l10n.orderNotifyNote(label, who);
   }
 
   Future<bool> _confirmCancel() async {
@@ -1953,6 +1996,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                           : l10n.close,
                       onAction: canUndo ? _undoDraft : _dismissNote,
                     ),
+                  )
+                else if (_notifyStatus != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: AssistantNote(
+                      key: const ValueKey('notify_note'),
+                      message: _notifyMessage(_notifyStatus!),
+                      icon: CupertinoIcons.checkmark_circle_fill,
+                      actionLabel: l10n.orderNotifyAction,
+                      onAction: _notifyNow,
+                    ),
                   ),
                 AssistantBar(
                   mode: _barMode,
@@ -2133,7 +2187,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final l10n = context.l10n;
     (String, VoidCallback)? to(String label, String target) =>
         _permissions.canChangeStatus(order, target)
-        ? (label, () => _trySetStatus(target))
+        ? (
+            label,
+            () {
+              if (_statusCooldown?.isActive ?? false) return;
+              _statusCooldown = Timer(kStatusTapCooldown, () {});
+              _trySetStatus(target);
+            },
+          )
         : null;
     switch (_store.status) {
       case 'quote':

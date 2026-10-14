@@ -272,7 +272,11 @@ class FormRow extends StatelessWidget {
               width: 28,
               child: icon == null
                   ? null
-                  : Icon(icon, size: 22, color: accent ? accentText : secondary),
+                  : Icon(
+                      icon,
+                      size: 22,
+                      color: accent ? accentText : secondary,
+                    ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -495,10 +499,7 @@ class _GlassCapsule extends StatelessWidget {
         constraints: const BoxConstraints(
           minHeight: AppSizes.primaryButtonHeight,
         ),
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: child,
-        ),
+        child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
       ),
     );
   }
@@ -964,6 +965,7 @@ class AssistantNote extends StatelessWidget {
     required this.actionLabel,
     required this.onAction,
     this.filled = false,
+    this.icon,
   });
 
   final String message;
@@ -972,6 +974,10 @@ class AssistantNote extends StatelessWidget {
 
   /// The assistant filled the order: blue sparkle; otherwise a warning.
   final bool filled;
+
+  /// Replaces the sparkle/warning (green): a note about something done, like
+  /// "Pronta. Avisar Ana?" after a status change.
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -990,11 +996,14 @@ class AssistantNote extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              filled
-                  ? CupertinoIcons.sparkles
-                  : CupertinoIcons.exclamationmark_circle,
+              icon ??
+                  (filled
+                      ? CupertinoIcons.sparkles
+                      : CupertinoIcons.exclamationmark_circle),
               size: 20,
-              color: filled
+              color: icon != null
+                  ? AppColors.success.resolveFrom(context)
+                  : filled
                   ? AppColors.accentText.resolveFrom(context)
                   : AppColors.textSecondary.resolveFrom(context),
             ),

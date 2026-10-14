@@ -3991,6 +3991,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderAssistantUndo => 'Deshacer';
 
   @override
+  String orderNotifyNote(String status, String name) {
+    return '$status. ¿Avisar a $name?';
+  }
+
+  @override
+  String get orderNotifyFallbackName => 'el cliente';
+
+  @override
+  String get orderNotifyAction => 'Avisar';
+
+  @override
   String get orderAssistantReadingPhotos => 'Leyendo las fotos…';
 
   @override

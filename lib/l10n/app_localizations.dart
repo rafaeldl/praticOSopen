@@ -6748,6 +6748,24 @@ abstract class AppLocalizations {
   /// **'Desfazer'**
   String get orderAssistantUndo;
 
+  /// No description provided for @orderNotifyNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'{status}. Avisar {name}?'**
+  String orderNotifyNote(String status, String name);
+
+  /// No description provided for @orderNotifyFallbackName.
+  ///
+  /// In pt, this message translates to:
+  /// **'o cliente'**
+  String get orderNotifyFallbackName;
+
+  /// No description provided for @orderNotifyAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisar'**
+  String get orderNotifyAction;
+
   /// No description provided for @orderAssistantReadingPhotos.
   ///
   /// In pt, this message translates to:
