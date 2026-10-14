@@ -3,7 +3,8 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// "‹ October 2026 ›": steps through periods below a screen title.
+/// "‹ October 2026 ›": steps through periods below a screen title, compact
+/// and left-aligned, with the period in secondary text.
 ///
 /// Both arrows have a 44pt touch target and a spoken label. Tapping the
 /// label returns to the current period ([onTapLabel], null when already
@@ -28,7 +29,7 @@ class PeriodStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
     final disabled = AppColors.textSecondary.resolveFrom(context);
     final accent = AppColors.accentText.resolveFrom(context);
 
@@ -55,16 +56,18 @@ class PeriodStepper extends StatelessWidget {
       );
     }
 
+    // Compact and left-aligned under the large title, as in the prototype:
+    // the chevrons hug the label instead of sitting at the screen edges.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Row(
         children: [
           arrow(
-            icon: CupertinoIcons.chevron_left,
+            icon: CupertinoIcons.chevron_back,
             semanticLabel: previousLabel,
             onPressed: onPrevious,
           ),
-          Expanded(
+          Flexible(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: onTapLabel,
@@ -72,18 +75,19 @@ class PeriodStepper extends StatelessWidget {
                 constraints: const BoxConstraints(
                   minHeight: AppSizes.minTouchTarget,
                 ),
-                child: Center(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 1,
                   child: Text(
                     label,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodyStrong.copyWith(color: textColor),
+                    style: AppTypography.callout.copyWith(color: secondary),
                   ),
                 ),
               ),
             ),
           ),
           arrow(
-            icon: CupertinoIcons.chevron_right,
+            icon: CupertinoIcons.chevron_forward,
             semanticLabel: nextLabel,
             onPressed: onNext,
           ),
