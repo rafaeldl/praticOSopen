@@ -48,15 +48,25 @@ O core atual cobre a criação e preenchimento de formulários na OS. As regras 
    - Armazenar refs no `photos` do item, sem duplicar em `OrderPhoto`.
 6. **Fechamento da OS**: validar que todos os formulários obrigatórios estão `completed`.
 
-## UX (seguir `docs/UX_GUIDELINES.md`)
-- Tela de OS: seção “Formulários” com lista e chips de status (pending/in_progress/completed/not_applicable).
-- Tela de preenchimento:
-  - `CupertinoPageScaffold` + `CupertinoSliverNavigationBar`.
-  - Lista agrupada (`CupertinoListSection.insetGrouped`) com itens ordenados e label + badge “Obrigatório” quando aplicável.
-  - Tipos de entrada respeitam HIG (switch para boolean, `CupertinoTextField`/`CupertinoPicker`/`CupertinoDatePicker` conforme tipo).
-  - Ação “Adicionar foto” inline no item com pré-visualização e indicador de upload.
-  - Botão “Marcar como não aplicável” (quando permitido).
-  - Status atualizado em tempo real; feedback de validação leve e consistente com iOS.
+## UX (seguir `docs/APP_DESIGN_SYSTEM.md`)
+- Tela de OS: seção “Checklists” com uma linha por checklist, ponto + texto de status (“Faltam 3 perguntas”, “Completo”).
+- **Resumo do checklist** (`lib/screens/forms/form_fill_screen.dart`, `FormFillScreen`):
+  - Fundo cinza agrupado, título grande, voltar em vidro e, só no checklist concluído (e para quem pode reabrir), “…” (`showPullDownMenu`) com “Reabrir”.
+  - Cabeçalho: aparelho/veículo, status (ponto + texto: âmbar “Faltam N perguntas”, verde “Completo”) e o único botão azul: “Começar”, “Continuar” ou “Concluir checklist”. Faltando só perguntas opcionais, “Concluir assim mesmo” aparece como link.
+  - “Perguntas”: cartão branco com cada pergunta, a resposta em palavras (“Sim”, a opção, “Óleo, Filtro”, o texto, “2 fotos”) ou “Sem resposta · Obrigatória”, e as miniaturas das fotos (tocar abre a galeria em tela cheia, com lixeira enquanto não estiver concluído). Tocar na linha abre aquela pergunta.
+  - Checklist sem nenhuma resposta abre direto na primeira pergunta.
+- **Uma pergunta por vez** (`lib/screens/forms/form_question_sheet.dart`, `FormQuestionSheet`, aberta em sheet grande):
+  - Topo: “Fechar” (X em vidro), nome do checklist, barra de progresso em segmentos (um por pergunta, azul quando respondida) e “Faltam N” (nunca “2 de 5”), pergunta em letra de título.
+  - `boolean`: “Sim”/“Não” em botões grandes (64 de altura, crescem com o texto). **Tocar já salva e passa.**
+  - `select`: opções em botões grandes com ✓ na resposta atual; tocar salva e passa. Salva a opção original do modelo e mostra a traduzida.
+  - `checklist` (várias): os mesmos botões, ✓ em cada marcada, “Pronto” salva e passa.
+  - `text`/`number`: campo grande com teclado aberto (numérico para `number`); “Próxima” (botão ou teclado) salva e passa. Voltar ou fechar mantém o que foi digitado.
+  - `photo_only`: “Tirar foto” abre a câmera; “Escolher da galeria” é link. Com foto, o botão vira “Próxima” e aparece “Tirar outra foto”.
+  - Qualquer item com `allowPhotos`: botão “Foto” em vidro embaixo, sempre no mesmo lugar (Câmera/Galeria).
+  - Embaixo: “Voltar à anterior” (a partir da 2ª) e “Pular por agora” em toda pergunta. Obrigatória não trava: a pulada continua em “Faltam N”.
+  - Depois da última pergunta a sheet fecha; se não faltar nada, o checklist é concluído (`status=completed`) e volta para a OS. Faltando algo, volta ao resumo.
+  - Upload e caminhos de Storage não mudaram (`tenants/{companyId}/orders/{orderId}/forms/{formId}/{itemId}_{timestamp}.jpg`).
+- Fora deste passo: sugestão automática do checklist na OS, IA (“Falar as respostas”, leitura da foto) e câmera abrindo sozinha na pergunta de foto (ver `docs/superpowers/specs/2026-10-10-checklists-design.md`).
 
 ## Componentes e serviços
 - Modelos: `lib/models/form_definition.dart`, `lib/models/order_form.dart`.

@@ -1,27 +1,43 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/share_token.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/share_link_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
-/// Sheet for sharing an order link with a customer
+/// "Mandar para o cliente": the order link, with one blue button to send it
+/// (WhatsApp when the customer has a phone). Validity, what the customer can
+/// do, a new link and turning it off live in the "…" menu.
 class ShareLinkSheet extends StatefulWidget {
   final Order order;
   final String? companyName;
   final String? statusContext;
+
+  /// Network and share calls; tests pass a fake.
+  final ShareLinkService? service;
 
   const ShareLinkSheet({
     super.key,
     required this.order,
     this.companyName,
     this.statusContext,
+    this.service,
   });
 
   @override
   State<ShareLinkSheet> createState() => _ShareLinkSheetState();
 
-  /// Show the share link sheet as a modal popup
+  /// Shows the sheet at the bottom of the screen.
   static Future<void> show(
     BuildContext context,
     Order order, {
@@ -39,17 +55,23 @@ class ShareLinkSheet extends StatefulWidget {
   }
 }
 
+/// What the customer can do through the link.
+enum _Access { all, approve, comment, view }
+
 class _ShareLinkSheetState extends State<ShareLinkSheet> {
-  final ShareLinkService _service = ShareLinkService.instance;
+  late final ShareLinkService _service =
+      widget.service ?? ShareLinkService.instance;
 
   bool _isLoading = true;
   bool _canApprove = true;
   bool _canComment = true;
-  String? _errorMessage;
+  bool _failed = false;
+  bool _copied = false;
   ShareLinkResult? _result;
   int _expiresInDays = 7;
-  bool _isReusing = false;
-  bool _showAdvancedOptions = false;
+  Timer? _copiedTimer;
+
+  static const _validityOptions = [7, 14, 30];
 
   @override
   void initState() {
@@ -57,506 +79,343 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     _loadOrGenerateLink();
   }
 
+  @override
+  void dispose() {
+    _copiedTimer?.cancel();
+    super.dispose();
+  }
+
+  void _useExisting({
+    required String? token,
+    required String? url,
+    required List<String>? permissions,
+    required DateTime? expiresAt,
+  }) {
+    setState(() {
+      _result = ShareLinkResult()
+        ..token = token
+        ..url = url
+        ..permissions = permissions
+        ..expiresAt = expiresAt
+        ..customer = widget.order.customer;
+      _canApprove = permissions?.contains('approve') ?? false;
+      _canComment = permissions?.contains('comment') ?? false;
+      _isLoading = false;
+    });
+  }
+
   Future<void> _loadOrGenerateLink() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _failed = false;
     });
 
-    // First check if order already has a valid share link
-    final existingLink = widget.order.shareLink;
-    if (existingLink != null && !existingLink.isExpired && existingLink.token != null) {
-      setState(() {
-        _result = ShareLinkResult()
-          ..token = existingLink.token
-          ..permissions = existingLink.permissions
-          ..expiresAt = existingLink.expiresAt
-          ..customer = widget.order.customer;
-        _result!.url = existingLink.url;
-        _isReusing = true;
-        _canApprove = existingLink.permissions?.contains('approve') ?? false;
-        _canComment = existingLink.permissions?.contains('comment') ?? false;
-        _isLoading = false;
-      });
+    // The order already has a valid link: reuse it.
+    final existing = widget.order.shareLink;
+    if (existing != null && !existing.isExpired && existing.token != null) {
+      _useExisting(
+        token: existing.token,
+        url: existing.url,
+        permissions: existing.permissions,
+        expiresAt: existing.expiresAt,
+      );
       return;
     }
 
-    // If no local link, fetch from API or generate new
     try {
       final tokens = await _service.getShareTokens(widget.order.id!);
-      final activeTokens = tokens.where((t) => !t.isExpired).toList();
-
-      if (activeTokens.isNotEmpty) {
-        final token = activeTokens.first;
-        setState(() {
-          _result = ShareLinkResult()
-            ..token = token.token
-            ..permissions = token.permissions
-            ..expiresAt = token.expiresAt
-            ..customer = token.customer;
-          _result!.url = 'https://praticos.web.app/q/${token.token}';
-          _isReusing = true;
-          _canApprove = token.permissions?.contains('approve') ?? false;
-          _canComment = token.permissions?.contains('comment') ?? false;
-          _isLoading = false;
-        });
-      } else {
-        await _generateLink();
+      final active = tokens.where((t) => !t.isExpired).toList();
+      if (!mounted) return;
+      if (active.isNotEmpty) {
+        final token = active.first;
+        _useExisting(
+          token: token.token,
+          url: 'https://praticos.web.app/q/${token.token}',
+          permissions: token.permissions,
+          expiresAt: token.expiresAt,
+        );
+        return;
       }
-    } catch (e) {
-      await _generateLink();
+    } catch (_) {
+      // Falls through to a new link.
     }
-  }
-
-  void _showValidityPicker() {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text(context.l10n.selectValidity),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_expiresInDays != 7) {
-                setState(() => _expiresInDays = 7);
-                _generateLink();
-              }
-            },
-            child: Text('7 ${context.l10n.days}'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_expiresInDays != 14) {
-                setState(() => _expiresInDays = 14);
-                _generateLink();
-              }
-            },
-            child: Text('14 ${context.l10n.days}'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_expiresInDays != 30) {
-                setState(() => _expiresInDays = 30);
-                _generateLink();
-              }
-            },
-            child: Text('30 ${context.l10n.days}'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: true,
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
-        ),
-      ),
-    );
+    await _generateLink();
   }
 
   Future<void> _generateLink() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
-      _isReusing = false;
+      _failed = false;
     });
-
     try {
       final permissions = <String>['view'];
       if (_canApprove) permissions.add('approve');
       if (_canComment) permissions.add('comment');
-
       final result = await _service.generateShareLink(
         orderId: widget.order.id!,
         permissions: permissions,
         expiresInDays: _expiresInDays,
       );
-
+      if (!mounted) return;
       setState(() {
         _result = result;
         _isLoading = false;
       });
-      // Share link is saved to order by the API
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = e.toString();
+        _failed = true;
         _isLoading = false;
       });
     }
   }
 
-  void _copyLink() {
-    if (_result?.url == null) return;
+  String _message() => _service.buildShareMessage(
+    customerName: widget.order.customer?.name ?? '',
+    orderNumber: widget.order.number ?? 0,
+    companyName: widget.companyName,
+    locale: context.l10n.localeName,
+    statusContext: widget.statusContext,
+  );
 
-    _service.copyToClipboard(_result!.url!);
-    _showCupertinoToast(context.l10n.linkCopied);
-  }
-
-  void _shareLink() {
-    if (_result?.url == null) return;
-
-    final message = _service.buildShareMessage(
-      customerName: widget.order.customer?.name ?? '',
-      orderNumber: widget.order.number ?? 0,
-      companyName: widget.companyName,
-      locale: context.l10n.localeName,
-      statusContext: widget.statusContext,
-    );
-
-    // Get the share position for iPad
-    final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin = box != null
-        ? box.localToGlobal(Offset.zero) & box.size
-        : null;
-
-    _service.shareViaSheet(
-      url: _result!.url!,
-      message: message,
-      subject: '${context.l10n.order} #${widget.order.number}',
-      sharePositionOrigin: sharePositionOrigin,
-    );
-  }
-
-  void _sendViaWhatsApp() {
-    if (_result?.url == null) return;
-
+  String? get _phone {
     final phone = widget.order.customer?.phone;
-    if (phone == null || phone.isEmpty) {
-      _showCupertinoToast(context.l10n.invalidPhone);
-      return;
+    return phone == null || phone.isEmpty ? null : phone;
+  }
+
+  Future<void> _sendViaWhatsApp() async {
+    final url = _result?.url;
+    final phone = _phone;
+    if (url == null || phone == null) return;
+    try {
+      await _service.shareViaWhatsApp(
+        url: url,
+        phone: phone,
+        message: _message(),
+      );
+    } catch (_) {
+      // WhatsApp missing: offer the system share sheet instead.
+      if (mounted) await _shareLink();
     }
+  }
 
-    final message = _service.buildShareMessage(
-      customerName: widget.order.customer?.name ?? '',
-      orderNumber: widget.order.number ?? 0,
-      companyName: widget.companyName,
-      locale: context.l10n.localeName,
-      statusContext: widget.statusContext,
-    );
-
-    _service.shareViaWhatsApp(
-      url: _result!.url!,
-      phone: phone,
-      message: message,
+  Future<void> _shareLink() async {
+    final url = _result?.url;
+    if (url == null) return;
+    final box = context.findRenderObject() as RenderBox?;
+    await _service.shareViaSheet(
+      url: url,
+      message: _message(),
+      subject: '${context.l10n.orderShort} ${widget.order.number ?? ''}',
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
     );
   }
 
-  void _showCupertinoToast(String message) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (context.mounted) Navigator.of(context).pop();
-        });
-        return DefaultTextStyle(
-          style: const TextStyle(
-            fontFamily: '.SF Pro Text',
-            decoration: TextDecoration.none,
+  Future<void> _copyLink() async {
+    final url = _result?.url;
+    if (url == null) return;
+    await _service.copyToClipboard(url);
+    if (!mounted) return;
+    setState(() => _copied = true);
+    _copiedTimer?.cancel();
+    _copiedTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _copied = false);
+    });
+  }
+
+  _Access get _access {
+    if (_canApprove && _canComment) return _Access.all;
+    if (_canApprove) return _Access.approve;
+    if (_canComment) return _Access.comment;
+    return _Access.view;
+  }
+
+  String _accessLabel(_Access access) {
+    final l10n = context.l10n;
+    switch (access) {
+      case _Access.all:
+        return l10n.sharePermAll;
+      case _Access.approve:
+        return l10n.sharePermApprove;
+      case _Access.comment:
+        return l10n.sharePermComment;
+      case _Access.view:
+        return l10n.sharePermView;
+    }
+  }
+
+  Future<void> _openMenu() async {
+    final l10n = context.l10n;
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'validity',
+            label: l10n.shareValidity,
+            icon: CupertinoIcons.clock,
+            submenu: true,
           ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 100),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey.darkColor,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 15,
-                ),
-              ),
+          PullDownItem(
+            value: 'access',
+            label: l10n.shareWhatCanDo,
+            icon: CupertinoIcons.person_crop_circle_badge_checkmark,
+            submenu: true,
+          ),
+        ]),
+        PullDownGroup([
+          PullDownItem(
+            value: 'new',
+            label: l10n.shareNewLink,
+            icon: CupertinoIcons.arrow_2_circlepath,
+          ),
+        ]),
+        PullDownGroup([
+          if (_result?.token != null)
+            PullDownItem(
+              value: 'revoke',
+              label: l10n.shareRevoke,
+              icon: CupertinoIcons.nosign,
+              destructive: true,
             ),
-          ),
-        );
-      },
+        ]),
+      ],
     );
+    if (!mounted || picked == null) return;
+    switch (picked) {
+      case 'validity':
+        await _pickValidity();
+      case 'access':
+        await _pickAccess();
+      case 'new':
+        await _generateLink();
+      case 'revoke':
+        await _confirmRevoke();
+    }
   }
 
-  void _confirmRevokeLink() {
-    showCupertinoDialog(
+  Future<void> _pickValidity() async {
+    final days = await pickOne<int>(
+      context,
+      title: context.l10n.shareValidityTitle,
+      selected: _validityOptions.contains(_expiresInDays)
+          ? _expiresInDays
+          : null,
+      options: [
+        for (final d in _validityOptions)
+          PickerItem(value: d, title: context.l10n.shareValidityDays(d)),
+      ],
+    );
+    if (days == null || !mounted) return;
+    _expiresInDays = days;
+    await _generateLink();
+  }
+
+  Future<void> _pickAccess() async {
+    final access = await pickOne<_Access>(
+      context,
+      title: context.l10n.sharePermissionsTitle,
+      selected: _access,
+      options: [
+        for (final a in _Access.values)
+          PickerItem(value: a, title: _accessLabel(a)),
+      ],
+    );
+    if (access == null || !mounted || access == _access) return;
+    _canApprove = access == _Access.all || access == _Access.approve;
+    _canComment = access == _Access.all || access == _Access.comment;
+    await _generateLink();
+  }
+
+  Future<void> _confirmRevoke() async {
+    final l10n = context.l10n;
+    final ok = await showCupertinoDialog<bool>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.revokeLink),
-        content: Text(context.l10n.revokeLinkConfirm),
+        title: Text(l10n.shareRevoke),
+        content: Text(l10n.shareRevokeConfirm(l10n.orderShort)),
         actions: [
           CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _revokeLink();
-            },
-            child: Text(context.l10n.revokeLink),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.shareRevoke),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _revokeLink() async {
-    if (_result?.token == null) return;
-
+    if (ok != true || !mounted) return;
     setState(() => _isLoading = true);
-
     try {
       await _service.revokeShareToken(widget.order.id!, _result!.token!);
-      // Share link is cleared from order by the API
-
-      if (mounted) {
-        Navigator.pop(context);
-        _showCupertinoToast(context.l10n.linkRevoked);
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-      _showCupertinoToast(e.toString());
+      if (mounted) Navigator.pop(context);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _failed = true;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+    final l10n = context.l10n;
+    final ready = !_isLoading && !_failed && _result != null;
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface.resolveFrom(context),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadii.button),
         ),
-        child: SafeArea(
-          top: false,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.lg,
+          ),
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey4.resolveFrom(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Header - simplified
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
                 children: [
                   Expanded(
                     child: Text(
-                      context.l10n.sendToCustomer,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
+                      l10n.shareTitle,
+                      style: AppTypography.highlight.copyWith(
+                        color: AppColors.text.resolveFrom(context),
                       ),
                     ),
                   ),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Icon(
-                      CupertinoIcons.xmark_circle_fill,
-                      color: CupertinoColors.systemGrey3.resolveFrom(context),
+                  if (ready)
+                    GlassBarButton(
+                      key: const Key('shareLinkMenu'),
+                      label: l10n.shareMenu,
+                      icon: CupertinoIcons.ellipsis,
+                      onPressed: _openMenu,
                     ),
+                  const SizedBox(width: AppSpacing.sm),
+                  GlassBarButton(
+                    key: const Key('shareLinkClose'),
+                    label: l10n.close,
+                    icon: CupertinoIcons.xmark,
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Content
-            if (_isLoading)
               Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    const CupertinoActivityIndicator(),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.l10n.generatingLink,
-                      style: TextStyle(
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    const Icon(
-                      CupertinoIcons.exclamationmark_circle,
-                      color: CupertinoColors.systemRed,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.l10n.errorGeneratingLink,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    CupertinoButton(
-                      onPressed: _generateLink,
-                      child: Text(context.l10n.tryAgain),
-                    ),
-                  ],
-                ),
-              )
-            else
-              _buildLinkContent(),
-
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    ),
-    );
-  }
-
-  Widget _buildLinkContent() {
-    final customer = widget.order.customer;
-    final hasPhone = customer?.phone != null && customer!.phone!.isNotEmpty;
-
-    return Column(
-      children: [
-        // Customer card
-        if (customer != null) _buildCustomerCard(customer, hasPhone),
-
-        const SizedBox(height: 20),
-
-        // Primary action button
-        if (hasPhone)
-          _buildWhatsAppButton()
-        else
-          _buildShareButton(isPrimary: true),
-
-        // Secondary share button (when WhatsApp is primary)
-        if (hasPhone) ...[
-          const SizedBox(height: 10),
-          _buildSecondaryShareButton(),
-        ],
-
-        const SizedBox(height: 16),
-
-        // Validity info with copy link - always visible
-        _buildValidityRow(),
-
-        const SizedBox(height: 8),
-
-        // Advanced options toggle
-        _buildAdvancedOptionsToggle(),
-
-        // Advanced options content (collapsible)
-        if (_showAdvancedOptions) _buildAdvancedOptions(),
-      ],
-    );
-  }
-
-  Widget _buildCustomerCard(dynamic customer, bool hasPhone) {
-    final customerName = customer.name as String? ?? context.l10n.customer;
-    final customerPhone = hasPhone ? customer.phone as String : null;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6.resolveFrom(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                customerName.isNotEmpty ? customerName[0].toUpperCase() : '?',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: CupertinoColors.activeBlue,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  customerName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (customerPhone != null)
-                  Text(
-                    customerPhone,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWhatsAppButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: CupertinoButton(
-          color: const Color(0xFF25D366), // WhatsApp green
-          borderRadius: BorderRadius.circular(12),
-          padding: EdgeInsets.zero,
-          onPressed: _sendViaWhatsApp,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(CupertinoIcons.chat_bubble_fill, color: Colors.white),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.sendViaWhatsApp,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: _body(context),
               ),
             ],
           ),
@@ -565,316 +424,125 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     );
   }
 
-  Widget _buildShareButton({required bool isPrimary}) {
-    if (isPrimary) {
+  Widget _body(BuildContext context) {
+    final l10n = context.l10n;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    if (_isLoading) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: CupertinoButton.filled(
-            borderRadius: BorderRadius.circular(12),
-            padding: EdgeInsets.zero,
-            onPressed: _shareLink,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.share, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.share,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+        child: Column(
+          children: [
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              l10n.sharePreparing,
+              style: AppTypography.callout.copyWith(color: secondary),
             ),
-          ),
+          ],
         ),
       );
     }
-    return const SizedBox.shrink();
-  }
+    if (_failed || _result == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.shareError,
+              style: AppTypography.body.copyWith(
+                color: AppColors.danger.resolveFrom(context),
+              ),
+            ),
+            TextLink(label: l10n.tryAgain, onPressed: _loadOrGenerateLink),
+          ],
+        ),
+      );
+    }
 
-  Widget _buildSecondaryShareButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        width: double.infinity,
-        height: 44,
-        child: CupertinoButton(
-          color: CupertinoColors.systemGrey5.resolveFrom(context),
-          borderRadius: BorderRadius.circular(10),
-          padding: EdgeInsets.zero,
-          onPressed: _shareLink,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.share,
-                size: 18,
-                color: CupertinoColors.label.resolveFrom(context),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.share,
-                style: TextStyle(
-                  color: CupertinoColors.label.resolveFrom(context),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+    final name = widget.order.customer?.name;
+    final who = name == null || name.trim().isEmpty
+        ? l10n.shareTheCustomer
+        : name;
+    final order = l10n.orderShort;
+    final sentence = switch (_access) {
+      _Access.all => l10n.shareCanAll(who, order),
+      _Access.approve => l10n.shareCanApprove(who, order),
+      _Access.comment => l10n.shareCanComment(who, order),
+      _Access.view => l10n.shareCanView(who, order),
+    };
+    final expires = _result!.expiresAt;
+    final hasPhone = _phone != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          expires == null
+              ? sentence
+              : '$sentence ${l10n.shareValidUntil(FormatService().formatDayMonthOrDate(expires))}',
+          key: const Key('shareLinkSentence'),
+          style: AppTypography.callout.copyWith(color: secondary),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        PrimaryButton(
+          key: const Key('shareLinkPrimary'),
+          label: hasPhone ? l10n.shareSendWhatsApp : l10n.shareSendLink,
+          icon: hasPhone
+              ? CupertinoIcons.chat_bubble_fill
+              : CupertinoIcons.share,
+          onPressed: hasPhone ? _sendViaWhatsApp : _shareLink,
+        ),
+        if (hasPhone) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _SecondaryButton(
+            key: const Key('shareLinkOtherWay'),
+            label: l10n.shareSendOtherWay,
+            onPressed: _shareLink,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.xs),
+        Center(
+          child: TextLink(
+            key: const Key('shareLinkCopy'),
+            label: _copied ? l10n.shareLinkCopied : l10n.shareCopyLink,
+            onPressed: _copyLink,
           ),
         ),
-      ),
+      ],
     );
   }
+}
 
-  Widget _buildValidityRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.clock,
-            size: 15,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            context.l10n.linkValidFor(_expiresInDays),
-            style: TextStyle(
-              fontSize: 14,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-          const Spacer(),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: _copyLink,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  CupertinoIcons.doc_on_doc,
-                  size: 15,
-                  color: CupertinoColors.activeBlue,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.copyLink,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+/// Grey filled button for the second way to send (design system: other
+/// actions use `secondaryFill`).
+class _SecondaryButton extends StatelessWidget {
+  const _SecondaryButton({super.key, required this.label, this.onPressed});
 
-  Widget _buildAdvancedOptionsToggle() {
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
     return CupertinoButton(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      onPressed: () => setState(() => _showAdvancedOptions = !_showAdvancedOptions),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.gear,
-            size: 16,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            context.l10n.advancedOptions,
-            style: TextStyle(
-              fontSize: 13,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-          const Spacer(),
-          Icon(
-            _showAdvancedOptions
-                ? CupertinoIcons.chevron_up
-                : CupertinoIcons.chevron_down,
-            size: 14,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
-    );
-  }
-
-  Widget _buildAdvancedOptions() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Permissions header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Text(
-              context.l10n.sharePermissions.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          // Permissions list
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey6.resolveFrom(context),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                _buildPermissionRow(
-                  title: context.l10n.canApprove,
-                  value: _canApprove,
-                  onChanged: _isReusing
-                      ? null
-                      : (value) {
-                          setState(() => _canApprove = value);
-                          _generateLink();
-                        },
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 16),
-                  height: 0.5,
-                  color: CupertinoColors.separator.resolveFrom(context),
-                ),
-                _buildPermissionRow(
-                  title: context.l10n.canComment,
-                  value: _canComment,
-                  onChanged: _isReusing
-                      ? null
-                      : (value) {
-                          setState(() => _canComment = value);
-                          _generateLink();
-                        },
-                ),
-              ],
-            ),
-          ),
-          // Validity picker (when not reusing)
-          if (!_isReusing)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                children: [
-                  Text(
-                    context.l10n.linkValidity,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    ),
-                  ),
-                  const Spacer(),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: _showValidityPicker,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$_expiresInDays ${context.l10n.days}',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(CupertinoIcons.chevron_down, size: 14),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          // Reusing existing link indicator
-          if (_isReusing) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.checkmark_circle_fill,
-                    size: 15,
-                    color: CupertinoColors.activeGreen,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    context.l10n.usingExistingLink,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: CupertinoColors.activeGreen,
-                    ),
-                  ),
-                  const Spacer(),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      setState(() => _isReusing = false);
-                      _generateLink();
-                    },
-                    child: Text(
-                      context.l10n.generateNewLink,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Revoke link button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: SizedBox(
-                width: double.infinity,
-                child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  color: CupertinoColors.systemRed.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  onPressed: _confirmRevokeLink,
-                  child: Text(
-                    context.l10n.revokeLink,
-                    style: const TextStyle(
-                      color: CupertinoColors.systemRed,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-        ],
+      minimumSize: const Size(
+        AppSizes.minTouchTarget,
+        AppSizes.minTouchTarget + 6,
       ),
-    );
-  }
-
-  Widget _buildPermissionRow({
-    required String title,
-    required bool value,
-    required ValueChanged<bool>? onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16),
-          ),
-          const Spacer(),
-          CupertinoSwitch(
-            value: value,
-            onChanged: onChanged,
-          ),
-        ],
+      color: AppColors.secondaryFill.resolveFrom(context),
+      borderRadius: BorderRadius.circular(AppRadii.button),
+      onPressed: onPressed,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: AppTypography.bodyStrong.copyWith(
+          color: AppColors.accentText.resolveFrom(context),
+        ),
       ),
     );
   }

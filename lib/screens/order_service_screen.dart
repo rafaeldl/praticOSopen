@@ -1,20 +1,32 @@
 import 'package:flutter/cupertino.dart';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:praticos/services/format_service.dart';
-import 'package:provider/provider.dart';
+import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/models/service.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/constants/label_keys.dart';
-import 'package:praticos/models/device.dart';
+import 'package:praticos/screens/order/order_item_form.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/extensions/context_extensions.dart';
+import 'package:provider/provider.dart';
 
+/// Service line of an order, opened pushed (`/order_service`) with the
+/// route arguments `orderStore` plus `service` (adding from the catalog) or
+/// `orderServiceIndex` (editing a line already in the order).
 class OrderServiceScreen extends StatefulWidget {
-  const OrderServiceScreen({super.key});
+  const OrderServiceScreen({
+    super.key,
+    this.canEditMainFields,
+    this.canViewPrices,
+  });
+
+  /// Overrides [AuthorizationService.canEditOrderMainFields] (tests).
+  final bool? canEditMainFields;
+
+  /// Overrides the `viewPrices` permission (tests).
+  final bool? canViewPrices;
 
   @override
   State<OrderServiceScreen> createState() => _OrderServiceScreenState();
@@ -30,8 +42,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   bool _initialized = false;
   final AuthorizationService _authService = AuthorizationService.instance;
 
-  final format = FormatService();
-  late final numberFormat = format.currencyFormat;
+  final TextEditingController _valueController = TextEditingController();
 
   bool get _isEditing => orderServiceIndex != null;
 
@@ -58,9 +69,29 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
           _orderService = _orderStore!.order!.services![orderServiceIndex!];
         }
       }
+      final value = _isEditing ? _orderService.value : _service?.value;
+      if (value != null) {
+        _valueController.text = orderItemMoneyFormatter(context).textFor(value);
+      }
       _initialized = true;
     }
   }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
+
+  bool get _canEditMainFields =>
+      widget.canEditMainFields ??
+      (_orderStore?.order != null
+          ? _authService.canEditOrderMainFields(_orderStore!.order!)
+          : true);
+
+  bool get _canViewPrices =>
+      widget.canViewPrices ??
+      _authService.hasPermission(PermissionType.viewPrices);
 
   Future<void> _saveService() async {
     if (_formKey.currentState!.validate()) {
@@ -77,261 +108,90 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
     }
   }
 
-  String _convertToCurrency(double? total) {
-    if (total == null) return '';
-    return format.formatCurrency(total);
+  Future<void> _showMore() async {
+    final index = orderServiceIndex;
+    if (index == null) return;
+    final remove = await askRemoveOrderItem(context, _serviceName);
+    if (!remove || !mounted) return;
+    _orderStore!.deleteService(index);
+    Navigator.pop(context);
   }
+
+  String get _serviceName =>
+      (_isEditing ? _orderService.service?.name : _service?.name) ?? '';
 
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
+    final l10n = context.l10n;
 
-    // Verifica se pode editar campos principais (valor, serviço)
-    // Sempre permite editar descrição/observações
-    final canEditMainFields = _orderStore?.order != null
-        ? _authService.canEditOrderMainFields(_orderStore!.order!)
-        : true;
+    // Main fields (value, device) follow the order permissions; notes can
+    // always be edited.
+    final canEditMainFields = _canEditMainFields;
+    final showValue = _canViewPrices && canEditMainFields;
+    final devices = _orderStore?.devices.toList() ?? const [];
+    final formatter = orderItemMoneyFormatter(context);
 
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing
+    return Form(
+      key: _formKey,
+      child: OrderItemScaffold(
+        title: _isEditing
             ? config.label(LabelKeys.editService)
-            : config.label(LabelKeys.createService)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveService,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(
-                  config.label(LabelKeys.save),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+            : config.label(LabelKeys.createService),
+        busy: _isLoading,
+        onSave: _saveService,
+        onMore: _isEditing && canEditMainFields ? _showMore : null,
+        children: [
+          OrderItemHeaderCard(
+            name: _serviceName,
+            icon: CupertinoIcons.wrench,
+            photoUrl: _isEditing ? _orderService.photo : _service?.photo,
+          ),
+          if (showValue)
+            FormFieldsCard(
+              children: [
+                AppFormField(
+                  key: const ValueKey('order_item_value'),
+                  label: l10n.value,
+                  controller: _valueController,
+                  placeholder: formatter.textFor(0),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [formatter],
+                  validator: (text) => text.trim().isEmpty
+                      ? config.label(LabelKeys.required)
+                      : null,
+                  onSaved: (text) =>
+                      _orderService.value = formatter.valueOf(text),
                 ),
-        ),
-      ),
-      child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
+              ],
+            ),
+          if (devices.length >= 2)
+            OrderItemRowsCard(
+              children: [
+                OrderItemDeviceRow(
+                  label: config.device,
+                  devices: devices,
+                  deviceId: _orderService.deviceId,
+                  enabled: canEditMainFields,
+                  onChanged: (id) =>
+                      setState(() => _orderService.deviceId = id),
+                ),
+              ],
+            ),
+          FormFieldsCard(
             children: [
-              const SizedBox(height: 20),
-
-              // Photo Section
-              Center(child: _buildHeaderImage(context)),
-              const SizedBox(height: 20),
-
-              // Form Fields
-              CupertinoListSection.insetGrouped(
-                children: [
-                  _buildServiceNameField(context),
-                  _buildDeviceField(context, config, enabled: canEditMainFields),
-                  // Apenas mostrar campo de valor se usuário pode ver/editar preços E pode editar campos principais
-                  if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields)
-                    _buildValueField(context, config),
-                ],
-              ),
-
-              CupertinoListSection.insetGrouped(
-                header: Text(
-                  config.label(LabelKeys.notes).toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-                children: [
-                  _buildDescriptionField(context),
-                ],
+              AppFormField(
+                key: const ValueKey('order_item_notes'),
+                label: config.label(LabelKeys.notes),
+                initialValue: _isEditing ? _orderService.description : null,
+                placeholder: l10n.orderItemNotesPlaceholder,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 3,
+                onSaved: (text) => _orderService.description = text,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeviceField(BuildContext context, SegmentConfigProvider config, {bool enabled = true}) {
-    if (_orderStore == null || _orderStore!.devices.length < 2) {
-      return const SizedBox.shrink();
-    }
-
-    final deviceId = _orderService.deviceId;
-    String displayName;
-
-    if (deviceId != null) {
-      final device = _orderStore!.devices.cast<DeviceAggr?>().firstWhere(
-        (d) => d?.id == deviceId,
-        orElse: () => null,
-      );
-      if (device != null) {
-        displayName = device.serial != null && device.serial!.trim().isNotEmpty
-            ? '${device.name} - ${device.serial}'
-            : device.name ?? '';
-      } else {
-        displayName = context.l10n.generalNoDevice;
-      }
-    } else {
-      displayName = context.l10n.generalNoDevice;
-    }
-
-    return CupertinoListTile(
-      title: Text(config.device, style: const TextStyle(fontSize: 16)),
-      additionalInfo: Text(
-        displayName,
-        style: TextStyle(
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          fontSize: 16,
-        ),
-      ),
-      trailing: enabled ? const CupertinoListTileChevron() : null,
-      onTap: enabled ? () => _changeDevice(config) : null,
-    );
-  }
-
-  void _changeDevice(SegmentConfigProvider config) {
-    final devices = _orderStore!.devices.toList();
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(context.l10n.selectDeviceFor),
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.generalNoDevice),
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _orderService.deviceId = null);
-            },
-          ),
-          ...devices.map((d) {
-            final name = d.serial != null && d.serial!.trim().isNotEmpty
-                ? '${d.name} - ${d.serial}'
-                : d.name ?? '';
-            return CupertinoActionSheetAction(
-              child: Text(name),
-              onPressed: () {
-                Navigator.pop(ctx);
-                setState(() => _orderService.deviceId = d.id);
-              },
-            );
-          }),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(ctx),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildServiceNameField(BuildContext context) {
-    final serviceName = orderServiceIndex == null
-        ? _service?.name
-        : _orderService.service?.name;
-
-    return CupertinoListTile(
-      title: const SizedBox(
-        width: 80,
-        child: Text('Serviço', style: TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: Expanded(
-        child: Text(
-          serviceName ?? '',
-          textAlign: TextAlign.right,
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            fontSize: 16,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDescriptionField(BuildContext context) {
-    return CupertinoTextFormFieldRow(
-      initialValue: orderServiceIndex != null ? _orderService.description : null,
-      placeholder: 'Detalhes adicionais do serviço',
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-      onSaved: (String? value) {
-        _orderService.description = value;
-      },
-    );
-  }
-
-  Widget _buildValueField(BuildContext context, SegmentConfigProvider config) {
-    final initialValue = orderServiceIndex == null
-        ? _convertToCurrency(_service?.value)
-        : _convertToCurrency(_orderService.value);
-
-    return CupertinoListTile(
-      title: const SizedBox(
-        width: 80,
-        child: Text('Valor', style: TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 150,
-        child: CupertinoTextFormFieldRow(
-          initialValue: initialValue,
-          placeholder: 'R\$ 0,00',
-          inputFormatters: [
-            CurrencyTextInputFormatter.currency(
-              locale: 'pt_BR',
-              symbol: 'R\$',
-              decimalDigits: 2,
-            ),
-          ],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.right,
-          padding: EdgeInsets.zero,
-          decoration: null,
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return config.label(LabelKeys.required);
-            }
-            return null;
-          },
-          onSaved: (String? value) {
-            _orderService.value = numberFormat.parse(value!) as double?;
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderImage(BuildContext context) {
-    String? photoUrl;
-    if (orderServiceIndex != null) {
-      photoUrl = _orderService.photo;
-    } else {
-      photoUrl = _service?.photo;
-    }
-
-    if (photoUrl != null && photoUrl.isNotEmpty) {
-      return ClipOval(
-        child: CachedImage(
-          imageUrl: photoUrl,
-          width: 100,
-          height: 100,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey5.resolveFrom(context),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        CupertinoIcons.wrench,
-        size: 50,
-        color: CupertinoColors.systemGrey.resolveFrom(context),
       ),
     );
   }

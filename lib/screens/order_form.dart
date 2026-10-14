@@ -466,9 +466,9 @@ class _OrderFormState extends State<OrderForm> {
     final contract = _store.order?.contract;
     if (contract == null) return;
 
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => ContractConfigSheet(
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (ctx) => ContractConfigScreen(
         contract: contract,
         onFrequencyChanged: (f) => _store.setContractFrequency(f),
         onIntervalChanged: (i) => _store.setContractInterval(i),
@@ -476,6 +476,7 @@ class _OrderFormState extends State<OrderForm> {
         onEndDateChanged: (d) => _store.setContractEndDate(d),
         onAutoGenerateChanged: (v) => _store.setContractAutoGenerate(v),
         onReminderDaysChanged: (d) => _store.setContractReminderDays(d),
+      ),
       ),
     );
   }

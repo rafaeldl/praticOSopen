@@ -6,6 +6,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/screens/onboarding/select_segment_screen.dart';
 import 'package:praticos/screens/onboarding/whatsapp_onboarding_screen.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
@@ -155,22 +156,29 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Widget build(BuildContext context) => SelectSegmentScreen(session: _session);
 }
 
-/// Page of the first access: native large title that collapses on scroll, an
-/// optional sentence under it, [slivers], and optional [bottom] actions that
-/// float over the content (which fades at the edge).
+/// Page of the first access: [AppNavBar] (large title that collapses on
+/// scroll, glass back button named [previousTitle]), an optional sentence
+/// under the title, [slivers], and optional [bottom] actions that float over
+/// the content (which fades at the edge).
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({
     super.key,
     required this.title,
     this.subtitle,
     this.leading,
+    this.previousTitle,
     required this.slivers,
     this.bottom,
   });
 
   final String title;
   final String? subtitle;
+
+  /// Replaces the automatic back button (e.g. "Sair" on the first step).
   final Widget? leading;
+
+  /// Name of the previous step on the back button ("‹ Seu ramo").
+  final String? previousTitle;
   final List<Widget> slivers;
   final Widget? bottom;
 
@@ -179,11 +187,10 @@ class OnboardingPage extends StatelessWidget {
     final background = AppColors.background.resolveFrom(context);
     final scroll = CustomScrollView(
       slivers: [
-        CupertinoSliverNavigationBar(
+        AppNavBar(
           largeTitle: Text(title),
           leading: leading,
-          backgroundColor: background,
-          border: null,
+          previousTitle: previousTitle,
         ),
         if (subtitle != null)
           SliverToBoxAdapter(
@@ -260,7 +267,8 @@ class OnboardingPage extends StatelessWidget {
   }
 }
 
-/// Text button for the top bar, on glass ("Sair").
+/// Text button for the top bar, on glass ("Sair"): same capsule as
+/// [GlassBackButton], 44pt touch target.
 class OnboardingTopButton extends StatelessWidget {
   const OnboardingTopButton({
     super.key,
@@ -273,94 +281,33 @@ class OnboardingTopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      widthFactor: 1,
-      child: AppGlass(
-        tint: AppColors.secondaryFill,
-        borderRadius: BorderRadius.circular(18),
-        child: CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          minimumSize: const Size(AppSizes.minTouchTarget, 36),
-          onPressed: onPressed,
-          child: Text(
-            label,
-            style: AppTypography.callout.copyWith(
-              color: AppColors.accentText.resolveFrom(context),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A choice in a list: optional emoji, title, ✓ on the right when
-/// [selected]. With [opensNext] the row also shows a chevron, because tapping
-/// it goes to the next step.
-class OnboardingChoiceRow extends StatelessWidget {
-  const OnboardingChoiceRow({
-    super.key,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-    this.emoji,
-    this.opensNext = false,
-  });
-
-  final String title;
-  final String? emoji;
-  final bool selected;
-  final bool opensNext;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = AppColors.accentText.resolveFrom(context);
+    final color = AppColors.text.resolveFrom(context);
     return Semantics(
       button: true,
-      selected: selected,
-      label: title,
+      label: label,
       excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pageMargin,
-              vertical: AppSpacing.md,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(
+          AppSizes.minTouchTarget,
+          AppSizes.minTouchTarget,
+        ),
+        onPressed: onPressed,
+        child: AppGlass(
+          elevated: true,
+          borderRadius: BorderRadius.circular(AppSizes.glassBarButton / 2),
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: AppSizes.glassBarButton,
             ),
-            child: Row(
-              children: [
-                if (emoji != null) ...[
-                  Text(emoji!, style: AppTypography.body),
-                  const SizedBox(width: AppSpacing.md),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.text.resolveFrom(context),
-                    ),
-                  ),
-                ),
-                if (selected) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(CupertinoIcons.checkmark, size: 20, color: accent),
-                ],
-                if (opensNext) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(
-                    CupertinoIcons.chevron_forward,
-                    size: 18,
-                    color: AppColors.textSecondary.resolveFrom(context),
-                  ),
-                ],
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Text(
+                label,
+                style: AppTypography.body.copyWith(color: color),
+              ),
             ),
           ),
         ),

@@ -1,20 +1,34 @@
 import 'package:flutter/cupertino.dart';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:praticos/services/format_service.dart';
-import 'package:provider/provider.dart';
+import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/models/product.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/models/product.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/constants/label_keys.dart';
-import 'package:praticos/models/device.dart';
+import 'package:praticos/screens/order/order_item_form.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/format_service.dart';
+import 'package:provider/provider.dart';
 
+/// Product line of an order, opened pushed (`/order_product`) with the
+/// route arguments `orderStore` plus `product` (adding from the catalog) or
+/// `orderProductIndex` (editing a line already in the order).
 class OrderProductScreen extends StatefulWidget {
-  const OrderProductScreen({super.key});
+  const OrderProductScreen({
+    super.key,
+    this.canEditMainFields,
+    this.canViewPrices,
+  });
+
+  /// Overrides [AuthorizationService.canEditOrderMainFields] (tests).
+  final bool? canEditMainFields;
+
+  /// Overrides the `viewPrices` permission (tests).
+  final bool? canViewPrices;
 
   @override
   State<OrderProductScreen> createState() => _OrderProductScreenState();
@@ -32,16 +46,15 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
 
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
+  late MoneyInputFormatter _money;
   double _total = 0;
-
-  final format = FormatService();
-  late final numberFormat = format.currencyFormat;
 
   bool get _isEditing => orderProductIndex != null;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _money = orderItemMoneyFormatter(context);
     if (!_initialized) {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -65,20 +78,18 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       }
 
       // Initialize controllers
-      if (orderProductIndex != null) {
-        _quantityController.text = _orderProduct.quantity.toString();
-        _valueController.text = _convertToCurrency(_orderProduct.value);
-      } else {
-        _quantityController.text = '1';
-        _valueController.text = _convertToCurrency(_product?.value);
+      final value = _isEditing ? _orderProduct.value : _product?.value;
+      _quantityController.text = _isEditing
+          ? _orderProduct.quantity.toString()
+          : '1';
+      if (value != null) {
+        _valueController.text = _money.textFor(value);
       }
 
-      // Add listeners for real-time total calculation
+      // Real-time total
       _quantityController.addListener(_updateTotal);
       _valueController.addListener(_updateTotal);
-
-      // Calculate initial total
-      _updateTotal();
+      _total = _computeTotal();
 
       _initialized = true;
     }
@@ -93,21 +104,24 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     super.dispose();
   }
 
-  void _updateTotal() {
-    final quantity = int.tryParse(_quantityController.text) ?? 0;
+  double _computeTotal() {
+    final quantity = int.tryParse(_quantityController.text.trim()) ?? 0;
     final valueText = _valueController.text;
-    double value = 0;
-    if (valueText.isNotEmpty) {
-      try {
-        value = numberFormat.parse(valueText) as double;
-      } catch (_) {
-        value = 0;
-      }
-    }
-    setState(() {
-      _total = quantity * value;
-    });
+    final value = valueText.isEmpty ? 0.0 : _money.valueOf(valueText);
+    return quantity * value;
   }
+
+  void _updateTotal() => setState(() => _total = _computeTotal());
+
+  bool get _canEditMainFields =>
+      widget.canEditMainFields ??
+      (_orderStore?.order != null
+          ? _authService.canEditOrderMainFields(_orderStore!.order!)
+          : true);
+
+  bool get _canViewPrices =>
+      widget.canViewPrices ??
+      _authService.hasPermission(PermissionType.viewPrices);
 
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
@@ -115,8 +129,9 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       _formKey.currentState!.save();
 
       final value = _orderProduct.value;
-      _orderProduct.total =
-          value == null ? null : (_orderProduct.quantity ?? 1) * value;
+      _orderProduct.total = value == null
+          ? null
+          : (_orderProduct.quantity ?? 1) * value;
 
       if (orderProductIndex == null) {
         _orderStore!.addProduct(_orderProduct);
@@ -128,319 +143,102 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     }
   }
 
-  String _convertToCurrency(double? total) {
-    if (total == null) return '';
-    return format.formatCurrency(total);
+  Future<void> _showMore() async {
+    final index = orderProductIndex;
+    if (index == null) return;
+    final remove = await askRemoveOrderItem(context, _productName);
+    if (!remove || !mounted) return;
+    _orderStore!.deleteProduct(index);
+    Navigator.pop(context);
   }
+
+  String get _productName =>
+      (_isEditing ? _orderProduct.product?.name : _product?.name) ?? '';
 
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
+    final l10n = context.l10n;
 
-    // Verifica se pode editar campos principais (valor, quantidade, produto)
-    // Sempre permite editar descrição/observações
-    final canEditMainFields = _orderStore?.order != null
-        ? _authService.canEditOrderMainFields(_orderStore!.order!)
-        : true;
+    // Main fields (quantity, value, device) follow the order permissions;
+    // notes can always be edited.
+    final canEditMainFields = _canEditMainFields;
+    final showValue = _canViewPrices && canEditMainFields;
+    final devices = _orderStore?.devices.toList() ?? const [];
+    final formatter = _money;
+    final format = FormatService()..setLocale(l10n.localeName);
 
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? config.label(LabelKeys.editProduct) : config.label(LabelKeys.createProduct)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveProduct,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(
-                  config.label(LabelKeys.save),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-        ),
-      ),
-      child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
+    return Form(
+      key: _formKey,
+      child: OrderItemScaffold(
+        title: _isEditing
+            ? config.label(LabelKeys.editProduct)
+            : config.label(LabelKeys.createProduct),
+        busy: _isLoading,
+        onSave: _saveProduct,
+        onMore: _isEditing && canEditMainFields ? _showMore : null,
+        children: [
+          OrderItemHeaderCard(
+            name: _productName,
+            icon: CupertinoIcons.cube_box,
+            photoUrl: _isEditing ? _orderProduct.photo : _product?.photo,
+          ),
+          FormFieldsCard(
             children: [
-              const SizedBox(height: 20),
-
-              // Photo Section
-              Center(child: _buildHeaderImage(context)),
-              const SizedBox(height: 20),
-
-              // Form Fields
-              CupertinoListSection.insetGrouped(
-                children: [
-                  _buildProductNameField(context),
-                  _buildDeviceField(context, config, enabled: canEditMainFields),
-                  // Mostrar quantidade (desabilitado se não puder editar)
-                  _buildQuantityField(context, config, enabled: canEditMainFields),
-                  // Apenas mostrar campos de valores se usuário pode ver preços E pode editar campos principais
-                  if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields) ...[
-                    _buildValueField(context, config),
-                    _buildTotalField(context, config),
-                  ],
-                ],
+              OrderItemQuantityField(
+                label: config.label(LabelKeys.quantity),
+                controller: _quantityController,
+                enabled: canEditMainFields,
+                onSaved: (q) => _orderProduct.quantity = q,
               ),
-
-              CupertinoListSection.insetGrouped(
-                header: Text(
-                  config.label(LabelKeys.notes).toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
+              if (showValue) ...[
+                AppFormField(
+                  key: const ValueKey('order_item_value'),
+                  label: config.label(LabelKeys.unitValue),
+                  controller: _valueController,
+                  placeholder: formatter.textFor(0),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [formatter],
+                  validator: (text) => text.trim().isEmpty
+                      ? config.label(LabelKeys.required)
+                      : null,
+                  onSaved: (text) =>
+                      _orderProduct.value = formatter.valueOf(text),
                 ),
-                children: [
-                  _buildDescriptionField(context),
-                ],
+                OrderItemTotalRow(
+                  label: config.label(LabelKeys.total),
+                  value: format.formatCurrency(_total),
+                ),
+              ],
+            ],
+          ),
+          if (devices.length >= 2)
+            OrderItemRowsCard(
+              children: [
+                OrderItemDeviceRow(
+                  label: config.device,
+                  devices: devices,
+                  deviceId: _orderProduct.deviceId,
+                  enabled: canEditMainFields,
+                  onChanged: (id) =>
+                      setState(() => _orderProduct.deviceId = id),
+                ),
+              ],
+            ),
+          FormFieldsCard(
+            children: [
+              AppFormField(
+                key: const ValueKey('order_item_notes'),
+                label: config.label(LabelKeys.notes),
+                initialValue: _isEditing ? _orderProduct.description : null,
+                placeholder: l10n.orderItemNotesPlaceholder,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 3,
+                onSaved: (text) => _orderProduct.description = text,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeviceField(BuildContext context, SegmentConfigProvider config, {bool enabled = true}) {
-    if (_orderStore == null || _orderStore!.devices.length < 2) {
-      return const SizedBox.shrink();
-    }
-
-    final deviceId = _orderProduct.deviceId;
-    String displayName;
-
-    if (deviceId != null) {
-      final device = _orderStore!.devices.cast<DeviceAggr?>().firstWhere(
-        (d) => d?.id == deviceId,
-        orElse: () => null,
-      );
-      if (device != null) {
-        displayName = device.serial != null && device.serial!.trim().isNotEmpty
-            ? '${device.name} - ${device.serial}'
-            : device.name ?? '';
-      } else {
-        displayName = context.l10n.generalNoDevice;
-      }
-    } else {
-      displayName = context.l10n.generalNoDevice;
-    }
-
-    return CupertinoListTile(
-      title: Text(config.device, style: const TextStyle(fontSize: 16)),
-      additionalInfo: Text(
-        displayName,
-        style: TextStyle(
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          fontSize: 16,
-        ),
-      ),
-      trailing: enabled ? const CupertinoListTileChevron() : null,
-      onTap: enabled ? () => _changeDevice(config) : null,
-    );
-  }
-
-  void _changeDevice(SegmentConfigProvider config) {
-    final devices = _orderStore!.devices.toList();
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(context.l10n.selectDeviceFor),
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.generalNoDevice),
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _orderProduct.deviceId = null);
-            },
-          ),
-          ...devices.map((d) {
-            final name = d.serial != null && d.serial!.trim().isNotEmpty
-                ? '${d.name} - ${d.serial}'
-                : d.name ?? '';
-            return CupertinoActionSheetAction(
-              child: Text(name),
-              onPressed: () {
-                Navigator.pop(ctx);
-                setState(() => _orderProduct.deviceId = d.id);
-              },
-            );
-          }),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(ctx),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProductNameField(BuildContext context) {
-    final productName = orderProductIndex == null
-        ? _product?.name
-        : _orderProduct.product?.name;
-
-    return CupertinoListTile(
-      title: const SizedBox(
-        width: 80,
-        child: Text('Produto', style: TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: Expanded(
-        child: Text(
-          productName ?? '',
-          textAlign: TextAlign.right,
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            fontSize: 16,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuantityField(BuildContext context, SegmentConfigProvider config, {bool enabled = true}) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 100,
-        child: Text(config.label(LabelKeys.quantity), style: const TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 80,
-        child: CupertinoTextFormFieldRow(
-          controller: _quantityController,
-          placeholder: '1',
-          enabled: enabled,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.right,
-          padding: EdgeInsets.zero,
-          decoration: null,
-          style: TextStyle(
-            color: enabled 
-                ? CupertinoColors.label.resolveFrom(context)
-                : CupertinoColors.secondaryLabel.resolveFrom(context)
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return config.label(LabelKeys.required);
-            }
-            final qty = int.tryParse(value);
-            if (qty == null || qty <= 0) {
-              return 'Inválida';
-            }
-            return null;
-          },
-          onSaved: (String? value) {
-            _orderProduct.quantity = int.parse(value!);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildValueField(BuildContext context, SegmentConfigProvider config) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 120,
-        child: Text(config.label(LabelKeys.unitValue), style: const TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 150,
-        child: CupertinoTextFormFieldRow(
-          controller: _valueController,
-          placeholder: 'R\$ 0,00',
-          inputFormatters: [
-            CurrencyTextInputFormatter.currency(
-              locale: 'pt_BR',
-              symbol: 'R\$',
-              decimalDigits: 2,
-            ),
-          ],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.right,
-          padding: EdgeInsets.zero,
-          decoration: null,
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return config.label(LabelKeys.required);
-            }
-            return null;
-          },
-          onSaved: (String? value) {
-            _orderProduct.value = numberFormat.parse(value!) as double?;
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTotalField(BuildContext context, SegmentConfigProvider config) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 80,
-        child: Text(
-          config.label(LabelKeys.total),
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-      additionalInfo: Text(
-        _convertToCurrency(_total),
-        textAlign: TextAlign.right,
-        style: TextStyle(
-          color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDescriptionField(BuildContext context) {
-    return CupertinoTextFormFieldRow(
-      initialValue: orderProductIndex != null ? _orderProduct.description : null,
-      placeholder: 'Observações sobre o produto',
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-      onSaved: (String? value) {
-        _orderProduct.description = value;
-      },
-    );
-  }
-
-  Widget _buildHeaderImage(BuildContext context) {
-    String? photoUrl;
-    if (orderProductIndex != null) {
-      photoUrl = _orderProduct.photo;
-    } else {
-      photoUrl = _product?.photo;
-    }
-
-    if (photoUrl != null && photoUrl.isNotEmpty) {
-      return ClipOval(
-        child: CachedImage(
-          imageUrl: photoUrl,
-          width: 100,
-          height: 100,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey5.resolveFrom(context),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        CupertinoIcons.cube_box,
-        size: 50,
-        color: CupertinoColors.systemGrey.resolveFrom(context),
       ),
     );
   }

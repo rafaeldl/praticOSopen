@@ -7,6 +7,7 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -19,7 +20,8 @@ import 'package:praticos/utils/invite_error.dart';
 ///
 /// Mostrada quando o usuário tem convites pendentes para entrar em empresas.
 /// Um único botão primário ("Entrar na equipe"); recusar é um link de texto
-/// com confirmação. Com vários convites, tocar na linha abre as opções.
+/// com confirmação. Com vários convites, tocar na linha abre o convite numa
+/// tela própria, com o mesmo botão e link.
 class PendingInvitesScreen extends StatefulWidget {
   final VoidCallback? onCreateCompany;
   final VoidCallback? onInviteAccepted;
@@ -131,11 +133,11 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     );
   }
 
-  void _showRejectConfirmation(Invite invite) {
+  void _showRejectConfirmation(Invite invite, {VoidCallback? onRejected}) {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.rejectInvite),
+        title: Text(context.l10n.inviteDecline),
         content: Text(
           context.l10n.areYouSureReject(invite.company?.name ?? ''),
         ),
@@ -148,6 +150,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
             isDestructiveAction: true,
             onPressed: () {
               Navigator.pop(context);
+              onRejected?.call();
               _rejectInvite(invite);
             },
             child: Text(context.l10n.reject),
@@ -157,32 +160,19 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     );
   }
 
-  /// With several invites, tapping a row offers join / decline.
-  void _showInviteOptions(Invite invite) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(invite.company?.name ?? ''),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _acceptInvite(invite);
-            },
-            child: Text(context.l10n.inviteJoinTeam),
+  /// With several invites, tapping a row opens that invite on its own
+  /// screen (same layout as a single invite), never an action sheet.
+  void _openInvite(Invite invite) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (detailContext) => _InviteDetailScreen(
+          invite: invite,
+          subtitle: _subtitle(invite),
+          onJoin: () => _acceptInvite(invite),
+          onDecline: () => _showRejectConfirmation(
+            invite,
+            onRejected: () => Navigator.of(detailContext).pop(),
           ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _showRejectConfirmation(invite);
-            },
-            child: Text(context.l10n.inviteDecline),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(context.l10n.back),
         ),
       ),
     );
@@ -228,11 +218,21 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                 Text(
                   single != null
                       ? context.l10n.inviteTitleOne(single.company?.name ?? '')
-                      : context.l10n.pendingInvites,
+                      : context.l10n.inviteTitleMany,
                   style: AppTypography.title.copyWith(
                     color: AppColors.text.resolveFrom(context),
                   ),
                 ),
+                if (invites.length > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
+                    child: Text(
+                      context.l10n.inviteManyHint,
+                      style: AppTypography.callout.copyWith(
+                        color: AppColors.textSecondary.resolveFrom(context),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: AppSpacing.md),
                 if (invites.isEmpty)
                   Text(
@@ -262,7 +262,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                     AppListRow(
                       title: invite.company?.name ?? '',
                       subtitle: _subtitle(invite),
-                      onTap: () => _showInviteOptions(invite),
+                      onTap: () => _openInvite(invite),
                     ),
                 const SizedBox(height: AppSpacing.lg),
                 Center(
@@ -281,6 +281,69 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// One invite among several: who invited, the single blue "Entrar na equipe"
+/// and the "Recusar convite" link.
+class _InviteDetailScreen extends StatelessWidget {
+  const _InviteDetailScreen({
+    required this.invite,
+    required this.subtitle,
+    required this.onJoin,
+    required this.onDecline,
+  });
+
+  final Invite invite;
+  final String subtitle;
+  final VoidCallback onJoin;
+  final VoidCallback onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final company = invite.company?.name ?? '';
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.background.resolveFrom(context),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.xl,
+          ),
+          children: [
+            const Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: GlassBackButton(),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            // Same layout as a single invite.
+            Text(
+              context.l10n.inviteTitleOne(company),
+              style: AppTypography.title.copyWith(
+                color: AppColors.text.resolveFrom(context),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppListRow(title: company, subtitle: subtitle),
+            const SizedBox(height: AppSpacing.xl),
+            PrimaryButton(
+              key: const ValueKey('invite_detail_join'),
+              label: context.l10n.inviteJoinTeam,
+              onPressed: onJoin,
+            ),
+            Center(
+              child: TextLink(
+                key: const ValueKey('invite_detail_decline'),
+                label: context.l10n.inviteDecline,
+                onPressed: onDecline,
+              ),
+            ),
+          ],
         ),
       ),
     );

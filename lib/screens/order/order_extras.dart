@@ -25,21 +25,39 @@ class OrderDatePick {
 /// Date and time picker for the order (schedule, due date): "Salvar" on the
 /// right; optional [removeLabel] in red to clear the date.
 class OrderDateSheet extends StatefulWidget {
-  const OrderDateSheet({super.key, required this.initial, this.removeLabel});
+  const OrderDateSheet({
+    super.key,
+    required this.initial,
+    this.removeLabel,
+    this.dateOnly = false,
+    this.minimum,
+  });
 
   final DateTime initial;
   final String? removeLabel;
+
+  /// Day only, with no time (contract start and end).
+  final bool dateOnly;
+
+  /// Earliest day that can be picked.
+  final DateTime? minimum;
 
   /// Resolves with what was picked, or null when dismissed.
   static Future<OrderDatePick?> show(
     BuildContext context, {
     required DateTime initial,
     String? removeLabel,
+    bool dateOnly = false,
+    DateTime? minimum,
   }) {
     return showCupertinoModalPopup<OrderDatePick>(
       context: context,
-      builder: (_) =>
-          OrderDateSheet(initial: initial, removeLabel: removeLabel),
+      builder: (_) => OrderDateSheet(
+        initial: initial,
+        removeLabel: removeLabel,
+        dateOnly: dateOnly,
+        minimum: minimum,
+      ),
     );
   }
 
@@ -91,7 +109,10 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
             Expanded(
               child: CupertinoDatePicker(
                 initialDateTime: widget.initial,
-                mode: CupertinoDatePickerMode.dateAndTime,
+                minimumDate: widget.minimum,
+                mode: widget.dateOnly
+                    ? CupertinoDatePickerMode.date
+                    : CupertinoDatePickerMode.dateAndTime,
                 use24hFormat: true,
                 onDateTimeChanged: (d) => _picked = d,
               ),

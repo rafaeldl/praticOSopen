@@ -383,9 +383,12 @@ class OrderScreenActions {
   Future<void> editContract(BuildContext context, OrderStore store) {
     final contract = store.order?.contract;
     if (contract == null) return Future.value();
-    return showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => ContractConfigSheet(
+    return Navigator.of(context).push<void>(
+      CupertinoPageRoute(
+        builder: (_) => ContractConfigScreen(
+        previousTitle: store.order?.number == null
+            ? null
+            : context.l10n.orderRowNumber(store.order!.number!.toString()),
         contract: contract,
         onFrequencyChanged: store.setContractFrequency,
         onIntervalChanged: store.setContractInterval,
@@ -393,6 +396,8 @@ class OrderScreenActions {
         onEndDateChanged: store.setContractEndDate,
         onAutoGenerateChanged: store.setContractAutoGenerate,
         onReminderDaysChanged: store.setContractReminderDays,
+        onStop: () => store.toggleContract(false),
+      ),
       ),
     );
   }

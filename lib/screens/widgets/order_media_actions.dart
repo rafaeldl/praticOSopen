@@ -4,7 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_document.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -50,9 +54,9 @@ Future<void> showAddOrderMediaSheet(
   Widget label(IconData icon, String text) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Text(text),
+          Icon(icon, size: 22),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(child: Text(text, textAlign: TextAlign.center)),
         ],
       );
 
@@ -104,6 +108,8 @@ Future<void> showAddOrderMediaSheet(
   );
 }
 
+/// "Que documento é este?": picks the type (receipt, invoice, ...) and
+/// uploads the file to the order documents.
 Future<void> _selectDocumentType(
   BuildContext context,
   OrderStore store,
@@ -111,7 +117,7 @@ Future<void> _selectDocumentType(
   String contentType,
   String fileName, {
   int? fileSize,
-}) {
+}) async {
   final l10n = context.l10n;
   final types = {
     OrderDocumentType.receipt: l10n.receipt,
@@ -120,39 +126,27 @@ Future<void> _selectDocumentType(
     OrderDocumentType.warranty: l10n.warranty,
     OrderDocumentType.other: l10n.other,
   };
-  return showCupertinoModalPopup<void>(
-    context: context,
-    builder: (ctx) => CupertinoActionSheet(
-      title: Text(l10n.selectDocumentType),
-      actions: [
-        for (final entry in types.entries)
-          CupertinoActionSheetAction(
-            child: Text(entry.value),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await store.addDocument(
-                file,
-                entry.key,
-                contentType,
-                fileName,
-                fileSize: fileSize,
-              );
-              if (!context.mounted) return;
-              showOrderMediaFeedback(
-                context,
-                success
-                    ? context.l10n.documentAdded
-                    : context.l10n.errorUploadingDocument,
-                isError: !success,
-              );
-            },
-          ),
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        child: Text(l10n.cancel),
-        onPressed: () => Navigator.pop(ctx),
-      ),
-    ),
+  final type = await pickOne<OrderDocumentType>(
+    context,
+    title: l10n.orderDocumentTypeTitle,
+    options: [
+      for (final entry in types.entries)
+        PickerItem<OrderDocumentType>(value: entry.key, title: entry.value),
+    ],
+  );
+  if (type == null || !context.mounted) return;
+  final success = await store.addDocument(
+    file,
+    type,
+    contentType,
+    fileName,
+    fileSize: fileSize,
+  );
+  if (!context.mounted) return;
+  showOrderMediaFeedback(
+    context,
+    success ? context.l10n.documentAdded : context.l10n.errorUploadingDocument,
+    isError: !success,
   );
 }
 
@@ -173,11 +167,11 @@ void showOrderMediaFeedback(
                 ? CupertinoIcons.xmark_circle_fill
                 : CupertinoIcons.checkmark_circle_fill,
             color: isError
-                ? CupertinoColors.systemRed
-                : CupertinoColors.systemGreen,
+                ? AppColors.danger.resolveFrom(ctx)
+                : AppColors.success.resolveFrom(ctx),
             size: 24,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Flexible(child: Text(message)),
         ],
       ),
@@ -201,6 +195,7 @@ Future<bool> confirmDeleteOrderDocument(BuildContext context) async {
       content: Text(context.l10n.confirmDeleteDocument),
       actions: [
         CupertinoDialogAction(
+          isDefaultAction: true,
           child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(ctx, false),
         ),
@@ -247,7 +242,8 @@ Future<void> openOrderDocument(BuildContext context, OrderDocument doc) async {
   }
 }
 
-/// Full-screen image viewer for document images.
+/// Full-screen image viewer for document images (black, like the iPhone's
+/// photo viewer: over a photo the colors do not follow the theme).
 class OrderDocumentImageViewer extends StatelessWidget {
   final String url;
   final String title;
@@ -258,22 +254,36 @@ class OrderDocumentImageViewer extends StatelessWidget {
     required this.title,
   });
 
+  static const _black = Color(0xFF000000);
+  static const _white = Color(0xFFFFFFFF);
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.black,
+      backgroundColor: _black,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
-          onPressed: () => Navigator.pop(context),
+        backgroundColor: _black.withValues(alpha: 0.8),
+        border: null,
+        leading: Semantics(
+          button: true,
+          label: context.l10n.back,
+          excludeSemantics: true,
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(
+              AppSizes.minTouchTarget,
+              AppSizes.minTouchTarget,
+            ),
+            child: const Icon(CupertinoIcons.back, color: _white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         middle: Text(
           title,
-          style: const TextStyle(color: CupertinoColors.white),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          style: AppTypography.callout.copyWith(
+            color: _white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       child: SafeArea(
@@ -285,13 +295,16 @@ class OrderDocumentImageViewer extends StatelessWidget {
               url,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
-                return const CupertinoActivityIndicator();
+                return const CupertinoActivityIndicator(color: _white);
               },
               errorBuilder: (context, error, stackTrace) {
-                return const Icon(
-                  CupertinoIcons.exclamationmark_triangle,
-                  color: CupertinoColors.systemGrey,
-                  size: 48,
+                return Semantics(
+                  label: context.l10n.errorLoadingPhoto,
+                  child: const Icon(
+                    CupertinoIcons.exclamationmark_triangle,
+                    color: _white,
+                    size: 48,
+                  ),
                 );
               },
             ),

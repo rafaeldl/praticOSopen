@@ -3,8 +3,10 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/onboarding/onboarding_flow.dart';
 import 'package:praticos/screens/onboarding/your_business_screen.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/onboarding_service.dart';
+import 'package:praticos/theme/app_typography.dart';
 
 /// Optional step, only for segments with specialties. All of them start
 /// checked (reasonable default, HIG onboarding), so "Continuar" is enough;
@@ -59,17 +61,24 @@ class _SelectSubspecialtiesScreenState
     final locale = Localizations.localeOf(context);
 
     return OnboardingPage(
-      title: l10n.onboardingSpecialtiesTitle,
-      subtitle: l10n.onboardingSpecialtiesSubtitle,
+      title: l10n.pickSpecialtiesTitle,
+      subtitle: l10n.onboardingSpecialtiesHint,
+      previousTitle: l10n.onboardingSegmentTitle,
       slivers: [
         SliverToBoxAdapter(
           child: MoreRows(rows: [
             for (final sub in widget.segment.subspecialties)
-              OnboardingChoiceRow(
+              AppListRow(
                 key: ValueKey('subspecialty_${sub.id}'),
-                emoji: sub.icon,
+                leading: sub.icon == null
+                    ? null
+                    : ExcludeSemantics(
+                        child: Text(sub.icon!, style: AppTypography.body),
+                      ),
                 title: sub.nameFor(locale),
                 selected: _selected.contains(sub.id),
+                // Toggles here: no chevron.
+                showChevron: false,
                 onTap: () => _toggle(sub.id),
               ),
           ]),

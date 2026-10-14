@@ -887,52 +887,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   Future<void> _contractActions() async {
-    final l10n = context.l10n;
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.recurringContract),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'change'),
-            child: Text(l10n.orderContractChange),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, 'stop'),
-            child: Text(l10n.deactivateContract),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-    if (!mounted || choice == null) return;
-    if (choice == 'change') {
-      await _actions.editContract(context, _store);
-    } else {
-      final stop = await showCupertinoDialog<bool>(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: Text(l10n.deactivateContract),
-          content: Text(l10n.deactivateContractConfirm),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.cancel),
-            ),
-            CupertinoDialogAction(
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.deactivateContract),
-            ),
-          ],
-        ),
-      );
-      if (stop == true) _store.toggleContract(false);
-    }
+    await _actions.editContract(context, _store);
     if (mounted) setState(() {});
   }
 

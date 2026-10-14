@@ -5,18 +5,52 @@ import 'package:image_picker/image_picker.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/screens/forms/form_question_sheet.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 
+/// A checklist of the OS: the summary of the answers, and the questions one
+/// at a time ([FormQuestionSheet]).
+///
+/// - Top: back and, for a completed checklist, "…" with "Reabrir".
+/// - Header: device, status (dot + text: "Faltam 3 perguntas", "Completo")
+///   and the one blue button: "Começar"/"Continuar" (opens the questions at
+///   the first one without an answer) or "Concluir checklist".
+/// - "Perguntas": a white card with each question and its answer; a tap opens
+///   that question.
+///
+/// A checklist with no answer yet opens straight on the first question.
+/// Answering the last one with nothing left completes the checklist and goes
+/// back to the OS.
 class FormFillScreen extends StatefulWidget {
   final String orderId;
   final String companyId;
   final OrderForm orderForm;
   final List<DeviceAggr>? devices;
+
+  /// Injected in tests (the defaults talk to Firebase).
+  final FormsService? formsService;
+  final PhotoService? photoService;
+
+  /// Who may reopen a completed checklist; defaults to
+  /// [AuthorizationService.canReopenCompletedForms].
+  final bool Function()? canReopen;
+
+  /// Opens the questions right away when nothing was answered yet.
+  final bool openQuestionsOnStart;
 
   const FormFillScreen({
     super.key,
@@ -24,6 +58,10 @@ class FormFillScreen extends StatefulWidget {
     required this.companyId,
     required this.orderForm,
     this.devices,
+    this.formsService,
+    this.photoService,
+    this.canReopen,
+    this.openQuestionsOnStart = true,
   });
 
   @override
@@ -31,21 +69,59 @@ class FormFillScreen extends StatefulWidget {
 }
 
 class _FormFillScreenState extends State<FormFillScreen> {
-  final FormsService _formsService = FormsService();
-  final PhotoService _photoService = PhotoService();
-  final AuthorizationService _authService = AuthorizationService.instance;
+  late final FormsService _formsService = widget.formsService ?? FormsService();
+  late final PhotoService _photoService = widget.photoService ?? PhotoService();
   late OrderForm _currentForm;
   bool _isUploading = false;
   bool _isSaving = false;
   String? _uploadingItemId;
 
+  /// Bumped on every change, so the open question sheet rebuilds.
+  final ValueNotifier<int> _changes = ValueNotifier(0);
+
   /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
   String? get _localeCode => context.l10n.localeName;
+
+  bool get _isCompleted => _currentForm.status == FormStatus.completed;
 
   @override
   void initState() {
     super.initState();
     _currentForm = widget.orderForm;
+    // The model may come with const lists; answers are added in place.
+    _currentForm.responses = List.of(_currentForm.responses);
+    if (widget.openQuestionsOnStart &&
+        !_isCompleted &&
+        _currentForm.items.isNotEmpty &&
+        _currentForm.responses.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openQuestions(0);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _changes.dispose();
+    super.dispose();
+  }
+
+  /// setState that also rebuilds the question sheet.
+  void _update(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+    _changes.value++;
+  }
+
+  void _putResponse(FormResponse response) {
+    final index = _currentForm.responses.indexWhere(
+      (r) => r.itemId == response.itemId,
+    );
+    if (index >= 0) {
+      _currentForm.responses[index] = response;
+    } else {
+      _currentForm.responses.add(response);
+    }
   }
 
   Future<void> _saveItemResponse(String itemId, dynamic value) async {
@@ -60,16 +136,14 @@ class _FormFillScreenState extends State<FormFillScreen> {
       photoUrls: photoUrls,
     );
 
-    setState(() {
-      final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
-      if (index >= 0) {
-        _currentForm.responses[index] = newResponse;
-      } else {
-        _currentForm.responses.add(newResponse);
-      }
-    });
+    _update(() => _putResponse(newResponse));
 
-    await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
+    await _formsService.saveResponse(
+      widget.companyId,
+      widget.orderId,
+      _currentForm.id,
+      newResponse,
+    );
   }
 
   Future<void> _addPhoto(String itemId, ImageSource source) async {
@@ -87,14 +161,15 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   Future<void> _uploadSinglePhoto(String itemId, File file) async {
-    setState(() {
+    _update(() {
       _isUploading = true;
       _uploadingItemId = itemId;
     });
 
     try {
       final fileName = '${itemId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final storagePath = 'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
+      final storagePath =
+          'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
 
       final url = await _photoService.uploadImage(
         file: file,
@@ -104,7 +179,9 @@ class _FormFillScreenState extends State<FormFillScreen> {
       if (url == null) throw Exception('Falha no upload');
 
       final currentResponse = _currentForm.getResponse(itemId);
-      final List<String> currentPhotos = List.from(currentResponse?.photoUrls ?? []);
+      final List<String> currentPhotos = List.from(
+        currentResponse?.photoUrls ?? [],
+      );
       currentPhotos.add(url);
 
       final newResponse = FormResponse(
@@ -113,37 +190,26 @@ class _FormFillScreenState extends State<FormFillScreen> {
         photoUrls: currentPhotos,
       );
 
-      await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
+      await _formsService.saveResponse(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        newResponse,
+      );
 
-      setState(() {
-        final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
-        if (index >= 0) {
-          _currentForm.responses[index] = newResponse;
-        } else {
-          _currentForm.responses.add(newResponse);
-        }
-      });
+      _update(() => _putResponse(newResponse));
 
       HapticFeedback.mediumImpact();
     } catch (e) {
       HapticFeedback.heavyImpact();
       if (mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.errorSendingPhoto),
-            content: Text(context.l10n.couldNotSendPhoto),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
+        _showError(
+          context.l10n.errorSendingPhoto,
+          context.l10n.couldNotSendPhoto,
         );
       }
     } finally {
-      setState(() {
+      _update(() {
         _isUploading = false;
         _uploadingItemId = null;
       });
@@ -151,20 +217,24 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   Future<void> _uploadMultiplePhotos(String itemId, List<File> files) async {
-    setState(() {
+    _update(() {
       _isUploading = true;
       _uploadingItemId = itemId;
     });
 
     try {
       final currentResponse = _currentForm.getResponse(itemId);
-      final List<String> currentPhotos = List.from(currentResponse?.photoUrls ?? []);
+      final List<String> currentPhotos = List.from(
+        currentResponse?.photoUrls ?? [],
+      );
       int successCount = 0;
 
       for (final file in files) {
         try {
-          final fileName = '${itemId}_${DateTime.now().millisecondsSinceEpoch}_$successCount.jpg';
-          final storagePath = 'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
+          final fileName =
+              '${itemId}_${DateTime.now().millisecondsSinceEpoch}_$successCount.jpg';
+          final storagePath =
+              'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
 
           final url = await _photoService.uploadImage(
             file: file,
@@ -176,7 +246,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
             successCount++;
           }
         } catch (e) {
-          print('Erro ao fazer upload de uma foto: $e');
+          debugPrint('Erro ao fazer upload de uma foto: $e');
         }
       }
 
@@ -187,16 +257,14 @@ class _FormFillScreenState extends State<FormFillScreen> {
           photoUrls: currentPhotos,
         );
 
-        await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
+        await _formsService.saveResponse(
+          widget.companyId,
+          widget.orderId,
+          _currentForm.id,
+          newResponse,
+        );
 
-        setState(() {
-          final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
-          if (index >= 0) {
-            _currentForm.responses[index] = newResponse;
-          } else {
-            _currentForm.responses.add(newResponse);
-          }
-        });
+        _update(() => _putResponse(newResponse));
 
         HapticFeedback.mediumImpact();
       } else {
@@ -205,22 +273,13 @@ class _FormFillScreenState extends State<FormFillScreen> {
     } catch (e) {
       HapticFeedback.heavyImpact();
       if (mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.errorSendingPhotos),
-            content: Text(context.l10n.couldNotSendPhotos),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
+        _showError(
+          context.l10n.errorSendingPhotos,
+          context.l10n.couldNotSendPhotos,
         );
       }
     } finally {
-      setState(() {
+      _update(() {
         _isUploading = false;
         _uploadingItemId = null;
       });
@@ -242,12 +301,30 @@ class _FormFillScreenState extends State<FormFillScreen> {
       photoUrls: currentPhotos,
     );
 
-    setState(() {
-      final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
-      _currentForm.responses[index] = newResponse;
-    });
+    _update(() => _putResponse(newResponse));
 
-    await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
+    await _formsService.saveResponse(
+      widget.companyId,
+      widget.orderId,
+      _currentForm.id,
+      newResponse,
+    );
+  }
+
+  void _showError(String title, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _finishForm() async {
@@ -259,99 +336,78 @@ class _FormFillScreenState extends State<FormFillScreen> {
         return response == null || response.photoUrls.isEmpty;
       }
 
-      return response == null || response.value == null || response.value.toString().isEmpty;
+      return response == null ||
+          response.value == null ||
+          response.value.toString().isEmpty;
     }).toList();
 
     if (missingRequired.isNotEmpty) {
       HapticFeedback.heavyImpact();
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: Text(context.l10n.requiredFields),
-          content: Text('${context.l10n.pleaseFill}\n${missingRequired.map((e) => "• ${e.getLocalizedLabel(_localeCode)}").join("\n")}'),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(context.l10n.ok),
-            ),
-          ],
-        ),
+      _showError(
+        context.l10n.requiredFields,
+        '${context.l10n.pleaseFill}\n${missingRequired.map((e) => "• ${e.getLocalizedLabel(_localeCode)}").join("\n")}',
       );
       return;
     }
 
-    setState(() => _isSaving = true);
+    _update(() => _isSaving = true);
 
     try {
-      await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.completed);
+      await _formsService.updateStatus(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        FormStatus.completed,
+      );
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        setState(() => _isSaving = false);
+        _update(() {
+          _currentForm.status = FormStatus.completed;
+          _isSaving = false;
+        });
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         HapticFeedback.heavyImpact();
-        setState(() => _isSaving = false);
-
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.error),
-            content: Text(context.l10n.couldNotCompleteForm),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
-        );
+        _update(() => _isSaving = false);
+        _showError(context.l10n.error, context.l10n.couldNotCompleteForm);
       }
-    }
-  }
-
-  /// Lida com o fechamento da tela (não auto-finaliza o formulário)
-  void _handleClose() {
-    if (mounted) {
-      Navigator.pop(context);
     }
   }
 
   /// Verifica se o usuário atual pode reabrir procedimentos concluídos
   bool _canReopenForm() {
-    return _authService.canReopenCompletedForms;
+    final canReopen = widget.canReopen;
+    if (canReopen != null) return canReopen();
+    return AuthorizationService.instance.canReopenCompletedForms;
   }
 
   Future<void> _reopenForm() async {
     // Verifica se usuário tem permissão (apenas Admin, Manager e Supervisor)
-    if (!_authService.canReopenCompletedForms) {
+    if (!_canReopenForm()) {
       HapticFeedback.heavyImpact();
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: Text(context.l10n.noPermission),
-          content: Text(context.l10n.noPermissionReopenForm),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(context.l10n.ok),
-            ),
-          ],
-        ),
+      _showError(
+        context.l10n.noPermission,
+        context.l10n.noPermissionReopenForm,
       );
       return;
     }
 
-    setState(() => _isSaving = true);
+    _update(() => _isSaving = true);
 
     try {
-      await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.inProgress);
+      await _formsService.updateStatus(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        FormStatus.inProgress,
+      );
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        setState(() {
+        _update(() {
           _currentForm.status = FormStatus.inProgress;
           _isSaving = false;
         });
@@ -359,21 +415,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
     } catch (e) {
       if (mounted) {
         HapticFeedback.heavyImpact();
-        setState(() => _isSaving = false);
-
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.error),
-            content: Text(context.l10n.couldNotReopenForm),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
-        );
+        _update(() => _isSaving = false);
+        _showError(context.l10n.error, context.l10n.couldNotReopenForm);
       }
     }
   }
@@ -390,7 +433,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         builder: (context) => _PhotoGalleryScreen(
           photos: photos,
           initialIndex: photoIndex,
-          onDelete: _currentForm.status == FormStatus.completed
+          onDelete: _isCompleted
               ? null
               : (index) async {
                   final url = photos[index];
@@ -403,153 +446,90 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  void _showPhotoSourceSheet(String itemId) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _addPhoto(itemId, ImageSource.camera);
+  /// Opens the questions one at a time, at [index] (default: the first one
+  /// without an answer).
+  Future<void> _openQuestions([int? index]) async {
+    if (_currentForm.items.isEmpty || _isCompleted) return;
+    final start = index ?? firstUnansweredIndex(_currentForm) ?? 0;
+    await Navigator.of(context).push(
+      CupertinoSheetRoute<void>(
+        builder: (sheetContext) => ValueListenableBuilder<int>(
+          valueListenable: _changes,
+          builder: (_, _, _) => FormQuestionSheet(
+            form: _currentForm,
+            initialIndex: start,
+            localeCode: _localeCode,
+            uploadingItemId: _uploadingItemId,
+            onAnswer: (item, value) => _saveItemResponse(item.id, value),
+            onAddPhoto: (item, source) => _addPhoto(item.id, source),
+            onOpenPhoto: (item, i) => _showPhotoPreview(item.id, i),
+            onClose: () => Navigator.of(sheetContext).pop(),
+            onEnd: () {
+              Navigator.of(sheetContext).pop();
+              // Last question answered and nothing left: done.
+              if (formItemsMissing(_currentForm) == 0) _finishForm();
             },
-            child: Text(context.l10n.takePhoto),
           ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _addPhoto(itemId, ImageSource.gallery);
-            },
-            child: Text(context.l10n.chooseFromGallery),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(context.l10n.cancel),
         ),
       ),
     );
   }
 
-  void _showOptionsPicker(FormItemDefinition item) {
-    final bool isChecklist = item.type == FormItemType.checklist;
-    final options = item.getLocalizedOptions(_localeCode) ?? [];
-    final originalOptions = item.options ?? [];
-    final currentResponse = _currentForm.getResponse(item.id);
-    final localizedLabel = item.getLocalizedLabel(_localeCode);
-
-    if (isChecklist) {
-      Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => _ChecklistSelectionScreen(
-            title: localizedLabel,
-            options: options,
-            originalOptions: originalOptions,
-            initialSelected: List<String>.from(currentResponse?.value ?? []),
+  Future<void> _showMenu() async {
+    final l10n = context.l10n;
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'reopen',
+            label: l10n.reopen,
+            icon: CupertinoIcons.arrow_counterclockwise,
           ),
-        ),
-      ).then((selected) {
-        if (selected != null) {
-          _saveItemResponse(item.id, selected);
-        }
-      });
-    } else {
-      showCupertinoModalPopup(
-        context: context,
-        builder: (ctx) => CupertinoActionSheet(
-          title: Text(localizedLabel),
-          actions: List.generate(options.length, (index) {
-            final localizedOpt = options[index];
-            final originalOpt = index < originalOptions.length ? originalOptions[index] : localizedOpt;
-            return CupertinoActionSheetAction(
-              onPressed: () {
-                // Save the original value for consistency
-                _saveItemResponse(item.id, originalOpt);
-                Navigator.pop(ctx);
-              },
-              child: Text(localizedOpt),
-            );
-          }),
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(context.l10n.cancel),
-          ),
-        ),
-      );
-    }
+        ]),
+      ],
+    );
+    if (picked == 'reopen') _reopenForm();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final showMenu = _isCompleted && !_isSaving && _canReopenForm();
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: AppColors.groupedBackground.resolveFrom(context),
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
+            automaticallyImplyLeading: false,
+            leading: const GlassBackButton(),
             largeTitle: Text(_currentForm.getLocalizedTitle(_localeCode)),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: _handleClose,
-              child: Text(context.l10n.close),
-            ),
+            alwaysShowMiddle: false,
+            backgroundColor: AppColors.groupedBackground
+                .resolveFrom(context)
+                .withValues(alpha: 0.8),
+            border: null,
             trailing: _isSaving
                 ? const CupertinoActivityIndicator()
-                : _currentForm.status == FormStatus.completed
-                    ? _canReopenForm()
-                        ? CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: _reopenForm,
-                            child: Text(
-                              context.l10n.reopen,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          )
-                        : null
-                    : CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: _finishForm,
-                        child: Text(
-                          context.l10n.complete,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
+                : showMenu
+                ? GlassBarButton(
+                    key: const ValueKey('form_fill_menu'),
+                    label: l10n.orderMoreActions,
+                    icon: CupertinoIcons.ellipsis,
+                    onPressed: _showMenu,
+                  )
+                : null,
           ),
           SliverSafeArea(
             top: false,
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                if (_currentForm.status == FormStatus.completed)
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemGreen.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          CupertinoIcons.checkmark_seal_fill,
-                          color: CupertinoColors.systemGreen,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            context.l10n.formCompleted,
-                            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                              color: CupertinoColors.systemGreen,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                _buildDeviceBanner(context),
-                ..._currentForm.items.map((item) => _buildFormSection(item)),
-                const SizedBox(height: 40),
+                _buildHeader(context),
+                if (_currentForm.items.isNotEmpty) ...[
+                  SectionLabel(l10n.checklistQuestionsTitle),
+                  _buildQuestionsCard(context),
+                ],
+                const SizedBox(height: AppSpacing.xxl),
               ]),
             ),
           ),
@@ -558,468 +538,295 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  Widget _buildDeviceBanner(BuildContext context) {
-    final deviceId = _currentForm.deviceId;
-    if (deviceId == null || widget.devices == null) return const SizedBox.shrink();
+  /// Device, status (dot + text) and the next step button.
+  Widget _buildHeader(BuildContext context) {
+    final l10n = context.l10n;
+    final missing = formItemsMissing(_currentForm);
+    final answeredAny = missing < _currentForm.items.length;
+    final device = _device();
+    final secondary = AppColors.textSecondary.resolveFrom(context);
 
+    final Color dot;
+    final String status;
+    if (_isCompleted) {
+      dot = AppColors.success;
+      status = l10n.checklistStatusDone;
+    } else if (missing > 0) {
+      dot = AppColors.warning;
+      status = l10n.orderChecklistMissing(missing);
+    } else {
+      dot = AppColors.accentText;
+      status = l10n.checklistRemaining(0);
+    }
+
+    final requiredMissing = _currentForm.items.any(
+      (item) =>
+          item.required &&
+          !isFormItemAnswered(item, _currentForm.getResponse(item.id)),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (device != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageMargin,
+                0,
+                AppSpacing.pageMargin,
+                AppSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    context.watch<SegmentConfigProvider>().deviceIcon,
+                    size: 20,
+                    color: secondary,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      device,
+                      key: const ValueKey('form_fill_device'),
+                      style: AppTypography.callout.copyWith(color: secondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
+            child: Row(
+              children: [
+                StatusDot(color: dot, size: 10),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    status,
+                    key: const ValueKey('form_fill_status'),
+                    style: AppTypography.body.copyWith(color: secondary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!_isCompleted && _currentForm.items.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.blockMargin,
+              ),
+              child: PrimaryButton(
+                key: const ValueKey('form_fill_primary'),
+                label: missing == 0
+                    ? l10n.checklistFinish
+                    : answeredAny
+                    ? l10n.continue_
+                    : l10n.checklistStart,
+                onPressed: _isSaving
+                    ? null
+                    : missing == 0
+                    ? _finishForm
+                    : () => _openQuestions(),
+              ),
+            ),
+            // Optional questions left: finishing is still possible.
+            if (missing > 0 && answeredAny && !requiredMissing)
+              Center(
+                child: TextLink(
+                  key: const ValueKey('form_fill_finish_anyway'),
+                  label: l10n.checklistFinishAnyway,
+                  onPressed: _isSaving ? null : _finishForm,
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String? _device() {
+    final deviceId = _currentForm.deviceId;
+    if (deviceId == null || widget.devices == null) return null;
     final device = widget.devices!.cast<DeviceAggr?>().firstWhere(
       (d) => d?.id == deviceId,
       orElse: () => null,
     );
-    if (device == null) return const SizedBox.shrink();
+    if (device == null) return null;
+    return device.serial != null && device.serial!.trim().isNotEmpty
+        ? '${device.name} · ${device.serial}'
+        : device.name;
+  }
 
-    final config = context.watch<SegmentConfigProvider>();
-    final displayName = device.serial != null && device.serial!.trim().isNotEmpty
-        ? '${device.name} - ${device.serial}'
-        : device.name ?? '';
-    final primaryColor = CupertinoTheme.of(context).primaryColor;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: primaryColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(config.deviceIcon, size: 20, color: primaryColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              displayName,
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                color: primaryColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+  Widget _buildQuestionsCard(BuildContext context) {
+    final separator = AppColors.separator.resolveFrom(context);
+    final items = _currentForm.items;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.blockMargin),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadii.block),
+        child: ColoredBox(
+          color: AppColors.surface.resolveFrom(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < items.length; i++) ...[
+                if (i > 0)
+                  Container(
+                    height: 0.5,
+                    margin: const EdgeInsets.only(left: AppSpacing.lg),
+                    color: separator,
+                  ),
+                _buildQuestionRow(context, i),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFormSection(FormItemDefinition item) {
+  /// Question, its answer (or "Sem resposta") and the photos.
+  Widget _buildQuestionRow(BuildContext context, int index) {
+    final l10n = context.l10n;
+    final item = _currentForm.items[index];
     final response = _currentForm.getResponse(item.id);
-    final photos = response?.photoUrls ?? [];
+    final answered = isFormItemAnswered(item, response);
+    final photos = response?.photoUrls ?? const <String>[];
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final canOpen = !_isCompleted;
     final isUploadingThis = _isUploading && _uploadingItemId == item.id;
 
-    return CupertinoListSection.insetGrouped(
-      header: _buildSectionHeader(item, photos.length, isUploadingThis),
-      children: [
-        _buildInputTile(item, response),
-        if (photos.isNotEmpty) _buildPhotosTile(item.id, photos),
-      ],
-    );
-  }
+    final answer = _answerText(item, response);
+    final subtitle = answered
+        ? answer
+        : item.required
+        ? '${l10n.checklistNoAnswer} · ${l10n.checklistQuestionRequired}'
+        : l10n.checklistNoAnswer;
 
-  Widget _buildSectionHeader(FormItemDefinition item, int photoCount, bool isUploading) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text.rich(
-            TextSpan(
-              text: item.getLocalizedLabel(_localeCode),
+    return Semantics(
+      button: canOpen,
+      child: GestureDetector(
+        key: ValueKey('form_fill_item_${item.id}'),
+        behavior: HitTestBehavior.opaque,
+        onTap: canOpen ? () => _openQuestions(index) : null,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (item.required)
-                  const TextSpan(
-                    text: ' *',
-                    style: TextStyle(color: CupertinoColors.systemRed),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.getLocalizedLabel(_localeCode),
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.text.resolveFrom(context),
+                        ),
+                      ),
+                      if (subtitle != null && subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: AppTypography.callout.copyWith(
+                            color: answered
+                                ? AppColors.text.resolveFrom(context)
+                                : secondary,
+                            fontWeight: answered
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                      if (isUploadingThis)
+                        const Padding(
+                          padding: EdgeInsets.only(top: AppSpacing.sm),
+                          child: CupertinoActivityIndicator(),
+                        ),
+                      if (photos.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            for (var p = 0; p < photos.length; p++)
+                              FormPhotoThumb(
+                                url: photos[p],
+                                size: 56,
+                                onTap: () => _showPhotoPreview(item.id, p),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
+                ),
+                if (canOpen) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Icon(
+                    CupertinoIcons.chevron_forward,
+                    size: 18,
+                    color: secondary,
+                  ),
+                ],
               ],
             ),
           ),
         ),
-        if ((item.allowPhotos || item.type == FormItemType.photoOnly) && _currentForm.status != FormStatus.completed)
-          isUploading
-              ? const Padding(
-                  padding: EdgeInsets.only(left: 8),
-                  child: CupertinoActivityIndicator(radius: 8),
-                )
-              : CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => _showPhotoSourceSheet(item.id),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (photoCount > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            '$photoCount',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                          ),
-                        ),
-                      Icon(
-                        CupertinoIcons.camera,
-                        size: 18,
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
-                      ),
-                    ],
-                  ),
-                ),
-      ],
+      ),
     );
   }
 
-  Widget _buildInputTile(FormItemDefinition item, FormResponse? response) {
-    final isCompleted = _currentForm.status == FormStatus.completed;
-
+  /// The answer in words: "Sim", the option in the user's language, "Óleo,
+  /// Filtro", the text, or "2 fotos" for a photo question.
+  String? _answerText(FormItemDefinition item, FormResponse? response) {
+    final l10n = context.l10n;
+    final value = response?.value;
+    final photos = response?.photoUrls.length ?? 0;
+    String? text;
     switch (item.type) {
+      case FormItemType.boolean:
+        if (value is bool) text = value ? l10n.yes : l10n.no;
+      case FormItemType.select:
+        if (value != null) text = _localizedOption(item, value.toString());
+      case FormItemType.checklist:
+        if (value is List && value.isNotEmpty) {
+          text = value
+              .map((v) => _localizedOption(item, v.toString()))
+              .join(', ');
+        }
       case FormItemType.text:
       case FormItemType.number:
-        return _TextInputTile(
-          item: item,
-          response: response,
-          onChanged: (val) => _saveItemResponse(item.id, val),
-          isReadOnly: isCompleted,
-        );
-
-      case FormItemType.boolean:
-        return _BooleanInputTile(
-          item: item,
-          response: response,
-          onChanged: (val) => _saveItemResponse(item.id, val),
-          isReadOnly: isCompleted,
-        );
-
-      case FormItemType.checklist:
-      case FormItemType.select:
-        return _SelectInputTile(
-          item: item,
-          response: response,
-          onTap: isCompleted ? null : () => _showOptionsPicker(item),
-        );
-
+        final s = value?.toString().trim();
+        if (s != null && s.isNotEmpty) text = s;
       case FormItemType.photoOnly:
-        final photos = response?.photoUrls ?? [];
-        if (photos.isEmpty) {
-          return CupertinoListTile(
-            title: Text(
-              isCompleted
-                ? context.l10n.noPhotoAdded
-                : context.l10n.tapCameraIconToAdd,
-              style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontSize: 15,
-              ),
-            ),
-          );
-        }
-        return const SizedBox.shrink();
+        return photos > 0 ? l10n.nPhotosCount(photos) : null;
     }
+    return text;
   }
 
-  Widget _buildPhotosTile(String itemId, List<String> photos) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: SizedBox(
-        height: 60,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: photos.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
-          itemBuilder: (context, index) {
-            final url = photos[index];
-            return GestureDetector(
-              onTap: () => _showPhotoPreview(itemId, index),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  url,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (ctx, child, progress) {
-                    if (progress == null) return child;
-                    return Container(
-                      width: 60,
-                      height: 60,
-                      color: CupertinoColors.systemGrey5.resolveFrom(context),
-                      child: const Center(child: CupertinoActivityIndicator()),
-                    );
-                  },
-                  errorBuilder: (ctx, error, stack) {
-                    return Container(
-                      width: 60,
-                      height: 60,
-                      color: CupertinoColors.systemGrey5.resolveFrom(context),
-                      child: const Icon(CupertinoIcons.exclamationmark_triangle, size: 20),
-                    );
-                  },
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
+  String _localizedOption(FormItemDefinition item, String original) {
+    final options = item.options ?? const <String>[];
+    final localized = item.getLocalizedOptions(_localeCode) ?? options;
+    final i = options.indexOf(original);
+    return i >= 0 && i < localized.length ? localized[i] : original;
   }
 }
 
-/// Campo de texto no padrão iOS
-class _TextInputTile extends StatefulWidget {
-  final FormItemDefinition item;
-  final FormResponse? response;
-  final Function(String) onChanged;
-  final bool isReadOnly;
-
-  const _TextInputTile({
-    required this.item,
-    required this.response,
-    required this.onChanged,
-    this.isReadOnly = false,
-  });
-
-  @override
-  State<_TextInputTile> createState() => _TextInputTileState();
-}
-
-class _TextInputTileState extends State<_TextInputTile> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.response?.value?.toString());
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoTextFormFieldRow(
-      controller: _controller,
-      placeholder: widget.isReadOnly ? '' : context.l10n.type,
-      textAlign: TextAlign.right,
-      enabled: !widget.isReadOnly,
-      style: CupertinoTheme.of(context).textTheme.textStyle,
-      placeholderStyle: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-        color: CupertinoColors.placeholderText.resolveFrom(context),
-      ),
-      keyboardType: widget.item.type == FormItemType.number
-          ? const TextInputType.numberWithOptions(decimal: true)
-          : TextInputType.text,
-      textInputAction: TextInputAction.next,
-      onChanged: widget.isReadOnly ? null : widget.onChanged,
-    );
-  }
-}
-
-/// Campo boolean no padrão iOS
-class _BooleanInputTile extends StatelessWidget {
-  final FormItemDefinition item;
-  final FormResponse? response;
-  final Function(bool) onChanged;
-  final bool isReadOnly;
-
-  const _BooleanInputTile({
-    required this.item,
-    required this.response,
-    required this.onChanged,
-    this.isReadOnly = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final boolValue = response?.value as bool?;
-
-    return CupertinoListTile(
-      title: const SizedBox.shrink(),
-      trailing: AbsorbPointer(
-        absorbing: isReadOnly,
-        child: Opacity(
-          opacity: isReadOnly ? 0.5 : 1.0,
-          child: CupertinoSlidingSegmentedControl<bool>(
-            groupValue: boolValue,
-            children: {
-              true: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Text(
-                  context.l10n.yes,
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
-                ),
-              ),
-              false: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Text(
-                  context.l10n.no,
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
-                ),
-              ),
-            },
-            onValueChanged: (newValue) {
-              if (newValue != null && !isReadOnly) onChanged(newValue);
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Campo select/checklist no padrão iOS
-class _SelectInputTile extends StatelessWidget {
-  final FormItemDefinition item;
-  final FormResponse? response;
-  final VoidCallback? onTap;
-
-  const _SelectInputTile({
-    required this.item,
-    required this.response,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isChecklist = item.type == FormItemType.checklist;
-    String displayValue = context.l10n.select;
-    bool hasValue = false;
-
-    final responseValue = response?.value;
-    if (responseValue != null) {
-      if (isChecklist && responseValue is List) {
-        if (responseValue.isNotEmpty) {
-          displayValue = responseValue.join(', ');
-          hasValue = true;
-        }
-      } else {
-        displayValue = responseValue.toString();
-        hasValue = responseValue.toString().isNotEmpty;
-      }
-    }
-
-    return CupertinoListTile(
-      title: const SizedBox.shrink(),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 200),
-            child: Text(
-              displayValue,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                color: hasValue
-                    ? CupertinoColors.label.resolveFrom(context)
-                    : CupertinoColors.placeholderText.resolveFrom(context),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            CupertinoIcons.chevron_right,
-            size: 16,
-            color: onTap == null
-                ? CupertinoColors.systemGrey4.resolveFrom(context)
-                : CupertinoColors.systemGrey2.resolveFrom(context),
-          ),
-        ],
-      ),
-      onTap: onTap == null ? null : () {
-        HapticFeedback.selectionClick();
-        onTap!();
-      },
-    );
-  }
-}
-
-/// Tela de seleção múltipla (Checklist)
-class _ChecklistSelectionScreen extends StatefulWidget {
-  final String title;
-  final List<String> options; // Localized options for display
-  final List<String> originalOptions; // Original options for saving
-  final List<String> initialSelected;
-
-  const _ChecklistSelectionScreen({
-    required this.title,
-    required this.options,
-    required this.originalOptions,
-    required this.initialSelected,
-  });
-
-  @override
-  _ChecklistSelectionScreenState createState() => _ChecklistSelectionScreenState();
-}
-
-class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
-  late List<String> _selected; // Stores original values
-
-  @override
-  void initState() {
-    super.initState();
-    _selected = List.from(widget.initialSelected);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(widget.title),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Text(context.l10n.cancel),
-              onPressed: () => Navigator.pop(context),
-            ),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => Navigator.pop(context, _selected),
-              child: Text(context.l10n.ok, style: const TextStyle(fontWeight: FontWeight.w600)),
-            ),
-          ),
-          SliverSafeArea(
-            top: false,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                CupertinoListSection.insetGrouped(
-                  children: List.generate(widget.options.length, (index) {
-                    final localizedOpt = widget.options[index];
-                    final originalOpt = index < widget.originalOptions.length
-                        ? widget.originalOptions[index]
-                        : localizedOpt;
-                    final bool isSelected = _selected.contains(originalOpt);
-                    return CupertinoListTile(
-                      title: Text(
-                        localizedOpt,
-                        style: CupertinoTheme.of(context).textTheme.textStyle,
-                      ),
-                      trailing: isSelected
-                          ? const Icon(CupertinoIcons.checkmark, color: CupertinoColors.activeBlue)
-                          : null,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() {
-                          if (isSelected) {
-                            _selected.remove(originalOpt);
-                          } else {
-                            _selected.add(originalOpt);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                ),
-              ]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tela de galeria de fotos com navegação
+/// Photos of a question in full screen (black, like the iPhone's photo
+/// viewer), swipe between them, trash to remove.
 class _PhotoGalleryScreen extends StatefulWidget {
   final List<String> photos;
   final int initialIndex;
@@ -1067,14 +874,20 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
           child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
         ),
         middle: Text(
-          '${_currentIndex + 1} de ${_photos.length}',
+          context.l10n.checklistPhotoPosition(
+            _currentIndex + 1,
+            _photos.length,
+          ),
           style: const TextStyle(color: CupertinoColors.white),
         ),
         trailing: widget.onDelete != null
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
                 onPressed: _confirmDelete,
-                child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
+                child: const Icon(
+                  CupertinoIcons.trash,
+                  color: CupertinoColors.white,
+                ),
               )
             : null,
       ),
@@ -1099,7 +912,9 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                   loadingBuilder: (ctx, child, progress) {
                     if (progress == null) return child;
                     return const Center(
-                      child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                      child: CupertinoActivityIndicator(
+                        color: CupertinoColors.white,
+                      ),
                     );
                   },
                   errorBuilder: (ctx, error, stack) {
@@ -1115,9 +930,10 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                           const SizedBox(height: 16),
                           Text(
                             context.l10n.errorLoadingPhoto,
-                            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                              color: CupertinoColors.white,
-                            ),
+                            style: CupertinoTheme.of(context)
+                                .textTheme
+                                .textStyle
+                                .copyWith(color: CupertinoColors.white),
                           ),
                         ],
                       ),

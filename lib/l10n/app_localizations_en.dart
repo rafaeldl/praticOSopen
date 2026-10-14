@@ -6490,4 +6490,309 @@ class AppLocalizationsEn extends AppLocalizations {
   String contractsEmptyAdd(String order) {
     return 'Tap + to create a $order that repeats on its own.';
   }
+
+  @override
+  String get contractRepeats => 'Repeats';
+
+  @override
+  String get contractRepeatsTitle => 'How often?';
+
+  @override
+  String get contractStarts => 'Starts';
+
+  @override
+  String get contractEnds => 'Ends';
+
+  @override
+  String get contractNeverEnds => 'Never';
+
+  @override
+  String get contractNoEndDate => 'No end date';
+
+  @override
+  String contractAutoCreate(String order) {
+    return 'Create the $order on its own';
+  }
+
+  @override
+  String contractAutoCreateHint(String order) {
+    return 'On, the new $order shows up by itself on the date. Off, you only get the reminder.';
+  }
+
+  @override
+  String get contractRemind => 'Remind me';
+
+  @override
+  String get contractRemindTitle => 'How early should we remind you?';
+
+  @override
+  String contractRemindDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days before',
+      one: '1 day before',
+      zero: 'On the day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingSegmentHint =>
+      'The app comes ready with the services and checklists of your trade.';
+
+  @override
+  String get onboardingSpecialtiesHint =>
+      'Check what fits. You can change it later.';
+
+  @override
+  String get emailLoginTitle => 'Sign in with email';
+
+  @override
+  String get emailLoginEmailRequired => 'Enter your email.';
+
+  @override
+  String get emailLoginEmailInvalid =>
+      'That email doesn\'t look right. Please check it.';
+
+  @override
+  String get emailLoginPasswordRequired => 'Enter your password.';
+
+  @override
+  String get emailLoginWrongCredentials =>
+      'Email or password doesn\'t match. Check them and try again.';
+
+  @override
+  String get emailLoginNoInternet =>
+      'No internet. Check your connection and try again.';
+
+  @override
+  String get emailLoginTooManyAttempts =>
+      'Too many tries. Wait a bit and try again.';
+
+  @override
+  String get emailLoginGenericError => 'Couldn\'t sign in. Try again.';
+
+  @override
+  String get emailLoginSigningIn => 'Signing in…';
+
+  @override
+  String get resetPasswordTitle => 'Reset your password';
+
+  @override
+  String get resetPasswordMessage => 'We\'ll send a link to your email.';
+
+  @override
+  String get resetPasswordError =>
+      'Couldn\'t send the email. Check the address and try again.';
+
+  @override
+  String get inviteTitleMany => 'You\'ve been invited';
+
+  @override
+  String get inviteManyHint => 'Tap an invite to see it and join the team.';
+
+  @override
+  String get inviteCodeTitle => 'What\'s the invite code?';
+
+  @override
+  String checklistRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count left',
+      one: '1 left',
+      zero: 'All answered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklistQuestionNext => 'Next';
+
+  @override
+  String get checklistQuestionDone => 'Done';
+
+  @override
+  String get checklistSkipForNow => 'Skip for now';
+
+  @override
+  String get checklistPreviousQuestion => 'Back to the previous one';
+
+  @override
+  String get checklistQuestionRequired => 'Required';
+
+  @override
+  String get checklistPickFromGallery => 'Choose from library';
+
+  @override
+  String get checklistTextPlaceholder => 'Type here';
+
+  @override
+  String get checklistStart => 'Start';
+
+  @override
+  String get checklistFinish => 'Finish checklist';
+
+  @override
+  String get checklistFinishAnyway => 'Finish anyway';
+
+  @override
+  String get checklistStatusDone => 'Complete';
+
+  @override
+  String get checklistNoAnswer => 'No answer';
+
+  @override
+  String checklistPhotoPosition(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get shareTitle => 'Send to the customer';
+
+  @override
+  String shareCanAll(String name, String order) {
+    return '$name opens the $order from the link, approves and comments.';
+  }
+
+  @override
+  String shareCanApprove(String name, String order) {
+    return '$name opens the $order from the link and approves.';
+  }
+
+  @override
+  String shareCanComment(String name, String order) {
+    return '$name opens the $order from the link and comments.';
+  }
+
+  @override
+  String shareCanView(String name, String order) {
+    return '$name opens the $order from the link.';
+  }
+
+  @override
+  String get shareTheCustomer => 'The customer';
+
+  @override
+  String shareValidUntil(String date) {
+    return 'Valid until $date.';
+  }
+
+  @override
+  String get shareSendWhatsApp => 'Send on WhatsApp';
+
+  @override
+  String get shareSendLink => 'Send the link';
+
+  @override
+  String get shareSendOtherWay => 'Send another way';
+
+  @override
+  String get shareCopyLink => 'Copy the link';
+
+  @override
+  String get shareLinkCopied => 'Link copied';
+
+  @override
+  String get sharePreparing => 'Getting the link ready…';
+
+  @override
+  String get shareError => 'Couldn\'t create the link.';
+
+  @override
+  String get shareValidity => 'Change how long it lasts';
+
+  @override
+  String get shareValidityTitle => 'How long should it last?';
+
+  @override
+  String shareValidityDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get sharePermissionsTitle => 'What can the customer do?';
+
+  @override
+  String get sharePermAll => 'View, approve and comment';
+
+  @override
+  String get sharePermApprove => 'View and approve';
+
+  @override
+  String get sharePermComment => 'View and comment';
+
+  @override
+  String get sharePermView => 'View only';
+
+  @override
+  String get shareNewLink => 'Make a new link';
+
+  @override
+  String get shareRevoke => 'Turn off the link';
+
+  @override
+  String shareRevokeConfirm(String order) {
+    return 'The customer won\'t be able to open the $order from this link anymore.';
+  }
+
+  @override
+  String get shareMenu => 'Link options';
+
+  @override
+  String get orderItemNotesPlaceholder => 'Anything else about this item';
+
+  @override
+  String get orderItemRemoveTitle => 'Remove from the order?';
+
+  @override
+  String orderItemRemoveMessage(String name) {
+    return '\"$name\" leaves the order and its total.';
+  }
+
+  @override
+  String get orderItemQuantityInvalid => 'Enter at least 1.';
+
+  @override
+  String orderPhotoShareText(String order) {
+    return 'Photo of the $order';
+  }
+
+  @override
+  String get orderPhotoShareError => 'Could not share the photo. Try again.';
+
+  @override
+  String get orderPhotoDeleteTitle => 'Delete this photo?';
+
+  @override
+  String get orderPhotoDeleted => 'Photo deleted';
+
+  @override
+  String get orderPhotoDeleteError => 'Could not delete the photo. Try again.';
+
+  @override
+  String get orderPhotoCoverSet => 'Photo set as cover';
+
+  @override
+  String get orderPhotoUploading => 'Uploading photo...';
+
+  @override
+  String get orderDocumentTypeTitle => 'What document is this?';
+
+  @override
+  String get shareWhatCanDo => 'What the customer can do';
+
+  @override
+  String get orderPhotoDelete => 'Delete photo';
+
+  @override
+  String get contractStopRepeating => 'Stop repeating';
+
+  @override
+  String get contractStopRepeatingTitle => 'Stop repeating?';
+
+  @override
+  String get contractStopRepeatingMessage =>
+      'No new orders will be created. Existing ones stay.';
 }
