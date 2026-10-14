@@ -376,6 +376,34 @@ void main() {
       expect(find.text('abrir'), findsNothing);
     });
 
+    testWidgets('from Contratos: starts with "Repetir" on, in sight', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        screen(store),
+        args: {'repeat': true},
+      );
+
+      expect(store.hasContract, isTrue);
+      expect(store.order?.contract?.frequency, 'monthly');
+      final repeat = find.byKey(const ValueKey('new_order_more_repeat'));
+      await tester.ensureVisible(repeat);
+      expect(repeat, findsOneWidget);
+      expect(
+        find.descendant(of: repeat, matching: find.text('Mensal')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a plain new order has no "Repetir" row', (tester) async {
+      final store = OrderStore();
+      await _pump(tester, screen(store), hosted: true);
+      expect(store.hasContract, isFalse);
+      expect(find.byKey(const ValueKey('new_order_more_repeat')), findsNothing);
+    });
+
     testWidgets('"Mais opções" changes the status and shows it under it', (
       tester,
     ) async {

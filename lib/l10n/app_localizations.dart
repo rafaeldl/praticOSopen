@@ -11143,6 +11143,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pagamento de {amount} recebido'**
   String noticePaymentReceived(String amount);
+
+  /// No description provided for @contractNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo contrato'**
+  String get contractNew;
+
+  /// No description provided for @orderRepeatRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir'**
+  String get orderRepeatRow;
+
+  /// No description provided for @contractsEmptyAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para criar uma {order} que se repete sozinha.'**
+  String contractsEmptyAdd(String order);
 }
 
 class _AppLocalizationsDelegate

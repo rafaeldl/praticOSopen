@@ -42,7 +42,11 @@ Order _order(
       ..endDate = end);
 }
 
-Widget _app(ContractDirectory directory, List<Object?> log) {
+Widget _app(
+  ContractDirectory directory,
+  List<Object?> log, {
+  VoidCallback? onNew,
+}) {
   return CupertinoApp(
     locale: const Locale('pt'),
     supportedLocales: AppLocalizations.supportedLocales,
@@ -52,7 +56,7 @@ Widget _app(ContractDirectory directory, List<Object?> log) {
       GlobalWidgetsLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
     ],
-    home: ContractListScreen(directory: directory),
+    home: ContractListScreen(directory: directory, onNew: onNew),
     onGenerateRoute: (settings) {
       log.add(settings);
       return CupertinoPageRoute<void>(
@@ -131,14 +135,24 @@ void main() {
     await tester.pumpWidget(_app(_FakeDirectory(Stream.value([])), []));
     await tester.pump();
     expect(find.text('Nenhum contrato'), findsOneWidget);
-    // The empty state explains how a contract is born.
+    // The empty state points at the "+".
     expect(
-      find.text('Contratos nascem dentro de uma OS: ligue “Repetir esta OS”.'),
+      find.text('Toque em + para criar uma OS que se repete sozinha.'),
       findsOneWidget,
     );
     await tester.tap(find.text('Encerrados'));
     await tester.pumpAndSettle();
     expect(find.text('Nenhum contrato encerrado.'), findsOneWidget);
+  });
+
+  testWidgets('"+" at the top starts a new contract', (tester) async {
+    var opened = 0;
+    await tester.pumpWidget(
+      _app(_FakeDirectory(Stream.value([])), [], onNew: () => opened++),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('contract_new')));
+    expect(opened, 1);
   });
 
   testWidgets('back button says "Minha empresa"', (tester) async {

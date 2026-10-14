@@ -2993,5 +2993,8 @@
   "agendaPreviousMonth": "Previous month",
   "agendaNextMonth": "Next month",
   "noticeCommented": "{name} commented: “{text}”",
-  "noticePaymentReceived": "Payment of {amount} received"
+  "noticePaymentReceived": "Payment of {amount} received",
+  "contractNew": "New contract",
+  "orderRepeatRow": "Repeat",
+  "contractsEmptyAdd": "Tap + to create a {order} that repeats on its own."
 }

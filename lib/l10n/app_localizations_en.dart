@@ -6479,4 +6479,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String noticePaymentReceived(String amount) {
     return 'Payment of $amount received';
   }
+
+  @override
+  String get contractNew => 'New contract';
+
+  @override
+  String get orderRepeatRow => 'Repeat';
+
+  @override
+  String contractsEmptyAdd(String order) {
+    return 'Tap + to create a $order that repeats on its own.';
+  }
 }

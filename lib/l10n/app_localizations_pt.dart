@@ -6490,4 +6490,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String noticePaymentReceived(String amount) {
     return 'Pagamento de $amount recebido';
   }
+
+  @override
+  String get contractNew => 'Novo contrato';
+
+  @override
+  String get orderRepeatRow => 'Repetir';
+
+  @override
+  String contractsEmptyAdd(String order) {
+    return 'Toque em + para criar uma $order que se repete sozinha.';
+  }
 }

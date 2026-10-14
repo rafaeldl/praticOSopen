@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/services/contract_directory.dart';
@@ -18,10 +19,13 @@ enum _ContractTab { active, ended }
 /// the next order is born; ended ones show when they stopped. Tapping a row
 /// opens the order that holds the contract.
 class ContractListScreen extends StatefulWidget {
-  const ContractListScreen({super.key, this.directory});
+  const ContractListScreen({super.key, this.directory, this.onNew});
 
   /// Injected in tests; defaults to [FirestoreContractDirectory].
   final ContractDirectory? directory;
+
+  /// "+": defaults to "Nova OS" with "Repetir" turned on.
+  final VoidCallback? onNew;
 
   @override
   State<ContractListScreen> createState() => _ContractListScreenState();
@@ -86,6 +90,13 @@ class _ContractListScreenState extends State<ContractListScreen> {
           AppNavBar(
             largeTitle: Text(l10n.contracts),
             previousTitle: l10n.myCompany,
+            trailing: GlassBarButton(
+              key: const ValueKey('contract_new'),
+              label: l10n.contractNew,
+              icon: CupertinoIcons.add,
+              onPressed:
+                  widget.onNew ?? () => openNewOrder(context, repeat: true),
+            ),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -166,7 +177,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
           child: EmptyState(
             title: showActive ? l10n.noContracts : l10n.contractsEmptyEnded,
             message: showActive
-                ? l10n.contractsFooterHint(l10n.orderShort)
+                ? l10n.contractsEmptyAdd(l10n.orderShort)
                 : null,
           ),
         )
