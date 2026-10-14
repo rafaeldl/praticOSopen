@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "appName": "PraticOS",
   "home": "Home",
   "orders": "Work Orders",
   "customers": "Customers",
@@ -44,20 +43,16 @@
   "selectAll": "Select All",
   "clear": "Clear",
   "reset": "Reset",
-  "basicInfo": "Basic Information",
   "apply": "Apply",
   "ok": "OK",
   "yes": "Yes",
   "no": "No",
   "more": "More",
   "less": "Less",
-  "seeAll": "See all",
-  "seeMore": "See More",
   "details": "Details",
   "options": "Options",
   "actions": "Actions",
   "status": "Status",
-  "statusAll": "All",
   "statusPending": "Pending",
   "statusApproved": "Approved",
   "statusInProgress": "In Progress",
@@ -65,50 +60,25 @@
   "statusCancelled": "Cancelled",
   "statusQuote": "Quote",
   "statusDelivery": "Delivery",
-  "statusScheduled": "Scheduled",
-  "statusWaiting": "Waiting",
-  "statusRejected": "Rejected",
-  "statusOpen": "Open",
-  "statusClosed": "Closed",
   "payments": "Payments",
   "payment": "Payment",
   "paid": "Paid",
   "unpaid": "Unpaid",
   "partiallyPaid": "Partially Paid",
   "toReceive": "To receive",
-  "toPay": "Payable",
   "received": "Received",
-  "paymentMethod": "Payment Method",
-  "paymentMethods": "Payment Methods",
-  "cash": "Cash",
-  "creditCard": "Credit Card",
-  "debitCard": "Debit Card",
   "pix": "PIX",
-  "bankTransfer": "Bank Transfer",
   "check": "Check",
   "installments": "Installments",
   "installment": "Installment",
   "dueDate": "Due Date",
-  "paymentDate": "Payment Date",
-  "payTotalAmount": "Pay total amount",
-  "registerPayment": "Register Payment",
-  "applyDiscount": "Apply Discount",
-  "paymentAmount": "Payment amount",
-  "discountAmount": "Discount amount",
-  "fillValue": "Fill in the value",
   "paymentCannotExceedBalance": "Payment cannot exceed balance",
   "discountCannotExceedBalance": "Discount cannot exceed balance",
-  "paymentRegistered": "Payment registered",
-  "discountApplied": "Discount applied",
   "asaasTransactionCannotBeRemoved": "Payments received through Asaas can't be removed here. To undo one, refund the charge in Asaas.",
   "paymentUpdateFailed": "Couldn't save the payment. Check your connection and try again.",
   "paymentRequiresConnection": "No connection. Try again when you're online.",
-  "register": "Register",
   "history": "History",
   "valueMustBeGreaterThanZero": "Value must be greater than zero",
-  "exampleCashPayment": "Ex: Cash payment",
-  "exampleLoyaltyDiscount": "Ex: Loyalty discount",
-  "noTransactionsRecorded": "No transactions recorded",
   "confirmRemoveTransaction": "Do you want to remove this {type} of {amount}?",
   "@confirmRemoveTransaction": {
     "description": "Confirmation message to remove transaction",
@@ -123,22 +93,14 @@
       }
     }
   },
-  "requiredField": "Required field",
   "invalidEmail": "Invalid email",
   "invalidPhone": "Invalid phone",
-  "invalidValue": "Invalid value",
-  "invalidDate": "Invalid date",
   "invalidFormat": "Invalid format",
   "minimum": "Minimum",
   "maximum": "Maximum",
   "characters": "characters",
-  "selectOption": "Select an option",
-  "noResults": "No results found",
-  "noData": "No data available",
   "noValuesRegistered": "No values registered",
   "typeAboveToAdd": "Type above to add",
-  "addNewValue": "Add new value",
-  "selectAtLeastOne": "Select at least one option",
   "minLength": "Minimum {count} characters",
   "maxLength": "Maximum {count} characters",
   "takePhoto": "Take Photo",
@@ -151,313 +113,150 @@
   "photo": "Photo",
   "camera": "Camera",
   "gallery": "Gallery",
-  "noPhotos": "No photos",
-  "photoAdded": "Photo added",
-  "photoRemoved": "Photo removed",
   "today": "Today",
   "yesterday": "Yesterday",
   "tomorrow": "Tomorrow",
-  "thisWeek": "This Week",
-  "lastWeek": "Last Week",
-  "thisMonth": "This Month",
-  "lastMonth": "Last Month",
-  "thisYear": "This Year",
   "scheduledDate": "Scheduled",
   "createdAt": "Created at",
   "updatedAt": "Updated at",
   "date": "Date",
   "time": "Time",
-  "dateTime": "Date and Time",
   "startDate": "Start date",
   "endDate": "End date",
   "period": "Period",
   "confirmDelete": "Confirm Deletion",
-  "confirmDeleteMessage": "Do you really want to delete this item?",
   "confirmDeleteMessageNamed": "Do you really want to delete \"{name}\"?",
-  "confirmCancel": "Confirm Cancellation",
-  "confirmCancelMessage": "Do you really want to cancel?",
-  "unsavedChanges": "Unsaved Changes",
-  "unsavedChangesMessage": "You have unsaved changes. Do you want to leave anyway?",
   "confirmAction": "Confirm Action",
-  "areYouSure": "Are you sure?",
   "cannotUndo": "This action cannot be undone.",
   "discard": "Discard",
-  "keepEditing": "Keep Editing",
   "leave": "Leave",
   "stay": "Stay",
   "customer": "Customer",
   "newCustomer": "New Customer",
   "editCustomer": "Edit Customer",
-  "customerDetails": "Customer Details",
   "customerName": "Customer Name",
   "customerList": "Customer List",
-  "searchCustomer": "Search Customer",
-  "selectCustomer": "Select Customer",
-  "noCustomers": "No customers registered",
   "addCustomer": "Add Customer",
   "name": "Name",
-  "namePlaceholder": "E.g.: John Smith",
   "fullName": "Full Name",
-  "nickname": "Nickname",
   "phone": "Phone",
-  "phones": "Phones",
-  "cellphone": "Cellphone",
   "whatsapp": "WhatsApp",
   "email": "Email",
-  "emails": "Emails",
   "address": "Address",
-  "addresses": "Addresses",
-  "street": "Street",
   "number": "Number",
-  "complement": "Complement",
-  "neighborhood": "Neighborhood",
   "city": "City",
   "state": "State",
-  "zipCode": "ZIP Code",
   "country": "Country",
   "notes": "Notes",
   "observation": "Observation",
   "description": "Description",
   "comments": "Comments",
   "document": "Document",
-  "cpf": "CPF",
-  "cnpj": "CNPJ",
   "cpfCnpj": "CPF/CNPJ",
   "order": "Work Order",
   "orderShort": "WO",
   "orderOverdue": "Overdue",
   "newOrder": "NEW",
   "editOrder": "Edit Order",
-  "orderDetails": "Order Details",
   "orderNumber": "Order Number",
   "orderList": "Order List",
-  "searchOrder": "Search Order",
-  "noOrders": "No orders found",
   "addOrder": "Add Order",
   "createOrder": "Create Order",
-  "orderCreated": "Order created successfully",
-  "orderUpdated": "Order updated successfully",
-  "orderDeleted": "Order deleted successfully",
   "orderStatus": "Order Status",
   "changeStatus": "Change Status",
   "technician": "Technician",
   "technicians": "Technicians",
-  "assignTechnician": "Assign Technician",
   "problem": "Reported Problem",
-  "problemDescription": "Problem Description",
-  "solution": "Solution",
-  "solutionDescription": "Solution Description",
-  "diagnosis": "Diagnosis",
   "warranty": "Warranty",
-  "warrantyPeriod": "Warranty Period",
-  "hasWarranty": "Has Warranty",
-  "noWarranty": "No Warranty",
-  "warrantyExpired": "Warranty Expired",
-  "warrantyValid": "Warranty Valid",
   "priority": "Priority",
-  "priorityLow": "Low",
-  "priorityMedium": "Medium",
-  "priorityHigh": "High",
-  "priorityUrgent": "Urgent",
   "device": "Device",
   "deviceCategory": "Category",
-  "newDevice": "New Device",
   "editDevice": "Edit Device",
-  "deviceDetails": "Device Details",
   "deviceList": "Device List",
-  "searchDevice": "Search Device",
-  "selectDevice": "Select Device",
-  "noDevices": "No devices registered",
   "addDevice": "Add Device",
   "brand": "Brand",
   "model": "Model",
   "serialNumber": "Serial Number",
-  "imei": "IMEI",
   "color": "Color",
   "condition": "Condition",
-  "conditionNew": "New",
-  "conditionUsed": "Used",
-  "conditionDamaged": "Damaged",
-  "accessories": "Accessories",
-  "accessory": "Accessory",
   "defects": "Defects",
-  "defect": "Defect",
   "service": "Service",
-  "newService": "New Service",
   "editService": "Edit Service",
-  "serviceDetails": "Service Details",
   "serviceList": "Service List",
   "searchService": "Search Service",
-  "selectService": "Select Service",
-  "noServices": "No services registered",
   "addService": "Add Service",
-  "serviceValue": "Service Value",
-  "laborCost": "Labor Cost",
   "product": "Product",
-  "newProduct": "New Product",
   "editProduct": "Edit Product",
-  "productDetails": "Product Details",
   "productList": "Product List",
   "searchProduct": "Search Product",
-  "selectProduct": "Select Product",
-  "noProducts": "No products registered",
   "addProduct": "Add Product",
-  "sku": "Code",
   "barcode": "Barcode",
-  "stock": "Stock",
-  "stockQuantity": "Stock Quantity",
-  "lowStock": "Low Stock",
-  "outOfStock": "Out of Stock",
-  "inStock": "In Stock",
   "unit": "Unit",
   "category": "Category",
   "categories": "Categories",
   "total": "Total",
   "subtotal": "Subtotal",
   "discount": "Discount",
-  "discountPercent": "Discount (%)",
   "discountValue": "Discount Value",
   "price": "Price",
-  "unitPrice": "Unit Price",
-  "costPrice": "Cost Price",
-  "salePrice": "Sale Price",
   "quantity": "Quantity",
   "value": "Value",
   "amount": "Amount",
   "tax": "Tax",
-  "taxes": "Taxes",
-  "fee": "Fee",
-  "fees": "Fees",
-  "grandTotal": "Grand Total",
   "balance": "Balance",
   "totalPaid": "Total Paid",
   "remaining": "Remaining",
   "change": "Change",
-  "savedSuccessfully": "Saved successfully",
-  "deletedSuccessfully": "Deleted successfully",
-  "updatedSuccessfully": "Updated successfully",
-  "createdSuccessfully": "Created successfully",
-  "copiedSuccessfully": "Copied successfully",
-  "sentSuccessfully": "Sent successfully",
   "errorOccurred": "An error occurred",
   "tryAgain": "Try again",
-  "operationFailed": "Operation failed",
   "noInternetConnection": "No internet connection",
-  "connectionError": "Connection error",
-  "serverError": "Server error",
-  "unknownError": "Unknown error",
   "permissionDenied": "Permission denied",
-  "notFound": "Not found",
   "timeout": "Timeout",
-  "sessionExpired": "Session expired",
   "login": "Sign In",
   "logout": "Sign Out",
   "logoutConfirm": "Do you really want to sign out?",
-  "signUp": "Sign Up",
   "signIn": "Sign In",
-  "forgotPassword": "Forgot Password",
-  "resetPassword": "Reset Password",
-  "changePassword": "Change Password",
   "password": "Password",
-  "currentPassword": "Current Password",
-  "newPassword": "New Password",
-  "confirmPassword": "Confirm Password",
-  "passwordsDontMatch": "Passwords don't match",
-  "passwordTooShort": "Password too short",
-  "invalidCredentials": "Invalid credentials",
-  "accountCreated": "Account created successfully",
   "emailSent": "Email sent",
-  "checkYourEmail": "Check your email",
   "continueWithGoogle": "Continue with Google",
   "continueWithApple": "Continue with Apple",
-  "orContinueWith": "Or continue with",
-  "alreadyHaveAccount": "Already have an account?",
-  "dontHaveAccount": "Don't have an account?",
   "termsAndConditions": "Terms and Conditions",
   "privacyPolicy": "Privacy Policy",
-  "agreeToTerms": "I agree to the Terms and Conditions",
-  "welcome": "Welcome",
-  "welcomeBack": "Welcome back",
-  "getStarted": "Get Started",
-  "letsStart": "Let's Start",
-  "selectSegment": "Select Segment",
-  "selectSpecialties": "Select your Specialties",
   "companyName": "Company Name",
-  "setupComplete": "Setup Complete",
-  "allSet": "All Set!",
-  "startUsing": "Start using PraticOS",
   "skip": "Skip",
   "continue_": "Continue",
   "language": "Language",
   "selectLanguage": "Select Language",
-  "portuguese": "Portuguese",
   "english": "English",
-  "spanish": "Spanish",
   "theme": "Theme",
-  "darkMode": "Dark Mode",
-  "lightMode": "Light Mode",
-  "systemDefault": "System Default",
   "notifications": "Notifications",
-  "noNotifications": "No notifications",
-  "noNotificationsDescription": "You will receive notifications when customers approve, reject, or rate work orders.",
   "markAllAsRead": "Mark all",
-  "enableNotifications": "Enable Notifications",
   "sound": "Sound",
-  "vibration": "Vibration",
   "about": "About",
   "version": "Version",
-  "help": "Help",
   "support": "Support",
-  "contactUs": "Contact Us",
-  "rateApp": "Rate App",
-  "shareApp": "Share App",
   "dashboard": "Dashboard",
   "overview": "Overview",
-  "statistics": "Statistics",
   "analytics": "Analytics",
   "revenue": "Revenue",
-  "expenses": "Expenses",
-  "profit": "Profit",
-  "ordersToday": "Orders Today",
-  "ordersThisWeek": "Orders This Week",
-  "ordersThisMonth": "Orders This Month",
-  "pendingOrders": "Pending Orders",
-  "completedOrders": "Completed Orders",
-  "topServices": "Top Services",
-  "topProducts": "Top Products",
   "recentOrders": "Recent orders",
-  "recentCustomers": "Used last",
   "role": "Role",
   "noRole": "No role",
   "roles": "Roles",
   "owner": "Owner",
   "admin": "Administrator",
   "manager": "Manager",
-  "employee": "Employee",
   "viewer": "Viewer",
   "permissions": "Permissions",
   "canCreate": "Can Create",
   "canEdit": "Can Edit",
   "canDelete": "Can Delete",
   "canView": "Can View",
-  "inviteMember": "Invite Member",
-  "removeMember": "Remove Member",
-  "memberRemoved": "Member removed",
-  "invitationSent": "Invitation sent",
-  "pendingInvitations": "Pending Invitations",
-  "acceptInvitation": "Accept Invitation",
-  "declineInvitation": "Decline Invitation",
   "form": "Form",
   "forms": "Forms",
   "checklist": "Checklist",
   "checklists": "Checklists",
-  "inspection": "Inspection",
-  "inspections": "Inspections",
-  "signature": "Signature",
   "customerSignature": "Customer Signature",
-  "technicianSignature": "Technician Signature",
-  "signHere": "Sign here",
-  "clearSignature": "Clear Signature",
   "required": "Required",
   "optional": "Optional",
   "complete": "Complete",
@@ -466,16 +265,6 @@
   "notAnswered": "Not Answered",
   "quote": "Quote",
   "quotes": "Quotes",
-  "newQuote": "New Quote",
-  "editQuote": "Edit Quote",
-  "quoteDetails": "Quote Details",
-  "sendQuote": "Send Quote",
-  "approveQuote": "Approve Quote",
-  "rejectQuote": "Reject Quote",
-  "quoteApproved": "Quote Approved",
-  "quoteRejected": "Quote Rejected",
-  "quoteSent": "Quote Sent",
-  "validUntil": "Valid until",
   "expiresIn": "Expires in {days} days",
   "expired": "Expired",
   "active": "Active",
@@ -487,65 +276,32 @@
   "public": "Public",
   "private": "Private",
   "draft": "Draft",
-  "published": "Published",
-  "archived": "Archived",
   "deleted": "Deleted",
   "all": "All",
   "none": "None",
   "other": "Other",
   "others": "Others",
-  "default_": "Default",
   "custom": "Custom",
-  "new_": "New",
   "old": "Old",
   "recent": "Recent",
-  "popular": "Popular",
-  "featured": "Featured",
-  "recommended": "Recommended",
-  "welcomeToApp": "Welcome to PraticOS",
-  "appSubtitle": "Manage your work orders\nsimply and efficiently",
-  "signInWithEmail": "Sign in with email",
   "byContinuingYouAgree": "By continuing, you agree to our",
   "error": "Error",
-  "couldNotLoadCompanyData": "Could not load company data",
-  "errorSignInApple": "Error signing in with Apple",
-  "errorSignInGoogle": "Error signing in with Google",
   "companyNotFound": "Company not found",
   "companyNoSegment": "Company has no segment defined",
-  "errorLoadingConfig": "Error loading configuration",
-  "enterEmailPassword": "Enter your email and password to access your account",
-  "credentials": "Credentials",
-  "enterYourPassword": "Enter your password",
   "userNotFound": "User not found",
-  "wrongPassword": "Wrong password",
-  "errorSignIn": "Error signing in. Please try again.",
-  "enterYourEmail": "Enter your email",
   "checkInboxResetPassword": "Check your inbox to reset your password.",
-  "errorSendingRecoveryEmail": "Error sending recovery email",
   "user": "User",
-  "organization": "Organization",
   "switchCompany": "Switch Company",
-  "switchBetweenOrganizations": "Switch between organizations",
   "management": "Management",
   "integrations": "Integrations",
   "integrationsSubtitle": "Connect PraticOS to ChatGPT and Claude",
   "integrationsEmpty": "No connections yet",
   "integrationsNew": "New connection",
-  "integrationsName": "Connection name",
   "integrationsNameHint": "e.g. My ChatGPT",
   "integrationsUrlOnce": "Copy this URL now. It will not be shown again.",
   "integrationsCopy": "Copy URL",
-  "integrationsCopied": "URL copied",
   "integrationsRevoke": "Revoke",
   "integrationsRevokeConfirm": "Revoke this connection? Anyone using this URL loses access.",
-  "integrationsCreatedAt": "Created on {date}",
-  "@integrationsCreatedAt": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "integrationsNeverUsed": "Never used",
   "integrationsLastUsed": "Last used on {date}",
   "@integrationsLastUsed": {
@@ -559,15 +315,8 @@
   "integrationsErrorNotFound": "This connection no longer exists.",
   "integrationsErrorGeneric": "Something went wrong. Please try again.",
   "companyData": "Company Data",
-  "interface_": "Interface",
-  "nightMode": "Night Mode",
-  "reopenOnboarding": "Initial Setup",
-  "reconfigureCompanySetup": "Reconfigure company data and segment",
   "account": "Account",
   "deleteAccount": "Delete Account",
-  "permanentlyRemoveAllData": "Permanently remove all data",
-  "chooseTheme": "Choose theme",
-  "automaticSystem": "Automatic (System)",
   "automatic": "Automatic",
   "light": "Light",
   "dark": "Dark",
@@ -587,29 +336,12 @@
   "pleaseSignInAgainToDelete": "For security reasons, you need to sign in again before deleting your account.",
   "signInAgain": "Sign In Again",
   "authenticated": "Authenticated",
-  "nowDeletingAccount": "You can now proceed with account deletion.",
   "reauthenticationFailed": "Re-authentication Failed",
   "couldNotReauthenticate": "Could not re-authenticate.",
-  "errorLoadingData": "Error loading data",
-  "tapToAddFirst": "Tap + to add",
-  "confirmRemove": "Do you want to remove",
   "remove": "Remove",
   "noPermission": "No Permission",
   "noPermissionToRemove": "You don't have permission to remove this item.",
-  "professionalizeYourBusiness": "Professionalize your business",
-  "configureCompanyProfile": "Set up your company profile to issue professional work orders right now.",
-  "professionalOrders": "Professional Orders",
-  "createDigitalOrders": "Create customized digital work orders.",
-  "customerManagement": "Customer Management",
-  "keepHistoryOrganized": "Keep history and contacts organized.",
-  "configureMyBusiness": "Configure My Business",
-  "configureLater": "Configure Later",
-  "errorCreatingCompany": "Error creating default company",
-  "chooseSegment": "Choose Segment",
-  "selectSegmentPrompt": "Select your business segment to customize the system for you.",
-  "availableSegments": "Available Segments",
   "noSegmentsAvailable": "No segments available",
-  "errorLoadingSegments": "Error loading segments",
   "specialties": "Specialties",
   "myCompany": "My company",
   "retryAgain": "Try again",
@@ -626,16 +358,10 @@
   "roleConsultant": "Consultant",
   "roleDescTechnician": "Executes services. Does not view prices and has limited editing after SO approval.",
   "roleTechnician": "Technician",
-  "noFeminine": "No",
   "registered": "registered",
-  "registeredFeminine": "registered",
   "errorLoading": "Error loading",
   "tapPlusToAddYourFirst": "Tap + to add your first",
-  "tapPlusToAddYourFirstFeminine": "Tap + to add your first",
   "doYouWantToRemoveThe": "Do you want to remove the",
-  "doYouWantToRemoveTheFeminine": "Do you want to remove the",
-  "searchCollaborator": "Search collaborator",
-  "noCollaboratorFound": "No collaborator found",
   "pending": "Pending",
   "inviteTo": "Invite to",
   "invitePendingMessage": "This invite is pending. The user will see the invite when they sign up.",
@@ -651,15 +377,8 @@
   "removeCollaborator": "Remove Collaborator",
   "confirmRemoveFromOrganization": "Are you sure you want to remove {name} from the organization?",
   "emailNotProvided": "Email not provided",
-  "newCollaborator": "New Collaborator",
-  "userInformation": "User Information",
-  "userWillReceiveInviteByEmail": "The user will receive an invite by email.",
   "emailPlaceholder": "email@example.com",
   "collaboratorAdded": "Collaborator Added",
-  "collaboratorAddedSuccess": "The collaborator has been successfully added to the company.",
-  "inviteSent": "Invite Sent",
-  "inviteCreatedMessage": "The user is not yet registered in the system. An invite has been created and will appear when they sign up.",
-  "financialDashboard": "Financial Dashboard",
   "financial": "Financial",
   "financialAccessDenied": "You don't have permission to access the financial dashboard.\\n\\nOnly Administrators and Managers can view financial data.",
   "week": "Week",
@@ -667,8 +386,6 @@
   "year": "Year",
   "currentMonth": "Current month",
   "currentYear": "Current year",
-  "tapToReturnToCurrent": "Tap to return to current",
-  "selectPeriod": "Select Period",
   "start": "Start",
   "end": "End",
   "billing": "Billing",
@@ -676,17 +393,12 @@
   "customersReceived": "Customers - Received",
   "customersToReceive": "Customers - To Receive",
   "customerWithoutName": "Customer without name",
-  "noCustomerDataInPeriod": "No customer data in this period",
   "serviceWithoutName": "Service without name",
   "productWithoutName": "Product without name",
-  "noServiceDataInPeriod": "No service data in this period",
-  "noProductDataInPeriod": "No product data in this period",
   "seeLess": "See less",
   "seeAllCount": "See all ({count})",
-  "toReceiveLowerCase": "To receive",
   "errorGeneratingReport": "Error generating report",
   "pendingPayment": "Pending",
-  "chooseCompanySegment": "Choose the company's line of business",
   "changeLogo": "Change Logo",
   "companyNamePlaceholder": "Company Name",
   "companyEmailPlaceholder": "contact@company.com",
@@ -705,9 +417,6 @@
   "couldNotCompleteForm": "Could not complete the procedure. Please try again.",
   "noPermissionReopenForm": "Only Administrators, Managers and Supervisors can reopen completed procedures.",
   "couldNotReopenForm": "Could not reopen the procedure. Please try again.",
-  "formCompleted": "Procedure completed",
-  "noPhotoAdded": "No photo added",
-  "tapCameraIconToAdd": "Tap the camera icon to add",
   "type": "Type",
   "errorLoadingPhoto": "Error loading photo",
   "reopen": "Reopen",
@@ -729,13 +438,8 @@
   "typeOneOptionPerLine": "Type one option per line",
   "allowPhotos": "Allow photos",
   "userCanAttachPhotos": "User can attach photos to this item",
-  "procedures": "Procedures",
   "searchProcedure": "Search procedure",
-  "myProcedures": "My Procedures",
-  "globalProcedures": "Global Procedures",
-  "noProceduresRegistered": "No procedures registered",
   "noProceduresAvailable": "No procedures available",
-  "tapPlusToCreateFirst": "Tap + to create your first procedure.",
   "fromCompany": "From your company",
   "global": "Global",
   "itemCount": "{count} {count, plural, =1{item} other{items}}",
@@ -767,7 +471,6 @@
   "companyLogo": "Company Logo",
   "information": "INFORMATION",
   "pendingInvites": "Pending Invites",
-  "youHaveBeenInvited": "You have been invited to join companies on PraticOS!",
   "noPendingInvites": "No pending invites",
   "acceptInvite": "Accept",
   "rejectInvite": "Reject Invite",
@@ -789,7 +492,6 @@
     }
   },
   "or": "or",
-  "createMyCompany": "Create My Company",
   "reject": "Reject",
   "invitedBy": "Invited by {name}",
   "@invitedBy": {
@@ -814,12 +516,10 @@
   "enterInviteCode": "Enter invite code",
   "enterCodeReceived": "Enter the code you received to join the team",
   "searchAnotherCode": "Search another code",
-  "joinAnotherCompany": "Join another company",
   "shareInvite": "Share Invite",
   "copyInviteCode": "Copy Invite Code",
   "sendViaWhatsAppInvite": "Send invite via WhatsApp",
   "inviteCodeCopied": "Invite code copied!",
-  "phoneOptional": "Phone (optional)",
   "emailOrPhone": "Enter email or phone",
   "inviteExpiresIn": "Invite valid for {days} days",
   "@inviteExpiresIn": {
@@ -829,41 +529,10 @@
       }
     }
   },
-  "markAsToReceive": "Mark as To Receive",
   "thisWillRemoveAllPayments": "This will remove all recorded payments and discounts. Do you want to continue?",
   "attention": "Attention",
-  "almostThere": "Almost there!",
-  "yesCreateSampleData": "Yes, create sample data",
-  "availableSpecialties": "AVAILABLE SPECIALTIES",
-  "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue.",
-  "selectSpecialtiesDescription": "Select your company's specialties.\nYou can choose more than one.",
-  "selectAtLeastOneOption": "Select at least one option",
-  "continueWithCount": "Continue ({count} {count, plural, =1{selected} other{selected}})",
-  "@continueWithCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "selectCountry": "Select Country",
   "contacts": "Contacts",
-  "contactMethods": "Contact Methods",
-  "howCustomersCanReachYou": "How can your customers reach you?",
   "preparing": "Preparing...",
-  "uploadingLogo": "Uploading logo...",
-  "creatingCompany": "Creating company...",
-  "importingForms": "Importing forms...",
-  "creatingSampleData": "Creating sample data...",
-  "createSampleDataQuestion": "Create sample data?",
-  "sampleDataDescription": "We can create some sample data for you to start using the system immediately:",
-  "commonServicesForSegment": "Common services for your segment",
-  "mostUsedProducts": "Most used products and parts",
-  "sampleEquipment": "Sample equipment",
-  "sampleForms": "Inspection forms",
-  "demoCustomer": "Demo customer",
-  "canEditOrDeleteAnytime": "You can edit or delete this data at any time.",
-  "noStartFromScratch": "No, start from scratch",
   "financialReport": "Financial report",
   "totalBilling": "Total Billing",
   "financialSummary": "Financial Summary",
@@ -969,9 +638,7 @@
       }
     }
   },
-  "connectedChannels": "Connected Channels",
   "linked": "Linked",
-  "notLinked": "Not linked",
   "linkWhatsApp": "Link WhatsApp",
   "linkWhatsAppDescription": "Scan the QR code or tap the button to open WhatsApp and send the linking code to the PraticOS bot.",
   "linkExpiresIn": "Expires in {time}",
@@ -983,41 +650,12 @@
     }
   },
   "openWhatsApp": "Open WhatsApp",
-  "whatsAppLinked": "WhatsApp linked",
-  "whatsAppNotLinked": "WhatsApp not linked",
-  "unlinkWhatsApp": "Unlink WhatsApp",
-  "unlinkWhatsAppConfirm": "Are you sure you want to unlink your WhatsApp?",
-  "whatsAppUnlinked": "WhatsApp unlinked successfully",
   "errorGeneratingToken": "Error generating linking code",
-  "errorCheckingStatus": "Error checking status",
-  "errorUnlinking": "Error unlinking",
-  "scanQRCodeOrTapButton": "Scan the QR code or tap the button below",
-  "linkYourWhatsApp": "Link your WhatsApp",
-  "linkWhatsAppBenefit": "Receive notifications and manage your work orders via WhatsApp",
   "shareWithCustomer": "Share with Customer",
-  "shareLinkTitle": "Tracking Link",
-  "shareLinkDescription": "Send this link to the customer to track the work order",
-  "linkValidFor": "Link valid for {days} days",
-  "@linkValidFor": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "canApprove": "Can approve",
-  "canComment": "Can comment",
-  "viewOnly": "View only",
   "copyLink": "Copy Link",
   "sendViaWhatsApp": "Send via WhatsApp",
   "shareLink": "Share Link",
   "linkCopied": "Link copied!",
-  "generatingLink": "Generating link...",
-  "errorGeneratingLink": "Error generating link",
-  "sharePermissions": "Link Permissions",
-  "shareLinkExpired": "This link has expired",
-  "shareLinkApproved": "Approved by customer",
-  "shareLinkRejected": "Rejected by customer",
   "viewCount": "{count} {count, plural, =1{view} other{views}}",
   "@viewCount": {
     "placeholders": {
@@ -1026,62 +664,17 @@
       }
     }
   },
-  "revokeLink": "Revoke Link",
-  "revokeLinkConfirm": "Do you want to revoke this link? The customer will no longer be able to access it.",
-  "linkRevoked": "Link revoked",
-  "activeLinks": "Active Links",
-  "noActiveLinks": "No active links",
   "noComments": "No comments",
-  "addComment": "Add comment",
   "commentPlaceholder": "Type your comment...",
-  "commentAdded": "Comment added",
   "commentFromCustomer": "Customer",
   "commentFromTeam": "Team",
   "internalComment": "Internal comment",
-  "internalCommentHint": "Visible only to the team",
   "publicComment": "Public comment",
-  "publicCommentHint": "Visible to the customer",
-  "markAsInternal": "Mark as internal",
-  "sendComment": "Send",
-  "approveQuoteAction": "Approve Quote",
-  "rejectQuoteAction": "Reject Quote",
-  "quoteApprovedByCustomer": "Quote approved by customer",
-  "quoteRejectedByCustomer": "Quote rejected by customer",
   "rejectionReason": "Rejection reason",
-  "linkValidity": "Link Validity",
-  "validFor": "Valid for",
   "days": "days",
-  "selectValidity": "Select validity",
-  "usingExistingLink": "Active link found",
-  "generateNewLink": "Generate new",
-  "loadingExistingLinks": "Checking existing links...",
-  "advancedOptions": "Advanced options",
-  "sendToCustomer": "Send to customer",
   "rating": "Rating",
   "ratings": "Ratings",
-  "averageRating": "Average rating",
-  "totalRatings": "Total ratings",
   "noRatingsYet": "No ratings yet",
-  "rateService": "Rate our service",
-  "rateSubmit": "Submit Rating",
-  "rateSuccess": "Thank you for your rating!",
-  "ratingScore": "{score}/5",
-  "@ratingScore": {
-    "placeholders": {
-      "score": {
-        "type": "int"
-      }
-    }
-  },
-  "customerRating": "Customer Rating",
-  "ratingWithStars": "{count} {count, plural, =1{star} other{stars}}",
-  "@ratingWithStars": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "notifyCustomerQuestion": "Notify customer?",
   "notifyCustomerDescription": "Do you want to send the update to {customerName} via WhatsApp?",
   "@notifyCustomerDescription": {
@@ -1112,29 +705,11 @@
       }
     }
   },
-  "downloadApp": "Download the app",
   "cannotRemoveOnlyAdmin": "Cannot remove the only administrator of the company. Promote another collaborator to administrator first.",
   "cannotChangeOnlyAdminRole": "Cannot change the only administrator's role. Promote another collaborator to administrator first.",
   "cannotRemoveSelf": "You cannot remove yourself from the company.",
   "invalidInviteCompanyNotFound": "Invalid invite: company not found.",
   "shareInviteAction": "Share Invite",
-  "inviteExpiresInDays": "{count, plural, =1{Expires in 1 day} other{Expires in {count} days}}",
-  "@inviteExpiresInDays": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "inviteExpiresInHours": "{count, plural, =1{Expires in 1 hour} other{Expires in {count} hours}}",
-  "@inviteExpiresInHours": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "inviteExpiresSoon": "Expires soon",
   "duplicateInviteTitle": "Existing Invite",
   "duplicateInviteMessage": "There is already a pending invite for this email/phone.",
   "resendExistingInvite": "Resend Existing",
@@ -1142,9 +717,7 @@
   "agenda": "Schedule",
   "noScheduledOrders": "No orders scheduled for this day",
   "allTeam": "Whole team",
-  "filterByTechnician": "Filter by technician",
   "allDay": "All day",
-  "clearSchedule": "Clear schedule",
   "scheduleReminder": "Schedule reminder",
   "reminderDisabled": "Disabled",
   "reminderMinutesBefore": "{minutes} min before",
@@ -1161,18 +734,6 @@
     "placeholders": {
       "hours": {
         "type": "int"
-      }
-    }
-  },
-  "reminderTitle": "Upcoming appointment",
-  "reminderBodyOrder": "WO #{orderNumber} - {customerName}",
-  "@reminderBodyOrder": {
-    "placeholders": {
-      "orderNumber": {
-        "type": "String"
-      },
-      "customerName": {
-        "type": "String"
       }
     }
   },
@@ -1198,7 +759,6 @@
     }
   },
   "removeDevice": "Remove Device",
-  "allDevices": "All Devices",
   "generalNoDevice": "General",
   "selectDeviceFor": "For which device?",
   "deviceCount": "{count} devices",
@@ -1209,7 +769,6 @@
       }
     }
   },
-  "duplicateForAll": "Duplicate for all",
   "confirmRemoveDevice": "Remove \"{name}\" from this order?",
   "@confirmRemoveDevice": {
     "placeholders": {
@@ -1232,26 +791,14 @@
     }
   },
   "features": "Features",
-  "fieldServiceLabel": "Field Service",
-  "fieldServiceDescription": "Show service location field",
-  "schedulingLabel": "Scheduling",
-  "schedulingDescription": "Use scheduled date in orders",
-  "deviceManagement": "Asset management",
-  "deviceManagementDescription": "Status, history and advanced device control",
   "contracts": "Contracts",
-  "contractsDescription": "Recurring maintenance contracts",
   "noContracts": "No contracts",
-  "contractActive": "Recurring contract",
   "activateContract": "Activate recurring contract",
   "deactivateContract": "Deactivate recurring contract",
   "deactivateContractConfirm": "Automatic order generation will be stopped.",
   "recurringContract": "Recurring contract",
   "automaticGeneration": "Automatic generation",
-  "contractAutoGenerate": "Auto-generate work orders",
-  "contractAutoGenerateDescription": "When enabled, automatically creates the order on the due date",
-  "contractReminderDays": "Reminder (days before)",
   "contractNextDue": "Next generation",
-  "generatedOrders": "Generated orders",
   "generatedOrdersCount": "Generated orders ({count})",
   "@generatedOrdersCount": {
     "placeholders": {
@@ -1269,45 +816,26 @@
   "deviceStatusMaintenance": "Under maintenance",
   "deviceStatusInactive": "Inactive",
   "deviceStatusDecommissioned": "Decommissioned",
-  "orderHistory": "Order History",
   "noOrderHistory": "No work orders recorded",
   "configure": "Configure",
   "frequency": "Frequency",
   "interval": "Interval",
   "indefinite": "Indefinite",
   "noOrdersDueOnDate": "No orders due on this day",
-  "companyFeatures": "Company features",
-  "youCanChangeThisLater": "You can change this later in settings",
   "documents": "Documents",
   "addDocument": "Add Document",
   "receipt": "Receipt",
   "invoice": "Invoice",
   "contract": "Contract",
-  "attachReceipt": "Attach Receipt",
-  "chooseFile": "Choose File",
-  "documentType": "Document Type",
-  "viewDocument": "View Document",
   "deleteDocument": "Delete Document",
   "confirmDeleteDocument": "Are you sure you want to delete this document?",
   "uploadingDocument": "Uploading document...",
-  "noDocuments": "No documents attached",
   "documentAdded": "Document added",
   "documentDeleted": "Document deleted",
   "openDocument": "Open",
-  "receiptAttached": "Receipt attached",
-  "receiptRemoved": "Receipt removed",
-  "removeReceipt": "Remove Receipt",
-  "confirmRemoveReceipt": "Are you sure you want to remove this receipt?",
   "fromFiles": "Files",
-  "selectDocumentType": "Select document type",
   "errorUploadingDocument": "Error uploading document",
   "engagementReminders": "Reminders",
-  "dailyReminderTitle": "Daily reminder",
-  "dailyReminderDescription": "Get a reminder every day at 9 AM",
-  "inactivityReminderTitle": "Inactivity reminder",
-  "inactivityReminderDescription": "Get reminders when you haven't used the app",
-  "pendingOsReminderTitle": "Pending orders reminder",
-  "pendingOsReminderDescription": "Get reminders about stalled orders",
   "dailyNotificationTitle": "Good morning!",
   "dailyNotificationBody": "Log today's work orders on PraticOS",
   "inactivity3dTitle": "We miss you!",
@@ -1325,10 +853,8 @@
       }
     }
   },
-  "legalSection": "Legal",
   "termsOfService": "Terms and Conditions",
   "termsOfServicePlaceholder": "E.g.: Devices not picked up within 90 days may be discarded...",
-  "termsOfServiceDescription": "These terms will be shown to the customer before approving the quote.",
   "useDefaultTerms": "Use default terms for this segment",
   "pdfTermsAndConditions": "Terms and Conditions",
   "pdfCompanySignature": "Responsible",
@@ -1390,61 +916,11 @@
     }
   },
   "featureGateLimitModalTitle": "Limit reached",
-  "featureGateLimitModalMessage": "You've reached the {feature} limit of your {plan} plan.",
-  "@featureGateLimitModalMessage": {
-    "placeholders": {
-      "feature": {
-        "type": "String"
-      },
-      "plan": {
-        "type": "String"
-      }
-    }
-  },
-  "featureGateLimitModalUsage": "{current} of {limit} {feature}",
-  "@featureGateLimitModalUsage": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      },
-      "feature": {
-        "type": "String"
-      }
-    }
-  },
-  "featureGateUpgradeButton": "Upgrade to {plan}",
-  "@featureGateUpgradeButton": {
-    "placeholders": {
-      "plan": {
-        "type": "String"
-      }
-    }
-  },
-  "featureGateUpgradeNewLimit": "New limit: {limit} {feature}",
-  "@featureGateUpgradeNewLimit": {
-    "placeholders": {
-      "limit": {
-        "type": "String"
-      },
-      "feature": {
-        "type": "String"
-      }
-    }
-  },
-  "unlimitedLabel": "unlimited",
   "subscription": "Subscription",
   "manageSubscription": "Manage subscription",
-  "viewPlanAndBilling": "View plan and billing",
   "restorePurchases": "Restore purchases",
-  "restorePreviousPurchases": "Recover previous purchases",
-  "restoringPurchases": "Restoring purchases...",
   "restorePurchasesSuccess": "Purchases restored successfully",
   "restorePurchasesError": "Error restoring purchases. Please try again.",
-  "restorePurchasesDescription": "Restore your previous purchases if you changed devices",
-  "purchaseHistory": "Purchase History",
   "success": "Success",
   "free": "Free",
   "renewsOn": "Renews on {date}",
@@ -1455,51 +931,9 @@
       }
     }
   },
-  "subscriptionCancelled": "Subscription cancelled",
-  "changePlan": "Change plan",
-  "viewAvailablePlans": "View available plans",
-  "cancelSubscription": "Cancel subscription",
   "manageInStore": "Manage in app store",
-  "choosePlan": "Choose plan",
   "restore": "Restore",
-  "perMonth": "/month",
-  "mostPopular": "MOST POPULAR",
   "currentPlan": "Current plan",
-  "yourCurrentPlan": "Your current plan",
-  "selectPlan": "Select plan",
-  "purchaseSuccessful": "Purchase completed successfully!",
-  "plansDisclaimer": "Subscriptions renew automatically. You can cancel anytime in store settings.",
-  "planFeatureUsers": "{count} users included",
-  "@planFeatureUsers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "planFeaturePhotos": "{count} photos/month",
-  "@planFeaturePhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "planFeatureForms": "{count} forms",
-  "@planFeatureForms": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "planFeatureCleanPdf": "PDF without watermark",
-  "planFeaturePriority": "Priority support",
-  "planFeatureUnlimitedPhotos": "Unlimited photos",
-  "planFeatureUnlimitedForms": "Unlimited forms",
-  "planFeatureMultiCompany": "Multi-company",
-  "planFeatureApi": "API access",
-  "upgradePlanTitle": "Upgrade",
   "featureLimitReached": "You've reached the limit for {feature}",
   "@featureLimitReached": {
     "placeholders": {
@@ -1508,36 +942,9 @@
       }
     }
   },
-  "withUpgrade": "With upgrade",
-  "upgradeNow": "Upgrade now",
   "photoLimitReachedMessage": "You have reached this month's photo limit.",
   "photoLimitUpgradeHint": "Upgrade to add more photos.",
   "viewPlans": "View plans",
-  "planCourtesyUntil": "Courtesy until {date}",
-  "@planCourtesyUntil": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "planRenewsOn": "Renews on {date}",
-  "@planRenewsOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "planPaymentIssue": "Payment issue",
-  "planValidUntil": "Valid until {date}",
-  "@planValidUntil": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "askAdminToChangePlanTitle": "Talk to your admin",
   "askAdminToChangePlan": "Ask your company admin to change the plan.",
   "subscriptionUnavailable": "Subscriptions are not available right now. Please try again later.",
@@ -1571,9 +978,6 @@
   "asaasErrorCustomerRequired": "Add a customer to the order before charging.",
   "asaasErrorGeneric": "Could not complete. Please try again.",
   "invalidTaxId": "Invalid CPF or CNPJ",
-  "chargeWithAsaas": "Charge with Asaas",
-  "chargeSectionTitle": "Charge",
-  "createChargeTitle": "New charge",
   "chargeValue": "Amount",
   "chargeBalanceHint": "Order balance: {value}",
   "@chargeBalanceHint": {
@@ -1583,11 +987,7 @@
       }
     }
   },
-  "chargeModeSingle": "One-time",
-  "chargeModeInstallments": "Card installments",
   "chargeSingleHint": "The customer chooses Pix, boleto or card.",
-  "chargeInstallmentsHint": "The customer pays by credit card in the chosen installments.",
-  "chargeInstallments": "Installments",
   "chargeInstallmentOption": "{count}x of {value}",
   "@chargeInstallmentOption": {
     "placeholders": {
@@ -1601,50 +1001,16 @@
   },
   "chargeDueDate": "Due date",
   "chargeTaxIdHint": "Asaas requires a CPF or CNPJ. It is saved to the customer record.",
-  "chargeGenerate": "Create charge",
-  "chargeCreated": "Charge created",
   "chargeStatusPending": "Awaiting payment",
   "chargeStatusOverdue": "Overdue",
   "chargeStatusPaid": "Paid",
   "chargeStatusCanceled": "Canceled",
   "chargeStatusRefunded": "Refunded",
-  "chargeDueOn": "Due {date}",
-  "@chargeDueOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "chargeInstallmentsSummary": "{count}x on card",
-  "@chargeInstallmentsSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "chargeShareOrderLink": "Share order link",
-  "chargeCopyInvoiceLink": "Copy invoice link",
-  "chargeInvoiceLinkCopied": "Invoice link copied",
-  "chargeCancel": "Cancel charge",
   "chargeCancelConfirm": "The customer will no longer be able to pay with this link.",
   "chargeKeep": "Keep",
   "chargeReplaceTitle": "There is already an open charge",
   "chargeReplaceConfirm": "Creating a new charge cancels the previous one in Asaas.",
   "chargeReplace": "Create new",
-  "chargeTotalChanged": "The order balance ({balance}) differs from the charge amount ({value}).",
-  "@chargeTotalChanged": {
-    "placeholders": {
-      "balance": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "chargeRegenerate": "Create new charge",
   "asaasErrorInstallmentsInProgress": "This installment plan already has paid installments. Wait for it to finish or refund in Asaas.",
   "asaasErrorOrderCanceled": "This order is canceled and cannot be charged.",
   "asaasErrorInvalidDueDate": "Invalid due date. Choose today or a future date.",
@@ -1654,11 +1020,7 @@
   "asaasErrorUnavailable": "Asaas is unavailable right now. Please try again shortly.",
   "listLoadError": "Could not load this. Check your connection and try again.",
   "pickCustomerTitle": "Who is the customer?",
-  "pickCustomerSubtitle": "Tap to choose, or type a name, phone or plate",
   "searchCustomerPlaceholder": "Search by name, phone or plate",
-  "searchCustomerNoPlatePlaceholder": "Search by name or phone",
-  "addNewCustomer": "Add a new customer",
-  "allCustomers": "All",
   "plateValue": "Plate {plate}",
   "@plateValue": {
     "placeholders": {
@@ -1676,14 +1038,6 @@
   "callAction": "Call",
   "newOrderFor": "New order for {name}",
   "@newOrderFor": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "ordersOfCustomer": "Orders of {name}",
-  "@ordersOfCustomer": {
     "placeholders": {
       "name": {
         "type": "String"
@@ -1847,19 +1201,8 @@
       }
     }
   },
-  "orderChangeStatusLink": "Change",
   "orderItemsSection": "What will be done",
-  "orderWhatGoesTitle": "What goes on the order?",
   "orderItemSearchPlaceholder": "Search service or part",
-  "orderCreateAndAdd": "Create “{name}” and add to the order",
-  "@orderCreateAndAdd": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "orderCreateItemHint": "You set the price on the order. It is saved for next time.",
   "orderCreateItemError": "Could not create it. Try again.",
   "orderCatalogEmpty": "Your catalog is empty. Type the name in the search to create one.",
   "orderMostUsed": "Most used",
@@ -1890,14 +1233,6 @@
     }
   },
   "orderFullyPaid": "Fully paid",
-  "orderSaveButton": "Save {order}",
-  "@orderSaveButton": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
   "orderSaveNeedsCustomer": "Choose the customer to save.",
   "orderDiscardTitle": "Leave without saving?",
   "orderDiscardMessage": "What you filled in will be lost.",
@@ -1910,24 +1245,7 @@
       }
     }
   },
-  "orderPhotoAction": "Photo",
   "orderTalkAction": "Say what to do",
-  "orderAssistantSoon": "Coming soon",
-  "orderNextStepQuote": "Quote ready for the customer",
-  "orderNextStepQuoteAction": "Customer approved",
-  "orderNextStepApproved": "Approved by the customer",
-  "orderNextStepApprovedAction": "Start the service",
-  "orderNextStepProgress": "Service in progress",
-  "orderNextStepProgressAction": "Mark as done",
-  "orderNextStepDone": "Done",
-  "orderNextStepDoneUnpaid": "Done. {amount} left to receive",
-  "@orderNextStepDoneUnpaid": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "orderNextStepReceive": "Receive {amount}",
   "@orderNextStepReceive": {
     "placeholders": {
@@ -1936,17 +1254,6 @@
       }
     }
   },
-  "orderNextStepDonePaid": "All set: done and paid",
-  "orderNextStepSend": "Send to the customer",
-  "orderNextStepCanceled": "{order} canceled",
-  "@orderNextStepCanceled": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderNextStepReopen": "Reopen",
   "orderMenuAddTo": "Add to the {order}",
   "@orderMenuAddTo": {
     "placeholders": {
@@ -1956,7 +1263,6 @@
     }
   },
   "orderMenuSendToCustomer": "Send to the customer",
-  "orderMenuPdf": "PDF",
   "orderMenuCancel": "Cancel {order}",
   "@orderMenuCancel": {
     "placeholders": {
@@ -1982,7 +1288,6 @@
       }
     }
   },
-  "orderAddMore": "Checklist, photos, comment and more",
   "orderCancelConfirmTitle": "Cancel {order}?",
   "@orderCancelConfirmTitle": {
     "placeholders": {
@@ -2002,8 +1307,6 @@
   },
   "orderDeleteConfirmMessage": "This cannot be undone.",
   "orderPhotosSection": "Photos",
-  "orderDeviceActionChange": "Change",
-  "orderDeviceActionRemove": "Remove from the order",
   "orderUnpricedCount": "{count, plural, =1{1 item without price, out of the total} other{{count} items without price, out of the total}}",
   "@orderUnpricedCount": {
     "placeholders": {
@@ -2024,7 +1327,6 @@
   "filterOpen": "Open",
   "filterAll": "All",
   "filterMine": "Mine",
-  "sectionScheduledToday": "Today",
   "nextVisitLabel": "Now",
   "homeWithYouToday": "{count, plural, =1{1 with you today} other{{count} with you today}}",
   "@homeWithYouToday": {
@@ -2076,15 +1378,6 @@
     }
   },
   "noOrdersWithYou": "No orders with you.",
-  "sectionLate": "Overdue",
-  "sectionDueToday": "Due today",
-  "sectionInProgress": "In progress",
-  "sectionWaitingApproval": "Waiting for approval",
-  "sectionApproved": "Approved",
-  "moreShowCanceled": "View canceled",
-  "viewCanceledTitle": "Canceled",
-  "backToOpenOrders": "Back to open",
-  "homeMoreMenu": "More options",
   "homeOpenCount": "{count} open",
   "@homeOpenCount": {
     "placeholders": {
@@ -2093,33 +1386,6 @@
       }
     }
   },
-  "nextStepLabelToday": "Today",
-  "nextStepLate": "{count, plural, =1{1 order is past its due date.} other{{count} orders are past their due date.}}",
-  "@nextStepLate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nextStepDueToday": "{count, plural, =1{1 order due today.} other{{count} orders due today.}}",
-  "@nextStepDueToday": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nextStepQuotesWaiting": "{count, plural, =1{1 quote waiting for the customer's answer.} other{{count} quotes waiting for the customer's answer.}}",
-  "@nextStepQuotesWaiting": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "seeLate": "See the overdue ones",
-  "seeThem": "See",
   "seeAllOrders": "See all",
   "notificationsA11y": "Notifications, {count} new",
   "@notificationsA11y": {
@@ -2129,7 +1395,6 @@
       }
     }
   },
-  "firstOrderTitle": "Create your first service order. It takes less than a minute.",
   "howItWorks": "How it works",
   "firstOrderLabel": "Start here",
   "homeNoOrdersYet": "None yet",
@@ -2147,30 +1412,6 @@
   "howItWorksStep2Detail": "over WhatsApp, with a link",
   "howItWorksStep3": "3. Get paid and deliver",
   "howItWorksStep3Detail": "the app reminds you who still owes",
-  "nextStepLateShort": "{count, plural, =1{1 order is past due.} other{{count} orders are past due.}}",
-  "@nextStepLateShort": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nextStepDueTodayShort": "{count, plural, =1{1 order due today.} other{{count} orders due today.}}",
-  "@nextStepDueTodayShort": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nextStepQuotesWaitingShort": "{count, plural, =1{1 quote without an answer.} other{{count} quotes without an answer.}}",
-  "@nextStepQuotesWaitingShort": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "searchNotFoundLoaded": "Not found in the loaded orders.",
   "searchOlder": "Search older ones",
   "noOpenOrders": "No open orders.",
@@ -2219,18 +1460,6 @@
       }
     }
   },
-  "orderRowNumberDevice": "Order {number} · {device}",
-  "@orderRowNumberDevice": {
-    "placeholders": {
-      "number": {
-        "type": "String"
-      },
-      "device": {
-        "type": "String"
-      }
-    }
-  },
-  "homeNewOrder": "New order",
   "yourAccount": "Your account",
   "yourCompany": "Your company",
   "catalog": "Catalog",
@@ -2244,7 +1473,6 @@
   "valuesAndBillingOffMessage": "Prices, totals, receiving payments and the Financial tab disappear for the whole team. Nothing is deleted: values come back if you turn it on again. Payment links already sent remain valid.",
   "valuesAndBillingOffAction": "Turn off",
   "valuesAndBillingSaveError": "Could not save. Check your connection and try again.",
-  "nameAndPhoto": "Name and photo",
   "joinWithInviteCode": "Join with an invite code",
   "followsPhoneSettings": "Language and appearance follow your iPhone settings.",
   "invitePerson": "Invite someone",
@@ -2269,18 +1497,6 @@
     }
   },
   "financialToReceive": "To collect",
-  "financialReceived": "Received",
-  "financialSummaryLine": "In {entered} · Owed {owed}",
-  "@financialSummaryLine": {
-    "placeholders": {
-      "entered": {
-        "type": "String"
-      },
-      "owed": {
-        "type": "String"
-      }
-    }
-  },
   "financialOrderSince": "Order {number} · since {date}",
   "@financialOrderSince": {
     "placeholders": {
@@ -2296,17 +1512,6 @@
   "@financialOrdersSince": {
     "placeholders": {
       "count": {
-        "type": "int"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "financialPaidOn": "Order {number} · paid {date}",
-  "@financialPaidOn": {
-    "placeholders": {
-      "number": {
         "type": "int"
       },
       "date": {
@@ -2404,14 +1609,6 @@
       }
     }
   },
-  "receiveDiscountButton": "Give {amount} discount",
-  "@receiveDiscountButton": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "receiveViewReceipt": "View receipt",
   "receiveRemovePayment": "Remove this payment",
   "receiveRecordedBy": "Recorded by {name} on {date}",
@@ -2444,11 +1641,9 @@
   "showPassword": "Show password",
   "hidePassword": "Hide password",
   "onboardingSegmentTitle": "Your trade",
-  "onboardingSegmentSubtitle": "What kind of work do you do? The app comes ready with the services and checklists of your trade.",
   "onboardingInviteCode": "I got an invite code",
   "onboardingSegmentsError": "Couldn't load the trades. Check your connection.",
   "onboardingSpecialtiesTitle": "Specialties",
-  "onboardingSpecialtiesSubtitle": "What do you work on? Check what fits. You can change it later.",
   "onboardingContinue": "Continue",
   "onboardingBusinessTitle": "Your business",
   "onboardingBusinessName": "What's your business called?",
@@ -2537,47 +1732,22 @@
   "inviteCreateOwnCompany": "Create my own company",
   "inviteCodePlaceholder": "E.g. 7K2P9QXA",
   "segmentLoadError": "Could not open your company. Check your internet and try again.",
-  "orderAssistantHint": "Take a photo of the plate and say the service",
-  "orderAssistantPlaceholder": "Tap the keyboard mic and speak. E.g.: South Motors, hood 500 and polishing 450",
-  "orderAssistantDone": "Done",
   "orderAssistantAddPhoto": "Take another photo",
   "orderAssistantTakePhoto": "Take a photo",
-  "orderAssistantPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
-  "orderAssistantReading": "Reading what you sent…",
-  "orderAssistantFilledNote": "Check what is highlighted in yellow before saving.",
   "orderAssistantCustomerGuess": "I heard “{name}”. Tap to choose the customer",
   "orderAssistantDeviceGuess": "“{device}” is not registered",
-  "orderAssistantErrorTitle": "Assistant",
   "orderAssistantErrorDisabled": "The assistant is not available for your company yet.",
   "orderAssistantErrorQuota": "You have used this month's {limit} assistant requests. You can keep filling it in by hand.",
   "orderAssistantErrorUnavailable": "Couldn't read it now. Try again or fill it in by hand.",
   "orderAssistantNothingFound": "I found nothing to add. Try again or fill it in by hand.",
-  "valuesAndBillingSoon": "On. You will be able to turn it off soon.",
   "reportPreviousPeriod": "Previous period",
   "reportNextPeriod": "Next period",
-  "orderInThisOrder": "In this {order}",
-  "@orderInThisOrder": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
   "orderAddChecklist": "Checklist",
   "orderAddMedia": "Photos or document",
   "orderAddComment": "Comment",
   "orderAddAddress": "Service address",
   "orderAddSchedule": "Schedule date and time",
   "orderAddDiscount": "Discount",
-  "orderAddContract": "Repeat this {order}",
-  "@orderAddContract": {
-    "placeholders": {
-      "order": {
-        "type": "String"
-      }
-    }
-  },
-  "orderAddOtherFields": "Other fields",
   "orderChecklistMissing": "{count, plural, =1{1 question left} other{{count} questions left}}",
   "@orderChecklistMissing": {
     "placeholders": {
@@ -2586,7 +1756,6 @@
       }
     }
   },
-  "orderChecklistDone": "Done",
   "orderAddressChange": "Change address",
   "orderAddressRemove": "Remove address",
   "orderScheduleRemove": "Remove schedule",
@@ -2601,28 +1770,11 @@
       }
     }
   },
-  "orderContractChange": "Change contract",
   "orderUploading": "Uploading…",
-  "pickDeviceTitle": "Which {device}?",
-  "@pickDeviceTitle": {
-    "placeholders": {
-      "device": {
-        "type": "String"
-      }
-    }
-  },
   "otherDevicesSection": "Other {devices}",
   "@otherDevicesSection": {
     "placeholders": {
       "devices": {
-        "type": "String"
-      }
-    }
-  },
-  "registerNewDevice": "Register new {device}",
-  "@registerNewDevice": {
-    "placeholders": {
-      "device": {
         "type": "String"
       }
     }
@@ -2649,7 +1801,6 @@
   "moreSectionYou": "You",
   "moreCompanySubtitle": "Order details, business type and features",
   "moreCatalogSubtitle": "Services and {products}",
-  "saveEntityButton": "Save {entity}",
   "planHeaderRenews": "{plan} · renews on {date}",
   "@planHeaderRenews": {"placeholders": {"plan": {"type": "String"}, "date": {"type": "String"}}},
   "planHeaderValidUntil": "{plan} · valid until {date}",
@@ -2719,9 +1870,6 @@
   "receiveOrderLink": "Order {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
   "receiveAmountHint": "Got only part of it? Change the amount.",
-  "orderMenuPdfOf": "{order} PDF",
-  "@orderMenuPdfOf": {"placeholders": {"order": {"type": "String"}}},
-  "orderAddItem": "Service or part",
   "orderAddContractMonthly": "Repeat every month (contract)",
   "ratingsSubtitle": "What customers thought",
   "ratingsLatest": "Latest",
@@ -2816,8 +1964,6 @@
   "contractsEmptyEnded": "No ended contracts.",
   "contractsFooterHint": "Contracts start inside a {order}: turn on “Repeat this {order}”.",
   "@contractsFooterHint": {"placeholders": {"order": {"type": "String"}}},
-  "orderChangeCustomer": "Change customer",
-  "orderChangeDevice": "Change {device}",
   "orderAddResponsible": "Responsible",
   "orderResponsibleRemove": "Remove responsible",
   "filterDone": "Completed",
@@ -2839,14 +1985,9 @@
   "orderStatusLabel": "Status",
   "orderScheduleLabel": "Visit",
   "orderAddressLabel": "Location",
-  "orderNotSet": "None",
-  "speechTitle": "Speak the job",
   "speechHint": "Say the customer, the vehicle and what will be done.",
   "speechListening": "Listening…",
-  "speechStop": "Stop",
-  "speechStart": "Speak again",
   "speechFill": "Fill in the order",
-  "speechType": "Type instead",
   "speechUnavailable": "The microphone is not allowed. Allow it in Settings or type the job.",
   "orderAddItemRow": "Add service or part",
   "orderPickCustomerRow": "Choose customer",
@@ -2887,7 +2028,6 @@
   "pickerNewDevice": "New {device}",
   "pickerNewItem": "New service or part",
   "pickerNewChecklist": "New checklist",
-  "pickerTypeAnother": "Type another",
   "pickerRegister": "Add “{query}”",
   "pickerNoDeviceWith": "No {device} matching “{query}”.",
   "pickerNoItemWith": "No service or part matching “{query}”. Add it and it goes straight on the order.",
@@ -2895,8 +2035,6 @@
   "pickerRecent": "Recent",
   "pickerAll": "All",
   "pickerSearch": "Search",
-  "orderMenuRemoveDevice": "Remove {device} from the order",
-  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
   "pickerNoDevice": "No {device}",
   "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}},
   "formMoreData": "More details",
