@@ -263,6 +263,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 AppListRow(
                   key: const ValueKey('device-none'),
                   title: l10n.pickerNoDevice(device),
+                  showChevron: false,
                   onTap: () => Navigator.pop(context, kRemoveDeviceResult),
                 ),
                 const PickerSeparator(),
