@@ -30,4 +30,26 @@ void main() {
     );
     handle.dispose();
   });
+
+  testWidgets('valueBesideTitle: value on the title line, subtitle full width',
+      (tester) async {
+    await tester.pumpWidget(host(
+      AppListRow(
+        title: 'Larissa',
+        subtitle: '3 OS · desde 24/10/2020',
+        trailing: 'R\$ 3.411,47',
+        valueBesideTitle: true,
+        onTap: () {},
+      ),
+    ));
+
+    final title = tester.getRect(find.text('Larissa'));
+    final value = tester.getRect(find.text('R\$ 3.411,47'));
+    final subtitle = tester.getRect(find.text('3 OS · desde 24/10/2020'));
+    // Same line as the name.
+    expect(value.top, title.top);
+    // The subtitle is not squeezed by the value column: it fits on one line.
+    expect(subtitle.height, lessThan(title.height * 1.5));
+    expect(subtitle.top, greaterThan(title.bottom - 1));
+  });
 }

@@ -553,7 +553,7 @@ abstract class AppLocalizations {
   /// No description provided for @toReceive.
   ///
   /// In pt, this message translates to:
-  /// **'A Receber'**
+  /// **'Falta receber'**
   String get toReceive;
 
   /// No description provided for @toPay.
@@ -4765,7 +4765,7 @@ abstract class AppLocalizations {
   /// No description provided for @financialReport.
   ///
   /// In pt, this message translates to:
-  /// **'Relatório Financeiro'**
+  /// **'Relatório financeiro'**
   String get financialReport;
 
   /// No description provided for @totalBilling.
@@ -4783,7 +4783,7 @@ abstract class AppLocalizations {
   /// No description provided for @averageTicket.
   ///
   /// In pt, this message translates to:
-  /// **'Ticket Médio'**
+  /// **'Média por OS'**
   String get averageTicket;
 
   /// No description provided for @customerRanking.
@@ -4855,7 +4855,7 @@ abstract class AppLocalizations {
   /// No description provided for @nOrdersCount.
   ///
   /// In pt, this message translates to:
-  /// **'{count} {count, plural, =1{ordem} other{ordens}}'**
+  /// **'{count} OS'**
   String nOrdersCount(int count);
 
   /// No description provided for @nItemsCount.
@@ -11053,6 +11053,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ex.: João da Silva'**
   String get profileNamePlaceholder;
+
+  /// No description provided for @financialWhichOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual OS?'**
+  String get financialWhichOrder;
+
+  /// No description provided for @reportThisWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta semana'**
+  String get reportThisWeek;
+
+  /// No description provided for @reportThisMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês'**
+  String get reportThisMonth;
+
+  /// No description provided for @reportThisYear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este ano'**
+  String get reportThisYear;
+
+  /// No description provided for @reportPickDates.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher datas'**
+  String get reportPickDates;
+
+  /// No description provided for @reportSeeOtherPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver outro período'**
+  String get reportSeeOtherPeriod;
+
+  /// No description provided for @reportStarts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começa'**
+  String get reportStarts;
+
+  /// No description provided for @reportEnds.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termina'**
+  String get reportEnds;
+
+  /// No description provided for @reportWhichPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Que período?'**
+  String get reportWhichPeriod;
 }
 
 class _AppLocalizationsDelegate

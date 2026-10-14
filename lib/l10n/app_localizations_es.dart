@@ -234,7 +234,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get partiallyPaid => 'Parcialmente Pagado';
 
   @override
-  String get toReceive => 'Por Recibir';
+  String get toReceive => 'Por recibir';
 
   @override
   String get toPay => 'Por Pagar';
@@ -2446,7 +2446,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get financialReport => 'Informe Financiero';
+  String get financialReport => 'Informe financiero';
 
   @override
   String get totalBilling => 'Facturación Total';
@@ -2455,7 +2455,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get financialSummary => 'Resumen Financiero';
 
   @override
-  String get averageTicket => 'Ticket Promedio';
+  String get averageTicket => 'Promedio por orden';
 
   @override
   String get customerRanking => 'Ranking de Clientes';
@@ -6437,4 +6437,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileNamePlaceholder => 'Ej.: Juan Pérez';
+
+  @override
+  String get financialWhichOrder => '¿Qué OS?';
+
+  @override
+  String get reportThisWeek => 'Esta semana';
+
+  @override
+  String get reportThisMonth => 'Este mes';
+
+  @override
+  String get reportThisYear => 'Este año';
+
+  @override
+  String get reportPickDates => 'Elegir fechas';
+
+  @override
+  String get reportSeeOtherPeriod => 'Ver otro período';
+
+  @override
+  String get reportStarts => 'Empieza';
+
+  @override
+  String get reportEnds => 'Termina';
+
+  @override
+  String get reportWhichPeriod => '¿Qué período?';
 }

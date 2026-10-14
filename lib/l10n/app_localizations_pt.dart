@@ -234,7 +234,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get partiallyPaid => 'Parcialmente Pago';
 
   @override
-  String get toReceive => 'A Receber';
+  String get toReceive => 'Falta receber';
 
   @override
   String get toPay => 'A Pagar';
@@ -2446,7 +2446,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get financialReport => 'Relatório Financeiro';
+  String get financialReport => 'Relatório financeiro';
 
   @override
   String get totalBilling => 'Faturamento Total';
@@ -2455,7 +2455,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialSummary => 'Resumo Financeiro';
 
   @override
-  String get averageTicket => 'Ticket Médio';
+  String get averageTicket => 'Média por OS';
 
   @override
   String get customerRanking => 'Ranking de Clientes';
@@ -2492,13 +2492,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String nOrdersCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'ordens',
-      one: 'ordem',
-    );
-    return '$count $_temp0';
+    return '$count OS';
   }
 
   @override
@@ -6425,4 +6419,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileNamePlaceholder => 'Ex.: João da Silva';
+
+  @override
+  String get financialWhichOrder => 'Qual OS?';
+
+  @override
+  String get reportThisWeek => 'Esta semana';
+
+  @override
+  String get reportThisMonth => 'Este mês';
+
+  @override
+  String get reportThisYear => 'Este ano';
+
+  @override
+  String get reportPickDates => 'Escolher datas';
+
+  @override
+  String get reportSeeOtherPeriod => 'Ver outro período';
+
+  @override
+  String get reportStarts => 'Começa';
+
+  @override
+  String get reportEnds => 'Termina';
+
+  @override
+  String get reportWhichPeriod => 'Que período?';
 }

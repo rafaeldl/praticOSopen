@@ -164,7 +164,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('debtor-Bia')));
     await tester.pumpAndSettle();
 
+    // The "Escolher" screen: question as the title, who as the subtitle.
+    expect(find.text('Qual OS?'), findsWidgets);
     expect(find.text('OS em aberto de Bia'), findsOneWidget);
+    expect(find.byType(CupertinoActionSheet), findsNothing);
     await tester.tap(find.textContaining('OS 190'));
     await tester.pumpAndSettle();
     expect(opened.single.id, 'b1');
@@ -278,12 +281,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('financialMore')));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(CupertinoActionSheet),
-        matching: find.text('Relatório'),
-      ),
-    );
+    // Pull-down menu (no action sheet, no "Cancelar").
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+    expect(find.text('Cancelar'), findsNothing);
+    await tester.tap(find.text('Relatório'));
     await tester.pumpAndSettle();
 
     expect(reports, [true, false]);
