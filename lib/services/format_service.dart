@@ -95,6 +95,20 @@ class FormatService {
     return text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
   }
 
+  /// Dia da semana, dia e mês por extenso, com inicial maiúscula
+  /// (ex: Quinta-feira, 9 de outubro; Thursday, October 9)
+  String formatWeekdayDayMonth(DateTime? date) {
+    if (date == null) return '';
+    final text = DateFormat.MMMMEEEEd(_intlLocale).format(date);
+    return text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
+  }
+
+  /// Dia da semana abreviado, sem ponto (ex: qui, Thu, jue)
+  String formatWeekdayShort(DateTime? date) {
+    if (date == null) return '';
+    return DateFormat.E(_intlLocale).format(date).replaceAll('.', '');
+  }
+
   /// Formata apenas hora (ex: 14:30, 2:30 PM)
   String formatTime(DateTime? date) {
     if (date == null) return '';

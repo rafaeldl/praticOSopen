@@ -2984,7 +2984,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noScheduledOrders => 'No hay OS programadas para este día';
 
   @override
-  String get allTeam => 'Todo el Equipo';
+  String get allTeam => 'Todo el equipo';
 
   @override
   String get filterByTechnician => 'Filtrar por técnico';
@@ -6437,4 +6437,59 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileNamePlaceholder => 'Ej.: Juan Pérez';
+
+  @override
+  String get agendaShowMonth => 'Ver el mes';
+
+  @override
+  String get agendaShowWeek => 'Ver la semana';
+
+  @override
+  String agendaWhose(String name) {
+    return 'De quién: $name';
+  }
+
+  @override
+  String get agendaWhoseTitle => '¿De quién mostrar?';
+
+  @override
+  String agendaOnlyOf(String name) {
+    return 'Solo de $name';
+  }
+
+  @override
+  String get agendaShowAll => 'Mostrar todos';
+
+  @override
+  String agendaWithPerson(String name) {
+    return 'con $name';
+  }
+
+  @override
+  String agendaDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agendados',
+      one: '1 agendado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agendaDayHasOrders(String day) {
+    return '$day, tiene servicio agendado';
+  }
+
+  @override
+  String get agendaPreviousWeek => 'Semana anterior';
+
+  @override
+  String get agendaNextWeek => 'Semana siguiente';
+
+  @override
+  String get agendaPreviousMonth => 'Mes anterior';
+
+  @override
+  String get agendaNextMonth => 'Mes siguiente';
 }

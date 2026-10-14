@@ -1141,7 +1141,7 @@
   "cancelAndCreateNew": "Cancelar y Crear Nueva",
   "agenda": "Agenda",
   "noScheduledOrders": "No hay OS programadas para este día",
-  "allTeam": "Todo el Equipo",
+  "allTeam": "Todo el equipo",
   "filterByTechnician": "Filtrar por técnico",
   "allDay": "Todo el día",
   "clearSchedule": "Quitar programación",
@@ -2978,5 +2978,18 @@
   "profileChangePhoto": "Cambiar foto",
   "profileSignedInAs": "Entras con {email}",
   "profileNameRequired": "Escribe tu nombre",
-  "profileNamePlaceholder": "Ej.: Juan Pérez"
+  "profileNamePlaceholder": "Ej.: Juan Pérez",
+  "agendaShowMonth": "Ver el mes",
+  "agendaShowWeek": "Ver la semana",
+  "agendaWhose": "De quién: {name}",
+  "agendaWhoseTitle": "¿De quién mostrar?",
+  "agendaOnlyOf": "Solo de {name}",
+  "agendaShowAll": "Mostrar todos",
+  "agendaWithPerson": "con {name}",
+  "agendaDayCount": "{count, plural, =1{1 agendado} other{{count} agendados}}",
+  "agendaDayHasOrders": "{day}, tiene servicio agendado",
+  "agendaPreviousWeek": "Semana anterior",
+  "agendaNextWeek": "Semana siguiente",
+  "agendaPreviousMonth": "Mes anterior",
+  "agendaNextMonth": "Mes siguiente"
 }

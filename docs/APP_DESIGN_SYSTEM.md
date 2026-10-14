@@ -180,6 +180,8 @@ Zonas, sempre nesta ordem. Zona vazia não aparece.
 
 **Início:** `Home` liga a store ao `HomeContent` (`lib/screens/menu_navigation/home_content.dart`, só dados e callbacks, testável). Zonas: sino e perfil em vidro no topo, título grande com subtítulo ("12 em aberto · 2 atrasadas"), filtros "Em aberto | Concluídas | Todas" (técnico: bloco "Agora" e "Minhas | Todas") e lista no estilo do Mail (`OrderListRow`: cliente e total, veículo · serviço, status em cinza; atrasada com ponto vermelho e status em `danger`). Sem grupos: a ordem resolve (atrasadas primeiro). A busca só aparece ao puxar a lista para baixo. "Nova OS" é o "+" azul ao lado das abas. Regras puras em `home_groups.dart`. Sem nenhuma OS na empresa, a tela vira o estado de primeira vez, apontando para o "+".
 
+**Agenda** (`lib/screens/agenda/agenda_screen.dart`, store `AgendaStore`): mesmo fundo e lista plana da Início. Topo com título grande e um "…" em vidro: "Ver o mês"/"Ver a semana", "Hoje" (só fora de hoje) e, para dono/gerente/supervisor, "De quem: Toda a equipe" (abre `pickOne` "De quem mostrar?"). Abaixo, "‹ Outubro de 2026 ›" (as setas andam uma semana ou um mês) e a semana do dia escolhido (dia escolhido em `accentSoft`, ponto cinza nos dias com OS); no modo mês, o `TableCalendar` com os papéis de cor. Com filtro, a linha "Só de Bruno · Mostrar todos". Depois "Quinta-feira, 8 de outubro · 2 marcados" e as OS do dia: cliente e hora (ou "Dia todo"), ponto + "situação · OS N" (atrasada em `danger`, negrito), veículo · "com" responsável. Dia vazio: `EmptyState`.
+
 Margens: texto com `AppSpacing.pageMargin` (24), blocos e botões com `AppSpacing.blockMargin` (16). Cantos: botões 16, blocos 20, campos 12.
 
 ## Fluxo de Dados

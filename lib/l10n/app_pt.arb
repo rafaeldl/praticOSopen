@@ -1186,7 +1186,7 @@
   "cancelAndCreateNew": "Cancelar e Criar Novo",
   "agenda": "Agenda",
   "noScheduledOrders": "Nenhuma OS agendada para este dia",
-  "allTeam": "Toda a Equipe",
+  "allTeam": "Toda a equipe",
   "filterByTechnician": "Filtrar por técnico",
   "allDay": "Dia todo",
   "clearSchedule": "Remover agendamento",
@@ -3150,5 +3150,23 @@
     }
   },
   "profileNameRequired": "Digite seu nome",
-  "profileNamePlaceholder": "Ex.: João da Silva"
+  "profileNamePlaceholder": "Ex.: João da Silva",
+  "agendaShowMonth": "Ver o mês",
+  "agendaShowWeek": "Ver a semana",
+  "agendaWhose": "De quem: {name}",
+  "@agendaWhose": {"placeholders": {"name": {"type": "String"}}},
+  "agendaWhoseTitle": "De quem mostrar?",
+  "agendaOnlyOf": "Só de {name}",
+  "@agendaOnlyOf": {"placeholders": {"name": {"type": "String"}}},
+  "agendaShowAll": "Mostrar todos",
+  "agendaWithPerson": "com {name}",
+  "@agendaWithPerson": {"placeholders": {"name": {"type": "String"}}},
+  "agendaDayCount": "{count, plural, =1{1 marcado} other{{count} marcados}}",
+  "@agendaDayCount": {"placeholders": {"count": {"type": "int"}}},
+  "agendaDayHasOrders": "{day}, tem serviço marcado",
+  "@agendaDayHasOrders": {"placeholders": {"day": {"type": "String"}}},
+  "agendaPreviousWeek": "Semana anterior",
+  "agendaNextWeek": "Próxima semana",
+  "agendaPreviousMonth": "Mês anterior",
+  "agendaNextMonth": "Próximo mês"
 }
