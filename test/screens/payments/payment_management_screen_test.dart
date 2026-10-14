@@ -230,6 +230,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Dar desconto'), findsOneWidget);
     expect(find.text('Desfazer pagamentos'), findsOneWidget);
+    // Pull-down menu of the "…" button, not an action sheet.
+    expect(find.byType(CupertinoActionSheet), findsNothing);
   });
 
   testWidgets('top buttons are the shared glass buttons', (tester) async {

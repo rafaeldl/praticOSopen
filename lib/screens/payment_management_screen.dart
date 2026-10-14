@@ -14,6 +14,7 @@ import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -414,37 +415,38 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // "..." MENU: discount and undo payments
   // ============================================================
 
-  void _showMoreMenu() {
+  Future<void> _showMoreMenu() async {
     final store = _store;
     if (store == null) return;
     final hasManual = store.transactions.any((t) => !t.isAsaas);
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _giveDiscount();
-            },
-            child: Text(context.l10n.receiveGiveDiscount),
+    final choice = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'discount',
+            label: context.l10n.receiveGiveDiscount,
+            icon: CupertinoIcons.tag,
           ),
+        ]),
+        PullDownGroup([
           if (hasManual)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(ctx);
-                _confirmUndoPayments();
-              },
-              child: Text(context.l10n.receiveUndoPayments),
+            PullDownItem(
+              value: 'undo',
+              label: context.l10n.receiveUndoPayments,
+              icon: CupertinoIcons.arrow_uturn_left,
+              destructive: true,
             ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(context.l10n.cancel),
-        ),
-      ),
+        ]),
+      ],
     );
+    if (!mounted) return;
+    switch (choice) {
+      case 'discount':
+        _giveDiscount();
+      case 'undo':
+        _confirmUndoPayments();
+    }
   }
 
   Future<void> _giveDiscount() async {

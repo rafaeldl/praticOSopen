@@ -1,30 +1,30 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/utils/currency_input.dart';
 
 /// Opens the discount sheet. Returns the discount to give, or null when the
-/// user cancels.
+/// user closes it.
 Future<double?> showReceiveDiscountSheet(
   BuildContext context, {
   required double currentTotal,
   required double maxDiscount,
 }) {
-  return showCupertinoModalPopup<double>(
-    context: context,
-    builder: (_) => ReceiveDiscountSheet(
+  return FormSheet.show<double>(
+    context,
+    (_) => ReceiveDiscountSheet(
       currentTotal: currentTotal,
       maxDiscount: maxDiscount,
     ),
   );
 }
 
-/// Sheet to give a discount: "Cancelar" on the left, the new total told
-/// before confirming, one blue button that follows the typed amount.
+/// Sheet to give a discount: "X" and "✓" at the top (✓ gray until the amount
+/// fits), the amount in a white card and the new total told under it.
 class ReceiveDiscountSheet extends StatefulWidget {
   const ReceiveDiscountSheet({
     super.key,
@@ -42,123 +42,58 @@ class ReceiveDiscountSheet extends StatefulWidget {
 }
 
 class _ReceiveDiscountSheetState extends State<ReceiveDiscountSheet> {
-  final _controller = TextEditingController();
+  double _amount = 0;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  bool get _tooBig => _amount > widget.maxDiscount;
+  bool get _valid => _amount > 0 && !_tooBig;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final format = FormatService();
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        key: const Key('receiveDiscountSheet'),
-        width: double.infinity,
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
+    return FormSheet(
+      key: const Key('receiveDiscountSheet'),
+      title: l10n.receiveGiveDiscount,
+      canSave: _valid,
+      dirty: _amount > 0,
+      onSave: () => Navigator.of(context).pop(_amount),
+      children: [
+        FormFieldsCard(
+          children: [
+            MoneyField(
+              key: const Key('receiveDiscountField'),
+              label: l10n.discount,
+              autofocus: true,
+              onChanged: (v) => setState(() => _amount = v),
+            ),
+          ],
         ),
-        decoration: BoxDecoration(
-          color: AppColors.surface.resolveFrom(context),
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadii.block),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _controller,
-            builder: (context, value, _) {
-              final amount = parseCurrencyInput(value.text);
-              final valid = amount > 0 && amount <= widget.maxDiscount;
-              final tooBig = amount > widget.maxDiscount;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CupertinoButton(
-                        key: const Key('receiveDiscountCancel'),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(context.l10n.cancel),
-                      ),
-                      Expanded(
-                        child: Text(
-                          context.l10n.receiveGiveDiscount,
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodyStrong.copyWith(
-                            color: AppColors.text.resolveFrom(context),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 80),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.pageMargin,
+        // Told only once there is an amount ("passa de X para X" says
+        // nothing).
+        if (_amount > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.blockMargin + AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.blockMargin + AppSpacing.lg,
+              0,
+            ),
+            child: Text(
+              _tooBig
+                  ? l10n.discountCannotExceedBalance
+                  : l10n.receiveDiscountNewTotal(
+                      format.formatCurrency(widget.currentTotal),
+                      format.formatCurrency(widget.currentTotal - _amount),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ReceiveAmountField(controller: _controller, autofocus: true),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          tooBig
-                              ? context.l10n.discountCannotExceedBalance
-                              : context.l10n.receiveDiscountNewTotal(
-                                  format.formatCurrency(widget.currentTotal),
-                                  format.formatCurrency(
-                                      widget.currentTotal - amount),
-                                ),
-                          key: const Key('receiveDiscountHint'),
-                          style: AppTypography.callout.copyWith(
-                            color: tooBig
-                                ? AppColors.danger.resolveFrom(context)
-                                : secondary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        SizedBox(
-                          width: double.infinity,
-                          height: AppSizes.primaryButtonHeight,
-                          child: CupertinoButton(
-                            key: const Key('receiveDiscountConfirm'),
-                            padding: EdgeInsets.zero,
-                            color: AppColors.accent.resolveFrom(context),
-                            disabledColor: AppColors.accent
-                                .resolveFrom(context)
-                                .withValues(alpha: 0.5),
-                            borderRadius:
-                                BorderRadius.circular(AppRadii.button),
-                            onPressed: valid
-                                ? () => Navigator.of(context).pop(amount)
-                                : null,
-                            child: Text(
-                              context.l10n.receiveDiscountButton(
-                                format.formatCurrency(amount),
-                              ),
-                              style: AppTypography.bodyStrong.copyWith(
-                                color: AppColors.onAccent.resolveFrom(context),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
+              key: const Key('receiveDiscountHint'),
+              style: AppTypography.label.copyWith(
+                color: _tooBig
+                    ? AppColors.danger.resolveFrom(context)
+                    : AppColors.textSecondary.resolveFrom(context),
+              ),
+            ),
           ),
-        ),
-      ),
+      ],
     );
   }
 }
