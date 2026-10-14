@@ -189,6 +189,14 @@ void main() {
     expect(find.textContaining(RegExp(r'^Nenhum ')), findsOneWidget);
     final none = tester.getTopLeft(find.textContaining(RegExp(r'^Nenhum '))).dy;
     expect(none, lessThan(tester.getTopLeft(find.text('Fiat Uno 2015')).dy));
+    // A choice like any other: no disclosure chevron.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('device-none')),
+        matching: find.byIcon(CupertinoIcons.chevron_forward),
+      ),
+      findsNothing,
+    );
     await tester.tap(find.textContaining(RegExp(r'^Nenhum ')));
     await tester.pumpAndSettle();
     expect(get(), kRemoveDeviceResult);
