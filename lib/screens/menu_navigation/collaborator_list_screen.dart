@@ -10,7 +10,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/screens/menu_navigation/team_view.dart';
 import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
@@ -61,7 +61,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   Future<void> _invite() async {
-    final result = await AppSheet.show<bool>(
+    final result = await FormSheet.show<bool>(
         context, (_) => const CollaboratorFormScreen());
     if (result == true) _collaboratorStore.loadCollaborators();
   }
@@ -74,7 +74,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       return;
     }
     if (!mounted) return;
-    await AppSheet.show<bool>(
+    await FormSheet.show<bool>(
         context, (_) => CollaboratorFormScreen(prefill: invite));
     // The old invite is gone either way, so refresh the list.
     if (mounted) _collaboratorStore.loadCollaborators();

@@ -58,6 +58,41 @@ void main() {
     expect(store.isLoading, isFalse);
   });
 
+  test('"Em aberto" loads every open order in one page', () async {
+    final store = OrderStore();
+    final limits = <int>[];
+    store.fetchOrdersPage = (_, __, ___, limit, ____) async {
+      limits.add(limit);
+      return (
+        orders: [for (var i = 0; i < 12; i++) _order('o$i')],
+        last: null,
+      );
+    };
+
+    await store.loadOrdersInfinite('open');
+
+    expect(limits, [kOpenOrdersLimit]);
+    expect(store.orders, hasLength(12));
+    expect(store.hasMoreOrders, isFalse);
+  });
+
+  test('"Todas" keeps loading page by page', () async {
+    final store = OrderStore();
+    final limits = <int>[];
+    store.fetchOrdersPage = (_, __, ___, limit, ____) async {
+      limits.add(limit);
+      return (
+        orders: [for (var i = 0; i < limit; i++) _order('o$i')],
+        last: null,
+      );
+    };
+
+    await store.loadOrdersInfinite(null);
+
+    expect(limits, [10]);
+    expect(store.hasMoreOrders, isTrue);
+  });
+
   test('a stale load finishing last does not replace the newer one', () async {
     final store = OrderStore();
     final pages = <Completer<List<Order>>>[];

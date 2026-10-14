@@ -10,7 +10,7 @@ import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/more_fields_link.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -26,12 +26,14 @@ import 'package:provider/provider.dart';
 
 /// New / edit vehicle (device) in a single screen.
 ///
-/// A new one opens as an [AppSheet] (`asSheet: true`, "Cancelar" on the left,
-/// "Salvar" on the right); editing stays a pushed screen. Only the model
-/// (with suggestions taken from the company's own devices, which also fill
-/// brand and category) and the plate/serial show at first; photo, brand,
-/// category, status (editing, with device management) and the segment fields
-/// sit behind a [MoreFieldsLink].
+/// A new one opens as a [FormSheet] (`asSheet: true`, open it with
+/// [FormSheet.show]): "X" and "✓" at the top, the model (with suggestions
+/// taken from the company's own devices, which also fill brand and category)
+/// and the plate/serial in a white card, and photo, brand, category and the
+/// segment fields in a "Mais dados" card that opens in place. The "✓" turns
+/// blue once the plate/serial is filled. Editing stays a pushed screen, with
+/// those fields (and the status, with device management) behind a
+/// [MoreFieldsLink].
 ///
 /// Pops with the saved [Device].
 class DeviceFormScreen extends StatefulWidget {
@@ -47,7 +49,7 @@ class DeviceFormScreen extends StatefulWidget {
   /// created when neither is given.
   final Device? device;
 
-  /// Present as the content of an [AppSheet].
+  /// Present as a [FormSheet] (new vehicle).
   final bool asSheet;
 
   /// Saves the device. Defaults to [DeviceStore.saveDevice].
@@ -71,6 +73,8 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   List<Device> _known = const [];
   bool _isLoading = false;
   bool _initialized = false;
+  bool _customTouched = false;
+  late String _initialSnapshot;
 
   DeviceStore get _deviceStore => _store ??= DeviceStore();
 
@@ -92,8 +96,30 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     _serial.text = _device!.serial ?? '';
     _brand.text = _device!.manufacturer ?? '';
     _category.text = _device!.category ?? '';
+    _initialSnapshot = _snapshot;
+    for (final controller in [_model, _serial, _brand, _category]) {
+      controller.addListener(_onEdit);
+    }
     _initialized = true;
   }
+
+  void _onEdit() {
+    if (mounted) setState(() {});
+  }
+
+  String get _snapshot => [
+        _model.text.trim(),
+        _serial.text.trim(),
+        _brand.text.trim(),
+        _category.text.trim(),
+        _device?.photo ?? '',
+      ].join('\u0000');
+
+  /// The sheet can be saved once the plate/serial (required) is filled.
+  bool get _canSave => _serial.text.trim().isNotEmpty;
+
+  /// Something was typed since the sheet opened: closing asks first.
+  bool get _dirty => _customTouched || _snapshot != _initialSnapshot;
 
   @override
   void dispose() {
@@ -236,6 +262,22 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     final title = _isEditing
         ? config.label(LabelKeys.editDevice)
         : l10n.newEntity(config.device.toLowerCase());
+    if (widget.asSheet) {
+      return Form(
+        key: _formKey,
+        child: FormSheet(
+          title: title,
+          canSave: _canSave,
+          missingHint: l10n.deviceSaveNeedsField(
+            config.label(LabelKeys.deviceSerialNumber),
+          ),
+          dirty: _dirty,
+          busy: _isLoading,
+          onSave: _saveDevice,
+          children: _buildSheetCards(config),
+        ),
+      );
+    }
     final body = Form(
       key: _formKey,
       child: ListView(
@@ -247,16 +289,6 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         children: _buildFields(config),
       ),
     );
-
-    if (widget.asSheet) {
-      return AppSheet(
-        title: title,
-        primaryLabel: l10n.saveEntityButton(config.device.toLowerCase()),
-        onAction: _saveDevice,
-        busy: _isLoading,
-        child: body,
-      );
-    }
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background.resolveFrom(context),
@@ -280,77 +312,112 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     );
   }
 
+  /// Fields of the pushed edit screen.
   List<Widget> _buildFields(SegmentConfigProvider config) {
+    return [
+      _modelField(config),
+      _serialField(config),
+      MoreFieldsLink(
+        label: context.l10n.photoAndMoreData,
+        initiallyExpanded: _hasMoreData,
+        children: _moreFields(config, inCard: false),
+      ),
+    ];
+  }
+
+  /// Cards of the new-vehicle sheet.
+  List<Widget> _buildSheetCards(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    return [
+      FormFieldsCard(children: [_modelField(config), _serialField(config)]),
+      FormMoreCard(
+        title: l10n.formMoreData,
+        hint: l10n.deviceMoreDataHint(
+          config.label(LabelKeys.deviceBrand).toLowerCase(),
+          config.label(LabelKeys.deviceCategory).toLowerCase(),
+        ),
+        initiallyOpen: _hasMoreData,
+        children: _moreFields(config, inCard: true),
+      ),
+    ];
+  }
+
+  Widget _modelField(SegmentConfigProvider config) {
+    final modelField = config.getField('device.model');
+    return SuggestField<DeviceSuggestion>(
+      label: config.label(LabelKeys.deviceModel),
+      controller: _model,
+      placeholder: modelField?.placeholder,
+      autofocus: !_isEditing,
+      textInputAction: TextInputAction.next,
+      suggestions: (text) => [
+        for (final s in deviceSuggestions(_known, text))
+          SuggestOption(value: s, title: s.name, subtitle: s.detail),
+      ],
+      onSelected: (s) => setState(() {
+        _brand.text = s.manufacturer ?? '';
+        _category.text = s.category ?? '';
+      }),
+    );
+  }
+
+  Widget _serialField(SegmentConfigProvider config) {
     final l10n = context.l10n;
     final serialLabel = config.label(LabelKeys.deviceSerialNumber);
     final serialField = config.getField('device.serial');
-    final modelField = config.getField('device.model');
     final masks = config.getMasks('device.serial');
+    return AppFormField(
+      label: serialLabel,
+      controller: _serial,
+      placeholder: serialField?.placeholder,
+      keyboardType: config.getKeyboardType('device.serial'),
+      textCapitalization: TextCapitalization.characters,
+      inputFormatters: masks.isEmpty
+          ? null
+          : [TextInputMask(mask: masks.length == 1 ? masks.first : masks)],
+      onSaved: (v) => _device!.serial = v.trim().toUpperCase(),
+      validator: (v) {
+        final value = v.trim();
+        if (value.isEmpty) return l10n.fieldRequiredHint(serialLabel);
+        final pattern = serialField?.pattern;
+        if (pattern != null && !RegExp(pattern).hasMatch(value)) {
+          return l10n.invalidFormat;
+        }
+        return null;
+      },
+    );
+  }
 
+  /// Photo, brand, category, status (editing) and the segment fields.
+  /// [inCard]: inside the sheet's "Mais dados" card, so no inset sections.
+  List<Widget> _moreFields(
+    SegmentConfigProvider config, {
+    required bool inCard,
+  }) {
+    final l10n = context.l10n;
     return [
-      SuggestField<DeviceSuggestion>(
-        label: config.label(LabelKeys.deviceModel),
-        controller: _model,
-        placeholder: modelField?.placeholder,
-        autofocus: !_isEditing,
-        textInputAction: TextInputAction.next,
-        suggestions: (text) => [
-          for (final s in deviceSuggestions(_known, text))
-            SuggestOption(value: s, title: s.name, subtitle: s.detail),
-        ],
-        onSelected: (s) => setState(() {
-          _brand.text = s.manufacturer ?? '';
-          _category.text = s.category ?? '';
-        }),
+      _buildPhotoRow(config),
+      AppFormField(
+        label: config.label(LabelKeys.deviceBrand),
+        controller: _brand,
+        textCapitalization: TextCapitalization.words,
       ),
       AppFormField(
-        label: serialLabel,
-        controller: _serial,
-        placeholder: serialField?.placeholder,
-        keyboardType: config.getKeyboardType('device.serial'),
-        textCapitalization: TextCapitalization.characters,
-        inputFormatters: masks.isEmpty
-            ? null
-            : [TextInputMask(mask: masks.length == 1 ? masks.first : masks)],
-        onSaved: (v) => _device!.serial = v.trim().toUpperCase(),
-        validator: (v) {
-          final value = v.trim();
-          if (value.isEmpty) return l10n.fieldRequiredHint(serialLabel);
-          final pattern = serialField?.pattern;
-          if (pattern != null && !RegExp(pattern).hasMatch(value)) {
-            return l10n.invalidFormat;
-          }
-          return null;
-        },
+        label: config.label(LabelKeys.deviceCategory),
+        controller: _category,
+        textCapitalization: TextCapitalization.sentences,
       ),
-      MoreFieldsLink(
-        label: l10n.photoAndMoreData,
-        initiallyExpanded: _hasMoreData,
-        children: [
-          _buildPhotoRow(config),
-          AppFormField(
-            label: config.label(LabelKeys.deviceBrand),
-            controller: _brand,
-            textCapitalization: TextCapitalization.words,
+      if (_isEditing && config.useDeviceManagement)
+        AppListRow(
+          leading: StatusDot(
+            color: DeviceStatusStyle.dotColor(_device?.status),
+            size: 10,
           ),
-          AppFormField(
-            label: config.label(LabelKeys.deviceCategory),
-            controller: _category,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          if (_isEditing && config.useDeviceManagement)
-            AppListRow(
-              leading: StatusDot(
-                color: DeviceStatusStyle.dotColor(_device?.status),
-                size: 10,
-              ),
-              title: l10n.status,
-              trailing: DeviceStatusStyle.label(l10n, _device?.status),
-              onTap: _pickStatus,
-            ),
-          ..._buildCustomFieldSections(config),
-        ],
-      ),
+          title: l10n.status,
+          trailing: DeviceStatusStyle.label(l10n, _device?.status),
+          onTap: _pickStatus,
+        ),
+      ..._buildCustomFieldSections(config, inCard: inCard),
     ];
   }
 
@@ -417,7 +484,10 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     'device.serial',
   };
 
-  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+  List<Widget> _buildCustomFieldSections(
+    SegmentConfigProvider config, {
+    required bool inCard,
+  }) {
     final grouped = config.fieldsGroupedBySectionLocalized(
       'device',
       exclude: _builtInFieldKeys,
@@ -429,28 +499,33 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
 
     for (final entry in grouped.entries) {
       sections.add(SectionLabel(entry.key));
+      final fields = entry.value.map((field) {
+        return DynamicFieldBuilder(
+          field: field,
+          value: _device?.customData?[field.fieldName] ??
+              _device?.customData?[field.key],
+          locale: locale,
+          onChanged: (newValue) {
+            setState(() {
+              _customTouched = true;
+              _device?.customData ??= {};
+              if (newValue == null) {
+                _device!.customData!.remove(field.fieldName);
+              } else {
+                _device!.customData![field.fieldName] = newValue;
+              }
+              _device!.customData!.remove(field.key); // migrate old key
+            });
+          },
+        );
+      }).toList();
       sections.add(
-        CupertinoListSection.insetGrouped(
-          children: entry.value.map((field) {
-            return DynamicFieldBuilder(
-              field: field,
-              value: _device?.customData?[field.fieldName] ??
-                  _device?.customData?[field.key],
-              locale: locale,
-              onChanged: (newValue) {
-                setState(() {
-                  _device?.customData ??= {};
-                  if (newValue == null) {
-                    _device!.customData!.remove(field.fieldName);
-                  } else {
-                    _device!.customData![field.fieldName] = newValue;
-                  }
-                  _device!.customData!.remove(field.key); // migrate old key
-                });
-              },
-            );
-          }).toList(),
-        ),
+        inCard
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: fields,
+              )
+            : CupertinoListSection.insetGrouped(children: fields),
       );
     }
 

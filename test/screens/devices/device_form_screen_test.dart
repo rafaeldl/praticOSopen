@@ -6,7 +6,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/device_form_screen.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:provider/provider.dart';
 
 Device known(String name, String brand, String category) => Device()
@@ -44,7 +44,7 @@ class _Harness {
                       onSave: (d) async => saved.add(d),
                     );
                     result = editing == null
-                        ? await AppSheet.show<Device>(context, (_) => form)
+                        ? await FormSheet.show<Device>(context, (_) => form)
                         : await Navigator.of(context).push(
                             CupertinoPageRoute(builder: (_) => form),
                           );
@@ -61,6 +61,12 @@ class _Harness {
   }
 }
 
+final _save = find.byKey(const ValueKey('new_order_save'));
+final _close = find.byKey(const ValueKey('new_order_close'));
+
+bool _saveEnabled(WidgetTester tester) =>
+    tester.widget<CupertinoButton>(_save).onPressed != null;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -70,30 +76,63 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  testWidgets('new vehicle opens as a sheet: Cancelar left, only model and '
+  testWidgets('new vehicle opens as a sheet: X and ✓, only model and '
       'plate visible', (tester) async {
     final h = _Harness();
     await h.open(tester);
 
-    expect(find.text('Cancelar'), findsOneWidget);
-    expect(find.textContaining(RegExp(r'^Salvar')), findsOneWidget);
+    expect(find.byType(FormSheet), findsOneWidget);
+    expect(_close, findsOneWidget);
+    expect(_save, findsOneWidget);
+    expect(find.textContaining(RegExp(r'^Salvar')), findsNothing);
     expect(find.byType(EditableText), findsNWidgets(2));
-    expect(find.text('+ Foto e mais dados'), findsOneWidget);
+    expect(find.text('Mais dados'), findsOneWidget);
 
-    await tester.tap(find.text('Cancelar'));
+    // Nothing typed: "X" closes at once.
+    await tester.tap(_close);
     await tester.pumpAndSettle();
+    expect(find.text('Sair sem salvar?'), findsNothing);
     expect(h.result, isNull);
     expect(h.saved, isEmpty);
   });
 
-  testWidgets('empty plate blocks saving with a hint', (tester) async {
+  testWidgets('✓ is gray with the hint until the plate is filled',
+      (tester) async {
     final h = _Harness();
     await h.open(tester);
 
-    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+    expect(_saveEnabled(tester), isFalse);
+    expect(find.byKey(const ValueKey('form_sheet_missing')), findsOneWidget);
+    expect(find.textContaining('para salvar'), findsOneWidget);
+    await tester.tap(_save);
     await tester.pumpAndSettle();
+    expect(h.saved, isEmpty);
 
-    expect(find.textContaining('Preencha o campo'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText).at(1), 'ABC1D23');
+    await tester.pump();
+    expect(_saveEnabled(tester), isTrue);
+    expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
+  });
+
+  testWidgets('with something typed, "X" asks and dragging is locked',
+      (tester) async {
+    final h = _Harness();
+    await h.open(tester);
+    final route =
+        ModalRoute.of(tester.element(find.byType(FormSheet))) as FormSheetRoute;
+    expect(route.dragLocked, isFalse);
+
+    await tester.enterText(find.byType(EditableText).first, 'Gol');
+    await tester.pumpAndSettle();
+    expect(route.dragLocked, isTrue);
+
+    await tester.tap(_close);
+    await tester.pumpAndSettle();
+    expect(find.text('Sair sem salvar?'), findsOneWidget);
+    await tester.tap(find.text('Descartar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FormSheet), findsNothing);
+    expect(h.result, isNull);
     expect(h.saved, isEmpty);
   });
 
@@ -114,12 +153,12 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(EditableText).at(1), 'abc1d23');
-    await tester.tap(find.text('+ Foto e mais dados'));
+    await tester.tap(find.byKey(const ValueKey('form_more')));
     await tester.pumpAndSettle();
     expect(find.text('Fiat'), findsOneWidget);
     expect(find.text('Carro'), findsOneWidget);
 
-    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+    await tester.tap(_save);
     await tester.pumpAndSettle();
 
     expect(h.saved, hasLength(1));
@@ -141,7 +180,8 @@ void main() {
     expect(find.text('Usar “Fiat Uno 2016”'), findsOneWidget);
 
     await tester.enterText(find.byType(EditableText).at(1), 'XYZ9K88');
-    await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+    await tester.pump();
+    await tester.tap(_save);
     await tester.pumpAndSettle();
 
     expect(h.saved.single.name, 'Fiat Uno 2016');
@@ -158,7 +198,7 @@ void main() {
       ..manufacturer = 'VW';
     await h.open(tester, editing: device);
 
-    expect(find.text('Cancelar'), findsNothing);
+    expect(find.byType(FormSheet), findsNothing);
     expect(find.text('Gol 1.0'), findsOneWidget);
     expect(find.text('AAA1B22'), findsOneWidget);
     expect(find.text('VW'), findsOneWidget);

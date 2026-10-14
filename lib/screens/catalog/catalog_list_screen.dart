@@ -9,7 +9,7 @@ import 'package:praticos/screens/order/order_item_search_screen.dart'
     show loadMostUsedItemKeys;
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
@@ -143,7 +143,7 @@ class _CatalogListScreenState extends State<CatalogListScreen> {
   bool get _canManage => _permissions.canManage(_kind);
 
   Future<void> _create() async {
-    final created = await AppSheet.show<CatalogItem>(
+    final created = await FormSheet.show<CatalogItem>(
       context,
       (_) => CatalogItemForm(
         kind: _kind,

@@ -10,6 +10,7 @@ import {
   parseLlmDraft,
   runOrderAssist,
   serialVariants,
+  todayLabel,
 } from '../order-assist.service';
 import { LlmUnavailableError } from '../llm.client';
 
@@ -90,6 +91,17 @@ describe('parseLlmDraft', () => {
     expect(draft.notes).toBeUndefined();
   });
 
+  it('reads the deadline and drops a malformed one', () => {
+    expect(parseLlmDraft(JSON.stringify({ items: [], dueDate: '2026-10-16', dueTime: '17:30' }))).toMatchObject({
+      dueDate: '2026-10-16',
+      dueTime: '17:30',
+    });
+    const bad = parseLlmDraft(JSON.stringify({ items: [], dueDate: 'sexta', dueTime: '25:00', notes: 'Barulho' }));
+    expect(bad.dueDate).toBeUndefined();
+    expect(bad.dueTime).toBeUndefined();
+    expect(bad.notes).toBe('Barulho');
+  });
+
   it('keeps items when top-level fields are garbage', () => {
     const draft = parseLlmDraft(JSON.stringify({ customer: 'Ana', device: 3, items: [{ kind: 'product', name: 'Gás' }] }));
     expect(draft.items).toEqual([{ kind: 'product', name: 'Gás' }]);
@@ -127,6 +139,8 @@ describe('serialVariants', () => {
 describe('prompt', () => {
   it('asks for the app language and lists the catalog with prices', () => {
     expect(buildSystemPrompt('es')).toContain('Spanish');
+    expect(buildSystemPrompt('pt', undefined, '2026-10-13 (Tuesday)')).toContain('Today is 2026-10-13 (Tuesday)');
+    expect(todayLabel(new Date('2026-10-14T02:00:00Z'))).toBe('2026-10-13 (Tuesday)');
     const text = buildUserText({ text: 'capô 500' }, CATALOG);
     expect(text).toContain('- Polimento (450)');
     expect(text).toContain('- Gás R410A\n');
@@ -150,6 +164,7 @@ describe('runOrderAssist', () => {
       { kind: 'service', name: 'Alinhamento' },
     ],
     notes: 'Risco na porta',
+    dueDate: '2026-10-16',
   };
 
   it('off by default: without settings it refuses before counting or calling the model', async () => {
@@ -192,6 +207,7 @@ describe('runOrderAssist', () => {
       expect.objectContaining({ name: 'Alinhamento', catalogId: null, value: null }),
     ]);
     expect(draft.notes).toBe('Risco na porta');
+    expect(draft.dueDate).toBe('2026-10-16');
     expect(draft.usage).toEqual({ used: 3, limit: 10 });
 
     const request = d.llm.generateJson.mock.calls[0][0];

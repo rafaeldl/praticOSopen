@@ -7,7 +7,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -89,7 +89,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
   }
 
   Future<void> _addCustomer() async {
-    final created = await AppSheet.show<Customer>(
+    final created = await FormSheet.show<Customer>(
       context,
       (_) => const CustomerFormScreen(asSheet: true),
     );

@@ -4,6 +4,8 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/screens/forms/checklists_view.dart';
+import 'package:praticos/screens/forms/form_template_form_screen.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 
@@ -56,8 +58,10 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         onDelete: _confirmDelete,
         onPreviewReady: _showGlobalTemplateDetails,
         onUseReady: _importGlobalTemplate,
-        onNew: () => Navigator.pushNamed(context, '/form_template_form')
-            .then((_) => templateStore.retrieveTemplates()),
+        onNew: () => FormSheet.show<FormDefinition>(
+          context,
+          (_) => const FormTemplateFormScreen(asSheet: true),
+        ).then((_) => templateStore.retrieveTemplates()),
       );
     });
   }

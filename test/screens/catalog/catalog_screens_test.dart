@@ -10,7 +10,8 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_list_screen.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/order/order_item_search_screen.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:provider/provider.dart';
 
 class FakeSource implements CatalogSource {
@@ -257,7 +258,7 @@ void main() {
       await tester.tap(find.text('Troca de óleo'));
       await tester.pumpAndSettle();
       expect(find.byType(CatalogItemForm), findsOneWidget);
-      expect(find.byType(AppSheet), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
     });
 
     testWidgets('/product_list style entry opens on products', (tester) async {
@@ -376,6 +377,11 @@ void main() {
   });
 
   group('catalog item form', () {
+    final save = find.byKey(const ValueKey('new_order_save'));
+    final close = find.byKey(const ValueKey('new_order_close'));
+    bool saveEnabled(WidgetTester tester) =>
+        tester.widget<CupertinoButton>(save).onPressed != null;
+
     Future<void> openSheet(
       WidgetTester tester,
       FakeSource src, {
@@ -394,29 +400,61 @@ void main() {
       );
     }
 
-    testWidgets('new item opens as a sheet with Cancelar and Salvar',
-        (tester) async {
+    testWidgets('new item opens as a sheet with X and ✓, no button below; '
+        'X with nothing typed closes at once', (tester) async {
       await pump(
         tester,
         CatalogListScreen(source: source, permissions: allPermissions),
       );
       await tester.tap(find.text('Novo serviço'));
       await tester.pumpAndSettle();
-      expect(find.byType(AppSheet), findsOneWidget);
-      expect(find.text('Cancelar'), findsOneWidget);
-      expect(find.textContaining(RegExp(r'^Salvar')), findsOneWidget);
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(close, findsOneWidget);
+      expect(save, findsOneWidget);
+      expect(find.textContaining(RegExp(r'^Salvar')), findsNothing);
       expect(find.text('Preço'), findsOneWidget);
-      await tester.tap(find.text('Cancelar'));
+      expect(find.text('Mais dados'), findsOneWidget);
+
+      await tester.tap(close);
       await tester.pumpAndSettle();
-      expect(find.byType(AppSheet), findsNothing);
+      expect(find.text('Sair sem salvar?'), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
     });
 
-    testWidgets('name is required', (tester) async {
+    testWidgets('✓ is gray with the hint until the name is filled',
+        (tester) async {
       final src = FakeSource();
       await openSheet(tester, src);
-      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+      expect(saveEnabled(tester), isFalse);
+      expect(find.byKey(const ValueKey('form_sheet_missing')), findsOneWidget);
+      await tester.tap(save);
       await tester.pumpAndSettle();
-      expect(find.text('Digite o nome do serviço'), findsOneWidget);
+      expect(src.saved, isEmpty);
+
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Revisão');
+      await tester.pump();
+      expect(saveEnabled(tester), isTrue);
+      expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
+    });
+
+    testWidgets('with something typed, X asks before discarding',
+        (tester) async {
+      final src = FakeSource(services: [item('s1', 'Troca de óleo', 120)]);
+      await pump(
+        tester,
+        CatalogListScreen(source: src, permissions: allPermissions),
+      );
+      await tester.tap(find.text('Novo serviço'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(CupertinoTextField).at(1), '15000');
+      await tester.pumpAndSettle();
+
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text('Sair sem salvar?'), findsOneWidget);
+      await tester.tap(find.text('Descartar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsNothing);
       expect(src.saved, isEmpty);
     });
 
@@ -424,7 +462,8 @@ void main() {
       final src = FakeSource();
       await openSheet(tester, src);
       await tester.enterText(find.byType(CupertinoTextField).first, 'Revisão');
-      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pumpAndSettle();
       expect(src.saved.single.name, 'Revisão');
       expect(src.saved.single.value, isNull);
@@ -435,15 +474,19 @@ void main() {
       await openSheet(tester, src2);
       await tester.enterText(find.byType(CupertinoTextField).first, 'Revisão');
       await tester.enterText(find.byType(CupertinoTextField).at(1), '15000');
-      await tester.tap(find.textContaining(RegExp(r'^Salvar')));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pumpAndSettle();
       expect(src2.saved.single.value, 150.0);
     });
 
-    testWidgets('product uses product labels', (tester) async {
+    testWidgets('product uses product labels; photo is in "Mais dados"',
+        (tester) async {
       await openSheet(tester, FakeSource(), kind: CatalogKind.product);
       expect(find.text('Novo produto'), findsOneWidget);
       expect(find.text('Ex.: Filtro de óleo'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('form_more')));
+      await tester.pumpAndSettle();
       expect(find.text('+ Foto do produto'), findsOneWidget);
     });
 
@@ -503,6 +546,80 @@ void main() {
       await pumpEdit(tester, FakeSource(),
           only({PermissionType.viewServices}));
       expect(find.byIcon(CupertinoIcons.ellipsis_circle), findsNothing);
+    });
+  });
+
+  group('"O que vai ser feito?" +', () {
+    final add = find.byKey(const ValueKey('picker-add'));
+
+    testWidgets('asks service or product, opens the new item sheet and the '
+        'saved item goes into the order', (tester) async {
+      final src = FakeSource(services: [item('s1', 'Troca de óleo', 120)]);
+      OrderItemPick? picked;
+      await pump(
+        tester,
+        Builder(
+          builder: (context) => CupertinoButton(
+            child: const Text('open'),
+            onPressed: () async {
+              picked = await Navigator.of(context).push<OrderItemPick>(
+                CupertinoPageRoute(
+                  builder: (_) => OrderItemSearchScreen(
+                    source: src,
+                    permissions: allPermissions,
+                    mostUsed: () async => const [],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      expect(find.text('O que vai cadastrar?'), findsOneWidget);
+      expect(find.text('Peça ou material que você vende'), findsOneWidget);
+      await tester.tap(find.text('Produto'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
+
+      await tester.enterText(
+        find
+            .descendant(
+              of: find.byType(FormSheet),
+              matching: find.byType(CupertinoTextField),
+            )
+            .first,
+        'Pastilha',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+
+      expect(src.saved.single.name, 'Pastilha');
+      expect(picked?.kind, CatalogKind.product);
+      expect(picked?.item.name, 'Pastilha');
+    });
+
+    testWidgets('with only one kind to create, opens the sheet directly',
+        (tester) async {
+      await pump(
+        tester,
+        OrderItemSearchScreen(
+          source: FakeSource(),
+          permissions: only({
+            PermissionType.viewServices,
+            PermissionType.manageServices,
+          }),
+          mostUsed: () async => const [],
+        ),
+      );
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
     });
   });
 }

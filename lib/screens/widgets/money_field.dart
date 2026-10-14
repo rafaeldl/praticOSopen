@@ -56,6 +56,7 @@ class MoneyField extends StatefulWidget {
     this.onSaved,
     this.onSavedNullable,
     this.validator,
+    this.autofocus = false,
   });
 
   final String label;
@@ -69,6 +70,7 @@ class MoneyField extends StatefulWidget {
   /// empty), instead of 0.
   final ValueChanged<double?>? onSavedNullable;
   final String? Function(double value)? validator;
+  final bool autofocus;
 
   @override
   State<MoneyField> createState() => _MoneyFieldState();
@@ -84,8 +86,9 @@ class _MoneyFieldState extends State<MoneyField> {
     final service = FormatService()..setLocale(context.l10n.localeName);
     final formatter = MoneyInputFormatter(service.currencyFormat);
     final previous = _controller;
-    final amount =
-        previous == null ? widget.initialValue : _formatter!.valueOf(previous.text);
+    final amount = previous == null
+        ? widget.initialValue
+        : _formatter!.valueOf(previous.text);
     _formatter = formatter;
     final text = amount == null ? '' : formatter.textFor(amount);
     if (previous == null) {
@@ -109,6 +112,7 @@ class _MoneyFieldState extends State<MoneyField> {
       controller: _controller,
       placeholder: widget.placeholder ?? formatter.textFor(0),
       hint: widget.hint,
+      autofocus: widget.autofocus,
       keyboardType: TextInputType.number,
       inputFormatters: [formatter],
       validator: widget.validator == null

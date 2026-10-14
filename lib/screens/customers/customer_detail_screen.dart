@@ -8,7 +8,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/order_history_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
@@ -101,7 +101,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> _addDevice() async {
-    final created = await AppSheet.show<Device>(
+    final created = await FormSheet.show<Device>(
       context,
       (_) => const DeviceFormScreen(asSheet: true),
     );

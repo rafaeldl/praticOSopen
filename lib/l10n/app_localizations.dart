@@ -4465,7 +4465,7 @@ abstract class AppLocalizations {
   /// No description provided for @fromCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Da Empresa'**
+  /// **'Da empresa'**
   String get fromCompany;
 
   /// No description provided for @global.
@@ -8140,6 +8140,60 @@ abstract class AppLocalizations {
   /// **'Todas'**
   String get filterAll;
 
+  /// No description provided for @filterMine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas'**
+  String get filterMine;
+
+  /// No description provided for @sectionScheduledToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get sectionScheduledToday;
+
+  /// No description provided for @nextVisitLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora'**
+  String get nextVisitLabel;
+
+  /// No description provided for @homeWithYouToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 com você hoje} other{{count} com você hoje}}'**
+  String homeWithYouToday(int count);
+
+  /// No description provided for @homeWithYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 com você} other{{count} com você}}'**
+  String homeWithYou(int count);
+
+  /// No description provided for @nextVisit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {customer}, às {time}.'**
+  String nextVisit(String customer, String time);
+
+  /// No description provided for @nextVisitDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {customer}, {device}, às {time}.'**
+  String nextVisitDevice(String customer, String device, String time);
+
+  /// No description provided for @openOrderNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir OS {number}'**
+  String openOrderNumber(String number);
+
+  /// No description provided for @noOrdersWithYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS com você.'**
+  String get noOrdersWithYou;
+
   /// No description provided for @sectionLate.
   ///
   /// In pt, this message translates to:
@@ -8251,7 +8305,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstOrderTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Crie sua primeira ordem de serviço e mande para o cliente aprovar.'**
+  /// **'Crie sua primeira ordem de serviço. Leva menos de um minuto.'**
   String get firstOrderTitle;
 
   /// No description provided for @howItWorks.
@@ -8260,23 +8314,77 @@ abstract class AppLocalizations {
   /// **'Como funciona'**
   String get howItWorks;
 
+  /// No description provided for @firstOrderLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comece por aqui'**
+  String get firstOrderLabel;
+
+  /// No description provided for @homeNoOrdersYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma ainda'**
+  String get homeNoOrdersYet;
+
   /// No description provided for @howItWorksStep1.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha o cliente e o que vai ser feito.'**
+  /// **'1. Anote o que vai ser feito'**
   String get howItWorksStep1;
+
+  /// No description provided for @howItWorksStep1Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'cliente e serviços'**
+  String get howItWorksStep1Detail;
+
+  /// No description provided for @howItWorksStep1DetailDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'cliente, {device} e serviços'**
+  String howItWorksStep1DetailDevice(String device);
 
   /// No description provided for @howItWorksStep2.
   ///
   /// In pt, this message translates to:
-  /// **'Mande o orçamento para o cliente aprovar.'**
+  /// **'2. Mande o orçamento'**
   String get howItWorksStep2;
+
+  /// No description provided for @howItWorksStep2Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'pelo WhatsApp, com um link'**
+  String get howItWorksStep2Detail;
 
   /// No description provided for @howItWorksStep3.
   ///
   /// In pt, this message translates to:
-  /// **'Acompanhe o serviço e receba.'**
+  /// **'3. Receba e entregue'**
   String get howItWorksStep3;
+
+  /// No description provided for @howItWorksStep3Detail.
+  ///
+  /// In pt, this message translates to:
+  /// **'o app lembra quem falta pagar'**
+  String get howItWorksStep3Detail;
+
+  /// No description provided for @nextStepLateShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS passou do prazo.} other{{count} OS passaram do prazo.}}'**
+  String nextStepLateShort(int count);
+
+  /// No description provided for @nextStepDueTodayShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS para hoje.} other{{count} OS para hoje.}}'**
+  String nextStepDueTodayShort(int count);
+
+  /// No description provided for @nextStepQuotesWaitingShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 orçamento sem resposta.} other{{count} orçamentos sem resposta.}}'**
+  String nextStepQuotesWaitingShort(int count);
 
   /// No description provided for @searchNotFoundLoaded.
   ///
@@ -8307,6 +8415,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para carregar as OS.'**
   String get loadOrdersError;
+
+  /// No description provided for @orderLateMonths.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada há 1 mês} other{Atrasada há {count} meses}}'**
+  String orderLateMonths(int count);
+
+  /// No description provided for @orderLateYears.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Atrasada há 1 ano} other{Atrasada há {count} anos}}'**
+  String orderLateYears(int count);
 
   /// No description provided for @orderLateDays.
   ///
@@ -8475,6 +8595,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que pode fazer'**
   String get inviteRoleLabel;
+
+  /// No description provided for @inviteRoleQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode fazer?'**
+  String get inviteRoleQuestion;
 
   /// No description provided for @createInvite.
   ///
@@ -10047,6 +10173,594 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tirar responsável'**
   String get orderResponsibleRemove;
+
+  /// No description provided for @filterDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluídas'**
+  String get filterDone;
+
+  /// No description provided for @homeLateCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 atrasada} other{{count} atrasadas}}'**
+  String homeLateCount(int count);
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar OS ou cliente'**
+  String get homeSearchHint;
+
+  /// No description provided for @homeSearchHintDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar OS, cliente ou {device}'**
+  String homeSearchHintDevice(String device);
+
+  /// No description provided for @remainingToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta receber {amount}'**
+  String remainingToReceive(String amount);
+
+  /// No description provided for @firstOrderTapPlus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no + para criar sua primeira OS. Leva menos de um minuto.'**
+  String get firstOrderTapPlus;
+
+  /// No description provided for @profileButtonA11y.
+  ///
+  /// In pt, this message translates to:
+  /// **'{company}: clientes, catálogo, equipe e ajustes'**
+  String profileButtonA11y(String company);
+
+  /// No description provided for @orderAssistantPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto'**
+  String get orderAssistantPhoto;
+
+  /// No description provided for @orderAssistantTalkShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar'**
+  String get orderAssistantTalkShort;
+
+  /// No description provided for @orderCustomerRequestTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que o cliente pediu'**
+  String get orderCustomerRequestTitle;
+
+  /// No description provided for @orderCustomerRequestPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: barulho ao frear'**
+  String get orderCustomerRequestPlaceholder;
+
+  /// No description provided for @orderDeliverySection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega'**
+  String get orderDeliverySection;
+
+  /// No description provided for @orderDueLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica pronto'**
+  String get orderDueLabel;
+
+  /// No description provided for @orderDueNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem data'**
+  String get orderDueNone;
+
+  /// No description provided for @orderMoreOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções'**
+  String get orderMoreOptions;
+
+  /// No description provided for @orderMoreOptionsHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Situação, visita, responsável, local'**
+  String get orderMoreOptionsHint;
+
+  /// No description provided for @orderStatusLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Situação'**
+  String get orderStatusLabel;
+
+  /// No description provided for @orderScheduleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visita'**
+  String get orderScheduleLabel;
+
+  /// No description provided for @orderAddressLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local'**
+  String get orderAddressLabel;
+
+  /// No description provided for @orderNotSet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum'**
+  String get orderNotSet;
+
+  /// No description provided for @speechTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar o serviço'**
+  String get speechTitle;
+
+  /// No description provided for @speechHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fale o cliente, o veículo e o que vai ser feito.'**
+  String get speechHint;
+
+  /// No description provided for @speechListening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvindo…'**
+  String get speechListening;
+
+  /// No description provided for @speechStop.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar'**
+  String get speechStop;
+
+  /// No description provided for @speechStart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar de novo'**
+  String get speechStart;
+
+  /// No description provided for @speechFill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencher a OS'**
+  String get speechFill;
+
+  /// No description provided for @speechType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar em vez de falar'**
+  String get speechType;
+
+  /// No description provided for @speechUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'O microfone não está liberado. Libere em Ajustes ou digite o serviço.'**
+  String get speechUnavailable;
+
+  /// No description provided for @orderAddItemRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar serviço ou peça'**
+  String get orderAddItemRow;
+
+  /// No description provided for @orderPickCustomerRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher cliente'**
+  String get orderPickCustomerRow;
+
+  /// No description provided for @newOrderButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova OS'**
+  String get newOrderButton;
+
+  /// No description provided for @orderAssistantFilled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchi o que está marcado. Confira e salve.'**
+  String get orderAssistantFilled;
+
+  /// No description provided for @orderAssistantUndo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer'**
+  String get orderAssistantUndo;
+
+  /// No description provided for @orderAssistantReadingPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo as fotos…'**
+  String get orderAssistantReadingPhotos;
+
+  /// No description provided for @orderAssistantReadingSpeech.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o que você falou…'**
+  String get orderAssistantReadingSpeech;
+
+  /// No description provided for @orderAssistantMarked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchido pela IA'**
+  String get orderAssistantMarked;
+
+  /// No description provided for @speechCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar fala'**
+  String get speechCancel;
+
+  /// No description provided for @speechStopAndFill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar e preencher a OS'**
+  String get speechStopAndFill;
+
+  /// No description provided for @speechTypeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o cliente, o veículo e o que vai ser feito'**
+  String get speechTypeHint;
+
+  /// No description provided for @speechNothingHeard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não ouvi nada. Toque em Falar e tente de novo.'**
+  String get speechNothingHeard;
+
+  /// No description provided for @orderServicesAndParts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços e peças'**
+  String get orderServicesAndParts;
+
+  /// No description provided for @orderItemKindPart.
+  ///
+  /// In pt, this message translates to:
+  /// **'peça'**
+  String get orderItemKindPart;
+
+  /// No description provided for @orderActionApproveQuote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar orçamento'**
+  String get orderActionApproveQuote;
+
+  /// No description provided for @orderActionStartService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Começar serviço'**
+  String get orderActionStartService;
+
+  /// No description provided for @orderActionMarkReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como pronta'**
+  String get orderActionMarkReady;
+
+  /// No description provided for @orderDuePhrase.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica pronto {when}'**
+  String orderDuePhrase(String when);
+
+  /// No description provided for @orderDueLatePhrase.
+  ///
+  /// In pt, this message translates to:
+  /// **'Era para ficar pronto {when}'**
+  String orderDueLatePhrase(String when);
+
+  /// No description provided for @orderDayAtTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'{day}, {time}'**
+  String orderDayAtTime(String day, String time);
+
+  /// No description provided for @orderChecklistProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'{answered} de {total} respondidas'**
+  String orderChecklistProgress(int answered, int total);
+
+  /// No description provided for @orderCommentYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você'**
+  String get orderCommentYou;
+
+  /// No description provided for @orderMenuChangeStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudar a situação'**
+  String get orderMenuChangeStatus;
+
+  /// No description provided for @orderMenuViewPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver PDF'**
+  String get orderMenuViewPdf;
+
+  /// No description provided for @orderMenuCopyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar link'**
+  String get orderMenuCopyLink;
+
+  /// No description provided for @orderPlaceOfService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local do atendimento'**
+  String get orderPlaceOfService;
+
+  /// No description provided for @orderAssistantApplied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coloquei na OS o que está marcado. Confira.'**
+  String get orderAssistantApplied;
+
+  /// No description provided for @pickerCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual cliente?'**
+  String get pickerCustomerTitle;
+
+  /// No description provided for @pickerDeviceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual {device}?'**
+  String pickerDeviceTitle(String device);
+
+  /// No description provided for @pickerDeviceSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'de {name}'**
+  String pickerDeviceSubtitle(String name);
+
+  /// No description provided for @pickerItemTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai ser feito?'**
+  String get pickerItemTitle;
+
+  /// No description provided for @pickerChecklistTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual checklist?'**
+  String get pickerChecklistTitle;
+
+  /// No description provided for @pickerStatusTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual a situação?'**
+  String get pickerStatusTitle;
+
+  /// No description provided for @pickerAssigneeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é o responsável?'**
+  String get pickerAssigneeTitle;
+
+  /// No description provided for @pickerDevicesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em quais {devices}?'**
+  String pickerDevicesTitle(String devices);
+
+  /// No description provided for @pickerNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo cliente'**
+  String get pickerNewCustomer;
+
+  /// No description provided for @pickerNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo {device}'**
+  String pickerNewDevice(String device);
+
+  /// No description provided for @pickerNewItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo serviço ou peça'**
+  String get pickerNewItem;
+
+  /// No description provided for @pickerNewChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo checklist'**
+  String get pickerNewChecklist;
+
+  /// No description provided for @pickerTypeAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar outro'**
+  String get pickerTypeAnother;
+
+  /// No description provided for @pickerRegister.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar “{query}”'**
+  String pickerRegister(String query);
+
+  /// No description provided for @pickerNoDeviceWith.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum {device} com “{query}”.'**
+  String pickerNoDeviceWith(String device, String query);
+
+  /// No description provided for @pickerNoItemWith.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum serviço ou peça com “{query}”. Cadastre e ele já entra na OS.'**
+  String pickerNoItemWith(String query);
+
+  /// No description provided for @pickerNoMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada com “{query}”.'**
+  String pickerNoMatch(String query);
+
+  /// No description provided for @pickerRecent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recentes'**
+  String get pickerRecent;
+
+  /// No description provided for @pickerAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get pickerAll;
+
+  /// No description provided for @pickerSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar'**
+  String get pickerSearch;
+
+  /// No description provided for @orderMenuRemoveDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar {device} da OS'**
+  String orderMenuRemoveDevice(String device);
+
+  /// No description provided for @pickerNoDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum {device}'**
+  String pickerNoDevice(String device);
+
+  /// No description provided for @formMoreData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais dados'**
+  String get formMoreData;
+
+  /// No description provided for @customerSaveNeedsName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome para salvar.'**
+  String get customerSaveNeedsName;
+
+  /// No description provided for @customerMoreDataHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail, CPF ou CNPJ, endereço'**
+  String get customerMoreDataHint;
+
+  /// No description provided for @deviceSaveNeedsField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o campo {field} para salvar.'**
+  String deviceSaveNeedsField(String field);
+
+  /// No description provided for @deviceMoreDataHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto, {brand} e {category}'**
+  String deviceMoreDataHint(String brand, String category);
+
+  /// No description provided for @catalogMoreDataHintFields.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto e outros campos'**
+  String get catalogMoreDataHintFields;
+
+  /// No description provided for @inviteSaveNeedsContact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o e-mail ou o WhatsApp para salvar.'**
+  String get inviteSaveNeedsContact;
+
+  /// No description provided for @checklistNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Vistoria de entrada'**
+  String get checklistNamePlaceholder;
+
+  /// No description provided for @checklistQuestionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas'**
+  String get checklistQuestionsTitle;
+
+  /// No description provided for @checklistAddQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar pergunta'**
+  String get checklistAddQuestion;
+
+  /// No description provided for @checklistSaveNeedsNameAndQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome e adicione uma pergunta para salvar.'**
+  String get checklistSaveNeedsNameAndQuestion;
+
+  /// No description provided for @checklistSaveNeedsQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione uma pergunta para salvar.'**
+  String get checklistSaveNeedsQuestion;
+
+  /// No description provided for @formItemTypeText.
+  ///
+  /// In pt, this message translates to:
+  /// **'Texto'**
+  String get formItemTypeText;
+
+  /// No description provided for @formItemTypeNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número'**
+  String get formItemTypeNumber;
+
+  /// No description provided for @formItemTypeBoolean.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim/Não'**
+  String get formItemTypeBoolean;
+
+  /// No description provided for @formItemTypeSelect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seleção única'**
+  String get formItemTypeSelect;
+
+  /// No description provided for @formItemTypeChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Múltipla escolha'**
+  String get formItemTypeChecklist;
+
+  /// No description provided for @formItemTypePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas foto'**
+  String get formItemTypePhoto;
+
+  /// No description provided for @pickerNewItemKind.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai cadastrar?'**
+  String get pickerNewItemKind;
+
+  /// No description provided for @pickerNewItemServiceHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mão de obra que você faz'**
+  String get pickerNewItemServiceHint;
+
+  /// No description provided for @pickerNewItemProductHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ou material que você vende'**
+  String get pickerNewItemProductHint;
 }
 
 class _AppLocalizationsDelegate

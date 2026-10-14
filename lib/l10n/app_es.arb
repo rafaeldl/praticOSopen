@@ -736,7 +736,7 @@
   "noProceduresRegistered": "No hay procedimientos registrados",
   "noProceduresAvailable": "No hay procedimientos disponibles",
   "tapPlusToCreateFirst": "Toque + para crear su primer procedimiento.",
-  "fromCompany": "De la Empresa",
+  "fromCompany": "De la empresa",
   "global": "Globales",
   "itemCount": "{count} {count, plural, =1{elemento} other{elementos}}",
   "@itemCount": {
@@ -2023,6 +2023,59 @@
   "orderMoreActions": "Más acciones",
   "filterOpen": "Abiertas",
   "filterAll": "Todas",
+  "filterMine": "Mías",
+  "sectionScheduledToday": "Hoy",
+  "nextVisitLabel": "Ahora",
+  "homeWithYouToday": "{count, plural, =1{1 contigo hoy} other{{count} contigo hoy}}",
+  "@homeWithYouToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeWithYou": "{count, plural, =1{1 contigo} other{{count} contigo}}",
+  "@homeWithYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextVisit": "Siguiente: {customer}, a las {time}.",
+  "@nextVisit": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "nextVisitDevice": "Siguiente: {customer}, {device}, a las {time}.",
+  "@nextVisitDevice": {
+    "placeholders": {
+      "customer": {
+        "type": "String"
+      },
+      "device": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openOrderNumber": "Abrir OS {number}",
+  "@openOrderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "noOrdersWithYou": "Ninguna OS contigo.",
   "sectionLate": "Atrasadas",
   "sectionDueToday": "Para hoy",
   "sectionInProgress": "En curso",
@@ -2076,16 +2129,69 @@
       }
     }
   },
-  "firstOrderTitle": "Crea tu primera orden de servicio y envíala al cliente para que la apruebe.",
+  "firstOrderTitle": "Crea tu primera orden de servicio. Toma menos de un minuto.",
   "howItWorks": "Cómo funciona",
-  "howItWorksStep1": "Elige al cliente y lo que se va a hacer.",
-  "howItWorksStep2": "Envía el presupuesto para que el cliente lo apruebe.",
-  "howItWorksStep3": "Sigue el trabajo y cobra.",
+  "firstOrderLabel": "Empieza aquí",
+  "homeNoOrdersYet": "Ninguna todavía",
+  "howItWorksStep1": "1. Anota lo que se va a hacer",
+  "howItWorksStep1Detail": "cliente y servicios",
+  "howItWorksStep1DetailDevice": "cliente, {device} y servicios",
+  "@howItWorksStep1DetailDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "howItWorksStep2": "2. Envía el presupuesto",
+  "howItWorksStep2Detail": "por WhatsApp, con un enlace",
+  "howItWorksStep3": "3. Cobra y entrega",
+  "howItWorksStep3Detail": "la app recuerda quién falta pagar",
+  "nextStepLateShort": "{count, plural, =1{1 OS pasó el plazo.} other{{count} OS pasaron el plazo.}}",
+  "@nextStepLateShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepDueTodayShort": "{count, plural, =1{1 OS para hoy.} other{{count} OS para hoy.}}",
+  "@nextStepDueTodayShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nextStepQuotesWaitingShort": "{count, plural, =1{1 presupuesto sin respuesta.} other{{count} presupuestos sin respuesta.}}",
+  "@nextStepQuotesWaitingShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "searchNotFoundLoaded": "No lo encontré en las OS cargadas.",
   "searchOlder": "Buscar en las más antiguas",
   "noOpenOrders": "Ninguna OS abierta.",
   "noOrdersInView": "Nada por aquí.",
   "loadOrdersError": "No se pudieron cargar las OS.",
+  "orderLateMonths": "{count, plural, =1{Atrasada hace 1 mes} other{Atrasada hace {count} meses}}",
+  "@orderLateMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderLateYears": "{count, plural, =1{Atrasada hace 1 año} other{Atrasada hace {count} años}}",
+  "@orderLateYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "orderLateDays": "{count, plural, =1{Atrasada 1 día} other{Atrasada {count} días}}",
   "@orderLateDays": {
     "placeholders": {
@@ -2148,6 +2254,7 @@
   "inviteEmailHint": "La persona entra con este correo y la invitación aparece sola.",
   "inviteWhatsAppLabel": "WhatsApp (opcional)",
   "inviteRoleLabel": "Qué puede hacer",
+  "inviteRoleQuestion": "¿Qué puede hacer?",
   "createInvite": "Crear invitación",
   "cancelAndInviteAgain": "Cancelar e invitar de nuevo",
   "inviteExpiredMessage": "Esta invitación venció. Cancélala e invita de nuevo.",
@@ -2704,5 +2811,107 @@
   "orderChangeCustomer": "Cambiar cliente",
   "orderChangeDevice": "Cambiar {device}",
   "orderAddResponsible": "Responsable",
-  "orderResponsibleRemove": "Quitar responsable"
+  "orderResponsibleRemove": "Quitar responsable",
+  "filterDone": "Terminadas",
+  "homeLateCount": "{count, plural, =1{1 atrasada} other{{count} atrasadas}}",
+  "homeSearchHint": "Buscar OS o cliente",
+  "homeSearchHintDevice": "Buscar OS, cliente o {device}",
+  "remainingToReceive": "falta cobrar {amount}",
+  "firstOrderTapPlus": "Toca + para crear tu primera OS. Toma menos de un minuto.",
+  "profileButtonA11y": "{company}: clientes, catálogo, equipo y ajustes",
+  "orderAssistantPhoto": "Foto",
+  "orderAssistantTalkShort": "Hablar",
+  "orderCustomerRequestTitle": "Lo que pidió el cliente",
+  "orderCustomerRequestPlaceholder": "Ej.: ruido al frenar",
+  "orderDeliverySection": "Entrega",
+  "orderDueLabel": "Listo el",
+  "orderDueNone": "Sin fecha",
+  "orderMoreOptions": "Más opciones",
+  "orderMoreOptionsHint": "Estado, visita, responsable, lugar",
+  "orderStatusLabel": "Estado",
+  "orderScheduleLabel": "Visita",
+  "orderAddressLabel": "Lugar",
+  "orderNotSet": "Ninguno",
+  "speechTitle": "Hablar el servicio",
+  "speechHint": "Di el cliente, el vehículo y lo que se va a hacer.",
+  "speechListening": "Escuchando…",
+  "speechStop": "Parar",
+  "speechStart": "Hablar de nuevo",
+  "speechFill": "Completar la OS",
+  "speechType": "Escribir en vez de hablar",
+  "speechUnavailable": "El micrófono no está permitido. Permítelo en Ajustes o escribe el servicio.",
+  "orderAddItemRow": "Agregar servicio o pieza",
+  "orderPickCustomerRow": "Elegir cliente",
+  "newOrderButton": "Nueva OS",
+  "orderAssistantFilled": "Completé lo marcado. Revísalo y guarda.",
+  "orderAssistantUndo": "Deshacer",
+  "orderAssistantReadingPhotos": "Leyendo las fotos…",
+  "orderAssistantReadingSpeech": "Leyendo lo que dijiste…",
+  "orderAssistantMarked": "Completado por la IA",
+  "speechCancel": "Cancelar",
+  "speechStopAndFill": "Detener y completar la OS",
+  "speechTypeHint": "Escribe el cliente, el vehículo y lo que se hará",
+  "speechNothingHeard": "No escuché nada. Toca Hablar e inténtalo de nuevo.",
+  "orderServicesAndParts": "Servicios y piezas",
+  "orderItemKindPart": "pieza",
+  "orderActionApproveQuote": "Aprobar presupuesto",
+  "orderActionStartService": "Empezar el servicio",
+  "orderActionMarkReady": "Marcar como lista",
+  "orderDuePhrase": "Lista {when}",
+  "orderDueLatePhrase": "Debía estar lista {when}",
+  "orderDayAtTime": "{day}, {time}",
+  "orderChecklistProgress": "{answered} de {total} respondidas",
+  "orderCommentYou": "Tú",
+  "orderMenuChangeStatus": "Cambiar el estado",
+  "orderMenuViewPdf": "Ver PDF",
+  "orderMenuCopyLink": "Copiar enlace",
+  "orderPlaceOfService": "Lugar de atención",
+  "orderAssistantApplied": "Agregué a la OS lo que está marcado. Revísalo.",
+  "pickerCustomerTitle": "¿Qué cliente?",
+  "pickerDeviceTitle": "¿Qué {device}?",
+  "pickerDeviceSubtitle": "de {name}",
+  "pickerItemTitle": "¿Qué se va a hacer?",
+  "pickerChecklistTitle": "¿Qué checklist?",
+  "pickerStatusTitle": "¿Cuál es la situación?",
+  "pickerAssigneeTitle": "¿Quién es el responsable?",
+  "pickerDevicesTitle": "¿En cuáles {devices}?",
+  "pickerNewCustomer": "Nuevo cliente",
+  "pickerNewDevice": "Nuevo {device}",
+  "pickerNewItem": "Nuevo servicio o pieza",
+  "pickerNewChecklist": "Nuevo checklist",
+  "pickerTypeAnother": "Escribir otro",
+  "pickerRegister": "Registrar “{query}”",
+  "pickerNoDeviceWith": "Ningún {device} con “{query}”.",
+  "pickerNoItemWith": "Ningún servicio o pieza con “{query}”. Regístrelo y entra directo en la OS.",
+  "pickerNoMatch": "Nada con “{query}”.",
+  "pickerRecent": "Recientes",
+  "pickerAll": "Todos",
+  "pickerSearch": "Buscar",
+  "orderMenuRemoveDevice": "Quitar {device} de la OS",
+  "@orderMenuRemoveDevice": {"placeholders": {"device": {"type": "String"}}},
+  "pickerNoDevice": "Ningún {device}",
+  "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}},
+  "formMoreData": "Más datos",
+  "customerSaveNeedsName": "Escribe el nombre para guardar.",
+  "customerMoreDataHint": "Correo, documento fiscal, dirección",
+  "deviceSaveNeedsField": "Completa el campo {field} para guardar.",
+  "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},
+  "deviceMoreDataHint": "Foto, {brand} y {category}",
+  "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}},
+  "catalogMoreDataHintFields": "Foto y otros campos",
+  "inviteSaveNeedsContact": "Escribe el correo o el WhatsApp para guardar.",
+  "checklistNamePlaceholder": "Ej.: Inspección de entrada",
+  "checklistQuestionsTitle": "Preguntas",
+  "checklistAddQuestion": "Agregar pregunta",
+  "checklistSaveNeedsNameAndQuestion": "Escribe el nombre y agrega una pregunta para guardar.",
+  "checklistSaveNeedsQuestion": "Agrega una pregunta para guardar.",
+  "formItemTypeText": "Texto",
+  "formItemTypeNumber": "Número",
+  "formItemTypeBoolean": "Sí/No",
+  "formItemTypeSelect": "Selección única",
+  "formItemTypeChecklist": "Selección múltiple",
+  "formItemTypePhoto": "Solo foto",
+  "pickerNewItemKind": "¿Qué vas a registrar?",
+  "pickerNewItemServiceHint": "Mano de obra que haces",
+  "pickerNewItemProductHint": "Pieza o material que vendes"
 }

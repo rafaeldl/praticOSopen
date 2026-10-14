@@ -9,6 +9,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/more/account_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/more_view.dart';
@@ -17,8 +18,9 @@ import 'package:praticos/screens/menu_navigation/more/plan_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/reminders_screen.dart';
 import 'package:praticos/services/authorization_service.dart';
 
-/// The "Mais" tab. Builds [MoreView] with the rows the current role can see
-/// and opens the destination of each row.
+/// Profile screen (former "Mais" tab), opened from the company button on
+/// Início. Builds [MoreView] with the rows the current role can see and
+/// opens the destination of each row.
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -54,6 +56,8 @@ class _SettingsState extends State<Settings> {
       final canViewProducts =
           _authService.hasPermission(PermissionType.viewProducts);
       final visibility = MoreVisibility(
+        customers: _authService.hasPermission(PermissionType.viewCustomers),
+        contracts: config.useContracts,
         company: _authService.hasPermission(PermissionType.manageCompany),
         team: _authService.hasPermission(PermissionType.manageUsers),
         catalog: canViewServices || canViewProducts,
@@ -68,6 +72,9 @@ class _SettingsState extends State<Settings> {
           _userStore.user?.value?.name ?? Global.currentUser?.displayName;
       final l10n = context.l10n;
       return MoreView(
+        // Fixed short title: a long company name would be cut with "…" in
+        // the large title. The name shows on the account row below.
+        title: l10n.myCompany,
         visibility: visibility,
         planName: subscription.effectivePlan(DateTime.now()).displayName,
         accountName: userName,
@@ -99,6 +106,10 @@ class _SettingsState extends State<Settings> {
     switch (destination) {
       case MoreDestination.account:
         _push(context, const AccountScreen());
+      case MoreDestination.customers:
+        _push(context, HomeCustomerList());
+      case MoreDestination.contracts:
+        Navigator.of(context, rootNavigator: true).pushNamed('/contract_list');
       case MoreDestination.company:
         _push(
           context,

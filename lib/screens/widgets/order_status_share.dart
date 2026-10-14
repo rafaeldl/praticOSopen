@@ -53,9 +53,11 @@ Future<bool> askNotifyCustomer(
     context: context,
     builder: (ctx) => CupertinoAlertDialog(
       title: Text(title(ctx)),
-      content: Text(ctx.l10n.notifyCustomerDescription(
-        order.customer?.name ?? ctx.l10n.customer,
-      )),
+      content: Text(
+        ctx.l10n.notifyCustomerDescription(
+          order.customer?.name ?? ctx.l10n.customer,
+        ),
+      ),
       actions: [
         CupertinoDialogAction(
           isDefaultAction: true,
@@ -70,6 +72,36 @@ Future<bool> askNotifyCustomer(
     ),
   );
   return send ?? false;
+}
+
+/// The order's customer link: the cached one, an active token from the API,
+/// or a new one. Throws when a new link cannot be generated.
+Future<String?> orderShareUrl(Order order) async {
+  if (order.id == null) return null;
+  final service = ShareLinkService.instance;
+
+  // 1. Cached link on the order
+  final existingLink = order.shareLink;
+  if (existingLink != null &&
+      !existingLink.isExpired &&
+      existingLink.url != null) {
+    return existingLink.url;
+  }
+
+  // 2. Active tokens from the API
+  try {
+    final tokens = await service.getShareTokens(order.id!);
+    final active = tokens.where((t) => !t.isExpired).toList();
+    if (active.isNotEmpty) {
+      return 'https://praticos.web.app/q/${active.first.token}';
+    }
+  } catch (_) {
+    // Generates a new link below.
+  }
+
+  // 3. New link
+  final result = await service.generateShareLink(orderId: order.id!);
+  return result.url;
 }
 
 /// Opens the native share sheet with the order's customer link (reusing an
@@ -92,34 +124,7 @@ Future<void> shareOrderLinkNatively(
   Overlay.of(context).insert(overlay);
 
   try {
-    String? url;
-
-    // 1. Cached link on the order
-    final existingLink = order.shareLink;
-    if (existingLink != null &&
-        !existingLink.isExpired &&
-        existingLink.url != null) {
-      url = existingLink.url;
-    }
-
-    // 2. Active tokens from the API
-    if (url == null) {
-      try {
-        final tokens = await service.getShareTokens(order.id!);
-        final active = tokens.where((t) => !t.isExpired).toList();
-        if (active.isNotEmpty) {
-          url = 'https://praticos.web.app/q/${active.first.token}';
-        }
-      } catch (_) {
-        // Generates a new link below.
-      }
-    }
-
-    // 3. New link
-    if (url == null) {
-      final result = await service.generateShareLink(orderId: order.id!);
-      url = result.url;
-    }
+    final url = await orderShareUrl(order);
 
     if (url == null || !context.mounted) return;
 
@@ -132,8 +137,9 @@ Future<void> shareOrderLinkNatively(
     );
 
     final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin =
-        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+    final sharePositionOrigin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
 
     await service.shareViaSheet(
       url: url,

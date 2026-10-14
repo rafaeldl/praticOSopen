@@ -1,14 +1,23 @@
+import 'dart:io';
+import 'dart:math' show max;
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/screens/device_list_screen.dart'
+    show kRemoveDeviceResult;
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
 import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/product.dart';
@@ -17,12 +26,13 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
-import 'package:praticos/screens/order/assistant/assistant_input_sheet.dart';
+import 'package:praticos/screens/order/assistant/speech_listener.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
-import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
@@ -34,12 +44,15 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/order_media_actions.dart'
     show confirmDeleteOrderDocument;
 import 'package:praticos/screens/widgets/order_status_share.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
@@ -65,10 +78,11 @@ import 'package:provider/provider.dart';
 ///   (same rules as the legacy screen, see `order_status_share.dart`).
 /// - Items without price are `null`: they show "sem valor" and are not summed.
 /// - No cover photo; photos show in "Fotos" only when the order has them.
-/// - Foto / "Falar o que fazer" (new order only, behind [kAiOrderAssistEnabled],
-///   off by default): the camera opens only on Foto; Falar opens a text sheet
-///   (keyboard dictation). The assistant's draft fills this same blank order
-///   and what it filled is highlighted (marca-texto) until "Salvar OS".
+/// - Foto / Falar (new order only; Falar behind [kAiOrderAssistEnabled], off
+///   by default): everything happens in the glass bar of the sheet, without
+///   another screen. Falar listens right there and the stop fills the order;
+///   Foto puts the photos in "Fotos" and the assistant reads them. What it
+///   filled gets a blue sparkle, with "Desfazer" in a note above the bar.
 class OrderScreenV2 extends StatefulWidget {
   const OrderScreenV2({
     super.key,
@@ -82,6 +96,8 @@ class OrderScreenV2 extends StatefulWidget {
     this.showAssistant = kAiOrderAssistEnabled,
     this.assistant,
     this.capturePhoto,
+    this.pickGalleryPhotos,
+    this.speechListener,
   });
 
   /// Injected in tests; defaults to a new [OrderStore].
@@ -112,16 +128,28 @@ class OrderScreenV2 extends StatefulWidget {
   /// Opens the camera; defaults to image_picker (tests inject).
   final Future<AiPhoto?> Function()? capturePhoto;
 
+  /// Opens the photo library; defaults to image_picker (tests inject).
+  final Future<List<AiPhoto>> Function()? pickGalleryPhotos;
+
+  /// Microphone for "Falar" (tests inject); defaults to the device one.
+  final SpeechListener? speechListener;
+
   @override
   State<OrderScreenV2> createState() => _OrderScreenV2State();
 }
 
-class _NextStep {
-  const _NextStep(this.sentence, [this.actionLabel, this.onAction]);
+/// What one assistant draft put in the order, for "Desfazer".
+class _DraftUndo {
+  _DraftUndo(this.customerGuess, this.deviceGuess);
 
-  final String sentence;
-  final String? actionLabel;
-  final VoidCallback? onAction;
+  /// Guesses before the draft (restored on undo).
+  final String? customerGuess;
+  final String? deviceGuess;
+  bool customer = false;
+  bool request = false;
+  bool due = false;
+  final List<String> devices = [];
+  final List<Object> lines = [];
 }
 
 class _OrderScreenV2State extends State<OrderScreenV2> {
@@ -137,18 +165,28 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// Set after "Sair sem salvar?" so the route can pop.
   bool _leaving = false;
+  bool _moreOpen = false;
 
-  /// Opened from a comment notification: scroll to the comments.
+  /// Opened from a comment notification: opens the comments screen.
   bool _scrollToComments = false;
   String? _highlightCommentId;
+
+  /// Comments of a saved order (the last two show on the screen).
+  Stream<List<OrderComment>>? _commentsStream;
 
   /// Orders whose "Avisar o cliente?" was answered "Agora não".
   final Set<String> _dismissedSharePrompts = {};
 
   final ScrollController _scroll = ScrollController();
 
+  /// "O que o cliente pediu" (new order only; saved as the first comment).
+  final TextEditingController _requestController = TextEditingController();
+
   @override
   void dispose() {
+    if (_barMode == AssistantBarMode.listening) _speech.stop();
+    _typedController.dispose();
+    _requestController.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -158,7 +196,42 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   final Set<Object> _marked = Set<Object>.identity();
   String? _customerGuess;
   String? _deviceGuess;
-  bool _assistantBusy = false;
+  bool get _assistantBusy => _barMode == AssistantBarMode.reading;
+
+  /// What the bar at the bottom of the sheet is doing.
+  AssistantBarMode _barMode = AssistantBarMode.idle;
+  String? _readingLabel;
+
+  /// Heard so far while listening; typed when there is no microphone.
+  String _heard = '';
+  final TextEditingController _typedController = TextEditingController();
+  late final SpeechListener _speech =
+      widget.speechListener ?? DeviceSpeechListener();
+
+  /// Note above the bar (what the assistant did, or why it could not).
+  String? _note;
+  bool _noteFilled = false;
+
+  /// What the last draft added, for "Desfazer".
+  _DraftUndo? _undo;
+
+  /// Height of what floats at the bottom (bar plus note or transcript), so
+  /// the last card can always scroll above it.
+  final GlobalKey _floatingKey = GlobalKey();
+  double _floatingHeight = 0;
+
+  void _measureFloating() {
+    final box = _floatingKey.currentContext?.findRenderObject() as RenderBox?;
+    if (!mounted || box == null || !box.hasSize) return;
+    final height = box.size.height;
+    if ((height - _floatingHeight).abs() > 1) {
+      setState(() => _floatingHeight = height);
+    }
+  }
+
+  /// Photos attached in the "Nova OS" sheet; uploaded once the order has
+  /// its id (an order is not created just to hold them).
+  final List<AiPhoto> _photos = [];
 
   FormatService get _format =>
       FormatService()..setLocale(context.l10n.localeName);
@@ -222,27 +295,29 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
     }
     if (!mounted) return;
-    _store.setOrder(fresh ?? order);
-    setState(() => _ready = true);
+    final loaded = fresh ?? order;
+    _store.setOrder(loaded);
+    setState(() {
+      _ready = true;
+      if (loaded.id != null) {
+        _commentsStream = _actions.watchComments(loaded).asBroadcastStream();
+      }
+    });
     if (_scrollToComments) {
       _scrollToComments = false;
-      _scrollToEnd();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _actions.openComments(
+          context,
+          loaded,
+          highlightCommentId: _highlightCommentId,
+        );
+      });
     }
   }
 
-  /// Comments live at the end of the order.
-  void _scrollToEnd() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
   bool get _hasContent =>
+      _photos.isNotEmpty ||
       _store.customer != null ||
       _store.devices.isNotEmpty ||
       (_store.services?.isNotEmpty ?? false) ||
@@ -252,36 +327,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   /// Header tap (saved OS): change the customer or a vehicle, which no
   /// longer have their own section (app-os).
-  Future<void> _showPeopleMenu() async {
-    final l10n = context.l10n;
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _pickCustomer();
-            },
-            child: Text(l10n.orderChangeCustomer),
-          ),
-          for (final device in _store.devices)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(sheetContext);
-                _changeDevice(device);
-              },
-              child: Text(l10n.orderChangeDevice(device.name ?? '')),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-  }
-
   Future<void> _pickCustomer() async {
     final result = await Navigator.pushNamed(
       context,
@@ -308,41 +353,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     setState(() => _deviceGuess = null);
   }
 
+  /// Tapping a vehicle opens "Qual veículo?" straight away; the pick
+  /// replaces it; its "Tirar … da OS" row takes it out.
   Future<void> _changeDevice(DeviceAggr device) async {
-    final l10n = context.l10n;
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(device.name ?? ''),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'change'),
-            child: Text(l10n.orderDeviceActionChange),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, 'remove'),
-            child: Text(l10n.orderDeviceActionRemove),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-    if (!mounted || choice == null) return;
-    if (choice == 'remove' && device.id != null) {
-      _store.removeDevice(device.id!);
-      return;
-    }
-    if (choice != 'change') return;
     final result = await Navigator.pushNamed(
       context,
       '/device_list',
-      arguments: {'order': _store.order},
+      arguments: {'order': _store.order, 'current': device},
     );
-    if (!mounted || result is! Device || device.id == null) return;
+    if (!mounted || device.id == null) return;
+    if (result == kRemoveDeviceResult) {
+      _store.removeDevice(device.id!);
+      setState(() {});
+      return;
+    }
+    if (result is! Device) return;
+    if (result.id == device.id) return;
     _store.removeDevice(device.id!);
     _store.addDevice(result);
   }
@@ -449,25 +475,31 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       await _alert(l10n.permissionDenied);
       return;
     }
-    final picked = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.changeStatus),
-        actions: [
-          for (final key in statuses)
-            CupertinoActionSheetAction(
-              isDestructiveAction: key == 'canceled',
-              onPressed: () => Navigator.pop(ctx, key),
-              child: Text(config.getStatus(key)),
+    final picked = await pickOne<String>(
+      context,
+      title: l10n.pickerStatusTitle,
+      selected: order.status,
+      options: [
+        // The current one stays in the list, with the ✓, so the person sees
+        // where the OS is now.
+        for (final key in const [
+          'quote',
+          'approved',
+          'progress',
+          'done',
+          'canceled',
+        ])
+          if (key == order.status || statuses.contains(key))
+            PickerItem<String>(
+              value: key,
+              title: config.getStatus(key),
+              leading: StatusDot(color: OrderStatusStyle.dotColor(key)),
             ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+      ],
     );
-    if (picked != null && mounted) await _trySetStatus(picked);
+    if (picked != null && picked != order.status && mounted) {
+      await _trySetStatus(picked);
+    }
   }
 
   Future<void> _trySetStatus(String status) async {
@@ -548,72 +580,167 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   // ─── "…" menu ────────────────────────────────────────────────────────────
 
+  /// Pull-down "…" (app-os-menu): change the status, "Adicionar à OS" (only
+  /// what the order does not have yet), PDF and link, then cancel / delete.
   Future<void> _showMenu() async {
     final order = _store.order;
     if (order == null) return;
     final l10n = context.l10n;
     final config = context.read<SegmentConfigProvider>();
     final orderLabel = _shortOrderLabel(config);
+    final saved = order.id != null;
+    final canEdit = _permissions.canEditMainFields(order);
     final canCancel =
         _store.status != 'canceled' &&
         _permissions.canChangeStatus(order, 'canceled');
-    final canDelete = order.id != null && _permissions.canDelete(order);
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          // 1. Adicionar à OS ›
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, 'add'),
-            child: Text('${l10n.orderMenuAddTo(orderLabel)} ›'),
-          ),
-          // 2. Mandar para o cliente · PDF
-          if (order.id != null)
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, 'send'),
-              child: Text(l10n.orderMenuSendToCustomer),
+    final canDelete = saved && _permissions.canDelete(order);
+    final choice = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          if (_permissions.availableStatuses(order).isNotEmpty)
+            PullDownItem(
+              value: 'status',
+              label: l10n.orderMenuChangeStatus,
+              icon: CupertinoIcons.arrow_right_arrow_left,
+              submenu: true,
             ),
+        ]),
+        PullDownGroup(title: l10n.orderMenuAddTo(orderLabel), [
+          if (saved && order.company?.id != null)
+            PullDownItem(
+              value: 'comment',
+              label: l10n.orderAddComment,
+              icon: CupertinoIcons.chat_bubble,
+            ),
+          if (saved && _permissions.canManageForms(order))
+            PullDownItem(
+              value: 'checklist',
+              label: l10n.orderAddChecklist,
+              icon: CupertinoIcons.checkmark_square,
+            ),
+          if (_canGiveDiscount)
+            PullDownItem(
+              value: 'discount',
+              label: l10n.orderAddDiscount,
+              icon: CupertinoIcons.tag,
+            ),
+          if (canEdit && saved && order.assignedTo == null)
+            PullDownItem(
+              value: 'responsible',
+              label: l10n.orderAddResponsible,
+              icon: CupertinoIcons.person,
+            ),
+          if (canEdit && config.fieldService && !_hasAddress)
+            PullDownItem(
+              value: 'address',
+              label: l10n.orderPlaceOfService,
+              icon: CupertinoIcons.location,
+            ),
+          if (saved && _permissions.canAttachMedia())
+            PullDownItem(
+              value: 'media',
+              label: l10n.document,
+              icon: CupertinoIcons.doc,
+            ),
+          if (canEdit && saved && config.useContracts && !_store.hasContract)
+            PullDownItem(
+              value: 'contract',
+              label: l10n.orderAddContractMonthly,
+              icon: CupertinoIcons.repeat,
+            ),
+          if (canEdit && order.dueDate == null)
+            PullDownItem(
+              value: 'due',
+              label: l10n.orderAddDueDate,
+              icon: CupertinoIcons.clock,
+            ),
+          if (canEdit && config.useScheduling && order.scheduledDate == null)
+            PullDownItem(
+              value: 'schedule',
+              label: l10n.orderAddSchedule,
+              icon: CupertinoIcons.calendar,
+            ),
+          if (canEdit)
+            PullDownItem(
+              value: 'device',
+              label: l10n.orderAddAnotherDevice(config.device.toLowerCase()),
+              icon: CupertinoIcons.plus_circle,
+            ),
+        ]),
+        PullDownGroup([
           if (canShareOrderPdf(
             canViewPrices: _permissions.canViewPrices(),
             useFinancial: config.useFinancial,
           ))
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, 'pdf'),
-              child: Text(l10n.orderMenuPdfOf(orderLabel)),
+            PullDownItem(
+              value: 'pdf',
+              label: l10n.orderMenuViewPdf,
+              icon: CupertinoIcons.doc_text,
             ),
-          // 3. Cancelar OS / Apagar OS
+          if (saved)
+            PullDownItem(
+              value: 'link',
+              label: l10n.orderMenuCopyLink,
+              icon: CupertinoIcons.link,
+            ),
+        ]),
+        PullDownGroup([
           if (canCancel)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(ctx, 'cancel'),
-              child: Text(l10n.orderMenuCancel(orderLabel)),
+            PullDownItem(
+              value: 'cancel',
+              label: l10n.orderMenuCancel(orderLabel),
+              icon: CupertinoIcons.xmark_circle,
+              destructive: true,
             ),
           if (canDelete)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(ctx, 'delete'),
-              child: Text(l10n.orderMenuDelete(orderLabel)),
+            PullDownItem(
+              value: 'delete',
+              label: l10n.orderMenuDelete(orderLabel),
+              icon: CupertinoIcons.trash,
+              destructive: true,
             ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+        ]),
+      ],
     );
     if (!mounted || choice == null) return;
     switch (choice) {
-      case 'add':
-        await _showAddToOrder();
-      case 'send':
-        await _actions.shareWithCustomer(context, order);
+      case 'status':
+        await _selectStatus();
+      case 'comment':
+        await _actions.openComments(context, order);
+      case 'checklist':
+        await _actions.addChecklist(context, _store);
+      case 'discount':
+        await _giveDiscount();
+      case 'responsible':
+        await _pickResponsible();
+      case 'address':
+        await _editAddress();
+      case 'media':
+        await _actions.addMedia(context, _store);
+      case 'contract':
+        _store.toggleContract(true);
+        await _actions.editContract(context, _store);
+      case 'due':
+        await _pickDueDate();
+      case 'schedule':
+        await _pickSchedule();
+      case 'device':
+        await _addDevice();
       case 'pdf':
         await _actions.sharePdf(context, order, config);
+      case 'link':
+        final copied = await _actions.copyLink(order);
+        if (mounted) {
+          await _alert(copied ? l10n.linkCopied : l10n.errorOccurred);
+        }
       case 'cancel':
         await _trySetStatus('canceled');
       case 'delete':
         await _confirmDelete();
     }
+    if (mounted) setState(() {});
   }
 
   bool get _hasAddress => _store.address?.trim().isNotEmpty ?? false;
@@ -624,108 +751,25 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       !const ['quote', 'canceled'].contains(_store.status) &&
       _store.remainingBalance > 0;
 
-  /// "Adicionar à OS ›": only what the order does not have yet.
-  Future<void> _showAddToOrder() async {
-    final order = _store.order;
-    if (order == null) return;
-    final l10n = context.l10n;
-    final config = context.read<SegmentConfigProvider>();
-    final orderLabel = _shortOrderLabel(config);
-    final saved = order.id != null;
-    final canEdit = _permissions.canEditMainFields(order);
-    final options = <(String, String)>[
-      if (canEdit) ('item', l10n.orderAddItem),
-      if (saved && _permissions.canManageForms(order))
-        ('checklist', l10n.orderAddChecklist),
-      if (canEdit && order.dueDate == null) ('due', l10n.orderAddDueDate),
-      if (canEdit && config.useScheduling && order.scheduledDate == null)
-        ('schedule', l10n.orderAddSchedule),
-      if (canEdit && config.fieldService && !_hasAddress)
-        ('address', l10n.orderAddAddress),
-      if (canEdit)
-        ('device', l10n.orderAddAnotherDevice(config.device.toLowerCase())),
-      if (_canGiveDiscount) ('discount', l10n.orderAddDiscount),
-      if (saved && order.company?.id != null) ('comment', l10n.orderAddComment),
-      if (saved && _permissions.canAttachMedia()) ('media', l10n.orderAddMedia),
-      if (canEdit && saved && order.assignedTo == null)
-        ('responsible', l10n.orderAddResponsible),
-      if (canEdit && saved && config.useContracts && !_store.hasContract)
-        ('contract', l10n.orderAddContractMonthly),
-    ];
-    final choice = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.orderMenuAddTo(orderLabel)),
-        actions: [
-          for (final (key, label) in options)
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, key),
-              child: Text(label),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-    if (!mounted || choice == null) return;
-    switch (choice) {
-      case 'item':
-        await _addItem();
-      case 'checklist':
-        await _actions.addChecklist(context, _store);
-      case 'media':
-        await _actions.addMedia(context, _store);
-      case 'comment':
-        _scrollToEnd();
-      case 'address':
-        await _editAddress();
-      case 'schedule':
-        await _pickSchedule();
-      case 'due':
-        await _pickDueDate();
-      case 'discount':
-        await _giveDiscount();
-      case 'contract':
-        _store.toggleContract(true);
-        await _actions.editContract(context, _store);
-      case 'device':
-        await _addDevice();
-      case 'responsible':
-        await _pickResponsible();
-    }
-    if (mounted) setState(() {});
-  }
-
   /// "Responsável": who of the team takes care of this order.
   Future<void> _pickResponsible() async {
     final l10n = context.l10n;
     final team = await _actions.teamMembers();
     if (!mounted || team.isEmpty) return;
     final current = _store.order?.assignedTo;
-    final picked = await showCupertinoModalPopup<Object>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(l10n.orderAddResponsible),
-        actions: [
-          for (final user in team)
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.pop(ctx, user),
-              child: Text(user.name ?? user.email ?? ''),
-            ),
-          if (current != null)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.orderResponsibleRemove),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(l10n.cancel),
-        ),
-      ),
+    final picked = await pickOne<Object>(
+      context,
+      title: l10n.pickerAssigneeTitle,
+      options: [
+        for (final user in team)
+          PickerItem<Object>(
+            value: user,
+            title: user.name ?? user.email ?? '',
+            selected: user.id != null && user.id == current?.id,
+          ),
+        if (current != null)
+          PickerItem<Object>(value: false, title: l10n.orderResponsibleRemove),
+      ],
     );
     if (!mounted || picked == null) return;
     setState(() => _store.setAssignedTo(picked is UserAggr ? picked : null));
@@ -943,23 +987,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (ok != true || !mounted) return;
     await _store.deleteOrder();
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) _popScreen();
   }
 
   // ─── Save / leave ────────────────────────────────────────────────────────
-
-  void _save() {
-    if (_store.customer == null) return;
-    _store.deferSave = false;
-    _store.updateTotal();
-    _store.createItem();
-    setState(() {
-      _isNew = false;
-      _marked.clear();
-      _customerGuess = null;
-      _deviceGuess = null;
-    });
-  }
 
   Future<void> _confirmDiscard() async {
     final l10n = context.l10n;
@@ -985,7 +1016,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (leave == true && mounted) {
       setState(() => _leaving = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) _popScreen();
       });
     }
   }
@@ -1005,35 +1036,133 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return AiPhoto(await file.readAsBytes());
   }
 
-  /// Foto: camera first, then the same sheet to add what to do (optional).
-  Future<void> _onPhoto() async {
-    final photo = await _capturePhoto();
-    if (!mounted || photo == null) return;
-    await _openAssistant(photos: [photo]);
+  Future<List<AiPhoto>> _pickGallery() async {
+    if (widget.pickGalleryPhotos != null) return widget.pickGalleryPhotos!();
+    final files = await ImagePicker().pickMultiImage(
+      maxWidth: 1600,
+      maxHeight: 1600,
+      imageQuality: 70,
+      requestFullMetadata: false,
+    );
+    return [for (final f in files) AiPhoto(await f.readAsBytes())];
   }
 
-  Future<void> _openAssistant({List<AiPhoto> photos = const []}) async {
-    final input = await AppSheet.show<AssistantInput>(
-      context,
-      (_) => AssistantInputSheet(
-        initialPhotos: photos,
-        capturePhoto: _capturePhoto,
+  /// Plan photo quota for [adding] more, counting those already attached.
+  bool _photoAllowed(int adding) {
+    final result = FeatureGateService.canAddPhotos(
+      Global.subscription,
+      (_isNew ? _photos.length : _store.photos.length) + adding,
+    );
+    if (!result.isAllowed) showPhotoLimitDialog(context, result);
+    return result.isAllowed;
+  }
+
+  /// Foto: camera or library. On a new order the photos go into the "Fotos"
+  /// card (uploaded once it is saved); on a saved order they are uploaded
+  /// right away. With the assistant, it then reads them.
+  Future<void> _onPhoto() async {
+    final l10n = context.l10n;
+    if (!_photoAllowed(1)) return;
+    final fromCamera = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.takePhoto),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.chooseFromGallery),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
       ),
     );
-    if (!mounted || input == null || input.isEmpty) return;
-    await _runAssistant(input);
+    if (!mounted || fromCamera == null) return;
+    final picked = fromCamera ? [?await _capturePhoto()] : await _pickGallery();
+    if (!mounted || picked.isEmpty) return;
+    if (picked.length > 1 && !_photoAllowed(picked.length)) return;
+    if (_isNew) {
+      setState(() => _photos.addAll(picked));
+    } else {
+      _actions.uploadPhotos(_store, picked);
+    }
+    if (widget.showAssistant) await _runAssistant(photos: picked);
   }
 
-  Future<void> _runAssistant(AssistantInput input) async {
+  Future<void> _onPhotoTapped(int index) async {
     final l10n = context.l10n;
-    setState(() => _assistantBusy = true);
+    final remove = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.removePhoto),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (remove == true && mounted) setState(() => _photos.removeAt(index));
+  }
+
+  Widget _buildPhotosCard() {
+    return FormCard(
+      key: const ValueKey('new_order_photos'),
+      title: context.l10n.orderPhotosSection,
+      children: [
+        FormPhotos(
+          photos: [for (final p in _photos) p.bytes],
+          onAdd: _onPhoto,
+          onTapPhoto: _onPhotoTapped,
+        ),
+      ],
+    );
+  }
+
+  /// Writes the attached photos to temp files and uploads them.
+  Future<void> _uploadPhotos(List<AiPhoto> photos) async {
+    final dir = await Directory.systemTemp.createTemp('new_order_photos');
+    final files = <File>[];
+    for (var i = 0; i < photos.length; i++) {
+      final file = File('${dir.path}/photo_$i.jpg');
+      await file.writeAsBytes(photos[i].bytes);
+      files.add(file);
+    }
+    await _store.uploadPhotoFiles(files);
+  }
+
+  /// Sends what was said and/or the photos to the assistant and fills this
+  /// same order. The bar shows what it is reading; the result (or why it
+  /// could not) shows in the note above the bar, never in an alert.
+  Future<void> _runAssistant({
+    String? text,
+    List<AiPhoto> photos = const [],
+  }) async {
+    final l10n = context.l10n;
+    setState(() {
+      _barMode = AssistantBarMode.reading;
+      _readingLabel = photos.isNotEmpty
+          ? l10n.orderAssistantReadingPhotos
+          : l10n.orderAssistantReadingSpeech;
+      _note = null;
+    });
     AiOrderDraft? draft;
     String? error;
     try {
       final client = widget.assistant ?? AiOrderAssistService();
       draft = await client.assist(
-        text: input.text,
-        photos: input.photos,
+        text: text,
+        photos: photos,
         locale: l10n.localeName.split('_').first,
       );
     } on AiOrderAssistException catch (e) {
@@ -1048,25 +1177,150 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       error = l10n.orderAssistantErrorUnavailable;
     }
     if (!mounted) return;
-    // Stop the spinner before any dialog.
-    setState(() => _assistantBusy = false);
-    if (error != null) {
-      await _alert(l10n.orderAssistantErrorTitle, error);
-    } else if (!_applyDraft(draft!)) {
-      await _alert(
-        l10n.orderAssistantErrorTitle,
-        l10n.orderAssistantNothingFound,
-      );
+    final filled = error == null && _applyDraft(draft!);
+    setState(() {
+      _barMode = AssistantBarMode.idle;
+      _noteFilled = filled;
+      _note = filled
+          ? (_isNew ? l10n.orderAssistantFilled : l10n.orderAssistantApplied)
+          : error ?? l10n.orderAssistantNothingFound;
+    });
+    if (filled) HapticFeedback.lightImpact();
+  }
+
+  void _dismissNote() => setState(() {
+    _note = null;
+    _undo = null;
+  });
+
+  /// "Desfazer": takes out what the last draft put in the order.
+  void _undoDraft() {
+    final undo = _undo;
+    if (undo != null) {
+      if (undo.customer) {
+        runInAction(() {
+          _store.order!.customer = null;
+          _store.customer = null;
+        });
+        _marked.remove('customer');
+      }
+      for (final id in undo.devices) {
+        _store.removeDevice(id);
+        _marked.remove('device:$id');
+      }
+      for (final line in undo.lines) {
+        final services = _store.services ?? const <OrderService>[];
+        final products = _store.products ?? const <OrderProduct>[];
+        final s = services.indexWhere((e) => identical(e, line));
+        if (s >= 0) _store.deleteService(s);
+        final p = products.indexWhere((e) => identical(e, line));
+        if (p >= 0) _store.deleteProduct(p);
+        _marked.remove(line);
+      }
+      if (undo.request) {
+        final field = _isNew
+            ? null
+            : orderRequestField(context.read<SegmentConfigProvider>());
+        if (field != null) {
+          _setRequest(field, null);
+        } else {
+          _requestController.clear();
+        }
+        _marked.remove('request');
+      }
+      if (undo.due) {
+        runInAction(() {
+          _store.order!.dueDate = null;
+          _store.dueDate = null;
+        });
+        if (!_isNew) _store.createItem();
+        _marked.remove('due');
+      }
+      _customerGuess = undo.customerGuess;
+      _deviceGuess = undo.deviceGuess;
+    }
+    _dismissNote();
+  }
+
+  // ─── Falar, right in the bar ───
+
+  /// Falar: the bar turns into "Ouvindo…" and what is heard shows above it.
+  /// No microphone (not allowed or not available): the bar turns into a
+  /// field.
+  Future<void> _onTalk() async {
+    setState(() {
+      _barMode = AssistantBarMode.listening;
+      _heard = '';
+      _note = null;
+      _undo = null;
+    });
+    final ok = await _speech.start(
+      localeId: context.l10n.localeName,
+      onWords: (words) {
+        if (mounted && _barMode == AssistantBarMode.listening) {
+          setState(() => _heard = words.trim());
+        }
+      },
+      // Ended by itself (a long pause): fill with what was heard.
+      onDone: () {
+        if (mounted && _barMode == AssistantBarMode.listening) _stopAndFill();
+      },
+    );
+    if (!ok && mounted && _barMode == AssistantBarMode.listening) {
+      setState(() {
+        _barMode = AssistantBarMode.typing;
+        _note = context.l10n.speechUnavailable;
+        _noteFilled = false;
+      });
     }
   }
 
-  /// Fills the blank order with the draft, without saving (deferSave). Never
-  /// replaces a customer already chosen; adds devices and items. Returns false
-  /// when the draft had nothing to use.
+  /// Blue stop: stops listening and fills the order with what was heard.
+  Future<void> _stopAndFill() async {
+    final heard = _heard;
+    setState(() => _barMode = AssistantBarMode.idle);
+    await _speech.stop();
+    if (!mounted) return;
+    if (heard.isEmpty) {
+      setState(() {
+        _note = context.l10n.speechNothingHeard;
+        _noteFilled = false;
+      });
+      return;
+    }
+    await _runAssistant(text: heard);
+  }
+
+  Future<void> _sendTyped() async {
+    final text = _typedController.text.trim();
+    if (text.isEmpty) return;
+    _typedController.clear();
+    await _runAssistant(text: text);
+  }
+
+  /// "X": nothing is sent.
+  Future<void> _cancelTalk() async {
+    final wasListening = _barMode == AssistantBarMode.listening;
+    setState(() {
+      _barMode = AssistantBarMode.idle;
+      _heard = '';
+      _note = null;
+    });
+    _typedController.clear();
+    if (wasListening) await _speech.stop();
+  }
+
+  /// Fills the order with the draft: the blank "Nova OS" without saving
+  /// (deferSave), a saved order right away. Never replaces a customer already
+  /// chosen, a request or a deadline already filled; adds devices and items.
+  /// Never receives, cancels or deletes. Returns false when the draft had
+  /// nothing to use.
   bool _applyDraft(AiOrderDraft draft) {
     var used = false;
+    final undo = _DraftUndo(_customerGuess, _deviceGuess);
     if (_store.customer == null) {
       if (draft.customer != null) {
+        undo.customer = true;
         _store.setCustomer(
           Customer()
             ..id = draft.customer!.id
@@ -1081,7 +1335,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         used = true;
       }
     }
-    if (draft.device != null) {
+    if (draft.device != null &&
+        _store.devices.any((e) => e.id == draft.device!.id)) {
+      // Already in the order: nothing to add.
+    } else if (draft.device != null) {
       final d = draft.device!;
       _store.addDevice(
         Device()
@@ -1091,6 +1348,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..manufacturer = d.manufacturer,
       );
       _marked.add('device:${d.id}');
+      undo.devices.add(d.id);
       _deviceGuess = null;
       used = true;
     } else {
@@ -1114,6 +1372,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..total = item.value == null ? null : item.value! * item.quantity;
         _store.addProduct(line);
         _marked.add(line);
+        undo.lines.add(line);
       } else {
         final line = OrderService()
           ..service = (ServiceAggr()
@@ -1122,9 +1381,38 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..value = item.value;
         _store.addService(line);
         _marked.add(line);
+        undo.lines.add(line);
       }
       used = true;
     }
+    // What the customer asked (defects, requests): only into a blank field.
+    final notes = draft.notes?.trim() ?? '';
+    final requestField = _isNew
+        ? null
+        : orderRequestField(context.read<SegmentConfigProvider>());
+    if (notes.isNotEmpty && _isNew && _requestController.text.trim().isEmpty) {
+      _requestController.text = notes;
+      _marked.add('request');
+      undo.request = true;
+      used = true;
+    } else if (notes.isNotEmpty &&
+        requestField != null &&
+        '${customFieldValue(_store.order?.customData, requestField) ?? ''}'
+            .trim()
+            .isEmpty) {
+      _setRequest(requestField, notes);
+      _marked.add('request');
+      undo.request = true;
+      used = true;
+    }
+    // Deadline ("pronto sexta"): only when none was picked yet.
+    if (draft.dueDate != null && _store.order?.dueDate == null) {
+      _store.setDueDate(draft.dueDate!);
+      _marked.add('due');
+      undo.due = true;
+      used = true;
+    }
+    if (used) _undo = undo;
     setState(() {});
     return used;
   }
@@ -1133,7 +1421,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final config = context.watch<SegmentConfigProvider>();
     if (!_ready) {
       return CupertinoPageScaffold(
@@ -1154,241 +1441,1416 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) _confirmDiscard();
           },
-          child: CupertinoPageScaffold(
-            backgroundColor: AppColors.background.resolveFrom(context),
-            child: Stack(
-              children: [
-                CustomScrollView(
-                  controller: _scroll,
-                  slivers: [
-                    if (_isNew)
-                      CupertinoSliverNavigationBar(
-                        backgroundColor: AppNavBar.barBackground(context),
-                        alwaysShowMiddle: false,
-                        largeTitle: Text(_title(config)),
-                        border: null,
-                      )
-                    else
-                      AppNavBar(
-                        largeTitle: Text(_title(config)),
-                        previousTitle: _previousTitle,
-                        trailing: GlassBarButton(
-                          label: l10n.orderMoreActions,
-                          icon: CupertinoIcons.ellipsis,
-                          onPressed: _showMenu,
-                        ),
-                      ),
-                    SliverToBoxAdapter(child: _buildContent(config)),
-                    const SliverToBoxAdapter(child: SizedBox(height: 140)),
-                  ],
-                ),
-                if (_isNew) _buildBottom(config),
-              ],
-            ),
-          ),
+          child: _isNew ? _buildNewSheet(config) : _buildExisting(config),
         );
       },
     );
   }
 
-  String _title(SegmentConfigProvider config) {
-    final l10n = context.l10n;
-    if (_isNew) return l10n.orderNewTitle(config.serviceOrder);
-    return _header(config).title;
-  }
+  // ─── New order sheet ─────────────────────────────────────────────────────
 
-  /// Vehicle in the large title, "Cliente · OS 186" under it (app-os).
-  OrderHeaderTexts _header(SegmentConfigProvider config) {
-    final number = _store.orderStream?.value?.number ?? _store.order?.number;
-    return orderHeaderTexts(
-      deviceName: _store.devices.isEmpty ? null : _store.devices.first.name,
-      customerName: _store.customer?.name,
-      orderLabel: number == null
-          ? config.serviceOrder
-          : '${_shortOrderLabel(config)} $number',
+  /// "Nova OS" (prototype "Nova OS · campos por ordem de importância"):
+  /// gray background with white cards, "X" and "✓" at the top and the
+  /// assistant tools in a glass bar at the bottom. Order of the cards: who
+  /// (customer and vehicle), what will be done, what the customer asked
+  /// (optional), delivery and "Mais opções" for the rest.
+  Widget _buildNewSheet(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final canSave = _store.customer != null && !_assistantBusy;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloating());
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.groupedBackground.resolveFrom(context),
+      child: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                NewOrderTopBar(
+                  title: l10n.orderNewTitle(_shortOrderLabel(config)),
+                  onClose: _close,
+                  onSave: canSave ? _saveAndClose : null,
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: _scroll,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.only(
+                      bottom: max(120, _floatingHeight + AppSpacing.lg),
+                    ),
+                    children: [
+                      _buildWhoCard(config),
+                      _buildItemsCard(),
+                      _buildRequestCard(),
+                      if (_photos.isNotEmpty) _buildPhotosCard(),
+                      _buildDeliveryCard(),
+                      ..._buildCustomFields(config, withoutRequest: true),
+                      _buildMoreOptionsCard(config),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            ..._buildFloating(AppColors.groupedBackground.resolveFrom(context)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildContent(SegmentConfigProvider config) {
+  Widget _buildWhoCard(SegmentConfigProvider config) {
     final l10n = context.l10n;
-    final canViewPrices = _permissions.canViewPrices();
-    final services = _store.services?.toList() ?? const <OrderService>[];
-    final products = _store.products?.toList() ?? const <OrderProduct>[];
-    final summary = summarizeOrderItems(services, products);
-    final nextStep = _isNew ? null : _nextStep(config, canViewPrices);
-    final comments = _buildComments();
-
-    final subtitle = _isNew ? null : _header(config).subtitle;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final customer = _store.customer;
+    return FormCard(
+      note: customer == null ? l10n.orderSaveNeedsCustomer : null,
       children: [
-        if (subtitle != null)
-          Semantics(
-            button: true,
-            hint: l10n.orderChangeCustomer,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _showPeopleMenu,
-              child: Padding(
-                // Lined up with the large title (16 from the edge).
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.blockMargin,
-                  0,
-                  AppSpacing.pageMargin,
-                  AppSpacing.xs,
-                ),
-                child: Text(
-                  subtitle,
-                  key: const ValueKey('order_header_subtitle'),
-                  style: AppTypography.callout.copyWith(
-                    color: AppColors.textSecondary.resolveFrom(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        // Saved OS: status lives in the top block, above the next step
-        // (app-os). New OS has no next step yet, so it keeps the status row.
-        if (nextStep != null)
-          _buildNextStep(nextStep, config)
+        if (customer == null && _customerGuess != null)
+          FormRow(
+            icon: CupertinoIcons.person,
+            title: l10n.orderAssistantCustomerGuess(_customerGuess!),
+            marked: true,
+            onTap: _pickCustomer,
+          )
+        else if (customer == null)
+          FormRow(
+            key: const ValueKey('new_order_pick_customer'),
+            icon: CupertinoIcons.person_add,
+            title: l10n.orderPickCustomerRow,
+            accent: true,
+            onTap: _pickCustomer,
+          )
         else
-          _buildStatusRow(config),
-        if (_isNew && _marked.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin,
-              AppSpacing.xs,
-              AppSpacing.pageMargin,
-              0,
-            ),
-            child: Text(
-              l10n.orderAssistantFilledNote,
-              style: AppTypography.label.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
+          FormRow(
+            icon: CupertinoIcons.person,
+            title: customer.name ?? '',
+            subtitle: (customer.phone?.isNotEmpty ?? false)
+                ? formatPhone(customer.phone)
+                : null,
+            marked: _marked.contains('customer'),
+            onTap: _pickCustomer,
           ),
-
-        // Customer and vehicle: picked here on a new OS. A saved OS shows
-        // them in the header (app-os) and only asks for what is missing.
-        if (_isNew) ...[
-          SectionLabel(config.customer),
-          if (_store.customer == null && _customerGuess != null)
-            AppListRow(
-              title: l10n.orderAssistantCustomerGuess(_customerGuess!),
-              marked: true,
-              onTap: _pickCustomer,
-            )
-          else if (_store.customer == null)
-            AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
-          else
-            AppListRow(
-              title: _store.customer!.name ?? '',
-              subtitle: (_store.customer!.phone?.isNotEmpty ?? false)
-                  ? formatPhone(_store.customer!.phone)
-                  : null,
-              marked: _marked.contains('customer'),
-              onTap: _pickCustomer,
-            ),
-          for (final device in _store.devices)
-            AppListRow(
-              title: device.name ?? '',
-              subtitle: (device.serial?.isNotEmpty ?? false)
-                  ? device.serial
-                  : null,
-              marked: _marked.contains('device:${device.id}'),
-              onTap: () => _changeDevice(device),
-            ),
-          if (_deviceGuess != null)
-            AppListRow(
-              title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
-              marked: true,
-              onTap: _addDevice,
-            ),
-          if (_store.customer != null && _store.devices.isEmpty)
-            AddRow(
-              label: l10n.orderPickDevice(config.device),
-              onTap: _addDevice,
-            ),
-        ] else ...[
-          if (_store.customer == null || _store.devices.isEmpty)
-            SectionLabel(config.customer),
-          if (_store.customer == null)
-            AddRow(label: l10n.pickCustomerTitle, onTap: _pickCustomer)
-          else if (_store.devices.isEmpty)
-            AddRow(
-              label: l10n.orderPickDevice(config.device),
-              onTap: _addDevice,
-            ),
-        ],
-
-        // What will be done
-        if (_store.devices.length >= 2)
-          ..._buildItemsByDevice(services, products, canViewPrices)
-        else ...[
-          SectionLabel(l10n.orderItemsSection),
-          for (var i = 0; i < services.length; i++)
-            _serviceRow(services, i, canViewPrices),
-          for (var i = 0; i < products.length; i++)
-            _productRow(products, i, canViewPrices),
-        ],
-        AddRow(label: l10n.orderWhatGoesTitle, onTap: _addItem),
-
-        // Total closes the list of items, before "Nesta OS" (app-os).
-        if (canViewPrices && (services.isNotEmpty || products.isNotEmpty))
-          _buildSummary(summary),
-
-        ..._buildCustomFields(config),
-
-        ..._buildExtras(config),
-
-        if (_isNew && _store.customer == null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin,
-              AppSpacing.xl,
-              AppSpacing.pageMargin,
-              0,
-            ),
-            child: Text(
-              l10n.orderSaveNeedsCustomer,
-              style: AppTypography.label.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
+        for (final device in _store.devices)
+          FormRow(
+            icon: CupertinoIcons.car_detailed,
+            title: device.name ?? '',
+            subtitle: (device.serial?.isNotEmpty ?? false)
+                ? device.serial
+                : null,
+            marked: _marked.contains('device:${device.id}'),
+            onTap: () => _changeDevice(device),
           ),
-
-        if (comments != null)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.lg),
-            child: comments,
+        if (_deviceGuess != null)
+          FormRow(
+            icon: CupertinoIcons.car_detailed,
+            title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
+            marked: true,
+            onTap: _addDevice,
+          ),
+        if (customer != null && _store.devices.isEmpty && _deviceGuess == null)
+          FormRow(
+            icon: CupertinoIcons.add_circled,
+            title: l10n.orderPickDevice(config.device.toLowerCase()),
+            accent: true,
+            onTap: _addDevice,
           ),
       ],
     );
   }
 
-  Widget _serviceRow(List<OrderService> services, int i, bool canViewPrices) =>
-      AppListRow(
-        title: _serviceName(services[i]),
-        subtitle: context.l10n.orderItemKindService,
-        trailing: canViewPrices ? _price(services[i].value) : null,
-        showChevron: false,
-        marked: _marked.contains(services[i]),
-        onTap: () => _editService(i),
-      );
-
-  Widget _productRow(List<OrderProduct> products, int i, bool canViewPrices) {
+  Widget _buildItemsCard() {
     final l10n = context.l10n;
-    return AppListRow(
-      title: _productName(products[i]),
-      subtitle: (products[i].quantity ?? 1) > 1
-          ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
-          : l10n.orderItemKindProduct,
-      trailing: canViewPrices ? _price(productLineTotal(products[i])) : null,
-      showChevron: false,
-      marked: _marked.contains(products[i]),
+    final canViewPrices = _permissions.canViewPrices();
+    final services = _store.services?.toList() ?? const <OrderService>[];
+    final products = _store.products?.toList() ?? const <OrderProduct>[];
+    String? price(double? value) =>
+        canViewPrices && value != null ? _format.formatCurrency(value) : null;
+    // Prototype: an item without price shows an amber dot + "sem valor" and
+    // stays out of the total.
+    Widget? noPrice(double? value) => canViewPrices && value == null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatusDot(color: AppColors.warning.resolveFrom(context)),
+              const SizedBox(width: AppSpacing.xs + 2),
+              Text(
+                l10n.catalogNoPrice,
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+              ),
+            ],
+          )
+        : null;
+    final summary = summarizeOrderItems(services, products);
+    return FormCard(
+      title: l10n.orderItemsSection,
+      note: canViewPrices && summary.unpricedCount > 0
+          ? l10n.orderUnpricedCount(summary.unpricedCount)
+          : null,
+      children: [
+        for (var i = 0; i < services.length; i++)
+          FormRow(
+            icon: CupertinoIcons.wrench,
+            title: _serviceName(services[i]),
+            subtitle: l10n.orderItemKindService,
+            value: price(services[i].value),
+            trailing: noPrice(services[i].value),
+            marked: _marked.contains(services[i]),
+            showChevron: false,
+            onTap: () => _editService(i),
+          ),
+        for (var i = 0; i < products.length; i++)
+          FormRow(
+            icon: CupertinoIcons.cube_box,
+            title: _productName(products[i]),
+            subtitle: (products[i].quantity ?? 1) > 1
+                ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
+                : l10n.orderItemKindProduct,
+            value: price(productLineTotal(products[i])),
+            trailing: noPrice(products[i].value),
+            marked: _marked.contains(products[i]),
+            showChevron: false,
+            onTap: () => _editProduct(i),
+          ),
+        FormRow(
+          key: const ValueKey('new_order_add_item'),
+          icon: CupertinoIcons.add_circled,
+          title: l10n.orderAddItemRow,
+          accent: true,
+          onTap: _addItem,
+        ),
+        if (canViewPrices && (services.isNotEmpty || products.isNotEmpty))
+          FormRow(
+            title: l10n.total,
+            value: _format.formatCurrency(summary.total),
+          ),
+      ],
+    );
+  }
+
+  /// Optional: many jobs (a tyre change) have nothing to write here. Saved
+  /// in the segment's "Observação" field, or as the first comment.
+  Widget _buildRequestCard() {
+    final l10n = context.l10n;
+    return FormCard(
+      title: l10n.orderCustomerRequestTitle,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          child: CupertinoTextField(
+            key: const ValueKey('new_order_request'),
+            suffix: _marked.contains('request')
+                ? Semantics(
+                    label: l10n.orderAssistantMarked,
+                    child: Icon(
+                      CupertinoIcons.sparkles,
+                      key: const ValueKey('new_order_request_marked'),
+                      size: 16,
+                      color: AppColors.accentText.resolveFrom(context),
+                    ),
+                  )
+                : null,
+            suffixMode: OverlayVisibilityMode.always,
+            controller: _requestController,
+            placeholder: l10n.orderCustomerRequestPlaceholder,
+            minLines: 2,
+            maxLines: null,
+            textCapitalization: TextCapitalization.sentences,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            decoration: null,
+            style: AppTypography.body.copyWith(
+              color: AppColors.text.resolveFrom(context),
+            ),
+            placeholderStyle: AppTypography.body.copyWith(
+              color: AppColors.textSecondary.resolveFrom(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryCard() {
+    final l10n = context.l10n;
+    final due = _store.order?.dueDate;
+    return FormCard(
+      title: l10n.orderDeliverySection,
+      children: [
+        FormRow(
+          key: const ValueKey('new_order_due'),
+          icon: CupertinoIcons.calendar,
+          title: l10n.orderDueLabel,
+          showChevron: false,
+          marked: _marked.contains('due'),
+          onTap: _pickDueDate,
+          trailing: due == null
+              ? Text(
+                  l10n.orderDueNone,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
+                  ),
+                )
+              : Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  alignment: WrapAlignment.end,
+                  children: [
+                    FormPill(_format.formatDayMonthOrDate(due)),
+                    FormPill(_format.formatTime(due)),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  /// Everything else, grouped. Closed it is one line with what is already
+  /// set under it; tapping opens the fields inside the same card.
+  Widget _buildMoreOptionsCard(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final order = _store.order;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final parts = <String>[
+      if (_store.status != null && _store.status != 'quote')
+        config.getStatus(_store.status),
+      if (order?.scheduledDate != null)
+        _format.formatDateTime(order!.scheduledDate),
+      if (order?.assignedTo?.name?.isNotEmpty ?? false)
+        order!.assignedTo!.name!,
+      if (_hasAddress) _store.address!.trim(),
+    ];
+    Future<void> run(Future<void> Function() action) async {
+      await action();
+      if (mounted) setState(() {});
+    }
+
+    return FormCard(
+      children: [
+        FormRow(
+          key: const ValueKey('new_order_more'),
+          icon: CupertinoIcons.ellipsis_circle,
+          title: l10n.orderMoreOptions,
+          subtitle: _moreOpen
+              ? null
+              : (parts.isEmpty ? l10n.orderMoreOptionsHint : parts.join(' · ')),
+          showChevron: false,
+          trailing: Icon(
+            _moreOpen ? CupertinoIcons.chevron_up : CupertinoIcons.chevron_down,
+            size: 18,
+            color: secondary,
+          ),
+          onTap: () => setState(() => _moreOpen = !_moreOpen),
+        ),
+        if (_moreOpen) ...[
+          FormRow(
+            key: const ValueKey('new_order_more_status'),
+            title: l10n.orderStatusLabel,
+            value: config.getStatus(_store.status ?? 'quote'),
+            onTap: () => run(_selectStatus),
+          ),
+          if (config.useScheduling)
+            FormRow(
+              key: const ValueKey('new_order_more_schedule'),
+              title: l10n.orderScheduleLabel,
+              value: order?.scheduledDate == null
+                  ? l10n.orderDueNone
+                  : _format.formatDateTime(order!.scheduledDate),
+              onTap: () => run(_pickSchedule),
+            ),
+          FormRow(
+            key: const ValueKey('new_order_more_responsible'),
+            title: l10n.orderAddResponsible,
+            value: order?.assignedTo?.name,
+            onTap: () => run(_pickResponsible),
+          ),
+          FormRow(
+            key: const ValueKey('new_order_more_address'),
+            title: l10n.orderAddressLabel,
+            value: _hasAddress ? _store.address!.trim() : null,
+            onTap: () => run(_editAddress),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Leaves this screen. Inside the "Nova OS" sheet it is the sheet's first
+  /// page, so the sheet itself closes.
+  void _popScreen([Object? result]) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(result);
+    } else {
+      Navigator.of(context, rootNavigator: true).pop(result);
+    }
+  }
+
+  /// "X": closes at once when nothing was filled; asks first otherwise.
+  void _close() {
+    if (_hasContent || _requestController.text.trim().isNotEmpty) {
+      _confirmDiscard();
+    } else {
+      setState(() => _leaving = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _popScreen();
+      });
+    }
+  }
+
+  /// "✓": saves and closes, like Lembretes. Does not wait for the server
+  /// (works offline). The request goes into the segment's "Observação" field
+  /// when there is one; otherwise it becomes the first comment once the
+  /// order has its id.
+  void _saveAndClose() {
+    if (_store.customer == null) return;
+    HapticFeedback.mediumImpact();
+    var request = _requestController.text.trim();
+    final requestField = orderRequestField(
+      context.read<SegmentConfigProvider>(),
+    );
+    if (requestField != null && request.isNotEmpty) {
+      _store.order?.customData = applyCustomFieldValue(
+        _store.order?.customData,
+        requestField,
+        request,
+      );
+      request = '';
+    }
+    final companyId = _store.companyId;
+    final photos = List<AiPhoto>.of(_photos);
+    _store.deferSave = false;
+    _store.updateTotal();
+    _store.createItem(
+      onCreated: (orderId) {
+        if (request.isNotEmpty && companyId != null) {
+          addOrderComment(
+            companyId: companyId,
+            orderId: orderId,
+            text: request,
+          );
+        }
+        if (photos.isNotEmpty) _uploadPhotos(photos);
+      },
+    );
+    setState(() => _leaving = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _popScreen(true);
+    });
+  }
+
+  // ─── Existing order (app-os) ─────────────────────────────────────────────
+
+  /// Money shows only to who can see prices, and only when the company uses
+  /// "Valores e cobrança" (`Company.useFinancial`).
+  bool _showMoney(SegmentConfigProvider config) =>
+      _permissions.canViewPrices() && config.useFinancial;
+
+  /// "OS 186" (small, centered title).
+  String _orderTitle(SegmentConfigProvider config) {
+    final number = _store.orderStream?.value?.number ?? _store.order?.number;
+    return number == null
+        ? config.serviceOrder
+        : '${_shortOrderLabel(config)} $number';
+  }
+
+  /// Saved order (app-os): small "OS 186" title with share and "…" on glass,
+  /// then a flat white page (customer, status and what matters now, the one
+  /// blue button, what the customer asked, items, photos, comments,
+  /// checklists and details). Foto / Falar float at the bottom.
+  Widget _buildExisting(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final order = _store.order;
+    final background = AppColors.background.resolveFrom(context);
+    final showBar = _permissions.canAttachMedia() || widget.showAssistant;
+    if (showBar) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloating());
+    }
+    // Built here, inside the Observer, so the store changes rebuild it.
+    final children = _buildDetail(config);
+    return CupertinoPageScaffold(
+      backgroundColor: background,
+      navigationBar: CupertinoNavigationBar(
+        automaticallyImplyLeading: false,
+        leading: Navigator.canPop(context)
+            ? GlassBackButton(previousTitle: _previousTitle)
+            : null,
+        middle: Text(_orderTitle(config), key: const ValueKey('order_title')),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (order?.id != null) ...[
+              GlassBarButton(
+                label: l10n.orderMenuSendToCustomer,
+                icon: CupertinoIcons.share,
+                onPressed: () => _actions.shareWithCustomer(context, order!),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            GlassBarButton(
+              label: l10n.orderMoreActions,
+              icon: CupertinoIcons.ellipsis,
+              onPressed: _showMenu,
+            ),
+          ],
+        ),
+        backgroundColor: AppNavBar.barBackground(context),
+        border: null,
+      ),
+      child: Builder(
+        builder: (context) => Stack(
+          // Fills the screen, so the bar sits at the bottom even when a short
+          // order would leave the scroll view smaller than the screen.
+          fit: StackFit.expand,
+          children: [
+            SingleChildScrollView(
+              controller: _scroll,
+              padding: EdgeInsets.only(
+                top: MediaQuery.paddingOf(context).top,
+                bottom: max(140, _floatingHeight + AppSpacing.xl),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
+            ),
+            if (showBar) ..._buildFloating(background),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Fade so the content passes under the glass bar, and the bar itself with
+  /// what was heard or the assistant's note above it. Shared by the "Nova
+  /// OS" sheet ([fade] gray) and the saved order ([fade] white).
+  List<Widget> _buildFloating(Color fade) {
+    final l10n = context.l10n;
+    final canUndo = _noteFilled && _undo != null;
+    return [
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 160,
+        child: IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.55],
+                colors: [fade.withValues(alpha: 0), fade],
+              ),
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        left: AppSpacing.blockMargin,
+        right: AppSpacing.blockMargin,
+        bottom: 0,
+        child: SafeArea(
+          key: _floatingKey,
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_barMode == AssistantBarMode.listening)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: AssistantTranscript(heard: _heard),
+                  )
+                else if (_note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: AssistantNote(
+                      message: _note!,
+                      filled: _noteFilled,
+                      actionLabel: canUndo
+                          ? l10n.orderAssistantUndo
+                          : l10n.close,
+                      onAction: canUndo ? _undoDraft : _dismissNote,
+                    ),
+                  ),
+                AssistantBar(
+                  mode: _barMode,
+                  readingLabel: _readingLabel,
+                  onPhoto: _onPhoto,
+                  onTalk: widget.showAssistant ? _onTalk : null,
+                  onCancel: _cancelTalk,
+                  onStop: _stopAndFill,
+                  onSend: _sendTyped,
+                  textController: _typedController,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildDetail(SegmentConfigProvider config) {
+    final order = _store.order;
+    if (order == null) return const [];
+    final l10n = context.l10n;
+    final uploading = _store.isUploadingPhoto || _store.isUploadingDocument;
+    return [
+      _buildHeader(config),
+      ..._buildRequest(config),
+      ..._buildItems(config),
+      ..._buildPhotos(config),
+      ..._buildCommentsPreview(),
+      ..._buildChecklists(order),
+      ..._buildCustomFields(config, withoutRequest: true),
+      ..._buildDetails(config, order),
+      if (uploading)
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              const CupertinoActivityIndicator(),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.orderUploading,
+                style: AppTypography.callout.copyWith(
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ];
+  }
+
+  /// [text] with the blue sparkle after it when the assistant put it there.
+  Widget _markedText(
+    String text,
+    TextStyle style, {
+    bool marked = false,
+    Key? key,
+  }) {
+    if (!marked) return Text(text, key: key, style: style);
+    return Text.rich(
+      key: key,
+      TextSpan(
+        children: [
+          TextSpan(text: '$text '),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Semantics(
+              label: context.l10n.orderAssistantMarked,
+              child: Icon(
+                CupertinoIcons.sparkles,
+                size: 16,
+                color: AppColors.accentText.resolveFrom(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+      style: style,
+    );
+  }
+
+  /// Tappable line (44+ high) of the flat page.
+  Widget _tappable({
+    Key? key,
+    required VoidCallback? onTap,
+    required Widget child,
+  }) {
+    if (onTap == null) return child;
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: key,
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: child,
+      ),
+    );
+  }
+
+  /// Blue-text link ("+ Adicionar serviço ou peça", "Ver todos (3) ›").
+  Widget _link(
+    String label, {
+    required VoidCallback onTap,
+    IconData? icon,
+    bool chevron = false,
+    Key? key,
+  }) {
+    final accent = AppColors.accentText.resolveFrom(context);
+    return _tappable(
+      key: key,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 22, color: accent),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.bodyStrong.copyWith(color: accent),
+                ),
+              ),
+              if (chevron)
+                Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 18,
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _isOverdue(String? status, DateTime? due) =>
+      due != null &&
+      due.isBefore(DateTime.now()) &&
+      const ['quote', 'approved', 'progress'].contains(status);
+
+  /// "hoje, 17:00", "amanhã", "15/10, 09:30": the day in words when close,
+  /// without the time when it is midnight (no time was picked).
+  String _when(DateTime date) {
+    final l10n = context.l10n;
+    final now = DateTime.now();
+    final days =
+        (DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                ).difference(DateTime(now.year, now.month, now.day)).inHours /
+                24)
+            .round();
+    final day = switch (days) {
+      0 => l10n.today.toLowerCase(),
+      1 => l10n.tomorrow.toLowerCase(),
+      -1 => l10n.yesterday.toLowerCase(),
+      _ => _format.formatDayMonthOrDate(date),
+    };
+    if (date.hour == 0 && date.minute == 0) return day;
+    return l10n.orderDayAtTime(day, _format.formatTime(date));
+  }
+
+  /// The one blue button: the next step of the cycle. Receiving only with
+  /// money on; nothing once it is done and paid.
+  (String, VoidCallback)? _nextAction(SegmentConfigProvider config) {
+    final order = _store.order;
+    if (order == null) return null;
+    final l10n = context.l10n;
+    (String, VoidCallback)? to(String label, String target) =>
+        _permissions.canChangeStatus(order, target)
+        ? (label, () => _trySetStatus(target))
+        : null;
+    switch (_store.status) {
+      case 'quote':
+        return to(l10n.orderActionApproveQuote, 'approved');
+      case 'approved':
+        return to(l10n.orderActionStartService, 'progress');
+      case 'progress':
+        return to(l10n.orderActionMarkReady, 'done');
+      case 'done':
+        final remaining = _store.remainingBalance;
+        if (!_showMoney(config) || remaining <= 0) return null;
+        return (
+          l10n.orderNextStepReceive(_format.formatCurrency(remaining)),
+          () => _actions.openPayments(context, _store),
+        );
+    }
+    return null;
+  }
+
+  /// Customer (large), vehicle, status (dot + text), what matters now and
+  /// the next step. Opaque, no card.
+  Widget _buildHeader(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final order = _store.order!;
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final customer = _store.customer;
+    final canEdit = _permissions.canEditMainFields(order);
+    final status = _store.status;
+    final due = order.dueDate;
+    final overdue = _isOverdue(status, due);
+    final remaining = _store.remainingBalance;
+
+    String? phrase;
+    VoidCallback? onPhrase;
+    if (_showMoney(config) && status == 'done' && remaining > 0) {
+      phrase = l10n.orderRemainingToReceive(_format.formatCurrency(remaining));
+      onPhrase = () => _actions.openPayments(context, _store);
+    } else if (due != null &&
+        const ['quote', 'approved', 'progress'].contains(status)) {
+      phrase = overdue
+          ? l10n.orderDueLatePhrase(_when(due))
+          : l10n.orderDuePhrase(_when(due));
+      onPhrase = canEdit ? _pickDueDate : null;
+    }
+    final action = _nextAction(config);
+    final statusStyle = overdue
+        ? AppTypography.callout.copyWith(
+            color: OrderStatusStyle.overdueColor.resolveFrom(context),
+            fontWeight: FontWeight.w700,
+          )
+        : AppTypography.callout.copyWith(color: secondary);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pageMargin,
+        AppSpacing.lg,
+        AppSpacing.pageMargin,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (customer == null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Text(
+                config.serviceOrder,
+                style: AppTypography.title.copyWith(fontSize: 28, color: text),
+              ),
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _tappable(
+                  key: const ValueKey('order_header_customer_tap'),
+                  onTap: canEdit ? _pickCustomer : null,
+                  child: _markedText(
+                    customer.name ?? '',
+                    AppTypography.title.copyWith(
+                      fontSize: 28,
+                      height: 1.2,
+                      letterSpacing: 0,
+                      color: text,
+                    ),
+                    marked: _marked.contains('customer'),
+                    key: const ValueKey('order_header_customer'),
+                  ),
+                ),
+                for (final device in _store.devices)
+                  _tappable(
+                    key: ValueKey('order_header_device_${device.id}'),
+                    onTap: canEdit ? () => _changeDevice(device) : null,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: _markedText(
+                        [device.name, device.serial]
+                            .where((v) => v?.trim().isNotEmpty ?? false)
+                            .join(' · '),
+                        AppTypography.callout.copyWith(color: secondary),
+                        marked: _marked.contains('device:${device.id}'),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          if (canEdit && (customer == null || _store.devices.isEmpty))
+            Transform.translate(
+              offset: const Offset(-AppSpacing.pageMargin, 0),
+              child: SizedBox(
+                width: double.infinity,
+                child: customer == null
+                    ? _link(
+                        l10n.pickCustomerTitle,
+                        icon: CupertinoIcons.person_add,
+                        onTap: _pickCustomer,
+                      )
+                    : _link(
+                        l10n.orderPickDevice(config.device.toLowerCase()),
+                        icon: CupertinoIcons.add,
+                        onTap: _addDevice,
+                      ),
+              ),
+            ),
+          const SizedBox(height: AppSpacing.sm),
+          _tappable(
+            key: const ValueKey('order_header_status'),
+            onTap: _selectStatus,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppSizes.minTouchTarget,
+              ),
+              child: Row(
+                children: [
+                  StatusDot(
+                    color: overdue
+                        ? OrderStatusStyle.overdueColor
+                        : OrderStatusStyle.dotColor(status),
+                    size: 10,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      overdue
+                          ? '${config.getStatus(status)} · ${l10n.orderOverdue}'
+                          : config.getStatus(status),
+                      style: statusStyle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (phrase != null)
+            _tappable(
+              onTap: onPhrase,
+              child: _markedText(
+                phrase,
+                AppTypography.bodyStrong.copyWith(color: text),
+                marked: _marked.contains('due'),
+                key: const ValueKey('order_header_phrase'),
+              ),
+            ),
+          if (action != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            _primaryButton(
+              action.$1,
+              action.$2,
+              key: const ValueKey('order_primary_button'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// "O que o cliente pediu": the segment's request field, only when filled.
+  List<Widget> _buildRequest(SegmentConfigProvider config) {
+    final field = orderRequestField(config);
+    final order = _store.order;
+    if (field == null || order == null) return const [];
+    final value = '${customFieldValue(order.customData, field) ?? ''}'.trim();
+    if (value.isEmpty) return const [];
+    final canEdit = _permissions.canEditMainFields(order);
+    return [
+      SectionLabel(context.l10n.orderCustomerRequestTitle),
+      _tappable(
+        onTap: canEdit ? () => _editRequest(field, value) : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+          ),
+          child: _markedText(
+            value,
+            AppTypography.body.copyWith(
+              color: AppColors.text.resolveFrom(context),
+            ),
+            marked: _marked.contains('request'),
+            key: const ValueKey('order_request'),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _editRequest(CustomField field, String current) async {
+    final text = await AppSheet.show<String>(
+      context,
+      (_) => OrderTextSheet(
+        title: context.l10n.orderCustomerRequestTitle,
+        initial: current,
+      ),
+    );
+    if (text == null || !mounted) return;
+    _setRequest(field, text.isEmpty ? null : text);
+  }
+
+  /// Saves what the customer asked into the segment field of the order.
+  void _setRequest(CustomField field, String? text) {
+    setState(() {
+      _store.order?.customData = applyCustomFieldValue(
+        _store.order?.customData,
+        field,
+        text,
+      );
+    });
+    _store.createItem();
+  }
+
+  /// One item of "Serviços e peças": name in bold with the value at the
+  /// right; "peça" under products only.
+  Widget _itemRow({
+    required String title,
+    String? kind,
+    String? value,
+    bool noPrice = false,
+    bool marked = false,
+    VoidCallback? onTap,
+  }) {
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return _tappable(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.separator.resolveFrom(context),
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _markedText(
+                      title,
+                      AppTypography.bodyStrong.copyWith(color: text),
+                      marked: marked,
+                    ),
+                  ),
+                  if (value != null) ...[
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      value,
+                      style: AppTypography.body.copyWith(
+                        color: text,
+                        fontFeatures: AppTypography.tabular,
+                      ),
+                    ),
+                  ] else if (noPrice) ...[
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      context.l10n.catalogNoPrice,
+                      style: AppTypography.callout.copyWith(color: secondary),
+                    ),
+                  ],
+                ],
+              ),
+              if (kind != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    kind,
+                    style: AppTypography.callout.copyWith(color: secondary),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _serviceRow(List<OrderService> services, int i, bool money) {
+    final value = services[i].value;
+    return _itemRow(
+      title: _serviceName(services[i]),
+      value: money && value != null ? _format.formatCurrency(value) : null,
+      noPrice: money && value == null,
+      marked: _marked.contains(services[i]),
+      onTap: () => _editService(i),
+    );
+  }
+
+  Widget _productRow(List<OrderProduct> products, int i, bool money) {
+    final l10n = context.l10n;
+    final product = products[i];
+    final quantity = product.quantity ?? 1;
+    final total = productLineTotal(product);
+    return _itemRow(
+      title: _productName(product),
+      kind: quantity > 1
+          ? '${l10n.orderItemKindPart} · ${l10n.orderItemQuantityValue('$quantity')}'
+          : l10n.orderItemKindPart,
+      value: money && total != null ? _format.formatCurrency(total) : null,
+      noPrice: money && product.value == null,
+      marked: _marked.contains(product),
       onTap: () => _editProduct(i),
     );
+  }
+
+  /// "Serviços e peças", the add link, then total, discount and what is
+  /// left to receive (money on only).
+  List<Widget> _buildItems(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final order = _store.order!;
+    final money = _showMoney(config);
+    final canEdit = _permissions.canEditMainFields(order);
+    final services = _store.services?.toList() ?? const <OrderService>[];
+    final products = _store.products?.toList() ?? const <OrderProduct>[];
+    final hasItems = services.isNotEmpty || products.isNotEmpty;
+    if (!hasItems && !canEdit) return const [];
+    return [
+      if (_store.devices.length >= 2)
+        ..._buildItemsByDevice(services, products, money)
+      else ...[
+        SectionLabel(l10n.orderServicesAndParts),
+        for (var i = 0; i < services.length; i++)
+          _serviceRow(services, i, money),
+        for (var i = 0; i < products.length; i++)
+          _productRow(products, i, money),
+      ],
+      if (canEdit)
+        _link(
+          l10n.orderAddItemRow,
+          key: const ValueKey('order_add_item'),
+          icon: CupertinoIcons.add,
+          onTap: _addItem,
+        ),
+      if (money && hasItems)
+        ..._buildTotals(summarizeOrderItems(services, products)),
+    ];
+  }
+
+  List<Widget> _buildTotals(OrderItemsSummary summary) {
+    final l10n = context.l10n;
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final total = _store.total ?? summary.total;
+    final showPayment = !const ['quote', 'canceled'].contains(_store.status);
+    final remaining = _store.remainingBalance;
+    final strong = AppTypography.bodyStrong.copyWith(
+      color: text,
+      fontWeight: FontWeight.w700,
+      fontFeatures: AppTypography.tabular,
+    );
+    Widget line(Widget left, Widget right) => Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pageMargin,
+        AppSpacing.xs,
+        AppSpacing.pageMargin,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(child: left),
+          const SizedBox(width: AppSpacing.md),
+          right,
+        ],
+      ),
+    );
+    return [
+      const SizedBox(height: AppSpacing.sm),
+      line(
+        Text(l10n.orderTotalLabel, style: strong),
+        Text(_format.formatCurrency(total), style: strong),
+      ),
+      if ((_store.discount ?? 0) > 0)
+        line(
+          Text(
+            l10n.discount,
+            style: AppTypography.callout.copyWith(color: secondary),
+          ),
+          Text(
+            '− ${_format.formatCurrency(_store.discount!)}',
+            style: AppTypography.callout.copyWith(
+              color: secondary,
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+        ),
+      if (summary.hasUnpriced)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.pageMargin,
+            AppSpacing.xs,
+            AppSpacing.pageMargin,
+            0,
+          ),
+          child: Text(
+            l10n.orderUnpricedCount(summary.unpricedCount),
+            style: AppTypography.label.copyWith(color: secondary),
+          ),
+        ),
+      if (showPayment)
+        _tappable(
+          key: const ValueKey('order_remaining'),
+          onTap: () => _actions.openPayments(context, _store),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      remaining > 0
+                          ? l10n.financialToReceive
+                          : l10n.orderFullyPaid,
+                      style: AppTypography.body.copyWith(
+                        color: remaining > 0
+                            ? AppColors.warning.resolveFrom(context)
+                            : secondary,
+                      ),
+                    ),
+                  ),
+                  if (remaining > 0) ...[
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      _format.formatCurrency(remaining),
+                      style: AppTypography.bodyStrong.copyWith(
+                        color: AppColors.warning.resolveFrom(context),
+                        fontFeatures: AppTypography.tabular,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(
+                    CupertinoIcons.chevron_forward,
+                    size: 18,
+                    color: secondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+    ];
+  }
+
+  List<Widget> _buildPhotos(SegmentConfigProvider config) {
+    final l10n = context.l10n;
+    final photos = _store.photos.toList();
+    if (photos.isEmpty) return const [];
+    return [
+      SectionLabel(l10n.orderPhotosSection),
+      SizedBox(
+        height: 84,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageMargin,
+          ),
+          itemCount: photos.length,
+          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (_, i) => GestureDetector(
+            onTap: () => _actions.viewPhoto(context, _store, i, config),
+            child: Semantics(
+              button: true,
+              label: '${l10n.orderPhotosSection} ${i + 1}',
+              child: _actions.photoThumb(
+                photos[i].url ?? '',
+                84,
+                BorderRadius.circular(AppRadii.field),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// The last two comments and "Ver todos (N) ›", which opens the comments
+  /// screen (where new ones are written). Nothing when there are none.
+  List<Widget> _buildCommentsPreview() {
+    final stream = _commentsStream;
+    final order = _store.order;
+    if (stream == null || order == null) return const [];
+    final l10n = context.l10n;
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final separator = AppColors.separator.resolveFrom(context);
+    return [
+      StreamBuilder<List<OrderComment>>(
+        stream: stream,
+        builder: (context, snapshot) {
+          final all = snapshot.data ?? const <OrderComment>[];
+          if (all.isEmpty) return const SizedBox.shrink();
+          final last = all.length > 2 ? all.sublist(all.length - 2) : all;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionLabel(l10n.comments),
+              for (final comment in last)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pageMargin,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.sm + 2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: separator, width: 0.5),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          [
+                            _commentAuthor(comment),
+                            if (comment.createdAt != null)
+                              _when(comment.createdAt!).split(',').first,
+                          ].where((s) => s.isNotEmpty).join(' · '),
+                          style: AppTypography.label.copyWith(color: secondary),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          comment.text ?? '',
+                          style: AppTypography.body.copyWith(color: text),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              _link(
+                l10n.seeAllCount(all.length),
+                key: const ValueKey('order_comments_all'),
+                chevron: true,
+                onTap: () => _actions.openComments(
+                  context,
+                  order,
+                  highlightCommentId: _highlightCommentId,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ];
+  }
+
+  String _commentAuthor(OrderComment comment) {
+    final l10n = context.l10n;
+    final userId = comment.author?.userId;
+    if (userId != null && userId == Global.currentUser?.uid) {
+      return l10n.orderCommentYou;
+    }
+    final name = comment.author?.name?.trim() ?? '';
+    if (name.isNotEmpty) return name;
+    return comment.isCustomerComment ? l10n.customer : '';
+  }
+
+  List<Widget> _buildChecklists(Order order) {
+    final forms = _store.formsStream?.value ?? const <of_model.OrderForm>[];
+    if (forms.isEmpty) return const [];
+    final canManage = _permissions.canManageForms(order);
+    return [
+      SectionLabel(context.l10n.checklists),
+      for (final form in forms) _checklistRow(form, canManage),
+    ];
+  }
+
+  /// "Detalhes": schedule, responsible, place, contract, documents, then
+  /// the orders a contract generated. Only what the order has.
+  List<Widget> _buildDetails(SegmentConfigProvider config, Order order) {
+    final l10n = context.l10n;
+    final canEdit = _permissions.canEditMainFields(order);
+    final scheduled = order.scheduledDate;
+    final contract = _store.hasContract ? order.contract : null;
+    final documents = _store.documents.toList();
+    final canAttach = _permissions.canAttachMedia();
+    final children = contract != null && contract.parentOrderId == null
+        ? (_store.childOrders?.value?.whereType<Order>().toList() ?? <Order>[])
+        : <Order>[];
+    children.sort(
+      (a, b) =>
+          (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+    );
+
+    final rows = <Widget>[
+      if (scheduled != null)
+        AppListRow(
+          title: l10n.scheduledDate,
+          trailing: _format.formatDateTime(scheduled),
+          onTap: canEdit ? _pickSchedule : null,
+        ),
+      if (order.assignedTo != null)
+        AppListRow(
+          title: l10n.orderAddResponsible,
+          trailing: order.assignedTo!.name ?? order.assignedTo!.email,
+          onTap: canEdit ? _pickResponsible : null,
+        ),
+      if (_hasAddress)
+        AppListRow(
+          title: l10n.orderPlaceOfService,
+          subtitle: _store.address,
+          onTap: _addressActions,
+        ),
+      if (contract != null && contract.parentOrderId != null)
+        AppListRow(
+          title: l10n.recurringContract,
+          trailing: contract.parentOrderNumber == null
+              ? null
+              : l10n.orderNumberTitle(
+                  config.serviceOrder,
+                  '${contract.parentOrderNumber}',
+                ),
+          onTap: () =>
+              _actions.openOrder(context, Order()..id = contract.parentOrderId),
+        )
+      else if (contract != null)
+        AppListRow(
+          title: l10n.recurringContract,
+          subtitle: contract.nextDueDate == null
+              ? _frequencyLabel(contract.frequency)
+              : l10n.orderContractSummary(
+                  _frequencyLabel(contract.frequency),
+                  _format.formatDate(contract.nextDueDate!),
+                ),
+          onTap: _contractActions,
+        ),
+      for (var i = 0; i < documents.length; i++)
+        _swipeToDelete(
+          key: ValueKey('doc_${documents[i].id ?? i}'),
+          enabled: canAttach,
+          onDelete: () => _confirmDeleteDocument(i),
+          child: AppListRow(
+            title: documents[i].fileName ?? l10n.document,
+            subtitle: [
+              documents[i].typeLabel(l10n),
+              if (documents[i].fileSizeFormatted.isNotEmpty)
+                documents[i].fileSizeFormatted,
+            ].join(' · '),
+            onTap: () => _actions.openDocument(context, documents[i]),
+          ),
+        ),
+    ];
+
+    return [
+      if (rows.isNotEmpty) ...[SectionLabel(l10n.details), ...rows],
+      if (children.isNotEmpty) ...[
+        SectionLabel(l10n.generatedOrdersCount(children.length)),
+        for (final child in children)
+          AppListRow(
+            title: l10n.orderNumberTitle(
+              config.serviceOrder,
+              '${child.number ?? ''}',
+            ),
+            leading: StatusDot(color: OrderStatusStyle.dotColor(child.status)),
+            trailing: child.createdAt == null
+                ? null
+                : _format.formatDate(child.createdAt!),
+            onTap: () => _actions.openOrder(context, child),
+          ),
+      ],
+    ];
   }
 
   /// 2+ vehicles: one block per vehicle (then "Geral" for items without
@@ -1396,7 +2858,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   List<Widget> _buildItemsByDevice(
     List<OrderService> services,
     List<OrderProduct> products,
-    bool canViewPrices,
+    bool money,
   ) {
     final l10n = context.l10n;
     final groups = <(String? id, String name)>[
@@ -1426,12 +2888,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (groupServices.isEmpty && groupProducts.isEmpty) continue;
       widgets.add(SectionLabel(name));
       for (final i in groupServices) {
-        widgets.add(_serviceRow(services, i, canViewPrices));
+        widgets.add(_serviceRow(services, i, money));
       }
       for (final i in groupProducts) {
-        widgets.add(_productRow(products, i, canViewPrices));
+        widgets.add(_productRow(products, i, money));
       }
-      if (canViewPrices) {
+      if (money) {
         final subtotal = summarizeOrderItems(
           [for (final i in groupServices) services[i]],
           [for (final i in groupProducts) products[i]],
@@ -1446,14 +2908,20 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         );
       }
     }
-    if (widgets.isEmpty) widgets.add(SectionLabel(l10n.orderItemsSection));
+    if (widgets.isEmpty) widgets.add(SectionLabel(l10n.orderServicesAndParts));
     return widgets;
   }
 
   /// Segment custom fields of the order (same fields and save as the legacy
   /// screen, see `order_custom_fields.dart`).
-  List<Widget> _buildCustomFields(SegmentConfigProvider config) {
-    final grouped = orderCustomFieldsFor(config);
+  List<Widget> _buildCustomFields(
+    SegmentConfigProvider config, {
+    bool withoutRequest = false,
+  }) {
+    final grouped = orderCustomFieldsFor(
+      config,
+      withoutRequest: withoutRequest,
+    );
     if (grouped.isEmpty) return const [];
     return [
       OrderCustomFieldSections(
@@ -1480,188 +2948,18 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     ];
   }
 
-  // ─── "Nesta OS" ──────────────────────────────────────────────────────────
-
-  /// Only what this order has: schedule, due date, address, contract,
-  /// checklists, then photos, documents and comments.
-  List<Widget> _buildExtras(SegmentConfigProvider config) {
-    final l10n = context.l10n;
-    final order = _store.order;
-    if (order == null) return const [];
-    final canEdit = _permissions.canEditMainFields(order);
-    final scheduled = order.scheduledDate;
-    final dueDate = order.dueDate;
-    final contract = _store.hasContract ? order.contract : null;
-    final forms = _store.formsStream?.value ?? const <of_model.OrderForm>[];
-    final canManageForms = _permissions.canManageForms(order);
-    final photos = _store.photos.toList();
-    final documents = _store.documents.toList();
-    final canAttach = _permissions.canAttachMedia();
-    final uploading = _store.isUploadingPhoto || _store.isUploadingDocument;
-    final children = contract != null && contract.parentOrderId == null
-        ? (_store.childOrders?.value?.whereType<Order>().toList() ?? <Order>[])
-        : <Order>[];
-    children.sort(
-      (a, b) =>
-          (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
-    );
-
-    final rows = <Widget>[
-      if (scheduled != null)
-        AppListRow(
-          title: l10n.scheduledDate,
-          trailing: _format.formatDateTime(scheduled),
-          showChevron: false,
-          onTap: canEdit ? _pickSchedule : null,
-        ),
-      if (order.assignedTo != null)
-        AppListRow(
-          title: l10n.orderAddResponsible,
-          trailing: order.assignedTo!.name ?? order.assignedTo!.email,
-          showChevron: false,
-          onTap: canEdit ? _pickResponsible : null,
-        ),
-      if (dueDate != null)
-        AppListRow(
-          title: l10n.orderAddDueDate,
-          trailing: _format.formatDateTime(dueDate),
-          showChevron: false,
-          onTap: canEdit ? _pickDueDate : null,
-        ),
-      if (_hasAddress)
-        AppListRow(
-          title: l10n.address,
-          subtitle: _store.address,
-          showChevron: false,
-          onTap: _addressActions,
-        ),
-      if (contract != null && contract.parentOrderId != null)
-        AppListRow(
-          title: l10n.recurringContract,
-          trailing: contract.parentOrderNumber == null
-              ? null
-              : l10n.orderNumberTitle(
-                  config.serviceOrder,
-                  '${contract.parentOrderNumber}',
-                ),
-          onTap: () =>
-              _actions.openOrder(context, Order()..id = contract.parentOrderId),
-        )
-      else if (contract != null)
-        AppListRow(
-          title: l10n.recurringContract,
-          subtitle: contract.nextDueDate == null
-              ? _frequencyLabel(contract.frequency)
-              : l10n.orderContractSummary(
-                  _frequencyLabel(contract.frequency),
-                  _format.formatDate(contract.nextDueDate!),
-                ),
-          showChevron: false,
-          onTap: _contractActions,
-        ),
-      for (final form in forms) _checklistRow(form, canManageForms),
-    ];
-
-    return [
-      if (rows.isNotEmpty) ...[
-        SectionLabel(l10n.orderInThisOrder(config.serviceOrder)),
-        ...rows,
-      ],
-      if (children.isNotEmpty) ...[
-        SectionLabel(l10n.generatedOrdersCount(children.length)),
-        for (final child in children)
-          AppListRow(
-            title: l10n.orderNumberTitle(
-              config.serviceOrder,
-              '${child.number ?? ''}',
-            ),
-            leading: StatusDot(color: OrderStatusStyle.dotColor(child.status)),
-            trailing: child.createdAt == null
-                ? null
-                : _format.formatDate(child.createdAt!),
-            onTap: () => _actions.openOrder(context, child),
-          ),
-      ],
-      if (photos.isNotEmpty) ...[
-        SectionLabel(l10n.orderPhotosSection),
-        SizedBox(
-          height: 88,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pageMargin,
-            ),
-            itemCount: photos.length,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (_, i) => GestureDetector(
-              onTap: () => _actions.viewPhoto(context, _store, i, config),
-              child: Semantics(
-                button: true,
-                label: '${l10n.orderPhotosSection} ${i + 1}',
-                child: _actions.photoThumb(
-                  photos[i].url ?? '',
-                  88,
-                  BorderRadius.circular(AppRadii.field),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-      if (documents.isNotEmpty) ...[
-        SectionLabel(l10n.documents),
-        for (var i = 0; i < documents.length; i++)
-          _swipeToDelete(
-            key: ValueKey('doc_${documents[i].id ?? i}'),
-            enabled: canAttach,
-            onDelete: () => _confirmDeleteDocument(i),
-            child: AppListRow(
-              title: documents[i].fileName ?? l10n.document,
-              subtitle: [
-                documents[i].typeLabel(l10n),
-                if (documents[i].fileSizeFormatted.isNotEmpty)
-                  documents[i].fileSizeFormatted,
-              ].join(' · '),
-              onTap: () => _actions.openDocument(context, documents[i]),
-            ),
-          ),
-      ],
-      if (uploading)
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.pageMargin,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              const CupertinoActivityIndicator(),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                l10n.orderUploading,
-                style: AppTypography.callout.copyWith(
-                  color: AppColors.textSecondary.resolveFrom(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-    ];
-  }
-
+  /// "Checklist de entrada · 7 de 10 respondidas ›".
   Widget _checklistRow(of_model.OrderForm form, bool canManage) {
     final l10n = context.l10n;
-    final done = form.status == of_model.FormStatus.completed;
-    final missing = checklistMissing(form);
+    final total = form.items.length;
+    final answered = total - checklistMissing(form);
     return _swipeToDelete(
       key: ValueKey('form_${form.id}'),
       enabled: canManage,
       onDelete: () => _confirmDeleteChecklist(form),
       child: AppListRow(
-        leading: StatusDot(color: done ? AppColors.success : AppColors.warning),
         title: form.getLocalizedTitle(l10n.localeName),
-        subtitle: done || missing == 0
-            ? l10n.orderChecklistDone
-            : l10n.orderChecklistMissing(missing),
+        subtitle: l10n.orderChecklistProgress(answered, total),
         onTap: () => _actions.openChecklist(context, _store, form),
       ),
     );
@@ -1712,184 +3010,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
   }
 
-  /// Comments (internal or for the customer), at the end of a saved order.
-  Widget? _buildComments() {
-    final order = _store.order;
-    if (order?.id == null || order?.company?.id == null) return null;
-    return _actions.comments(order!, highlightCommentId: _highlightCommentId);
-  }
-
-  String _price(double? value) => value == null
-      ? context.l10n.catalogNoPrice
-      : _format.formatCurrency(value);
-
-  Widget _buildStatusRow(SegmentConfigProvider config, {bool inBlock = false}) {
-    final l10n = context.l10n;
-    final status = _store.status;
-    final due = _store.order?.dueDate;
-    final overdue =
-        due != null &&
-        due.isBefore(DateTime.now()) &&
-        const ['quote', 'approved', 'progress'].contains(status);
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _selectStatus,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-          child: Padding(
-            padding: inBlock
-                ? EdgeInsets.zero
-                : const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.pageMargin,
-                    vertical: AppSpacing.sm,
-                  ),
-            child: Row(
-              children: [
-                StatusDot(
-                  color: overdue
-                      ? OrderStatusStyle.overdueColor
-                      : OrderStatusStyle.dotColor(status),
-                  size: 10,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      text: config.getStatus(status),
-                      style: AppTypography.callout.copyWith(
-                        color: inBlock
-                            ? AppColors.onAccentSoft.resolveFrom(context)
-                            : AppColors.textSecondary.resolveFrom(context),
-                        fontWeight: inBlock ? FontWeight.w600 : null,
-                      ),
-                      children: [
-                        if (overdue)
-                          TextSpan(
-                            text: ' · ${l10n.orderOverdue}',
-                            style: AppTypography.callout.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: OrderStatusStyle.overdueColor.resolveFrom(
-                                context,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                Text(
-                  l10n.orderChangeStatusLink,
-                  style: AppTypography.callout.copyWith(
-                    color: inBlock
-                        ? AppColors.onAccentSoft.resolveFrom(context)
-                        : AppColors.accentText.resolveFrom(context),
-                    decoration: inBlock ? TextDecoration.underline : null,
-                    decorationColor: AppColors.onAccentSoft.resolveFrom(
-                      context,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _NextStep? _nextStep(SegmentConfigProvider config, bool canViewPrices) {
-    final order = _store.order;
-    if (order == null) return null;
-    final l10n = context.l10n;
-    _NextStep toStatus(String sentence, String label, String target) =>
-        _permissions.canChangeStatus(order, target)
-        ? _NextStep(sentence, label, () => _trySetStatus(target))
-        : _NextStep(sentence);
-
-    switch (_store.status) {
-      case 'quote':
-        return toStatus(
-          l10n.orderNextStepQuote,
-          l10n.orderNextStepQuoteAction,
-          'approved',
-        );
-      case 'approved':
-        return toStatus(
-          l10n.orderNextStepApproved,
-          l10n.orderNextStepApprovedAction,
-          'progress',
-        );
-      case 'progress':
-        return toStatus(
-          l10n.orderNextStepProgress,
-          l10n.orderNextStepProgressAction,
-          'done',
-        );
-      case 'done':
-        final remaining = _store.remainingBalance;
-        if (canViewPrices && remaining > 0) {
-          final amount = _format.formatCurrency(remaining);
-          return _NextStep(
-            l10n.orderNextStepDoneUnpaid(amount),
-            l10n.orderNextStepReceive(amount),
-            () => _actions.openPayments(context, _store),
-          );
-        }
-        if (order.id == null) return _NextStep(l10n.orderNextStepDone);
-        return _NextStep(
-          canViewPrices ? l10n.orderNextStepDonePaid : l10n.orderNextStepDone,
-          l10n.orderNextStepSend,
-          () => _actions.shareWithCustomer(context, order),
-        );
-      case 'canceled':
-        return toStatus(
-          l10n.orderNextStepCanceled(config.serviceOrder),
-          l10n.orderNextStepReopen,
-          'quote',
-        );
-    }
-    return null;
-  }
-
-  Widget _buildNextStep(_NextStep step, SegmentConfigProvider config) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.blockMargin,
-        AppSpacing.sm,
-        AppSpacing.blockMargin,
-        0,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.accentSoft.resolveFrom(context),
-          borderRadius: BorderRadius.circular(AppRadii.block),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildStatusRow(config, inBlock: true),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              step.sentence,
-              style: AppTypography.highlight.copyWith(
-                color: AppColors.onAccentSoft.resolveFrom(context),
-              ),
-            ),
-            if (step.actionLabel != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              _primaryButton(step.actionLabel!, step.onAction),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _primaryButton(String label, VoidCallback? onPressed) {
+  Widget _primaryButton(String label, VoidCallback? onPressed, {Key? key}) {
     return CupertinoButton(
+      key: key,
       padding: EdgeInsets.zero,
       minimumSize: const Size.fromHeight(AppSizes.primaryButtonHeight),
       color: AppColors.accent.resolveFrom(context),
@@ -1903,141 +3026,6 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           color: onPressed == null
               ? AppColors.textSecondary.resolveFrom(context)
               : AppColors.onAccent.resolveFrom(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummary(OrderItemsSummary summary) {
-    final l10n = context.l10n;
-    final text = AppColors.text.resolveFrom(context);
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    final total = _store.total ?? summary.total;
-    final showPayment =
-        !_isNew && !const ['quote', 'canceled'].contains(_store.status);
-    final remaining = _store.remainingBalance;
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.pageMargin,
-            ),
-            color: AppColors.separator.resolveFrom(context),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin,
-              AppSpacing.md,
-              AppSpacing.pageMargin,
-              0,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.orderTotalLabel,
-                    style: AppTypography.bodyStrong.copyWith(color: text),
-                  ),
-                ),
-                Text(
-                  _format.formatCurrency(total),
-                  style: AppTypography.bodyStrong.copyWith(
-                    color: text,
-                    fontFeatures: AppTypography.tabular,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if ((_store.discount ?? 0) > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pageMargin,
-                AppSpacing.xs,
-                AppSpacing.pageMargin,
-                0,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.discount,
-                      style: AppTypography.callout.copyWith(color: secondary),
-                    ),
-                  ),
-                  Text(
-                    '− ${_format.formatCurrency(_store.discount!)}',
-                    style: AppTypography.callout.copyWith(
-                      color: secondary,
-                      fontFeatures: AppTypography.tabular,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (summary.hasUnpriced)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pageMargin,
-                AppSpacing.xs,
-                AppSpacing.pageMargin,
-                0,
-              ),
-              child: Text(
-                l10n.orderUnpricedCount(summary.unpricedCount),
-                style: AppTypography.label.copyWith(color: secondary),
-              ),
-            ),
-          if (showPayment)
-            AppListRow(
-              title: remaining > 0
-                  ? l10n.orderRemainingToReceive(
-                      _format.formatCurrency(remaining),
-                    )
-                  : l10n.orderFullyPaid,
-              titleStyle: AppTypography.callout,
-              onTap: () => _actions.openPayments(context, _store),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottom(SegmentConfigProvider config) {
-    final l10n = context.l10n;
-    return Positioned(
-      left: AppSpacing.blockMargin,
-      right: AppSpacing.blockMargin,
-      bottom: 0,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.showAssistant) ...[
-                if (_assistantBusy)
-                  _AssistantBusy(label: l10n.orderAssistantReading)
-                else
-                  _AssistantButtons(
-                    hint: _hasContent ? null : l10n.orderAssistantHint,
-                    onPhoto: _onPhoto,
-                    onTalk: () => _openAssistant(),
-                  ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              _primaryButton(
-                l10n.orderSaveButton(config.serviceOrder),
-                _store.customer == null ? null : _save,
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -2099,153 +3087,4 @@ void addPickToOrder(OrderStore store, OrderItemPick pick) {
         ..total = item.value,
     );
   }
-}
-
-/// Foto (glass) and "Falar o que fazer" (graphite), floating above
-/// "Salvar OS". The camera opens only when Foto is tapped.
-class _AssistantButtons extends StatelessWidget {
-  const _AssistantButtons({
-    required this.onPhoto,
-    required this.onTalk,
-    this.hint,
-  });
-
-  final VoidCallback onPhoto;
-  final VoidCallback onTalk;
-
-  /// "Tire foto da placa e fale o serviço" while the order is blank.
-  final String? hint;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final text = AppColors.text.resolveFrom(context);
-    final onAssistant = AppColors.onAssistantFill.resolveFrom(context);
-    final radius = BorderRadius.circular(AppRadii.button);
-    Widget label(IconData icon, String value, Color color) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            value,
-            style: AppTypography.callout.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (hint != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Text(
-              hint!,
-              textAlign: TextAlign.center,
-              style: AppTypography.label.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
-          ),
-        Row(
-          children: [
-            Expanded(
-              child: AppGlass(
-                borderRadius: radius,
-                child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                  ),
-                  minimumSize: const Size.fromHeight(52),
-                  borderRadius: radius,
-                  onPressed: onPhoto,
-                  child: label(
-                    CupertinoIcons.camera,
-                    l10n.orderPhotoAction,
-                    text,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              flex: 2,
-              child: CupertinoButton(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                minimumSize: const Size.fromHeight(52),
-                color: AppColors.assistantFill.resolveFrom(context),
-                borderRadius: radius,
-                onPressed: onTalk,
-                child: label(
-                  CupertinoIcons.mic,
-                  l10n.orderTalkAction,
-                  onAssistant,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _AssistantBusy extends StatelessWidget {
-  const _AssistantBusy({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppGlass(
-      borderRadius: BorderRadius.circular(AppRadii.button),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                label,
-                style: AppTypography.callout.copyWith(
-                  color: AppColors.text.resolveFrom(context),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Large title and the line under it of an existing order.
-typedef OrderHeaderTexts = ({String title, String? subtitle});
-
-/// app-os header: the vehicle as the title and "Cliente · OS 186" under it.
-/// Without a vehicle the customer takes the title; without either, the
-/// order label does.
-OrderHeaderTexts orderHeaderTexts({
-  String? deviceName,
-  String? customerName,
-  required String orderLabel,
-}) {
-  final device = deviceName?.trim() ?? '';
-  final customer = customerName?.trim() ?? '';
-  if (device.isNotEmpty) {
-    return (
-      title: device,
-      subtitle: customer.isEmpty ? orderLabel : '$customer · $orderLabel',
-    );
-  }
-  if (customer.isNotEmpty) return (title: customer, subtitle: orderLabel);
-  return (title: orderLabel, subtitle: null);
 }

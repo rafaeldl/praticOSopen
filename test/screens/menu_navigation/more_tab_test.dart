@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/l10n/app_localizations_pt.dart';
 import 'package:praticos/models/user_role.dart';
@@ -11,6 +12,7 @@ import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/my_company_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/more_view.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/account_deletion_api_service.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +39,7 @@ final _financialSwitch = find.descendant(
 
 void main() {
   group('MoreView', () {
-    testWidgets('shows the 9 rows in order, each opening a screen',
+    testWidgets('shows the 11 rows in order, each opening a screen',
         (tester) async {
       tallScreen(tester);
       final opened = <MoreDestination>[];
@@ -53,17 +55,19 @@ void main() {
           .toList();
       expect(titles, [
         'Sua conta',
+        'Clientes',
+        'Catálogo',
+        'Contratos',
+        'Checklists',
+        'Avaliações',
         'Sua empresa',
         'Equipe',
         'Plano',
-        'Catálogo',
-        'Checklists',
-        'Avaliações',
         'Lembretes',
         'Avançado',
       ]);
       // every row opens another screen, so every row has a chevron
-      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(9));
+      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(11));
       expect(find.text('Starter'), findsOneWidget);
       expect(find.text('PraticOS 1.0.0'), findsOneWidget);
 
@@ -71,7 +75,7 @@ void main() {
       expect(opened, [MoreDestination.team]);
     });
 
-    testWidgets('groups rows under Empresa, Cadastros and Você like the '
+    testWidgets('groups rows under Cadastros, Empresa and Você like the '
         'prototype, with the user as the account row', (tester) async {
       tallScreen(tester);
       await tester.pumpWidget(app(MoreView(
@@ -88,11 +92,20 @@ void main() {
       expect(find.text('Dados na OS, ramo e recursos'), findsOneWidget);
       expect(find.text('Serviços e peças'), findsOneWidget);
       double y(String t) => tester.getTopLeft(find.text(t)).dy;
+      expect(y('Cadastros'), lessThan(y('Clientes')));
+      expect(y('Avaliações'), lessThan(y('Empresa')));
       expect(y('Empresa'), lessThan(y('Sua empresa')));
-      expect(y('Plano'), lessThan(y('Cadastros')));
-      expect(y('Cadastros'), lessThan(y('Catálogo')));
-      expect(y('Avaliações'), lessThan(y('Você')));
+      expect(y('Plano'), lessThan(y('Você')));
       expect(y('Você'), lessThan(y('Lembretes')));
+    });
+
+    testWidgets('titled with the company name', (tester) async {
+      await tester.pumpWidget(app(MoreView(
+        onOpen: (_) {},
+        title: 'Oficina do Zé',
+      )));
+      expect(find.text('Oficina do Zé'), findsOneWidget);
+      expect(find.text('Mais'), findsNothing);
     });
 
     testWidgets('hides empty sections', (tester) async {
@@ -100,6 +113,8 @@ void main() {
       await tester.pumpWidget(app(MoreView(
         onOpen: (_) {},
         visibility: const MoreVisibility(
+          customers: false,
+          contracts: false,
           catalog: false,
           checklists: false,
           ratings: false,
@@ -113,6 +128,8 @@ void main() {
       await tester.pumpWidget(app(MoreView(
         onOpen: (_) {},
         visibility: const MoreVisibility(
+          customers: false,
+          contracts: false,
           company: false,
           team: false,
           checklists: false,
@@ -124,7 +141,7 @@ void main() {
           .widgetList<AppListRow>(find.byType(AppListRow))
           .map((row) => row.title)
           .toList();
-      expect(titles, ['Sua conta', 'Plano', 'Catálogo', 'Lembretes']);
+      expect(titles, ['Sua conta', 'Catálogo', 'Plano', 'Lembretes']);
     });
   });
 
@@ -479,20 +496,85 @@ void main() {
   });
 
   group('Convidar pessoa', () {
+    final save = find.byKey(const ValueKey('new_order_save'));
+    final close = find.byKey(const ValueKey('new_order_close'));
+    bool saveEnabled(WidgetTester tester) =>
+        tester.widget<CupertinoButton>(save).onPressed != null;
+
+    /// Opens the form as the app does ([FormSheet.show]).
     Future<List<InviteFormData>> pumpForm(WidgetTester tester) async {
       final submitted = <InviteFormData>[];
-      await tester.pumpWidget(app(InviteForm(
-        onSubmit: (data) async => submitted.add(data),
+      await tester.pumpWidget(app(Builder(
+        builder: (context) => CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoButton(
+              child: const Text('open'),
+              onPressed: () => FormSheet.show<bool>(
+                context,
+                (_) => InviteForm(
+                  onSubmit: (data) async => submitted.add(data),
+                ),
+              ),
+            ),
+          ),
+        ),
       )));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
       return submitted;
     }
+
+    testWidgets('opens as a sheet with X and ✓; X with nothing typed closes',
+        (tester) async {
+      await pumpForm(tester);
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(find.text('Criar convite'), findsNothing);
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text(pt.orderDiscardTitle), findsNothing);
+      expect(find.byType(FormSheet), findsNothing);
+    });
+
+    testWidgets('✓ is gray with the hint until e-mail or WhatsApp is typed',
+        (tester) async {
+      final submitted = await pumpForm(tester);
+      expect(saveEnabled(tester), isFalse);
+      expect(find.text(pt.inviteSaveNeedsContact), findsOneWidget);
+      await tester.tap(save);
+      await tester.pump();
+      expect(submitted, isEmpty);
+
+      await tester.enterText(
+          find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
+          '11 99999-9999');
+      await tester.pump();
+      expect(saveEnabled(tester), isTrue);
+      expect(find.text(pt.inviteSaveNeedsContact), findsNothing);
+    });
+
+    testWidgets('with something typed, X asks before discarding',
+        (tester) async {
+      final submitted = await pumpForm(tester);
+      await tester.enterText(
+          find.widgetWithText(CupertinoTextField, pt.inviteWhoPlaceholder),
+          'Lucas');
+      await tester.pumpAndSettle();
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text(pt.orderDiscardTitle), findsOneWidget);
+      await tester.tap(find.text(pt.discard));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsNothing);
+      expect(submitted, isEmpty);
+    });
 
     testWidgets('name is optional: only the e-mail is enough', (tester) async {
       final submitted = await pumpForm(tester);
       await tester.enterText(
           find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
           'lucas@example.com');
-      await tester.tap(find.text('Criar convite'));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pump();
 
       expect(submitted, hasLength(1));
@@ -501,21 +583,13 @@ void main() {
       expect(submitted.single.role, RolesType.technician);
     });
 
-    testWidgets('asks for e-mail or WhatsApp when both are empty',
-        (tester) async {
-      final submitted = await pumpForm(tester);
-      await tester.tap(find.text('Criar convite'));
-      await tester.pump();
-      expect(submitted, isEmpty);
-      expect(find.text(pt.emailOrPhone), findsOneWidget);
-    });
-
     testWidgets('rejects an e-mail without @', (tester) async {
       final submitted = await pumpForm(tester);
       await tester.enterText(
           find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
           'lucas');
-      await tester.tap(find.text('Criar convite'));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pump();
       expect(submitted, isEmpty);
       expect(find.text(pt.invalidEmail), findsOneWidget);
@@ -523,6 +597,7 @@ void main() {
 
     testWidgets('role picker offers Supervisor and marks the choice with a check',
         (tester) async {
+      tallScreen(tester);
       final submitted = await pumpForm(tester);
       await tester.tap(find.byKey(const ValueKey('invite_role')));
       await tester.pumpAndSettle();
@@ -530,17 +605,23 @@ void main() {
       for (final role in RolePermissions5.all) {
         expect(find.byKey(ValueKey('role_${role.name}')), findsOneWidget);
       }
+      // "Escolher" screen with the question as title, not a small sheet.
+      expect(find.byType(PickerScaffold<RolesType>), findsOneWidget);
+      expect(find.text(pt.inviteRoleQuestion), findsWidgets);
       expect(find.text(pt.roleSupervisor), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.checkmark), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('role_supervisor')));
       await tester.pumpAndSettle();
+      expect(find.byType(PickerScaffold<RolesType>), findsNothing);
+      // Role on the row's line, its sentence under the card.
+      expect(find.text(pt.roleSupervisor), findsOneWidget);
       expect(find.text(pt.roleDescSupervisor), findsOneWidget);
 
       await tester.enterText(
           find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
           '11 99999-9999');
-      await tester.tap(find.text('Criar convite'));
+      await tester.pump();
+      await tester.tap(save);
       await tester.pump();
       expect(submitted.single.role, RolesType.supervisor);
       expect(submitted.single.phone, '11 99999-9999');

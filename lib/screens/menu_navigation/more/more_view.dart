@@ -7,9 +7,11 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// Where a row of the "Mais" tab leads.
+/// Where a row of the profile screen (former "Mais" tab) leads.
 enum MoreDestination {
   account,
+  customers,
+  contracts,
   company,
   team,
   plan,
@@ -25,6 +27,8 @@ enum MoreDestination {
 class MoreVisibility {
   const MoreVisibility({
     this.account = true,
+    this.customers = true,
+    this.contracts = true,
     this.company = true,
     this.team = true,
     this.plan = true,
@@ -36,6 +40,8 @@ class MoreVisibility {
   });
 
   final bool account;
+  final bool customers;
+  final bool contracts;
   final bool company;
   final bool team;
   final bool plan;
@@ -49,6 +55,10 @@ class MoreVisibility {
     switch (destination) {
       case MoreDestination.account:
         return account;
+      case MoreDestination.customers:
+        return customers;
+      case MoreDestination.contracts:
+        return contracts;
       case MoreDestination.company:
         return company;
       case MoreDestination.team:
@@ -69,10 +79,11 @@ class MoreVisibility {
   }
 }
 
-/// The "Mais" tab, in this order, each row opening a screen (chevron): the
-/// account row (avatar + name), then "Empresa" (Sua empresa, Equipe, Plano),
-/// "Cadastros" (Catálogo, Checklists, Avaliações) and "Você" (Lembretes,
-/// Avançado). No colored icons.
+/// Profile screen, opened from the company button on Início (it replaced the
+/// "Mais" tab). In this order, each row opening a screen (chevron): the
+/// account row (avatar + name), then "Cadastros" (Clientes, Catálogo,
+/// Contratos, Checklists, Avaliações), "Empresa" (Sua empresa, Equipe, Plano)
+/// and "Você" (Lembretes, Avançado). No colored icons.
 class MoreView extends StatelessWidget {
   const MoreView({
     super.key,
@@ -83,7 +94,11 @@ class MoreView extends StatelessWidget {
     this.companyName,
     this.catalogSubtitle,
     this.version,
+    this.title,
   });
+
+  /// Large title; the company name, else "Mais".
+  final String? title;
 
   final ValueChanged<MoreDestination> onOpen;
   final MoreVisibility visibility;
@@ -109,6 +124,10 @@ class MoreView extends StatelessWidget {
     switch (destination) {
       case MoreDestination.account:
         return l10n.yourAccount;
+      case MoreDestination.customers:
+        return l10n.customers;
+      case MoreDestination.contracts:
+        return l10n.contracts;
       case MoreDestination.company:
         return l10n.yourCompany;
       case MoreDestination.team:
@@ -162,12 +181,14 @@ class MoreView extends StatelessWidget {
   /// has no label; empty sections are left out.
   static const sections = <List<MoreDestination>>[
     [MoreDestination.account],
-    [MoreDestination.company, MoreDestination.team, MoreDestination.plan],
     [
+      MoreDestination.customers,
       MoreDestination.catalog,
+      MoreDestination.contracts,
       MoreDestination.checklists,
       MoreDestination.ratings,
     ],
+    [MoreDestination.company, MoreDestination.team, MoreDestination.plan],
     [MoreDestination.reminders, MoreDestination.advanced],
   ];
 
@@ -176,8 +197,8 @@ class MoreView extends StatelessWidget {
     final l10n = context.l10n;
     final labels = [
       null,
-      l10n.moreSectionCompany,
       l10n.moreSectionRecords,
+      l10n.moreSectionCompany,
       l10n.moreSectionYou,
     ];
     final children = <Widget>[];
@@ -191,7 +212,7 @@ class MoreView extends StatelessWidget {
     }
 
     return MorePage(
-      title: context.l10n.more,
+      title: title ?? context.l10n.more,
       children: [
         ...children,
         if (version != null)

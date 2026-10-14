@@ -96,8 +96,31 @@ void main() {
       args: {'currentValue': 'Honda'},
     );
     expect(find.byType(AppListRow), findsNWidgets(2));
-    expect(find.text('✓'), findsOneWidget);
+    final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+    expect(
+      {for (final r in rows) r.title: r.selected},
+      {'Fiat': false, 'Honda': true},
+    );
     expect(find.text('9'), findsNothing);
+  });
+
+  testWidgets('multiple choice: ✓ on top is gray until the choice changes',
+      (tester) async {
+    final get = await pumpScreen(
+      tester,
+      FakeRepo([v('1', 'Fiat'), v('2', 'Honda')]),
+      args: {'multiSelect': true, 'currentValues': ['Fiat']},
+    );
+    CupertinoButton confirm() => tester.widget<CupertinoButton>(
+      find.byKey(const ValueKey('picker_confirm')),
+    );
+    expect(confirm().onPressed, isNull);
+    await tester.tap(find.text('Honda'));
+    await tester.pumpAndSettle();
+    expect(confirm().onPressed, isNotNull);
+    await tester.tap(find.byKey(const ValueKey('picker_confirm')));
+    await tester.pumpAndSettle();
+    expect((get() as List).toSet(), {'Fiat', 'Honda'});
   });
 
   testWidgets('typing a new value puts "Usar “X”" on top and returns it',

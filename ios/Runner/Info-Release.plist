@@ -77,6 +77,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>O PraticOS precisa acessar a câmera para tirar fotos de veículos, produtos e ordens de serviço.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O PraticOS usa o microfone quando você toca em Falar, para preencher a ordem de serviço com o que você disse.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O PraticOS transforma o que você fala em texto para preencher a ordem de serviço.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>O PraticOS precisa acessar suas fotos para anexar imagens a veículos, produtos e ordens de serviço.</string>
 	<key>UILaunchStoryboardName</key>

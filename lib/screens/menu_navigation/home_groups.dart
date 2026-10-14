@@ -1,49 +1,37 @@
 import 'package:praticos/models/order.dart';
 
-/// Which list the Início screen is showing.
+/// Which list the Início screen is showing (the filter buttons).
 enum HomeView {
-  /// Quotes, approved and in progress orders, grouped by urgency.
+  /// Quotes, approved and in progress orders, overdue first.
   open,
 
-  /// Every order, one continuous list with a section per month.
+  /// Completed orders, most recent first.
+  done,
+
+  /// Every order (canceled included), one section per month.
   all,
 
-  /// Canceled orders ("…" menu).
-  canceled;
+  /// Technician: the open orders assigned to them ("Minhas").
+  mine;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
     HomeView.open => 'open',
+    HomeView.done => 'done',
     HomeView.all => null,
-    HomeView.canceled => 'canceled',
+    HomeView.mine => 'open',
   };
 
-  /// Whether the "Em aberto | Todas" toggle is shown in this view.
-  bool get isSegmented => this == HomeView.open || this == HomeView.all;
+  /// Views that load every open order (so counts are exact).
+  bool get isOpenList => this == HomeView.open || this == HomeView.mine;
 }
 
-/// Urgency sections of the "Em aberto" list, in display order.
+/// Urgency of an open order, in list order.
 enum HomeGroup { late, dueToday, inProgress, waitingApproval, approved }
-
-/// What the "next step" block asks the owner to look at.
-enum NextStepKind { late, dueToday, quotesWaiting }
-
-class NextStep {
-  const NextStep(this.kind, this.count, this.target);
-
-  final NextStepKind kind;
-  final int count;
-
-  /// Section the link scrolls to.
-  final HomeGroup target;
-}
 
 /// Pure rules for the Início list (kept out of the widget for testing).
 class HomeRules {
   HomeRules._();
-
-  /// Quotes/approved orders older than this many days count as "waiting".
-  static const int staleQuoteDays = 7;
 
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -60,6 +48,16 @@ class HomeRules {
   static int overdueDays(Order o, DateTime now) {
     if (!isOverdue(o, now)) return 0;
     return _day(now).difference(_day(o.dueDate!)).inDays;
+  }
+
+  /// How long an order is overdue, in the unit people say out loud: days up
+  /// to a month, then months, then years ("Atrasada há 6 anos", not
+  /// "Atrasada 2190 dias").
+  static (OverdueUnit, int) overdueSpan(Order o, DateTime now) {
+    final days = overdueDays(o, now);
+    if (days >= 365) return (OverdueUnit.years, days ~/ 365);
+    if (days >= 30) return (OverdueUnit.months, days ~/ 30);
+    return (OverdueUnit.days, days);
   }
 
   static bool isDueToday(Order o, DateTime now) {
@@ -84,7 +82,10 @@ class HomeRules {
 
   /// Groups open orders; empty groups are absent. Late and due-today sections
   /// are ordered by due date, the rest keeps the incoming order.
-  static Map<HomeGroup, List<Order>> groupOpen(List<Order> orders, DateTime now) {
+  static Map<HomeGroup, List<Order>> groupOpen(
+    List<Order> orders,
+    DateTime now,
+  ) {
     final result = <HomeGroup, List<Order>>{};
     for (final group in HomeGroup.values) {
       final items = orders.where((o) => groupOf(o, now) == group).toList();
@@ -104,7 +105,9 @@ class HomeRules {
     final result = <MapEntry<DateTime?, List<Order>>>[];
     for (final o in orders) {
       final created = o.createdAt;
-      final key = created == null ? null : DateTime(created.year, created.month);
+      final key = created == null
+          ? null
+          : DateTime(created.year, created.month);
       if (result.isNotEmpty && result.last.key == key) {
         result.last.value.add(o);
       } else {
@@ -114,31 +117,48 @@ class HomeRules {
     return result;
   }
 
-  /// The one sentence for the next-step block, by priority: late, due today,
-  /// stale quotes. Null when there is nothing to say.
-  static NextStep? nextStep(List<Order> orders, DateTime now) {
-    final open = orders.where((o) => !isFinished(o)).toList();
-    final late = open.where((o) => isOverdue(o, now)).length;
-    if (late > 0) return NextStep(NextStepKind.late, late, HomeGroup.late);
-    final today = open.where((o) => isDueToday(o, now)).length;
-    if (today > 0) {
-      return NextStep(NextStepKind.dueToday, today, HomeGroup.dueToday);
-    }
-    final limit = now.subtract(const Duration(days: staleQuoteDays));
-    final stale = open
-        .where(
-          (o) =>
-              (o.status == 'quote' || o.status == 'approved') &&
-              o.createdAt != null &&
-              o.createdAt!.isBefore(limit),
-        )
-        .toList();
-    if (stale.isNotEmpty) {
-      final target = stale.any((o) => groupOf(o, now) == HomeGroup.waitingApproval)
-          ? HomeGroup.waitingApproval
-          : HomeGroup.approved;
-      return NextStep(NextStepKind.quotesWaiting, stale.length, target);
-    }
-    return null;
+  /// Open orders in list order: overdue first (oldest due date first),
+  /// then due today, then the rest as they came (newest first).
+  static List<Order> sortOpen(List<Order> orders, DateTime now) {
+    final groups = groupOpen(orders, now);
+    final urgent = [...?groups[HomeGroup.late], ...?groups[HomeGroup.dueToday]];
+    return [...urgent, ...orders.where((o) => !urgent.contains(o))];
+  }
+
+  /// Overdue orders among [orders].
+  static int lateCount(List<Order> orders, DateTime now) =>
+      orders.where((o) => isOverdue(o, now)).length;
+
+  /// Orders assigned to [userId] ("Minhas").
+  static List<Order> assignedTo(List<Order> orders, String? userId) {
+    if (userId == null) return const [];
+    return orders.where((o) => o.assignedTo?.id == userId).toList();
+  }
+
+  static bool isScheduledToday(Order o, DateTime now) {
+    final at = o.scheduledDate;
+    if (at == null || isFinished(o)) return false;
+    return _day(at) == _day(now);
+  }
+
+  /// Unfinished orders scheduled for today, by time.
+  static List<Order> scheduledToday(List<Order> orders, DateTime now) {
+    final items = orders.where((o) => isScheduledToday(o, now)).toList()
+      ..sort((a, b) => a.scheduledDate!.compareTo(b.scheduledDate!));
+    return items;
+  }
+
+  /// The technician's "Agora" order: today's first visit not started yet,
+  /// else the first one still running. Null when nothing is scheduled today.
+  static Order? nextVisit(List<Order> orders, DateTime now) {
+    final today = scheduledToday(orders, now);
+    if (today.isEmpty) return null;
+    return today.firstWhere(
+      (o) => o.status != 'progress',
+      orElse: () => today.first,
+    );
   }
 }
+
+/// Unit of [HomeRules.overdueSpan].
+enum OverdueUnit { days, months, years }

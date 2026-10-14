@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/mobx/company_store.dart';
@@ -7,6 +11,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/permission.dart';
@@ -14,15 +19,16 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
+import 'package:praticos/screens/order/order_comments_screen.dart';
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
-import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/screens/widgets/order_media_actions.dart';
 import 'package:praticos/screens/widgets/order_media_widget.dart'
     show PhotoViewerScreen;
 import 'package:praticos/screens/widgets/order_status_share.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/services/ai_order_assist_service.dart' show AiPhoto;
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/location_service.dart';
@@ -180,6 +186,18 @@ class OrderScreenActions {
   Future<void> addMedia(BuildContext context, OrderStore store) =>
       showAddOrderMediaSheet(context, store);
 
+  /// Writes [photos] to temp files and uploads them to the order.
+  Future<void> uploadPhotos(OrderStore store, List<AiPhoto> photos) async {
+    final dir = await Directory.systemTemp.createTemp('order_photos');
+    final files = <File>[];
+    for (var i = 0; i < photos.length; i++) {
+      final file = File('${dir.path}/photo_$i.jpg');
+      await file.writeAsBytes(photos[i].bytes);
+      files.add(file);
+    }
+    await store.uploadPhotoFiles(files);
+  }
+
   /// Full-screen photo viewer (share, delete).
   Future<void> viewPhoto(
     BuildContext context,
@@ -278,14 +296,56 @@ class OrderScreenActions {
     return FormsService().deleteOrderForm(companyId, orderId, form.id);
   }
 
-  /// Comments of the order (internal or for the customer).
-  Widget comments(Order order, {String? highlightCommentId}) {
-    return OrderCommentsWidget(
-      orderId: order.id!,
-      companyId: order.company!.id!,
-      showInternalToggle: true,
-      highlightCommentId: highlightCommentId,
+  /// Comments of the order, oldest first (deleted ones left out).
+  Stream<List<OrderComment>> watchComments(Order order) {
+    final companyId = order.company?.id;
+    if (order.id == null || companyId == null) return Stream.value(const []);
+    return FirebaseFirestore.instance
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders')
+        .doc(order.id)
+        .collection('comments')
+        .orderBy('createdAt')
+        .snapshots()
+        .map(
+          (snapshot) => [
+            for (final doc in snapshot.docs)
+              OrderComment.fromJson(doc.data())..id = doc.id,
+          ].where((c) => c.deleted != true).toList(),
+        );
+  }
+
+  /// All the comments, with the box to write one (internal or for the
+  /// customer).
+  Future<void> openComments(
+    BuildContext context,
+    Order order, {
+    String? highlightCommentId,
+  }) {
+    final companyId = order.company?.id;
+    if (order.id == null || companyId == null) return Future.value();
+    return Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => OrderCommentsScreen(
+          orderId: order.id!,
+          companyId: companyId,
+          highlightCommentId: highlightCommentId,
+        ),
+      ),
     );
+  }
+
+  /// Copies the customer link of the order. Resolves true when copied.
+  Future<bool> copyLink(Order order) async {
+    try {
+      final url = await orderShareUrl(order);
+      if (url == null) return false;
+      await Clipboard.setData(ClipboardData(text: url));
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// "Avisar o cliente?" answered yes: native share with the customer link.

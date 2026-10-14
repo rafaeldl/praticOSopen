@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// What the invite form collects. [name] is optional; at least one of
@@ -26,8 +26,10 @@ class InviteFormData {
   final RolesType role;
 }
 
-/// "Convidar pessoa": a creation sheet (Cancelar on the left, "Criar convite"
-/// on the right) with name (optional), e-mail, WhatsApp and the role.
+/// "Convidar pessoa" as a [FormSheet] (open it with [FormSheet.show]): "X"
+/// and "✓" at the top, name (optional), e-mail and WhatsApp in a white card
+/// and the role in a card below. The "✓" turns blue once the e-mail or the
+/// WhatsApp is filled; with something typed the "X" asks before discarding.
 class InviteForm extends StatefulWidget {
   const InviteForm({
     super.key,
@@ -60,6 +62,34 @@ class _InviteFormState extends State<InviteForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _contactError;
   bool _busy = false;
+  late final String _initialSnapshot;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialSnapshot = _snapshot;
+    for (final controller in [_name, _email, _phone]) {
+      controller.addListener(_onEdit);
+    }
+  }
+
+  void _onEdit() {
+    if (mounted) setState(() {});
+  }
+
+  String get _snapshot => [
+        _name.text.trim(),
+        _email.text.trim(),
+        _phone.text.trim(),
+        _role.name,
+      ].join('\u0000');
+
+  /// Saving needs a way to reach the person: e-mail or WhatsApp.
+  bool get _canSave =>
+      _email.text.trim().isNotEmpty || _phone.text.trim().isNotEmpty;
+
+  /// Something changed since the sheet opened: closing asks first.
+  bool get _dirty => _snapshot != _initialSnapshot;
 
   @override
   void dispose() {
@@ -98,142 +128,93 @@ class _InviteFormState extends State<InviteForm> {
     }
   }
 
+  /// "Escolher" screen: one sentence per role, ✓ on the current one. All
+  /// five roles are offered, Supervisor included.
   Future<void> _pickRole() async {
-    final picked = await RolePickerSheet.show(context, selected: _role);
+    final l10n = context.l10n;
+    final picked = await pickOne<RolesType>(
+      context,
+      title: l10n.inviteRoleQuestion,
+      selected: _role,
+      options: [
+        for (final role in RolePermissions.availableRoles)
+          PickerItem(
+            key: ValueKey('role_${role.name}'),
+            value: role,
+            title: RolePermissions.getRoleLabel(role, l10n),
+            subtitle: RolePermissions.getRoleDescription(role, l10n),
+          ),
+      ],
+    );
     if (picked != null && mounted) setState(() => _role = picked);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AppSheet(
-      title: l10n.invitePerson,
-      actionLabel: l10n.createInvite,
-      onAction: _submit,
-      busy: _busy,
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            const SizedBox(height: AppSpacing.sm),
-            AppFormField(
-              label: l10n.inviteWhoLabel,
-              controller: _name,
-              placeholder: l10n.inviteWhoPlaceholder,
-              keyboardType: TextInputType.name,
-              textCapitalization: TextCapitalization.words,
-            ),
-            AppFormField(
-              label: l10n.inviteEmailLabel,
-              controller: _email,
-              placeholder: l10n.emailPlaceholder,
-              hint: _contactError ?? l10n.inviteEmailHint,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                final text = value.trim();
-                if (text.isEmpty) return null;
-                return text.contains('@') ? null : l10n.invalidEmail;
-              },
-            ),
-            AppFormField(
-              label: l10n.inviteWhatsAppLabel,
-              controller: _phone,
-              placeholder: l10n.phonePlaceholder,
-              hint: l10n.userWillReceiveInviteByWhatsAppHint,
-              keyboardType: TextInputType.phone,
-              validator: (value) =>
-                  isValidPhone(value.trim()) ? null : l10n.invalidPhone,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppListRow(
-              key: const ValueKey('invite_role'),
-              title: l10n.inviteRoleLabel,
-              subtitle: RolePermissions.getRoleDescription(_role, l10n),
-              trailing: RolePermissions.getRoleLabel(_role, l10n),
-              onTap: _pickRole,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Role choice with one sentence per role. The selected role shows a check
-/// on the right (no radio buttons). All five roles are offered, Supervisor
-/// included.
-class RolePickerSheet extends StatelessWidget {
-  const RolePickerSheet({super.key, required this.selected});
-
-  final RolesType selected;
-
-  static Future<RolesType?> show(
-    BuildContext context, {
-    required RolesType selected,
-  }) {
-    return AppSheet.show<RolesType>(
-      context,
-      (_) => RolePickerSheet(selected: selected),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AppSheet(
-      title: l10n.inviteRoleLabel,
-      child: ListView(
+    return Form(
+      key: _formKey,
+      child: FormSheet(
+        title: l10n.invitePerson,
+        canSave: _canSave,
+        missingHint: l10n.inviteSaveNeedsContact,
+        dirty: _dirty,
+        busy: _busy,
+        onSave: _submit,
         children: [
-          for (final role in RolePermissions.availableRoles)
-            GestureDetector(
-              key: ValueKey('role_${role.name}'),
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.of(context).pop(role),
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.pageMargin,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              RolePermissions.getRoleLabel(role, l10n),
-                              style: AppTypography.body.copyWith(
-                                color: AppColors.text.resolveFrom(context),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                RolePermissions.getRoleDescription(role, l10n),
-                                style: AppTypography.callout.copyWith(
-                                  color: AppColors.textSecondary
-                                      .resolveFrom(context),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (role == selected)
-                        Icon(
-                          CupertinoIcons.checkmark,
-                          size: 20,
-                          color: AppColors.accentText.resolveFrom(context),
-                        ),
-                    ],
+          FormFieldsCard(
+            children: [
+              AppFormField(
+                label: l10n.inviteWhoLabel,
+                controller: _name,
+                placeholder: l10n.inviteWhoPlaceholder,
+                keyboardType: TextInputType.name,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+              ),
+              AppFormField(
+                label: l10n.inviteEmailLabel,
+                controller: _email,
+                placeholder: l10n.emailPlaceholder,
+                hint: _contactError ?? l10n.inviteEmailHint,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  final text = value.trim();
+                  if (text.isEmpty) return null;
+                  return text.contains('@') ? null : l10n.invalidEmail;
+                },
+              ),
+              AppFormField(
+                label: l10n.inviteWhatsAppLabel,
+                controller: _phone,
+                placeholder: l10n.phonePlaceholder,
+                hint: l10n.userWillReceiveInviteByWhatsAppHint,
+                keyboardType: TextInputType.phone,
+                validator: (value) =>
+                    isValidPhone(value.trim()) ? null : l10n.invalidPhone,
+              ),
+            ],
+          ),
+          // The role sentence goes under the card, so the row keeps title
+          // and role on one line.
+          FormCard(
+            note: RolePermissions.getRoleDescription(_role, l10n),
+            children: [
+              FormRow(
+                key: const ValueKey('invite_role'),
+                icon: CupertinoIcons.person_crop_circle,
+                title: l10n.inviteRoleLabel,
+                trailing: Text(
+                  RolePermissions.getRoleLabel(_role, l10n),
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
                   ),
                 ),
+                onTap: _pickRole,
               ),
-            ),
+            ],
+          ),
         ],
       ),
     );

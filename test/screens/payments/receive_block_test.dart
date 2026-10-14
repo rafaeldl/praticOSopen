@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
@@ -211,18 +212,25 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
+      // Sheet with "X" and "✓", the amount in a card; the new total only
+      // once there is an amount.
+      expect(find.byType(FormSheet), findsOneWidget);
+      expect(find.byKey(const Key('receiveDiscountHint')), findsNothing);
       await tester.enterText(
-          find.byKey(const Key('receiveAmountField')), '5000');
+          find.descendant(
+            of: find.byKey(const Key('receiveDiscountField')),
+            matching: find.byType(CupertinoTextField),
+          ),
+          '5000');
       await tester.pump();
-      expect(find.textContaining('50,00 de desconto'), findsOneWidget);
       expect(find.textContaining('1.200,00'), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('receiveDiscountConfirm')));
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
       await tester.pumpAndSettle();
       expect(result, 50);
     });
 
-    testWidgets('cancel returns null; too big disables confirm',
+    testWidgets('too big keeps ✓ off; closing returns null',
         (tester) async {
       double? result = -1;
       await tester.pumpWidget(app(Builder(
@@ -238,14 +246,22 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       await tester.enterText(
-          find.byKey(const Key('receiveAmountField')), '20000');
+          find.descendant(
+            of: find.byKey(const Key('receiveDiscountField')),
+            matching: find.byType(CupertinoTextField),
+          ),
+          '20000');
       await tester.pump();
-      final confirm = tester.widget<CupertinoButton>(
-        find.byKey(const Key('receiveDiscountConfirm')),
-      );
-      expect(confirm.onPressed, isNull);
+      expect(find.text('Desconto não pode ser maior que o saldo'),
+          findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('receiveDiscountCancel')));
+      // Something typed: closing asks before discarding.
+      await tester.tap(find.byKey(const ValueKey('new_order_close')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Descartar'));
       await tester.pumpAndSettle();
       expect(result, isNull);
     });

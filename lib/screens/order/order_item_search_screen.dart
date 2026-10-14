@@ -6,15 +6,11 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
-import 'package:praticos/screens/widgets/add_row.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/list_states.dart';
-import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/format_service.dart';
-import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
-import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/utils/search_utils.dart';
 
@@ -39,13 +35,17 @@ Future<List<String>> loadMostUsedItemKeys() async {
   return mostUsedItemKeys(list.whereType<Order>().toList());
 }
 
-/// "O que vai na OS?": one search over services and products.
+/// "O que vai ser feito?": one picker ([PickerScaffold]) over services and
+/// products. The search is always shown: typing creates.
 ///
 /// - Each row says "serviço" or "produto" and shows the price (only with the
 ///   view-prices permission; no price shows "sem valor").
 /// - Tapping a row pops with an [OrderItemPick]: the order adds it right away.
-/// - When nothing has exactly the typed name, the first row is
-///   "Criar “X” e pôr na OS" (only with `manageServices`/`manageProducts`).
+/// - The "+" on top opens the new item sheet (asking service or product
+///   first when both can be created); the saved item goes into the order.
+///   When nothing has
+///   exactly the typed name, the first row is "Cadastrar “X”" (only with
+///   `manageServices`/`manageProducts`).
 ///   It saves the item with the name only (price left blank) and adds it.
 /// - Without a query, "Mais usados" (derived from the last ~50 orders) comes
 ///   first, then everything by name.
@@ -84,13 +84,11 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   late final CatalogSource _source = widget.source ?? FirestoreCatalogSource();
   late final CatalogPermissions _permissions =
       widget.permissions ?? CatalogPermissions.current();
-  final TextEditingController _search = TextEditingController();
 
   final Map<CatalogKind, List<CatalogItem>?> _items = {};
   final List<StreamSubscription<List<CatalogItem>>> _subs = [];
   bool _hasError = false;
   bool _creating = false;
-  String _query = '';
   List<String> _mostUsed = const [];
 
   List<CatalogKind> get _kinds => [
@@ -147,7 +145,6 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
     for (final s in _subs) {
       s.cancel();
     }
-    _search.dispose();
     super.dispose();
   }
 
@@ -165,6 +162,48 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
 
   void _pick(_Entry entry) {
     Navigator.pop(context, OrderItemPick(entry.kind, entry.item));
+  }
+
+  List<CatalogKind> get _manageableKinds => [
+    for (final k in CatalogKind.values)
+      if (_permissions.canManage(k)) k,
+  ];
+
+  /// "+" on top: the new item sheet, then the item goes into the order.
+  Future<void> _add() async {
+    final kinds = _manageableKinds;
+    if (kinds.isEmpty) return;
+    final l10n = context.l10n;
+    final kind = kinds.length == 1
+        ? kinds.single
+        : await pickOne<CatalogKind>(
+            context,
+            title: l10n.pickerNewItemKind,
+            options: [
+              PickerItem(
+                value: CatalogKind.service,
+                title: l10n.service,
+                subtitle: l10n.pickerNewItemServiceHint,
+              ),
+              PickerItem(
+                value: CatalogKind.product,
+                title: l10n.product,
+                subtitle: l10n.pickerNewItemProductHint,
+              ),
+            ],
+          );
+    if (kind == null || !mounted) return;
+    final created = await FormSheet.show<CatalogItem>(
+      context,
+      (_) => CatalogItemForm(
+        kind: kind,
+        source: _source,
+        permissions: _permissions,
+        asSheet: true,
+      ),
+    );
+    if (created == null || !mounted) return;
+    Navigator.pop(context, OrderItemPick(kind, created));
   }
 
   Future<void> _create(String name) async {
@@ -199,134 +238,58 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return CupertinoPageScaffold(
-      backgroundColor: AppColors.background.resolveFrom(context),
-      child: CustomScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(l10n.orderWhatGoesTitle),
-            backgroundColor: AppColors.background.resolveFrom(context),
-            border: null,
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.blockMargin,
-                vertical: AppSpacing.sm,
-              ),
-              child: CupertinoSearchTextField(
-                controller: _search,
-                autofocus: true,
-                placeholder: l10n.orderItemSearchPlaceholder,
-                backgroundColor: AppColors.secondaryFill.resolveFrom(context),
-                style: AppTypography.body.copyWith(
-                  color: AppColors.text.resolveFrom(context),
-                ),
-                onChanged: (v) => setState(() => _query = v),
-              ),
-            ),
-          ),
-          ..._buildBody(),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
-      ),
+    final entries = _loading ? const <_Entry>[] : _entries;
+    return PickerScaffold<_Entry>(
+      title: l10n.pickerItemTitle,
+      itemCount: entries.length,
+      searchPlaceholder: l10n.orderItemSearchPlaceholder,
+      // Typing is how a new item is created here, so the search is always
+      // there (as in the prototype), whatever the size of the catalog.
+      alwaysShowSearch: true,
+      autofocusSearch: true,
+      loading: _loading && !_hasError,
+      hasError: _hasError,
+      onRetry: _listen,
+      enabled: !_creating,
+      addLabel: _createKind == null ? null : l10n.pickerNewItem,
+      onAdd: _createKind == null ? null : _add,
+      onCreate: _createKind == null ? null : _create,
+      noMatchText: l10n.pickerNoItemWith,
+      emptyTitle: l10n.orderCatalogEmpty,
+      onSelect: _pick,
+      sections: (query) => _sections(entries, query),
     );
   }
 
-  List<Widget> _buildBody() {
+  List<PickerSection<_Entry>> _sections(List<_Entry> entries, String query) {
     final l10n = context.l10n;
-    if (_hasError) {
+    if (query.isNotEmpty) {
+      final folded = removeAccents(query).toLowerCase();
       return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: ErrorState(onRetry: _listen),
+        PickerSection(
+          items: [
+            for (final e in entries)
+              if (e.folded.contains(folded)) _item(e),
+          ],
         ),
       ];
     }
-    if (_loading) {
-      return const [
-        SliverFillRemaining(hasScrollBody: false, child: LoadingState()),
-      ];
-    }
-
-    final query = _query.trim();
-    final folded = removeAccents(query).toLowerCase();
-    final entries = _entries;
-    final matches = query.isEmpty
-        ? entries
-        : entries.where((e) => e.folded.contains(folded)).toList();
-    final exact = matches.any((e) => e.folded == folded);
-    final canCreate = query.isNotEmpty && !exact && _createKind != null;
-
-    final children = <Widget>[];
-    if (canCreate) {
-      children.add(
-        AddRow(
-          label: l10n.orderCreateAndAdd(query),
-          onTap: () => _create(query),
+    final byKey = {for (final e in entries) e.key: e};
+    final mostUsed = _mostUsed.map((k) => byKey[k]).whereType<_Entry>();
+    return [
+      if (mostUsed.isNotEmpty)
+        PickerSection(
+          label: l10n.orderMostUsed,
+          items: mostUsed.map(_item).toList(),
         ),
-      );
-      children.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pageMargin,
-            0,
-            AppSpacing.pageMargin,
-            AppSpacing.md,
-          ),
-          child: Text(
-            l10n.orderCreateItemHint,
-            style: AppTypography.label.copyWith(
-              color: AppColors.textSecondary.resolveFrom(context),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (entries.isEmpty && query.isEmpty) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: EmptyState(title: l10n.orderCatalogEmpty),
-        ),
-      ];
-    }
-
-    if (matches.isEmpty) {
-      children.add(
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.pageMargin),
-          child: Text(
-            l10n.catalogNoMatch(query),
-            textAlign: TextAlign.center,
-            style: AppTypography.callout.copyWith(
-              color: AppColors.textSecondary.resolveFrom(context),
-            ),
-          ),
-        ),
-      );
-    } else if (query.isEmpty) {
-      final byKey = {for (final e in entries) e.key: e};
-      final mostUsed = _mostUsed
-          .map((k) => byKey[k])
-          .whereType<_Entry>()
-          .toList();
-      if (mostUsed.isNotEmpty) {
-        children.add(SectionLabel(l10n.orderMostUsed));
-        children.addAll(mostUsed.map(_row));
-        children.add(SectionLabel(l10n.orderAllItems));
-      }
-      children.addAll(entries.map(_row));
-    } else {
-      children.addAll(matches.map(_row));
-    }
-
-    return [SliverList(delegate: SliverChildListDelegate(children))];
+      PickerSection(
+        label: mostUsed.isEmpty ? null : l10n.orderAllItems,
+        items: entries.map(_item).toList(),
+      ),
+    ];
   }
 
-  Widget _row(_Entry entry) {
+  PickerItem<_Entry> _item(_Entry entry) {
     final l10n = context.l10n;
     final item = entry.item;
     final kindLabel = entry.kind == CatalogKind.service
@@ -340,12 +303,11 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
               item.value!,
             );
     }
-    return AppListRow(
+    return PickerItem(
+      value: entry,
       title: item.name ?? '',
       subtitle: kindLabel,
       trailing: price,
-      showChevron: false,
-      onTap: _creating ? null : () => _pick(entry),
     );
   }
 }

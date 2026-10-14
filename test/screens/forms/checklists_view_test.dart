@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/screens/forms/checklists_view.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 List<FormItemDefinition> _items(int n, {bool photo = false}) => [
       for (var i = 0; i < n; i++)
@@ -44,7 +45,10 @@ void main() {
     expect(find.text('Prontos para usar'), findsOneWidget);
     expect(find.text('10 perguntas'), findsOneWidget);
     expect(find.text('Usar'), findsOneWidget);
-    expect(find.text('Novo checklist'), findsOneWidget);
+    // "+" at the top, not a big blue button over the list.
+    expect(find.text('Novo checklist'), findsNothing);
+    expect(find.bySemanticsLabel('Novo checklist'), findsOneWidget);
+    expect(find.byType(PrimaryButton), findsNothing);
     expect(find.textContaining('PROCEDIMENTOS'), findsNothing);
   });
 
@@ -62,7 +66,7 @@ void main() {
     await tester.tap(find.text('Entrada do veículo'));
     await tester.tap(find.text('Usar'));
     await tester.tap(find.text('Inspeção de freios'));
-    await tester.tap(find.text('Novo checklist'));
+    await tester.tap(find.byKey(const ValueKey('checklist_new')));
     expect(calls, ['open a', 'use g1', 'preview g1', 'new']);
   });
 

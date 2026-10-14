@@ -4,37 +4,31 @@ import 'package:praticos/screens/menu_navigation/tab_routes.dart';
 
 void main() {
   group('visibleAppTabs', () {
-    test('shows every tab in the fixed order', () {
+    test('shows Início, Agenda and Financeiro in the fixed order', () {
       expect(
         visibleAppTabs(useScheduling: true, canViewFinancialReports: true),
-        [
-          AppTab.home,
-          AppTab.customers,
-          AppTab.agenda,
-          AppTab.financial,
-          AppTab.more,
-        ],
+        [AppTab.home, AppTab.agenda, AppTab.financial],
       );
     });
 
     test('hides Agenda when the company does not use scheduling', () {
       expect(
         visibleAppTabs(useScheduling: false, canViewFinancialReports: true),
-        [AppTab.home, AppTab.customers, AppTab.financial, AppTab.more],
+        [AppTab.home, AppTab.financial],
       );
     });
 
     test('hides Financeiro without viewFinancialReports', () {
       expect(
         visibleAppTabs(useScheduling: true, canViewFinancialReports: false),
-        [AppTab.home, AppTab.customers, AppTab.agenda, AppTab.more],
+        [AppTab.home, AppTab.agenda],
       );
     });
 
-    test('hides both and keeps Início, Clientes, Mais in order', () {
+    test('hides both and keeps Início alone', () {
       expect(
         visibleAppTabs(useScheduling: false, canViewFinancialReports: false),
-        [AppTab.home, AppTab.customers, AppTab.more],
+        [AppTab.home],
       );
     });
 
@@ -46,14 +40,7 @@ void main() {
           canViewFinancialReports: true,
           useFinancial: false,
         ),
-        [AppTab.home, AppTab.customers, AppTab.agenda, AppTab.more],
-      );
-    });
-
-    test('useFinancial defaults to on (field absent = current behavior)', () {
-      expect(
-        visibleAppTabs(useScheduling: true, canViewFinancialReports: true),
-        contains(AppTab.financial),
+        [AppTab.home, AppTab.agenda],
       );
     });
 
@@ -69,7 +56,6 @@ void main() {
             final indexes = tabs.map((t) => t.index).toList();
             expect(indexes, [...indexes]..sort());
             expect(tabs.first, AppTab.home);
-            expect(tabs.last, AppTab.more);
           }
         }
       }
@@ -81,14 +67,13 @@ void main() {
       final routes = [
         for (final tab in visibleAppTabs(
           useScheduling: false,
-          canViewFinancialReports: false,
+          canViewFinancialReports: true,
         ))
           tab.routeName,
       ];
       expect(TabRoutes.nameForIndex(0, routes: routes), TabRoutes.home);
-      expect(TabRoutes.nameForIndex(1, routes: routes), TabRoutes.customers);
-      expect(TabRoutes.nameForIndex(2, routes: routes), TabRoutes.more);
-      expect(TabRoutes.nameForIndex(3, routes: routes), isNull);
+      expect(TabRoutes.nameForIndex(1, routes: routes), TabRoutes.financial);
+      expect(TabRoutes.nameForIndex(2, routes: routes), isNull);
     });
 
     test('route names match TabRoutes.all for the full tab list', () {

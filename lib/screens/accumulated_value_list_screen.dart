@@ -6,16 +6,18 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
 
 /// Screen for selecting or creating accumulated values.
 ///
-/// Displays a searchable list of previously used values sorted by usage count,
-/// with "Usar “X”" on top for a new value, a check mark on the current choice
-/// and "Deixar em branco" when clearing is allowed. Deleting (swipe) needs the
+/// "Escolher" pattern ([PickerScaffold]): the field as the large title, the
+/// search always on (typing adds), previously used values sorted by usage
+/// count, "Usar “X”" on top for a new value, a ✓ on the current choice and
+/// "Deixar em branco" when clearing is allowed. Multiple choice
+/// (`multiSelect`) confirms with the ✓ in the top bar (blue once the choice
+/// changed) and pops with the list. Deleting (swipe) needs the
 /// permission of the field's area (`manageDevices` for device fields,
 /// `manageServices` / `manageProducts` for catalog fields).
 class AccumulatedValueListScreen extends StatefulWidget {
@@ -40,10 +42,8 @@ class _AccumulatedValueListScreenState
     extends State<AccumulatedValueListScreen> {
   late final AccumulatedValueRepository _repo =
       widget.repository ?? AccumulatedValueRepository();
-  final _searchController = TextEditingController();
 
   List<AccumulatedValue> _allValues = [];
-  List<AccumulatedValue> _filteredValues = [];
   bool _isLoading = false;
 
   String? _companyId;
@@ -57,12 +57,6 @@ class _AccumulatedValueListScreenState
   Set<String> _selectedValues =
       {}; // Track selected values in multi-select mode
   bool _argumentsLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_filterValues);
-  }
 
   @override
   void didChangeDependencies() {
@@ -137,7 +131,6 @@ class _AccumulatedValueListScreenState
 
     try {
       _allValues = await _repo.getAll(_companyId!, _fieldType!, group: _group);
-      _filteredValues = _allValues;
       debugPrint(
         'AccumulatedValueListScreen: Loaded ${_allValues.length} values',
       );
@@ -148,20 +141,6 @@ class _AccumulatedValueListScreenState
     if (mounted) {
       setState(() => _isLoading = false);
     }
-  }
-
-  void _filterValues() {
-    final query = _searchController.text.toLowerCase().trim();
-
-    setState(() {
-      if (query.isEmpty) {
-        _filteredValues = _allValues;
-      } else {
-        _filteredValues = _allValues
-            .where((v) => v.searchKey.contains(query))
-            .toList();
-      }
-    });
   }
 
   Future<void> _selectValue(String value) async {
@@ -224,98 +203,75 @@ class _AccumulatedValueListScreenState
 
   @override
   Widget build(BuildContext context) {
-    final background = AppColors.background.resolveFrom(context);
-    return CupertinoPageScaffold(
-      backgroundColor: background,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(_title ?? context.l10n.select),
-        backgroundColor: background,
-        trailing: _multiSelect
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _confirmSelection,
-                child: Text(
-                  context.l10n.done,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              )
-            : null,
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.pageMargin),
-              child: CupertinoSearchTextField(
-                controller: _searchController,
-                placeholder: context.l10n.searchOrAddNew,
-              ),
-            ),
-            Expanded(child: _isLoading ? const LoadingState() : _buildList()),
+    final l10n = context.l10n;
+    final current = _currentValue;
+    final hasCurrent = current != null && current.isNotEmpty;
+    bool inList(String v) =>
+        _allValues.any((x) => x.value.toLowerCase() == v.toLowerCase());
+    final changed =
+        _multiSelect &&
+        (_selectedValues.length != (_currentValues ?? const []).length ||
+            !_selectedValues.containsAll(_currentValues ?? const []));
+
+    return PickerScaffold<String>(
+      title: _title ?? l10n.select,
+      itemCount: _allValues.length,
+      // Typing is how a new value comes in, so the search is always there.
+      alwaysShowSearch: true,
+      searchPlaceholder: l10n.searchOrAddNew,
+      loading: _isLoading && _allValues.isEmpty,
+      strongTitles: false,
+      multiple: _multiSelect,
+      onConfirm: changed ? _confirmSelection : null,
+      onSelect: _selectValue,
+      onCreate: _selectValue,
+      createLabel: l10n.accumulatedUse,
+      canCreate: (query) => !inList(query),
+      emptyIcon: CupertinoIcons.square_list,
+      emptyTitle: l10n.noValuesRegistered,
+      emptyMessage: l10n.typeAboveToAdd,
+      headerRows: (query) => [
+        if (_allowClear && !_multiSelect && hasCurrent && query.isEmpty)
+          AppListRow(
+            title: l10n.accumulatedLeaveBlank,
+            showChevron: false,
+            onTap: _clearSelection,
+          ),
+        // The current value when it is not saved yet.
+        if (query.isEmpty && hasCurrent && !inList(current))
+          AddRow(
+            plain: true,
+            label: l10n.accumulatedUse(current),
+            onTap: () => _selectValue(current),
+          ),
+      ],
+      sections: (query) => [
+        PickerSection(
+          items: [
+            for (final value in _allValues)
+              if (value.searchKey.contains(query.toLowerCase()))
+                _valueItem(value),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildList() {
-    final l10n = context.l10n;
-    final searchQuery = _searchController.text.trim();
-    final hasSearchQuery = searchQuery.isNotEmpty;
-    final current = _currentValue;
-    final hasCurrent = current != null && current.isNotEmpty;
-
-    bool inList(String v) =>
-        _filteredValues.any((x) => x.value.toLowerCase() == v.toLowerCase());
-
-    // New value to confirm: what was typed, or the current value when it is
-    // not saved yet.
-    final String? toAdd = hasSearchQuery
-        ? (inList(searchQuery) ? null : searchQuery)
-        : (hasCurrent && !inList(current) ? current : null);
-
-    final showClear = _allowClear && !_multiSelect && hasCurrent;
-    final children = <Widget>[
-      if (showClear)
-        AppListRow(title: l10n.accumulatedLeaveBlank, onTap: _clearSelection),
-      if (toAdd != null)
-        AddRow(
-          label: l10n.accumulatedUse(toAdd),
-          onTap: () => _selectValue(toAdd),
-        ),
-      for (final value in _filteredValues) _valueRow(value),
-    ];
-
-    if (children.isEmpty) {
-      return EmptyState(
-        icon: CupertinoIcons.square_list,
-        title: l10n.noValuesRegistered,
-        message: l10n.typeAboveToAdd,
-      );
-    }
-    return ListView(children: children);
-  }
-
-  Widget _valueRow(AccumulatedValue value) {
+  PickerItem<String> _valueItem(AccumulatedValue value) {
     final isSelected = _multiSelect
         ? _selectedValues.contains(value.value)
         : value.value == _currentValue;
-    final row = Container(
-      color: AppColors.background.resolveFrom(context),
-      child: AppListRow(
-        key: ValueKey('value-${value.id ?? value.value}'),
-        title: value.value,
-        subtitle: value.group,
-        trailing: isSelected ? '✓' : null,
-        showChevron: false,
-        titleStyle: isSelected
-            ? const TextStyle(fontWeight: FontWeight.w600)
-            : null,
-        onTap: () => _selectValue(value.value),
-      ),
+    return PickerItem(
+      key: ValueKey('value-${value.id ?? value.value}'),
+      value: value.value,
+      title: value.value,
+      subtitle: value.group,
+      selected: isSelected,
+      wrap: _mayDelete ? (row) => _dismissible(value, row) : null,
     );
-    if (!_mayDelete) return row;
+  }
 
+  Widget _dismissible(AccumulatedValue value, Widget row) {
     return Dismissible(
       key: Key(value.id ?? value.value),
       direction: DismissDirection.endToStart,
@@ -351,7 +307,6 @@ class _AccumulatedValueListScreenState
           await _repo.remove(_companyId!, _fieldType!, value.id!);
           setState(() {
             _allValues.removeWhere((v) => v.id == value.id);
-            _filteredValues.removeWhere((v) => v.id == value.id);
           });
           return true;
         } catch (e) {
@@ -365,7 +320,6 @@ class _AccumulatedValueListScreenState
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 }

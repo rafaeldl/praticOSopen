@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
-import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -16,12 +15,12 @@ class MorePage extends StatelessWidget {
     this.previousPageTitle,
     this.subtitle,
     this.floatingButton,
+    this.trailing,
   });
 
   final String title;
 
-  /// Back button label; defaults to "Mais", where every page of this kind
-  /// is opened from.
+  /// Back button label; defaults to the title of the screen below.
   final String? previousPageTitle;
 
   /// One line under the large title.
@@ -30,6 +29,9 @@ class MorePage extends StatelessWidget {
   /// The screen's single blue button, floating over the bottom of the page
   /// (design system rule 11). The list gets room so nothing hides under it.
   final Widget? floatingButton;
+
+  /// Top-right bar button, e.g. the "+" that adds a new record.
+  final Widget? trailing;
   final List<Widget> children;
 
   @override
@@ -42,7 +44,8 @@ class MorePage extends StatelessWidget {
           slivers: [
             AppNavBar(
               largeTitle: Text(title),
-              previousTitle: previousPageTitle ?? context.l10n.more,
+              previousTitle: previousPageTitle,
+              trailing: trailing,
             ),
             SliverSafeArea(
               top: false,

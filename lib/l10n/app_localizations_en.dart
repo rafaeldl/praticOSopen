@@ -2247,7 +2247,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapPlusToCreateFirst => 'Tap + to create your first procedure.';
 
   @override
-  String get fromCompany => 'From Company';
+  String get fromCompany => 'From your company';
 
   @override
   String get global => 'Global';
@@ -4426,6 +4426,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAll => 'All';
 
   @override
+  String get filterMine => 'Mine';
+
+  @override
+  String get sectionScheduledToday => 'Today';
+
+  @override
+  String get nextVisitLabel => 'Now';
+
+  @override
+  String homeWithYouToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count with you today',
+      one: '1 with you today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeWithYou(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count with you',
+      one: '1 with you',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextVisit(String customer, String time) {
+    return 'Next: $customer, at $time.';
+  }
+
+  @override
+  String nextVisitDevice(String customer, String device, String time) {
+    return 'Next: $customer, $device, at $time.';
+  }
+
+  @override
+  String openOrderNumber(String number) {
+    return 'Open order $number';
+  }
+
+  @override
+  String get noOrdersWithYou => 'No orders with you.';
+
+  @override
   String get sectionLate => 'Overdue';
 
   @override
@@ -4509,19 +4558,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstOrderTitle =>
-      'Create your first service order and send it to the customer for approval.';
+      'Create your first service order. It takes less than a minute.';
 
   @override
   String get howItWorks => 'How it works';
 
   @override
-  String get howItWorksStep1 => 'Pick the customer and what will be done.';
+  String get firstOrderLabel => 'Start here';
 
   @override
-  String get howItWorksStep2 => 'Send the quote for the customer to approve.';
+  String get homeNoOrdersYet => 'None yet';
 
   @override
-  String get howItWorksStep3 => 'Follow the work and get paid.';
+  String get howItWorksStep1 => '1. Write down the job';
+
+  @override
+  String get howItWorksStep1Detail => 'customer and services';
+
+  @override
+  String howItWorksStep1DetailDevice(String device) {
+    return 'customer, $device and services';
+  }
+
+  @override
+  String get howItWorksStep2 => '2. Send the quote';
+
+  @override
+  String get howItWorksStep2Detail => 'over WhatsApp, with a link';
+
+  @override
+  String get howItWorksStep3 => '3. Get paid and deliver';
+
+  @override
+  String get howItWorksStep3Detail => 'the app reminds you who still owes';
+
+  @override
+  String nextStepLateShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders are past due.',
+      one: '1 order is past due.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepDueTodayShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders due today.',
+      one: '1 order due today.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextStepQuotesWaitingShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quotes without an answer.',
+      one: '1 quote without an answer.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get searchNotFoundLoaded => 'Not found in the loaded orders.';
@@ -4537,6 +4639,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadOrdersError => 'Could not load the orders.';
+
+  @override
+  String orderLateMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Overdue $count months',
+      one: 'Overdue 1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderLateYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Overdue $count years',
+      one: 'Overdue 1 year',
+    );
+    return '$_temp0';
+  }
 
   @override
   String orderLateDays(int count) {
@@ -4640,6 +4764,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteRoleLabel => 'What they can do';
+
+  @override
+  String get inviteRoleQuestion => 'What can they do?';
 
   @override
   String get createInvite => 'Create invite';
@@ -5752,4 +5879,352 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderResponsibleRemove => 'Remove responsible';
+
+  @override
+  String get filterDone => 'Completed';
+
+  @override
+  String homeLateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count late',
+      one: '1 late',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeSearchHint => 'Search orders or customers';
+
+  @override
+  String homeSearchHintDevice(String device) {
+    return 'Search orders, customers or $device';
+  }
+
+  @override
+  String remainingToReceive(String amount) {
+    return '$amount left to receive';
+  }
+
+  @override
+  String get firstOrderTapPlus =>
+      'Tap + to create your first work order. It takes less than a minute.';
+
+  @override
+  String profileButtonA11y(String company) {
+    return '$company: customers, catalog, team and settings';
+  }
+
+  @override
+  String get orderAssistantPhoto => 'Photo';
+
+  @override
+  String get orderAssistantTalkShort => 'Speak';
+
+  @override
+  String get orderCustomerRequestTitle => 'What the customer asked';
+
+  @override
+  String get orderCustomerRequestPlaceholder => 'E.g.: noise when braking';
+
+  @override
+  String get orderDeliverySection => 'Delivery';
+
+  @override
+  String get orderDueLabel => 'Ready by';
+
+  @override
+  String get orderDueNone => 'No date';
+
+  @override
+  String get orderMoreOptions => 'More options';
+
+  @override
+  String get orderMoreOptionsHint => 'Status, visit, assignee, location';
+
+  @override
+  String get orderStatusLabel => 'Status';
+
+  @override
+  String get orderScheduleLabel => 'Visit';
+
+  @override
+  String get orderAddressLabel => 'Location';
+
+  @override
+  String get orderNotSet => 'None';
+
+  @override
+  String get speechTitle => 'Speak the job';
+
+  @override
+  String get speechHint =>
+      'Say the customer, the vehicle and what will be done.';
+
+  @override
+  String get speechListening => 'Listening…';
+
+  @override
+  String get speechStop => 'Stop';
+
+  @override
+  String get speechStart => 'Speak again';
+
+  @override
+  String get speechFill => 'Fill in the order';
+
+  @override
+  String get speechType => 'Type instead';
+
+  @override
+  String get speechUnavailable =>
+      'The microphone is not allowed. Allow it in Settings or type the job.';
+
+  @override
+  String get orderAddItemRow => 'Add service or part';
+
+  @override
+  String get orderPickCustomerRow => 'Choose customer';
+
+  @override
+  String get newOrderButton => 'New order';
+
+  @override
+  String get orderAssistantFilled =>
+      'I filled in what\'s marked. Check it and save.';
+
+  @override
+  String get orderAssistantUndo => 'Undo';
+
+  @override
+  String get orderAssistantReadingPhotos => 'Reading the photos…';
+
+  @override
+  String get orderAssistantReadingSpeech => 'Reading what you said…';
+
+  @override
+  String get orderAssistantMarked => 'Filled in by AI';
+
+  @override
+  String get speechCancel => 'Cancel';
+
+  @override
+  String get speechStopAndFill => 'Stop and fill in the order';
+
+  @override
+  String get speechTypeHint =>
+      'Type the customer, the vehicle and what will be done';
+
+  @override
+  String get speechNothingHeard =>
+      'I didn\'t hear anything. Tap Speak and try again.';
+
+  @override
+  String get orderServicesAndParts => 'Services and parts';
+
+  @override
+  String get orderItemKindPart => 'part';
+
+  @override
+  String get orderActionApproveQuote => 'Approve quote';
+
+  @override
+  String get orderActionStartService => 'Start the job';
+
+  @override
+  String get orderActionMarkReady => 'Mark as ready';
+
+  @override
+  String orderDuePhrase(String when) {
+    return 'Ready $when';
+  }
+
+  @override
+  String orderDueLatePhrase(String when) {
+    return 'Was due $when';
+  }
+
+  @override
+  String orderDayAtTime(String day, String time) {
+    return '$day at $time';
+  }
+
+  @override
+  String orderChecklistProgress(int answered, int total) {
+    return '$answered of $total answered';
+  }
+
+  @override
+  String get orderCommentYou => 'You';
+
+  @override
+  String get orderMenuChangeStatus => 'Change status';
+
+  @override
+  String get orderMenuViewPdf => 'View PDF';
+
+  @override
+  String get orderMenuCopyLink => 'Copy link';
+
+  @override
+  String get orderPlaceOfService => 'Service location';
+
+  @override
+  String get orderAssistantApplied =>
+      'I added what\'s marked to the order. Check it.';
+
+  @override
+  String get pickerCustomerTitle => 'Which customer?';
+
+  @override
+  String pickerDeviceTitle(String device) {
+    return 'Which $device?';
+  }
+
+  @override
+  String pickerDeviceSubtitle(String name) {
+    return 'for $name';
+  }
+
+  @override
+  String get pickerItemTitle => 'What will be done?';
+
+  @override
+  String get pickerChecklistTitle => 'Which checklist?';
+
+  @override
+  String get pickerStatusTitle => 'What is the status?';
+
+  @override
+  String get pickerAssigneeTitle => 'Who is responsible?';
+
+  @override
+  String pickerDevicesTitle(String devices) {
+    return 'On which $devices?';
+  }
+
+  @override
+  String get pickerNewCustomer => 'New customer';
+
+  @override
+  String pickerNewDevice(String device) {
+    return 'New $device';
+  }
+
+  @override
+  String get pickerNewItem => 'New service or part';
+
+  @override
+  String get pickerNewChecklist => 'New checklist';
+
+  @override
+  String get pickerTypeAnother => 'Type another';
+
+  @override
+  String pickerRegister(String query) {
+    return 'Add “$query”';
+  }
+
+  @override
+  String pickerNoDeviceWith(String device, String query) {
+    return 'No $device matching “$query”.';
+  }
+
+  @override
+  String pickerNoItemWith(String query) {
+    return 'No service or part matching “$query”. Add it and it goes straight on the order.';
+  }
+
+  @override
+  String pickerNoMatch(String query) {
+    return 'Nothing matching “$query”.';
+  }
+
+  @override
+  String get pickerRecent => 'Recent';
+
+  @override
+  String get pickerAll => 'All';
+
+  @override
+  String get pickerSearch => 'Search';
+
+  @override
+  String orderMenuRemoveDevice(String device) {
+    return 'Remove $device from the order';
+  }
+
+  @override
+  String pickerNoDevice(String device) {
+    return 'No $device';
+  }
+
+  @override
+  String get formMoreData => 'More details';
+
+  @override
+  String get customerSaveNeedsName => 'Type the name to save.';
+
+  @override
+  String get customerMoreDataHint => 'E-mail, tax ID, address';
+
+  @override
+  String deviceSaveNeedsField(String field) {
+    return 'Fill in $field to save.';
+  }
+
+  @override
+  String deviceMoreDataHint(String brand, String category) {
+    return 'Photo, $brand and $category';
+  }
+
+  @override
+  String get catalogMoreDataHintFields => 'Photo and other fields';
+
+  @override
+  String get inviteSaveNeedsContact => 'Type the e-mail or WhatsApp to save.';
+
+  @override
+  String get checklistNamePlaceholder => 'E.g.: Check-in inspection';
+
+  @override
+  String get checklistQuestionsTitle => 'Questions';
+
+  @override
+  String get checklistAddQuestion => 'Add question';
+
+  @override
+  String get checklistSaveNeedsNameAndQuestion =>
+      'Type the name and add a question to save.';
+
+  @override
+  String get checklistSaveNeedsQuestion => 'Add a question to save.';
+
+  @override
+  String get formItemTypeText => 'Text';
+
+  @override
+  String get formItemTypeNumber => 'Number';
+
+  @override
+  String get formItemTypeBoolean => 'Yes/No';
+
+  @override
+  String get formItemTypeSelect => 'Single choice';
+
+  @override
+  String get formItemTypeChecklist => 'Multiple choice';
+
+  @override
+  String get formItemTypePhoto => 'Photo only';
+
+  @override
+  String get pickerNewItemKind => 'What are you adding?';
+
+  @override
+  String get pickerNewItemServiceHint => 'Work you do';
+
+  @override
+  String get pickerNewItemProductHint => 'Part or material you sell';
 }

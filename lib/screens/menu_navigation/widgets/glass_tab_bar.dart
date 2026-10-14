@@ -24,7 +24,15 @@ class GlassTabBar extends CupertinoTabBar {
     super.height,
     super.border,
     this.reduceTransparency = false,
+    this.action,
   }) : super(backgroundColor: _transparent);
+
+  /// Round button beside the capsule ("Nova OS"), the screen's main action
+  /// within thumb reach. It is a button, not a tab: [NewOrderTabButton].
+  final Widget? action;
+
+  /// Width of one tab when the capsule does not span the screen.
+  static const double compactTabWidth = 105;
 
   /// iOS "Reduce Transparency" (not exposed by `MediaQuery`).
   final bool reduceTransparency;
@@ -69,7 +77,7 @@ class GlassTabBar extends CupertinoTabBar {
         alignment: Alignment.bottomCenter,
         child: Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, bottomGap),
-          child: DecoratedBox(
+          child: _layout(DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(capsuleHeight / 2),
               boxShadow: [
@@ -109,10 +117,35 @@ class GlassTabBar extends CupertinoTabBar {
                 ),
               ),
             ),
-          ),
+          )),
         ),
       ),
     );
+  }
+
+  /// With [action], the capsule fills the room left of it. Without it, a
+  /// short tab list (technician: Início and Agenda) sits centered instead of
+  /// stretching from edge to edge.
+  Widget _layout(Widget capsule) {
+    final action = this.action;
+    if (action != null) {
+      return Row(
+        children: [
+          Expanded(child: capsule),
+          const SizedBox(width: 12),
+          action,
+        ],
+      );
+    }
+    if (items.length < 3) {
+      return Center(
+        child: SizedBox(
+          width: items.length * compactTabWidth + 10,
+          child: capsule,
+        ),
+      );
+    }
+    return capsule;
   }
 
   @override
@@ -140,6 +173,57 @@ class GlassTabBar extends CupertinoTabBar {
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,
       reduceTransparency: reduceTransparency,
+      action: action,
+    );
+  }
+}
+
+/// The blue "+" beside the tab capsule: starts a new order from any tab.
+/// Solid accent with no glass, so it never reads as one more tab (the round
+/// glass slot next to the tabs is iOS's search tab).
+class NewOrderTabButton extends StatelessWidget {
+  const NewOrderTabButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  });
+
+  /// Spoken name ("Nova OS").
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppColors.accent.resolveFrom(context);
+    return Semantics(
+      identifier: 'add_order_button',
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Container(
+          width: GlassTabBar.capsuleHeight,
+          height: GlassTabBar.capsuleHeight,
+          decoration: BoxDecoration(
+            color: accent,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Icon(
+            CupertinoIcons.add,
+            size: 30,
+            color: AppColors.onAccent.resolveFrom(context),
+          ),
+        ),
+      ),
     );
   }
 }

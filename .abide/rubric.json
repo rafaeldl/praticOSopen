@@ -10,7 +10,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "sha": "617dec62ab0194ed713015cf523611ccb3f99b27e3a6d735fe261e69f28d664e",
+      "sha": "7a26d76276e817ff77d9eaed3a5aa753dff85d2b3969588fc37d233fb25dabac",
       "scope": "**/*"
     },
     {
@@ -25,7 +25,7 @@
       "text": "SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco",
       "source": {
         "path": "CLAUDE.md",
-        "line": 596
+        "line": 600
       },
       "scope": [
         "lib/**/*.dart",
@@ -36,20 +36,20 @@
         "type": "model",
         "question": {
           "type": "boolean",
-          "instructions": "Among the added lines, is there at least one declared identifier (class, variable, field, method, enum or constant name) or quoted map/JSON key spelled as a Portuguese word, such as cliente, valor, pendente or statusDaOS? Text inside Text(...), l10n strings and comments never counts.",
+          "instructions": "Is any name declared on an added line (after class, enum, final, var, const, static, a type, or in a parameter list) a Portuguese word like cliente, valor, pendente, servico, statusDaOS? Answer only about declared names; strings, Text(...), l10n keys and comments never count.",
           "criteria": {
-            "true": "final valorTotal = 0; map['cliente'] = c; static const pendente = 'pendente';",
-            "false": "final total = 0; Text('Cliente'); // calcula o total"
+            "true": "final valorTotal = 0; class StatusOS {} static const pendente = 'pendente';",
+            "false": "final total = 0; Text('Cliente'); // calcula o total; context.l10n.cliente"
           }
         }
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 11,
-        "median": 0.19,
-        "min": 0.06,
-        "max": 0.37,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.13,
+        "min": 0.09,
+        "max": 0.31,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -59,7 +59,7 @@
       "text": "SEMPRE usar `context.l10n` para strings visíveis ao usuário, NUNCA hardcoded",
       "source": {
         "path": "CLAUDE.md",
-        "line": 597
+        "line": 601
       },
       "scope": [
         "lib/screens/**/*.dart",
@@ -79,13 +79,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.05,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 8,
+        "median": 0.065,
         "min": 0.04,
-        "max": 0.06,
+        "max": 0.15,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -108,11 +108,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 3,
+        "median": 0.03,
+        "min": 0.02,
+        "max": 0.03,
         "fired": 0,
         "verdict": "skipped"
       }
@@ -122,7 +122,7 @@
       "text": "SEMPRE usar `FormatService` para datas, números e moedas, NUNCA formatar manualmente. NUNCA usar `toStringAsFixed()` direto",
       "source": {
         "path": "CLAUDE.md",
-        "line": 598
+        "line": 602
       },
       "scope": [
         "lib/**/*.dart"
@@ -141,13 +141,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
-        "median": 0.04,
-        "min": 0.03,
-        "max": 0.04,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.03,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -155,7 +155,7 @@
       "text": "Labels customizáveis DEVEM ter fallback com `context.l10n`",
       "source": {
         "path": "CLAUDE.md",
-        "line": 599
+        "line": 603
       },
       "scope": [
         "lib/**/*.dart"
@@ -174,13 +174,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
-        "median": 0.04,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.065,
         "min": 0.04,
-        "max": 0.05,
+        "max": 0.08,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -203,7 +203,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -248,7 +248,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -262,7 +262,7 @@
       "text": "Widgets: CupertinoPageScaffold + CupertinoSliverNavigationBar, CupertinoListSection.insetGrouped para formulários, CupertinoAlertDialog, CupertinoActionSheet, CupertinoSearchTextField",
       "source": {
         "path": "CLAUDE.md",
-        "line": 234
+        "line": 238
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -281,13 +281,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.04,
-        "min": 0.04,
-        "max": 0.04,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 8,
+        "median": 0.06,
+        "min": 0.03,
+        "max": 0.06,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -295,7 +295,7 @@
       "text": "Sempre usar `.resolveFrom(context)` para cores dinâmicas",
       "source": {
         "path": "CLAUDE.md",
-        "line": 606
+        "line": 610
       },
       "scope": [
         "lib/**/*.dart"
@@ -312,7 +312,7 @@
       "text": "Status: ponto colorido + texto em `textSecondary`, nunca selo colorido.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 253
+        "line": 257
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -327,13 +327,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.04,
-        "min": 0.04,
-        "max": 0.04,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 8,
+        "median": 0.05,
+        "min": 0.03,
+        "max": 0.06,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -341,7 +341,7 @@
       "text": "Cores: usar os papéis de `AppColors`, nunca hex, sempre com `.resolveFrom(context)`.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 240
+        "line": 244
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -377,14 +377,27 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 5,
+        "median": 0.09,
+        "min": 0.06,
+        "max": 0.22,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
+    },
+    {
+      "id": "new-record-sheet",
+      "text": "Cadastro novo abre em sheet grande: \"X\" à esquerda e \"✓\" à direita no topo (cinza até dar para salvar, azul quando dá), formulário em cartões brancos sobre fundo cinza. Edição do que já existe abre empurrada",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 228
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs to know whether the screen creates or edits a record and how it is opened elsewhere"
+      },
+      "status": "active"
     },
     {
       "id": "glass-only-in-navigation",
@@ -410,13 +423,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.025,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 8,
+        "median": 0.04,
         "min": 0.02,
-        "max": 0.03,
+        "max": 0.07,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -424,7 +437,7 @@
       "text": "O texto cresce com o tamanho do texto do iPhone: nunca travar o `textScaler`, nunca usar altura fixa em linha com texto, nunca reticências em nome, título ou valor.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 251
+        "line": 255
       },
       "scope": [
         "lib/screens/**/*.dart"
@@ -443,13 +456,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 2,
-        "median": 0.03,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 8,
+        "median": 0.035,
         "min": 0.03,
-        "max": 0.03,
+        "max": 0.05,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -457,7 +470,7 @@
       "text": "Site Eleventy: Editar APENAS em `src/`, nunca em `public/`.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 608
+        "line": 612
       },
       "scope": [
         "firebase/hosting/public/**/*"
@@ -472,7 +485,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -486,7 +499,7 @@
       "text": "Azul da marca como acento, amarelo do logo só como marca-texto; sem gradientes, glassmorphism ou cards com ícone",
       "source": {
         "path": "CLAUDE.md",
-        "line": 289
+        "line": 293
       },
       "scope": [
         "firebase/hosting/src/**/*"
@@ -501,7 +514,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -515,7 +528,7 @@
       "text": "Nada de números inventados (usuários, notas, depoimentos)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 290
+        "line": 294
       },
       "scope": [
         "firebase/hosting/src/**/*"
@@ -530,7 +543,7 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 0,
         "median": 0,
         "min": 0,
@@ -544,7 +557,7 @@
       "text": "Dados de clientes (nomes, telefones, conversas) nunca entram no repositório — ele é público. Só números agregados.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 580
+        "line": 584
       },
       "when": "edit",
       "check": {
@@ -560,11 +573,11 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
+        "at": "2026-10-14T00:27:41.563Z",
         "hunks": 20,
         "median": 0.02,
-        "min": 0.02,
-        "max": 0.02,
+        "min": 0.01,
+        "max": 0.04,
         "fired": 0,
         "verdict": "decisive"
       }
@@ -574,7 +587,7 @@
       "text": "Implementar com **teste novo** para o que mudou.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 572
+        "line": 576
       },
       "scope": [
         "lib/**/*.dart",
@@ -590,13 +603,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 0,
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "fired": 0,
-        "verdict": "skipped"
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 7,
+        "median": 0.14,
+        "min": 0.03,
+        "max": 0.95,
+        "fired": 1,
+        "verdict": "decisive"
       }
     },
     {
@@ -604,7 +617,7 @@
       "text": "Build Runner: Executar após alterar Stores/Models, e `fvm flutter gen-l10n` após alterar .arb",
       "source": {
         "path": "CLAUDE.md",
-        "line": 602
+        "line": 606
       },
       "check": {
         "type": "unenforceable",
@@ -617,7 +630,7 @@
       "text": "AuthService: Usar para criar novos usuários (não gravar direto no banco)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 603
+        "line": 607
       },
       "scope": [
         "lib/**/*.dart"
@@ -632,13 +645,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
-        "median": 0.01,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.02,
         "min": 0.01,
-        "max": 0.01,
+        "max": 0.02,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -646,7 +659,7 @@
       "text": "CollaboratorStore: Usar para gerenciar membros da equipe (não usar CompanyStore)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 604
+        "line": 608
       },
       "scope": [
         "lib/**/*.dart"
@@ -661,13 +674,13 @@
       },
       "status": "active",
       "calibration": {
-        "at": "2026-10-11T18:53:54.433Z",
-        "hunks": 3,
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
         "median": 0.01,
         "min": 0.01,
-        "max": 0.02,
+        "max": 0.01,
         "fired": 0,
-        "verdict": "skipped"
+        "verdict": "decisive"
       }
     },
     {
@@ -675,7 +688,7 @@
       "text": "Documentação Obrigatória: Documentar toda nova funcionalidade",
       "source": {
         "path": "CLAUDE.md",
-        "line": 607
+        "line": 611
       },
       "check": {
         "type": "deferred",
@@ -688,7 +701,7 @@
       "text": "Multi-Tenancy é Prioridade: Sempre verificar estrutura de company/roles",
       "source": {
         "path": "CLAUDE.md",
-        "line": 601
+        "line": 605
       },
       "check": {
         "type": "deferred",
@@ -701,7 +714,7 @@
       "text": "Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)",
       "source": {
         "path": "CLAUDE.md",
-        "line": 600
+        "line": 604
       },
       "check": {
         "type": "unenforceable",
@@ -714,7 +727,7 @@
       "text": "Sempre criar branch `tipo/descricao-curta` a partir da master antes de implementar. Nunca commitar direto na master.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 609
+        "line": 613
       },
       "check": {
         "type": "unenforceable",
@@ -727,7 +740,7 @@
       "text": "Issues no GitHub devem ser escritas em português",
       "source": {
         "path": "CLAUDE.md",
-        "line": 610
+        "line": 614
       },
       "check": {
         "type": "unenforceable",
@@ -740,7 +753,7 @@
       "text": "WIP: no máximo 2 PRs de agente abertos.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 577
+        "line": 581
       },
       "check": {
         "type": "unenforceable",
@@ -753,7 +766,7 @@
       "text": "Não mergear PR `risk:high`. Não fazer deploy nem promover release fora do fluxo de CI.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 578
+        "line": 582
       },
       "check": {
         "type": "unenforceable",
@@ -766,7 +779,7 @@
       "text": "Não criar docs de planejamento sem pedido.",
       "source": {
         "path": "CLAUDE.md",
-        "line": 581
+        "line": 585
       },
       "check": {
         "type": "unenforceable",
@@ -797,6 +810,214 @@
       "check": {
         "type": "unenforceable",
         "reason": "runtime bot behavior, not code"
+      },
+      "status": "active"
+    },
+    {
+      "id": "app-tab-order",
+      "text": "Abas sempre na ordem Início, Agenda, Financeiro (`visibleAppTabs()`), com o \"+\" azul (Nova OS) ao lado. Clientes e o que era \"Mais\" abrem pelo botão do perfil, no topo da Início",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 235
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add or reorder bottom tab bar entries so the tabs are not exactly Início, Agenda, Financeiro in that order, for example adding a Clientes or Mais tab or putting Agenda before Início?",
+          "criteria": {
+            "true": "tabs: [home, customers, agenda, financial, more]",
+            "false": "tabs: [home, agenda, financial] with a separate + button"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.03,
+        "min": 0.02,
+        "max": 0.08,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "picker-not-action-sheet",
+      "text": "Escolher algo (cliente, veículo, situação, responsável, checklist) abre a tela de escolher (`PickerScaffold`/`pickOne`), nunca menu de ações.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 230
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add a CupertinoActionSheet (or showCupertinoModalPopup with action-sheet actions) whose actions are a list of values for the user to pick from, such as statuses, team members, customers, vehicles or checklists?",
+          "criteria": {
+            "true": "CupertinoActionSheet(actions: [for (final s in statuses) CupertinoActionSheetAction(child: Text(label(s)), ...)])",
+            "false": "await pickOne<String>(context, title: l10n.pickerStatusTitle, options: [...])"
+          }
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.02,
+        "min": 0.02,
+        "max": 0.03,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "picker-search-threshold",
+      "text": "Tela de escolher: busca só com mais de 10 itens.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 230
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs the runtime item count, not visible in a diff"
+      },
+      "status": "active"
+    },
+    {
+      "id": "destructive-menu-last",
+      "text": "Menu \"…\" (`showPullDownMenu`) só para o raro, em grupos com ícone, destrutivas em vermelho no fim.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 231
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change build a \"…\" menu (showPullDownMenu or an action list) where a destructive action (cancel, delete, remove) is placed before non-destructive items, or is not marked destructive/red?"
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.07500000000000001,
+        "min": 0.04,
+        "max": 0.23,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "no-edit-button",
+      "text": "Sem botão \"Editar\": cada linha abre o seu editor.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 231
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change add an \"Editar\"/Edit button (l10n.edit or similar) that toggles a whole screen into an edit mode, instead of each row opening its own editor?"
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.03,
+        "min": 0.02,
+        "max": 0.04,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "ai-error-not-alert",
+      "text": "IA ... erro no aviso, nunca em alerta.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 232
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change show an AI assistant failure (aiOrderAssist, assistant, speech or photo reading error) in a CupertinoAlertDialog or other modal alert instead of an inline notice?"
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.025,
+        "min": 0.02,
+        "max": 0.04,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "ai-never-pays-cancels-deletes",
+      "text": "IA ... nunca recebe, cancela ou apaga sozinha.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 232
+      },
+      "scope": [
+        "lib/**/*.dart"
+      ],
+      "when": "edit",
+      "check": {
+        "type": "model",
+        "question": {
+          "type": "boolean",
+          "instructions": "Does this change let AI assistant output directly register a payment, cancel an order or delete a record without a user confirmation step?"
+        }
+      },
+      "status": "active",
+      "calibration": {
+        "at": "2026-10-14T00:27:41.563Z",
+        "hunks": 12,
+        "median": 0.02,
+        "min": 0.01,
+        "max": 0.02,
+        "fired": 0,
+        "verdict": "decisive"
+      }
+    },
+    {
+      "id": "record-screen-structure",
+      "text": "Tela de um registro (OS): título pequeno no topo, cabeçalho com quem identifica (cliente), situação e uma frase, e o botão azul do próximo passo logo abaixo.",
+      "source": {
+        "path": "CLAUDE.md",
+        "line": 233
+      },
+      "check": {
+        "type": "deferred",
+        "reason": "needs the whole screen layout, not one hunk"
       },
       "status": "active"
     }

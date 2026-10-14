@@ -25,6 +25,14 @@ class AppColors {
     highContrastColor: Color(0xFFFFFFFF),
     darkHighContrastColor: Color(0xFF000000),
   );
+  /// Gray behind the white cards of a form sheet (Lembretes, Calendário).
+  static const groupedBackground =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+        color: Color(0xFFF2F2F7),
+        darkColor: Color(0xFF000000),
+        highContrastColor: Color(0xFFEBEBF0),
+        darkHighContrastColor: Color(0xFF000000),
+      );
   static const surface = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color(0xFFFFFFFF),
     darkColor: Color(0xFF1C1C1E),

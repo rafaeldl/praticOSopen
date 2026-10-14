@@ -32,6 +32,10 @@ import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 part 'order_store.g.dart';
 
+/// "Em aberto" loads every open order at once: the next-step block, the
+/// sections and the "12 em aberto" count must see all of them, not a page.
+const int kOpenOrdersLimit = 500;
+
 class OrderStore = _OrderStore with _$OrderStore;
 
 abstract class _OrderStore with Store {
@@ -1034,6 +1038,11 @@ abstract class _OrderStore with Store {
     return false;
   }
 
+  /// Uploads the photos picked in the "Nova OS" sheet before the order
+  /// existed. Called once the order has its id.
+  Future<bool> uploadPhotoFiles(List<File> files) =>
+      _uploadMultiplePhotos(files);
+
   /// Faz o upload de uma foto
   Future<bool> _uploadPhoto(File file, {String source = 'unknown'}) async {
     if (order == null || companyId == null) return false;
@@ -1727,7 +1736,9 @@ abstract class _OrderStore with Store {
     total = temp;
   }
 
-  createItem() {
+  /// [onCreated] runs once a new order has its id (used to add the
+  /// customer's request as the first comment).
+  createItem({void Function(String orderId)? onCreated}) {
     if (deferSave || order == null || companyId == null) return;
     order!.syncDeviceIds();
 
@@ -1742,6 +1753,7 @@ abstract class _OrderStore with Store {
             // Se encontrou, usa o ID da existente
             order!.id = existingOrder.id;
             repository.updateItem(companyId!, order);
+            if (order!.id != null) onCreated?.call(order!.id!);
             orderStream = repository
                 .streamSingle(companyId!, order!.id)
                 .asObservable();
@@ -1753,6 +1765,7 @@ abstract class _OrderStore with Store {
                     .streamSingle(companyId!, order!.id)
                     .asObservable();
                 _logOrderCreated();
+                onCreated?.call(order!.id!);
               }
             });
           }
@@ -1765,6 +1778,7 @@ abstract class _OrderStore with Store {
                 .streamSingle(companyId!, order!.id)
                 .asObservable();
             _logOrderCreated();
+            onCreated?.call(order!.id!);
           }
         });
       }
@@ -2236,12 +2250,13 @@ abstract class _OrderStore with Store {
   Future<void> _fetchOrdersInfinite(String? status, int generation) async {
     if (companyId == null) return;
 
+    final limit = status == 'open' ? kOpenOrdersLimit : _limit;
     try {
       final page = await fetchOrdersPage(
         companyId!,
         status,
         customerFilter?.id,
-        _limit,
+        limit,
         _lastDocument,
       );
       if (generation != _ordersGeneration) return;
@@ -2258,7 +2273,7 @@ abstract class _OrderStore with Store {
       orders.addAll(newOrders.where((o) => !known.contains(o.id)));
 
       // Verificar se há mais resultados
-      if (newOrders.length < _limit) {
+      if (newOrders.length < limit) {
         hasMoreOrders = false;
       }
     } catch (e) {

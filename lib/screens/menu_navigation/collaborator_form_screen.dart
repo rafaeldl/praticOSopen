@@ -11,8 +11,9 @@ import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 
-/// "Convidar pessoa" as a sheet. Optionally prefilled from an expired invite
-/// (see [prefill]) when the admin chose "Cancelar e convidar de novo".
+/// "Convidar pessoa" as a `FormSheet` (open it with `FormSheet.show`).
+/// Optionally prefilled from an expired invite (see [prefill]) when the admin
+/// chose "Cancelar e convidar de novo".
 class CollaboratorFormScreen extends StatefulWidget {
   const CollaboratorFormScreen({super.key, this.prefill});
 
