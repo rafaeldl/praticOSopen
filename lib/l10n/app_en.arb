@@ -59,12 +59,10 @@
   "statusCompleted": "Completed",
   "statusCancelled": "Cancelled",
   "statusQuote": "Quote",
-  "statusDelivery": "Delivery",
   "payments": "Payments",
   "payment": "Payment",
   "paid": "Paid",
   "unpaid": "Unpaid",
-  "partiallyPaid": "Partially Paid",
   "toReceive": "To receive",
   "received": "Received",
   "pix": "PIX",
@@ -108,7 +106,6 @@
   "changePhoto": "Change Photo",
   "removePhoto": "Remove Photo",
   "addPhoto": "Add Photo",
-  "addPhotoOrAttachment": "Photo / Attachment",
   "photos": "photos",
   "photo": "Photo",
   "camera": "Camera",
@@ -117,7 +114,6 @@
   "yesterday": "Yesterday",
   "tomorrow": "Tomorrow",
   "scheduledDate": "Scheduled",
-  "createdAt": "Created at",
   "updatedAt": "Updated at",
   "date": "Date",
   "time": "Time",
@@ -161,8 +157,6 @@
   "orderList": "Order List",
   "addOrder": "Add Order",
   "createOrder": "Create Order",
-  "orderStatus": "Order Status",
-  "changeStatus": "Change Status",
   "technician": "Technician",
   "technicians": "Technicians",
   "problem": "Reported Problem",
@@ -235,7 +229,6 @@
   "version": "Version",
   "support": "Support",
   "dashboard": "Dashboard",
-  "overview": "Overview",
   "analytics": "Analytics",
   "revenue": "Revenue",
   "recentOrders": "Recent orders",
@@ -251,15 +244,12 @@
   "canEdit": "Can Edit",
   "canDelete": "Can Delete",
   "canView": "Can View",
-  "form": "Form",
-  "forms": "Forms",
   "checklist": "Checklist",
   "checklists": "Checklists",
   "customerSignature": "Customer Signature",
   "required": "Required",
   "optional": "Optional",
   "complete": "Complete",
-  "incomplete": "Incomplete",
   "answered": "Answered",
   "notAnswered": "Not Answered",
   "quote": "Quote",
@@ -407,7 +397,6 @@
   "type": "Type",
   "errorLoadingPhoto": "Error loading photo",
   "reopen": "Reopen",
-  "addItems": "Add items",
   "typeOneOptionPerLine": "Type one option per line",
   "searchProcedure": "Search procedure",
   "noProceduresAvailable": "No procedures available",
@@ -611,9 +600,7 @@
   },
   "openWhatsApp": "Open WhatsApp",
   "errorGeneratingToken": "Error generating linking code",
-  "shareWithCustomer": "Share with Customer",
   "copyLink": "Copy Link",
-  "sendViaWhatsApp": "Send via WhatsApp",
   "shareLink": "Share Link",
   "linkCopied": "Link copied!",
   "viewCount": "{count} {count, plural, =1{view} other{views}}",
@@ -632,19 +619,7 @@
   "rating": "Rating",
   "ratings": "Ratings",
   "noRatingsYet": "No ratings yet",
-  "notifyCustomerQuestion": "Notify customer?",
-  "notifyCustomerDescription": "Do you want to send the update to {customerName} via WhatsApp?",
-  "@notifyCustomerDescription": {
-    "placeholders": {
-      "customerName": {
-        "type": "String"
-      }
-    }
-  },
   "notNow": "Not now",
-  "statusUpdateApproved": "Quote approved!",
-  "statusUpdateProgress": "Service in progress!",
-  "statusUpdateDone": "Service completed!",
   "connectWhatsApp": "Connect your WhatsApp",
   "connectWhatsAppBannerDescription": "Receive notifications, manage work orders and send updates to customers via WhatsApp.",
   "whatsappOnboardingTitle": "Connect your WhatsApp",
@@ -725,35 +700,10 @@
       }
     }
   },
-  "confirmRemoveDevice": "Remove \"{name}\" from this order?",
-  "@confirmRemoveDevice": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "removeDeviceKeepItems": "Keep items",
-  "removeDeviceAndItems": "Remove all",
-  "removeDeviceHasItems": "\"{name}\" has {count} associated items. What do you want to do?",
-  "@removeDeviceHasItems": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "String"
-      }
-    }
-  },
   "features": "Features",
   "contracts": "Contracts",
   "noContracts": "No contracts",
-  "activateContract": "Activate recurring contract",
-  "deactivateContract": "Deactivate recurring contract",
-  "deactivateContractConfirm": "Automatic order generation will be stopped.",
   "recurringContract": "Recurring contract",
-  "automaticGeneration": "Automatic generation",
   "contractNextDue": "Next generation",
   "generatedOrdersCount": "Generated orders ({count})",
   "@generatedOrdersCount": {
@@ -770,7 +720,6 @@
   "deviceStatusDecommissioned": "Decommissioned",
   "noOrderHistory": "No work orders recorded",
   "configure": "Configure",
-  "frequency": "Frequency",
   "interval": "Interval",
   "indefinite": "Indefinite",
   "noOrdersDueOnDate": "No orders due on this day",
@@ -781,9 +730,7 @@
   "contract": "Contract",
   "deleteDocument": "Delete Document",
   "confirmDeleteDocument": "Are you sure you want to delete this document?",
-  "uploadingDocument": "Uploading document...",
   "documentAdded": "Document added",
-  "documentDeleted": "Document deleted",
   "openDocument": "Open",
   "fromFiles": "Files",
   "errorUploadingDocument": "Error uploading document",
@@ -1131,8 +1078,6 @@
   },
   "deleteDeviceKeepsOrders": "The orders stay saved.",
   "deviceDetailsLabel": "Details",
-  "newOrderScreenSetting": "New order screen",
-  "newOrderScreenSettingHint": "Turn off to go back to the old order screen.",
   "orderNewTitle": "New {order}",
   "@orderNewTitle": {
     "placeholders": {
@@ -1692,7 +1637,6 @@
   "reportPreviousPeriod": "Previous period",
   "reportNextPeriod": "Next period",
   "orderAddChecklist": "Checklist",
-  "orderAddMedia": "Photos or document",
   "orderAddComment": "Comment",
   "orderAddAddress": "Service address",
   "orderAddSchedule": "Schedule date and time",
@@ -2210,7 +2154,6 @@
   "orderPhotoDeleted": "Photo deleted",
   "orderPhotoDeleteError": "Could not delete the photo. Try again.",
   "orderPhotoCoverSet": "Photo set as cover",
-  "orderPhotoUploading": "Uploading photo...",
   "orderDocumentTypeTitle": "What document is this?",
   "shareWhatCanDo": "What the customer can do",
   "orderPhotoDelete": "Delete photo",

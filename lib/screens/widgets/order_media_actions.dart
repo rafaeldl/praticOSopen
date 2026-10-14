@@ -13,9 +13,7 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Shared actions for the photos and documents of an order, used by the
-// legacy order screen (OrderMediaWidget, OrderForm) and the new one
-// (OrderScreenV2).
+// Actions for the photos and documents of an order (OrderScreenV2).
 
 /// MIME type of a picked file by its extension.
 String orderDocumentContentType(String extension) {

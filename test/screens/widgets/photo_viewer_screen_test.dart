@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/screens/widgets/order_media_widget.dart';
+import 'package:praticos/screens/widgets/photo_viewer_screen.dart';
 
 void main() {
   final config = SegmentConfigProvider()

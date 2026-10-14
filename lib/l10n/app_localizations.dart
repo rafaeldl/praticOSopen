@@ -454,12 +454,6 @@ abstract class AppLocalizations {
   /// **'Orçamento'**
   String get statusQuote;
 
-  /// No description provided for @statusDelivery.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrega'**
-  String get statusDelivery;
-
   /// No description provided for @payments.
   ///
   /// In pt, this message translates to:
@@ -483,12 +477,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não Pago'**
   String get unpaid;
-
-  /// No description provided for @partiallyPaid.
-  ///
-  /// In pt, this message translates to:
-  /// **'Parcialmente Pago'**
-  String get partiallyPaid;
 
   /// No description provided for @toReceive.
   ///
@@ -670,12 +658,6 @@ abstract class AppLocalizations {
   /// **'Adicionar Foto'**
   String get addPhoto;
 
-  /// No description provided for @addPhotoOrAttachment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Foto / Anexo'**
-  String get addPhotoOrAttachment;
-
   /// No description provided for @photos.
   ///
   /// In pt, this message translates to:
@@ -723,12 +705,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Agendado'**
   String get scheduledDate;
-
-  /// No description provided for @createdAt.
-  ///
-  /// In pt, this message translates to:
-  /// **'Criado em'**
-  String get createdAt;
 
   /// No description provided for @updatedAt.
   ///
@@ -987,18 +963,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Criar OS'**
   String get createOrder;
-
-  /// No description provided for @orderStatus.
-  ///
-  /// In pt, this message translates to:
-  /// **'Status da OS'**
-  String get orderStatus;
-
-  /// No description provided for @changeStatus.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alterar Status'**
-  String get changeStatus;
 
   /// No description provided for @technician.
   ///
@@ -1432,12 +1396,6 @@ abstract class AppLocalizations {
   /// **'Painel'**
   String get dashboard;
 
-  /// No description provided for @overview.
-  ///
-  /// In pt, this message translates to:
-  /// **'Visão Geral'**
-  String get overview;
-
   /// No description provided for @analytics.
   ///
   /// In pt, this message translates to:
@@ -1528,18 +1486,6 @@ abstract class AppLocalizations {
   /// **'Pode Visualizar'**
   String get canView;
 
-  /// No description provided for @form.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formulário'**
-  String get form;
-
-  /// No description provided for @forms.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formulários'**
-  String get forms;
-
   /// No description provided for @checklist.
   ///
   /// In pt, this message translates to:
@@ -1575,12 +1521,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Concluir'**
   String get complete;
-
-  /// No description provided for @incomplete.
-  ///
-  /// In pt, this message translates to:
-  /// **'Incompleto'**
-  String get incomplete;
 
   /// No description provided for @answered.
   ///
@@ -2434,12 +2374,6 @@ abstract class AppLocalizations {
   /// **'Reabrir'**
   String get reopen;
 
-  /// No description provided for @addItems.
-  ///
-  /// In pt, this message translates to:
-  /// **'Adicione itens'**
-  String get addItems;
-
   /// No description provided for @typeOneOptionPerLine.
   ///
   /// In pt, this message translates to:
@@ -2932,23 +2866,11 @@ abstract class AppLocalizations {
   /// **'Erro ao gerar código de vinculação'**
   String get errorGeneratingToken;
 
-  /// No description provided for @shareWithCustomer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar com Cliente'**
-  String get shareWithCustomer;
-
   /// No description provided for @copyLink.
   ///
   /// In pt, this message translates to:
   /// **'Copiar Link'**
   String get copyLink;
-
-  /// No description provided for @sendViaWhatsApp.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar via WhatsApp'**
-  String get sendViaWhatsApp;
 
   /// No description provided for @shareLink.
   ///
@@ -3016,41 +2938,11 @@ abstract class AppLocalizations {
   /// **'Nenhuma avaliação ainda'**
   String get noRatingsYet;
 
-  /// No description provided for @notifyCustomerQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'Notificar cliente?'**
-  String get notifyCustomerQuestion;
-
-  /// No description provided for @notifyCustomerDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deseja enviar a atualização para {customerName} via WhatsApp?'**
-  String notifyCustomerDescription(String customerName);
-
   /// No description provided for @notNow.
   ///
   /// In pt, this message translates to:
   /// **'Agora não'**
   String get notNow;
-
-  /// No description provided for @statusUpdateApproved.
-  ///
-  /// In pt, this message translates to:
-  /// **'Orçamento aprovado!'**
-  String get statusUpdateApproved;
-
-  /// No description provided for @statusUpdateProgress.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviço em andamento!'**
-  String get statusUpdateProgress;
-
-  /// No description provided for @statusUpdateDone.
-  ///
-  /// In pt, this message translates to:
-  /// **'Serviço concluído!'**
-  String get statusUpdateDone;
 
   /// No description provided for @connectWhatsApp.
   ///
@@ -3280,30 +3172,6 @@ abstract class AppLocalizations {
   /// **'{count} equipamentos'**
   String deviceCount(int count);
 
-  /// No description provided for @confirmRemoveDevice.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover \"{name}\" desta OS?'**
-  String confirmRemoveDevice(String name);
-
-  /// No description provided for @removeDeviceKeepItems.
-  ///
-  /// In pt, this message translates to:
-  /// **'Manter itens'**
-  String get removeDeviceKeepItems;
-
-  /// No description provided for @removeDeviceAndItems.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover tudo'**
-  String get removeDeviceAndItems;
-
-  /// No description provided for @removeDeviceHasItems.
-  ///
-  /// In pt, this message translates to:
-  /// **'\"{name}\" possui {count} itens associados. O que deseja fazer?'**
-  String removeDeviceHasItems(String name, String count);
-
   /// No description provided for @features.
   ///
   /// In pt, this message translates to:
@@ -3322,35 +3190,11 @@ abstract class AppLocalizations {
   /// **'Nenhum contrato'**
   String get noContracts;
 
-  /// No description provided for @activateContract.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ativar contrato recorrente'**
-  String get activateContract;
-
-  /// No description provided for @deactivateContract.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desativar contrato recorrente'**
-  String get deactivateContract;
-
-  /// No description provided for @deactivateContractConfirm.
-  ///
-  /// In pt, this message translates to:
-  /// **'A geração automática de OS será interrompida.'**
-  String get deactivateContractConfirm;
-
   /// No description provided for @recurringContract.
   ///
   /// In pt, this message translates to:
   /// **'Contrato recorrente'**
   String get recurringContract;
-
-  /// No description provided for @automaticGeneration.
-  ///
-  /// In pt, this message translates to:
-  /// **'Geração automática'**
-  String get automaticGeneration;
 
   /// No description provided for @contractNextDue.
   ///
@@ -3405,12 +3249,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Configurar'**
   String get configure;
-
-  /// No description provided for @frequency.
-  ///
-  /// In pt, this message translates to:
-  /// **'Frequência'**
-  String get frequency;
 
   /// No description provided for @interval.
   ///
@@ -3472,23 +3310,11 @@ abstract class AppLocalizations {
   /// **'Tem certeza que deseja excluir este documento?'**
   String get confirmDeleteDocument;
 
-  /// No description provided for @uploadingDocument.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviando documento...'**
-  String get uploadingDocument;
-
   /// No description provided for @documentAdded.
   ///
   /// In pt, this message translates to:
   /// **'Documento adicionado'**
   String get documentAdded;
-
-  /// No description provided for @documentDeleted.
-  ///
-  /// In pt, this message translates to:
-  /// **'Documento excluído'**
-  String get documentDeleted;
 
   /// No description provided for @openDocument.
   ///
@@ -4533,18 +4359,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Dados'**
   String get deviceDetailsLabel;
-
-  /// No description provided for @newOrderScreenSetting.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nova tela da OS'**
-  String get newOrderScreenSetting;
-
-  /// No description provided for @newOrderScreenSettingHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desligue para voltar à tela antiga da OS.'**
-  String get newOrderScreenSettingHint;
 
   /// No description provided for @orderNewTitle.
   ///
@@ -5661,12 +5475,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Checklist'**
   String get orderAddChecklist;
-
-  /// No description provided for @orderAddMedia.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fotos ou documento'**
-  String get orderAddMedia;
 
   /// No description provided for @orderAddComment.
   ///
@@ -8143,12 +7951,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Foto definida como capa'**
   String get orderPhotoCoverSet;
-
-  /// No description provided for @orderPhotoUploading.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviando foto...'**
-  String get orderPhotoUploading;
 
   /// No description provided for @orderDocumentTypeTitle.
   ///

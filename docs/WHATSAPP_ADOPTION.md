@@ -50,7 +50,7 @@ O sistema incentiva a vinculação do WhatsApp e o uso de compartilhamento de OS
 | **UI** | `lib/screens/menu_navigation/home.dart` | Botão navbar (Estratégia 1) + Banner (Estratégia 3) |
 | **UI** | `lib/screens/widgets/whatsapp_setup_banner.dart` | Widget do banner dismissível |
 | **UI** | `lib/screens/onboarding/whatsapp_onboarding_screen.dart` | Tela pós-onboarding (Estratégia 4) |
-| **UI** | `lib/screens/order_form.dart` | Prompt pós-status (Estratégia 2) |
+| **UI** | `lib/screens/order/order_screen_v2.dart`, `lib/screens/widgets/order_status_share.dart` | Aviso pós-status (Estratégia 2) |
 | **UI** | `lib/screens/widgets/share_link_sheet.dart` | Sheet de compartilhamento (recebe `statusContext`) |
 | **Backend** | `firebase/functions/src/routes/user/link.routes.ts` | API de vinculação (token, status, unlink) |
 | **i18n** | `lib/l10n/app_pt.arb`, `app_en.arb`, `app_es.arb` | Strings localizadas |
@@ -83,7 +83,7 @@ A flag `_whatsappStatusLoaded` garante que `loadStatus()` é chamado apenas uma 
 
 ## Estratégia 2 — Prompt Pós-Mudança de Status
 
-Após mudar o status de uma OS para `approved`, `progress` ou `done`, um `CupertinoAlertDialog` pergunta se o usuário quer notificar o cliente via WhatsApp.
+Após mudar o status de uma OS para `approved`, `progress` ou `done`, a tela da OS (`OrderScreenV2`) mostra o aviso "Avisar o cliente?" (sem alerta), que abre o compartilhar com o link do cliente. As regras ficam em `shouldOfferStatusShare` (`order_status_share.dart`).
 
 ### Condições (Guards)
 
@@ -101,11 +101,11 @@ O prompt só aparece quando **todas** as condições são verdadeiras:
 final Set<String> _dismissedSharePrompts = {};
 ```
 
-Tracking por sessão (in-memory). Ao clicar "Agora não", o `order.id` é adicionado ao Set. O prompt não reaparece para aquela OS até o usuário fechar e reabrir o formulário.
+Tracking por sessão (in-memory). Ao mostrar o aviso, o `order.id` é adicionado ao Set. O aviso não reaparece para aquela OS até o usuário fechar e reabrir a tela.
 
 ### Mensagens Contextuais
 
-O `statusContext` é propagado pela cadeia: `OrderForm` → `ShareLinkSheet` → `ShareLinkService.buildShareMessage()`.
+O `statusContext` é propagado pela cadeia: `OrderScreenV2` → `shareOrderLinkNatively` / `ShareLinkSheet` → `ShareLinkService.buildShareMessage()`.
 
 O `_buildStatusMessage` gera mensagens específicas por status em 3 idiomas:
 
@@ -114,14 +114,6 @@ O `_buildStatusMessage` gera mensagens específicas por status em 3 idiomas:
 | `approved` | "O orçamento da sua OS #N foi aprovado!" | "The quote for your SO #N has been approved!" | "El presupuesto de tu OS #N fue aprobado!" |
 | `progress` | "Sua OS #N está em andamento!" | "Your SO #N is now in progress!" | "Tu OS #N está en progreso!" |
 | `done` | "O serviço da sua OS #N foi concluído!" | "Your SO #N has been completed!" | "El servicio de tu OS #N fue completado!" |
-
-### Títulos do Dialog (i18n)
-
-| Status | Key | pt | en | es |
-|--------|-----|----|----|-----|
-| `approved` | `statusUpdateApproved` | Orçamento aprovado! | Quote approved! | ¡Presupuesto aprobado! |
-| `progress` | `statusUpdateProgress` | Serviço em andamento! | Service in progress! | ¡Servicio en progreso! |
-| `done` | `statusUpdateDone` | Serviço concluído! | Service completed! | ¡Servicio completado! |
 
 ## Estratégia 3 — Banner de Setup na Home
 
@@ -181,12 +173,7 @@ WhatsAppOnboardingScreen
 
 | Key | pt | en | es |
 |-----|----|----|-----|
-| `notifyCustomerQuestion` | Notificar cliente? | Notify customer? | ¿Notificar al cliente? |
-| `notifyCustomerDescription` | Deseja enviar a atualização para {customerName} via WhatsApp? | Do you want to send the update to {customerName} via WhatsApp? | ¿Desea enviar la actualización a {customerName} vía WhatsApp? |
 | `notNow` | Agora não | Not now | Ahora no |
-| `statusUpdateApproved` | Orçamento aprovado! | Quote approved! | ¡Presupuesto aprobado! |
-| `statusUpdateProgress` | Serviço em andamento! | Service in progress! | ¡Servicio en progreso! |
-| `statusUpdateDone` | Serviço concluído! | Service completed! | ¡Servicio completado! |
 | `connectWhatsApp` | Conecte seu WhatsApp | Connect your WhatsApp | Conecta tu WhatsApp |
 | `connectWhatsAppBannerDescription` | Receba notificações, gerencie OS e envie atualizações... | Receive notifications, manage work orders... | Recibe notificaciones, gestiona órdenes... |
 | `whatsappOnboardingTitle` | Conecte seu WhatsApp | Connect your WhatsApp | Conecta tu WhatsApp |
@@ -196,7 +183,6 @@ WhatsAppOnboardingScreen
 | `whatsappBenefitClients` | Envie atualizações para clientes | Send updates to customers | Envía actualizaciones a clientes |
 | `linkNow` | Vincular agora | Link now | Vincular ahora |
 | `maybeLater` | Talvez depois | Maybe later | Quizás después |
-| `sendViaWhatsApp` | Enviar via WhatsApp | Send via WhatsApp | Enviar vía WhatsApp |
 
 ## Padrões Reutilizados
 

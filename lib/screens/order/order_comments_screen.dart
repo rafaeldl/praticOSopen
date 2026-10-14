@@ -51,7 +51,6 @@ class OrderCommentsScreen extends StatelessWidget {
           companyId: companyId,
           showInternalToggle: true,
           highlightCommentId: highlightCommentId,
-          expand: true,
           commentsStream: commentsStream,
           onSend: onSend,
         ),

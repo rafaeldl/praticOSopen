@@ -5,12 +5,12 @@ import 'package:praticos/models/order.dart';
 /// Opens the order referenced by a tapped push notification.
 ///
 /// Uses the same route as the order list (`/order` with an [Order] holding
-/// only the id; OrderForm loads the rest from the current company).
+/// only the id; OrderScreenV2 loads the rest from the current company).
 ///
-/// A notification for another company of the user is ignored: OrderForm reads
-/// the order from `Global.companyAggr`, so opening it would load the wrong
-/// tenant. Switching company from a tap would rebuild the whole session, which
-/// is out of scope for a tap handler.
+/// A notification for another company of the user is ignored: the order
+/// screen reads the order from `Global.companyAggr`, so opening it would load
+/// the wrong tenant. Switching company from a tap would rebuild the whole
+/// session, which is out of scope for a tap handler.
 class NotificationTapHandler {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();

@@ -1,87 +1,53 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/routes.dart';
 import 'package:praticos/screens/order/order_route.dart';
-import 'package:praticos/services/order_screen_preference.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-Future<void> _pump(WidgetTester tester, {Map<String, dynamic>? args}) async {
-  await tester.pumpWidget(
-    CupertinoApp(
-      onGenerateRoute: (settings) => CupertinoPageRoute(
-        settings: RouteSettings(name: '/order', arguments: args),
-        builder: (_) => OrderRoute(
-          newScreenBuilder: (_) => const Text('new screen'),
-          legacyBuilder: (_) => const Text('legacy screen'),
-        ),
-      ),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
+import 'package:praticos/screens/order/order_screen_v2.dart';
 
 void main() {
-  tearDown(() => OrderScreenPreference.useNewScreen.value = true);
-
-  group('"Nova tela da OS" routing', () {
-    testWidgets('new screen by default', (tester) async {
-      expect(OrderScreenPreference.defaultValue, isTrue);
-      expect(OrderScreenPreference.useNewScreen.value, isTrue);
-      await _pump(tester, args: {'order': null});
-      expect(find.text('new screen'), findsOneWidget);
-      expect(find.text('legacy screen'), findsNothing);
-    });
-
-    testWidgets('legacy screen when the switch is off', (tester) async {
-      OrderScreenPreference.useNewScreen.value = false;
-      await _pump(tester);
-      expect(find.text('legacy screen'), findsOneWidget);
-    });
-
-    testWidgets('comments from a notification open on the new screen', (
+  group('/order', () {
+    testWidgets('always builds the order screen (OrderScreenV2)', (
       tester,
     ) async {
-      OrderScreenPreference.useNewScreen.value = true;
-      await _pump(tester, args: {'scrollToComments': true});
-      expect(find.text('new screen'), findsOneWidget);
+      late BuildContext context;
+      await tester.pumpWidget(
+        Builder(
+          builder: (c) {
+            context = c;
+            return const SizedBox();
+          },
+        ),
+      );
+
+      final route = appRoutes['/order']!(context);
+      expect(route, isA<OrderRoute>());
+      expect((route as OrderRoute).build(context), isA<OrderScreenV2>());
     });
 
-    testWidgets('an open screen is not swapped when the switch flips', (
+    testWidgets('shows the injected screen with the route arguments', (
       tester,
     ) async {
-      await _pump(tester);
-      OrderScreenPreference.useNewScreen.value = false;
-      await tester.pump();
-      expect(find.text('new screen'), findsOneWidget);
+      Object? seenArgs;
+      await tester.pumpWidget(
+        CupertinoApp(
+          onGenerateRoute: (settings) => CupertinoPageRoute(
+            settings: const RouteSettings(
+              name: '/order',
+              arguments: {'scrollToComments': true},
+            ),
+            builder: (_) => OrderRoute(
+              builder: (context) {
+                seenArgs = ModalRoute.of(context)!.settings.arguments;
+                return const Text('order screen');
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('order screen'), findsOneWidget);
+      expect(seenArgs, {'scrollToComments': true});
     });
-  });
-
-  group('OrderScreenPreference', () {
-    test('loads the saved value and saves changes', () async {
-      SharedPreferences.setMockInitialValues({
-        OrderScreenPreference.storageKey: false,
-      });
-      await OrderScreenPreference.load();
-      expect(OrderScreenPreference.useNewScreen.value, isFalse);
-
-      await OrderScreenPreference.set(true);
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool(OrderScreenPreference.storageKey), isTrue);
-      expect(OrderScreenPreference.useNewScreen.value, isTrue);
-    });
-
-    test('defaults to on when nothing is saved', () async {
-      SharedPreferences.setMockInitialValues({});
-      await OrderScreenPreference.load();
-      expect(OrderScreenPreference.useNewScreen.value, isTrue);
-    });
-
-    test(
-      'a choice saved during the pilot does not keep the old screen',
-      () async {
-        SharedPreferences.setMockInitialValues({'useNewOrderScreen': false});
-        await OrderScreenPreference.load();
-        expect(OrderScreenPreference.useNewScreen.value, isTrue);
-      },
-    );
   });
 }

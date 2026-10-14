@@ -524,18 +524,38 @@ void main() {
   });
 
   group('Avançado', () {
-    test('always shows (the "Nova tela da OS" switch lives there)', () {
+    test('has entries only with integrations or the vehicles list', () {
       expect(
         AdvancedScreen.hasEntries(showIntegrations: false, showDevices: false),
-        isTrue,
+        isFalse,
       );
       expect(
         AdvancedScreen.hasEntries(showIntegrations: false, showDevices: true),
         isTrue,
       );
+      expect(
+        AdvancedScreen.hasEntries(showIntegrations: true, showDevices: false),
+        isTrue,
+      );
     });
 
-    testWidgets('switch sits in a plain row with the hint below, no grey card',
+    testWidgets('the "Avançado" row hides when it has nothing to show',
+        (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(app(MoreView(
+        onOpen: (_) {},
+        visibility: MoreVisibility(
+          advanced: AdvancedScreen.hasEntries(
+            showIntegrations: false,
+            showDevices: false,
+          ),
+        ),
+      )));
+      expect(find.text('Avançado'), findsNothing);
+      expect(find.text('Lembretes'), findsOneWidget);
+    });
+
+    testWidgets('lists the allowed entries in plain rows, no switch',
         (tester) async {
       await tester.pumpWidget(app(AdvancedScreen(
         devicesLabel: 'Veículos',
@@ -546,13 +566,11 @@ void main() {
       )));
       expect(find.byType(CupertinoListSection), findsNothing);
       expect(
-        find.descendant(
-          of: find.byKey(const ValueKey('advanced_new_order_screen')),
-          matching: find.byType(CupertinoSwitch),
-        ),
+        find.byKey(const ValueKey('advanced_integrations')),
         findsOneWidget,
       );
-      expect(find.text(pt.newOrderScreenSettingHint), findsOneWidget);
+      expect(find.byKey(const ValueKey('advanced_devices')), findsOneWidget);
+      expect(find.byType(CupertinoSwitch), findsNothing);
     });
   });
 

@@ -4,7 +4,6 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order_comment.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
-import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -15,17 +14,14 @@ typedef OrderCommentSender = Future<void> Function(String text, bool internal);
 
 /// Comments of an order as a message thread (author and time in
 /// `textSecondary`, the text wrapping under them) with the box to write a new
-/// one at the end: "Só a equipe vê" switch, field and send.
-///
-/// [expand] fills the available height: the thread scrolls and the box stays
-/// at the bottom (comments screen). Without it the widget sizes to its
-/// content, under a "Comentários" label (legacy order form).
+/// one at the end: "Só a equipe vê" switch, field and send. Fills the
+/// available height: the thread scrolls and the box stays at the bottom
+/// (comments screen).
 class OrderCommentsWidget extends StatefulWidget {
   final String orderId;
   final String companyId;
   final bool showInternalToggle;
   final String? highlightCommentId;
-  final bool expand;
 
   /// Test seam; defaults to the order's `comments` subcollection.
   final Stream<List<OrderComment>>? commentsStream;
@@ -39,7 +35,6 @@ class OrderCommentsWidget extends StatefulWidget {
     required this.companyId,
     this.showInternalToggle = true,
     this.highlightCommentId,
-    this.expand = false,
     this.commentsStream,
     this.onSend,
   });
@@ -192,26 +187,15 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
       },
     );
 
-    if (widget.expand) {
-      return Column(
-        children: [
-          Expanded(
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-              children: [thread],
-            ),
-          ),
-          _buildCommentInput(),
-        ],
-      );
-    }
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(context.l10n.comments),
-        thread,
+        Expanded(
+          child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            children: [thread],
+          ),
+        ),
         _buildCommentInput(),
       ],
     );
@@ -427,7 +411,6 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
         ],
       ),
     );
-    if (!widget.expand) return box;
     return Container(
       color: AppColors.background.resolveFrom(context),
       child: SafeArea(top: false, child: box),

@@ -62,8 +62,7 @@ import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:provider/provider.dart';
 
-/// Redesigned order screen (phase 1, manual, no AI yet), behind the local
-/// switch "Nova tela da OS" (see `OrderRoute`).
+/// The order screen (`/order`, see `OrderRoute`).
 ///
 /// - **New order** opens the order itself, blank: "Quem é o cliente?" (plate
 ///   search picks customer and vehicle), "O que vai na OS?" (one search over
@@ -78,7 +77,7 @@ import 'package:provider/provider.dart';
 ///   another vehicle. Once added, each shows in "Nesta OS" (only what
 ///   exists); comments show at the end of a saved order.
 /// - After a status change, "Avisar o cliente?" offers the customer link
-///   (same rules as the legacy screen, see `order_status_share.dart`).
+///   (rules in `order_status_share.dart`).
 /// - Items without price are `null`: they show "sem valor" and are not summed.
 /// - No cover photo; photos show in "Fotos" only when the order has them.
 /// - Foto / Falar (new order only; Falar behind [kAiOrderAssistEnabled], off
@@ -412,8 +411,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ),
     );
     if (!mounted || pick == null) return;
-    // 2+ vehicles: same question as the legacy screen (which vehicle, all of
-    // them, several, or general). Set only now so cancelling leaves no state.
+    // 2+ vehicles: which vehicle, all of them, several, or general. Set only now so cancelling leaves no state.
     if (_store.devices.length >= 2) {
       final result = await (widget.devicePicker ?? DevicePickerSheet.show)(
         context,
@@ -2036,6 +2034,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       ..._buildRequest(config),
       ..._buildItems(config),
       ..._buildPhotos(config),
+      ..._buildRating(order),
       ..._buildCommentsPreview(),
       ..._buildChecklists(order),
       ..._buildCustomFields(config, withoutRequest: true),
@@ -2700,6 +2699,66 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     ];
   }
 
+  /// What the customer rated (stars, "5 de 5" and the comment), when the
+  /// order has a rating. Nothing otherwise.
+  List<Widget> _buildRating(Order order) {
+    final rating = order.rating;
+    if (rating == null || !rating.hasRating) return const [];
+    final l10n = context.l10n;
+    final score = rating.score!;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final comment = rating.comment?.trim() ?? '';
+    return [
+      SectionLabel(l10n.rating),
+      Padding(
+        key: const ValueKey('order_rating'),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < 5; i++)
+                      Icon(
+                        i < score
+                            ? CupertinoIcons.star_fill
+                            : CupertinoIcons.star,
+                        size: 18,
+                        color: i < score
+                            ? AppColors.warning.resolveFrom(context)
+                            : AppColors.separator.resolveFrom(context),
+                      ),
+                  ],
+                ),
+                Text(
+                  l10n.ratingScoreOf('$score'),
+                  style: AppTypography.callout.copyWith(
+                    color: secondary,
+                    fontFeatures: AppTypography.tabular,
+                  ),
+                ),
+              ],
+            ),
+            if (comment.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                comment,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.text.resolveFrom(context),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ];
+  }
+
   /// The last two comments and "Ver todos (N) ›", which opens the comments
   /// screen (where new ones are written). Nothing when there are none.
   List<Widget> _buildCommentsPreview() {
@@ -2890,7 +2949,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// 2+ vehicles: one block per vehicle (then "Geral" for items without
-  /// one), each with its subtotal, like the legacy screen groups them.
+  /// one), each with its subtotal.
   List<Widget> _buildItemsByDevice(
     List<OrderService> services,
     List<OrderProduct> products,
@@ -2948,8 +3007,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return widgets;
   }
 
-  /// Segment custom fields of the order (same fields and save as the legacy
-  /// screen, see `order_custom_fields.dart`).
+  /// Segment custom fields of the order (see `order_custom_fields.dart`).
   List<Widget> _buildCustomFields(
     SegmentConfigProvider config, {
     bool withoutRequest = false,

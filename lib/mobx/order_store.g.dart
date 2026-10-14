@@ -90,14 +90,6 @@ mixin _$OrderStore on _OrderStore, Store {
         () => super.canViewFinancialDashboard,
         name: '_OrderStore.canViewFinancialDashboard',
       )).value;
-  Computed<String>? _$formattedCreatedDateComputed;
-
-  @override
-  String get formattedCreatedDate =>
-      (_$formattedCreatedDateComputed ??= Computed<String>(
-        () => super.formattedCreatedDate,
-        name: '_OrderStore.formattedCreatedDate',
-      )).value;
 
   late final _$orderListAtom = Atom(
     name: '_OrderStore.orderList',
@@ -1312,18 +1304,6 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  void removeDeviceAndItems(String deviceId) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.removeDeviceAndItems',
-    );
-    try {
-      return super.removeDeviceAndItems(deviceId);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   dynamic setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setScheduledDate',
@@ -1722,8 +1702,7 @@ hasPartialPayment: ${hasPartialPayment},
 filteredOrders: ${filteredOrders},
 canViewPrices: ${canViewPrices},
 canCreateOrder: ${canCreateOrder},
-canViewFinancialDashboard: ${canViewFinancialDashboard},
-formattedCreatedDate: ${formattedCreatedDate}
+canViewFinancialDashboard: ${canViewFinancialDashboard}
     ''';
   }
 }

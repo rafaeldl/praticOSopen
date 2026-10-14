@@ -27,8 +27,7 @@ import '../../global.dart';
 /// tabs creates one), so the list reloads.
 final ValueNotifier<int> ordersChanged = ValueNotifier(0);
 
-/// Início tab: wires [HomeContent] to the order store. The legacy order flow
-/// (`/order`) is still what "Nova OS" opens.
+/// Início tab: wires [HomeContent] to the order store.
 class Home extends StatefulWidget {
   const Home({super.key});
 
