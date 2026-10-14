@@ -6226,4 +6226,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get formItemTypePhoto => 'Apenas foto';
+
+  @override
+  String get pickerNewItemKind => 'O que vai cadastrar?';
 }

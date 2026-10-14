@@ -2909,5 +2909,6 @@
   "formItemTypeBoolean": "Sí/No",
   "formItemTypeSelect": "Selección única",
   "formItemTypeChecklist": "Selección múltiple",
-  "formItemTypePhoto": "Solo foto"
+  "formItemTypePhoto": "Solo foto",
+  "pickerNewItemKind": "¿Qué vas a registrar?"
 }

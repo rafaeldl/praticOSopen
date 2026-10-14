@@ -2909,5 +2909,6 @@
   "formItemTypeBoolean": "Yes/No",
   "formItemTypeSelect": "Single choice",
   "formItemTypeChecklist": "Multiple choice",
-  "formItemTypePhoto": "Photo only"
+  "formItemTypePhoto": "Photo only",
+  "pickerNewItemKind": "What are you adding?"
 }

@@ -6238,4 +6238,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get formItemTypePhoto => 'Solo foto';
+
+  @override
+  String get pickerNewItemKind => '¿Qué vas a registrar?';
 }

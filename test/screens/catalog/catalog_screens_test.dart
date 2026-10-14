@@ -10,6 +10,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_list_screen.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:provider/provider.dart';
 
@@ -545,6 +546,79 @@ void main() {
       await pumpEdit(tester, FakeSource(),
           only({PermissionType.viewServices}));
       expect(find.byIcon(CupertinoIcons.ellipsis_circle), findsNothing);
+    });
+  });
+
+  group('"O que vai ser feito?" +', () {
+    final add = find.byKey(const ValueKey('picker-add'));
+
+    testWidgets('asks service or product, opens the new item sheet and the '
+        'saved item goes into the order', (tester) async {
+      final src = FakeSource(services: [item('s1', 'Troca de óleo', 120)]);
+      OrderItemPick? picked;
+      await pump(
+        tester,
+        Builder(
+          builder: (context) => CupertinoButton(
+            child: const Text('open'),
+            onPressed: () async {
+              picked = await Navigator.of(context).push<OrderItemPick>(
+                CupertinoPageRoute(
+                  builder: (_) => OrderItemSearchScreen(
+                    source: src,
+                    permissions: allPermissions,
+                    mostUsed: () async => const [],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      expect(find.text('O que vai cadastrar?'), findsOneWidget);
+      await tester.tap(find.text('Produto'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
+
+      await tester.enterText(
+        find
+            .descendant(
+              of: find.byType(FormSheet),
+              matching: find.byType(CupertinoTextField),
+            )
+            .first,
+        'Pastilha',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+
+      expect(src.saved.single.name, 'Pastilha');
+      expect(picked?.kind, CatalogKind.product);
+      expect(picked?.item.name, 'Pastilha');
+    });
+
+    testWidgets('with only one kind to create, opens the sheet directly',
+        (tester) async {
+      await pump(
+        tester,
+        OrderItemSearchScreen(
+          source: FakeSource(),
+          permissions: only({
+            PermissionType.viewServices,
+            PermissionType.manageServices,
+          }),
+          mostUsed: () async => const [],
+        ),
+      );
+      await tester.tap(add);
+      await tester.pumpAndSettle();
+      expect(find.byType(FormSheet), findsOneWidget);
     });
   });
 }

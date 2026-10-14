@@ -10737,6 +10737,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Apenas foto'**
   String get formItemTypePhoto;
+
+  /// No description provided for @pickerNewItemKind.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vai cadastrar?'**
+  String get pickerNewItemKind;
 }
 
 class _AppLocalizationsDelegate

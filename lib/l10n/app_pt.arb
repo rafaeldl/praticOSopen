@@ -3069,5 +3069,6 @@
   "formItemTypeBoolean": "Sim/Não",
   "formItemTypeSelect": "Seleção única",
   "formItemTypeChecklist": "Múltipla escolha",
-  "formItemTypePhoto": "Apenas foto"
+  "formItemTypePhoto": "Apenas foto",
+  "pickerNewItemKind": "O que vai cadastrar?"
 }

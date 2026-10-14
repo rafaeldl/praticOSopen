@@ -6,7 +6,9 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/catalog/catalog_item_form.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/utils/order_items.dart';
@@ -39,7 +41,9 @@ Future<List<String>> loadMostUsedItemKeys() async {
 /// - Each row says "serviço" or "produto" and shows the price (only with the
 ///   view-prices permission; no price shows "sem valor").
 /// - Tapping a row pops with an [OrderItemPick]: the order adds it right away.
-/// - "+ Novo serviço ou peça" on top focuses the search; when nothing has
+/// - The "+" on top opens the new item sheet (asking service or product
+///   first when both can be created); the saved item goes into the order.
+///   When nothing has
 ///   exactly the typed name, the first row is "Cadastrar “X”" (only with
 ///   `manageServices`/`manageProducts`).
 ///   It saves the item with the name only (price left blank) and adds it.
@@ -160,6 +164,40 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
     Navigator.pop(context, OrderItemPick(entry.kind, entry.item));
   }
 
+  List<CatalogKind> get _manageableKinds => [
+    for (final k in CatalogKind.values)
+      if (_permissions.canManage(k)) k,
+  ];
+
+  /// "+" on top: the new item sheet, then the item goes into the order.
+  Future<void> _add() async {
+    final kinds = _manageableKinds;
+    if (kinds.isEmpty) return;
+    final l10n = context.l10n;
+    final kind = kinds.length == 1
+        ? kinds.single
+        : await pickOne<CatalogKind>(
+            context,
+            title: l10n.pickerNewItemKind,
+            options: [
+              PickerItem(value: CatalogKind.service, title: l10n.service),
+              PickerItem(value: CatalogKind.product, title: l10n.product),
+            ],
+          );
+    if (kind == null || !mounted) return;
+    final created = await FormSheet.show<CatalogItem>(
+      context,
+      (_) => CatalogItemForm(
+        kind: kind,
+        source: _source,
+        permissions: _permissions,
+        asSheet: true,
+      ),
+    );
+    if (created == null || !mounted) return;
+    Navigator.pop(context, OrderItemPick(kind, created));
+  }
+
   Future<void> _create(String name) async {
     final kind = _createKind;
     if (kind == null || _creating) return;
@@ -206,6 +244,7 @@ class _OrderItemSearchScreenState extends State<OrderItemSearchScreen> {
       onRetry: _listen,
       enabled: !_creating,
       addLabel: _createKind == null ? null : l10n.pickerNewItem,
+      onAdd: _createKind == null ? null : _add,
       onCreate: _createKind == null ? null : _create,
       noMatchText: l10n.pickerNoItemWith,
       emptyTitle: l10n.orderCatalogEmpty,
