@@ -7255,7 +7255,7 @@ abstract class AppLocalizations {
   /// No description provided for @chargeCancelConfirm.
   ///
   /// In pt, this message translates to:
-  /// **'Cancelar esta cobrança no Asaas? O cliente não poderá mais pagar por ela.'**
+  /// **'O cliente não vai mais conseguir pagar por esse link.'**
   String get chargeCancelConfirm;
 
   /// No description provided for @chargeKeep.
@@ -10761,6 +10761,220 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Peça ou material que você vende'**
   String get pickerNewItemProductHint;
+
+  /// No description provided for @receiveSubtitleWithDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{customer} · total {total} · desconto {discount}'**
+  String receiveSubtitleWithDiscount(
+    String customer,
+    String total,
+    String discount,
+  );
+
+  /// No description provided for @receiveSubtitleNoCustomerWithDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'total {total} · desconto {discount}'**
+  String receiveSubtitleNoCustomerWithDiscount(String total, String discount);
+
+  /// No description provided for @chargeSendLinkTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar link para {customer} pagar'**
+  String chargeSendLinkTo(String customer);
+
+  /// No description provided for @chargeSendLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar link para pagar'**
+  String get chargeSendLink;
+
+  /// No description provided for @chargeLinkSentOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link mandado em {date}'**
+  String chargeLinkSentOn(String date);
+
+  /// No description provided for @chargeLinkSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link mandado'**
+  String get chargeLinkSent;
+
+  /// No description provided for @chargeLinkExpiredOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'O link venceu em {date}'**
+  String chargeLinkExpiredOn(String date);
+
+  /// No description provided for @chargeNotPaidYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'{customer} ainda não pagou os {value}.'**
+  String chargeNotPaidYet(String customer, String value);
+
+  /// No description provided for @chargeNotPaidYetNoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os {value} ainda não foram pagos.'**
+  String chargeNotPaidYetNoCustomer(String value);
+
+  /// No description provided for @chargeLinkValidUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'O link vale até {date}.'**
+  String chargeLinkValidUntil(String date);
+
+  /// No description provided for @chargeRemindWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrar pelo WhatsApp também'**
+  String get chargeRemindWhatsApp;
+
+  /// No description provided for @chargeReceivedOtherWay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebi de outro jeito'**
+  String get chargeReceivedOtherWay;
+
+  /// No description provided for @chargeLinkSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link para pagar'**
+  String get chargeLinkSection;
+
+  /// No description provided for @chargePaymentLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link de pagamento'**
+  String get chargePaymentLink;
+
+  /// No description provided for @chargeWaitingFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando {customer} pagar'**
+  String chargeWaitingFor(String customer);
+
+  /// No description provided for @chargeWaitingPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando o pagamento'**
+  String get chargeWaitingPayment;
+
+  /// No description provided for @chargeExpiredOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Venceu em {date}'**
+  String chargeExpiredOn(String date);
+
+  /// No description provided for @chargeMethodsUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pix, boleto ou cartão · até {date}'**
+  String chargeMethodsUntil(String date);
+
+  /// No description provided for @chargeInstallmentsUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count}x no cartão · até {date}'**
+  String chargeInstallmentsUntil(int count, String date);
+
+  /// No description provided for @chargeInstallmentsPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'{paid} de {count} parcelas pagas'**
+  String chargeInstallmentsPaid(int paid, int count);
+
+  /// No description provided for @chargeUntilReplaced.
+  ///
+  /// In pt, this message translates to:
+  /// **'até {date} · o link novo cancela este'**
+  String chargeUntilReplaced(String date);
+
+  /// No description provided for @chargeOrderChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'A OS mudou de valor'**
+  String get chargeOrderChanged;
+
+  /// No description provided for @chargeNowMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora falta {remaining}, mas o link ainda cobra {value}.'**
+  String chargeNowMissing(String remaining, String value);
+
+  /// No description provided for @chargeGenerateNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar link novo de {value}'**
+  String chargeGenerateNew(String value);
+
+  /// No description provided for @chargeKeepLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter o link de {value}'**
+  String chargeKeepLink(String value);
+
+  /// No description provided for @chargeSendAgainWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar de novo pelo WhatsApp'**
+  String get chargeSendAgainWhatsApp;
+
+  /// No description provided for @chargeCopyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar o link'**
+  String get chargeCopyLink;
+
+  /// No description provided for @chargeLinkCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link copiado'**
+  String get chargeLinkCopied;
+
+  /// No description provided for @chargeCancelLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar o link'**
+  String get chargeCancelLink;
+
+  /// No description provided for @chargeLinkTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link para pagar'**
+  String get chargeLinkTitle;
+
+  /// No description provided for @chargeLinkIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} recebe o link e paga por Pix, boleto ou cartão.'**
+  String chargeLinkIntro(String name);
+
+  /// No description provided for @chargeLinkIntroNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente recebe o link e paga por Pix, boleto ou cartão.'**
+  String get chargeLinkIntroNoName;
+
+  /// No description provided for @chargeSplitQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcelar no cartão?'**
+  String get chargeSplitQuestion;
+
+  /// No description provided for @chargeSplitOnCard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcelar no cartão'**
+  String get chargeSplitOnCard;
+
+  /// No description provided for @chargeSplitNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não'**
+  String get chargeSplitNo;
 }
 
 class _AppLocalizationsDelegate

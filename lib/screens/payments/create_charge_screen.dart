@@ -6,13 +6,18 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/repositories/tenant/tenant_customer_repository.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/tax_id.dart';
-import 'package:praticos/widgets/tax_id_form_field.dart';
 
 enum ChargeFormError {
   customerRequired,
@@ -225,31 +230,44 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     if (failure != null) _showMessage(failure);
   }
 
-  void _pickInstallments() {
+  /// "Escolher" screen for the card installments: "Não" (single charge,
+  /// Pix/boleto/card) or 2x..12x on the card.
+  Future<void> _pickInstallments() async {
+    final l10n = context.l10n;
     final value = parseCurrencyInput(_valueController.text);
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(sheetContext.l10n.chargeInstallments),
-        actions: [
-          for (var count = _minInstallments; count <= _maxInstallments; count++)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                setState(() => _installmentCount = count);
-                Navigator.pop(sheetContext);
-              },
-              child: Text(sheetContext.l10n.chargeInstallmentOption(
-                count,
-                _formatService.formatBrl(value / count),
-              )),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: Text(sheetContext.l10n.cancel),
+    final current =
+        _mode == ChargeMode.single ? 1 : _installmentCount;
+    final picked = await pickOne<int>(
+      context,
+      title: l10n.chargeSplitQuestion,
+      selected: current,
+      options: [
+        PickerItem(
+          key: const ValueKey('charge_split_none'),
+          value: 1,
+          title: l10n.chargeSplitNo,
+          subtitle: l10n.chargeSingleHint,
         ),
-      ),
+        for (var count = _minInstallments; count <= _maxInstallments; count++)
+          PickerItem(
+            key: ValueKey('charge_split_$count'),
+            value: count,
+            title: l10n.chargeInstallmentOption(
+              count,
+              _formatService.formatBrl(value / count),
+            ),
+          ),
+      ],
     );
+    if (picked == null || !mounted) return;
+    setState(() {
+      if (picked == 1) {
+        _mode = ChargeMode.single;
+      } else {
+        _mode = ChargeMode.cardInstallments;
+        _installmentCount = picked;
+      }
+    });
   }
 
   void _pickDueDate() {
@@ -258,7 +276,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
       context: context,
       builder: (popupContext) => Container(
         height: 300,
-        color: CupertinoColors.systemBackground.resolveFrom(popupContext),
+        color: AppColors.surface.resolveFrom(popupContext),
         child: SafeArea(
           top: false,
           child: Column(
@@ -305,130 +323,90 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     );
   }
 
+  /// What still blocks the "✓" (null when the link can be created).
+  ChargeFormError? _currentError() => validateChargeInput(
+        hasCustomer: widget.order.customer?.id != null,
+        value: parseCurrencyInput(_valueController.text),
+        remainingBalance: widget.remainingBalance,
+        needsTaxId: _needsTaxId,
+        taxIdInput: _taxIdInput,
+      );
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final value = parseCurrencyInput(_valueController.text);
+    final error = _currentError();
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final name = widget.order.customer?.name;
 
-    return CupertinoPageScaffold(
-      backgroundColor:
-          CupertinoColors.systemGroupedBackground.resolveFrom(context),
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(l10n.createChargeTitle),
-      ),
-      child: SafeArea(
-        child: ListView(
+    return FormSheet(
+      key: const Key('createChargeSheet'),
+      title: l10n.chargeLinkTitle,
+      canSave: !_loadingTaxId && error == null,
+      missingHint:
+          _loadingTaxId || error == null ? null : chargeFormErrorText(l10n, error),
+      dirty: _taxIdInput.isNotEmpty,
+      busy: _submitting,
+      onSave: _submit,
+      children: [
+        FormFieldsCard(
           children: [
-            CupertinoListSection.insetGrouped(
-              header: Text(l10n.chargeValue.toUpperCase()),
-              footer: Text(l10n.chargeBalanceHint(
-                  _formatService.formatBrl(widget.remainingBalance))),
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: CupertinoTextField(
-                    key: const Key('chargeValueField'),
-                    controller: _valueController,
-                    enabled: !_submitting,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [_brlFormatter],
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: CupertinoColors.label.resolveFrom(context),
-                    ),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemGrey6.resolveFrom(context),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            CupertinoListSection.insetGrouped(
-              footer: Text(_mode == ChargeMode.single
-                  ? l10n.chargeSingleHint
-                  : l10n.chargeInstallmentsHint),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: CupertinoSlidingSegmentedControl<ChargeMode>(
-                      groupValue: _mode,
-                      onValueChanged: (mode) {
-                        if (mode != null && !_submitting) {
-                          setState(() => _mode = mode);
-                        }
-                      },
-                      children: {
-                        ChargeMode.single: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(l10n.chargeModeSingle),
-                        ),
-                        ChargeMode.cardInstallments: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(l10n.chargeModeInstallments),
-                        ),
-                      },
-                    ),
-                  ),
-                ),
-                if (_mode == ChargeMode.cardInstallments)
-                  CupertinoListTile(
-                    key: const Key('chargeInstallmentsTile'),
-                    title: Text(l10n.chargeInstallments),
-                    additionalInfo: Text(l10n.chargeInstallmentOption(
-                      _installmentCount,
-                      _formatService.formatBrl(value / _installmentCount),
-                    )),
-                    trailing: const CupertinoListTileChevron(),
-                    onTap: _submitting ? null : _pickInstallments,
-                  ),
-              ],
-            ),
-            CupertinoListSection.insetGrouped(
-              children: [
-                CupertinoListTile(
-                  key: const Key('chargeDueDateTile'),
-                  title: Text(l10n.chargeDueDate),
-                  additionalInfo: Text(_formatService.formatDate(_dueDate)),
-                  trailing: const CupertinoListTileChevron(),
-                  onTap: _submitting ? null : _pickDueDate,
-                ),
-              ],
+            AppFormField(
+              key: const Key('chargeValueField'),
+              label: l10n.chargeValue,
+              controller: _valueController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [_brlFormatter],
+              hint: l10n.chargeBalanceHint(
+                _formatService.formatBrl(widget.remainingBalance),
+              ),
             ),
             if (_needsTaxId)
-              CupertinoListSection.insetGrouped(
-                footer: Text(l10n.chargeTaxIdHint),
-                children: [
-                  TaxIdFormField(
-                    key: const Key('chargeTaxIdField'),
-                    required: true,
-                    onChanged: (id) => _taxIdInput = id,
-                  ),
-                ],
+              AppFormField(
+                key: const Key('chargeTaxIdField'),
+                label: l10n.cpfCnpj,
+                hint: l10n.chargeTaxIdHint,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.characters,
+                onChanged: (text) =>
+                    setState(() => _taxIdInput = normalizeTaxId(text)),
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-              child: SizedBox(
-                width: double.infinity,
-                child: CupertinoButton.filled(
-                  key: const Key('generateChargeButton'),
-                  onPressed: (_submitting || _loadingTaxId) ? null : _submit,
-                  child: _submitting
-                      ? const CupertinoActivityIndicator(
-                          color: CupertinoColors.white)
-                      : Text(l10n.chargeGenerate),
-                ),
+          ],
+        ),
+        FormCard(
+          note: (name ?? '').isEmpty
+              ? l10n.chargeLinkIntroNoName
+              : l10n.chargeLinkIntro(name!),
+          children: [
+            FormRow(
+              key: const Key('chargeDueDateTile'),
+              icon: CupertinoIcons.calendar,
+              title: l10n.chargeDueDate,
+              trailing: Text(
+                _formatService.formatDate(_dueDate),
+                style: AppTypography.body.copyWith(color: secondary),
               ),
+              onTap: _submitting ? null : _pickDueDate,
+            ),
+            FormRow(
+              key: const Key('chargeInstallmentsTile'),
+              icon: CupertinoIcons.creditcard,
+              title: l10n.chargeSplitOnCard,
+              trailing: Text(
+                _mode == ChargeMode.single
+                    ? l10n.chargeSplitNo
+                    : l10n.chargeInstallmentOption(
+                        _installmentCount,
+                        _formatService.formatBrl(value / _installmentCount),
+                      ),
+                style: AppTypography.body.copyWith(color: secondary),
+              ),
+              onTap: _submitting ? null : _pickInstallments,
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
