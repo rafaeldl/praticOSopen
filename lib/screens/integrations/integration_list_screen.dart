@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:flutter/material.dart' show SelectableText;
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -7,8 +6,18 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/integration_token.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart';
+import 'package:praticos/screens/menu_navigation/more/more_page.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/list_states.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/integration_api_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
 /// Maps an [IntegrationApiException] to a localized, user-visible message.
 ///
@@ -74,8 +83,17 @@ class _IntegrationNameDialogState extends State<IntegrationNameDialog> {
   }
 }
 
+/// "Integrações": the Asaas account (when the company is in the pilot) and
+/// the ChatGPT/Claude connections, each row with a one-line status. "+" on
+/// top creates a connection; tapping one offers turning it off.
 class IntegrationListScreen extends StatefulWidget {
-  const IntegrationListScreen({super.key});
+  const IntegrationListScreen({super.key, this.service, this.paymentSettings});
+
+  /// Test seam; defaults to [IntegrationApiService.instance].
+  final IntegrationApiService? service;
+
+  /// Test seam; defaults to [paymentSettingsStream].
+  final Stream<PaymentSettings>? paymentSettings;
 
   @override
   State<IntegrationListScreen> createState() => _IntegrationListScreenState();
@@ -89,7 +107,10 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
 
   /// Null hides the Payments section (not owner/admin or no company).
   late final Stream<PaymentSettings>? _paymentSettings =
-      paymentSettingsStream();
+      widget.paymentSettings ?? paymentSettingsStream();
+
+  IntegrationApiService get _service =>
+      widget.service ?? IntegrationApiService.instance;
 
   @override
   void initState() {
@@ -104,7 +125,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
       _error = null;
     });
     try {
-      final tokens = await IntegrationApiService.instance.list();
+      final tokens = await _service.list();
       if (!mounted) return;
       setState(() {
         _tokens = tokens;
@@ -128,7 +149,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
     if (name == null || name.isEmpty) return;
 
     try {
-      final created = await IntegrationApiService.instance.create(name: name);
+      final created = await _service.create(name: name);
       if (!mounted) return;
       await _showUrlOnce(created);
       if (!mounted) return;
@@ -156,7 +177,9 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
             const SizedBox(height: 12),
             SelectableText(
               url,
-              style: const TextStyle(fontSize: 12),
+              style: AppTypography.label.copyWith(
+                color: AppColors.text.resolveFrom(dialogContext),
+              ),
             ),
           ],
         ),
@@ -174,6 +197,23 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
     );
   }
 
+  Future<void> _openToken(IntegrationToken token) async {
+    final picked = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'revoke',
+            label: context.l10n.integrationsRevoke,
+            icon: CupertinoIcons.power,
+            destructive: true,
+          ),
+        ]),
+      ],
+    );
+    if (picked == 'revoke' && mounted) await _revoke(token);
+  }
+
   Future<void> _revoke(IntegrationToken token) async {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
@@ -189,6 +229,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
             child: Text(dialogContext.l10n.cancel),
           ),
           CupertinoDialogAction(
+            key: const Key('confirmRevokeAction'),
             isDestructiveAction: true,
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(dialogContext.l10n.integrationsRevoke),
@@ -200,8 +241,9 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
     if (confirmed != true || token.id == null) return;
 
     try {
-      await IntegrationApiService.instance.revoke(token.id!);
+      await _service.revoke(token.id!);
       if (!mounted) return;
+      showAppToast(context, context.l10n.integrationsRevoked);
       await _load();
     } on IntegrationApiException catch (e) {
       if (!mounted) return;
@@ -210,18 +252,10 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.ok),
-          ),
-        ],
-      ),
+    showAppToast(
+      context,
+      message,
+      icon: CupertinoIcons.exclamationmark_circle_fill,
     );
   }
 
@@ -235,99 +269,67 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   @override
   Widget build(BuildContext context) {
     _formatService.setLocale(Localizations.localeOf(context).toString());
+    final l10n = context.l10n;
     final paymentSettings = _paymentSettings;
 
-    return CupertinoPageScaffold(
-      backgroundColor:
-          CupertinoColors.systemGroupedBackground.resolveFrom(context),
-      child: CustomScrollView(
-        slivers: [
-          AppNavBar(
-            largeTitle: Text(context.l10n.integrations),
-            previousTitle: context.l10n.advancedTitle,
-            trailing: GlassBarButton(
-              label: context.l10n.add,
-              icon: CupertinoIcons.add,
-              onPressed: _create,
-            ),
-          ),
-          SliverToBoxAdapter(child: _buildBody(context)),
-          if (paymentSettings != null)
-            SliverToBoxAdapter(
-              child: PaymentsIntegrationSection(
-                settingsStream: paymentSettings,
-              ),
-            ),
-        ],
+    return MorePage(
+      title: l10n.integrations,
+      previousPageTitle: l10n.advancedTitle,
+      trailing: GlassBarButton(
+        key: const Key('integrationsAdd'),
+        label: l10n.integrationsNew,
+        icon: CupertinoIcons.add,
+        onPressed: _create,
       ),
+      children: [
+        if (paymentSettings != null)
+          PaymentsIntegrationSection(settingsStream: paymentSettings),
+        SectionLabel(l10n.integrationsAiSection),
+        _buildTokens(context),
+      ],
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildTokens(BuildContext context) {
+    final l10n = context.l10n;
     if (_loading) {
       return const Padding(
-        padding: EdgeInsets.all(32),
-        child: Center(child: CupertinoActivityIndicator()),
+        padding: EdgeInsets.all(AppSpacing.xl),
+        child: LoadingState(),
       );
     }
 
     if (_error != null) {
-      return Padding(
-        padding: const EdgeInsets.all(32),
-        child: Center(
-          child: Text(
-            _error!,
-            style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-        ),
-      );
+      return ErrorState(message: _error, onRetry: _load);
     }
 
     if (_tokens.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          children: [
-            Text(
-              context.l10n.integrationsEmpty,
-              style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.integrationsSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-              ),
-            ),
-          ],
+        key: const Key('integrationsEmpty'),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageMargin,
+          vertical: AppSpacing.sm,
+        ),
+        child: Text(
+          l10n.integrationsEmptyLine,
+          style: AppTypography.callout.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
+          ),
         ),
       );
     }
 
-    return CupertinoListSection.insetGrouped(
-      children: _tokens.map((token) {
-        return CupertinoListTile(
-          title: Text(token.name ?? ''),
-          subtitle: Text(_subtitle(context, token)),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _revoke(token),
-            child: Text(
-              context.l10n.integrationsRevoke,
-              style: const TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.systemRed,
-              ),
-            ),
+    return MoreRows(
+      rows: [
+        for (final token in _tokens)
+          AppListRow(
+            key: Key('integrationToken_${token.id}'),
+            title: token.name ?? '',
+            subtitle: _subtitle(context, token),
+            showChevron: false,
+            onTap: () => _openToken(token),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }

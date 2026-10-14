@@ -1786,12 +1786,6 @@ abstract class AppLocalizations {
   /// **'Integrações'**
   String get integrations;
 
-  /// No description provided for @integrationsSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Conecte o PraticOS ao ChatGPT e ao Claude'**
-  String get integrationsSubtitle;
-
   /// No description provided for @integrationsEmpty.
   ///
   /// In pt, this message translates to:
@@ -1825,7 +1819,7 @@ abstract class AppLocalizations {
   /// No description provided for @integrationsRevoke.
   ///
   /// In pt, this message translates to:
-  /// **'Revogar'**
+  /// **'Desligar conexão'**
   String get integrationsRevoke;
 
   /// No description provided for @integrationsRevokeConfirm.
@@ -2158,35 +2152,11 @@ abstract class AppLocalizations {
   /// **'Pendente'**
   String get pending;
 
-  /// No description provided for @inviteTo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convite para'**
-  String get inviteTo;
-
-  /// No description provided for @invitePendingMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.'**
-  String get invitePendingMessage;
-
   /// No description provided for @cancelInvite.
   ///
   /// In pt, this message translates to:
   /// **'Cancelar Convite'**
   String get cancelInvite;
-
-  /// No description provided for @confirmCancelInvite.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza que deseja cancelar o convite para'**
-  String get confirmCancelInvite;
-
-  /// No description provided for @yesCancel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sim, Cancelar'**
-  String get yesCancel;
 
   /// No description provided for @userWithoutName.
   ///
@@ -2194,47 +2164,11 @@ abstract class AppLocalizations {
   /// **'Usuário sem nome'**
   String get userWithoutName;
 
-  /// No description provided for @actionsFor.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ações para'**
-  String get actionsFor;
-
-  /// No description provided for @editPermission.
-  ///
-  /// In pt, this message translates to:
-  /// **'Editar Permissão'**
-  String get editPermission;
-
-  /// No description provided for @removeFromCompany.
-  ///
-  /// In pt, this message translates to:
-  /// **'Remover da Empresa'**
-  String get removeFromCompany;
-
-  /// No description provided for @selectProfile.
-  ///
-  /// In pt, this message translates to:
-  /// **'Selecionar Perfil'**
-  String get selectProfile;
-
-  /// No description provided for @chooseCollaboratorRole.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolha o perfil de acesso do colaborador'**
-  String get chooseCollaboratorRole;
-
   /// No description provided for @removeCollaborator.
   ///
   /// In pt, this message translates to:
   /// **'Remover Colaborador'**
   String get removeCollaborator;
-
-  /// No description provided for @confirmRemoveFromOrganization.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza que deseja remover {name} da organização?'**
-  String confirmRemoveFromOrganization(String name);
 
   /// No description provided for @emailNotProvided.
   ///
@@ -2812,24 +2746,6 @@ abstract class AppLocalizations {
   /// **'Buscar outro código'**
   String get searchAnotherCode;
 
-  /// No description provided for @shareInvite.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar Convite'**
-  String get shareInvite;
-
-  /// No description provided for @copyInviteCode.
-  ///
-  /// In pt, this message translates to:
-  /// **'Copiar Código do Convite'**
-  String get copyInviteCode;
-
-  /// No description provided for @sendViaWhatsAppInvite.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enviar convite via WhatsApp'**
-  String get sendViaWhatsAppInvite;
-
   /// No description provided for @inviteCodeCopied.
   ///
   /// In pt, this message translates to:
@@ -2841,12 +2757,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Informe email ou telefone'**
   String get emailOrPhone;
-
-  /// No description provided for @inviteExpiresIn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Convite válido por {days} dias'**
-  String inviteExpiresIn(int days);
 
   /// No description provided for @thisWillRemoveAllPayments.
   ///
@@ -3166,12 +3076,6 @@ abstract class AppLocalizations {
   /// **'{count} {count, plural, =1{visualização} other{visualizações}}'**
   String viewCount(int count);
 
-  /// No description provided for @noComments.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum comentário'**
-  String get noComments;
-
   /// No description provided for @commentPlaceholder.
   ///
   /// In pt, this message translates to:
@@ -3189,18 +3093,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Equipe'**
   String get commentFromTeam;
-
-  /// No description provided for @internalComment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comentário interno'**
-  String get internalComment;
-
-  /// No description provided for @publicComment.
-  ///
-  /// In pt, this message translates to:
-  /// **'Comentário público'**
-  String get publicComment;
 
   /// No description provided for @rejectionReason.
   ///
@@ -3351,12 +3243,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Convite inválido: empresa não encontrada.'**
   String get invalidInviteCompanyNotFound;
-
-  /// No description provided for @shareInviteAction.
-  ///
-  /// In pt, this message translates to:
-  /// **'Compartilhar Convite'**
-  String get shareInviteAction;
 
   /// No description provided for @duplicateInviteTitle.
   ///
@@ -4113,12 +3999,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Conectar conta Asaas'**
   String get asaasConnectTitle;
-
-  /// No description provided for @asaasConnectIntro.
-  ///
-  /// In pt, this message translates to:
-  /// **'Receba por Pix, boleto ou cartão na conta Asaas da sua empresa. Quando o pagamento é confirmado, a OS dá baixa sozinha.'**
-  String get asaasConnectIntro;
 
   /// No description provided for @asaasConnectStep1.
   ///
@@ -5361,18 +5241,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Criar convite'**
   String get createInvite;
-
-  /// No description provided for @cancelAndInviteAgain.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cancelar e convidar de novo'**
-  String get cancelAndInviteAgain;
-
-  /// No description provided for @inviteExpiredMessage.
-  ///
-  /// In pt, this message translates to:
-  /// **'Este convite venceu. Cancele e convide de novo.'**
-  String get inviteExpiredMessage;
 
   /// No description provided for @userWillReceiveInviteByWhatsAppHint.
   ///
@@ -8281,6 +8149,216 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'As próximas OS não serão mais criadas. As que já existem continuam.'**
   String get contractStopRepeatingMessage;
+
+  /// No description provided for @commentsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ninguém comentou ainda.'**
+  String get commentsEmpty;
+
+  /// No description provided for @commentsTeamOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só a equipe vê'**
+  String get commentsTeamOnly;
+
+  /// No description provided for @commentsCustomerSees.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente também vê, pelo link da OS'**
+  String get commentsCustomerSees;
+
+  /// No description provided for @commentsCustomerHidden.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente não vê'**
+  String get commentsCustomerHidden;
+
+  /// No description provided for @commentTeamOnlyTag.
+  ///
+  /// In pt, this message translates to:
+  /// **'só a equipe'**
+  String get commentTeamOnlyTag;
+
+  /// No description provided for @commentSendError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para enviar. Tente de novo.'**
+  String get commentSendError;
+
+  /// No description provided for @inviteSheetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite para a equipe'**
+  String get inviteSheetTitle;
+
+  /// No description provided for @inviteShareSentence.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mande este código para a pessoa entrar na equipe. Vale por {days} dias.'**
+  String inviteShareSentence(int days);
+
+  /// No description provided for @inviteShareButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar convite'**
+  String get inviteShareButton;
+
+  /// No description provided for @inviteSendWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar pelo WhatsApp'**
+  String get inviteSendWhatsApp;
+
+  /// No description provided for @inviteCopyCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar código'**
+  String get inviteCopyCode;
+
+  /// No description provided for @inviteMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções do convite'**
+  String get inviteMenu;
+
+  /// No description provided for @teamCancelInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar convite'**
+  String get teamCancelInvite;
+
+  /// No description provided for @teamCancelInviteQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar o convite de {name}?'**
+  String teamCancelInviteQuestion(String name);
+
+  /// No description provided for @teamCancelInviteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O código para de funcionar.'**
+  String get teamCancelInviteMessage;
+
+  /// No description provided for @teamKeepInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter convite'**
+  String get teamKeepInvite;
+
+  /// No description provided for @teamInviteCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite cancelado'**
+  String get teamInviteCanceled;
+
+  /// No description provided for @teamInviteExpiredQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O convite de {name} venceu'**
+  String teamInviteExpiredQuestion(String name);
+
+  /// No description provided for @teamInviteExpiredMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O código não funciona mais. Convide de novo para mandar um código novo.'**
+  String get teamInviteExpiredMessage;
+
+  /// No description provided for @teamInviteAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar de novo'**
+  String get teamInviteAgain;
+
+  /// No description provided for @teamMemberRoleQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que {name} pode fazer?'**
+  String teamMemberRoleQuestion(String name);
+
+  /// No description provided for @teamRemoveMember.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar da equipe'**
+  String get teamRemoveMember;
+
+  /// No description provided for @teamRemoveMemberQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar {name} da equipe?'**
+  String teamRemoveMemberQuestion(String name);
+
+  /// No description provided for @teamRemoveMemberMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'A pessoa perde o acesso às OS da empresa.'**
+  String get teamRemoveMemberMessage;
+
+  /// No description provided for @teamRoleChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Papel trocado'**
+  String get teamRoleChanged;
+
+  /// No description provided for @teamMemberRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} saiu da equipe'**
+  String teamMemberRemoved(String name);
+
+  /// No description provided for @integrationsAiSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'ChatGPT e Claude'**
+  String get integrationsAiSection;
+
+  /// No description provided for @integrationsEmptyLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma conexão ainda. Toque em + para ligar o PraticOS ao ChatGPT ou ao Claude.'**
+  String get integrationsEmptyLine;
+
+  /// No description provided for @integrationsRevoked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conexão desligada'**
+  String get integrationsRevoked;
+
+  /// No description provided for @asaasConnectHeadline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conecte a conta Asaas para receber Pix, boleto e cartão pela OS.'**
+  String get asaasConnectHeadline;
+
+  /// No description provided for @asaasConnectedHeadline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os pagamentos pelo Asaas dão baixa na OS sozinhos.'**
+  String get asaasConnectedHeadline;
+
+  /// No description provided for @asaasConnecting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conectando…'**
+  String get asaasConnecting;
+
+  /// No description provided for @asaasConnectedToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta Asaas conectada'**
+  String get asaasConnectedToast;
+
+  /// No description provided for @asaasDisconnectedToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta Asaas desconectada'**
+  String get asaasDisconnectedToast;
+
+  /// No description provided for @asaasMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções do Asaas'**
+  String get asaasMenu;
 }
 
 class _AppLocalizationsDelegate

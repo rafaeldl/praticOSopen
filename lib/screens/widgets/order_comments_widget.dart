@@ -1,18 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/screens/widgets/section_label.dart';
-import 'package:flutter/material.dart' show Divider;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order_comment.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 
-/// Widget to display and add comments on an order
+/// Sends a comment: the text and whether only the team sees it.
+typedef OrderCommentSender = Future<void> Function(String text, bool internal);
+
+/// Comments of an order as a message thread (author and time in
+/// `textSecondary`, the text wrapping under them) with the box to write a new
+/// one at the end: "Só a equipe vê" switch, field and send.
+///
+/// [expand] fills the available height: the thread scrolls and the box stays
+/// at the bottom (comments screen). Without it the widget sizes to its
+/// content, under a "Comentários" label (legacy order form).
 class OrderCommentsWidget extends StatefulWidget {
   final String orderId;
   final String companyId;
   final bool showInternalToggle;
   final String? highlightCommentId;
+  final bool expand;
+
+  /// Test seam; defaults to the order's `comments` subcollection.
+  final Stream<List<OrderComment>>? commentsStream;
+
+  /// Test seam; defaults to adding the comment to Firestore.
+  final OrderCommentSender? onSend;
 
   const OrderCommentsWidget({
     super.key,
@@ -20,6 +39,9 @@ class OrderCommentsWidget extends StatefulWidget {
     required this.companyId,
     this.showInternalToggle = true,
     this.highlightCommentId,
+    this.expand = false,
+    this.commentsStream,
+    this.onSend,
   });
 
   @override
@@ -30,14 +52,43 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
   final TextEditingController _commentController = TextEditingController();
   final FormatService _formatService = FormatService();
   final Map<String, GlobalKey> _commentKeys = {};
+  late final Stream<List<OrderComment>> _stream = _watch();
   bool _isInternal = false;
   bool _isSending = false;
   bool _hasScrolledToComment = false;
 
   @override
+  void initState() {
+    super.initState();
+    _commentController.addListener(_onTextChanged);
+  }
+
+  @override
   void dispose() {
+    _commentController.removeListener(_onTextChanged);
     _commentController.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged() => setState(() {});
+
+  Stream<List<OrderComment>> _watch() {
+    final injected = widget.commentsStream;
+    if (injected != null) return injected;
+    return FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('orders')
+        .doc(widget.orderId)
+        .collection('comments')
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snapshot) => [
+            for (final doc in snapshot.docs)
+              OrderComment.fromJson(doc.data())..id = doc.id,
+          ].where((c) => c.deleted != true).toList(),
+        );
   }
 
   void _scrollToComment(String commentId) {
@@ -58,61 +109,46 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
     });
   }
 
+  Future<void> _addToFirestore(String text, bool internal) {
+    final user = Global.currentUser;
+    return FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('orders')
+        .doc(widget.orderId)
+        .collection('comments')
+        .add({
+          'text': text,
+          'authorType': 'internal',
+          'author': {
+            'name': user?.displayName ?? 'Equipe',
+            'userId': user?.uid,
+            'email': user?.email,
+          },
+          'source': 'app',
+          'isInternal': internal,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+  }
+
   Future<void> _sendComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
-    setState(() {
-      _isSending = true;
-    });
-
+    setState(() => _isSending = true);
     try {
-      final user = Global.currentUser;
-      final comment = {
-        'text': text,
-        'authorType': 'internal',
-        'author': {
-          'name': user?.displayName ?? 'Equipe',
-          'userId': user?.uid,
-          'email': user?.email,
-        },
-        'source': 'app',
-        'isInternal': _isInternal,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(widget.companyId)
-          .collection('orders')
-          .doc(widget.orderId)
-          .collection('comments')
-          .add(comment);
-
+      await (widget.onSend ?? _addToFirestore)(text, _isInternal);
       _commentController.clear();
-    } catch (e) {
-      // Show error dialog
+    } catch (_) {
       if (mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: Text(context.l10n.errorOccurred),
-            content: Text(e.toString()),
-            actions: [
-              CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+        showAppToast(
+          context,
+          context.l10n.commentSendError,
+          icon: CupertinoIcons.exclamationmark_circle_fill,
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSending = false;
-        });
-      }
+      if (mounted) setState(() => _isSending = false);
     }
   }
 
@@ -120,346 +156,281 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
   Widget build(BuildContext context) {
     _formatService.setLocale(context.l10n.localeName);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Same header as the other sections (sentence case).
-        SectionLabel(context.l10n.comments),
-
-        // Comments list in grouped card
-        _buildCommentsList(),
-      ],
-    );
-  }
-
-  Widget _buildCommentsList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('companies')
-          .doc(widget.companyId)
-          .collection('orders')
-          .doc(widget.orderId)
-          .collection('comments')
-          .orderBy('createdAt', descending: false)
-          .snapshots(),
+    final thread = StreamBuilder<List<OrderComment>>(
+      stream: _stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return _buildGroupedCard(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  '${context.l10n.errorOccurred}: ${snapshot.error}',
-                  style: TextStyle(
-                    color: CupertinoColors.systemRed.resolveFrom(context),
-                  ),
-                ),
-              ),
-            ],
+          return _line(
+            context.l10n.listLoadError,
+            key: const ValueKey('order_comments_error'),
           );
         }
-
         if (!snapshot.hasData) {
-          return _buildGroupedCard(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CupertinoActivityIndicator()),
-              ),
-            ],
+          return const Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Center(child: CupertinoActivityIndicator()),
+          );
+        }
+        final comments = snapshot.data!;
+        if (comments.isEmpty) {
+          return _line(
+            context.l10n.commentsEmpty,
+            key: const ValueKey('order_comments_empty'),
           );
         }
 
-        final comments = snapshot.data!.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final comment = OrderComment.fromJson(data);
-          comment.id = doc.id;
-          return comment;
-        }).where((c) => c.deleted != true).toList();
-
-        // Scroll to highlighted comment after build
-        if (widget.highlightCommentId != null && !_hasScrolledToComment && comments.isNotEmpty) {
+        if (widget.highlightCommentId != null && !_hasScrolledToComment) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToComment(widget.highlightCommentId!);
           });
         }
 
-        return _buildGroupedCard(
-          children: [
-            if (comments.isEmpty)
-              _buildEmptyState()
-            else
-              ...comments.asMap().entries.map((entry) {
-                final index = entry.key;
-                final comment = entry.value;
-                final isHighlighted = comment.id == widget.highlightCommentId;
-                return _buildCommentRow(
-                  comment,
-                  isLast: index == comments.length - 1,
-                  isHighlighted: isHighlighted,
-                );
-              }),
-            // Divider before input
-            Divider(
-              height: 1,
-              color: CupertinoColors.separator.resolveFrom(context),
-            ),
-            // Input row
-            _buildCommentInput(),
-          ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [for (final comment in comments) _buildCommentRow(comment)],
         );
       },
     );
-  }
 
-  Widget _buildGroupedCard({required List<Widget> children}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: children,
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      child: Row(
+    if (widget.expand) {
+      return Column(
         children: [
-          Icon(
-            CupertinoIcons.chat_bubble_2,
-            size: 20,
-            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            context.l10n.noComments,
-            style: TextStyle(
-              fontSize: 16,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+          Expanded(
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              children: [thread],
             ),
           ),
+          _buildCommentInput(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCommentRow(OrderComment comment, {bool isLast = false, bool isHighlighted = false}) {
-    final isCustomer = comment.authorType == 'customer';
-    final isInternal = comment.isInternal == true;
-
-    // Create or get key for this comment
-    if (comment.id != null) {
-      _commentKeys.putIfAbsent(comment.id!, () => GlobalKey());
-    }
-
-    // Icon and color based on comment type
-    IconData icon;
-    Color iconColor;
-    Color? badgeColor;
-    String? badgeText;
-
-    if (isCustomer) {
-      icon = CupertinoIcons.person_fill;
-      iconColor = CupertinoColors.systemGreen;
-    } else if (isInternal) {
-      icon = CupertinoIcons.lock_fill;
-      iconColor = CupertinoColors.systemOrange;
-      badgeColor = CupertinoColors.systemOrange;
-      badgeText = context.l10n.internalComment;
-    } else {
-      icon = CupertinoIcons.person_2_fill;
-      iconColor = CupertinoColors.activeBlue;
+      );
     }
 
     return Column(
-      key: comment.id != null ? _commentKeys[comment.id!] : null,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          color: isHighlighted
-              ? CupertinoColors.systemYellow.withValues(alpha: 0.2)
-              : null,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon indicator
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 16,
-                  color: iconColor,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Author row
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            comment.author?.name ??
-                                (isCustomer ? context.l10n.commentFromCustomer : context.l10n.commentFromTeam),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label.resolveFrom(context),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (badgeText != null) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: badgeColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              badgeText,
-                              style: const TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w600,
-                                color: CupertinoColors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    // Timestamp
-                    Text(
-                      comment.createdAt != null
-                          ? _formatService.formatDateTime(comment.createdAt!)
-                          : '',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Comment text
-                    Text(
-                      comment.text ?? '',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: CupertinoColors.label.resolveFrom(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (!isLast)
-          Divider(
-            height: 1,
-            indent: 60,
-            color: CupertinoColors.separator.resolveFrom(context),
-          ),
+        SectionLabel(context.l10n.comments),
+        thread,
+        _buildCommentInput(),
       ],
     );
   }
 
-  Widget _buildCommentInput() {
+  /// One line of `textSecondary` text (empty thread, load error).
+  Widget _line(String text, {Key? key}) {
     return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          // Internal toggle
-          if (widget.showInternalToggle)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  CupertinoSwitch(
-                    value: _isInternal,
-                    onChanged: (value) {
-                      setState(() {
-                        _isInternal = value;
-                      });
-                    },
-                    activeTrackColor: CupertinoColors.systemOrange,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _isInternal ? context.l10n.internalComment : context.l10n.publicComment,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: _isInternal
-                            ? CupertinoColors.systemOrange
-                            : CupertinoColors.activeBlue,
-                      ),
+      key: key,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pageMargin,
+        vertical: AppSpacing.lg,
+      ),
+      child: Text(
+        text,
+        style: AppTypography.callout.copyWith(
+          color: AppColors.textSecondary.resolveFrom(context),
+        ),
+      ),
+    );
+  }
+
+  String _author(OrderComment comment) {
+    final l10n = context.l10n;
+    final userId = comment.author?.userId;
+    if (userId != null && userId == Global.currentUser?.uid) {
+      return l10n.orderCommentYou;
+    }
+    final name = comment.author?.name?.trim() ?? '';
+    final isCustomer = comment.authorType == 'customer';
+    if (name.isEmpty) {
+      return isCustomer ? l10n.commentFromCustomer : l10n.commentFromTeam;
+    }
+    return isCustomer ? '$name · ${l10n.commentFromCustomer}' : name;
+  }
+
+  Widget _buildCommentRow(OrderComment comment) {
+    if (comment.id != null) {
+      _commentKeys.putIfAbsent(comment.id!, () => GlobalKey());
+    }
+    final highlighted =
+        comment.id != null && comment.id == widget.highlightCommentId;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final meta = [
+      _author(comment),
+      if (comment.createdAt != null)
+        _formatService.formatDateTime(comment.createdAt!),
+      if (comment.isInternal == true) context.l10n.commentTeamOnlyTag,
+    ].join(' · ');
+
+    return Container(
+      key: comment.id != null ? _commentKeys[comment.id!] : null,
+      color: highlighted ? AppColors.accentSoft.resolveFrom(context) : null,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: AppColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (comment.isInternal == true)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: AppSpacing.xs,
+                      top: 2,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.lock_fill,
+                      size: 14,
+                      color: secondary,
                     ),
                   ),
-                  Icon(
-                    _isInternal ? CupertinoIcons.lock_fill : CupertinoIcons.globe,
-                    size: 16,
-                    color: _isInternal
-                        ? CupertinoColors.systemOrange
-                        : CupertinoColors.activeBlue,
+                Expanded(
+                  child: Text(
+                    meta,
+                    style: AppTypography.label.copyWith(color: secondary),
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              comment.text ?? '',
+              style: AppTypography.body.copyWith(
+                color: AppColors.text.resolveFrom(context),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Input row
+  Widget _buildCommentInput() {
+    final l10n = context.l10n;
+    final text = AppColors.text.resolveFrom(context);
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final canSend = _commentController.text.trim().isNotEmpty && !_isSending;
+
+    final box = Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.blockMargin,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.showInternalToggle)
+            Padding(
+              padding: const EdgeInsets.only(
+                left: AppSpacing.sm,
+                right: AppSpacing.sm,
+                bottom: AppSpacing.sm,
+              ),
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.commentsTeamOnly,
+                            style: AppTypography.callout.copyWith(color: text),
+                          ),
+                          Text(
+                            _isInternal
+                                ? l10n.commentsCustomerHidden
+                                : l10n.commentsCustomerSees,
+                            key: const ValueKey('order_comments_audience'),
+                            style: AppTypography.label.copyWith(
+                              color: secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    CupertinoSwitch(
+                      key: const ValueKey('order_comments_internal'),
+                      value: _isInternal,
+                      onChanged: (value) => setState(() => _isInternal = value),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: CupertinoTextField(
+                  key: const ValueKey('order_comments_field'),
                   controller: _commentController,
-                  placeholder: context.l10n.commentPlaceholder,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey6.resolveFrom(context),
-                    borderRadius: BorderRadius.circular(20),
+                  placeholder: l10n.commentPlaceholder,
+                  style: AppTypography.body.copyWith(color: text),
+                  placeholderStyle: AppTypography.body.copyWith(
+                    color: secondary,
                   ),
-                  maxLines: null,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm + 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryFill.resolveFrom(context),
+                    borderRadius: BorderRadius.circular(AppRadii.field),
+                  ),
+                  maxLines: 5,
                   minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => _sendComment(),
                 ),
               ),
-              const SizedBox(width: 8),
-              CupertinoButton(
-                padding: const EdgeInsets.all(10),
-                minimumSize: Size.zero,
-                color: CupertinoColors.activeBlue,
-                borderRadius: BorderRadius.circular(20),
-                onPressed: _isSending ? null : _sendComment,
-                child: _isSending
-                    ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                    : const Icon(
-                        CupertinoIcons.paperplane_fill,
-                        color: CupertinoColors.white,
-                        size: 18,
-                      ),
+              Semantics(
+                button: true,
+                enabled: canSend,
+                label: l10n.send,
+                excludeSemantics: true,
+                child: CupertinoButton(
+                  key: const ValueKey('order_comments_send'),
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(
+                    AppSizes.minTouchTarget,
+                    AppSizes.minTouchTarget,
+                  ),
+                  onPressed: canSend ? _sendComment : null,
+                  child: _isSending
+                      ? const CupertinoActivityIndicator()
+                      : Icon(
+                          CupertinoIcons.arrow_up_circle_fill,
+                          size: 32,
+                          color: canSend
+                              ? AppColors.accent.resolveFrom(context)
+                              : secondary,
+                        ),
+                ),
               ),
             ],
           ),
         ],
       ),
+    );
+    if (!widget.expand) return box;
+    return Container(
+      color: AppColors.background.resolveFrom(context),
+      child: SafeArea(top: false, child: box),
     );
   }
 }
