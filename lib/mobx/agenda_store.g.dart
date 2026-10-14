@@ -125,6 +125,24 @@ mixin _$AgendaStore on _AgendaStore, Store {
     });
   }
 
+  late final _$showMonthAtom = Atom(
+    name: '_AgendaStore.showMonth',
+    context: context,
+  );
+
+  @override
+  bool get showMonth {
+    _$showMonthAtom.reportRead();
+    return super.showMonth;
+  }
+
+  @override
+  set showMonth(bool value) {
+    _$showMonthAtom.reportWrite(value, super.showMonth, () {
+      super.showMonth = value;
+    });
+  }
+
   late final _$_AgendaStoreActionController = ActionController(
     name: '_AgendaStore',
     context: context,
@@ -167,6 +185,54 @@ mixin _$AgendaStore on _AgendaStore, Store {
   }
 
   @override
+  void toggleMonth() {
+    final _$actionInfo = _$_AgendaStoreActionController.startAction(
+      name: '_AgendaStore.toggleMonth',
+    );
+    try {
+      return super.toggleMonth();
+    } finally {
+      _$_AgendaStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void goToToday() {
+    final _$actionInfo = _$_AgendaStoreActionController.startAction(
+      name: '_AgendaStore.goToToday',
+    );
+    try {
+      return super.goToToday();
+    } finally {
+      _$_AgendaStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void moveWeek(int delta) {
+    final _$actionInfo = _$_AgendaStoreActionController.startAction(
+      name: '_AgendaStore.moveWeek',
+    );
+    try {
+      return super.moveWeek(delta);
+    } finally {
+      _$_AgendaStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void moveMonth(int delta) {
+    final _$actionInfo = _$_AgendaStoreActionController.startAction(
+      name: '_AgendaStore.moveMonth',
+    );
+    try {
+      return super.moveMonth(delta);
+    } finally {
+      _$_AgendaStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 selectedDate: ${selectedDate},
@@ -174,6 +240,7 @@ focusedMonth: ${focusedMonth},
 orders: ${orders},
 selectedTechnicianId: ${selectedTechnicianId},
 isLoading: ${isLoading},
+showMonth: ${showMonth},
 ordersForSelectedDate: ${ordersForSelectedDate},
 eventMarkers: ${eventMarkers},
 filteredOrders: ${filteredOrders}
