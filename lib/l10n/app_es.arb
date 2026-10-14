@@ -2896,5 +2896,18 @@
   "deviceSaveNeedsField": "Completa el campo {field} para guardar.",
   "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},
   "deviceMoreDataHint": "Foto, {brand} y {category}",
-  "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}}
+  "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}},
+  "catalogMoreDataHintFields": "Foto y otros campos",
+  "inviteSaveNeedsContact": "Escribe el correo o el WhatsApp para guardar.",
+  "checklistNamePlaceholder": "Ej.: Inspección de entrada",
+  "checklistQuestionsTitle": "Preguntas",
+  "checklistAddQuestion": "Agregar pregunta",
+  "checklistSaveNeedsNameAndQuestion": "Escribe el nombre y agrega una pregunta para guardar.",
+  "checklistSaveNeedsQuestion": "Agrega una pregunta para guardar.",
+  "formItemTypeText": "Texto",
+  "formItemTypeNumber": "Número",
+  "formItemTypeBoolean": "Sí/No",
+  "formItemTypeSelect": "Selección única",
+  "formItemTypeChecklist": "Selección múltiple",
+  "formItemTypePhoto": "Solo foto"
 }

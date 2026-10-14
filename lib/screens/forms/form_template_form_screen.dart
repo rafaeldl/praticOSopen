@@ -4,12 +4,51 @@ import 'package:flutter/material.dart' show Divider, Colors, ReorderableListView
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 
+/// How a question is answered, in the user's words.
+String formItemTypeLabel(AppLocalizations l10n, FormItemType type) {
+  switch (type) {
+    case FormItemType.text:
+      return l10n.formItemTypeText;
+    case FormItemType.number:
+      return l10n.formItemTypeNumber;
+    case FormItemType.boolean:
+      return l10n.formItemTypeBoolean;
+    case FormItemType.select:
+      return l10n.formItemTypeSelect;
+    case FormItemType.checklist:
+      return l10n.formItemTypeChecklist;
+    case FormItemType.photoOnly:
+      return l10n.formItemTypePhoto;
+  }
+}
+
+/// New / edit checklist (form template).
+///
+/// A new one opens as a [FormSheet] (`asSheet: true`, open it with
+/// [FormSheet.show]): "X" and "✓" at the top, the name in a white card, the
+/// questions in a card below ("Adicionar pergunta", tap one to change it,
+/// swipe to remove) and the description in "Mais dados". The "✓" turns blue
+/// once it has a name and at least one question. Editing stays a pushed
+/// screen (the `template` route argument).
+///
+/// Pops with the saved [FormDefinition].
 class FormTemplateFormScreen extends StatefulWidget {
-  const FormTemplateFormScreen({super.key});
+  const FormTemplateFormScreen({super.key, this.asSheet = false, this.onSave});
+
+  /// Present as a [FormSheet] (new checklist).
+  final bool asSheet;
+
+  /// Saves a new checklist. Defaults to [FormTemplateStore.saveTemplate].
+  final Future<void> Function(FormDefinition template)? onSave;
 
   @override
   State<FormTemplateFormScreen> createState() => _FormTemplateFormScreenState();
@@ -17,7 +56,8 @@ class FormTemplateFormScreen extends StatefulWidget {
 
 class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final FormTemplateStore _store = FormTemplateStore();
+  FormTemplateStore? _storeInstance;
+  FormTemplateStore get _store => _storeInstance ??= FormTemplateStore();
 
   FormDefinition? _template;
   List<FormItemDefinition> _items = [];
@@ -49,6 +89,17 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
 
   bool get _isEditing => _template?.createdAt != null;
 
+  /// Name typed in the sheet (kept in sync for the "✓").
+  String _title = '';
+
+  bool get _canSave => _title.trim().isNotEmpty && _items.isNotEmpty;
+
+  /// Something was filled since the sheet opened: closing asks first.
+  bool get _dirty =>
+      _title.trim().isNotEmpty ||
+      _items.isNotEmpty ||
+      (_template?.description?.trim().isNotEmpty ?? false);
+
   Future<void> _saveTemplate() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -68,8 +119,11 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       _template!.items = _items;
       _template!.isActive = _isActive;
 
+      final onSave = widget.onSave;
       if (_isEditing) {
         await _store.updateTemplate(_template!);
+      } else if (onSave != null) {
+        await onSave(_template!);
       } else {
         await _store.saveTemplate(_template!);
       }
@@ -144,6 +198,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.asSheet && !_isEditing) return _buildSheet();
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
@@ -237,6 +292,105 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// The new-checklist sheet (design system rule 9).
+  Widget _buildSheet() {
+    final l10n = context.l10n;
+    final String hint;
+    if (_title.trim().isEmpty) {
+      hint = _items.isEmpty
+          ? l10n.checklistSaveNeedsNameAndQuestion
+          : l10n.customerSaveNeedsName;
+    } else {
+      hint = l10n.checklistSaveNeedsQuestion;
+    }
+    return Form(
+      key: _formKey,
+      child: FormSheet(
+        title: l10n.checklistNew,
+        canSave: _canSave,
+        missingHint: hint,
+        dirty: _dirty,
+        busy: _isLoading,
+        onSave: _saveTemplate,
+        children: [
+          FormFieldsCard(
+            children: [
+              AppFormField(
+                label: l10n.name,
+                initialValue: _template?.title,
+                placeholder: l10n.checklistNamePlaceholder,
+                textCapitalization: TextCapitalization.sentences,
+                autofocus: true,
+                onChanged: (v) => setState(() => _title = v),
+                onSaved: (v) => _template?.title = v.trim(),
+                validator: (v) => v.trim().isEmpty ? l10n.required : null,
+              ),
+            ],
+          ),
+          FormCard(
+            title: l10n.checklistQuestionsTitle,
+            children: [
+              for (var i = 0; i < _items.length; i++)
+                Dismissible(
+                  key: ValueKey('checklist_item_${_items[i].id}'),
+                  direction: DismissDirection.endToStart,
+                  background: ColoredBox(
+                    color: AppColors.danger.resolveFrom(context),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: Icon(
+                          CupertinoIcons.trash,
+                          color: AppColors.onAccent.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  onDismissed: (_) => setState(() => _items.removeAt(i)),
+                  child: FormRow(
+                    icon: _getIconForType(_items[i].type),
+                    title: _items[i].label,
+                    subtitle: [
+                      formItemTypeLabel(l10n, _items[i].type),
+                      if (_items[i].required) l10n.required,
+                    ].join(' · '),
+                    onTap: () => _editItem(i),
+                  ),
+                ),
+              FormRow(
+                key: const ValueKey('checklist_add_question'),
+                icon: CupertinoIcons.plus_circle_fill,
+                title: l10n.checklistAddQuestion,
+                accent: true,
+                onTap: _addItem,
+              ),
+            ],
+          ),
+          FormMoreCard(
+            title: l10n.formMoreData,
+            hint: l10n.description,
+            children: [
+              AppFormField(
+                label: l10n.description,
+                initialValue: _template?.description,
+                placeholder: l10n.optional,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 3,
+                onChanged: (v) => setState(
+                  () => _template?.description =
+                      v.trim().isEmpty ? null : v.trim(),
+                ),
+                onSaved: (v) => _template?.description =
+                    v.trim().isEmpty ? null : v.trim(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -554,22 +708,8 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
     }
   }
 
-  String _getTypeLabel(FormItemType type) {
-    switch (type) {
-      case FormItemType.text:
-        return 'Texto';
-      case FormItemType.number:
-        return 'Número';
-      case FormItemType.boolean:
-        return 'Sim/Não';
-      case FormItemType.select:
-        return 'Seleção única';
-      case FormItemType.checklist:
-        return 'Múltipla escolha';
-      case FormItemType.photoOnly:
-        return 'Apenas foto';
-    }
-  }
+  String _getTypeLabel(FormItemType type) =>
+      formItemTypeLabel(context.l10n, type);
 }
 
 // ============================================================================
@@ -875,20 +1015,6 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
     }
   }
 
-  String _getTypeLabel(FormItemType type) {
-    switch (type) {
-      case FormItemType.text:
-        return 'Texto';
-      case FormItemType.number:
-        return 'Número';
-      case FormItemType.boolean:
-        return 'Sim/Não';
-      case FormItemType.select:
-        return 'Seleção única';
-      case FormItemType.checklist:
-        return 'Múltipla escolha';
-      case FormItemType.photoOnly:
-        return 'Apenas foto';
-    }
-  }
+  String _getTypeLabel(FormItemType type) =>
+      formItemTypeLabel(context.l10n, type);
 }

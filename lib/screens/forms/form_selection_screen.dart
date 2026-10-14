@@ -3,6 +3,8 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
+import 'package:praticos/screens/forms/form_template_form_screen.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:provider/provider.dart';
@@ -83,9 +85,9 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
   }
 
   void _newTemplate() {
-    Navigator.pushNamed(
+    FormSheet.show<FormDefinition>(
       context,
-      '/form_template_form',
+      (_) => const FormTemplateFormScreen(asSheet: true),
     ).then((_) => _loadTemplates());
   }
 

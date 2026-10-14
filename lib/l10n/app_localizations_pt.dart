@@ -6185,4 +6185,45 @@ class AppLocalizationsPt extends AppLocalizations {
   String deviceMoreDataHint(String brand, String category) {
     return 'Foto, $brand e $category';
   }
+
+  @override
+  String get catalogMoreDataHintFields => 'Foto e outros campos';
+
+  @override
+  String get inviteSaveNeedsContact =>
+      'Escreva o e-mail ou o WhatsApp para salvar.';
+
+  @override
+  String get checklistNamePlaceholder => 'Ex.: Vistoria de entrada';
+
+  @override
+  String get checklistQuestionsTitle => 'Perguntas';
+
+  @override
+  String get checklistAddQuestion => 'Adicionar pergunta';
+
+  @override
+  String get checklistSaveNeedsNameAndQuestion =>
+      'Escreva o nome e adicione uma pergunta para salvar.';
+
+  @override
+  String get checklistSaveNeedsQuestion => 'Adicione uma pergunta para salvar.';
+
+  @override
+  String get formItemTypeText => 'Texto';
+
+  @override
+  String get formItemTypeNumber => 'Número';
+
+  @override
+  String get formItemTypeBoolean => 'Sim/Não';
+
+  @override
+  String get formItemTypeSelect => 'Seleção única';
+
+  @override
+  String get formItemTypeChecklist => 'Múltipla escolha';
+
+  @override
+  String get formItemTypePhoto => 'Apenas foto';
 }

@@ -1,25 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/theme/app_colors.dart';
-import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// Small modal sheet (address, item, period, invite).
 ///
 /// HIG: "Cancelar" on the leading edge, title in the middle. Small sheets
-/// confirm on the trailing edge ([actionLabel]). [primaryLabel] (big button
-/// at the bottom) is the old pattern for creating a record, still used by
-/// the new catalog item until it moves to `FormSheet` (design system rule
-/// 9), as the new customer and vehicle did. Never both. Open it with
-/// [AppSheet.show] and put an [AppSheet] as the root of the builder.
+/// confirm on the trailing edge ([actionLabel]). Creating a record uses
+/// `FormSheet` instead (design system rule 9). Open it with [AppSheet.show]
+/// and put an [AppSheet] as the root of the builder.
 class AppSheet extends StatelessWidget {
   const AppSheet({
     super.key,
     required this.title,
     required this.child,
     this.actionLabel,
-    this.primaryLabel,
     this.onAction,
     this.busy = false,
     this.onCancel,
@@ -30,10 +25,6 @@ class AppSheet extends StatelessWidget {
 
   /// Label of the trailing action (e.g. "Salvar"). No action when null.
   final String? actionLabel;
-
-  /// Label of the big confirming button at the bottom (e.g. "Salvar
-  /// cliente"). Takes the place of [actionLabel].
-  final String? primaryLabel;
 
   /// Disabled while null or [busy].
   final VoidCallback? onAction;
@@ -75,7 +66,7 @@ class AppSheet extends StatelessWidget {
             color: AppColors.text.resolveFrom(context),
           ),
         ),
-        trailing: actionLabel == null || primaryLabel != null
+        trailing: actionLabel == null
             ? null
             : CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -92,32 +83,7 @@ class AppSheet extends StatelessWidget {
                       ),
               ),
       ),
-      child: SafeArea(
-        child: primaryLabel == null
-            ? child
-            : Column(
-                children: [
-                  Expanded(child: child),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.blockMargin,
-                      AppSpacing.sm,
-                      AppSpacing.blockMargin,
-                      AppSpacing.lg,
-                    ),
-                    child: busy
-                        ? const SizedBox(
-                            height: AppSizes.primaryButtonHeight,
-                            child: CupertinoActivityIndicator(),
-                          )
-                        : PrimaryButton(
-                            label: primaryLabel!,
-                            onPressed: onAction,
-                          ),
-                  ),
-                ],
-              ),
-      ),
+      child: SafeArea(child: child),
     );
   }
 }

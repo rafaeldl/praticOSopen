@@ -10659,6 +10659,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Foto, {brand} e {category}'**
   String deviceMoreDataHint(String brand, String category);
+
+  /// No description provided for @catalogMoreDataHintFields.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto e outros campos'**
+  String get catalogMoreDataHintFields;
+
+  /// No description provided for @inviteSaveNeedsContact.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o e-mail ou o WhatsApp para salvar.'**
+  String get inviteSaveNeedsContact;
+
+  /// No description provided for @checklistNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Vistoria de entrada'**
+  String get checklistNamePlaceholder;
+
+  /// No description provided for @checklistQuestionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas'**
+  String get checklistQuestionsTitle;
+
+  /// No description provided for @checklistAddQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar pergunta'**
+  String get checklistAddQuestion;
+
+  /// No description provided for @checklistSaveNeedsNameAndQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome e adicione uma pergunta para salvar.'**
+  String get checklistSaveNeedsNameAndQuestion;
+
+  /// No description provided for @checklistSaveNeedsQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione uma pergunta para salvar.'**
+  String get checklistSaveNeedsQuestion;
+
+  /// No description provided for @formItemTypeText.
+  ///
+  /// In pt, this message translates to:
+  /// **'Texto'**
+  String get formItemTypeText;
+
+  /// No description provided for @formItemTypeNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número'**
+  String get formItemTypeNumber;
+
+  /// No description provided for @formItemTypeBoolean.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim/Não'**
+  String get formItemTypeBoolean;
+
+  /// No description provided for @formItemTypeSelect.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seleção única'**
+  String get formItemTypeSelect;
+
+  /// No description provided for @formItemTypeChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Múltipla escolha'**
+  String get formItemTypeChecklist;
+
+  /// No description provided for @formItemTypePhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas foto'**
+  String get formItemTypePhoto;
 }
 
 class _AppLocalizationsDelegate
