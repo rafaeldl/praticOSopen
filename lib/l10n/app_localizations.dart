@@ -3586,30 +3586,6 @@ abstract class AppLocalizations {
   /// **'OS geradas ({count})'**
   String generatedOrdersCount(int count);
 
-  /// No description provided for @frequencyDaily.
-  ///
-  /// In pt, this message translates to:
-  /// **'Diário'**
-  String get frequencyDaily;
-
-  /// No description provided for @frequencyWeekly.
-  ///
-  /// In pt, this message translates to:
-  /// **'Semanal'**
-  String get frequencyWeekly;
-
-  /// No description provided for @frequencyMonthly.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mensal'**
-  String get frequencyMonthly;
-
-  /// No description provided for @frequencyYearly.
-  ///
-  /// In pt, this message translates to:
-  /// **'Anual'**
-  String get frequencyYearly;
-
   /// No description provided for @selectDate.
   ///
   /// In pt, this message translates to:

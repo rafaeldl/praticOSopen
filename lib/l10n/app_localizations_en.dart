@@ -1897,18 +1897,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get frequencyDaily => 'Daily';
-
-  @override
-  String get frequencyWeekly => 'Weekly';
-
-  @override
-  String get frequencyMonthly => 'Monthly';
-
-  @override
-  String get frequencyYearly => 'Yearly';
-
-  @override
   String get selectDate => 'Select date';
 
   @override

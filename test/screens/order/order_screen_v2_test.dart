@@ -392,7 +392,7 @@ void main() {
       await tester.ensureVisible(repeat);
       expect(repeat, findsOneWidget);
       expect(
-        find.descendant(of: repeat, matching: find.text('Mensal')),
+        find.descendant(of: repeat, matching: find.text('Todo mês')),
         findsOneWidget,
       );
     });

@@ -30,6 +30,14 @@ class ContractRepeat {
     ContractRepeat('yearly', 1),
   ];
 
+  /// The everyday text for [contract]'s repetition ("Todo mês",
+  /// "A cada 2 semanas"), the same everywhere the contract shows up.
+  static String describe(BuildContext context, OrderContract? contract) {
+    final frequency = contract?.frequency;
+    if (frequency == null) return '';
+    return ContractRepeat(frequency, contract?.interval ?? 1).label(context);
+  }
+
   String label(BuildContext context) {
     final l10n = context.l10n;
     switch (frequency) {
