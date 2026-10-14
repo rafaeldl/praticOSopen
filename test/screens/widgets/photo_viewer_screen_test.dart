@@ -79,6 +79,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(cover, 2);
     expect(find.text('Foto definida como capa'), findsOneWidget);
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    await tester.pump(const Duration(seconds: 3));
   });
 
   testWidgets('"…" > Apagar foto asks first; cancel keeps, confirm deletes', (
@@ -116,6 +118,9 @@ void main() {
     await tester.tap(key('order_photo_delete_confirm'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(deleted, [1]);
+    expect(find.text('Foto apagada'), findsOneWidget);
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    await tester.pump(const Duration(seconds: 3));
   });
 
   testWidgets('share failure shows a plain message', (tester) async {

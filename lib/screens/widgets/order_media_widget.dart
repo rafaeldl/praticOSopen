@@ -597,7 +597,14 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   Future<void> _confirmDelete() async {
     if (!await confirmDeleteOrderPhoto(context)) return;
     final success = await widget.onDelete(_currentIndex);
-    if (!mounted || !success) return;
+    if (!mounted) return;
+    final l10n = context.l10n;
+    showOrderMediaFeedback(
+      context,
+      success ? l10n.orderPhotoDeleted : l10n.orderPhotoDeleteError,
+      isError: !success,
+    );
+    if (!success) return;
     if (widget.photos.length <= 1) {
       Navigator.pop(context); // Close viewer if no photos left
     } else {

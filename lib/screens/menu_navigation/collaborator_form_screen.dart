@@ -7,6 +7,7 @@ import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/invite_form.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
@@ -73,10 +74,9 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
       if (mounted) {
         if (wasAddedDirectly) {
           // Usuário já existia e foi adicionado diretamente
-          _showSuccessDialog(
-            context.l10n.collaboratorAdded,
-            context.l10n.collaboratorAddedSuccess,
-          );
+          // Quick notice (it outlives this screen) and back to the list.
+          showAppToast(context, context.l10n.collaboratorAdded);
+          Navigator.pop(context, true);
         } else if (kWhatsAppBotEnabled &&
             inviteToken != null &&
             phone.isNotEmpty) {
@@ -152,25 +152,6 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     if (mounted) {
       Navigator.pop(context, true);
     }
-  }
-
-  void _showSuccessDialog(String title, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () {
-              Navigator.pop(context); // Fecha o dialog
-              Navigator.pop(this.context, true); // Volta para a lista
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   /// Shows a dialog when a duplicate invite is found.

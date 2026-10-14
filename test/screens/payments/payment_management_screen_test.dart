@@ -698,7 +698,12 @@ void main() {
         await tester.tap(find.text('Copiar o link'));
         await tester.pumpAndSettle();
         expect(copied, ['https://sandbox.asaas.com/i/abc']);
+        // Quick notice, not an alert to dismiss.
         expect(find.text('Link copiado'), findsOneWidget);
+        expect(find.byType(CupertinoAlertDialog), findsNothing);
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+        expect(find.text('Link copiado'), findsNothing);
       });
 
       testWidgets('cancels the link after confirming', (tester) async {
