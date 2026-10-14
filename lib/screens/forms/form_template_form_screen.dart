@@ -1,16 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Divider, Colors, ReorderableListView, Material, MaterialType;
+import 'package:flutter/material.dart' show ReorderableListView;
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
-import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/more_fields_link.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/theme/app_spacing.dart';
+import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 /// How a question is answered, in the user's words.
@@ -31,24 +44,73 @@ String formItemTypeLabel(AppLocalizations l10n, FormItemType type) {
   }
 }
 
+/// Second line of a question row: "Sim ou não · obrigatória · com foto".
+String formItemSubtitle(AppLocalizations l10n, FormItemDefinition item) => [
+  formItemTypeLabel(l10n, item.type),
+  if (item.required && item.type != FormItemType.photoOnly)
+    l10n.checklistQuestionRequiredShort,
+  if (item.allowPhotos && item.type != FormItemType.photoOnly)
+    l10n.checklistQuestionWithPhoto,
+].join(' · ');
+
 /// New / edit checklist (form template).
 ///
 /// A new one opens as a [FormSheet] (`asSheet: true`, open it with
 /// [FormSheet.show]): "X" and "✓" at the top, the name in a white card, the
 /// questions in a card below ("Adicionar pergunta", tap one to change it,
 /// swipe to remove) and the description in "Mais dados". The "✓" turns blue
-/// once it has a name and at least one question. Editing stays a pushed
-/// screen (the `template` route argument).
+/// once it has a name and at least one question.
+///
+/// An existing one (the `template` route argument, or [template]) opens
+/// pushed (prototype "app-checklist-editar"): the name as the large title,
+/// "N perguntas" under it, "…" with "Não usar na empresa"/"Voltar a usar" and
+/// "Apagar checklist", the name field, the numbered questions (tap opens the
+/// question editor, long-press drags to reorder), "Adicionar pergunta", the
+/// description in "Mais dados" and the blue "Salvar checklist".
 ///
 /// Pops with the saved [FormDefinition].
+
+/// Answer types in the order the editor offers them: the most common first.
+const questionTypeOrder = [
+  FormItemType.boolean,
+  FormItemType.text,
+  FormItemType.number,
+  FormItemType.select,
+  FormItemType.checklist,
+  FormItemType.photoOnly,
+];
+
 class FormTemplateFormScreen extends StatefulWidget {
-  const FormTemplateFormScreen({super.key, this.asSheet = false, this.onSave});
+  const FormTemplateFormScreen({
+    super.key,
+    this.asSheet = false,
+    this.template,
+    this.onSave,
+    this.onUpdate,
+    this.onDelete,
+    this.onSetActive,
+  });
 
   /// Present as a [FormSheet] (new checklist).
   final bool asSheet;
 
+  /// Checklist to edit; defaults to the `template` route argument.
+  final FormDefinition? template;
+
   /// Saves a new checklist. Defaults to [FormTemplateStore.saveTemplate].
   final Future<void> Function(FormDefinition template)? onSave;
+
+  /// Saves an existing checklist. Defaults to
+  /// [FormTemplateStore.updateTemplate].
+  final Future<void> Function(FormDefinition template)? onUpdate;
+
+  /// Deletes the checklist. Defaults to [FormTemplateStore.deleteTemplate].
+  final Future<void> Function(FormDefinition template)? onDelete;
+
+  /// Turns the checklist on/off in the company right away. Defaults to
+  /// [FormTemplateStore.toggleTemplateStatus].
+  final Future<void> Function(FormDefinition template, bool active)?
+  onSetActive;
 
   @override
   State<FormTemplateFormScreen> createState() => _FormTemplateFormScreenState();
@@ -65,16 +127,32 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
   bool _isLoading = false;
   bool _initialized = false;
 
+  /// Name typed (kept in sync for the "✓" and the large title).
+  String _title = '';
+
+  /// Description typed on the pushed screen.
+  String? _description;
+
+  /// The questions changed (added, edited, removed or moved).
+  bool _itemsChanged = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null && args.containsKey('template')) {
-        _template = args['template'] as FormDefinition;
-        _items = List.from(_template!.items);
-        _isActive = _template!.isActive;
+      final given =
+          widget.template ??
+          (args != null && args.containsKey('template')
+              ? args['template'] as FormDefinition
+              : null);
+      if (given != null) {
+        _template = given;
+        _items = List.from(given.items);
+        _isActive = given.isActive;
+        _title = given.title;
+        _description = given.description;
       } else {
         _template = FormDefinition(
           id: FirebaseFirestore.instance.collection('tmp').doc().id,
@@ -89,48 +167,58 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
 
   bool get _isEditing => _template?.createdAt != null;
 
-  /// Name typed in the sheet (kept in sync for the "✓").
-  String _title = '';
-
   bool get _canSave => _title.trim().isNotEmpty && _items.isNotEmpty;
 
+  /// What is missing for the save button, or null when it can save.
+  String? get _missingHint {
+    if (_canSave) return null;
+    final l10n = context.l10n;
+    if (_title.trim().isEmpty) {
+      return _items.isEmpty
+          ? l10n.checklistSaveNeedsNameAndQuestion
+          : l10n.customerSaveNeedsName;
+    }
+    return l10n.checklistSaveNeedsQuestion;
+  }
+
   /// Something was filled since the sheet opened: closing asks first.
-  bool get _dirty =>
-      _title.trim().isNotEmpty ||
-      _items.isNotEmpty ||
-      (_template?.description?.trim().isNotEmpty ?? false);
+  bool get _dirty {
+    if (!_isEditing) {
+      return _title.trim().isNotEmpty ||
+          _items.isNotEmpty ||
+          (_template?.description?.trim().isNotEmpty ?? false);
+    }
+    return _itemsChanged ||
+        _title.trim() != _template!.title.trim() ||
+        (_description?.trim() ?? '') != (_template!.description?.trim() ?? '');
+  }
 
   Future<void> _saveTemplate() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_items.isEmpty) {
-      HapticFeedback.heavyImpact();
-      _showAlert(
-        context.l10n.addItems,
-        context.l10n.pleaseAddAtLeastOneItem,
-      );
-      return;
-    }
+    if (!_canSave || _isLoading) return;
+    _formKey.currentState?.save();
 
     setState(() => _isLoading = true);
-    _formKey.currentState!.save();
-
     try {
-      _template!.items = _items;
-      _template!.isActive = _isActive;
+      final template = _template!;
+      template.title = _title.trim();
+      if (!widget.asSheet || _isEditing) {
+        final description = _description?.trim();
+        template.description = (description?.isEmpty ?? true)
+            ? null
+            : description;
+      }
+      template.items = List.of(_items);
+      template.isActive = _isActive;
 
-      final onSave = widget.onSave;
       if (_isEditing) {
-        await _store.updateTemplate(_template!);
-      } else if (onSave != null) {
-        await onSave(_template!);
+        await (widget.onUpdate ?? _store.updateTemplate)(template);
       } else {
-        await _store.saveTemplate(_template!);
+        await (widget.onSave ?? _store.saveTemplate)(template);
       }
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        Navigator.pop(context, _template);
+        Navigator.pop(context, template);
       }
     } on FeatureGateLimitException catch (e) {
       if (mounted) {
@@ -142,49 +230,46 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       if (mounted) {
         HapticFeedback.heavyImpact();
         setState(() => _isLoading = false);
-        _showAlert(context.l10n.error, context.l10n.couldNotSaveForm);
+        _showError();
       }
     }
   }
 
-  void _showAlert(String title, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _showError() {
+    showAppToast(
+      context,
+      context.l10n.checklistSaveError,
+      icon: CupertinoIcons.exclamationmark_circle_fill,
     );
   }
 
-  void _addItem() {
-    _showItemEditor(null, (item) {
-      setState(() => _items.add(item));
-      HapticFeedback.selectionClick();
+  Future<void> _addItem() async {
+    final result = await _QuestionEditor.open(context, null);
+    final item = result?.item;
+    if (item == null || !mounted) return;
+    setState(() {
+      _items.add(item);
+      _itemsChanged = true;
     });
+    HapticFeedback.selectionClick();
   }
 
-  void _editItem(int index) {
-    _showItemEditor(_items[index], (item) {
-      setState(() => _items[index] = item);
-      HapticFeedback.selectionClick();
+  Future<void> _editItem(int index) async {
+    final current = _items[index];
+    final result = await _QuestionEditor.open(context, current);
+    if (result == null || !mounted) return;
+    // The list may have changed meanwhile: find the question again.
+    final at = _items.indexOf(current);
+    if (at < 0) return;
+    setState(() {
+      if (result.deleted) {
+        _items.removeAt(at);
+      } else {
+        _items[at] = result.item!;
+      }
+      _itemsChanged = true;
     });
-  }
-
-  void _showItemEditor(FormItemDefinition? existingItem, Function(FormItemDefinition) onSave) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => _ItemFormSheet(
-        existingItem: existingItem,
-        onSave: onSave,
-      ),
-    );
+    HapticFeedback.selectionClick();
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -192,127 +277,320 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       if (newIndex > oldIndex) newIndex -= 1;
       final item = _items.removeAt(oldIndex);
       _items.insert(newIndex, item);
+      _itemsChanged = true;
     });
     HapticFeedback.mediumImpact();
   }
 
+  // ─── "…" menu ────────────────────────────────────────────────────────────
+
+  Future<void> _openMenu() async {
+    final l10n = context.l10n;
+    final choice = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          if (_isActive)
+            PullDownItem(
+              value: 'off',
+              label: l10n.checklistStopUsing,
+              icon: CupertinoIcons.pause_circle,
+            )
+          else
+            PullDownItem(
+              value: 'on',
+              label: l10n.checklistUseAgain,
+              icon: CupertinoIcons.play_circle,
+            ),
+        ]),
+        PullDownGroup([
+          PullDownItem(
+            value: 'delete',
+            label: l10n.checklistDelete,
+            icon: CupertinoIcons.trash,
+            destructive: true,
+          ),
+        ]),
+      ],
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'off':
+        await _setActive(false);
+      case 'on':
+        await _setActive(true);
+      case 'delete':
+        await _confirmDelete();
+    }
+  }
+
+  Future<void> _setActive(bool active) async {
+    final template = _template!;
+    try {
+      final onSetActive = widget.onSetActive;
+      if (onSetActive != null) {
+        await onSetActive(template, active);
+      } else if (template.isActive != active) {
+        await _store.toggleTemplateStatus(template);
+      }
+      template.isActive = active;
+      if (mounted) {
+        setState(() => _isActive = active);
+        HapticFeedback.selectionClick();
+      }
+    } on FeatureGateLimitException catch (e) {
+      if (mounted) showFeatureLimitDialog(context, e.result);
+    } catch (_) {
+      if (mounted) _showError();
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final l10n = context.l10n;
+    final name = _template!.title;
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(l10n.checklistDeleteTitle),
+        content: Text(l10n.checklistDeleteMessage(name)),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            key: const ValueKey('checklist_delete_confirm'),
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.checklistDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await (widget.onDelete ?? _store.deleteTemplate)(_template!);
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        Navigator.pop(context);
+      }
+    } catch (_) {
+      if (mounted) _showError();
+    }
+  }
+
+  // ─── Leaving ─────────────────────────────────────────────────────────────
+
+  Future<void> _confirmDiscard() async {
+    final l10n = context.l10n;
+    final leave = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(l10n.orderDiscardTitle),
+        content: Text(l10n.orderDiscardMessage),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.orderKeepEditing),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.discard),
+          ),
+        ],
+      ),
+    );
+    if (leave == true && mounted) Navigator.pop(context);
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     if (widget.asSheet && !_isEditing) return _buildSheet();
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? context.l10n.editOrder : context.l10n.newOrder),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
-        ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveTemplate,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(context.l10n.save, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ),
-      child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
+    return _buildPushed();
+  }
 
-              // Header Icon
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey5.resolveFrom(context),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.doc_text,
-                    size: 50,
-                    color: CupertinoColors.systemGrey.resolveFrom(context),
+  /// Existing checklist (prototype "app-checklist-editar").
+  Widget _buildPushed() {
+    final l10n = context.l10n;
+    final name = _title.trim();
+    final hint = _missingHint;
+    return PopScope(
+      canPop: !_dirty || _isLoading,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmDiscard();
+      },
+      child: Form(
+        key: _formKey,
+        child: MorePage(
+          title: name.isNotEmpty
+              ? name
+              : (_isEditing ? l10n.checklist : l10n.checklistNew),
+          fitTitle: true,
+          previousPageTitle: l10n.checklistsTitle,
+          trailing: _isEditing
+              ? GlassBarButton(
+                  key: const ValueKey('checklist_more'),
+                  label: l10n.orderMoreActions,
+                  icon: CupertinoIcons.ellipsis,
+                  onPressed: _isLoading ? null : _openMenu,
+                )
+              : null,
+          floatingButton: PrimaryButton(
+            key: const ValueKey('checklist_save'),
+            label: l10n.checklistSave,
+            onPressed: _canSave && !_isLoading ? _saveTemplate : null,
+          ),
+          children: [
+            _subtitle(),
+            AppFormField(
+              label: l10n.checklistNameLabel,
+              initialValue: _title,
+              placeholder: l10n.checklistNamePlaceholder,
+              textCapitalization: TextCapitalization.sentences,
+              autofocus: !_isEditing,
+              onChanged: (v) => setState(() => _title = v),
+            ),
+            SectionLabel(l10n.checklistQuestionsTitle),
+            _questionList(),
+            AddRow(
+              key: const ValueKey('checklist_add_question'),
+              label: l10n.checklistAddQuestion,
+              plain: true,
+              onTap: _addItem,
+            ),
+            if (hint != null)
+              Padding(
+                key: const ValueKey('checklist_missing'),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pageMargin,
+                  0,
+                  AppSpacing.pageMargin,
+                  AppSpacing.sm,
+                ),
+                child: Text(
+                  hint,
+                  style: AppTypography.callout.copyWith(
+                    color: AppColors.textSecondary.resolveFrom(context),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-
-              // Basic Info Section
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.formInformation),
-                children: [
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.title, style: const TextStyle(fontSize: 16)),
-                    initialValue: _template?.title,
-                    placeholder: context.l10n.companyName,
-                    textCapitalization: TextCapitalization.sentences,
-                    textAlign: TextAlign.right,
-                    onSaved: (val) => _template?.title = val ?? '',
-                    validator: (val) =>
-                        val == null || val.trim().isEmpty ? context.l10n.required : null,
-                  ),
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.description, style: const TextStyle(fontSize: 16)),
-                    initialValue: _template?.description,
-                    placeholder: context.l10n.optional,
-                    textCapitalization: TextCapitalization.sentences,
-                    textAlign: TextAlign.right,
-                    maxLines: 2,
-                    onSaved: (val) => _template?.description =
-                        val?.trim().isEmpty == true ? null : val?.trim(),
-                  ),
-                ],
-              ),
-
-              // Status Section
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.formConfiguration),
-                children: [
-                  CupertinoListTile(
-                    title: Text(context.l10n.active),
-                    trailing: CupertinoSwitch(
-                      value: _isActive,
-                      onChanged: (value) {
-                        setState(() => _isActive = value);
-                        HapticFeedback.selectionClick();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              // Items Section
-              _buildItemsSection(),
-
-              const SizedBox(height: 40),
-            ],
-          ),
+            MoreFieldsLink(
+              label: l10n.formMoreData,
+              initiallyExpanded:
+                  _template?.description?.trim().isNotEmpty ?? false,
+              children: [
+                AppFormField(
+                  label: l10n.description,
+                  initialValue: _description,
+                  placeholder: l10n.optional,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: 3,
+                  onChanged: (v) => setState(() => _description = v),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  /// "5 perguntas", or "● Desligado · 5 perguntas" when it is off.
+  Widget _subtitle() {
+    final l10n = context.l10n;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    final questions = l10n.checklistQuestions(_items.length);
+    return Padding(
+      key: const ValueKey('checklist_subtitle'),
+      // Lined up with the large title, as MorePage.subtitle.
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.blockMargin,
+        0,
+        AppSpacing.pageMargin,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          if (!_isActive) ...[
+            StatusDot(color: AppColors.textSecondary),
+            const SizedBox(width: AppSpacing.xs + 2),
+          ],
+          Flexible(
+            child: Text(
+              _isActive ? questions : '${l10n.checklistOff} · $questions',
+              style: AppTypography.callout.copyWith(color: secondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Numbered questions; long-press drags to reorder.
+  Widget _questionList() {
+    final l10n = context.l10n;
+    final separator = AppColors.separator.resolveFrom(context);
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: _items.length,
+      onReorder: _onReorder,
+      proxyDecorator: (child, index, animation) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surface.resolveFrom(context),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.text
+                  .resolveFrom(context)
+                  .withValues(alpha: 0.12),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: child,
+      ),
+      itemBuilder: (context, i) {
+        final item = _items[i];
+        return Container(
+          key: ValueKey('checklist_item_${item.id}'),
+          color: AppColors.background.resolveFrom(context),
+          child: Column(
+            children: [
+              if (i > 0)
+                Container(
+                  height: 0.5,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pageMargin,
+                  ),
+                  color: separator,
+                ),
+              AppListRow(
+                title: '${i + 1}. ${item.label}',
+                subtitle: formItemSubtitle(l10n, item),
+                onTap: () => _editItem(i),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   /// The new-checklist sheet (design system rule 9).
   Widget _buildSheet() {
     final l10n = context.l10n;
-    final String hint;
-    if (_title.trim().isEmpty) {
-      hint = _items.isEmpty
-          ? l10n.checklistSaveNeedsNameAndQuestion
-          : l10n.customerSaveNeedsName;
-    } else {
-      hint = l10n.checklistSaveNeedsQuestion;
-    }
     return Form(
       key: _formKey,
       child: FormSheet(
         title: l10n.checklistNew,
         canSave: _canSave,
-        missingHint: hint,
+        missingHint: _missingHint,
         dirty: _dirty,
         busy: _isLoading,
         onSave: _saveTemplate,
@@ -326,8 +604,6 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 autofocus: true,
                 onChanged: (v) => setState(() => _title = v),
-                onSaved: (v) => _template?.title = v.trim(),
-                validator: (v) => v.trim().isEmpty ? l10n.required : null,
               ),
             ],
           ),
@@ -353,12 +629,8 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                   ),
                   onDismissed: (_) => setState(() => _items.removeAt(i)),
                   child: FormRow(
-                    icon: _getIconForType(_items[i].type),
-                    title: _items[i].label,
-                    subtitle: [
-                      formItemTypeLabel(l10n, _items[i].type),
-                      if (_items[i].required) l10n.required,
-                    ].join(' · '),
+                    title: '${i + 1}. ${_items[i].label}',
+                    subtitle: formItemSubtitle(l10n, _items[i]),
                     onTap: () => _editItem(i),
                   ),
                 ),
@@ -382,11 +654,10 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 maxLines: 3,
                 onChanged: (v) => setState(
-                  () => _template?.description =
-                      v.trim().isEmpty ? null : v.trim(),
+                  () => _template?.description = v.trim().isEmpty
+                      ? null
+                      : v.trim(),
                 ),
-                onSaved: (v) => _template?.description =
-                    v.trim().isEmpty ? null : v.trim(),
               ),
             ],
           ),
@@ -394,627 +665,234 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       ),
     );
   }
-
-  Widget _buildItemsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(32, 24, 32, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'ITENS DO FORMULÁRIO (${_items.length})',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
-              if (_items.isNotEmpty)
-                Text(
-                  'Arraste para reordenar',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-            ],
-          ),
-        ),
-
-        // Items List Container
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              if (_items.isEmpty)
-                // Empty State
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Column(
-                    children: [
-                      Icon(
-                        CupertinoIcons.doc_text_search,
-                        size: 40,
-                        color: CupertinoColors.systemGrey3.resolveFrom(context),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Nenhum item adicionado',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          decoration: TextDecoration.none,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Toque em "Adicionar Item" abaixo',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                // Reorderable List
-                Material(
-                  type: MaterialType.transparency,
-                  child: ReorderableListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    buildDefaultDragHandles: false,
-                    itemCount: _items.length,
-                    // TODO: migrar para onReorderItem, que ja entrega o
-                    // newIndex ajustado (dispensa o -1 em _onReorder)
-                    // ignore: deprecated_member_use
-                    onReorder: _onReorder,
-                    proxyDecorator: (child, index, animation) {
-                      return Material(
-                        color: Colors.transparent,
-                        elevation: 4,
-                        shadowColor: Colors.black26,
-                        borderRadius: BorderRadius.circular(10),
-                        child: child,
-                      );
-                    },
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      return _buildDismissibleItemTile(
-                        key: ValueKey(item.id),
-                        item: item,
-                        index: index,
-                        isLast: index == _items.length - 1,
-                      );
-                    },
-                  ),
-                ),
-
-              // Add Button
-              CupertinoButton(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                onPressed: _addItem,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      CupertinoIcons.plus_circle_fill,
-                      color: CupertinoColors.activeBlue,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Adicionar Item',
-                      style: TextStyle(
-                        color: CupertinoColors.activeBlue,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Footer hint
-        if (_items.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
-            child: Text(
-              'Deslize um item para a esquerda para excluir',
-              style: TextStyle(
-                fontSize: 12,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildDismissibleItemTile({
-    required Key key,
-    required FormItemDefinition item,
-    required int index,
-    required bool isLast,
-  }) {
-    return Dismissible(
-      key: key,
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: CupertinoColors.systemRed,
-        child: const Icon(
-          CupertinoIcons.trash_fill,
-          color: CupertinoColors.white,
-        ),
-      ),
-      confirmDismiss: (_) async {
-        HapticFeedback.mediumImpact();
-        return await showCupertinoDialog<bool>(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.removeItem),
-            content: Text('${context.l10n.discard} "${item.label}"?'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(context.l10n.cancel),
-              ),
-              CupertinoDialogAction(
-                isDestructiveAction: true,
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(context.l10n.delete),
-              ),
-            ],
-          ),
-        ) ?? false;
-      },
-      onDismissed: (_) {
-        setState(() => _items.removeAt(index));
-        HapticFeedback.mediumImpact();
-      },
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Row(
-                  children: [
-                    // Drag Handle
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          CupertinoIcons.line_horizontal_3,
-                          size: 20,
-                          color: CupertinoColors.systemGrey.resolveFrom(context),
-                        ),
-                      ),
-                    ),
-
-                    // Type Icon
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemTeal.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        _getIconForType(item.type),
-                        size: 18,
-                        color: CupertinoColors.systemTeal,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Content
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _editItem(index),
-                        behavior: HitTestBehavior.opaque,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.label,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: CupertinoColors.label.resolveFrom(context),
-                                decoration: TextDecoration.none,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${_getTypeLabel(item.type)}${item.required ? ' · Obrigatório' : ''}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Edit chevron
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => _editItem(index),
-                      child: Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 16,
-                        color: CupertinoColors.systemGrey3.resolveFrom(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  indent: 68, // Drag handle + icon + spacing
-                  color: CupertinoColors.separator.resolveFrom(context),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _getIconForType(FormItemType type) {
-    switch (type) {
-      case FormItemType.text:
-        return CupertinoIcons.textformat;
-      case FormItemType.number:
-        return CupertinoIcons.number;
-      case FormItemType.boolean:
-        return CupertinoIcons.checkmark_circle;
-      case FormItemType.select:
-        return CupertinoIcons.chevron_down_circle;
-      case FormItemType.checklist:
-        return CupertinoIcons.checkmark_square;
-      case FormItemType.photoOnly:
-        return CupertinoIcons.camera;
-    }
-  }
-
-  String _getTypeLabel(FormItemType type) =>
-      formItemTypeLabel(context.l10n, type);
 }
 
 // ============================================================================
-// Item Form Sheet
+// Question editor
 // ============================================================================
 
-class _ItemFormSheet extends StatefulWidget {
-  final FormItemDefinition? existingItem;
-  final Function(FormItemDefinition) onSave;
+/// What the question editor resolved with: the saved question, or [deleted].
+class _QuestionResult {
+  const _QuestionResult.saved(FormItemDefinition this.item) : deleted = false;
+  const _QuestionResult.deleted() : item = null, deleted = true;
 
-  const _ItemFormSheet({
-    this.existingItem,
-    required this.onSave,
-  });
+  final FormItemDefinition? item;
+  final bool deleted;
+}
+
+/// "Nova pergunta" / "Pergunta" (prototype "app-checklist-pergunta"): small
+/// sheet with "Pronto" on the right (gray until the question can be saved,
+/// with a line saying what is missing), the question, the answer type as an
+/// inline choice with ✓, the options (one per line) for the choice types,
+/// the "Obrigatória" and "Pode pôr foto" switches and, when editing,
+/// "Apagar pergunta". Nothing is saved until the checklist is saved.
+class _QuestionEditor extends StatefulWidget {
+  const _QuestionEditor({this.existing});
+
+  final FormItemDefinition? existing;
+
+  static Future<_QuestionResult?> open(
+    BuildContext context,
+    FormItemDefinition? existing,
+  ) {
+    return AppSheet.show<_QuestionResult>(
+      context,
+      (_) => _QuestionEditor(existing: existing),
+    );
+  }
 
   @override
-  State<_ItemFormSheet> createState() => _ItemFormSheetState();
+  State<_QuestionEditor> createState() => _QuestionEditorState();
 }
 
-class _ItemFormSheetState extends State<_ItemFormSheet> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  late String _label;
+class _QuestionEditorState extends State<_QuestionEditor> {
+  late final TextEditingController _label;
+  late final TextEditingController _options;
   late FormItemType _type;
   late bool _required;
   late bool _allowPhotos;
-  late String _optionsText;
 
   @override
   void initState() {
     super.initState();
-    final item = widget.existingItem;
-    _label = item?.label ?? '';
+    final item = widget.existing;
+    _label = TextEditingController(text: item?.label ?? '')
+      ..addListener(_changed);
+    _options = TextEditingController(text: item?.options?.join('\n') ?? '')
+      ..addListener(_changed);
     _type = item?.type ?? FormItemType.text;
     _required = item?.required ?? false;
     _allowPhotos = item?.allowPhotos ?? true;
-    _optionsText = item?.options?.join('\n') ?? '';
+  }
+
+  void _changed() => setState(() {});
+
+  @override
+  void dispose() {
+    _label.dispose();
+    _options.dispose();
+    super.dispose();
   }
 
   bool get _needsOptions =>
       _type == FormItemType.select || _type == FormItemType.checklist;
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
+  List<String> get _optionList => _options.text
+      .split('\n')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
 
-    List<String>? options;
-    if (_needsOptions) {
-      options = _optionsText
-          .split('\n')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-
-      if (options.length < 2) {
-        HapticFeedback.heavyImpact();
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: Text(context.l10n.minOptions),
-            content: Text(context.l10n.pleaseEnterAtLeast2Options),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
+  String? get _missing {
+    final l10n = context.l10n;
+    if (_label.text.trim().isEmpty) return l10n.checklistQuestionNeedsLabel;
+    if (_needsOptions && _optionList.length < 2) {
+      return l10n.checklistQuestionNeedsOptions;
     }
+    return null;
+  }
 
+  void _done() {
+    final existing = widget.existing;
+    final label = _label.text.trim();
+    final options = _needsOptions ? _optionList : null;
     final item = FormItemDefinition(
-      id: widget.existingItem?.id ??
-          FirebaseFirestore.instance.collection('tmp').doc().id,
-      label: _label.trim(),
+      id: existing?.id ?? FirebaseFirestore.instance.collection('tmp').doc().id,
+      label: label,
       type: _type,
       options: options,
-      required: _required,
+      required: _type == FormItemType.photoOnly ? false : _required,
       allowPhotos: _allowPhotos,
+      // Keep the translations of a ready checklist while the text is the same.
+      labelI18n: existing?.label == label ? existing?.labelI18n : null,
+      optionsI18n:
+          const ListEquality<String>().equals(existing?.options, options)
+          ? existing?.optionsI18n
+          : null,
     );
+    Navigator.pop(context, _QuestionResult.saved(item));
+  }
 
-    widget.onSave(item);
-    Navigator.pop(context);
+  void _setType(FormItemType type) {
+    if (type == _type) return;
+    setState(() => _type = type);
+    HapticFeedback.selectionClick();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 36,
-              height: 5,
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey3.resolveFrom(context),
-                borderRadius: BorderRadius.circular(2.5),
-              ),
+    final l10n = context.l10n;
+    final missing = _missing;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return AppSheet(
+      title: widget.existing == null
+          ? l10n.checklistQuestionNew
+          : l10n.checklistQuestion,
+      actionLabel: l10n.checklistQuestionDone,
+      onAction: missing == null ? _done : null,
+      child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+        children: [
+          Padding(
+            key: const ValueKey('question_missing'),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.xs,
+              AppSpacing.pageMargin,
+              0,
             ),
-
-            // Navigation bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar'),
-                  ),
-                  Text(
-                    widget.existingItem == null ? 'Novo Item' : 'Editar Item',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.label.resolveFrom(context),
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  CupertinoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    onPressed: _save,
-                    child: const Text(
-                      'Salvar',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 1),
-
-          // Content
-          Expanded(
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.only(top: 12),
-                children: [
-                  // Label and Type
-                  CupertinoListSection.insetGrouped(
-                    header: Text(context.l10n.itemConfiguration),
-                    children: [
-                      CupertinoTextFormFieldRow(
-                        prefix: Text(context.l10n.label, style: const TextStyle(fontSize: 16)),
-                        initialValue: _label,
-                        placeholder: context.l10n.itemType,
-                        textCapitalization: TextCapitalization.sentences,
-                        textAlign: TextAlign.right,
-                        onSaved: (val) => _label = val ?? '',
-                        validator: (val) =>
-                            val == null || val.trim().isEmpty ? context.l10n.required : null,
-                      ),
-                      CupertinoListTile(
-                        title: Text(context.l10n.itemType),
-                        additionalInfo: Text(_getTypeLabel(_type)),
-                        trailing: const CupertinoListTileChevron(),
-                        onTap: _showTypePicker,
-                      ),
-                    ],
-                  ),
-
-                  // Options (conditional)
-                  if (_needsOptions)
-                    CupertinoListSection.insetGrouped(
-                      header: Text(context.l10n.optionsHeader),
-                      footer: Text(context.l10n.typeOneOptionPerLine),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: CupertinoTextField(
-                            placeholder: 'Opção 1\nOpção 2\nOpção 3',
-                            maxLines: 5,
-                            controller: TextEditingController(text: _optionsText),
-                            onChanged: (val) => _optionsText = val,
-                            textCapitalization: TextCapitalization.sentences,
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.systemBackground.resolveFrom(context),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                  // Settings
-                  CupertinoListSection.insetGrouped(
-                    header: Text(context.l10n.optionsHeader),
-                    children: [
-                      if (_type != FormItemType.photoOnly)
-                        CupertinoListTile(
-                          title: Text(context.l10n.required),
-                          trailing: CupertinoSwitch(
-                            value: _required,
-                            onChanged: (val) {
-                              setState(() => _required = val);
-                              HapticFeedback.selectionClick();
-                            },
-                          ),
-                        ),
-                      CupertinoListTile(
-                        title: Text(context.l10n.allowPhotos),
-                        subtitle: Text(context.l10n.userCanAttachPhotos),
-                        trailing: CupertinoSwitch(
-                          value: _allowPhotos,
-                          onChanged: (val) {
-                            setState(() => _allowPhotos = val);
-                            HapticFeedback.selectionClick();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-                ],
-              ),
+            child: Text(
+              missing ?? '',
+              style: AppTypography.callout.copyWith(color: secondary),
             ),
           ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showTypePicker() {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(context.l10n.selectItemType),
-        message: Text(context.l10n.selectResponseType),
-        actions: FormItemType.values.map((type) {
-          final isSelected = type == _type;
-          return CupertinoActionSheetAction(
-            onPressed: () {
-              setState(() => _type = type);
-              Navigator.pop(ctx);
-              HapticFeedback.selectionClick();
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _getIconForType(type),
-                  size: 20,
-                  color: isSelected
-                      ? CupertinoColors.activeBlue
-                      : CupertinoColors.label.resolveFrom(context),
+          AppFormField(
+            label: l10n.checklistQuestion,
+            controller: _label,
+            placeholder: l10n.checklistQuestionPlaceholder,
+            textCapitalization: TextCapitalization.sentences,
+            autofocus: widget.existing == null,
+          ),
+          SectionLabel(l10n.checklistAnswerType),
+          MoreRows(
+            rows: [
+              for (final type in questionTypeOrder)
+                AppListRow(
+                  key: ValueKey('question_type_${type.name}'),
+                  title: formItemTypeLabel(l10n, type),
+                  selected: type == _type,
+                  showChevron: false,
+                  onTap: () => _setType(type),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _getTypeLabel(type),
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-                if (isSelected) ...[
-                  const SizedBox(width: 8),
-                  const Icon(
-                    CupertinoIcons.checkmark,
-                    size: 18,
-                    color: CupertinoColors.activeBlue,
-                  ),
-                ],
-              ],
+            ],
+          ),
+          if (_needsOptions) ...[
+            const SizedBox(height: AppSpacing.md),
+            AppFormField(
+              key: const ValueKey('question_options'),
+              label: l10n.checklistOptions,
+              controller: _options,
+              placeholder: l10n.checklistOptionsPlaceholder,
+              hint: l10n.typeOneOptionPerLine,
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: 6,
             ),
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
-        ),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          MoreRows(
+            rows: [
+              if (_type != FormItemType.photoOnly)
+                MoreSwitchRow(
+                  key: const ValueKey('question_required'),
+                  title: l10n.checklistQuestionRequired,
+                  subtitle: l10n.checklistQuestionRequiredHint,
+                  value: _required,
+                  onChanged: (v) {
+                    setState(() => _required = v);
+                    HapticFeedback.selectionClick();
+                  },
+                ),
+              MoreSwitchRow(
+                key: const ValueKey('question_photos'),
+                title: l10n.checklistQuestionAllowPhotos,
+                value: _allowPhotos,
+                onChanged: (v) {
+                  setState(() => _allowPhotos = v);
+                  HapticFeedback.selectionClick();
+                },
+              ),
+            ],
+          ),
+          if (widget.existing != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageMargin,
+                vertical: AppSpacing.lg,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: CupertinoButton(
+                  key: const ValueKey('question_delete'),
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(
+                    AppSizes.minTouchTarget,
+                    AppSizes.minTouchTarget,
+                  ),
+                  onPressed: () =>
+                      Navigator.pop(context, const _QuestionResult.deleted()),
+                  child: Text(
+                    l10n.checklistQuestionDelete,
+                    style: AppTypography.callout.copyWith(
+                      color: AppColors.danger.resolveFrom(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
-
-  IconData _getIconForType(FormItemType type) {
-    switch (type) {
-      case FormItemType.text:
-        return CupertinoIcons.textformat;
-      case FormItemType.number:
-        return CupertinoIcons.number;
-      case FormItemType.boolean:
-        return CupertinoIcons.checkmark_circle;
-      case FormItemType.select:
-        return CupertinoIcons.chevron_down_circle;
-      case FormItemType.checklist:
-        return CupertinoIcons.checkmark_square;
-      case FormItemType.photoOnly:
-        return CupertinoIcons.camera;
-    }
-  }
-
-  String _getTypeLabel(FormItemType type) =>
-      formItemTypeLabel(context.l10n, type);
 }

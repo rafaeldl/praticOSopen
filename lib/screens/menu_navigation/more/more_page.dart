@@ -16,9 +16,14 @@ class MorePage extends StatelessWidget {
     this.subtitle,
     this.floatingButton,
     this.trailing,
+    this.fitTitle = false,
   });
 
   final String title;
+
+  /// The title is a record's name (e.g. a checklist), which can be long: it
+  /// shrinks to fit the large title line instead of ending in "…".
+  final bool fitTitle;
 
   /// Back button label; defaults to the title of the screen below.
   final String? previousPageTitle;
@@ -40,45 +45,59 @@ class MorePage extends StatelessWidget {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: Material(
         type: MaterialType.transparency,
-        child: _withFloatingButton(context, CustomScrollView(
-          slivers: [
-            AppNavBar(
-              largeTitle: Text(title),
-              previousTitle: previousPageTitle,
-              trailing: trailing,
-            ),
-            SliverSafeArea(
-              top: false,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  if (subtitle != null)
-                    Padding(
-                      // Lined up with the large title (16 from the edge).
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.blockMargin,
-                        0,
-                        AppSpacing.pageMargin,
-                        AppSpacing.sm,
-                      ),
-                      child: Text(
-                        subtitle!,
-                        key: const Key('morePageSubtitle'),
-                        style: AppTypography.callout.copyWith(
-                          color: AppColors.textSecondary.resolveFrom(context),
+        child: _withFloatingButton(
+          context,
+          CustomScrollView(
+            slivers: [
+              AppNavBar(
+                largeTitle: fitTitle
+                    ? Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          end: AppSpacing.md,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(title),
+                        ),
+                      )
+                    : Text(title),
+                previousTitle: previousPageTitle,
+                trailing: trailing,
+              ),
+              SliverSafeArea(
+                top: false,
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    if (subtitle != null)
+                      Padding(
+                        // Lined up with the large title (16 from the edge).
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.blockMargin,
+                          0,
+                          AppSpacing.pageMargin,
+                          AppSpacing.sm,
+                        ),
+                        child: Text(
+                          subtitle!,
+                          key: const Key('morePageSubtitle'),
+                          style: AppTypography.callout.copyWith(
+                            color: AppColors.textSecondary.resolveFrom(context),
+                          ),
                         ),
                       ),
+                    ...children,
+                    SizedBox(
+                      height: floatingButton == null
+                          ? AppSpacing.xxl
+                          : AppSizes.primaryButtonHeight + AppSpacing.xxl * 2,
                     ),
-                  ...children,
-                  SizedBox(
-                    height: floatingButton == null
-                        ? AppSpacing.xxl
-                        : AppSizes.primaryButtonHeight + AppSpacing.xxl * 2,
-                  ),
-                ]),
+                  ]),
+                ),
               ),
-            ),
-          ],
-        )),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -115,7 +134,9 @@ class MoreRows extends StatelessWidget {
           if (i > 0)
             Container(
               height: 0.5,
-              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageMargin,
+              ),
               color: separator,
             ),
           rows[i],
@@ -161,13 +182,18 @@ class MoreSwitchRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTypography.body.copyWith(color: text)),
+                    Text(
+                      title,
+                      style: AppTypography.body.copyWith(color: text),
+                    ),
                     if (subtitle != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           subtitle!,
-                          style: AppTypography.callout.copyWith(color: secondary),
+                          style: AppTypography.callout.copyWith(
+                            color: secondary,
+                          ),
                         ),
                       ),
                   ],
