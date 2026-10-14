@@ -373,7 +373,10 @@ class _PasswordFieldState extends State<_PasswordField> {
                     ),
                   ),
                 ),
-                onChanged: state.didChange,
+                onChanged: (value) {
+                  state.didChange(value);
+                  if (state.hasError) state.validate();
+                },
                 onSubmitted: (_) => widget.onSubmitted(),
               ),
               if (error != null)

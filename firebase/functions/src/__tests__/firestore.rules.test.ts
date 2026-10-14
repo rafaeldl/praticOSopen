@@ -467,6 +467,25 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('segments/{segmentId}/bootstrap', () => {
+    const path = 'segments/automotive/bootstrap/mechanical';
+
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.setDoc(fs.doc(ctx.firestore(), path), { services: [] });
+      });
+    });
+
+    it('is readable by a signed-in user without a company (first access samples)', async () => {
+      await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('new1'), path)));
+    });
+
+    it('is not readable signed out nor writable by clients', async () => {
+      await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), path)));
+      await rut.assertFails(fs.setDoc(fs.doc(asUser('admin1', { c1: 'admin' }), path), { services: [] }));
+    });
+  });
+
   describe('Asaas payments', () => {
     // admin1 is owner.id of c1 (seeded above); owner2 holds the 'owner' claim.
     const owner = () => asUser('admin1', { c1: 'admin' });

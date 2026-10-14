@@ -79,6 +79,22 @@ void main() {
       expect(auth.calls, isEmpty);
     });
 
+    testWidgets('a field error goes away as soon as the field is filled',
+        (tester) async {
+      tall(tester);
+      await tester.pumpWidget(
+          _app(const EmailLoginScreen(), auth: _FakeAuthStore()));
+
+      await tester.tap(find.byKey(const ValueKey('email_login_submit')));
+      await tester.pump();
+      await tester.enterText(_field('email_login_email'), 'ana@exemplo.com');
+      await tester.enterText(_field('email_login_password'), 'segredo');
+      await tester.pump();
+
+      expect(find.text('Escreva o seu e-mail.'), findsNothing);
+      expect(find.text('Escreva a sua senha.'), findsNothing);
+    });
+
     testWidgets('wrong password shows a fixed sentence and keeps the form',
         (tester) async {
       tall(tester);

@@ -58,12 +58,13 @@ class _FakePhotos implements PhotoService {
 }
 
 OrderForm _form({
+  String title = 'Entrada do veículo',
   FormStatus status = FormStatus.pending,
   List<FormResponse> responses = const [],
 }) => OrderForm(
   id: 'f1',
   formDefinitionId: 'd1',
-  title: 'Entrada do veículo',
+  title: title,
   status: status,
   responses: responses,
   items: [
@@ -149,6 +150,32 @@ void main() {
     expect(find.text('Continuar'), findsOneWidget);
     // A required one is missing: no "Concluir assim mesmo".
     expect(find.text('Concluir assim mesmo'), findsNothing);
+  });
+
+  testWidgets('long name: "Checklist" in the bar, name wraps in the header', (
+    tester,
+  ) async {
+    const name = 'Autorização do Cliente para Serviços (Veículo)';
+    await _open(
+      tester,
+      FormFillScreen(
+        orderId: 'o1',
+        companyId: 'c1',
+        orderForm: _form(
+          title: name,
+          responses: [FormResponse(itemId: 'a', value: true)],
+        ),
+        formsService: _FakeForms(),
+        photoService: _FakePhotos(),
+      ),
+    );
+
+    expect(find.text('Checklist'), findsOneWidget);
+    final title = find.byKey(const ValueKey('form_fill_title'));
+    expect(tester.widget<Text>(title).data, name);
+    expect(tester.widget<Text>(title).overflow, isNot(TextOverflow.ellipsis));
+    // Wrapped: taller than a single 28pt line.
+    expect(tester.getSize(title).height, greaterThan(40));
   });
 
   testWidgets('answering until the end saves and completes the checklist', (

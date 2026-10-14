@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
@@ -21,11 +22,7 @@ class AcceptInviteScreen extends StatefulWidget {
   final VoidCallback? onInviteAccepted;
   final VoidCallback? onCancel;
 
-  const AcceptInviteScreen({
-    super.key,
-    this.onInviteAccepted,
-    this.onCancel,
-  });
+  const AcceptInviteScreen({super.key, this.onInviteAccepted, this.onCancel});
 
   @override
   State<AcceptInviteScreen> createState() => _AcceptInviteScreenState();
@@ -69,7 +66,9 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
 
     try {
       // Use API to get invite details (bypasses Firestore security rules)
-      final invite = await InviteApiService.instance.getInviteByToken(normalizedCode);
+      final invite = await InviteApiService.instance.getInviteByToken(
+        normalizedCode,
+      );
 
       if (invite == null) {
         setState(() {
@@ -99,16 +98,16 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
     setState(() => _isAccepting = true);
 
     try {
-      final result = await InviteApiService.instance.acceptInvite(_invite!.token!);
+      final result = await InviteApiService.instance.acceptInvite(
+        _invite!.token!,
+      );
 
       // Wait for Cloud Function to update custom claims (polls until ready)
       await ClaimsService.instance.waitForCompanyClaim(result.companyId);
 
       if (mounted) {
-        _showSuccessDialog(
-          context.l10n.inviteAccepted,
-          context.l10n.youAreNowPartOf(result.companyName),
-        );
+        showAppToast(context, context.l10n.youAreNowPartOf(result.companyName));
+        widget.onInviteAccepted?.call();
       }
     } catch (e) {
       debugPrint('[AcceptInvite] accept failed: $e');
@@ -119,25 +118,6 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
         });
       }
     }
-  }
-
-  void _showSuccessDialog(String title, String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.ok),
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onInviteAccepted?.call();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override

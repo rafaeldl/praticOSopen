@@ -118,12 +118,16 @@ class _FormQuestionSheetState extends State<FormQuestionSheet> {
     });
   }
 
+  /// Goes to the next question still without an answer (answered ones are
+  /// reviewed by "Voltar à anterior"); ends when none is left after this one.
   void _next() {
-    if (_index < _items.length - 1) {
-      _goTo(_index + 1);
-    } else {
-      widget.onEnd();
+    for (var i = _index + 1; i < _items.length; i++) {
+      if (!isFormItemAnswered(_items[i], _responseOf(_items[i]))) {
+        _goTo(i);
+        return;
+      }
     }
+    widget.onEnd();
   }
 
   /// Saves what was typed and not saved yet (leaving the question by
@@ -657,7 +661,8 @@ class AnswerButton extends StatelessWidget {
   }
 }
 
-/// Multiple choice: tap marks/unmarks (✓), "Pronto" saves and moves on.
+/// Multiple choice: tap marks/unmarks (✓), "Pronto" (enabled once something
+/// is marked) saves and moves on.
 class _MultiQuestion extends StatefulWidget {
   const _MultiQuestion({
     required this.options,
@@ -700,7 +705,10 @@ class _MultiQuestionState extends State<_MultiQuestion> {
         PrimaryButton(
           key: const ValueKey('question_primary'),
           label: context.l10n.checklistQuestionDone,
-          onPressed: () => widget.onDone([..._selected]),
+          // Gray until something is marked; skipping is "Pular por agora".
+          onPressed: _selected.isEmpty
+              ? null
+              : () => widget.onDone([..._selected]),
         ),
       ],
     );

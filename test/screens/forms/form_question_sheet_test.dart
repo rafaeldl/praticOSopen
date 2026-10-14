@@ -5,6 +5,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/screens/forms/form_question_sheet.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 
 FormItemDefinition _item(
   String id,
@@ -152,6 +153,40 @@ void main() {
     expect(ended, isTrue);
   });
 
+  testWidgets('an answer skips questions already answered and ends after', (
+    tester,
+  ) async {
+    var ended = false;
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          form: _form(
+            [
+              _item('1', FormItemType.boolean),
+              _item('2', FormItemType.boolean),
+              _item('3', FormItemType.boolean),
+              _item('4', FormItemType.text),
+            ],
+            [
+              FormResponse(itemId: '2', value: true),
+              FormResponse(itemId: '4', value: 'Já escrito'),
+            ],
+          ),
+          answers: [],
+          onEnd: () => ended = true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Sim'));
+    await tester.pump();
+    expect(_label(tester), 'Pergunta 3');
+
+    await tester.tap(find.text('Sim'));
+    await tester.pump();
+    expect(ended, isTrue);
+  });
+
   testWidgets('single choice: a tap saves the option and moves on', (
     tester,
   ) async {
@@ -227,6 +262,41 @@ void main() {
     expect(answers.single.$1, '1');
     expect(answers.single.$2, ['Óleo']);
     expect(_label(tester), 'Pergunta 2');
+  });
+
+  testWidgets('multiple choice: "Pronto" is off until something is marked', (
+    tester,
+  ) async {
+    final answers = <(String, dynamic)>[];
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          form: _form([
+            _item(
+              '1',
+              FormItemType.checklist,
+              options: ['Óleo', 'Filtro'],
+              required: true,
+            ),
+            _item('2', FormItemType.boolean),
+          ]),
+          answers: answers,
+        ),
+      ),
+    );
+
+    PrimaryButton primary() => tester.widget<PrimaryButton>(
+      find.byKey(const ValueKey('question_primary')),
+    );
+    expect(primary().onPressed, isNull);
+    await tester.tap(find.text('Pronto'));
+    await tester.pump();
+    expect(answers, isEmpty);
+    expect(_label(tester), 'Pergunta 1');
+
+    await tester.tap(find.text('Filtro'));
+    await tester.pump();
+    expect(primary().onPressed, isNotNull);
   });
 
   testWidgets('text: field and "Próxima" saves and moves on', (tester) async {

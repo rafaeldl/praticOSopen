@@ -54,17 +54,17 @@ class BootstrapResult {
       skippedOrders.length;
 
   Map<String, dynamic> toJson() => {
-        'createdServices': createdServices,
-        'createdProducts': createdProducts,
-        'createdDevices': createdDevices,
-        'createdCustomers': createdCustomers,
-        'createdOrders': createdOrders,
-        'skippedServices': skippedServices,
-        'skippedProducts': skippedProducts,
-        'skippedDevices': skippedDevices,
-        'skippedCustomers': skippedCustomers,
-        'skippedOrders': skippedOrders,
-      };
+    'createdServices': createdServices,
+    'createdProducts': createdProducts,
+    'createdDevices': createdDevices,
+    'createdCustomers': createdCustomers,
+    'createdOrders': createdOrders,
+    'skippedServices': skippedServices,
+    'skippedProducts': skippedProducts,
+    'skippedDevices': skippedDevices,
+    'skippedCustomers': skippedCustomers,
+    'skippedOrders': skippedOrders,
+  };
 }
 
 /// Serviço responsável por executar o bootstrap de dados iniciais
@@ -112,16 +112,19 @@ class BootstrapService {
     }
   }
 
-  bool _shouldIncludeForm(List<String> formSubspecialties,
-      List<String> selectedSubspecialties) {
+  bool _shouldIncludeForm(
+    List<String> formSubspecialties,
+    List<String> selectedSubspecialties,
+  ) {
     if (formSubspecialties.isEmpty) {
       return true;
     }
     if (selectedSubspecialties.isEmpty) {
       return false;
     }
-    return formSubspecialties
-        .any((subspecialty) => selectedSubspecialties.contains(subspecialty));
+    return formSubspecialties.any(
+      (subspecialty) => selectedSubspecialties.contains(subspecialty),
+    );
   }
 
   List<String> _extractStringList(dynamic value) {
@@ -167,18 +170,16 @@ class BootstrapService {
     // Localize title
     if (data['titleI18n'] is Map) {
       final titleI18n = data['titleI18n'] as Map;
-      localized['title'] = titleI18n[localeCode] ??
-                          titleI18n['pt'] ??
-                          data['title'];
+      localized['title'] =
+          titleI18n[localeCode] ?? titleI18n['pt'] ?? data['title'];
       localized.remove('titleI18n');
     }
 
     // Localize description
     if (data['descriptionI18n'] is Map) {
       final descI18n = data['descriptionI18n'] as Map;
-      localized['description'] = descI18n[localeCode] ??
-                                descI18n['pt'] ??
-                                data['description'];
+      localized['description'] =
+          descI18n[localeCode] ?? descI18n['pt'] ?? data['description'];
       localized.remove('descriptionI18n');
     }
 
@@ -192,18 +193,16 @@ class BootstrapService {
         // Localize item label
         if (item['labelI18n'] is Map) {
           final labelI18n = item['labelI18n'] as Map;
-          item['label'] = labelI18n[localeCode] ??
-                         labelI18n['pt'] ??
-                         item['label'];
+          item['label'] =
+              labelI18n[localeCode] ?? labelI18n['pt'] ?? item['label'];
           item.remove('labelI18n');
         }
 
         // Localize item options
         if (item['optionsI18n'] is Map) {
           final optionsI18n = item['optionsI18n'] as Map;
-          item['options'] = optionsI18n[localeCode] ??
-                           optionsI18n['pt'] ??
-                           item['options'];
+          item['options'] =
+              optionsI18n[localeCode] ?? optionsI18n['pt'] ?? item['options'];
           item.remove('optionsI18n');
         }
       }
@@ -229,8 +228,10 @@ class BootstrapService {
 
     if (segmentSnapshot.docs.isEmpty) return;
 
-    final companyFormsRef =
-        _db.collection('companies').doc(companyId).collection('forms');
+    final companyFormsRef = _db
+        .collection('companies')
+        .doc(companyId)
+        .collection('forms');
     final existingSnapshot = await companyFormsRef.get();
     final existingIds = existingSnapshot.docs.map((doc) => doc.id).toSet();
 
@@ -322,6 +323,21 @@ class BootstrapService {
       'customer': customer,
     };
   }
+
+  /// Due date of the i-th sample order: the coming days, so the first look
+  /// at the app shows upcoming work in the Agenda instead of late orders.
+  static DateTime sampleOrderDueDate(int index, DateTime now) {
+    final day = DateTime(now.year, now.month, now.day + 1 + index * 2);
+    return day.add(const Duration(hours: 9));
+  }
+
+  /// Scheduled date of a sample order: same as its due date, so it shows in
+  /// the Agenda of segments that use scheduling; a finished one has none.
+  static DateTime? sampleOrderScheduledDate(
+    int index,
+    String status,
+    DateTime now,
+  ) => status == 'done' ? null : sampleOrderDueDate(index, now);
 
   /// Busca nomes existentes de uma collection
   Future<Set<String>> _getExistingNames(
@@ -450,10 +466,12 @@ class BootstrapService {
       if (customerName != null) {
         // Verifica se já existe cliente de exemplo
         // Checa por "(Exemplo)", "(Example)", "(Ejemplo)"
-        final hasExampleCustomer = existingCustomers.any((name) =>
-            name.contains('(Exemplo)') ||
-            name.contains('(Example)') ||
-            name.contains('(Ejemplo)'));
+        final hasExampleCustomer = existingCustomers.any(
+          (name) =>
+              name.contains('(Exemplo)') ||
+              name.contains('(Example)') ||
+              name.contains('(Ejemplo)'),
+        );
 
         if (hasExampleCustomer) {
           skippedCustomers.add(customerName);
@@ -477,10 +495,7 @@ class BootstrapService {
 
     // 7. Criar OSs de exemplo (usando customers, devices e services criados)
     // Verificar se já existem OSs criadas para evitar duplicação
-    final existingOrders = await _orderRepo.getQueryList(
-      companyId,
-      limit: 1,
-    );
+    final existingOrders = await _orderRepo.getQueryList(companyId, limit: 1);
 
     if (existingOrders.isEmpty) {
       // Primeira vez executando o bootstrap, criar OSs demo
@@ -532,12 +547,23 @@ class BootstrapService {
       final services = await _serviceRepo.getQueryList(companyId, limit: 10);
 
       // Filtrar nulls
-      final validCustomers = customers.where((c) => c != null).cast<Customer>().toList();
-      final validDevices = devices.where((d) => d != null).cast<Device>().toList();
-      final validServices = services.where((s) => s != null).cast<Service>().toList();
+      final validCustomers = customers
+          .where((c) => c != null)
+          .cast<Customer>()
+          .toList();
+      final validDevices = devices
+          .where((d) => d != null)
+          .cast<Device>()
+          .toList();
+      final validServices = services
+          .where((s) => s != null)
+          .cast<Service>()
+          .toList();
 
       // Se não houver dados suficientes, pular criação
-      if (validCustomers.isEmpty || validDevices.isEmpty || validServices.isEmpty) {
+      if (validCustomers.isEmpty ||
+          validDevices.isEmpty ||
+          validServices.isEmpty) {
         skipped.add('Insufficient data to create orders');
         return {'created': created, 'skipped': skipped};
       }
@@ -550,7 +576,7 @@ class BootstrapService {
 
         // Definir status baseado no índice
         final status = _getOrderStatus(i);
-        final dueDate = DateTime.now().subtract(Duration(days: 10 - (i * 2)));
+        final dueDate = sampleOrderDueDate(i, DateTime.now());
 
         // Criar OrderService (usa o nome do serviço que já foi criado pelo bootstrap do segmento)
         final orderService = models.OrderService()
@@ -563,6 +589,7 @@ class BootstrapService {
           ..services = [orderService]
           ..status = status
           ..dueDate = dueDate
+          ..scheduledDate = sampleOrderScheduledDate(i, status, DateTime.now())
           ..total = service.value ?? 0
           ..company = companyAggr
           ..createdAt = DateTime.now().subtract(Duration(days: 11 - (i * 2)))
@@ -576,7 +603,9 @@ class BootstrapService {
         // Add a form to the first order (for screenshots)
         if (i == 0 && order.id != null) {
           try {
-            final templates = await _formsService.getCompanyTemplates(companyId);
+            final templates = await _formsService.getCompanyTemplates(
+              companyId,
+            );
             if (templates.isNotEmpty) {
               await _formsService.addFormToOrder(
                 companyId,
