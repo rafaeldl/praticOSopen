@@ -938,9 +938,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       onTap: () => NfseInvoiceScreen.open(
         context,
         invoice,
-        previousPageTitle: _shortOrderLabel(
-          context.read<SegmentConfigProvider>(),
-        ),
+        // "‹ OS 182", like the order screen's own title.
+        previousPageTitle: _orderTitle(context.read<SegmentConfigProvider>()),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),

@@ -121,6 +121,10 @@ void main() {
     final (_, bodies) = await pump(tester, taxId: null, initial: 300);
     expect(find.byKey(const Key('customerChargeTaxIdField')), findsOneWidget);
     expect(saveEnabled(tester), isFalse);
+    // Only the field's hint explains it; no second "Informe o CPF" line.
+    final l10n = lookupAppLocalizations(const Locale('pt'));
+    expect(find.text(l10n.chargeTaxIdHint), findsOneWidget);
+    expect(find.text(l10n.asaasErrorTaxIdRequired), findsNothing);
 
     await tester.enterText(
       find.descendant(

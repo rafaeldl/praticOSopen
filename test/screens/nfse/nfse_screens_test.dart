@@ -452,6 +452,21 @@ void main() {
         opened: opened,
       );
       expect(find.text('Emitida · nº 77'), findsWidgets);
+      // "Nota fiscal" only as the page title; the status row says "Situação".
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('nfseInvoiceStatus')),
+          matching: find.text('Situação'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('nfseInvoiceStatus')),
+          matching: find.text('Nota fiscal'),
+        ),
+        findsNothing,
+      );
       await tester.tap(find.byKey(const Key('nfseOpenPdf')));
       expect(opened, ['https://x/pdf']);
     });

@@ -256,7 +256,9 @@ void main() {
           api: service((_) async => http.Response('{}', 500)));
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
-      expect(find.text(l10n.asaasErrorTaxIdRequired), findsOneWidget);
+      // Only the field's hint explains it; no second "Informe o CPF" line.
+      expect(find.text(l10n.chargeTaxIdHint), findsOneWidget);
+      expect(find.text(l10n.asaasErrorTaxIdRequired), findsNothing);
       // The document sits in the first card, right under the value.
       expect(
         tester.getTopLeft(find.byKey(const Key('chargeTaxIdField'))).dy,

@@ -18,9 +18,9 @@ const int kPickerSearchThreshold = 10;
 /// True when [text] contains [query], ignoring case and accents.
 bool pickerMatches(String? text, String query) {
   if (query.isEmpty) return true;
-  return removeAccents(text ?? '').toLowerCase().contains(
-    removeAccents(query).toLowerCase(),
-  );
+  return removeAccents(
+    text ?? '',
+  ).toLowerCase().contains(removeAccents(query).toLowerCase());
 }
 
 /// True when [text] is [query], ignoring case, accents and outer spaces.
@@ -239,7 +239,16 @@ class _PickerScaffoldState<T> extends State<PickerScaffold<T>> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
           AppNavBar(
-            largeTitle: Text(widget.title),
+            // The question can be long ("Quais OS ele está pagando?"): it
+            // shrinks to fit the large title line instead of ending in "…".
+            largeTitle: Padding(
+              padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(widget.title),
+              ),
+            ),
             previousTitle: widget.previousTitle,
             trailing: widget.multiple
                 ? PickerConfirmButton(
