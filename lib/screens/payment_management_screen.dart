@@ -9,6 +9,7 @@ import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
@@ -101,6 +102,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.chargesStream,
     this.chargeService,
     this.canSendReceipt,
+    this.canOpenReceiptGroup,
     this.onSendReceipt,
     this.onOpenReceipt,
   });
@@ -131,6 +133,11 @@ class PaymentManagementScreen extends StatefulWidget {
   /// Test seam; defaults to [AuthorizationService.canReceiveOnOrder] (who
   /// receives on this order sends its recibo).
   final bool? canSendReceipt;
+
+  /// Test seam: whether a payment that is a share of a customer receipt
+  /// opens that receipt. Defaults to financial access or having
+  /// registered it (who else the rules don't let read the receipt).
+  final bool Function(PaymentTransaction tx)? canOpenReceiptGroup;
 
   /// Test seams; default to the recibo share sheet and the "Recebimento"
   /// screen.
@@ -241,6 +248,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool get _canSendReceipt =>
       widget.canSendReceipt ??
       AuthorizationService.instance.canReceiveOnOrder(_store?.order);
+  bool _canOpenReceiptGroup(PaymentTransaction tx) {
+    final override = widget.canOpenReceiptGroup;
+    if (override != null) return override(tx);
+    if (AuthorizationService.instance.canViewFinancialReports) return true;
+    final uid = Global.currentUser?.uid;
+    return uid != null && tx.createdBy?.id == uid;
+  }
+
   bool get _canDiscount =>
       widget.canGiveDiscount ??
       AuthorizationService.instance.canViewFinancialReports;
@@ -883,10 +898,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     // A share of a customer receipt: its own screen shows every OS it
     // covered, sends the recibo and undoes it as a whole.
     final groupId = tx.receiptGroupId;
-    if (groupId != null) {
+    if (groupId != null && _canOpenReceiptGroup(tx)) {
       _openReceiptGroup(groupId);
       return;
     }
+    // A share of a receipt someone else registered: shown, but it is undone
+    // and its recibo sent from the receipt, by who can open it.
+    final inOtherReceipt = groupId != null;
     final format = FormatService();
     final isPayment = tx.type == PaymentTransactionType.payment;
     final who = tx.isAsaas
@@ -912,7 +930,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
         message: Text(who),
         actions: [
-          if (isPayment && !tx.isAsaas && _canSendReceipt)
+          if (isPayment && !tx.isAsaas && !inOtherReceipt && _canSendReceipt)
             CupertinoActionSheetAction(
               key: const Key('receiveSendReceipt'),
               onPressed: () {
@@ -946,7 +964,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               },
               child: Text(context.l10n.receiveAttachReceipt),
             ),
-          if (!tx.isAsaas)
+          if (!tx.isAsaas && !inOtherReceipt)
             CupertinoActionSheetAction(
               isDestructiveAction: true,
               onPressed: () {

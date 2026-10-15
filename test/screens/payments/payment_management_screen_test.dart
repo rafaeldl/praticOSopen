@@ -102,6 +102,7 @@ void main() {
     List<ReceiptPdfData>? sentReceipts,
     List<String>? openedReceipts,
     bool receiptUndone = false,
+    bool Function(PaymentTransaction tx)? canOpenReceiptGroup,
     bool canDiscount = true,
   }) async {
     await tester.pumpWidget(
@@ -123,6 +124,7 @@ void main() {
           chargesStream: Stream.value(charges),
           chargeService: service,
           canSendReceipt: canSendReceipt,
+          canOpenReceiptGroup: canOpenReceiptGroup ?? (_) => true,
           onSendReceipt: (_, data) async => sentReceipts?.add(data),
           onOpenReceipt: (_, id) async {
             openedReceipts?.add(id);
@@ -1069,6 +1071,36 @@ void main() {
       expect(opened, ['r9']);
       // No sheet with "Remover este pagamento".
       expect(find.text('Remover este pagamento'), findsNothing);
+    });
+
+    testWidgets('a share of a receipt someone else registered does not open '
+        'it nor offer removing it', (tester) async {
+      final opened = <String>[];
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 1000,
+          paid: 400,
+          transactions: [
+            PaymentTransaction(
+              id: 'r9_0',
+              type: PaymentTransactionType.payment,
+              amount: 400,
+              createdAt: when,
+              receiptGroupId: 'r9',
+            ),
+          ],
+        ),
+        openedReceipts: opened,
+        canOpenReceiptGroup: (_) => false,
+      );
+      await tester.tap(
+        find.byKey(ValueKey('receivePayment_${when.microsecondsSinceEpoch}')),
+      );
+      await tester.pumpAndSettle();
+      expect(opened, isEmpty);
+      expect(find.text('Remover este pagamento'), findsNothing);
+      expect(find.byKey(const Key('receiveSendReceipt')), findsNothing);
     });
 
     testWidgets('undoing the Recebimento re-reads this order', (tester) async {
