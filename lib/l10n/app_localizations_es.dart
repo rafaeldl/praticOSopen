@@ -2970,6 +2970,62 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo enviar el comprobante. Revise la conexión e intente de nuevo.';
 
   @override
+  String get receiveCustomerSendCharge => 'Enviar cobro';
+
+  @override
+  String receiveCustomerChargeIntro(String name, int count, String numbers) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'las OS $numbers',
+      one: 'la OS $numbers',
+    );
+    return '$name recibe un solo enlace para pagar $_temp0 con Pix, boleto o tarjeta.';
+  }
+
+  @override
+  String receiveCustomerChargeOwedHint(String value) {
+    return 'Pendiente en esas OS: $value';
+  }
+
+  @override
+  String receiveCustomerOpenCharge(String amount) {
+    return 'Enlace abierto de $amount';
+  }
+
+  @override
+  String receiveCustomerOpenChargeDetail(String numbers, String date) {
+    return 'OS $numbers · vence $date';
+  }
+
+  @override
+  String get receiveCustomerChargeMenu => 'Acciones del enlace';
+
+  @override
+  String get receiveCustomerShareCharge => 'Enviar el enlace de nuevo';
+
+  @override
+  String receiveCustomerChargeCancelTitle(String amount) {
+    return '¿Cancelar el enlace de $amount?';
+  }
+
+  @override
+  String get receiveCustomerChargeCanceled => 'Enlace cancelado';
+
+  @override
+  String receiveCustomerOthersTitle(String name) {
+    return 'Otras OS de $name';
+  }
+
+  @override
+  String get receiveCustomerOthersNote =>
+      'Hechas por otra persona. Para incluirlas, toque Elegir las OS.';
+
+  @override
+  String get receiveCustomerOffline =>
+      'Sin internet. Para recibir en OS de otra persona necesita estar conectado.';
+
+  @override
   String get receiveCustomerChooseOrders => 'Elegir las OS';
 
   @override

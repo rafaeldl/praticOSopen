@@ -5236,6 +5236,78 @@ abstract class AppLocalizations {
   /// **'Não deu para enviar o comprovante. Confira a internet e tente de novo.'**
   String get receiveCustomerUploadFailed;
 
+  /// No description provided for @receiveCustomerSendCharge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar cobrança'**
+  String get receiveCustomerSendCharge;
+
+  /// No description provided for @receiveCustomerChargeIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} recebe um link só para pagar {count, plural, =1{a OS {numbers}} other{as OS {numbers}}} por Pix, boleto ou cartão.'**
+  String receiveCustomerChargeIntro(String name, int count, String numbers);
+
+  /// No description provided for @receiveCustomerChargeOwedHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em aberto nessas OS: {value}'**
+  String receiveCustomerChargeOwedHint(String value);
+
+  /// No description provided for @receiveCustomerOpenCharge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link aberto de {amount}'**
+  String receiveCustomerOpenCharge(String amount);
+
+  /// No description provided for @receiveCustomerOpenChargeDetail.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {numbers} · vence {date}'**
+  String receiveCustomerOpenChargeDetail(String numbers, String date);
+
+  /// No description provided for @receiveCustomerChargeMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações do link'**
+  String get receiveCustomerChargeMenu;
+
+  /// No description provided for @receiveCustomerShareCharge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar o link de novo'**
+  String get receiveCustomerShareCharge;
+
+  /// No description provided for @receiveCustomerChargeCancelTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar o link de {amount}?'**
+  String receiveCustomerChargeCancelTitle(String amount);
+
+  /// No description provided for @receiveCustomerChargeCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link cancelado'**
+  String get receiveCustomerChargeCanceled;
+
+  /// No description provided for @receiveCustomerOthersTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outras OS de {name}'**
+  String receiveCustomerOthersTitle(String name);
+
+  /// No description provided for @receiveCustomerOthersNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Feitas por outra pessoa. Para incluir, toque em Escolher as OS.'**
+  String get receiveCustomerOthersNote;
+
+  /// No description provided for @receiveCustomerOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem internet. Para receber em OS de outra pessoa, precisa estar conectado.'**
+  String get receiveCustomerOffline;
+
   /// No description provided for @receiveCustomerChooseOrders.
   ///
   /// In pt, this message translates to:
