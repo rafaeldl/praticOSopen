@@ -74,37 +74,37 @@ describe('orderAssistInputSchema', () => {
 
 describe('parseLlmDraft', () => {
   it('reads JSON inside ``` fences', () => {
-    const draft = parseLlmDraft('```json\n{"items":[{"kind":"service","name":"Polimento","value":450}]}\n```');
-    expect(draft.items).toEqual([{ kind: 'service', name: 'Polimento', value: 450 }]);
+    const draft = parseLlmDraft('```json\n{"operations":[{"action":"add","kind":"service","name":"Polimento","value":450}]}\n```');
+    expect(draft.operations).toMatchObject([{ action: 'add', kind: 'service', name: 'Polimento', value: 450 }]);
   });
 
   it('drops invalid items and keeps the valid ones', () => {
     const draft = parseLlmDraft(
       JSON.stringify({
         customer: { name: '  Ana  ', phone: null },
-        items: [{ kind: 'service', name: '' }, { kind: 'weird', name: 'Capô' }, { name: 'X', value: -5 }, 'oops'],
+        operations: [{ kind: 'service', name: '' }, { kind: 'weird', name: 'Capô' }, { name: 'X', value: -5 }, 'oops'],
         notes: '',
       }),
     );
-    expect(draft.items).toEqual([{ kind: 'service', name: 'Capô' }]);
+    expect(draft.operations).toMatchObject([{ action: 'add', kind: 'service', name: 'Capô' }]);
     expect(draft.customer).toEqual({ name: 'Ana', phone: undefined });
     expect(draft.notes).toBeUndefined();
   });
 
   it('reads the deadline and drops a malformed one', () => {
-    expect(parseLlmDraft(JSON.stringify({ items: [], dueDate: '2026-10-16', dueTime: '17:30' }))).toMatchObject({
+    expect(parseLlmDraft(JSON.stringify({ operations: [], dueDate: '2026-10-16', dueTime: '17:30' }))).toMatchObject({
       dueDate: '2026-10-16',
       dueTime: '17:30',
     });
-    const bad = parseLlmDraft(JSON.stringify({ items: [], dueDate: 'sexta', dueTime: '25:00', notes: 'Barulho' }));
+    const bad = parseLlmDraft(JSON.stringify({ operations: [], dueDate: 'sexta', dueTime: '25:00', notes: 'Barulho' }));
     expect(bad.dueDate).toBeUndefined();
     expect(bad.dueTime).toBeUndefined();
     expect(bad.notes).toBe('Barulho');
   });
 
-  it('keeps items when top-level fields are garbage', () => {
-    const draft = parseLlmDraft(JSON.stringify({ customer: 'Ana', device: 3, items: [{ kind: 'product', name: 'Gás' }] }));
-    expect(draft.items).toEqual([{ kind: 'product', name: 'Gás' }]);
+  it('keeps operations when top-level fields are garbage', () => {
+    const draft = parseLlmDraft(JSON.stringify({ customer: 'Ana', device: 3, operations: [{ kind: 'product', name: 'Gás' }] }));
+    expect(draft.operations).toMatchObject([{ action: 'add', kind: 'product', name: 'Gás' }]);
     expect(draft.customer).toBeUndefined();
   });
 
@@ -147,8 +147,21 @@ describe('prompt', () => {
     expect(text).toContain('capô 500');
   });
 
-  it('response schema requires items', () => {
-    expect(LLM_RESPONSE_SCHEMA.required).toEqual(['items']);
+  it('response schema requires operations', () => {
+    expect(LLM_RESPONSE_SCHEMA.required).toEqual(['operations']);
+  });
+
+  it('numbers the lines already in the order and says when there are none', () => {
+    const text = buildUserText(
+      {
+        text: 'a pintura é 300',
+        order: { services: [{ name: 'Pintura', value: 33 }], products: [{ name: 'Óleo', value: 40, quantity: 4 }] },
+      },
+      CATALOG,
+    );
+    expect(text).toContain('S1: Pintura, value 33');
+    expect(text).toContain('P1: Óleo, value 40, quantity 4');
+    expect(buildUserText({ text: 'x' }, CATALOG)).toContain('(none: new order)');
   });
 });
 
@@ -157,11 +170,11 @@ describe('runOrderAssist', () => {
     transcript: 'Revenda Sul, capô 500 e polimento, placa NXS 8620',
     customer: { name: 'Revenda Sul' },
     device: { name: 'Classic', serial: 'nxs 8620', manufacturer: 'Chevrolet' },
-    items: [
-      { kind: 'service', name: 'pintura de capo', value: 500 },
-      { kind: 'service', name: 'polimento' },
-      { kind: 'product', name: 'Para-choque dianteiro', quantity: 2 },
-      { kind: 'service', name: 'Alinhamento' },
+    operations: [
+      { action: 'add', kind: 'service', name: 'pintura de capo', value: 500 },
+      { action: 'add', kind: 'service', name: 'polimento' },
+      { action: 'add', kind: 'product', name: 'Para-choque dianteiro', quantity: 2 },
+      { action: 'add', kind: 'service', name: 'Alinhamento' },
     ],
     notes: 'Risco na porta',
     dueDate: '2026-10-16',
@@ -206,6 +219,7 @@ describe('runOrderAssist', () => {
       expect.objectContaining({ kind: 'product', catalogId: 'p1', value: 850, quantity: 2 }),
       expect.objectContaining({ name: 'Alinhamento', catalogId: null, value: null }),
     ]);
+    expect(draft.changes).toEqual([]);
     expect(draft.notes).toBe('Risco na porta');
     expect(draft.dueDate).toBe('2026-10-16');
     expect(draft.usage).toEqual({ used: 3, limit: 10 });
@@ -255,5 +269,77 @@ describe('runOrderAssist', () => {
     d.llm.generateJson.mockResolvedValue('desculpe');
     await expect(runOrderAssist('c1', { text: 'x' }, d)).rejects.toMatchObject({ code: 'AI_UNAVAILABLE' });
     expect(d.release).toHaveBeenCalled();
+  });
+
+  describe('changes to lines already in the order', () => {
+    const order = {
+      services: [
+        { name: 'Pintura', value: 33 },
+        { name: 'Pintura', value: 400 },
+        { name: 'Lavação completa', value: 300 },
+      ],
+      products: [{ name: 'Óleo', value: 40, quantity: 4 }],
+    };
+    const run = (operations: unknown[]) =>
+      runOrderAssist('c1', { text: 'x', order }, deps({}, { operations }));
+
+    it('"a pintura de 33 é 300" changes that line instead of adding one', async () => {
+      const draft = await run([{ action: 'update', line: 'S1', kind: 'service', name: 'Pintura', value: 300 }]);
+      expect(draft.items).toEqual([]);
+      expect(draft.changes).toEqual([
+        { action: 'update', line: { kind: 'service', index: 0 }, candidates: [], name: 'Pintura', value: 300 },
+      ]);
+    });
+
+    it('"tira a lavação" removes it; lowercase ids work', async () => {
+      const draft = await run([{ action: 'remove', line: 's3', kind: 'service', name: 'Lavação completa' }]);
+      expect(draft.changes).toEqual([
+        { action: 'remove', line: { kind: 'service', index: 2 }, candidates: [], name: 'Lavação completa' },
+      ]);
+    });
+
+    it('quantity of a part is rounded and kept at least 1', async () => {
+      const draft = await run([{ action: 'update', line: 'P1', kind: 'product', name: 'Óleo', quantity: 2.6 }]);
+      expect(draft.changes[0]).toMatchObject({ line: { kind: 'product', index: 0 }, quantity: 3 });
+    });
+
+    it('two lines fit: no line, the candidates go to the app to ask', async () => {
+      const draft = await run([
+        { action: 'update', line: null, candidates: ['S1', 'S2', 'S9', 'S1'], kind: 'service', name: 'Pintura', value: 300 },
+      ]);
+      expect(draft.changes).toEqual([
+        {
+          action: 'update',
+          line: null,
+          candidates: [
+            { kind: 'service', index: 0 },
+            { kind: 'service', index: 1 },
+          ],
+          name: 'Pintura',
+          value: 300,
+        },
+      ]);
+    });
+
+    it('drops changes to lines that do not exist and updates with nothing to change', async () => {
+      const draft = await run([
+        { action: 'remove', line: 'S9', kind: 'service', name: 'Fantasma' },
+        { action: 'update', line: 'S1', kind: 'service', name: 'Pintura' },
+        { action: 'remove', line: null, candidates: ['S7'], kind: 'service', name: 'X' },
+      ]);
+      expect(draft.changes).toEqual([]);
+    });
+
+    it('without the order (older app) every change is dropped, adds still work', async () => {
+      const d = deps({}, {
+        operations: [
+          { action: 'remove', line: 'S1', kind: 'service', name: 'Pintura' },
+          { action: 'add', kind: 'service', name: 'Polimento' },
+        ],
+      });
+      const draft = await runOrderAssist('c1', { text: 'x' }, d);
+      expect(draft.changes).toEqual([]);
+      expect(draft.items).toEqual([expect.objectContaining({ name: 'Polimento', catalogId: 's1' })]);
+    });
   });
 });

@@ -950,6 +950,29 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
+  /// After changing a line in place (value, quantity): refreshes the lists,
+  /// the total and saves.
+  @action
+  void refreshLines() {
+    services = order?.services?.asObservable();
+    products = order?.products?.asObservable();
+    updateTotal();
+    createItem();
+  }
+
+  /// Puts a removed line back where it was ("Desfazer").
+  @action
+  void insertLine(Object line, int index) {
+    if (line is OrderService) {
+      final all = order!.services!;
+      all.insert(index.clamp(0, all.length), line);
+    } else if (line is OrderProduct) {
+      final all = order!.products!;
+      all.insert(index.clamp(0, all.length), line);
+    }
+    refreshLines();
+  }
+
   /// Adiciona uma ou mais fotos da galeria
   /// Verifica limite de fotos do plano antes de permitir upload.
   /// Retorna false se limite atingido (photoLimitResult contera detalhes).

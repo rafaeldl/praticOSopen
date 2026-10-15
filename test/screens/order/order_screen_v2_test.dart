@@ -98,7 +98,8 @@ class FakeActions extends OrderScreenActions {
 class FakeAssistant implements AiOrderAssistClient {
   FakeAssistant(this.draft, {this.error, this.enabled = true});
 
-  final AiOrderDraft draft;
+  /// What the next call returns (a test can swap it between calls).
+  AiOrderDraft draft;
   final AiOrderAssistException? error;
   final bool enabled;
   int statusCalls = 0;
@@ -111,15 +112,18 @@ class FakeAssistant implements AiOrderAssistClient {
 
   final List<String?> texts = [];
   final List<int> photoCounts = [];
+  final List<AiOrderSnapshot?> orders = [];
 
   @override
   Future<AiOrderDraft> assist({
     String? text,
     List<AiPhoto> photos = const [],
     String? locale,
+    AiOrderSnapshot? order,
   }) async {
     texts.add(text);
     photoCounts.add(photos.length);
+    orders.add(order);
     if (error != null) throw error!;
     return draft;
   }
@@ -710,6 +714,102 @@ void main() {
         find.byKey(const ValueKey('new_order_pick_customer')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('sends the order; changes and takes out the lines named', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final assistant = FakeAssistant(draft);
+      await _pump(tester, assistantScreen(store, assistant));
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(assistant.orders.single!.isEmpty, isTrue);
+
+      // "troca de óleo 150, tira o polimento e são 3 filtros".
+      assistant.draft = const AiOrderDraft(
+        changes: [
+          AiDraftChange(
+            remove: false,
+            name: 'Troca de óleo',
+            line: AiLineRef(kind: 'service', index: 0),
+            value: 150,
+          ),
+          AiDraftChange(
+            remove: true,
+            name: 'Polimento',
+            line: AiLineRef(kind: 'service', index: 1),
+          ),
+          AiDraftChange(
+            remove: false,
+            name: 'Filtro de óleo',
+            line: AiLineRef(kind: 'product', index: 0),
+            quantity: 3,
+          ),
+        ],
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      final sent = assistant.orders.last!;
+      expect(sent.services.map((l) => l.name), ['Troca de óleo', 'Polimento']);
+      expect(sent.services.first.value, 120);
+      expect(sent.products.single.quantity, 2);
+
+      expect(store.services, hasLength(1));
+      expect(store.services!.single.value, 150);
+      expect(store.products!.single.quantity, 3);
+      expect(store.products!.single.total, closeTo(106.5, 0.001));
+      expect(store.order!.total, closeTo(256.5, 0.001));
+      expect(rowOf(tester, 'Troca de óleo').marked, isTrue);
+      expect(find.text('Mudei a OS como você pediu. Confira.'), findsOneWidget);
+
+      // "Desfazer" puts the value, the quantity and the line back.
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+      expect(store.services!.map((s) => s.service?.name), [
+        'Troca de óleo',
+        'Polimento',
+      ]);
+      expect(store.services!.first.value, 120);
+      expect(store.products!.single.quantity, 2);
+      expect(store.order!.total, closeTo(191, 0.001));
+    });
+
+    testWidgets('two lines with the same name: asks which one', (tester) async {
+      final store = OrderStore();
+      final assistant = FakeAssistant(
+        const AiOrderDraft(
+          items: [
+            AiDraftItem(kind: 'service', name: 'Pintura', value: 33),
+            AiDraftItem(kind: 'service', name: 'Pintura', value: 400),
+          ],
+        ),
+      );
+      await _pump(tester, assistantScreen(store, assistant));
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      assistant.draft = const AiOrderDraft(
+        changes: [
+          AiDraftChange(
+            remove: false,
+            name: 'Pintura',
+            candidates: [
+              AiLineRef(kind: 'service', index: 0),
+              AiLineRef(kind: 'service', index: 1),
+            ],
+            value: 300,
+          ),
+        ],
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Qual Pintura?'), findsWidgets);
+      await tester.tap(find.textContaining('400').last);
+      await tester.pumpAndSettle();
+      expect(store.services!.map((s) => s.value), [33, 300]);
     });
 
     testWidgets('notes fill "O que o cliente pediu"; "Desfazer" clears', (

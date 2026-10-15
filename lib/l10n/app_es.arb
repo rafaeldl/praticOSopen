@@ -1992,6 +1992,11 @@
   "orderMenuCopyLink": "Copiar enlace",
   "orderPlaceOfService": "Lugar de atención",
   "orderAssistantApplied": "Agregué a la OS lo que está marcado. Revísalo.",
+  "orderAssistantWhichLine": "¿Cuál {name}?",
+  "@orderAssistantWhichLine": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantChanged": "Cambié la OS como pediste. Revísala.",
   "pickerCustomerTitle": "¿Qué cliente?",
   "pickerDeviceTitle": "¿Qué {device}?",
   "pickerDeviceSubtitle": "de {name}",

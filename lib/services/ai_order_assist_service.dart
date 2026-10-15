@@ -67,6 +67,112 @@ class AiDraftItem {
   );
 }
 
+/// One line already in the order, sent so the assistant can change or remove
+/// it ("a pintura é 300", "tira a lavação") instead of adding a new one.
+class AiOrderLine {
+  const AiOrderLine({required this.name, this.value, this.quantity});
+
+  final String name;
+  final double? value;
+
+  /// Parts only.
+  final int? quantity;
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    if (value != null) 'value': value,
+    if (quantity != null && quantity! > 0) 'quantity': quantity,
+  };
+}
+
+/// The order lines in screen order. The server refers to them by index.
+class AiOrderSnapshot {
+  const AiOrderSnapshot({this.services = const [], this.products = const []});
+
+  final List<AiOrderLine> services;
+  final List<AiOrderLine> products;
+
+  bool get isEmpty => services.isEmpty && products.isEmpty;
+
+  /// The server takes at most 50 lines of each kind and names up to 200 chars.
+  Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> lines(List<AiOrderLine> all) => [
+      for (final l in all.take(50))
+        if (l.name.trim().isNotEmpty)
+          AiOrderLine(
+            name: l.name.trim().length > 200
+                ? l.name.trim().substring(0, 200)
+                : l.name.trim(),
+            value: l.value,
+            quantity: l.quantity,
+          ).toJson(),
+    ];
+    return {'services': lines(services), 'products': lines(products)};
+  }
+}
+
+/// A line of the order: its kind and its index in [AiOrderSnapshot].
+class AiLineRef {
+  const AiLineRef({required this.kind, required this.index});
+
+  /// 'service' or 'product'.
+  final String kind;
+  final int index;
+
+  bool get isProduct => kind == 'product';
+
+  static AiLineRef? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final index = (json['index'] as num?)?.toInt();
+    if (index == null || index < 0) return null;
+    return AiLineRef(
+      kind: json['kind'] == 'product' ? 'product' : 'service',
+      index: index,
+    );
+  }
+}
+
+/// A change the assistant asks for on a line already in the order.
+class AiDraftChange {
+  const AiDraftChange({
+    required this.remove,
+    required this.name,
+    this.line,
+    this.candidates = const [],
+    this.value,
+    this.quantity,
+  });
+
+  /// True = take the line out; false = change [value] and/or [quantity].
+  final bool remove;
+  final String name;
+
+  /// Null when it could fit more than one line: ask among [candidates].
+  final AiLineRef? line;
+  final List<AiLineRef> candidates;
+  final double? value;
+  final int? quantity;
+
+  static AiDraftChange? fromJson(Map<String, dynamic> json) {
+    final action = json['action'];
+    if (action != 'update' && action != 'remove') return null;
+    final line = AiLineRef.fromJson(json['line']);
+    final candidates = [
+      for (final c in (json['candidates'] as List? ?? const []))
+        ?AiLineRef.fromJson(c),
+    ];
+    if (line == null && candidates.length < 2) return null;
+    return AiDraftChange(
+      remove: action == 'remove',
+      name: json['name'] as String? ?? '',
+      line: line,
+      candidates: line == null ? candidates : const [],
+      value: (json['value'] as num?)?.toDouble(),
+      quantity: (json['quantity'] as num?)?.toInt(),
+    );
+  }
+}
+
 /// Customer registered in the company that the assistant matched.
 class AiCustomerHit {
   const AiCustomerHit({required this.id, required this.name, this.phone});
@@ -104,8 +210,9 @@ class AiDeviceHit {
   );
 }
 
-/// Structured draft of a new order returned by `aiOrderAssist`. Nothing is
-/// saved: the app fills the blank order and the user taps "Salvar OS".
+/// Structured draft returned by `aiOrderAssist`: what to add ([items]) and
+/// what to change in the lines already in the order ([changes]). The function
+/// saves nothing: the app applies it on screen.
 class AiOrderDraft {
   const AiOrderDraft({
     this.transcript,
@@ -115,6 +222,7 @@ class AiOrderDraft {
     this.deviceGuessName,
     this.deviceGuessSerial,
     this.items = const [],
+    this.changes = const [],
     this.notes,
     this.dueDate,
     this.used,
@@ -130,6 +238,9 @@ class AiOrderDraft {
   final String? deviceGuessName;
   final String? deviceGuessSerial;
   final List<AiDraftItem> items;
+
+  /// Changes to lines already in the order (only when the order was sent).
+  final List<AiDraftChange> changes;
   final String? notes;
 
   /// When the customer wants it ready. Without a spoken time it is 18:00.
@@ -160,6 +271,10 @@ class AiOrderDraft {
       items: [
         for (final i in (json['items'] as List? ?? const []))
           AiDraftItem.fromJson(Map<String, dynamic>.from(i as Map)),
+      ],
+      changes: [
+        for (final c in (json['changes'] as List? ?? const []))
+          if (c is Map) ?AiDraftChange.fromJson(Map<String, dynamic>.from(c)),
       ],
       notes: json['notes'] as String?,
       dueDate: parseDueDate(json['dueDate']),
@@ -207,6 +322,7 @@ abstract class AiOrderAssistClient {
     String? text,
     List<AiPhoto> photos = const [],
     String? locale,
+    AiOrderSnapshot? order,
   });
 
   /// Whether the assistant is on for the selected company. Never throws: any
@@ -270,6 +386,7 @@ class AiOrderAssistService implements AiOrderAssistClient {
     String? text,
     List<AiPhoto> photos = const [],
     String? locale,
+    AiOrderSnapshot? order,
   }) async {
     final body = <String, dynamic>{
       if (text != null && text.trim().isNotEmpty) 'text': text.trim(),
@@ -280,6 +397,7 @@ class AiOrderAssistService implements AiOrderAssistClient {
         ],
       if (locale != null && const ['pt', 'en', 'es'].contains(locale))
         'locale': locale,
+      if (order != null && !order.isEmpty) 'order': order.toJson(),
     };
     final http.Response response;
     try {

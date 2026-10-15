@@ -4036,6 +4036,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Agregué a la OS lo que está marcado. Revísalo.';
 
   @override
+  String orderAssistantWhichLine(String name) {
+    return '¿Cuál $name?';
+  }
+
+  @override
+  String get orderAssistantChanged => 'Cambié la OS como pediste. Revísala.';
+
+  @override
   String get pickerCustomerTitle => '¿Qué cliente?';
 
   @override
