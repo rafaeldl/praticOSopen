@@ -18,6 +18,9 @@ import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/models/nfse.dart';
+import 'package:praticos/models/payment_settings.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
@@ -279,12 +282,14 @@ void main() {
     bool edit = true,
     bool prices = true,
     bool receive = true,
+    NfseController? nfse,
   }) => OrderScreenV2(
     showAssistant: false,
     store: store,
     permissions: _permissions(edit: edit, prices: prices, receive: receive),
     actions: actions ?? FakeActions(),
     mostUsed: () async => const [],
+    nfse: nfse,
   );
 
   group('"…" > "Adicionar à OS"', () {
@@ -887,6 +892,94 @@ void main() {
       expect(store.status, 'progress');
       expect(find.byType(CupertinoAlertDialog), findsNothing);
       expect(find.byKey(const ValueKey('notify_note')), findsNothing);
+    });
+  });
+
+  group('Nota fiscal', () {
+    NfseController nfse({
+      bool enabled = true,
+      List<NfseInvoice> invoices = const [],
+    }) => NfseController(
+      canIssue: true,
+      settingsStream: Stream.value(
+        PaymentSettings(
+          asaasEnabled: true,
+          asaasConnected: true,
+          nfseEnabled: enabled,
+          nfseReady: true,
+        ),
+      ),
+      invoicesOf: (_) => Stream.value(invoices),
+    );
+
+    NfseInvoice invoice(String status, {String? number}) =>
+        NfseInvoice.fromJson({
+          'status': status,
+          'orderIds': ['o1'],
+          'value': 500,
+          'number': number,
+          'createdAt': DateTime.now().toIso8601String(),
+        }, id: 'inv1');
+
+    testWidgets('flag off: no "Emitir nota fiscal" and no row', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse(enabled: false)),
+        args: {'order': _order(status: 'done')},
+      );
+      expect(find.byKey(const ValueKey('order_nfse')), findsNothing);
+      await _openMenu(tester);
+      expect(_menuLabels(tester), isNot(contains('Emitir nota fiscal')));
+    });
+
+    testWidgets('flag on: the "…" offers "Emitir nota fiscal"', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse()),
+        args: {'order': _order(status: 'done')},
+      );
+      await _openMenu(tester);
+      expect(_menuLabels(tester), contains('Emitir nota fiscal'));
+    });
+
+    testWidgets('a quote cannot have a nota', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse()),
+        args: {'order': _order()},
+      );
+      await _openMenu(tester);
+      expect(_menuLabels(tester), isNot(contains('Emitir nota fiscal')));
+    });
+
+    testWidgets('the nota shows as a row and blocks a second one', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(
+          OrderStore(),
+          nfse: nfse(invoices: [invoice('authorized', number: '123')]),
+        ),
+        args: {'order': _order(status: 'done')},
+      );
+      expect(find.byKey(const ValueKey('order_nfse')), findsOneWidget);
+      expect(find.text('Emitida · nº 123'), findsOneWidget);
+      await _openMenu(tester);
+      expect(_menuLabels(tester), isNot(contains('Emitir nota fiscal')));
+    });
+
+    testWidgets('a refused nota shows in red and allows a new one', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), nfse: nfse(invoices: [invoice('error')])),
+        args: {'order': _order(status: 'done')},
+      );
+      expect(find.byKey(const ValueKey('order_nfse')), findsOneWidget);
+      await _openMenu(tester);
+      expect(_menuLabels(tester), contains('Emitir nota fiscal'));
     });
   });
 }

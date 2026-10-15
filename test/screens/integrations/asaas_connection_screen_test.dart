@@ -415,5 +415,32 @@ void main() {
 
       expect(find.text('Asaas'), findsNothing);
     });
+
+    group('AsaasConnectionScreen nota fiscal', () {
+      final base = PaymentSettings(
+        asaasEnabled: true,
+        asaasConnected: true,
+        asaasAccountName: 'Oficina do João',
+        asaasEnvironment: 'sandbox',
+      );
+      final api = service((_) async => http.Response('{}', 200));
+
+      testWidgets('sem nfseEnabled não mostra a linha de nota', (tester) async {
+        await pumpScreen(tester, settings: base, api: api);
+        expect(find.byKey(const Key('asaasNfseRow')), findsNothing);
+      });
+
+      testWidgets('com nfseEnabled mostra a linha de nota', (tester) async {
+        final on = PaymentSettings(
+          asaasEnabled: true,
+          asaasConnected: true,
+          asaasAccountName: 'Oficina do João',
+          asaasEnvironment: 'sandbox',
+          nfseEnabled: true,
+        );
+        await pumpScreen(tester, settings: on, api: api);
+        expect(find.byKey(const Key('asaasNfseRow')), findsOneWidget);
+      });
+    });
   });
 }
