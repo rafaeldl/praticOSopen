@@ -5,7 +5,14 @@ import 'package:praticos/services/asaas_api_service.dart';
 ///
 /// Never exposes the raw server message; unknown codes fall back to a
 /// generic text.
-String asaasErrorText(AppLocalizations l10n, AsaasApiException e) {
+///
+/// [nota] is for the nota fiscal screens: an Asaas rejection there is about
+/// the fiscal data, not a charge.
+String asaasErrorText(
+  AppLocalizations l10n,
+  AsaasApiException e, {
+  bool nota = false,
+}) {
   switch (e.code) {
     case 'FORBIDDEN':
     case 'INSUFFICIENT_PERMISSIONS':
@@ -43,7 +50,29 @@ String asaasErrorText(AppLocalizations l10n, AsaasApiException e) {
     case 'CHARGE_NOT_OPEN':
       return l10n.asaasErrorChargeNotOpen;
     case 'ASAAS_VALIDATION_ERROR':
-      return l10n.asaasErrorValidation;
+      return nota ? l10n.nfseErrorAsaasValidation : l10n.asaasErrorValidation;
+    case 'NFSE_NOT_ENABLED':
+      return l10n.nfseErrorNotEnabled;
+    case 'NFSE_NOT_READY':
+      return l10n.nfseErrorNotReady;
+    case 'NFSE_ORDER_NOT_ALLOWED':
+      return l10n.nfseErrorOrderNotAllowed;
+    case 'NO_SERVICES':
+      return l10n.nfseErrorNoServices;
+    case 'ORDER_HAS_INVOICE':
+      return l10n.nfseErrorOrderHasInvoice;
+    case 'ORDER_NOT_OF_CUSTOMER':
+      return l10n.nfseErrorOrderNotOfCustomer;
+    case 'INVOICE_NOT_FOUND':
+      return l10n.nfseErrorNotFound;
+    case 'INVOICE_NOT_CANCELABLE':
+      return l10n.nfseErrorNotCancelable;
+    case 'CANCEL_NOT_SUPPORTED':
+      return l10n.nfseErrorCancelNotSupported;
+    case 'INVALID_EFFECTIVE_DATE':
+      return l10n.nfseErrorInvalidDate;
+    case 'INVALID_FISCAL_INFO':
+      return l10n.nfseErrorInvalidFiscalInfo;
     case 'ASAAS_UNAVAILABLE':
       return l10n.asaasErrorUnavailable;
     case 'NETWORK_ERROR':

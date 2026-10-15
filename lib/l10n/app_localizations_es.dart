@@ -5198,4 +5198,384 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get asaasMenu => 'Más opciones de Asaas';
+
+  @override
+  String get nfseErrorAsaasValidation =>
+      'Asaas rechazó los datos de la factura. Revisa el documento y la dirección del cliente y la configuración fiscal.';
+
+  @override
+  String get nfseErrorNotEnabled =>
+      'La factura de servicio no está activada para esta empresa.';
+
+  @override
+  String get nfseErrorNotReady =>
+      'Falta configurar la factura. Mira en Integraciones, Asaas.';
+
+  @override
+  String get nfseErrorOrderNotAllowed =>
+      'Esta orden no puede tener factura: es presupuesto o fue cancelada.';
+
+  @override
+  String get nfseErrorNoServices =>
+      'Esta orden no tiene servicios con valor. Solo los servicios van en la factura.';
+
+  @override
+  String get nfseErrorOrderHasInvoice =>
+      'Esta orden ya tiene factura. Cancélala antes de emitir otra.';
+
+  @override
+  String get nfseErrorOrderNotOfCustomer =>
+      'Todas las órdenes de la factura deben ser del mismo cliente.';
+
+  @override
+  String get nfseErrorNotFound =>
+      'No encontramos esta factura. Actualiza la pantalla.';
+
+  @override
+  String get nfseErrorNotCancelable =>
+      'Esta factura no se puede cancelar ahora.';
+
+  @override
+  String get nfseErrorCancelNotSupported =>
+      'Este municipio no permite cancelar la factura desde aquí. Cancélala en el sitio del municipio.';
+
+  @override
+  String get nfseErrorInvalidDate =>
+      'La fecha de la factura no puede ser anterior a hoy.';
+
+  @override
+  String get nfseErrorInvalidFiscalInfo =>
+      'Asaas no aceptó los datos fiscales. Revísalos con tu contador.';
+
+  @override
+  String get nfseStatusWaiting => 'Esperando al municipio';
+
+  @override
+  String nfseStatusScheduledFor(String date) {
+    return 'Se emitirá el $date';
+  }
+
+  @override
+  String get nfseStatusIssued => 'Emitida';
+
+  @override
+  String nfseStatusIssuedNumber(String number) {
+    return 'Emitida · nº $number';
+  }
+
+  @override
+  String get nfseStatusCanceling => 'Cancelando';
+
+  @override
+  String get nfseStatusCancelDenied => 'Cancelación rechazada';
+
+  @override
+  String get nfseStatusCanceled => 'Cancelada';
+
+  @override
+  String get nfseStatusError => 'Rechazada por el municipio';
+
+  @override
+  String get nfseRowTitle => 'Factura de servicio';
+
+  @override
+  String get nfseIssueAction => 'Emitir factura de servicio';
+
+  @override
+  String get nfseIssueSeveralAction => 'Emitir una factura con varias órdenes';
+
+  @override
+  String get nfseValueLabel => 'Valor de la factura';
+
+  @override
+  String get nfseOnlyServicesNote =>
+      'Solo los servicios van en la factura. Piezas y productos quedan fuera.';
+
+  @override
+  String get nfseDiscountNote =>
+      'El descuento se repartió entre servicios y piezas.';
+
+  @override
+  String nfseOrderLine(String number, String value) {
+    return 'Orden $number · $value';
+  }
+
+  @override
+  String get nfseDescriptionLabel => 'Lo que dice la factura';
+
+  @override
+  String get nfseDateLabel => 'Fecha de la factura';
+
+  @override
+  String get nfseServiceRow => 'Servicio municipal';
+
+  @override
+  String get nfseTaxIdHint =>
+      'La factura necesita el documento fiscal del cliente. Se guarda en su ficha.';
+
+  @override
+  String get nfseTaxIdMissing => 'Falta el documento fiscal del cliente';
+
+  @override
+  String get nfseNothingToIssue =>
+      'Nada que emitir: la factura quedaría sin valor';
+
+  @override
+  String nfseAlreadyIssued(String numbers) {
+    return 'La orden $numbers ya tiene factura';
+  }
+
+  @override
+  String get nfseSent => 'Factura enviada al municipio';
+
+  @override
+  String nfseSeveralIntro(int count, String name, String numbers) {
+    return 'Una factura para $count órdenes de $name: $numbers.';
+  }
+
+  @override
+  String get nfseNotReadyTitle => 'Falta configurar la factura';
+
+  @override
+  String get nfseNotReadyAdmin =>
+      'Antes de la primera factura, completa los datos fiscales de la empresa y el servicio de la factura.';
+
+  @override
+  String get nfseNotReadyOther =>
+      'Pide al dueño de la empresa que configure la factura en Integraciones, Asaas.';
+
+  @override
+  String get nfseSetupAction => 'Configurar';
+
+  @override
+  String get nfsePickOrdersTitle => '¿Qué órdenes van en la factura?';
+
+  @override
+  String nfsePickOrderSubtitle(String value, String date) {
+    return 'Servicios $value · $date';
+  }
+
+  @override
+  String get nfseNoOrdersToPick =>
+      'Ninguna orden de este cliente puede tener factura ahora';
+
+  @override
+  String get nfseHeadWaiting =>
+      'El municipio todavía está revisando la factura.';
+
+  @override
+  String nfseHeadScheduled(String date) {
+    return 'La factura va al municipio el $date.';
+  }
+
+  @override
+  String get nfseHeadIssued => 'La factura fue emitida.';
+
+  @override
+  String get nfseHeadError =>
+      'El municipio rechazó la factura. Revisa los datos fiscales y la ficha del cliente y emítela de nuevo.';
+
+  @override
+  String get nfseHeadCanceling => 'El municipio está cancelando la factura.';
+
+  @override
+  String get nfseHeadCancelDenied =>
+      'El municipio no aceptó cancelar la factura. Sigue siendo válida.';
+
+  @override
+  String get nfseHeadCanceled => 'La factura fue cancelada.';
+
+  @override
+  String get nfseReasonLabel => 'Motivo dado por el municipio';
+
+  @override
+  String get nfseNumberLabel => 'Número';
+
+  @override
+  String get nfseOrdersLabel => 'Órdenes en la factura';
+
+  @override
+  String get nfseOpenPdf => 'Abrir PDF de la factura';
+
+  @override
+  String get nfseOpenXml => 'Abrir XML de la factura';
+
+  @override
+  String get nfseMenu => 'Más opciones de la factura';
+
+  @override
+  String get nfseCancelAction => 'Cancelar factura';
+
+  @override
+  String nfseCancelQuestion(String value) {
+    return '¿Cancelar la factura de $value?';
+  }
+
+  @override
+  String get nfseCancelMessage =>
+      'El municipio recibe el pedido y la factura deja de valer. El pago de la orden queda igual.';
+
+  @override
+  String get nfseKeep => 'Mantener factura';
+
+  @override
+  String get nfseCancelRequested => 'Pedido de cancelación enviado';
+
+  @override
+  String get nfseCancelAtCityTitle => 'Cancela en el sitio del municipio';
+
+  @override
+  String get nfseCancelAtCityMessage =>
+      'Este municipio no permite cancelar la factura desde aquí. Cancélala en su sitio y luego márcalo aquí.';
+
+  @override
+  String get nfseCanceledAtCity => 'Ya la cancelé en el municipio';
+
+  @override
+  String get nfseCanceledToast => 'Factura cancelada';
+
+  @override
+  String get nfseSetupReady => 'Lista para emitir';
+
+  @override
+  String get nfseSetupMissingShort => 'Falta configurar';
+
+  @override
+  String get nfseSetupHeadReady =>
+      'Todo listo. La factura se emite desde la orden, en “…”.';
+
+  @override
+  String nfseSetupHeadMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Faltan $count pasos para emitir facturas.',
+      one: 'Falta 1 paso para emitir facturas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseSetupFiscalInfo => 'Datos fiscales de la empresa';
+
+  @override
+  String get nfseSetupCityAccess => 'Acceso al municipio';
+
+  @override
+  String get nfseSetupService => 'Servicio de la factura';
+
+  @override
+  String get nfseSetupDone => 'Listo';
+
+  @override
+  String get nfseSetupTodo => 'Falta';
+
+  @override
+  String get nfseSetupNext => 'Configurar lo que falta';
+
+  @override
+  String get nfseCityAccessCertificate =>
+      'El municipio pide el certificado digital de la empresa. Envíalo en el panel de Asaas, en Facturas.';
+
+  @override
+  String get nfseCityAccessPassword =>
+      'El municipio pide el usuario y la contraseña de su sitio. Ingrésalos en el panel de Asaas, en Facturas.';
+
+  @override
+  String get nfseCityAccessToken =>
+      'El municipio pide un código de acceso. Ingrésalo en el panel de Asaas, en Facturas.';
+
+  @override
+  String get nfseCityAccessFirst =>
+      'Completa primero los datos fiscales: así sabremos qué pide el municipio.';
+
+  @override
+  String get nfseCityAccessNone => 'Este municipio no pide acceso extra.';
+
+  @override
+  String get nfseOpenAsaasPanel => 'Abrir el panel de Asaas';
+
+  @override
+  String get nfseCheckAgain => 'Ya lo envié, revisar de nuevo';
+
+  @override
+  String get nfseNoCancelNote =>
+      'Este municipio no permite cancelar desde la app: se cancela en su sitio.';
+
+  @override
+  String get nfseFiscalNote =>
+      'Estos datos quedan en Asaas y van en todas las facturas. Si tienes dudas, pregunta a tu contador.';
+
+  @override
+  String get nfseFiscalEmail => 'Correo que recibe las facturas';
+
+  @override
+  String get nfseFiscalMunicipalInscription => 'Inscripción municipal';
+
+  @override
+  String get nfseFiscalSimples => 'Empresa del Simples Nacional';
+
+  @override
+  String get nfseFiscalCnae => 'CNAE (si tu contador lo pide)';
+
+  @override
+  String get nfseFiscalSpecialRegime => 'Régimen especial';
+
+  @override
+  String get nfseFiscalSpecialRegimeQuestion => '¿Cuál es el régimen especial?';
+
+  @override
+  String get nfseFiscalServiceListItem => 'Ítem de la lista de servicios';
+
+  @override
+  String get nfseFiscalEmailMissing => 'Escribe un correo válido para guardar.';
+
+  @override
+  String get nfseFiscalSaved => 'Datos fiscales guardados';
+
+  @override
+  String get nfseServicePickTitle => '¿Qué servicio prestas?';
+
+  @override
+  String get nfseServiceSearch => 'Busca por nombre, ej.: mantenimiento';
+
+  @override
+  String get nfseServiceSearchEmpty =>
+      'Nada encontrado. Prueba otra palabra o escribe el código.';
+
+  @override
+  String get nfseServiceTypeCode => 'Escribir el código';
+
+  @override
+  String get nfseServiceCode => 'Código del servicio en el municipio';
+
+  @override
+  String get nfseServiceName => 'Nombre del servicio';
+
+  @override
+  String get nfseServiceMissing => 'Elige el servicio municipal para guardar.';
+
+  @override
+  String get nfseIss => 'ISS (%)';
+
+  @override
+  String get nfseRetainIss => 'El cliente retiene el ISS';
+
+  @override
+  String get nfseOtherTaxes => 'Otros impuestos (%)';
+
+  @override
+  String get nfseTaxesNote =>
+      'Usa lo que indiquen el municipio y tu contador. Deja 0 donde no aplica.';
+
+  @override
+  String get nfseTemplateLabel => 'Texto de la factura';
+
+  @override
+  String nfseTemplateHint(Object os, Object servicos) {
+    return '$servicos se convierte en los servicios y $os en los números de las órdenes.';
+  }
+
+  @override
+  String get nfseServiceSaved => 'Servicio de la factura guardado';
 }

@@ -5,6 +5,7 @@ import 'dart:io' show SocketException;
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:praticos/models/customer_charge.dart';
+import 'package:praticos/models/nfse.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/services/api_headers.dart';
@@ -58,7 +59,8 @@ class CustomerOpenOrder {
 }
 
 /// Client for the payment endpoints: Asaas connection, order charges, the
-/// customer charge of several orders and the server-side customer receipt.
+/// customer charge of several orders, the server-side customer receipt and
+/// the NFS-e (`/v1/app/nfse`, docs/NFSE_ASAAS.md).
 ///
 /// The app never talks to Asaas directly and never keeps the API key.
 class AsaasApiService {
@@ -333,4 +335,138 @@ class AsaasApiService {
     );
     _ensureOk(response);
   }
+
+  // ─── NFS-e (nota fiscal de serviço) ───
+
+  Future<Map<String, dynamic>> _nfse(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    final headers = await _headers();
+    final uri = Uri.parse('$appApiBaseUrl/v1/app/nfse$path');
+    final response = await _send(() {
+      switch (method) {
+        case 'GET':
+          return _client.get(uri, headers: headers);
+        case 'PUT':
+          return _client.put(uri, headers: headers, body: jsonEncode(body));
+        default:
+          return _client.post(
+            uri,
+            headers: headers,
+            body: jsonEncode(body ?? const {}),
+          );
+      }
+    });
+    _ensureOk(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final data = decoded['data'];
+    return data is Map ? Map<String, dynamic>.from(data) : {'list': data};
+  }
+
+  /// What is filled and what is missing to issue notas (owner/admin).
+  Future<NfseSetup> nfseSetup() async =>
+      NfseSetup.fromJson(await _nfse('GET', '/setup'));
+
+  /// Saves the company's fiscal info in Asaas (owner/admin).
+  Future<NfseSetup> saveNfseFiscalInfo({
+    required String email,
+    required bool simplesNacional,
+    String? municipalInscription,
+    String? cnae,
+    String? specialTaxRegime,
+    String? serviceListItem,
+  }) async {
+    String? clean(String? v) => (v ?? '').trim().isEmpty ? null : v!.trim();
+    final body = <String, dynamic>{
+      'email': email.trim(),
+      'simplesNacional': simplesNacional,
+      if (clean(municipalInscription) != null)
+        'municipalInscription': clean(municipalInscription),
+      if (clean(cnae) != null) 'cnae': clean(cnae),
+      if (clean(specialTaxRegime) != null)
+        'specialTaxRegime': clean(specialTaxRegime),
+      if (clean(serviceListItem) != null)
+        'serviceListItem': clean(serviceListItem),
+    };
+    return NfseSetup.fromJson(
+      await _nfse('POST', '/setup/fiscal-info', body: body),
+    );
+  }
+
+  /// Services of the city's list matching [query].
+  Future<List<NfseMunicipalService>> nfseMunicipalServices(
+    String query,
+  ) async {
+    final q = Uri.encodeQueryComponent(query.trim());
+    final data = await _nfse(
+      'GET',
+      '/setup/municipal-services${q.isEmpty ? '' : '?q=$q'}',
+    );
+    return [
+      for (final item in (data['list'] as List? ?? const []))
+        if (item is Map)
+          NfseMunicipalService.fromJson(Map<String, dynamic>.from(item)),
+    ];
+  }
+
+  /// Saves the default service of the notas (owner/admin).
+  Future<NfseSetup> saveNfseService(NfseServiceSettings service) async =>
+      NfseSetup.fromJson(
+        await _nfse('PUT', '/setup/service', body: service.toJson()),
+      );
+
+  /// What a nota for [orderIds] (one customer) will have.
+  Future<NfsePreview> previewInvoice(
+    List<String> orderIds, {
+    String? customerId,
+  }) async => NfsePreview.fromJson(
+    await _nfse(
+      'POST',
+      '/invoices/preview',
+      body: {
+        'orderIds': orderIds,
+        if (customerId != null) 'customerId': customerId,
+      },
+    ),
+  );
+
+  /// Issues one nota for [orderIds]. [effectiveDate] defaults to today on
+  /// the server.
+  Future<NfseInvoice> createInvoice(
+    List<String> orderIds, {
+    String? customerId,
+    String? serviceDescription,
+    DateTime? effectiveDate,
+    String? customerTaxId,
+  }) async {
+    final data = await _nfse(
+      'POST',
+      '/invoices',
+      body: {
+        'orderIds': orderIds,
+        if (customerId != null) 'customerId': customerId,
+        if ((serviceDescription ?? '').trim().isNotEmpty)
+          'serviceDescription': serviceDescription!.trim(),
+        if (effectiveDate != null)
+          'effectiveDate': DateFormat('yyyy-MM-dd').format(effectiveDate),
+        if ((customerTaxId ?? '').isNotEmpty) 'customerTaxId': customerTaxId,
+      },
+    );
+    return NfseInvoice.fromJson(data);
+  }
+
+  /// Cancels a nota. [onlyOnAsaas]: the city does not cancel through the
+  /// integration and the user already canceled it at the city.
+  Future<NfseInvoice> cancelInvoice(
+    String invoiceId, {
+    bool onlyOnAsaas = false,
+  }) async => NfseInvoice.fromJson(
+    await _nfse(
+      'POST',
+      '/invoices/$invoiceId/cancel',
+      body: {if (onlyOnAsaas) 'onlyOnAsaas': true},
+    ),
+  );
 }
