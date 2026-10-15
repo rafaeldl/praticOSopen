@@ -7,6 +7,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
+import 'package:praticos/screens/payments/receive_customer_screen.dart';
 import 'package:praticos/screens/payments/send_charge_flow.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -41,12 +42,18 @@ class FinancialTab extends StatefulWidget {
     this.onSendCharge,
     this.onOpenReport,
     this.sendChargeFlow,
+    this.onReceiveFromCustomer,
   });
 
   final FinancialTabStore? store;
 
   /// Opens one order.
   final void Function(BuildContext context, Order order)? onOpenOrder;
+
+  /// "Receber de João": one payment over the customer's open orders.
+  /// Defaults to pushing [ReceiveCustomerScreen] (test seam).
+  final Future<bool> Function(BuildContext context, Debtor debtor)?
+      onReceiveFromCustomer;
 
   /// Sends the payment link of an order to its customer. Overrides
   /// [sendChargeFlow] entirely (test seam).
@@ -137,9 +144,25 @@ class _FinancialTabState extends State<FinancialTab> {
     );
   }
 
+  /// One open order: its Receber. Several (same customer): "Receber de
+  /// João", one payment split oldest first. Orders without a customer are
+  /// not one payer, so they keep the "Qual OS?" picker.
   Future<void> _openDebtor(Debtor debtor) async {
     if (debtor.hasSingleOrder) {
       _openOrder(debtor.oldestOrder);
+      return;
+    }
+    if (debtor.customerId != null) {
+      final receive = widget.onReceiveFromCustomer;
+      final received = receive != null
+          ? await receive(context, debtor)
+          : await ReceiveCustomerScreen.open(
+              context,
+              orders: debtor.orders,
+              customer: debtor.oldestOrder.customer,
+              customerName: debtor.name,
+            );
+      if (received && mounted) _store.refresh();
       return;
     }
     final l10n = context.l10n;

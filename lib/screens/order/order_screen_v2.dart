@@ -812,6 +812,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   bool get _canGiveDiscount =>
       _store.order?.id != null &&
       _permissions.canViewPrices() &&
+      _permissions.canGiveDiscount() &&
       !const ['quote', 'canceled'].contains(_store.status) &&
       _store.remainingBalance > 0;
 
@@ -1876,6 +1877,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   bool _showMoney(SegmentConfigProvider config) =>
       _permissions.canViewPrices() && config.useFinancial;
 
+  /// Receiving also needs [OrderPermissions.canReceivePayments]: financial
+  /// access, or a consultant on an order they created. Others see what is
+  /// left to receive but cannot register the payment.
+  bool _canReceive(SegmentConfigProvider config) =>
+      _showMoney(config) && _permissions.canReceivePayments(_store.order);
+
   /// "OS 186" (small, centered title).
   String _orderTitle(SegmentConfigProvider config) {
     final number = _store.orderStream?.value?.number ?? _store.order?.number;
@@ -2190,7 +2197,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// The one blue button: the next step of the cycle. Receiving only with
-  /// money on; nothing once it is done and paid.
+  /// money on and the person can receive on it; nothing once it is done and paid (or
+  /// when the person cannot receive).
   (String, VoidCallback)? _nextAction(SegmentConfigProvider config) {
     final order = _store.order;
     if (order == null) return null;
@@ -2215,7 +2223,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         return to(l10n.orderActionMarkReady, 'done');
       case 'done':
         final remaining = _store.remainingBalance;
-        if (!_showMoney(config) || remaining <= 0) return null;
+        if (!_canReceive(config) || remaining <= 0) return null;
         return (
           l10n.orderNextStepReceive(_format.formatCurrency(remaining)),
           () => _actions.openPayments(context, _store),
@@ -2242,7 +2250,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     VoidCallback? onPhrase;
     if (_showMoney(config) && status == 'done' && remaining > 0) {
       phrase = l10n.orderRemainingToReceive(_format.formatCurrency(remaining));
-      onPhrase = () => _actions.openPayments(context, _store);
+      onPhrase = _canReceive(config)
+          ? () => _actions.openPayments(context, _store)
+          : null;
     } else if (due != null &&
         const ['quote', 'approved', 'progress'].contains(status)) {
       phrase = overdue
@@ -2566,11 +2576,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           onTap: _addItem,
         ),
       if (money && hasItems)
-        ..._buildTotals(summarizeOrderItems(services, products)),
+        ..._buildTotals(
+          summarizeOrderItems(services, products),
+          canReceive: _canReceive(config),
+        ),
     ];
   }
 
-  List<Widget> _buildTotals(OrderItemsSummary summary) {
+  List<Widget> _buildTotals(
+    OrderItemsSummary summary, {
+    required bool canReceive,
+  }) {
     final l10n = context.l10n;
     final text = AppColors.text.resolveFrom(context);
     final secondary = AppColors.textSecondary.resolveFrom(context);
@@ -2633,7 +2649,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (showPayment)
         _tappable(
           key: const ValueKey('order_remaining'),
-          onTap: () => _actions.openPayments(context, _store),
+          onTap: canReceive
+              ? () => _actions.openPayments(context, _store)
+              : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.pageMargin,
@@ -2664,12 +2682,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                       ),
                     ),
                   ],
-                  const SizedBox(width: AppSpacing.xs),
-                  Icon(
-                    CupertinoIcons.chevron_forward,
-                    size: 18,
-                    color: secondary,
-                  ),
+                  if (canReceive) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    Icon(
+                      CupertinoIcons.chevron_forward,
+                      size: 18,
+                      color: secondary,
+                    ),
+                  ],
                 ],
               ),
             ),

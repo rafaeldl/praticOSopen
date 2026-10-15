@@ -90,8 +90,7 @@ class FinancialSummary {
     final byCustomer = <String, List<Order>>{};
     final names = <String, String?>{};
     for (final order in openOrders.whereType<Order>()) {
-      if (order.status == 'quote' || order.status == 'canceled') continue;
-      if (order.payment == 'paid' || openAmount(order) <= 0) continue;
+      if (!isOpen(order)) continue;
       final id = order.customer?.id;
       final key = id ?? Debtor.noCustomerKey;
       byCustomer.putIfAbsent(key, () => []).add(order);
@@ -123,12 +122,13 @@ class FinancialSummary {
   static double openAmount(Order order) =>
       (order.total ?? 0) - (order.paidAmount ?? 0);
 
-  /// When [order] was paid: its latest payment, falling back to its last
+  /// When [order] was paid: its latest payment (its chosen date, `paidAt`,
+  /// or when it was recorded), falling back to its last
   /// update (old orders have no transactions).
   static DateTime paidDate(Order order) {
     final payments = (order.transactions ?? const <PaymentTransaction>[])
         .where((t) => t.type == PaymentTransactionType.payment)
-        .map((t) => t.createdAt)
+        .map((t) => t.paidOn)
         .toList()
       ..sort();
     if (payments.isNotEmpty) return payments.last;
@@ -136,6 +136,19 @@ class FinancialSummary {
         order.createdAt ??
         DateTime.fromMillisecondsSinceEpoch(0);
   }
+
+  /// Whether [order] still has money to receive (not a quote, not
+  /// canceled, not paid, something open).
+  static bool isOpen(Order order) =>
+      order.status != 'quote' &&
+      order.status != 'canceled' &&
+      order.payment != 'paid' &&
+      openAmount(order) > 0;
+
+  /// The open orders among [orders], oldest first: the same list and order
+  /// as `Debtor.orders` (the order a customer payment is split in).
+  static List<Order> openOrdersOldestFirst(Iterable<Order?> orders) =>
+      orders.whereType<Order>().where(isOpen).toList()..sort(_oldestFirst);
 
   static int _oldestFirst(Order a, Order b) {
     final da = a.createdAt;

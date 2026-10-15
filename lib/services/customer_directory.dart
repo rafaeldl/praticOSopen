@@ -6,6 +6,7 @@ import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_customer_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/customer_utils.dart';
 
 export 'package:praticos/utils/customer_utils.dart' show OpenOrdersSummary;
@@ -74,15 +75,28 @@ class FirestoreCustomerDirectory implements CustomerDirectory {
     return distinctVehicles(orders);
   }
 
+  /// Consultant and technician read only the orders they created (Firestore
+  /// rules), so their query has to say so or it is denied.
+  String? get _ownOrdersOnly {
+    final auth = AuthorizationService.instance;
+    if (auth.isConsultant || auth.isTechnician) return Global.currentUser?.uid;
+    return null;
+  }
+
   @override
   Stream<List<Order>> watchOrdersOf(String customerId) => _orders
-      .streamOrders(_companyId, customerId: customerId)
+      .streamOrders(
+        _companyId,
+        customerId: customerId,
+        createdById: _ownOrdersOnly,
+      )
       .map((l) => l.whereType<Order>().toList());
 
   @override
   Future<Map<String, OpenOrdersSummary>> openOrdersByCustomer() async {
-    final list =
-        await _orders.streamOrders(_companyId, status: 'due_date').first;
+    final list = await _orders
+        .streamOrders(_companyId, status: 'due_date')
+        .first;
     return summarizeOpenOrders(
       list.whereType<Order>().toList(),
       DateTime.now(),

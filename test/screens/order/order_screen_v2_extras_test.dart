@@ -144,16 +144,21 @@ class FakeActions extends OrderScreenActions {
 
 String _money(double v) => (FormatService()..setLocale('pt')).formatCurrency(v);
 
-OrderPermissions _permissions({bool edit = true, bool prices = true}) =>
-    OrderPermissions(
-      canViewPrices: () => prices,
-      availableStatuses: (_) => const ['approved', 'progress', 'done'],
-      canChangeStatus: (_, _) => true,
-      canDelete: (_) => true,
-      canEditMainFields: (_) => edit,
-      canManageForms: (_) => edit,
-      canAttachMedia: () => edit,
-    );
+OrderPermissions _permissions({
+  bool edit = true,
+  bool prices = true,
+  bool receive = true,
+}) => OrderPermissions(
+  canViewPrices: () => prices,
+  canReceivePayments: (_) => receive,
+  canGiveDiscount: () => receive,
+  availableStatuses: (_) => const ['approved', 'progress', 'done'],
+  canChangeStatus: (_, _) => true,
+  canDelete: (_) => true,
+  canEditMainFields: (_) => edit,
+  canManageForms: (_) => edit,
+  canAttachMedia: () => edit,
+);
 
 Future<SegmentConfigProvider> _pump(
   WidgetTester tester,
@@ -273,10 +278,11 @@ void main() {
     FakeActions? actions,
     bool edit = true,
     bool prices = true,
+    bool receive = true,
   }) => OrderScreenV2(
     showAssistant: false,
     store: store,
-    permissions: _permissions(edit: edit, prices: prices),
+    permissions: _permissions(edit: edit, prices: prices, receive: receive),
     actions: actions ?? FakeActions(),
     mostUsed: () async => const [],
   );
@@ -711,6 +717,18 @@ void main() {
       await _pump(
         tester,
         screen(OrderStore(), prices: false),
+        args: {'order': _order(status: 'approved')},
+      );
+      await _openMenu(tester);
+      expect(find.text('Desconto'), findsNothing);
+    });
+
+    testWidgets('no discount without financial access (consultant)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), receive: false),
         args: {'order': _order(status: 'approved')},
       );
       await _openMenu(tester);

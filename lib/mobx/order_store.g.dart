@@ -1114,9 +1114,13 @@ mixin _$OrderStore on _OrderStore, Store {
   );
 
   @override
-  Future<PaymentTransaction?> addPayment(double amount, {String? description}) {
+  Future<PaymentTransaction?> addPayment(
+    double amount, {
+    String? description,
+    DateTime? paidAt,
+  }) {
     return _$addPaymentAsyncAction.run(
-      () => super.addPayment(amount, description: description),
+      () => super.addPayment(amount, description: description, paidAt: paidAt),
     );
   }
 

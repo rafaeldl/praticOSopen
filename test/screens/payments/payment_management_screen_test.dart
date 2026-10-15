@@ -18,11 +18,16 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/models/user.dart';
+import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/payment_management_screen.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/asaas_api_service.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/widgets/permission_widgets.dart'
+    show AccessDeniedScreen;
 
 /// Firebase core mock whose default app has a storage bucket.
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
@@ -92,6 +97,7 @@ void main() {
     PaymentSettings? settings,
     List<OrderCharge> charges = const [],
     AsaasApiService? service,
+    bool canDiscount = true,
   }) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -102,6 +108,7 @@ void main() {
           store: store,
           canAttachReceipt: canAttach,
           canViewReceipt: canView,
+          canGiveDiscount: canDiscount,
           onOpenExternalUrl: (uri) async => opened?.add(uri),
           canCharge: canCharge,
           paymentSettingsStream: Stream.value(
@@ -153,6 +160,28 @@ void main() {
     // Old segmented control and shortcut are gone.
     expect(find.byType(CupertinoSlidingSegmentedControl<int>), findsNothing);
     expect(find.textContaining('Pagar valor total'), findsNothing);
+  });
+
+  testWidgets('manual receive asks when the money came in ("Hoje")', (
+    tester,
+  ) async {
+    await pumpScreen(tester, storeWith(total: 500));
+
+    expect(find.text('Quando'), findsOneWidget);
+    expect(find.text('Hoje'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('receiveDateRow')));
+    await tester.pumpAndSettle();
+    final picker = tester.widget<CupertinoDatePicker>(
+      find.byKey(const Key('receiveDatePicker')),
+    );
+    final now = DateTime.now();
+    expect(
+      picker.maximumDate!.isBefore(DateTime(now.year, now.month, now.day + 1)),
+      isTrue,
+    );
+    await tester.tap(find.byKey(const Key('receiveDateConfirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoje'), findsOneWidget);
   });
 
   testWidgets('Asaas paid: shows billing type and "Tudo recebido"', (
@@ -253,6 +282,96 @@ void main() {
     expect(find.text('Desfazer pagamentos'), findsOneWidget);
     // Pull-down menu of the "…" button, not an action sheet.
     expect(find.byType(CupertinoActionSheet), findsNothing);
+  });
+
+  testWidgets('without financial access (consultant): no discount in "…"', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      storeWith(
+        total: 1000,
+        paid: 100,
+        transactions: [
+          PaymentTransaction(
+            id: '1728000000000',
+            type: PaymentTransactionType.payment,
+            amount: 100,
+          ),
+        ],
+      ),
+      canDiscount: false,
+    );
+
+    await tester.tap(find.byKey(const Key('receiveMoreButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Dar desconto'), findsNothing);
+    expect(find.text('Desfazer pagamentos'), findsOneWidget);
+  });
+
+  testWidgets('no "…" when there is no discount nor payment to undo', (
+    tester,
+  ) async {
+    await pumpScreen(tester, storeWith(total: 1000), canDiscount: false);
+    expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
+    expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
+  });
+
+  group('/payment_management route', () {
+    Future<void> pumpRoute(
+      WidgetTester tester,
+      OrderStore store,
+      bool Function(Order? order) canReceiveOn,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => CupertinoButton(
+              child: const Text('open'),
+              onPressed: () => Navigator.of(context).push(
+                CupertinoPageRoute(
+                  settings: RouteSettings(arguments: {'orderStore': store}),
+                  builder: (_) =>
+                      PaymentManagementRoute(canReceiveOn: canReceiveOn),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
+
+    bool consultantReceives(Order? o) =>
+        AuthorizationService.canReceiveOnOrderFor(
+          role: RolesType.consultant,
+          userId: 'me',
+          order: o,
+        );
+
+    testWidgets('consultant opens Receber of an order they created', (
+      tester,
+    ) async {
+      final store = storeWith();
+      store.order!.createdBy = UserAggr()..id = 'me';
+      await pumpRoute(tester, store, consultantReceives);
+      expect(find.byType(PaymentManagementScreen), findsOneWidget);
+      expect(find.byType(AccessDeniedScreen), findsNothing);
+    });
+
+    testWidgets('consultant gets "access denied" on an order of someone else', (
+      tester,
+    ) async {
+      final store = storeWith();
+      store.order!.createdBy = UserAggr()..id = 'other';
+      await pumpRoute(tester, store, consultantReceives);
+      expect(find.byType(PaymentManagementScreen), findsNothing);
+      expect(find.byType(AccessDeniedScreen), findsOneWidget);
+    });
   });
 
   testWidgets('top buttons are the shared glass buttons', (tester) async {
@@ -731,9 +850,7 @@ void main() {
         await tester.tap(find.text('Cancelar o link'));
         await tester.pumpAndSettle();
         expect(
-          find.text(
-            'O cliente não vai mais conseguir pagar por esse link.',
-          ),
+          find.text('O cliente não vai mais conseguir pagar por esse link.'),
           findsOneWidget,
         );
         await tester.tap(find.byKey(const Key('confirmCancelChargeAction')));

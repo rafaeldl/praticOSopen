@@ -62,6 +62,28 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
+    // Membro da empresa (custom claims, como no firestore.rules)
+    function belongsToCompany(companyId) {
+      return request.auth != null
+        && request.auth.token.roles != null
+        && request.auth.token.roles[companyId] != null;
+    }
+
+    // Imagem ou PDF até 10MB (comprovante)
+    function isValidReceipt() {
+      return request.resource.contentType != null
+        && (request.resource.contentType.matches('image/.*')
+            || request.resource.contentType == 'application/pdf')
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Comprovante de um recebimento de cliente (vale para várias OS):
+    // enviado uma vez, nunca sobrescrito
+    match /tenants/{companyId}/receipts/{receiptId}/{fileId} {
+      allow read: if belongsToCompany(companyId);
+      allow create: if belongsToCompany(companyId) && isValidReceipt();
+    }
+
     // Regras para documentos anexados à OS
     match /tenants/{companyId}/orders/{orderId}/documents/{docId} {
       allow read: if isAuthenticated();

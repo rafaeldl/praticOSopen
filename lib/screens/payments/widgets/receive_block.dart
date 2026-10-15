@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
+import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -25,6 +26,8 @@ class ReceiveBlock extends StatelessWidget {
     this.onAttachReceipt,
     this.onRemoveReceipt,
     this.onAmountChanged,
+    this.paidDay,
+    this.onPickDay,
   });
 
   final bool isPaid;
@@ -44,6 +47,10 @@ class ReceiveBlock extends StatelessWidget {
   final VoidCallback? onAttachReceipt;
   final VoidCallback? onRemoveReceipt;
   final ValueChanged<String>? onAmountChanged;
+
+  /// Day the money came in ("Quando"); null hides the row.
+  final DateTime? paidDay;
+  final VoidCallback? onPickDay;
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +109,13 @@ class ReceiveBlock extends StatelessWidget {
             key: const Key('receiveAmountHint'),
             style: AppTypography.label.copyWith(color: onSoft),
           ),
+          if (paidDay != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            ReceiveDateRow(day: paidDay!, onTap: busy ? null : onPickDay),
+          ],
           const SizedBox(height: AppSpacing.md),
           if (receiptName != null)
-            _ReceiptChip(name: receiptName!, onRemove: onRemoveReceipt)
+            ReceiptChip(name: receiptName!, onRemove: onRemoveReceipt)
           else if (onAttachReceipt != null)
             CupertinoButton(
               key: const Key('receiveAttachReceipt'),
@@ -200,8 +211,8 @@ class _Card extends StatelessWidget {
 }
 
 /// Receipt picked but not saved yet: name and an "x" to take it out.
-class _ReceiptChip extends StatelessWidget {
-  const _ReceiptChip({required this.name, this.onRemove});
+class ReceiptChip extends StatelessWidget {
+  const ReceiptChip({super.key, required this.name, this.onRemove});
 
   final String name;
   final VoidCallback? onRemove;

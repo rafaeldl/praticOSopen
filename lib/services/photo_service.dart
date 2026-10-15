@@ -9,6 +9,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/global.dart';
@@ -416,6 +417,47 @@ class PhotoService {
       };
     } catch (e) {
       debugPrint('PhotoService: Erro no upload de comprovante: $e');
+      rethrow;
+    }
+  }
+
+  /// Uploads the receipt of a customer payment once
+  /// (`tenants/{companyId}/receipts/{receiptId}/receipt.{ext}`); every order
+  /// the payment covered points to this same file. Images become JPEG.
+  Future<ReceiptFile?> uploadCustomerReceipt({
+    required File file,
+    required String companyId,
+    required String receiptId,
+    required String contentType,
+    required String fileName,
+  }) async {
+    try {
+      await _validateAuth();
+
+      if (Global.companyAggr?.id != companyId) {
+        throw Exception('Sem permissão para upload nesta empresa');
+      }
+
+      final isImage = contentType.startsWith('image/');
+      final extension =
+          isImage ? 'jpg' : fileName.split('.').last.toLowerCase();
+      final storagePath =
+          'tenants/$companyId/receipts/$receiptId/receipt.$extension';
+      final storedType = isImage ? 'image/jpeg' : contentType;
+
+      final upload = isImage ? await _convertToJpeg(file) : file;
+      final downloadUrl =
+          await _uploadWithFallback(upload, storagePath, contentType: storedType);
+      if (downloadUrl == null) return null;
+
+      return ReceiptFile(
+        url: downloadUrl,
+        storagePath: storagePath,
+        fileName: fileName,
+        contentType: storedType,
+      );
+    } catch (e) {
+      debugPrint('PhotoService: Erro no upload de comprovante do cliente: $e');
       rethrow;
     }
   }

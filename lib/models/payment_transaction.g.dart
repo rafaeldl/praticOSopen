@@ -21,6 +21,10 @@ PaymentTransaction _$PaymentTransactionFromJson(Map<String, dynamic> json) =>
       receiptDocumentId: json['receiptDocumentId'] as String?,
       receiptUrl: json['receiptUrl'] as String?,
       billingType: json['billingType'] as String?,
+      paidAt: json['paidAt'] == null
+          ? null
+          : DateTime.parse(json['paidAt'] as String),
+      receiptGroupId: json['receiptGroupId'] as String?,
     );
 
 Map<String, dynamic> _$PaymentTransactionToJson(PaymentTransaction instance) =>
@@ -34,6 +38,8 @@ Map<String, dynamic> _$PaymentTransactionToJson(PaymentTransaction instance) =>
       'receiptDocumentId': instance.receiptDocumentId,
       'receiptUrl': ?instance.receiptUrl,
       'billingType': ?instance.billingType,
+      'paidAt': ?instance.paidAt?.toIso8601String(),
+      'receiptGroupId': ?instance.receiptGroupId,
     };
 
 const _$PaymentTransactionTypeEnumMap = {

@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_settings.dart';
@@ -16,7 +15,11 @@ import 'package:praticos/screens/payments/create_charge_screen.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
+import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
+import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
+import 'package:praticos/services/customer_receipt_service.dart'
+    show PickedReceiptFile;
 import 'package:praticos/screens/payments/widgets/receive_discount_sheet.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
@@ -37,7 +40,37 @@ import 'package:praticos/utils/asaas_billing.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
+import 'package:praticos/widgets/permission_widgets.dart'
+    show AccessDeniedScreen;
 import 'package:url_launcher/url_launcher.dart';
+
+/// `/payment_management` route: the order's Receber, or "access denied"
+/// when the person cannot receive on that order
+/// ([AuthorizationService.canReceiveOnOrder]: financial access on any order,
+/// a consultant only on the orders they created).
+class PaymentManagementRoute extends StatelessWidget {
+  const PaymentManagementRoute({super.key, this.canReceiveOn});
+
+  /// Overrides [AuthorizationService.canReceiveOnOrder] (tests).
+  final bool Function(Order? order)? canReceiveOn;
+
+  @override
+  Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final store = args?['orderStore'] as OrderStore?;
+    return Observer(
+      builder: (_) {
+        final order = store?.order;
+        final allowed =
+            canReceiveOn?.call(order) ??
+            AuthorizationService.instance.canReceiveOnOrder(order);
+        if (allowed) return const PaymentManagementScreen();
+        return AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
+      },
+    );
+  }
+}
 
 /// "Receber" screen of an order: one block answering "did the customer pay?"
 /// (amount already filled, one "Recebi R$ X" button), the received payments
@@ -55,6 +88,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.store,
     this.canAttachReceipt,
     this.canViewReceipt,
+    this.canGiveDiscount,
     this.onOpenExternalUrl,
     this.canCharge,
     this.paymentSettingsStream,
@@ -68,6 +102,11 @@ class PaymentManagementScreen extends StatefulWidget {
   /// Test seams; default to the attachPhotos / viewPhotos permission checks.
   final bool? canAttachReceipt;
   final bool? canViewReceipt;
+
+  /// "Dar desconto" in the "…" menu. Defaults to financial access
+  /// (`viewFinancialReports`): a consultant receives on their own orders
+  /// but does not give discounts. Test seam.
+  final bool? canGiveDiscount;
 
   /// Test seam; defaults to opening the link in the browser.
   final Future<void> Function(Uri uri)? onOpenExternalUrl;
@@ -85,15 +124,6 @@ class PaymentManagementScreen extends StatefulWidget {
       _PaymentManagementScreenState();
 }
 
-class _PickedReceipt {
-  _PickedReceipt(this.file, this.contentType, this.name);
-  final File file;
-  final String contentType;
-  final String name;
-}
-
-enum _ReceiptSource { camera, gallery, files }
-
 class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _initialized = false;
   OrderStore? _store;
@@ -103,7 +133,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _busy = false;
 
   final TextEditingController _valueController = TextEditingController();
-  _PickedReceipt? _receipt;
+  PickedReceiptFile? _receipt;
+
+  /// Day the money came in ("Quando"); today by default.
+  DateTime _paidDay = DateTime.now();
 
   /// Opened from the order screen: "‹ OS 183" just goes back to it.
   bool _fromOrder = false;
@@ -183,6 +216,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool get _canView =>
       widget.canViewReceipt ??
       AuthorizationService.instance.hasPermission(PermissionType.viewPhotos);
+  bool get _canDiscount =>
+      widget.canGiveDiscount ??
+      AuthorizationService.instance.canViewFinancialReports;
 
   // ============================================================
   // BUILD
@@ -285,7 +321,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return Observer(
       builder: (_) {
         final status = _store?.status;
-        if (_store == null || status == 'quote' || status == 'canceled') {
+        final store = _store;
+        if (store == null || status == 'quote' || status == 'canceled') {
+          return const SizedBox.shrink();
+        }
+        // Nothing to offer: no discount, no link and no payment to undo.
+        if (!_canDiscount &&
+            _visibleOpenCharge() == null &&
+            !store.transactions.any((t) => !t.isAsaas)) {
           return const SizedBox.shrink();
         }
         return GlassBarButton(
@@ -453,7 +496,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       receiptName: _receipt?.name,
       onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
       onRemoveReceipt: () => setState(() => _receipt = null),
+      paidDay: _paidDay,
+      onPickDay: _pickPaidDay,
     );
+  }
+
+  Future<void> _pickPaidDay() async {
+    final day = await pickPaymentDay(context, _paidDay);
+    if (day != null && mounted) setState(() => _paidDay = day);
   }
 
   /// "Já recebido": the payments, newest first. Paid charges are not listed
@@ -462,7 +512,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final transactions = _store?.transactions ?? <PaymentTransaction>[];
     if (transactions.isEmpty) return const SizedBox.shrink();
     final sorted = List<PaymentTransaction>.from(transactions)
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.paidOn.compareTo(a.paidOn));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -618,7 +668,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       return;
     }
 
-    final transaction = await store.addPayment(value);
+    final transaction = await store.addPayment(
+      value,
+      paidAt: paidAtFor(_paidDay),
+    );
     var receiptOk = true;
     final receipt = _receipt;
     if (transaction != null && receipt != null) {
@@ -639,7 +692,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       _showError(_paymentFailureMessage(store));
       return;
     }
-    setState(() => _receipt = null);
+    setState(() {
+      _receipt = null;
+      _paidDay = DateTime.now();
+    });
     _prefillValue();
     if (!receiptOk) _showError(_paymentFailureMessage(store));
   }
@@ -686,13 +742,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               icon: CupertinoIcons.square_arrow_up,
             ),
           ]),
-        PullDownGroup([
-          PullDownItem(
-            value: 'discount',
-            label: context.l10n.receiveGiveDiscount,
-            icon: CupertinoIcons.tag,
-          ),
-        ]),
+        if (_canDiscount)
+          PullDownGroup([
+            PullDownItem(
+              value: 'discount',
+              label: context.l10n.receiveGiveDiscount,
+              icon: CupertinoIcons.tag,
+            ),
+          ]),
         PullDownGroup([
           if (canCancel)
             PullDownItem(
@@ -915,54 +972,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // RECEIPTS
   // ============================================================
 
-  Future<_PickedReceipt?> _pickReceipt() async {
-    final source = await showCupertinoModalPopup<_ReceiptSource>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, _ReceiptSource.camera),
-            child: Text(context.l10n.takePhoto),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, _ReceiptSource.gallery),
-            child: Text(context.l10n.gallery),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(ctx, _ReceiptSource.files),
-            child: Text(context.l10n.fromFiles),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(context.l10n.cancel),
-        ),
-      ),
-    );
-    if (source == null) return null;
-    final photoService = PhotoService();
-    String photoName() => 'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    switch (source) {
-      case _ReceiptSource.camera:
-        final file = await photoService.takePhoto();
-        return file == null
-            ? null
-            : _PickedReceipt(file, 'image/jpeg', photoName());
-      case _ReceiptSource.gallery:
-        final file = await photoService.pickImageFromGallery();
-        return file == null
-            ? null
-            : _PickedReceipt(file, 'image/jpeg', photoName());
-      case _ReceiptSource.files:
-        final result = await photoService.pickDocument();
-        if (result == null || result.path == null) return null;
-        return _PickedReceipt(
-          File(result.path!),
-          _contentTypeOf(result.extension?.toLowerCase() ?? ''),
-          result.name,
-        );
-    }
-  }
+  Future<PickedReceiptFile?> _pickReceipt() => pickReceiptFile(context);
 
   Future<void> _attachBeforeSaving() async {
     final picked = await _pickReceipt();
@@ -1018,20 +1028,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       );
     } else {
       launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    }
-  }
-
-  String _contentTypeOf(String extension) {
-    switch (extension) {
-      case 'pdf':
-        return 'application/pdf';
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      default:
-        return 'application/octet-stream';
     }
   }
 

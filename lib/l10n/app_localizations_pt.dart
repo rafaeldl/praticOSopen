@@ -2899,6 +2899,67 @@ class AppLocalizationsPt extends AppLocalizations {
   String get receiveRemoveReceipt => 'Tirar comprovante';
 
   @override
+  String get receiveWhen => 'Quando';
+
+  @override
+  String receiveCustomerTitle(String name) {
+    return 'Receber de $name';
+  }
+
+  @override
+  String receiveCustomerOwes(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return 'Deve $amount em $_temp0';
+  }
+
+  @override
+  String get receiveCustomerAmountLabel => 'Quanto recebeu';
+
+  @override
+  String get receiveCustomerHowItGoes => 'Como fica';
+
+  @override
+  String get receiveCustomerOldestFirst =>
+      'O valor vai primeiro para as OS mais antigas.';
+
+  @override
+  String receiveCustomerSettles(int number, String amount) {
+    return 'OS $number · quita $amount';
+  }
+
+  @override
+  String receiveCustomerPartial(int number, String amount, String left) {
+    return 'OS $number · recebe $amount, fica $left';
+  }
+
+  @override
+  String receiveCustomerUntouched(int number, String amount) {
+    return 'OS $number · continua $amount';
+  }
+
+  @override
+  String receiveCustomerTooMuch(String total) {
+    return 'Passa do que ele deve ($total).';
+  }
+
+  @override
+  String get receiveCustomerZero => 'Digite quanto recebeu.';
+
+  @override
+  String receiveCustomerDone(String amount, String name) {
+    return 'Recebido $amount de $name';
+  }
+
+  @override
+  String get receiveCustomerUploadFailed =>
+      'Não deu para enviar o comprovante. Confira a internet e tente de novo.';
+
+  @override
   String get loginTitle => 'Entre para começar';
 
   @override

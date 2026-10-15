@@ -58,16 +58,55 @@ A tela unificada permite:
 - Valor já pago
 - Saldo restante
 
-#### Registrar Pagamento/Desconto
-- Alternar entre **Pagamento** e **Desconto** via segmented control
-- Campo de valor pré-preenchido com saldo restante
-- Campo de observação opcional (ex: "Pagamento em dinheiro", "Desconto fidelidade")
-- Ação rápida "Pagar valor total"
+#### Registrar Pagamento ("Receber")
+- Campo de valor pré-preenchido com o que falta receber (não passa disso)
+- **Quando**: dia em que o dinheiro entrou, "Hoje" por padrão; abre um seletor de data
+  sem datas futuras. Grava `paidAt` na transação (hoje = agora; outro dia = meio-dia do dia)
+- "Anexar comprovante" (câmera, galeria ou arquivo), se tiver `attachPhotos`
+- Botão azul "Recebi R$ X". Sem forma de pagamento (Pix/dinheiro/cartão)
+- Desconto e "Desfazer" ficam no menu "…"
 
 #### Histórico de Transações
 - Lista de todas as transações (pagamentos e descontos)
-- Ordenadas por data (mais recente primeiro)
-- Swipe para remover transação
+- Ordenadas pelo dia do pagamento (`paidAt ?? createdAt`), mais recente primeiro
+- A linha mostra o dia escolhido quando ele difere do dia do registro
+
+### Receber de um cliente (várias OS)
+
+Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart`), empurrada:
+
+- Título "Receber de João" (quebra linha, sem reticências) e a frase "Deve R$ 1.250 em 3 OS".
+- Valor pré-preenchido com tudo o que o cliente deve; "Quando" (como acima); "Anexar comprovante".
+- **Como fica**: uma linha por OS, recalculada a cada tecla: "OS 182 · quita R$ 450",
+  "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Linhas sem toque (fase 1).
+- Botão azul "Recebi R$ X", desligado com 0 ou acima do que deve (com uma linha explicando).
+  Sucesso: aviso (`showAppToast`) e volta; o Financeiro recarrega.
+- O valor vai **primeiro para as OS mais antigas** (`allocatePayment` em
+  `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
+  "Escolher as OS" (divisão manual) fica para a fase 2: o gravador só consome a lista de
+  `PaymentAllocation`, então basta montar outra lista.
+
+**Entradas:**
+- Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
+  Com 1 OS vai direto ao Receber da OS. OS sem cliente continuam no "Qual OS?".
+- Tela do cliente: link "Receber" ao lado de "Falta receber R$ X" (mesma regra do Receber,
+  `AuthorizationService.canReceiveOnOrder`: aparece se a pessoa pode receber em pelo menos uma
+  OS em aberto do cliente; o consultor só leva as OS que ele criou). Com 1 OS abre o Receber dela.
+
+**Dados** (`CustomerReceiptService` → `buildReceiptPlan` → `TenantReceiptRepository.save`):
+- Documento `companies/{companyId}/receipts/{receiptId}` (`Receipt`): `customer` (aggr), `amount`,
+  `paidAt`, `allocations` [{`orderId`, `orderNumber`, `amount`, `transactionId`}],
+  `receiptFile` ({`url`, `storagePath`, `fileName`, `contentType`}, opcional), `status`
+  (`active`; desfazer será `canceled`, nunca apagado), auditoria (`createdAt`, `createdBy`, ...).
+- Cada OS recebe uma transação `payment` normal com a sua parte, `paidAt` e
+  `receiptGroupId` = id do recebimento. `paidAmount` sobe por `increment` e `paid`/`payment`
+  viram `paid` na OS que fica quitada (mesma conta de `OrderPaymentMath.addPaymentUpdate`).
+- Recebimento + todas as OS num único **WriteBatch** (tudo ou nada, funciona offline; a tela
+  não espera o servidor).
+- Comprovante: enviado **uma vez** para `tenants/{companyId}/receipts/{receiptId}/{arquivo}`
+  (precisa de internet; se falhar, nada é gravado). Cada OS ganha um `OrderDocument` do tipo
+  `receipt` apontando para o mesmo arquivo, com `linkedTransactionId` = transação dela, e a
+  transação guarda `receiptDocumentId`. Assim o "ver comprovante" da OS continua igual.
 
 ---
 
@@ -100,6 +139,10 @@ Cada transação registra:
 - `description` - Observação opcional
 - `createdAt` - Data/hora do registro
 - `createdBy` - Usuário que registrou
+- `paidAt` - Dia em que o dinheiro entrou (opcional; transações antigas não têm). Onde a data do
+  pagamento aparece ou é somada por período, vale `paidAt ?? createdAt` (`PaymentTransaction.paidOn`)
+- `receiptGroupId` - Id do recebimento de cliente (`receipts`) de que este pagamento é parte (opcional)
+- `receiptDocumentId` - Id do comprovante (`OrderDocument`) ligado a este pagamento (opcional)
 
 ---
 
@@ -108,19 +151,22 @@ Cada transação registra:
 Aba fixa na barra inferior (requer `viewFinancialReports`). Responde só "quem me deve":
 
 - **Mês** com setas (`PeriodStepper`); o mês seguinte fica desabilitado no mês atual.
-- **Próximo passo**: "Falta receber R$ X de N clientes", quem deve há mais tempo e o botão
-  "Mandar cobrança para ..." que abre o `ShareLinkSheet` da OS em aberto mais antiga desse cliente.
-  Sem dívida, o bloco some. Não gera cobrança Asaas nesta etapa.
-- **Falta receber**: **tudo** o que está em aberto, de qualquer mês (`getUnpaidOrders`: `payment == 'unpaid'`,
-  sem orçamento e sem OS cancelada), agrupado por cliente, mais antigo primeiro. 5 linhas + "Ver todos (N)".
-  Cliente com uma OS abre a OS; com várias, abre uma lista para escolher a OS.
-- **Recebido**: OS pagas do mês, mais recentes primeiro.
-- **Resumo fixo** acima da barra: "Entrou R$ X · Falta R$ Y" (Y = tudo em aberto).
+- **Próximo passo**: quem deve há mais tempo e o botão azul "Mandar cobrança para ...". Com Asaas
+  conectado gera a cobrança da OS em aberto mais antiga desse cliente e depois compartilha o link
+  (uma vez só, toque duplo ignorado); sem Asaas compartilha o link da OS. Sem dívida, o bloco some.
+- **Falta receber**: **tudo** o que está em aberto, de qualquer mês (sem orçamento, sem OS
+  cancelada, sem OS paga), agrupado por cliente, mais antigo primeiro ("N OS · desde 02/10";
+  outro ano mostra o ano). 5 linhas + "Ver todos (N)".
+  Tocar no cliente: com uma OS abre o **Receber** dessa OS; com várias abre **Receber de {cliente}**
+  (ver acima). OS sem cliente continuam abrindo a escolha "Qual OS?".
+- **Recebido em {mês}**: uma linha com o total recebido no mês (pelo dia do pagamento,
+  `paidAt ?? createdAt`), que abre o Relatório.
 - Mês sem OS e sem dívida: `EmptyState`. Erro: mensagem fixa + "Tentar novamente".
-- "…" e a linha "Relatório Financeiro" abrem o Relatório (com "Outro período" abrindo o seletor).
+- "…" abre o Relatório e "Outro período" (seletor de datas).
 
 Arquivos: `lib/screens/dashboard/financial_tab.dart`, `lib/mobx/financial_tab_store.dart`,
-`lib/utils/financial_summary.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`.
+`lib/utils/financial_summary.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`,
+`lib/screens/payments/receive_customer_screen.dart`.
 
 ## Relatório Financeiro
 
@@ -197,13 +243,42 @@ O PDF exibe:
 
 | Perfil | Ver Preços | Ver Dashboard | Registrar Pagamentos |
 |--------|------------|---------------|----------------------|
+| Dono | Sim | Sim | Sim |
 | Admin | Sim | Sim | Sim |
 | Gerente | Sim | Sim | Sim |
 | Supervisor | Não | Não | Não |
-| Consultor | Sim* | Não | Não |
+| Consultor | Sim* | Não | Sim** |
 | Técnico | Não | Não | Não |
 
 *Consultor vê preços apenas das próprias OS
+**Só nas OS que ele criou (`createdBy`), sem dar desconto
+
+Quem recebe é decidido num lugar só: `AuthorizationService.canReceiveOnOrder(order)`
+(lógica pura em `canReceiveOnOrderFor`). Quem tem acesso ao financeiro (`viewFinancialReports`:
+dono, admin e gerente) recebe em qualquer OS; o **consultor recebe só nas OS que ele criou**
+(`order.createdBy.id`, a mesma posse do `viewOwnOrders` e da regra de update de `/orders`).
+Supervisor e técnico nunca recebem. Sem "Valores e cobrança" ninguém recebe.
+
+A regra libera o **Receber** da OS (botão azul "Receber R$ X", a frase "Falta receber" e a linha
+"Falta receber" dos totais), a tela `/payment_management` (`PaymentManagementRoute`, acesso
+negado se a pessoa não pode receber naquela OS) e o "Receber de {cliente}" (aba Financeiro e link
+"· Receber" na tela do cliente; para o consultor a lista só traz as OS dele, e com uma só vai
+direto ao Receber dela). Nas OS dos outros, o consultor vê os valores (`viewPrices`), mas o
+"Falta receber" é só texto.
+
+O **desconto** continua só com acesso ao financeiro (`viewFinancialReports`): some do menu "…"
+da OS e do Receber para o consultor. Desconto mexe no valor combinado, que é decisão de gestão.
+
+Na tela do cliente, para consultor e técnico, a consulta das OS do cliente também filtra
+`createdBy.id` (`FirestoreCustomerDirectory.watchOrdersOf`): as regras só deixam esses perfis
+ler as próprias OS, e uma consulta sem esse filtro é negada. São só filtros de igualdade, então
+não precisa de índice composto; a ordem (mais nova primeiro) é feita no app.
+
+A regra de `receipts` no `firestore.rules` (`canReceivePayments`: owner, admin, manager e
+consultant) cria com `createdBy.id` = usuário; lê e atualiza (desfazer, anexar comprovante) quem
+passa em `canViewFinancial` ou quem criou o recebimento; ninguém apaga. As regras não conferem,
+no recebimento, se cada OS da repartição é do consultor: isso vale pela regra de update de
+`/orders`, que vai no mesmo batch (OS de outro = batch inteiro negado).
 
 ### Campos Ocultos por Permissão
 

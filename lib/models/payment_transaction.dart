@@ -50,6 +50,16 @@ class PaymentTransaction {
   @JsonKey(includeIfNull: false)
   String? billingType;
 
+  /// When the money came in, chosen by the user ("Quando"). Absent on
+  /// payments booked before this field existed: use [paidOn].
+  @JsonKey(includeIfNull: false)
+  DateTime? paidAt;
+
+  /// Id of the customer receipt (`companies/{id}/receipts/{receiptId}`)
+  /// this payment is a share of, when one payment covered several orders.
+  @JsonKey(includeIfNull: false)
+  String? receiptGroupId;
+
   PaymentTransaction({
     this.id,
     required this.type,
@@ -60,7 +70,12 @@ class PaymentTransaction {
     this.receiptDocumentId,
     this.receiptUrl,
     this.billingType,
+    this.paidAt,
+    this.receiptGroupId,
   }) : createdAt = createdAt ?? DateTime.now();
+
+  /// Date the payment counts for: [paidAt], or [createdAt] for old ones.
+  DateTime get paidOn => paidAt ?? createdAt;
 
   /// Whether this transaction has a receipt attached
   bool get hasReceipt => receiptDocumentId != null;
@@ -77,12 +92,16 @@ class PaymentTransaction {
     required double amount,
     String? description,
     UserAggr? createdBy,
+    DateTime? paidAt,
+    String? receiptGroupId,
   }) {
     return PaymentTransaction(
       type: PaymentTransactionType.payment,
       amount: amount,
       description: description,
       createdBy: createdBy,
+      paidAt: paidAt,
+      receiptGroupId: receiptGroupId,
     );
   }
 

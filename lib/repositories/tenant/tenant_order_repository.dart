@@ -52,9 +52,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   @override
   Future<void> updateItem(String companyId, Order? item) {
     final json = OrderPaymentMath.stripPaymentFields(toJson(item));
-    return collectionFor(companyId)
-        .doc(item?.id)
-        .set(json, SetOptions(merge: true));
+    return collectionFor(
+      companyId,
+    ).doc(item?.id).set(json, SetOptions(merge: true));
   }
 
   /// Offline without cache, `get()` throws: treat as a new order (full write).
@@ -96,9 +96,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     Map<String, dynamic> update, {
     UserAggr? actor,
   }) {
-    return collectionFor(companyId).doc(orderId).update(
-          toFirestoreUpdate(update, actor: actor ?? Global.userAggr),
-        );
+    return collectionFor(companyId)
+        .doc(orderId)
+        .update(toFirestoreUpdate(update, actor: actor ?? Global.userAggr));
   }
 
   /// Reads the order inside a Firestore transaction, applies [mutate] to the
@@ -131,9 +131,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   /// Reads the order from the server, skipping the local cache (e.g. after
   /// an Asaas webhook changed its payments). Throws when offline.
   Future<Order?> getFromServer(String companyId, String orderId) async {
-    final snap = await collectionFor(companyId)
-        .doc(orderId)
-        .get(const GetOptions(source: Source.server));
+    final snap = await collectionFor(
+      companyId,
+    ).doc(orderId).get(const GetOptions(source: Source.server));
     if (!snap.exists) return null;
     return fromJson({...snap.data()!, 'id': snap.id});
   }
@@ -187,8 +187,11 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         int currentWeek =
             ((now.difference(DateTime(now.year, 1, 1)).inDays) / 7).floor();
         int targetWeek = currentWeek + offset;
-        startDate =
-            DateTime(now.year, 1, 1).add(Duration(days: targetWeek * 7));
+        startDate = DateTime(
+          now.year,
+          1,
+          1,
+        ).add(Duration(days: targetWeek * 7));
         startDate = startDate.subtract(Duration(days: startDate.weekday));
         endDate = startDate.add(Duration(days: 7));
         break;
@@ -225,11 +228,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
           startDate.toIso8601String(),
           oper: 'isGreaterThanOrEqualTo',
         ),
-        QueryArgs(
-          'createdAt',
-          endDate.toIso8601String(),
-          oper: 'isLessThan',
-        ),
+        QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan'),
       ];
 
       final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
@@ -245,10 +244,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   /// de qualquer período. Equality-only filter: needs no composite index.
   /// Errors are not swallowed so callers can show a retry state.
   Future<List<Order?>> getUnpaidOrders(String companyId) {
-    return getQueryList(
-      companyId,
-      args: [QueryArgs('payment', 'unpaid')],
-    );
+    return getQueryList(companyId, args: [QueryArgs('payment', 'unpaid')]);
   }
 
   /// Busca orders por intervalo de scheduledDate.
@@ -292,11 +288,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         startDate.toIso8601String(),
         oper: 'isGreaterThanOrEqualTo',
       ),
-      QueryArgs(
-        'scheduledDate',
-        endDate.toIso8601String(),
-        oper: 'isLessThan',
-      ),
+      QueryArgs('scheduledDate', endDate.toIso8601String(), oper: 'isLessThan'),
     ];
 
     final List<OrderBy> orderBy = [OrderBy('scheduledDate')];
@@ -316,11 +308,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         startDate.toIso8601String(),
         oper: 'isGreaterThanOrEqualTo',
       ),
-      QueryArgs(
-        'dueDate',
-        endDate.toIso8601String(),
-        oper: 'isLessThan',
-      ),
+      QueryArgs('dueDate', endDate.toIso8601String(), oper: 'isLessThan'),
     ];
 
     final List<OrderBy> orderBy = [OrderBy('dueDate')];
@@ -334,6 +322,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     String? status,
     String? payment,
     String? customerId,
+    String? createdById,
   }) {
     List<QueryArgs> filterList = [];
     List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
@@ -359,6 +348,22 @@ class TenantOrderRepository extends TenantRepository<Order?> {
       filterList.add(QueryArgs('customer.id', customerId));
     }
 
+    // Only the orders this user created (consultant/technician: the rules
+    // deny any query that could return someone else's order). Equality
+    // filters only, so no composite index is needed; newest first is sorted
+    // here instead of in the query.
+    if (createdById != null) {
+      filterList.add(QueryArgs('createdBy.id', createdById));
+      return streamQueryList(companyId, args: filterList).map(
+        (list) => list.toList()
+          ..sort(
+            (a, b) => (b?.createdAt ?? DateTime(0)).compareTo(
+              a?.createdAt ?? DateTime(0),
+            ),
+          ),
+      );
+    }
+
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
@@ -366,10 +371,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   ///
   /// Older orders have only `device` (no `deviceIds`), so both are queried
   /// and merged; otherwise the vehicle screen missed most of its history.
-  Stream<List<Order?>> streamOrdersByDevice(
-    String companyId,
-    String deviceId,
-  ) {
+  Stream<List<Order?>> streamOrdersByDevice(String companyId, String deviceId) {
     return mergeOrderStreams(
       streamQueryList(
         companyId,
@@ -385,7 +387,10 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
   /// Stream of orders generated from a contract template.
   /// No orderBy to avoid composite index requirement — sorted client-side.
-  Stream<List<Order?>> streamChildOrders(String companyId, String parentOrderId) {
+  Stream<List<Order?>> streamChildOrders(
+    String companyId,
+    String parentOrderId,
+  ) {
     return streamQueryList(
       companyId,
       args: [QueryArgs('contract.parentOrderId', parentOrderId)],
@@ -398,10 +403,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
   /// All orders with active contract (for list and auto-generation)
   Stream<List<Order?>> streamContractOrders(String companyId) {
-    return streamQueryList(
-      companyId,
-      args: [QueryArgs('isContract', true)],
-    );
+    return streamQueryList(companyId, args: [QueryArgs('isContract', true)]);
   }
 
   /// Orders with contract linked to a specific device

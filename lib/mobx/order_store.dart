@@ -1212,7 +1212,8 @@ abstract class _OrderStore with Store {
 
     final doc = order!.documents![index];
 
-    if (doc.storagePath != null) {
+    // A customer receipt file is shared with other orders: keep it.
+    if (doc.storagePath != null && !doc.isSharedReceiptFile) {
       final deleted = await photoService.deletePhoto(doc.storagePath!);
       if (!deleted) return false;
     }
@@ -1328,7 +1329,8 @@ abstract class _OrderStore with Store {
     final docIndex = order!.documents?.indexWhere((d) => d.id == docId) ?? -1;
     if (docIndex < 0) return;
     final doc = order!.documents![docIndex];
-    if (doc.storagePath != null) {
+    // A customer receipt file is shared with other orders: keep it.
+    if (doc.storagePath != null && !doc.isSharedReceiptFile) {
       await photoService.deletePhoto(doc.storagePath!);
     }
     order!.documents!.removeAt(docIndex);
@@ -1527,11 +1529,13 @@ abstract class _OrderStore with Store {
 
   /// Adiciona um pagamento parcial. Funciona offline: grava com
   /// arrayUnion/increment e atualiza o estado local na hora. Retorna a
-  /// transação criada, ou null se não foi possível registrar.
+  /// transação criada, ou null se não foi possível registrar. [paidAt] é o
+  /// dia em que o dinheiro entrou ("Quando"), escolhido na tela.
   @action
   Future<PaymentTransaction?> addPayment(
     double amount, {
     String? description,
+    DateTime? paidAt,
   }) async {
     lastPaymentFailure = null;
     if (order == null || companyId == null || amount <= 0) return null;
@@ -1541,6 +1545,7 @@ abstract class _OrderStore with Store {
       amount: amount,
       description: description,
       createdBy: actor,
+      paidAt: paidAt,
     );
     transaction.id = _newTransactionId();
 
