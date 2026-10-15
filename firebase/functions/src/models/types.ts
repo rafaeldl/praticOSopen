@@ -234,6 +234,12 @@ export interface PaymentTransaction {
   receiptUrl?: string;
   /** Asaas only: how the customer paid (PIX | BOLETO | CREDIT_CARD | DEBIT_CARD ...). Optional, additive. */
   billingType?: string;
+  /** App: when the money came in, chosen by the user. Absent on old payments (use createdAt). Optional, additive. */
+  paidAt?: DateValue;
+  /** App: id of the customer receipt (`companies/{id}/receipts/{id}`) this payment is a share of. Optional, additive. */
+  receiptGroupId?: string;
+  /** App: id of the receipt OrderDocument attached to this payment. Optional, additive. */
+  receiptDocumentId?: string;
 }
 
 export interface OrderAggr {

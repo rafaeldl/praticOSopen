@@ -12,6 +12,7 @@ import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/screens/dashboard/financial_tab.dart';
 import 'package:praticos/screens/payments/send_charge_flow.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/utils/financial_summary.dart';
 
 Order _order(
   String id,
@@ -68,6 +69,7 @@ void main() {
     List<Order>? opened,
     List<Order>? charged,
     List<bool>? reports,
+    List<Debtor>? received,
   }) async {
     FormatService().setLocale(locale);
     tester.view.physicalSize = const Size(800, 4000);
@@ -86,6 +88,10 @@ void main() {
           onSendCharge: (_, order) => charged?.add(order),
           onOpenReport: (_, {required customPeriod}) =>
               reports?.add(customPeriod),
+          onReceiveFromCustomer: (_, debtor) async {
+            received?.add(debtor);
+            return true;
+          },
         ),
       ),
     );
@@ -157,20 +163,64 @@ void main() {
     expect(opened.single.id, 'a1');
   });
 
-  testWidgets('a debtor with several orders asks which one', (tester) async {
+  testWidgets('a customer with several orders opens "Receber de Bia", '
+      'oldest order first (no "Qual OS?")', (tester) async {
     final opened = <Order>[];
-    await pumpTab(tester, storeWith(open: [bia1, bia2]), opened: opened);
+    final received = <Debtor>[];
+    await pumpTab(tester, storeWith(open: [bia1, bia2]),
+        opened: opened, received: received);
 
     await tester.tap(find.byKey(const ValueKey('debtor-Bia')));
     await tester.pumpAndSettle();
 
-    // The "Escolher" screen: question as the title, who as the subtitle.
-    expect(find.text('Qual OS?'), findsWidgets);
-    expect(find.text('OS em aberto de Bia'), findsOneWidget);
-    expect(find.byType(CupertinoActionSheet), findsNothing);
-    await tester.tap(find.textContaining('OS 190'));
+    expect(find.text('Qual OS?'), findsNothing);
+    expect(opened, isEmpty);
+    expect(received.single.name, 'Bia');
+    expect(received.single.orders.map((o) => o.id), ['b2', 'b1']);
+  });
+
+  testWidgets('orders without a customer still ask which one', (tester) async {
+    final opened = <Order>[];
+    final received = <Debtor>[];
+    final x1 = _order('x1', 300, customer: 'X', total: 100,
+        createdAt: DateTime(2026, 10, 3))
+      ..customer = null;
+    final x2 = _order('x2', 301, customer: 'X', total: 50,
+        createdAt: DateTime(2026, 10, 4))
+      ..customer = null;
+    await pumpTab(tester, storeWith(open: [x1, x2]),
+        opened: opened, received: received);
+
+    await tester.tap(find.byKey(const ValueKey('debtor-${Debtor.noCustomerKey}')));
     await tester.pumpAndSettle();
-    expect(opened.single.id, 'b1');
+
+    // The "Escolher" screen: question as the title.
+    expect(find.text('Qual OS?'), findsWidgets);
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+    await tester.tap(find.textContaining('OS 301'));
+    await tester.pumpAndSettle();
+    expect(opened.single.id, 'x2');
+    expect(received, isEmpty);
+  });
+
+  testWidgets('"Ver todos" rows open "Receber de" too', (tester) async {
+    final received = <Debtor>[];
+    final many = [
+      for (var i = 1; i <= 6; i++)
+        _order('d$i', i, customer: 'Cliente $i', total: 100.0 * i,
+            createdAt: DateTime(2026, 10, i)),
+      _order('d7a', 70, customer: 'Cliente 7', total: 90,
+          createdAt: DateTime(2026, 10, 7)),
+      _order('d7b', 71, customer: 'Cliente 7', total: 40,
+          createdAt: DateTime(2026, 10, 8)),
+    ];
+    await pumpTab(tester, storeWith(open: many), received: received);
+
+    await tester.tap(find.text('Ver todos (7)'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('debtor-Cliente 7')));
+    await tester.pumpAndSettle();
+    expect(received.single.orders.map((o) => o.number), [70, 71]);
   });
 
   testWidgets('shows 5 debtors and expands with "Ver todos"', (tester) async {
@@ -307,10 +357,6 @@ void main() {
     expect(find.text('OS 183 · desde 02/10'), findsOneWidget);
     expect(find.textContaining('Dora deve há mais tempo'), findsOneWidget);
     expect(find.textContaining('desde 24/10/2025'), findsWidgets);
-
-    await tester.tap(find.text('Dora'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('07/11/2025'), findsOneWidget);
   });
 
   testWidgets('english: no Portuguese text and US date format', (tester) async {

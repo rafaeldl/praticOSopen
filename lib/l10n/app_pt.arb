@@ -1561,6 +1561,86 @@
   },
   "receiveMoreOptions": "Mais opções",
   "receiveRemoveReceipt": "Tirar comprovante",
+  "receiveWhen": "Quando",
+  "receiveCustomerTitle": "Receber de {name}",
+  "@receiveCustomerTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerOwes": "Deve {amount} em {count, plural, =1{1 OS} other{{count} OS}}",
+  "@receiveCustomerOwes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receiveCustomerAmountLabel": "Quanto recebeu",
+  "receiveCustomerHowItGoes": "Como fica",
+  "receiveCustomerOldestFirst": "O valor vai primeiro para as OS mais antigas.",
+  "receiveCustomerSettles": "OS {number} · quita {amount}",
+  "@receiveCustomerSettles": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerPartial": "OS {number} · recebe {amount}, fica {left}",
+  "@receiveCustomerPartial": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerUntouched": "OS {number} · continua {amount}",
+  "@receiveCustomerUntouched": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerTooMuch": "Passa do que ele deve ({total}).",
+  "@receiveCustomerTooMuch": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerZero": "Digite quanto recebeu.",
+  "receiveCustomerDone": "Recebido {amount} de {name}",
+  "@receiveCustomerDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerUploadFailed": "Não deu para enviar o comprovante. Confira a internet e tente de novo.",
   "loginTitle": "Entre para começar",
   "loginSubtitle": "Suas OS ficam salvas e a equipe vê as mesmas.",
   "loginWithEmailLink": "Entrar com e-mail e senha",

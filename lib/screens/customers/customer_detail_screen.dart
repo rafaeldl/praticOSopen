@@ -3,9 +3,11 @@ import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/screens/payments/receive_customer_screen.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
@@ -19,14 +21,16 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/utils/financial_summary.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
-/// and, with the view-prices permission, "Falta receber R$ X" (what is still
-/// open on the customer's orders); call / WhatsApp, "Nova OS para Ana", the
+/// and, with the view-prices permission, "Falta receber R$ X · Receber" (what
+/// is still open on the customer's orders; the link opens "Receber de Ana"
+/// or, with one open order, its Receber); call / WhatsApp, "Nova OS para Ana", the
 /// customer's vehicles (with "Cadastrar outro veículo") and the latest orders.
 /// Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
@@ -35,6 +39,7 @@ class CustomerDetailScreen extends StatefulWidget {
     this.customer,
     this.directory,
     this.showPrices,
+    this.onReceive,
   });
 
   /// Falls back to the `customer` route argument.
@@ -47,6 +52,11 @@ class CustomerDetailScreen extends StatefulWidget {
   /// permission, which is off for everyone when the company does not use
   /// values and billing (`Company.useFinancial == false`).
   final bool? showPrices;
+
+  /// "Receber" next to "Falta receber R$ X", with the customer's open
+  /// orders (oldest first). Defaults to the order's Receber (one order) or
+  /// [ReceiveCustomerScreen] (several). Test seam.
+  final void Function(BuildContext context, List<Order> openOrders)? onReceive;
 
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
@@ -97,6 +107,32 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       context,
       '/order',
       arguments: {'order': Order()..customer = _customer!.toAggr()},
+    );
+  }
+
+  /// Same gate as the order's Receber: prices visible (`viewPrices`, off
+  /// when the company does not use values and billing).
+  Future<void> _receive(List<Order> orders) async {
+    final open = FinancialSummary.openOrdersOldestFirst(orders);
+    if (open.isEmpty) return;
+    final receive = widget.onReceive;
+    if (receive != null) {
+      receive(context, open);
+      return;
+    }
+    if (open.length == 1) {
+      await Navigator.pushNamed(
+        context,
+        '/payment_management',
+        arguments: {'orderStore': OrderStore()..setOrder(open.first)},
+      );
+      return;
+    }
+    await ReceiveCustomerScreen.open(
+      context,
+      orders: open,
+      customer: _customer?.toAggr(),
+      customerName: _customer?.name,
     );
   }
 
@@ -249,12 +285,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         if (_showPrices && spent > 0)
           l10n.customerSpentValue(format.formatCurrency(spent)),
       ].join(' · '),
-      if (_showPrices && owed > 0)
-        l10n.customerOwesValue(format.formatCurrency(owed)),
     ].where((line) => line.isNotEmpty).toList();
+    final owes = _showPrices && owed > 0;
 
     return [
-      if (infoLines.isNotEmpty)
+      if (infoLines.isNotEmpty || owes)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -268,6 +303,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     line,
                     style: AppTypography.callout.copyWith(color: secondary),
                   ),
+                if (owes) _owedLine(format.formatCurrency(owed), orders!),
               ],
             ),
           ),
@@ -326,6 +362,40 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         ),
       ),
     ];
+  }
+
+  /// "Falta receber R$ 1.250 · Receber" (the link opens the payment).
+  Widget _owedLine(String owed, List<Order> orders) {
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          context.l10n.customerOwesValue(owed),
+          key: const Key('customerOwes'),
+          style: AppTypography.callout.copyWith(
+            color: secondary,
+            fontFeatures: AppTypography.tabular,
+          ),
+        ),
+        Text(' · ', style: AppTypography.callout.copyWith(color: secondary)),
+        CupertinoButton(
+          key: const Key('customerReceive'),
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(
+            AppSizes.minTouchTarget,
+            AppSizes.minTouchTarget,
+          ),
+          onPressed: () => _receive(orders),
+          child: Text(
+            context.l10n.receiveTitle,
+            style: AppTypography.callout.copyWith(
+              color: AppColors.accentText.resolveFrom(context),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   List<Widget> _buildOrderSections(List<Order> orders) {

@@ -155,6 +155,28 @@ void main() {
     expect(find.textContaining('Pagar valor total'), findsNothing);
   });
 
+  testWidgets('manual receive asks when the money came in ("Hoje")', (
+    tester,
+  ) async {
+    await pumpScreen(tester, storeWith(total: 500));
+
+    expect(find.text('Quando'), findsOneWidget);
+    expect(find.text('Hoje'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('receiveDateRow')));
+    await tester.pumpAndSettle();
+    final picker = tester.widget<CupertinoDatePicker>(
+      find.byKey(const Key('receiveDatePicker')),
+    );
+    final now = DateTime.now();
+    expect(
+      picker.maximumDate!.isBefore(DateTime(now.year, now.month, now.day + 1)),
+      isTrue,
+    );
+    await tester.tap(find.byKey(const Key('receiveDateConfirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hoje'), findsOneWidget);
+  });
+
   testWidgets('Asaas paid: shows billing type and "Tudo recebido"', (
     tester,
   ) async {

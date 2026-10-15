@@ -67,6 +67,14 @@ service cloud.firestore {
       );
     }
 
+    // Pode anotar pagamento recebido (mesmos perfis com a permissão
+    // viewPrices no app, que libera a tela "Receber"): owner, admin, manager
+    // e consultant. A escrita nas OS segue a regra de update de /orders.
+    function canRegisterPayments(companyId) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'manager', 'consultant'];
+    }
+
     // Cobranças Asaas: dono, admin e gerente (mesmo público da permissão chargeOrder)
     function canViewCharges(companyId) {
       return canViewFinancial(companyId) || isCompanyOwner(companyId);
@@ -455,6 +463,33 @@ service cloud.firestore {
           allow read: if canViewCharges(companyId);
           allow write: if false;
         }
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // RECEBIMENTOS DE CLIENTE ("Receber de João")
+      // Um pagamento do cliente repartido entre várias OS. Gravado no mesmo
+      // batch que os pagamentos de cada OS. Nunca é apagado: desfazer é
+      // status 'canceled'. Valor e repartição não mudam depois de criados.
+      // ──────────────────────────────────────────────────────────────────────
+      match /receipts/{receiptId} {
+        allow read: if canViewFinancial(companyId)
+          || (canRegisterPayments(companyId)
+              && resource.data.createdBy.id == request.auth.uid);
+
+        allow create: if canRegisterPayments(companyId)
+          && request.resource.data.createdBy.id == request.auth.uid
+          && request.resource.data.status == 'active'
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.allocations is list
+          && request.resource.data.allocations.size() > 0;
+
+        allow update: if canRegisterPayments(companyId)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'receiptFile', 'updatedAt', 'updatedBy'])
+          && request.resource.data.status in ['active', 'canceled'];
+
+        allow delete: if false;
       }
 
       // ──────────────────────────────────────────────────────────────────────

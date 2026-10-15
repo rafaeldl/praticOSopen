@@ -697,6 +697,142 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('companies/{cid}/receipts/{receiptId} (Receber de cliente)', () => {
+    const path = 'companies/c1/receipts/r1';
+    const receipt = (uid: string, extra: Record<string, unknown> = {}) => ({
+      customer: { id: 'cu1', name: 'João' },
+      amount: 750,
+      paidAt: '2026-10-14T12:00:00.000',
+      status: 'active',
+      allocations: [
+        { orderId: 'o1', orderNumber: 1, amount: 450, transactionId: 'r1_0' },
+        { orderId: 'o2', orderNumber: 2, amount: 300, transactionId: 'r1_1' },
+      ],
+      createdAt: '2026-10-14T12:00:00.000',
+      createdBy: { id: uid, name: uid },
+      ...extra,
+    });
+
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        await fs.setDoc(fs.doc(db, 'companies/c1/receipts/existing'), receipt('cons1'));
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/o2'), {
+          number: 2,
+          status: 'done',
+          total: 300,
+          paidAmount: 0,
+          createdBy: { id: 'admin1', name: 'Admin' },
+        });
+      });
+    });
+
+    it.each(['owner', 'admin', 'manager', 'consultant'])('can be created by a %s', async (role) => {
+      const uid = `u_${role}`;
+      await rut.assertSucceeds(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
+    });
+
+    it.each(['supervisor', 'technician', 'viewer'])('cannot be created by a %s', async (role) => {
+      const uid = `u_${role}`;
+      await rut.assertFails(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
+    });
+
+    it('cannot be created by non-members or in another company', async () => {
+      await rut.assertFails(fs.setDoc(fs.doc(asUser('outsider'), path), receipt('outsider')));
+      await rut.assertFails(fs.setDoc(fs.doc(asUser('other', { c2: 'admin' }), path), receipt('other')));
+      await rut.assertFails(
+        fs.setDoc(fs.doc(env.unauthenticatedContext().firestore(), path), receipt('anon')),
+      );
+    });
+
+    it('must be created active, by the caller, with a positive amount and allocations', async () => {
+      const db = asUser('mgr1', { c1: 'manager' });
+      await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('someone-else')));
+      await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('mgr1', { status: 'canceled' })));
+      await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('mgr1', { amount: 0 })));
+      await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('mgr1', { amount: '750' })));
+      await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('mgr1', { allocations: [] })));
+    });
+
+    it('is readable by owner, admin and manager', async () => {
+      for (const role of ['owner', 'admin', 'manager']) {
+        const db = asUser(`u_${role}`, { c1: role });
+        await rut.assertSucceeds(fs.getDoc(fs.doc(db, 'companies/c1/receipts/existing')));
+        await rut.assertSucceeds(fs.getDocs(fs.collection(db, 'companies/c1/receipts')));
+      }
+    });
+
+    it('is readable by the consultant who created it, not by other consultants', async () => {
+      await rut.assertSucceeds(
+        fs.getDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/existing')),
+      );
+      await rut.assertFails(
+        fs.getDoc(fs.doc(asUser('cons2', { c1: 'consultant' }), 'companies/c1/receipts/existing')),
+      );
+    });
+
+    it.each(['supervisor', 'technician'])('is not readable by a %s', async (role) => {
+      await rut.assertFails(
+        fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), 'companies/c1/receipts/existing')),
+      );
+    });
+
+    it('is not readable by non-members', async () => {
+      await rut.assertFails(fs.getDoc(fs.doc(asUser('outsider'), 'companies/c1/receipts/existing')));
+      await rut.assertFails(
+        fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), 'companies/c1/receipts/existing')),
+      );
+    });
+
+    it('can be soft-deleted (status canceled) and get a file, but amount and split never change', async () => {
+      const db = asUser('mgr1', { c1: 'manager' });
+      const ref = fs.doc(db, 'companies/c1/receipts/existing');
+      await rut.assertSucceeds(
+        fs.updateDoc(ref, { status: 'canceled', updatedAt: 'now', updatedBy: { id: 'mgr1' } }),
+      );
+      await rut.assertSucceeds(fs.updateDoc(ref, { receiptFile: { url: 'u', storagePath: 'p' } }));
+      await rut.assertFails(fs.updateDoc(ref, { amount: 10 }));
+      await rut.assertFails(fs.updateDoc(ref, { allocations: [] }));
+      await rut.assertFails(fs.updateDoc(ref, { status: 'deleted' }));
+      await rut.assertFails(
+        fs.updateDoc(fs.doc(asUser('tech1', { c1: 'technician' }), 'companies/c1/receipts/existing'), {
+          status: 'canceled',
+        }),
+      );
+    });
+
+    it('is never hard-deleted, not even by the owner', async () => {
+      for (const db of [asUser('admin1', { c1: 'admin' }), asUser('own', { c1: 'owner' })]) {
+        await rut.assertFails(fs.deleteDoc(fs.doc(db, 'companies/c1/receipts/existing')));
+      }
+    });
+
+    it('is written in one batch with the order payments (all or nothing)', async () => {
+      const db = asUser('mgr1', { c1: 'manager' });
+      const batch = fs.writeBatch(db);
+      batch.set(fs.doc(db, path), receipt('mgr1'));
+      batch.update(fs.doc(db, 'companies/c1/orders/o1'), {
+        transactions: fs.arrayUnion({ id: 'r1_0', type: 'payment', amount: 450, receiptGroupId: 'r1' }),
+        paidAmount: fs.increment(450),
+      });
+      batch.update(fs.doc(db, 'companies/c1/orders/o2'), {
+        transactions: fs.arrayUnion({ id: 'r1_1', type: 'payment', amount: 300, receiptGroupId: 'r1' }),
+        paidAmount: fs.increment(300),
+        paid: true,
+        payment: 'paid',
+      });
+      await rut.assertSucceeds(batch.commit());
+
+      // A consultant cannot touch orders created by someone else: the whole
+      // batch fails, receipt included.
+      const cons = asUser('cons1', { c1: 'consultant' });
+      const failing = fs.writeBatch(cons);
+      failing.set(fs.doc(cons, 'companies/c1/receipts/r2'), receipt('cons1'));
+      failing.update(fs.doc(cons, 'companies/c1/orders/o2'), { paidAmount: fs.increment(10) });
+      await rut.assertFails(failing.commit());
+    });
+  });
+
   describe("'owner' claim is a superset of 'admin' (#312)", () => {
     // ownerX/adminX are not owner.id of c1, so only the claim grants access.
     const asRole = (role: string) => asUser(`${role}X`, { c1: role });

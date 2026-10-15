@@ -5158,6 +5158,84 @@ abstract class AppLocalizations {
   /// **'Tirar comprovante'**
   String get receiveRemoveReceipt;
 
+  /// No description provided for @receiveWhen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando'**
+  String get receiveWhen;
+
+  /// No description provided for @receiveCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber de {name}'**
+  String receiveCustomerTitle(String name);
+
+  /// No description provided for @receiveCustomerOwes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deve {amount} em {count, plural, =1{1 OS} other{{count} OS}}'**
+  String receiveCustomerOwes(String amount, int count);
+
+  /// No description provided for @receiveCustomerAmountLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quanto recebeu'**
+  String get receiveCustomerAmountLabel;
+
+  /// No description provided for @receiveCustomerHowItGoes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como fica'**
+  String get receiveCustomerHowItGoes;
+
+  /// No description provided for @receiveCustomerOldestFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor vai primeiro para as OS mais antigas.'**
+  String get receiveCustomerOldestFirst;
+
+  /// No description provided for @receiveCustomerSettles.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · quita {amount}'**
+  String receiveCustomerSettles(int number, String amount);
+
+  /// No description provided for @receiveCustomerPartial.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · recebe {amount}, fica {left}'**
+  String receiveCustomerPartial(int number, String amount, String left);
+
+  /// No description provided for @receiveCustomerUntouched.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · continua {amount}'**
+  String receiveCustomerUntouched(int number, String amount);
+
+  /// No description provided for @receiveCustomerTooMuch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passa do que ele deve ({total}).'**
+  String receiveCustomerTooMuch(String total);
+
+  /// No description provided for @receiveCustomerZero.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite quanto recebeu.'**
+  String get receiveCustomerZero;
+
+  /// No description provided for @receiveCustomerDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido {amount} de {name}'**
+  String receiveCustomerDone(String amount, String name);
+
+  /// No description provided for @receiveCustomerUploadFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para enviar o comprovante. Confira a internet e tente de novo.'**
+  String get receiveCustomerUploadFailed;
+
   /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:

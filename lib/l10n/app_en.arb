@@ -1526,6 +1526,86 @@
   },
   "receiveMoreOptions": "More options",
   "receiveRemoveReceipt": "Remove receipt",
+  "receiveWhen": "When",
+  "receiveCustomerTitle": "Receive from {name}",
+  "@receiveCustomerTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerOwes": "Owes {amount} on {count, plural, =1{1 order} other{{count} orders}}",
+  "@receiveCustomerOwes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receiveCustomerAmountLabel": "How much you got",
+  "receiveCustomerHowItGoes": "How it splits",
+  "receiveCustomerOldestFirst": "The amount goes to the oldest orders first.",
+  "receiveCustomerSettles": "Order {number} · paid off with {amount}",
+  "@receiveCustomerSettles": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerPartial": "Order {number} · gets {amount}, {left} left",
+  "@receiveCustomerPartial": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerUntouched": "Order {number} · still {amount}",
+  "@receiveCustomerUntouched": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerTooMuch": "That is more than they owe ({total}).",
+  "@receiveCustomerTooMuch": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerZero": "Type how much you got.",
+  "receiveCustomerDone": "Got {amount} from {name}",
+  "@receiveCustomerDone": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerUploadFailed": "Could not send the receipt. Check the internet and try again.",
   "loginTitle": "Sign in to get started",
   "loginSubtitle": "Your orders stay saved and your team sees the same ones.",
   "loginWithEmailLink": "Sign in with email and password",

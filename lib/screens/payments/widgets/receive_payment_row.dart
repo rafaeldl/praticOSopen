@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show DateUtils;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -21,6 +22,16 @@ String? receiveBillingLabel(BuildContext context, PaymentTransaction tx) {
     case AsaasBillingType.other:
       return context.l10n.receiveViaLink;
   }
+}
+
+/// When the payment came in: the chosen day (`paidAt`) when it differs from
+/// the day it was recorded, otherwise the recording date and time.
+String paymentWhenLabel(PaymentTransaction tx, FormatService format) {
+  final paidAt = tx.paidAt;
+  if (paidAt != null && !DateUtils.isSameDay(paidAt, tx.createdAt)) {
+    return format.formatDate(paidAt);
+  }
+  return format.formatDateTime(tx.createdAt);
 }
 
 /// One line of the received payments list: amount, what/when, and whether it
@@ -48,7 +59,7 @@ class ReceivePaymentRow extends StatelessWidget {
             transaction.typeLabel(context.l10n)
         : transaction.typeLabel(context.l10n);
     final parts = <String>[
-      format.formatDateTime(transaction.createdAt),
+      paymentWhenLabel(transaction, format),
       if (isPayment && showReceiptState)
         transaction.hasReceipt || asaasReceiptUri(transaction) != null
             ? context.l10n.receiveWithReceipt

@@ -18,6 +18,7 @@ import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/customer_directory.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
 
 class FakeDirectory implements CustomerDirectory {
@@ -601,6 +602,37 @@ void main() {
       expect(find.text('Falta receber R\$ 110,00'), findsOneWidget);
     });
 
+    testWidgets('"Receber" next to "Falta receber" opens with the open '
+        'orders, oldest first', (tester) async {
+      final received = <List<Order>>[];
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(orders: {
+            'c1': [
+              order(7, 'done', 100)..createdAt = DateTime(2026, 10, 9),
+              order(5, 'done', 80)..createdAt = DateTime(2026, 10, 1),
+              order(6, 'done', 30)
+                ..createdAt = DateTime(2026, 10, 5)
+                ..payment = 'paid',
+              order(8, 'quote', 70)..createdAt = DateTime(2026, 10, 2),
+            ],
+          }),
+          showPrices: true,
+          onReceive: (_, open) => received.add(open),
+        ),
+        direct: true,
+      );
+
+      expect(find.text('Falta receber ${FormatService().formatCurrency(180)}'),
+          findsOneWidget);
+      await tester.tap(find.byKey(const Key('customerReceive')));
+      await tester.pump();
+      expect(received.single.map((o) => o.number), [5, 7]);
+    });
+
     testWidgets('"Falta receber" is hidden when nothing is open',
         (tester) async {
       await pumpDetail(
@@ -627,6 +659,7 @@ void main() {
       expect(find.textContaining('gastou'), findsNothing);
       expect(find.textContaining('Falta receber'), findsNothing);
       expect(find.textContaining('100,00'), findsNothing);
+      expect(find.byKey(const Key('customerReceive')), findsNothing);
       expect(find.text('OS 1'), findsOneWidget);
     });
 

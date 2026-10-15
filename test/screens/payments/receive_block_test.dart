@@ -47,6 +47,31 @@ void main() {
       expect(confirmed, 1);
     });
 
+    testWidgets('"Quando" row shows the day and opens the picker',
+        (tester) async {
+      var picks = 0;
+      await tester.pumpWidget(app(ReceiveBlock(
+        isPaid: false,
+        controller: TextEditingController(text: 'R\$ 10,00'),
+        onConfirm: () {},
+        paidDay: DateTime.now(),
+        onPickDay: () => picks++,
+      )));
+      expect(find.text('Quando'), findsOneWidget);
+      expect(find.text('Hoje'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('receiveDateRow')));
+      expect(picks, 1);
+    });
+
+    testWidgets('without a day there is no "Quando" row', (tester) async {
+      await tester.pumpWidget(app(ReceiveBlock(
+        isPaid: false,
+        controller: TextEditingController(text: 'R\$ 10,00'),
+        onConfirm: () {},
+      )));
+      expect(find.text('Quando'), findsNothing);
+    });
+
     testWidgets('open without attach permission hides "Anexar comprovante"',
         (tester) async {
       await tester.pumpWidget(app(ReceiveBlock(

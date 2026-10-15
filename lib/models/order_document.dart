@@ -47,6 +47,15 @@ class OrderDocument {
   /// Whether this document is a PDF
   bool get isPdf => contentType == 'application/pdf';
 
+  /// File of a customer receipt (`tenants/{id}/receipts/{receiptId}/...`),
+  /// shared by every order the payment covered: removing it from one order
+  /// must not delete the file from Storage.
+  bool get isSharedReceiptFile => isSharedReceiptPath(storagePath);
+
+  static bool isSharedReceiptPath(String? storagePath) =>
+      storagePath != null &&
+      RegExp(r'^tenants/[^/]+/receipts/').hasMatch(storagePath);
+
   /// Human-readable file size
   String get fileSizeFormatted {
     if (fileSize == null) return '';
