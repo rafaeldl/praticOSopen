@@ -51,6 +51,79 @@ export interface OrderCharge {
   appliedTransactions?: PaymentTransaction[];
   /** Server-only: Asaas payments refunded on this charge; never booked again. */
   refundedAsaasPaymentIds?: string[];
+  /** Paid outside Asaas: marked received in cash on Asaas by the server (no booking). */
+  paidOutside?: boolean;
+  /**
+   * Server-only: receiveInCash in progress or with an unknown outcome
+   * (timeout/5xx); a RECEIVED_IN_CASH webhook for it must not book, and the
+   * next reconciliation confirms the payment status on Asaas.
+   */
+  settlingOutsideAt?: string;
+  /** Server-only: value sent in that receiveInCash. */
+  settlingOutsideValue?: number;
+  /** Server-only: lease of the outside-payment reconciliation (ISO). */
+  adjustingUntil?: string;
+  /** Server-only: bumped by a reconciliation that found the lease taken (the holder runs again). */
+  dirtyCount?: number;
+  dirtyAt?: string;
+}
+
+/** One order covered by a CustomerCharge and how much of the charge goes to it. */
+export interface CustomerChargeAllocation {
+  orderId: string;
+  orderNumber?: number | null;
+  amount: number;
+}
+
+/** Order + transaction written on it when a CustomerCharge payment was booked (repair copy). */
+export interface CustomerChargeAppliedTransaction {
+  orderId: string;
+  asaasPaymentId: string;
+  transaction: PaymentTransaction;
+}
+
+/**
+ * companies/{companyId}/customerCharges/{chargeId}: one Asaas charge for
+ * several orders of the same customer ("Mandar cobrança" from "Receber de
+ * João"). Written only by the server; read like the order `charges`.
+ */
+export interface CustomerCharge {
+  id: string;
+  customer: { id: string; name?: string | null };
+  asaasPaymentId: string;
+  value: number;
+  dueDate: string; // YYYY-MM-DD
+  status: ChargeStatus;
+  invoiceUrl: string;
+  /** Order ids covered (for array-contains queries), same order as `allocations`. */
+  orderIds: string[];
+  /** Oldest first; sum = value. */
+  allocations: CustomerChargeAllocation[];
+  paidAsaasPaymentIds: string[];
+  createdBy: UserAggr;
+  createdAt: string;
+  paidAt?: string;
+  /** Receipt (`companies/{cid}/receipts/{id}`) written when it was paid through Asaas. */
+  receiptId?: string;
+  /** Paid outside Asaas: marked received in cash on Asaas by the server (no booking). */
+  paidOutside?: boolean;
+  /**
+   * Server-only: receiveInCash in progress or with an unknown outcome
+   * (timeout/5xx); a RECEIVED_IN_CASH webhook for it must not book, and the
+   * next reconciliation confirms the payment status on Asaas.
+   */
+  settlingOutsideAt?: string;
+  /** Server-only: value sent in that receiveInCash. */
+  settlingOutsideValue?: number;
+  /** Server-only: lease of the outside-payment reconciliation (ISO). */
+  adjustingUntil?: string;
+  /** Server-only: bumped by a reconciliation that found the lease taken (the holder runs again). */
+  dirtyCount?: number;
+  dirtyAt?: string;
+  /** Server-only. */
+  appliedTransactions?: CustomerChargeAppliedTransaction[];
+  /** Server-only. */
+  refundedAsaasPaymentIds?: string[];
 }
 
 /** companies/{companyId}/settings/payments */
@@ -59,6 +132,15 @@ export interface PaymentSettingsDoc {
   asaasConnected: boolean;
   asaasAccountName?: string;
   asaasEnvironment?: AsaasEnvironment;
+}
+
+/** Input of POST /v1/app/customers/:customerId/charges */
+export interface CreateCustomerChargeInput {
+  /** Orders to charge, oldest first (the app's `Debtor.orders` order). */
+  orderIds: string[];
+  value: number;
+  dueDate?: string;
+  customerTaxId?: string;
 }
 
 /** Input of POST /v1/app/orders/:orderId/charges */
@@ -97,7 +179,9 @@ export type AsaasWebhookEventType =
   | 'PAYMENT_CONFIRMED'
   | 'PAYMENT_OVERDUE'
   | 'PAYMENT_REFUNDED'
-  | 'PAYMENT_DELETED';
+  | 'PAYMENT_DELETED'
+  | 'PAYMENT_RECEIVED_IN_CASH_UNDONE'
+  | 'PAYMENT_PARTIALLY_REFUNDED';
 
 export interface AsaasCreateWebhookInput {
   name: string;
@@ -154,6 +238,8 @@ export interface AsaasPayment {
   externalReference?: string | null;
   installment?: string | null;
   installmentNumber?: number | null;
+  /** GET /payments/{id} of a removed payment. */
+  deleted?: boolean;
 }
 
 export interface AsaasList<T> {
@@ -180,7 +266,7 @@ export interface AsaasPaymentEvent {
   /** PIX | BOLETO | CREDIT_CARD | DEBIT_CARD | UNDEFINED | RECEIVED_IN_CASH ... */
   billingType: string;
   status: string;
-  /** '<companyId>:<orderId>:<chargeId>' set by createOrderCharge. */
+  /** '<companyId>:<orderId>:<chargeId>' (createOrderCharge) or '<companyId>:cc:<chargeId>' (createCustomerCharge). */
   externalReference?: string | null;
   /** Installment id, only for installment payments. */
   installment?: string | null;
@@ -188,6 +274,8 @@ export interface AsaasPaymentEvent {
   description?: string | null;
   /** Asaas receipt page of a confirmed/received payment (absent in older or pending payloads). */
   transactionReceiptUrl?: string | null;
+  /** Refunds of the payment (PAYMENT_PARTIALLY_REFUNDED), when Asaas sends them. */
+  refunds?: Array<{ value?: number; status?: string }> | null;
 }
 
 export interface AsaasWebhookEvent {

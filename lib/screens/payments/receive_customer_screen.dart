@@ -1,9 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/models/customer_charge.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/repositories/tenant/customer_charge_repository.dart';
+import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
+import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
+    show safePaymentSettings;
+import 'package:praticos/screens/payments/asaas_error_text.dart';
+import 'package:praticos/screens/payments/create_customer_charge_screen.dart';
 import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart'
@@ -12,10 +23,13 @@ import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/screens/payments/widgets/receive_orders_picker.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -25,6 +39,17 @@ import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
+import 'package:share_plus/share_plus.dart';
+
+/// Whether "Mandar cobrança" goes through Asaas: the user may charge
+/// (`chargeOrder`), the company is in the pilot and connected, and there is
+/// a customer to charge.
+bool customerChargeReady({
+  required bool canCharge,
+  required bool asaasEnabled,
+  required bool asaasConnected,
+  required String? customerId,
+}) => canCharge && asaasEnabled && asaasConnected && customerId != null;
 
 /// "Receber de João": one payment from a customer who owes on several
 /// orders, split oldest order first ([allocatePayment]). "Escolher as OS"
@@ -34,6 +59,13 @@ import 'package:praticos/widgets/permission_widgets.dart';
 /// in ("Hoje" by default, no future dates), optional receipt, the live
 /// "Como fica" split and one blue "Recebi R$ X". On success it shows a toast
 /// and pops with `true`. Pushed (not a sheet): it acts on existing orders.
+///
+/// With Asaas connected, "Mandar cobrança" creates one link for the chosen
+/// orders (or shares the open one); the open link shows on top, with copy,
+/// share and cancel in the "…". A consultant also sees "Outras OS de João"
+/// (orders someone else created, only number, open amount and date, read
+/// from the server); including one makes the save go through the server,
+/// which needs connection.
 class ReceiveCustomerScreen extends StatefulWidget {
   const ReceiveCustomerScreen({
     super.key,
@@ -44,7 +76,40 @@ class ReceiveCustomerScreen extends StatefulWidget {
     this.canAttachReceipt,
     this.pickReceipt,
     this.pickOrders,
+    this.chargeReady,
+    this.openCharge,
+    this.createCharge,
+    this.shareLink,
+    this.api,
+    this.otherOrdersLoader,
   });
+
+  /// Whether "Mandar cobrança" is available (tests). Defaults to the
+  /// `chargeOrder` permission plus the company's `settings/payments`.
+  final Future<bool> Function()? chargeReady;
+
+  /// The customer's open multi-order charge (tests). Defaults to Firestore.
+  final Stream<CustomerCharge?>? openCharge;
+
+  /// Opens the "Link para pagar" sheet (tests). Completes with the created
+  /// charge or null.
+  final Future<CustomerCharge?> Function(
+    BuildContext context,
+    List<OpenBalance> balances,
+    double value,
+  )?
+  createCharge;
+
+  /// Shares a link (tests). Defaults to the share sheet.
+  final Future<void> Function(BuildContext context, String url)? shareLink;
+
+  /// Payment endpoints (tests).
+  final AsaasApiService? api;
+
+  /// Open orders of the customer as the server lists them (tests). Defaults
+  /// to the server for a consultant, nothing for financial roles (they
+  /// already get every order).
+  final Future<List<CustomerOpenOrder>> Function()? otherOrdersLoader;
 
   /// Open orders of the customer, oldest first (as `Debtor.orders`).
   final List<Order> orders;
@@ -121,11 +186,56 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     text: ReceiveAmountField.textFor(_owed),
   );
 
-  /// Orders chosen in "Escolher as OS"; null = all of them.
+  /// Orders chosen in "Escolher as OS"; null = all of the customer's orders
+  /// on the screen ([_balances], never [_others]).
   Set<String>? _chosen;
 
+  /// "Outras OS de João": open orders someone else created (consultant).
+  List<CustomerOpenOrder> _others = const [];
+
+  bool _chargeReady = false;
+  CustomerCharge? _openCharge;
+  StreamSubscription<CustomerCharge?>? _chargeSub;
+
+  /// Every order that can be chosen, oldest first: the screen's and the
+  /// others (as light [Order]s with only id, number, open and date).
+  List<Order> get _allOrders {
+    final own = [
+      for (final b in _balances)
+        for (final o in widget.orders)
+          if (o.id == b.orderId) o,
+    ];
+    if (_others.isEmpty) return own;
+    final all = [
+      ...own,
+      for (final other in _others)
+        Order()
+          ..id = other.id
+          ..number = other.number
+          ..total = other.open
+          ..paidAmount = 0
+          ..createdAt = other.createdAt,
+    ];
+    final epoch = DateTime.fromMillisecondsSinceEpoch(0);
+    all.sort((a, b) {
+      final byDate = (a.createdAt ?? epoch).compareTo(b.createdAt ?? epoch);
+      return byDate != 0 ? byDate : (a.number ?? 0).compareTo(b.number ?? 0);
+    });
+    return all;
+  }
+
   /// Balances the payment goes to (the chosen ones, oldest first).
-  List<OpenBalance> get _active => chosenBalances(_balances, _chosen);
+  List<OpenBalance> get _active {
+    if (_chosen == null) return List.of(_balances);
+    return [
+      for (final order in _allOrders)
+        if (_chosen!.contains(order.id)) OpenBalance.ofOrder(order),
+    ].where((b) => b.open > 0).toList();
+  }
+
+  /// Whether the chosen orders include someone else's (save via server).
+  bool get _includesOthers =>
+      _chosen != null && _others.any((o) => _chosen!.contains(o.id));
 
   /// Most that can be received now: what is open on [_active].
   double get _max => totalOpen(_active);
@@ -144,9 +254,229 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       context.l10n.customerWithoutName;
 
   @override
+  void initState() {
+    super.initState();
+    _loadCharge();
+    _loadOthers();
+  }
+
+  @override
   void dispose() {
+    _chargeSub?.cancel();
     _amount.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCharge() async {
+    bool ready;
+    try {
+      ready = await (widget.chargeReady ?? _defaultChargeReady)();
+    } catch (_) {
+      ready = false;
+    }
+    if (!mounted || !ready) return;
+    setState(() => _chargeReady = true);
+    final customerId = widget.customer?.id;
+    final companyId = Global.companyAggr?.id;
+    final stream =
+        widget.openCharge ??
+        (companyId == null || customerId == null
+            ? null
+            : CustomerChargeRepository().watchOpen(companyId, customerId));
+    _chargeSub = stream?.listen((charge) {
+      if (mounted) setState(() => _openCharge = charge);
+    }, onError: (Object _) {});
+  }
+
+  Future<bool> _defaultChargeReady() async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null || Global.currentUser == null) return false;
+    final canCharge = AuthorizationService.instance.hasPermission(
+      PermissionType.chargeOrder,
+    );
+    if (!canCharge) return false;
+    final settings = await safePaymentSettings(
+      PaymentSettingsRepository().watch(companyId),
+    ).first.timeout(const Duration(seconds: 8));
+    return customerChargeReady(
+      canCharge: canCharge,
+      asaasEnabled: settings.asaasEnabled,
+      asaasConnected: settings.asaasConnected,
+      customerId: widget.customer?.id,
+    );
+  }
+
+  Future<void> _loadOthers() async {
+    List<CustomerOpenOrder> listed;
+    try {
+      final loader = widget.otherOrdersLoader ?? _defaultOthersLoader();
+      if (loader == null) return;
+      listed = await loader();
+    } catch (_) {
+      // Offline or server error: the screen works with the own orders.
+      return;
+    }
+    final mine = {for (final b in _balances) b.orderId};
+    final others = [
+      for (final o in listed)
+        if (!o.own && !mine.contains(o.id) && o.open > 0) o,
+    ];
+    if (mounted && others.isNotEmpty) setState(() => _others = others);
+  }
+
+  /// Only a consultant (receives on their own orders) needs the server
+  /// list; financial roles already have every order of the customer.
+  Future<List<CustomerOpenOrder>> Function()? _defaultOthersLoader() {
+    final customerId = widget.customer?.id;
+    if (customerId == null || Global.currentUser == null) return null;
+    final auth = AuthorizationService.instance;
+    if (!auth.isConsultant ||
+        auth.hasPermission(PermissionType.viewFinancialReports)) {
+      return null;
+    }
+    final api = widget.api ?? AsaasApiService.instance;
+    return () => api.listCustomerOpenOrders(customerId);
+  }
+
+  Future<void> _share(String url) =>
+      (widget.shareLink ?? _defaultShare)(context, url);
+
+  static Future<void> _defaultShare(BuildContext context, String url) async {
+    await SharePlus.instance.share(ShareParams(text: url));
+  }
+
+  /// "Mandar cobrança": shares the open link, or creates one for the chosen
+  /// orders (the typed amount, never more than they owe) and shares it.
+  Future<void> _sendCharge() async {
+    final open = _openCharge;
+    if (open?.invoiceUrl != null) {
+      await _share(open!.invoiceUrl!);
+      return;
+    }
+    final customer = widget.customer;
+    final active = _active.where((b) => !_others.any((o) => o.id == b.orderId));
+    final balances = active.toList();
+    if (customer == null || balances.isEmpty) return;
+    final typed = parseCurrencyInput(_amount.text);
+    final created =
+        await (widget.createCharge ??
+            (context, balances, value) => FormSheet.show<CustomerCharge>(
+              context,
+              (_) => CreateCustomerChargeScreen(
+                customer: customer,
+                balances: balances,
+                initialValue: value,
+                service: widget.api,
+              ),
+            ))(context, balances, typed);
+    if (created == null || !mounted) return;
+    setState(() => _openCharge = created);
+    if (created.invoiceUrl != null) await _share(created.invoiceUrl!);
+  }
+
+  Future<void> _showChargeMenu(CustomerCharge charge) async {
+    final l10n = context.l10n;
+    final choice = await showPullDownMenu(
+      context,
+      groups: [
+        PullDownGroup([
+          PullDownItem(
+            value: 'share',
+            label: l10n.receiveCustomerShareCharge,
+            icon: CupertinoIcons.share,
+          ),
+          PullDownItem(
+            value: 'copy',
+            label: l10n.chargeCopyLink,
+            icon: CupertinoIcons.doc_on_doc,
+          ),
+        ]),
+        PullDownGroup([
+          PullDownItem(
+            value: 'cancel',
+            label: l10n.chargeCancelLink,
+            icon: CupertinoIcons.xmark_circle,
+            destructive: true,
+          ),
+        ]),
+      ],
+    );
+    if (!mounted || choice == null) return;
+    final url = charge.invoiceUrl;
+    if (choice == 'share' && url != null) await _share(url);
+    if (choice == 'copy' && url != null) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) {
+        showAppToast(
+          context,
+          l10n.chargeLinkCopied,
+          icon: CupertinoIcons.checkmark_circle,
+        );
+      }
+    }
+    if (choice == 'cancel') _confirmCancelCharge(charge);
+  }
+
+  void _confirmCancelCharge(CustomerCharge charge) {
+    final l10n = context.l10n;
+    final amount = FormatService().formatCurrency(charge.value ?? 0);
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.receiveCustomerChargeCancelTitle(amount)),
+        content: Text(l10n.chargeCancelConfirm),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.chargeKeepLink(amount)),
+          ),
+          CupertinoDialogAction(
+            key: const Key('receiveCustomerChargeCancelConfirm'),
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _cancelCharge(charge);
+            },
+            child: Text(l10n.chargeCancelLink),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _cancelCharge(CustomerCharge charge) async {
+    final l10n = context.l10n;
+    final customerId = widget.customer?.id;
+    final chargeId = charge.id;
+    if (customerId == null || chargeId == null) return;
+    setState(() => _busy = true);
+    try {
+      await (widget.api ?? AsaasApiService.instance).cancelCustomerCharge(
+        customerId,
+        chargeId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _openCharge = null;
+      });
+      showAppToast(
+        context,
+        l10n.receiveCustomerChargeCanceled,
+        icon: CupertinoIcons.checkmark_circle,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      showAppToast(
+        context,
+        e is AsaasApiException
+            ? asaasErrorText(l10n, e)
+            : l10n.asaasErrorGeneric,
+        icon: CupertinoIcons.exclamationmark_circle,
+      );
+    }
   }
 
   int _cents(double value) => (value * 100).round();
@@ -162,22 +492,20 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   }
 
   Future<void> _chooseOrders() async {
-    final openOrders = [
-      for (final b in _balances)
-        for (final o in widget.orders)
-          if (o.id == b.orderId) o,
-    ];
+    final openOrders = _allOrders;
     final current = _chosen ?? {for (final b in _balances) b.orderId};
-    final picked = await (widget.pickOrders ??
-        (context, orders, selected) =>
-            pickReceiveOrders(context, orders: orders, selected: selected))(
-      context,
-      openOrders,
-      current,
-    );
+    final picked =
+        await (widget.pickOrders ??
+            (context, orders, selected) => pickReceiveOrders(
+              context,
+              orders: orders,
+              selected: selected,
+            ))(context, openOrders, current);
     if (picked == null || picked.isEmpty || !mounted) return;
+    final own = {for (final b in _balances) b.orderId};
+    final allOwn = picked.length == own.length && picked.every(own.contains);
     setState(() {
-      _chosen = picked.length == _balances.length ? null : picked;
+      _chosen = allOwn ? null : picked;
       _amount.text = ReceiveAmountField.textFor(_max);
     });
   }
@@ -188,26 +516,29 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     final l10n = context.l10n;
     final allocations = allocatePayment(_active, value);
     setState(() => _busy = true);
+    final service = widget.service ?? CustomerReceiptService();
+    final request = CustomerReceiptRequest(
+      customer: widget.customer,
+      orders: widget.orders,
+      allocations: allocations,
+      paidAt: paidAtFor(_paidDay),
+      file: _receipt,
+    );
     try {
-      await (widget.service ?? CustomerReceiptService()).record(
-        CustomerReceiptRequest(
-          customer: widget.customer,
-          orders: widget.orders,
-          allocations: allocations,
-          paidAt: paidAtFor(_paidDay),
-          file: _receipt,
-        ),
-      );
+      // Someone else's order: only the server may write it (online).
+      if (_includesOthers) {
+        await service.recordOnline(request);
+      } else {
+        await service.record(request);
+      }
     } on CustomerReceiptException catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      showAppToast(
-        context,
-        e.reason == CustomerReceiptFailure.upload
-            ? l10n.receiveCustomerUploadFailed
-            : l10n.paymentUpdateFailed,
-        icon: CupertinoIcons.exclamationmark_circle,
-      );
+      showAppToast(context, switch (e.reason) {
+        CustomerReceiptFailure.upload => l10n.receiveCustomerUploadFailed,
+        CustomerReceiptFailure.offline => l10n.receiveCustomerOffline,
+        CustomerReceiptFailure.failed => l10n.paymentUpdateFailed,
+      }, icon: CupertinoIcons.exclamationmark_circle);
       return;
     }
     if (!mounted) return;
@@ -231,6 +562,14 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       navigationBar: CupertinoNavigationBar(
         backgroundColor: AppNavBar.barBackground(context),
         border: null,
+        trailing: _openCharge != null && !_busy
+            ? GlassBarButton(
+                key: const Key('receiveCustomerChargeMenu'),
+                label: l10n.receiveCustomerChargeMenu,
+                icon: CupertinoIcons.ellipsis,
+                onPressed: () => _showChargeMenu(_openCharge!),
+              )
+            : null,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -287,6 +626,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                       ),
                     ),
                   ),
+                  if (_openCharge != null) _buildOpenCharge(_openCharge!),
                   _buildAmountCard(amount, tooMuch),
                   SectionLabel(l10n.receiveCustomerHowItGoes),
                   for (final preview in previews)
@@ -309,11 +649,9 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                               ? l10n.receiveCustomerOldestFirst
                               : l10n.receiveCustomerChosenOnly,
                           key: const Key('receiveCustomerSplitNote'),
-                          style: AppTypography.label.copyWith(
-                            color: secondary,
-                          ),
+                          style: AppTypography.label.copyWith(color: secondary),
                         ),
-                        if (_balances.length > 1)
+                        if (_balances.length > 1 || _others.isNotEmpty)
                           TextLink(
                             key: const Key('receiveCustomerChoose'),
                             label: l10n.receiveCustomerChooseOrders,
@@ -339,6 +677,25 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                             onPressed: canSave ? _confirm : null,
                           ),
                   ),
+                  if (_chargeReady && widget.customer?.id != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.pageMargin,
+                        AppSpacing.sm,
+                        AppSpacing.pageMargin,
+                        0,
+                      ),
+                      child: Center(
+                        child: TextLink(
+                          key: const Key('receiveCustomerSendCharge'),
+                          label: _openCharge != null
+                              ? l10n.receiveCustomerShareCharge
+                              : l10n.receiveCustomerSendCharge,
+                          onPressed: _busy ? null : _sendCharge,
+                        ),
+                      ),
+                    ),
+                  ..._buildOthers(format),
                 ],
               );
             },
@@ -434,6 +791,68 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
         ],
       ),
     );
+  }
+
+  /// The open multi-order link: amount, orders and due date.
+  Widget _buildOpenCharge(CustomerCharge charge) {
+    final l10n = context.l10n;
+    final format = FormatService();
+    final due = charge.dueDay;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: AppListRow(
+        key: const Key('receiveCustomerOpenCharge'),
+        leading: Icon(
+          CupertinoIcons.link,
+          color: AppColors.accentText.resolveFrom(context),
+        ),
+        title: l10n.receiveCustomerOpenCharge(
+          format.formatCurrency(charge.value ?? 0),
+        ),
+        subtitle: l10n.receiveCustomerOpenChargeDetail(
+          charge.orderNumbers.join(', '),
+          due == null ? '-' : format.formatDate(due),
+        ),
+      ),
+    );
+  }
+
+  /// "Outras OS de João": the others not chosen yet (consultant).
+  List<Widget> _buildOthers(FormatService format) {
+    final l10n = context.l10n;
+    final left = [
+      for (final o in _others)
+        if (_chosen == null || !_chosen!.contains(o.id)) o,
+    ];
+    if (left.isEmpty) return const [];
+    return [
+      const SizedBox(height: AppSpacing.lg),
+      SectionLabel(l10n.receiveCustomerOthersTitle(_name)),
+      for (final other in left)
+        AppListRow(
+          key: Key('receiveCustomerOther_${other.id}'),
+          title: l10n.receiveCustomerPickRow(other.number ?? 0),
+          subtitle: l10n.receiveCustomerPickSubtitle(
+            format.formatCurrency(other.open),
+            other.createdAt == null ? '-' : format.formatDate(other.createdAt!),
+          ),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pageMargin,
+          AppSpacing.sm,
+          AppSpacing.pageMargin,
+          0,
+        ),
+        child: Text(
+          l10n.receiveCustomerOthersNote,
+          key: const Key('receiveCustomerOthersNote'),
+          style: AppTypography.label.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
+          ),
+        ),
+      ),
+    ];
   }
 
   String _previewLine(AllocationPreview preview, FormatService format) {

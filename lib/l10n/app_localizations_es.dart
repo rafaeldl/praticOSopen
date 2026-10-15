@@ -2115,6 +2115,22 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este plan de cuotas ya tiene cuotas pagadas. Espera a que termine o reembolsa en Asaas.';
 
   @override
+  String get asaasErrorCustomerChargeOpen =>
+      'Esta OS ya está en un link de cobro de varias OS del cliente. Cancela ese link en Recibir del cliente.';
+
+  @override
+  String get asaasErrorChargeSuperseded =>
+      'Otro link para estas OS se creó al mismo tiempo y es el que vale. Míralo en la OS o en el cliente.';
+
+  @override
+  String get asaasErrorPreviousLinkCanceled =>
+      'Un link anterior se canceló, pero el nuevo no se creó. Envía un link nuevo.';
+
+  @override
+  String get asaasErrorOrderNotPayable =>
+      'Presupuestos y OS canceladas no se pueden cobrar.';
+
+  @override
   String get asaasErrorOrderCanceled =>
       'Esta orden está cancelada y no se puede cobrar.';
 
@@ -2968,6 +2984,62 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get receiveCustomerUploadFailed =>
       'No se pudo enviar el comprobante. Revise la conexión e intente de nuevo.';
+
+  @override
+  String get receiveCustomerSendCharge => 'Enviar cobro';
+
+  @override
+  String receiveCustomerChargeIntro(String name, int count, String numbers) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'las OS $numbers',
+      one: 'la OS $numbers',
+    );
+    return '$name recibe un solo enlace para pagar $_temp0 con Pix, boleto o tarjeta.';
+  }
+
+  @override
+  String receiveCustomerChargeOwedHint(String value) {
+    return 'Pendiente en esas OS: $value';
+  }
+
+  @override
+  String receiveCustomerOpenCharge(String amount) {
+    return 'Enlace abierto de $amount';
+  }
+
+  @override
+  String receiveCustomerOpenChargeDetail(String numbers, String date) {
+    return 'OS $numbers · vence $date';
+  }
+
+  @override
+  String get receiveCustomerChargeMenu => 'Acciones del enlace';
+
+  @override
+  String get receiveCustomerShareCharge => 'Enviar el enlace de nuevo';
+
+  @override
+  String receiveCustomerChargeCancelTitle(String amount) {
+    return '¿Cancelar el enlace de $amount?';
+  }
+
+  @override
+  String get receiveCustomerChargeCanceled => 'Enlace cancelado';
+
+  @override
+  String receiveCustomerOthersTitle(String name) {
+    return 'Otras OS de $name';
+  }
+
+  @override
+  String get receiveCustomerOthersNote =>
+      'Hechas por otra persona. Para incluirlas, toque Elegir las OS.';
+
+  @override
+  String get receiveCustomerOffline =>
+      'Sin internet. Para recibir en OS de otra persona necesita estar conectado.';
 
   @override
   String get receiveCustomerChooseOrders => 'Elegir las OS';

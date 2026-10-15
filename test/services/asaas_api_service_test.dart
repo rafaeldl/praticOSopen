@@ -19,27 +19,27 @@ AsaasApiService _service(MockClientHandler handler) =>
     );
 
 Map<String, dynamic> _chargeJson({String status = 'pending'}) => {
-      'id': 'ch1',
-      'asaasPaymentId': 'pay_1',
-      'mode': 'single',
-      'value': 300,
-      'dueDate': '2026-10-07',
-      'status': status,
-      'invoiceUrl': 'https://sandbox.asaas.com/i/abc',
-      'paidAsaasPaymentIds': <String>[],
-      'createdAt': '2026-10-04T12:00:00.000Z',
-    };
+  'id': 'ch1',
+  'asaasPaymentId': 'pay_1',
+  'mode': 'single',
+  'value': 300,
+  'dueDate': '2026-10-07',
+  'status': status,
+  'invoiceUrl': 'https://sandbox.asaas.com/i/abc',
+  'paidAsaasPaymentIds': <String>[],
+  'createdAt': '2026-10-04T12:00:00.000Z',
+};
 
 http.Response _ok(Object data, [int status = 200]) =>
     http.Response(jsonEncode({'success': true, 'data': data}), status);
 
 http.Response _error(String code, int status) => http.Response(
-      jsonEncode({
-        'success': false,
-        'error': {'code': code, 'message': 'raw backend text'},
-      }),
-      status,
-    );
+  jsonEncode({
+    'success': false,
+    'error': {'code': code, 'message': 'raw backend text'},
+  }),
+  status,
+);
 
 void main() {
   group('AsaasApiService', () {
@@ -67,13 +67,19 @@ void main() {
     });
 
     test('connect() com chave inválida lança ASAAS_INVALID_API_KEY', () async {
-      final service =
-          _service((_) async => _error('ASAAS_INVALID_API_KEY', 400));
+      final service = _service(
+        (_) async => _error('ASAAS_INVALID_API_KEY', 400),
+      );
 
       expect(
         () => service.connect('\$aact_hmlg_bad'),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', 'ASAAS_INVALID_API_KEY')),
+        throwsA(
+          isA<AsaasApiException>().having(
+            (e) => e.code,
+            'code',
+            'ASAAS_INVALID_API_KEY',
+          ),
+        ),
       );
     });
 
@@ -148,14 +154,16 @@ void main() {
     });
 
     test('parseCharge aceita chargeId no lugar de id', () {
-      final charge = AsaasApiService.parseCharge(jsonEncode({
-        'success': true,
-        'data': {
-          'chargeId': 'ch9',
-          'invoiceUrl': 'https://sandbox.asaas.com/i/xyz',
-          'status': 'pending',
-        },
-      }));
+      final charge = AsaasApiService.parseCharge(
+        jsonEncode({
+          'success': true,
+          'data': {
+            'chargeId': 'ch9',
+            'invoiceUrl': 'https://sandbox.asaas.com/i/xyz',
+            'status': 'pending',
+          },
+        }),
+      );
 
       expect(charge.id, 'ch9');
       expect(charge.invoiceUrl, 'https://sandbox.asaas.com/i/xyz');
@@ -185,8 +193,13 @@ void main() {
 
       await expectLater(
         service.disconnect(),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', 'UNAUTHENTICATED')),
+        throwsA(
+          isA<AsaasApiException>().having(
+            (e) => e.code,
+            'code',
+            'UNAUTHENTICATED',
+          ),
+        ),
       );
       expect(calls, 0);
     });
@@ -199,40 +212,60 @@ void main() {
 
       expect(
         () => service.disconnect(),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', 'UNAUTHENTICATED')),
+        throwsA(
+          isA<AsaasApiException>().having(
+            (e) => e.code,
+            'code',
+            'UNAUTHENTICATED',
+          ),
+        ),
       );
     });
 
     test('falha de rede vira NETWORK_ERROR', () async {
-      final service =
-          _service((_) async => throw http.ClientException('offline'));
+      final service = _service(
+        (_) async => throw http.ClientException('offline'),
+      );
 
       expect(
         () => service.disconnect(),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', 'NETWORK_ERROR')),
+        throwsA(
+          isA<AsaasApiException>().having(
+            (e) => e.code,
+            'code',
+            'NETWORK_ERROR',
+          ),
+        ),
       );
     });
 
     test('corpo HTML com 502 lança code null', () async {
       final service = _service(
-          (_) async => http.Response('<html>Bad Gateway</html>', 502));
+        (_) async => http.Response('<html>Bad Gateway</html>', 502),
+      );
 
       expect(
         () => service.disconnect(),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', isNull)
-            .having((e) => e.message, 'message', 'Request failed (502)')),
+        throwsA(
+          isA<AsaasApiException>()
+              .having((e) => e.code, 'code', isNull)
+              .having((e) => e.message, 'message', 'Request failed (502)'),
+        ),
       );
     });
 
     test('sem envelope: 401/403/429 recebem código pelo status', () async {
-      for (final entry in {401: 'UNAUTHENTICATED', 403: 'FORBIDDEN', 429: 'RATE_LIMIT_EXCEEDED'}.entries) {
+      for (final entry in {
+        401: 'UNAUTHENTICATED',
+        403: 'FORBIDDEN',
+        429: 'RATE_LIMIT_EXCEEDED',
+      }.entries) {
         final service = _service((_) async => http.Response('', entry.key));
         await expectLater(
           service.disconnect(),
-          throwsA(isA<AsaasApiException>().having((e) => e.code, 'code', entry.value)),
+          throwsA(
+            isA<AsaasApiException>().having((e) => e.code, 'code', entry.value),
+          ),
         );
       }
     });
@@ -246,9 +279,127 @@ void main() {
 
       await expectLater(
         service.disconnect(),
-        throwsA(isA<AsaasApiException>()
-            .having((e) => e.code, 'code', 'NETWORK_ERROR')),
+        throwsA(
+          isA<AsaasApiException>().having(
+            (e) => e.code,
+            'code',
+            'NETWORK_ERROR',
+          ),
+        ),
       );
     });
+  });
+
+  group('customer charge and receipt endpoints', () {
+    final chargeData = {
+      'id': 'cc1',
+      'customer': {'id': 'c1', 'name': 'João'},
+      'value': 650,
+      'dueDate': '2026-10-20',
+      'status': 'pending',
+      'invoiceUrl': 'https://sandbox.asaas.com/i/cc1',
+      'allocations': [
+        {'orderId': 'a', 'orderNumber': 182, 'amount': 450},
+        {'orderId': 'b', 'orderNumber': 190, 'amount': 200},
+      ],
+    };
+
+    test(
+      'createCustomerCharge posts the orders and parses the charge',
+      () async {
+        final service = _service((request) async {
+          expect(request.method, 'POST');
+          expect(request.url.path, endsWith('/v1/app/customers/c1/charges'));
+          expect(jsonDecode(request.body), {
+            'orderIds': ['a', 'b'],
+            'value': 650.0,
+            'dueDate': '2026-10-20',
+            'customerTaxId': '12345678909',
+          });
+          return _ok(chargeData, 201);
+        });
+        final charge = await service.createCustomerCharge(
+          'c1',
+          orderIds: ['a', 'b'],
+          value: 650.004,
+          dueDate: DateTime(2026, 10, 20),
+          customerTaxId: '12345678909',
+        );
+        expect(charge.id, 'cc1');
+        expect(charge.isOpen, isTrue);
+        expect(charge.orderNumbers, [182, 190]);
+        expect(charge.allocations.map((a) => a.amount), [450, 200]);
+      },
+    );
+
+    test('cancelCustomerCharge deletes it', () async {
+      final service = _service((request) async {
+        expect(request.method, 'DELETE');
+        expect(request.url.path, endsWith('/v1/app/customers/c1/charges/cc1'));
+        return _ok({...chargeData, 'status': 'canceled'});
+      });
+      final charge = await service.cancelCustomerCharge('c1', 'cc1');
+      expect(charge.isOpen, isFalse);
+    });
+
+    test('listCustomerOpenOrders parses number, open, date and own', () async {
+      final service = _service((request) async {
+        expect(request.method, 'GET');
+        expect(request.url.path, endsWith('/v1/app/customers/c1/open-orders'));
+        return _ok([
+          {
+            'id': 'x',
+            'number': 175,
+            'open': 200,
+            'createdAt': '2026-08-20T10:00:00.000Z',
+            'own': false,
+          },
+          {
+            'id': 'a',
+            'number': 182,
+            'open': 450,
+            'createdAt': null,
+            'own': true,
+          },
+        ]);
+      });
+      final orders = await service.listCustomerOpenOrders('c1');
+      expect(orders.map((o) => o.id), ['x', 'a']);
+      expect(orders.first.open, 200);
+      expect(orders.first.createdAt, DateTime.utc(2026, 8, 20, 10));
+      expect(orders.first.own, isFalse);
+      expect(orders.last.own, isTrue);
+    });
+
+    test(
+      'registerCustomerReceipt posts the split; errors keep the code',
+      () async {
+        final service = _service((request) async {
+          expect(request.url.path, endsWith('/v1/app/customers/c1/receipts'));
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['receiptId'], 'r1');
+          expect(body['allocations'], [
+            {'orderId': 'x', 'amount': 200.0},
+          ]);
+          expect(body.containsKey('receiptFile'), isFalse);
+          return _error('EXCEEDS_OPEN', 400);
+        });
+        await expectLater(
+          service.registerCustomerReceipt(
+            'c1',
+            receiptId: 'r1',
+            paidAt: DateTime(2026, 10, 15),
+            allocations: [(orderId: 'x', amount: 200)],
+          ),
+          throwsA(
+            isA<AsaasApiException>().having(
+              (e) => e.code,
+              'code',
+              'EXCEEDS_OPEN',
+            ),
+          ),
+        );
+      },
+    );
   });
 }

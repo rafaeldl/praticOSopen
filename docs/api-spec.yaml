@@ -49,6 +49,8 @@ tags:
     description: Busca inteligente
   - name: Bot Summary
     description: Resumos formatados
+  - name: App Payments
+    description: Receber de um cliente com várias OS e cobrança Asaas de várias OS (app Flutter)
 
 components:
   securitySchemes:
@@ -77,6 +79,20 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Firebase ID Token
+
+  parameters:
+    AppCustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        type: string
+    AppCompanyId:
+      name: X-Company-Id
+      in: header
+      required: true
+      schema:
+        type: string
 
   schemas:
     Error:
@@ -812,3 +828,141 @@ paths:
       responses:
         '200':
           description: Pending items with formatted message
+
+  /v1/app/customers/{customerId}/open-orders:
+    get:
+      tags: [App Payments]
+      summary: OS em aberto do cliente (número, quanto falta, data)
+      description: |
+        Só número, valor em aberto, data e se a OS é do próprio usuário. Mais antiga primeiro.
+        Usado pelo consultor para "Outras OS de {cliente}". Quem recebe: owner, admin, manager
+        ou consultor, com "Valores e cobrança" ligado.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200':
+          description: OS em aberto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        number: { type: integer, nullable: true }
+                        open: { type: number }
+                        createdAt: { type: string, nullable: true }
+                        own: { type: boolean }
+        '403': { description: FORBIDDEN }
+        '404': { description: CUSTOMER_NOT_FOUND }
+
+  /v1/app/customers/{customerId}/receipts:
+    post:
+      tags: [App Payments]
+      summary: Registrar recebimento em várias OS do cliente (inclui OS de outra pessoa)
+      description: |
+        Para o consultor que inclui OS que não criou. O servidor confere papel, empresa,
+        cliente, OS que não é orçamento nem cancelada e valor até o que falta (por OS e no total),
+        e grava numa transação só os campos de pagamento de cada OS e o recebimento
+        (`companies/{cid}/receipts/{receiptId}`).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiptId, paidAt, allocations]
+              properties:
+                receiptId: { type: string }
+                paidAt: { type: string, format: date-time }
+                allocations:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [orderId, amount]
+                    properties:
+                      orderId: { type: string }
+                      amount: { type: number }
+                receiptFile:
+                  type: object
+                  properties:
+                    url: { type: string }
+                    storagePath: { type: string }
+                    fileName: { type: string }
+                    contentType: { type: string }
+      responses:
+        '201': { description: Recebimento registrado }
+        '400': { description: VALIDATION_ERROR / ORDER_NOT_OF_CUSTOMER / INVALID_PAID_AT / INVALID_FILE }
+        '403': { description: FORBIDDEN }
+        '404': { description: CUSTOMER_NOT_FOUND / ORDER_NOT_FOUND }
+        '409': { description: ORDER_NOT_PAYABLE / VALUE_EXCEEDS_BALANCE / RECEIPT_EXISTS }
+
+  /v1/app/customers/{customerId}/charges:
+    post:
+      tags: [App Payments]
+      summary: Uma cobrança Asaas para várias OS do cliente
+      description: |
+        Valor até o que falta nas OS escolhidas, repartido da mais antiga para a mais nova.
+        Cancela antes as cobranças abertas de uma OS só dessas OS e a cobrança de várias OS
+        anterior do cliente. `externalReference` no Asaas = `{companyId}:cc:{chargeId}`.
+        Permissão `manage:payments`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderIds, value]
+              properties:
+                orderIds:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items: { type: string }
+                value: { type: number }
+                dueDate: { type: string, example: '2026-10-18' }
+                customerTaxId: { type: string }
+      responses:
+        '201': { description: Cobrança criada (sem os campos internos do servidor) }
+        '400': { description: VALIDATION_ERROR / INVALID_VALUE / ORDER_NOT_OF_CUSTOMER / TAX_ID_REQUIRED / INVALID_TAX_ID }
+        '403': { description: FORBIDDEN / ASAAS_NOT_ENABLED }
+        '409': { description: ASAAS_NOT_CONNECTED / ORDER_NOT_PAYABLE / INSTALLMENTS_IN_PROGRESS }
+        '502': { description: ASAAS_UNAVAILABLE }
+
+  /v1/app/customers/{customerId}/charges/{chargeId}:
+    delete:
+      tags: [App Payments]
+      summary: Cancelar a cobrança de várias OS
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCustomerId'
+        - $ref: '#/components/parameters/AppCompanyId'
+        - name: chargeId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Cobrança cancelada }
+        '404': { description: CHARGE_NOT_FOUND }
+        '409': { description: CHARGE_NOT_OPEN }

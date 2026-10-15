@@ -41,6 +41,32 @@ describe('AsaasClient', () => {
     expect(headersOf(calls[0])['User-Agent']).toBe('PraticOS');
   });
 
+  it('altera o valor com PUT /payments/{id}', async () => {
+    const { impl, calls } = fakeFetch(200, { id: 'pay_1', value: 80 });
+    const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });
+
+    await client.updatePayment('pay_1', { value: 80 });
+
+    expect(calls[0].url).toBe('https://api-sandbox.asaas.com/v3/payments/pay_1');
+    expect(calls[0].init.method).toBe('PUT');
+    expect(JSON.parse(calls[0].init.body as string)).toEqual({ value: 80 });
+  });
+
+  it('dá baixa em dinheiro com POST /payments/{id}/receiveInCash', async () => {
+    const { impl, calls } = fakeFetch(200, { id: 'pay_1', status: 'RECEIVED_IN_CASH' });
+    const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });
+
+    await client.receiveInCash('pay_1', { paymentDate: '2026-10-15', value: 100, notifyCustomer: false });
+
+    expect(calls[0].url).toBe('https://api-sandbox.asaas.com/v3/payments/pay_1/receiveInCash');
+    expect(calls[0].init.method).toBe('POST');
+    expect(JSON.parse(calls[0].init.body as string)).toEqual({
+      paymentDate: '2026-10-15',
+      value: 100,
+      notifyCustomer: false,
+    });
+  });
+
   it('usa URL de produção', async () => {
     const { impl, calls } = fakeFetch(200, { object: 'list', data: [{ id: 'w1' }] });
     const client = new AsaasClient({ apiKey: '$aact_prod_k', environment: 'production', fetchImpl: impl });

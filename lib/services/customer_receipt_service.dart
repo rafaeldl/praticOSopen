@@ -8,6 +8,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
+import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/utils/receipt_plan.dart';
@@ -51,7 +52,7 @@ class ReceiptDetails {
 }
 
 /// Why recording a customer receipt failed.
-enum CustomerReceiptFailure { upload, failed }
+enum CustomerReceiptFailure { upload, failed, offline }
 
 class CustomerReceiptException implements Exception {
   const CustomerReceiptException(this.reason);
@@ -70,9 +71,13 @@ class CustomerReceiptService {
     TenantReceiptRepository? repository,
     PhotoService? photoService,
     TenantOrderRepository? orderRepository,
-  })  : _repository = repository,
-        _photoService = photoService,
-        _orderRepository = orderRepository;
+    AsaasApiService? api,
+  }) : _repository = repository,
+       _photoService = photoService,
+       _orderRepository = orderRepository,
+       _api = api;
+
+  final AsaasApiService? _api;
 
   final TenantReceiptRepository? _repository;
   final PhotoService? _photoService;
@@ -81,8 +86,7 @@ class CustomerReceiptService {
   TenantOrderRepository get _orders =>
       _orderRepository ?? TenantOrderRepository();
 
-  TenantReceiptRepository get _repo =>
-      _repository ?? TenantReceiptRepository();
+  TenantReceiptRepository get _repo => _repository ?? TenantReceiptRepository();
 
   /// Returns the written [Receipt]. Throws [CustomerReceiptException].
   Future<Receipt> record(CustomerReceiptRequest request) async {
@@ -92,26 +96,7 @@ class CustomerReceiptService {
     }
     final repo = _repo;
     final receiptId = repo.newId(companyId);
-
-    ReceiptFile? file;
-    final picked = request.file;
-    if (picked != null) {
-      try {
-        file = await (_photoService ?? PhotoService()).uploadCustomerReceipt(
-          file: picked.file,
-          companyId: companyId,
-          receiptId: receiptId,
-          contentType: picked.contentType,
-          fileName: picked.name,
-        );
-      } catch (_) {
-        file = null;
-      }
-      if (file == null) {
-        throw const CustomerReceiptException(CustomerReceiptFailure.upload);
-      }
-    }
-
+    final file = await _upload(companyId, receiptId, request.file);
     final actor = Global.userAggr;
     final plan = buildReceiptPlan(
       receiptId: receiptId,
@@ -140,6 +125,76 @@ class CustomerReceiptService {
     return plan.receipt;
   }
 
+  /// Uploads the picked receipt file under [receiptId] (needs connection).
+  Future<ReceiptFile?> _upload(
+    String companyId,
+    String receiptId,
+    PickedReceiptFile? picked,
+  ) async {
+    if (picked == null) return null;
+    ReceiptFile? file;
+    try {
+      file = await (_photoService ?? PhotoService()).uploadCustomerReceipt(
+        file: picked.file,
+        companyId: companyId,
+        receiptId: receiptId,
+        contentType: picked.contentType,
+        fileName: picked.name,
+      );
+    } catch (_) {
+      file = null;
+    }
+    if (file == null) {
+      throw const CustomerReceiptException(CustomerReceiptFailure.upload);
+    }
+    return file;
+  }
+
+  /// Records the receipt through the server ("Outras OS de João": a
+  /// consultant including orders someone else created, which the Firestore
+  /// rules do not let them write). Online only: on failure nothing was
+  /// written and the screen keeps what was typed. Throws
+  /// [CustomerReceiptException] ([CustomerReceiptFailure.offline] when the
+  /// server could not be reached).
+  Future<void> recordOnline(CustomerReceiptRequest request) async {
+    final companyId = Global.companyAggr?.id;
+    final customerId = request.customer?.id;
+    if (companyId == null ||
+        customerId == null ||
+        request.allocations.isEmpty) {
+      throw const CustomerReceiptException(CustomerReceiptFailure.failed);
+    }
+    final receiptId = _repo.newId(companyId);
+    final file = await _upload(companyId, receiptId, request.file);
+    try {
+      await (_api ?? AsaasApiService.instance).registerCustomerReceipt(
+        customerId,
+        receiptId: receiptId,
+        paidAt: request.paidAt,
+        allocations: [
+          for (final a in request.allocations)
+            (orderId: a.orderId, amount: a.amount),
+        ],
+        receiptFile: file == null
+            ? null
+            : {
+                'url': file.url,
+                'storagePath': file.storagePath,
+                if (file.fileName != null) 'fileName': file.fileName,
+                'contentType': file.contentType,
+              },
+      );
+    } on AsaasApiException catch (e) {
+      throw CustomerReceiptException(
+        e.code == 'NETWORK_ERROR'
+            ? CustomerReceiptFailure.offline
+            : CustomerReceiptFailure.failed,
+      );
+    } catch (_) {
+      throw const CustomerReceiptException(CustomerReceiptFailure.failed);
+    }
+  }
+
   /// Reads receipt [receiptId] and the orders it covered. Null when the
   /// receipt does not exist.
   Future<ReceiptDetails?> load(String receiptId) async {
@@ -163,19 +218,21 @@ class CustomerReceiptService {
         if (a.orderId != null) a.orderId!,
     };
     final orders = <String, Order>{};
-    await Future.wait(ids.map((id) async {
-      Order? order;
-      try {
-        order = await _orders.getFromServer(companyId, id);
-      } catch (_) {
+    await Future.wait(
+      ids.map((id) async {
+        Order? order;
         try {
-          order = await _orders.getSingle(companyId, id);
+          order = await _orders.getFromServer(companyId, id);
         } catch (_) {
-          order = null;
+          try {
+            order = await _orders.getSingle(companyId, id);
+          } catch (_) {
+            order = null;
+          }
         }
-      }
-      if (order != null) orders[id] = order;
-    }));
+        if (order != null) orders[id] = order;
+      }),
+    );
     return orders;
   }
 
@@ -200,9 +257,12 @@ class CustomerReceiptService {
     );
     try {
       unawaited(
-        _repo.cancel(companyId, receiptId, plan, actor: actor).catchError(
-          (Object e) => debugPrint('CustomerReceiptService: undo failed: $e'),
-        ),
+        _repo
+            .cancel(companyId, receiptId, plan, actor: actor)
+            .catchError(
+              (Object e) =>
+                  debugPrint('CustomerReceiptService: undo failed: $e'),
+            ),
       );
     } catch (e) {
       debugPrint('CustomerReceiptService: could not queue undo: $e');

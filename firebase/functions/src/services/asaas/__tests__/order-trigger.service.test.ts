@@ -1,10 +1,14 @@
 jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 jest.mock('../charge.service', () => ({ handleOrderStatusChange: jest.fn(async () => undefined) }));
+jest.mock('../outside-payment.service', () => ({ reconcileOutsidePayments: jest.fn(async () => undefined) }));
 
 import { fakeDb, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { handleOrderStatusChange } from '../charge.service';
 import { applyAsaasPayment } from '../order-payment.service';
 import { handleOrderUpdatedAsaas } from '../order-trigger.service';
+import { reconcileOutsidePayments } from '../outside-payment.service';
+
+const reconcile = reconcileOutsidePayments as jest.Mock;
 
 const ORDER_PATH = 'companies/c1/orders/o1';
 const CHARGE_PATH = `${ORDER_PATH}/charges/ch1`;
@@ -31,6 +35,7 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
   beforeEach(() => {
     resetFakeDb();
     handleStatus.mockClear();
+    reconcile.mockClear();
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
@@ -40,7 +45,7 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     const collection = jest.spyOn(fakeDb, 'collection');
     const transaction = jest.spyOn(fakeDb, 'runTransaction');
     const before = { status: 'approved', total: 100, transactions: [] };
-    const after = { status: 'done', total: 200, transactions: [] };
+    const after = { status: 'done', total: 100, transactions: [] };
 
     await handleOrderUpdatedAsaas('c1', 'o1', before, after);
 
@@ -127,5 +132,23 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     expect(order.transactions).toEqual(applied);
     expect(order.paidAmount).toBe(1000);
     expect(order.payment).toBe('paid');
+  });
+
+  it('total mudou com Asaas conectado: confere os links abertos (dar baixa)', async () => {
+    seed(SETTINGS_PATH, { asaasConnected: true });
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'approved', total: 100 }, { status: 'approved', total: 80 });
+    expect(reconcile).toHaveBeenCalledWith('c1', 'o1');
+  });
+
+  it('OS virou cancelada: também confere os links de várias OS', async () => {
+    seed(SETTINGS_PATH, { asaasConnected: true });
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'approved', total: 100 }, { status: 'canceled', total: 100 });
+    expect(reconcile).toHaveBeenCalledWith('c1', 'o1');
+  });
+
+  it('sem Asaas conectado: não confere links', async () => {
+    seed(SETTINGS_PATH, { asaasConnected: false });
+    await handleOrderUpdatedAsaas('c1', 'o1', { total: 100, transactions: [] }, { total: 100, transactions: [{ id: 't1' }] as any });
+    expect(reconcile).not.toHaveBeenCalled();
   });
 });

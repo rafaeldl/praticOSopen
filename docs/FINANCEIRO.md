@@ -113,6 +113,45 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
   `receipt` apontando para o mesmo arquivo, com `linkedTransactionId` = transação dela, e a
   transação guarda `receiptDocumentId`. Assim o "ver comprovante" da OS continua igual.
 
+### Mandar cobrança de várias OS (Asaas)
+
+Em "Receber de João", com a conta Asaas conectada (piloto) e permissão `chargeOrder`, o link
+"Mandar cobrança" abre `CreateCustomerChargeScreen`
+(`lib/screens/payments/create_customer_charge_screen.dart`, sheet grande): valor (até o que falta
+nas OS escolhidas, mais antiga primeiro), vencimento e CPF/CNPJ se faltar. O servidor cria **um**
+link do Asaas para as OS (`POST /v1/app/customers/{id}/charges`) e o app abre o compartilhar.
+
+- A cobrança aberta aparece na tela ("Link aberto de R$ X", "OS 182, 190 · vence 18/10"), lida de
+  `companies/{cid}/customerCharges` (`CustomerChargeRepository.watchOpen`, um filtro só). No "…":
+  copiar, mandar o link de novo e cancelar (vermelho, com confirmação).
+- Criar o link cancela os links abertos de uma OS só dessas OS e o link anterior de várias OS do
+  cliente. Enquanto a OS está nesse link, "Mandar cobrança" da OS sozinha explica que é preciso
+  cancelar o de várias OS primeiro.
+- Pago no Asaas: cada OS ganha a sua parte (`asaas_{pagamento}_{n}`, travada como qualquer
+  pagamento Asaas) e é criado um recebimento (`receipts/asaas_{pagamento}`), então a tela
+  "Recebimento" e o recibo funcionam como num recebimento manual.
+- **Recebido por fora com o link aberto:** se o que entrou quita o link, o servidor dá baixa no
+  Asaas (recebido em dinheiro, sem avisar o cliente); se é só uma parte, o link passa a cobrar o
+  que falta. Roda no servidor quando a OS muda, então vale também para recebimento offline. Ver
+  `docs/ASAAS_INTEGRATION.md`.
+
+### Receber em OS de outra pessoa (consultor)
+
+O consultor só grava nas OS que ele criou (regras do Firestore). Em "Receber de João" ele vê as
+OS dele primeiro e uma seção "Outras OS de {nome}" (só número, quanto falta e data, vindas de
+`GET /v1/app/customers/{id}/open-orders`), que ele inclui pelo "Escolher as OS".
+
+- Sem OS de outra pessoa marcada: caminho normal do app (WriteBatch, funciona offline).
+- Com alguma OS de outra pessoa: o recebimento vai pelo servidor
+  (`POST /v1/app/customers/{id}/receipts`, `CustomerReceiptService` → `AsaasApiService`). Precisa
+  de internet; se falhar, aviso (`showAppToast`) e o que foi digitado fica na tela.
+- O servidor confere papel (owner/admin/manager/consultor, com "Valores e cobrança" ligado),
+  mesma empresa, mesmo cliente, OS que não é orçamento nem cancelada e valor até o que falta em
+  cada OS. Grava numa transação só os campos de pagamento de cada OS (mesmas transações do app,
+  `{receiptId}_{n}` com `receiptGroupId`) e o recebimento, com `createdBy` = consultor (ele
+  consegue abrir e desfazer como os dele).
+- Quem tem acesso ao financeiro continua no caminho offline do app.
+
 ### Recebimento (ver, mandar recibo, desfazer)
 
 Tela `ReceiptDetailScreen` (`lib/screens/payments/receipt_detail_screen.dart`), empurrada e só

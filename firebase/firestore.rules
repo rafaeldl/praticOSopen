@@ -467,6 +467,16 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // COBRANÇA ASAAS DE VÁRIAS OS ("Mandar cobrança" em "Receber de João")
+      // Uma cobrança do Asaas para várias OS do mesmo cliente, com a
+      // repartição por OS. Escrita só via Cloud Functions (Admin SDK).
+      // ──────────────────────────────────────────────────────────────────────
+      match /customerCharges/{chargeId} {
+        allow read: if canViewCharges(companyId);
+        allow write: if false;
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // RECEBIMENTOS DE CLIENTE ("Receber de João")
       // Um pagamento do cliente repartido entre várias OS. Gravado no mesmo
       // batch que os pagamentos de cada OS. Nunca é apagado: desfazer é
@@ -481,7 +491,9 @@ service cloud.firestore {
           || (canReceivePayments(companyId)
               && resource.data.createdBy.id == request.auth.uid);
 
+        // `asaas_*` é reservado aos recibos dos pagamentos do Asaas (servidor).
         allow create: if canReceivePayments(companyId)
+          && !receiptId.matches('asaas_.*')
           && request.resource.data.createdBy.id == request.auth.uid
           && request.resource.data.status == 'active'
           && request.resource.data.amount is number

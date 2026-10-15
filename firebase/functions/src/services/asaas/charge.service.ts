@@ -16,11 +16,12 @@ import {
 } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient } from './asaas-client';
 import { asaasConnectionRef, getAsaasCredentialProvider } from './credential-provider';
+import { assertNoOpenCustomerCharge, listRivalsOfOrderCharge, replaceRivals } from './customer-charge.service';
 import { AsaasServiceError } from './errors';
 import { getPaymentSettings } from './connection.service';
 import { isValidTaxId, normalizeTaxId } from '../../utils/tax-id.utils';
 
-const OPEN_STATUSES: ChargeStatus[] = ['pending', 'overdue'];
+export const OPEN_STATUSES: ChargeStatus[] = ['pending', 'overdue'];
 const TIME_ZONE = 'America/Sao_Paulo';
 const DEFAULT_DUE_DAYS = 3;
 const MIN_INSTALLMENTS = 2;
@@ -53,7 +54,7 @@ function asaasCustomerMapRef(companyId: string, customerId: string) {
     .doc(customerId);
 }
 
-function roundMoney(value: number): number {
+export function roundMoney(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
@@ -83,21 +84,24 @@ function isCalendarDate(value: string): boolean {
   return DATE_PATTERN.test(value) && addDays(value, 0) === value;
 }
 
-function isOpen(charge: Pick<OrderCharge, 'status'>): boolean {
+export function isOpen(charge: Pick<OrderCharge, 'status'>): boolean {
   return OPEN_STATUSES.includes(charge.status);
 }
 
 /** An installment plan with any paid installment must not be canceled (mirrors the webhook rule). */
-function hasPaidInstallments(charge: Pick<OrderCharge, 'paidAsaasPaymentIds'>): boolean {
+export function hasPaidInstallments(charge: Pick<OrderCharge, 'paidAsaasPaymentIds'>): boolean {
   return (charge.paidAsaasPaymentIds?.length ?? 0) > 0;
 }
 
 /** Open and with nothing paid yet: safe to cancel on Asaas and mark canceled. */
-function isCancelable(charge: OrderCharge): boolean {
+export function isCancelable(charge: OrderCharge): boolean {
   return isOpen(charge) && !hasPaidInstallments(charge);
 }
 
-async function cancelInAsaas(client: AsaasClient, charge: OrderCharge): Promise<void> {
+export async function cancelInAsaas(
+  client: AsaasClient,
+  charge: Pick<OrderCharge, 'asaasPaymentId' | 'asaasInstallmentId'>,
+): Promise<void> {
   try {
     if (charge.asaasInstallmentId) {
       await client.deleteInstallment(charge.asaasInstallmentId);
@@ -111,7 +115,7 @@ async function cancelInAsaas(client: AsaasClient, charge: OrderCharge): Promise<
   }
 }
 
-async function listCharges(companyId: string, orderId: string): Promise<OrderCharge[]> {
+export async function listCharges(companyId: string, orderId: string): Promise<OrderCharge[]> {
   const snapshot = await chargesRef(companyId, orderId).get();
   return snapshot.docs.map((doc) => ({ ...(doc.data() as OrderCharge), id: doc.id }));
 }
@@ -120,7 +124,7 @@ async function listCharges(companyId: string, orderId: string): Promise<OrderCha
  * Cancels on Asaas, then marks the doc canceled only if it is still open, so a
  * status written meanwhile by the webhook (paid/refunded) is never overwritten.
  */
-async function cancelCharge(
+export async function cancelCharge(
   client: AsaasClient,
   companyId: string,
   orderId: string,
@@ -142,7 +146,7 @@ async function cancelCharge(
  * CPF/CNPJ for the charge, normalized. A tax id sent in the request is
  * validated and saved on the customer; otherwise the customer's stored one is used.
  */
-async function resolveTaxId(
+export async function resolveTaxId(
   companyId: string,
   customer: Customer,
   inputTaxId: string | undefined,
@@ -195,7 +199,7 @@ function mapEntryMatches(entry: Partial<AsaasCustomerMapEntry> | undefined, acco
   return true;
 }
 
-async function findOrCreateAsaasCustomer(
+export async function findOrCreateAsaasCustomer(
   client: AsaasClient,
   companyId: string,
   customer: Customer,
@@ -234,7 +238,7 @@ interface ValidatedInput {
   installmentCount?: number;
 }
 
-function validateInput(input: CreateChargeInput, remaining: number): ValidatedInput {
+export function validateInput(input: CreateChargeInput, remaining: number): ValidatedInput {
   const rawValue = typeof input.value === 'number' ? input.value : NaN;
   const value = roundMoney(rawValue);
   if (!Number.isFinite(value) || value <= 0) {
@@ -285,6 +289,8 @@ export async function createOrderCharge(
   if (order.status === 'canceled') {
     throw new AsaasServiceError('ORDER_CANCELED', 'Order is canceled');
   }
+  // The customer never gets two payable charges for the same debt.
+  await assertNoOpenCustomerCharge(companyId, orderId);
 
   // 2. Value, installments and due date (remaining = total - paidAmount; total is net of discount)
   const { value, dueDate, installmentCount } = validateInput(input, calculateRemainingBalance(order));
@@ -367,21 +373,12 @@ export async function createOrderCharge(
     throw error;
   }
 
-  // 7. One open charge per order: cancel the previous ones. If one cannot be
-  // canceled, roll back the new charge so there is never more than one open.
-  for (const previous of openCharges) {
-    try {
-      await cancelCharge(client, companyId, orderId, previous);
-    } catch (error) {
-      console.error(
-        `[Asaas] Could not cancel previous charge ${previous.id} of order ${orderId}; rolling back ${charge.id}`,
-      );
-      await cancelCharge(client, companyId, orderId, charge).catch(() => {
-        console.error(`[Asaas] Could not roll back charge ${charge.id} of order ${orderId}`);
-      });
-      throw error;
-    }
-  }
+  // 7. One payable link per order: cancel the open charges of the order and a
+  // multi-order charge covering it, read again now that the new charge exists
+  // (catches a concurrent create). The newest wins; if a previous one cannot
+  // be canceled, the new charge is rolled back.
+  const rivals = await listRivalsOfOrderCharge(companyId, orderId);
+  await replaceRivals(client, companyId, charge, rivals, () => cancelCharge(client, companyId, orderId, charge));
 
   console.log(`[Asaas] Charge ${charge.id} created for order ${orderId} of company ${companyId}`);
   return charge;

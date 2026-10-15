@@ -44,8 +44,25 @@ void main() {
     });
 
     test('INSTALLMENTS_IN_PROGRESS', () {
-      expect(text('INSTALLMENTS_IN_PROGRESS'),
-          l10n.asaasErrorInstallmentsInProgress);
+      expect(
+        text('INSTALLMENTS_IN_PROGRESS'),
+        l10n.asaasErrorInstallmentsInProgress,
+      );
+    });
+
+    test('códigos de cobrança de várias OS', () {
+      expect(text('VALUE_EXCEEDS_BALANCE'), l10n.asaasErrorExceedsBalance);
+      expect(text('CUSTOMER_CHARGE_OPEN'), l10n.asaasErrorCustomerChargeOpen);
+      expect(text('ORDER_NOT_PAYABLE'), l10n.asaasErrorOrderNotPayable);
+    });
+
+    test('criação concorrente e link anterior cancelado sem o novo', () {
+      expect(text('CHARGE_SUPERSEDED'), l10n.asaasErrorChargeSuperseded);
+      expect(
+        text('PREVIOUS_LINK_CANCELED'),
+        l10n.asaasErrorPreviousLinkCanceled,
+      );
+      expect(l10n.asaasErrorPreviousLinkCanceled, contains('link novo'));
     });
 
     test('ORDER_CANCELED', () {
@@ -57,8 +74,10 @@ void main() {
     });
 
     test('INVALID_INSTALLMENT_COUNT', () {
-      expect(text('INVALID_INSTALLMENT_COUNT'),
-          l10n.asaasErrorInvalidInstallmentCount);
+      expect(
+        text('INVALID_INSTALLMENT_COUNT'),
+        l10n.asaasErrorInvalidInstallmentCount,
+      );
     });
 
     test('CHARGE_NOT_OPEN', () {
@@ -92,7 +111,12 @@ void main() {
     });
 
     test('nunca devolve a mensagem crua', () {
-      for (final code in ['FORBIDDEN', 'INTERNAL_ERROR', 'NETWORK_ERROR', null]) {
+      for (final code in [
+        'FORBIDDEN',
+        'INTERNAL_ERROR',
+        'NETWORK_ERROR',
+        null,
+      ]) {
         expect(text(code), isNot(contains('raw backend text')));
       }
     });
