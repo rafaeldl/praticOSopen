@@ -1,10 +1,15 @@
 /**
- * AI assistant pilot switch and monthly quota (docs/AI_ORDER_ASSIST.md).
+ * AI assistant switches and monthly quota (docs/AI_ORDER_ASSIST.md).
  *
- * - companies/{cid}/settings/ai   { enabled: boolean, monthlyLimit?: number }
- *   Pilot switch, written only by admins/scripts (Admin SDK). The Firestore
- *   rules have no match for it, so app users can neither read nor write it.
- *   Missing doc or enabled != true → the assistant is off for the company.
+ * - config/ai   { enabledForAll?: boolean, defaultProvider?: 'gemini'|'claude' }
+ *   Global switch for every company. Read at most once a minute per instance.
+ * - companies/{cid}/settings/ai   { enabled?: boolean, monthlyLimit?: number, provider?: ... }
+ *   Per company. Each field it has wins over the global one, so a company can
+ *   be turned off (or kept on Gemini) while the rest follows config/ai.
+ *   No doc and no global switch → the assistant is off.
+ * Both are written only by admins/scripts (Admin SDK, `npm run ai`). The
+ * Firestore rules have no match for them, so app users can neither read nor
+ * write them.
  * - companies/{cid}/aiUsage/{YYYY-MM}  { count, limit, updatedAt }
  *   One counter per calendar month (UTC). A new month is a new document, so
  *   no reset job is needed. Also without client rules (Admin SDK only).
@@ -16,6 +21,7 @@
 
 import { db, FieldValue } from '../firestore.service';
 import type { SubscriptionPlan } from '../../models/types';
+import { isLlmProvider, type LlmProvider } from './llm.client';
 
 /** Requests per month by plan (decided 2026-10-09). -1 = unlimited. */
 export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = {
@@ -29,6 +35,8 @@ export interface AiSettings {
   enabled: boolean;
   /** Overrides the plan limit when set (pilot). -1 = unlimited. */
   monthlyLimit?: number;
+  /** Model provider ('gemini' | 'claude'); unset = AI_PROVIDER env, else gemini. */
+  provider?: LlmProvider;
 }
 
 export type QuotaReservation =
@@ -54,14 +62,65 @@ export function resolveAiLimit(plan: unknown, settings: AiSettings | null): numb
   return AI_REQUESTS_PER_MONTH[isPlan(plan) ? plan : 'free'];
 }
 
-export async function getAiSettings(companyId: string): Promise<AiSettings | null> {
-  const snap = await db.collection('companies').doc(companyId).collection('settings').doc('ai').get();
-  if (!snap.exists) return null;
-  const data = snap.data() as Record<string, unknown>;
+/**
+ * Combines the global switch (config/ai) with the company's own settings/ai.
+ * A field the company sets wins; otherwise the global one applies.
+ */
+export function resolveAiSettings(
+  company: Record<string, unknown> | undefined,
+  global: Record<string, unknown> | undefined,
+): AiSettings {
+  const enabled =
+    typeof company?.enabled === 'boolean' ? company.enabled : global?.enabledForAll === true;
+  const provider = isLlmProvider(company?.provider)
+    ? company?.provider
+    : isLlmProvider(global?.defaultProvider)
+      ? global?.defaultProvider
+      : undefined;
   return {
-    enabled: data.enabled === true,
-    monthlyLimit: validLimit(data.monthlyLimit) ? data.monthlyLimit : undefined,
+    enabled,
+    monthlyLimit: validLimit(company?.monthlyLimit) ? company?.monthlyLimit : undefined,
+    provider: provider as LlmProvider | undefined,
   };
+}
+
+const GLOBAL_TTL_MS = 60_000;
+let globalCache: { data: Record<string, unknown> | undefined; at: number } | undefined;
+
+/** Clears the cached config/ai (tests). */
+export function resetAiGlobalCache(): void {
+  globalCache = undefined;
+}
+
+async function getGlobalAiConfig(now = Date.now()): Promise<Record<string, unknown> | undefined> {
+  if (globalCache && now - globalCache.at < GLOBAL_TTL_MS) return globalCache.data;
+  const snap = await db.collection('config').doc('ai').get();
+  globalCache = { data: snap.exists ? (snap.data() as Record<string, unknown>) : undefined, at: now };
+  return globalCache.data;
+}
+
+export async function getAiSettings(companyId: string): Promise<AiSettings> {
+  const [snap, global] = await Promise.all([
+    db.collection('companies').doc(companyId).collection('settings').doc('ai').get(),
+    getGlobalAiConfig(),
+  ]);
+  const company = snap.exists ? (snap.data() as Record<string, unknown>) : undefined;
+  return resolveAiSettings(company, global);
+}
+
+/** This month's use and limit, without counting anything (status for the app). */
+export async function getAiUsage(
+  companyId: string,
+  settings: AiSettings | null,
+  now: Date = new Date(),
+): Promise<{ used: number; limit: number }> {
+  const companyRef = db.collection('companies').doc(companyId);
+  const [companySnap, usageSnap] = await Promise.all([companyRef.get(), usageRef(companyId, monthKey(now)).get()]);
+  const plan = (companySnap.data() as Record<string, unknown> | undefined)?.subscription as
+    | { plan?: unknown }
+    | undefined;
+  const used = Number((usageSnap.data() as Record<string, unknown> | undefined)?.count ?? 0) || 0;
+  return { used, limit: resolveAiLimit(plan?.plan, settings) };
 }
 
 function usageRef(companyId: string, key: string) {

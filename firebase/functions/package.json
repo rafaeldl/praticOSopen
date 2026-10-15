@@ -17,6 +17,7 @@
     "setup-test": "npx ts-node scripts/setup-test-data.ts",
     "e2e:asaas": "ts-node scripts/asaas-sandbox-e2e.ts",
     "asaas:pilot": "ts-node scripts/enable-asaas-pilot.ts",
+    "ai": "ts-node scripts/ai-settings.ts",
     "claims:recompute": "ts-node scripts/recompute-claims.ts",
     "memberships:seed": "ts-node scripts/seed-private-membership.ts",
     "subscriptions:grace": "ts-node scripts/grant-grace-period.ts",
@@ -28,6 +29,7 @@
     "node": "22"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "busboy": "^1.6.0",
     "cors": "^2.8.5",

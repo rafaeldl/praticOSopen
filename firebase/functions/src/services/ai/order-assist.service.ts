@@ -103,32 +103,36 @@ export const llmDraftSchema = z.object({
 
 export type LlmDraft = z.infer<typeof llmDraftSchema>;
 
-/** Gemini responseSchema (OpenAPI subset) matching [llmDraftSchema]. */
+/** JSON Schema for the model answer, matching [llmDraftSchema] (adapted per provider). */
+const STRING = { type: 'string' };
 export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
-  type: 'OBJECT',
+  type: 'object',
+  additionalProperties: false,
   properties: {
-    transcript: { type: 'STRING' },
-    customer: { type: 'OBJECT', properties: { name: { type: 'STRING' }, phone: { type: 'STRING' } } },
+    transcript: STRING,
+    customer: { type: 'object', additionalProperties: false, properties: { name: STRING, phone: STRING } },
     device: {
-      type: 'OBJECT',
-      properties: { name: { type: 'STRING' }, serial: { type: 'STRING' }, manufacturer: { type: 'STRING' } },
+      type: 'object',
+      additionalProperties: false,
+      properties: { name: STRING, serial: STRING, manufacturer: STRING },
     },
     items: {
-      type: 'ARRAY',
+      type: 'array',
       items: {
-        type: 'OBJECT',
+        type: 'object',
+        additionalProperties: false,
         properties: {
-          kind: { type: 'STRING', enum: ['service', 'product'] },
-          name: { type: 'STRING' },
-          value: { type: 'NUMBER', nullable: true },
-          quantity: { type: 'NUMBER' },
+          kind: { type: 'string', enum: ['service', 'product'] },
+          name: STRING,
+          value: { type: ['number', 'null'] },
+          quantity: { type: 'number' },
         },
         required: ['kind', 'name'],
       },
     },
-    notes: { type: 'STRING' },
-    dueDate: { type: 'STRING' },
-    dueTime: { type: 'STRING' },
+    notes: STRING,
+    dueDate: STRING,
+    dueTime: STRING,
   },
   required: ['items'],
 };
@@ -306,6 +310,8 @@ export interface OrderAssistDeps {
   findDevices(companyId: string, name: string): Promise<DeviceHit[]>;
   /** Segment label of the device ("Veículo"), optional. */
   deviceLabel?(companyId: string): Promise<string | undefined>;
+  /** This month's use and limit without counting (GET /status), optional. */
+  getUsage?(companyId: string, settings: AiSettings | null): Promise<{ used: number; limit: number }>;
 }
 
 export interface DraftItem {
@@ -432,6 +438,7 @@ export async function runOrderAssist(
       userText: buildUserText(input, catalog),
       media,
       responseSchema: LLM_RESPONSE_SCHEMA,
+      provider: settings.provider,
     });
     draft = parseLlmDraft(raw);
   } catch (error) {

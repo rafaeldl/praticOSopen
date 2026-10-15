@@ -28,6 +28,35 @@ function buildApp(permissions: string[], deps: OrderAssistDeps, companyId = 'com
   return app;
 }
 
+describe('GET /status', () => {
+  it('on → enabled with this month\'s usage', async () => {
+    const deps = fakeDeps({ getUsage: jest.fn().mockResolvedValue({ used: 3, limit: 150 }) });
+    const res = await request(buildApp(['write:orders'], deps, 'tenant-B')).get('/status');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ enabled: true, usage: { used: 3, limit: 150 } });
+    expect(deps.getSettings).toHaveBeenCalledWith('tenant-B');
+    expect(deps.reserve).not.toHaveBeenCalled();
+  });
+
+  it('off → enabled false, no usage', async () => {
+    const deps = fakeDeps({ getSettings: jest.fn().mockResolvedValue({ enabled: false }), getUsage: jest.fn() });
+    const res = await request(buildApp(['write:orders'], deps)).get('/status');
+    expect(res.body.data).toEqual({ enabled: false });
+    expect(deps.getUsage).not.toHaveBeenCalled();
+  });
+
+  it('technician (no write:orders) → 403', async () => {
+    const res = await request(buildApp(['read:assigned'], fakeDeps())).get('/status');
+    expect(res.status).toBe(403);
+  });
+
+  it('settings failure → 500', async () => {
+    const deps = fakeDeps({ getSettings: jest.fn().mockRejectedValue(new Error('boom')) });
+    const res = await request(buildApp(['write:orders'], deps)).get('/status');
+    expect(res.status).toBe(500);
+  });
+});
+
 describe('POST /order-assist', () => {
   it('returns the draft', async () => {
     const res = await request(buildApp(['write:all'], fakeDeps())).post('/order-assist').send({ text: 'polimento' });

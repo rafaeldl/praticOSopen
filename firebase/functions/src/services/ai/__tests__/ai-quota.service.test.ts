@@ -8,10 +8,13 @@ import { FakeFirestore } from '../../../__tests__/helpers/fake-firestore';
 import {
   AI_REQUESTS_PER_MONTH,
   getAiSettings,
+  getAiUsage,
   monthKey,
   releaseAiRequest,
   reserveAiRequest,
+  resetAiGlobalCache,
   resolveAiLimit,
+  resolveAiSettings,
 } from '../ai-quota.service';
 
 const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
@@ -19,7 +22,10 @@ const NOW = new Date('2026-10-11T12:00:00.000Z');
 const ON = { enabled: true };
 
 describe('ai quota', () => {
-  beforeEach(() => fake.reset());
+  beforeEach(() => {
+    fake.reset();
+    resetAiGlobalCache();
+  });
 
   it('monthKey is the UTC calendar month', () => {
     expect(monthKey(NOW)).toBe('2026-10');
@@ -34,12 +40,47 @@ describe('ai quota', () => {
     expect(resolveAiLimit('free', { enabled: true, monthlyLimit: -1 })).toBe(-1);
   });
 
-  it('getAiSettings: missing doc → null; only enabled === true turns it on', async () => {
-    await expect(getAiSettings('c1')).resolves.toBeNull();
+  it('getAiSettings: no company doc and no global switch → off; only enabled === true turns it on', async () => {
+    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: false, monthlyLimit: undefined, provider: undefined });
     fake.seed('companies/c1/settings/ai', { enabled: 'yes', monthlyLimit: 2.5 });
-    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: false, monthlyLimit: undefined });
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: false, monthlyLimit: undefined });
     fake.seed('companies/c1/settings/ai', { enabled: true, monthlyLimit: 20 });
-    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: true, monthlyLimit: 20 });
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: true, monthlyLimit: 20 });
+  });
+
+  it('getAiSettings: config/ai turns it on for every company, company fields win', async () => {
+    fake.seed('config/ai', { enabledForAll: true, defaultProvider: 'claude' });
+    await expect(getAiSettings('c1')).resolves.toEqual({ enabled: true, monthlyLimit: undefined, provider: 'claude' });
+    fake.seed('companies/c2/settings/ai', { enabled: false });
+    await expect(getAiSettings('c2')).resolves.toMatchObject({ enabled: false, provider: 'claude' });
+    fake.seed('companies/c3/settings/ai', { provider: 'gemini', monthlyLimit: 5 });
+    await expect(getAiSettings('c3')).resolves.toEqual({ enabled: true, monthlyLimit: 5, provider: 'gemini' });
+  });
+
+  it('resolveAiSettings ignores invalid values', () => {
+    expect(resolveAiSettings({ provider: 'gpt' }, { enabledForAll: 'yes', defaultProvider: 'x' })).toEqual({
+      enabled: false,
+      monthlyLimit: undefined,
+      provider: undefined,
+    });
+    expect(resolveAiSettings(undefined, { enabledForAll: true })).toMatchObject({ enabled: true, provider: undefined });
+  });
+
+  it('reads config/ai at most once a minute', async () => {
+    fake.seed('config/ai', { enabledForAll: true });
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: true });
+    fake.seed('config/ai', { enabledForAll: false });
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: true });
+    resetAiGlobalCache();
+    await expect(getAiSettings('c1')).resolves.toMatchObject({ enabled: false });
+  });
+
+  it('getAiUsage reads the month without counting', async () => {
+    fake.seed('companies/c1', { subscription: { plan: 'pro' } });
+    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 0, limit: 400 });
+    fake.seed('companies/c1/aiUsage/2026-10', { count: 7 });
+    await expect(getAiUsage('c1', ON, NOW)).resolves.toEqual({ used: 7, limit: 400 });
+    expect(fake.read('companies/c1/aiUsage/2026-10')?.count).toBe(7);
   });
 
   it('counts each request in the month counter', async () => {
