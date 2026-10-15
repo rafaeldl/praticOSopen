@@ -53,10 +53,19 @@ export interface OrderCharge {
   refundedAsaasPaymentIds?: string[];
   /** Paid outside Asaas: marked received in cash on Asaas by the server (no booking). */
   paidOutside?: boolean;
-  /** Server-only: receiveInCash in progress; a webhook for it must not book. */
+  /**
+   * Server-only: receiveInCash in progress or with an unknown outcome
+   * (timeout/5xx); a RECEIVED_IN_CASH webhook for it must not book, and the
+   * next reconciliation confirms the payment status on Asaas.
+   */
   settlingOutsideAt?: string;
+  /** Server-only: value sent in that receiveInCash. */
+  settlingOutsideValue?: number;
   /** Server-only: lease of the outside-payment reconciliation (ISO). */
   adjustingUntil?: string;
+  /** Server-only: bumped by a reconciliation that found the lease taken (the holder runs again). */
+  dirtyCount?: number;
+  dirtyAt?: string;
 }
 
 /** One order covered by a CustomerCharge and how much of the charge goes to it. */
@@ -98,10 +107,19 @@ export interface CustomerCharge {
   receiptId?: string;
   /** Paid outside Asaas: marked received in cash on Asaas by the server (no booking). */
   paidOutside?: boolean;
-  /** Server-only: receiveInCash in progress; a webhook for it must not book. */
+  /**
+   * Server-only: receiveInCash in progress or with an unknown outcome
+   * (timeout/5xx); a RECEIVED_IN_CASH webhook for it must not book, and the
+   * next reconciliation confirms the payment status on Asaas.
+   */
   settlingOutsideAt?: string;
+  /** Server-only: value sent in that receiveInCash. */
+  settlingOutsideValue?: number;
   /** Server-only: lease of the outside-payment reconciliation (ISO). */
   adjustingUntil?: string;
+  /** Server-only: bumped by a reconciliation that found the lease taken (the holder runs again). */
+  dirtyCount?: number;
+  dirtyAt?: string;
   /** Server-only. */
   appliedTransactions?: CustomerChargeAppliedTransaction[];
   /** Server-only. */
@@ -220,6 +238,8 @@ export interface AsaasPayment {
   externalReference?: string | null;
   installment?: string | null;
   installmentNumber?: number | null;
+  /** GET /payments/{id} of a removed payment. */
+  deleted?: boolean;
 }
 
 export interface AsaasList<T> {

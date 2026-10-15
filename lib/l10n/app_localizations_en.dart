@@ -2113,6 +2113,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This order is already in a payment link for several orders of the customer. Cancel that link in Receive from the customer.';
 
   @override
+  String get asaasErrorChargeSuperseded =>
+      'Another link for these orders was created at the same time and is the one that counts. See it on the order or the customer.';
+
+  @override
+  String get asaasErrorPreviousLinkCanceled =>
+      'An old link was canceled, but the new one was not created. Send a new link.';
+
+  @override
   String get asaasErrorOrderNotPayable =>
       'Quotes and canceled orders cannot be charged.';
 

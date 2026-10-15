@@ -56,6 +56,15 @@ void main() {
       expect(text('ORDER_NOT_PAYABLE'), l10n.asaasErrorOrderNotPayable);
     });
 
+    test('criação concorrente e link anterior cancelado sem o novo', () {
+      expect(text('CHARGE_SUPERSEDED'), l10n.asaasErrorChargeSuperseded);
+      expect(
+        text('PREVIOUS_LINK_CANCELED'),
+        l10n.asaasErrorPreviousLinkCanceled,
+      );
+      expect(l10n.asaasErrorPreviousLinkCanceled, contains('link novo'));
+    });
+
     test('ORDER_CANCELED', () {
       expect(text('ORDER_CANCELED'), l10n.asaasErrorOrderCanceled);
     });

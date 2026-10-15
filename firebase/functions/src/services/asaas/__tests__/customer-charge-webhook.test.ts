@@ -98,6 +98,26 @@ describe('webhook - cobrança de várias OS', () => {
     expect(read(O2)!.paidAmount).toBe(20);
   });
 
+  it('repartição desatualizada: OS paga por fora depois do link não é paga duas vezes', async () => {
+    // o1 was paid in full outside Asaas and the link was lowered to 150 on
+    // Asaas (PUT), but the allocations write was lost: the charge still says
+    // 100 for o1 and 150 for o2.
+    seed(O1, { number: 182, status: 'done', total: 100, paidAmount: 100, transactions: [], customer: { id: 'cust1' } });
+    await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', { value: 150 }));
+    expect(read(O1)!.paidAmount).toBe(100);
+    expect(read(O1)!.transactions).toHaveLength(0);
+    expect(read(O2)!.paidAmount).toBe(150);
+    expect(read(RECEIPT)!.allocations).toEqual([
+      expect.objectContaining({ orderId: 'o2', amount: 150, transactionId: 'asaas_pay_cc_1' }),
+    ]);
+  });
+
+  it('juros além do que as OS devem vão para a última OS', async () => {
+    await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', { value: 255.5 }));
+    expect(read(O1)!.paidAmount).toBe(100);
+    expect(read(O2)!.paidAmount).toBe(155.5);
+  });
+
   it('idempotente: evento repetido e RECEIVED depois de CONFIRMED não lançam de novo', async () => {
     const e = event('PAYMENT_CONFIRMED');
     await handleAsaasEvent('c1', e);
@@ -170,6 +190,7 @@ describe('webhook - cobrança de várias OS', () => {
     await handleAsaasEvent('c1', event('PAYMENT_RECEIVED', { status: 'RECEIVED_IN_CASH' }));
     expect(read(O1)!.transactions).toHaveLength(0);
     expect(read(CC)!).toMatchObject({ status: 'paid', paidOutside: true });
+    expect(read(CC)!.settlingOutsideAt).toBeUndefined();
   });
 
   it('desfazer a baixa em dinheiro reabre a cobrança que nós baixamos', async () => {

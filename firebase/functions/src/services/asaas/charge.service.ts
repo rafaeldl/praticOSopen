@@ -16,7 +16,7 @@ import {
 } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient } from './asaas-client';
 import { asaasConnectionRef, getAsaasCredentialProvider } from './credential-provider';
-import { assertNoOpenCustomerCharge } from './customer-charge.service';
+import { assertNoOpenCustomerCharge, listRivalsOfOrderCharge, replaceRivals } from './customer-charge.service';
 import { AsaasServiceError } from './errors';
 import { getPaymentSettings } from './connection.service';
 import { isValidTaxId, normalizeTaxId } from '../../utils/tax-id.utils';
@@ -373,21 +373,12 @@ export async function createOrderCharge(
     throw error;
   }
 
-  // 7. One open charge per order: cancel the previous ones. If one cannot be
-  // canceled, roll back the new charge so there is never more than one open.
-  for (const previous of openCharges) {
-    try {
-      await cancelCharge(client, companyId, orderId, previous);
-    } catch (error) {
-      console.error(
-        `[Asaas] Could not cancel previous charge ${previous.id} of order ${orderId}; rolling back ${charge.id}`,
-      );
-      await cancelCharge(client, companyId, orderId, charge).catch(() => {
-        console.error(`[Asaas] Could not roll back charge ${charge.id} of order ${orderId}`);
-      });
-      throw error;
-    }
-  }
+  // 7. One payable link per order: cancel the open charges of the order and a
+  // multi-order charge covering it, read again now that the new charge exists
+  // (catches a concurrent create). The newest wins; if a previous one cannot
+  // be canceled, the new charge is rolled back.
+  const rivals = await listRivalsOfOrderCharge(companyId, orderId);
+  await replaceRivals(client, companyId, charge, rivals, () => cancelCharge(client, companyId, orderId, charge));
 
   console.log(`[Asaas] Charge ${charge.id} created for order ${orderId} of company ${companyId}`);
   return charge;

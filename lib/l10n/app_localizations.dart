@@ -3964,6 +3964,18 @@ abstract class AppLocalizations {
   /// **'Esta OS já está num link de cobrança de várias OS do cliente. Cancele aquele link em Receber do cliente.'**
   String get asaasErrorCustomerChargeOpen;
 
+  /// No description provided for @asaasErrorChargeSuperseded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro link para essas OS foi criado ao mesmo tempo e ficou valendo. Veja o link na OS ou no cliente.'**
+  String get asaasErrorChargeSuperseded;
+
+  /// No description provided for @asaasErrorPreviousLinkCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Um link antigo foi cancelado, mas o novo não foi criado. Mande um link novo.'**
+  String get asaasErrorPreviousLinkCanceled;
+
   /// No description provided for @asaasErrorOrderNotPayable.
   ///
   /// In pt, this message translates to:

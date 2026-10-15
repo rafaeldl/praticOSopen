@@ -491,7 +491,9 @@ service cloud.firestore {
           || (canReceivePayments(companyId)
               && resource.data.createdBy.id == request.auth.uid);
 
+        // `asaas_*` é reservado aos recibos dos pagamentos do Asaas (servidor).
         allow create: if canReceivePayments(companyId)
+          && !receiptId.matches('asaas_.*')
           && request.resource.data.createdBy.id == request.auth.uid
           && request.resource.data.status == 'active'
           && request.resource.data.amount is number

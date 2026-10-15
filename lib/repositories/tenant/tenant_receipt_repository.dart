@@ -21,7 +21,9 @@ class TenantReceiptRepository extends TenantRepository<Receipt> {
   @override
   Map<String, dynamic> toJson(Receipt receipt) => receipt.toJson();
 
-  /// New receipt id (generated locally, works offline).
+  /// New receipt id (generated locally, works offline). Firestore auto ids
+  /// are 20 letters/digits, so they never start with `asaas_` (reserved for
+  /// receipts of Asaas payments; the rules and the server refuse it).
   String newId(String companyId) => collectionFor(companyId).doc().id;
 
   /// Writes [plan] in one batch: the receipt document and the payment update

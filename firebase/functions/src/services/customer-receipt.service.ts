@@ -14,6 +14,7 @@ import { db } from './firestore.service';
 import { applyPaymentTransaction, calculateRemainingBalance } from './order.service';
 import type { Order, PaymentTransaction, UserAggr } from '../models/types';
 import { AsaasServiceError } from './asaas/errors';
+import { ASAAS_TRANSACTION_PREFIX } from './asaas/order-payment.service';
 import { toCents } from '../utils/payment-allocation';
 
 export const MAX_RECEIPT_ORDERS = 50;
@@ -130,7 +131,10 @@ export async function registerCustomerReceipt(
   input: CustomerReceiptInput,
   user: UserAggr,
 ): Promise<{ receiptId: string; amount: number }> {
-  if (!ID_PATTERN.test(input.receiptId)) throw new AsaasServiceError('INVALID_VALUE', 'Invalid receipt id');
+  // `asaas_` ids are reserved for receipts of Asaas payments (customer-charge-payment.service.ts).
+  if (!ID_PATTERN.test(input.receiptId) || input.receiptId.startsWith(ASAAS_TRANSACTION_PREFIX)) {
+    throw new AsaasServiceError('INVALID_VALUE', 'Invalid receipt id');
+  }
   const allocations = input.allocations ?? [];
   const ids = allocations.map((a) => a.orderId);
   if (

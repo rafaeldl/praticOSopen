@@ -141,6 +141,18 @@ describe('customer-receipt.service', () => {
     ).rejects.toMatchObject({ code: 'ORDER_NOT_FOUND' });
   });
 
+  it('recusa id de recebimento com o prefixo das cobranças do Asaas (asaas_)', async () => {
+    await expect(
+      registerCustomerReceipt(
+        'c1', 'cust1',
+        { receiptId: 'asaas_pay_1', paidAt: PAID_AT, allocations: [{ orderId: 'o1', amount: 10 }] },
+        CONSULTANT,
+      ),
+    ).rejects.toMatchObject({ code: 'INVALID_VALUE', httpStatus: 400 });
+    expect(read('companies/c1/receipts/asaas_pay_1')).toBeUndefined();
+    expect(read('companies/c1/orders/o1').transactions).toHaveLength(0);
+  });
+
   it('mesmo id de recebimento duas vezes não lança de novo', async () => {
     const input = { receiptId: 'r1', paidAt: PAID_AT, allocations: [{ orderId: 'o1', amount: 10 }] };
     await registerCustomerReceipt('c1', 'cust1', input, CONSULTANT);

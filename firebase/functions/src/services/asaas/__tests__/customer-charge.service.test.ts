@@ -3,6 +3,7 @@ jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests_
 import { read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { setAsaasCredentialProvider } from '../credential-provider';
 import { createOrderCharge } from '../charge.service';
+import { AsaasApiError } from '../asaas-client';
 import {
   cancelCustomerCharge,
   createCustomerCharge,
@@ -12,6 +13,7 @@ import {
 
 const USER = { id: 'u1', name: 'Ana' };
 const CPF = '52998224725';
+const PAST = '2026-10-01T10:00:00.000Z';
 const CC = (id: string) => `companies/c1/customerCharges/${id}`;
 
 const client = {
@@ -117,12 +119,12 @@ describe('customer-charge.service', () => {
   it('cancela as cobranças de uma OS abertas e a cobrança anterior de várias OS do cliente', async () => {
     seed('companies/c1/orders/o182/charges/ch1', {
       id: 'ch1', asaasPaymentId: 'pay_single', mode: 'single', value: 100, dueDate: '2026-10-20',
-      status: 'pending', invoiceUrl: 'x', paidAsaasPaymentIds: [], createdBy: USER, createdAt: 'x',
+      status: 'pending', invoiceUrl: 'x', paidAsaasPaymentIds: [], createdBy: USER, createdAt: PAST,
     });
     seed(CC('old'), {
       id: 'old', customer: { id: 'cust1' }, asaasPaymentId: 'pay_old', value: 100, dueDate: '2026-10-20',
       status: 'overdue', invoiceUrl: 'x', orderIds: ['o182'], allocations: [{ orderId: 'o182', amount: 100 }],
-      paidAsaasPaymentIds: [], createdBy: USER, createdAt: 'x',
+      paidAsaasPaymentIds: [], createdBy: USER, createdAt: PAST,
     });
 
     const charge = await createCustomerCharge('c1', 'cust1', { orderIds: ['o182', 'o201'], value: 400 }, USER);
@@ -138,7 +140,7 @@ describe('customer-charge.service', () => {
     seed(CC('old'), {
       id: 'old', customer: { id: 'cust1' }, asaasPaymentId: 'pay_old', value: 100, dueDate: '2026-10-20',
       status: 'pending', invoiceUrl: 'x', orderIds: ['o182'], allocations: [{ orderId: 'o182', amount: 100 }],
-      paidAsaasPaymentIds: [], createdBy: USER, createdAt: 'x',
+      paidAsaasPaymentIds: [], createdBy: USER, createdAt: PAST,
     });
     client.createPayment.mockRejectedValue(new Error('boom'));
 
@@ -171,5 +173,115 @@ describe('customer-charge.service', () => {
     expect(canceled.status).toBe('canceled');
     expect(client.deletePayment).toHaveBeenCalledWith('pay_cc');
     await expect(cancelCustomerCharge('c1', 'cust1', charge.id)).rejects.toMatchObject({ code: 'CHARGE_NOT_OPEN' });
+  });
+
+  describe('uma cobrança por dívida mesmo com criações ao mesmo tempo', () => {
+    const OLD_CC = {
+      id: 'old', customer: { id: 'cust1' }, asaasPaymentId: 'pay_old', value: 100, dueDate: '2026-10-20',
+      status: 'pending', invoiceUrl: 'x', orderIds: ['o182'], allocations: [{ orderId: 'o182', amount: 100 }],
+      paidAsaasPaymentIds: [], createdBy: USER, createdAt: PAST,
+    };
+    const SINGLE = {
+      id: 'ch1', asaasPaymentId: 'pay_single', mode: 'single', value: 100, dueDate: '2026-10-20',
+      status: 'pending', invoiceUrl: 'x', paidAsaasPaymentIds: [], createdBy: USER, createdAt: PAST,
+    };
+    // createdAt has millisecond precision: let the clock move between creates.
+    const tick = () => new Promise((resolve) => setTimeout(resolve, 5));
+    const openCustomerCharges = (ids: string[]) => ids.map((id) => read(CC(id))?.status);
+
+    it('dois pedidos juntos (repetição depois de erro de rede): fica só o mais novo', async () => {
+      let first: { id: string } | undefined;
+      client.createPayment
+        .mockImplementationOnce(async () => {
+          // While the first request waits for Asaas, the retry runs to the end.
+          first = await createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER);
+          await tick();
+          return { id: 'pay_a', invoiceUrl: 'https://sandbox.asaas.com/i/a', status: 'PENDING' };
+        })
+        .mockResolvedValueOnce({ id: 'pay_b', invoiceUrl: 'https://sandbox.asaas.com/i/b', status: 'PENDING' });
+
+      const second = await createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER);
+
+      expect(openCustomerCharges([first!.id, second.id])).toEqual(['canceled', 'pending']);
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_b');
+    });
+
+    it('apareceu um link mais novo antes de terminar: este é desfeito e o mais novo fica', async () => {
+      client.createPayment.mockImplementationOnce(async () => {
+        seed(CC('newer'), { ...OLD_CC, id: 'newer', asaasPaymentId: 'pay_newer', createdAt: '2099-01-01T00:00:00.000Z' });
+        return { id: 'pay_cc', invoiceUrl: 'x', status: 'PENDING' };
+      });
+
+      await expect(
+        createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER),
+      ).rejects.toMatchObject({ code: 'CHARGE_SUPERSEDED' });
+      expect(read(CC('newer'))!.status).toBe('pending');
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_cc');
+      expect(client.deletePayment).not.toHaveBeenCalledWith('pay_newer');
+    });
+
+    it('cobrança de uma OS criada junto com a de várias OS: a mais nova fica, a outra é cancelada', async () => {
+      let customerCharge: { id: string } | undefined;
+      client.createPayment
+        .mockImplementationOnce(async () => {
+          // The single-order request passed the "no open multi-order charge" check;
+          // meanwhile the multi-order charge is created.
+          customerCharge = await createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER);
+          await tick();
+          return { id: 'pay_s', invoiceUrl: 'x', status: 'PENDING' };
+        })
+        .mockResolvedValueOnce({ id: 'pay_cc', invoiceUrl: 'x', status: 'PENDING' });
+
+      const single = await createOrderCharge('c1', 'o182', { value: 100, mode: 'single' }, USER);
+
+      expect(read(`companies/c1/orders/o182/charges/${single.id}`)!.status).toBe('pending');
+      expect(read(CC(customerCharge!.id))!.status).toBe('canceled');
+    });
+
+    it('confere de novo antes de cancelar: parcelamento pago aparecido no meio desfaz o novo sem cancelar nada', async () => {
+      seed(CC('old'), OLD_CC);
+      client.createPayment.mockImplementationOnce(async () => {
+        seed('companies/c1/orders/o182/charges/ch2', {
+          ...SINGLE, id: 'ch2', mode: 'cardInstallments', asaasInstallmentId: 'ins_1', paidAsaasPaymentIds: ['p1'],
+        });
+        return { id: 'pay_cc', invoiceUrl: 'x', status: 'PENDING' };
+      });
+
+      await expect(
+        createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER),
+      ).rejects.toMatchObject({ code: 'INSTALLMENTS_IN_PROGRESS' });
+      expect(read(CC('old'))!.status).toBe('pending');
+      expect(client.deletePayment).toHaveBeenCalledTimes(1);
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_cc');
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+    });
+
+    it('um link anterior já cancelado e outro falhou: desfaz o novo e pede um link novo', async () => {
+      seed('companies/c1/orders/o182/charges/ch1', SINGLE);
+      seed(CC('old'), OLD_CC);
+      client.deletePayment.mockImplementation(async (id: string) => {
+        if (id === 'pay_old') throw new AsaasApiError(500, [], '/payments/pay_old');
+      });
+
+      await expect(
+        createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER),
+      ).rejects.toMatchObject({ code: 'PREVIOUS_LINK_CANCELED', httpStatus: 409 });
+      expect(read('companies/c1/orders/o182/charges/ch1')!.status).toBe('canceled');
+      const created = client.createPayment.mock.calls.length;
+      expect(created).toBe(1);
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_cc');
+    });
+
+    it('nada cancelado ainda quando falha: devolve o erro original', async () => {
+      seed(CC('old'), OLD_CC);
+      client.deletePayment.mockImplementation(async (id: string) => {
+        if (id === 'pay_old') throw new AsaasApiError(500, [], '/payments/pay_old');
+      });
+
+      await expect(
+        createCustomerCharge('c1', 'cust1', { orderIds: ['o182'], value: 100 }, USER),
+      ).rejects.toBeInstanceOf(AsaasApiError);
+      expect(read(CC('old'))!.status).toBe('pending');
+    });
   });
 });

@@ -12,7 +12,10 @@
  * The customer never has two payable charges for the same debt: creating one
  * cancels the open single-order charges of the covered orders and the
  * previous open multi-order charge of the customer, and a single-order charge
- * is refused while the order is covered by an open multi-order charge.
+ * is refused while the order is covered by an open multi-order charge. Those
+ * are read again after the new charge is saved (`replaceRivals`), so two
+ * concurrent creates (a retry after a network error) end with one link: the
+ * newest wins and the other is rolled back.
  */
 
 import { db } from '../firestore.service';
@@ -34,7 +37,6 @@ import {
   cancelCharge,
   findOrCreateAsaasCustomer,
   hasPaidInstallments,
-  isCancelable,
   isOpen,
   listCharges,
   resolveTaxId,
@@ -48,7 +50,15 @@ export const MAX_CHARGE_ORDERS = 50;
 const MAX_DESCRIPTION = 500;
 
 /** Server-only fields, never returned to the app. */
-const SERVER_ONLY_FIELDS = ['appliedTransactions', 'refundedAsaasPaymentIds', 'settlingOutsideAt', 'adjustingUntil'] as const;
+const SERVER_ONLY_FIELDS = [
+  'appliedTransactions',
+  'refundedAsaasPaymentIds',
+  'settlingOutsideAt',
+  'settlingOutsideValue',
+  'adjustingUntil',
+  'dirtyCount',
+  'dirtyAt',
+] as const;
 
 export function customerChargesRef(companyId: string) {
   return db.collection('companies').doc(companyId).collection(CUSTOMER_CHARGES);
@@ -198,10 +208,10 @@ export async function createCustomerCharge(
   const taxId = await resolveTaxId(companyId, customer, input.customerTaxId);
   const client = await getAsaasCredentialProvider().getClient(companyId);
 
-  // 4. What has to be canceled once the new charge exists.
-  const coveredIds = allocations.map((a) => a.orderId);
-  const singleCharges: Array<{ orderId: string; charge: OrderCharge }> = [];
-  for (const orderId of coveredIds) {
+  // 4. Fail early (before creating anything on Asaas) when an installment
+  // plan with paid installments covers a chosen order. What the new charge
+  // replaces is read again after it exists (step 7).
+  for (const orderId of allocations.map((a) => a.orderId)) {
     const open = (await listCharges(companyId, orderId)).filter(isOpen);
     if (open.some(hasPaidInstallments)) {
       throw new AsaasServiceError(
@@ -209,9 +219,8 @@ export async function createCustomerCharge(
         'An order has an installment plan with paid installments; it cannot be replaced',
       );
     }
-    for (const charge of open.filter(isCancelable)) singleCharges.push({ orderId, charge });
   }
-  const previousCustomerCharges = await listOpenCustomerCharges(companyId, customerId);
+  const coveredIds = allocations.map((a) => a.orderId);
 
   // 5. Asaas payment. Previous charges are canceled only after the new one
   // exists, so an Asaas rejection never kills a link already shared; the new
@@ -256,24 +265,117 @@ export async function createCustomerCharge(
     throw error;
   }
 
-  // 7. Cancel what the new charge replaces; roll back if anything cannot be canceled.
-  try {
-    for (const { orderId, charge: previous } of singleCharges) {
-      await cancelCharge(client, companyId, orderId, previous);
-    }
-    for (const previous of previousCustomerCharges) {
-      await cancelCustomerChargeDoc(client, companyId, previous);
-    }
-  } catch (error) {
-    console.error(`[Asaas] Could not cancel a replaced charge; rolling back customer charge ${charge.id}`);
-    await cancelCustomerChargeDoc(client, companyId, charge).catch(() => {
-      console.error(`[Asaas] Could not roll back customer charge ${charge.id}`);
-    });
-    throw error;
-  }
+  // 7. Cancel what the new charge replaces, read again now that it exists (a
+  // concurrent create, e.g. a retry after a network error, is caught here).
+  const rivals = await listRivalsOfCustomerCharge(companyId, customerId, coveredIds);
+  await replaceRivals(client, companyId, charge, rivals, () => cancelCustomerChargeDoc(client, companyId, charge));
 
   console.log(`[Asaas] Customer charge ${charge.id} created for ${coveredIds.length} orders of company ${companyId}`);
   return charge;
+}
+
+/** A payable link that competes with a new one for the same debt. */
+export type RivalCharge =
+  | { kind: 'order'; orderId: string; charge: OrderCharge }
+  | { kind: 'customer'; charge: CustomerCharge };
+
+/** Deterministic order of creation: later `createdAt`, then the larger id. */
+export function isNewerCharge(
+  a: { createdAt?: string; id: string },
+  b: { createdAt?: string; id: string },
+): boolean {
+  const ca = a.createdAt ?? '';
+  const cb = b.createdAt ?? '';
+  if (ca !== cb) return ca > cb;
+  return a.id > b.id;
+}
+
+/** Open single-order charges of the covered orders and open multi-order charges of the customer. */
+export async function listRivalsOfCustomerCharge(
+  companyId: string,
+  customerId: string,
+  orderIds: string[],
+): Promise<RivalCharge[]> {
+  const rivals: RivalCharge[] = [];
+  for (const orderId of orderIds) {
+    for (const charge of (await listCharges(companyId, orderId)).filter(isOpen)) {
+      rivals.push({ kind: 'order', orderId, charge });
+    }
+  }
+  for (const charge of await listOpenCustomerCharges(companyId, customerId)) {
+    rivals.push({ kind: 'customer', charge });
+  }
+  return rivals;
+}
+
+/** Open single-order charges of the order and open multi-order charges covering it. */
+export async function listRivalsOfOrderCharge(companyId: string, orderId: string): Promise<RivalCharge[]> {
+  const rivals: RivalCharge[] = (await listCharges(companyId, orderId))
+    .filter(isOpen)
+    .map((charge) => ({ kind: 'order' as const, orderId, charge }));
+  for (const charge of await listOpenCustomerChargesForOrder(companyId, orderId)) {
+    rivals.push({ kind: 'customer', charge });
+  }
+  return rivals;
+}
+
+/**
+ * One payable link per debt, run right after a new charge (`own`) is saved,
+ * with the open charges read again (`rivals`):
+ *
+ * - a rival newer than `own` (a concurrent create) or one that can no longer
+ *   be canceled (paid installments) wins: `own` is rolled back and
+ *   CHARGE_SUPERSEDED / INSTALLMENTS_IN_PROGRESS is thrown;
+ * - otherwise every rival is canceled. When one cannot be canceled, `own` is
+ *   rolled back; if some rival was already canceled the customer may be left
+ *   with no payable link, so PREVIOUS_LINK_CANCELED tells the app to send a
+ *   new one.
+ */
+export async function replaceRivals(
+  client: AsaasClient,
+  companyId: string,
+  own: { id: string; createdAt?: string },
+  rivals: RivalCharge[],
+  rollback: () => Promise<unknown>,
+): Promise<void> {
+  const others = rivals.filter((r) => r.charge.id !== own.id);
+  const undo = () =>
+    rollback().catch(() => {
+      console.error(`[Asaas] Could not roll back charge ${own.id}`);
+    });
+
+  const paid = others.some((r) => hasPaidInstallments(r.charge));
+  const newer = others.some((r) => isNewerCharge(r.charge, own));
+  if (paid || newer) {
+    console.warn(`[Asaas] Charge ${own.id} lost to another open charge; rolling it back`, { paid, newer });
+    await undo();
+    if (paid) {
+      throw new AsaasServiceError(
+        'INSTALLMENTS_IN_PROGRESS',
+        'An order has an installment plan with paid installments; it cannot be replaced',
+      );
+    }
+    throw new AsaasServiceError('CHARGE_SUPERSEDED', 'A newer charge for the same orders was created meanwhile');
+  }
+
+  let canceled = 0;
+  try {
+    for (const rival of others) {
+      if (rival.kind === 'order') await cancelCharge(client, companyId, rival.orderId, rival.charge);
+      else await cancelCustomerChargeDoc(client, companyId, rival.charge);
+      canceled++;
+    }
+  } catch (error) {
+    console.error(`[Asaas] Could not cancel a replaced charge; rolling back ${own.id}`, { canceled });
+    await undo();
+    if (canceled > 0) {
+      throw new AsaasServiceError(
+        'PREVIOUS_LINK_CANCELED',
+        'A previous link was canceled but another could not be; send a new link',
+      );
+    }
+    throw error;
+  }
 }
 
 export async function cancelCustomerCharge(

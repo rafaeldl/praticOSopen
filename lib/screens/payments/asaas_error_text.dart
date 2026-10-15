@@ -28,6 +28,10 @@ String asaasErrorText(AppLocalizations l10n, AsaasApiException e) {
       return l10n.asaasErrorInstallmentsInProgress;
     case 'CUSTOMER_CHARGE_OPEN':
       return l10n.asaasErrorCustomerChargeOpen;
+    case 'CHARGE_SUPERSEDED':
+      return l10n.asaasErrorChargeSuperseded;
+    case 'PREVIOUS_LINK_CANCELED':
+      return l10n.asaasErrorPreviousLinkCanceled;
     case 'ORDER_NOT_PAYABLE':
       return l10n.asaasErrorOrderNotPayable;
     case 'ORDER_CANCELED':

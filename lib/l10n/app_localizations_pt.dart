@@ -2109,6 +2109,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Esta OS já está num link de cobrança de várias OS do cliente. Cancele aquele link em Receber do cliente.';
 
   @override
+  String get asaasErrorChargeSuperseded =>
+      'Outro link para essas OS foi criado ao mesmo tempo e ficou valendo. Veja o link na OS ou no cliente.';
+
+  @override
+  String get asaasErrorPreviousLinkCanceled =>
+      'Um link antigo foi cancelado, mas o novo não foi criado. Mande um link novo.';
+
+  @override
   String get asaasErrorOrderNotPayable =>
       'Orçamento e OS cancelada não podem ser cobrados.';
 

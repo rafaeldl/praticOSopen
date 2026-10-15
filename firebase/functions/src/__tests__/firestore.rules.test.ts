@@ -805,6 +805,12 @@ describeEmulator('firestore.rules', () => {
       await rut.assertFails(fs.setDoc(fs.doc(db, path), receipt('mgr1', { allocations: [] })));
     });
 
+    it('cannot be created with an id reserved for Asaas receipts (asaas_*)', async () => {
+      const db = asUser('mgr1', { c1: 'manager' });
+      await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/receipts/asaas_pay_1'), receipt('mgr1')));
+      await rut.assertSucceeds(fs.setDoc(fs.doc(db, 'companies/c1/receipts/r_asaas_1'), receipt('mgr1')));
+    });
+
     it('is readable by owner, admin and manager', async () => {
       for (const role of ['owner', 'admin', 'manager']) {
         const db = asUser(`u_${role}`, { c1: role });

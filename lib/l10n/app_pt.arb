@@ -946,6 +946,8 @@
   "chargeReplace": "Gerar nova",
   "asaasErrorInstallmentsInProgress": "Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.",
   "asaasErrorCustomerChargeOpen": "Esta OS já está num link de cobrança de várias OS do cliente. Cancele aquele link em Receber do cliente.",
+  "asaasErrorChargeSuperseded": "Outro link para essas OS foi criado ao mesmo tempo e ficou valendo. Veja o link na OS ou no cliente.",
+  "asaasErrorPreviousLinkCanceled": "Um link antigo foi cancelado, mas o novo não foi criado. Mande um link novo.",
   "asaasErrorOrderNotPayable": "Orçamento e OS cancelada não podem ser cobrados.",
   "asaasErrorOrderCanceled": "Esta OS está cancelada e não pode receber cobrança.",
   "asaasErrorInvalidDueDate": "Data de vencimento inválida. Escolha hoje ou uma data futura.",

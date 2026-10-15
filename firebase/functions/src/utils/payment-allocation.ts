@@ -83,3 +83,54 @@ export function spreadPayment(allocations: Allocation[], value: number): Allocat
     return { ...a, amount: fromCents(share) };
   });
 }
+
+/**
+ * Spreads what the customer actually paid (`value`) over the orders of a
+ * charge, capped at what each order still owes NOW (`open`, same order as
+ * `allocations`; null = order not found). The stored allocations can be stale
+ * (an order paid outside Asaas after the link was created), so:
+ *
+ * 1. oldest first, each order gets its stored share, at most its open amount;
+ * 2. what is left goes to the orders still owing, oldest first;
+ * 3. anything beyond the total open (interest/fine, overpayment) goes to the
+ *    last order that exists, reported as `excess`.
+ *
+ * Returns one entry per stored allocation (amount can be 0).
+ */
+export function spreadPaymentOverOpen(
+  allocations: Allocation[],
+  open: Array<number | null>,
+  value: number,
+): { shares: Allocation[]; excess: number } {
+  let left = Math.max(0, toCents(value));
+  const openCents = allocations.map((_, i) => (open[i] === null || open[i] === undefined ? 0 : Math.max(0, toCents(open[i] as number))));
+  const cents = allocations.map(() => 0);
+
+  allocations.forEach((a, i) => {
+    const share = Math.min(Math.max(0, toCents(a.amount)), openCents[i], left);
+    cents[i] += share;
+    left -= share;
+  });
+  allocations.forEach((_, i) => {
+    const share = Math.min(openCents[i] - cents[i], left);
+    if (share <= 0) return;
+    cents[i] += share;
+    left -= share;
+  });
+
+  const excess = left;
+  if (excess > 0 && allocations.length > 0) {
+    let target = allocations.length - 1;
+    for (let i = allocations.length - 1; i >= 0; i--) {
+      if (open[i] !== null && open[i] !== undefined) {
+        target = i;
+        break;
+      }
+    }
+    cents[target] += excess;
+  }
+  return {
+    shares: allocations.map((a, i) => ({ ...a, amount: fromCents(cents[i]) })),
+    excess: fromCents(excess),
+  };
+}

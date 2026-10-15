@@ -249,8 +249,14 @@ export async function applyAsaasPayment(
     // Settled by us with receiveInCash (paid outside Asaas): the money is
     // already on the order, never book it a second time.
     if (isOurOutsideSettlement(charge, payment)) {
-      if (charge.status !== 'paid' || !charge.paidOutside) {
-        tx.update(cRef, { status: 'paid', paidOutside: true, paidAt: charge.paidAt ?? now.toISOString() });
+      if (charge.status !== 'paid' || !charge.paidOutside || charge.settlingOutsideAt) {
+        tx.update(cRef, {
+          status: 'paid',
+          paidOutside: true,
+          paidAt: charge.paidAt ?? now.toISOString(),
+          settlingOutsideAt: FieldValue.delete(),
+          settlingOutsideValue: FieldValue.delete(),
+        });
       }
       console.log('[AsaasPayment] charge settled outside Asaas; not booked', { companyId, orderId, chargeId });
       return { applied: false };

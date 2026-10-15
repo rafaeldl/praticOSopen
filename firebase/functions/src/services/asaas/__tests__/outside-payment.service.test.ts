@@ -11,6 +11,7 @@ import {
 
 const client = {
   receiveInCash: jest.fn(),
+  getPayment: jest.fn(),
   updatePayment: jest.fn(),
   deletePayment: jest.fn(),
   deleteInstallment: jest.fn(),
@@ -59,6 +60,7 @@ describe('outside-payment.service', () => {
     setAsaasCredentialProvider({ getClient: async () => client as any });
     client.receiveInCash.mockResolvedValue({ id: 'pay_1', status: 'RECEIVED_IN_CASH' });
     client.updatePayment.mockResolvedValue({ id: 'pay_1', status: 'PENDING' });
+    client.getPayment.mockResolvedValue({ id: 'pay_1', status: 'PENDING' });
     client.deletePayment.mockResolvedValue(undefined);
     seed('companies/c1', { name: 'Oficina' });
   });
@@ -126,16 +128,74 @@ describe('outside-payment.service', () => {
       expect(read(CHARGE)!.status).toBe('canceled');
     });
 
-    it('falha no receiveInCash não deixa a cobrança marcada e propaga o erro', async () => {
+    it('Asaas recusa o receiveInCash (4xx): tira a marca e propaga o erro', async () => {
       seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
       seedSingle();
-      client.receiveInCash.mockRejectedValue(new Error('down'));
+      client.receiveInCash.mockRejectedValue(new AsaasApiError(400, [], '/payments/pay_1/receiveInCash'));
 
-      await expect(reconcileOutsidePayments('c1', 'o1')).rejects.toThrow('down');
+      await expect(reconcileOutsidePayments('c1', 'o1')).rejects.toBeInstanceOf(AsaasApiError);
       const charge = read(CHARGE)!;
       expect(charge.status).toBe('pending');
       expect(charge.settlingOutsideAt).toBeUndefined();
+      expect(charge.settlingOutsideValue).toBeUndefined();
       expect(charge.adjustingUntil).toBeUndefined();
+    });
+
+    it('receiveInCash sem resposta (timeout) e Asaas fora: mantém a marca; a próxima rodada confirma pelo GET', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle();
+      client.receiveInCash.mockRejectedValue(new Error('timeout'));
+      client.getPayment.mockRejectedValue(new Error('timeout'));
+
+      await expect(reconcileOutsidePayments('c1', 'o1')).rejects.toThrow('timeout');
+      let charge = read(CHARGE)!;
+      expect(charge.status).toBe('pending');
+      expect(charge.settlingOutsideAt).toBeDefined();
+      expect(charge.settlingOutsideValue).toBe(100);
+      expect(charge.adjustingUntil).toBeUndefined();
+
+      // Asaas did receive it: the next round confirms and does not call receiveInCash again.
+      client.receiveInCash.mockClear();
+      client.getPayment.mockResolvedValue({ id: 'pay_1', status: 'RECEIVED_IN_CASH' });
+      await reconcileOutsidePayments('c1', 'o1');
+      expect(client.getPayment).toHaveBeenCalledWith('pay_1');
+      expect(client.receiveInCash).not.toHaveBeenCalled();
+      charge = read(CHARGE)!;
+      expect(charge).toMatchObject({ status: 'paid', paidOutside: true });
+      expect(charge.settlingOutsideAt).toBeUndefined();
+      expect(charge.settlingOutsideValue).toBeUndefined();
+    });
+
+    it('receiveInCash sem resposta, mas o GET mostra que entrou: marca paga por fora na hora', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle();
+      client.receiveInCash.mockRejectedValue(new AsaasApiError(503, [], '/payments/pay_1/receiveInCash'));
+      client.getPayment.mockResolvedValue({ id: 'pay_1', status: 'RECEIVED_IN_CASH' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+      expect(read(CHARGE)!).toMatchObject({ status: 'paid', paidOutside: true });
+    });
+
+    it('marca pendente e o GET mostra que não entrou: tira a marca e tenta a baixa de novo', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({ settlingOutsideAt: CREATED, settlingOutsideValue: 100 });
+
+      await reconcileOutsidePayments('c1', 'o1');
+      expect(client.getPayment).toHaveBeenCalledWith('pay_1');
+      expect(client.receiveInCash).toHaveBeenCalledTimes(1);
+      expect(read(CHARGE)!).toMatchObject({ status: 'paid', paidOutside: true });
+    });
+
+    it('marca pendente e o pagamento foi pago pelo Asaas: só tira a marca (o webhook lança)', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({ settlingOutsideAt: CREATED, settlingOutsideValue: 100 });
+      client.getPayment.mockResolvedValue({ id: 'pay_1', status: 'RECEIVED' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+      expect(client.receiveInCash).not.toHaveBeenCalled();
+      const charge = read(CHARGE)!;
+      expect(charge.status).toBe('pending');
+      expect(charge.settlingOutsideAt).toBeUndefined();
     });
 
     it('nada muda quando a OS ainda deve o valor do link', async () => {
@@ -160,11 +220,32 @@ describe('outside-payment.service', () => {
       expect(client.deletePayment).not.toHaveBeenCalled();
     });
 
-    it('com a vez tomada por outra execução, não faz nada', async () => {
+    it('com a vez tomada por outra execução, não faz nada e marca a cobrança para a outra rodar de novo', async () => {
       seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
       seedSingle({ adjustingUntil: new Date(Date.now() + 30000).toISOString() });
       await reconcileOutsidePayments('c1', 'o1');
       expect(client.receiveInCash).not.toHaveBeenCalled();
+      expect(read(CHARGE)!.dirtyCount).toBe(1);
+      expect(read(CHARGE)!.dirtyAt).toBeDefined();
+    });
+
+    it('pagamento gravado depois da leitura de quem tem a vez: ele roda de novo antes de soltar', async () => {
+      // The holder reads the order (still owing), then, while it talks to
+      // Asaas, the order is paid outside and a second trigger finds the lease taken.
+      seedOrder(ORDER, { paidAmount: 0 });
+      seedSingle({ settlingOutsideAt: CREATED, settlingOutsideValue: 100 });
+      client.getPayment.mockImplementationOnce(async () => {
+        seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+        await reconcileOutsidePayments('c1', 'o1');
+        return { id: 'pay_1', status: 'PENDING' };
+      });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.receiveInCash).toHaveBeenCalledWith('pay_1', expect.objectContaining({ value: 100 }));
+      const charge = read(CHARGE)!;
+      expect(charge).toMatchObject({ status: 'paid', paidOutside: true });
+      expect(charge.adjustingUntil).toBeUndefined();
     });
   });
 

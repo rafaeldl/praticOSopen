@@ -29,7 +29,9 @@ export type AsaasErrorCode =
   | 'RECEIPT_EXISTS'
   | 'INVALID_PAID_AT'
   | 'INVALID_FILE'
-  | 'VALUE_EXCEEDS_BALANCE';
+  | 'VALUE_EXCEEDS_BALANCE'
+  | 'CHARGE_SUPERSEDED'
+  | 'PREVIOUS_LINK_CANCELED';
 
 const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   ASAAS_NOT_ENABLED: 403,
@@ -56,6 +58,8 @@ const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   INVALID_PAID_AT: 400,
   INVALID_FILE: 400,
   VALUE_EXCEEDS_BALANCE: 409,
+  CHARGE_SUPERSEDED: 409,
+  PREVIOUS_LINK_CANCELED: 409,
 };
 
 export class AsaasServiceError extends Error {

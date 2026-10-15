@@ -93,6 +93,11 @@ export class AsaasClient {
     return this.request<AsaasPayment>('POST', '/payments', input);
   }
 
+  /** GET /payments/{id}: current status of a payment. */
+  getPayment(id: string): Promise<AsaasPayment> {
+    return this.request<AsaasPayment>('GET', `/payments/${encodeURIComponent(id)}`);
+  }
+
   /** PUT /payments/{id}: only PENDING/OVERDUE payments can be changed. */
   updatePayment(id: string, input: { value: number; description?: string }): Promise<AsaasPayment> {
     return this.request<AsaasPayment>('PUT', `/payments/${encodeURIComponent(id)}`, input);

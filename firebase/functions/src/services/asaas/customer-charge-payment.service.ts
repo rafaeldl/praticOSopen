@@ -1,9 +1,11 @@
 /**
  * Bookkeeping of a multi-order charge (CustomerCharge) paid through Asaas.
  *
- * One Asaas payment is spread over the covered orders by the stored
- * `allocations` (`spreadPayment`: same total → as stored; less → oldest
- * first; more → the extra goes to the last order). In one transaction:
+ * One Asaas payment is spread over the covered orders oldest first, each
+ * capped at what the order owes at that moment (`spreadPaymentOverOpen`: the
+ * stored share first, then what is left to orders still owing; interest,
+ * fine or overpayment beyond that goes to the last order and is logged). In
+ * one transaction:
  *
  * - each order gets a regular `payment` transaction
  *   `asaas_<paymentId>_<n>` (the `asaas_` prefix keeps it locked in the app
@@ -18,14 +20,14 @@
  * registered by hand on the orders.
  */
 import { db, FieldValue } from '../firestore.service';
-import { applyPaymentTransaction } from '../order.service';
+import { applyPaymentTransaction, calculateRemainingBalance } from '../order.service';
 import type { Order, PaymentTransaction } from '../../models/types';
 import type {
   AsaasPaymentEvent,
   CustomerCharge,
   CustomerChargeAppliedTransaction,
 } from '../../models/asaas.types';
-import { spreadPayment } from '../../utils/payment-allocation';
+import { spreadPaymentOverOpen } from '../../utils/payment-allocation';
 import { customerChargeRef } from './customer-charge.service';
 import {
   ASAAS_ACTOR,
@@ -76,15 +78,32 @@ export async function applyCustomerChargePayment(
 
     // Settled by us with receiveInCash: the money is already on the orders.
     if (isOurOutsideSettlement(charge, payment)) {
-      if (charge.status !== 'paid' || !charge.paidOutside) {
-        tx.update(cRef, { status: 'paid', paidOutside: true, paidAt: charge.paidAt ?? now.toISOString() });
+      if (charge.status !== 'paid' || !charge.paidOutside || charge.settlingOutsideAt) {
+        tx.update(cRef, {
+          status: 'paid',
+          paidOutside: true,
+          paidAt: charge.paidAt ?? now.toISOString(),
+          settlingOutsideAt: FieldValue.delete(),
+          settlingOutsideValue: FieldValue.delete(),
+        });
       }
       console.log('[AsaasPayment] customer charge settled outside Asaas; not booked', { companyId, chargeId });
       return { applied: false, orderIds: [] };
     }
 
     const receiptId = asaasReceiptId(payment.id);
-    const shares = spreadPayment(charge.allocations, Number(payment.value) || 0);
+    // Split by what each order owes now (the stored allocations can be stale).
+    const open = orderSnaps.map((snap) => {
+      if (!snap.exists) return null;
+      const order = snap.data() as Order;
+      return order.status === 'quote' || order.status === 'canceled' ? 0 : calculateRemainingBalance(order);
+    });
+    const { shares, excess } = spreadPaymentOverOpen(charge.allocations, open, Number(payment.value) || 0);
+    if (excess > 0) {
+      console.log('[AsaasPayment] customer charge paid beyond what the orders owe; extra on the last order', {
+        companyId, chargeId, asaasPaymentId: payment.id, excess,
+      });
+    }
     const applied: CustomerChargeAppliedTransaction[] = [];
     const receiptAllocations: Array<Record<string, unknown>> = [];
     const bookedOrderIds: string[] = [];
