@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/screens/payments/receipt_share.dart';
 import 'package:praticos/screens/payments/widgets/receipt_image_viewer.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
@@ -37,6 +37,7 @@ class ReceiptDetailScreen extends StatefulWidget {
     this.onSend,
     this.onOpenOrder,
     this.onViewFile,
+    this.canManage,
   });
 
   final String receiptId;
@@ -52,9 +53,15 @@ class ReceiptDetailScreen extends StatefulWidget {
   final Future<void> Function(BuildContext context, ReceiptFile file)?
   onViewFile;
 
-  /// Pushes the screen. Only who has financial access sees it
-  /// (`viewFinancialReports`); [canView] overrides it (tests). Completes
-  /// with true when the receipt was undone.
+  /// Whether the person can undo the receipt and send its recibo. Defaults
+  /// to [AuthorizationService.canManageReceipt] (financial access, or the
+  /// consultant who registered it). Test seam.
+  final bool Function(Receipt receipt)? canManage;
+
+  /// Pushes the screen. Who receives payments opens it
+  /// ([AuthorizationService.canReceivePayments]: financial access, or a
+  /// consultant, who only reads the receipts they registered); [canView]
+  /// overrides it (tests). Completes with true when the receipt was undone.
   static Future<bool> open(
     BuildContext context, {
     required String receiptId,
@@ -70,10 +77,9 @@ class ReceiptDetailScreen extends StatefulWidget {
                 ? screen
                 : AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
           }
-          return ProtectedRoute(
-            permission: PermissionType.viewFinancialReports,
-            child: screen,
-          );
+          return AuthorizationService.instance.canReceivePayments
+              ? screen
+              : AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
         },
       ),
     );
@@ -89,6 +95,10 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       widget.service ?? CustomerReceiptService();
   late Future<ReceiptDetails?> _future = _service.load(widget.receiptId);
   bool _busy = false;
+
+  bool _canManage(Receipt receipt) =>
+      widget.canManage?.call(receipt) ??
+      AuthorizationService.instance.canManageReceipt(receipt);
 
   void _reload() {
     setState(() => _future = _service.load(widget.receiptId));
@@ -221,7 +231,8 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
         builder: (context, snapshot) {
           final details = snapshot.data;
           final receipt = details?.receipt;
-          final active = receipt?.status == ReceiptStatus.active;
+          final active =
+              receipt?.status == ReceiptStatus.active && _canManage(receipt!);
           return CustomScrollView(
             slivers: [
               AppNavBar(
@@ -236,7 +247,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                         key: const Key('receiptMenu'),
                         label: context.l10n.receiptActions,
                         icon: CupertinoIcons.ellipsis,
-                        onPressed: () => _showMenu(receipt!),
+                        onPressed: () => _showMenu(receipt),
                       )
                     : null,
               ),
@@ -339,7 +350,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
               subtitle: file.fileName,
               onTap: () => _viewFile(file),
             ),
-          if (active)
+          if (active && _canManage(receipt))
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.blockMargin,

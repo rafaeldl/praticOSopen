@@ -94,9 +94,9 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 **Entradas:**
 - Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
   Com 1 OS vai direto ao Receber da OS. OS sem cliente continuam no "Qual OS?".
-- Tela do cliente: link "Receber" ao lado de "Falta receber R$ X" (mesma permissão do Receber:
-  `viewFinancialReports`, que some sem "Valores e cobrança"; o consultor vê o "Falta receber",
-  sem o link). Com 1 OS abre o Receber dela.
+- Tela do cliente: link "Receber" ao lado de "Falta receber R$ X" (mesma regra do Receber,
+  `AuthorizationService.canReceiveOnOrder`: aparece se a pessoa pode receber em pelo menos uma
+  OS em aberto do cliente; o consultor só leva as OS que ele criou). Com 1 OS abre o Receber dela.
 
 **Dados** (`CustomerReceiptService` → `buildReceiptPlan` → `TenantReceiptRepository.save`):
 - Documento `companies/{companyId}/receipts/{receiptId}` (`Receipt`): `customer` (aggr), `amount`,
@@ -125,6 +125,9 @@ para quem vê o financeiro (`viewFinancialReports`, via `ProtectedRoute`):
 - Um botão azul: **"Mandar recibo para João"** (PDF do recibo, ver `docs/PDF_GENERATION.md`).
 - Menu "…" com **"Desfazer recebimento"** (vermelho) → `CupertinoAlertDialog` de confirmação.
 - Recebimento já desfeito: "Este recebimento foi desfeito.", sem botão nem menu.
+- Quem abre: quem recebe (`AuthorizationService.canReceivePayments`). Botão e "Desfazer" só
+  para quem pode mexer nesse recebimento (`canManageReceipt`): acesso ao financeiro, ou o
+  consultor que o registrou (as regras só deixam o consultor ler os recebimentos dele).
 
 **Entradas:**
 - Receber da OS: tocar num pagamento com `receiptGroupId` abre o Recebimento (em vez da folha
@@ -150,7 +153,8 @@ para quem vê o financeiro (`viewFinancialReports`, via `ProtectedRoute`):
 
 - No Recebimento: "Mandar recibo para {nome}" (todas as OS do recebimento).
 - No Receber da OS: tocar num pagamento manual → "Mandar recibo" (só esse pagamento, uma OS,
-  sem documento `Receipt`). Só com acesso ao financeiro. Pagamentos do Asaas não têm: continuam
+  sem documento `Receipt`). Quem recebe nessa OS (`canReceiveOnOrder`; o consultor, nas dele).
+  Pagamentos do Asaas não têm: continuam
   com o "Ver comprovante" do próprio Asaas.
 - O PDF é gerado no idioma do app e aberto na folha de compartilhar do sistema (WhatsApp,
   e-mail, imprimir). Detalhes em `docs/PDF_GENERATION.md`.
@@ -294,19 +298,38 @@ O PDF exibe:
 | Admin | Sim | Sim | Sim |
 | Gerente | Sim | Sim | Sim |
 | Supervisor | Não | Não | Não |
-| Consultor | Sim* | Não | Não |
+| Consultor | Sim* | Não | Sim** |
 | Técnico | Não | Não | Não |
 
 *Consultor vê preços apenas das próprias OS
+**Só nas OS que ele criou (`createdBy`), sem dar desconto
 
-Só quem tem acesso ao financeiro recebe. No app é a permissão `viewFinancialReports` (dono,
-admin e gerente), que some sem "Valores e cobrança". Ela libera o **Receber** da OS (botão azul
-"Receber R$ X", a frase "Falta receber" e a linha "Falta receber" dos totais), o "Desconto" do
-menu "…", a tela `/payment_management` (`ProtectedRoute`) e o "Receber de {cliente}" (aba
-Financeiro e link "· Receber" na tela do cliente). O consultor vê os valores (`viewPrices`), mas
-não recebe: na OS pronta com saldo ele fica sem botão azul e o "Falta receber" vira só texto.
-A regra de `receipts` no `firestore.rules` segue isso: lê, cria e atualiza quem passa em
-`canViewFinancial` (owner, admin, manager); ninguém apaga.
+Quem recebe é decidido num lugar só: `AuthorizationService.canReceiveOnOrder(order)`
+(lógica pura em `canReceiveOnOrderFor`). Quem tem acesso ao financeiro (`viewFinancialReports`:
+dono, admin e gerente) recebe em qualquer OS; o **consultor recebe só nas OS que ele criou**
+(`order.createdBy.id`, a mesma posse do `viewOwnOrders` e da regra de update de `/orders`).
+Supervisor e técnico nunca recebem. Sem "Valores e cobrança" ninguém recebe.
+
+A regra libera o **Receber** da OS (botão azul "Receber R$ X", a frase "Falta receber" e a linha
+"Falta receber" dos totais), a tela `/payment_management` (`PaymentManagementRoute`, acesso
+negado se a pessoa não pode receber naquela OS) e o "Receber de {cliente}" (aba Financeiro e link
+"· Receber" na tela do cliente; para o consultor a lista só traz as OS dele, e com uma só vai
+direto ao Receber dela). Nas OS dos outros, o consultor vê os valores (`viewPrices`), mas o
+"Falta receber" é só texto.
+
+O **desconto** continua só com acesso ao financeiro (`viewFinancialReports`): some do menu "…"
+da OS e do Receber para o consultor. Desconto mexe no valor combinado, que é decisão de gestão.
+
+Na tela do cliente, para consultor e técnico, a consulta das OS do cliente também filtra
+`createdBy.id` (`FirestoreCustomerDirectory.watchOrdersOf`): as regras só deixam esses perfis
+ler as próprias OS, e uma consulta sem esse filtro é negada. São só filtros de igualdade, então
+não precisa de índice composto; a ordem (mais nova primeiro) é feita no app.
+
+A regra de `receipts` no `firestore.rules` (`canReceivePayments`: owner, admin, manager e
+consultant) cria com `createdBy.id` = usuário; lê e atualiza (desfazer, anexar comprovante) quem
+passa em `canViewFinancial` ou quem criou o recebimento; ninguém apaga. As regras não conferem,
+no recebimento, se cada OS da repartição é do consultor: isso vale pela regra de update de
+`/orders`, que vai no mesmo batch (OS de outro = batch inteiro negado).
 
 ### Campos Ocultos por Permissão
 

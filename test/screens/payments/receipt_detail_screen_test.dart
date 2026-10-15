@@ -84,6 +84,7 @@ void main() {
     List<ReceiptFile>? viewed,
     List<bool>? popped,
     double textScale = 1,
+    bool canManage = true,
   }) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
@@ -113,6 +114,7 @@ void main() {
                         onSend: (_, data) async => sent?.add(data),
                         onViewFile: (_, file) async => viewed?.add(file),
                         onOpenOrder: (_, __) {},
+                        canManage: (_) => canManage,
                       ),
                     ),
                   );
@@ -239,6 +241,15 @@ void main() {
       ),
     );
     expect(find.text('Este recebimento foi desfeito.'), findsOneWidget);
+    expect(find.byType(PrimaryButton), findsNothing);
+    expect(find.byKey(const Key('receiptMenu')), findsNothing);
+  });
+
+  testWidgets('who cannot manage it sees it without button or menu', (
+    tester,
+  ) async {
+    await pump(tester, service: _FakeService(_details()), canManage: false);
+    expect(find.text('OS 185 · ${brl(400)} · quitada'), findsOneWidget);
     expect(find.byType(PrimaryButton), findsNothing);
     expect(find.byKey(const Key('receiptMenu')), findsNothing);
   });

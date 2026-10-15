@@ -801,7 +801,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   bool get _canGiveDiscount =>
       _store.order?.id != null &&
       _permissions.canViewPrices() &&
-      _permissions.canReceivePayments() &&
+      _permissions.canGiveDiscount() &&
       !const ['quote', 'canceled'].contains(_store.status) &&
       _store.remainingBalance > 0;
 
@@ -1866,10 +1866,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   bool _showMoney(SegmentConfigProvider config) =>
       _permissions.canViewPrices() && config.useFinancial;
 
-  /// Receiving (and discounts) also needs financial access: a consultant
-  /// sees what is left to receive but cannot register the payment.
+  /// Receiving also needs [OrderPermissions.canReceivePayments]: financial
+  /// access, or a consultant on an order they created. Others see what is
+  /// left to receive but cannot register the payment.
   bool _canReceive(SegmentConfigProvider config) =>
-      _showMoney(config) && _permissions.canReceivePayments();
+      _showMoney(config) && _permissions.canReceivePayments(_store.order);
 
   /// "OS 186" (small, centered title).
   String _orderTitle(SegmentConfigProvider config) {
@@ -2185,7 +2186,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// The one blue button: the next step of the cycle. Receiving only with
-  /// money on and financial access; nothing once it is done and paid (or
+  /// money on and the person can receive on it; nothing once it is done and paid (or
   /// when the person cannot receive).
   (String, VoidCallback)? _nextAction(SegmentConfigProvider config) {
     final order = _store.order;

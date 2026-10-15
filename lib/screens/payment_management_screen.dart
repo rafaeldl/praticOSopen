@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_settings.dart';
@@ -43,7 +44,37 @@ import 'package:praticos/utils/asaas_billing.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
+import 'package:praticos/widgets/permission_widgets.dart'
+    show AccessDeniedScreen;
 import 'package:url_launcher/url_launcher.dart';
+
+/// `/payment_management` route: the order's Receber, or "access denied"
+/// when the person cannot receive on that order
+/// ([AuthorizationService.canReceiveOnOrder]: financial access on any order,
+/// a consultant only on the orders they created).
+class PaymentManagementRoute extends StatelessWidget {
+  const PaymentManagementRoute({super.key, this.canReceiveOn});
+
+  /// Overrides [AuthorizationService.canReceiveOnOrder] (tests).
+  final bool Function(Order? order)? canReceiveOn;
+
+  @override
+  Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final store = args?['orderStore'] as OrderStore?;
+    return Observer(
+      builder: (_) {
+        final order = store?.order;
+        final allowed =
+            canReceiveOn?.call(order) ??
+            AuthorizationService.instance.canReceiveOnOrder(order);
+        if (allowed) return const PaymentManagementScreen();
+        return AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
+      },
+    );
+  }
+}
 
 /// "Receber" screen of an order: one block answering "did the customer pay?"
 /// (amount already filled, one "Recebi R$ X" button), the received payments
@@ -63,6 +94,7 @@ class PaymentManagementScreen extends StatefulWidget {
     this.store,
     this.canAttachReceipt,
     this.canViewReceipt,
+    this.canGiveDiscount,
     this.onOpenExternalUrl,
     this.canCharge,
     this.paymentSettingsStream,
@@ -80,6 +112,11 @@ class PaymentManagementScreen extends StatefulWidget {
   final bool? canAttachReceipt;
   final bool? canViewReceipt;
 
+  /// "Dar desconto" in the "…" menu. Defaults to financial access
+  /// (`viewFinancialReports`): a consultant receives on their own orders
+  /// but does not give discounts. Test seam.
+  final bool? canGiveDiscount;
+
   /// Test seam; defaults to opening the link in the browser.
   final Future<void> Function(Uri uri)? onOpenExternalUrl;
 
@@ -91,7 +128,8 @@ class PaymentManagementScreen extends StatefulWidget {
   final Stream<List<OrderCharge>>? chargesStream;
   final AsaasApiService? chargeService;
 
-  /// Test seam; defaults to financial access (`viewFinancialReports`).
+  /// Test seam; defaults to [AuthorizationService.canReceiveOnOrder] (who
+  /// receives on this order sends its recibo).
   final bool? canSendReceipt;
 
   /// Test seams; default to the recibo share sheet and the "Recebimento"
@@ -202,9 +240,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       AuthorizationService.instance.hasPermission(PermissionType.viewPhotos);
   bool get _canSendReceipt =>
       widget.canSendReceipt ??
-      AuthorizationService.instance.hasPermission(
-        PermissionType.viewFinancialReports,
-      );
+      AuthorizationService.instance.canReceiveOnOrder(_store?.order);
+  bool get _canDiscount =>
+      widget.canGiveDiscount ??
+      AuthorizationService.instance.canViewFinancialReports;
 
   // ============================================================
   // BUILD
@@ -307,7 +346,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return Observer(
       builder: (_) {
         final status = _store?.status;
-        if (_store == null || status == 'quote' || status == 'canceled') {
+        final store = _store;
+        if (store == null || status == 'quote' || status == 'canceled') {
+          return const SizedBox.shrink();
+        }
+        // Nothing to offer: no discount, no link and no payment to undo.
+        if (!_canDiscount &&
+            _visibleOpenCharge() == null &&
+            !store.transactions.any((t) => !t.isAsaas)) {
           return const SizedBox.shrink();
         }
         return GlassBarButton(
@@ -721,13 +767,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               icon: CupertinoIcons.square_arrow_up,
             ),
           ]),
-        PullDownGroup([
-          PullDownItem(
-            value: 'discount',
-            label: context.l10n.receiveGiveDiscount,
-            icon: CupertinoIcons.tag,
-          ),
-        ]),
+        if (_canDiscount)
+          PullDownGroup([
+            PullDownItem(
+              value: 'discount',
+              label: context.l10n.receiveGiveDiscount,
+              icon: CupertinoIcons.tag,
+            ),
+          ]),
         PullDownGroup([
           if (canCancel)
             PullDownItem(

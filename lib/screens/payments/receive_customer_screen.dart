@@ -71,8 +71,10 @@ class ReceiveCustomerScreen extends StatefulWidget {
   pickOrders;
 
   /// Pushes the screen; completes with true when a payment was recorded.
-  /// Without financial access (`viewFinancialReports`) it shows "access
-  /// denied" instead. [canReceive] overrides that permission (tests).
+  /// Unless the person can receive on every one of [orders]
+  /// ([AuthorizationService.canReceiveOnOrder]: financial access, or a
+  /// consultant on their own orders) it shows "access denied" instead.
+  /// [canReceive] overrides that check (tests).
   static Future<bool> open(
     BuildContext context, {
     required List<Order> orders,
@@ -91,16 +93,15 @@ class ReceiveCustomerScreen extends StatefulWidget {
             customerName: customerName,
             canAttachReceipt: canAttachReceipt,
           );
-          // Only who has financial access receives (owner, admin, manager).
-          if (canReceive != null) {
-            return canReceive
-                ? screen
-                : AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
-          }
-          return ProtectedRoute(
-            permission: PermissionType.viewFinancialReports,
-            child: screen,
-          );
+          final allowed =
+              canReceive ??
+              (orders.isNotEmpty &&
+                  orders.every(
+                    AuthorizationService.instance.canReceiveOnOrder,
+                  ));
+          return allowed
+              ? screen
+              : AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
         },
       ),
     );

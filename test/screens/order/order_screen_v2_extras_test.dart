@@ -150,7 +150,8 @@ OrderPermissions _permissions({
   bool receive = true,
 }) => OrderPermissions(
   canViewPrices: () => prices,
-  canReceivePayments: () => receive,
+  canReceivePayments: (_) => receive,
+  canGiveDiscount: () => receive,
   availableStatuses: (_) => const ['approved', 'progress', 'done'],
   canChangeStatus: (_, _) => true,
   canDelete: (_) => true,

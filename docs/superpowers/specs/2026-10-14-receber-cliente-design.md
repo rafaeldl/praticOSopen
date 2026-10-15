@@ -32,11 +32,13 @@ Sucesso: aviso opaco (`showAppToast`) e volta; o Financeiro recarrega. Erro: avi
 ## Entradas
 
 - **Financeiro**: cliente com 2+ OS em aberto (lista e "Ver todos") abre a tela nova. Com 1 OS, Receber da OS. OS sem cliente continuam no "Qual OS?" (não são um pagador só).
-- **Tela do cliente**: "Falta receber R$ X · Receber". Mesma permissão do Receber (`viewFinancialReports`, some sem "Valores e cobrança"). Com 1 OS abre o Receber dela. O consultor vê o "Falta receber R$ X" (tem `viewPrices`), sem o "· Receber".
+- **Tela do cliente**: "Falta receber R$ X · Receber". Mesma regra do Receber (`AuthorizationService.canReceiveOnOrder`, some sem "Valores e cobrança"). O link só leva as OS em aberto em que a pessoa pode receber; com 1 abre o Receber dela. Consultor sem OS própria em aberto vê o "Falta receber R$ X" sem o "· Receber".
 
 ## Quem recebe
 
-Só quem tem acesso ao financeiro: dono, admin e gerente (`viewFinancialReports` no app, `canViewFinancial` nas regras). O consultor vê valores, mas não recebe: sem "Receber" na OS (a OS pronta com saldo fica sem botão azul e o "Falta receber" é só texto), sem "Desconto", sem "· Receber" na tela do cliente; `/payment_management` e "Receber de {cliente}" mostram acesso negado.
+Uma regra só, `AuthorizationService.canReceiveOnOrder(order)`: dono, admin e gerente (`viewFinancialReports`) recebem em qualquer OS; o consultor recebe só nas OS que ele criou (`createdBy.id`, mesma posse do `viewOwnOrders` e da regra de update de `/orders`). Supervisor e técnico nunca. Ela decide o "Receber" da OS (botão azul, frase e linha "Falta receber"), a tela `/payment_management` (acesso negado na OS de outro) e o "· Receber" da tela do cliente (para o consultor, só as OS dele). Desconto continua só com acesso ao financeiro.
+
+As "Outras OS do cliente" (OS de outros vendedores) não aparecem para o consultor: as regras não deixam ele ler essas OS. Isso vem depois por uma função no servidor, junto com a fase 3 (Asaas).
 
 ## Dados
 
@@ -48,7 +50,8 @@ Só quem tem acesso ao financeiro: dono, admin e gerente (`viewFinancialReports`
 
 ## Regras (risk:high)
 
-- `receipts`: lê, cria e atualiza só quem vê o financeiro (`canViewFinancial`: owner, admin, manager; consultor não); criação exige `status == 'active'`, `amount > 0`, `allocations` não vazia e `createdBy.id` = usuário; atualização só em `status`/`receiptFile`/`updatedAt`/`updatedBy`; `delete` nunca.
+- `receipts`: cria owner, admin, manager e consultant (`canReceivePayments`); lê e atualiza quem vê o financeiro (`canViewFinancial`) ou quem criou o recebimento; criação exige `status == 'active'`, `amount > 0`, `allocations` não vazia e `createdBy.id` = usuário; atualização só em `status`/`receiptFile`/`updatedAt`/`updatedBy`; `delete` nunca. As regras não conferem se cada OS da repartição é do consultor; isso vale pela regra de update de `/orders`, no mesmo batch (OS de outro nega o batch todo).
+- Consultor/técnico: a consulta das OS do cliente filtra também `createdBy.id` (só igualdade, sem índice composto), senão as regras negam.
 - Storage `tenants/{companyId}/receipts/{receiptId}/{arquivo}`: membro da empresa (claims), imagem ou PDF até 10 MB, só criação.
 
 ## Fase 2 (feita)
@@ -60,7 +63,7 @@ Decisões do dono: mais antiga primeiro com opção de escolher as OS; data do p
 3. **Desfazer.** Um WriteBatch: recebimento `canceled` + cada OS perde a sua transação, com a conta de `OrderPaymentMath.removeTransaction` (`paidAmount`, `paid`, `payment`). Sai o `OrderDocument` do comprovante, o arquivo fica. Sem desfazer parcial: remover a parte de um recebimento numa OS (ou "Desfazer pagamentos" com uma parte dessas) explica e oferece abrir o recebimento.
 4. **Recibo em PDF.** Cabeçalho da empresa como no PDF da OS, "RECIBO" + "Nº 3F9A1C" (6 primeiros caracteres do id), "Recebemos de João a quantia de R$ 700,00 em 14/10/2026.", tabela (OS, descrição = veículo/aparelho ou primeiro serviço, pago agora, ainda falta), total, "Falta receber R$ X dessas OS." se sobrar, "Registrado por Ana". Também para um pagamento de uma OS só ("Mandar recibo" na folha do pagamento). Asaas fica fora (continua o comprovante do Asaas).
 
-Regras: sem mudança (o desfazer só toca `status`/`updatedAt`/`updatedBy` no recebimento; as OS seguem a regra de sempre, e só owner/admin/manager chegam aqui).
+Regras: sem mudança (o desfazer só toca `status`/`updatedAt`/`updatedBy` no recebimento; as OS seguem a regra de sempre). Quem vê e mexe: acesso ao financeiro em todos; o consultor só nos recebimentos que ele registrou (`AuthorizationService.canManageReceipt`, mesma posse da regra de `receipts`). "Mandar recibo" de um pagamento de uma OS: quem recebe nessa OS (`canReceiveOnOrder`). A seção "Recebimentos" da tela do cliente fica só com acesso ao financeiro.
 
 ## Fase 3
 

@@ -10,6 +10,8 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/models/user.dart';
+import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_detail_screen.dart';
@@ -18,6 +20,7 @@ import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
@@ -532,7 +535,7 @@ void main() {
           customer: ana,
           directory: dir,
           showPrices: showPrices,
-          canReceive: true,
+          canReceiveOn: (_) => true,
         ),
         direct: true,
       );
@@ -553,7 +556,7 @@ void main() {
             },
           ),
           showPrices: true,
-          canReceive: true,
+          canReceiveOn: (_) => true,
         ),
         direct: true,
       );
@@ -611,7 +614,8 @@ void main() {
             },
           ),
           showPrices: true,
-          canReceive: true,
+          canSeeReceipts: true,
+          canReceiveOn: (_) => true,
           receipts: Stream.value([
             Receipt()
               ..id = 'r1'
@@ -651,7 +655,8 @@ void main() {
           customer: ana,
           directory: FakeDirectory(),
           showPrices: true,
-          canReceive: true,
+          canSeeReceipts: true,
+          canReceiveOn: (_) => true,
           receipts: Stream.value(const []),
         ),
         direct: true,
@@ -732,7 +737,7 @@ void main() {
             },
           ),
           showPrices: true,
-          canReceive: true,
+          canReceiveOn: (_) => true,
           onReceive: (_, open) => received.add(open),
         ),
         direct: true,
@@ -747,8 +752,18 @@ void main() {
       expect(received.single.map((o) => o.number), [5, 7]);
     });
 
-    testWidgets('consultant (prices, no financial access) sees what is owed '
-        'but no "Receber"', (tester) async {
+    // The real rule for a consultant whose uid is 'me'.
+    bool consultantReceives(Order o) =>
+        AuthorizationService.canReceiveOnOrderFor(
+          role: RolesType.consultant,
+          userId: 'me',
+          order: o,
+        );
+    Order mine(Order o) => o..createdBy = (UserAggr()..id = 'me');
+    Order theirs(Order o) => o..createdBy = (UserAggr()..id = 'other');
+
+    testWidgets('consultant with no open order of their own sees what is '
+        'owed but no "Receber"', (tester) async {
       final received = <List<Order>>[];
       final h = Harness();
       await h.pump(
@@ -757,11 +772,11 @@ void main() {
           customer: ana,
           directory: FakeDirectory(
             orders: {
-              'c1': [order(5, 'done', 80)],
+              'c1': [theirs(order(5, 'done', 80))],
             },
           ),
           showPrices: true,
-          canReceive: false,
+          canReceiveOn: consultantReceives,
           onReceive: (_, open) => received.add(open),
         ),
         direct: true,
@@ -773,6 +788,58 @@ void main() {
       expect(find.byKey(const Key('customerReceive')), findsNothing);
       expect(find.text(' · '), findsNothing);
       expect(received, isEmpty);
+    });
+
+    testWidgets('consultant "Receber" only takes their own open orders', (
+      tester,
+    ) async {
+      final received = <List<Order>>[];
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(
+            orders: {
+              'c1': [
+                mine(order(7, 'done', 100)..createdAt = DateTime(2026, 10, 9)),
+                theirs(order(5, 'done', 80)..createdAt = DateTime(2026, 10, 1)),
+                mine(order(6, 'done', 30)..createdAt = DateTime(2026, 10, 5)),
+              ],
+            },
+          ),
+          showPrices: true,
+          canReceiveOn: consultantReceives,
+          onReceive: (_, open) => received.add(open),
+        ),
+        direct: true,
+      );
+      await tester.tap(find.byKey(const Key('customerReceive')));
+      await tester.pump();
+      expect(received.single.map((o) => o.number), [6, 7]);
+    });
+
+    testWidgets('supervisor never gets "Receber"', (tester) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(
+            orders: {
+              'c1': [mine(order(5, 'done', 80))],
+            },
+          ),
+          showPrices: true,
+          canReceiveOn: (o) => AuthorizationService.canReceiveOnOrderFor(
+            role: RolesType.supervisor,
+            userId: 'me',
+            order: o,
+          ),
+        ),
+        direct: true,
+      );
+      expect(find.byKey(const Key('customerReceive')), findsNothing);
     });
 
     testWidgets('"Falta receber" is hidden when nothing is open', (

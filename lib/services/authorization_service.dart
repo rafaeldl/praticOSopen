@@ -2,6 +2,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/segment_config_service.dart';
 
@@ -25,7 +26,8 @@ import 'package:praticos/services/segment_config_service.dart';
 /// }
 /// ```
 class AuthorizationService {
-  static final AuthorizationService _instance = AuthorizationService._internal();
+  static final AuthorizationService _instance =
+      AuthorizationService._internal();
   static AuthorizationService get instance => _instance;
 
   AuthorizationService._internal() {
@@ -270,7 +272,9 @@ class AuthorizationService {
     // Supervisor pode gerenciar enquanto OS estiver ativa (não concluída/cancelada)
     if (role == RolesType.supervisor) {
       final status = order.status;
-      return status != 'done' && status != 'canceled' && hasPermission(PermissionType.editOrder);
+      return status != 'done' &&
+          status != 'canceled' &&
+          hasPermission(PermissionType.editOrder);
     }
 
     // Técnico só pode gerenciar quando status for 'quote'
@@ -312,7 +316,7 @@ class AuthorizationService {
         if (currentStatus == 'done') return false;
         // De 'quote' para 'approved' ou 'canceled'
         return currentStatus == 'quote' &&
-               (newStatus == 'approved' || newStatus == 'canceled');
+            (newStatus == 'approved' || newStatus == 'canceled');
 
       case RolesType.supervisor:
       case RolesType.technician:
@@ -320,9 +324,13 @@ class AuthorizationService {
         if (currentStatus == 'done') return false;
 
         // Se for o criador da OS, permite sair de 'quote' para 'approved' ou 'progress' (auto-aprovação)
-        final isCreator = Global.currentUser?.uid != null && order.createdBy?.id == Global.currentUser!.uid;
-        if (currentStatus == 'quote' && isCreator && (newStatus == 'approved' || newStatus == 'progress')) {
-           return true;
+        final isCreator =
+            Global.currentUser?.uid != null &&
+            order.createdBy?.id == Global.currentUser!.uid;
+        if (currentStatus == 'quote' &&
+            isCreator &&
+            (newStatus == 'approved' || newStatus == 'progress')) {
+          return true;
         }
 
         // De 'approved' para 'progress' ou 'done'
@@ -379,7 +387,9 @@ class AuthorizationService {
         if (currentStatus == 'done') return [];
 
         // Se for o criador da OS e está em orçamento, pode aprovar ou iniciar
-        final isCreator = Global.currentUser?.uid != null && order.createdBy?.id == Global.currentUser!.uid;
+        final isCreator =
+            Global.currentUser?.uid != null &&
+            order.createdBy?.id == Global.currentUser!.uid;
         if (currentStatus == 'quote' && isCreator) {
           availableStatuses.addAll(['approved', 'progress']);
         }
@@ -403,8 +413,8 @@ class AuthorizationService {
   bool get canReopenCompletedForms {
     final role = normalizedRole;
     return role == RolesType.admin ||
-           role == RolesType.manager ||
-           role == RolesType.supervisor;
+        role == RolesType.manager ||
+        role == RolesType.supervisor;
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -420,6 +430,105 @@ class AuthorizationService {
   /// Verifica se o usuário pode acessar relatórios financeiros.
   bool get canViewFinancialReports =>
       hasPermission(PermissionType.viewFinancialReports);
+
+  // ═══════════════════════════════════════════════════════════════════
+  // RECEIVING PAYMENTS
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Whether [role] (user [userId]) can register money received on [order]
+  /// ("Receber"). Financial access (`viewFinancialReports`: owner, admin,
+  /// manager) receives on any order; a consultant receives only on the
+  /// orders they created (the same ownership as `viewOwnOrders` and the
+  /// Firestore order update rule: `createdBy.id`). Supervisor and technician
+  /// never. Off for everyone when the company does not use values and
+  /// billing. Discount stays with financial access only.
+  static bool canReceiveOnOrderFor({
+    required RolesType? role,
+    required String? userId,
+    required Order? order,
+    bool useFinancial = true,
+  }) {
+    if (role == null) return false;
+    if (RolePermissions.hasPermissionInCompany(
+      role,
+      PermissionType.viewFinancialReports,
+      useFinancial: useFinancial,
+    )) {
+      return true;
+    }
+    return role == RolesType.consultant &&
+        RolePermissions.hasPermissionInCompany(
+          role,
+          PermissionType.viewPrices,
+          useFinancial: useFinancial,
+        ) &&
+        userId != null &&
+        order?.createdBy?.id == userId;
+  }
+
+  /// Whether [role] receives at all (on some order): financial access, or a
+  /// consultant (on their own orders). Used before the orders are known.
+  static bool canReceivePaymentsFor({
+    required RolesType? role,
+    bool useFinancial = true,
+  }) {
+    if (role == null) return false;
+    if (RolePermissions.hasPermissionInCompany(
+      role,
+      PermissionType.viewFinancialReports,
+      useFinancial: useFinancial,
+    )) {
+      return true;
+    }
+    return role == RolesType.consultant &&
+        RolePermissions.hasPermissionInCompany(
+          role,
+          PermissionType.viewPrices,
+          useFinancial: useFinancial,
+        );
+  }
+
+  /// [canReceiveOnOrderFor] for the current user.
+  bool canReceiveOnOrder(Order? order) => canReceiveOnOrderFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    order: order,
+    useFinancial: _useFinancial,
+  );
+
+  /// [canReceivePaymentsFor] for the current user.
+  bool get canReceivePayments =>
+      canReceivePaymentsFor(role: normalizedRole, useFinancial: _useFinancial);
+
+  /// Whether [role] (user [userId]) can see, undo and send the recibo of
+  /// [receipt]: financial access on any receipt, a consultant only on the
+  /// ones they registered (`createdBy.id`, as in the Firestore rules).
+  static bool canManageReceiptFor({
+    required RolesType? role,
+    required String? userId,
+    required Receipt? receipt,
+    bool useFinancial = true,
+  }) {
+    if (role == null) return false;
+    if (RolePermissions.hasPermissionInCompany(
+      role,
+      PermissionType.viewFinancialReports,
+      useFinancial: useFinancial,
+    )) {
+      return true;
+    }
+    return canReceivePaymentsFor(role: role, useFinancial: useFinancial) &&
+        userId != null &&
+        receipt?.createdBy?.id == userId;
+  }
+
+  /// [canManageReceiptFor] for the current user.
+  bool canManageReceipt(Receipt? receipt) => canManageReceiptFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    receipt: receipt,
+    useFinancial: _useFinancial,
+  );
 
   /// Verifica se o usuário pode acessar relatórios operacionais.
   bool get canViewOperationalReports =>

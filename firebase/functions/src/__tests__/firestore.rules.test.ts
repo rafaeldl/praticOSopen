@@ -724,15 +724,30 @@ describeEmulator('firestore.rules', () => {
           paidAmount: 0,
           createdBy: { id: 'admin1', name: 'Admin' },
         });
+        // Orders created by the consultant cons1 (theirs to receive on).
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/c_o1'), {
+          number: 11,
+          status: 'done',
+          total: 200,
+          paidAmount: 0,
+          createdBy: { id: 'cons1', name: 'Cons' },
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/c_o2'), {
+          number: 12,
+          status: 'done',
+          total: 100,
+          paidAmount: 0,
+          createdBy: { id: 'cons1', name: 'Cons' },
+        });
       });
     });
 
-    it.each(['owner', 'admin', 'manager'])('can be created by a %s', async (role) => {
+    it.each(['owner', 'admin', 'manager', 'consultant'])('can be created by a %s', async (role) => {
       const uid = `u_${role}`;
       await rut.assertSucceeds(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
     });
 
-    it.each(['consultant', 'supervisor', 'technician', 'viewer'])('cannot be created by a %s', async (role) => {
+    it.each(['supervisor', 'technician', 'viewer'])('cannot be created by a %s', async (role) => {
       const uid = `u_${role}`;
       await rut.assertFails(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
     });
@@ -762,15 +777,20 @@ describeEmulator('firestore.rules', () => {
       }
     });
 
-    it('is not readable by a consultant, not even the one who created it', async () => {
+    it('is readable by the consultant who created it, and only those', async () => {
       await env.withSecurityRulesDisabled(async (ctx) => {
         await fs.setDoc(fs.doc(ctx.firestore(), 'companies/c1/receipts/byCons'), receipt('cons1'));
       });
-      await rut.assertFails(
-        fs.getDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/byCons')),
+      const cons = asUser('cons1', { c1: 'consultant' });
+      await rut.assertSucceeds(fs.getDoc(fs.doc(cons, 'companies/c1/receipts/byCons')));
+      await rut.assertSucceeds(
+        fs.getDocs(fs.query(fs.collection(cons, 'companies/c1/receipts'), fs.where('createdBy.id', '==', 'cons1'))),
       );
+      // Unfiltered list would include others' receipts.
+      await rut.assertFails(fs.getDocs(fs.collection(cons, 'companies/c1/receipts')));
+      // Another consultant does not see it.
       await rut.assertFails(
-        fs.getDocs(fs.collection(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts')),
+        fs.getDoc(fs.doc(asUser('cons2', { c1: 'consultant' }), 'companies/c1/receipts/byCons')),
       );
     });
 
@@ -797,7 +817,21 @@ describeEmulator('firestore.rules', () => {
       await rut.assertFails(fs.updateDoc(ref, { amount: 10 }));
       await rut.assertFails(fs.updateDoc(ref, { allocations: [] }));
       await rut.assertFails(fs.updateDoc(ref, { status: 'deleted' }));
-      for (const role of ['consultant', 'technician']) {
+      // The consultant who created a receipt can undo it; others cannot.
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.setDoc(fs.doc(ctx.firestore(), 'companies/c1/receipts/byCons'), receipt('cons1'));
+      });
+      await rut.assertSucceeds(
+        fs.updateDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/byCons'), {
+          status: 'canceled',
+        }),
+      );
+      await rut.assertFails(
+        fs.updateDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/byCons'), {
+          amount: 1,
+        }),
+      );
+      for (const role of ['consultant', 'supervisor', 'technician']) {
         await rut.assertFails(
           fs.updateDoc(fs.doc(asUser(`u_${role}`, { c1: role }), 'companies/c1/receipts/existing'), {
             status: 'canceled',
@@ -828,13 +862,75 @@ describeEmulator('firestore.rules', () => {
       });
       await rut.assertSucceeds(batch.commit());
 
-      // A consultant cannot receive (no financial access): the whole batch
-      // fails, order payments included.
+      // A consultant receives on an order of someone else: the order
+      // update is denied, so the whole batch fails (receipt included).
       const cons = asUser('cons1', { c1: 'consultant' });
       const failing = fs.writeBatch(cons);
       failing.set(fs.doc(cons, 'companies/c1/receipts/r2'), receipt('cons1'));
       failing.update(fs.doc(cons, 'companies/c1/orders/o2'), { paidAmount: fs.increment(10) });
       await rut.assertFails(failing.commit());
+    });
+
+    it('a consultant receives on their own orders (receipt + payments in one batch)', async () => {
+      const cons = asUser('cons1', { c1: 'consultant' });
+      const batch = fs.writeBatch(cons);
+      batch.set(
+        fs.doc(cons, 'companies/c1/receipts/rc'),
+        receipt('cons1', {
+          amount: 300,
+          allocations: [
+            { orderId: 'c_o1', orderNumber: 11, amount: 200, transactionId: 'rc_0' },
+            { orderId: 'c_o2', orderNumber: 12, amount: 100, transactionId: 'rc_1' },
+          ],
+        }),
+      );
+      for (const [id, amount, tx] of [
+        ['c_o1', 200, 'rc_0'],
+        ['c_o2', 100, 'rc_1'],
+      ] as const) {
+        batch.update(fs.doc(cons, `companies/c1/orders/${id}`), {
+          transactions: fs.arrayUnion({ id: tx, type: 'payment', amount, receiptGroupId: 'rc' }),
+          paidAmount: fs.increment(amount),
+          paid: true,
+          payment: 'paid',
+        });
+      }
+      await rut.assertSucceeds(batch.commit());
+    });
+
+    it("a consultant pays their own order but not someone else's (single-OS Receber)", async () => {
+      const cons = asUser('cons1', { c1: 'consultant' });
+      const payment = (id: string) => ({
+        transactions: fs.arrayUnion({ id, type: 'payment', amount: 50 }),
+        paidAmount: fs.increment(50),
+      });
+      await rut.assertSucceeds(fs.updateDoc(fs.doc(cons, 'companies/c1/orders/c_o1'), payment('t1')));
+      await rut.assertFails(fs.updateDoc(fs.doc(cons, 'companies/c1/orders/o2'), payment('t2')));
+    });
+
+    it.each(['supervisor', 'technician'])('a %s cannot create a receipt for any order', async (role) => {
+      const uid = `u_${role}`;
+      await rut.assertFails(
+        fs.setDoc(
+          fs.doc(asUser(uid, { c1: role }), 'companies/c1/receipts/rx'),
+          receipt(uid, {
+            allocations: [{ orderId: 'c_o1', orderNumber: 11, amount: 200, transactionId: 'rx_0' }],
+          }),
+        ),
+      );
+    });
+
+    it("a consultant reads a customer's orders only with the createdBy filter", async () => {
+      // Mirrors FirestoreCustomerDirectory.watchOrdersOf: for a consultant the
+      // customer orders query also filters createdBy.id, or it is denied.
+      const cons = asUser('cons1', { c1: 'consultant' });
+      const orders = fs.collection(cons, 'companies/c1/orders');
+      await rut.assertFails(fs.getDocs(fs.query(orders, fs.where('customer.id', '==', 'cu1'))));
+      await rut.assertSucceeds(
+        fs.getDocs(
+          fs.query(orders, fs.where('customer.id', '==', 'cu1'), fs.where('createdBy.id', '==', 'cons1')),
+        ),
+      );
     });
   });
 

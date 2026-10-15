@@ -67,6 +67,15 @@ service cloud.firestore {
       );
     }
 
+    // Pode receber pagamentos: quem tem acesso ao financeiro (owner, admin,
+    // manager) em qualquer OS, e o consultor nas OS que criou. No app:
+    // AuthorizationService.canReceiveOnOrder. A escrita nas OS segue a regra
+    // de update de /orders (consultor só atualiza as próprias).
+    function canReceivePayments(companyId) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in ['owner', 'admin', 'manager', 'consultant'];
+    }
+
     // Cobranças Asaas: dono, admin e gerente (mesmo público da permissão chargeOrder)
     function canViewCharges(companyId) {
       return canViewFinancial(companyId) || isCompanyOwner(companyId);
@@ -464,11 +473,15 @@ service cloud.firestore {
       // status 'canceled'. Valor e repartição não mudam depois de criados.
       // ──────────────────────────────────────────────────────────────────────
       match /receipts/{receiptId} {
-        // Só quem tem acesso ao financeiro (owner, admin, manager; no app,
-        // viewFinancialReports) recebe pagamentos.
-        allow read: if canViewFinancial(companyId);
+        // Quem tem acesso ao financeiro (owner, admin, manager) vê todos; o
+        // consultor só os que ele mesmo registrou. Não dá para conferir aqui,
+        // sem custo, que cada OS da repartição é dele: isso vale pela regra
+        // de update de /orders, gravada no mesmo batch.
+        allow read: if canViewFinancial(companyId)
+          || (canReceivePayments(companyId)
+              && resource.data.createdBy.id == request.auth.uid);
 
-        allow create: if canViewFinancial(companyId)
+        allow create: if canReceivePayments(companyId)
           && request.resource.data.createdBy.id == request.auth.uid
           && request.resource.data.status == 'active'
           && request.resource.data.amount is number
@@ -476,7 +489,9 @@ service cloud.firestore {
           && request.resource.data.allocations is list
           && request.resource.data.allocations.size() > 0;
 
-        allow update: if canViewFinancial(companyId)
+        allow update: if (canViewFinancial(companyId)
+              || (canReceivePayments(companyId)
+                  && resource.data.createdBy.id == request.auth.uid))
           && request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly(['status', 'receiptFile', 'updatedAt', 'updatedBy'])
           && request.resource.data.status in ['active', 'canceled'];
