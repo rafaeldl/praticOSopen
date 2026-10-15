@@ -4172,6 +4172,40 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderAssistantChanged => 'Mudei a OS como você pediu. Confira.';
 
   @override
+  String orderAssistantWhichCustomer(String name) {
+    return 'Qual $name?';
+  }
+
+  @override
+  String orderAssistantRegisterNewCustomer(String name) {
+    return 'Cadastrar $name como cliente novo';
+  }
+
+  @override
+  String get orderAssistantOtherCustomer => 'Outro cliente';
+
+  @override
+  String get orderAssistantNewCustomer => 'novo';
+
+  @override
+  String orderAssistantWhichDevice(String name) {
+    return 'Qual $name?';
+  }
+
+  @override
+  String orderAssistantRegisterNewDevice(String name) {
+    return 'Cadastrar $name';
+  }
+
+  @override
+  String orderAssistantOtherDevice(String label) {
+    return 'Outro $label';
+  }
+
+  @override
+  String get orderAssistantNewDevice => 'novo';
+
+  @override
   String get pickerCustomerTitle => 'Qual cliente?';
 
   @override

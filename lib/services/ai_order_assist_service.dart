@@ -218,9 +218,13 @@ class AiOrderDraft {
     this.transcript,
     this.customer,
     this.customerGuess,
+    this.customerGuessPhone,
+    this.customerOptions = const [],
     this.device,
     this.deviceGuessName,
     this.deviceGuessSerial,
+    this.deviceGuessManufacturer,
+    this.deviceOptions = const [],
     this.items = const [],
     this.changes = const [],
     this.notes,
@@ -234,9 +238,18 @@ class AiOrderDraft {
 
   /// Name heard/read when no registered customer matched.
   final String? customerGuess;
+  final String? customerGuessPhone;
+
+  /// Registered customers close to [customerGuess] ("Juliene" → Juliana
+  /// Souza, Juliana Lima): the app asks which one, or registers a new one.
+  final List<AiCustomerHit> customerOptions;
   final AiDeviceHit? device;
   final String? deviceGuessName;
   final String? deviceGuessSerial;
+  final String? deviceGuessManufacturer;
+
+  /// Registered vehicles close to the guess (same model, other plate).
+  final List<AiDeviceHit> deviceOptions;
   final List<AiDraftItem> items;
 
   /// Changes to lines already in the order (only when the order was sent).
@@ -265,9 +278,23 @@ class AiOrderDraft {
           ? null
           : AiCustomerHit.fromJson(customerMatch),
       customerGuess: map(customer?['guess'])?['name'] as String?,
+      customerGuessPhone: map(customer?['guess'])?['phone'] as String?,
+      customerOptions: customerMatch != null
+          ? const []
+          : [
+              for (final a in (customer?['alternatives'] as List? ?? const []))
+                if (a is Map) AiCustomerHit.fromJson(Map<String, dynamic>.from(a)),
+            ],
       device: deviceMatch == null ? null : AiDeviceHit.fromJson(deviceMatch),
       deviceGuessName: deviceGuess?['name'] as String?,
       deviceGuessSerial: deviceGuess?['serial'] as String?,
+      deviceGuessManufacturer: deviceGuess?['manufacturer'] as String?,
+      deviceOptions: deviceMatch != null
+          ? const []
+          : [
+              for (final a in (device?['alternatives'] as List? ?? const []))
+                if (a is Map) AiDeviceHit.fromJson(Map<String, dynamic>.from(a)),
+            ],
       items: [
         for (final i in (json['items'] as List? ?? const []))
           AiDraftItem.fromJson(Map<String, dynamic>.from(i as Map)),

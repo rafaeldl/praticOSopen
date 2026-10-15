@@ -4,15 +4,53 @@
  */
 
 import { getTenantCollection } from '../firestore.service';
-import { searchCustomers } from '../customer.service';
+import { findCustomerByPhone, searchCustomers } from '../customer.service';
 import { findDeviceBySerial, searchDevices } from '../device.service';
 import { getAiSettings, getAiUsage, releaseAiRequest, reserveAiRequest } from './ai-quota.service';
 import { ClaudeClient } from './claude.client';
 import { VertexGeminiClient } from './gemini.client';
 import { LlmRouter } from './llm.client';
-import type { CatalogEntry, OrderAssistDeps } from './order-assist.service';
+import { plateLookups } from './fuzzy-match';
+import type { CatalogEntry, CustomerHit, DeviceHit, OrderAssistDeps } from './order-assist.service';
 
 const CATALOG_LIMIT = 300;
+/**
+ * Customers/vehicles compared in memory for "Juliene" → Juliana. Almost every
+ * company fits; above this, exact phone/plate/word lookups still find them.
+ */
+const PEOPLE_LIMIT = 2000;
+
+function text(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+/** Unique by id, keeping the first. */
+function uniq<T extends { id: string }>(lists: (T | null | undefined)[][]): T[] {
+  const seen = new Map<string, T>();
+  for (const list of lists) for (const e of list) if (e && !seen.has(e.id)) seen.set(e.id, e);
+  return [...seen.values()];
+}
+
+async function loadCustomers(companyId: string): Promise<CustomerHit[]> {
+  const snap = await getTenantCollection(companyId, 'customers').select('name', 'phone').limit(PEOPLE_LIMIT).get();
+  return snap.docs.flatMap((doc) => {
+    const name = text(doc.get('name'));
+    return name ? [{ id: doc.id, name, phone: text(doc.get('phone')) }] : [];
+  });
+}
+
+async function loadDevices(companyId: string): Promise<DeviceHit[]> {
+  const snap = await getTenantCollection(companyId, 'devices')
+    .select('name', 'serial', 'manufacturer')
+    .limit(PEOPLE_LIMIT)
+    .get();
+  return snap.docs.flatMap((doc) => {
+    const name = text(doc.get('name'));
+    return name
+      ? [{ id: doc.id, name, serial: text(doc.get('serial')), manufacturer: text(doc.get('manufacturer')) }]
+      : [];
+  });
+}
 
 async function loadEntries(companyId: string, collection: 'services' | 'products'): Promise<CatalogEntry[]> {
   const snap = await getTenantCollection(companyId, collection).orderBy('name').limit(CATALOG_LIMIT).get();
@@ -45,18 +83,32 @@ export function defaultOrderAssistDeps(): OrderAssistDeps {
       ]);
       return { services, products };
     },
-    findCustomers: async (companyId, name) =>
-      (await searchCustomers(companyId, name, 5)).map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? undefined })),
-    findDeviceBySerial: async (companyId, serial) => {
-      const d = await findDeviceBySerial(companyId, serial);
-      return d ? { id: d.id, name: d.name, serial: d.serial ?? undefined, manufacturer: d.manufacturer } : null;
+    findCustomers: async (companyId, guess) => {
+      const [all, byPhone, byName] = await Promise.all([
+        loadCustomers(companyId),
+        guess.phone ? findCustomerByPhone(companyId, guess.phone) : null,
+        guess.name ? searchCustomers(companyId, guess.name, 5) : [],
+      ]);
+      const hit = (c: { id: string; name: string; phone?: string | null }): CustomerHit => ({
+        id: c.id,
+        name: c.name,
+        phone: c.phone ?? undefined,
+      });
+      return uniq([all, byPhone ? [hit(byPhone)] : [], byName.map(hit)]);
     },
-    findDevices: async (companyId, name) =>
-      (await searchDevices(companyId, name, 5)).map((d) => ({
+    findDevices: async (companyId, guess) => {
+      const hit = (d: { id: string; name: string; serial?: string | null; manufacturer?: string }): DeviceHit => ({
         id: d.id,
         name: d.name,
         serial: d.serial ?? undefined,
         manufacturer: d.manufacturer,
-      })),
+      });
+      const [all, byPlate, byName] = await Promise.all([
+        loadDevices(companyId),
+        guess.serial ? Promise.all(plateLookups(guess.serial).map((v) => findDeviceBySerial(companyId, v))) : [],
+        guess.name ? searchDevices(companyId, guess.name, 5) : [],
+      ]);
+      return uniq([all, byPlate.flatMap((d) => (d ? [hit(d)] : [])), byName.map(hit)]);
+    },
   };
 }
