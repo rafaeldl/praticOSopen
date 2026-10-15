@@ -215,6 +215,12 @@ describe('runOrderAssist', () => {
     expect(request.responseSchema).toBe(LLM_RESPONSE_SCHEMA);
   });
 
+  it('passes the company provider to the model client', async () => {
+    const d = deps({ getSettings: jest.fn().mockResolvedValue({ enabled: true, provider: 'claude' }) }, answer);
+    await runOrderAssist('c1', { text: 'x' }, d);
+    expect(d.llm.generateJson.mock.calls[0][0].provider).toBe('claude');
+  });
+
   it('never sends customer names to the model', async () => {
     const d = deps({ findCustomers: jest.fn().mockResolvedValue([{ id: 'cu9', name: 'Cliente Secreto' }]) }, answer);
     await runOrderAssist('c1', { text: 'x' }, d);

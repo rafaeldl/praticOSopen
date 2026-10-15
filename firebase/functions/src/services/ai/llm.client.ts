@@ -1,20 +1,26 @@
 /**
- * LLM client used by the AI assistant (docs/AI_ORDER_ASSIST.md).
+ * Provider-neutral LLM client used by the AI assistant (docs/AI_ORDER_ASSIST.md).
  *
- * Production calls Gemini on Vertex AI with the function's own service account
- * (Application Default Credentials): there is no API key to store. The project
- * needs the Vertex AI API enabled and the runtime service account with
- * `roles/aiplatform.user` (needs-human, see the doc).
+ * Callers build one [LlmRequest] (system prompt, user text, photos/audio and a
+ * standard JSON Schema for the answer) and get back the raw JSON text. Each
+ * provider adapts the request to its own API:
+ * - `gemini` → [VertexGeminiClient] (gemini.client.ts), Vertex AI in São Paulo
+ * - `claude` → [ClaudeClient] (claude.client.ts), Anthropic API
  *
- * Model and region come from environment variables, so they can change without
- * a new app release:
- * - AI_GEMINI_MODEL   (default gemini-2.5-flash)
- * - AI_VERTEX_LOCATION (default southamerica-east1, São Paulo — dados ficam no Brasil)
+ * [LlmRouter] picks the provider per request: `request.provider` (from
+ * `companies/{cid}/settings/ai.provider`), else `AI_PROVIDER`, else `gemini`.
+ * A provider that can't read a part (Claude has no audio input) hands the
+ * request to the default provider instead of failing.
  *
- * Tests inject a fake [LlmClient]; nothing here runs in unit tests.
+ * Tests inject a fake [LlmClient]; the real clients never run in unit tests.
  */
 
-import * as admin from 'firebase-admin';
+export const LLM_PROVIDERS = ['gemini', 'claude'] as const;
+export type LlmProvider = (typeof LLM_PROVIDERS)[number];
+
+export function isLlmProvider(value: unknown): value is LlmProvider {
+  return typeof value === 'string' && (LLM_PROVIDERS as readonly string[]).includes(value);
+}
 
 export interface LlmInlinePart {
   mimeType: string;
@@ -22,17 +28,31 @@ export interface LlmInlinePart {
   data: string;
 }
 
+/**
+ * JSON Schema subset understood by every provider: object/array/string/number,
+ * `enum`, `required`, `additionalProperties: false` and nullable as
+ * `type: ['number', 'null']`. No numeric/string constraints.
+ */
+export type JsonSchema = Record<string, unknown>;
+
 export interface LlmRequest {
   systemPrompt: string;
   userText: string;
   media: LlmInlinePart[];
-  /** OpenAPI-subset schema the answer must follow (Gemini responseSchema). */
-  responseSchema: Record<string, unknown>;
+  /** Schema the answer must follow. */
+  responseSchema: JsonSchema;
+  /** Preferred provider; the router falls back to the default when unset. */
+  provider?: LlmProvider;
 }
 
 export interface LlmClient {
   /** Returns the raw JSON text produced by the model. */
   generateJson(request: LlmRequest): Promise<string>;
+}
+
+/** A concrete provider: knows which media types it can read. */
+export interface LlmProviderClient extends LlmClient {
+  supportsMedia(mimeType: string): boolean;
 }
 
 export class LlmUnavailableError extends Error {
@@ -42,79 +62,29 @@ export class LlmUnavailableError extends Error {
   }
 }
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
-const DEFAULT_LOCATION = 'southamerica-east1';
-const TIMEOUT_MS = 45_000;
-
-function projectId(): string | undefined {
-  return process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || admin.app().options.projectId;
+export function defaultProvider(env: NodeJS.ProcessEnv = process.env): LlmProvider {
+  return isLlmProvider(env.AI_PROVIDER) ? env.AI_PROVIDER : 'gemini';
 }
 
-export class VertexGeminiClient implements LlmClient {
+export class LlmRouter implements LlmClient {
   constructor(
-    private readonly model = process.env.AI_GEMINI_MODEL || DEFAULT_MODEL,
-    private readonly location = process.env.AI_VERTEX_LOCATION || DEFAULT_LOCATION,
+    private readonly clients: Partial<Record<LlmProvider, () => LlmProviderClient>>,
+    private readonly fallback: LlmProvider = defaultProvider(),
   ) {}
 
+  /** Provider that will answer [request] (exposed for tests and logs). */
+  resolve(request: LlmRequest): LlmProvider {
+    const wanted = request.provider ?? this.fallback;
+    const client = this.clients[wanted]?.();
+    if (!client) return this.fallback;
+    const readsAll = request.media.every((m) => client.supportsMedia(m.mimeType));
+    return readsAll ? wanted : this.fallback;
+  }
+
   async generateJson(request: LlmRequest): Promise<string> {
-    const project = projectId();
-    if (!project) throw new LlmUnavailableError('missing project id');
-
-    let token: string;
-    try {
-      token = (await admin.credential.applicationDefault().getAccessToken()).access_token;
-    } catch {
-      throw new LlmUnavailableError('no credentials for Vertex AI');
-    }
-
-    const host = this.location === 'global' ? 'aiplatform.googleapis.com' : `${this.location}-aiplatform.googleapis.com`;
-    const url =
-      `https://${host}/v1/projects/${project}/locations/${this.location}` +
-      `/publishers/google/models/${this.model}:generateContent`;
-
-    const body = {
-      systemInstruction: { parts: [{ text: request.systemPrompt }] },
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: request.userText },
-            ...request.media.map((m) => ({ inlineData: { mimeType: m.mimeType, data: m.data } })),
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.1,
-        responseMimeType: 'application/json',
-        responseSchema: request.responseSchema,
-      },
-    };
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
-    } catch {
-      throw new LlmUnavailableError('model request failed');
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if (!response.ok) {
-      // Never log the body: it may echo the user's audio transcript.
-      throw new LlmUnavailableError(`model returned HTTP ${response.status}`);
-    }
-    const json = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-    const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
-    if (!text) throw new LlmUnavailableError('empty model answer');
-    return text;
+    const provider = this.resolve(request);
+    const client = this.clients[provider]?.();
+    if (!client) throw new LlmUnavailableError(`provider ${provider} not configured`);
+    return client.generateJson(request);
   }
 }

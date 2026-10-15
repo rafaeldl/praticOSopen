@@ -280,6 +280,7 @@ void main() {
     bool prices = true,
     bool receive = true,
   }) => OrderScreenV2(
+    showAssistant: false,
     store: store,
     permissions: _permissions(edit: edit, prices: prices, receive: receive),
     actions: actions ?? FakeActions(),

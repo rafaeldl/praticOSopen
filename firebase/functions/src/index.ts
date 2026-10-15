@@ -478,6 +478,13 @@ const mcpLimiter = rateLimit({
 // per share token for the Nuxt SSR, which reaches the function from one shared
 // IP for every visitor — see public-rate-limit.utils.ts
 const ssrApiSecret = defineSecret('SSR_API_SECRET');
+
+/**
+ * Anthropic API key for the AI assistant when a company uses provider 'claude'
+ * (docs/AI_ORDER_ASSIST.md). Must exist before deploy:
+ *   firebase functions:secrets:set ANTHROPIC_API_KEY
+ */
+const anthropicApiKey = defineSecret('ANTHROPIC_API_KEY');
 const publicOrdersLimiters = createPublicOrdersLimiters(() => ssrApiSecret.value());
 
 // Health Check
@@ -566,7 +573,7 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
-    secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey],
+    secrets: [ssrApiSecret, asaasCredentialsKey, revenuecatWebhookAuth, revenuecatSecretApiKey, anthropicApiKey],
   },
   app
 );

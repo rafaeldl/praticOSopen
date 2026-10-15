@@ -4,6 +4,58 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
 
 void main() {
+  group('parseAiStatusResponse', () {
+    test('only 200 with data.enabled == true is on', () {
+      expect(
+        parseAiStatusResponse(
+          200,
+          jsonEncode({
+            'success': true,
+            'data': {
+              'enabled': true,
+              'usage': {'used': 3, 'limit': 150},
+            },
+          }),
+        ),
+        isTrue,
+      );
+      expect(
+        parseAiStatusResponse(
+          200,
+          jsonEncode({
+            'data': {'enabled': false},
+          }),
+        ),
+        isFalse,
+      );
+      expect(
+        parseAiStatusResponse(
+          200,
+          jsonEncode({
+            'data': {'enabled': 'yes'},
+          }),
+        ),
+        isFalse,
+      );
+      expect(parseAiStatusResponse(200, 'not json'), isFalse);
+      expect(
+        parseAiStatusResponse(
+          403,
+          jsonEncode({
+            'data': {'enabled': true},
+          }),
+        ),
+        isFalse,
+      );
+      expect(parseAiStatusResponse(404, ''), isFalse);
+    });
+
+    test('isEnabled never throws: no signed-in user means off', () async {
+      AiOrderAssistService.clearStatusCache();
+      expect(await AiOrderAssistService().isEnabled(), isFalse);
+    });
+  });
+
   group('parseAiOrderAssistResponse', () {
     test('reads the draft', () {
       final draft = parseAiOrderAssistResponse(
