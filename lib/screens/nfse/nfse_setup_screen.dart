@@ -145,6 +145,49 @@ class _NfseSetupScreenState extends State<NfseSetupScreen> {
     );
   }
 
+  Future<void> _pickAutoIssue() async {
+    final current = _setup?.service;
+    if (current == null || _loading) return;
+    final l10n = context.l10n;
+    final picked = await pickOne<NfseAutoIssue>(
+      context,
+      title: l10n.nfseAutoIssueQuestion,
+      previousTitle: l10n.nfseRowTitle,
+      selected: current.autoIssue ?? NfseAutoIssue.manual,
+      options: [
+        for (final option in NfseAutoIssue.values)
+          PickerItem(
+            key: Key('nfseAutoIssue_${option.name}'),
+            value: option,
+            title: nfseAutoIssueLabel(l10n, option),
+            subtitle: nfseAutoIssueHint(l10n, option),
+          ),
+      ],
+    );
+    if (picked == null || picked == current.autoIssue || !mounted) return;
+    setState(() => _loading = true);
+    String? failure;
+    try {
+      final saved = await _service.saveNfseService(
+        current.copyWith(autoIssue: picked),
+      );
+      if (mounted) setState(() => _setup = saved);
+    } on AsaasApiException catch (e) {
+      if (mounted) failure = asaasErrorText(context.l10n, e, nota: true);
+    } catch (_) {
+      if (mounted) failure = context.l10n.asaasErrorGeneric;
+    }
+    if (!mounted) return;
+    setState(() => _loading = false);
+    if (failure != null) {
+      showAppToast(
+        context,
+        failure,
+        icon: CupertinoIcons.exclamationmark_circle,
+      );
+    }
+  }
+
   Future<void> _openPanel() async {
     final url = widget.sandbox ? asaasSandboxNfsePanelUrl : asaasNfsePanelUrl;
     final custom = widget.openUrl;
@@ -240,6 +283,16 @@ class _NfseSetupScreenState extends State<NfseSetupScreen> {
                   : null,
               onTap: _openService,
             ),
+            if (setup.service != null)
+              AppListRow(
+                key: const Key('nfseSetupAutoIssue'),
+                title: l10n.nfseAutoIssueRow,
+                subtitle: nfseAutoIssueLabel(
+                  l10n,
+                  setup.service!.autoIssue ?? NfseAutoIssue.manual,
+                ),
+                onTap: _loading ? null : _pickAutoIssue,
+              ),
           ],
         ),
         SectionLabel(l10n.nfseSetupCityAccess),
@@ -284,6 +337,29 @@ class _NfseSetupScreenState extends State<NfseSetupScreen> {
         ),
       ],
     );
+  }
+}
+
+/// "Só quando eu pedir", "Quando a OS for paga", "Quando a OS for concluída".
+String nfseAutoIssueLabel(AppLocalizations l10n, NfseAutoIssue option) {
+  switch (option) {
+    case NfseAutoIssue.manual:
+      return l10n.nfseAutoIssueManual;
+    case NfseAutoIssue.paid:
+      return l10n.nfseAutoIssuePaid;
+    case NfseAutoIssue.completed:
+      return l10n.nfseAutoIssueCompleted;
+  }
+}
+
+String nfseAutoIssueHint(AppLocalizations l10n, NfseAutoIssue option) {
+  switch (option) {
+    case NfseAutoIssue.manual:
+      return l10n.nfseAutoIssueManualHint;
+    case NfseAutoIssue.paid:
+      return l10n.nfseAutoIssuePaidHint;
+    case NfseAutoIssue.completed:
+      return l10n.nfseAutoIssueCompletedHint;
   }
 }
 

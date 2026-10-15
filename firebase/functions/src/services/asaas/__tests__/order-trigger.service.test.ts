@@ -1,12 +1,14 @@
 jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 jest.mock('../charge.service', () => ({ handleOrderStatusChange: jest.fn(async () => undefined) }));
 jest.mock('../outside-payment.service', () => ({ reconcileOutsidePayments: jest.fn(async () => undefined) }));
+jest.mock('../invoice.service', () => ({ autoIssueInvoice: jest.fn(async () => undefined) }));
 
 import { fakeDb, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { handleOrderStatusChange } from '../charge.service';
 import { applyAsaasPayment } from '../order-payment.service';
 import { handleOrderUpdatedAsaas } from '../order-trigger.service';
 import { reconcileOutsidePayments } from '../outside-payment.service';
+import { autoIssueInvoice } from '../invoice.service';
 
 const reconcile = reconcileOutsidePayments as jest.Mock;
 
@@ -14,6 +16,7 @@ const ORDER_PATH = 'companies/c1/orders/o1';
 const CHARGE_PATH = `${ORDER_PATH}/charges/ch1`;
 const SETTINGS_PATH = 'companies/c1/settings/payments';
 const handleStatus = handleOrderStatusChange as jest.Mock;
+const autoIssue = autoIssueInvoice as jest.Mock;
 
 async function seedPaidOrderThenOverwrite() {
   seed(ORDER_PATH, { total: 1000, paidAmount: 0, paid: false, payment: 'unpaid', transactions: [], status: 'approved' });
@@ -36,6 +39,7 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     resetFakeDb();
     handleStatus.mockClear();
     reconcile.mockClear();
+    autoIssue.mockClear();
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
@@ -45,13 +49,30 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     const collection = jest.spyOn(fakeDb, 'collection');
     const transaction = jest.spyOn(fakeDb, 'runTransaction');
     const before = { status: 'approved', total: 100, transactions: [] };
-    const after = { status: 'done', total: 100, transactions: [] };
+    const after = { status: 'progress', total: 100, transactions: [] };
 
     await handleOrderUpdatedAsaas('c1', 'o1', before, after);
 
     expect(collection).not.toHaveBeenCalled();
     expect(transaction).not.toHaveBeenCalled();
     expect(handleStatus).not.toHaveBeenCalled();
+  });
+
+  it('OS ficou paga: tenta a nota automática do momento "paga"', async () => {
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', payment: 'unpaid' }, { status: 'done', payment: 'paid' });
+    expect(autoIssue).toHaveBeenCalledTimes(1);
+    expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'paid');
+  });
+
+  it('OS foi concluída: tenta a nota automática do momento "concluída"', async () => {
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress' }, { status: 'done' });
+    expect(autoIssue).toHaveBeenCalledTimes(1);
+    expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'completed');
+  });
+
+  it('OS já paga e já concluída salva de novo: não tenta nota', async () => {
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', payment: 'paid' }, { status: 'done', payment: 'paid' });
+    expect(autoIssue).not.toHaveBeenCalled();
   });
 
   it('status mudou para canceled: delega para handleOrderStatusChange', async () => {

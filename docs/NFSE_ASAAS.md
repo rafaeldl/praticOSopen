@@ -10,6 +10,7 @@ A empresa emite a nota fiscal de serviço da OS pela própria conta Asaas. O Asa
 - **O Asaas só emite NFS-e** (serviço), não NF-e (produto). Por isso a nota leva **só os serviços da OS**; as peças ficam de fora, e a folha de emissão diz isso.
 - **Uma nota por OS** (padrão), mesmo quando o cliente pagou várias OS juntas. A nota é da OS, não do pagamento.
 - **Uma nota com várias OS** (opção, para cliente mensal ou de contrato): escolhida pela pessoa no cliente ("…" → "Emitir uma nota com várias OS").
+- **Quando emitir** (por empresa, `settings/nfse.autoIssue`): "Só quando eu pedir" (padrão), "Quando a OS for paga" ou "Quando a OS for concluída" (empresas que emitem a nota antes de receber). Ver [Emissão automática](#emissão-automática).
 - Uma OS só pode ter **uma nota ativa** (agendada, enviada, emitida ou com cancelamento negado). Nota com erro ou cancelada libera a OS para outra.
 
 ## Decisões
@@ -73,6 +74,17 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a
 5. Grava o id do Asaas **logo que ele responde**, antes de qualquer outra coisa, e depois o status. Cada nota guarda a conta em que foi emitida (`asaasEnvironment`, `asaasWalletId`).
 6. Se o Asaas **recusar** (400, 401, 403, 404 ou 422), nada foi criado: a nota é apagada e as travas saem. **Sem resposta certa** (tempo esgotado, 408, 5xx, rede) o Asaas pode ter criado a nota: ela fica `creating` e a OS continua travada até a conferência (repetir na hora dá `ORDER_HAS_INVOICE`, nunca duas notas).
 
+### Emissão automática
+
+`settings/nfse.autoIssue`: `manual` (padrão, campo ausente), `paid` ou `completed`. Escolhido na configuração da nota ("Emitir a nota"), salvo pelo mesmo `PUT /setup/service` (sem o campo, o servidor mantém o que estava).
+
+1. O gatilho único da OS (`onOrderUpdatedAsaas` → `handleOrderUpdatedAsaas`) chama `autoIssueInvoice` quando `payment` vira `paid` (momento `paid`) ou `status` vira `done` (momento `completed`). Só na virada: salvar de novo uma OS já paga ou concluída não emite.
+2. `autoIssueInvoice` só segue com `nfseEnabled`, `nfseReady`, Asaas conectado e `autoIssue` igual ao momento.
+3. **Uma vez por OS:** se a OS já teve qualquer nota (até cancelada, com erro ou automática que falhou), fica com o usuário. Assim cancelar a nota e reabrir/concluir a OS de novo não emite outra.
+4. Emite como na emissão manual (`createInvoice`, uma nota só da OS, data de hoje), com `createdBy` `{ id: 'system', name: 'PraticOS' }` e `auto: true`.
+5. **Falha que o usuário resolve** (cliente sem CPF/CNPJ, OS só com peças, configuração feita em outra conta, recusa do Asaas): grava `invoices/auto-{orderId}` com `status: 'error'`, `errorCode` (e o texto do Asaas em `statusDescription` quando ele recusou, `ASAAS_REJECTED`). A OS mostra "Nota fiscal · Erro"; o detalhe diz "A nota não saiu sozinha" e o motivo. Não trava a OS: o usuário emite pelo "…".
+6. **Sem resposta do Asaas**: igual à manual, a nota fica `creating` e travada até a conferência. Erros que não são da OS (flag desligada, OS já com nota, orçamento/cancelada) não gravam nada.
+
 ### Conferência com o Asaas
 
 `reconcileInvoice` olha no Asaas uma nota não final (`creating`, `scheduled`, `synchronized`, `processingCancellation`) sem novidade há mais de 3 minutos:
@@ -123,9 +135,9 @@ Eventos assinados na conexão (gravados em `private/asaas.webhookEvents`): `INVO
 | `companies/{cid}/invoices/{id}` | servidor (rotas e webhook) | `canViewCharges` |
 | `companies/{cid}/private/nfse/orders/{orderId}` | servidor (trava uma nota ativa por OS) | ninguém |
 
-`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`.
+`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`, `auto` (emitida sozinha), `errorCode` (por que a automática não saiu).
 
-`settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`, `asaasEnvironment`, `asaasWalletId`.
+`settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`, `autoIssue` (`manual` | `paid` | `completed`), `asaasEnvironment`, `asaasWalletId`.
 
 `private/asaas` (conexão): além dos campos da [integração](ASAAS_INTEGRATION.md), `webhookEvents` (eventos assinados ao conectar).
 
@@ -135,7 +147,7 @@ Tudo fica escondido sem `nfseEnabled` + Asaas conectado (`PaymentSettings.nfseAv
 
 | Onde | O quê |
 |------|-------|
-| Conexão do Asaas | Linha "Nota fiscal" → configuração (`NfseSetupScreen`): o que falta, dados fiscais, acesso da prefeitura (aponta para o painel do Asaas), serviço padrão com impostos e modelo da descrição |
+| Conexão do Asaas | Linha "Nota fiscal" → configuração (`NfseSetupScreen`): o que falta, dados fiscais, acesso da prefeitura (aponta para o painel do Asaas), serviço padrão com impostos e modelo da descrição, e "Emitir a nota" (quando emitir sozinha) |
 | OS (`order_screen_v2.dart`) | "…" → "Emitir nota fiscal" (OS com serviço, fora de orçamento/cancelada, sem nota ativa). Linha "Nota fiscal · Aguardando prefeitura / Emitida / Erro / Cancelada" com ponto de status, que abre o detalhe |
 | Cliente | "…" → "Emitir uma nota com várias OS" → escolher as OS (`NfseOrdersPicker`) → mesma folha de emissão |
 | Folha de emissão (`NfseIssueSheet`) | Valor (serviços, peças fora, desconto), descrição editável, CPF/CNPJ (pede quando falta), data; ✓ emite |
@@ -164,6 +176,7 @@ Não testado contra o Asaas real. Antes de oferecer:
 - [ ] `GET /v3/invoices?externalReference=` acha a nota agendada (conferência de create sem resposta).
 - [ ] Recusa da prefeitura (`INVOICE_ERROR`): motivo em `statusDescription` e OS liberada para outra nota.
 - [ ] Cancelamento de nota agendada e de nota emitida; cidade sem cancelamento pela integração (`CANCEL_NOT_SUPPORTED`).
+- [ ] Emissão automática: com "Quando a OS for concluída", concluir uma OS de teste e ver a nota sair sozinha; com cliente sem CPF, ver "Nota fiscal · Erro" com o motivo.
 - [ ] Nota com várias OS: descrição com uma linha por OS e observações "OS 182, 190".
 
 ## Regras de Negócio
@@ -172,6 +185,7 @@ Não testado contra o Asaas real. Antes de oferecer:
 - Uma nota ativa por OS; nota com erro ou cancelada libera a OS.
 - Uma nota com várias OS só junta OS do **mesmo cliente**, até 50.
 - Orçamento e OS cancelada não têm nota.
+- Emissão automática: no momento escolhido (paga ou concluída), uma vez por OS, só com a configuração pronta. Nunca junta várias OS numa nota.
 - Data da nota: de hoje até 60 dias à frente (horário de São Paulo).
 - Emitir/cancelar: dono, admin, gerente. Configurar: dono, admin.
 - Cancelar nota emitida depende da prefeitura; quando a cidade não cancela pela integração, o app explica e manda cancelar no site da prefeitura.
@@ -182,3 +196,4 @@ Não testado contra o Asaas real. Antes de oferecer:
 - Nota emitida pelo painel do Asaas, ou vinculada a cobrança pela configuração do Asaas, não aparece no PraticOS.
 - Deduções (`deductions`) sempre zero; retenções além do ISS seguem os percentuais do serviço padrão, iguais para todas as notas.
 - Estorno de um pagamento não cancela a nota: cancelar à mão se for o caso.
+- Emissão automática "quando paga" usa a situação de pagamento da OS: OS paga junto com outras num link de várias OS gera uma nota por OS, não uma nota do pagamento.

@@ -11,6 +11,9 @@
  * - `transactions` or `total` changed, or the order became a quote/canceled, and the company has Asaas
  *   connected → `reconcileOutsidePayments` (money received outside Asaas
  *   while a link is open: settle or lower the link, outside-payment.service);
+ * - the order became paid (`payment` → 'paid') or done (`status` → 'done') →
+ *   `autoIssueInvoice`, which issues the nota when the company chose that
+ *   moment (settings/nfse.autoIssue);
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -20,8 +23,9 @@ import { handleOrderStatusChange } from './charge.service';
 import { getPaymentSettings } from './connection.service';
 import { OrderPaymentState, repairAsaasTransactions, transactionsChanged } from './order-payment.service';
 import { reconcileOutsidePayments } from './outside-payment.service';
+import { autoIssueInvoice } from './invoice.service';
 
-export type OrderUpdateSnapshot = OrderPaymentState & { status?: string };
+export type OrderUpdateSnapshot = OrderPaymentState & { status?: string; payment?: string | null };
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
 async function paymentsChangedIfConnected(companyId: string, orderId: string, repair: boolean): Promise<void> {
@@ -52,6 +56,12 @@ export async function handleOrderUpdatedAsaas(
     (owesNothing(after.status) && !owesNothing(before?.status));
   if (repair || owedChanged) {
     tasks.push(paymentsChangedIfConnected(companyId, orderId, repair));
+  }
+  if (after.payment === 'paid' && before?.payment !== 'paid') {
+    tasks.push(autoIssueInvoice(companyId, orderId, 'paid'));
+  }
+  if (after.status === 'done' && before?.status !== 'done') {
+    tasks.push(autoIssueInvoice(companyId, orderId, 'completed'));
   }
   if (tasks.length === 0) return;
 

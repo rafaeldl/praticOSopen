@@ -9295,6 +9295,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Serviço da nota salvo'**
   String get nfseServiceSaved;
+
+  /// No description provided for @nfseAutoIssueRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir a nota'**
+  String get nfseAutoIssueRow;
+
+  /// No description provided for @nfseAutoIssueQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando emitir a nota?'**
+  String get nfseAutoIssueQuestion;
+
+  /// No description provided for @nfseAutoIssueManual.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só quando eu pedir'**
+  String get nfseAutoIssueManual;
+
+  /// No description provided for @nfseAutoIssuePaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando a OS for paga'**
+  String get nfseAutoIssuePaid;
+
+  /// No description provided for @nfseAutoIssueCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando a OS for concluída'**
+  String get nfseAutoIssueCompleted;
+
+  /// No description provided for @nfseAutoIssueManualHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você emite pelo menu da OS ou do cliente.'**
+  String get nfseAutoIssueManualHint;
+
+  /// No description provided for @nfseAutoIssuePaidHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sai sozinha quando o cliente termina de pagar a OS.'**
+  String get nfseAutoIssuePaidHint;
+
+  /// No description provided for @nfseAutoIssueCompletedHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sai sozinha quando a OS é concluída, antes de receber.'**
+  String get nfseAutoIssueCompletedHint;
+
+  /// No description provided for @nfseHeadAutoError.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.'**
+  String get nfseHeadAutoError;
+
+  /// No description provided for @nfseAutoReasonLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por que não saiu'**
+  String get nfseAutoReasonLabel;
+
+  /// No description provided for @nfseAutoErrorTaxId.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente não tem CPF ou CNPJ no cadastro.'**
+  String get nfseAutoErrorTaxId;
 }
 
 class _AppLocalizationsDelegate

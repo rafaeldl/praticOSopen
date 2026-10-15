@@ -70,6 +70,7 @@ export const serviceSchema = z
       ir: percent,
     }),
     descriptionTemplate: z.string().max(1000).optional(),
+    autoIssue: z.enum(['manual', 'paid', 'completed']).optional(),
   })
   .refine((data) => !!(data.municipalServiceId || data.municipalServiceCode), {
     message: 'municipalServiceId or municipalServiceCode is required',

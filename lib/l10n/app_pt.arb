@@ -2746,5 +2746,16 @@
   "nfseTaxesNote": "Use o que a prefeitura e o seu contador indicarem. Deixe 0 no que não se aplica.",
   "nfseTemplateLabel": "Texto da nota",
   "nfseTemplateHint": "{servicos} vira os serviços da OS e {os} os números das OS.",
-  "nfseServiceSaved": "Serviço da nota salvo"
+  "nfseServiceSaved": "Serviço da nota salvo",
+  "nfseAutoIssueRow": "Emitir a nota",
+  "nfseAutoIssueQuestion": "Quando emitir a nota?",
+  "nfseAutoIssueManual": "Só quando eu pedir",
+  "nfseAutoIssuePaid": "Quando a OS for paga",
+  "nfseAutoIssueCompleted": "Quando a OS for concluída",
+  "nfseAutoIssueManualHint": "Você emite pelo menu da OS ou do cliente.",
+  "nfseAutoIssuePaidHint": "Sai sozinha quando o cliente termina de pagar a OS.",
+  "nfseAutoIssueCompletedHint": "Sai sozinha quando a OS é concluída, antes de receber.",
+  "nfseHeadAutoError": "A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.",
+  "nfseAutoReasonLabel": "Por que não saiu",
+  "nfseAutoErrorTaxId": "O cliente não tem CPF ou CNPJ no cadastro."
 }

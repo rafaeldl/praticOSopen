@@ -5575,4 +5575,41 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseServiceSaved => 'Serviço da nota salvo';
+
+  @override
+  String get nfseAutoIssueRow => 'Emitir a nota';
+
+  @override
+  String get nfseAutoIssueQuestion => 'Quando emitir a nota?';
+
+  @override
+  String get nfseAutoIssueManual => 'Só quando eu pedir';
+
+  @override
+  String get nfseAutoIssuePaid => 'Quando a OS for paga';
+
+  @override
+  String get nfseAutoIssueCompleted => 'Quando a OS for concluída';
+
+  @override
+  String get nfseAutoIssueManualHint =>
+      'Você emite pelo menu da OS ou do cliente.';
+
+  @override
+  String get nfseAutoIssuePaidHint =>
+      'Sai sozinha quando o cliente termina de pagar a OS.';
+
+  @override
+  String get nfseAutoIssueCompletedHint =>
+      'Sai sozinha quando a OS é concluída, antes de receber.';
+
+  @override
+  String get nfseHeadAutoError =>
+      'A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.';
+
+  @override
+  String get nfseAutoReasonLabel => 'Por que não saiu';
+
+  @override
+  String get nfseAutoErrorTaxId => 'O cliente não tem CPF ou CNPJ no cadastro.';
 }

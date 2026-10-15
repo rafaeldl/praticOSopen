@@ -12,6 +12,7 @@ import {
   AsaasMunicipalService,
   AsaasSaveFiscalInfoInput,
   InvoiceTaxes,
+  NfseAutoIssue,
   NfseServiceSettings,
 } from '../../models/asaas.types';
 import { getAsaasCredentialProvider } from './credential-provider';
@@ -103,6 +104,8 @@ export interface SaveServiceInput {
   municipalServiceName: string;
   taxes: InvoiceTaxes;
   descriptionTemplate?: string;
+  /** Absent: keeps the saved choice ('manual' when none). */
+  autoIssue?: NfseAutoIssue;
 }
 
 export async function saveNfseService(
@@ -122,6 +125,7 @@ export async function saveNfseService(
     municipalServiceName: input.municipalServiceName.trim(),
     taxes: input.taxes,
     descriptionTemplate: input.descriptionTemplate?.trim() || DEFAULT_DESCRIPTION_TEMPLATE,
+    autoIssue: input.autoIssue ?? (await getNfseServiceSettings(companyId))?.autoIssue ?? 'manual',
     ...accountStampOf(connection),
     updatedAt: new Date().toISOString(),
     updatedBy: { id: user.id, name: user.name },

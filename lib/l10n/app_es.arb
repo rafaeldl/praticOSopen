@@ -2456,5 +2456,16 @@
   "nfseTaxesNote": "Usa lo que indiquen el municipio y tu contador. Deja 0 donde no aplica.",
   "nfseTemplateLabel": "Texto de la factura",
   "nfseTemplateHint": "{servicos} se convierte en los servicios y {os} en los números de las órdenes.",
-  "nfseServiceSaved": "Servicio de la factura guardado"
+  "nfseServiceSaved": "Servicio de la factura guardado",
+  "nfseAutoIssueRow": "Emitir la factura",
+  "nfseAutoIssueQuestion": "¿Cuándo emitir la factura?",
+  "nfseAutoIssueManual": "Solo cuando yo la pida",
+  "nfseAutoIssuePaid": "Cuando la OS esté pagada",
+  "nfseAutoIssueCompleted": "Cuando la OS esté concluida",
+  "nfseAutoIssueManualHint": "La emites desde el menú de la OS o del cliente.",
+  "nfseAutoIssuePaidHint": "Sale sola cuando el cliente termina de pagar la OS.",
+  "nfseAutoIssueCompletedHint": "Sale sola cuando la OS se concluye, antes de cobrar.",
+  "nfseHeadAutoError": "La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.",
+  "nfseAutoReasonLabel": "Por qué no salió",
+  "nfseAutoErrorTaxId": "El cliente no tiene documento fiscal registrado."
 }

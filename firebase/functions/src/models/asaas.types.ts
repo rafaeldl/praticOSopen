@@ -345,12 +345,20 @@ export interface NfseServiceSettings {
   taxes: InvoiceTaxes;
   /** Template of the service description; `{os}` and `{servicos}` are replaced. */
   descriptionTemplate: string;
+  /** When a nota is issued without anyone asking (absent: 'manual'). */
+  autoIssue?: NfseAutoIssue;
   /** Asaas account the service was set up on (another account has its own setup). */
   asaasEnvironment?: AsaasEnvironment;
   asaasWalletId?: string | null;
   updatedAt: string;
   updatedBy: UserAggr;
 }
+
+/**
+ * When the server issues the nota of an order by itself: never ('manual',
+ * default), when the order becomes paid, or when it becomes done.
+ */
+export type NfseAutoIssue = 'manual' | 'paid' | 'completed';
 
 /** One order covered by an invoice and the services value it contributed. */
 export interface InvoiceOrderPart {
@@ -382,6 +390,10 @@ export interface NfseInvoice {
   xmlUrl?: string | null;
   /** Asaas statusDescription (error or cancellation reason), shown only as detail. */
   statusDescription?: string | null;
+  /** Our error code when an automatic nota could not be issued (status 'error'). */
+  errorCode?: string | null;
+  /** Issued by the server on its own (NfseServiceSettings.autoIssue). */
+  auto?: boolean;
   createdBy: UserAggr;
   createdAt: string;
   updatedAt?: string;

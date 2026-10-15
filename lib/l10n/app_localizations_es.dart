@@ -5594,4 +5594,42 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseServiceSaved => 'Servicio de la factura guardado';
+
+  @override
+  String get nfseAutoIssueRow => 'Emitir la factura';
+
+  @override
+  String get nfseAutoIssueQuestion => '¿Cuándo emitir la factura?';
+
+  @override
+  String get nfseAutoIssueManual => 'Solo cuando yo la pida';
+
+  @override
+  String get nfseAutoIssuePaid => 'Cuando la OS esté pagada';
+
+  @override
+  String get nfseAutoIssueCompleted => 'Cuando la OS esté concluida';
+
+  @override
+  String get nfseAutoIssueManualHint =>
+      'La emites desde el menú de la OS o del cliente.';
+
+  @override
+  String get nfseAutoIssuePaidHint =>
+      'Sale sola cuando el cliente termina de pagar la OS.';
+
+  @override
+  String get nfseAutoIssueCompletedHint =>
+      'Sale sola cuando la OS se concluye, antes de cobrar.';
+
+  @override
+  String get nfseHeadAutoError =>
+      'La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.';
+
+  @override
+  String get nfseAutoReasonLabel => 'Por qué no salió';
+
+  @override
+  String get nfseAutoErrorTaxId =>
+      'El cliente no tiene documento fiscal registrado.';
 }

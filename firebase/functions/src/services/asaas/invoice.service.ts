@@ -31,6 +31,7 @@ import {
   CreateInvoiceInput,
   InvoiceOrderPart,
   InvoiceStatus,
+  NfseAutoIssue,
   NfseInvoice,
   NfseServiceSettings,
   PaymentSettingsDoc,
@@ -560,6 +561,7 @@ export async function createInvoice(
   input: CreateInvoiceInput,
   user: UserAggr,
   expectedCustomerId?: string,
+  options: { auto?: boolean } = {},
 ): Promise<NfseInvoice> {
   const ctx = await assertNfseEnabled(companyId);
   const service = await requireReadyService(companyId, ctx);
@@ -604,6 +606,7 @@ export async function createInvoice(
     municipalServiceName: service.municipalServiceName,
     createdBy: { id: user.id, name: user.name },
     createdAt: now,
+    ...(options.auto ? { auto: true } : {}),
     ...accountStampOf(ctx.connection),
   };
   await db.runTransaction(async (tx) => {
@@ -679,6 +682,98 @@ export async function createInvoice(
 
   console.log(`[NFS-e] Invoice ${invoiceRef.id} created for ${orderIds.length} order(s) of company ${companyId}`);
   return { ...result, id: invoiceRef.id };
+}
+
+// ----------------------------------------------------------------------------
+// Automatic issue (settings/nfse.autoIssue)
+// ----------------------------------------------------------------------------
+
+/** Author of the notas the server issues by itself. */
+export const AUTO_ISSUE_USER: UserAggr = { id: 'system', name: 'PraticOS' };
+
+/** Failures that are not the order's problem: nothing to record on the order. */
+const AUTO_ISSUE_SILENT = ['NFSE_NOT_ENABLED', 'ASAAS_NOT_CONNECTED', 'ORDER_HAS_INVOICE', 'NFSE_ORDER_NOT_ALLOWED', 'ORDER_NOT_FOUND'];
+
+/** Doc id of the error record of an automatic nota that failed (one per order). */
+export function autoIssueErrorId(orderId: string): string {
+  return `auto-${orderId}`;
+}
+
+/**
+ * Issues the nota of one order without anyone asking, when the company chose
+ * that moment (`autoIssue` 'paid' or 'completed'). Runs from the order trigger.
+ *
+ * - Only once per order: an order that ever had a nota (any status, including
+ *   canceled or a failed automatic one) is left to the user.
+ * - A failure the user can fix (no CPF, no services, city/Asaas rejection) is
+ *   recorded as an invoice with status 'error' and `errorCode`, so the order
+ *   shows "Nota fiscal · Erro" and the user can issue it by hand.
+ * - No answer from Asaas: createInvoice keeps it 'creating' (reconciled later).
+ */
+export async function autoIssueInvoice(companyId: string, orderId: string, moment: Exclude<NfseAutoIssue, 'manual'>): Promise<void> {
+  const settings = await getPaymentSettings(companyId);
+  if (!settings.nfseEnabled || !settings.nfseReady || !settings.asaasConnected) return;
+  const service = await getNfseServiceSettings(companyId);
+  if ((service?.autoIssue ?? 'manual') !== moment) return;
+
+  const previous = await invoicesRef(companyId).where('orderIds', 'array-contains', orderId).limit(1).get();
+  if (!previous.empty) return;
+
+  try {
+    await createInvoice(companyId, { orderIds: [orderId] }, AUTO_ISSUE_USER, undefined, { auto: true });
+    console.log(`[NFS-e] Automatic nota (${moment}) of order ${orderId} of company ${companyId}`);
+  } catch (error) {
+    let errorCode: string;
+    let statusDescription: string | null = null;
+    if (error instanceof AsaasServiceError) {
+      if (AUTO_ISSUE_SILENT.includes(error.code)) return;
+      errorCode = error.code;
+    } else if (error instanceof AsaasApiError && DEFINITIVE_REJECTIONS.includes(error.status)) {
+      errorCode = 'ASAAS_REJECTED';
+      statusDescription = error.errors[0]?.description ?? null;
+    } else {
+      throw error;
+    }
+    console.warn(`[NFS-e] Automatic nota of order ${orderId} of company ${companyId} not issued (${errorCode})`);
+    await recordAutoIssueError(companyId, orderId, errorCode, statusDescription, service?.municipalServiceName ?? '');
+  }
+}
+
+async function recordAutoIssueError(
+  companyId: string,
+  orderId: string,
+  errorCode: string,
+  statusDescription: string | null,
+  municipalServiceName: string,
+): Promise<void> {
+  const snap = await companyRef(companyId).collection('orders').doc(orderId).get();
+  const order = snap.data() as Order | undefined;
+  const value = order ? invoiceValueOfOrder(order).value : 0;
+  const now = new Date().toISOString();
+  const record: NfseInvoice = {
+    id: autoIssueErrorId(orderId),
+    status: 'error',
+    customer: { id: order?.customer?.id ?? '', name: order?.customer?.name ?? null },
+    orderIds: [orderId],
+    orders: [{ orderId, orderNumber: order?.number ?? null, value }],
+    value,
+    serviceDescription: '',
+    observations: '',
+    effectiveDate: todayInSaoPaulo(),
+    municipalServiceName,
+    statusDescription,
+    errorCode,
+    auto: true,
+    createdBy: AUTO_ISSUE_USER,
+    createdAt: now,
+    updatedAt: now,
+  };
+  // Fixed id: a second trigger for the same order does not write it twice.
+  const ref = invoicesRef(companyId).doc(record.id);
+  await db.runTransaction(async (tx) => {
+    if ((await tx.get(ref)).exists) return;
+    tx.set(ref, record as unknown as Record<string, unknown>);
+  });
 }
 
 // ----------------------------------------------------------------------------
