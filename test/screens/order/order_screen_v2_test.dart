@@ -955,10 +955,11 @@ void main() {
       expect(registration.devices.single.manufacturer, 'Chevrolet');
     });
 
-    testWidgets('a model without plate is not registered alone', (
+    testWidgets('a model with nothing close: new vehicle saved on ✓', (
       tester,
     ) async {
       final store = OrderStore();
+      final registration = FakeRegistration();
       await _pump(
         tester,
         assistantScreen(
@@ -966,15 +967,66 @@ void main() {
           FakeAssistant(
             const AiOrderDraft(
               customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
-              deviceGuessName: 'Corsa',
+              deviceGuessName: 'Super Classic',
             ),
           ),
+          registration: registration,
         ),
+        hosted: true,
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(store.devices.single.name, 'Super Classic');
+      expect(store.devices.single.serial, isNull);
+      expect(rowOf(tester, 'Super Classic').subtitle, 'novo');
+      expect(registration.devices, isEmpty);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(registration.devices.single.name, 'Super Classic');
+    });
+
+    testWidgets('a model close to registered ones asks, and can register', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final registration = FakeRegistration();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(
+            const AiOrderDraft(
+              customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+              deviceGuessName: 'Super Classic',
+              deviceOptions: [
+                AiDeviceHit(
+                  id: 'd1',
+                  name: 'Chevrolet Classic 1.0',
+                  serial: 'NXS8620',
+                ),
+              ],
+            ),
+          ),
+          registration: registration,
+        ),
+        hosted: true,
       );
       await tester.tap(find.byKey(const ValueKey('assistant_talk')));
       await tester.pumpAndSettle();
       expect(store.devices, isEmpty);
-      expect(find.textContaining('Corsa'), findsWidgets);
+
+      await tester.tap(find.textContaining('Super Classic').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Chevrolet Classic 1.0'), findsOneWidget);
+      await tester.tap(find.text('Cadastrar Super Classic'));
+      await tester.pumpAndSettle();
+
+      expect(store.devices.single.name, 'Super Classic');
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(registration.devices.single.name, 'Super Classic');
     });
 
     testWidgets('notes fill "O que o cliente pediu"; "Desfazer" clears', (

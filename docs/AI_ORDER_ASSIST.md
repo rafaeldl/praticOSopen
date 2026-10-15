@@ -154,8 +154,8 @@ O erro comum ("tira o óleo e o filtro", com o serviço "Troca de óleo" e a pe�
 
 **Decisão:**
 - **Certeza** (telefone ou placa iguais, nome igual, ou um único nome com nota ≥ 0,97) → entra na OS com ✦.
-- **Perto** (nota ≥ 0,80, até 4) → a linha "Ouvi “Juliene”" abre **"Qual Juliene?"** com os parecidos, "Cadastrar Juliene como cliente novo" e "Outro cliente". Para veículo, "Cadastrar" só aparece com placa.
-- **Nada perto** → na Nova OS, entra como **"Juliana · (48) 2222-2222 · novo"** e é cadastrado no ✓. Veículo só com placa.
+- **Perto** (nota ≥ 0,80, até 4) → a linha "Ouvi “Juliene”" abre **"Qual Juliene?"** com os parecidos, "Cadastrar Juliene como cliente novo" e "Outro cliente". Para veículo é igual, com ou sem placa ("Super Classic" perto de "Classic 1.0" pergunta "Qual Super Classic?").
+- **Nada perto** → na Nova OS, entra como **"Juliana · (48) 2222-2222 · novo"** e é cadastrado no ✓. Veículo também: pela placa que não existe, ou pelo modelo quando nenhum cadastrado é parecido ("Super Classic · novo").
 
 **Testes:** `src/services/ai/__tests__/fuzzy-match.test.ts` (nomes, sons, marcas, placas, telefones).
 
@@ -186,7 +186,7 @@ O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `f
 5. **Cota esgotada** → mensagem clara e o fluxo manual continua livre.
 6. **Catálogo nunca é poluído:** item sem correspondência entra na OS só com o nome (sem `id` de catálogo). Preço: o falado; senão o do catálogo; senão `null` ("sem valor").
 7. **Cliente:** escolhido sozinho só quando a busca tem certeza (mesmo telefone, mesmo nome, ou um único nome muito próximo). Parecidos → "Qual Juliene?". Nada parecido → cliente novo, cadastrado no ✓ (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)). Nunca troca um cliente já escolhido.
-8. **Veículo:** escolhido sozinho pela placa/série (com ou sem traço, Mercosul ou antiga) ou por um único modelo do mesmo jeito. Placa que não existe → veículo novo, cadastrado no ✓. Modelo sem placa nunca cadastra sozinho (faria repetidos).
+8. **Veículo:** escolhido sozinho pela placa/série (com ou sem traço, Mercosul ou antiga) ou por um único modelo do mesmo jeito. Placa que não existe → veículo novo, cadastrado no ✓. Modelo sem placa: se nenhum cadastrado é parecido, veículo novo cadastrado no ✓; se há parecidos, pergunta qual, com "Cadastrar" como opção (para não criar repetidos sem perguntar).
 14. **Cadastro só no ✓.** Cliente e veículo novos ganham o id na tela, mas só são gravados quando a OS é salva; "Desfazer" antes disso não deixa nada. Numa OS já salva, o novo não entra sozinho: a linha pede para tocar ("Cadastrar … como cliente novo").
 15. **Serviços e peças não vão para o catálogo pela voz.** Entram só na OS (regra 6). Um "Salvar no catálogo" na linha fica para depois.
 9. **Isolamento:** a empresa vem do token + `X-Company-Id` validado pela membership; o corpo não aceita `companyId` (schema `strict`). Toda busca recebe esse `companyId`.
@@ -216,4 +216,4 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 ## Testes
 
 - Functions: `src/services/ai/__tests__/` (`fuzzy-match`, `ai-quota.service`, `order-assist.service` com o grupo "changes to lines already in the order", `llm.client`, `gemini.client`, `claude.client`), `src/routes/v1/__tests__/ai.routes.test.ts` (`/status` e `/order-assist`) e `src/__tests__/ai-settings-script.test.ts`.
-- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha, cliente novo salvo no ✓, "Qual Juliene?", veículo novo pela placa), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).
+- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha, cliente novo salvo no ✓, "Qual Juliene?", veículo novo pela placa e pelo modelo, "Qual Super Classic?"), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).
