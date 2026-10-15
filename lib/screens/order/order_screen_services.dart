@@ -46,10 +46,12 @@ class OrderPermissions {
     this.canEditMainFields = _anyOrder,
     this.canManageForms = _anyOrder,
     this.canAttachMedia = _always,
-    this.canReceivePayments = _always,
+    this.canReceivePayments = _anyOrderOrNone,
+    this.canGiveDiscount = _always,
   });
 
   static bool _anyOrder(Order order) => true;
+  static bool _anyOrderOrNone(Order? order) => true;
   static bool _always() => true;
 
   /// Checks against the current user's role ([AuthorizationService]).
@@ -63,8 +65,8 @@ class OrderPermissions {
       canEditMainFields: auth.canEditOrderMainFields,
       canManageForms: auth.canManageOrderForms,
       canAttachMedia: () => auth.hasPermission(PermissionType.attachPhotos),
-      canReceivePayments: () =>
-          auth.hasPermission(PermissionType.viewFinancialReports),
+      canReceivePayments: auth.canReceiveOnOrder,
+      canGiveDiscount: () => auth.canViewFinancialReports,
     );
   }
 
@@ -82,10 +84,14 @@ class OrderPermissions {
   /// Add and remove photos and documents.
   final bool Function() canAttachMedia;
 
-  /// Register money on the order: "Receber", discount and the payments
-  /// screen. Only who has financial access (`viewFinancialReports`: owner,
-  /// admin, manager); a consultant sees values but does not receive.
-  final bool Function() canReceivePayments;
+  /// Register money on the order: "Receber" and the payments screen.
+  /// Financial access (`viewFinancialReports`: owner, admin, manager) on any
+  /// order; a consultant only on the orders they created
+  /// ([AuthorizationService.canReceiveOnOrder]).
+  final bool Function(Order? order) canReceivePayments;
+
+  /// "Desconto" in the "…" menu: financial access only.
+  final bool Function() canGiveDiscount;
 }
 
 /// Side effects of the order screen that leave it (other screens, sharing,

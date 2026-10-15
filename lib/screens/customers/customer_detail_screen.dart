@@ -29,9 +29,10 @@ import 'package:url_launcher/url_launcher.dart';
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
 /// and, with the view-prices permission, "Falta receber R$ X" (what is
-/// still open on the customer's orders) plus, with financial access, the
-/// "· Receber" link (opens "Receber de Ana" or, with one open order, its
-/// Receber); call / WhatsApp, "Nova OS para Ana", the
+/// still open on the customer's orders) plus the "· Receber" link when the
+/// person can receive on at least one open order (financial access: all of
+/// them; a consultant: only their own). It opens "Receber de Ana" or, with
+/// one such order, its Receber; call / WhatsApp, "Nova OS para Ana", the
 /// customer's vehicles (with "Cadastrar outro veículo") and the latest orders.
 /// Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
@@ -40,7 +41,7 @@ class CustomerDetailScreen extends StatefulWidget {
     this.customer,
     this.directory,
     this.showPrices,
-    this.canReceive,
+    this.canReceiveOn,
     this.onReceive,
   });
 
@@ -55,13 +56,13 @@ class CustomerDetailScreen extends StatefulWidget {
   /// values and billing (`Company.useFinancial == false`).
   final bool? showPrices;
 
-  /// The "· Receber" link. Defaults to financial access
-  /// (`viewFinancialReports`: owner, admin, manager); a consultant sees what
-  /// is owed but does not receive.
-  final bool? canReceive;
+  /// Whether the person can receive on an order. Defaults to
+  /// [AuthorizationService.canReceiveOnOrder]: financial access receives on
+  /// any order, a consultant only on the orders they created. Test seam.
+  final bool Function(Order order)? canReceiveOn;
 
   /// "Receber" next to "Falta receber R$ X", with the customer's open
-  /// orders (oldest first). Defaults to the order's Receber (one order) or
+  /// orders the person can receive on (oldest first). Defaults to the order's Receber (one order) or
   /// [ReceiveCustomerScreen] (several). Test seam.
   final void Function(BuildContext context, List<Order> openOrders)? onReceive;
 
@@ -79,9 +80,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   bool get _showPrices =>
       widget.showPrices ?? AuthorizationService.instance.canViewPrices;
 
-  bool get _canReceive =>
-      widget.canReceive ??
-      AuthorizationService.instance.canViewFinancialReports;
+  bool _canReceiveOn(Order order) =>
+      widget.canReceiveOn?.call(order) ??
+      AuthorizationService.instance.canReceiveOnOrder(order);
+
+  /// Open orders (oldest first) the person can receive on. A consultant
+  /// only gets their own, even if the stream brings others.
+  List<Order> _receivable(List<Order> orders) =>
+      FinancialSummary.openOrdersOldestFirst(
+        orders,
+      ).where(_canReceiveOn).toList();
 
   @override
   void didChangeDependencies() {
@@ -126,11 +134,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
   }
 
-  /// Same gate as the order's Receber: financial access
-  /// (`viewFinancialReports`, off when the company does not use values and
-  /// billing).
+  /// Same gate as the order's Receber ([_canReceiveOn]); with one such
+  /// order it goes straight to that order's Receber.
   Future<void> _receive(List<Order> orders) async {
-    final open = FinancialSummary.openOrdersOldestFirst(orders);
+    final open = _receivable(orders);
     if (open.isEmpty) return;
     final receive = widget.onReceive;
     if (receive != null) {
@@ -400,7 +407,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             fontFeatures: AppTypography.tabular,
           ),
         ),
-        if (_canReceive) ...[
+        if (_receivable(orders).isNotEmpty) ...[
           Text(' · ', style: AppTypography.callout.copyWith(color: secondary)),
           CupertinoButton(
             key: const Key('customerReceive'),
