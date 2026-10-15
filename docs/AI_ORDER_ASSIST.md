@@ -193,7 +193,7 @@ O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `f
 10. **Relato e prazo:** `notes` (o que o cliente pediu ou o defeito) vai para "O que o cliente pediu" se estiver vazio. `dueDate` ("pronto sexta", "amanhã") vem como `YYYY-MM-DD` (ou `YYYY-MM-DDTHH:MM` quando a hora foi dita) e preenche "Fica pronto" se não houver data; sem hora, fica às 18:00. O modelo recebe a data de hoje no fuso de São Paulo para resolver dias da semana.
 11. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor). Logs só têm empresa, contagem de itens, código de erro e latência — nunca texto, transcrição ou imagem.
 12. **Permissão:** `write:orders` (técnico não usa).
-13. **Câmera** só abre ao tocar em Foto. **Microfone:** o "Falar" ouve na própria barra (reconhecimento de fala do aparelho, `speech_to_text`) e manda o texto; sem permissão, a barra vira um campo para digitar. A Function já aceita `audio` (m4a/aac, ≤3 MB) para quando o app gravar áudio.
+13. **Câmera** só abre ao tocar em Foto. **Microfone:** o "Falar" ouve na própria barra (reconhecimento de fala do aparelho, `speech_to_text`) e manda o texto; sem permissão, a barra vira um campo para digitar. Continua ouvindo até tocar em parar: quando o iPhone encerra a sessão sozinho (pausa de 10 s ou o limite de cerca de 1 minuto), outra começa e o texto continua; só termina sozinho depois de 20 s sem fala nova ou em 5 minutos. A tela fica acesa enquanto ouve (`wakelock_plus`, em `speech_listener.dart`). A Function já aceita `audio` (m4a/aac, ≤3 MB) para quando o app gravar áudio.
 
 ## Exemplos de Uso
 
