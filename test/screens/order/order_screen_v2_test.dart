@@ -6,7 +6,6 @@ import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
-import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -94,10 +93,19 @@ class FakeActions extends OrderScreenActions {
 }
 
 class FakeAssistant implements AiOrderAssistClient {
-  FakeAssistant(this.draft, {this.error});
+  FakeAssistant(this.draft, {this.error, this.enabled = true});
 
   final AiOrderDraft draft;
   final AiOrderAssistException? error;
+  final bool enabled;
+  int statusCalls = 0;
+
+  @override
+  Future<bool> isEnabled() async {
+    statusCalls++;
+    return enabled;
+  }
+
   final List<String?> texts = [];
   final List<int> photoCounts = [];
 
@@ -290,6 +298,7 @@ void main() {
     OrderScreenActions? actions,
     bool prices = true,
   }) => OrderScreenV2(
+    showAssistant: false,
     store: store,
     permissions: _permissions(prices: prices),
     actions: actions ?? FakeActions(),
@@ -513,20 +522,37 @@ void main() {
 
     const filledNote = 'Preenchi o que está marcado. Confira e salve.';
 
-    testWidgets('flag is off by default: Foto stays, Falar is hidden', (
-      tester,
-    ) async {
-      expect(kAiOrderAssistEnabled, isFalse);
+    testWidgets('server says off: Foto stays, Falar is hidden', (tester) async {
+      final assistant = FakeAssistant(const AiOrderDraft(), enabled: false);
       await _pump(
         tester,
         OrderScreenV2(
           store: OrderStore(),
           permissions: _permissions(),
           actions: FakeActions(),
+          assistant: assistant,
         ),
       );
+      expect(assistant.statusCalls, 1);
       expect(find.byKey(const ValueKey('assistant_photo')), findsOneWidget);
       expect(find.byKey(const ValueKey('assistant_talk')), findsNothing);
+    });
+
+    testWidgets('server says on: Falar shows without a new app build', (
+      tester,
+    ) async {
+      final assistant = FakeAssistant(const AiOrderDraft());
+      await _pump(
+        tester,
+        OrderScreenV2(
+          store: OrderStore(),
+          permissions: _permissions(),
+          actions: FakeActions(),
+          assistant: assistant,
+        ),
+      );
+      expect(assistant.statusCalls, 1);
+      expect(find.byKey(const ValueKey('assistant_talk')), findsOneWidget);
     });
 
     testWidgets('without the flag Foto attaches photos in a "Fotos" card', (
@@ -535,6 +561,7 @@ void main() {
       await _pump(
         tester,
         OrderScreenV2(
+          showAssistant: false,
           store: OrderStore(),
           permissions: _permissions(),
           actions: FakeActions(),
@@ -941,6 +968,7 @@ void main() {
       await _pump(
         tester,
         OrderScreenV2(
+          showAssistant: false,
           store: OrderStore(),
           permissions: _permissions(),
           actions: FakeActions(),
@@ -1499,6 +1527,7 @@ void main() {
       await _pump(
         tester,
         OrderScreenV2(
+          showAssistant: false,
           store: store,
           permissions: _permissions(),
           actions: FakeActions(),
@@ -1529,6 +1558,7 @@ void main() {
       await _pump(
         tester,
         OrderScreenV2(
+          showAssistant: false,
           store: store,
           permissions: _permissions(),
           actions: FakeActions(),

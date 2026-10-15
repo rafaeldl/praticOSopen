@@ -1,6 +1,11 @@
 /**
  * AI assistant routes (Flutter app, bearer auth). Mounted at /v1/app/ai.
  *
+ * GET  /status        →  is the assistant on for this company? (docs/AI_ORDER_ASSIST.md)
+ * 200  { success: true, data: { enabled, usage?: { used, limit } } }
+ *      The app shows Foto / Falar only when enabled. Counts nothing.
+ * 403  INSUFFICIENT_PERMISSIONS (no write:orders: the app hides the buttons)
+ *
  * POST /order-assist  →  aiOrderAssist (docs/AI_ORDER_ASSIST.md)
  * Body: { text?, audio?: {mimeType, data(base64)}, photos?: [{mimeType, data}], locale? }
  * 200  { success: true, data: OrderDraft }
@@ -26,6 +31,24 @@ import { defaultOrderAssistDeps } from '../../services/ai/order-assist.deps';
 
 export function createAiRouter(depsFactory: () => OrderAssistDeps = defaultOrderAssistDeps): Router {
   const router: Router = Router();
+
+  router.get('/status', requirePermission('write:orders'), async (req: AuthenticatedRequest, res: Response) => {
+    const companyId = req.userContext?.companyId;
+    if (!companyId) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context is required' } });
+      return;
+    }
+    try {
+      const deps = depsFactory();
+      const settings = await deps.getSettings(companyId);
+      const enabled = settings?.enabled === true;
+      const usage = enabled && deps.getUsage ? await deps.getUsage(companyId, settings) : undefined;
+      res.json({ success: true, data: { enabled, ...(usage ? { usage } : {}) } });
+    } catch (error) {
+      console.error(`[aiStatus] company=${companyId} unexpected error`, (error as Error)?.name);
+      res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Unexpected error' } });
+    }
+  });
 
   router.post('/order-assist', requirePermission('write:orders'), async (req: AuthenticatedRequest, res: Response) => {
     const companyId = req.userContext?.companyId;

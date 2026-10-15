@@ -11,7 +11,6 @@ import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
-import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
@@ -80,8 +79,8 @@ import 'package:provider/provider.dart';
 ///   (rules in `order_status_share.dart`).
 /// - Items without price are `null`: they show "sem valor" and are not summed.
 /// - No cover photo; photos show in "Fotos" only when the order has them.
-/// - Foto / Falar (new order only; Falar behind [kAiOrderAssistEnabled], off
-///   by default): everything happens in the glass bar of the sheet, without
+/// - Foto / Falar (Falar only when the server says the assistant is on for
+///   the company, `GET /v1/app/ai/status`): everything happens in the glass bar of the sheet, without
 ///   another screen. Falar listens right there and the stop fills the order;
 ///   Foto puts the photos in "Fotos" and the assistant reads them. What it
 ///   filled gets a blue sparkle, with "Desfazer" in a note above the bar.
@@ -102,7 +101,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.catalogPermissions,
     this.mostUsed,
     this.devicePicker,
-    this.showAssistant = kAiOrderAssistEnabled,
+    this.showAssistant,
     this.assistant,
     this.capturePhoto,
     this.pickGalleryPhotos,
@@ -127,9 +126,10 @@ class OrderScreenV2 extends StatefulWidget {
   )?
   devicePicker;
 
-  /// Shows Foto / "Falar o que fazer" on a new order. Defaults to the
-  /// compile-time flag [kAiOrderAssistEnabled] (off).
-  final bool showAssistant;
+  /// Shows "Falar o que fazer" and lets Foto read the photos. `null` (the
+  /// default) asks the server ([AiOrderAssistClient.isEnabled]); tests pass
+  /// true/false.
+  final bool? showAssistant;
 
   /// Assistant client; defaults to [AiOrderAssistService] (tests inject).
   final AiOrderAssistClient? assistant;
@@ -169,6 +169,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       widget.actions ?? const OrderScreenActions();
 
   bool _argsRead = false;
+
+  /// The assistant is on for this company (see [OrderScreenV2.showAssistant]).
+  late bool _assistantOn = widget.showAssistant ?? false;
   bool _ready = false;
   bool _isNew = true;
 
@@ -263,6 +266,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     super.didChangeDependencies();
     if (_argsRead) return;
     _argsRead = true;
+    if (widget.showAssistant == null) _askAssistantStatus();
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final order = args?['order'] as Order?;
@@ -281,6 +285,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _moreOpen = true;
       }
     }
+  }
+
+  /// Off until the server answers; any failure keeps it off.
+  Future<void> _askAssistantStatus() async {
+    final client = widget.assistant ?? AiOrderAssistService();
+    final on = await client.isEnabled();
+    if (mounted && on != _assistantOn) setState(() => _assistantOn = on);
   }
 
   void _startNew(Order? prefill) {
@@ -1099,7 +1110,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     } else {
       _actions.uploadPhotos(_store, picked);
     }
-    if (widget.showAssistant) await _runAssistant(photos: picked);
+    if (_assistantOn) await _runAssistant(photos: picked);
   }
 
   Future<void> _onPhotoTapped(int index) async {
@@ -1881,7 +1892,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final l10n = context.l10n;
     final order = _store.order;
     final background = AppColors.background.resolveFrom(context);
-    final showBar = _permissions.canAttachMedia() || widget.showAssistant;
+    final showBar = _permissions.canAttachMedia() || _assistantOn;
     if (showBar) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _measureFloating());
     }
@@ -2010,7 +2021,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   mode: _barMode,
                   readingLabel: _readingLabel,
                   onPhoto: _onPhoto,
-                  onTalk: widget.showAssistant ? _onTalk : null,
+                  onTalk: _assistantOn ? _onTalk : null,
                   onCancel: _cancelTalk,
                   onStop: _stopAndFill,
                   onSend: _sendTyped,

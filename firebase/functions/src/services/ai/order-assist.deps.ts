@@ -6,7 +6,7 @@
 import { getTenantCollection } from '../firestore.service';
 import { searchCustomers } from '../customer.service';
 import { findDeviceBySerial, searchDevices } from '../device.service';
-import { getAiSettings, releaseAiRequest, reserveAiRequest } from './ai-quota.service';
+import { getAiSettings, getAiUsage, releaseAiRequest, reserveAiRequest } from './ai-quota.service';
 import { ClaudeClient } from './claude.client';
 import { VertexGeminiClient } from './gemini.client';
 import { LlmRouter } from './llm.client';
@@ -35,6 +35,7 @@ export function defaultOrderAssistDeps(): OrderAssistDeps {
   return {
     llm,
     getSettings: getAiSettings,
+    getUsage: getAiUsage,
     reserve: (companyId, settings) => reserveAiRequest(companyId, settings),
     release: releaseAiRequest,
     loadCatalog: async (companyId) => {

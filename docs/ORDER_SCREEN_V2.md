@@ -47,7 +47,7 @@ Sem modelo novo e sem campo novo (nada muda no Firestore nem nas Functions). Est
 11. Sem foto de capa; fotos aparecem em "Fotos" só quando existem.
 12. Campos do segmento (`customData`) aparecem na OS logo depois dos itens, agrupados por seção, (campos já fixos da tela ficam de fora; esvaziar o último apaga `customData`). Gravam na hora numa OS salva e só em memória até "Salvar OS" numa nova.
 13. Com 2 ou mais veículos os itens se agrupam por veículo (e "Geral" para os sem veículo), cada bloco com o seu "Subtotal" (só com `viewPrices`). Ao pôr um item, a pergunta do `DevicePickerSheet`: um veículo, vários, todos ou geral.
-14. Foto e "Falar o que fazer" só aparecem na Nova OS com `kAiOrderAssistEnabled` (desligado por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
+14. "Falar o que fazer" (e a leitura da foto pela IA) só aparece quando o servidor diz que a IA está ligada para a empresa (`GET /v1/app/ai/status`; desligada por padrão). A IA preenche a mesma tela com marca-texto; ver `docs/AI_ORDER_ASSIST.md`.
 
 ## Exemplos de Uso
 

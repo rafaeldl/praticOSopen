@@ -201,13 +201,34 @@ class AiOrderAssistException implements Exception {
   String toString() => 'AiOrderAssistException($error)';
 }
 
-/// Calls `POST /v1/app/ai/order-assist`. Injected in tests.
+/// Calls `/v1/app/ai/*`. Injected in tests.
 abstract class AiOrderAssistClient {
   Future<AiOrderDraft> assist({
     String? text,
     List<AiPhoto> photos = const [],
     String? locale,
   });
+
+  /// Whether the assistant is on for the selected company. Never throws: any
+  /// failure (offline, old server, no permission) means off.
+  Future<bool> isEnabled();
+}
+
+/// How long one company's answer to `GET /status` is reused.
+const Duration kAiStatusCacheDuration = Duration(minutes: 5);
+
+/// Reads the body of `GET /v1/app/ai/status`: only a 200 with
+/// `data.enabled == true` turns the assistant on.
+bool parseAiStatusResponse(int status, String body) {
+  if (status != 200) return false;
+  try {
+    final json = jsonDecode(body);
+    return json is Map &&
+        json['data'] is Map &&
+        json['data']['enabled'] == true;
+  } catch (_) {
+    return false;
+  }
 }
 
 class AiOrderAssistService implements AiOrderAssistClient {
@@ -215,6 +236,34 @@ class AiOrderAssistService implements AiOrderAssistClient {
     : _client = client ?? http.Client();
 
   final http.Client _client;
+
+  /// Last answer per company, shared by every screen (see
+  /// [kAiStatusCacheDuration]).
+  static final Map<String, ({bool enabled, DateTime at})> _statusCache = {};
+
+  /// Clears the cached answers (tests, company switch).
+  static void clearStatusCache() => _statusCache.clear();
+
+  @override
+  Future<bool> isEnabled({DateTime Function() now = DateTime.now}) async {
+    try {
+      final headers = await appApiHeaders();
+      final companyId = headers['X-Company-Id'] ?? '';
+      final cached = _statusCache[companyId];
+      if (cached != null &&
+          now().difference(cached.at) < kAiStatusCacheDuration) {
+        return cached.enabled;
+      }
+      final response = await _client
+          .get(Uri.parse('$appApiBaseUrl/v1/app/ai/status'), headers: headers)
+          .timeout(const Duration(seconds: 10));
+      final enabled = parseAiStatusResponse(response.statusCode, response.body);
+      _statusCache[companyId] = (enabled: enabled, at: now());
+      return enabled;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<AiOrderDraft> assist({

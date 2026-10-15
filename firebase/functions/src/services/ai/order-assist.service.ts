@@ -310,6 +310,8 @@ export interface OrderAssistDeps {
   findDevices(companyId: string, name: string): Promise<DeviceHit[]>;
   /** Segment label of the device ("Veículo"), optional. */
   deviceLabel?(companyId: string): Promise<string | undefined>;
+  /** This month's use and limit without counting (GET /status), optional. */
+  getUsage?(companyId: string, settings: AiSettings | null): Promise<{ used: number; limit: number }>;
 }
 
 export interface DraftItem {
