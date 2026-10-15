@@ -44,7 +44,29 @@ String nfseHeadline(AppLocalizations l10n, NfseInvoice invoice) {
     case NfseStatus.canceled:
       return l10n.nfseHeadCanceled;
     case NfseStatus.error:
-      return l10n.nfseHeadError;
+      return invoice.errorCode != null
+          ? l10n.nfseHeadAutoError
+          : l10n.nfseHeadError;
+  }
+}
+
+/// Why a nota did not go out: our reason for an automatic one that failed,
+/// or the city's text. Null when there is nothing to say.
+String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
+  switch (invoice.errorCode) {
+    case null:
+      return invoice.statusDescription;
+    case 'ASAAS_REJECTED':
+      return invoice.statusDescription ?? l10n.nfseErrorAsaasValidation;
+    case 'TAX_ID_REQUIRED':
+    case 'INVALID_TAX_ID':
+      return l10n.nfseAutoErrorTaxId;
+    default:
+      return asaasErrorText(
+        l10n,
+        AsaasApiException(invoice.errorCode, ''),
+        nota: true,
+      );
   }
 }
 
@@ -250,6 +272,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     final refused =
         invoice.status == NfseStatus.error ||
         invoice.status == NfseStatus.cancellationDenied;
+    final reason = refused ? nfseReasonText(l10n, invoice) : null;
 
     return MorePage(
       title: l10n.nfseRowTitle,
@@ -305,14 +328,18 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               style: AppTypography.body.copyWith(color: text),
             ),
           ),
-        if (refused && invoice.statusDescription != null) ...[
-          SectionLabel(l10n.nfseReasonLabel),
+        if (reason != null) ...[
+          SectionLabel(
+            invoice.errorCode != null
+                ? l10n.nfseAutoReasonLabel
+                : l10n.nfseReasonLabel,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.pageMargin,
             ),
             child: Text(
-              invoice.statusDescription!,
+              reason,
               key: const Key('nfseInvoiceReason'),
               style: AppTypography.body.copyWith(color: text),
             ),

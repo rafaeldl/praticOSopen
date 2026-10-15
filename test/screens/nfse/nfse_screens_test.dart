@@ -484,6 +484,27 @@ void main() {
       expect(find.byKey(const Key('nfseMenuButton')), findsNothing);
     });
 
+    testWidgets('automatic nota that failed: says why, in plain words', (
+      tester,
+    ) async {
+      await pumpInvoice(
+        tester,
+        'error',
+        extra: {'errorCode': 'TAX_ID_REQUIRED', 'auto': true},
+      );
+      expect(find.textContaining('não saiu sozinha'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('nfseInvoiceReason')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Por que não saiu'), findsOneWidget);
+      expect(
+        find.text('O cliente não tem CPF ou CNPJ no cadastro.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('"Cancelar nota" asks first, then calls the server', (
       tester,
     ) async {
@@ -525,6 +546,7 @@ void main() {
     Map<String, dynamic> setup({
       List<String> missing = const [],
       bool fiscal = true,
+      String? autoIssue,
     }) => {
       'ready': missing.isEmpty,
       'missing': missing,
@@ -543,6 +565,7 @@ void main() {
           'municipalServiceId': '10',
           'municipalServiceName': 'Manutenção de veículos',
           'taxes': {'iss': 2},
+          if (autoIssue != null) 'autoIssue': autoIssue,
         },
     };
 
@@ -592,6 +615,46 @@ void main() {
       expect(find.text('Pronto'), findsNWidgets(2));
     });
 
+    testWidgets('"Emitir a nota": picks the moment and saves it', (
+      tester,
+    ) async {
+      final server = _Server((method, path, body) {
+        if (path == '/setup/service') return setup(autoIssue: 'completed');
+        return setup();
+      });
+      await _pump(tester, NfseSetupScreen(service: server.api), textScale: 2);
+      expect(tester.takeException(), isNull);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('nfseSetupAutoIssue')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Só quando eu pedir'), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('nfseSetupAutoIssue')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('nfseSetupAutoIssue')));
+      await tester.pumpAndSettle();
+      expect(find.text('Quando emitir a nota?'), findsWidgets);
+      final completed = find.text('Quando a OS for concluída');
+      await tester.scrollUntilVisible(
+        completed,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.ensureVisible(completed);
+      await tester.pumpAndSettle();
+      await tester.tap(completed);
+      await tester.pumpAndSettle();
+
+      final save = server.calls.last;
+      expect(save.$1, 'PUT');
+      expect(save.$2, '/setup/service');
+      expect(save.$3['autoIssue'], 'completed');
+      expect(save.$3['municipalServiceName'], 'Manutenção de veículos');
+      expect(find.text('Quando a OS for concluída'), findsOneWidget);
+    });
+
     testWidgets('service sheet saves service and taxes', (tester) async {
       final server = _Server((method, path, body) {
         if (path == '/setup/service') return setup();
@@ -619,6 +682,8 @@ void main() {
       expect(save.$3['municipalServiceCode'], '14.01');
       expect(save.$3['municipalServiceName'], 'Conserto');
       expect((save.$3['taxes'] as Map)['iss'], 2.5);
+      // The sheet never sends the moment: the server keeps the saved one.
+      expect(save.$3.containsKey('autoIssue'), isFalse);
     });
   });
 }

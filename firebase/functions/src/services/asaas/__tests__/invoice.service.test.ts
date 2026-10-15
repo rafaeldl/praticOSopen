@@ -8,6 +8,7 @@ import { addDays, todayInSaoPaulo } from '../charge.service';
 import {
   applyDescriptionTemplate,
   applyInvoiceEvent,
+  autoIssueInvoice,
   canMoveInvoiceStatus,
   cancelInvoice,
   createInvoice,
@@ -466,6 +467,102 @@ describe('invoice.service', () => {
       const result = await cancelInvoice('c1', 'nfA');
       expect(client.cancelInvoice).toHaveBeenCalledWith('inv_9', false);
       expect(result.status).toBe('canceled');
+    });
+  });
+
+  describe('emitir sozinho', () => {
+    const setAuto = (autoIssue: string) =>
+      seed('companies/c1/settings/nfse', { ...read('companies/c1/settings/nfse')!, autoIssue });
+    const invoicesOf = async (orderId: string) =>
+      (await fakeDb.collection('companies/c1/invoices').where('orderIds', 'array-contains', orderId).get()).docs.map(
+        (d: any) => ({ id: d.id, ...d.data() }),
+      );
+
+    it('no momento escolhido: emite a nota da OS, marcada como automática', async () => {
+      setAuto('paid');
+      await autoIssueInvoice('c1', 'o182', 'paid');
+
+      const [invoice] = await invoicesOf('o182');
+      expect(client.createInvoice).toHaveBeenCalledTimes(1);
+      expect(invoice).toMatchObject({ auto: true, orderIds: ['o182'], value: 270, createdBy: { id: 'system' } });
+      expect(read(LOCK('o182'))).toMatchObject({ invoiceId: invoice.id });
+    });
+
+    it('outro momento, "só quando eu pedir" ou sem escolha: não emite', async () => {
+      await autoIssueInvoice('c1', 'o182', 'paid');
+      setAuto('manual');
+      await autoIssueInvoice('c1', 'o182', 'completed');
+      setAuto('completed');
+      await autoIssueInvoice('c1', 'o182', 'paid');
+
+      expect(client.createInvoice).not.toHaveBeenCalled();
+      expect(await invoicesOf('o182')).toEqual([]);
+    });
+
+    it('nota fiscal desligada ou configuração incompleta: não emite', async () => {
+      setAuto('completed');
+      seed('companies/c1/settings/payments', { asaasConnected: true, nfseEnabled: true, nfseReady: false });
+      await autoIssueInvoice('c1', 'o182', 'completed');
+      seed('companies/c1/settings/payments', { asaasConnected: true, nfseEnabled: false, nfseReady: true });
+      await autoIssueInvoice('c1', 'o182', 'completed');
+
+      expect(client.createInvoice).not.toHaveBeenCalled();
+    });
+
+    it('OS que já teve nota (mesmo cancelada) fica com o usuário', async () => {
+      setAuto('completed');
+      seed(INV('old'), { status: 'canceled', orderIds: ['o182'], createdAt: minutesAgo(60) });
+      await autoIssueInvoice('c1', 'o182', 'completed');
+
+      expect(client.createInvoice).not.toHaveBeenCalled();
+    });
+
+    it('cliente sem CPF: registra a nota com erro na OS, uma vez só', async () => {
+      setAuto('completed');
+      seed('companies/c1/customers/cust1', { name: 'João' });
+      await autoIssueInvoice('c1', 'o182', 'completed');
+      await autoIssueInvoice('c1', 'o182', 'completed');
+
+      const invoices = await invoicesOf('o182');
+      expect(invoices).toHaveLength(1);
+      expect(invoices[0]).toMatchObject({
+        id: 'auto-o182', status: 'error', errorCode: 'TAX_ID_REQUIRED', auto: true, value: 270,
+        orders: [{ orderId: 'o182', orderNumber: 182, value: 270 }],
+      });
+      expect(read(LOCK('o182'))).toBeUndefined();
+      expect(client.createInvoice).not.toHaveBeenCalled();
+    });
+
+    it('Asaas recusa: guarda o motivo dele na nota com erro', async () => {
+      setAuto('paid');
+      client.createInvoice.mockRejectedValue(
+        new AsaasApiError(400, [{ code: 'invalid', description: 'Inscrição municipal inválida' }], '/invoices'),
+      );
+      await autoIssueInvoice('c1', 'o182', 'paid');
+
+      const invoices = await invoicesOf('o182');
+      expect(invoices).toHaveLength(1);
+      expect(invoices[0]).toMatchObject({
+        id: 'auto-o182', status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Inscrição municipal inválida',
+      });
+    });
+
+    it('Asaas sem resposta: a nota fica aguardando (conferida depois), sem registro de erro', async () => {
+      setAuto('paid');
+      client.createInvoice.mockRejectedValue(new AsaasApiError(503, [], '/invoices'));
+      await expect(autoIssueInvoice('c1', 'o182', 'paid')).rejects.toThrow();
+
+      const invoices = await invoicesOf('o182');
+      expect(invoices).toHaveLength(1);
+      expect(invoices[0]).toMatchObject({ status: 'creating', auto: true });
+    });
+
+    it('OS só com peças: registra o erro de "sem serviço"', async () => {
+      setAuto('completed');
+      seedOrder('o200', { services: [], discount: 0 });
+      await autoIssueInvoice('c1', 'o200', 'completed');
+
+      expect((await invoicesOf('o200'))[0]).toMatchObject({ status: 'error', errorCode: 'NO_SERVICES', value: 0 });
     });
   });
 

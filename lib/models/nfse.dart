@@ -79,6 +79,8 @@ class NfseInvoice {
     this.pdfUrl,
     this.xmlUrl,
     this.statusDescription,
+    this.errorCode,
+    this.auto = false,
     this.createdAt,
     this.conflict = false,
   });
@@ -100,6 +102,13 @@ class NfseInvoice {
 
   /// Why the city refused it (raw text from the city, shown as detail only).
   final String? statusDescription;
+
+  /// Why an automatic nota did not go out (server error code, see
+  /// `asaasErrorText`); null for notas the user asked for.
+  final String? errorCode;
+
+  /// Issued by the server on its own (`autoIssue`).
+  final bool auto;
   final DateTime? createdAt;
 
   /// A refused nota that came back on Asaas after the order already had
@@ -133,6 +142,8 @@ class NfseInvoice {
       pdfUrl: _str(json['pdfUrl']),
       xmlUrl: _str(json['xmlUrl']),
       statusDescription: _str(json['statusDescription']),
+      errorCode: _str(json['errorCode']),
+      auto: json['auto'] == true,
       createdAt: _date(json['createdAt']),
       conflict: json['conflict'] == true,
     );
@@ -386,6 +397,7 @@ class NfseServiceSettings {
     required this.municipalServiceName,
     this.taxes = const NfseTaxes(),
     this.descriptionTemplate = defaultTemplate,
+    this.autoIssue,
   });
 
   /// `{servicos}` becomes the services of the order(s), `{os}` the numbers.
@@ -397,6 +409,20 @@ class NfseServiceSettings {
   final NfseTaxes taxes;
   final String descriptionTemplate;
 
+  /// When the server issues the nota by itself; null keeps the saved choice
+  /// on save (and reads as [NfseAutoIssue.manual]).
+  final NfseAutoIssue? autoIssue;
+
+  NfseServiceSettings copyWith({NfseAutoIssue? autoIssue}) =>
+      NfseServiceSettings(
+        municipalServiceId: municipalServiceId,
+        municipalServiceCode: municipalServiceCode,
+        municipalServiceName: municipalServiceName,
+        taxes: taxes,
+        descriptionTemplate: descriptionTemplate,
+        autoIssue: autoIssue ?? this.autoIssue,
+      );
+
   factory NfseServiceSettings.fromJson(
     Map<String, dynamic> json,
   ) => NfseServiceSettings(
@@ -407,6 +433,7 @@ class NfseServiceSettings {
         ? NfseTaxes.fromJson(Map<String, dynamic>.from(json['taxes'] as Map))
         : const NfseTaxes(),
     descriptionTemplate: _str(json['descriptionTemplate']) ?? defaultTemplate,
+    autoIssue: NfseAutoIssue.parse(json['autoIssue']),
   );
 
   Map<String, dynamic> toJson() => {
@@ -415,7 +442,25 @@ class NfseServiceSettings {
     'municipalServiceName': municipalServiceName,
     'taxes': taxes.toJson(),
     'descriptionTemplate': descriptionTemplate,
+    if (autoIssue != null) 'autoIssue': autoIssue!.name,
   };
+}
+
+/// When a nota is issued without anyone asking (`settings/nfse.autoIssue`).
+enum NfseAutoIssue {
+  /// Only when the user asks (default).
+  manual,
+
+  /// When the order becomes paid.
+  paid,
+
+  /// When the order is done.
+  completed;
+
+  static NfseAutoIssue parse(Object? value) => NfseAutoIssue.values.firstWhere(
+    (v) => v.name == value,
+    orElse: () => NfseAutoIssue.manual,
+  );
 }
 
 /// A service of the city's list (`GET /v3/fiscalInfo/services`).

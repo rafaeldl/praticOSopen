@@ -2456,5 +2456,16 @@
   "nfseTaxesNote": "Use what the city and your accountant say. Leave 0 where it doesn't apply.",
   "nfseTemplateLabel": "Invoice text",
   "nfseTemplateHint": "{servicos} becomes the order's services and {os} the order numbers.",
-  "nfseServiceSaved": "Invoice service saved"
+  "nfseServiceSaved": "Invoice service saved",
+  "nfseAutoIssueRow": "Issue the invoice",
+  "nfseAutoIssueQuestion": "When to issue the invoice?",
+  "nfseAutoIssueManual": "Only when I ask",
+  "nfseAutoIssuePaid": "When the order is paid",
+  "nfseAutoIssueCompleted": "When the order is completed",
+  "nfseAutoIssueManualHint": "You issue it from the order or customer menu.",
+  "nfseAutoIssuePaidHint": "Goes out by itself when the customer finishes paying the order.",
+  "nfseAutoIssueCompletedHint": "Goes out by itself when the order is completed, before payment.",
+  "nfseHeadAutoError": "The invoice did not go out by itself. Fix the reason below and issue it from the order menu.",
+  "nfseAutoReasonLabel": "Why it did not go out",
+  "nfseAutoErrorTaxId": "The customer has no tax ID on file."
 }

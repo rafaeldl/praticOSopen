@@ -5576,4 +5576,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseServiceSaved => 'Invoice service saved';
+
+  @override
+  String get nfseAutoIssueRow => 'Issue the invoice';
+
+  @override
+  String get nfseAutoIssueQuestion => 'When to issue the invoice?';
+
+  @override
+  String get nfseAutoIssueManual => 'Only when I ask';
+
+  @override
+  String get nfseAutoIssuePaid => 'When the order is paid';
+
+  @override
+  String get nfseAutoIssueCompleted => 'When the order is completed';
+
+  @override
+  String get nfseAutoIssueManualHint =>
+      'You issue it from the order or customer menu.';
+
+  @override
+  String get nfseAutoIssuePaidHint =>
+      'Goes out by itself when the customer finishes paying the order.';
+
+  @override
+  String get nfseAutoIssueCompletedHint =>
+      'Goes out by itself when the order is completed, before payment.';
+
+  @override
+  String get nfseHeadAutoError =>
+      'The invoice did not go out by itself. Fix the reason below and issue it from the order menu.';
+
+  @override
+  String get nfseAutoReasonLabel => 'Why it did not go out';
+
+  @override
+  String get nfseAutoErrorTaxId => 'The customer has no tax ID on file.';
 }
