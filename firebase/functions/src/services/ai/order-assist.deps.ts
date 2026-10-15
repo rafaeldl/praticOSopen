@@ -1,13 +1,15 @@
 /**
  * Production wiring of [OrderAssistDeps]: Firestore lookups scoped to the
- * company, the quota service and the Vertex AI client.
+ * company, the quota service and the LLM router (Gemini or Claude per company).
  */
 
 import { getTenantCollection } from '../firestore.service';
 import { searchCustomers } from '../customer.service';
 import { findDeviceBySerial, searchDevices } from '../device.service';
 import { getAiSettings, releaseAiRequest, reserveAiRequest } from './ai-quota.service';
-import { VertexGeminiClient } from './llm.client';
+import { ClaudeClient } from './claude.client';
+import { VertexGeminiClient } from './gemini.client';
+import { LlmRouter } from './llm.client';
 import type { CatalogEntry, OrderAssistDeps } from './order-assist.service';
 
 const CATALOG_LIMIT = 300;
@@ -21,10 +23,15 @@ async function loadEntries(companyId: string, collection: 'services' | 'products
   });
 }
 
-let llm: VertexGeminiClient | undefined;
+let llm: LlmRouter | undefined;
+let gemini: VertexGeminiClient | undefined;
+let claude: ClaudeClient | undefined;
 
 export function defaultOrderAssistDeps(): OrderAssistDeps {
-  llm ??= new VertexGeminiClient();
+  llm ??= new LlmRouter({
+    gemini: () => (gemini ??= new VertexGeminiClient()),
+    claude: () => (claude ??= new ClaudeClient()),
+  });
   return {
     llm,
     getSettings: getAiSettings,

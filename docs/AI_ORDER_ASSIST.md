@@ -21,7 +21,9 @@ Specs: `docs/superpowers/specs/2026-10-11-telas-os-ia-design.md` (vale sobre) e 
 | `src/services/ai/order-assist.service.ts` | Validação (zod), prompt, parse da resposta, casamento com catálogo, orquestração (`runOrderAssist`) com dependências injetáveis |
 | `src/services/ai/order-assist.deps.ts` | Dependências de produção (Firestore da empresa, cota, Vertex AI) |
 | `src/services/ai/ai-quota.service.ts` | Piloto (`settings/ai`) e cota mensal (`aiUsage/{YYYY-MM}`) |
-| `src/services/ai/llm.client.ts` | `LlmClient` + `VertexGeminiClient` (Gemini no Vertex AI, credencial da conta de serviço; sem chave) |
+| `src/services/ai/llm.client.ts` | Interface neutra (`LlmClient`, `LlmRequest` com JSON Schema) e `LlmRouter`, que escolhe o provedor por pedido |
+| `src/services/ai/gemini.client.ts` | `VertexGeminiClient` (Gemini no Vertex AI, credencial da conta de serviço; sem chave) e `toGeminiSchema` |
+| `src/services/ai/claude.client.ts` | `ClaudeClient` (Claude na API da Anthropic, `@anthropic-ai/sdk`, structured outputs, fallback do servidor) |
 
 ### App
 
@@ -35,7 +37,7 @@ Specs: `docs/superpowers/specs/2026-10-11-telas-os-ia-design.md` (vale sobre) e 
 ### Firestore
 
 ```
-companies/{companyId}/settings/ai        { enabled: bool, monthlyLimit?: int }   # só Admin SDK
+companies/{companyId}/settings/ai        { enabled: bool, monthlyLimit?: int, provider?: 'gemini'|'claude' }   # só Admin SDK
 companies/{companyId}/aiUsage/{YYYY-MM}  { count, limit, updatedAt }             # só Admin SDK
 ```
 
@@ -52,11 +54,28 @@ POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio
   1. settings/ai.enabled? senão 403 AI_DISABLED
   2. cota: transação em aiUsage/{mês}; no limite → 429 AI_QUOTA_EXCEEDED {used, limit}
   3. catálogo da empresa (até 300 serviços e 300 produtos, nome + preço)
-  4. Gemini (responseSchema JSON) — falhou → devolve a cota, 503 AI_UNAVAILABLE
+  4. Modelo (Gemini ou Claude, ver "Provedores"; resposta presa ao JSON Schema) — falhou → devolve a cota, 503 AI_UNAVAILABLE
   5. casa itens com o catálogo; cliente por nome (searchCustomers); veículo por placa/série
   ◀── rascunho {transcript, customer, device, items[], notes, dueDate, usage}
 App: preenche a OS em memória (deferSave), ✦ azul no que veio da IA, aviso "Preenchi… · Desfazer" → ✓ no topo
 ```
+
+## Provedores
+
+A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmRequest` (prompt, texto, fotos/áudio e o JSON Schema da resposta) e o `LlmRouter` entrega para o cliente certo:
+
+1. `settings/ai.provider` da empresa (`gemini` ou `claude`);
+2. senão `AI_PROVIDER` no ambiente da Function;
+3. senão `gemini`.
+
+Se o provedor escolhido não lê alguma parte do pedido (o Claude não recebe áudio), o pedido vai para o provedor padrão. Para somar outro provedor: criar um `LlmProviderClient` (`generateJson` + `supportsMedia`), registrar no `LlmRouter` em `order-assist.deps.ts` e incluir o nome em `LLM_PROVIDERS`.
+
+| Provedor | Modelo padrão | Variáveis | Credencial | Onde roda |
+|---|---|---|---|---|
+| `gemini` | `gemini-2.5-flash` | `AI_GEMINI_MODEL`, `AI_VERTEX_LOCATION` | Conta de serviço (sem chave) | Vertex AI, São Paulo |
+| `claude` | `claude-sonnet-5-5` | `AI_CLAUDE_MODEL`, `AI_CLAUDE_EFFORT` (padrão `low`) | Secret `ANTHROPIC_API_KEY` | API da Anthropic (EUA) |
+
+O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`): se o modelo recusar, o servidor da Anthropic tenta outro modelo na mesma chamada. Recusa final, resposta cortada ou erro da API viram `AI_UNAVAILABLE` e a cota é devolvida.
 
 ## Regras de Negócio
 
@@ -94,9 +113,11 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 - ~~Ativar a **Vertex AI API** (`aiplatform.googleapis.com`) no projeto `praticos`~~ feito em 2026-10-11. A conta de serviço de runtime (`…-compute@developer`) tem Editor, que cobre `aiplatform.user`. Não há chave/segredo para cadastrar.
 - Opcional: `AI_GEMINI_MODEL` / `AI_VERTEX_LOCATION` (padrão `gemini-2.5-flash` / `southamerica-east1`, São Paulo, para os dados ficarem no Brasil — LGPD) em `firebase/functions/.env` se quiser outro modelo/região.
 - Ligar o piloto por empresa (`settings/ai`).
+- **Claude:** antes do deploy, cadastrar a chave (sem ela o deploy da Function `api` falha): `firebase functions:secrets:set ANTHROPIC_API_KEY`. Depois, por empresa: `settings/ai.provider = 'claude'`.
+- Antes de abrir o Claude para todos: a política de privacidade precisa citar a Anthropic (dados processados fora do Brasil, LGPD art. 33).
 - Antes de abrir para todos: política de privacidade (fotos/texto processados pelo Google Vertex AI) e, quando houver gravação de áudio, `NSMicrophoneUsageDescription`/`RECORD_AUDIO` e rótulos de privacidade das lojas.
 
 ## Testes
 
-- Functions: `src/services/ai/__tests__/ai-quota.service.test.ts`, `src/services/ai/__tests__/order-assist.service.test.ts`, `src/routes/v1/__tests__/ai.routes.test.ts`.
+- Functions: `src/services/ai/__tests__/` (`ai-quota.service`, `order-assist.service`, `llm.client`, `gemini.client`, `claude.client`) e `src/routes/v1/__tests__/ai.routes.test.ts`.
 - App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant"), `test/services/ai_order_assist_service_test.dart`.

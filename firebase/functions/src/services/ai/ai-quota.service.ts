@@ -16,6 +16,7 @@
 
 import { db, FieldValue } from '../firestore.service';
 import type { SubscriptionPlan } from '../../models/types';
+import { isLlmProvider, type LlmProvider } from './llm.client';
 
 /** Requests per month by plan (decided 2026-10-09). -1 = unlimited. */
 export const AI_REQUESTS_PER_MONTH: Record<SubscriptionPlan, number> = {
@@ -29,6 +30,8 @@ export interface AiSettings {
   enabled: boolean;
   /** Overrides the plan limit when set (pilot). -1 = unlimited. */
   monthlyLimit?: number;
+  /** Model provider for this company ('gemini' | 'claude'); unset = AI_PROVIDER/gemini. */
+  provider?: LlmProvider;
 }
 
 export type QuotaReservation =
@@ -61,6 +64,7 @@ export async function getAiSettings(companyId: string): Promise<AiSettings | nul
   return {
     enabled: data.enabled === true,
     monthlyLimit: validLimit(data.monthlyLimit) ? data.monthlyLimit : undefined,
+    provider: isLlmProvider(data.provider) ? data.provider : undefined,
   };
 }
 

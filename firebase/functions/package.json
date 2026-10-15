@@ -28,6 +28,7 @@
     "node": "22"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "busboy": "^1.6.0",
     "cors": "^2.8.5",
