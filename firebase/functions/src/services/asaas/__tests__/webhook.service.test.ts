@@ -337,10 +337,10 @@ describe('webhook.service - INVOICE_* (NFS-e)', () => {
   });
   afterEach(() => jest.restoreAllMocks());
 
-  it('emitida: atualiza a nota, põe o PDF na OS e grava o evento', async () => {
+  it('emitida: atualiza a nota e grava o evento, sem mexer nos arquivos da OS', async () => {
     await handleAsaasEvent('c1', invoiceEvent('INVOICE_AUTHORIZED', 'AUTHORIZED', 'evt_nf_1', { pdfUrl: 'https://pdf' }));
     expect(data(INVOICE)).toMatchObject({ status: 'authorized', pdfUrl: 'https://pdf' });
-    expect((data(ORDER_PATH).documents as unknown[]).length).toBe(1);
+    expect(data(ORDER_PATH).documents).toEqual([]);
     expect(read(`${EVENTS_PREFIX}evt_nf_1`)).toBeDefined();
   });
 

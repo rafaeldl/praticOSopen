@@ -80,6 +80,16 @@ void main() {
       );
     });
 
+    test('nota fiscal: reconectar, conta do Asaas trocada', () {
+      expect(text('NFSE_RECONNECT_NEEDED'), l10n.nfseErrorReconnectNeeded);
+      expect(
+        l10n.nfseErrorReconnectNeeded,
+        'Reconecte o Asaas para emitir notas.',
+      );
+      expect(text('NFSE_SETUP_NEEDED'), l10n.nfseErrorSetupNeeded);
+      expect(text('INVOICE_OTHER_ACCOUNT'), l10n.nfseErrorOtherAccount);
+    });
+
     test('CHARGE_NOT_OPEN', () {
       expect(text('CHARGE_NOT_OPEN'), l10n.asaasErrorChargeNotOpen);
     });

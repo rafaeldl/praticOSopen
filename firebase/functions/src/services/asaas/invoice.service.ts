@@ -13,12 +13,20 @@
  *   One active invoice per order is guaranteed by the lock docs
  *   companies/{cid}/private/nfse/orders/{orderId} (server-only), read and
  *   written in the same transaction as the new invoice.
+ * - A create whose answer was lost (timeout, 5xx, network) may still have
+ *   created the nota on Asaas: the invoice stays 'creating' and locked until
+ *   it is reconciled with Asaas (`reconcileInvoice`, by the externalReference),
+ *   on the next preview/emit/cancel touching the order or by the webhook.
+ * - The nota PDF/XML live only on the invoice doc; the order `documents`
+ *   array belongs to the app (saved whole) and is never written here.
  */
 
 import { db } from '../firestore.service';
 import { Customer, Order, UserAggr } from '../../models/types';
 import {
+  AsaasConnectionDoc,
   AsaasCreateInvoiceInput,
+  AsaasEnvironment,
   AsaasInvoice,
   CreateInvoiceInput,
   InvoiceOrderPart,
@@ -27,17 +35,26 @@ import {
   NfseServiceSettings,
   PaymentSettingsDoc,
 } from '../../models/asaas.types';
-import { AsaasApiError } from './asaas-client';
-import { getAsaasCredentialProvider } from './credential-provider';
+import { AsaasApiError, AsaasClient } from './asaas-client';
+import { asaasConnectionRef, getAsaasCredentialProvider } from './credential-provider';
 import { AsaasServiceError } from './errors';
 import { getPaymentSettings } from './connection.service';
+import { hasNfseWebhookEvents } from './webhook-events';
 import { findOrCreateAsaasCustomer, resolveTaxId, roundMoney, todayInSaoPaulo, addDays } from './charge.service';
 
 export const MAX_INVOICE_ORDERS = 50;
 /** Tag of the invoice externalReference `{companyId}:nf:{invoiceId}`. */
 export const INVOICE_REF_TAG = 'nf';
-/** A 'creating' invoice older than this never reached Asaas (crash) and stops blocking. */
-const STALE_CREATING_MS = 15 * 60 * 1000;
+/**
+ * A non-final invoice untouched for this long is checked against Asaas before
+ * deciding (lost answer of the create, missed webhook). Long enough for an
+ * in-flight create (20 s timeout) to have finished.
+ */
+export const RECONCILE_AFTER_MS = 3 * 60 * 1000;
+/** Statuses that may still change without us hearing (checked by `reconcileInvoice`). */
+const RECONCILE_STATUSES: InvoiceStatus[] = ['creating', 'scheduled', 'synchronized', 'processingCancellation'];
+/** Asaas answers that prove the invoice was not created (anything else: unknown). */
+const DEFINITIVE_REJECTIONS = [400, 401, 403, 404, 422];
 const MAX_DESCRIPTION = 2000;
 const MAX_OBSERVATIONS = 500;
 /** Furthest future date accepted for the issue date. */
@@ -208,34 +225,83 @@ export function canMoveInvoiceStatus(from: InvoiceStatus, to: InvoiceStatus): bo
   return RANK[to] >= RANK[from];
 }
 
-export function isActiveInvoice(invoice: Pick<NfseInvoice, 'status' | 'createdAt'>, now: number = Date.now()): boolean {
+/**
+ * Counts as "the order has a nota". A 'creating' one stays active however old
+ * (it may exist on Asaas): only `reconcileInvoice` frees it. A `conflict` nota
+ * never holds the orders' locks.
+ */
+export function isActiveInvoice(invoice: Pick<NfseInvoice, 'status' | 'createdAt' | 'conflict'>): boolean {
   if (INACTIVE_STATUSES.includes(invoice.status)) return false;
-  if (invoice.status === 'creating') {
-    const created = Date.parse(invoice.createdAt || '');
-    if (Number.isFinite(created) && now - created > STALE_CREATING_MS) return false;
-  }
-  return true;
+  return invoice.conflict !== true;
 }
 
 // ----------------------------------------------------------------------------
 // Preconditions and order loading
 // ----------------------------------------------------------------------------
 
-/** NFS-e is available: server flag on and Asaas connected. */
-export async function assertNfseEnabled(companyId: string): Promise<PaymentSettingsDoc> {
+export interface NfseContext {
+  settings: PaymentSettingsDoc;
+  connection: AsaasConnectionDoc;
+}
+
+/**
+ * NFS-e is available: server flag on, Asaas connected, and the connection's
+ * webhook receives the INVOICE_* events (connections made before NFS-e must
+ * reconnect, or a city rejection would never arrive and the order stay locked).
+ */
+export async function assertNfseEnabled(companyId: string): Promise<NfseContext> {
   const settings = await getPaymentSettings(companyId);
   if (!settings.nfseEnabled) {
     throw new AsaasServiceError('NFSE_NOT_ENABLED', 'NFS-e is not enabled for this company');
   }
-  if (!settings.asaasConnected) {
+  const snap = settings.asaasConnected ? await asaasConnectionRef(companyId).get() : null;
+  const connection = snap?.exists ? (snap.data() as AsaasConnectionDoc) : undefined;
+  if (!connection) {
     throw new AsaasServiceError('ASAAS_NOT_CONNECTED', 'Asaas account is not connected');
   }
-  return settings;
+  if (!hasNfseWebhookEvents(connection.webhookEvents)) {
+    throw new AsaasServiceError('NFSE_RECONNECT_NEEDED', 'Reconnect the Asaas account to receive the nota events');
+  }
+  return { settings, connection };
+}
+
+export interface AsaasAccountStamp {
+  asaasEnvironment: AsaasEnvironment;
+  asaasWalletId: string | null;
+}
+
+/** Identity of the connected Asaas account, stored on settings/nfse and on each invoice. */
+export function accountStampOf(connection: Pick<AsaasConnectionDoc, 'environment' | 'walletId'>): AsaasAccountStamp {
+  return { asaasEnvironment: connection.environment, asaasWalletId: connection.walletId ?? null };
+}
+
+/** Whether a stamped doc belongs to the connected account (unstamped: no). */
+export function isSameAccount(
+  stamped: { asaasEnvironment?: AsaasEnvironment; asaasWalletId?: string | null },
+  connection: Pick<AsaasConnectionDoc, 'environment' | 'walletId'>,
+): boolean {
+  const current = accountStampOf(connection);
+  return stamped.asaasEnvironment === current.asaasEnvironment && (stamped.asaasWalletId ?? null) === current.asaasWalletId;
 }
 
 export async function getNfseServiceSettings(companyId: string): Promise<NfseServiceSettings | null> {
   const snap = await nfseSettingsRef(companyId).get();
   return snap.exists ? (snap.data() as NfseServiceSettings) : null;
+}
+
+/**
+ * The default service, ready for notas: setup checked (`nfseReady`) and saved
+ * on the connected Asaas account (settings/nfse survives an account change).
+ */
+async function requireReadyService(companyId: string, ctx: NfseContext): Promise<NfseServiceSettings> {
+  const service = await getNfseServiceSettings(companyId);
+  if (!service || !ctx.settings.nfseReady) {
+    throw new AsaasServiceError('NFSE_NOT_READY', 'Set up the nota service first');
+  }
+  if (!isSameAccount(service, ctx.connection)) {
+    throw new AsaasServiceError('NFSE_SETUP_NEEDED', 'The nota service was set up on another Asaas account');
+  }
+  return service;
 }
 
 interface LoadedOrders {
@@ -290,15 +356,28 @@ export async function loadInvoiceOrders(
   return { orders, parts, customerId, customerName: orders[0].customer?.name ?? null, value };
 }
 
-/** Active invoice ids covering each order (via the lock docs). */
-async function activeInvoicesOf(companyId: string, orderIds: string[]): Promise<Record<string, string>> {
+/**
+ * Active invoice ids covering each order (via the lock docs), after checking
+ * stale non-final ones against Asaas.
+ */
+async function activeInvoicesOf(
+  companyId: string,
+  orderIds: string[],
+  client: AsaasClient,
+): Promise<Record<string, string>> {
   const result: Record<string, string> = {};
+  const checked = new Map<string, NfseInvoice | null>();
   for (const orderId of orderIds) {
     const lock = await orderLockRef(companyId, orderId).get();
     const invoiceId = lock.data()?.invoiceId as string | undefined;
     if (!invoiceId) continue;
-    const invoice = await invoicesRef(companyId).doc(invoiceId).get();
-    if (invoice.exists && isActiveInvoice(invoice.data() as NfseInvoice)) result[orderId] = invoiceId;
+    if (!checked.has(invoiceId)) {
+      const snap = await invoicesRef(companyId).doc(invoiceId).get();
+      const invoice = snap.exists ? { ...(snap.data() as NfseInvoice), id: snap.id } : null;
+      checked.set(invoiceId, invoice ? await reconcileInvoice(companyId, invoice, client) : null);
+    }
+    const invoice = checked.get(invoiceId);
+    if (invoice && isActiveInvoice(invoice)) result[orderId] = invoiceId;
   }
   return result;
 }
@@ -335,11 +414,11 @@ export async function previewInvoice(
   orderIds: string[],
   expectedCustomerId?: string,
 ): Promise<InvoicePreview> {
-  await assertNfseEnabled(companyId);
-  const service = await getNfseServiceSettings(companyId);
-  if (!service) throw new AsaasServiceError('NFSE_NOT_READY', 'Set up the nota service first');
+  const ctx = await assertNfseEnabled(companyId);
+  const service = await requireReadyService(companyId, ctx);
 
   const loaded = await loadInvoiceOrders(companyId, orderIds, expectedCustomerId);
+  const client = await getAsaasCredentialProvider().getClient(companyId);
   const customerSnap = await companyRef(companyId).collection('customers').doc(loaded.customerId).get();
   const customer = customerSnap.data() as Customer | undefined;
   const numbers = describeOrderNumbers(loaded.orders.map((o) => o.number));
@@ -355,7 +434,7 @@ export async function previewInvoice(
       name: customer?.name ?? loaded.customerName,
       hasTaxId: !!customer?.taxId,
     },
-    invoicedOrders: await activeInvoicesOf(companyId, loaded.orders.map((o) => o.id)),
+    invoicedOrders: await activeInvoicesOf(companyId, loaded.orders.map((o) => o.id), client),
     municipalServiceName: service.municipalServiceName,
   };
 }
@@ -385,7 +464,12 @@ export function invoiceUpdateFrom(
   return update;
 }
 
-/** Writes the Asaas state to the invoice doc in a transaction (never moves the status back). */
+/**
+ * Writes the Asaas state to the invoice doc in a transaction (never moves the
+ * status back). A nota leaving 'error' for a live status while one of its
+ * orders already has another nota (the lock points elsewhere) is recorded
+ * but marked `conflict`: it does not take the orders back.
+ */
 export async function syncInvoice(
   companyId: string,
   invoiceId: string,
@@ -400,12 +484,68 @@ export async function syncInvoice(
     if (before.asaasInvoiceId && asaas.id && before.asaasInvoiceId !== asaas.id) return null;
     const update = invoiceUpdateFrom(before, asaas, eventName);
     if (!update) return { before, after: before };
+    const revived = before.status === 'error' && !INACTIVE_STATUSES.includes(update.status as InvoiceStatus);
+    if (revived && !before.conflict) {
+      const locks = await Promise.all(before.orderIds.map((id) => tx.get(orderLockRef(companyId, id))));
+      const taken = locks.filter((lock) => lock.data()?.invoiceId !== invoiceId).map((lock) => lock.id);
+      if (taken.length > 0) {
+        update.conflict = true;
+        console.error('[NFS-e] ALERT nota with error came back while its orders have another nota', {
+          companyId, invoiceId, status: update.status, orders: taken,
+        });
+      }
+    }
     tx.update(ref, update as Record<string, unknown>);
     return { before, after: { ...before, ...update } as NfseInvoice };
   });
 }
 
-async function releaseLocks(companyId: string, invoiceId: string, orderIds: string[]): Promise<void> {
+/**
+ * Checks a non-final invoice untouched for RECONCILE_AFTER_MS against Asaas:
+ * by its Asaas id, or by the externalReference when the create answer was
+ * lost. A 'creating' one Asaas does not know never got there and is removed
+ * (orders freed). Asaas unreachable: left as is (still locks). Returns the
+ * current invoice, or null when it was removed.
+ */
+export async function reconcileInvoice(
+  companyId: string,
+  invoice: NfseInvoice,
+  client: AsaasClient,
+  now: number = Date.now(),
+): Promise<NfseInvoice | null> {
+  if (!RECONCILE_STATUSES.includes(invoice.status)) return invoice;
+  const last = Date.parse(invoice.updatedAt || invoice.createdAt || '');
+  if (Number.isFinite(last) && now - last < RECONCILE_AFTER_MS) return invoice;
+  try {
+    let asaas: AsaasInvoice | null;
+    if (invoice.asaasInvoiceId) {
+      asaas = await client.getInvoice(invoice.asaasInvoiceId);
+    } else {
+      const found = await client.listInvoicesByExternalReference(invoiceExternalReference(companyId, invoice.id));
+      if (found.length > 1) {
+        console.error('[NFS-e] ALERT several Asaas notas for one PraticOS invoice', {
+          companyId, invoiceId: invoice.id, asaasIds: found.map((f) => f.id),
+        });
+      }
+      asaas = found[0] ?? null;
+    }
+    if (!asaas) {
+      if (invoice.status !== 'creating') return invoice;
+      await releaseInvoice(companyId, invoice.id, invoice.orderIds);
+      console.warn(`[NFS-e] Invoice ${invoice.id} of company ${companyId} never reached Asaas; orders freed`);
+      return null;
+    }
+    const result = await syncInvoice(companyId, invoice.id, asaas);
+    return result ? { ...result.after, id: invoice.id } : invoice;
+  } catch (error) {
+    const status = error instanceof AsaasApiError ? error.status : 'unknown';
+    console.warn(`[NFS-e] Could not reconcile invoice ${invoice.id} of company ${companyId} (status ${status})`);
+    return invoice;
+  }
+}
+
+/** Removes an invoice that never reached Asaas and frees its orders. */
+async function releaseInvoice(companyId: string, invoiceId: string, orderIds: string[]): Promise<void> {
   await db.runTransaction(async (tx) => {
     const locks = await Promise.all(orderIds.map((id) => tx.get(orderLockRef(companyId, id))));
     locks.forEach((lock, i) => {
@@ -421,9 +561,8 @@ export async function createInvoice(
   user: UserAggr,
   expectedCustomerId?: string,
 ): Promise<NfseInvoice> {
-  await assertNfseEnabled(companyId);
-  const service = await getNfseServiceSettings(companyId);
-  if (!service) throw new AsaasServiceError('NFSE_NOT_READY', 'Set up the nota service first');
+  const ctx = await assertNfseEnabled(companyId);
+  const service = await requireReadyService(companyId, ctx);
 
   const effectiveDate = validEffectiveDate(input.effectiveDate);
   const loaded = await loadInvoiceOrders(companyId, input.orderIds, expectedCustomerId);
@@ -436,6 +575,12 @@ export async function createInvoice(
   const taxId = await resolveTaxId(companyId, customer, input.customerTaxId);
 
   const client = await getAsaasCredentialProvider().getClient(companyId);
+  // Stale notas of these orders are checked with Asaas first (lost create
+  // answer, missed city rejection), so the reservation below sees the truth.
+  const invoiced = await activeInvoicesOf(companyId, orderIds, client);
+  if (Object.keys(invoiced).length > 0) {
+    throw new AsaasServiceError('ORDER_HAS_INVOICE', 'An order already has an active nota');
+  }
   const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId);
 
   const numbers = describeOrderNumbers(loaded.orders.map((o) => o.number));
@@ -459,6 +604,7 @@ export async function createInvoice(
     municipalServiceName: service.municipalServiceName,
     createdBy: { id: user.id, name: user.name },
     createdAt: now,
+    ...accountStampOf(ctx.connection),
   };
   await db.runTransaction(async (tx) => {
     const locks = await Promise.all(orderIds.map((id) => tx.get(orderLockRef(companyId, id))));
@@ -495,13 +641,30 @@ export async function createInvoice(
   try {
     created = await client.createInvoice(payload);
   } catch (error) {
-    await releaseLocks(companyId, invoiceRef.id, orderIds).catch(() => {
-      console.error(`[NFS-e] Could not release invoice ${invoiceRef.id} of company ${companyId}`);
-    });
+    if (error instanceof AsaasApiError && DEFINITIVE_REJECTIONS.includes(error.status)) {
+      // Asaas refused it: nothing was created, the orders are free again.
+      await releaseInvoice(companyId, invoiceRef.id, orderIds).catch(() => {
+        console.error(`[NFS-e] Could not release invoice ${invoiceRef.id} of company ${companyId}`);
+      });
+    } else {
+      // No clear answer (timeout, 408, 5xx, network): Asaas may have created
+      // it. Kept 'creating' and locked; reconcileInvoice or the webhook finds out.
+      const status = error instanceof AsaasApiError ? error.status : 'no answer';
+      console.warn(`[NFS-e] create of invoice ${invoiceRef.id} of company ${companyId} unknown (${status}); kept locked`);
+    }
     throw error;
   }
 
-  let result = (await syncInvoice(companyId, invoiceRef.id, created))?.after ?? invoice;
+  // Asaas id first, before anything else can fail: the nota exists there.
+  invoice.asaasInvoiceId = created.id;
+  let result: NfseInvoice = invoice;
+  try {
+    await invoiceRef.update({ asaasInvoiceId: created.id, updatedAt: new Date().toISOString() });
+    result = (await syncInvoice(companyId, invoiceRef.id, created))?.after ?? invoice;
+  } catch (error) {
+    console.error(`[NFS-e] ALERT invoice ${invoiceRef.id} of company ${companyId} created on Asaas (${created.id}) but not saved`, error);
+    return { ...invoice, id: invoiceRef.id };
+  }
 
   // 3. Issue now when the date is today (otherwise Asaas issues it on the date).
   if (effectiveDate === todayInSaoPaulo() && created.status === 'SCHEDULED') {
@@ -527,15 +690,21 @@ export async function cancelInvoice(
   invoiceId: string,
   onlyOnAsaas = false,
 ): Promise<NfseInvoice> {
-  await assertNfseEnabled(companyId);
+  const { connection } = await assertNfseEnabled(companyId);
   const snap = await invoicesRef(companyId).doc(invoiceId).get();
   if (!snap.exists) throw new AsaasServiceError('INVOICE_NOT_FOUND', 'Invoice not found');
-  const invoice = { ...(snap.data() as NfseInvoice), id: snap.id };
-  if (!CANCELABLE_STATUSES.includes(invoice.status) || !invoice.asaasInvoiceId) {
-    throw new AsaasServiceError('INVOICE_NOT_CANCELABLE', 'This nota cannot be canceled now');
+  const stored = { ...(snap.data() as NfseInvoice), id: snap.id };
+  // Notas from before the account stamp have none and stay cancelable.
+  if (stored.asaasEnvironment && !isSameAccount(stored, connection)) {
+    throw new AsaasServiceError('INVOICE_OTHER_ACCOUNT', 'The nota was issued on another Asaas account');
   }
 
   const client = await getAsaasCredentialProvider().getClient(companyId);
+  const invoice = await reconcileInvoice(companyId, stored, client);
+  if (!invoice || !CANCELABLE_STATUSES.includes(invoice.status) || !invoice.asaasInvoiceId) {
+    throw new AsaasServiceError('INVOICE_NOT_CANCELABLE', 'This nota cannot be canceled now');
+  }
+
   // An issued nota is canceled at the city; some cities do not allow it through the API.
   if (invoice.status !== 'scheduled' && !onlyOnAsaas) {
     const options = await client.getMunicipalOptions().catch(() => null);
@@ -547,55 +716,6 @@ export async function cancelInvoice(
   const canceled = await client.cancelInvoice(invoice.asaasInvoiceId, onlyOnAsaas);
   const result = await syncInvoice(companyId, invoiceId, canceled);
   return { ...(result?.after ?? invoice), id: invoiceId };
-}
-
-// ----------------------------------------------------------------------------
-// Order documents (the PDF of an issued nota appears among the OS files)
-// ----------------------------------------------------------------------------
-
-export function invoiceDocumentId(invoiceId: string): string {
-  return `nfse_${invoiceId}`;
-}
-
-/** Adds (authorized) or removes (canceled) the nota PDF on each order. Idempotent. */
-export async function syncOrderDocuments(companyId: string, invoice: NfseInvoice): Promise<void> {
-  const docId = invoiceDocumentId(invoice.id);
-  const attach = invoice.status === 'authorized' && !!invoice.pdfUrl;
-  const detach = invoice.status === 'canceled';
-  if (!attach && !detach) return;
-
-  for (const orderId of invoice.orderIds) {
-    const ref = companyRef(companyId).collection('orders').doc(orderId);
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(ref);
-      if (!snap.exists) return;
-      const documents = ((snap.data() as { documents?: Array<{ id?: string }> }).documents ?? []) as Array<
-        Record<string, unknown>
-      >;
-      const has = documents.some((d) => d.id === docId);
-      if (attach && !has) {
-        const number = invoice.number ? ` ${invoice.number}` : '';
-        tx.update(ref, {
-          documents: [
-            ...documents,
-            {
-              id: docId,
-              url: invoice.pdfUrl,
-              storagePath: null,
-              fileName: `Nota fiscal${number}.pdf`,
-              contentType: 'application/pdf',
-              type: 'invoice',
-              description: invoice.number ? `NFS-e ${invoice.number}` : 'NFS-e',
-              createdAt: new Date().toISOString(),
-              createdBy: { id: 'system', name: 'PraticOS' },
-            },
-          ],
-        });
-      } else if (detach && has) {
-        tx.update(ref, { documents: documents.filter((d) => d.id !== docId) });
-      }
-    });
-  }
 }
 
 /** Webhook entry: INVOICE_* event for this company. Acknowledged when unknown. */
@@ -620,10 +740,10 @@ export async function applyInvoiceEvent(companyId: string, eventName: string, as
 
   const result = await syncInvoice(companyId, invoiceId, asaas, eventName);
   if (!result) {
-    console.warn('[AsaasWebhook] invoice not found or other Asaas id, acknowledged', {
-      companyId, invoiceId, event: eventName,
+    // Our reference (or our Asaas id) but no matching doc: a nota exists on
+    // Asaas that PraticOS lost track of. Acknowledged, but loudly.
+    console.error('[AsaasWebhook] ALERT PraticOS nota without its invoice doc (or another Asaas id)', {
+      companyId, invoiceId, asaasInvoiceId: asaas.id, event: eventName,
     });
-    return;
   }
-  await syncOrderDocuments(companyId, { ...result.after, id: invoiceId });
 }

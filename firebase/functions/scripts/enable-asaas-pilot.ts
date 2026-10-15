@@ -17,9 +17,12 @@
  * --nfse turns the NFS-e flag (settings/payments.nfseEnabled) on or off instead
  * of asaasEnabled (docs/NFSE_ASAAS.md):
  *   npm run asaas:pilot -- --project praticos --company <id> --nfse --yes
+ * Enabling NFS-e is refused (NFSE_RECONNECT_NEEDED) for a company whose Asaas
+ * connection predates the INVOICE_* webhook events: reconnect it first.
  */
 
 import * as admin from 'firebase-admin';
+import { hasNfseWebhookEvents } from '../src/services/asaas/webhook-events';
 
 export interface Args {
   companyIds: string[];
@@ -85,6 +88,20 @@ export function buildUpdate(exists: boolean, disable: boolean, nfse = false): Re
   return exists ? { asaasEnabled } : { asaasEnabled, asaasConnected: false };
 }
 
+/**
+ * Why NFS-e cannot be enabled for this company, or null. A connection made
+ * before the INVOICE_* events would never hear a city rejection; a company
+ * not connected yet records the events when it connects.
+ */
+export function nfseEnableBlocker(
+  args: Pick<Args, 'nfse' | 'disable'>,
+  connection: { webhookEvents?: string[] | null } | undefined,
+): string | null {
+  if (!args.nfse || args.disable || !connection) return null;
+  if (hasNfseWebhookEvents(connection.webhookEvents)) return null;
+  return 'NFSE_RECONNECT_NEEDED: the Asaas connection has no INVOICE_* webhook events; reconnect Asaas in the app first';
+}
+
 async function main(): Promise<void> {
   let args: Args;
   let target: Target;
@@ -114,6 +131,12 @@ async function main(): Promise<void> {
     }
     const ref = companyRef.collection('settings').doc('payments');
     const current = await ref.get();
+    const connection = await companyRef.collection('private').doc('asaas').get();
+    const blocker = nfseEnableBlocker(args, connection.exists ? connection.data() : undefined);
+    if (blocker) {
+      console.error(`Company ${id}: ${blocker}`);
+      process.exit(1);
+    }
     const update = buildUpdate(current.exists, args.disable, args.nfse);
     console.log(`- ${company.get('name') ?? '(no name)'} (${id})`);
     console.log(`  before: ${JSON.stringify(current.exists ? current.data() : null)}`);

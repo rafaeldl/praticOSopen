@@ -8,9 +8,17 @@ jest.mock('../../../services/firestore.service', () =>
 import { read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { setAsaasCredentialProvider } from '../../../services/asaas/credential-provider';
 import { AsaasApiError } from '../../../services/asaas/asaas-client';
+import { ASAAS_WEBHOOK_EVENTS } from '../../../services/asaas/webhook-events';
 import router from '../nfse.routes';
 
 const TAXES = { retainIss: false, iss: 2, pis: 0, cofins: 0, csll: 0, inss: 0, ir: 0 };
+const ACCOUNT = { asaasEnvironment: 'sandbox', asaasWalletId: 'w1' };
+
+function seedConnection(companyId: string, data: Record<string, unknown> = {}) {
+  seed(`companies/${companyId}/private/asaas`, {
+    mode: 'apiKey', environment: 'sandbox', walletId: 'w1', status: 'active', webhookEvents: ASAAS_WEBHOOK_EVENTS, ...data,
+  });
+}
 
 const client = {
   findCustomerByExternalReference: jest.fn(),
@@ -57,8 +65,9 @@ describe('nfse.routes', () => {
     client.listMunicipalServices.mockResolvedValue([{ id: 'ms_1', description: '14.01 Manutenção', issTax: 2 }]);
 
     seed('companies/c1', { name: 'Oficina' });
-    seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: true, nfseEnabled: true });
-    seed('companies/c1/settings/nfse', { municipalServiceId: 'ms_1', municipalServiceName: 'Manutenção', taxes: TAXES });
+    seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: true, nfseEnabled: true, nfseReady: true });
+    seed('companies/c1/settings/nfse', { municipalServiceId: 'ms_1', municipalServiceName: 'Manutenção', taxes: TAXES, ...ACCOUNT });
+    seedConnection('c1');
     seed('companies/c1/customers/cust1', { name: 'João', taxId: '52998224725' });
     seed('companies/c1/orders/o1', {
       number: 1, status: 'done', customer: { id: 'cust1', name: 'João' },
@@ -95,6 +104,21 @@ describe('nfse.routes', () => {
       expect(client.getFiscalInfo).not.toHaveBeenCalled();
     });
 
+    it('conexão antiga, sem os eventos da nota → 409 NFSE_RECONNECT_NEEDED', async () => {
+      seedConnection('c1', { webhookEvents: null });
+      const res = await request(buildApp('owner')).get('/setup');
+      expect(res.status).toBe(409);
+      expect(res.body.error.code).toBe('NFSE_RECONNECT_NEEDED');
+      expect(client.getFiscalInfo).not.toHaveBeenCalled();
+    });
+
+    it('serviço salvo em outra conta do Asaas volta a faltar', async () => {
+      seedConnection('c1', { walletId: 'w2' });
+      const res = await request(buildApp('owner')).get('/setup');
+      expect(res.body.data).toMatchObject({ ready: false, missing: ['service'], service: null });
+      expect(read('companies/c1/settings/payments')!.nfseReady).toBe(false);
+    });
+
     it('salva os dados fiscais no Asaas', async () => {
       const body = { email: 'nf@oficina.com', simplesNacional: true, municipalInscription: '123', cnae: '4520-0/01' };
       const res = await request(buildApp('owner')).post('/setup/fiscal-info').send(body);
@@ -122,7 +146,7 @@ describe('nfse.routes', () => {
       expect(ok.status).toBe(200);
       expect(read('companies/c1/settings/nfse')).toMatchObject({
         municipalServiceId: null, municipalServiceCode: '14.01', descriptionTemplate: '{servicos} - {os}',
-        updatedBy: { id: 'u1', name: 'Ana' },
+        updatedBy: { id: 'u1', name: 'Ana' }, ...ACCOUNT,
       });
 
       const bad = await request(buildApp('owner')).put('/setup/service').send({ municipalServiceName: 'X', taxes: TAXES });
@@ -163,8 +187,9 @@ describe('nfse.routes', () => {
     });
 
     it('OS de outra empresa → 404', async () => {
-      seed('companies/c2/settings/payments', { asaasEnabled: true, asaasConnected: true, nfseEnabled: true });
-      seed('companies/c2/settings/nfse', { municipalServiceId: 'ms_1', municipalServiceName: 'X', taxes: TAXES });
+      seed('companies/c2/settings/payments', { asaasEnabled: true, asaasConnected: true, nfseEnabled: true, nfseReady: true });
+      seed('companies/c2/settings/nfse', { municipalServiceId: 'ms_1', municipalServiceName: 'X', taxes: TAXES, ...ACCOUNT });
+      seedConnection('c2');
       const res = await request(buildApp('owner', FINANCE, 'c2')).post('/invoices').send({ orderIds: ['o1'] });
       expect(res.status).toBe(404);
       expect(res.body.error.code).toBe('ORDER_NOT_FOUND');

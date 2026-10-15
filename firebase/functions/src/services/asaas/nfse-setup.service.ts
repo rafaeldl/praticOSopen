@@ -17,7 +17,14 @@ import {
 import { getAsaasCredentialProvider } from './credential-provider';
 import { AsaasServiceError } from './errors';
 import { paymentSettingsRef } from './connection.service';
-import { assertNfseEnabled, getNfseServiceSettings, nfseSettingsRef, DEFAULT_DESCRIPTION_TEMPLATE } from './invoice.service';
+import {
+  accountStampOf,
+  assertNfseEnabled,
+  getNfseServiceSettings,
+  isSameAccount,
+  nfseSettingsRef,
+  DEFAULT_DESCRIPTION_TEMPLATE,
+} from './invoice.service';
 
 /** What is still missing before notas can be issued. */
 export type NfseMissingItem = 'fiscalInfo' | 'cityAccess' | 'service';
@@ -63,9 +70,11 @@ async function storeReady(companyId: string, ready: boolean): Promise<void> {
 }
 
 export async function getNfseSetup(companyId: string): Promise<NfseSetupStatus> {
-  await assertNfseEnabled(companyId);
+  const { connection } = await assertNfseEnabled(companyId);
   const client = await getAsaasCredentialProvider().getClient(companyId);
-  const [fiscalInfo, service] = await Promise.all([client.getFiscalInfo(), getNfseServiceSettings(companyId)]);
+  const [fiscalInfo, saved] = await Promise.all([client.getFiscalInfo(), getNfseServiceSettings(companyId)]);
+  // A service saved on another Asaas account (or before the account stamp) is set up again.
+  const service = saved && isSameAccount(saved, connection) ? saved : null;
   // Municipal options depend on the account address; tolerate failures here.
   const municipalOptions = await client.getMunicipalOptions().catch(() => null);
   const missing = missingItems(fiscalInfo, municipalOptions, service);
@@ -101,7 +110,7 @@ export async function saveNfseService(
   input: SaveServiceInput,
   user: UserAggr,
 ): Promise<NfseSetupStatus> {
-  await assertNfseEnabled(companyId);
+  const { connection } = await assertNfseEnabled(companyId);
   const id = input.municipalServiceId?.trim() || null;
   const code = input.municipalServiceCode?.trim() || null;
   if (!id && !code) {
@@ -113,6 +122,7 @@ export async function saveNfseService(
     municipalServiceName: input.municipalServiceName.trim(),
     taxes: input.taxes,
     descriptionTemplate: input.descriptionTemplate?.trim() || DEFAULT_DESCRIPTION_TEMPLATE,
+    ...accountStampOf(connection),
     updatedAt: new Date().toISOString(),
     updatedBy: { id: user.id, name: user.name },
   };

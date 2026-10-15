@@ -1,4 +1,5 @@
-import { parseArgs, resolveTarget, buildUpdate } from '../../scripts/enable-asaas-pilot';
+import { parseArgs, resolveTarget, buildUpdate, nfseEnableBlocker } from '../../scripts/enable-asaas-pilot';
+import { ASAAS_WEBHOOK_EVENTS } from '../services/asaas/webhook-events';
 
 describe('enable-asaas-pilot', () => {
   it('parses multiple companies and flags', () => {
@@ -45,5 +46,16 @@ describe('enable-asaas-pilot', () => {
     expect(buildUpdate(true, false, true)).toEqual({ nfseEnabled: true });
     expect(buildUpdate(true, true, true)).toEqual({ nfseEnabled: false });
     expect(buildUpdate(false, false, true)).toEqual({ asaasEnabled: false, asaasConnected: false, nfseEnabled: true });
+  });
+
+  it('--nfse refuses a connection without the INVOICE_* events (NFSE_RECONNECT_NEEDED)', () => {
+    const enable = { nfse: true, disable: false };
+    expect(nfseEnableBlocker(enable, { status: 'active' } as any)).toMatch(/^NFSE_RECONNECT_NEEDED/);
+    expect(nfseEnableBlocker(enable, { webhookEvents: ['PAYMENT_RECEIVED'] })).toMatch(/^NFSE_RECONNECT_NEEDED/);
+    expect(nfseEnableBlocker(enable, { webhookEvents: ASAAS_WEBHOOK_EVENTS })).toBeNull();
+    // Not connected yet (records the events at connect), disabling, or the Asaas flag: allowed.
+    expect(nfseEnableBlocker(enable, undefined)).toBeNull();
+    expect(nfseEnableBlocker({ nfse: true, disable: true }, {})).toBeNull();
+    expect(nfseEnableBlocker({ nfse: false, disable: false }, {})).toBeNull();
   });
 });

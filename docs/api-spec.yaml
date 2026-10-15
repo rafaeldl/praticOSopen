@@ -1095,7 +1095,7 @@ paths:
         '200': { description: '{ value, orders, hasProducts, serviceDescription, observations, effectiveDate, customer { id, name, hasTaxId }, invoicedOrders, municipalServiceName }' }
         '400': { description: VALIDATION_ERROR / NO_SERVICES / ORDER_NOT_OF_CUSTOMER / NFSE_ORDER_NOT_ALLOWED }
         '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
-        '409': { description: NFSE_NOT_READY }
+        '409': { description: NFSE_NOT_READY / NFSE_SETUP_NEEDED / NFSE_RECONNECT_NEEDED }
 
   /v1/app/nfse/invoices:
     post:
@@ -1126,7 +1126,7 @@ paths:
         '201': { description: Nota criada (status scheduled, ou error se o Asaas recusou) }
         '400': { description: VALIDATION_ERROR / NO_SERVICES / TAX_ID_REQUIRED / INVALID_TAX_ID / INVALID_EFFECTIVE_DATE / ASAAS_VALIDATION_ERROR }
         '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
-        '409': { description: ASAAS_NOT_CONNECTED / NFSE_NOT_READY / ORDER_HAS_INVOICE }
+        '409': { description: ASAAS_NOT_CONNECTED / NFSE_NOT_READY / NFSE_SETUP_NEEDED / NFSE_RECONNECT_NEEDED / ORDER_HAS_INVOICE }
         '502': { description: ASAAS_UNAVAILABLE }
 
   /v1/app/nfse/invoices/{invoiceId}/cancel:
@@ -1153,4 +1153,4 @@ paths:
       responses:
         '200': { description: Nota com o novo status }
         '404': { description: INVOICE_NOT_FOUND }
-        '409': { description: INVOICE_NOT_CANCELABLE / CANCEL_NOT_SUPPORTED }
+        '409': { description: INVOICE_NOT_CANCELABLE / CANCEL_NOT_SUPPORTED / INVOICE_OTHER_ACCOUNT / NFSE_RECONNECT_NEEDED }

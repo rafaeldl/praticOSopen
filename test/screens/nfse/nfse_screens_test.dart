@@ -214,6 +214,22 @@ void main() {
       expect(currentInvoiceOf([inv('canceled')])?.isActive(), isFalse);
     });
 
+    test('a nota in conflict never counts as the order\'s nota', () {
+      final now = DateTime.now();
+      final conflict = NfseInvoice.fromJson({
+        'status': 'authorized',
+        'conflict': true,
+        'createdAt': now.toIso8601String(),
+      }, id: 'a');
+      expect(conflict.conflict, isTrue);
+      expect(conflict.isActive(), isFalse);
+      final current = currentInvoiceOf([
+        conflict,
+        inv('authorized', at: now.subtract(const Duration(days: 1)), id: 'b'),
+      ]);
+      expect(current?.id, 'b');
+    });
+
     test('"creating" that never reached Asaas stops counting', () {
       final old = inv(
         'creating',
@@ -440,6 +456,14 @@ void main() {
       expect(opened, ['https://x/pdf']);
     });
 
+    testWidgets('conflict: says to check it in Asaas', (tester) async {
+      await pumpInvoice(tester, 'authorized', extra: {'conflict': true});
+      expect(
+        find.text('Nota emitida fora do PraticOS, confira no Asaas.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('refused: shows the reason; fits at text size 2', (
       tester,
     ) async {
@@ -550,6 +574,15 @@ void main() {
       await tester.tap(find.byKey(const Key('nfseSetupNext')));
       await tester.pumpAndSettle();
       expect(opened.single, contains('sandbox'));
+    });
+
+    testWidgets('old Asaas connection: asks to reconnect', (tester) async {
+      final server = _Server(
+        (method, path, body) => _error('NFSE_RECONNECT_NEEDED'),
+      );
+      await _pump(tester, NfseSetupScreen(service: server.api));
+      expect(find.text('Reconecte o Asaas para emitir notas.'), findsOneWidget);
+      expect(find.text('raw'), findsNothing);
     });
 
     testWidgets('ready: no button', (tester) async {

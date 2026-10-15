@@ -5248,6 +5248,22 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asaas no aceptó los datos fiscales. Revísalos con tu contador.';
 
   @override
+  String get nfseErrorReconnectNeeded =>
+      'Vuelve a conectar Asaas para emitir facturas.';
+
+  @override
+  String get nfseErrorSetupNeeded =>
+      'La cuenta de Asaas cambió. Configura la factura de nuevo.';
+
+  @override
+  String get nfseErrorOtherAccount =>
+      'Esta factura es de otra cuenta de Asaas. Cancélala allí.';
+
+  @override
+  String get nfseConflictNotice =>
+      'Factura emitida fuera de PraticOS, revísala en Asaas.';
+
+  @override
   String get nfseStatusWaiting => 'Esperando al municipio';
 
   @override

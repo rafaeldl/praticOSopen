@@ -126,6 +126,8 @@ describe('connection.service', () => {
         connectedBy: { id: 'u1', name: 'Ana' },
       });
       expect(stored.webhookTokenHash).toBe(hashToken(webhookInput.authToken));
+      // Recorded so NFS-e can tell connections made before the INVOICE_* events.
+      expect(stored.webhookEvents).toEqual(webhookInput.events);
       expect(JSON.stringify(stored)).not.toContain('aact');
       expect(decryptSecret(stored.encryptedApiKey as EncryptedSecret, MASTER_KEY)).toBe('$aact_hmlg_k');
       expect(read('companies/c1/settings/payments')).toEqual(settings);

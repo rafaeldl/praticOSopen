@@ -55,6 +55,12 @@ String asaasErrorText(
       return l10n.nfseErrorNotEnabled;
     case 'NFSE_NOT_READY':
       return l10n.nfseErrorNotReady;
+    case 'NFSE_RECONNECT_NEEDED':
+      return l10n.nfseErrorReconnectNeeded;
+    case 'NFSE_SETUP_NEEDED':
+      return l10n.nfseErrorSetupNeeded;
+    case 'INVOICE_OTHER_ACCOUNT':
+      return l10n.nfseErrorOtherAccount;
     case 'NFSE_ORDER_NOT_ALLOWED':
       return l10n.nfseErrorOrderNotAllowed;
     case 'NO_SERVICES':

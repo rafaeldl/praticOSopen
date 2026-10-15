@@ -24,6 +24,8 @@ export interface AsaasConnectionDoc {
   walletId?: string;
   webhookId?: string;
   webhookTokenHash?: string;
+  /** Events subscribed at connect (missing on connections made before NFS-e). */
+  webhookEvents?: string[];
   status: 'active' | 'invalid';
   connectedBy: UserAggr;
   connectedAt: string;
@@ -343,6 +345,9 @@ export interface NfseServiceSettings {
   taxes: InvoiceTaxes;
   /** Template of the service description; `{os}` and `{servicos}` are replaced. */
   descriptionTemplate: string;
+  /** Asaas account the service was set up on (another account has its own setup). */
+  asaasEnvironment?: AsaasEnvironment;
+  asaasWalletId?: string | null;
   updatedAt: string;
   updatedBy: UserAggr;
 }
@@ -382,6 +387,14 @@ export interface NfseInvoice {
   updatedAt?: string;
   authorizedAt?: string;
   canceledAt?: string;
+  /** Asaas account the nota was issued on (cancel only through the same account). */
+  asaasEnvironment?: AsaasEnvironment;
+  asaasWalletId?: string | null;
+  /**
+   * A nota with error came back to life on Asaas after its orders already had
+   * another nota: kept for the record, does not lock the orders (see syncInvoice).
+   */
+  conflict?: boolean;
 }
 
 /** Input of POST /v1/app/nfse/orders/:orderId/invoices and /customers/:customerId/invoices */

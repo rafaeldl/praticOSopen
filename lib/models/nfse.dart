@@ -80,6 +80,7 @@ class NfseInvoice {
     this.xmlUrl,
     this.statusDescription,
     this.createdAt,
+    this.conflict = false,
   });
 
   final String id;
@@ -100,6 +101,10 @@ class NfseInvoice {
   /// Why the city refused it (raw text from the city, shown as detail only).
   final String? statusDescription;
   final DateTime? createdAt;
+
+  /// A refused nota that came back on Asaas after the order already had
+  /// another one: kept for the record, never counts as the order's nota.
+  final bool conflict;
 
   /// A `creating` nota older than this never reached Asaas.
   static const staleCreating = Duration(minutes: 15);
@@ -129,15 +134,20 @@ class NfseInvoice {
       xmlUrl: _str(json['xmlUrl']),
       statusDescription: _str(json['statusDescription']),
       createdAt: _date(json['createdAt']),
+      conflict: json['conflict'] == true,
     );
   }
 
   DateTime? get effectiveDay =>
       effectiveDate == null ? null : DateTime.tryParse(effectiveDate!);
 
-  /// Counts as "the order has a nota" (blocks a second one).
+  /// Counts as "the order has a nota" (blocks a second one). An old
+  /// `creating` stops counting here so "Emitir" shows again: the server then
+  /// checks it with Asaas before issuing another.
   bool isActive({DateTime? now}) {
-    if (status == NfseStatus.canceled || status == NfseStatus.error) {
+    if (conflict ||
+        status == NfseStatus.canceled ||
+        status == NfseStatus.error) {
       return false;
     }
     if (status == NfseStatus.creating) {

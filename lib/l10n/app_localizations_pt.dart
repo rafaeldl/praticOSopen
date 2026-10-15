@@ -5232,6 +5232,21 @@ class AppLocalizationsPt extends AppLocalizations {
       'O Asaas não aceitou os dados fiscais. Confira com o seu contador.';
 
   @override
+  String get nfseErrorReconnectNeeded => 'Reconecte o Asaas para emitir notas.';
+
+  @override
+  String get nfseErrorSetupNeeded =>
+      'A conta do Asaas mudou. Configure a nota fiscal de novo.';
+
+  @override
+  String get nfseErrorOtherAccount =>
+      'Esta nota é de outra conta do Asaas. Cancele por lá.';
+
+  @override
+  String get nfseConflictNotice =>
+      'Nota emitida fora do PraticOS, confira no Asaas.';
+
+  @override
   String get nfseStatusWaiting => 'Aguardando prefeitura';
 
   @override

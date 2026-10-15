@@ -191,6 +191,16 @@ export class AsaasClient {
     return this.request<AsaasInvoice>('GET', `/invoices/${encodeURIComponent(id)}`);
   }
 
+  /**
+   * GET /invoices?externalReference=: the notas Asaas has for our reference.
+   * Used to find out whether a create whose answer was lost reached Asaas.
+   */
+  async listInvoicesByExternalReference(ref: string): Promise<AsaasInvoice[]> {
+    const query = new URLSearchParams({ externalReference: ref, limit: '10' });
+    const list = await this.request<AsaasList<AsaasInvoice>>('GET', `/invoices?${query.toString()}`);
+    return list.data ?? [];
+  }
+
   private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
     const headers: Record<string, string> = {
       access_token: this.apiKey,

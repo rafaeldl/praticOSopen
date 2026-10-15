@@ -8702,6 +8702,30 @@ abstract class AppLocalizations {
   /// **'O Asaas não aceitou os dados fiscais. Confira com o seu contador.'**
   String get nfseErrorInvalidFiscalInfo;
 
+  /// No description provided for @nfseErrorReconnectNeeded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reconecte o Asaas para emitir notas.'**
+  String get nfseErrorReconnectNeeded;
+
+  /// No description provided for @nfseErrorSetupNeeded.
+  ///
+  /// In pt, this message translates to:
+  /// **'A conta do Asaas mudou. Configure a nota fiscal de novo.'**
+  String get nfseErrorSetupNeeded;
+
+  /// No description provided for @nfseErrorOtherAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta nota é de outra conta do Asaas. Cancele por lá.'**
+  String get nfseErrorOtherAccount;
+
+  /// No description provided for @nfseConflictNotice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota emitida fora do PraticOS, confira no Asaas.'**
+  String get nfseConflictNotice;
+
   /// No description provided for @nfseStatusWaiting.
   ///
   /// In pt, this message translates to:

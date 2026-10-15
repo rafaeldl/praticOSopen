@@ -39,17 +39,18 @@ OS sem valor de serviço (só peças, ou serviços sem preço) não pode ter not
 
 | Arquivo | O quê |
 |---------|-------|
-| `services/asaas/invoice.service.ts` | Regra do valor, descrição, prévia, emissão, cancelamento, status, PDF na OS e o evento do webhook |
+| `services/asaas/invoice.service.ts` | Regra do valor, descrição, prévia, emissão, cancelamento, status, conferência com o Asaas (`reconcileInvoice`) e o evento do webhook |
 | `services/asaas/nfse-setup.service.ts` | Configuração fiscal (`/v3/fiscalInfo`), serviços municipais, serviço padrão e o que falta |
-| `services/asaas/asaas-client.ts` | `getFiscalInfo`, `saveFiscalInfo`, `getMunicipalOptions`, `listMunicipalServices`, `createInvoice`, `authorizeInvoice`, `cancelInvoice`, `getInvoice` |
+| `services/asaas/asaas-client.ts` | `getFiscalInfo`, `saveFiscalInfo`, `getMunicipalOptions`, `listMunicipalServices`, `createInvoice`, `authorizeInvoice`, `cancelInvoice`, `getInvoice`, `listInvoicesByExternalReference` |
 | `routes/v1/nfse.routes.ts` | Rotas do app em `/v1/app/nfse` |
 | `services/asaas/webhook.service.ts` | Encaminha `INVOICE_*` para `applyInvoiceEvent` |
-| `services/asaas/connection.service.ts` | Assina os eventos `INVOICE_*` no webhook da conexão |
-| `scripts/enable-asaas-pilot.ts --nfse` | Liga/desliga `nfseEnabled` de uma empresa |
+| `services/asaas/webhook-events.ts` | Eventos do webhook e `hasNfseWebhookEvents` (conexão tem os `INVOICE_*`?) |
+| `services/asaas/connection.service.ts` | Assina os eventos `INVOICE_*` no webhook e grava a lista em `private/asaas.webhookEvents` |
+| `scripts/enable-asaas-pilot.ts --nfse` | Liga/desliga `nfseEnabled` de uma empresa; recusa ligar (`NFSE_RECONNECT_NEEDED`) se a conexão não tem os eventos `INVOICE_*` |
 
 ### Endpoints (`/v1/app/nfse`, bearer do app)
 
-Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag e `ASAAS_NOT_CONNECTED` sem a conta conectada.
+Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a conta conectada e `NFSE_RECONNECT_NEEDED` (409, "Reconecte o Asaas para emitir notas.") quando a conexão foi feita antes da nota fiscal (sem `webhookEvents` com os `INVOICE_*`): sem esses eventos a recusa da prefeitura nunca chegaria e a OS ficaria travada.
 
 | Método e rota | Quem | O quê |
 |---------------|------|-------|
@@ -65,13 +66,26 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag e `ASAAS_NOT_CONNECTED` sem 
 
 ### Emissão (`POST /invoices`)
 
-1. Confere flag, conta, serviço padrão (`NFSE_NOT_READY`), OS do mesmo cliente (`ORDER_NOT_OF_CUSTOMER`), OS fora de orçamento/cancelada (`NFSE_ORDER_NOT_ALLOWED`) e valor de serviço (`NO_SERVICES`).
+1. Confere flag, conta, configuração pronta (`nfseReady`, senão `NFSE_NOT_READY`) e feita na conta conectada (`NFSE_SETUP_NEEDED`), OS do mesmo cliente (`ORDER_NOT_OF_CUSTOMER`), OS fora de orçamento/cancelada (`NFSE_ORDER_NOT_ALLOWED`) e valor de serviço (`NO_SERVICES`).
 2. CPF/CNPJ do cliente: o enviado (`customerTaxId`, que também é gravado no cliente) ou o do cadastro; sem ele, `TAX_ID_REQUIRED`.
-3. Numa transação: lê as travas `private/nfse/orders/{orderId}`; se alguma aponta para nota ativa, `ORDER_HAS_INVOICE`. Cria a nota `creating` e grava as travas.
+3. Confere com o Asaas as notas antigas que ainda travam essas OS (ver [Conferência com o Asaas](#conferência-com-o-asaas)). Numa transação: lê as travas `private/nfse/orders/{orderId}`; se alguma aponta para nota ativa, `ORDER_HAS_INVOICE`. Cria a nota `creating` e grava as travas.
 4. Acha ou cria o cliente no Asaas e chama `POST /v3/invoices` (avulsa) com `externalReference` = `{companyId}:nf:{invoiceId}`, `serviceDescription`, `observations` ("OS 182, 190"), `value`, `deductions: 0`, `effectiveDate`, serviço municipal e `taxes`.
-5. Grava o id do Asaas e o status. Se o Asaas recusar, a nota vira `error` e as travas saem.
+5. Grava o id do Asaas **logo que ele responde**, antes de qualquer outra coisa, e depois o status. Cada nota guarda a conta em que foi emitida (`asaasEnvironment`, `asaasWalletId`).
+6. Se o Asaas **recusar** (400, 401, 403, 404 ou 422), nada foi criado: a nota é apagada e as travas saem. **Sem resposta certa** (tempo esgotado, 408, 5xx, rede) o Asaas pode ter criado a nota: ela fica `creating` e a OS continua travada até a conferência (repetir na hora dá `ORDER_HAS_INVOICE`, nunca duas notas).
 
-Uma nota `creating` com mais de 15 minutos (o servidor caiu no meio) deixa de travar a OS.
+### Conferência com o Asaas
+
+`reconcileInvoice` olha no Asaas uma nota não final (`creating`, `scheduled`, `synchronized`, `processingCancellation`) sem novidade há mais de 3 minutos:
+
+- Com `asaasInvoiceId`: `GET /v3/invoices/{id}` e grava a situação (pega a recusa da prefeitura cujo webhook se perdeu).
+- Sem `asaasInvoiceId` (resposta do create perdida): `GET /v3/invoices?externalReference={cid}:nf:{id}`. Achou: grava o id e a situação. Não achou: a nota nunca chegou ao Asaas, é apagada e a OS fica livre.
+- Asaas fora do ar: nada muda, a OS continua travada.
+
+Roda na prévia, na emissão e no cancelamento que tocam a OS; o webhook também completa a nota (`INVOICE_*` com a nossa referência grava o id). Mais de uma nota no Asaas com a mesma referência gera log `ALERT`.
+
+### Conta do Asaas
+
+`settings/nfse` guarda a conta em que o serviço foi configurado (`asaasEnvironment`, `asaasWalletId`). Trocando a conta conectada, a configuração volta a faltar o serviço (`nfseReady` false) e emitir dá `NFSE_SETUP_NEEDED` ("A conta do Asaas mudou. Configure a nota fiscal de novo."). Configuração salva antes desta regra (sem a conta) também pede o serviço de novo. Cancelar nota de outra conta dá `INVOICE_OTHER_ACCOUNT` ("Esta nota é de outra conta do Asaas. Cancele por lá."); nota sem a conta gravada (anterior à regra) cancela normalmente.
 
 ### Status
 
@@ -88,14 +102,16 @@ Uma nota `creating` com mais de 15 minutos (o servidor caiu no meio) deixa de tr
 
 O status só anda para a frente (evento atrasado ou repetido não desfaz nota emitida ou cancelada); `canceled` é final; `error` pode ir para qualquer um (a nota foi corrigida e reagendada no Asaas).
 
+Saindo de `error`, a transação confere se a trava de cada OS ainda aponta para essa nota. Se alguma OS já tem outra nota, a situação é gravada mas a nota vira `conflict: true`: não trava a OS de novo, gera log `ALERT` e o detalhe mostra "Nota emitida fora do PraticOS, confira no Asaas.". Nota em conflito nunca conta como a nota da OS.
+
 ### Webhook
 
-Eventos assinados na conexão: `INVOICE_CREATED`, `INVOICE_UPDATED`, `INVOICE_SYNCHRONIZED`, `INVOICE_AUTHORIZED`, `INVOICE_PROCESSING_CANCELLATION`, `INVOICE_CANCELED`, `INVOICE_CANCELLATION_DENIED`, `INVOICE_ERROR`. **Empresas conectadas antes desta versão precisam reconectar a conta** para receber esses eventos (como na etapa 3).
+Eventos assinados na conexão (gravados em `private/asaas.webhookEvents`): `INVOICE_CREATED`, `INVOICE_UPDATED`, `INVOICE_SYNCHRONIZED`, `INVOICE_AUTHORIZED`, `INVOICE_PROCESSING_CANCELLATION`, `INVOICE_CANCELED`, `INVOICE_CANCELLATION_DENIED`, `INVOICE_ERROR`. **Empresas conectadas antes desta versão precisam reconectar a conta** para receber esses eventos: até lá as rotas respondem `NFSE_RECONNECT_NEEDED` e a configuração no app mostra "Reconecte o Asaas para emitir notas.".
 
-- A nota é achada pelo `externalReference` (`{cid}:nf:{id}`); sem ele, por `asaasInvoiceId`. Referência de outra empresa ou nota emitida fora do PraticOS (painel, nota vinculada a cobrança) → registrada e respondida com 200.
+- A nota é achada pelo `externalReference` (`{cid}:nf:{id}`); sem ele, por `asaasInvoiceId`. Referência de outra empresa ou nota emitida fora do PraticOS (painel, nota vinculada a cobrança) → registrada e respondida com 200. Referência nossa sem o documento da nota (ou com outro id do Asaas) → 200 com log `ALERT`: existe nota no Asaas que o PraticOS perdeu.
 - Idempotente como os eventos de cobrança (`private/asaas/events`), e o status segue a regra acima.
 - Grava número, código de verificação, `pdfUrl`, `xmlUrl` e `statusDescription` (motivo do erro ou do cancelamento).
-- **Emitida**: o PDF entra nos documentos de cada OS (`OrderDocument` tipo `invoice`, id `nfse_{invoiceId}`). **Cancelada**: o documento sai. Sem push por enquanto.
+- PDF e XML ficam **só no documento da nota** (`invoices/{id}`), abertos pela linha "Nota fiscal" da OS. O servidor nunca escreve em `orders/{id}.documents`: o app grava essa lista inteira e apagaria (ou traria de volta) o PDF. Sem push por enquanto.
 
 ## Modelo de dados (Firestore)
 
@@ -107,9 +123,11 @@ Eventos assinados na conexão: `INVOICE_CREATED`, `INVOICE_UPDATED`, `INVOICE_SY
 | `companies/{cid}/invoices/{id}` | servidor (rotas e webhook) | `canViewCharges` |
 | `companies/{cid}/private/nfse/orders/{orderId}` | servidor (trava uma nota ativa por OS) | ninguém |
 
-`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`.
+`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`.
 
-`settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`.
+`settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`, `asaasEnvironment`, `asaasWalletId`.
+
+`private/asaas` (conexão): além dos campos da [integração](ASAAS_INTEGRATION.md), `webhookEvents` (eventos assinados ao conectar).
 
 ## App
 
@@ -121,7 +139,7 @@ Tudo fica escondido sem `nfseEnabled` + Asaas conectado (`PaymentSettings.nfseAv
 | OS (`order_screen_v2.dart`) | "…" → "Emitir nota fiscal" (OS com serviço, fora de orçamento/cancelada, sem nota ativa). Linha "Nota fiscal · Aguardando prefeitura / Emitida / Erro / Cancelada" com ponto de status, que abre o detalhe |
 | Cliente | "…" → "Emitir uma nota com várias OS" → escolher as OS (`NfseOrdersPicker`) → mesma folha de emissão |
 | Folha de emissão (`NfseIssueSheet`) | Valor (serviços, peças fora, desconto), descrição editável, CPF/CNPJ (pede quando falta), data; ✓ emite |
-| Detalhe (`NfseInvoiceScreen`) | Status, número, valor, OS, PDF e XML quando emitida, motivo do erro em português; "…" → "Cancelar nota" em vermelho com confirmação |
+| Detalhe (`NfseInvoiceScreen`) | Status, número, valor, OS, PDF e XML quando emitida, motivo do erro em português, aviso de nota em conflito; "…" → "Cancelar nota" em vermelho com confirmação |
 
 Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`showAppToast`), nunca a mensagem crua.
 
@@ -133,7 +151,7 @@ Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`
 4. Dono/admin abre Conexão do Asaas → "Nota fiscal" e preenche dados fiscais (inscrição municipal, CNAE, Simples Nacional, item da lista quando a cidade pede).
 5. No painel do Asaas → Notas fiscais: enviar o acesso da prefeitura que a cidade exige (certificado digital A1, ou usuário e senha, ou token).
 6. Escolher o serviço municipal e o ISS (e demais impostos) — conferir com o contador da empresa.
-7. Emitir uma nota de valor baixo para uma OS de teste e acompanhar até "Emitida"; conferir o PDF na OS.
+7. Emitir uma nota de valor baixo para uma OS de teste e acompanhar até "Emitida"; abrir o PDF pela linha "Nota fiscal" da OS.
 
 ## Teste no sandbox
 
@@ -142,7 +160,8 @@ Não testado contra o Asaas real. Antes de oferecer:
 - [ ] `GET/POST /v3/fiscalInfo` e `GET /v3/fiscalInfo/municipalOptions` com uma conta sandbox: campos aceitos e o que volta em `authenticationType` / `supportsCancellation`.
 - [ ] `GET /v3/fiscalInfo/services` com e sem `description`: formato e se a cidade de teste tem lista.
 - [ ] `POST /v3/invoices` avulsa com o payload montado (`taxes`, `deductions: 0`, `municipalServiceId` vs `municipalServiceCode`): aceita e agenda.
-- [ ] Webhooks `INVOICE_*` chegando na URL da empresa com o `externalReference`; nota passando a "Emitida" e PDF na OS.
+- [ ] Webhooks `INVOICE_*` chegando na URL da empresa com o `externalReference`; nota passando a "Emitida" com PDF e XML.
+- [ ] `GET /v3/invoices?externalReference=` acha a nota agendada (conferência de create sem resposta).
 - [ ] Recusa da prefeitura (`INVOICE_ERROR`): motivo em `statusDescription` e OS liberada para outra nota.
 - [ ] Cancelamento de nota agendada e de nota emitida; cidade sem cancelamento pela integração (`CANCEL_NOT_SUPPORTED`).
 - [ ] Nota com várias OS: descrição com uma linha por OS e observações "OS 182, 190".

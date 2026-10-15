@@ -291,6 +291,20 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
               ),
           ],
         ),
+        if (invoice.conflict)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.pageMargin,
+              AppSpacing.md,
+              AppSpacing.pageMargin,
+              0,
+            ),
+            child: Text(
+              l10n.nfseConflictNotice,
+              key: const Key('nfseInvoiceConflict'),
+              style: AppTypography.body.copyWith(color: text),
+            ),
+          ),
         if (refused && invoice.statusDescription != null) ...[
           SectionLabel(l10n.nfseReasonLabel),
           Padding(

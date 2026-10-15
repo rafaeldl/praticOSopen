@@ -5232,6 +5232,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Asaas didn\'t accept the tax details. Check them with your accountant.';
 
   @override
+  String get nfseErrorReconnectNeeded => 'Reconnect Asaas to issue invoices.';
+
+  @override
+  String get nfseErrorSetupNeeded =>
+      'The Asaas account changed. Set up the service invoice again.';
+
+  @override
+  String get nfseErrorOtherAccount =>
+      'This invoice belongs to another Asaas account. Cancel it there.';
+
+  @override
+  String get nfseConflictNotice =>
+      'Invoice issued outside PraticOS, check it in Asaas.';
+
+  @override
   String get nfseStatusWaiting => 'Waiting for the city';
 
   @override
