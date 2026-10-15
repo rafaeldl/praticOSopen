@@ -23,6 +23,7 @@ import 'package:praticos/screens/payments/create_charge_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/receipt_pdf.dart';
 
 /// Firebase core mock whose default app has a storage bucket.
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
@@ -92,6 +93,10 @@ void main() {
     PaymentSettings? settings,
     List<OrderCharge> charges = const [],
     AsaasApiService? service,
+    bool canSendReceipt = true,
+    List<ReceiptPdfData>? sentReceipts,
+    List<String>? openedReceipts,
+    bool receiptUndone = false,
   }) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -110,6 +115,12 @@ void main() {
           ),
           chargesStream: Stream.value(charges),
           chargeService: service,
+          canSendReceipt: canSendReceipt,
+          onSendReceipt: (_, data) async => sentReceipts?.add(data),
+          onOpenReceipt: (_, id) async {
+            openedReceipts?.add(id);
+            return receiptUndone;
+          },
         ),
         routes: {
           '/order': (context) => CupertinoPageScaffold(
@@ -753,9 +764,7 @@ void main() {
         await tester.tap(find.text('Cancelar o link'));
         await tester.pumpAndSettle();
         expect(
-          find.text(
-            'O cliente não vai mais conseguir pagar por esse link.',
-          ),
+          find.text('O cliente não vai mais conseguir pagar por esse link.'),
           findsOneWidget,
         );
         await tester.tap(find.byKey(const Key('confirmCancelChargeAction')));
@@ -865,6 +874,172 @@ void main() {
         expect(find.byKey(const Key('chargeChangedBlock')), findsOneWidget);
         expect(find.byKey(const Key('chargeRegenerateButton')), findsNothing);
       });
+    });
+  });
+
+  group('recibo and customer receipts', () {
+    final when = DateTime(2026, 10, 10, 9);
+
+    testWidgets('"Mandar recibo" sends the recibo of that one payment', (
+      tester,
+    ) async {
+      final sent = <ReceiptPdfData>[];
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 1000,
+          paid: 400,
+          transactions: [
+            PaymentTransaction(
+              id: '1728000000000',
+              type: PaymentTransactionType.payment,
+              amount: 400,
+              createdAt: when,
+              paidAt: DateTime(2026, 10, 9),
+            ),
+          ],
+        ),
+        sentReceipts: sent,
+      );
+      await tester.tap(
+        find.byKey(ValueKey('receivePayment_${when.microsecondsSinceEpoch}')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Mandar recibo'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('receiveSendReceipt')));
+      await tester.pumpAndSettle();
+
+      final data = sent.single;
+      expect(data.customerName, 'Ana Ribeiro');
+      expect(data.amount, 400);
+      expect(data.paidAt, DateTime(2026, 10, 9));
+      expect(data.lines.single.orderNumber, 42);
+      expect(data.lines.single.paid, 400);
+      expect(data.lines.single.open, 600);
+    });
+
+    testWidgets('no "Mandar recibo" without financial access nor for Asaas', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 1000,
+          paid: 400,
+          transactions: [
+            PaymentTransaction(
+              id: '1728000000000',
+              type: PaymentTransactionType.payment,
+              amount: 400,
+              createdAt: when,
+            ),
+          ],
+        ),
+        canSendReceipt: false,
+      );
+      await tester.tap(
+        find.byKey(ValueKey('receivePayment_${when.microsecondsSinceEpoch}')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Mandar recibo'), findsNothing);
+    });
+
+    testWidgets('a payment from a customer receipt opens the Recebimento', (
+      tester,
+    ) async {
+      final opened = <String>[];
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 1000,
+          paid: 400,
+          transactions: [
+            PaymentTransaction(
+              id: 'r9_0',
+              type: PaymentTransactionType.payment,
+              amount: 400,
+              createdAt: when,
+              receiptGroupId: 'r9',
+            ),
+          ],
+        ),
+        openedReceipts: opened,
+      );
+      await tester.tap(
+        find.byKey(ValueKey('receivePayment_${when.microsecondsSinceEpoch}')),
+      );
+      await tester.pumpAndSettle();
+      expect(opened, ['r9']);
+      // No sheet with "Remover este pagamento".
+      expect(find.text('Remover este pagamento'), findsNothing);
+    });
+
+    testWidgets('undoing the Recebimento re-reads this order', (tester) async {
+      final reloads = <int>[];
+      final store =
+          storeWith(
+              total: 1000,
+              paid: 400,
+              transactions: [
+                PaymentTransaction(
+                  id: 'r9_0',
+                  type: PaymentTransactionType.payment,
+                  amount: 400,
+                  createdAt: when,
+                  receiptGroupId: 'r9',
+                ),
+              ],
+            )
+            ..fetchOrderFromServer = (companyId, orderId) async {
+              reloads.add(1);
+              return null;
+            };
+      await pumpScreen(tester, store, receiptUndone: true);
+      reloads.clear();
+      await tester.tap(
+        find.byKey(ValueKey('receivePayment_${when.microsecondsSinceEpoch}')),
+      );
+      await tester.pumpAndSettle();
+      expect(reloads, hasLength(1));
+    });
+
+    testWidgets('"Desfazer pagamentos" with a receipt share explains and '
+        'offers the Recebimento', (tester) async {
+      final opened = <String>[];
+      await pumpScreen(
+        tester,
+        storeWith(
+          total: 1000,
+          paid: 500,
+          transactions: [
+            PaymentTransaction(
+              id: '1728000000000',
+              type: PaymentTransactionType.payment,
+              amount: 100,
+            ),
+            PaymentTransaction(
+              id: 'r9_0',
+              type: PaymentTransactionType.payment,
+              amount: 400,
+              createdAt: when,
+              receiptGroupId: 'r9',
+            ),
+          ],
+        ),
+        openedReceipts: opened,
+      );
+      await tester.tap(find.byKey(const Key('receiveMoreButton')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Desfazer pagamentos'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('faz parte de um recebimento'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('receiveOpenReceiptGroup')));
+      await tester.pumpAndSettle();
+      expect(opened, ['r9']);
     });
   });
 }

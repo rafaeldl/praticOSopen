@@ -8,6 +8,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -593,6 +594,70 @@ void main() {
       final add = tester.getTopLeft(find.textContaining('Cadastrar outro'));
       final latest = tester.getTopLeft(find.text('Últimas OS'));
       expect(add.dy, lessThan(latest.dy));
+    });
+
+    testWidgets('"Recebimentos" lists the active receipts and opens one', (
+      tester,
+    ) async {
+      final opened = <String>[];
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(
+            orders: {
+              'c1': [order(1, 'done', 700)],
+            },
+          ),
+          showPrices: true,
+          canReceive: true,
+          receipts: Stream.value([
+            Receipt()
+              ..id = 'r1'
+              ..amount = 700
+              ..status = ReceiptStatus.active
+              ..paidAt = DateTime(2026, 10, 14)
+              ..allocations = [
+                ReceiptAllocation(orderId: 'a', amount: 400),
+                ReceiptAllocation(orderId: 'b', amount: 300),
+              ],
+          ]),
+          onOpenReceipt: (_, r) => opened.add(r.id!),
+        ),
+        direct: true,
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Recebimentos'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Recebimentos'), findsOneWidget);
+      expect(find.text('14/10/2026 · 2 OS'), findsOneWidget);
+      final row = find.byKey(const Key('customerReceipt_r1'));
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(opened, ['r1']);
+    });
+
+    testWidgets('no receipts: no "Recebimentos" section', (tester) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(),
+          showPrices: true,
+          canReceive: true,
+          receipts: Stream.value(const []),
+        ),
+        direct: true,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Recebimentos'), findsNothing);
     });
 
     testWidgets('"Cadastrar outro dispositivo" opens the new-vehicle sheet', (

@@ -51,7 +51,17 @@ Só quem tem acesso ao financeiro: dono, admin e gerente (`viewFinancialReports`
 - `receipts`: lê, cria e atualiza só quem vê o financeiro (`canViewFinancial`: owner, admin, manager; consultor não); criação exige `status == 'active'`, `amount > 0`, `allocations` não vazia e `createdBy.id` = usuário; atualização só em `status`/`receiptFile`/`updatedAt`/`updatedBy`; `delete` nunca.
 - Storage `tenants/{companyId}/receipts/{receiptId}/{arquivo}`: membro da empresa (claims), imagem ou PDF até 10 MB, só criação.
 
-## Fase 2 / 3
+## Fase 2 (feita)
 
-- Fase 2: "Escolher as OS", desfazer recebimento (status `canceled` + estorno nas OS), linhas tocáveis.
-- Fase 3: Asaas (cobrança de várias OS).
+Decisões do dono: mais antiga primeiro com opção de escolher as OS; data do pagamento sim; sem forma de pagamento; pagar a mais bloqueado.
+
+1. **Escolher as OS.** Link "Escolher as OS" embaixo de "Como fica" (só com 2+ OS em aberto) abre a tela de escolher com várias marcações: título "Quais OS ele está pagando?", linha "OS 185" com "Falta R$ 400 · 01/10/2026", ✓ nas marcadas, ✓ do topo confirma. Padrão: todas. Depois de escolher, o valor vai só para as escolhidas, mais antiga primeiro; o valor é preenchido com o que falta nelas e esse é o máximo.
+2. **Recebimento.** Tela própria: título = valor, "João · 14/10/2026", uma linha por OS ("OS 185 · R$ 400 · quitada" / "OS 184 · R$ 100 · falta R$ 200"), "Ver comprovante" se houver, um botão azul "Mandar recibo para João" e "…" com "Desfazer recebimento" em vermelho (confirmação em alerta). Abre ao tocar no pagamento (com `receiptGroupId`) no "Já recebido" da OS e pela seção "Recebimentos" da tela do cliente.
+3. **Desfazer.** Um WriteBatch: recebimento `canceled` + cada OS perde a sua transação, com a conta de `OrderPaymentMath.removeTransaction` (`paidAmount`, `paid`, `payment`). Sai o `OrderDocument` do comprovante, o arquivo fica. Sem desfazer parcial: remover a parte de um recebimento numa OS (ou "Desfazer pagamentos" com uma parte dessas) explica e oferece abrir o recebimento.
+4. **Recibo em PDF.** Cabeçalho da empresa como no PDF da OS, "RECIBO" + "Nº 3F9A1C" (6 primeiros caracteres do id), "Recebemos de João a quantia de R$ 700,00 em 14/10/2026.", tabela (OS, descrição = veículo/aparelho ou primeiro serviço, pago agora, ainda falta), total, "Falta receber R$ X dessas OS." se sobrar, "Registrado por Ana". Também para um pagamento de uma OS só ("Mandar recibo" na folha do pagamento). Asaas fica fora (continua o comprovante do Asaas).
+
+Regras: sem mudança (o desfazer só toca `status`/`updatedAt`/`updatedBy` no recebimento; as OS seguem a regra de sempre, e só owner/admin/manager chegam aqui).
+
+## Fase 3
+
+- Asaas (cobrança de várias OS).

@@ -78,13 +78,18 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 - Título "Receber de João" (quebra linha, sem reticências) e a frase "Deve R$ 1.250 em 3 OS".
 - Valor pré-preenchido com tudo o que o cliente deve; "Quando" (como acima); "Anexar comprovante".
 - **Como fica**: uma linha por OS, recalculada a cada tecla: "OS 182 · quita R$ 450",
-  "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Linhas sem toque (fase 1).
+  "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Linhas sem toque.
 - Botão azul "Recebi R$ X", desligado com 0 ou acima do que deve (com uma linha explicando).
   Sucesso: aviso (`showAppToast`) e volta; o Financeiro recarrega.
 - O valor vai **primeiro para as OS mais antigas** (`allocatePayment` em
   `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
-  "Escolher as OS" (divisão manual) fica para a fase 2: o gravador só consome a lista de
-  `PaymentAllocation`, então basta montar outra lista.
+- **Escolher as OS** (link embaixo de "Como fica", só com 2+ OS em aberto): tela de escolher
+  com várias marcações (`ReceiveOrdersPicker`, `PickerScaffold(multiple: true)`), título
+  "Quais OS ele está pagando?", cada linha "OS 185" / "Falta R$ 400 · 01/10/2026", ✓ no topo
+  confirma (cinza sem nenhuma marcada). Começa com todas marcadas. Depois disso o valor vai só
+  para as escolhidas, ainda da mais antiga para a mais nova (`chosenBalances` +
+  `allocatePayment`), o valor é preenchido com o que falta nelas, e o máximo passa a ser essa
+  soma ("Passa do que falta nessas OS (R$ X)."). Marcar todas volta ao padrão.
 
 **Entradas:**
 - Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
@@ -97,7 +102,7 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 - Documento `companies/{companyId}/receipts/{receiptId}` (`Receipt`): `customer` (aggr), `amount`,
   `paidAt`, `allocations` [{`orderId`, `orderNumber`, `amount`, `transactionId`}],
   `receiptFile` ({`url`, `storagePath`, `fileName`, `contentType`}, opcional), `status`
-  (`active`; desfazer será `canceled`, nunca apagado), auditoria (`createdAt`, `createdBy`, ...).
+  (`active`; desfazer grava `canceled`, nunca apagado), auditoria (`createdAt`, `createdBy`, ...).
 - Cada OS recebe uma transação `payment` normal com a sua parte, `paidAt` e
   `receiptGroupId` = id do recebimento. `paidAmount` sobe por `increment` e `paid`/`payment`
   viram `paid` na OS que fica quitada (mesma conta de `OrderPaymentMath.addPaymentUpdate`).
@@ -107,6 +112,48 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
   (precisa de internet; se falhar, nada é gravado). Cada OS ganha um `OrderDocument` do tipo
   `receipt` apontando para o mesmo arquivo, com `linkedTransactionId` = transação dela, e a
   transação guarda `receiptDocumentId`. Assim o "ver comprovante" da OS continua igual.
+
+### Recebimento (ver, mandar recibo, desfazer)
+
+Tela `ReceiptDetailScreen` (`lib/screens/payments/receipt_detail_screen.dart`), empurrada e só
+para quem vê o financeiro (`viewFinancialReports`, via `ProtectedRoute`):
+
+- Título grande = valor ("R$ 700,00"); embaixo "João Silva · 14/10/2026".
+- Uma linha por OS com a situação **atual** dela: "OS 185 · R$ 400 · quitada" ou
+  "OS 184 · R$ 100 · falta R$ 200". Tocar abre a OS.
+- "Ver comprovante" quando o recebimento tem arquivo (imagem no visualizador, PDF fora).
+- Um botão azul: **"Mandar recibo para João"** (PDF do recibo, ver `docs/PDF_GENERATION.md`).
+- Menu "…" com **"Desfazer recebimento"** (vermelho) → `CupertinoAlertDialog` de confirmação.
+- Recebimento já desfeito: "Este recebimento foi desfeito.", sem botão nem menu.
+
+**Entradas:**
+- Receber da OS: tocar num pagamento com `receiptGroupId` abre o Recebimento (em vez da folha
+  do pagamento).
+- Tela do cliente: seção "Recebimentos" (só com acesso ao financeiro e se houver algum ativo),
+  uma linha por recebimento ("R$ 700,00" / "14/10/2026 · 2 OS").
+  `TenantReceiptRepository.watchActiveOfCustomer` filtra por `customer.id` (um filtro de
+  igualdade, sem índice composto) e ordena/filtra `active` no app.
+
+**Desfazer** (`CustomerReceiptService.undo` → `buildReceiptUndo` em
+`lib/utils/receipt_undo.dart` → `TenantReceiptRepository.cancel`):
+- Um único **WriteBatch**: o recebimento vira `status: 'canceled'` (com `updatedAt`/`updatedBy`)
+  e cada OS perde a transação dele, com a mesma conta de remover um pagamento à mão
+  (`OrderPaymentMath.removeTransaction`): `paidAmount` desce e `paid`/`payment` são recalculados.
+  O `OrderDocument` do comprovante sai da OS, mas **o arquivo fica no Storage** (é do
+  recebimento). As OS são lidas na hora (servidor, ou cache offline); OS que já não têm a
+  transação ficam de fora.
+- Não há desfazer parcial: na OS, remover um pagamento que é parte de um recebimento (ou
+  "Desfazer pagamentos" com uma parte dessas) mostra "Este pagamento faz parte de um
+  recebimento de várias OS…" e oferece "Abrir recebimento".
+
+### Recibo para o cliente
+
+- No Recebimento: "Mandar recibo para {nome}" (todas as OS do recebimento).
+- No Receber da OS: tocar num pagamento manual → "Mandar recibo" (só esse pagamento, uma OS,
+  sem documento `Receipt`). Só com acesso ao financeiro. Pagamentos do Asaas não têm: continuam
+  com o "Ver comprovante" do próprio Asaas.
+- O PDF é gerado no idioma do app e aberto na folha de compartilhar do sistema (WhatsApp,
+  e-mail, imprimir). Detalhes em `docs/PDF_GENERATION.md`.
 
 ---
 

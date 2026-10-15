@@ -9,11 +9,13 @@ import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart'
     show ReceiptChip;
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
+import 'package:praticos/screens/payments/widgets/receive_orders_picker.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -25,7 +27,8 @@ import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 
 /// "Receber de João": one payment from a customer who owes on several
-/// orders, split oldest order first ([allocatePayment]).
+/// orders, split oldest order first ([allocatePayment]). "Escolher as OS"
+/// limits the split to the chosen orders (still oldest first).
 ///
 /// Amount (pre-filled with everything owed, never more), day the money came
 /// in ("Hoje" by default, no future dates), optional receipt, the live
@@ -40,6 +43,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
     this.service,
     this.canAttachReceipt,
     this.pickReceipt,
+    this.pickOrders,
   });
 
   /// Open orders of the customer, oldest first (as `Debtor.orders`).
@@ -57,6 +61,14 @@ class ReceiveCustomerScreen extends StatefulWidget {
 
   /// Overrides the camera/gallery/files picker (tests).
   final Future<PickedReceiptFile?> Function(BuildContext context)? pickReceipt;
+
+  /// Overrides the "Escolher as OS" picker (tests).
+  final Future<Set<String>?> Function(
+    BuildContext context,
+    List<Order> orders,
+    Set<String> selected,
+  )?
+  pickOrders;
 
   /// Pushes the screen; completes with true when a payment was recorded.
   /// Without financial access (`viewFinancialReports`) it shows "access
@@ -108,6 +120,15 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     text: ReceiveAmountField.textFor(_owed),
   );
 
+  /// Orders chosen in "Escolher as OS"; null = all of them.
+  Set<String>? _chosen;
+
+  /// Balances the payment goes to (the chosen ones, oldest first).
+  List<OpenBalance> get _active => chosenBalances(_balances, _chosen);
+
+  /// Most that can be received now: what is open on [_active].
+  double get _max => totalOpen(_active);
+
   DateTime _paidDay = DateTime.now();
   PickedReceiptFile? _receipt;
   bool _busy = false;
@@ -139,11 +160,32 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     if (picked != null && mounted) setState(() => _receipt = picked);
   }
 
+  Future<void> _chooseOrders() async {
+    final openOrders = [
+      for (final b in _balances)
+        for (final o in widget.orders)
+          if (o.id == b.orderId) o,
+    ];
+    final current = _chosen ?? {for (final b in _balances) b.orderId};
+    final picked = await (widget.pickOrders ??
+        (context, orders, selected) =>
+            pickReceiveOrders(context, orders: orders, selected: selected))(
+      context,
+      openOrders,
+      current,
+    );
+    if (picked == null || picked.isEmpty || !mounted) return;
+    setState(() {
+      _chosen = picked.length == _balances.length ? null : picked;
+      _amount.text = ReceiveAmountField.textFor(_max);
+    });
+  }
+
   Future<void> _confirm() async {
     final value = parseCurrencyInput(_amount.text);
-    if (_busy || value <= 0 || _cents(value) > _cents(_owed)) return;
+    if (_busy || value <= 0 || _cents(value) > _cents(_max)) return;
     final l10n = context.l10n;
-    final allocations = allocatePayment(_balances, value);
+    final allocations = allocatePayment(_active, value);
     setState(() => _busy = true);
     try {
       await (widget.service ?? CustomerReceiptService()).record(
@@ -197,11 +239,12 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
             valueListenable: _amount,
             builder: (context, value, _) {
               final amount = parseCurrencyInput(value.text);
-              final tooMuch = _cents(amount) > _cents(_owed);
+              final active = _active;
+              final tooMuch = _cents(amount) > _cents(_max);
               final canSave = !_busy && amount > 0 && !tooMuch;
               final previews = previewAllocation(
-                _balances,
-                tooMuch ? const [] : allocatePayment(_balances, amount),
+                active,
+                tooMuch ? const [] : allocatePayment(active, amount),
               );
               return ListView(
                 padding: EdgeInsets.only(
@@ -257,9 +300,25 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                       AppSpacing.pageMargin,
                       AppSpacing.lg,
                     ),
-                    child: Text(
-                      l10n.receiveCustomerOldestFirst,
-                      style: AppTypography.label.copyWith(color: secondary),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _chosen == null
+                              ? l10n.receiveCustomerOldestFirst
+                              : l10n.receiveCustomerChosenOnly,
+                          key: const Key('receiveCustomerSplitNote'),
+                          style: AppTypography.label.copyWith(
+                            color: secondary,
+                          ),
+                        ),
+                        if (_balances.length > 1)
+                          TextLink(
+                            key: const Key('receiveCustomerChoose'),
+                            label: l10n.receiveCustomerChooseOrders,
+                            onPressed: _busy ? null : _chooseOrders,
+                          ),
+                      ],
                     ),
                   ),
                   Padding(
@@ -296,7 +355,10 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     final String hint;
     Color hintColor = onSoft;
     if (tooMuch) {
-      hint = l10n.receiveCustomerTooMuch(FormatService().formatCurrency(_owed));
+      final max = FormatService().formatCurrency(_max);
+      hint = _chosen == null
+          ? l10n.receiveCustomerTooMuch(max)
+          : l10n.receiveCustomerTooMuchChosen(max);
       hintColor = AppColors.danger.resolveFrom(context);
     } else if (amount <= 0) {
       hint = l10n.receiveCustomerZero;

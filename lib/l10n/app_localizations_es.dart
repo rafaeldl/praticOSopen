@@ -2970,6 +2970,147 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo enviar el comprobante. Revise la conexión e intente de nuevo.';
 
   @override
+  String get receiveCustomerChooseOrders => 'Elegir las OS';
+
+  @override
+  String get receiveCustomerPickTitle => '¿Qué OS está pagando?';
+
+  @override
+  String receiveCustomerPickRow(int number) {
+    return 'OS $number';
+  }
+
+  @override
+  String receiveCustomerPickSubtitle(String amount, String date) {
+    return 'Falta $amount · $date';
+  }
+
+  @override
+  String get receiveCustomerChosenOnly =>
+      'El valor va solo a las OS elegidas, primero la más antigua.';
+
+  @override
+  String receiveCustomerTooMuchChosen(String total) {
+    return 'Supera lo que falta en estas OS ($total).';
+  }
+
+  @override
+  String get receiptTitle => 'Cobro';
+
+  @override
+  String receiptRowSettled(int number, String amount) {
+    return 'OS $number · $amount · saldada';
+  }
+
+  @override
+  String receiptRowOpen(int number, String amount, String left) {
+    return 'OS $number · $amount · falta $left';
+  }
+
+  @override
+  String receiptSendTo(String name) {
+    return 'Enviar recibo a $name';
+  }
+
+  @override
+  String get receiptSend => 'Enviar recibo';
+
+  @override
+  String get receiptActions => 'Más opciones del cobro';
+
+  @override
+  String get receiptUndo => 'Deshacer cobro';
+
+  @override
+  String receiptUndoTitle(String amount) {
+    return '¿Deshacer el cobro de $amount?';
+  }
+
+  @override
+  String receiptUndoMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return 'El valor sale de $_temp0 y vuelve a faltar cobrar.';
+  }
+
+  @override
+  String get receiptUndone => 'Cobro deshecho';
+
+  @override
+  String get receiptCanceled => 'Este cobro fue deshecho.';
+
+  @override
+  String get receiptPartOfGroup =>
+      'Este pago es parte de un cobro de varias OS. Para deshacerlo, abra el cobro.';
+
+  @override
+  String get receiptOpen => 'Abrir cobro';
+
+  @override
+  String get receiptsSection => 'Cobros';
+
+  @override
+  String receiptListSubtitle(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return '$date · $_temp0';
+  }
+
+  @override
+  String get receiptNotFound => 'No encontramos este cobro.';
+
+  @override
+  String get pdfReceiptTitle => 'Recibo';
+
+  @override
+  String pdfReceiptNumber(String number) {
+    return 'N.º $number';
+  }
+
+  @override
+  String pdfReceiptSentence(String name, String amount, String date) {
+    return 'Recibimos de $name la cantidad de $amount el $date.';
+  }
+
+  @override
+  String get pdfReceiptOrderColumn => 'OS';
+
+  @override
+  String get pdfReceiptPaidColumn => 'Pagado ahora';
+
+  @override
+  String get pdfReceiptOpenColumn => 'Aún falta';
+
+  @override
+  String get pdfReceiptDescriptionColumn => 'Descripción';
+
+  @override
+  String get pdfReceiptTotal => 'Total recibido';
+
+  @override
+  String pdfReceiptRemaining(String amount) {
+    return 'Falta cobrar $amount de estas OS.';
+  }
+
+  @override
+  String pdfReceiptRecordedBy(String name) {
+    return 'Registrado por $name';
+  }
+
+  @override
+  String pdfReceiptFileName(String number) {
+    return 'Recibo-$number';
+  }
+
+  @override
   String get loginTitle => 'Entra para empezar';
 
   @override

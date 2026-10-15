@@ -2960,6 +2960,147 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não deu para enviar o comprovante. Confira a internet e tente de novo.';
 
   @override
+  String get receiveCustomerChooseOrders => 'Escolher as OS';
+
+  @override
+  String get receiveCustomerPickTitle => 'Quais OS ele está pagando?';
+
+  @override
+  String receiveCustomerPickRow(int number) {
+    return 'OS $number';
+  }
+
+  @override
+  String receiveCustomerPickSubtitle(String amount, String date) {
+    return 'Falta $amount · $date';
+  }
+
+  @override
+  String get receiveCustomerChosenOnly =>
+      'O valor vai só para as OS escolhidas, primeiro a mais antiga.';
+
+  @override
+  String receiveCustomerTooMuchChosen(String total) {
+    return 'Passa do que falta nessas OS ($total).';
+  }
+
+  @override
+  String get receiptTitle => 'Recebimento';
+
+  @override
+  String receiptRowSettled(int number, String amount) {
+    return 'OS $number · $amount · quitada';
+  }
+
+  @override
+  String receiptRowOpen(int number, String amount, String left) {
+    return 'OS $number · $amount · falta $left';
+  }
+
+  @override
+  String receiptSendTo(String name) {
+    return 'Mandar recibo para $name';
+  }
+
+  @override
+  String get receiptSend => 'Mandar recibo';
+
+  @override
+  String get receiptActions => 'Mais opções do recebimento';
+
+  @override
+  String get receiptUndo => 'Desfazer recebimento';
+
+  @override
+  String receiptUndoTitle(String amount) {
+    return 'Desfazer o recebimento de $amount?';
+  }
+
+  @override
+  String receiptUndoMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return 'O valor sai de $_temp0 e volta a faltar receber.';
+  }
+
+  @override
+  String get receiptUndone => 'Recebimento desfeito';
+
+  @override
+  String get receiptCanceled => 'Este recebimento foi desfeito.';
+
+  @override
+  String get receiptPartOfGroup =>
+      'Este pagamento faz parte de um recebimento de várias OS. Para desfazer, abra o recebimento.';
+
+  @override
+  String get receiptOpen => 'Abrir recebimento';
+
+  @override
+  String get receiptsSection => 'Recebimentos';
+
+  @override
+  String receiptListSubtitle(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count OS',
+      one: '1 OS',
+    );
+    return '$date · $_temp0';
+  }
+
+  @override
+  String get receiptNotFound => 'Não achamos este recebimento.';
+
+  @override
+  String get pdfReceiptTitle => 'Recibo';
+
+  @override
+  String pdfReceiptNumber(String number) {
+    return 'Nº $number';
+  }
+
+  @override
+  String pdfReceiptSentence(String name, String amount, String date) {
+    return 'Recebemos de $name a quantia de $amount em $date.';
+  }
+
+  @override
+  String get pdfReceiptOrderColumn => 'OS';
+
+  @override
+  String get pdfReceiptPaidColumn => 'Pago agora';
+
+  @override
+  String get pdfReceiptOpenColumn => 'Ainda falta';
+
+  @override
+  String get pdfReceiptDescriptionColumn => 'Descrição';
+
+  @override
+  String get pdfReceiptTotal => 'Total recebido';
+
+  @override
+  String pdfReceiptRemaining(String amount) {
+    return 'Falta receber $amount dessas OS.';
+  }
+
+  @override
+  String pdfReceiptRecordedBy(String name) {
+    return 'Registrado por $name';
+  }
+
+  @override
+  String pdfReceiptFileName(String number) {
+    return 'Recibo-$number';
+  }
+
+  @override
   String get loginTitle => 'Entre para começar';
 
   @override

@@ -57,15 +57,26 @@ double _fromCents(int cents) => cents / 100;
 double totalOpen(Iterable<OpenBalance> balances) =>
     _fromCents(balances.fold<int>(0, (sum, b) => sum + _toCents(b.open)));
 
+/// The balances of the orders the user chose ("Escolher as OS"), still in
+/// the order of [balances] (oldest first). A null [chosen] means all of them.
+List<OpenBalance> chosenBalances(
+  List<OpenBalance> balances,
+  Set<String>? chosen,
+) {
+  if (chosen == null) return List.of(balances);
+  return [
+    for (final b in balances)
+      if (chosen.contains(b.orderId)) b,
+  ];
+}
+
 /// Splits [amount] over [balances] in the given order (the caller passes
 /// them oldest first, as `Debtor.orders`): each order gets at most what is
 /// open on it, in whole cents. Orders that get nothing are left out.
 ///
 /// The amount above the total open is not allocated (callers block
-/// overpayment before). A manual split ("Escolher as OS", phase 2) can be
-/// built the same way by passing the chosen orders in the chosen order, or
-/// by building the [PaymentAllocation] list directly: the writers only
-/// consume allocations.
+/// overpayment before). "Escolher as OS" passes only the chosen orders
+/// ([chosenBalances]), still oldest first.
 List<PaymentAllocation> allocatePayment(
   List<OpenBalance> balances,
   double amount,

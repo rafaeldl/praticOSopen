@@ -2962,6 +2962,147 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not send the receipt. Check the internet and try again.';
 
   @override
+  String get receiveCustomerChooseOrders => 'Choose the orders';
+
+  @override
+  String get receiveCustomerPickTitle => 'Which orders is this for?';
+
+  @override
+  String receiveCustomerPickRow(int number) {
+    return 'Order $number';
+  }
+
+  @override
+  String receiveCustomerPickSubtitle(String amount, String date) {
+    return '$amount open · $date';
+  }
+
+  @override
+  String get receiveCustomerChosenOnly =>
+      'The amount goes only to the chosen orders, oldest first.';
+
+  @override
+  String receiveCustomerTooMuchChosen(String total) {
+    return 'That is more than is open on these orders ($total).';
+  }
+
+  @override
+  String get receiptTitle => 'Payment';
+
+  @override
+  String receiptRowSettled(int number, String amount) {
+    return 'Order $number · $amount · paid off';
+  }
+
+  @override
+  String receiptRowOpen(int number, String amount, String left) {
+    return 'Order $number · $amount · $left open';
+  }
+
+  @override
+  String receiptSendTo(String name) {
+    return 'Send receipt to $name';
+  }
+
+  @override
+  String get receiptSend => 'Send receipt';
+
+  @override
+  String get receiptActions => 'More payment options';
+
+  @override
+  String get receiptUndo => 'Undo payment';
+
+  @override
+  String receiptUndoTitle(String amount) {
+    return 'Undo the payment of $amount?';
+  }
+
+  @override
+  String receiptUndoMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders',
+      one: '1 order',
+    );
+    return 'The amount comes off $_temp0 and is open again.';
+  }
+
+  @override
+  String get receiptUndone => 'Payment undone';
+
+  @override
+  String get receiptCanceled => 'This payment was undone.';
+
+  @override
+  String get receiptPartOfGroup =>
+      'This payment is part of a payment for several orders. To undo it, open the payment.';
+
+  @override
+  String get receiptOpen => 'Open payment';
+
+  @override
+  String get receiptsSection => 'Payments';
+
+  @override
+  String receiptListSubtitle(String date, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders',
+      one: '1 order',
+    );
+    return '$date · $_temp0';
+  }
+
+  @override
+  String get receiptNotFound => 'We could not find this payment.';
+
+  @override
+  String get pdfReceiptTitle => 'Receipt';
+
+  @override
+  String pdfReceiptNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String pdfReceiptSentence(String name, String amount, String date) {
+    return 'We received from $name the amount of $amount on $date.';
+  }
+
+  @override
+  String get pdfReceiptOrderColumn => 'Order';
+
+  @override
+  String get pdfReceiptPaidColumn => 'Paid now';
+
+  @override
+  String get pdfReceiptOpenColumn => 'Still open';
+
+  @override
+  String get pdfReceiptDescriptionColumn => 'Description';
+
+  @override
+  String get pdfReceiptTotal => 'Total received';
+
+  @override
+  String pdfReceiptRemaining(String amount) {
+    return '$amount is still open on these orders.';
+  }
+
+  @override
+  String pdfReceiptRecordedBy(String name) {
+    return 'Recorded by $name';
+  }
+
+  @override
+  String pdfReceiptFileName(String number) {
+    return 'Receipt-$number';
+  }
+
+  @override
   String get loginTitle => 'Sign in to get started';
 
   @override

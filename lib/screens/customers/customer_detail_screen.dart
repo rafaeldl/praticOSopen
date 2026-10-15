@@ -7,6 +7,10 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/models/receipt.dart';
+import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
+import 'package:praticos/screens/payments/receipt_detail_screen.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -32,7 +36,9 @@ import 'package:url_launcher/url_launcher.dart';
 /// still open on the customer's orders) plus, with financial access, the
 /// "· Receber" link (opens "Receber de Ana" or, with one open order, its
 /// Receber); call / WhatsApp, "Nova OS para Ana", the
-/// customer's vehicles (with "Cadastrar outro veículo") and the latest orders.
+/// customer's vehicles (with "Cadastrar outro veículo"), the latest orders
+/// and, with financial access, the customer's "Recebimentos" (payments that
+/// covered several orders; each opens [ReceiptDetailScreen]).
 /// Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
   const CustomerDetailScreen({
@@ -42,6 +48,8 @@ class CustomerDetailScreen extends StatefulWidget {
     this.showPrices,
     this.canReceive,
     this.onReceive,
+    this.receipts,
+    this.onOpenReceipt,
   });
 
   /// Falls back to the `customer` route argument.
@@ -65,6 +73,13 @@ class CustomerDetailScreen extends StatefulWidget {
   /// [ReceiveCustomerScreen] (several). Test seam.
   final void Function(BuildContext context, List<Order> openOrders)? onReceive;
 
+  /// Active receipts of the customer. Defaults to
+  /// [TenantReceiptRepository.watchActiveOfCustomer]. Test seam.
+  final Stream<List<Receipt>>? receipts;
+
+  /// Opens a receipt. Defaults to [ReceiptDetailScreen.open]. Test seam.
+  final void Function(BuildContext context, Receipt receipt)? onOpenReceipt;
+
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
 }
@@ -75,6 +90,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   Customer? _customer;
   String? _previousTitle;
   Stream<List<Order>>? _orders;
+  Stream<List<Receipt>>? _receipts;
 
   bool get _showPrices =>
       widget.showPrices ?? AuthorizationService.instance.canViewPrices;
@@ -92,6 +108,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     _customer = widget.customer ?? args?['customer'] as Customer?;
     _previousTitle = args?['previousTitle'] as String?;
     _loadOrders();
+    _receipts = _receiptsStream();
+  }
+
+  /// Only with financial access (the rules deny the rest).
+  Stream<List<Receipt>>? _receiptsStream() {
+    if (widget.receipts != null) return widget.receipts;
+    final companyId = Global.companyAggr?.id;
+    final id = _customer?.id;
+    if (!_canReceive || companyId == null || id == null) return null;
+    return TenantReceiptRepository().watchActiveOfCustomer(companyId, id);
   }
 
   void _loadOrders() {
@@ -439,7 +465,44 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         SectionLabel(l10n.latestOrders),
         for (final o in orders) _orderRow(o),
       ],
+      if (_receipts != null && _canReceive) _receiptsSection(),
     ];
+  }
+
+  /// "Recebimentos": one row per active receipt ("R$ 700" / "14/10 · 2 OS").
+  Widget _receiptsSection() {
+    return StreamBuilder<List<Receipt>>(
+      stream: _receipts,
+      builder: (context, snapshot) {
+        final receipts = snapshot.data ?? const <Receipt>[];
+        if (receipts.isEmpty) return const SizedBox.shrink();
+        final l10n = context.l10n;
+        final format = FormatService();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionLabel(l10n.receiptsSection),
+            for (final r in receipts)
+              AppListRow(
+                key: Key('customerReceipt_${r.id}'),
+                title: format.formatCurrency(r.amount ?? 0),
+                subtitle: l10n.receiptListSubtitle(
+                  format.formatDate(r.paidAt ?? r.createdAt ?? DateTime.now()),
+                  r.allocations?.length ?? 0,
+                ),
+                onTap: () {
+                  final open = widget.onOpenReceipt;
+                  if (open != null) {
+                    open(context, r);
+                  } else if (r.id != null) {
+                    ReceiptDetailScreen.open(context, receiptId: r.id!);
+                  }
+                },
+              ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _vehicleRow(DeviceAggr vehicle, List<Order> orders) {
