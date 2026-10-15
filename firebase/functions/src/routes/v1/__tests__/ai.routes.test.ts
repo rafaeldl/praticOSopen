@@ -5,7 +5,7 @@ import type { OrderAssistDeps } from '../../../services/ai/order-assist.service'
 
 function fakeDeps(overrides: Partial<OrderAssistDeps> = {}): OrderAssistDeps {
   return {
-    llm: { generateJson: jest.fn().mockResolvedValue('{"items":[{"kind":"service","name":"Polimento"}]}') },
+    llm: { generateJson: jest.fn().mockResolvedValue('{"operations":[{"action":"add","kind":"service","name":"Polimento"}]}') },
     getSettings: jest.fn().mockResolvedValue({ enabled: true }),
     reserve: jest.fn().mockResolvedValue({ ok: true, used: 1, limit: 10, monthKey: '2026-10' }),
     release: jest.fn(),

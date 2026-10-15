@@ -31,6 +31,16 @@ const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 export const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 export const MAX_AUDIO_BYTES = 3 * 1024 * 1024;
 export const MAX_PHOTOS = 4;
+export const MAX_ORDER_LINES = 50;
+const MAX_OPERATIONS = 30;
+
+const orderLineSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    value: z.number().finite().nullable().optional(),
+    quantity: z.number().finite().positive().optional(),
+  })
+  .strict();
 
 const base64Of = (maxBytes: number) =>
   z
@@ -61,6 +71,18 @@ export const orderAssistInputSchema = z
       .max(MAX_PHOTOS)
       .optional(),
     locale: z.enum(['pt', 'en', 'es']).optional(),
+    /**
+     * Lines already in the order, in screen order. Lets the model change or
+     * remove them ("a pintura é 300", "tira a lavação") instead of adding new
+     * ones. Older apps don't send it: then the model can only add.
+     */
+    order: z
+      .object({
+        services: z.array(orderLineSchema).max(MAX_ORDER_LINES).optional(),
+        products: z.array(orderLineSchema).max(MAX_ORDER_LINES).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .refine((v) => !!v.text || !!v.audio || (v.photos?.length ?? 0) > 0, {
@@ -68,6 +90,7 @@ export const orderAssistInputSchema = z
   });
 
 export type OrderAssistInput = z.infer<typeof orderAssistInputSchema>;
+export type OrderLine = z.infer<typeof orderLineSchema>;
 
 // ============================================================================
 // Model answer
@@ -79,11 +102,27 @@ const optionalText = z.preprocess(
   z.string().optional(),
 );
 
-const draftItemSchema = z.object({
+/** Id of an order line in the prompt: S1, S2… (services) and P1, P2… (products). */
+const LINE_ID = /^[SP][1-9]\d{0,2}$/;
+const lineId = z.preprocess(
+  (v) => (typeof v === 'string' ? v.trim().toUpperCase() : v),
+  z.string().regex(LINE_ID),
+);
+
+const draftOperationSchema = z.object({
+  action: z.enum(['add', 'update', 'remove']).catch('add'),
+  /** Line to change or remove; null when unsure (see candidates). */
+  line: lineId.nullable().optional().catch(null),
+  /** Lines that fit equally when the model can't tell which one was meant. */
+  candidates: z
+    .array(z.unknown())
+    .transform((ids) => ids.flatMap((id) => (lineId.safeParse(id).success ? [lineId.parse(id)] : [])))
+    .optional()
+    .catch([]),
   kind: z.enum(['service', 'product']).catch('service'),
   name: z.string().trim().min(1).max(200),
   value: z.number().finite().nonnegative().nullable().optional(),
-  quantity: z.number().finite().positive().optional(),
+  quantity: z.number().finite().positive().nullable().optional(),
 });
 
 export const llmDraftSchema = z.object({
@@ -94,7 +133,7 @@ export const llmDraftSchema = z.object({
     .nullable()
     .optional()
     .catch(undefined),
-  items: z.array(draftItemSchema).max(30).catch([]).default([]),
+  operations: z.array(draftOperationSchema).max(MAX_OPERATIONS).catch([]).default([]),
   notes: optionalText,
   /** When the customer wants it ready: "YYYY-MM-DD", "HH:MM" only when said. */
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().catch(undefined),
@@ -116,25 +155,28 @@ export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
       additionalProperties: false,
       properties: { name: STRING, serial: STRING, manufacturer: STRING },
     },
-    items: {
+    operations: {
       type: 'array',
       items: {
         type: 'object',
         additionalProperties: false,
         properties: {
+          action: { type: 'string', enum: ['add', 'update', 'remove'] },
+          line: { type: ['string', 'null'] },
+          candidates: { type: 'array', items: STRING },
           kind: { type: 'string', enum: ['service', 'product'] },
           name: STRING,
           value: { type: ['number', 'null'] },
-          quantity: { type: 'number' },
+          quantity: { type: ['number', 'null'] },
         },
-        required: ['kind', 'name'],
+        required: ['action', 'kind', 'name'],
       },
     },
     notes: STRING,
     dueDate: STRING,
     dueTime: STRING,
   },
-  required: ['items'],
+  required: ['operations'],
 };
 
 /**
@@ -154,17 +196,16 @@ export function parseLlmDraft(raw: string): LlmDraft {
     throw new LlmUnavailableError('model answer is not an object');
   }
   const obj = json as Record<string, unknown>;
-  // Keep only the valid items, one by one.
-  const items = Array.isArray(obj.items)
-    ? obj.items.flatMap((it) => {
-        const parsed = draftItemSchema.safeParse(it);
-        return parsed.success ? [parsed.data] : [];
-      })
-    : [];
-  const parsed = llmDraftSchema.safeParse({ ...obj, items: items.slice(0, 30) });
+  // Keep only the valid operations, one by one.
+  const operations = (Array.isArray(obj.operations) ? obj.operations : []).flatMap((op) => {
+    const parsed = draftOperationSchema.safeParse(op);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const kept = operations.slice(0, MAX_OPERATIONS);
+  const parsed = llmDraftSchema.safeParse({ ...obj, operations: kept });
   if (parsed.success) return parsed.data;
-  // Bad top-level fields: keep the items, drop the rest.
-  return { items: items.slice(0, 30) };
+  // Bad top-level fields: keep the operations, drop the rest.
+  return { operations: kept };
 }
 
 // ============================================================================
@@ -195,16 +236,28 @@ export function todayLabel(now: Date = new Date(), timeZone = 'America/Sao_Paulo
 export function buildSystemPrompt(locale: string, deviceLabel?: string, today: string = todayLabel()): string {
   const device = deviceLabel || 'device (vehicle, appliance, equipment)';
   return [
-    'You help a small service business open a service order (OS) from a photo, a short audio or a text.',
+    'You help a small service business fill or change a service order (OS) from a photo, a short audio or a text.',
     'Return ONLY JSON following the schema. Never invent data that is not in the input.',
     `- transcript: what the person said, verbatim, when there is audio (in ${LANGUAGE[locale] ?? LANGUAGE.pt}).`,
     '- customer: the customer name and phone only when said or clearly written. Nicknames are fine.',
     `- device: the ${device}. Put a license plate, serial number or model code in "serial" (uppercase, no spaces);`,
     '  brand in "manufacturer"; a short readable name in "name" (e.g. "Gol 2018", "Split Samsung 12000 BTU").',
-    '- items: each service or part to be done/used. Prefer the exact name from the catalog lists below when',
-    '  one clearly matches; otherwise use a short name. "value" is the unit price in the currency, as a number',
-    '  ("500" → 500, "1,5 mil" → 1500), or null when no price was said. "200 cada" means unit value 200 with',
-    '  quantity. "garantia" means value 0. Parts/materials are kind "product"; labor is kind "service".',
+    '- operations: what to do with the order lines. The lines already in the order are listed below with ids',
+    '  (S1, S2… services; P1, P2… parts). Each operation has an "action":',
+    '  "add": a new service or part. Prefer the exact name from the catalog lists below when one clearly',
+    '  matches; otherwise use a short name.',
+    '  "update": change the unit price ("value") and/or the "quantity" of a line already in the order. Set',
+    '  "line" to its id, "name" to its name, and leave the field that does not change null.',
+    '  "remove": take a line out of the order. Set "line" to its id and "name" to its name.',
+    '  Never add again something that is already a line just because it was mentioned: change it or leave it.',
+    '  "Troca X por Y" means remove X and add Y. A price said next to a name ("a pintura de 33") tells which',
+    '  line is meant. "Mais um/dois" on a part already in the order updates its quantity (current + n).',
+    '  When the words fit more than one line equally, set "line" to null and list every fitting id in',
+    '  "candidates"; do not guess. When the user changes or removes something that is not in the order,',
+    '  return no operation for it.',
+    '  "value" is the unit price in the currency, as a number ("500" → 500, "1,5 mil" → 1500), or null when',
+    '  no price was said. "200 cada" means unit value 200 with quantity. "garantia" or "cortesia" means value 0.',
+    '  Parts/materials are kind "product"; labor is kind "service".',
     `- dueDate: when the order must be ready ("pronto sexta", "entregar amanhã", "dia 20"), as YYYY-MM-DD.`,
     `  Today is ${today}; a weekday means the next one after today. dueTime as HH:MM only when a time was said.`,
     '  Leave both out when no deadline was said, and do not repeat the deadline in notes.',
@@ -219,11 +272,20 @@ export function buildUserText(input: OrderAssistInput, catalog: CompanyCatalog):
       .slice(0, PROMPT_CATALOG_LIMIT)
       .map((e) => `- ${e.name}${typeof e.value === 'number' ? ` (${e.value})` : ''}`)
       .join('\n') || '(empty)';
+  const lines = (prefix: 'S' | 'P', entries: OrderLine[]) =>
+    entries.map((l, i) => {
+      const value = typeof l.value === 'number' ? `, value ${l.value}` : ', no value';
+      const quantity = prefix === 'P' ? `, quantity ${l.quantity ?? 1}` : '';
+      return `${prefix}${i + 1}: ${l.name}${value}${quantity}`;
+    });
+  const current = [...lines('S', input.order?.services ?? []), ...lines('P', input.order?.products ?? [])];
   const parts = [
     'Services catalog:',
     list(catalog.services),
     'Products catalog:',
     list(catalog.products),
+    'Lines already in the order:',
+    current.join('\n') || '(none: new order)',
   ];
   if (input.text) parts.push('Text from the user:', input.text);
   if (input.audio) parts.push('An audio from the user is attached.');
@@ -325,6 +387,26 @@ export interface DraftItem {
   alternatives: CatalogEntry[];
 }
 
+/** A line already in the order: its kind and index in `input.order.services`/`products`. */
+export interface LineRef {
+  kind: 'service' | 'product';
+  index: number;
+}
+
+export interface DraftChange {
+  action: 'update' | 'remove';
+  /** The line to change; null when ambiguous (see [candidates]). */
+  line: LineRef | null;
+  /** When [line] is null: the lines that fit, for the app to ask which one. */
+  candidates: LineRef[];
+  /** Name of the line as the model saw it. */
+  name: string;
+  /** New unit price, when it changes. */
+  value?: number;
+  /** New quantity (parts only), when it changes. */
+  quantity?: number;
+}
+
 export interface OrderDraft {
   transcript: string | null;
   customer: { match: CustomerHit | null; guess: { name?: string; phone?: string } | null; alternatives: CustomerHit[] } | null;
@@ -333,7 +415,10 @@ export interface OrderDraft {
     guess: { name?: string; serial?: string; manufacturer?: string } | null;
     alternatives: DeviceHit[];
   } | null;
+  /** New lines to add (older apps read only this). */
   items: DraftItem[];
+  /** Changes to lines already in the order (sent in `input.order`). */
+  changes: DraftChange[];
   notes: string | null;
   /** "YYYY-MM-DD", or "YYYY-MM-DDTHH:MM" when a time was said. */
   dueDate: string | null;
@@ -359,7 +444,7 @@ export const ORDER_ASSIST_HTTP_STATUS: Record<OrderAssistErrorCode, number> = {
   AI_UNAVAILABLE: 503,
 };
 
-function toItem(item: LlmDraft['items'][number], catalog: CompanyCatalog): DraftItem {
+function toItem(item: LlmDraft['operations'][number], catalog: CompanyCatalog): DraftItem {
   const entries = item.kind === 'product' ? catalog.products : catalog.services;
   const { match, alternatives } = matchCatalog(item.name, entries);
   const spoken = typeof item.value === 'number' ? item.value : null;
@@ -373,6 +458,37 @@ function toItem(item: LlmDraft['items'][number], catalog: CompanyCatalog): Draft
     catalogId: match?.id ?? null,
     alternatives,
   };
+}
+
+/** Line id from the prompt ("S2") → the line, when it exists in the order. */
+function lineRef(id: string | null | undefined, order: OrderAssistInput['order']): LineRef | null {
+  if (!id) return null;
+  const kind = id[0] === 'P' ? 'product' : 'service';
+  const index = Number(id.slice(1)) - 1;
+  const size = (kind === 'product' ? order?.products : order?.services)?.length ?? 0;
+  return index >= 0 && index < size ? { kind, index } : null;
+}
+
+/** Update/remove operations → changes on existing lines. Drops lines that don't exist. */
+export function toChanges(operations: LlmDraft['operations'], order: OrderAssistInput['order']): DraftChange[] {
+  return operations.flatMap((op): DraftChange[] => {
+    if (op.action === 'add') return [];
+    const fits = (op.candidates ?? [])
+      .map((id) => lineRef(id, order))
+      .filter((r, i, all): r is LineRef => !!r && all.findIndex((o) => o?.kind === r.kind && o.index === r.index) === i);
+    const line = lineRef(op.line, order) ?? (fits.length === 1 ? fits[0] : null);
+    if (!line && fits.length < 2) return [];
+    const change: DraftChange = { action: op.action, line, candidates: line ? [] : fits, name: op.name };
+    if (op.action === 'update') {
+      if (typeof op.value === 'number') change.value = op.value;
+      // Quantity only exists on parts; when ambiguous the app applies it if the chosen line is a part.
+      if (typeof op.quantity === 'number' && (line?.kind ?? 'product') === 'product') {
+        change.quantity = Math.max(1, Math.round(op.quantity));
+      }
+      if (change.value === undefined && change.quantity === undefined) return [];
+    }
+    return [change];
+  });
 }
 
 async function resolveCustomer(companyId: string, draft: LlmDraft, deps: OrderAssistDeps): Promise<OrderDraft['customer']> {
@@ -462,7 +578,8 @@ export async function runOrderAssist(
     transcript: draft.transcript ?? null,
     customer,
     device,
-    items: draft.items.map((item) => toItem(item, catalog)),
+    items: draft.operations.filter((op) => op.action === 'add').map((op) => toItem(op, catalog)),
+    changes: toChanges(draft.operations, input.order),
     notes: draft.notes ?? null,
     dueDate: draft.dueDate ? (draft.dueTime ? `${draft.dueDate}T${draft.dueTime}` : draft.dueDate) : null,
     usage: { used: reservation.used, limit: reservation.limit },

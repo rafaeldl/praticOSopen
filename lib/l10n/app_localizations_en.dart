@@ -4232,6 +4232,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'I added what\'s marked to the order. Check it.';
 
   @override
+  String orderAssistantWhichLine(String name) {
+    return 'Which $name?';
+  }
+
+  @override
+  String get orderAssistantChanged =>
+      'I changed the order as you asked. Check it.';
+
+  @override
   String get pickerCustomerTitle => 'Which customer?';
 
   @override

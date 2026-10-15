@@ -4228,6 +4228,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Coloquei na OS o que está marcado. Confira.';
 
   @override
+  String orderAssistantWhichLine(String name) {
+    return 'Qual $name?';
+  }
+
+  @override
+  String get orderAssistantChanged => 'Mudei a OS como você pediu. Confira.';
+
+  @override
   String get pickerCustomerTitle => 'Qual cliente?';
 
   @override
