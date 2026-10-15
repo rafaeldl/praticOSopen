@@ -716,7 +716,7 @@ describeEmulator('firestore.rules', () => {
     beforeEach(async () => {
       await env.withSecurityRulesDisabled(async (ctx) => {
         const db = ctx.firestore();
-        await fs.setDoc(fs.doc(db, 'companies/c1/receipts/existing'), receipt('cons1'));
+        await fs.setDoc(fs.doc(db, 'companies/c1/receipts/existing'), receipt('mgr1'));
         await fs.setDoc(fs.doc(db, 'companies/c1/orders/o2'), {
           number: 2,
           status: 'done',
@@ -727,12 +727,12 @@ describeEmulator('firestore.rules', () => {
       });
     });
 
-    it.each(['owner', 'admin', 'manager', 'consultant'])('can be created by a %s', async (role) => {
+    it.each(['owner', 'admin', 'manager'])('can be created by a %s', async (role) => {
       const uid = `u_${role}`;
       await rut.assertSucceeds(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
     });
 
-    it.each(['supervisor', 'technician', 'viewer'])('cannot be created by a %s', async (role) => {
+    it.each(['consultant', 'supervisor', 'technician', 'viewer'])('cannot be created by a %s', async (role) => {
       const uid = `u_${role}`;
       await rut.assertFails(fs.setDoc(fs.doc(asUser(uid, { c1: role }), path), receipt(uid)));
     });
@@ -762,16 +762,19 @@ describeEmulator('firestore.rules', () => {
       }
     });
 
-    it('is readable by the consultant who created it, not by other consultants', async () => {
-      await rut.assertSucceeds(
-        fs.getDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/existing')),
+    it('is not readable by a consultant, not even the one who created it', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.setDoc(fs.doc(ctx.firestore(), 'companies/c1/receipts/byCons'), receipt('cons1'));
+      });
+      await rut.assertFails(
+        fs.getDoc(fs.doc(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts/byCons')),
       );
       await rut.assertFails(
-        fs.getDoc(fs.doc(asUser('cons2', { c1: 'consultant' }), 'companies/c1/receipts/existing')),
+        fs.getDocs(fs.collection(asUser('cons1', { c1: 'consultant' }), 'companies/c1/receipts')),
       );
     });
 
-    it.each(['supervisor', 'technician'])('is not readable by a %s', async (role) => {
+    it.each(['consultant', 'supervisor', 'technician'])('is not readable by a %s', async (role) => {
       await rut.assertFails(
         fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), 'companies/c1/receipts/existing')),
       );
@@ -794,11 +797,13 @@ describeEmulator('firestore.rules', () => {
       await rut.assertFails(fs.updateDoc(ref, { amount: 10 }));
       await rut.assertFails(fs.updateDoc(ref, { allocations: [] }));
       await rut.assertFails(fs.updateDoc(ref, { status: 'deleted' }));
-      await rut.assertFails(
-        fs.updateDoc(fs.doc(asUser('tech1', { c1: 'technician' }), 'companies/c1/receipts/existing'), {
-          status: 'canceled',
-        }),
-      );
+      for (const role of ['consultant', 'technician']) {
+        await rut.assertFails(
+          fs.updateDoc(fs.doc(asUser(`u_${role}`, { c1: role }), 'companies/c1/receipts/existing'), {
+            status: 'canceled',
+          }),
+        );
+      }
     });
 
     it('is never hard-deleted, not even by the owner', async () => {
@@ -823,8 +828,8 @@ describeEmulator('firestore.rules', () => {
       });
       await rut.assertSucceeds(batch.commit());
 
-      // A consultant cannot touch orders created by someone else: the whole
-      // batch fails, receipt included.
+      // A consultant cannot receive (no financial access): the whole batch
+      // fails, order payments included.
       const cons = asUser('cons1', { c1: 'consultant' });
       const failing = fs.writeBatch(cons);
       failing.set(fs.doc(cons, 'companies/c1/receipts/r2'), receipt('cons1'));

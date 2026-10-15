@@ -136,12 +136,14 @@ String _money(double v) => (FormatService()..setLocale('pt')).formatCurrency(v);
 CatalogItem _item(String id, String name, [double? value]) =>
     CatalogItem(id: id, name: name, value: value, origin: Object());
 
-OrderPermissions _permissions({bool prices = true}) => OrderPermissions(
-  canViewPrices: () => prices,
-  availableStatuses: (_) => const ['approved', 'progress', 'canceled'],
-  canChangeStatus: (_, _) => true,
-  canDelete: (_) => true,
-);
+OrderPermissions _permissions({bool prices = true, bool receive = true}) =>
+    OrderPermissions(
+      canViewPrices: () => prices,
+      canReceivePayments: () => receive,
+      availableStatuses: (_) => const ['approved', 'progress', 'canceled'],
+      canChangeStatus: (_, _) => true,
+      canDelete: (_) => true,
+    );
 
 const _allCatalog = CatalogPermissions(_all);
 bool _all(PermissionType p) => true;
@@ -289,9 +291,10 @@ void main() {
     CatalogPermissions catalogPermissions = _allCatalog,
     OrderScreenActions? actions,
     bool prices = true,
+    bool receive = true,
   }) => OrderScreenV2(
     store: store,
-    permissions: _permissions(prices: prices),
+    permissions: _permissions(prices: prices, receive: receive),
     actions: actions ?? FakeActions(),
     catalogSource: catalog ?? source,
     catalogPermissions: catalogPermissions,
@@ -1244,6 +1247,58 @@ void main() {
       );
       expect(find.text('Falta receber ${_money(500)}'), findsOneWidget);
       await tester.tap(find.text('Receber ${_money(500)}'));
+      await tester.pumpAndSettle();
+      expect(actions.calls, ['payments']);
+    });
+
+    testWidgets('consultant (prices, no financial access) sees what is left '
+        'but has no "Receber"', (tester) async {
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions, receive: false),
+        args: {'order': order()..status = 'done'},
+      );
+      // Values still show.
+      expect(find.text('Falta receber ${_money(500)}'), findsOneWidget);
+      expect(find.text('Falta receber'), findsOneWidget);
+      // No blue "Receber" button: done with balance has no next step.
+      expect(find.byKey(const ValueKey('order_primary_button')), findsNothing);
+      expect(find.text('Receber ${_money(500)}'), findsNothing);
+      // Neither the phrase nor the remaining row open the payments.
+      await tester.tap(find.text('Falta receber ${_money(500)}'));
+      await tester.ensureVisible(find.text('Falta receber'));
+      await tester.tap(find.text('Falta receber'));
+      await tester.pumpAndSettle();
+      expect(actions.calls, isEmpty);
+      expect(find.byKey(const ValueKey('order_remaining')), findsNothing);
+    });
+
+    testWidgets('consultant still gets the status next steps', (tester) async {
+      await _pump(
+        tester,
+        screen(OrderStore(), receive: false),
+        args: {'order': order()..status = 'progress'},
+      );
+      final buttons = find.byKey(const ValueKey('order_primary_button'));
+      expect(buttons, findsOneWidget);
+      expect(
+        find.descendant(of: buttons, matching: find.text('Marcar como pronta')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('manager (financial access) gets "Receber" and the remaining '
+        'row opens payments', (tester) async {
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        screen(OrderStore(), actions: actions),
+        args: {'order': order()..status = 'done'},
+      );
+      expect(find.text('Receber ${_money(500)}'), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const ValueKey('order_remaining')));
+      await tester.tap(find.byKey(const ValueKey('order_remaining')));
       await tester.pumpAndSettle();
       expect(actions.calls, ['payments']);
     });

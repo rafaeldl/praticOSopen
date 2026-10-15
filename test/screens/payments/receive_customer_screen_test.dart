@@ -8,6 +8,7 @@ import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/widgets/permission_widgets.dart';
 
 class _FakeService extends CustomerReceiptService {
   _FakeService({this.fail});
@@ -23,22 +24,21 @@ class _FakeService extends CustomerReceiptService {
   }
 }
 
-Order _order(String id, int number, double total, {double paid = 0}) =>
-    Order()
-      ..id = id
-      ..number = number
-      ..total = total
-      ..paidAmount = paid;
+Order _order(String id, int number, double total, {double paid = 0}) => Order()
+  ..id = id
+  ..number = number
+  ..total = total
+  ..paidAmount = paid;
 
 final _customer = CustomerAggr()
   ..id = 'c1'
   ..name = 'João';
 
 List<Order> _orders() => [
-      _order('a', 182, 450),
-      _order('b', 190, 600, paid: 100),
-      _order('c', 201, 300),
-    ];
+  _order('a', 182, 450),
+  _order('b', 190, 600, paid: 100),
+  _order('c', 201, 300),
+];
 
 void main() {
   setUp(() => FormatService().setLocale('pt-BR'));
@@ -54,34 +54,36 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final fake = service ?? _FakeService();
-    await tester.pumpWidget(CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Builder(
-        builder: (context) => CupertinoPageScaffold(
-          child: Center(
-            child: CupertinoButton(
-              child: const Text('abrir'),
-              onPressed: () async {
-                final done = await Navigator.of(context).push<bool>(
-                  CupertinoPageRoute(
-                    builder: (_) => ReceiveCustomerScreen(
-                      orders: orders ?? _orders(),
-                      customer: name == null ? _customer : null,
-                      customerName: name,
-                      service: fake,
-                      canAttachReceipt: true,
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => CupertinoPageScaffold(
+            child: Center(
+              child: CupertinoButton(
+                child: const Text('abrir'),
+                onPressed: () async {
+                  final done = await Navigator.of(context).push<bool>(
+                    CupertinoPageRoute(
+                      builder: (_) => ReceiveCustomerScreen(
+                        orders: orders ?? _orders(),
+                        customer: name == null ? _customer : null,
+                        customerName: name,
+                        service: fake,
+                        canAttachReceipt: true,
+                      ),
                     ),
-                  ),
-                );
-                popped?.add(done ?? false);
-              },
+                  );
+                  popped?.add(done ?? false);
+                },
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     await tester.tap(find.text('abrir'));
     await tester.pumpAndSettle();
     return fake;
@@ -101,8 +103,9 @@ void main() {
     return button.onPressed != null;
   }
 
-  testWidgets('title, sentence, total prefilled and the full split',
-      (tester) async {
+  testWidgets('title, sentence, total prefilled and the full split', (
+    tester,
+  ) async {
     await pump(tester);
 
     expect(find.text('Receber de João'), findsOneWidget);
@@ -125,15 +128,18 @@ void main() {
     await typeAmount(tester, 750);
 
     expect(find.text('OS 182 · quita ${brl(450)}'), findsOneWidget);
-    expect(find.text('OS 190 · recebe ${brl(300)}, fica ${brl(200)}'),
-        findsOneWidget);
+    expect(
+      find.text('OS 190 · recebe ${brl(300)}, fica ${brl(200)}'),
+      findsOneWidget,
+    );
     expect(find.text('OS 201 · continua ${brl(300)}'), findsOneWidget);
     expect(find.textContaining('Recebi'), findsOneWidget);
     expect(find.textContaining('750,00'), findsWidgets);
   });
 
-  testWidgets('more than owed or zero disables the button with a hint',
-      (tester) async {
+  testWidgets('more than owed or zero disables the button with a hint', (
+    tester,
+  ) async {
     await pump(tester);
 
     await typeAmount(tester, 1300);
@@ -146,14 +152,16 @@ void main() {
     expect(find.text('Digite quanto recebeu.'), findsOneWidget);
   });
 
-  testWidgets('the date row opens a picker without future dates',
-      (tester) async {
+  testWidgets('the date row opens a picker without future dates', (
+    tester,
+  ) async {
     await pump(tester);
     await tester.tap(find.byKey(const Key('receiveDateRow')));
     await tester.pumpAndSettle();
 
-    final picker =
-        tester.widget<CupertinoDatePicker>(find.byKey(const Key('receiveDatePicker')));
+    final picker = tester.widget<CupertinoDatePicker>(
+      find.byKey(const Key('receiveDatePicker')),
+    );
     final now = DateTime.now();
     expect(picker.maximumDate, isNotNull);
     expect(
@@ -165,8 +173,9 @@ void main() {
     expect(find.text('Hoje'), findsOneWidget);
   });
 
-  testWidgets('"Recebi" records the split, toasts and pops with true',
-      (tester) async {
+  testWidgets('"Recebi" records the split, toasts and pops with true', (
+    tester,
+  ) async {
     final popped = <bool>[];
     final service = await pump(tester, popped: popped);
     await typeAmount(tester, 750);
@@ -188,9 +197,11 @@ void main() {
 
   testWidgets('a failure keeps the screen open', (tester) async {
     final popped = <bool>[];
-    await pump(tester,
-        service: _FakeService(fail: CustomerReceiptFailure.upload),
-        popped: popped);
+    await pump(
+      tester,
+      service: _FakeService(fail: CustomerReceiptFailure.upload),
+      popped: popped,
+    );
     await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
     await tester.pump();
     expect(find.textContaining('comprovante'), findsWidgets);
@@ -199,63 +210,115 @@ void main() {
     expect(find.text('Receber de João'), findsOneWidget);
   });
 
-  testWidgets('long name wraps and text scale 2 does not overflow',
-      (tester) async {
+  testWidgets('long name wraps and text scale 2 does not overflow', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: MediaQuery(
-        data: const MediaQueryData(
-          size: Size(390, 844),
-          textScaler: TextScaler.linear(2),
-        ),
-        child: ReceiveCustomerScreen(
-          orders: _orders(),
-          customerName: 'Maria Aparecida dos Santos Oliveira Transportes',
-          service: _FakeService(),
-          canAttachReceipt: true,
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 844),
+            textScaler: TextScaler.linear(2),
+          ),
+          child: ReceiveCustomerScreen(
+            orders: _orders(),
+            customerName: 'Maria Aparecida dos Santos Oliveira Transportes',
+            service: _FakeService(),
+            canAttachReceipt: true,
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    final title = tester.widget<Text>(find.byKey(const Key('receiveCustomerTitle')));
+    final title = tester.widget<Text>(
+      find.byKey(const Key('receiveCustomerTitle')),
+    );
     expect(title.overflow, isNot(TextOverflow.ellipsis));
     expect(title.maxLines, isNull);
   });
 
-  testWidgets('orders already paid are left out of the sentence',
-      (tester) async {
-    await pump(tester, orders: [
-      _order('a', 1, 100, paid: 100),
-      _order('b', 2, 80),
-      _order('c', 3, 20),
-    ]);
+  testWidgets('orders already paid are left out of the sentence', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      orders: [
+        _order('a', 1, 100, paid: 100),
+        _order('b', 2, 80),
+        _order('c', 3, 20),
+      ],
+    );
     expect(find.text('Deve ${brl(100)} em 2 OS'), findsOneWidget);
     expect(find.textContaining('OS 1 ·'), findsNothing);
   });
 
-  testWidgets('open() pushes above the tab bar (root navigator)',
-      (tester) async {
+  testWidgets('open() pushes above the tab bar (root navigator)', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: CupertinoTabScaffold(
-        tabBar: CupertinoTabBar(items: const [
-          BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home), label: 'Aba A'),
-          BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.money_dollar), label: 'Aba B'),
-        ]),
-        tabBuilder: (_, __) => CupertinoTabView(
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.home),
+                label: 'Aba A',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.money_dollar),
+                label: 'Aba B',
+              ),
+            ],
+          ),
+          tabBuilder: (_, __) => CupertinoTabView(
+            builder: (context) => CupertinoPageScaffold(
+              child: Center(
+                child: CupertinoButton(
+                  child: const Text('abrir'),
+                  onPressed: () => ReceiveCustomerScreen.open(
+                    context,
+                    orders: _orders(),
+                    customer: _customer,
+                    canAttachReceipt: false,
+                    canReceive: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Aba A'), findsOneWidget);
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ReceiveCustomerScreen), findsOneWidget);
+    // On the root navigator the tab bar is covered, so it is no longer
+    // hit-testable under the screen's blue button.
+    expect(find.text('Aba A').hitTestable(), findsNothing);
+  });
+  testWidgets('open() without financial access shows access denied', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
           builder: (context) => CupertinoPageScaffold(
             child: Center(
               child: CupertinoButton(
@@ -265,19 +328,18 @@ void main() {
                   orders: _orders(),
                   customer: _customer,
                   canAttachReceipt: false,
+                  canReceive: false,
                 ),
               ),
             ),
           ),
         ),
       ),
-    ));
-    expect(find.text('Aba A'), findsOneWidget);
+    );
     await tester.tap(find.text('abrir'));
     await tester.pumpAndSettle();
-    expect(find.byType(ReceiveCustomerScreen), findsOneWidget);
-    // On the root navigator the tab bar is covered, so it is no longer
-    // hit-testable under the screen's blue button.
-    expect(find.text('Aba A').hitTestable(), findsNothing);
+    // A consultant (no viewFinancialReports) gets no "Receber de ...".
+    expect(find.byType(ReceiveCustomerScreen), findsNothing);
+    expect(find.byType(AccessDeniedScreen), findsOneWidget);
   });
 }

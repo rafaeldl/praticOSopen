@@ -32,7 +32,11 @@ Sucesso: aviso opaco (`showAppToast`) e volta; o Financeiro recarrega. Erro: avi
 ## Entradas
 
 - **Financeiro**: cliente com 2+ OS em aberto (lista e "Ver todos") abre a tela nova. Com 1 OS, Receber da OS. OS sem cliente continuam no "Qual OS?" (não são um pagador só).
-- **Tela do cliente**: "Falta receber R$ X · Receber". Mesma permissão do Receber (`viewPrices`, some sem "Valores e cobrança"). Com 1 OS abre o Receber dela.
+- **Tela do cliente**: "Falta receber R$ X · Receber". Mesma permissão do Receber (`viewFinancialReports`, some sem "Valores e cobrança"). Com 1 OS abre o Receber dela. O consultor vê o "Falta receber R$ X" (tem `viewPrices`), sem o "· Receber".
+
+## Quem recebe
+
+Só quem tem acesso ao financeiro: dono, admin e gerente (`viewFinancialReports` no app, `canViewFinancial` nas regras). O consultor vê valores, mas não recebe: sem "Receber" na OS (a OS pronta com saldo fica sem botão azul e o "Falta receber" é só texto), sem "Desconto", sem "· Receber" na tela do cliente; `/payment_management` e "Receber de {cliente}" mostram acesso negado.
 
 ## Dados
 
@@ -44,7 +48,7 @@ Sucesso: aviso opaco (`showAppToast`) e volta; o Financeiro recarrega. Erro: avi
 
 ## Regras (risk:high)
 
-- `receipts`: lê quem vê o financeiro (`canViewFinancial`) ou quem criou; cria/atualiza owner, admin, manager e consultant (os perfis com `viewPrices`, que liberam o Receber no app); criação exige `status == 'active'`, `amount > 0`, `allocations` não vazia e `createdBy.id` = usuário; atualização só em `status`/`receiptFile`/`updatedAt`/`updatedBy`; `delete` nunca.
+- `receipts`: lê, cria e atualiza só quem vê o financeiro (`canViewFinancial`: owner, admin, manager; consultor não); criação exige `status == 'active'`, `amount > 0`, `allocations` não vazia e `createdBy.id` = usuário; atualização só em `status`/`receiptFile`/`updatedAt`/`updatedBy`; `delete` nunca.
 - Storage `tenants/{companyId}/receipts/{receiptId}/{arquivo}`: membro da empresa (claims), imagem ou PDF até 10 MB, só criação.
 
 ## Fase 2 / 3

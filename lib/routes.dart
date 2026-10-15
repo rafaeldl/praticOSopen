@@ -42,7 +42,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/order': (context) => const OrderRoute(),
   '/order_service': (context) => OrderServiceScreen(),
   '/order_product': (context) => OrderProductScreen(),
-  '/payment_management': (context) => PaymentManagementScreen(),
+  '/payment_management': (context) => ProtectedRoute(
+    permission: PermissionType.viewFinancialReports,
+    child: PaymentManagementScreen(),
+  ),
   '/financial_report': (context) => ProtectedRoute(
     permission: PermissionType.viewFinancialReports,
     child: const FinancialReportScreen(),

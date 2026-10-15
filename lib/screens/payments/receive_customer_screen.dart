@@ -6,7 +6,8 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
-import 'package:praticos/screens/payments/widgets/receive_block.dart' show ReceiptChip;
+import 'package:praticos/screens/payments/widgets/receive_block.dart'
+    show ReceiptChip;
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
@@ -21,6 +22,7 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/payment_allocation.dart';
+import 'package:praticos/widgets/permission_widgets.dart';
 
 /// "Receber de João": one payment from a customer who owes on several
 /// orders, split oldest order first ([allocatePayment]).
@@ -57,22 +59,37 @@ class ReceiveCustomerScreen extends StatefulWidget {
   final Future<PickedReceiptFile?> Function(BuildContext context)? pickReceipt;
 
   /// Pushes the screen; completes with true when a payment was recorded.
+  /// Without financial access (`viewFinancialReports`) it shows "access
+  /// denied" instead. [canReceive] overrides that permission (tests).
   static Future<bool> open(
     BuildContext context, {
     required List<Order> orders,
     CustomerAggr? customer,
     String? customerName,
     bool? canAttachReceipt,
+    bool? canReceive,
   }) async {
     final done = await Navigator.of(context, rootNavigator: true).push<bool>(
       CupertinoPageRoute<bool>(
         settings: const RouteSettings(name: '/receive_customer'),
-        builder: (_) => ReceiveCustomerScreen(
-          orders: orders,
-          customer: customer,
-          customerName: customerName,
-          canAttachReceipt: canAttachReceipt,
-        ),
+        builder: (context) {
+          final screen = ReceiveCustomerScreen(
+            orders: orders,
+            customer: customer,
+            customerName: customerName,
+            canAttachReceipt: canAttachReceipt,
+          );
+          // Only who has financial access receives (owner, admin, manager).
+          if (canReceive != null) {
+            return canReceive
+                ? screen
+                : AccessDeniedScreen(onBack: () => Navigator.of(context).pop());
+          }
+          return ProtectedRoute(
+            permission: PermissionType.viewFinancialReports,
+            child: screen,
+          );
+        },
       ),
     );
     return done ?? false;

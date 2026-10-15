@@ -90,7 +90,8 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 - Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
   Com 1 OS vai direto ao Receber da OS. OS sem cliente continuam no "Qual OS?".
 - Tela do cliente: link "Receber" ao lado de "Falta receber R$ X" (mesma permissão do Receber:
-  `viewPrices`, que some sem "Valores e cobrança"). Com 1 OS abre o Receber dela.
+  `viewFinancialReports`, que some sem "Valores e cobrança"; o consultor vê o "Falta receber",
+  sem o link). Com 1 OS abre o Receber dela.
 
 **Dados** (`CustomerReceiptService` → `buildReceiptPlan` → `TenantReceiptRepository.save`):
 - Documento `companies/{companyId}/receipts/{receiptId}` (`Receipt`): `customer` (aggr), `amount`,
@@ -242,6 +243,7 @@ O PDF exibe:
 
 | Perfil | Ver Preços | Ver Dashboard | Registrar Pagamentos |
 |--------|------------|---------------|----------------------|
+| Dono | Sim | Sim | Sim |
 | Admin | Sim | Sim | Sim |
 | Gerente | Sim | Sim | Sim |
 | Supervisor | Não | Não | Não |
@@ -250,10 +252,14 @@ O PDF exibe:
 
 *Consultor vê preços apenas das próprias OS
 
-No app não existe permissão própria para receber: o **Receber** (da OS e "Receber de {cliente}")
-aparece para quem tem `viewPrices` (dono, admin, gerente e consultor), e some sem "Valores e
-cobrança". A regra de `receipts` no `firestore.rules` segue isso: cria/atualiza quem é owner,
-admin, manager ou consultant; lê quem vê o financeiro (ou quem criou); ninguém apaga.
+Só quem tem acesso ao financeiro recebe. No app é a permissão `viewFinancialReports` (dono,
+admin e gerente), que some sem "Valores e cobrança". Ela libera o **Receber** da OS (botão azul
+"Receber R$ X", a frase "Falta receber" e a linha "Falta receber" dos totais), o "Desconto" do
+menu "…", a tela `/payment_management` (`ProtectedRoute`) e o "Receber de {cliente}" (aba
+Financeiro e link "· Receber" na tela do cliente). O consultor vê os valores (`viewPrices`), mas
+não recebe: na OS pronta com saldo ele fica sem botão azul e o "Falta receber" vira só texto.
+A regra de `receipts` no `firestore.rules` segue isso: lê, cria e atualiza quem passa em
+`canViewFinancial` (owner, admin, manager); ninguém apaga.
 
 ### Campos Ocultos por Permissão
 

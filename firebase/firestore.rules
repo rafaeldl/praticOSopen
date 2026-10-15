@@ -67,14 +67,6 @@ service cloud.firestore {
       );
     }
 
-    // Pode anotar pagamento recebido (mesmos perfis com a permissão
-    // viewPrices no app, que libera a tela "Receber"): owner, admin, manager
-    // e consultant. A escrita nas OS segue a regra de update de /orders.
-    function canRegisterPayments(companyId) {
-      return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['owner', 'admin', 'manager', 'consultant'];
-    }
-
     // Cobranças Asaas: dono, admin e gerente (mesmo público da permissão chargeOrder)
     function canViewCharges(companyId) {
       return canViewFinancial(companyId) || isCompanyOwner(companyId);
@@ -472,11 +464,11 @@ service cloud.firestore {
       // status 'canceled'. Valor e repartição não mudam depois de criados.
       // ──────────────────────────────────────────────────────────────────────
       match /receipts/{receiptId} {
-        allow read: if canViewFinancial(companyId)
-          || (canRegisterPayments(companyId)
-              && resource.data.createdBy.id == request.auth.uid);
+        // Só quem tem acesso ao financeiro (owner, admin, manager; no app,
+        // viewFinancialReports) recebe pagamentos.
+        allow read: if canViewFinancial(companyId);
 
-        allow create: if canRegisterPayments(companyId)
+        allow create: if canViewFinancial(companyId)
           && request.resource.data.createdBy.id == request.auth.uid
           && request.resource.data.status == 'active'
           && request.resource.data.amount is number
@@ -484,7 +476,7 @@ service cloud.firestore {
           && request.resource.data.allocations is list
           && request.resource.data.allocations.size() > 0;
 
-        allow update: if canRegisterPayments(companyId)
+        allow update: if canViewFinancial(companyId)
           && request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly(['status', 'receiptFile', 'updatedAt', 'updatedBy'])
           && request.resource.data.status in ['active', 'canceled'];

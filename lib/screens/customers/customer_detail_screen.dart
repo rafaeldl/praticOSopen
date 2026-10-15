@@ -28,9 +28,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
-/// and, with the view-prices permission, "Falta receber R$ X · Receber" (what
-/// is still open on the customer's orders; the link opens "Receber de Ana"
-/// or, with one open order, its Receber); call / WhatsApp, "Nova OS para Ana", the
+/// and, with the view-prices permission, "Falta receber R$ X" (what is
+/// still open on the customer's orders) plus, with financial access, the
+/// "· Receber" link (opens "Receber de Ana" or, with one open order, its
+/// Receber); call / WhatsApp, "Nova OS para Ana", the
 /// customer's vehicles (with "Cadastrar outro veículo") and the latest orders.
 /// Edit and delete live in the "…" menu.
 class CustomerDetailScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class CustomerDetailScreen extends StatefulWidget {
     this.customer,
     this.directory,
     this.showPrices,
+    this.canReceive,
     this.onReceive,
   });
 
@@ -52,6 +54,11 @@ class CustomerDetailScreen extends StatefulWidget {
   /// permission, which is off for everyone when the company does not use
   /// values and billing (`Company.useFinancial == false`).
   final bool? showPrices;
+
+  /// The "· Receber" link. Defaults to financial access
+  /// (`viewFinancialReports`: owner, admin, manager); a consultant sees what
+  /// is owed but does not receive.
+  final bool? canReceive;
 
   /// "Receber" next to "Falta receber R$ X", with the customer's open
   /// orders (oldest first). Defaults to the order's Receber (one order) or
@@ -72,6 +79,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   bool get _showPrices =>
       widget.showPrices ?? AuthorizationService.instance.canViewPrices;
 
+  bool get _canReceive =>
+      widget.canReceive ??
+      AuthorizationService.instance.canViewFinancialReports;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -86,7 +97,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   void _loadOrders() {
     final id = _customer?.id;
     setState(() {
-      _orders = id == null ? Stream.value(const <Order>[]) : _directory.watchOrdersOf(id);
+      _orders = id == null
+          ? Stream.value(const <Order>[])
+          : _directory.watchOrdersOf(id);
     });
   }
 
@@ -94,13 +107,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       (_customer?.name ?? '').trim().split(RegExp(r'\s+')).first;
 
   Future<void> _call() => launchUrl(
-        Uri(scheme: 'tel', path: _customer!.phone!.replaceAll(RegExp(r'[^\d+]'), '')),
-      );
+    Uri(
+      scheme: 'tel',
+      path: _customer!.phone!.replaceAll(RegExp(r'[^\d+]'), ''),
+    ),
+  );
 
   Future<void> _whatsapp() => launchUrl(
-        Uri.parse('https://wa.me/${whatsappNumber(_customer!.phone!)}'),
-        mode: LaunchMode.externalApplication,
-      );
+    Uri.parse('https://wa.me/${whatsappNumber(_customer!.phone!)}'),
+    mode: LaunchMode.externalApplication,
+  );
 
   void _newOrder() {
     Navigator.pushNamed(
@@ -110,8 +126,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
   }
 
-  /// Same gate as the order's Receber: prices visible (`viewPrices`, off
-  /// when the company does not use values and billing).
+  /// Same gate as the order's Receber: financial access
+  /// (`viewFinancialReports`, off when the company does not use values and
+  /// billing).
   Future<void> _receive(List<Order> orders) async {
     final open = FinancialSummary.openOrdersOldestFirst(orders);
     if (open.isEmpty) return;
@@ -262,7 +279,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                 )
               else
                 SliverList(
-                  delegate: SliverChildListDelegate(_buildOrderSections(orders)),
+                  delegate: SliverChildListDelegate(
+                    _buildOrderSections(orders),
+                  ),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
@@ -293,7 +312,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
+              AppSpacing.pageMargin,
+              0,
+              AppSpacing.pageMargin,
+              AppSpacing.md,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,22 +400,24 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             fontFeatures: AppTypography.tabular,
           ),
         ),
-        Text(' · ', style: AppTypography.callout.copyWith(color: secondary)),
-        CupertinoButton(
-          key: const Key('customerReceive'),
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(
-            AppSizes.minTouchTarget,
-            AppSizes.minTouchTarget,
-          ),
-          onPressed: () => _receive(orders),
-          child: Text(
-            context.l10n.receiveTitle,
-            style: AppTypography.callout.copyWith(
-              color: AppColors.accentText.resolveFrom(context),
+        if (_canReceive) ...[
+          Text(' · ', style: AppTypography.callout.copyWith(color: secondary)),
+          CupertinoButton(
+            key: const Key('customerReceive'),
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(
+              AppSizes.minTouchTarget,
+              AppSizes.minTouchTarget,
+            ),
+            onPressed: () => _receive(orders),
+            child: Text(
+              context.l10n.receiveTitle,
+              style: AppTypography.callout.copyWith(
+                color: AppColors.accentText.resolveFrom(context),
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
