@@ -8,7 +8,9 @@
 
 O técnico cobra o cliente da OS por Pix, boleto ou cartão (à vista, ou parcelado no cartão em 2–12x) pela conta Asaas da própria empresa. O cliente paga pelo link da OS (`/q/{token}`, botão "Pagar"). Quando o Asaas confirma o pagamento, um webhook lança o pagamento na OS e dá baixa automática.
 
-Etapas seguintes (specs próprias): criar a empresa e importar clientes a partir da conta Asaas (etapa 2) e distribuição pela **Flapp Store**, a loja de apps dentro da conta Asaas (etapa 3). Fora do escopo atual: split para a Rafsoft, NFS-e, cliente escolher o número de parcelas.
+Etapas seguintes (specs próprias): criar a empresa e importar clientes a partir da conta Asaas (etapa 2) e distribuição pela **Flapp Store**, a loja de apps dentro da conta Asaas (etapa 3). Fora do escopo atual: split para a Rafsoft, cliente escolher o número de parcelas.
+
+**Nota fiscal de serviço (NFS-e)**: pronta atrás da flag `nfseEnabled` (desligada por padrão), ver [`NFSE_ASAAS.md`](NFSE_ASAAS.md).
 
 ## Ambientes
 
@@ -152,7 +154,7 @@ As consultas novas (`customerCharges` por `customer.id` e por `orderIds array-co
 
 ## Webhook e baixa na OS
 
-- URL por empresa: `{ASAAS_WEBHOOK_BASE_URL}/webhooks/asaas/{companyId}`, cadastrada na conexão com `sendType: SEQUENTIALLY`, `apiVersion: 3`, um `authToken` aleatório próprio da empresa (guardado só como hash) e os eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_DELETED`, `PAYMENT_RECEIVED_IN_CASH_UNDONE` e `PAYMENT_PARTIALLY_REFUNDED`. **Empresas conectadas antes desta versão** continuam com o webhook antigo (sem os dois últimos) até reconectar a conta.
+- URL por empresa: `{ASAAS_WEBHOOK_BASE_URL}/webhooks/asaas/{companyId}`, cadastrada na conexão com `sendType: SEQUENTIALLY`, `apiVersion: 3`, um `authToken` aleatório próprio da empresa (guardado só como hash) e os eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_DELETED`, `PAYMENT_RECEIVED_IN_CASH_UNDONE` e `PAYMENT_PARTIALLY_REFUNDED`, mais os eventos de nota fiscal `INVOICE_CREATED`, `INVOICE_UPDATED`, `INVOICE_SYNCHRONIZED`, `INVOICE_AUTHORIZED`, `INVOICE_PROCESSING_CANCELLATION`, `INVOICE_CANCELED`, `INVOICE_CANCELLATION_DENIED` e `INVOICE_ERROR` (tratados em `invoice.service.ts`, ver [`NFSE_ASAAS.md`](NFSE_ASAAS.md#webhook)). **Empresas conectadas antes desta versão** continuam com o webhook antigo (sem os eventos novos) até reconectar a conta.
 - Autenticação pelo header `asaas-access-token`. Token ausente ou inválido → 401. Evento sem `id`/`event` → 400.
 - Endpoint com limite de requisições por empresa + IP.
 - Idempotência por `event.id` em `private/asaas/events`, gravado só depois do processamento dar certo. Erro interno → 500, o Asaas reenvia. Eventos que nunca vão dar certo (cobrança inexistente, `externalReference` de outra empresa, evento não tratado) são registrados e respondidos com 200 para não travar a fila `SEQUENTIALLY`.
@@ -196,6 +198,7 @@ O app novo não envia `transactions`, `paidAmount`, `paid` nem `payment` ao salv
 - `companies/{cid}/private/**`: negado para o cliente (credencial, mapa de clientes e eventos do webhook).
 - `companies/{cid}/settings/payments`: leitura para membros da empresa, escrita só pelo servidor.
 - `companies/{cid}/orders/{oid}/charges/{chargeId}`: leitura para dono/admin/gerente (`canViewCharges`), escrita só pelo servidor.
+- `companies/{cid}/invoices/{id}` e `companies/{cid}/settings/nfse` (nota fiscal): leitura `canViewCharges`, escrita só pelo servidor.
 - Testes automatizados em `firebase/functions/src/__tests__/firestore.rules.test.ts` (`cd firebase/functions && npm run test:rules`, precisa de Java 21+).
 
 ## App
@@ -381,6 +384,6 @@ Itens que o E2E automático não cobre:
 | Webhooks de cobrança | https://docs.asaas.com/docs/webhook-para-cobrancas |
 | Ações de sandbox | https://docs.asaas.com/reference/confirmar-pagamento |
 | Split (futuro) | https://docs.asaas.com/docs/split-de-pagamentos |
-| NFS-e (futuro) | https://docs.asaas.com/docs/notas-fiscais |
+| NFS-e ([`NFSE_ASAAS.md`](NFSE_ASAAS.md)) | https://docs.asaas.com/docs/notas-fiscais · https://docs.asaas.com/reference/agendar-nota-fiscal |
 | Subcontas / BaaS (futuro) | https://docs.asaas.com/docs/criacao-de-subcontas · https://docs.asaas.com/docs/sobre-baas |
 | Flapp Store (etapa 3) | https://docs.asaas.com/docs/flappstore |

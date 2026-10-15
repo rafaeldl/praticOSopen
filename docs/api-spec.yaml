@@ -51,6 +51,8 @@ tags:
     description: Resumos formatados
   - name: App Payments
     description: Receber de um cliente com várias OS e cobrança Asaas de várias OS (app Flutter)
+  - name: App NFS-e
+    description: Nota fiscal de serviço pelo Asaas, atrás da flag nfseEnabled (docs/NFSE_ASAAS.md)
 
 components:
   securitySchemes:
@@ -966,3 +968,189 @@ paths:
         '200': { description: Cobrança cancelada }
         '404': { description: CHARGE_NOT_FOUND }
         '409': { description: CHARGE_NOT_OPEN }
+
+  /v1/app/nfse/setup:
+    get:
+      tags: [App NFS-e]
+      summary: O que falta para emitir notas
+      description: |
+        Configuração fiscal do Asaas, regras da cidade e serviço padrão, com `missing`
+        (`fiscalInfo`, `cityAccess`, `service`). Atualiza `nfseReady` em `settings/payments`.
+        Só dono e admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      responses:
+        '200': { description: '{ ready, missing, fiscalInfo, municipalOptions, service }' }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+        '409': { description: ASAAS_NOT_CONNECTED }
+
+  /v1/app/nfse/setup/fiscal-info:
+    post:
+      tags: [App NFS-e]
+      summary: Salvar a configuração fiscal no Asaas (POST /v3/fiscalInfo)
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, simplesNacional]
+              properties:
+                email: { type: string }
+                simplesNacional: { type: boolean }
+                municipalInscription: { type: string }
+                cnae: { type: string }
+                specialTaxRegime: { type: string }
+                serviceListItem: { type: string }
+                rpsSerie: { type: string }
+                rpsNumber: { type: integer }
+                loteNumber: { type: integer }
+      responses:
+        '200': { description: Situação da configuração (como GET /setup) }
+        '400': { description: VALIDATION_ERROR / ASAAS_VALIDATION_ERROR }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+
+  /v1/app/nfse/setup/municipal-services:
+    get:
+      tags: [App NFS-e]
+      summary: Serviços municipais da cidade (GET /v3/fiscalInfo/services)
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: Lista de serviços municipais do Asaas }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+
+  /v1/app/nfse/setup/service:
+    put:
+      tags: [App NFS-e]
+      summary: Serviço padrão das notas (settings/nfse)
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [municipalServiceName, taxes]
+              description: municipalServiceId ou municipalServiceCode é obrigatório
+              properties:
+                municipalServiceId: { type: string, nullable: true }
+                municipalServiceCode: { type: string, nullable: true }
+                municipalServiceName: { type: string }
+                taxes:
+                  type: object
+                  required: [retainIss, iss, pis, cofins, csll, inss, ir]
+                  properties:
+                    retainIss: { type: boolean }
+                    iss: { type: number, minimum: 0, maximum: 100 }
+                    pis: { type: number }
+                    cofins: { type: number }
+                    csll: { type: number }
+                    inss: { type: number }
+                    ir: { type: number }
+                descriptionTemplate:
+                  type: string
+                  description: 'Marcadores {servicos} e {os}'
+      responses:
+        '200': { description: Situação da configuração (como GET /setup) }
+        '400': { description: VALIDATION_ERROR / INVALID_FISCAL_INFO }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+
+  /v1/app/nfse/invoices/preview:
+    post:
+      tags: [App NFS-e]
+      summary: Prévia da nota de uma ou mais OS
+      description: |
+        Valor = serviços − desconto × serviços / (serviços + peças), somado por OS.
+        Permissão `manage:payments`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderIds]
+              properties:
+                orderIds: { type: array, minItems: 1, maxItems: 50, items: { type: string } }
+                customerId: { type: string }
+      responses:
+        '200': { description: '{ value, orders, hasProducts, serviceDescription, observations, effectiveDate, customer { id, name, hasTaxId }, invoicedOrders, municipalServiceName }' }
+        '400': { description: VALIDATION_ERROR / NO_SERVICES / ORDER_NOT_OF_CUSTOMER / NFSE_ORDER_NOT_ALLOWED }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+        '409': { description: NFSE_NOT_READY }
+
+  /v1/app/nfse/invoices:
+    post:
+      tags: [App NFS-e]
+      summary: Emitir uma nota para uma ou mais OS do mesmo cliente
+      description: |
+        Nota avulsa no Asaas (POST /v3/invoices com `customer`, sem `payment`),
+        `externalReference` = `{companyId}:nf:{invoiceId}`. Uma nota ativa por OS.
+        Grava `companies/{cid}/invoices/{id}`. Permissão `manage:payments`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderIds]
+              properties:
+                orderIds: { type: array, minItems: 1, maxItems: 50, items: { type: string } }
+                customerId: { type: string }
+                serviceDescription: { type: string, maxLength: 2000 }
+                effectiveDate: { type: string, example: '2026-10-15' }
+                customerTaxId: { type: string }
+      responses:
+        '201': { description: Nota criada (status scheduled, ou error se o Asaas recusou) }
+        '400': { description: VALIDATION_ERROR / NO_SERVICES / TAX_ID_REQUIRED / INVALID_TAX_ID / INVALID_EFFECTIVE_DATE / ASAAS_VALIDATION_ERROR }
+        '403': { description: FORBIDDEN / NFSE_NOT_ENABLED }
+        '409': { description: ASAAS_NOT_CONNECTED / NFSE_NOT_READY / ORDER_HAS_INVOICE }
+        '502': { description: ASAAS_UNAVAILABLE }
+
+  /v1/app/nfse/invoices/{invoiceId}/cancel:
+    post:
+      tags: [App NFS-e]
+      summary: Cancelar a nota
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppCompanyId'
+        - name: invoiceId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                onlyOnAsaas:
+                  type: boolean
+                  description: Só no Asaas, para cidade que não cancela pela integração
+      responses:
+        '200': { description: Nota com o novo status }
+        '404': { description: INVOICE_NOT_FOUND }
+        '409': { description: INVOICE_NOT_CANCELABLE / CANCEL_NOT_SUPPORTED }
