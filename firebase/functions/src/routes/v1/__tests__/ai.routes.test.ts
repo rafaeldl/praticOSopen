@@ -11,7 +11,6 @@ function fakeDeps(overrides: Partial<OrderAssistDeps> = {}): OrderAssistDeps {
     release: jest.fn(),
     loadCatalog: jest.fn().mockResolvedValue({ services: [{ id: 's1', name: 'Polimento', value: 450 }], products: [] }),
     findCustomers: jest.fn().mockResolvedValue([]),
-    findDeviceBySerial: jest.fn().mockResolvedValue(null),
     findDevices: jest.fn().mockResolvedValue([]),
     ...overrides,
   };

@@ -32,6 +32,7 @@ import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
@@ -93,6 +94,21 @@ class FakeActions extends OrderScreenActions {
   @override
   Future<void> shareWithCustomer(BuildContext context, Order order) async =>
       calls.add('send');
+}
+
+/// Registration without Firebase: ids in order, writes kept in lists.
+class FakeRegistration extends AssistantRegistration {
+  FakeRegistration() : super(newId: _next);
+  static int _n = 0;
+  static String _next() => 'new${++_n}';
+  final List<Customer> customers = [];
+  final List<Device> devices = [];
+
+  @override
+  Future<void> saveCustomer(Customer customer) async => customers.add(customer);
+
+  @override
+  Future<void> saveDevice(Device device) async => devices.add(device);
 }
 
 class FakeAssistant implements AiOrderAssistClient {
@@ -522,6 +538,7 @@ void main() {
       FakeAssistant assistant, {
       Future<AiPhoto?> Function()? capture,
       SpeechListener? speech,
+      AssistantRegistration? registration,
     }) => OrderScreenV2(
       store: store,
       permissions: _permissions(),
@@ -533,6 +550,7 @@ void main() {
       assistant: assistant,
       capturePhoto: capture ?? () async => AiPhoto(png),
       speechListener: speech ?? FakeSpeech('Revenda Sul, troca de óleo'),
+      registration: registration ?? FakeRegistration(),
     );
 
     FormRow rowOf(WidgetTester tester, String text) => tester.widget<FormRow>(
@@ -810,6 +828,153 @@ void main() {
       await tester.tap(find.textContaining('400').last);
       await tester.pumpAndSettle();
       expect(store.services!.map((s) => s.value), [33, 300]);
+    });
+
+    testWidgets('customer not found: "novo" in the order, saved on ✓', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final registration = FakeRegistration();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(
+            const AiOrderDraft(
+              customerGuess: 'Juliana',
+              customerGuessPhone: '48222222222',
+            ),
+          ),
+          registration: registration,
+        ),
+        hosted: true,
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(store.customer!.name, 'Juliana');
+      expect(rowOf(tester, 'Juliana').subtitle, contains('novo'));
+      expect(rowOf(tester, 'Juliana').marked, isTrue);
+      // Nothing is registered before "✓".
+      expect(registration.customers, isEmpty);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(registration.customers.single.name, 'Juliana');
+      expect(registration.customers.single.phone, '48222222222');
+      expect(registration.customers.single.id, store.customer!.id);
+    });
+
+    testWidgets('"Desfazer" before ✓: the new customer is not registered', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final registration = FakeRegistration();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(const AiOrderDraft(customerGuess: 'Juliana')),
+          registration: registration,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+      expect(store.customer, isNull);
+      expect(registration.customers, isEmpty);
+    });
+
+    testWidgets('close names ("Juliene"): asks which, or registers new', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final registration = FakeRegistration();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(
+            const AiOrderDraft(
+              customerGuess: 'Juliene',
+              customerOptions: [
+                AiCustomerHit(id: 'c1', name: 'Juliana Souza'),
+                AiCustomerHit(id: 'c2', name: 'Juliana Lima'),
+              ],
+            ),
+          ),
+          registration: registration,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(store.customer, isNull);
+
+      await tester.tap(find.textContaining('Juliene').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Qual Juliene?'), findsWidgets);
+      expect(find.text('Cadastrar Juliene como cliente novo'), findsOneWidget);
+
+      await tester.tap(find.text('Juliana Lima'));
+      await tester.pumpAndSettle();
+      expect(store.customer!.id, 'c2');
+      expect(registration.customers, isEmpty);
+    });
+
+    testWidgets('plate not registered: new vehicle saved on ✓', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final registration = FakeRegistration();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(
+            const AiOrderDraft(
+              customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+              deviceGuessName: 'Corsa',
+              deviceGuessSerial: 'MMM0099',
+              deviceGuessManufacturer: 'Chevrolet',
+            ),
+          ),
+          registration: registration,
+        ),
+        hosted: true,
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(store.devices.single.serial, 'MMM0099');
+      expect(rowOf(tester, 'Corsa').subtitle, 'MMM0099 · novo');
+      expect(registration.devices, isEmpty);
+
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(registration.devices.single.manufacturer, 'Chevrolet');
+    });
+
+    testWidgets('a model without plate is not registered alone', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        assistantScreen(
+          store,
+          FakeAssistant(
+            const AiOrderDraft(
+              customer: AiCustomerHit(id: 'c9', name: 'Revenda Sul'),
+              deviceGuessName: 'Corsa',
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      expect(store.devices, isEmpty);
+      expect(find.textContaining('Corsa'), findsWidgets);
     });
 
     testWidgets('notes fill "O que o cliente pediu"; "Desfazer" clears', (

@@ -4036,6 +4036,40 @@ class AppLocalizationsEn extends AppLocalizations {
       'I changed the order as you asked. Check it.';
 
   @override
+  String orderAssistantWhichCustomer(String name) {
+    return 'Which $name?';
+  }
+
+  @override
+  String orderAssistantRegisterNewCustomer(String name) {
+    return 'Add $name as a new customer';
+  }
+
+  @override
+  String get orderAssistantOtherCustomer => 'Another customer';
+
+  @override
+  String get orderAssistantNewCustomer => 'new';
+
+  @override
+  String orderAssistantWhichDevice(String name) {
+    return 'Which $name?';
+  }
+
+  @override
+  String orderAssistantRegisterNewDevice(String name) {
+    return 'Add $name';
+  }
+
+  @override
+  String orderAssistantOtherDevice(String label) {
+    return 'Another $label';
+  }
+
+  @override
+  String get orderAssistantNewDevice => 'new';
+
+  @override
   String get pickerCustomerTitle => 'Which customer?';
 
   @override

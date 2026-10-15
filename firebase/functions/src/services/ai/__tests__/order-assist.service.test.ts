@@ -9,7 +9,6 @@ import {
   orderAssistInputSchema,
   parseLlmDraft,
   runOrderAssist,
-  serialVariants,
   todayLabel,
 } from '../order-assist.service';
 import { LlmUnavailableError } from '../llm.client';
@@ -38,7 +37,6 @@ function deps(overrides: Partial<OrderAssistDeps> = {}, answer: unknown = {}): O
     release: jest.fn().mockResolvedValue(undefined),
     loadCatalog: jest.fn().mockResolvedValue(CATALOG),
     findCustomers: jest.fn().mockResolvedValue([]),
-    findDeviceBySerial: jest.fn().mockResolvedValue(null),
     findDevices: jest.fn().mockResolvedValue([]),
     ...overrides,
   } as OrderAssistDeps & { llm: { generateJson: jest.Mock } };
@@ -128,14 +126,6 @@ describe('matchCatalog', () => {
   });
 });
 
-describe('serialVariants', () => {
-  it('covers the formats a plate may be stored in', () => {
-    expect(serialVariants('abc 1234')).toEqual(expect.arrayContaining(['ABC1234', 'ABC-1234']));
-    expect(serialVariants('NXS8620')).toContain('NXS-8620');
-    expect(serialVariants('BRA2E19')).toEqual(['BRA2E19']);
-  });
-});
-
 describe('prompt', () => {
   it('asks for the app language and lists the catalog with prices', () => {
     expect(buildSystemPrompt('es')).toContain('Spanish');
@@ -200,9 +190,10 @@ describe('runOrderAssist', () => {
     const d = deps(
       {
         findCustomers: jest.fn().mockResolvedValue([{ id: 'cu1', name: 'Revenda Sul' }, { id: 'cu2', name: 'Revenda Sul Filial' }]),
-        findDeviceBySerial: jest.fn(async (_c: string, serial: string) =>
-          serial === 'NXS-8620' ? { id: 'd1', name: 'Classic 1.0', serial: 'NXS-8620' } : null,
-        ),
+        findDevices: jest.fn().mockResolvedValue([
+          { id: 'd1', name: 'Classic 1.0', serial: 'NXS-8620' },
+          { id: 'd3', name: 'Gol', serial: 'ABC1234' },
+        ]),
       },
       answer,
     );
@@ -249,10 +240,22 @@ describe('runOrderAssist', () => {
     expect(draft.device?.alternatives).toEqual([{ id: 'd2', name: 'Classic' }]);
   });
 
+  it('a close spoken name asks instead of guessing (Juliene → Juliana)', async () => {
+    const d = deps(
+      { findCustomers: jest.fn().mockResolvedValue([{ id: 'j1', name: 'Juliana Souza' }, { id: 'x', name: 'Pedro' }]) },
+      { ...answer, customer: { name: 'Juliene', phone: '48 2222-2222' } },
+    );
+    const draft = await runOrderAssist('c1', { text: 'x' }, d);
+    expect(draft.customer?.match).toBeNull();
+    expect(draft.customer?.guess).toEqual({ name: 'Juliene', phone: '48 2222-2222' });
+    expect(draft.customer?.alternatives).toEqual([{ id: 'j1', name: 'Juliana Souza' }]);
+    expect(d.findCustomers).toHaveBeenCalledWith('c1', { name: 'Juliene', phone: '48 2222-2222' });
+  });
+
   it('tenant isolation: every lookup uses the companyId it was given', async () => {
     const d = deps({}, answer);
     await runOrderAssist('tenant-A', { text: 'x' }, d);
-    for (const fn of [d.getSettings, d.reserve, d.loadCatalog, d.findCustomers, d.findDeviceBySerial, d.findDevices]) {
+    for (const fn of [d.getSettings, d.reserve, d.loadCatalog, d.findCustomers, d.findDevices]) {
       for (const call of (fn as jest.Mock).mock.calls) expect(call[0]).toBe('tenant-A');
     }
   });

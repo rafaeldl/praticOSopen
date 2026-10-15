@@ -6796,6 +6796,54 @@ abstract class AppLocalizations {
   /// **'Mudei a OS como você pediu. Confira.'**
   String get orderAssistantChanged;
 
+  /// Title of the picker when the assistant heard a customer name close to several registered ones
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual {name}?'**
+  String orderAssistantWhichCustomer(String name);
+
+  /// No description provided for @orderAssistantRegisterNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar {name} como cliente novo'**
+  String orderAssistantRegisterNewCustomer(String name);
+
+  /// No description provided for @orderAssistantOtherCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro cliente'**
+  String get orderAssistantOtherCustomer;
+
+  /// No description provided for @orderAssistantNewCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'novo'**
+  String get orderAssistantNewCustomer;
+
+  /// Title of the picker when the assistant heard a vehicle close to registered ones
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual {name}?'**
+  String orderAssistantWhichDevice(String name);
+
+  /// No description provided for @orderAssistantRegisterNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar {name}'**
+  String orderAssistantRegisterNewDevice(String name);
+
+  /// No description provided for @orderAssistantOtherDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro {label}'**
+  String orderAssistantOtherDevice(String label);
+
+  /// No description provided for @orderAssistantNewDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'novo'**
+  String get orderAssistantNewDevice;
+
   /// No description provided for @pickerCustomerTitle.
   ///
   /// In pt, this message translates to:

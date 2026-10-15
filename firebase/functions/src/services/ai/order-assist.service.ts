@@ -15,6 +15,7 @@ import { z } from 'zod';
 import type { LlmClient, LlmInlinePart } from './llm.client';
 import { LlmUnavailableError } from './llm.client';
 import { removeAccents } from '../../utils/search.utils';
+import { matchCustomer, matchDevice } from './fuzzy-match';
 import type { AiSettings, QuotaReservation } from './ai-quota.service';
 
 // ============================================================================
@@ -334,16 +335,6 @@ export function matchCatalog(
   return { match: best?.e ?? null, alternatives: rest.slice(0, 3).map((s) => s.e) };
 }
 
-/** Plate/serial variants to look up: as said, uppercase without spaces/dashes. */
-export function serialVariants(serial: string): string[] {
-  const upper = serial.trim().toUpperCase();
-  const compact = upper.replace(/[\s.-]/g, '');
-  const variants = new Set([serial.trim(), upper, compact]);
-  // Old Brazilian plate format with dash: ABC-1234.
-  if (/^[A-Z]{3}\d{4}$/.test(compact)) variants.add(`${compact.slice(0, 3)}-${compact.slice(3)}`);
-  return [...variants].filter(Boolean);
-}
-
 // ============================================================================
 // Orchestration
 // ============================================================================
@@ -367,9 +358,14 @@ export interface OrderAssistDeps {
   reserve(companyId: string, settings: AiSettings | null): Promise<QuotaReservation>;
   release(companyId: string, monthKey: string): Promise<void>;
   loadCatalog(companyId: string): Promise<CompanyCatalog>;
-  findCustomers(companyId: string, name: string): Promise<CustomerHit[]>;
-  findDeviceBySerial(companyId: string, serial: string): Promise<DeviceHit | null>;
-  findDevices(companyId: string, name: string): Promise<DeviceHit[]>;
+  /**
+   * Customers that may be the one said: the company's customers (all of them
+   * when the list is small) plus exact lookups by phone and name. The service
+   * picks among them with [matchCustomer], without AI.
+   */
+  findCustomers(companyId: string, guess: { name?: string; phone?: string }): Promise<CustomerHit[]>;
+  /** Same for vehicles/devices: the company's list plus plate lookups ([matchDevice]). */
+  findDevices(companyId: string, guess: { name?: string; serial?: string; manufacturer?: string }): Promise<DeviceHit[]>;
   /** Segment label of the device ("Veículo"), optional. */
   deviceLabel?(companyId: string): Promise<string | undefined>;
   /** This month's use and limit without counting (GET /status), optional. */
@@ -493,28 +489,18 @@ export function toChanges(operations: LlmDraft['operations'], order: OrderAssist
 
 async function resolveCustomer(companyId: string, draft: LlmDraft, deps: OrderAssistDeps): Promise<OrderDraft['customer']> {
   const guess = draft.customer?.name || draft.customer?.phone ? { ...draft.customer } : null;
-  if (!guess?.name) return guess ? { match: null, guess, alternatives: [] } : null;
-  const hits = await deps.findCustomers(companyId, guess.name);
-  const target = normalizeName(guess.name);
-  const exact = hits.find((h) => normalizeName(h.name) === target);
-  const match = exact ?? (hits.length === 1 ? hits[0] : null);
-  return { match, guess, alternatives: hits.filter((h) => h !== match).slice(0, 3) };
+  if (!guess) return null;
+  const { match, alternatives } = matchCustomer(guess, await deps.findCustomers(companyId, guess));
+  return { match, guess, alternatives };
 }
 
 async function resolveDevice(companyId: string, draft: LlmDraft, deps: OrderAssistDeps): Promise<OrderDraft['device']> {
   const d = draft.device;
   if (!d || (!d.name && !d.serial && !d.manufacturer)) return null;
-  const guess = { ...d, serial: d.serial ? d.serial.toUpperCase().replace(/\s/g, '') : undefined };
-  if (guess.serial) {
-    for (const variant of serialVariants(guess.serial)) {
-      const hit = await deps.findDeviceBySerial(companyId, variant);
-      if (hit) return { match: hit, guess, alternatives: [] };
-    }
-  }
-  const hits = guess.name ? await deps.findDevices(companyId, guess.name) : [];
-  // Never auto-pick a device by name only when the photo showed a different plate.
-  const match = !guess.serial && hits.length === 1 ? hits[0] : null;
-  return { match, guess, alternatives: hits.filter((h) => h !== match).slice(0, 3) };
+  // Kept as read (Mercosul stays Mercosul): it may become a new vehicle.
+  const guess = { ...d, serial: d.serial ? d.serial.toUpperCase().replace(/[^A-Z0-9]/g, '') || undefined : undefined };
+  const { match, alternatives } = matchDevice(guess, await deps.findDevices(companyId, guess));
+  return { match, guess, alternatives };
 }
 
 /**

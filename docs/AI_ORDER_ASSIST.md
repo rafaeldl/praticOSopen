@@ -54,7 +54,8 @@ Quanto demora para valer:
 |---|---|
 | `src/routes/v1/ai.routes.ts` | `GET /v1/app/ai/status` (ligada? + uso do mês, sem contar) e `POST /v1/app/ai/order-assist` no `api` (bearer + `resolveCompanyContext` + `apiCoreLimiter`); os dois exigem `write:orders` |
 | `src/services/ai/order-assist.service.ts` | Validação (zod), prompt, parse da resposta, casamento com catálogo, orquestração (`runOrderAssist`) com dependências injetáveis |
-| `src/services/ai/order-assist.deps.ts` | Dependências de produção (Firestore da empresa, cota, Vertex AI) |
+| `src/services/ai/order-assist.deps.ts` | Dependências de produção (Firestore da empresa, cota, Vertex AI); carrega até 2.000 clientes e veículos (só nome, telefone, placa, marca) para comparar na memória |
+| `src/services/ai/fuzzy-match.ts` | Busca por semelhança sem IA: `matchCustomer` e `matchDevice` (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)) |
 | `src/services/ai/ai-quota.service.ts` | Chave geral (`config/ai`) + chave da empresa (`settings/ai`) → `resolveAiSettings`; cota mensal (`aiUsage/{YYYY-MM}`) e `getAiUsage` |
 | `scripts/ai-settings.ts` | `npm run ai`: liga/desliga por empresa ou para todas |
 | `src/services/ai/llm.client.ts` | Interface neutra (`LlmClient`, `LlmRequest` com JSON Schema) e `LlmRouter`, que escolhe o provedor por pedido |
@@ -67,7 +68,8 @@ Quanto demora para valer:
 |---|---|
 | `lib/services/ai_order_assist_service.dart` | `AiOrderAssistClient`/`AiOrderAssistService` (HTTP): `isEnabled()` (status com cache de 5 min por empresa) e `assist()`; modelo `AiOrderDraft`, erros `AiAssistError` |
 | `lib/screens/order/assistant/assistant_input_sheet.dart` | Sheet "Falar o que fazer": campo de texto (o microfone do teclado faz o ditado) + fotos; "Pronto" manda tudo junto |
-| `lib/screens/order/order_screen_v2.dart` | Botões Foto (vidro) e Falar (grafite) na Nova OS; aplica o rascunho e marca o que a IA preencheu |
+| `lib/screens/order/order_screen_v2.dart` | Botões Foto (vidro) e Falar (grafite) na Nova OS; aplica o rascunho e marca o que a IA preencheu; "Qual Juliene?" para cliente e veículo |
+| `lib/services/assistant_registration.dart` | `AssistantRegistration`: monta o cliente/veículo novo com id e grava só no ✓ |
 | `lib/screens/widgets/app_list_row.dart` | `marked: true` = marca-texto (`AppColors.marker` / `onMarker`) |
 
 ### Firestore
@@ -93,8 +95,9 @@ POST /v1/app/ai/order-assist {text?, photos?[base64 JPEG ≤2 MB, até 4], audio
   3. catálogo da empresa (até 300 serviços e 300 produtos, nome + preço)
   4. Modelo (Gemini ou Claude, ver "Provedores"; resposta presa ao JSON Schema) — falhou → devolve a cota, 503 AI_UNAVAILABLE
   5. operações add → casa com o catálogo (items); update/remove → confere a linha (changes);
-     cliente por nome (searchCustomers); veículo por placa/série
-  ◀── rascunho {transcript, customer, device, items[], changes[], notes, dueDate, usage}
+     cliente e veículo por semelhança (fuzzy-match: telefone, placa, nome, marca)
+  ◀── rascunho {transcript, customer, customerGuess(+Phone), customerOptions[], device, deviceGuess*, deviceOptions[],
+                items[], changes[], notes, dueDate, usage}
 App: aplica changes (pergunta qual linha se houver duas iguais), soma items, ✦ azul no que veio da IA,
      aviso "Preenchi… · Desfazer" → ✓ no topo
 ```
@@ -134,6 +137,28 @@ O erro comum ("tira o óleo e o filtro", com o serviço "Troca de óleo" e a pe�
 
 **Jev para escolher do catálogo: por enquanto não.** O catálogo no prompt é pequeno: metade das empresas tem 2 serviços e 2 peças, 90% até 17, e só 3 empresas passam de 150 (o limite do prompt). O caminho A acerta o mesmo, é mais rápido e simples. Rever quando houver empresas com catálogo grande ou erros de casamento medidos: o Jev entra no passo 5, só para o nome que não casou.
 
+## Cliente e veículo pela voz
+
+"OS da Juliana, 48 2222-2222, Corsa placa MMM0099": o servidor procura cada um **sem IA**, comparando na memória. A IA só tira o nome, o telefone, a placa e a marca da fala; os cadastros nunca vão para ela.
+
+**Por que não a busca do Firestore:** ela só acha palavra exata (`keywords`), então "Juliene" não acha "Juliana" e "GM Corsa" não acha um Corsa com marca "Chevrolet". Os cadastros são pequenos (2026-10-15: a maior empresa tem menos de 2.000 clientes), então o servidor lê nome/telefone/placa/marca de até 2.000 e compara tudo. Acima disso, as buscas exatas por telefone, placa e palavra continuam valendo.
+
+**Como compara** (`fuzzy-match.ts`):
+
+| O que | Como | Exemplo |
+|---|---|---|
+| Telefone | Só os dígitos; os 8 últimos batem (ignora DDI, DDD e o 9 da frente) | "+55 48 2222-2222" = "(48) 2222-2222" |
+| Placa | Sem traço e espaço; Mercosul ↔ antiga (`ABC1C34` = `ABC1234`) | "abc 1234" = "ABC-1234" |
+| Nome | Jaro-Winkler por palavra + som parecido em português (Luis/Luiz, Thiago/Tiago, Rafael/Raphael, Sousa/Souza, Wagner/Vagner) | "Juliene" ~ "Juliana" (perto, pergunta) |
+| Marca | Apelidos: GM/Chevrolet, VW/Volkswagen, Mercedes/MB… | "GM Corsa" = Corsa · Chevrolet |
+
+**Decisão:**
+- **Certeza** (telefone ou placa iguais, nome igual, ou um único nome com nota ≥ 0,97) → entra na OS com ✦.
+- **Perto** (nota ≥ 0,80, até 4) → a linha "Ouvi “Juliene”" abre **"Qual Juliene?"** com os parecidos, "Cadastrar Juliene como cliente novo" e "Outro cliente". Para veículo, "Cadastrar" só aparece com placa.
+- **Nada perto** → na Nova OS, entra como **"Juliana · (48) 2222-2222 · novo"** e é cadastrado no ✓. Veículo só com placa.
+
+**Testes:** `src/services/ai/__tests__/fuzzy-match.test.ts` (nomes, sons, marcas, placas, telefones).
+
 ## Provedores
 
 A Function não depende de um provedor. `order-assist.service.ts` monta um `LlmRequest` (prompt, texto, fotos/áudio e o JSON Schema da resposta) e o `LlmRouter` entrega para o cliente certo:
@@ -160,8 +185,10 @@ O Claude usa structured outputs (`output_config.format`) com o mesmo schema e `f
 4. **Limite por plano** (spec 2026-10-09 §4.2): Free 10, Starter 150, Pro 400, Business 1.000 por mês. `settings/ai.monthlyLimit` sobrepõe (piloto; `-1` = ilimitado). Mês = mês UTC; mês novo = documento novo, sem job de reset.
 5. **Cota esgotada** → mensagem clara e o fluxo manual continua livre.
 6. **Catálogo nunca é poluído:** item sem correspondência entra na OS só com o nome (sem `id` de catálogo). Preço: o falado; senão o do catálogo; senão `null` ("sem valor").
-7. **Cliente:** só é escolhido quando o nome bate com um cadastrado (exato, ou único resultado). Sem cadastro, aparece "Ouvi “X”. Toque para escolher o cliente". Nunca troca um cliente já escolhido.
-8. **Veículo:** só pela placa/série cadastrada (variações `ABC1234`/`ABC-1234`). Placa lida que não existe → "“Classic · NXS8620” não está no cadastro" (toque para escolher). Nome sozinho não escolhe veículo.
+7. **Cliente:** escolhido sozinho só quando a busca tem certeza (mesmo telefone, mesmo nome, ou um único nome muito próximo). Parecidos → "Qual Juliene?". Nada parecido → cliente novo, cadastrado no ✓ (ver [Cliente e veículo pela voz](#cliente-e-veículo-pela-voz)). Nunca troca um cliente já escolhido.
+8. **Veículo:** escolhido sozinho pela placa/série (com ou sem traço, Mercosul ou antiga) ou por um único modelo do mesmo jeito. Placa que não existe → veículo novo, cadastrado no ✓. Modelo sem placa nunca cadastra sozinho (faria repetidos).
+14. **Cadastro só no ✓.** Cliente e veículo novos ganham o id na tela, mas só são gravados quando a OS é salva; "Desfazer" antes disso não deixa nada. Numa OS já salva, o novo não entra sozinho: a linha pede para tocar ("Cadastrar … como cliente novo").
+15. **Serviços e peças não vão para o catálogo pela voz.** Entram só na OS (regra 6). Um "Salvar no catálogo" na linha fica para depois.
 9. **Isolamento:** a empresa vem do token + `X-Company-Id` validado pela membership; o corpo não aceita `companyId` (schema `strict`). Toda busca recebe esse `companyId`.
 10. **Relato e prazo:** `notes` (o que o cliente pediu ou o defeito) vai para "O que o cliente pediu" se estiver vazio. `dueDate` ("pronto sexta", "amanhã") vem como `YYYY-MM-DD` (ou `YYYY-MM-DDTHH:MM` quando a hora foi dita) e preenche "Fica pronto" se não houver data; sem hora, fica às 18:00. O modelo recebe a data de hoje no fuso de São Paulo para resolver dias da semana.
 11. **Privacidade:** nomes de clientes não vão para o modelo (casamento no servidor). Logs só têm empresa, contagem de itens, código de erro e latência — nunca texto, transcrição ou imagem.
@@ -188,5 +215,5 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 
 ## Testes
 
-- Functions: `src/services/ai/__tests__/` (`ai-quota.service`, `order-assist.service` com o grupo "changes to lines already in the order", `llm.client`, `gemini.client`, `claude.client`), `src/routes/v1/__tests__/ai.routes.test.ts` (`/status` e `/order-assist`) e `src/__tests__/ai-settings-script.test.ts`.
-- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).
+- Functions: `src/services/ai/__tests__/` (`fuzzy-match`, `ai-quota.service`, `order-assist.service` com o grupo "changes to lines already in the order", `llm.client`, `gemini.client`, `claude.client`), `src/routes/v1/__tests__/ai.routes.test.ts` (`/status` e `/order-assist`) e `src/__tests__/ai-settings-script.test.ts`.
+- App: `test/screens/order/order_screen_v2_test.dart` (grupo "assistant": servidor ligado/desligado, mudar valor, tirar e Desfazer, perguntar qual linha, cliente novo salvo no ✓, "Qual Juliene?", veículo novo pela placa), `test/services/ai_order_assist_service_test.dart` (`parseAiStatusResponse`, leitura de `changes`).

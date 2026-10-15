@@ -50,6 +50,7 @@ import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
@@ -106,6 +107,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.capturePhoto,
     this.pickGalleryPhotos,
     this.speechListener,
+    this.registration,
   });
 
   /// Injected in tests; defaults to a new [OrderStore].
@@ -143,17 +145,20 @@ class OrderScreenV2 extends StatefulWidget {
   /// Microphone for "Falar" (tests inject); defaults to the device one.
   final SpeechListener? speechListener;
 
+  /// Registers the customer/vehicle the assistant heard (tests fake it).
+  final AssistantRegistration? registration;
+
   @override
   State<OrderScreenV2> createState() => _OrderScreenV2State();
 }
 
 /// What one assistant draft put in the order, for "Desfazer".
 class _DraftUndo {
-  _DraftUndo(this.customerGuess, this.deviceGuess);
+  _DraftUndo(this.customerAsk, this.deviceAsk);
 
-  /// Guesses before the draft (restored on undo).
-  final String? customerGuess;
-  final String? deviceGuess;
+  /// Questions before the draft (restored on undo).
+  final _CustomerAsk? customerAsk;
+  final _DeviceAsk? deviceAsk;
   bool customer = false;
   bool request = false;
   bool due = false;
@@ -165,6 +170,28 @@ class _DraftUndo {
 
   /// Lines it took out, with where they were (in removal order).
   final List<(Object line, int index)> removed = [];
+}
+
+/// Customer the assistant heard but could not pick for sure.
+class _CustomerAsk {
+  const _CustomerAsk(this.name, this.phone, this.options);
+  final String name;
+  final String? phone;
+
+  /// Close registered ones ("Juliana Souza" for "Juliene").
+  final List<AiCustomerHit> options;
+}
+
+/// Vehicle the assistant heard but could not pick for sure.
+class _DeviceAsk {
+  const _DeviceAsk(this.name, this.serial, this.manufacturer, this.options);
+  final String? name;
+  final String? serial;
+  final String? manufacturer;
+  final List<AiDeviceHit> options;
+
+  String get label =>
+      [name, serial].where((v) => v != null && v.isNotEmpty).join(' · ');
 }
 
 /// Value and quantity of a line before the assistant changed it.
@@ -245,10 +272,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   // ─── Assistant state (new order only) ───
-  /// What the assistant filled: item instances, 'customer', 'device:{id}'.
+  /// What the assistant filled: item instances and 'customer'.
   final Set<Object> _marked = Set<Object>.identity();
-  String? _customerGuess;
-  String? _deviceGuess;
+
+  /// Vehicles the assistant put in the order (by id).
+  final Set<String> _markedDevices = {};
+
+  /// Customer heard but not sure ("Juliene"): the row asks which one.
+  _CustomerAsk? _customerAsk;
+
+  /// Vehicle heard but not found/sure: the row asks or offers to register.
+  _DeviceAsk? _deviceAsk;
+
+  /// Registered when the order is saved ("✓"), never before.
+  Customer? _newCustomer;
+  final List<Device> _newDevices = [];
+  late final _registration = widget.registration ?? AssistantRegistration();
   bool get _assistantBusy => _barMode == AssistantBarMode.reading;
 
   /// What the bar at the bottom of the sheet is doing.
@@ -405,7 +444,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (result.device != null) _store.addDevice(result.device!);
     setState(() {
       _marked.remove('customer');
-      _customerGuess = null;
+      _customerAsk = null;
     });
   }
 
@@ -417,7 +456,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     );
     if (!mounted || result is! Device) return;
     _store.addDevice(result);
-    setState(() => _deviceGuess = null);
+    setState(() => _deviceAsk = null);
   }
 
   /// Tapping a vehicle opens "Qual veículo?" straight away; the pick
@@ -1269,7 +1308,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       }
       for (final id in undo.devices) {
         _store.removeDevice(id);
-        _marked.remove('device:$id');
+        _markedDevices.remove(id);
+        _newDevices.removeWhere((d) => d.id == id);
       }
       for (final before in undo.changed) {
         before.restore();
@@ -1307,8 +1347,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         if (!_isNew) _store.createItem();
         _marked.remove('due');
       }
-      _customerGuess = undo.customerGuess;
-      _deviceGuess = undo.deviceGuess;
+      _customerAsk = undo.customerAsk;
+      _deviceAsk = undo.deviceAsk;
+      if (undo.customer) _newCustomer = null;
     }
     _dismissNote();
   }
@@ -1515,6 +1556,132 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return changed;
   }
 
+  void _setDraftCustomer(Customer customer, _DraftUndo undo) {
+    undo.customer = true;
+    _store.setCustomer(customer);
+    _marked.add('customer');
+    _customerAsk = null;
+  }
+
+  void _addDraftDevice(Device device, _DraftUndo undo) {
+    _store.addDevice(device);
+    _markedDevices.add(device.id!);
+    undo.devices.add(device.id!);
+    _deviceAsk = null;
+  }
+
+  /// "Qual Juliene?": the close registered customers, "Cadastrar … como
+  /// cliente novo" and "Outro cliente". On a saved order a new customer is
+  /// registered right away (the user tapped it); on a new one, at "✓".
+  Future<void> _resolveCustomerAsk() async {
+    final ask = _customerAsk;
+    if (ask == null) return _pickCustomer();
+    const newOne = '_new';
+    const other = '_other';
+    final picked = await pickOne<Object>(
+      context,
+      title: context.l10n.orderAssistantWhichCustomer(ask.name),
+      options: [
+        for (final c in ask.options)
+          PickerItem(
+            value: c,
+            title: c.name,
+            subtitle: (c.phone?.isNotEmpty ?? false) ? formatPhone(c.phone) : null,
+          ),
+        PickerItem(
+          value: newOne,
+          title: context.l10n.orderAssistantRegisterNewCustomer(ask.name),
+          subtitle: (ask.phone?.isNotEmpty ?? false) ? formatPhone(ask.phone) : null,
+        ),
+        PickerItem(value: other, title: context.l10n.orderAssistantOtherCustomer),
+      ],
+    );
+    if (!mounted || picked == null) return;
+    if (picked == other) return _pickCustomer();
+    final customer = picked is AiCustomerHit
+        ? (Customer()
+            ..id = picked.id
+            ..name = picked.name
+            ..phone = picked.phone)
+        : _registration.newCustomer(ask.name, ask.phone);
+    if (picked == newOne) {
+      if (_isNew) {
+        _newCustomer = customer;
+      } else {
+        unawaited(_registration.saveCustomer(customer));
+      }
+    }
+    _store.setCustomer(customer);
+    if (!_isNew) _store.createItem();
+    setState(() {
+      _marked.remove('customer');
+      _customerAsk = null;
+    });
+  }
+
+  /// Same for a vehicle: close ones, "Cadastrar … " (only with a plate) and
+  /// "Outro".
+  Future<void> _resolveDeviceAsk() async {
+    final ask = _deviceAsk;
+    if (ask == null) return _addDevice();
+    const newOne = '_new';
+    const other = '_other';
+    final label = context.read<SegmentConfigProvider>().device.toLowerCase();
+    final picked = await pickOne<Object>(
+      context,
+      title: context.l10n.orderAssistantWhichDevice(ask.label),
+      options: [
+        for (final d in ask.options)
+          PickerItem(value: d, title: d.name, subtitle: d.serial),
+        if (ask.serial != null)
+          PickerItem(
+            value: newOne,
+            title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
+          ),
+        PickerItem(value: other, title: context.l10n.orderAssistantOtherDevice(label)),
+      ],
+    );
+    if (!mounted || picked == null) return;
+    if (picked == other) return _addDevice();
+    final device = picked is AiDeviceHit
+        ? (Device()
+            ..id = picked.id
+            ..name = picked.name
+            ..serial = picked.serial
+            ..manufacturer = picked.manufacturer)
+        : _registration.newDevice(
+            serial: ask.serial!,
+            name: ask.name,
+            manufacturer: ask.manufacturer,
+          );
+    if (picked == newOne) {
+      if (_isNew) {
+        _newDevices.add(device);
+      } else {
+        unawaited(_registration.saveDevice(device));
+      }
+    }
+    _store.addDevice(device);
+    if (!_isNew) _store.createItem();
+    setState(() => _deviceAsk = null);
+  }
+
+  /// Writes what the assistant registered as new, if it is still in the
+  /// order (the user may have picked someone else).
+  void _registerNew() {
+    final customer = _newCustomer;
+    if (customer != null && _store.customer?.id == customer.id) {
+      unawaited(_registration.saveCustomer(customer));
+    }
+    for (final device in _newDevices) {
+      if (_store.devices.any((d) => d.id == device.id)) {
+        unawaited(_registration.saveDevice(device));
+      }
+    }
+    _newCustomer = null;
+    _newDevices.clear();
+  }
+
   /// Fills the order with the draft: the blank "Nova OS" without saving
   /// (deferSave), a saved order right away. Never replaces a customer already
   /// chosen, a request or a deadline already filled; adds devices and items,
@@ -1526,52 +1693,82 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     sent,
   ) async {
     var used = false;
-    final undo = _DraftUndo(_customerGuess, _deviceGuess);
+    final undo = _DraftUndo(_customerAsk, _deviceAsk);
     if (draft.changes.isNotEmpty &&
         await _applyChanges(draft.changes, sent, undo)) {
       used = true;
     }
     if (!mounted) return false;
     if (_store.customer == null) {
+      final guess = draft.customerGuess?.trim() ?? '';
       if (draft.customer != null) {
-        undo.customer = true;
-        _store.setCustomer(
+        _setDraftCustomer(
           Customer()
             ..id = draft.customer!.id
             ..name = draft.customer!.name
             ..phone = draft.customer!.phone,
+          undo,
         );
-        _marked.add('customer');
-        _customerGuess = null;
         used = true;
-      } else if (draft.customerGuess?.isNotEmpty ?? false) {
-        _customerGuess = draft.customerGuess;
+      } else if (guess.isNotEmpty &&
+          draft.customerOptions.isEmpty &&
+          _isNew) {
+        // Nobody close: a new customer, registered when the order is saved.
+        final customer = _registration.newCustomer(
+          guess,
+          draft.customerGuessPhone,
+        );
+        _setDraftCustomer(customer, undo);
+        _newCustomer = customer;
+        used = true;
+      } else if (guess.isNotEmpty) {
+        // Close ones ("Juliene" → Juliana Souza, Juliana Lima), or a saved
+        // order: the row asks.
+        _customerAsk = _CustomerAsk(
+          guess,
+          draft.customerGuessPhone,
+          draft.customerOptions,
+        );
         used = true;
       }
     }
+    final serial = draft.deviceGuessSerial?.trim() ?? '';
     if (draft.device != null &&
         _store.devices.any((e) => e.id == draft.device!.id)) {
       // Already in the order: nothing to add.
     } else if (draft.device != null) {
       final d = draft.device!;
-      _store.addDevice(
+      _addDraftDevice(
         Device()
           ..id = d.id
           ..name = d.name
           ..serial = d.serial
           ..manufacturer = d.manufacturer,
+        undo,
       );
-      _marked.add('device:${d.id}');
-      undo.devices.add(d.id);
-      _deviceGuess = null;
+      used = true;
+    } else if (serial.isNotEmpty &&
+        _isNew &&
+        !_store.devices.any((e) => e.serial?.toUpperCase() == serial)) {
+      // A plate that is not registered is a new vehicle (saved with the
+      // order). A model alone is not: it would make duplicates.
+      final device = _registration.newDevice(
+        serial: serial,
+        name: draft.deviceGuessName,
+        manufacturer: draft.deviceGuessManufacturer,
+      );
+      _addDraftDevice(device, undo);
+      _newDevices.add(device);
       used = true;
     } else {
-      final guess = [
+      final ask = _DeviceAsk(
         draft.deviceGuessName,
-        draft.deviceGuessSerial,
-      ].where((v) => v != null && v.isNotEmpty).join(' · ');
-      if (guess.isNotEmpty) {
-        _deviceGuess = guess;
+        serial.isEmpty ? null : serial,
+        draft.deviceGuessManufacturer,
+        draft.deviceOptions,
+      );
+      if (ask.label.isNotEmpty) {
+        _deviceAsk = ask;
         used = true;
       }
     }
@@ -1719,12 +1916,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return FormCard(
       note: customer == null ? l10n.orderSaveNeedsCustomer : null,
       children: [
-        if (customer == null && _customerGuess != null)
+        if (customer == null && _customerAsk != null)
           FormRow(
             icon: CupertinoIcons.person,
-            title: l10n.orderAssistantCustomerGuess(_customerGuess!),
+            title: l10n.orderAssistantCustomerGuess(_customerAsk!.name),
             marked: true,
-            onTap: _pickCustomer,
+            onTap: _resolveCustomerAsk,
           )
         else if (customer == null)
           FormRow(
@@ -1738,7 +1935,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           FormRow(
             icon: CupertinoIcons.person,
             title: customer.name ?? '',
-            subtitle: (customer.phone?.isNotEmpty ?? false)
+            subtitle: _newCustomer?.id == customer.id
+                ? [
+                    if (customer.phone?.isNotEmpty ?? false)
+                      formatPhone(customer.phone),
+                    l10n.orderAssistantNewCustomer,
+                  ].join(' · ')
+                : (customer.phone?.isNotEmpty ?? false)
                 ? formatPhone(customer.phone)
                 : null,
             marked: _marked.contains('customer'),
@@ -1748,20 +1951,25 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           FormRow(
             icon: CupertinoIcons.car_detailed,
             title: device.name ?? '',
-            subtitle: (device.serial?.isNotEmpty ?? false)
+            subtitle: _newDevices.any((d) => d.id == device.id)
+                ? [
+                    if (device.serial?.isNotEmpty ?? false) device.serial!,
+                    l10n.orderAssistantNewDevice,
+                  ].join(' · ')
+                : (device.serial?.isNotEmpty ?? false)
                 ? device.serial
                 : null,
-            marked: _marked.contains('device:${device.id}'),
+            marked: _markedDevices.contains(device.id),
             onTap: () => _changeDevice(device),
           ),
-        if (_deviceGuess != null)
+        if (_deviceAsk != null)
           FormRow(
             icon: CupertinoIcons.car_detailed,
-            title: l10n.orderAssistantDeviceGuess(_deviceGuess!),
+            title: l10n.orderAssistantDeviceGuess(_deviceAsk!.label),
             marked: true,
-            onTap: _addDevice,
+            onTap: _resolveDeviceAsk,
           ),
-        if (customer != null && _store.devices.isEmpty && _deviceGuess == null)
+        if (customer != null && _store.devices.isEmpty && _deviceAsk == null)
           FormRow(
             icon: CupertinoIcons.add_circled,
             title: l10n.orderPickDevice(config.device.toLowerCase()),
@@ -2046,6 +2254,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final photos = List<AiPhoto>.of(_photos);
     _store.deferSave = false;
     _store.updateTotal();
+    _registerNew();
     _store.createItem(
       onCreated: (orderId) {
         if (request.isNotEmpty && companyId != null) {
@@ -2510,7 +2719,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                             .where((v) => v?.trim().isNotEmpty ?? false)
                             .join(' · '),
                         AppTypography.callout.copyWith(color: secondary),
-                        marked: _marked.contains('device:${device.id}'),
+                        marked: _markedDevices.contains(device.id),
                       ),
                     ),
                   ),

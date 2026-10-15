@@ -2111,6 +2111,31 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "orderAssistantChanged": "Mudei a OS como você pediu. Confira.",
+  "orderAssistantWhichCustomer": "Qual {name}?",
+  "@orderAssistantWhichCustomer": {
+    "description": "Title of the picker when the assistant heard a customer name close to several registered ones",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantRegisterNewCustomer": "Cadastrar {name} como cliente novo",
+  "@orderAssistantRegisterNewCustomer": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantOtherCustomer": "Outro cliente",
+  "orderAssistantNewCustomer": "novo",
+  "orderAssistantWhichDevice": "Qual {name}?",
+  "@orderAssistantWhichDevice": {
+    "description": "Title of the picker when the assistant heard a vehicle close to registered ones",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantRegisterNewDevice": "Cadastrar {name}",
+  "@orderAssistantRegisterNewDevice": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantOtherDevice": "Outro {label}",
+  "@orderAssistantOtherDevice": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "orderAssistantNewDevice": "novo",
   "pickerCustomerTitle": "Qual cliente?",
   "pickerDeviceTitle": "Qual {device}?",
   "@pickerDeviceTitle": {"placeholders": {"device": {"type": "String"}}},
