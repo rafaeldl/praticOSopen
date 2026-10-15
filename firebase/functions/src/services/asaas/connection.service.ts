@@ -10,25 +10,19 @@ import { db } from '../firestore.service';
 import { UserAggr } from '../../models/types';
 import {
   AsaasConnectionDoc,
-  AsaasCreateWebhookInput,
   PaymentSettingsDoc,
 } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient, environmentFromApiKey } from './asaas-client';
 import { encryptSecret, hashToken, readMasterKeyFromEnv } from './crypto';
 import { asaasConnectionRef, clientFromConnection } from './credential-provider';
 import { AsaasServiceError } from './errors';
+import { ASAAS_WEBHOOK_EVENTS } from './webhook-events';
 
 const DEFAULT_WEBHOOK_BASE_URL = 'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
-export const ASAAS_WEBHOOK_EVENTS: AsaasCreateWebhookInput['events'] = [
-  'PAYMENT_RECEIVED',
-  'PAYMENT_CONFIRMED',
-  'PAYMENT_OVERDUE',
-  'PAYMENT_REFUNDED',
-  'PAYMENT_DELETED',
-  'PAYMENT_RECEIVED_IN_CASH_UNDONE',
-  'PAYMENT_PARTIALLY_REFUNDED',
-];
+// Events of the webhook (NFS-e ones included); recorded on the connection
+// doc so NFS-e can refuse connections made before they existed.
+export { ASAAS_WEBHOOK_EVENTS };
 
 export function paymentSettingsRef(companyId: string) {
   return db.collection('companies').doc(companyId).collection('settings').doc('payments');
@@ -48,6 +42,8 @@ export async function getPaymentSettings(companyId: string): Promise<PaymentSett
   };
   if (data.asaasAccountName) settings.asaasAccountName = data.asaasAccountName;
   if (data.asaasEnvironment) settings.asaasEnvironment = data.asaasEnvironment;
+  if (data.nfseEnabled === true) settings.nfseEnabled = true;
+  if (data.nfseReady === true) settings.nfseReady = true;
   return settings;
 }
 
@@ -151,6 +147,7 @@ export async function connectAsaas(
     status: 'active',
     connectedBy: { id: user.id, name: user.name },
     connectedAt: new Date().toISOString(),
+    webhookEvents: [...ASAAS_WEBHOOK_EVENTS],
   };
   if (wallets[0]?.id) connection.walletId = wallets[0].id;
 
@@ -160,11 +157,17 @@ export async function connectAsaas(
     asaasAccountName: accountName,
     asaasEnvironment: environment,
   };
+  if (settings.nfseEnabled) newSettings.nfseEnabled = true;
+  // Another Asaas account (or environment) has its own fiscal setup.
+  const sameAccount = previous?.environment === environment && (!previous?.walletId || previous.walletId === wallets[0]?.id);
+  if (settings.nfseReady && sameAccount) newSettings.nfseReady = true;
 
   try {
     const batch = db.batch();
     batch.set(connectionRef, connection);
-    batch.set(paymentSettingsRef(companyId), newSettings, { merge: true });
+    // Merge keeps other fields; a stale nfseReady of another account is turned off.
+    const resetReady = settings.nfseReady && !newSettings.nfseReady ? { nfseReady: false } : {};
+    batch.set(paymentSettingsRef(companyId), { ...newSettings, ...resetReady }, { merge: true });
     await batch.commit();
   } catch (error) {
     await client.deleteWebhook(webhook.id).catch(() => undefined);
@@ -185,9 +188,11 @@ export async function disconnectAsaas(companyId: string): Promise<void> {
   }
 
   const settings = await getPaymentSettings(companyId);
+  // Keeps the server-set NFS-e flag; the fiscal setup belongs to the old account.
   await paymentSettingsRef(companyId).set({
     asaasEnabled: settings.asaasEnabled,
     asaasConnected: false,
+    ...(settings.nfseEnabled ? { nfseEnabled: true } : {}),
   });
 
   // Removes the credential and the server-only subcollections (customers map, events).

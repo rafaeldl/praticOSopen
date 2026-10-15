@@ -10,10 +10,14 @@ import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
+import 'package:praticos/screens/nfse/nfse_orders_picker.dart';
 import 'package:praticos/screens/payments/receipt_detail_screen.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/order_history_row.dart';
@@ -52,6 +56,7 @@ class CustomerDetailScreen extends StatefulWidget {
     this.onReceive,
     this.receipts,
     this.onOpenReceipt,
+    this.nfse,
   });
 
   /// Falls back to the `customer` route argument.
@@ -87,6 +92,10 @@ class CustomerDetailScreen extends StatefulWidget {
   /// Opens a receipt. Defaults to [ReceiptDetailScreen.open]. Test seam.
   final void Function(BuildContext context, Receipt receipt)? onOpenReceipt;
 
+  /// Notas fiscais of the customer (tests); defaults to a new
+  /// [NfseController] that stays off unless the company has `nfseEnabled`.
+  final NfseController? nfse;
+
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
 }
@@ -98,6 +107,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   String? _previousTitle;
   Stream<List<Order>>? _orders;
   Stream<List<Receipt>>? _receipts;
+
+  late final NfseController _nfse = widget.nfse ?? NfseController();
+
+  /// Last orders shown (the "…" menu picks from them).
+  List<Order> _lastOrders = const [];
+
+  void _onNfse() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nfse.addListener(_onNfse);
+  }
+
+  @override
+  void dispose() {
+    _nfse.removeListener(_onNfse);
+    if (widget.nfse == null) _nfse.dispose();
+    super.dispose();
+  }
 
   bool get _showPrices =>
       widget.showPrices ?? AuthorizationService.instance.canViewPrices;
@@ -127,6 +158,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     _previousTitle = args?['previousTitle'] as String?;
     _loadOrders();
     _receipts = _receiptsStream();
+    _nfse.watchCustomer(_customer?.id);
   }
 
   /// Only with financial access (the rules deny the rest).
@@ -247,12 +279,58 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     if (mounted) Navigator.pop(context);
   }
 
+  /// "Emitir uma nota com várias OS": picks orders of this customer that
+  /// can have a nota and have none, then the issue sheet.
+  Future<void> _issueSeveralNfse() async {
+    if (!_nfse.ready) {
+      await showNfseNotReady(context, sandbox: _nfse.sandbox);
+      return;
+    }
+    final invoiced = _nfse.invoicedOrderIds;
+    final eligible = [
+      for (final o in _lastOrders)
+        if (orderCanHaveNfse(o) && !invoiced.contains(o.id)) o,
+    ];
+    final l10n = context.l10n;
+    if (eligible.isEmpty) {
+      showAppToast(context, l10n.nfseNoOrdersToPick);
+      return;
+    }
+    final ids = await NfseOrdersPicker.open(
+      context,
+      orders: eligible,
+      previousTitle: _customer?.name,
+    );
+    if (ids == null || ids.isEmpty || !mounted) return;
+    final invoice = await NfseIssueSheet.show(
+      context,
+      orderIds: ids,
+      customerId: _customer?.id,
+    );
+    if (invoice != null && mounted) {
+      showAppToast(
+        context,
+        l10n.nfseSent,
+        icon: CupertinoIcons.checkmark_circle,
+      );
+    }
+  }
+
   void _showMenu() {
     final l10n = context.l10n;
     showCupertinoModalPopup<void>(
       context: context,
       builder: (sheetContext) => CupertinoActionSheet(
         actions: [
+          if (_nfse.enabled)
+            CupertinoActionSheetAction(
+              key: const Key('customerNfseSeveral'),
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                _issueSeveralNfse();
+              },
+              child: Text(l10n.nfseIssueSeveralAction),
+            ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(sheetContext);
@@ -297,6 +375,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         stream: _orders,
         builder: (context, snapshot) {
           final orders = snapshot.data;
+          if (orders != null) _lastOrders = orders;
           return CustomScrollView(
             slivers: [
               AppNavBar(

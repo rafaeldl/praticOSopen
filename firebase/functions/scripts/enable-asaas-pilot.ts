@@ -13,25 +13,34 @@
  *   npm run asaas:pilot -- --project praticos --company <id> [--company <id2>]
  *   npm run asaas:pilot -- --project praticos --company <id> --yes
  *   npm run asaas:pilot -- --project praticos --company <id> --disable --yes
+ *
+ * --nfse turns the NFS-e flag (settings/payments.nfseEnabled) on or off instead
+ * of asaasEnabled (docs/NFSE_ASAAS.md):
+ *   npm run asaas:pilot -- --project praticos --company <id> --nfse --yes
+ * Enabling NFS-e is refused (NFSE_RECONNECT_NEEDED) for a company whose Asaas
+ * connection predates the INVOICE_* webhook events: reconnect it first.
  */
 
 import * as admin from 'firebase-admin';
+import { hasNfseWebhookEvents } from '../src/services/asaas/webhook-events';
 
 export interface Args {
   companyIds: string[];
   dryRun: boolean;
   disable: boolean;
   yes: boolean;
+  /** Toggle nfseEnabled instead of asaasEnabled. */
+  nfse: boolean;
   project?: string;
 }
 
 export const USAGE =
-  'Usage: enable-asaas-pilot.ts --company <id> [--company <id>...] [--dry-run] [--disable] [--project <projectId> --yes]';
+  'Usage: enable-asaas-pilot.ts --company <id> [--company <id>...] [--dry-run] [--disable] [--nfse] [--project <projectId> --yes]';
 
 export function parseArgs(argv: string[]): Args {
   const companyIds: string[] = [];
   let project: string | undefined;
-  const flags = ['--dry-run', '--disable', '--yes'];
+  const flags = ['--dry-run', '--disable', '--yes', '--nfse'];
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--company' || argv[i] === '--project') {
       const value = argv[i + 1];
@@ -49,6 +58,7 @@ export function parseArgs(argv: string[]): Args {
     dryRun: argv.includes('--dry-run'),
     disable: argv.includes('--disable'),
     yes: argv.includes('--yes'),
+    nfse: argv.includes('--nfse'),
     project,
   };
 }
@@ -72,9 +82,24 @@ export function resolveTarget(args: Args, env: NodeJS.ProcessEnv): Target {
   return { projectId: args.project, emulator, write: args.yes && !args.dryRun };
 }
 
-export function buildUpdate(exists: boolean, disable: boolean): Record<string, boolean> {
+export function buildUpdate(exists: boolean, disable: boolean, nfse = false): Record<string, boolean> {
+  if (nfse) return exists ? { nfseEnabled: !disable } : { asaasEnabled: false, asaasConnected: false, nfseEnabled: !disable };
   const asaasEnabled = !disable;
   return exists ? { asaasEnabled } : { asaasEnabled, asaasConnected: false };
+}
+
+/**
+ * Why NFS-e cannot be enabled for this company, or null. A connection made
+ * before the INVOICE_* events would never hear a city rejection; a company
+ * not connected yet records the events when it connects.
+ */
+export function nfseEnableBlocker(
+  args: Pick<Args, 'nfse' | 'disable'>,
+  connection: { webhookEvents?: string[] | null } | undefined,
+): string | null {
+  if (!args.nfse || args.disable || !connection) return null;
+  if (hasNfseWebhookEvents(connection.webhookEvents)) return null;
+  return 'NFSE_RECONNECT_NEEDED: the Asaas connection has no INVOICE_* webhook events; reconnect Asaas in the app first';
 }
 
 async function main(): Promise<void> {
@@ -90,7 +115,7 @@ async function main(): Promise<void> {
 
   console.log(`Target:    ${target.projectId} (${target.emulator ? 'EMULATOR' : 'PRODUCTION'})`);
   console.log(`Companies: ${args.companyIds.join(', ')}`);
-  console.log(`Action:    ${args.disable ? 'DISABLE' : 'ENABLE'} asaasEnabled${target.write ? '' : ' [dry-run, nothing will be written]'}`);
+  console.log(`Action:    ${args.disable ? 'DISABLE' : 'ENABLE'} ${args.nfse ? 'nfseEnabled' : 'asaasEnabled'}${target.write ? '' : ' [dry-run, nothing will be written]'}`);
 
   admin.initializeApp({ projectId: target.projectId });
   const db = admin.firestore();
@@ -106,7 +131,13 @@ async function main(): Promise<void> {
     }
     const ref = companyRef.collection('settings').doc('payments');
     const current = await ref.get();
-    const update = buildUpdate(current.exists, args.disable);
+    const connection = await companyRef.collection('private').doc('asaas').get();
+    const blocker = nfseEnableBlocker(args, connection.exists ? connection.data() : undefined);
+    if (blocker) {
+      console.error(`Company ${id}: ${blocker}`);
+      process.exit(1);
+    }
+    const update = buildUpdate(current.exists, args.disable, args.nfse);
     console.log(`- ${company.get('name') ?? '(no name)'} (${id})`);
     console.log(`  before: ${JSON.stringify(current.exists ? current.data() : null)}`);
     console.log(`  merge:  ${JSON.stringify(update)}`);
@@ -122,7 +153,8 @@ async function main(): Promise<void> {
     await plan.ref.set(plan.update, { merge: true });
     console.log(`  after (${plan.id}): ${JSON.stringify((await plan.ref.get()).data())}`);
   }
-  console.log(args.disable ? 'Asaas pilot DISABLED' : 'Asaas pilot ENABLED');
+  const what = args.nfse ? 'NFS-e' : 'Asaas pilot';
+  console.log(`${what} ${args.disable ? 'DISABLED' : 'ENABLED'}`);
 }
 
 if (require.main === module) {

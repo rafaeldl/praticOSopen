@@ -8629,6 +8629,672 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mais opções do Asaas'**
   String get asaasMenu;
+
+  /// No description provided for @nfseErrorAsaasValidation.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas recusou os dados da nota. Confira o CPF/CNPJ e o endereço do cliente e a configuração fiscal.'**
+  String get nfseErrorAsaasValidation;
+
+  /// No description provided for @nfseErrorNotEnabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota fiscal não está ligada para esta empresa.'**
+  String get nfseErrorNotEnabled;
+
+  /// No description provided for @nfseErrorNotReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta configurar a nota fiscal. Veja em Integrações, Asaas.'**
+  String get nfseErrorNotReady;
+
+  /// No description provided for @nfseErrorOrderNotAllowed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS não pode ter nota: ela é orçamento ou foi cancelada.'**
+  String get nfseErrorOrderNotAllowed;
+
+  /// No description provided for @nfseErrorNoServices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS não tem serviço com valor. Só serviços entram na nota.'**
+  String get nfseErrorNoServices;
+
+  /// No description provided for @nfseErrorOrderHasInvoice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS já tem nota. Cancele a nota antes de emitir outra.'**
+  String get nfseErrorOrderHasInvoice;
+
+  /// No description provided for @nfseErrorOrderNotOfCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas as OS da nota precisam ser do mesmo cliente.'**
+  String get nfseErrorOrderNotOfCustomer;
+
+  /// No description provided for @nfseErrorNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achamos esta nota. Atualize a tela.'**
+  String get nfseErrorNotFound;
+
+  /// No description provided for @nfseErrorNotCancelable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta nota não pode ser cancelada agora.'**
+  String get nfseErrorNotCancelable;
+
+  /// No description provided for @nfseErrorCancelNotSupported.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta prefeitura não deixa cancelar a nota por aqui. Cancele no site da prefeitura.'**
+  String get nfseErrorCancelNotSupported;
+
+  /// No description provided for @nfseErrorInvalidDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'A data da nota não pode ser antes de hoje.'**
+  String get nfseErrorInvalidDate;
+
+  /// No description provided for @nfseErrorInvalidFiscalInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas não aceitou os dados fiscais. Confira com o seu contador.'**
+  String get nfseErrorInvalidFiscalInfo;
+
+  /// No description provided for @nfseErrorReconnectNeeded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reconecte o Asaas para emitir notas.'**
+  String get nfseErrorReconnectNeeded;
+
+  /// No description provided for @nfseErrorSetupNeeded.
+  ///
+  /// In pt, this message translates to:
+  /// **'A conta do Asaas mudou. Configure a nota fiscal de novo.'**
+  String get nfseErrorSetupNeeded;
+
+  /// No description provided for @nfseErrorOtherAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta nota é de outra conta do Asaas. Cancele por lá.'**
+  String get nfseErrorOtherAccount;
+
+  /// No description provided for @nfseConflictNotice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota emitida fora do PraticOS, confira no Asaas.'**
+  String get nfseConflictNotice;
+
+  /// No description provided for @nfseStatusWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando prefeitura'**
+  String get nfseStatusWaiting;
+
+  /// No description provided for @nfseStatusScheduledFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Será emitida em {date}'**
+  String nfseStatusScheduledFor(String date);
+
+  /// No description provided for @nfseStatusIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida'**
+  String get nfseStatusIssued;
+
+  /// No description provided for @nfseStatusIssuedNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida · nº {number}'**
+  String nfseStatusIssuedNumber(String number);
+
+  /// No description provided for @nfseStatusCanceling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelando'**
+  String get nfseStatusCanceling;
+
+  /// No description provided for @nfseStatusCancelDenied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelamento recusado'**
+  String get nfseStatusCancelDenied;
+
+  /// No description provided for @nfseStatusCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelada'**
+  String get nfseStatusCanceled;
+
+  /// No description provided for @nfseStatusError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro na prefeitura'**
+  String get nfseStatusError;
+
+  /// No description provided for @nfseRowTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota fiscal'**
+  String get nfseRowTitle;
+
+  /// No description provided for @nfseIssueAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir nota fiscal'**
+  String get nfseIssueAction;
+
+  /// No description provided for @nfseIssueSeveralAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir uma nota com várias OS'**
+  String get nfseIssueSeveralAction;
+
+  /// No description provided for @nfseValueLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor da nota'**
+  String get nfseValueLabel;
+
+  /// No description provided for @nfseOnlyServicesNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só os serviços entram na nota. Peças e produtos ficam de fora.'**
+  String get nfseOnlyServicesNote;
+
+  /// No description provided for @nfseDiscountNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'O desconto foi repartido entre serviços e peças.'**
+  String get nfseDiscountNote;
+
+  /// No description provided for @nfseOrderLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {value}'**
+  String nfseOrderLine(String number, String value);
+
+  /// No description provided for @nfseDescriptionLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que aparece na nota'**
+  String get nfseDescriptionLabel;
+
+  /// No description provided for @nfseDateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data da nota'**
+  String get nfseDateLabel;
+
+  /// No description provided for @nfseServiceRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço da prefeitura'**
+  String get nfseServiceRow;
+
+  /// No description provided for @nfseTaxIdHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota precisa do CPF ou CNPJ do cliente. Fica salvo no cadastro dele.'**
+  String get nfseTaxIdHint;
+
+  /// No description provided for @nfseTaxIdMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o CPF ou CNPJ do cliente'**
+  String get nfseTaxIdMissing;
+
+  /// No description provided for @nfseNothingToIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada para emitir: a nota ficaria sem valor'**
+  String get nfseNothingToIssue;
+
+  /// No description provided for @nfseAlreadyIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'A OS {numbers} já tem nota'**
+  String nfseAlreadyIssued(String numbers);
+
+  /// No description provided for @nfseSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota enviada para a prefeitura'**
+  String get nfseSent;
+
+  /// No description provided for @nfseSeveralIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Uma nota para {count} OS de {name}: {numbers}.'**
+  String nfseSeveralIntro(int count, String name, String numbers);
+
+  /// No description provided for @nfseNotReadyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta configurar a nota fiscal'**
+  String get nfseNotReadyTitle;
+
+  /// No description provided for @nfseNotReadyAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes da primeira nota, preencha os dados fiscais da empresa e o serviço da nota.'**
+  String get nfseNotReadyAdmin;
+
+  /// No description provided for @nfseNotReadyOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peça ao dono da empresa para configurar a nota fiscal em Integrações, Asaas.'**
+  String get nfseNotReadyOther;
+
+  /// No description provided for @nfseSetupAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurar'**
+  String get nfseSetupAction;
+
+  /// No description provided for @nfsePickOrdersTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quais OS entram na nota?'**
+  String get nfsePickOrdersTitle;
+
+  /// No description provided for @nfsePickOrderSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços {value} · {date}'**
+  String nfsePickOrderSubtitle(String value, String date);
+
+  /// No description provided for @nfseNoOrdersToPick.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS deste cliente pode ter nota agora'**
+  String get nfseNoOrdersToPick;
+
+  /// No description provided for @nfseHeadWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura ainda está analisando a nota.'**
+  String get nfseHeadWaiting;
+
+  /// No description provided for @nfseHeadScheduled.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota vai para a prefeitura em {date}.'**
+  String nfseHeadScheduled(String date);
+
+  /// No description provided for @nfseHeadIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota foi emitida.'**
+  String get nfseHeadIssued;
+
+  /// No description provided for @nfseHeadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura recusou a nota. Confira os dados fiscais e o cadastro do cliente e emita de novo.'**
+  String get nfseHeadError;
+
+  /// No description provided for @nfseHeadCanceling.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura está cancelando a nota.'**
+  String get nfseHeadCanceling;
+
+  /// No description provided for @nfseHeadCancelDenied.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura não aceitou cancelar a nota. Ela continua valendo.'**
+  String get nfseHeadCancelDenied;
+
+  /// No description provided for @nfseHeadCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota foi cancelada.'**
+  String get nfseHeadCanceled;
+
+  /// No description provided for @nfseReasonLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Motivo dado pela prefeitura'**
+  String get nfseReasonLabel;
+
+  /// No description provided for @nfseNumberLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número'**
+  String get nfseNumberLabel;
+
+  /// No description provided for @nfseOrdersLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS na nota'**
+  String get nfseOrdersLabel;
+
+  /// No description provided for @nfseOpenPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir PDF da nota'**
+  String get nfseOpenPdf;
+
+  /// No description provided for @nfseOpenXml.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir XML da nota'**
+  String get nfseOpenXml;
+
+  /// No description provided for @nfseMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções da nota'**
+  String get nfseMenu;
+
+  /// No description provided for @nfseCancelAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar nota'**
+  String get nfseCancelAction;
+
+  /// No description provided for @nfseCancelQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar a nota de {value}?'**
+  String nfseCancelQuestion(String value);
+
+  /// No description provided for @nfseCancelMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura recebe o pedido e a nota deixa de valer. O pagamento da OS continua como está.'**
+  String get nfseCancelMessage;
+
+  /// No description provided for @nfseKeep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter nota'**
+  String get nfseKeep;
+
+  /// No description provided for @nfseCancelRequested.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedido de cancelamento enviado'**
+  String get nfseCancelRequested;
+
+  /// No description provided for @nfseCancelAtCityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancele no site da prefeitura'**
+  String get nfseCancelAtCityTitle;
+
+  /// No description provided for @nfseCancelAtCityMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta prefeitura não deixa cancelar a nota por aqui. Cancele no site dela e depois marque aqui que já cancelou.'**
+  String get nfseCancelAtCityMessage;
+
+  /// No description provided for @nfseCanceledAtCity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já cancelei na prefeitura'**
+  String get nfseCanceledAtCity;
+
+  /// No description provided for @nfseCanceledToast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota cancelada'**
+  String get nfseCanceledToast;
+
+  /// No description provided for @nfseSetupReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronta para emitir'**
+  String get nfseSetupReady;
+
+  /// No description provided for @nfseSetupMissingShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta configurar'**
+  String get nfseSetupMissingShort;
+
+  /// No description provided for @nfseSetupHeadReady.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo pronto. A nota sai pela OS, no “…”.'**
+  String get nfseSetupHeadReady;
+
+  /// No description provided for @nfseSetupHeadMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Falta 1 passo para emitir notas.} other{Faltam {count} passos para emitir notas.}}'**
+  String nfseSetupHeadMissing(int count);
+
+  /// No description provided for @nfseSetupFiscalInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados fiscais da empresa'**
+  String get nfseSetupFiscalInfo;
+
+  /// No description provided for @nfseSetupCityAccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso à prefeitura'**
+  String get nfseSetupCityAccess;
+
+  /// No description provided for @nfseSetupService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço da nota'**
+  String get nfseSetupService;
+
+  /// No description provided for @nfseSetupDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get nfseSetupDone;
+
+  /// No description provided for @nfseSetupTodo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta'**
+  String get nfseSetupTodo;
+
+  /// No description provided for @nfseSetupNext.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurar o que falta'**
+  String get nfseSetupNext;
+
+  /// No description provided for @nfseCityAccessCertificate.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura pede o certificado digital da empresa. Envie no painel do Asaas, em Notas fiscais.'**
+  String get nfseCityAccessCertificate;
+
+  /// No description provided for @nfseCityAccessPassword.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura pede o usuário e a senha do site dela. Informe no painel do Asaas, em Notas fiscais.'**
+  String get nfseCityAccessPassword;
+
+  /// No description provided for @nfseCityAccessToken.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura pede um código de acesso. Informe no painel do Asaas, em Notas fiscais.'**
+  String get nfseCityAccessToken;
+
+  /// No description provided for @nfseCityAccessFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha primeiro os dados fiscais: aí dá para saber o que a prefeitura pede.'**
+  String get nfseCityAccessFirst;
+
+  /// No description provided for @nfseCityAccessNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta prefeitura não pede acesso extra.'**
+  String get nfseCityAccessNone;
+
+  /// No description provided for @nfseOpenAsaasPanel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir o painel do Asaas'**
+  String get nfseOpenAsaasPanel;
+
+  /// No description provided for @nfseCheckAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já enviei, conferir de novo'**
+  String get nfseCheckAgain;
+
+  /// No description provided for @nfseNoCancelNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta prefeitura não deixa cancelar a nota pelo app: o cancelamento é feito no site dela.'**
+  String get nfseNoCancelNote;
+
+  /// No description provided for @nfseFiscalNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esses dados ficam no Asaas e vão em todas as notas. Na dúvida, peça ao seu contador.'**
+  String get nfseFiscalNote;
+
+  /// No description provided for @nfseFiscalEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail para receber as notas'**
+  String get nfseFiscalEmail;
+
+  /// No description provided for @nfseFiscalMunicipalInscription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inscrição municipal'**
+  String get nfseFiscalMunicipalInscription;
+
+  /// No description provided for @nfseFiscalSimples.
+  ///
+  /// In pt, this message translates to:
+  /// **'Empresa do Simples Nacional'**
+  String get nfseFiscalSimples;
+
+  /// No description provided for @nfseFiscalCnae.
+  ///
+  /// In pt, this message translates to:
+  /// **'CNAE (se o contador pedir)'**
+  String get nfseFiscalCnae;
+
+  /// No description provided for @nfseFiscalSpecialRegime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Regime especial'**
+  String get nfseFiscalSpecialRegime;
+
+  /// No description provided for @nfseFiscalSpecialRegimeQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual é o regime especial?'**
+  String get nfseFiscalSpecialRegimeQuestion;
+
+  /// No description provided for @nfseFiscalServiceListItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Item da lista de serviço'**
+  String get nfseFiscalServiceListItem;
+
+  /// No description provided for @nfseFiscalEmailMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva um e-mail válido para salvar.'**
+  String get nfseFiscalEmailMissing;
+
+  /// No description provided for @nfseFiscalSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados fiscais salvos'**
+  String get nfseFiscalSaved;
+
+  /// No description provided for @nfseServicePickTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual serviço você presta?'**
+  String get nfseServicePickTitle;
+
+  /// No description provided for @nfseServiceSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Busque pelo nome, ex.: manutenção'**
+  String get nfseServiceSearch;
+
+  /// No description provided for @nfseServiceSearchEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada encontrado. Tente outra palavra ou digite o código.'**
+  String get nfseServiceSearchEmpty;
+
+  /// No description provided for @nfseServiceTypeCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar o código'**
+  String get nfseServiceTypeCode;
+
+  /// No description provided for @nfseServiceCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código do serviço na prefeitura'**
+  String get nfseServiceCode;
+
+  /// No description provided for @nfseServiceName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do serviço'**
+  String get nfseServiceName;
+
+  /// No description provided for @nfseServiceMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o serviço da prefeitura para salvar.'**
+  String get nfseServiceMissing;
+
+  /// No description provided for @nfseIss.
+  ///
+  /// In pt, this message translates to:
+  /// **'ISS (%)'**
+  String get nfseIss;
+
+  /// No description provided for @nfseRetainIss.
+  ///
+  /// In pt, this message translates to:
+  /// **'O cliente retém o ISS'**
+  String get nfseRetainIss;
+
+  /// No description provided for @nfseOtherTaxes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros impostos (%)'**
+  String get nfseOtherTaxes;
+
+  /// No description provided for @nfseTaxesNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use o que a prefeitura e o seu contador indicarem. Deixe 0 no que não se aplica.'**
+  String get nfseTaxesNote;
+
+  /// No description provided for @nfseTemplateLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Texto da nota'**
+  String get nfseTemplateLabel;
+
+  /// No description provided for @nfseTemplateHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'{servicos} vira os serviços da OS e {os} os números das OS.'**
+  String nfseTemplateHint(Object os, Object servicos);
+
+  /// No description provided for @nfseServiceSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço da nota salvo'**
+  String get nfseServiceSaved;
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
+import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
@@ -28,6 +29,11 @@ import 'package:url_launcher/url_launcher.dart';
 const asaasPanelUrl = 'https://www.asaas.com/customerConfigIntegrations/index';
 const asaasSandboxPanelUrl =
     'https://sandbox.asaas.com/customerConfigIntegrations/index';
+
+/// Asaas dashboard where the company sends its access to the city
+/// (certificate, password or token) under "Notas fiscais".
+const asaasNfsePanelUrl = 'https://www.asaas.com/';
+const asaasSandboxNfsePanelUrl = 'https://sandbox.asaas.com/';
 
 /// Settings stream shared by the Integrations list and the connection
 /// screen. Null when there is no company or the user cannot manage
@@ -400,6 +406,28 @@ class _AsaasConnectionScreenState extends State<AsaasConnectionScreen> {
           ),
         ],
       ),
+      if (settings.nfseAvailable)
+        MoreRows(
+          rows: [
+            AppListRow(
+              key: const Key('asaasNfseRow'),
+              title: l10n.nfseRowTitle,
+              subtitleWidget: _StatusLine(
+                color: settings.nfseReady
+                    ? AppColors.success
+                    : AppColors.warning,
+                text: settings.nfseReady
+                    ? l10n.nfseSetupReady
+                    : l10n.nfseSetupMissingShort,
+              ),
+              onTap: () => Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (_) => NfseSetupScreen(sandbox: isSandbox),
+                ),
+              ),
+            ),
+          ],
+        ),
     ];
   }
 }

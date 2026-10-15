@@ -80,12 +80,40 @@ void main() {
       );
     });
 
+    test('nota fiscal: reconectar, conta do Asaas trocada', () {
+      expect(text('NFSE_RECONNECT_NEEDED'), l10n.nfseErrorReconnectNeeded);
+      expect(
+        l10n.nfseErrorReconnectNeeded,
+        'Reconecte o Asaas para emitir notas.',
+      );
+      expect(text('NFSE_SETUP_NEEDED'), l10n.nfseErrorSetupNeeded);
+      expect(text('INVOICE_OTHER_ACCOUNT'), l10n.nfseErrorOtherAccount);
+    });
+
     test('CHARGE_NOT_OPEN', () {
       expect(text('CHARGE_NOT_OPEN'), l10n.asaasErrorChargeNotOpen);
     });
 
     test('ASAAS_VALIDATION_ERROR', () {
       expect(text('ASAAS_VALIDATION_ERROR'), l10n.asaasErrorValidation);
+    });
+
+    test('nas telas de nota a recusa do Asaas fala da nota', () {
+      expect(
+        asaasErrorText(
+          l10n,
+          AsaasApiException('ASAAS_VALIDATION_ERROR', 'raw'),
+          nota: true,
+        ),
+        l10n.nfseErrorAsaasValidation,
+      );
+    });
+
+    test('códigos de nota fiscal', () {
+      expect(text('ORDER_HAS_INVOICE'), l10n.nfseErrorOrderHasInvoice);
+      expect(text('CANCEL_NOT_SUPPORTED'), l10n.nfseErrorCancelNotSupported);
+      expect(text('NO_SERVICES'), l10n.nfseErrorNoServices);
+      expect(text('NFSE_NOT_READY'), l10n.nfseErrorNotReady);
     });
 
     test('ASAAS_UNAVAILABLE', () {

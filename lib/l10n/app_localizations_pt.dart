@@ -5183,4 +5183,396 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get asaasMenu => 'Mais opções do Asaas';
+
+  @override
+  String get nfseErrorAsaasValidation =>
+      'O Asaas recusou os dados da nota. Confira o CPF/CNPJ e o endereço do cliente e a configuração fiscal.';
+
+  @override
+  String get nfseErrorNotEnabled =>
+      'A nota fiscal não está ligada para esta empresa.';
+
+  @override
+  String get nfseErrorNotReady =>
+      'Falta configurar a nota fiscal. Veja em Integrações, Asaas.';
+
+  @override
+  String get nfseErrorOrderNotAllowed =>
+      'Esta OS não pode ter nota: ela é orçamento ou foi cancelada.';
+
+  @override
+  String get nfseErrorNoServices =>
+      'Esta OS não tem serviço com valor. Só serviços entram na nota.';
+
+  @override
+  String get nfseErrorOrderHasInvoice =>
+      'Esta OS já tem nota. Cancele a nota antes de emitir outra.';
+
+  @override
+  String get nfseErrorOrderNotOfCustomer =>
+      'Todas as OS da nota precisam ser do mesmo cliente.';
+
+  @override
+  String get nfseErrorNotFound => 'Não achamos esta nota. Atualize a tela.';
+
+  @override
+  String get nfseErrorNotCancelable =>
+      'Esta nota não pode ser cancelada agora.';
+
+  @override
+  String get nfseErrorCancelNotSupported =>
+      'Esta prefeitura não deixa cancelar a nota por aqui. Cancele no site da prefeitura.';
+
+  @override
+  String get nfseErrorInvalidDate =>
+      'A data da nota não pode ser antes de hoje.';
+
+  @override
+  String get nfseErrorInvalidFiscalInfo =>
+      'O Asaas não aceitou os dados fiscais. Confira com o seu contador.';
+
+  @override
+  String get nfseErrorReconnectNeeded => 'Reconecte o Asaas para emitir notas.';
+
+  @override
+  String get nfseErrorSetupNeeded =>
+      'A conta do Asaas mudou. Configure a nota fiscal de novo.';
+
+  @override
+  String get nfseErrorOtherAccount =>
+      'Esta nota é de outra conta do Asaas. Cancele por lá.';
+
+  @override
+  String get nfseConflictNotice =>
+      'Nota emitida fora do PraticOS, confira no Asaas.';
+
+  @override
+  String get nfseStatusWaiting => 'Aguardando prefeitura';
+
+  @override
+  String nfseStatusScheduledFor(String date) {
+    return 'Será emitida em $date';
+  }
+
+  @override
+  String get nfseStatusIssued => 'Emitida';
+
+  @override
+  String nfseStatusIssuedNumber(String number) {
+    return 'Emitida · nº $number';
+  }
+
+  @override
+  String get nfseStatusCanceling => 'Cancelando';
+
+  @override
+  String get nfseStatusCancelDenied => 'Cancelamento recusado';
+
+  @override
+  String get nfseStatusCanceled => 'Cancelada';
+
+  @override
+  String get nfseStatusError => 'Erro na prefeitura';
+
+  @override
+  String get nfseRowTitle => 'Nota fiscal';
+
+  @override
+  String get nfseIssueAction => 'Emitir nota fiscal';
+
+  @override
+  String get nfseIssueSeveralAction => 'Emitir uma nota com várias OS';
+
+  @override
+  String get nfseValueLabel => 'Valor da nota';
+
+  @override
+  String get nfseOnlyServicesNote =>
+      'Só os serviços entram na nota. Peças e produtos ficam de fora.';
+
+  @override
+  String get nfseDiscountNote =>
+      'O desconto foi repartido entre serviços e peças.';
+
+  @override
+  String nfseOrderLine(String number, String value) {
+    return 'OS $number · $value';
+  }
+
+  @override
+  String get nfseDescriptionLabel => 'O que aparece na nota';
+
+  @override
+  String get nfseDateLabel => 'Data da nota';
+
+  @override
+  String get nfseServiceRow => 'Serviço da prefeitura';
+
+  @override
+  String get nfseTaxIdHint =>
+      'A nota precisa do CPF ou CNPJ do cliente. Fica salvo no cadastro dele.';
+
+  @override
+  String get nfseTaxIdMissing => 'Falta o CPF ou CNPJ do cliente';
+
+  @override
+  String get nfseNothingToIssue => 'Nada para emitir: a nota ficaria sem valor';
+
+  @override
+  String nfseAlreadyIssued(String numbers) {
+    return 'A OS $numbers já tem nota';
+  }
+
+  @override
+  String get nfseSent => 'Nota enviada para a prefeitura';
+
+  @override
+  String nfseSeveralIntro(int count, String name, String numbers) {
+    return 'Uma nota para $count OS de $name: $numbers.';
+  }
+
+  @override
+  String get nfseNotReadyTitle => 'Falta configurar a nota fiscal';
+
+  @override
+  String get nfseNotReadyAdmin =>
+      'Antes da primeira nota, preencha os dados fiscais da empresa e o serviço da nota.';
+
+  @override
+  String get nfseNotReadyOther =>
+      'Peça ao dono da empresa para configurar a nota fiscal em Integrações, Asaas.';
+
+  @override
+  String get nfseSetupAction => 'Configurar';
+
+  @override
+  String get nfsePickOrdersTitle => 'Quais OS entram na nota?';
+
+  @override
+  String nfsePickOrderSubtitle(String value, String date) {
+    return 'Serviços $value · $date';
+  }
+
+  @override
+  String get nfseNoOrdersToPick =>
+      'Nenhuma OS deste cliente pode ter nota agora';
+
+  @override
+  String get nfseHeadWaiting => 'A prefeitura ainda está analisando a nota.';
+
+  @override
+  String nfseHeadScheduled(String date) {
+    return 'A nota vai para a prefeitura em $date.';
+  }
+
+  @override
+  String get nfseHeadIssued => 'A nota foi emitida.';
+
+  @override
+  String get nfseHeadError =>
+      'A prefeitura recusou a nota. Confira os dados fiscais e o cadastro do cliente e emita de novo.';
+
+  @override
+  String get nfseHeadCanceling => 'A prefeitura está cancelando a nota.';
+
+  @override
+  String get nfseHeadCancelDenied =>
+      'A prefeitura não aceitou cancelar a nota. Ela continua valendo.';
+
+  @override
+  String get nfseHeadCanceled => 'A nota foi cancelada.';
+
+  @override
+  String get nfseReasonLabel => 'Motivo dado pela prefeitura';
+
+  @override
+  String get nfseNumberLabel => 'Número';
+
+  @override
+  String get nfseOrdersLabel => 'OS na nota';
+
+  @override
+  String get nfseOpenPdf => 'Abrir PDF da nota';
+
+  @override
+  String get nfseOpenXml => 'Abrir XML da nota';
+
+  @override
+  String get nfseMenu => 'Mais opções da nota';
+
+  @override
+  String get nfseCancelAction => 'Cancelar nota';
+
+  @override
+  String nfseCancelQuestion(String value) {
+    return 'Cancelar a nota de $value?';
+  }
+
+  @override
+  String get nfseCancelMessage =>
+      'A prefeitura recebe o pedido e a nota deixa de valer. O pagamento da OS continua como está.';
+
+  @override
+  String get nfseKeep => 'Manter nota';
+
+  @override
+  String get nfseCancelRequested => 'Pedido de cancelamento enviado';
+
+  @override
+  String get nfseCancelAtCityTitle => 'Cancele no site da prefeitura';
+
+  @override
+  String get nfseCancelAtCityMessage =>
+      'Esta prefeitura não deixa cancelar a nota por aqui. Cancele no site dela e depois marque aqui que já cancelou.';
+
+  @override
+  String get nfseCanceledAtCity => 'Já cancelei na prefeitura';
+
+  @override
+  String get nfseCanceledToast => 'Nota cancelada';
+
+  @override
+  String get nfseSetupReady => 'Pronta para emitir';
+
+  @override
+  String get nfseSetupMissingShort => 'Falta configurar';
+
+  @override
+  String get nfseSetupHeadReady => 'Tudo pronto. A nota sai pela OS, no “…”.';
+
+  @override
+  String nfseSetupHeadMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Faltam $count passos para emitir notas.',
+      one: 'Falta 1 passo para emitir notas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseSetupFiscalInfo => 'Dados fiscais da empresa';
+
+  @override
+  String get nfseSetupCityAccess => 'Acesso à prefeitura';
+
+  @override
+  String get nfseSetupService => 'Serviço da nota';
+
+  @override
+  String get nfseSetupDone => 'Pronto';
+
+  @override
+  String get nfseSetupTodo => 'Falta';
+
+  @override
+  String get nfseSetupNext => 'Configurar o que falta';
+
+  @override
+  String get nfseCityAccessCertificate =>
+      'A prefeitura pede o certificado digital da empresa. Envie no painel do Asaas, em Notas fiscais.';
+
+  @override
+  String get nfseCityAccessPassword =>
+      'A prefeitura pede o usuário e a senha do site dela. Informe no painel do Asaas, em Notas fiscais.';
+
+  @override
+  String get nfseCityAccessToken =>
+      'A prefeitura pede um código de acesso. Informe no painel do Asaas, em Notas fiscais.';
+
+  @override
+  String get nfseCityAccessFirst =>
+      'Preencha primeiro os dados fiscais: aí dá para saber o que a prefeitura pede.';
+
+  @override
+  String get nfseCityAccessNone => 'Esta prefeitura não pede acesso extra.';
+
+  @override
+  String get nfseOpenAsaasPanel => 'Abrir o painel do Asaas';
+
+  @override
+  String get nfseCheckAgain => 'Já enviei, conferir de novo';
+
+  @override
+  String get nfseNoCancelNote =>
+      'Esta prefeitura não deixa cancelar a nota pelo app: o cancelamento é feito no site dela.';
+
+  @override
+  String get nfseFiscalNote =>
+      'Esses dados ficam no Asaas e vão em todas as notas. Na dúvida, peça ao seu contador.';
+
+  @override
+  String get nfseFiscalEmail => 'E-mail para receber as notas';
+
+  @override
+  String get nfseFiscalMunicipalInscription => 'Inscrição municipal';
+
+  @override
+  String get nfseFiscalSimples => 'Empresa do Simples Nacional';
+
+  @override
+  String get nfseFiscalCnae => 'CNAE (se o contador pedir)';
+
+  @override
+  String get nfseFiscalSpecialRegime => 'Regime especial';
+
+  @override
+  String get nfseFiscalSpecialRegimeQuestion => 'Qual é o regime especial?';
+
+  @override
+  String get nfseFiscalServiceListItem => 'Item da lista de serviço';
+
+  @override
+  String get nfseFiscalEmailMissing => 'Escreva um e-mail válido para salvar.';
+
+  @override
+  String get nfseFiscalSaved => 'Dados fiscais salvos';
+
+  @override
+  String get nfseServicePickTitle => 'Qual serviço você presta?';
+
+  @override
+  String get nfseServiceSearch => 'Busque pelo nome, ex.: manutenção';
+
+  @override
+  String get nfseServiceSearchEmpty =>
+      'Nada encontrado. Tente outra palavra ou digite o código.';
+
+  @override
+  String get nfseServiceTypeCode => 'Digitar o código';
+
+  @override
+  String get nfseServiceCode => 'Código do serviço na prefeitura';
+
+  @override
+  String get nfseServiceName => 'Nome do serviço';
+
+  @override
+  String get nfseServiceMissing =>
+      'Escolha o serviço da prefeitura para salvar.';
+
+  @override
+  String get nfseIss => 'ISS (%)';
+
+  @override
+  String get nfseRetainIss => 'O cliente retém o ISS';
+
+  @override
+  String get nfseOtherTaxes => 'Outros impostos (%)';
+
+  @override
+  String get nfseTaxesNote =>
+      'Use o que a prefeitura e o seu contador indicarem. Deixe 0 no que não se aplica.';
+
+  @override
+  String get nfseTemplateLabel => 'Texto da nota';
+
+  @override
+  String nfseTemplateHint(Object os, Object servicos) {
+    return '$servicos vira os serviços da OS e $os os números das OS.';
+  }
+
+  @override
+  String get nfseServiceSaved => 'Serviço da nota salvo';
 }

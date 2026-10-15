@@ -112,6 +112,17 @@ describe('AsaasClient', () => {
     expect(await client.findCustomerByExternalReference('x')).toBeNull();
   });
 
+  it('busca notas fiscais pela referência externa', async () => {
+    const { impl, calls } = fakeFetch(200, { object: 'list', data: [{ id: 'inv_9', status: 'SCHEDULED' }] });
+    const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });
+
+    const invoices = await client.listInvoicesByExternalReference('c1:nf:abc');
+
+    expect(invoices.map((i) => i.id)).toEqual(['inv_9']);
+    expect(calls[0].init.method).toBe('GET');
+    expect(calls[0].url).toBe('https://api-sandbox.asaas.com/v3/invoices?externalReference=c1%3Anf%3Aabc&limit=10');
+  });
+
   it('DELETE de cobrança, parcelamento e webhook', async () => {
     const { impl, calls } = fakeFetch(200, { deleted: true });
     const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });

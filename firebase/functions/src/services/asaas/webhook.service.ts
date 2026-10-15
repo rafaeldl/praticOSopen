@@ -20,6 +20,7 @@ import {
   reopenAfterCashUndone,
   revertCustomerChargePayment,
 } from './customer-charge-payment.service';
+import { applyInvoiceEvent } from './invoice.service';
 import type {
   AsaasPaymentEvent,
   AsaasWebhookEvent,
@@ -39,6 +40,18 @@ const HANDLED_EVENTS: ReadonlySet<string> = new Set<AsaasWebhookEventName>([
   'PAYMENT_DELETED',
   'PAYMENT_RECEIVED_IN_CASH_UNDONE',
   'PAYMENT_PARTIALLY_REFUNDED',
+]);
+
+/** NFS-e events (docs/NFSE_ASAAS.md); INVOICE_UPDATED carries the current status too. */
+const INVOICE_EVENTS: ReadonlySet<string> = new Set<AsaasWebhookEventName>([
+  'INVOICE_CREATED',
+  'INVOICE_UPDATED',
+  'INVOICE_SYNCHRONIZED',
+  'INVOICE_AUTHORIZED',
+  'INVOICE_PROCESSING_CANCELLATION',
+  'INVOICE_CANCELED',
+  'INVOICE_CANCELLATION_DENIED',
+  'INVOICE_ERROR',
 ]);
 
 interface ChargeTarget {
@@ -322,7 +335,9 @@ export async function handleAsaasEvent(companyId: string, event: AsaasWebhookEve
   }
 
   const payment = event.payment;
-  if (payment?.id && HANDLED_EVENTS.has(event.event)) {
+  if (event.invoice?.id && INVOICE_EVENTS.has(event.event)) {
+    await applyInvoiceEvent(companyId, event.event, event.invoice);
+  } else if (payment?.id && HANDLED_EVENTS.has(event.event)) {
     const name = event.event as AsaasWebhookEventName;
     if (parseCustomerChargeReference(payment.externalReference)) {
       const chargeId = await resolveCustomerCharge(companyId, event.event, payment);

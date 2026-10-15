@@ -103,6 +103,14 @@ describe('connection.service', () => {
           'PAYMENT_DELETED',
           'PAYMENT_RECEIVED_IN_CASH_UNDONE',
           'PAYMENT_PARTIALLY_REFUNDED',
+          'INVOICE_CREATED',
+          'INVOICE_UPDATED',
+          'INVOICE_SYNCHRONIZED',
+          'INVOICE_AUTHORIZED',
+          'INVOICE_PROCESSING_CANCELLATION',
+          'INVOICE_CANCELED',
+          'INVOICE_CANCELLATION_DENIED',
+          'INVOICE_ERROR',
         ],
       });
       expect(webhookInput.authToken).toMatch(/^[A-Za-z0-9_-]{64}$/);
@@ -118,6 +126,8 @@ describe('connection.service', () => {
         connectedBy: { id: 'u1', name: 'Ana' },
       });
       expect(stored.webhookTokenHash).toBe(hashToken(webhookInput.authToken));
+      // Recorded so NFS-e can tell connections made before the INVOICE_* events.
+      expect(stored.webhookEvents).toEqual(webhookInput.events);
       expect(JSON.stringify(stored)).not.toContain('aact');
       expect(decryptSecret(stored.encryptedApiKey as EncryptedSecret, MASTER_KEY)).toBe('$aact_hmlg_k');
       expect(read('companies/c1/settings/payments')).toEqual(settings);
@@ -304,6 +314,18 @@ describe('connection.service', () => {
       expect(read('companies/c1/private/asaas')).toBeUndefined();
       expect(read('companies/c1/settings/payments')!.asaasConnected).toBe(false);
     });
+  });
+
+  it('NFS-e: reconectar mantém a opção; outra conta desliga o "pronto"; desconectar mantém a opção', async () => {
+    seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: false, nfseEnabled: true, nfseReady: true });
+    seed('companies/c1/private/asaas', { mode: 'apiKey', environment: 'production', walletId: 'old', status: 'active' });
+    const settings = await connectAsaas('c1', '$aact_hmlg_k', USER);
+    expect(settings.nfseEnabled).toBe(true);
+    expect(settings.nfseReady).toBeUndefined();
+    expect(read('companies/c1/settings/payments')).toMatchObject({ nfseEnabled: true, nfseReady: false });
+
+    await disconnectAsaas('c1');
+    expect(read('companies/c1/settings/payments')).toEqual({ asaasEnabled: true, asaasConnected: false, nfseEnabled: true });
   });
 
   it('getPaymentSettings devolve falso sem documento', async () => {

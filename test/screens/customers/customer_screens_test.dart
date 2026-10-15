@@ -8,11 +8,13 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_detail_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
@@ -912,6 +914,50 @@ void main() {
       await tester.tap(find.text('Apagar'));
       await tester.pumpAndSettle();
       expect(dir.deleted.single.id, 'c1');
+    });
+
+    Future<void> pumpWithNfse(WidgetTester tester, PaymentSettings s) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          customer: ana,
+          directory: FakeDirectory(),
+          showPrices: true,
+          canReceiveOn: (_) => true,
+          nfse: NfseController(
+            canIssue: true,
+            settingsStream: Stream.value(s),
+            invoicesOf: (_) => Stream.value(const []),
+          ),
+        ),
+        direct: true,
+      );
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('"…" has no nota action while notas are off', (tester) async {
+      await pumpWithNfse(
+        tester,
+        PaymentSettings(asaasEnabled: true, asaasConnected: true),
+      );
+      expect(find.byKey(const Key('customerNfseSeveral')), findsNothing);
+    });
+
+    testWidgets('"…" offers one nota with several OS when notas are on', (
+      tester,
+    ) async {
+      await pumpWithNfse(
+        tester,
+        PaymentSettings(
+          asaasEnabled: true,
+          asaasConnected: true,
+          nfseEnabled: true,
+          nfseReady: true,
+        ),
+      );
+      expect(find.byKey(const Key('customerNfseSeveral')), findsOneWidget);
     });
   });
 

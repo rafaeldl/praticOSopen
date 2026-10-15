@@ -5184,4 +5184,396 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get asaasMenu => 'More Asaas options';
+
+  @override
+  String get nfseErrorAsaasValidation =>
+      'Asaas rejected the invoice data. Check the customer\'s tax ID and address and the tax setup.';
+
+  @override
+  String get nfseErrorNotEnabled =>
+      'Service invoices are not turned on for this company.';
+
+  @override
+  String get nfseErrorNotReady =>
+      'The service invoice setup is not finished. See Integrations, Asaas.';
+
+  @override
+  String get nfseErrorOrderNotAllowed =>
+      'This order can\'t have an invoice: it is a quote or was canceled.';
+
+  @override
+  String get nfseErrorNoServices =>
+      'This order has no priced service. Only services go into the invoice.';
+
+  @override
+  String get nfseErrorOrderHasInvoice =>
+      'This order already has an invoice. Cancel it before issuing another.';
+
+  @override
+  String get nfseErrorOrderNotOfCustomer =>
+      'Every order in the invoice must be of the same customer.';
+
+  @override
+  String get nfseErrorNotFound =>
+      'We couldn\'t find this invoice. Refresh the screen.';
+
+  @override
+  String get nfseErrorNotCancelable => 'This invoice can\'t be canceled now.';
+
+  @override
+  String get nfseErrorCancelNotSupported =>
+      'This city doesn\'t allow canceling the invoice from here. Cancel it on the city\'s website.';
+
+  @override
+  String get nfseErrorInvalidDate => 'The invoice date can\'t be before today.';
+
+  @override
+  String get nfseErrorInvalidFiscalInfo =>
+      'Asaas didn\'t accept the tax details. Check them with your accountant.';
+
+  @override
+  String get nfseErrorReconnectNeeded => 'Reconnect Asaas to issue invoices.';
+
+  @override
+  String get nfseErrorSetupNeeded =>
+      'The Asaas account changed. Set up the service invoice again.';
+
+  @override
+  String get nfseErrorOtherAccount =>
+      'This invoice belongs to another Asaas account. Cancel it there.';
+
+  @override
+  String get nfseConflictNotice =>
+      'Invoice issued outside PraticOS, check it in Asaas.';
+
+  @override
+  String get nfseStatusWaiting => 'Waiting for the city';
+
+  @override
+  String nfseStatusScheduledFor(String date) {
+    return 'Will be issued on $date';
+  }
+
+  @override
+  String get nfseStatusIssued => 'Issued';
+
+  @override
+  String nfseStatusIssuedNumber(String number) {
+    return 'Issued · no. $number';
+  }
+
+  @override
+  String get nfseStatusCanceling => 'Canceling';
+
+  @override
+  String get nfseStatusCancelDenied => 'Cancellation refused';
+
+  @override
+  String get nfseStatusCanceled => 'Canceled';
+
+  @override
+  String get nfseStatusError => 'Refused by the city';
+
+  @override
+  String get nfseRowTitle => 'Service invoice';
+
+  @override
+  String get nfseIssueAction => 'Issue service invoice';
+
+  @override
+  String get nfseIssueSeveralAction => 'Issue one invoice for several orders';
+
+  @override
+  String get nfseValueLabel => 'Invoice amount';
+
+  @override
+  String get nfseOnlyServicesNote =>
+      'Only services go into the invoice. Parts and products stay out.';
+
+  @override
+  String get nfseDiscountNote =>
+      'The discount was split between services and parts.';
+
+  @override
+  String nfseOrderLine(String number, String value) {
+    return 'Order $number · $value';
+  }
+
+  @override
+  String get nfseDescriptionLabel => 'What the invoice says';
+
+  @override
+  String get nfseDateLabel => 'Invoice date';
+
+  @override
+  String get nfseServiceRow => 'City service';
+
+  @override
+  String get nfseTaxIdHint =>
+      'The invoice needs the customer\'s tax ID. It is saved on their record.';
+
+  @override
+  String get nfseTaxIdMissing => 'The customer\'s tax ID is missing';
+
+  @override
+  String get nfseNothingToIssue =>
+      'Nothing to issue: the invoice would have no amount';
+
+  @override
+  String nfseAlreadyIssued(String numbers) {
+    return 'Order $numbers already has an invoice';
+  }
+
+  @override
+  String get nfseSent => 'Invoice sent to the city';
+
+  @override
+  String nfseSeveralIntro(int count, String name, String numbers) {
+    return 'One invoice for $count orders of $name: $numbers.';
+  }
+
+  @override
+  String get nfseNotReadyTitle => 'Service invoices aren\'t set up yet';
+
+  @override
+  String get nfseNotReadyAdmin =>
+      'Before the first invoice, fill in the company\'s tax details and the invoice service.';
+
+  @override
+  String get nfseNotReadyOther =>
+      'Ask the company owner to set up service invoices in Integrations, Asaas.';
+
+  @override
+  String get nfseSetupAction => 'Set up';
+
+  @override
+  String get nfsePickOrdersTitle => 'Which orders go into the invoice?';
+
+  @override
+  String nfsePickOrderSubtitle(String value, String date) {
+    return 'Services $value · $date';
+  }
+
+  @override
+  String get nfseNoOrdersToPick =>
+      'No order of this customer can have an invoice now';
+
+  @override
+  String get nfseHeadWaiting => 'The city is still reviewing the invoice.';
+
+  @override
+  String nfseHeadScheduled(String date) {
+    return 'The invoice goes to the city on $date.';
+  }
+
+  @override
+  String get nfseHeadIssued => 'The invoice was issued.';
+
+  @override
+  String get nfseHeadError =>
+      'The city refused the invoice. Check the tax details and the customer record, then issue it again.';
+
+  @override
+  String get nfseHeadCanceling => 'The city is canceling the invoice.';
+
+  @override
+  String get nfseHeadCancelDenied =>
+      'The city refused to cancel the invoice. It is still valid.';
+
+  @override
+  String get nfseHeadCanceled => 'The invoice was canceled.';
+
+  @override
+  String get nfseReasonLabel => 'Reason given by the city';
+
+  @override
+  String get nfseNumberLabel => 'Number';
+
+  @override
+  String get nfseOrdersLabel => 'Orders in the invoice';
+
+  @override
+  String get nfseOpenPdf => 'Open invoice PDF';
+
+  @override
+  String get nfseOpenXml => 'Open invoice XML';
+
+  @override
+  String get nfseMenu => 'More invoice options';
+
+  @override
+  String get nfseCancelAction => 'Cancel invoice';
+
+  @override
+  String nfseCancelQuestion(String value) {
+    return 'Cancel the $value invoice?';
+  }
+
+  @override
+  String get nfseCancelMessage =>
+      'The city gets the request and the invoice stops being valid. The order\'s payment stays as it is.';
+
+  @override
+  String get nfseKeep => 'Keep invoice';
+
+  @override
+  String get nfseCancelRequested => 'Cancellation request sent';
+
+  @override
+  String get nfseCancelAtCityTitle => 'Cancel on the city\'s website';
+
+  @override
+  String get nfseCancelAtCityMessage =>
+      'This city doesn\'t allow canceling the invoice from here. Cancel it on its website, then mark it here.';
+
+  @override
+  String get nfseCanceledAtCity => 'I already canceled it at the city';
+
+  @override
+  String get nfseCanceledToast => 'Invoice canceled';
+
+  @override
+  String get nfseSetupReady => 'Ready to issue';
+
+  @override
+  String get nfseSetupMissingShort => 'Not set up yet';
+
+  @override
+  String get nfseSetupHeadReady =>
+      'All set. Issue the invoice from the order\'s “…”.';
+
+  @override
+  String nfseSetupHeadMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps left before issuing invoices.',
+      one: '1 step left before issuing invoices.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nfseSetupFiscalInfo => 'Company tax details';
+
+  @override
+  String get nfseSetupCityAccess => 'City access';
+
+  @override
+  String get nfseSetupService => 'Invoice service';
+
+  @override
+  String get nfseSetupDone => 'Done';
+
+  @override
+  String get nfseSetupTodo => 'Missing';
+
+  @override
+  String get nfseSetupNext => 'Set up what\'s missing';
+
+  @override
+  String get nfseCityAccessCertificate =>
+      'The city asks for the company\'s digital certificate. Send it in the Asaas dashboard, under Invoices.';
+
+  @override
+  String get nfseCityAccessPassword =>
+      'The city asks for the login of its website. Enter it in the Asaas dashboard, under Invoices.';
+
+  @override
+  String get nfseCityAccessToken =>
+      'The city asks for an access code. Enter it in the Asaas dashboard, under Invoices.';
+
+  @override
+  String get nfseCityAccessFirst =>
+      'Fill in the tax details first: then we know what the city asks for.';
+
+  @override
+  String get nfseCityAccessNone => 'This city doesn\'t ask for extra access.';
+
+  @override
+  String get nfseOpenAsaasPanel => 'Open the Asaas dashboard';
+
+  @override
+  String get nfseCheckAgain => 'I sent it, check again';
+
+  @override
+  String get nfseNoCancelNote =>
+      'This city doesn\'t allow canceling from the app: cancel on its website.';
+
+  @override
+  String get nfseFiscalNote =>
+      'These details stay in Asaas and go on every invoice. If unsure, ask your accountant.';
+
+  @override
+  String get nfseFiscalEmail => 'Email that receives the invoices';
+
+  @override
+  String get nfseFiscalMunicipalInscription => 'Municipal registration';
+
+  @override
+  String get nfseFiscalSimples => 'Simples Nacional company';
+
+  @override
+  String get nfseFiscalCnae => 'CNAE (if your accountant asks)';
+
+  @override
+  String get nfseFiscalSpecialRegime => 'Special tax regime';
+
+  @override
+  String get nfseFiscalSpecialRegimeQuestion => 'Which special tax regime?';
+
+  @override
+  String get nfseFiscalServiceListItem => 'Service list item';
+
+  @override
+  String get nfseFiscalEmailMissing => 'Type a valid email to save.';
+
+  @override
+  String get nfseFiscalSaved => 'Tax details saved';
+
+  @override
+  String get nfseServicePickTitle => 'Which service do you provide?';
+
+  @override
+  String get nfseServiceSearch => 'Search by name, e.g. maintenance';
+
+  @override
+  String get nfseServiceSearchEmpty =>
+      'Nothing found. Try another word or type the code.';
+
+  @override
+  String get nfseServiceTypeCode => 'Type the code';
+
+  @override
+  String get nfseServiceCode => 'Service code at the city';
+
+  @override
+  String get nfseServiceName => 'Service name';
+
+  @override
+  String get nfseServiceMissing => 'Pick the city service to save.';
+
+  @override
+  String get nfseIss => 'ISS (%)';
+
+  @override
+  String get nfseRetainIss => 'The customer withholds the ISS';
+
+  @override
+  String get nfseOtherTaxes => 'Other taxes (%)';
+
+  @override
+  String get nfseTaxesNote =>
+      'Use what the city and your accountant say. Leave 0 where it doesn\'t apply.';
+
+  @override
+  String get nfseTemplateLabel => 'Invoice text';
+
+  @override
+  String nfseTemplateHint(Object os, Object servicos) {
+    return '$servicos becomes the order\'s services and $os the order numbers.';
+  }
+
+  @override
+  String get nfseServiceSaved => 'Invoice service saved';
 }

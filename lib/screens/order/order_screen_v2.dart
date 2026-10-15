@@ -25,6 +25,9 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/nfse/nfse_invoice_screen.dart';
+import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/assistant/speech_listener.dart';
@@ -108,6 +111,7 @@ class OrderScreenV2 extends StatefulWidget {
     this.pickGalleryPhotos,
     this.speechListener,
     this.registration,
+    this.nfse,
   });
 
   /// Injected in tests; defaults to a new [OrderStore].
@@ -147,6 +151,10 @@ class OrderScreenV2 extends StatefulWidget {
 
   /// Registers the customer/vehicle the assistant heard (tests fake it).
   final AssistantRegistration? registration;
+
+  /// Notas fiscais of the order (tests); defaults to a new [NfseController]
+  /// that stays off unless the company has `nfseEnabled`.
+  final NfseController? nfse;
 
   @override
   State<OrderScreenV2> createState() => _OrderScreenV2State();
@@ -228,6 +236,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   bool _argsRead = false;
 
+  late final NfseController _nfse = widget.nfse ?? NfseController();
+  bool _nfseListening = false;
+
+  void _onNfse() {
+    if (mounted) setState(() {});
+  }
+
   /// The assistant is on for this company (see [OrderScreenV2.showAssistant]).
   late bool _assistantOn = widget.showAssistant ?? false;
   bool _ready = false;
@@ -262,6 +277,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
 
   @override
   void dispose() {
+    if (_nfseListening) _nfse.removeListener(_onNfse);
+    if (widget.nfse == null) _nfse.dispose();
     if (_barMode == AssistantBarMode.listening) _speech.stop();
     _typedController.dispose();
     _requestController.dispose();
@@ -814,6 +831,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               label: l10n.orderMenuCopyLink,
               icon: CupertinoIcons.link,
             ),
+          if (_canIssueNfse(order))
+            PullDownItem(
+              value: 'nfse',
+              label: l10n.nfseIssueAction,
+              icon: CupertinoIcons.doc_plaintext,
+            ),
         ]),
         PullDownGroup([
           if (canCancel)
@@ -869,6 +892,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             await _alert(l10n.errorOccurred);
           }
         }
+      case 'nfse':
+        await _issueNfse(order);
       case 'cancel':
         await _trySetStatus('canceled');
       case 'delete':
@@ -878,6 +903,74 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   bool get _hasAddress => _store.address?.trim().isNotEmpty ?? false;
+
+  // ─── Nota fiscal (NFS-e) ─────────────────────────────────────────────────
+
+  /// "Emitir nota fiscal": notas on, the order can have one and has no
+  /// active one.
+  bool _canIssueNfse(Order order) =>
+      _nfse.enabled &&
+      orderCanHaveNfse(order) &&
+      (_nfse.current?.isActive() != true);
+
+  Future<void> _issueNfse(Order order) async {
+    if (!_nfse.ready) {
+      await showNfseNotReady(context, sandbox: _nfse.sandbox);
+      return;
+    }
+    final invoice = await NfseIssueSheet.show(context, orderIds: [order.id!]);
+    if (invoice != null && mounted) {
+      showAppToast(
+        context,
+        context.l10n.nfseSent,
+        icon: CupertinoIcons.checkmark_circle,
+      );
+    }
+  }
+
+  /// "Nota fiscal · Emitida": the nota of the order, when there is one.
+  Widget? _buildNfseRow() {
+    final invoice = _nfse.current;
+    if (invoice == null) return null;
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return _tappable(
+      key: const ValueKey('order_nfse'),
+      onTap: () => NfseInvoiceScreen.open(
+        context,
+        invoice,
+        previousPageTitle: _shortOrderLabel(
+          context.read<SegmentConfigProvider>(),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.nfseRowTitle,
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.text.resolveFrom(context),
+                      ),
+                    ),
+                    NfseStatusLine(invoice: invoice),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(CupertinoIcons.chevron_forward, size: 18, color: secondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   bool get _canGiveDiscount =>
       _store.order?.id != null &&
@@ -1586,14 +1679,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           PickerItem(
             value: c,
             title: c.name,
-            subtitle: (c.phone?.isNotEmpty ?? false) ? formatPhone(c.phone) : null,
+            subtitle: (c.phone?.isNotEmpty ?? false)
+                ? formatPhone(c.phone)
+                : null,
           ),
         PickerItem(
           value: newOne,
           title: context.l10n.orderAssistantRegisterNewCustomer(ask.name),
-          subtitle: (ask.phone?.isNotEmpty ?? false) ? formatPhone(ask.phone) : null,
+          subtitle: (ask.phone?.isNotEmpty ?? false)
+              ? formatPhone(ask.phone)
+              : null,
         ),
-        PickerItem(value: other, title: context.l10n.orderAssistantOtherCustomer),
+        PickerItem(
+          value: other,
+          title: context.l10n.orderAssistantOtherCustomer,
+        ),
       ],
     );
     if (!mounted || picked == null) return;
@@ -1638,7 +1738,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             value: newOne,
             title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
           ),
-        PickerItem(value: other, title: context.l10n.orderAssistantOtherDevice(label)),
+        PickerItem(
+          value: other,
+          title: context.l10n.orderAssistantOtherDevice(label),
+        ),
       ],
     );
     if (!mounted || picked == null) return;
@@ -1710,9 +1813,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           undo,
         );
         used = true;
-      } else if (guess.isNotEmpty &&
-          draft.customerOptions.isEmpty &&
-          _isNew) {
+      } else if (guess.isNotEmpty && draft.customerOptions.isEmpty && _isNew) {
         // Nobody close: a new customer, registered when the order is saved.
         final customer = _registration.newCustomer(
           guess,
@@ -1833,6 +1934,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
+    if (!_nfseListening) {
+      _nfse.addListener(_onNfse);
+      _nfseListening = true;
+    }
+    _nfse.watchOrder(_store.order?.id);
     if (!_ready) {
       return CupertinoPageScaffold(
         backgroundColor: AppColors.background.resolveFrom(context),
@@ -3098,6 +3204,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ),
           ),
         ),
+      ?_buildNfseRow(),
     ];
   }
 

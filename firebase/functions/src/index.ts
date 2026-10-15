@@ -317,6 +317,7 @@ import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
 import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
+import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -523,6 +524,7 @@ app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, de
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
 app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
 app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
+app.use('/v1/app/nfse', apiCoreLimiter, bearerAuth, resolveCompanyContext, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
 

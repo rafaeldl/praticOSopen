@@ -1,0 +1,475 @@
+/// NFS-e (nota fiscal de serviço) through Asaas. See docs/NFSE_ASAAS.md.
+///
+/// Everything here is written only by the server: the app reads the
+/// invoices from Firestore (`companies/{cid}/invoices`) and talks to
+/// `/v1/app/nfse` for the rest. Plain classes with hand-written `fromJson`
+/// (read-only data, no `toJson`).
+library;
+
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+
+DateTime? _date(Object? value) {
+  if (value is String) return DateTime.tryParse(value);
+  if (value is Timestamp) return value.toDate();
+  if (value is DateTime) return value;
+  return null;
+}
+
+double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
+
+String? _str(Object? value) =>
+    value is String && value.isNotEmpty ? value : null;
+
+/// Status of a nota. `creating` is PraticOS's own (before Asaas answered);
+/// the others mirror Asaas.
+enum NfseStatus {
+  creating,
+  scheduled,
+  synchronized,
+  authorized,
+  processingCancellation,
+  cancellationDenied,
+  canceled,
+  error;
+
+  static NfseStatus parse(Object? value) => NfseStatus.values.firstWhere(
+    (s) => s.name == value,
+    orElse: () => NfseStatus.creating,
+  );
+
+  /// Still on the way to the city.
+  bool get waiting =>
+      this == creating || this == scheduled || this == synchronized;
+}
+
+/// One order covered by a nota and the services value it put in.
+class NfseInvoiceOrder {
+  const NfseInvoiceOrder({
+    required this.orderId,
+    this.orderNumber,
+    required this.value,
+  });
+
+  final String orderId;
+  final int? orderNumber;
+  final double value;
+
+  factory NfseInvoiceOrder.fromJson(Map<String, dynamic> json) =>
+      NfseInvoiceOrder(
+        orderId: json['orderId'] as String? ?? '',
+        orderNumber: (json['orderNumber'] as num?)?.toInt(),
+        value: _num(json['value']),
+      );
+}
+
+/// `companies/{cid}/invoices/{id}`: one nota for one order (default) or for
+/// several orders of the same customer.
+class NfseInvoice {
+  NfseInvoice({
+    required this.id,
+    required this.status,
+    this.customerId,
+    this.customerName,
+    this.orderIds = const [],
+    this.orders = const [],
+    this.value = 0,
+    this.serviceDescription,
+    this.effectiveDate,
+    this.number,
+    this.pdfUrl,
+    this.xmlUrl,
+    this.statusDescription,
+    this.createdAt,
+    this.conflict = false,
+  });
+
+  final String id;
+  final NfseStatus status;
+  final String? customerId;
+  final String? customerName;
+  final List<String> orderIds;
+  final List<NfseInvoiceOrder> orders;
+  final double value;
+  final String? serviceDescription;
+
+  /// Day the nota is issued (YYYY-MM-DD).
+  final String? effectiveDate;
+  final String? number;
+  final String? pdfUrl;
+  final String? xmlUrl;
+
+  /// Why the city refused it (raw text from the city, shown as detail only).
+  final String? statusDescription;
+  final DateTime? createdAt;
+
+  /// A refused nota that came back on Asaas after the order already had
+  /// another one: kept for the record, never counts as the order's nota.
+  final bool conflict;
+
+  /// A `creating` nota older than this never reached Asaas.
+  static const staleCreating = Duration(minutes: 15);
+
+  factory NfseInvoice.fromJson(Map<String, dynamic> json, {String? id}) {
+    final customer = json['customer'] is Map
+        ? Map<String, dynamic>.from(json['customer'] as Map)
+        : const <String, dynamic>{};
+    return NfseInvoice(
+      id: id ?? json['id'] as String? ?? '',
+      status: NfseStatus.parse(json['status']),
+      customerId: _str(customer['id']),
+      customerName: _str(customer['name']),
+      orderIds: [
+        for (final o in (json['orderIds'] as List? ?? const []))
+          if (o is String) o,
+      ],
+      orders: [
+        for (final o in (json['orders'] as List? ?? const []))
+          if (o is Map) NfseInvoiceOrder.fromJson(Map<String, dynamic>.from(o)),
+      ],
+      value: _num(json['value']),
+      serviceDescription: _str(json['serviceDescription']),
+      effectiveDate: _str(json['effectiveDate']),
+      number: _str(json['number']),
+      pdfUrl: _str(json['pdfUrl']),
+      xmlUrl: _str(json['xmlUrl']),
+      statusDescription: _str(json['statusDescription']),
+      createdAt: _date(json['createdAt']),
+      conflict: json['conflict'] == true,
+    );
+  }
+
+  DateTime? get effectiveDay =>
+      effectiveDate == null ? null : DateTime.tryParse(effectiveDate!);
+
+  /// Counts as "the order has a nota" (blocks a second one). An old
+  /// `creating` stops counting here so "Emitir" shows again: the server then
+  /// checks it with Asaas before issuing another.
+  bool isActive({DateTime? now}) {
+    if (conflict ||
+        status == NfseStatus.canceled ||
+        status == NfseStatus.error) {
+      return false;
+    }
+    if (status == NfseStatus.creating) {
+      final created = createdAt;
+      if (created != null &&
+          (now ?? DateTime.now()).difference(created) > staleCreating) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// The user may ask to cancel it.
+  bool get canCancel =>
+      status == NfseStatus.scheduled ||
+      status == NfseStatus.authorized ||
+      status == NfseStatus.cancellationDenied;
+
+  /// Order numbers covered ("182, 190").
+  String get orderNumbers => [
+    for (final o in orders)
+      if (o.orderNumber != null) '${o.orderNumber}',
+  ].join(', ');
+}
+
+/// The nota that represents [invoices] of one order on the order screen:
+/// the active one, else the latest (so a refused or canceled nota still
+/// shows until a new one is issued). Null when there is none.
+NfseInvoice? currentInvoiceOf(List<NfseInvoice> invoices, {DateTime? now}) {
+  if (invoices.isEmpty) return null;
+  final sorted = [...invoices]
+    ..sort(
+      (a, b) =>
+          (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)),
+    );
+  for (final invoice in sorted) {
+    if (invoice.isActive(now: now)) return invoice;
+  }
+  final latest = sorted.first;
+  // A stale "creating" never reached Asaas: nothing to show.
+  return latest.status == NfseStatus.creating ? null : latest;
+}
+
+/// One order of the preview.
+class NfsePreviewOrder {
+  const NfsePreviewOrder({
+    required this.orderId,
+    this.orderNumber,
+    required this.value,
+    required this.servicesTotal,
+    required this.productsTotal,
+    required this.discount,
+  });
+
+  final String orderId;
+  final int? orderNumber;
+
+  /// What goes into the nota (services minus their share of the discount).
+  final double value;
+  final double servicesTotal;
+  final double productsTotal;
+  final double discount;
+
+  factory NfsePreviewOrder.fromJson(Map<String, dynamic> json) =>
+      NfsePreviewOrder(
+        orderId: json['orderId'] as String? ?? '',
+        orderNumber: (json['orderNumber'] as num?)?.toInt(),
+        value: _num(json['value']),
+        servicesTotal: _num(json['servicesTotal']),
+        productsTotal: _num(json['productsTotal']),
+        discount: _num(json['discount']),
+      );
+}
+
+/// `POST /v1/app/nfse/invoices/preview`: what the nota will have.
+class NfsePreview {
+  const NfsePreview({
+    required this.value,
+    required this.orders,
+    required this.hasProducts,
+    required this.serviceDescription,
+    required this.effectiveDate,
+    required this.customerName,
+    required this.customerHasTaxId,
+    required this.invoicedOrders,
+    required this.municipalServiceName,
+  });
+
+  final double value;
+  final List<NfsePreviewOrder> orders;
+  final bool hasProducts;
+  final String serviceDescription;
+  final String effectiveDate;
+  final String? customerName;
+  final bool customerHasTaxId;
+
+  /// Orders that already have an active nota (orderId → invoiceId).
+  final Map<String, String> invoicedOrders;
+  final String municipalServiceName;
+
+  factory NfsePreview.fromJson(Map<String, dynamic> json) {
+    final customer = json['customer'] is Map
+        ? Map<String, dynamic>.from(json['customer'] as Map)
+        : const <String, dynamic>{};
+    final invoiced = json['invoicedOrders'] is Map
+        ? Map<String, dynamic>.from(json['invoicedOrders'] as Map)
+        : const <String, dynamic>{};
+    return NfsePreview(
+      value: _num(json['value']),
+      orders: [
+        for (final o in (json['orders'] as List? ?? const []))
+          if (o is Map) NfsePreviewOrder.fromJson(Map<String, dynamic>.from(o)),
+      ],
+      hasProducts: json['hasProducts'] == true,
+      serviceDescription: json['serviceDescription'] as String? ?? '',
+      effectiveDate: json['effectiveDate'] as String? ?? '',
+      customerName: _str(customer['name']),
+      customerHasTaxId: customer['hasTaxId'] == true,
+      invoicedOrders: {
+        for (final e in invoiced.entries)
+          if (e.value is String) e.key: e.value as String,
+      },
+      municipalServiceName: json['municipalServiceName'] as String? ?? '',
+    );
+  }
+}
+
+/// What is still missing before notas can be issued.
+enum NfseMissing { fiscalInfo, cityAccess, service }
+
+/// Fiscal info kept in Asaas (`GET /v3/fiscalInfo`, the fields shown).
+class NfseFiscalInfo {
+  const NfseFiscalInfo({
+    this.email,
+    this.municipalInscription,
+    this.simplesNacional,
+    this.cnae,
+    this.specialTaxRegime,
+    this.serviceListItem,
+  });
+
+  final String? email;
+  final String? municipalInscription;
+  final bool? simplesNacional;
+  final String? cnae;
+  final String? specialTaxRegime;
+  final String? serviceListItem;
+
+  factory NfseFiscalInfo.fromJson(Map<String, dynamic> json) => NfseFiscalInfo(
+    email: _str(json['email']),
+    municipalInscription: _str(json['municipalInscription']),
+    simplesNacional: json['simplesNacional'] as bool?,
+    cnae: _str(json['cnae']),
+    specialTaxRegime: _str(json['specialTaxRegime']),
+    serviceListItem: _str(json['serviceListItem']),
+  );
+}
+
+/// City rules (`GET /v3/fiscalInfo/municipalOptions`).
+class NfseCityOptions {
+  const NfseCityOptions({
+    this.authenticationType,
+    this.supportsCancellation,
+    this.usesSpecialTaxRegimes = false,
+    this.usesServiceListItem = false,
+    this.specialTaxRegimes = const [],
+  });
+
+  /// CERTIFICATE | TOKEN | USER_AND_PASSWORD
+  final String? authenticationType;
+  final bool? supportsCancellation;
+  final bool usesSpecialTaxRegimes;
+  final bool usesServiceListItem;
+  final List<({String label, String value})> specialTaxRegimes;
+
+  factory NfseCityOptions.fromJson(Map<String, dynamic> json) =>
+      NfseCityOptions(
+        authenticationType: _str(json['authenticationType']),
+        supportsCancellation: json['supportsCancellation'] as bool?,
+        usesSpecialTaxRegimes: json['usesSpecialTaxRegimes'] == true,
+        usesServiceListItem: json['usesServiceListItem'] == true,
+        specialTaxRegimes: [
+          for (final r in (json['specialTaxRegimesList'] as List? ?? const []))
+            if (r is Map && r['value'] != null)
+              (label: '${r['label'] ?? r['value']}', value: '${r['value']}'),
+        ],
+      );
+}
+
+/// Taxes of the notas, in percent.
+class NfseTaxes {
+  const NfseTaxes({
+    this.retainIss = false,
+    this.iss = 0,
+    this.pis = 0,
+    this.cofins = 0,
+    this.csll = 0,
+    this.inss = 0,
+    this.ir = 0,
+  });
+
+  final bool retainIss;
+  final double iss;
+  final double pis;
+  final double cofins;
+  final double csll;
+  final double inss;
+  final double ir;
+
+  factory NfseTaxes.fromJson(Map<String, dynamic> json) => NfseTaxes(
+    retainIss: json['retainIss'] == true,
+    iss: _num(json['iss']),
+    pis: _num(json['pis']),
+    cofins: _num(json['cofins']),
+    csll: _num(json['csll']),
+    inss: _num(json['inss']),
+    ir: _num(json['ir']),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'retainIss': retainIss,
+    'iss': iss,
+    'pis': pis,
+    'cofins': cofins,
+    'csll': csll,
+    'inss': inss,
+    'ir': ir,
+  };
+}
+
+/// `companies/{cid}/settings/nfse`: the default service of the notas.
+class NfseServiceSettings {
+  const NfseServiceSettings({
+    this.municipalServiceId,
+    this.municipalServiceCode,
+    required this.municipalServiceName,
+    this.taxes = const NfseTaxes(),
+    this.descriptionTemplate = defaultTemplate,
+  });
+
+  /// `{servicos}` becomes the services of the order(s), `{os}` the numbers.
+  static const defaultTemplate = '{servicos}';
+
+  final String? municipalServiceId;
+  final String? municipalServiceCode;
+  final String municipalServiceName;
+  final NfseTaxes taxes;
+  final String descriptionTemplate;
+
+  factory NfseServiceSettings.fromJson(
+    Map<String, dynamic> json,
+  ) => NfseServiceSettings(
+    municipalServiceId: _str(json['municipalServiceId']),
+    municipalServiceCode: _str(json['municipalServiceCode']),
+    municipalServiceName: json['municipalServiceName'] as String? ?? '',
+    taxes: json['taxes'] is Map
+        ? NfseTaxes.fromJson(Map<String, dynamic>.from(json['taxes'] as Map))
+        : const NfseTaxes(),
+    descriptionTemplate: _str(json['descriptionTemplate']) ?? defaultTemplate,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'municipalServiceId': municipalServiceId,
+    'municipalServiceCode': municipalServiceCode,
+    'municipalServiceName': municipalServiceName,
+    'taxes': taxes.toJson(),
+    'descriptionTemplate': descriptionTemplate,
+  };
+}
+
+/// A service of the city's list (`GET /v3/fiscalInfo/services`).
+class NfseMunicipalService {
+  const NfseMunicipalService({
+    required this.id,
+    required this.description,
+    this.issTax,
+  });
+
+  final String id;
+  final String description;
+  final double? issTax;
+
+  factory NfseMunicipalService.fromJson(Map<String, dynamic> json) =>
+      NfseMunicipalService(
+        id: '${json['id'] ?? ''}',
+        description: json['description'] as String? ?? '',
+        issTax: (json['issTax'] as num?)?.toDouble(),
+      );
+}
+
+/// `GET /v1/app/nfse/setup`: what is filled and what is missing.
+class NfseSetup {
+  const NfseSetup({
+    required this.ready,
+    required this.missing,
+    this.fiscalInfo,
+    this.cityOptions,
+    this.service,
+  });
+
+  final bool ready;
+  final List<NfseMissing> missing;
+  final NfseFiscalInfo? fiscalInfo;
+  final NfseCityOptions? cityOptions;
+  final NfseServiceSettings? service;
+
+  factory NfseSetup.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? map(String key) =>
+        json[key] is Map ? Map<String, dynamic>.from(json[key] as Map) : null;
+    final fiscal = map('fiscalInfo');
+    final options = map('municipalOptions');
+    final service = map('service');
+    return NfseSetup(
+      ready: json['ready'] == true,
+      missing: [
+        for (final m in (json['missing'] as List? ?? const []))
+          for (final v in NfseMissing.values)
+            if (v.name == m) v,
+      ],
+      fiscalInfo: fiscal == null ? null : NfseFiscalInfo.fromJson(fiscal),
+      cityOptions: options == null ? null : NfseCityOptions.fromJson(options),
+      service: service == null ? null : NfseServiceSettings.fromJson(service),
+    );
+  }
+}
