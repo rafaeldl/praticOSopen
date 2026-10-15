@@ -75,6 +75,10 @@ Rotas `/v1/app/*` usam `bearerAuth` + `resolveCompanyContext`; o app envia `X-Co
 | DELETE | `/v1/app/payments/asaas/connect` | owner/admin | Remove o webhook no Asaas, apaga `private/asaas` com as subcoleções (mapa de clientes, eventos), `asaasConnected=false`. Cobranças abertas continuam no Asaas, sem baixa automática |
 | POST | `/v1/app/orders/:orderId/charges` `{ value, mode, installmentCount?, dueDate?, customerTaxId? }` | `manage:payments` (owner/admin/manager) | Ver "Gerar cobrança". Resposta 201 com a cobrança |
 | DELETE | `/v1/app/orders/:orderId/charges/:chargeId` | `manage:payments` | Cancela no Asaas (`DELETE /payments/{id}` ou `/installments/{id}`; 404 no Asaas conta como cancelada), `status=canceled` |
+| POST | `/v1/app/customers/:customerId/charges` `{ orderIds, value, dueDate?, customerTaxId? }` | `manage:payments` | Uma cobrança para várias OS do cliente. Ver "Cobrança de várias OS" |
+| DELETE | `/v1/app/customers/:customerId/charges/:chargeId` | `manage:payments` | Cancela a cobrança de várias OS (como a de uma OS) |
+| GET | `/v1/app/customers/:customerId/open-orders` | quem recebe (owner/admin/manager/consultor, com `useFinancial`) | OS em aberto do cliente: só `id`, `number`, `open`, `createdAt`, `own`. Mais antiga primeiro |
+| POST | `/v1/app/customers/:customerId/receipts` `{ receiptId, paidAt, allocations, receiptFile? }` | quem recebe | Recebimento em várias OS do cliente feito pelo servidor (consultor com OS de outra pessoa). Ver "Receber em OS de outra pessoa (consultor)" em `docs/FINANCEIRO.md` |
 | POST | `/webhooks/asaas/:companyId` | header `asaas-access-token` | Ver "Webhook" |
 | GET | `/public/orders/:token` | share token | Bloco E: inclui `charge` (ver "Link da OS") |
 
@@ -88,9 +92,38 @@ Rotas `/v1/app/*` usam `bearerAuth` + `resolveCompanyContext`; o app envia `X-Co
 6. Cria a cobrança no Asaas: à vista com `billingType: UNDEFINED` (o cliente escolhe Pix, boleto ou cartão) ou `CREDIT_CARD` com `installmentCount` + `totalValue`. Descrição `OS #{número} - {empresa}`, `externalReference = {companyId}:{orderId}:{chargeId}`.
 7. Grava o doc em `charges` (se falhar, cancela a cobrança órfã no Asaas). Só **depois** cancela a cobrança aberta anterior, para uma recusa do Asaas nunca matar um link já enviado; se a anterior não puder ser cancelada, desfaz a nova.
 
+### Cobrança de várias OS
+
+"Mandar cobrança" em "Receber de João" (`customer-charge.service.ts`). O Asaas não tem itens nem pagamento parcial de uma cobrança, então é **uma** cobrança do Asaas (valor = total) e a divisão fica no nosso lado:
+
+1. Conta conectada, cliente existe, 1 a 50 OS, todas do cliente (`ORDER_NOT_OF_CUSTOMER`), nenhuma orçamento ou cancelada (`ORDER_NOT_PAYABLE`), nenhuma com parcelamento já pago (`INSTALLMENTS_IN_PROGRESS`). `0 < value <=` soma do que falta nas OS (`INVALID_VALUE`).
+2. Repartição (`allocations`) da mais antiga para a mais nova, cada uma até o que falta na OS: a mesma regra do `allocatePayment` do app (`utils/payment-allocation.ts`).
+3. CPF/CNPJ e cliente no Asaas como na cobrança de uma OS. Cobrança à vista (`billingType: UNDEFINED`), descrição `OS 182, 190, 201 - {empresa}` (até 500 caracteres; se passar, termina em "e mais N"), `externalReference = {companyId}:cc:{chargeId}` (um id curto nosso, nunca a lista de OS).
+4. Grava `customerCharges/{chargeId}`. **Depois** cancela as cobranças abertas de uma OS só dessas OS e a cobrança de várias OS anterior do cliente, para o cliente nunca ter dois links que pagam a mesma dívida. Se alguma não puder ser cancelada, desfaz a nova.
+5. Enquanto uma OS está numa cobrança de várias OS aberta, gerar cobrança só dela é recusado (`CUSTOMER_CHARGE_OPEN`): cancele a de várias OS primeiro.
+
+O parsing do `externalReference` aceita os dois formatos: `{cid}:{oid}:{chargeId}` (uma OS) e `{cid}:cc:{chargeId}` (várias OS).
+
+### Recebido por fora com link aberto ("dar baixa")
+
+Quando entra um pagamento manual numa OS que está numa cobrança aberta (Receber da OS ou Receber de João), o servidor ajusta o link (`outside-payment.service.ts`):
+
+| Situação | Ação no Asaas |
+|----------|---------------|
+| O que ainda falta pelo link é zero e entrou dinheiro nas OS desde que o link foi criado | `POST /v3/payments/{id}/receiveInCash` com o dinheiro que entrou (no máximo o valor da cobrança), `paymentDate` de hoje, `notifyCustomer: false`. Cobrança `paid` + `paidOutside: true` |
+| Falta zero mas não entrou dinheiro (desconto, total baixou, OS cancelada) | Cancela o link: nada foi recebido em dinheiro |
+| Falta uma parte | `PUT /v3/payments/{id}` com o que falta (só `PENDING`/`OVERDUE`); o link continua o mesmo; na de várias OS, a repartição é refeita. Se o Asaas recusar o valor (ex.: abaixo do mínimo), o link é cancelado, para o cliente nunca pagar mais do que deve |
+| Falta tudo ainda | Nada |
+
+O que falta pelo link é recalculado das OS (cada parte limitada ao que falta na OS; orçamento e cancelada devem zero). Parcelamento no cartão fica de fora (pode já ter parcela paga).
+
+**Sem lançar em dobro:** antes do `receiveInCash` a cobrança recebe `settlingOutsideAt`; o webhook `PAYMENT_RECEIVED` que o Asaas manda depois (status `RECEIVED_IN_CASH`) é reconhecido por `settlingOutsideAt`/`paidOutside` e não lança nada. Concorrência: um lease curto (`adjustingUntil`) na cobrança; quem tem o lease recalcula até nada mudar.
+
+**Por que trigger e não chamada do app:** roda no `onOrderUpdatedAsaas` quando `transactions`, `total` ou `status` da OS mudam. Assim cobre também o pagamento registrado offline (chega ao servidor quando o celular sincroniza) e o "Receber de João" em lote, sem o app precisar de conexão no momento de receber e sem depender de versão nova do app.
+
 ### Códigos de erro
 
-`errors.ts`: `ASAAS_NOT_ENABLED` (403), `ASAAS_INVALID_API_KEY` (400), `ASAAS_NOT_CONNECTED` (409), `ASAAS_VALIDATION_ERROR` (400, recusa do Asaas com a descrição dele), `ASAAS_UNAVAILABLE` (502, Asaas fora ou timeout), `ORDER_NOT_FOUND` (404), `ORDER_CANCELED` (409), `INVALID_VALUE`, `INVALID_INSTALLMENT_COUNT`, `INVALID_DUE_DATE`, `CUSTOMER_REQUIRED`, `TAX_ID_REQUIRED`, `INVALID_TAX_ID` (400), `CHARGE_NOT_FOUND` (404), `CHARGE_NOT_OPEN`, `INSTALLMENTS_IN_PROGRESS` (409). Validação do corpo → `VALIDATION_ERROR`; papel sem permissão → `FORBIDDEN`; erro inesperado → `INTERNAL_ERROR`.
+`errors.ts`: `ASAAS_NOT_ENABLED` (403), `ASAAS_INVALID_API_KEY` (400), `ASAAS_NOT_CONNECTED` (409), `ASAAS_VALIDATION_ERROR` (400, recusa do Asaas com a descrição dele), `ASAAS_UNAVAILABLE` (502, Asaas fora ou timeout), `ORDER_NOT_FOUND` (404), `ORDER_CANCELED` (409), `INVALID_VALUE`, `INVALID_INSTALLMENT_COUNT`, `INVALID_DUE_DATE`, `CUSTOMER_REQUIRED`, `TAX_ID_REQUIRED`, `INVALID_TAX_ID` (400), `CHARGE_NOT_FOUND` (404), `CHARGE_NOT_OPEN`, `INSTALLMENTS_IN_PROGRESS` (409). Várias OS e recebimento pelo servidor: `CUSTOMER_NOT_FOUND` (404), `ORDER_NOT_OF_CUSTOMER`, `INVALID_PAID_AT`, `INVALID_FILE` (400), `ORDER_NOT_PAYABLE`, `CUSTOMER_CHARGE_OPEN`, `VALUE_EXCEEDS_BALANCE`, `RECEIPT_EXISTS` (409). Validação do corpo → `VALIDATION_ERROR`; papel sem permissão → `FORBIDDEN`; erro inesperado → `INTERNAL_ERROR`.
 
 ## Modelo de dados (Firestore)
 
@@ -101,17 +134,23 @@ Rotas `/v1/app/*` usam `bearerAuth` + `resolveCompanyContext`; o app envia `X-Co
 | `companies/{cid}/private/asaas/events/{eventId}` | só servidor | `{ processedAt, expiresAt }`: idempotência do webhook, TTL de 30 dias em `expiresAt` |
 | `companies/{cid}/settings/payments` | leitura membros, escrita servidor | `asaasEnabled` (piloto, só via script), `asaasConnected`, `asaasAccountName?`, `asaasEnvironment?` |
 | `companies/{cid}/orders/{oid}/charges/{chargeId}` | leitura owner/admin/manager, escrita servidor | `asaasPaymentId`, `asaasInstallmentId?`, `mode` (`single`\|`cardInstallments`), `installmentCount?`, `value`, `dueDate` (YYYY-MM-DD), `status` (`pending`\|`paid`\|`overdue`\|`canceled`\|`refunded`), `invoiceUrl`, `paidAsaasPaymentIds`, `createdBy`, `createdAt`, `paidAt?`; só servidor: `appliedTransactions`, `refundedAsaasPaymentIds` |
+| `companies/{cid}/customerCharges/{chargeId}` | leitura como `charges` (owner/admin/manager), escrita servidor | Cobrança de várias OS: `customer {id, name}`, `asaasPaymentId`, `value`, `dueDate`, `status`, `invoiceUrl`, `orderIds` (para `array-contains`), `allocations [{orderId, orderNumber, amount}]` (mais antiga primeiro, soma = `value`), `paidAsaasPaymentIds`, `createdBy`, `createdAt`, `paidAt?`, `receiptId?`, `paidOutside?`; só servidor: `appliedTransactions`, `refundedAsaasPaymentIds`, `settlingOutsideAt`, `adjustingUntil` |
+| `companies/{cid}/receipts/asaas_{paymentId}` | como os recebimentos | Recebimento criado pelo webhook quando uma cobrança de várias OS é paga (`createdBy` = Asaas), para a tela "Recebimento" e o recibo funcionarem |
 | `Customer.taxId` / `CustomerAggr.taxId` | app | CPF/CNPJ normalizado: dígitos e, no CNPJ alfanumérico, letras maiúsculas |
 
 Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{paymentId}` e `type: payment` (nunca um tipo novo: versões antigas do app quebram com valor desconhecido). Campos opcionais e aditivos (só em transações `asaas_*`, gravados pelo webhook): `billingType` (`PIX` | `BOLETO` | `CREDIT_CARD` | `DEBIT_CARD`...) e `receiptUrl` (o `transactionReceiptUrl` do Asaas; só é gravado se for `https` em `asaas.com` ou subdomínio). Versões antigas do app ignoram esses campos; transações antigas não os têm e o app cai na descrição ("Asaas • Pix"). O status de pagamento da OS continua `paid` | `unpaid` (o "parcial" é calculado no app).
 
 **As cobranças são a fonte da verdade** dos pagamentos Asaas da OS: `paidAsaasPaymentIds` lista o que foi lançado e `appliedTransactions` guarda uma cópia de cada transação, usada pelo reparo.
 
+Na cobrança de várias OS, cada OS recebe a sua parte como `asaas_{paymentId}_{n}` (`type: payment`, `receiptGroupId = asaas_{paymentId}`); o prefixo `asaas_` mantém a transação travada no app como qualquer pagamento Asaas.
+
+As consultas novas (`customerCharges` por `customer.id` e por `orderIds array-contains`, OS por `customer.id`) usam um filtro só e não pedem índice composto.
+
 Índices (`firebase/firestore.indexes.json`): `charges.asaasInstallmentId` com escopo de collection group (o webhook acha a cobrança pelo id do parcelamento quando falta `externalReference`) e TTL em `events.expiresAt`.
 
 ## Webhook e baixa na OS
 
-- URL por empresa: `{ASAAS_WEBHOOK_BASE_URL}/webhooks/asaas/{companyId}`, cadastrada na conexão com `sendType: SEQUENTIALLY`, `apiVersion: 3`, um `authToken` aleatório próprio da empresa (guardado só como hash) e os eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_DELETED`.
+- URL por empresa: `{ASAAS_WEBHOOK_BASE_URL}/webhooks/asaas/{companyId}`, cadastrada na conexão com `sendType: SEQUENTIALLY`, `apiVersion: 3`, um `authToken` aleatório próprio da empresa (guardado só como hash) e os eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_DELETED`, `PAYMENT_RECEIVED_IN_CASH_UNDONE` e `PAYMENT_PARTIALLY_REFUNDED`. **Empresas conectadas antes desta versão** continuam com o webhook antigo (sem os dois últimos) até reconectar a conta.
 - Autenticação pelo header `asaas-access-token`. Token ausente ou inválido → 401. Evento sem `id`/`event` → 400.
 - Endpoint com limite de requisições por empresa + IP.
 - Idempotência por `event.id` em `private/asaas/events`, gravado só depois do processamento dar certo. Erro interno → 500, o Asaas reenvia. Eventos que nunca vão dar certo (cobrança inexistente, `externalReference` de outra empresa, evento não tratado) são registrados e respondidos com 200 para não travar a fila `SEQUENTIALLY`.
@@ -124,6 +163,17 @@ Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{payment
 | `PAYMENT_OVERDUE` | `overdue` (se `pending`) |
 | `PAYMENT_REFUNDED` | Remove `asaas_{payment.id}` da OS, recalcula, cobrança `refunded`, comentário interno no histórico da OS. O id vai para `refundedAsaasPaymentIds` e nunca é lançado de novo |
 | `PAYMENT_DELETED` | `canceled` (se `pending`/`overdue` e sem parcela paga; parcelamento parcialmente pago mantém o status) |
+| `PAYMENT_RECEIVED_IN_CASH_UNDONE` | Se a cobrança foi quitada pelo próprio servidor (`paidOutside`), volta a ficar aberta (`pending`, ou `overdue` se o vencimento passou). Se era um pagamento lançado (baixa em dinheiro marcada no painel do Asaas), fica como está e vai para o log com `ALERT`, para uma pessoa decidir |
+| `PAYMENT_PARTIALLY_REFUNDED` | Nada muda nas OS (o Asaas não diz de qual OS sai o dinheiro); registrado no log para lançar à mão |
+
+Cobrança de várias OS (`externalReference` `{cid}:cc:{id}`, `customer-charge-payment.service.ts`):
+
+| Evento | Efeito |
+|--------|--------|
+| `PAYMENT_RECEIVED` / `PAYMENT_CONFIRMED` | Numa transação Firestore: reparte `payment.value` pelas OS conforme `allocations` (valor igual → como gravado; menor → da mais antiga para a mais nova; maior → a sobra vai para a última), lança `asaas_{paymentId}_{n}` em cada OS com `receiptGroupId`, recalcula `paidAmount`/`paid`/`payment`, cria o recebimento `receipts/asaas_{paymentId}` e marca a cobrança `paid` com `receiptId`. Idempotente pelo evento e por `paidAsaasPaymentIds`. Cobrança quitada por fora (`paidOutside`/`settlingOutsideAt`) não lança nada |
+| `PAYMENT_REFUNDED` | Tira de cada OS a sua parte, recalcula, recebimento `canceled`, cobrança `refunded` |
+| `PAYMENT_OVERDUE` / `PAYMENT_DELETED` | Como na de uma OS |
+| `PAYMENT_RECEIVED_IN_CASH_UNDONE` / `PAYMENT_PARTIALLY_REFUNDED` | Como na de uma OS |
 
 OS em orçamento (`quote`) ou cancelada (`canceled`) fica sem status de pagamento (`payment: null`, `paid: false`), como no app; `paidAmount` e transações continuam sendo mantidos.
 
@@ -132,11 +182,14 @@ OS em orçamento (`quote`) ou cancelada (`canceled`) fica sem status de pagament
 Único trigger Asaas em `companies/{cid}/orders/{oid}` (onUpdate, lógica em `order-trigger.service.ts`):
 
 - OS passou para `canceled` → cancela no Asaas as cobranças abertas sem parcela paga (só com `asaasConnected`).
+- `transactions`, `total` ou `status` mudou → ajusta as cobranças abertas que cobrem a OS (ver "Recebido por fora com link aberto").
 - `transactions` mudou e a empresa tem `asaasConnected` → `repairAsaasTransactions`: reinsere transações Asaas apagadas por uma versão antiga do app que salvou a OS inteira, remove `asaas_*` estornadas que voltaram, devolve `receiptUrl`/`billingType` que uma versão antiga do app apagou ao salvar (copiando de `appliedTransactions`, sem mexer em `updatedBy`) e corrige `paidAmount`/`paid`/`payment` inconsistentes. Só grava quando algo muda (não entra em loop).
 
 O app novo não envia `transactions`, `paidAmount`, `paid` nem `payment` ao salvar uma OS existente. Pagamento e desconto manuais usam transformações de campo (`arrayUnion`/`increment`, funcionam offline); remover transação, zerar e quitar tudo usam `runTransaction` (pedem conexão).
 
 ## Regras Firestore
+
+`customerCharges`: leitura igual a `charges` (`canViewCharges`), escrita só servidor. O consultor continua sem poder escrever em OS de outra pessoa: o recebimento que inclui essas OS passa pelo endpoint do servidor.
 
 - `companies/{cid}/private/**`: negado para o cliente (credencial, mapa de clientes e eventos do webhook).
 - `companies/{cid}/settings/payments`: leitura para membros da empresa, escrita só pelo servidor.
@@ -310,7 +363,9 @@ Itens que o E2E automático não cobre:
 
 ## Limitações conhecidas
 
-- **Chargeback e estorno parcial não são tratados.** Os eventos `PAYMENT_CHARGEBACK_REQUESTED`/`PAYMENT_CHARGEBACK_DISPUTE`, `PAYMENT_RECEIVED_IN_CASH_UNDONE` e `PAYMENT_PARTIALLY_REFUNDED` não são assinados: um chargeback de cartão ou um estorno parcial deixa a OS paga. Até serem tratados, corrigir manualmente no app.
+- **Chargeback e estorno parcial não são lançados.** `PAYMENT_CHARGEBACK_REQUESTED`/`PAYMENT_CHARGEBACK_DISPUTE` não são assinados; `PAYMENT_PARTIALLY_REFUNDED` só vai para o log. Um chargeback ou estorno parcial deixa a OS paga: corrigir manualmente no app.
+- **Baixa em dinheiro desfeita no painel** de um pagamento já lançado fica como está (log com `ALERT`).
+- **Valor mínimo do Asaas:** se o que falta ficar abaixo do mínimo de cobrança do Asaas, o `PUT` é recusado e o link é cancelado. Conferir no sandbox.
 - **Parcelamento:** o estorno de uma única parcela marca a cobrança inteira como `refunded`. Apagar uma parcela de um parcelamento ainda não pago no painel do Asaas cancela a cobrança.
 - **Depois de desconectar o Asaas**, o trigger de reparo para de rodar (só age em empresas com `asaasConnected`). Uma versão antiga do app que sobrescrever a OS pode então apagar transações Asaas já lançadas, e elas não são reinseridas. Pagamentos de cobranças que continuaram abertas no Asaas também não dão baixa.
 - **Sandbox:** cobrança recebida não pode ser apagada; o E2E acumula uma cobrança paga de R$ 10 por execução na conta de teste.
