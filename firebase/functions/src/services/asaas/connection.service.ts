@@ -28,6 +28,16 @@ export const ASAAS_WEBHOOK_EVENTS: AsaasCreateWebhookInput['events'] = [
   'PAYMENT_DELETED',
   'PAYMENT_RECEIVED_IN_CASH_UNDONE',
   'PAYMENT_PARTIALLY_REFUNDED',
+  // NFS-e (docs/NFSE_ASAAS.md). Connections made before these were added
+  // need a reconnect to receive them.
+  'INVOICE_CREATED',
+  'INVOICE_UPDATED',
+  'INVOICE_SYNCHRONIZED',
+  'INVOICE_AUTHORIZED',
+  'INVOICE_PROCESSING_CANCELLATION',
+  'INVOICE_CANCELED',
+  'INVOICE_CANCELLATION_DENIED',
+  'INVOICE_ERROR',
 ];
 
 export function paymentSettingsRef(companyId: string) {
@@ -48,6 +58,8 @@ export async function getPaymentSettings(companyId: string): Promise<PaymentSett
   };
   if (data.asaasAccountName) settings.asaasAccountName = data.asaasAccountName;
   if (data.asaasEnvironment) settings.asaasEnvironment = data.asaasEnvironment;
+  if (data.nfseEnabled === true) settings.nfseEnabled = true;
+  if (data.nfseReady === true) settings.nfseReady = true;
   return settings;
 }
 
@@ -160,11 +172,17 @@ export async function connectAsaas(
     asaasAccountName: accountName,
     asaasEnvironment: environment,
   };
+  if (settings.nfseEnabled) newSettings.nfseEnabled = true;
+  // Another Asaas account (or environment) has its own fiscal setup.
+  const sameAccount = previous?.environment === environment && (!previous?.walletId || previous.walletId === wallets[0]?.id);
+  if (settings.nfseReady && sameAccount) newSettings.nfseReady = true;
 
   try {
     const batch = db.batch();
     batch.set(connectionRef, connection);
-    batch.set(paymentSettingsRef(companyId), newSettings, { merge: true });
+    // Merge keeps other fields; a stale nfseReady of another account is turned off.
+    const resetReady = settings.nfseReady && !newSettings.nfseReady ? { nfseReady: false } : {};
+    batch.set(paymentSettingsRef(companyId), { ...newSettings, ...resetReady }, { merge: true });
     await batch.commit();
   } catch (error) {
     await client.deleteWebhook(webhook.id).catch(() => undefined);
@@ -185,9 +203,11 @@ export async function disconnectAsaas(companyId: string): Promise<void> {
   }
 
   const settings = await getPaymentSettings(companyId);
+  // Keeps the server-set NFS-e flag; the fiscal setup belongs to the old account.
   await paymentSettingsRef(companyId).set({
     asaasEnabled: settings.asaasEnabled,
     asaasConnected: false,
+    ...(settings.nfseEnabled ? { nfseEnabled: true } : {}),
   });
 
   // Removes the credential and the server-only subcollections (customers map, events).

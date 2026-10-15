@@ -505,6 +505,11 @@ describeEmulator('firestore.rules', () => {
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas'), { webhookTokenHash: 'x' });
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/events/e1'), { processedAt: 'now' });
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/customers/cu1'), { asaasCustomerId: 'cus_1' });
+        await fs.setDoc(fs.doc(db, 'companies/c1/invoices/nf1'), {
+          status: 'authorized', value: 100, customer: { id: 'cu1' }, orderIds: ['o1'],
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c1/settings/nfse'), { municipalServiceName: 'X' });
+        await fs.setDoc(fs.doc(db, 'companies/c1/private/nfse/orders/o1'), { invoiceId: 'nf1' });
       });
     });
 
@@ -599,6 +604,45 @@ describeEmulator('firestore.rules', () => {
           await rut.assertFails(fs.updateDoc(fs.doc(db, path), { status: 'paid' }));
           await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/customerCharges/cc2'), { status: 'pending' }));
           await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+      });
+    });
+
+    describe('invoices/{invoiceId} e settings/nfse (NFS-e)', () => {
+      const path = 'companies/c1/invoices/nf1';
+      const settings = 'companies/c1/settings/nfse';
+
+      it('owner, admin e gerente leem (também pela OS)', async () => {
+        await rut.assertSucceeds(fs.getDoc(fs.doc(owner(), path)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(owner(), settings)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('adm2', { c1: 'admin' }), settings)));
+        await rut.assertSucceeds(
+          fs.getDocs(
+            fs.query(
+              fs.collection(asUser('mgr1', { c1: 'manager' }), 'companies/c1/invoices'),
+              fs.where('orderIds', 'array-contains', 'o1'),
+            ),
+          ),
+        );
+      });
+
+      it.each(['supervisor', 'consultant', 'technician'])('%s não lê', async (role) => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), path)));
+        await rut.assertFails(fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), settings)));
+      });
+
+      it('outra empresa não lê', async () => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), path)));
+      });
+
+      it('ninguém escreve, nem o dono; a trava por OS é privada', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.updateDoc(fs.doc(db, path), { status: 'canceled' }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/invoices/nf2'), { status: 'authorized' }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+          await rut.assertFails(fs.setDoc(fs.doc(db, settings), { municipalServiceName: 'Y' }));
+          await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c1/private/nfse/orders/o1')));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, 'companies/c1/private/nfse/orders/o1')));
         }
       });
     });

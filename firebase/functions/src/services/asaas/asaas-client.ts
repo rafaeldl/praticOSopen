@@ -6,12 +6,18 @@
 import {
   AsaasAccountInfo,
   AsaasCreateCustomerInput,
+  AsaasCreateInvoiceInput,
   AsaasCreatePaymentInput,
   AsaasCreateWebhookInput,
   AsaasCustomer,
   AsaasEnvironment,
   AsaasErrorItem,
+  AsaasFiscalInfo,
+  AsaasInvoice,
   AsaasList,
+  AsaasMunicipalOptions,
+  AsaasMunicipalService,
+  AsaasSaveFiscalInfoInput,
   AsaasPayment,
   AsaasWallet,
   AsaasWebhook,
@@ -127,18 +133,78 @@ export class AsaasClient {
     return list.data ?? [];
   }
 
+  // --------------------------------------------------------------------------
+  // NFS-e (docs/NFSE_ASAAS.md)
+  // --------------------------------------------------------------------------
+
+  /** GET /fiscalInfo: null when the account never saved fiscal info (404). */
+  async getFiscalInfo(): Promise<AsaasFiscalInfo | null> {
+    try {
+      return await this.request<AsaasFiscalInfo>('GET', '/fiscalInfo');
+    } catch (error) {
+      if (error instanceof AsaasApiError && error.status === 404) return null;
+      throw error;
+    }
+  }
+
+  /** POST /fiscalInfo (multipart/form-data, as the Asaas API requires). */
+  saveFiscalInfo(input: AsaasSaveFiscalInfoInput): Promise<AsaasFiscalInfo> {
+    const form = new FormData();
+    for (const [key, value] of Object.entries(input)) {
+      if (value === undefined || value === null || value === '') continue;
+      form.append(key, String(value));
+    }
+    return this.request<AsaasFiscalInfo>('POST', '/fiscalInfo', form);
+  }
+
+  getMunicipalOptions(): Promise<AsaasMunicipalOptions> {
+    return this.request<AsaasMunicipalOptions>('GET', '/fiscalInfo/municipalOptions');
+  }
+
+  async listMunicipalServices(description?: string): Promise<AsaasMunicipalService[]> {
+    const query = new URLSearchParams({ limit: '100' });
+    if (description) query.set('description', description);
+    const list = await this.request<AsaasList<AsaasMunicipalService>>(
+      'GET',
+      `/fiscalInfo/services?${query.toString()}`,
+    );
+    return list.data ?? [];
+  }
+
+  createInvoice(input: AsaasCreateInvoiceInput): Promise<AsaasInvoice> {
+    return this.request<AsaasInvoice>('POST', '/invoices', input);
+  }
+
+  /** POST /invoices/{id}/authorize: issues a scheduled invoice now. */
+  authorizeInvoice(id: string): Promise<AsaasInvoice> {
+    return this.request<AsaasInvoice>('POST', `/invoices/${encodeURIComponent(id)}/authorize`);
+  }
+
+  /** POST /invoices/{id}/cancel. `onlyOnAsaas`: the city does not cancel through the API. */
+  cancelInvoice(id: string, onlyOnAsaas = false): Promise<AsaasInvoice> {
+    return this.request<AsaasInvoice>('POST', `/invoices/${encodeURIComponent(id)}/cancel`, {
+      cancelOnlyOnAsaas: onlyOnAsaas,
+    });
+  }
+
+  getInvoice(id: string): Promise<AsaasInvoice> {
+    return this.request<AsaasInvoice>('GET', `/invoices/${encodeURIComponent(id)}`);
+  }
+
   private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
     const headers: Record<string, string> = {
       access_token: this.apiKey,
       'User-Agent': USER_AGENT,
       accept: 'application/json',
     };
-    if (body !== undefined) headers['content-type'] = 'application/json';
+    const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+    // FormData sets its own multipart boundary header.
+    if (body !== undefined && !isForm) headers['content-type'] = 'application/json';
 
     const response = await this.fetchImpl(`${this.baseUrl}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 

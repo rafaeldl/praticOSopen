@@ -313,3 +313,46 @@ describe('webhook.service - handleAsaasEvent', () => {
     expect(all).not.toContain('secret123');
   });
 });
+
+describe('webhook.service - INVOICE_* (NFS-e)', () => {
+  const INVOICE = 'companies/c1/invoices/nf1';
+
+  function invoiceEvent(name: string, status: string, id: string, extra: Record<string, unknown> = {}): AsaasWebhookEvent {
+    return {
+      id,
+      event: name,
+      invoice: { id: 'inv_1', status, externalReference: 'c1:nf:nf1', ...extra },
+    } as AsaasWebhookEvent;
+  }
+
+  beforeEach(() => {
+    resetFakeDb();
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    seedDoc(ORDER_PATH, { number: 42, documents: [] });
+    seedDoc(INVOICE, {
+      id: 'nf1', asaasInvoiceId: 'inv_1', status: 'synchronized', orderIds: ['o1'],
+      orders: [{ orderId: 'o1', orderNumber: 42, value: 100 }], value: 100, createdAt: '2026-10-15T10:00:00.000Z',
+    });
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('emitida: atualiza a nota, põe o PDF na OS e grava o evento', async () => {
+    await handleAsaasEvent('c1', invoiceEvent('INVOICE_AUTHORIZED', 'AUTHORIZED', 'evt_nf_1', { pdfUrl: 'https://pdf' }));
+    expect(data(INVOICE)).toMatchObject({ status: 'authorized', pdfUrl: 'https://pdf' });
+    expect((data(ORDER_PATH).documents as unknown[]).length).toBe(1);
+    expect(read(`${EVENTS_PREFIX}evt_nf_1`)).toBeDefined();
+  });
+
+  it('evento repetido pelo id é ignorado', async () => {
+    await handleAsaasEvent('c1', invoiceEvent('INVOICE_ERROR', 'ERROR', 'evt_nf_2', { statusDescription: 'x' }));
+    seedDoc(INVOICE, { ...data(INVOICE), status: 'scheduled', statusDescription: null });
+    await handleAsaasEvent('c1', invoiceEvent('INVOICE_ERROR', 'ERROR', 'evt_nf_2', { statusDescription: 'x' }));
+    expect(data(INVOICE).status).toBe('scheduled');
+  });
+
+  it('INVOICE_UPDATED usa a situação que vem na nota', async () => {
+    await handleAsaasEvent('c1', invoiceEvent('INVOICE_UPDATED', 'CANCELED', 'evt_nf_3'));
+    expect(data(INVOICE).status).toBe('canceled');
+  });
+});

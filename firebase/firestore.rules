@@ -477,6 +477,17 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // NOTAS FISCAIS DE SERVIÇO (NFS-e via Asaas) — docs/NFSE_ASAAS.md
+      // Uma nota por OS (ou uma nota com várias OS do mesmo cliente).
+      // Escrita só via Cloud Functions; leitura do mesmo público das cobranças.
+      // A trava "uma nota ativa por OS" fica em private/nfse/** (negado acima).
+      // ──────────────────────────────────────────────────────────────────────
+      match /invoices/{invoiceId} {
+        allow read: if canViewCharges(companyId);
+        allow write: if false;
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // RECEBIMENTOS DE CLIENTE ("Receber de João")
       // Um pagamento do cliente repartido entre várias OS. Gravado no mesmo
       // batch que os pagamentos de cada OS. Nunca é apagado: desfazer é
@@ -656,6 +667,12 @@ service cloud.firestore {
       // ──────────────────────────────────────────────────────────────────────
       match /settings/payments {
         allow read: if belongsToCompany(companyId);
+        allow write: if false;
+      }
+
+      // settings/nfse: serviço padrão das notas (código municipal, ISS).
+      match /settings/nfse {
+        allow read: if canViewCharges(companyId);
         allow write: if false;
       }
     }

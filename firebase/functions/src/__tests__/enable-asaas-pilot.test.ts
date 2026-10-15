@@ -3,7 +3,7 @@ import { parseArgs, resolveTarget, buildUpdate } from '../../scripts/enable-asaa
 describe('enable-asaas-pilot', () => {
   it('parses multiple companies and flags', () => {
     const args = parseArgs(['--company', 'a', '--company', 'b', '--disable', '--project', 'p', '--yes']);
-    expect(args).toEqual({ companyIds: ['a', 'b'], dryRun: false, disable: true, yes: true, project: 'p' });
+    expect(args).toEqual({ companyIds: ['a', 'b'], dryRun: false, disable: true, yes: true, nfse: false, project: 'p' });
   });
 
   it('requires a company and values', () => {
@@ -38,5 +38,12 @@ describe('enable-asaas-pilot', () => {
     expect(buildUpdate(false, false)).toEqual({ asaasEnabled: true, asaasConnected: false });
     expect(buildUpdate(true, false)).toEqual({ asaasEnabled: true });
     expect(buildUpdate(true, true)).toEqual({ asaasEnabled: false });
+  });
+
+  it('--nfse toggles only nfseEnabled', () => {
+    expect(parseArgs(['--company', 'a', '--nfse']).nfse).toBe(true);
+    expect(buildUpdate(true, false, true)).toEqual({ nfseEnabled: true });
+    expect(buildUpdate(true, true, true)).toEqual({ nfseEnabled: false });
+    expect(buildUpdate(false, false, true)).toEqual({ asaasEnabled: false, asaasConnected: false, nfseEnabled: true });
   });
 });
