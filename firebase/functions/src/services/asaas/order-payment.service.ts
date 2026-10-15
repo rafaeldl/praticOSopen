@@ -19,7 +19,7 @@
 import { db, FieldValue } from '../firestore.service';
 import { applyPaymentTransaction, paymentStatusFields, roundMoney } from '../order.service';
 import type { Order, PaymentTransaction, UserAggr } from '../../models/types';
-import type { AsaasPaymentEvent, OrderCharge } from '../../models/asaas.types';
+import type { AsaasPaymentEvent, CustomerCharge, OrderCharge } from '../../models/asaas.types';
 
 export const ASAAS_TRANSACTION_PREFIX = 'asaas_';
 export const ASAAS_ACTOR: UserAggr = { id: 'asaas', name: 'Asaas' };
@@ -53,6 +53,26 @@ export function orderRef(companyId: string, orderId: string) {
 
 export function chargeRef(companyId: string, orderId: string, chargeId: string) {
   return orderRef(companyId, orderId).collection('charges').doc(chargeId);
+}
+
+/**
+ * A payment Asaas reports as received in cash (`receiveInCash`, ours or one
+ * marked in the Asaas panel).
+ */
+export function isCashReceipt(payment: Pick<AsaasPaymentEvent, 'status'>): boolean {
+  return payment.status === 'RECEIVED_IN_CASH';
+}
+
+/**
+ * The webhook of our own `receiveInCash` (outside-payment.service.ts): the
+ * money is already on the order(s), so it is never booked. A real Pix/card
+ * payment that raced it is booked (the customer did pay twice).
+ */
+export function isOurOutsideSettlement(
+  charge: { paidOutside?: boolean; settlingOutsideAt?: string },
+  payment: Pick<AsaasPaymentEvent, 'status'>,
+): boolean {
+  return (!!charge.paidOutside || !!charge.settlingOutsideAt) && isCashReceipt(payment);
 }
 
 export function asaasTransactionId(asaasPaymentId: string): string {
@@ -226,6 +246,16 @@ export async function applyAsaasPayment(
     }
 
     const now = new Date();
+    // Settled by us with receiveInCash (paid outside Asaas): the money is
+    // already on the order, never book it a second time.
+    if (isOurOutsideSettlement(charge, payment)) {
+      if (charge.status !== 'paid' || !charge.paidOutside) {
+        tx.update(cRef, { status: 'paid', paidOutside: true, paidAt: charge.paidAt ?? now.toISOString() });
+      }
+      console.log('[AsaasPayment] charge settled outside Asaas; not booked', { companyId, orderId, chargeId });
+      return { applied: false };
+    }
+
     const transaction = buildAsaasTransaction(payment, charge, now, paidIds.length + 1);
     const alreadyOnOrder = (order.transactions ?? []).some((t) => t.id === transaction.id);
 
@@ -413,15 +443,26 @@ export async function repairAsaasTransactions(
     if (!orderSnap.exists) return { repaired: 0 };
     const chargesSnap = await tx.get(chargesRef);
 
+    // Multi-order charges covering this order (customer-charge-payment.service).
+    const customerChargesSnap = await tx.get(
+      db.collection('companies').doc(companyId).collection('customerCharges').where('orderIds', 'array-contains', orderId),
+    );
+
     const order = orderSnap.data() as OrderPaymentState & { paid?: unknown; payment?: unknown };
     const charges = chargesSnap.docs.map((doc) => ({ id: doc.id, charge: doc.data() as OrderCharge }));
+    const customerCharges = customerChargesSnap.docs.map((doc) => ({ id: doc.id, charge: doc.data() as CustomerCharge }));
 
     // A stale copy saved by an old app can bring back a refunded payment.
     const refundedTransactionIds = new Set(
       charges.flatMap(({ charge }) => (charge.refundedAsaasPaymentIds ?? []).map(asaasTransactionId)),
     );
+    const refundedSharePrefixes = customerCharges.flatMap(({ charge }) =>
+      (charge.refundedAsaasPaymentIds ?? []).map((id) => `${asaasTransactionId(id)}_`),
+    );
+    const isRefunded = (id: string | undefined) =>
+      !!id && (refundedTransactionIds.has(id) || refundedSharePrefixes.some((prefix) => id.startsWith(prefix)));
     const original = order.transactions ?? [];
-    const current = original.filter((t) => !refundedTransactionIds.has(t.id));
+    const current = original.filter((t) => !isRefunded(t.id));
     const removed = original.length - current.length;
     const present = new Set(current.map((t) => t.id));
     const missing: PaymentTransaction[] = [];
@@ -444,11 +485,27 @@ export async function repairAsaasTransactions(
       }
     }
 
+    // Shares of multi-order charge payments booked on this order.
+    for (const { charge } of customerCharges) {
+      const paid = new Set(charge.paidAsaasPaymentIds ?? []);
+      for (const entry of charge.appliedTransactions ?? []) {
+        if (entry.orderId !== orderId || !paid.has(entry.asaasPaymentId)) continue;
+        if (present.has(entry.transaction.id)) continue;
+        missing.push(entry.transaction);
+        present.add(entry.transaction.id);
+      }
+    }
+
     // An old app version (model without receiptUrl/billingType) drops these
     // keys when it saves the order: put them back from the charge copy.
     const appliedById = new Map<string, PaymentTransaction>();
     for (const { charge } of charges) {
       for (const copy of charge.appliedTransactions ?? []) appliedById.set(copy.id, copy);
+    }
+    for (const { charge } of customerCharges) {
+      for (const entry of charge.appliedTransactions ?? []) {
+        if (entry.orderId === orderId) appliedById.set(entry.transaction.id, entry.transaction);
+      }
     }
     let enriched = 0;
     const kept = current.map((t) => {

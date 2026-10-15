@@ -95,7 +95,15 @@ describe('connection.service', () => {
         interrupted: false,
         apiVersion: 3,
         sendType: 'SEQUENTIALLY',
-        events: ['PAYMENT_RECEIVED', 'PAYMENT_CONFIRMED', 'PAYMENT_OVERDUE', 'PAYMENT_REFUNDED', 'PAYMENT_DELETED'],
+        events: [
+          'PAYMENT_RECEIVED',
+          'PAYMENT_CONFIRMED',
+          'PAYMENT_OVERDUE',
+          'PAYMENT_REFUNDED',
+          'PAYMENT_DELETED',
+          'PAYMENT_RECEIVED_IN_CASH_UNDONE',
+          'PAYMENT_PARTIALLY_REFUNDED',
+        ],
       });
       expect(webhookInput.authToken).toMatch(/^[A-Za-z0-9_-]{64}$/);
 

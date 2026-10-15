@@ -316,6 +316,7 @@ import appInviteRoutes from './routes/v1/invite.routes';
 import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
+import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -517,7 +518,7 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 // Bearer token routes (for Flutter app)
 // Single mount so the rate limit and token check run once per request.
 app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
-app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
+app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
 app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);

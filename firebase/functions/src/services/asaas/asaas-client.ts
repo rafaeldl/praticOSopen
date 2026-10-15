@@ -93,6 +93,19 @@ export class AsaasClient {
     return this.request<AsaasPayment>('POST', '/payments', input);
   }
 
+  /** PUT /payments/{id}: only PENDING/OVERDUE payments can be changed. */
+  updatePayment(id: string, input: { value: number; description?: string }): Promise<AsaasPayment> {
+    return this.request<AsaasPayment>('PUT', `/payments/${encodeURIComponent(id)}`, input);
+  }
+
+  /** POST /payments/{id}/receiveInCash: marks the whole payment as received outside Asaas. */
+  receiveInCash(
+    id: string,
+    input: { paymentDate: string; value: number; notifyCustomer: boolean },
+  ): Promise<AsaasPayment> {
+    return this.request<AsaasPayment>('POST', `/payments/${encodeURIComponent(id)}/receiveInCash`, input);
+  }
+
   async deletePayment(id: string): Promise<void> {
     await this.request<unknown>('DELETE', `/payments/${encodeURIComponent(id)}`);
   }
@@ -109,7 +122,7 @@ export class AsaasClient {
     return list.data ?? [];
   }
 
-  private async request<T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<T> {
+  private async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
     const headers: Record<string, string> = {
       access_token: this.apiKey,
       'User-Agent': USER_AGENT,

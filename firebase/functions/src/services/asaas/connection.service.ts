@@ -26,6 +26,8 @@ export const ASAAS_WEBHOOK_EVENTS: AsaasCreateWebhookInput['events'] = [
   'PAYMENT_OVERDUE',
   'PAYMENT_REFUNDED',
   'PAYMENT_DELETED',
+  'PAYMENT_RECEIVED_IN_CASH_UNDONE',
+  'PAYMENT_PARTIALLY_REFUNDED',
 ];
 
 export function paymentSettingsRef(companyId: string) {

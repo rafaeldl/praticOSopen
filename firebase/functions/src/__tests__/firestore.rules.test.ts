@@ -499,6 +499,9 @@ describeEmulator('firestore.rules', () => {
           asaasConnected: true,
         });
         await fs.setDoc(fs.doc(db, 'companies/c1/orders/o1/charges/ch1'), { status: 'pending', value: 100 });
+        await fs.setDoc(fs.doc(db, 'companies/c1/customerCharges/cc1'), {
+          status: 'pending', value: 300, customer: { id: 'cu1' }, orderIds: ['o1', 'o2'],
+        });
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas'), { webhookTokenHash: 'x' });
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/events/e1'), { processedAt: 'now' });
         await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/customers/cu1'), { asaasCustomerId: 'cus_1' });
@@ -562,6 +565,39 @@ describeEmulator('firestore.rules', () => {
         for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
           await rut.assertFails(fs.updateDoc(fs.doc(db, path), { status: 'paid' }));
           await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/orders/o1/charges/ch2'), { status: 'paid' }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+      });
+    });
+
+    describe('customerCharges/{chargeId}', () => {
+      const path = 'companies/c1/customerCharges/cc1';
+
+      it('is readable by the owner, admin and manager (also by customer query)', async () => {
+        await rut.assertSucceeds(fs.getDoc(fs.doc(owner(), path)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('adm2', { c1: 'admin' }), path)));
+        await rut.assertSucceeds(
+          fs.getDocs(
+            fs.query(
+              fs.collection(asUser('mgr1', { c1: 'manager' }), 'companies/c1/customerCharges'),
+              fs.where('customer.id', '==', 'cu1'),
+            ),
+          ),
+        );
+      });
+
+      it.each(['supervisor', 'consultant', 'technician'])('is not readable by a %s', async (role) => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), path)));
+      });
+
+      it('is not readable by another company', async () => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), path)));
+      });
+
+      it('is not writable by anyone, including the owner', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.updateDoc(fs.doc(db, path), { status: 'paid' }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/customerCharges/cc2'), { status: 'pending' }));
           await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
         }
       });
