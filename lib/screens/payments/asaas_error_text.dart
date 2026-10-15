@@ -16,6 +16,7 @@ String asaasErrorText(AppLocalizations l10n, AsaasApiException e) {
     case 'ASAAS_NOT_ENABLED':
       return l10n.asaasErrorNotConnected;
     case 'INVALID_VALUE':
+    case 'VALUE_EXCEEDS_BALANCE':
       return l10n.asaasErrorExceedsBalance;
     case 'TAX_ID_REQUIRED':
       return l10n.asaasErrorTaxIdRequired;
@@ -25,6 +26,10 @@ String asaasErrorText(AppLocalizations l10n, AsaasApiException e) {
       return l10n.asaasErrorCustomerRequired;
     case 'INSTALLMENTS_IN_PROGRESS':
       return l10n.asaasErrorInstallmentsInProgress;
+    case 'CUSTOMER_CHARGE_OPEN':
+      return l10n.asaasErrorCustomerChargeOpen;
+    case 'ORDER_NOT_PAYABLE':
+      return l10n.asaasErrorOrderNotPayable;
     case 'ORDER_CANCELED':
       return l10n.asaasErrorOrderCanceled;
     case 'INVALID_DUE_DATE':

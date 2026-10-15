@@ -910,6 +910,8 @@
   "chargeReplaceConfirm": "Generar un nuevo cobro cancela el anterior en Asaas.",
   "chargeReplace": "Generar nuevo",
   "asaasErrorInstallmentsInProgress": "Este plan de cuotas ya tiene cuotas pagadas. Espera a que termine o reembolsa en Asaas.",
+  "asaasErrorCustomerChargeOpen": "Esta OS ya está en un link de cobro de varias OS del cliente. Cancela ese link en Recibir del cliente.",
+  "asaasErrorOrderNotPayable": "Presupuestos y OS canceladas no se pueden cobrar.",
   "asaasErrorOrderCanceled": "Esta orden está cancelada y no se puede cobrar.",
   "asaasErrorInvalidDueDate": "Fecha de vencimiento inválida. Elige hoy o una fecha futura.",
   "asaasErrorInvalidInstallmentCount": "Número de cuotas inválido. Elige de 2 a 12.",

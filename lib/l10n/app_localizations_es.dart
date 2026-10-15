@@ -2115,6 +2115,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este plan de cuotas ya tiene cuotas pagadas. Espera a que termine o reembolsa en Asaas.';
 
   @override
+  String get asaasErrorCustomerChargeOpen =>
+      'Esta OS ya está en un link de cobro de varias OS del cliente. Cancela ese link en Recibir del cliente.';
+
+  @override
+  String get asaasErrorOrderNotPayable =>
+      'Presupuestos y OS canceladas no se pueden cobrar.';
+
+  @override
   String get asaasErrorOrderCanceled =>
       'Esta orden está cancelada y no se puede cobrar.';
 

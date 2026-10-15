@@ -910,6 +910,8 @@
   "chargeReplaceConfirm": "Creating a new charge cancels the previous one in Asaas.",
   "chargeReplace": "Create new",
   "asaasErrorInstallmentsInProgress": "This installment plan already has paid installments. Wait for it to finish or refund in Asaas.",
+  "asaasErrorCustomerChargeOpen": "This order is already in a payment link for several orders of the customer. Cancel that link in Receive from the customer.",
+  "asaasErrorOrderNotPayable": "Quotes and canceled orders cannot be charged.",
   "asaasErrorOrderCanceled": "This order is canceled and cannot be charged.",
   "asaasErrorInvalidDueDate": "Invalid due date. Choose today or a future date.",
   "asaasErrorInvalidInstallmentCount": "Invalid number of installments. Choose from 2 to 12.",

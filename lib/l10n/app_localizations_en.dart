@@ -2109,6 +2109,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This installment plan already has paid installments. Wait for it to finish or refund in Asaas.';
 
   @override
+  String get asaasErrorCustomerChargeOpen =>
+      'This order is already in a payment link for several orders of the customer. Cancel that link in Receive from the customer.';
+
+  @override
+  String get asaasErrorOrderNotPayable =>
+      'Quotes and canceled orders cannot be charged.';
+
+  @override
   String get asaasErrorOrderCanceled =>
       'This order is canceled and cannot be charged.';
 

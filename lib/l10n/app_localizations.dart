@@ -3958,6 +3958,18 @@ abstract class AppLocalizations {
   /// **'Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.'**
   String get asaasErrorInstallmentsInProgress;
 
+  /// No description provided for @asaasErrorCustomerChargeOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta OS já está num link de cobrança de várias OS do cliente. Cancele aquele link em Receber do cliente.'**
+  String get asaasErrorCustomerChargeOpen;
+
+  /// No description provided for @asaasErrorOrderNotPayable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento e OS cancelada não podem ser cobrados.'**
+  String get asaasErrorOrderNotPayable;
+
   /// No description provided for @asaasErrorOrderCanceled.
   ///
   /// In pt, this message translates to:

@@ -2105,6 +2105,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Este parcelamento já tem parcelas pagas. Aguarde terminar ou estorne no Asaas.';
 
   @override
+  String get asaasErrorCustomerChargeOpen =>
+      'Esta OS já está num link de cobrança de várias OS do cliente. Cancele aquele link em Receber do cliente.';
+
+  @override
+  String get asaasErrorOrderNotPayable =>
+      'Orçamento e OS cancelada não podem ser cobrados.';
+
+  @override
   String get asaasErrorOrderCanceled =>
       'Esta OS está cancelada e não pode receber cobrança.';
 
