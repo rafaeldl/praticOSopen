@@ -33,15 +33,20 @@ class AssistantRegistration {
     ..name = name.trim()
     ..phone = (phone?.trim().isEmpty ?? true) ? null : phone!.trim();
 
-  /// A new vehicle with its id, not saved yet. Only with a plate/serial: a
-  /// model alone would make duplicates.
-  Device newDevice({required String serial, String? name, String? manufacturer}) =>
-      Device()
-        ..id = _newId()
-        ..serial = serial.trim().toUpperCase()
-        ..name = (name?.trim().isEmpty ?? true) ? serial.trim().toUpperCase() : name!.trim()
-        ..manufacturer = (manufacturer?.trim().isEmpty ?? true) ? null : manufacturer!.trim()
-        ..status = 'active';
+  /// A new vehicle with its id, not saved yet: by plate/serial, or by the
+  /// model alone when nothing registered is close to it.
+  Device newDevice({String? serial, String? name, String? manufacturer}) {
+    final plate = serial?.trim().toUpperCase() ?? '';
+    final model = name?.trim() ?? '';
+    return Device()
+      ..id = _newId()
+      ..serial = plate.isEmpty ? null : plate
+      ..name = model.isEmpty ? plate : model
+      ..manufacturer = (manufacturer?.trim().isEmpty ?? true)
+          ? null
+          : manufacturer!.trim()
+      ..status = 'active';
+  }
 
   /// Writes the customer (on "✓"). Does not wait for the server (offline).
   Future<void> saveCustomer(Customer customer) async {
@@ -55,7 +60,10 @@ class AssistantRegistration {
       ..updatedAt = now
       ..updatedBy = Global.userAggr
       ..keywords = generateKeywords(customer.name);
-    await (_customers ?? CustomerRepositoryV2()).createItem(companyId, customer);
+    await (_customers ?? CustomerRepositoryV2()).createItem(
+      companyId,
+      customer,
+    );
     AnalyticsService.instance.logCustomerCreated(customerId: customer.id);
   }
 

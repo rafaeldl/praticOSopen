@@ -1718,7 +1718,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     });
   }
 
-  /// Same for a vehicle: close ones, "Cadastrar … " (only with a plate) and
+  /// Same for a vehicle: close ones, "Cadastrar … como novo" and
   /// "Outro".
   Future<void> _resolveDeviceAsk() async {
     final ask = _deviceAsk;
@@ -1732,11 +1732,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       options: [
         for (final d in ask.options)
           PickerItem(value: d, title: d.name, subtitle: d.serial),
-        if (ask.serial != null)
-          PickerItem(
-            value: newOne,
-            title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
-          ),
+        PickerItem(
+          value: newOne,
+          title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
+        ),
         PickerItem(
           value: other,
           title: context.l10n.orderAssistantOtherDevice(label),
@@ -1752,7 +1751,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             ..serial = picked.serial
             ..manufacturer = picked.manufacturer)
         : _registration.newDevice(
-            serial: ask.serial!,
+            serial: ask.serial,
             name: ask.name,
             manufacturer: ask.manufacturer,
           );
@@ -1847,11 +1846,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         undo,
       );
       used = true;
-    } else if (serial.isNotEmpty &&
-        _isNew &&
-        !_store.devices.any((e) => e.serial?.toUpperCase() == serial)) {
-      // A plate that is not registered is a new vehicle (saved with the
-      // order). A model alone is not: it would make duplicates.
+    } else if (_isNew &&
+        (serial.isNotEmpty
+            ? !_store.devices.any((e) => e.serial?.toUpperCase() == serial)
+            : (draft.deviceGuessName?.trim().isNotEmpty ?? false) &&
+                  draft.deviceOptions.isEmpty)) {
+      // A plate that is not registered, or a model with nothing registered
+      // close to it, is a new vehicle (saved with the order). A model close
+      // to registered ones asks which, with "Cadastrar … como novo".
       final device = _registration.newDevice(
         serial: serial,
         name: draft.deviceGuessName,
