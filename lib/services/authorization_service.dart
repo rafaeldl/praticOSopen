@@ -2,6 +2,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/segment_config_service.dart';
 
@@ -498,6 +499,36 @@ class AuthorizationService {
   /// [canReceivePaymentsFor] for the current user.
   bool get canReceivePayments =>
       canReceivePaymentsFor(role: normalizedRole, useFinancial: _useFinancial);
+
+  /// Whether [role] (user [userId]) can see, undo and send the recibo of
+  /// [receipt]: financial access on any receipt, a consultant only on the
+  /// ones they registered (`createdBy.id`, as in the Firestore rules).
+  static bool canManageReceiptFor({
+    required RolesType? role,
+    required String? userId,
+    required Receipt? receipt,
+    bool useFinancial = true,
+  }) {
+    if (role == null) return false;
+    if (RolePermissions.hasPermissionInCompany(
+      role,
+      PermissionType.viewFinancialReports,
+      useFinancial: useFinancial,
+    )) {
+      return true;
+    }
+    return canReceivePaymentsFor(role: role, useFinancial: useFinancial) &&
+        userId != null &&
+        receipt?.createdBy?.id == userId;
+  }
+
+  /// [canManageReceiptFor] for the current user.
+  bool canManageReceipt(Receipt? receipt) => canManageReceiptFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    receipt: receipt,
+    useFinancial: _useFinancial,
+  );
 
   /// Verifica se o usuário pode acessar relatórios operacionais.
   bool get canViewOperationalReports =>

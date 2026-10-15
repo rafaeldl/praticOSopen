@@ -9,9 +9,13 @@ import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_charge_screen.dart';
+import 'package:praticos/screens/payments/receipt_detail_screen.dart';
+import 'package:praticos/screens/payments/receipt_share.dart';
+import 'package:praticos/screens/payments/widgets/receipt_image_viewer.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
@@ -32,6 +36,7 @@ import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/receipt_pdf.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -80,7 +85,9 @@ class PaymentManagementRoute extends StatelessWidget {
 ///
 /// Payment method is not asked: it is shown only for payments that came from
 /// Asaas. Discount and "undo payments" live in the "…" menu. Tapping a payment
-/// opens its sheet (view/attach receipt, remove). No success dialogs: after
+/// opens its sheet (send recibo, view/attach receipt, remove); a payment that
+/// is a share of a customer receipt opens the "Recebimento" screen instead.
+/// No success dialogs: after
 /// "Recebi" the block turns into "Tudo recebido" or shows the new balance.
 class PaymentManagementScreen extends StatefulWidget {
   const PaymentManagementScreen({
@@ -94,6 +101,10 @@ class PaymentManagementScreen extends StatefulWidget {
     this.paymentSettingsStream,
     this.chargesStream,
     this.chargeService,
+    this.canSendReceipt,
+    this.canOpenReceiptGroup,
+    this.onSendReceipt,
+    this.onOpenReceipt,
   });
 
   /// Order store. When null it comes from the route arguments (`orderStore`).
@@ -118,6 +129,24 @@ class PaymentManagementScreen extends StatefulWidget {
   final Stream<PaymentSettings>? paymentSettingsStream;
   final Stream<List<OrderCharge>>? chargesStream;
   final AsaasApiService? chargeService;
+
+  /// Test seam; defaults to [AuthorizationService.canReceiveOnOrder] (who
+  /// receives on this order sends its recibo).
+  final bool? canSendReceipt;
+
+  /// Test seam: whether a payment that is a share of a customer receipt
+  /// opens that receipt. Defaults to financial access or having
+  /// registered it (who else the rules don't let read the receipt).
+  final bool Function(PaymentTransaction tx)? canOpenReceiptGroup;
+
+  /// Test seams; default to the recibo share sheet and the "Recebimento"
+  /// screen.
+  final Future<void> Function(BuildContext context, ReceiptPdfData data)?
+  onSendReceipt;
+
+  /// Completes with true when the receipt was undone.
+  final Future<bool> Function(BuildContext context, String receiptId)?
+  onOpenReceipt;
 
   @override
   State<PaymentManagementScreen> createState() =>
@@ -216,6 +245,17 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool get _canView =>
       widget.canViewReceipt ??
       AuthorizationService.instance.hasPermission(PermissionType.viewPhotos);
+  bool get _canSendReceipt =>
+      widget.canSendReceipt ??
+      AuthorizationService.instance.canReceiveOnOrder(_store?.order);
+  bool _canOpenReceiptGroup(PaymentTransaction tx) {
+    final override = widget.canOpenReceiptGroup;
+    if (override != null) return override(tx);
+    if (AuthorizationService.instance.canViewFinancialReports) return true;
+    final uid = Global.currentUser?.uid;
+    return uid != null && tx.createdBy?.id == uid;
+  }
+
   bool get _canDiscount =>
       widget.canGiveDiscount ??
       AuthorizationService.instance.canViewFinancialReports;
@@ -806,6 +846,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   void _confirmUndoPayments() {
+    // Shares of a customer receipt are undone from the receipt, never here.
+    final groupId = (_store?.transactions ?? const <PaymentTransaction>[])
+        .map((t) => t.receiptGroupId)
+        .whereType<String>()
+        .firstOrNull;
+    if (groupId != null) {
+      _explainReceiptGroup(groupId);
+      return;
+    }
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
@@ -846,6 +895,16 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // ============================================================
 
   void _showPaymentSheet(PaymentTransaction tx) {
+    // A share of a customer receipt: its own screen shows every OS it
+    // covered, sends the recibo and undoes it as a whole.
+    final groupId = tx.receiptGroupId;
+    if (groupId != null && _canOpenReceiptGroup(tx)) {
+      _openReceiptGroup(groupId);
+      return;
+    }
+    // A share of a receipt someone else registered: shown, but it is undone
+    // and its recibo sent from the receipt, by who can open it.
+    final inOtherReceipt = groupId != null;
     final format = FormatService();
     final isPayment = tx.type == PaymentTransactionType.payment;
     final who = tx.isAsaas
@@ -871,6 +930,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ),
         message: Text(who),
         actions: [
+          if (isPayment && !tx.isAsaas && !inOtherReceipt && _canSendReceipt)
+            CupertinoActionSheetAction(
+              key: const Key('receiveSendReceipt'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _sendReceipt(tx);
+              },
+              child: Text(context.l10n.receiptSend),
+            ),
           if (canViewReceipt)
             CupertinoActionSheetAction(
               onPressed: () {
@@ -896,7 +964,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               },
               child: Text(context.l10n.receiveAttachReceipt),
             ),
-          if (!tx.isAsaas)
+          if (!tx.isAsaas && !inOtherReceipt)
             CupertinoActionSheetAction(
               isDestructiveAction: true,
               onPressed: () {
@@ -928,7 +996,61 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return list.indexWhere((t) => OrderPaymentMath.sameTransaction(t, tx));
   }
 
+  Future<void> _openReceiptGroup(String receiptId) async {
+    final open = widget.onOpenReceipt;
+    final bool undone;
+    if (open != null) {
+      undone = await open(context, receiptId);
+    } else {
+      undone = await ReceiptDetailScreen.open(context, receiptId: receiptId);
+    }
+    if (!mounted) return;
+    // The undo writes to every order of the receipt; this screen still
+    // holds the old payments of this one.
+    if (undone) await _store?.reloadPayments();
+    if (mounted) _prefillValue();
+  }
+
+  /// "Mandar recibo" of one payment of this order (no receipt document).
+  Future<void> _sendReceipt(PaymentTransaction tx) async {
+    final order = _store?.order;
+    if (order == null) return;
+    final data = ReceiptPdfData.fromPayment(order, tx);
+    await (widget.onSendReceipt ?? shareReceiptPdf)(context, data);
+  }
+
+  /// A share of a customer receipt can't be removed alone: tells so and
+  /// offers the receipt (undo there takes it out of every OS).
+  void _explainReceiptGroup(String receiptId) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        content: Text(context.l10n.receiptPartOfGroup),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            key: const Key('receiveOpenReceiptGroup'),
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _openReceiptGroup(receiptId);
+            },
+            child: Text(context.l10n.receiptOpen),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmRemove(PaymentTransaction tx) {
+    final groupId = tx.receiptGroupId;
+    if (groupId != null) {
+      _explainReceiptGroup(groupId);
+      return;
+    }
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
@@ -1020,7 +1142,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     if (doc.isImage) {
       Navigator.of(context).push(
         CupertinoPageRoute(
-          builder: (context) => _ReceiptImageViewer(
+          builder: (context) => ReceiptImageViewer(
             url: url!,
             title: doc.fileName ?? context.l10n.receipt,
           ),
@@ -1060,57 +1182,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Full-screen receipt image viewer
-class _ReceiptImageViewer extends StatelessWidget {
-  final String url;
-  final String title;
-
-  const _ReceiptImageViewer({required this.url, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.black,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        middle: Text(
-          title,
-          style: const TextStyle(color: CupertinoColors.white),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-      child: SafeArea(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 3.0,
-          child: Center(
-            child: Image.network(
-              url,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const CupertinoActivityIndicator();
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  CupertinoIcons.exclamationmark_triangle,
-                  color: AppColors.textSecondary.resolveFrom(context),
-                  size: 48,
-                );
-              },
-            ),
-          ),
-        ),
       ),
     );
   }

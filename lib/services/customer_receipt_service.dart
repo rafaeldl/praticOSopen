@@ -6,10 +6,12 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/receipt.dart';
+import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/utils/receipt_plan.dart';
+import 'package:praticos/utils/receipt_undo.dart';
 
 /// File picked on the "Receber de …" screen, uploaded only on save.
 class PickedReceiptFile {
@@ -37,6 +39,17 @@ class CustomerReceiptRequest {
   final PickedReceiptFile? file;
 }
 
+/// A receipt with the current state of the orders it covered (for the
+/// "Recebimento" screen and the recibo PDF).
+class ReceiptDetails {
+  const ReceiptDetails({required this.receipt, required this.orders});
+
+  final Receipt receipt;
+
+  /// orderId -> current order (missing when it could not be read).
+  final Map<String, Order> orders;
+}
+
 /// Why recording a customer receipt failed.
 enum CustomerReceiptFailure { upload, failed }
 
@@ -56,11 +69,17 @@ class CustomerReceiptService {
   CustomerReceiptService({
     TenantReceiptRepository? repository,
     PhotoService? photoService,
+    TenantOrderRepository? orderRepository,
   })  : _repository = repository,
-        _photoService = photoService;
+        _photoService = photoService,
+        _orderRepository = orderRepository;
 
   final TenantReceiptRepository? _repository;
   final PhotoService? _photoService;
+  final TenantOrderRepository? _orderRepository;
+
+  TenantOrderRepository get _orders =>
+      _orderRepository ?? TenantOrderRepository();
 
   TenantReceiptRepository get _repo =>
       _repository ?? TenantReceiptRepository();
@@ -119,5 +138,76 @@ class CustomerReceiptService {
       throw const CustomerReceiptException(CustomerReceiptFailure.failed);
     }
     return plan.receipt;
+  }
+
+  /// Reads receipt [receiptId] and the orders it covered. Null when the
+  /// receipt does not exist.
+  Future<ReceiptDetails?> load(String receiptId) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    final receipt = await _repo.getSingle(companyId, receiptId);
+    if (receipt == null) return null;
+    return ReceiptDetails(
+      receipt: receipt,
+      orders: await _readOrders(companyId, receipt),
+    );
+  }
+
+  /// Fresh orders (server first, local cache when offline).
+  Future<Map<String, Order>> _readOrders(
+    String companyId,
+    Receipt receipt,
+  ) async {
+    final ids = {
+      for (final a in receipt.allocations ?? const <ReceiptAllocation>[])
+        if (a.orderId != null) a.orderId!,
+    };
+    final orders = <String, Order>{};
+    await Future.wait(ids.map((id) async {
+      Order? order;
+      try {
+        order = await _orders.getFromServer(companyId, id);
+      } catch (_) {
+        try {
+          order = await _orders.getSingle(companyId, id);
+        } catch (_) {
+          order = null;
+        }
+      }
+      if (order != null) orders[id] = order;
+    }));
+    return orders;
+  }
+
+  /// "Desfazer recebimento": cancels [receipt] and takes its share out of
+  /// each order, in one batch (not awaited: works offline). The shared
+  /// receipt file stays in Storage. Throws [CustomerReceiptException].
+  Future<void> undo(Receipt receipt) async {
+    final companyId = Global.companyAggr?.id;
+    final receiptId = receipt.id;
+    if (companyId == null ||
+        receiptId == null ||
+        receipt.status != ReceiptStatus.active) {
+      throw const CustomerReceiptException(CustomerReceiptFailure.failed);
+    }
+    final orders = await _readOrders(companyId, receipt);
+    final actor = Global.userAggr;
+    final plan = buildReceiptUndo(
+      receipt: receipt,
+      orders: orders.values.toList(),
+      now: DateTime.now(),
+      actor: actor,
+    );
+    try {
+      unawaited(
+        _repo.cancel(companyId, receiptId, plan, actor: actor).catchError(
+          (Object e) => debugPrint('CustomerReceiptService: undo failed: $e'),
+        ),
+      );
+    } catch (e) {
+      debugPrint('CustomerReceiptService: could not queue undo: $e');
+      throw const CustomerReceiptException(CustomerReceiptFailure.failed);
+    }
+    receipt.status = ReceiptStatus.canceled;
   }
 }

@@ -1641,6 +1641,158 @@
     }
   },
   "receiveCustomerUploadFailed": "Não deu para enviar o comprovante. Confira a internet e tente de novo.",
+  "receiveCustomerChooseOrders": "Escolher as OS",
+  "receiveCustomerPickTitle": "Quais OS ele está pagando?",
+  "receiveCustomerPickRow": "OS {number}",
+  "@receiveCustomerPickRow": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "receiveCustomerPickSubtitle": "Falta {amount} · {date}",
+  "@receiveCustomerPickSubtitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "receiveCustomerChosenOnly": "O valor vai só para as OS escolhidas, primeiro a mais antiga.",
+  "receiveCustomerTooMuchChosen": "Passa do que falta nessas OS ({total}).",
+  "@receiveCustomerTooMuchChosen": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptTitle": "Recebimento",
+  "receiptRowSettled": "OS {number} · {amount} · quitada",
+  "@receiptRowSettled": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptRowOpen": "OS {number} · {amount} · falta {left}",
+  "@receiptRowOpen": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptSendTo": "Mandar recibo para {name}",
+  "@receiptSendTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptSend": "Mandar recibo",
+  "receiptActions": "Mais opções do recebimento",
+  "receiptUndo": "Desfazer recebimento",
+  "receiptUndoTitle": "Desfazer o recebimento de {amount}?",
+  "@receiptUndoTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptUndoMessage": "O valor sai de {count, plural, =1{1 OS} other{{count} OS}} e volta a faltar receber.",
+  "@receiptUndoMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receiptUndone": "Recebimento desfeito",
+  "receiptCanceled": "Este recebimento foi desfeito.",
+  "receiptPartOfGroup": "Este pagamento faz parte de um recebimento de várias OS. Para desfazer, abra o recebimento.",
+  "receiptOpen": "Abrir recebimento",
+  "receiptsSection": "Recebimentos",
+  "receiptListSubtitle": "{date} · {count, plural, =1{1 OS} other{{count} OS}}",
+  "@receiptListSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receiptNotFound": "Não achamos este recebimento.",
+  "pdfReceiptTitle": "Recibo",
+  "pdfReceiptNumber": "Nº {number}",
+  "@pdfReceiptNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReceiptSentence": "Recebemos de {name} a quantia de {amount} em {date}.",
+  "@pdfReceiptSentence": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReceiptOrderColumn": "OS",
+  "pdfReceiptPaidColumn": "Pago agora",
+  "pdfReceiptOpenColumn": "Ainda falta",
+  "pdfReceiptDescriptionColumn": "Descrição",
+  "pdfReceiptTotal": "Total recebido",
+  "pdfReceiptRemaining": "Falta receber {amount} dessas OS.",
+  "@pdfReceiptRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReceiptRecordedBy": "Registrado por {name}",
+  "@pdfReceiptRecordedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReceiptFileName": "Recibo-{number}",
+  "@pdfReceiptFileName": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "loginTitle": "Entre para começar",
   "loginSubtitle": "Suas OS ficam salvas e a equipe vê as mesmas.",
   "loginWithEmailLink": "Entrar com e-mail e senha",

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -71,6 +72,35 @@ void main() {
       expect(can(RolesType.technician), isFalse);
       expect(can(null), isFalse);
       expect(can(RolesType.consultant, useFinancial: false), isFalse);
+    });
+  });
+
+  group('canManageReceiptFor', () {
+    Receipt by(String? uid) =>
+        Receipt()..createdBy = (uid == null ? null : (UserAggr()..id = uid));
+    bool can(RolesType? r, Receipt? receipt, {bool useFinancial = true}) =>
+        AuthorizationService.canManageReceiptFor(
+          role: r,
+          userId: 'me',
+          receipt: receipt,
+          useFinancial: useFinancial,
+        );
+
+    test('financial access on any receipt', () {
+      expect(can(RolesType.admin, by('other')), isTrue);
+      expect(can(RolesType.manager, by(null)), isTrue);
+    });
+
+    test('consultant only on the receipts they registered', () {
+      expect(can(RolesType.consultant, by('me')), isTrue);
+      expect(can(RolesType.consultant, by('other')), isFalse);
+      expect(can(RolesType.consultant, null), isFalse);
+      expect(can(RolesType.consultant, by('me'), useFinancial: false), isFalse);
+    });
+
+    test('supervisor and technician never, even their own', () {
+      expect(can(RolesType.supervisor, by('me')), isFalse);
+      expect(can(RolesType.technician, by('me')), isFalse);
     });
   });
 }

@@ -132,9 +132,36 @@ Como é decidido:
 | `PdfMainOsBuilder(showValues:)` | padrão `true` (comportamento de sempre) |
 | `canShareOrderPdf()` | o item "PDF" do menu "…" da OS (nova e antiga) aparece para quem vê preços **ou** quando a empresa desligou a opção (aí todo mundo recebe o PDF sem valores) |
 
+## Recibo (pagamento recebido)
+
+PDF de uma página para mandar ao cliente depois de receber. Arquivo
+`lib/services/pdf/receipt_pdf.dart`; quem chama é `shareReceiptPdf`
+(`lib/screens/payments/receipt_share.dart`), na tela "Recebimento" e na folha de um pagamento do
+Receber da OS.
+
+| Peça | Papel |
+|------|-------|
+| `ReceiptPdfData.fromReceipt(receipt, orders)` | Recebimento de várias OS; `orders` (atuais) dão o "ainda falta" e a descrição |
+| `ReceiptPdfData.fromPayment(order, tx)` | Um pagamento de uma OS, sem documento `Receipt` |
+| `buildReceiptPdfContent(data, l10n, format)` | Todos os textos, já traduzidos (`context.l10n`) e formatados (`FormatService`). Puro: é o que os testes verificam |
+| `ReceiptPdfService.generate/share` | Desenha (Helvetica, como o PDF da OS) e abre a folha de compartilhar (`Printing.sharePdf`) |
+
+Conteúdo: cabeçalho da empresa (logo, nome, endereço, telefone, e-mail) com "RECIBO" e
+"Nº 3F9A1C" (6 primeiros caracteres do id do recebimento/transação); a frase
+"Recebemos de {cliente} a quantia de {valor} em {data}."; tabela OS / Descrição (veículos ou
+aparelhos da OS, senão o primeiro serviço) / Pago agora / Ainda falta; "Total recebido";
+"Falta receber R$ X dessas OS." quando sobra algo; rodapé "Registrado por {nome} · Nº …".
+Arquivo `Recibo-3F9A1C.pdf` (no idioma do app).
+
+Diferente do PDF da OS, os textos vêm do `AppLocalizations` com acentos: `pdfSafeText` só tira
+o que a Helvetica não desenha (fora do Latin-1, como emoji). Pagamentos do Asaas não geram
+recibo aqui (usam o comprovante do próprio Asaas).
+
 ## Testes
 
 - `test/services/pdf/pdf_main_os_builder_photos_test.dart` — seção de fotos, ausência de
   regressão sem fotos e quebra do grid entre páginas.
 - `test/services/pdf/pdf_image_loader_test.dart` — limite, URLs vazias, paralelismo,
   falhas, cache e deduplicação.
+- `test/services/pdf/receipt_pdf_test.dart` — textos do recibo (frase, tabela, total, "falta",
+  quem registrou, número, idioma) e geração do PDF sem rede.

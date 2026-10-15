@@ -93,4 +93,27 @@ void main() {
     expect(preview[2].untouched, isTrue);
     expect(preview[2].remaining, 500);
   });
+
+  group('chosenBalances ("Escolher as OS")', () {
+    final balances = [_b('a', 450, 182), _b('b', 500, 190), _b('c', 300, 201)];
+
+    test('null means every order', () {
+      expect(chosenBalances(balances, null).map((b) => b.orderId),
+          ['a', 'b', 'c']);
+    });
+
+    test('keeps oldest first whatever the choice order', () {
+      final chosen = chosenBalances(balances, {'c', 'a'});
+      expect(chosen.map((b) => b.orderId), ['a', 'c']);
+      expect(totalOpen(chosen), 750);
+    });
+
+    test('the payment goes only to the chosen orders, oldest first', () {
+      final chosen = chosenBalances(balances, {'c', 'b'});
+      expect(allocatePayment(chosen, 600), [
+        const PaymentAllocation(orderId: 'b', orderNumber: 190, amount: 500),
+        const PaymentAllocation(orderId: 'c', orderNumber: 201, amount: 100),
+      ]);
+    });
+  });
 }

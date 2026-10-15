@@ -5236,6 +5236,204 @@ abstract class AppLocalizations {
   /// **'Não deu para enviar o comprovante. Confira a internet e tente de novo.'**
   String get receiveCustomerUploadFailed;
 
+  /// No description provided for @receiveCustomerChooseOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher as OS'**
+  String get receiveCustomerChooseOrders;
+
+  /// No description provided for @receiveCustomerPickTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quais OS ele está pagando?'**
+  String get receiveCustomerPickTitle;
+
+  /// No description provided for @receiveCustomerPickRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number}'**
+  String receiveCustomerPickRow(int number);
+
+  /// No description provided for @receiveCustomerPickSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta {amount} · {date}'**
+  String receiveCustomerPickSubtitle(String amount, String date);
+
+  /// No description provided for @receiveCustomerChosenOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor vai só para as OS escolhidas, primeiro a mais antiga.'**
+  String get receiveCustomerChosenOnly;
+
+  /// No description provided for @receiveCustomerTooMuchChosen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passa do que falta nessas OS ({total}).'**
+  String receiveCustomerTooMuchChosen(String total);
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebimento'**
+  String get receiptTitle;
+
+  /// No description provided for @receiptRowSettled.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {amount} · quitada'**
+  String receiptRowSettled(int number, String amount);
+
+  /// No description provided for @receiptRowOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {amount} · falta {left}'**
+  String receiptRowOpen(int number, String amount, String left);
+
+  /// No description provided for @receiptSendTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar recibo para {name}'**
+  String receiptSendTo(String name);
+
+  /// No description provided for @receiptSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar recibo'**
+  String get receiptSend;
+
+  /// No description provided for @receiptActions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções do recebimento'**
+  String get receiptActions;
+
+  /// No description provided for @receiptUndo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer recebimento'**
+  String get receiptUndo;
+
+  /// No description provided for @receiptUndoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desfazer o recebimento de {amount}?'**
+  String receiptUndoTitle(String amount);
+
+  /// No description provided for @receiptUndoMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor sai de {count, plural, =1{1 OS} other{{count} OS}} e volta a faltar receber.'**
+  String receiptUndoMessage(int count);
+
+  /// No description provided for @receiptUndone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebimento desfeito'**
+  String get receiptUndone;
+
+  /// No description provided for @receiptCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este recebimento foi desfeito.'**
+  String get receiptCanceled;
+
+  /// No description provided for @receiptPartOfGroup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este pagamento faz parte de um recebimento de várias OS. Para desfazer, abra o recebimento.'**
+  String get receiptPartOfGroup;
+
+  /// No description provided for @receiptOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir recebimento'**
+  String get receiptOpen;
+
+  /// No description provided for @receiptsSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebimentos'**
+  String get receiptsSection;
+
+  /// No description provided for @receiptListSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{date} · {count, plural, =1{1 OS} other{{count} OS}}'**
+  String receiptListSubtitle(String date, int count);
+
+  /// No description provided for @receiptNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não achamos este recebimento.'**
+  String get receiptNotFound;
+
+  /// No description provided for @pdfReceiptTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recibo'**
+  String get pdfReceiptTitle;
+
+  /// No description provided for @pdfReceiptNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº {number}'**
+  String pdfReceiptNumber(String number);
+
+  /// No description provided for @pdfReceiptSentence.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebemos de {name} a quantia de {amount} em {date}.'**
+  String pdfReceiptSentence(String name, String amount, String date);
+
+  /// No description provided for @pdfReceiptOrderColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS'**
+  String get pdfReceiptOrderColumn;
+
+  /// No description provided for @pdfReceiptPaidColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pago agora'**
+  String get pdfReceiptPaidColumn;
+
+  /// No description provided for @pdfReceiptOpenColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda falta'**
+  String get pdfReceiptOpenColumn;
+
+  /// No description provided for @pdfReceiptDescriptionColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get pdfReceiptDescriptionColumn;
+
+  /// No description provided for @pdfReceiptTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total recebido'**
+  String get pdfReceiptTotal;
+
+  /// No description provided for @pdfReceiptRemaining.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta receber {amount} dessas OS.'**
+  String pdfReceiptRemaining(String amount);
+
+  /// No description provided for @pdfReceiptRecordedBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrado por {name}'**
+  String pdfReceiptRecordedBy(String name);
+
+  /// No description provided for @pdfReceiptFileName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recibo-{number}'**
+  String pdfReceiptFileName(String number);
+
   /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:

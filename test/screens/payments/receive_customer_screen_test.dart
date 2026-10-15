@@ -4,6 +4,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/models/receipt.dart';
@@ -49,6 +50,8 @@ void main() {
     List<Order>? orders,
     String? name,
     List<bool>? popped,
+    Future<Set<String>?> Function(BuildContext, List<Order>, Set<String>)?
+    pickOrders,
   }) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
@@ -73,6 +76,7 @@ void main() {
                         customerName: name,
                         service: fake,
                         canAttachReceipt: true,
+                        pickOrders: pickOrders,
                       ),
                     ),
                   );
@@ -341,5 +345,98 @@ void main() {
     // A consultant (no viewFinancialReports) gets no "Receber de ...".
     expect(find.byType(ReceiveCustomerScreen), findsNothing);
     expect(find.byType(AccessDeniedScreen), findsOneWidget);
+  });
+
+  group('Escolher as OS', () {
+    testWidgets('the picker lists open orders, all checked, oldest first', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        orders: [
+          _order('a', 182, 450)..createdAt = DateTime(2026, 9, 1),
+          _order('b', 190, 600, paid: 100)..createdAt = DateTime(2026, 9, 5),
+          _order('x', 191, 50, paid: 50),
+        ],
+      );
+      await tester.tap(find.byKey(const Key('receiveCustomerChoose')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Quais OS ele está pagando?'), findsWidgets);
+      expect(find.text('OS 182'), findsOneWidget);
+      expect(find.text('OS 190'), findsOneWidget);
+      // Paid order is not offered.
+      expect(find.text('OS 191'), findsNothing);
+      expect(find.text('Falta ${brl(450)} · 01/09/2026'), findsOneWidget);
+      expect(find.text('Falta ${brl(500)} · 05/09/2026'), findsOneWidget);
+
+      // Uncheck 182 and confirm with the ✓ in the top bar.
+      await tester.tap(find.text('OS 182'));
+      await tester.pump();
+      await tester.tap(find.byType(PickerConfirmButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Receber de João'), findsOneWidget);
+      expect(find.textContaining('OS 182'), findsNothing);
+      expect(find.text('OS 190 · quita ${brl(500)}'), findsOneWidget);
+      expect(
+        find.text(
+          'O valor vai só para as OS escolhidas, primeiro a mais antiga.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('chosen orders: max is their open sum and only they get it', (
+      tester,
+    ) async {
+      final service = await pump(
+        tester,
+        pickOrders: (_, orders, selected) async {
+          // Every open order comes in, all selected, oldest first.
+          expect(orders.map((o) => o.id), ['a', 'b', 'c']);
+          expect(selected, {'a', 'b', 'c'});
+          return {'c', 'b'};
+        },
+      );
+      await tester.tap(find.byKey(const Key('receiveCustomerChoose')));
+      await tester.pumpAndSettle();
+
+      // Prefilled with what is open on the chosen ones (500 + 300).
+      expect(find.textContaining('800,00'), findsWidgets);
+      expect(find.text('OS 190 · quita ${brl(500)}'), findsOneWidget);
+      expect(find.text('OS 201 · quita ${brl(300)}'), findsOneWidget);
+      expect(find.textContaining('OS 182'), findsNothing);
+
+      await typeAmount(tester, 900);
+      expect(buttonEnabled(tester), isFalse);
+      expect(
+        find.text('Passa do que falta nessas OS (${brl(800)}).'),
+        findsOneWidget,
+      );
+
+      await typeAmount(tester, 600);
+      expect(buttonEnabled(tester), isTrue);
+      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await tester.pump();
+      final request = service.requests.single;
+      // Oldest first among the chosen: 190 before 201.
+      expect(request.allocations.map((a) => a.orderId), ['b', 'c']);
+      expect(request.allocations.map((a) => a.amount), [500, 100]);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+    });
+
+    testWidgets('going back from the picker keeps everything', (tester) async {
+      await pump(tester, pickOrders: (_, __, ___) async => null);
+      await tester.tap(find.byKey(const Key('receiveCustomerChoose')));
+      await tester.pumpAndSettle();
+      expect(find.text('OS 182 · quita ${brl(450)}'), findsOneWidget);
+      expect(find.textContaining('1.250,00'), findsWidgets);
+    });
+
+    testWidgets('one open order: no "Escolher as OS"', (tester) async {
+      await pump(tester, orders: [_order('a', 1, 100)]);
+      expect(find.byKey(const Key('receiveCustomerChoose')), findsNothing);
+    });
   });
 }
