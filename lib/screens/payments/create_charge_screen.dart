@@ -344,8 +344,12 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
       key: const Key('createChargeSheet'),
       title: l10n.chargeLinkTitle,
       canSave: !_loadingTaxId && error == null,
-      missingHint:
-          _loadingTaxId || error == null ? null : chargeFormErrorText(l10n, error),
+      // An empty CPF/CNPJ is already explained by the field's own hint.
+      missingHint: _loadingTaxId ||
+              error == null ||
+              error == ChargeFormError.taxIdRequired
+          ? null
+          : chargeFormErrorText(l10n, error),
       dirty: _taxIdInput.isNotEmpty,
       busy: _submitting,
       onSave: _submit,

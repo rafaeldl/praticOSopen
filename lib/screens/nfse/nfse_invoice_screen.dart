@@ -293,7 +293,8 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
           rows: [
             AppListRow(
               key: const Key('nfseInvoiceStatus'),
-              title: l10n.nfseRowTitle,
+              // "Situação": the page title already says "Nota fiscal".
+              title: l10n.orderStatusLabel,
               subtitleWidget: NfseStatusLine(invoice: invoice),
             ),
             AppListRow(

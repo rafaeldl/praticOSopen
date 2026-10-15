@@ -69,6 +69,32 @@ CupertinoButton confirmButton(WidgetTester tester) => tester
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  testWidgets('long question shrinks to fit, never ends in "…"', (
+    tester,
+  ) async {
+    const question = 'Quais OS ele está pagando? Escolha uma ou mais';
+    await open(
+      tester,
+      (context) => Navigator.of(context).push<String>(
+        CupertinoPageRoute(
+          builder: (_) => PickerScaffold<String>(
+            title: question,
+            itemCount: 1,
+            sections: (_) => [
+              PickerSection(items: [PickerItem(value: 'a', title: 'a')]),
+            ],
+          ),
+        ),
+      ),
+    );
+    final title = find.text(question).first;
+    expect(
+      find.ancestor(of: title, matching: find.byType(FittedBox)),
+      findsWidgets,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('no search with 10 items', (tester) async {
     await openPicker(tester, items: names(10));
     expect(find.text('Qual item?'), findsOneWidget);

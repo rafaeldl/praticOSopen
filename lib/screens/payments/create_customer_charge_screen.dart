@@ -229,7 +229,11 @@ class _CreateCustomerChargeScreenState
       key: const Key('createCustomerChargeSheet'),
       title: l10n.chargeLinkTitle,
       canSave: !_loadingTaxId && error == null,
-      missingHint: _loadingTaxId || error == null
+      // An empty CPF/CNPJ is already explained by the field's own hint.
+      missingHint:
+          _loadingTaxId ||
+              error == null ||
+              error == ChargeFormError.taxIdRequired
           ? null
           : chargeFormErrorText(l10n, error),
       dirty: _taxIdInput.isNotEmpty,
