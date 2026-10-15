@@ -1508,6 +1508,30 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void refreshLines() {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.refreshLines',
+    );
+    try {
+      return super.refreshLines();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void insertLine(Object line, int index) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.insertLine',
+    );
+    try {
+      return super.insertLine(line, index);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setPhotoCover(int index) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setPhotoCover',

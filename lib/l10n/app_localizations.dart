@@ -6706,6 +6706,18 @@ abstract class AppLocalizations {
   /// **'Coloquei na OS o que está marcado. Confira.'**
   String get orderAssistantApplied;
 
+  /// Title of the picker when the assistant can't tell which line the user meant
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual {name}?'**
+  String orderAssistantWhichLine(String name);
+
+  /// No description provided for @orderAssistantChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudei a OS como você pediu. Confira.'**
+  String get orderAssistantChanged;
+
   /// No description provided for @pickerCustomerTitle.
   ///
   /// In pt, this message translates to:

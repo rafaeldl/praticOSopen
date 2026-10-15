@@ -159,6 +159,37 @@ class _DraftUndo {
   bool due = false;
   final List<String> devices = [];
   final List<Object> lines = [];
+
+  /// Lines it changed, with what they had before.
+  final List<_LineBefore> changed = [];
+
+  /// Lines it took out, with where they were (in removal order).
+  final List<(Object line, int index)> removed = [];
+}
+
+/// Value and quantity of a line before the assistant changed it.
+class _LineBefore {
+  _LineBefore(this.line)
+    : value = line is OrderProduct ? line.value : (line as OrderService).value,
+      quantity = line is OrderProduct ? line.quantity : null,
+      total = line is OrderProduct ? line.total : null;
+
+  final Object line;
+  final double? value;
+  final int? quantity;
+  final double? total;
+
+  void restore() {
+    final l = line;
+    if (l is OrderProduct) {
+      l
+        ..value = value
+        ..quantity = quantity
+        ..total = total;
+    } else if (l is OrderService) {
+      l.value = value;
+    }
+  }
 }
 
 class _OrderScreenV2State extends State<OrderScreenV2> {
@@ -1176,13 +1207,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _note = null;
     });
     AiOrderDraft? draft;
+    ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})?
+    sent;
     String? error;
     try {
       final client = widget.assistant ?? AiOrderAssistService();
+      sent = _orderSnapshot();
       draft = await client.assist(
         text: text,
         photos: photos,
         locale: l10n.localeName.split('_').first,
+        order: sent.snapshot,
       );
     } on AiOrderAssistException catch (e) {
       error = switch (e.error) {
@@ -1196,13 +1231,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       error = l10n.orderAssistantErrorUnavailable;
     }
     if (!mounted) return;
-    final filled = error == null && _applyDraft(draft!);
+    final filled = error == null && await _applyDraft(draft!, sent!);
+    if (!mounted) return;
     setState(() {
       _barMode = AssistantBarMode.idle;
       _noteFilled = filled;
-      _note = filled
-          ? (_isNew ? l10n.orderAssistantFilled : l10n.orderAssistantApplied)
-          : error ?? l10n.orderAssistantNothingFound;
+      final undo = _undo;
+      final onlyChanged =
+          undo != null &&
+          undo.lines.isEmpty &&
+          (undo.changed.isNotEmpty || undo.removed.isNotEmpty);
+      _note = !filled
+          ? error ?? l10n.orderAssistantNothingFound
+          : onlyChanged
+          ? l10n.orderAssistantChanged
+          : (_isNew ? l10n.orderAssistantFilled : l10n.orderAssistantApplied);
     });
     if (filled) HapticFeedback.lightImpact();
   }
@@ -1227,6 +1270,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _store.removeDevice(id);
         _marked.remove('device:$id');
       }
+      for (final before in undo.changed) {
+        before.restore();
+        _marked.remove(before.line);
+      }
+      for (final (line, index) in undo.removed.reversed) {
+        _store.insertLine(line, index);
+      }
+      if (undo.changed.isNotEmpty) _store.refreshLines();
       for (final line in undo.lines) {
         final services = _store.services ?? const <OrderService>[];
         final products = _store.products ?? const <OrderProduct>[];
@@ -1329,14 +1380,157 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (wasListening) await _speech.stop();
   }
 
+  /// The lines on screen, sent so the assistant can change or remove them
+  /// ("a pintura é 300", "tira a lavação"). The server answers by index, so
+  /// the lines themselves are kept to find them even if the list changes
+  /// while it reads.
+  ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
+  _orderSnapshot() {
+    final services = List<OrderService>.of(_store.services ?? const []);
+    final products = List<OrderProduct>.of(_store.products ?? const []);
+    return (
+      snapshot: AiOrderSnapshot(
+        services: [
+          for (final s in services)
+            AiOrderLine(
+              name: s.service?.name ?? s.description ?? '',
+              value: s.value,
+            ),
+        ],
+        products: [
+          for (final p in products)
+            AiOrderLine(
+              name: p.product?.name ?? p.description ?? '',
+              value: p.value,
+              quantity: p.quantity,
+            ),
+        ],
+      ),
+      services: services,
+      products: products,
+    );
+  }
+
+  /// The line a change is about. When it could be more than one (two
+  /// "Pintura"), asks which one in the picker; null when the user goes back
+  /// or the line is no longer in the order.
+  Future<Object?> _lineFor(
+    AiDraftChange change,
+    ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
+    sent,
+  ) async {
+    Object? at(AiLineRef ref) {
+      final all = ref.isProduct ? sent.products : sent.services;
+      return ref.index < all.length ? all[ref.index] : null;
+    }
+
+    if (change.line != null) return at(change.line!);
+    final options = [
+      for (final ref in change.candidates)
+        if (at(ref) case final line?) (ref, line),
+    ];
+    if (options.isEmpty) return null;
+    final format = FormatService()..setLocale(context.l10n.localeName);
+    return pickOne<Object>(
+      context,
+      title: context.l10n.orderAssistantWhichLine(change.name),
+      options: [
+        for (final (ref, line) in options)
+          PickerItem(
+            value: line,
+            title: ref.isProduct
+                ? (line as OrderProduct).product?.name ?? change.name
+                : (line as OrderService).service?.name ?? change.name,
+            subtitle: switch (line) {
+              OrderProduct(:final value?) => format.formatCurrency(value),
+              OrderService(:final value?) => format.formatCurrency(value),
+              _ => context.l10n.catalogNoPrice,
+            },
+          ),
+      ],
+    );
+  }
+
+  /// Changes and removals the user asked for on lines already in the order
+  /// ("a pintura é 300", "tira a lavação"). Removing is the user's own
+  /// request, never the assistant's idea, and "Desfazer" puts it back.
+  Future<bool> _applyChanges(
+    List<AiDraftChange> changes,
+    ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
+    sent,
+    _DraftUndo undo,
+  ) async {
+    final toRemove = <Object>[];
+    var changed = false;
+    for (final change in changes) {
+      final line = await _lineFor(change, sent);
+      if (!mounted) return false;
+      if (line == null) continue;
+      if (change.remove) {
+        if (!toRemove.any((l) => identical(l, line))) toRemove.add(line);
+        continue;
+      }
+      if (change.value == null && change.quantity == null) continue;
+      undo.changed.add(_LineBefore(line));
+      if (line is OrderProduct) {
+        line
+          ..value = change.value ?? line.value
+          ..quantity = change.quantity ?? line.quantity;
+        line.total = line.value == null
+            ? null
+            : line.value! * (line.quantity ?? 1);
+      } else if (line is OrderService) {
+        line.value = change.value ?? line.value;
+      }
+      _marked.add(line);
+      changed = true;
+    }
+    if (changed) _store.refreshLines();
+    // Highest index first, so "Desfazer" can put them back in reverse.
+    final indexed = [
+      for (final line in toRemove)
+        if (line is OrderService)
+          (
+            line,
+            (_store.services ?? const []).indexWhere((e) => identical(e, line)),
+          )
+        else
+          (
+            line,
+            (_store.products ?? const []).indexWhere((e) => identical(e, line)),
+          ),
+    ]..sort((a, b) => b.$2.compareTo(a.$2));
+    for (final (line, index) in indexed) {
+      if (index < 0) continue;
+      if (line is OrderService) {
+        _store.deleteService(index);
+      } else {
+        _store.deleteProduct(index);
+      }
+      _marked.remove(line);
+      undo.removed.add((line, index));
+      changed = true;
+    }
+    return changed;
+  }
+
   /// Fills the order with the draft: the blank "Nova OS" without saving
   /// (deferSave), a saved order right away. Never replaces a customer already
-  /// chosen, a request or a deadline already filled; adds devices and items.
-  /// Never receives, cancels or deletes. Returns false when the draft had
-  /// nothing to use.
-  bool _applyDraft(AiOrderDraft draft) {
+  /// chosen, a request or a deadline already filled; adds devices and items,
+  /// and changes or takes out the lines the user named. Never receives or
+  /// cancels. Returns false when the draft had nothing to use.
+  Future<bool> _applyDraft(
+    AiOrderDraft draft,
+    ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})
+    sent,
+  ) async {
     var used = false;
     final undo = _DraftUndo(_customerGuess, _deviceGuess);
+    if (draft.changes.isNotEmpty &&
+        await _applyChanges(draft.changes, sent, undo)) {
+      used = true;
+    }
+    if (!mounted) return false;
     if (_store.customer == null) {
       if (draft.customer != null) {
         undo.customer = true;

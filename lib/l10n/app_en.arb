@@ -1912,6 +1912,11 @@
   "orderMenuCopyLink": "Copy link",
   "orderPlaceOfService": "Service location",
   "orderAssistantApplied": "I added what's marked to the order. Check it.",
+  "orderAssistantWhichLine": "Which {name}?",
+  "@orderAssistantWhichLine": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantChanged": "I changed the order as you asked. Check it.",
   "pickerCustomerTitle": "Which customer?",
   "pickerDeviceTitle": "Which {device}?",
   "pickerDeviceSubtitle": "for {name}",

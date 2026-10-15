@@ -2025,6 +2025,12 @@
   "orderMenuCopyLink": "Copiar link",
   "orderPlaceOfService": "Local do atendimento",
   "orderAssistantApplied": "Coloquei na OS o que está marcado. Confira.",
+  "orderAssistantWhichLine": "Qual {name}?",
+  "@orderAssistantWhichLine": {
+    "description": "Title of the picker when the assistant can't tell which line the user meant",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "orderAssistantChanged": "Mudei a OS como você pediu. Confira.",
   "pickerCustomerTitle": "Qual cliente?",
   "pickerDeviceTitle": "Qual {device}?",
   "@pickerDeviceTitle": {"placeholders": {"device": {"type": "String"}}},
