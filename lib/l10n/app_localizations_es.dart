@@ -42,7 +42,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get team => 'Equipo';
 
   @override
-  String get collaborators => 'Colaboradores';
+  String get collaborators => 'Miembros del equipo';
 
   @override
   String get save => 'Guardar';
@@ -822,7 +822,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get user => 'Usuario';
 
   @override
-  String get switchCompany => 'Cambiar Empresa';
+  String get switchCompany => 'Cambiar de cuenta';
 
   @override
   String get management => 'Gestión';
@@ -873,7 +873,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo completar. Inténtalo de nuevo.';
 
   @override
-  String get companyData => 'Datos de la Empresa';
+  String get companyData => 'Datos para el cliente';
 
   @override
   String get account => 'Cuenta';
@@ -891,10 +891,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dark => 'Oscuro';
 
   @override
-  String get selectCompany => 'Seleccionar Empresa';
+  String get selectCompany => 'Elegir cuenta';
 
   @override
-  String get companyNoName => 'Empresa sin nombre';
+  String get companyNoName => 'Cuenta sin nombre';
 
   @override
   String get deleteAccountWarning =>
@@ -968,7 +968,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get specialties => 'Especialidades';
 
   @override
-  String get myCompany => 'Mi empresa';
+  String get myCompany => 'Ajustes';
 
   @override
   String get retryAgain => 'Intentar de nuevo';
@@ -984,7 +984,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get roleDescAdmin =>
-      'Acceso total. Configura la empresa, gestiona usuarios y accede a todos los datos.';
+      'Acceso total. Se encarga de los ajustes y del equipo, y ve todos los datos.';
 
   @override
   String get roleAdmin => 'Administrador';
@@ -1123,7 +1123,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get changeLogo => 'Cambiar Logo';
 
   @override
-  String get companyNamePlaceholder => 'Nombre de la Empresa';
+  String get companyNamePlaceholder => 'Nombre que aparece en la OS';
 
   @override
   String get companyEmailPlaceholder => 'contacto@empresa.com';
@@ -1225,7 +1225,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importProcedure => 'Importar Procedimiento';
 
   @override
-  String get importForMyCompany => 'Importar a Mi Empresa';
+  String get importForMyCompany => 'Importar a mi cuenta';
 
   @override
   String get couldNotImportProcedure =>
@@ -1580,15 +1580,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cannotRemoveOnlyAdmin =>
-      'No es posible eliminar al único administrador de la empresa. Promueva a otro colaborador a administrador primero.';
+      'No se puede quitar al único administrador. Haz administrador a otra persona antes.';
 
   @override
   String get cannotChangeOnlyAdminRole =>
       'No es posible cambiar el perfil del único administrador. Promueva a otro colaborador a administrador primero.';
 
   @override
-  String get cannotRemoveSelf =>
-      'No puede eliminarse a sí mismo de la empresa.';
+  String get cannotRemoveSelf => 'No puedes quitarte a ti mismo del equipo.';
 
   @override
   String get invalidInviteCompanyNotFound =>
@@ -1952,7 +1951,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get askAdminToChangePlan =>
-      'Pide al administrador de la empresa que cambie el plan.';
+      'Pide al administrador de la cuenta que cambie el plan.';
 
   @override
   String get subscriptionUnavailable =>
@@ -2715,7 +2714,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get yourAccount => 'Tu cuenta';
 
   @override
-  String get yourCompany => 'Tu empresa';
+  String get yourCompany => 'Datos para el cliente';
 
   @override
   String get catalog => 'Catálogo';
@@ -3217,17 +3216,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingContinue => 'Continuar';
 
   @override
-  String get onboardingBusinessTitle => 'Tu negocio';
+  String get onboardingBusinessTitle => 'Para tus clientes';
 
   @override
-  String get onboardingBusinessName => '¿Cómo se llama tu negocio?';
+  String get onboardingBusinessName => 'Nombre que aparece en la OS';
 
   @override
-  String get onboardingBusinessNamePlaceholder => 'Ej.: Taller de Pepe';
+  String get onboardingBusinessNamePlaceholder =>
+      'Ej.: Taller de Pepe o tu nombre';
 
   @override
   String get onboardingBusinessNameRequired =>
-      'Escribe el nombre de tu negocio.';
+      'Escribe el nombre que aparece en la OS.';
 
   @override
   String get onboardingPhoneLabel => 'Teléfono (opcional)';
@@ -3346,14 +3346,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inviteHaveAnotherCode => 'Tengo otro código';
 
   @override
-  String get inviteCreateOwnCompany => 'Crear mi propia empresa';
+  String get inviteCreateOwnCompany => 'Empezar sin invitación';
 
   @override
   String get inviteCodePlaceholder => 'Ej.: 7K2P9QXA';
 
   @override
   String get segmentLoadError =>
-      'No se pudo abrir tu empresa. Revisa tu internet e inténtalo de nuevo.';
+      'No se pudieron abrir tus OS. Revisa tu internet e inténtalo de nuevo.';
 
   @override
   String get orderAssistantAddPhoto => 'Sacar otra foto';
@@ -3373,7 +3373,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderAssistantErrorDisabled =>
-      'El asistente aún no está disponible para tu empresa.';
+      'El asistente aún no está disponible para tu cuenta.';
 
   @override
   String orderAssistantErrorQuota(String limit) {
@@ -3456,7 +3456,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accumulatedLeaveBlank => 'Dejar en blanco';
 
   @override
-  String get moreSectionCompany => 'Empresa';
+  String get moreSectionCompany => 'Tu trabajo';
 
   @override
   String get moreSectionRecords => 'Registros';
@@ -3579,7 +3579,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pickCountryTitle => '¿Qué país?';
 
   @override
-  String get companyNameRequired => 'Escribe el nombre de la empresa';
+  String get companyNameRequired => 'Escribe el nombre que aparece en la OS';
 
   @override
   String get schedulingRow => 'Agenda';
@@ -5169,8 +5169,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get teamRemoveMemberMessage =>
-      'La persona pierde el acceso a las OS de la empresa.';
+  String get teamRemoveMemberMessage => 'La persona pierde el acceso a las OS.';
 
   @override
   String get teamRoleChanged => 'Rol cambiado';

@@ -60,7 +60,7 @@ void main() {
         'Contratos',
         'Checklists',
         'Avaliações',
-        'Sua empresa',
+        'Dados para o cliente',
         'Equipe',
         'Plano',
         'Lembretes',
@@ -75,7 +75,7 @@ void main() {
       expect(opened, [MoreDestination.team]);
     });
 
-    testWidgets('groups rows under Cadastros, Empresa and Você like the '
+    testWidgets('groups rows under Cadastros, Seu trabalho and Você like the '
         'prototype, with the user as the account row', (tester) async {
       tallScreen(tester);
       await tester.pumpWidget(app(MoreView(
@@ -93,8 +93,8 @@ void main() {
       expect(find.text('Serviços e peças'), findsOneWidget);
       double y(String t) => tester.getTopLeft(find.text(t)).dy;
       expect(y('Cadastros'), lessThan(y('Clientes')));
-      expect(y('Avaliações'), lessThan(y('Empresa')));
-      expect(y('Empresa'), lessThan(y('Sua empresa')));
+      expect(y('Avaliações'), lessThan(y('Seu trabalho')));
+      expect(y('Seu trabalho'), lessThan(y('Dados para o cliente')));
       expect(y('Plano'), lessThan(y('Você')));
       expect(y('Você'), lessThan(y('Lembretes')));
     });
@@ -121,7 +121,7 @@ void main() {
         ),
       )));
       expect(find.text('Cadastros'), findsNothing);
-      expect(find.text('Empresa'), findsOneWidget);
+      expect(find.text('Seu trabalho'), findsOneWidget);
     });
 
     testWidgets('hides rows the role cannot see', (tester) async {
@@ -325,7 +325,7 @@ void main() {
         onOpenTerms: () {},
         onOpenSegment: () {},
       )));
-      expect(find.text('Dados da Empresa'), findsOneWidget);
+      expect(find.text('Dados para o cliente'), findsWidgets);
       expect(find.text('Como você trabalha'), findsOneWidget);
       expect(find.text('Valores e cobrança'), findsOneWidget);
       expect(find.text(pt.valuesAndBillingHint), findsOneWidget);

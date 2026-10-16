@@ -169,7 +169,7 @@ abstract class AppLocalizations {
   /// No description provided for @collaborators.
   ///
   /// In pt, this message translates to:
-  /// **'Colaboradores'**
+  /// **'Pessoas na equipe'**
   String get collaborators;
 
   /// No description provided for @save.
@@ -1699,7 +1699,7 @@ abstract class AppLocalizations {
   /// No description provided for @switchCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Trocar Empresa'**
+  /// **'Trocar de conta'**
   String get switchCompany;
 
   /// No description provided for @management.
@@ -1789,7 +1789,7 @@ abstract class AppLocalizations {
   /// No description provided for @companyData.
   ///
   /// In pt, this message translates to:
-  /// **'Dados da Empresa'**
+  /// **'Dados para o cliente'**
   String get companyData;
 
   /// No description provided for @account.
@@ -1825,13 +1825,13 @@ abstract class AppLocalizations {
   /// No description provided for @selectCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Selecionar Empresa'**
+  /// **'Escolher conta'**
   String get selectCompany;
 
   /// No description provided for @companyNoName.
   ///
   /// In pt, this message translates to:
-  /// **'Empresa sem nome'**
+  /// **'Conta sem nome'**
   String get companyNoName;
 
   /// No description provided for @deleteAccountWarning.
@@ -1963,7 +1963,7 @@ abstract class AppLocalizations {
   /// No description provided for @myCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Minha empresa'**
+  /// **'Ajustes'**
   String get myCompany;
 
   /// No description provided for @retryAgain.
@@ -1993,7 +1993,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleDescAdmin.
   ///
   /// In pt, this message translates to:
-  /// **'Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.'**
+  /// **'Acesso total. Cuida dos ajustes, da equipe e vê todos os dados.'**
   String get roleDescAdmin;
 
   /// No description provided for @roleAdmin.
@@ -2257,7 +2257,7 @@ abstract class AppLocalizations {
   /// No description provided for @companyNamePlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Nome da Empresa'**
+  /// **'Nome que aparece na OS'**
   String get companyNamePlaceholder;
 
   /// No description provided for @companyEmailPlaceholder.
@@ -2431,7 +2431,7 @@ abstract class AppLocalizations {
   /// No description provided for @importForMyCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Importar para Minha Empresa'**
+  /// **'Importar para a minha conta'**
   String get importForMyCompany;
 
   /// No description provided for @couldNotImportProcedure.
@@ -3007,7 +3007,7 @@ abstract class AppLocalizations {
   /// No description provided for @cannotRemoveOnlyAdmin.
   ///
   /// In pt, this message translates to:
-  /// **'Não é possível remover o único administrador da empresa. Promova outro colaborador a administrador antes de remover este.'**
+  /// **'Não dá para tirar o único administrador. Torne outra pessoa administrador antes.'**
   String get cannotRemoveOnlyAdmin;
 
   /// No description provided for @cannotChangeOnlyAdminRole.
@@ -3019,7 +3019,7 @@ abstract class AppLocalizations {
   /// No description provided for @cannotRemoveSelf.
   ///
   /// In pt, this message translates to:
-  /// **'Você não pode remover a si mesmo da empresa.'**
+  /// **'Você não pode tirar a si mesmo da equipe.'**
   String get cannotRemoveSelf;
 
   /// No description provided for @invalidInviteCompanyNotFound.
@@ -3673,7 +3673,7 @@ abstract class AppLocalizations {
   /// No description provided for @askAdminToChangePlan.
   ///
   /// In pt, this message translates to:
-  /// **'Peça ao administrador da empresa para mudar de plano.'**
+  /// **'Peça ao administrador da conta para mudar de plano.'**
   String get askAdminToChangePlan;
 
   /// No description provided for @subscriptionUnavailable.
@@ -4837,7 +4837,7 @@ abstract class AppLocalizations {
   /// No description provided for @yourCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Sua empresa'**
+  /// **'Dados para o cliente'**
   String get yourCompany;
 
   /// No description provided for @catalog.
@@ -5605,25 +5605,25 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingBusinessTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Seu negócio'**
+  /// **'Para o cliente'**
   String get onboardingBusinessTitle;
 
   /// No description provided for @onboardingBusinessName.
   ///
   /// In pt, this message translates to:
-  /// **'Como se chama o seu negócio?'**
+  /// **'Nome que aparece na OS'**
   String get onboardingBusinessName;
 
   /// No description provided for @onboardingBusinessNamePlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: Oficina do Zé'**
+  /// **'Ex.: Refrigeração Silva ou o seu nome'**
   String get onboardingBusinessNamePlaceholder;
 
   /// No description provided for @onboardingBusinessNameRequired.
   ///
   /// In pt, this message translates to:
-  /// **'Diga o nome do seu negócio.'**
+  /// **'Escreva o nome que aparece na OS.'**
   String get onboardingBusinessNameRequired;
 
   /// No description provided for @onboardingPhoneLabel.
@@ -5791,7 +5791,7 @@ abstract class AppLocalizations {
   /// No description provided for @inviteCreateOwnCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Criar minha própria empresa'**
+  /// **'Começar sem convite'**
   String get inviteCreateOwnCompany;
 
   /// No description provided for @inviteCodePlaceholder.
@@ -5803,7 +5803,7 @@ abstract class AppLocalizations {
   /// No description provided for @segmentLoadError.
   ///
   /// In pt, this message translates to:
-  /// **'Não deu para abrir a sua empresa. Confira a internet e tente de novo.'**
+  /// **'Não deu para abrir as suas OS. Confira a internet e tente de novo.'**
   String get segmentLoadError;
 
   /// No description provided for @orderAssistantAddPhoto.
@@ -5833,7 +5833,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderAssistantErrorDisabled.
   ///
   /// In pt, this message translates to:
-  /// **'O assistente ainda não está liberado para a sua empresa.'**
+  /// **'O assistente ainda não está liberado para a sua conta.'**
   String get orderAssistantErrorDisabled;
 
   /// No description provided for @orderAssistantErrorQuota.
@@ -5959,7 +5959,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreSectionCompany.
   ///
   /// In pt, this message translates to:
-  /// **'Empresa'**
+  /// **'Seu trabalho'**
   String get moreSectionCompany;
 
   /// No description provided for @moreSectionRecords.
@@ -6169,7 +6169,7 @@ abstract class AppLocalizations {
   /// No description provided for @companyNameRequired.
   ///
   /// In pt, this message translates to:
-  /// **'Escreva o nome da empresa'**
+  /// **'Escreva o nome que aparece na OS'**
   String get companyNameRequired;
 
   /// No description provided for @schedulingRow.
@@ -8585,7 +8585,7 @@ abstract class AppLocalizations {
   /// No description provided for @teamRemoveMemberMessage.
   ///
   /// In pt, this message translates to:
-  /// **'A pessoa perde o acesso às OS da empresa.'**
+  /// **'A pessoa perde o acesso às OS.'**
   String get teamRemoveMemberMessage;
 
   /// No description provided for @teamRoleChanged.

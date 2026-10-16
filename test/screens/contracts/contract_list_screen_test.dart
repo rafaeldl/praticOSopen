@@ -155,7 +155,7 @@ void main() {
     expect(opened, 1);
   });
 
-  testWidgets('back button says "Minha empresa"', (tester) async {
+  testWidgets('back button says "Ajustes"', (tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -178,7 +178,7 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(find.text('Minha empresa'), findsOneWidget);
+    expect(find.text('Ajustes'), findsOneWidget);
   });
 
   testWidgets('loading state', (tester) async {

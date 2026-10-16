@@ -45,7 +45,8 @@ Campos gravados na empresa: `name`, `phone` (só se preenchido), `segment`, `sub
 AuthWrapper (sem empresa e sem convite pendente, ou empresa sem ramo)
   → OnboardingFlow → Seu ramo (toque no ramo avança; ✓ no escolhido)
   → [Especialidades: todas marcadas; "Continuar" sempre ativo]
-  → Seu negócio: nome (obrigatório), telefone (opcional), "Valores e cobrança"
+  → Seu negócio ("Como você aparece para o cliente"): nome opcional — vazio usa o nome
+    da pessoa (só é obrigatório se a conta não tiver nome), telefone (opcional), "Valores e cobrança"
   → "Criar meu PraticOS" (com exemplos) ou "Começar sem exemplos"
   → saveCompany → seedCompany → finish (recarrega AuthStore) → '/' (Início)
 ```
@@ -91,3 +92,10 @@ Segue `docs/APP_DESIGN_SYSTEM.md`:
 
 `tutorial_begin` (`variant: setup`, primeiro toque num ramo), `company_created`,
 `tutorial_complete`: ver `docs/FIREBASE_ANALYTICS.md`.
+
+## Modo individual (iOS 3.1.1)
+
+O app não fala em "cadastro de empresa": a empresa continua existindo por baixo (assinatura,
+OS, permissões), mas para o usuário é a conta dele. Spec:
+`docs/superpowers/specs/2026-10-16-modo-individual-design.md`. Equipe é recurso pago: no Free,
+"Convidar" abre os planos (IAP) antes do formulário.

@@ -137,13 +137,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   /// First access without a company (or with a company that has no segment
-  /// yet): Ramo → [Especialidades] → Seu negócio → Início.
+  /// yet): Ramo → [Especialidades] → Para o cliente → Início.
   Widget _onboarding(_CompanyCheckResult result) {
     return OnboardingFlow(
       deps: OnboardingDeps.firebase(widget.authStore),
       companyId: result.companyId,
       initialName: result.companyName,
       initialPhone: result.companyPhone,
+      ownerName: FirebaseAuth.instance.currentUser?.displayName,
     );
   }
 

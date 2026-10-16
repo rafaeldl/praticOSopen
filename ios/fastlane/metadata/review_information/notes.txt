@@ -1,20 +1,21 @@
 IN-APP PURCHASE (GUIDELINE 3.1.1) - PLEASE READ
 
-PraticOS is a freemium app. All paid plans are sold only through In-App Purchase.
+PraticOS is a personal work-order tool for independent service professionals (air-conditioning technicians, mechanics, phone repair, cleaning, etc.). There is no business or organization registration in the app: on first launch the user picks their line of work and, optionally, the name their customers will see on work orders. Everything after that is the user's own account.
 
-- Creating a company account is free and gives access to the Free plan. Registration does not unlock any paid content.
-- The Free plan has monthly limits on photos, checklist form templates and team users. Paid plans raise these limits and remove the watermark from PDF work orders.
+All paid features are sold only through In-App Purchase:
+- The Free plan has monthly limits on photos, checklist templates and people on the account. Paid plans raise these limits and remove the watermark from PDF work orders.
+- Inviting another person to work on the same account ("Equipe") is a paid feature. On the Free plan, tapping "Convidar" opens the In-App Purchase plans.
 - Paid plans are auto-renewable monthly subscriptions sold through In-App Purchase: Starter, Pro and Business (subscription group "PraticOS").
-- Paid plans cannot be bought anywhere else: the website shows no prices, and the app has no external purchase links or calls to action.
+- Paid plans cannot be bought anywhere else from the app: the app has no external purchase links or calls to action, and the website shows no prices.
 
 Where to find the paywall:
 1. Sign in with the demo account (steps below).
-2. Open the "Mais" (More) tab.
-3. In the "Assinatura" (Subscription) section, tap "Ver planos" (View plans).
+2. On the "Início" (Home) tab, tap the profile button at the top.
+3. Tap "Plano" (Plan), then "Ver planos" (View plans).
 
-The paywall shows each plan with its price and period, the auto-renewal terms, Terms of Use, Privacy Policy and a Restore Purchases button. In the same section, "Gerenciar assinatura" (Manage subscription) opens subscription management and "Restaurar compras" (Restore purchases) restores previous purchases.
+The paywall shows each plan with its price and period, the auto-renewal terms, Terms of Use, Privacy Policy and a Restore Purchases button.
 
-PraticOS is a work-order management tool for service companies (mechanics, technicians, cleaning, etc.): work orders, customers, scheduling and teams. The payment features in work orders let a business record and charge its own customers for physical, real-world services performed outside the app (guideline 3.1.3(e)); they are not payments to PraticOS.
+The payment features in work orders let the professional record and charge their own customers for physical, real-world services performed outside the app (guideline 3.1.3(e)); they are not payments to PraticOS.
 
 ----------
 

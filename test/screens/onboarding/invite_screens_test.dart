@@ -72,7 +72,7 @@ void main() {
       expect(find.text('Entrar na equipe'), findsOneWidget);
       expect(find.text('Recusar convite'), findsOneWidget);
       expect(find.text('Tenho outro código'), findsOneWidget);
-      expect(find.text('Criar minha própria empresa'), findsOneWidget);
+      expect(find.text('Começar sem convite'), findsOneWidget);
       // No filled Cupertino buttons anymore.
       expect(find.byType(CupertinoButton), findsWidgets);
       expect(
