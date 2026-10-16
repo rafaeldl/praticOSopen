@@ -63,7 +63,7 @@ A tela unificada permite:
 - **Quando**: dia em que o dinheiro entrou, "Hoje" por padrão; abre um seletor de data
   sem datas futuras. Grava `paidAt` na transação (hoje = agora; outro dia = meio-dia do dia)
 - "Anexar comprovante" (câmera, galeria ou arquivo), se tiver `attachPhotos`
-- Botão azul "Recebi R$ X". Sem forma de pagamento (Pix/dinheiro/cartão)
+- Botão azul "Confirmar recebimento" (o valor fica só no campo). Sem forma de pagamento (Pix/dinheiro/cartão)
 - Desconto e "Desfazer" ficam no menu "…"
 
 #### Histórico de Transações
@@ -75,27 +75,28 @@ A tela unificada permite:
 
 Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart`), empurrada:
 
-- Título "Receber de João" (quebra linha, sem reticências) e a frase "Deve R$ 1.250 em 3 OS".
-- **Um cartão só** (`accentSoft`): "Quanto recebeu", o valor num campo com cara de campo
-  (`ReceiveAmountField`: caixa opaca com borda azul e lápis; tocar em qualquer parte abre o
-  teclado numérico), pré-preenchido com tudo o que o cliente deve, a dica "Recebeu só uma
-  parte? Toque no valor e digite quanto.", "Quando" (como acima), "Anexar comprovante" e, no
-  fim do mesmo cartão, o botão azul "Recebi R$ X" (segue o valor digitado), desligado com 0
-  ou acima do que deve (a dica vira o motivo). "Mandar cobrança" fica como link logo abaixo.
-  Sucesso: aviso (`showAppToast`) e volta; o Financeiro recarrega.
-- **Como fica** (embaixo do cartão): uma linha por OS, recalculada a cada tecla: "OS 182 ·
-  quita R$ 450", "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Cada OS
-  do cliente abre a OS (`/order`, com ›); ao voltar, o valor digitado fica e a OS é lida de
-  novo, então a dívida e a divisão se atualizam. "Outras OS" (de outro vendedor) não abrem.
-- O valor vai **primeiro para as OS mais antigas** (`allocatePayment` em
+- Título "Receber de João" (quebra linha, sem reticências) e a frase "3 OS em aberto. Marque as
+  OS que foram pagas." (com 1 OS só "1 OS em aberto.").
+- **Formulário em cartões brancos** (`CupertinoListSection.insetGrouped`):
+  - "Quanto recebeu": campo padrão (sem borda azul nem lápis), com ⓧ para limpar, teclado numérico
+    com vírgula e uma barra "OK" em cima do teclado. Não abre o teclado sozinho. Começa com a soma
+    das OS marcadas e é o **único lugar** onde o valor aparece. Rodapé: "Se recebeu só uma parte,
+    digite quanto." ou o motivo do botão desligado ("Digite quanto recebeu.", "Passa do que falta
+    nessas OS (R$ X).", "Marque pelo menos uma OS.").
+  - "Quando › Hoje" (como acima) e "Comprovante › Anexar" (depois, o nome do arquivo com ⓧ para
+    tirar), linhas normais do formulário.
+- Botão azul "Confirmar recebimento" (58 de altura, o único azul da tela). Sucesso: aviso
+  (`showAppToast`) e volta; o Financeiro recarrega.
+- **Está pagando**: uma linha por OS em aberto, mais antiga primeiro. Tocar na linha marca ou
+  desmarca (✓ no círculo, padrão de seleção do iPhone; com 1 OS não há o que marcar). A linha mostra
+  "OS 15 · Fiat Uno" (veículo/aparelho, ou o primeiro serviço, como no recibo em PDF), quanto falta à
+  direita e, embaixo, o que este pagamento faz nela: "Quita", "Recebe R$ 300 · fica R$ 199,99" ou
+  "Fica para depois". O ⓘ (44 pt) abre a OS (`/order`); ao voltar, o valor digitado fica e a OS é
+  lida de novo. Rodapé: "Se o valor não der para tudo, as mais antigas são pagas primeiro."
+- Enquanto a pessoa não digita, o valor segue a soma das OS marcadas; depois de digitar, marcar e
+  desmarcar não muda o valor. O máximo é o que falta nas marcadas.
+- O valor vai **primeiro para as OS mais antigas** entre as marcadas (`allocatePayment` em
   `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
-- **Escolher as OS** (link embaixo de "Como fica", só com 2+ OS em aberto): tela de escolher
-  com várias marcações (`ReceiveOrdersPicker`, `PickerScaffold(multiple: true)`), título
-  "Quais OS ele está pagando?", cada linha "OS 185" / "Falta R$ 400 · 01/10/2026", ✓ no topo
-  confirma (cinza sem nenhuma marcada). Começa com todas marcadas. Depois disso o valor vai só
-  para as escolhidas, ainda da mais antiga para a mais nova (`chosenBalances` +
-  `allocatePayment`), o valor é preenchido com o que falta nelas, e o máximo passa a ser essa
-  soma ("Passa do que falta nessas OS (R$ X)."). Marcar todas volta ao padrão.
 
 **Entradas:**
 - Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
@@ -121,15 +122,16 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 
 ### Mandar cobrança de várias OS (Asaas)
 
-Em "Receber de João", com a conta Asaas conectada (piloto) e permissão `chargeOrder`, o link
-"Mandar cobrança" abre `CreateCustomerChargeScreen`
+Em "Receber de João", com a conta Asaas conectada (piloto) e permissão `chargeOrder`, o "…" do
+topo tem "Mandar link para pagar…", que abre `CreateCustomerChargeScreen`
 (`lib/screens/payments/create_customer_charge_screen.dart`, sheet grande): valor (até o que falta
-nas OS escolhidas, mais antiga primeiro), vencimento e CPF/CNPJ se faltar. O servidor cria **um**
+nas OS marcadas, mais antiga primeiro), vencimento e CPF/CNPJ se faltar. O servidor cria **um**
 link do Asaas para as OS (`POST /v1/app/customers/{id}/charges`) e o app abre o compartilhar.
 
 - A cobrança aberta aparece na tela ("Link aberto de R$ X", "OS 182, 190 · vence 18/10"), lida de
-  `companies/{cid}/customerCharges` (`CustomerChargeRepository.watchOpen`, um filtro só). No "…":
-  copiar, mandar o link de novo e cancelar (vermelho, com confirmação).
+  `companies/{cid}/customerCharges` (`CustomerChargeRepository.watchOpen`, um filtro só), como uma
+  linha acima do valor. Com link aberto, o "…" troca "Mandar link para pagar…" por mandar o link de
+  novo, copiar e cancelar (vermelho, com confirmação).
 - Criar o link cancela os links abertos de uma OS só dessas OS e o link anterior de várias OS do
   cliente. Enquanto a OS está nesse link, "Mandar cobrança" da OS sozinha explica que é preciso
   cancelar o de várias OS primeiro.
@@ -145,7 +147,8 @@ link do Asaas para as OS (`POST /v1/app/customers/{id}/charges`) e o app abre o 
 
 O consultor só grava nas OS que ele criou (regras do Firestore). Em "Receber de João" ele vê as
 OS dele primeiro e uma seção "Outras OS de {nome}" (só número, quanto falta e data, vindas de
-`GET /v1/app/customers/{id}/open-orders`), que ele inclui pelo "Escolher as OS".
+`GET /v1/app/customers/{id}/open-orders`), desmarcadas e sem ⓘ (não abrem); ele inclui marcando a
+linha.
 
 - Sem OS de outra pessoa marcada: caminho normal do app (WriteBatch, funciona offline).
 - Com alguma OS de outra pessoa: o recebimento vai pelo servidor

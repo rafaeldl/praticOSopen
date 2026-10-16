@@ -79,8 +79,6 @@ void main() {
     List<String>? shared,
     AsaasApiService? api,
     Future<List<CustomerOpenOrder>> Function()? others,
-    Future<Set<String>?> Function(BuildContext, List<Order>, Set<String>)?
-    pickOrders,
     double textScale = 1,
   }) async {
     tester.view.physicalSize = const Size(430, 1600);
@@ -107,7 +105,6 @@ void main() {
             shareLink: (_, url) async => shared?.add(url),
             api: api,
             otherOrdersLoader: others ?? () async => const [],
-            pickOrders: pickOrders,
           ),
         ),
       ),
@@ -115,11 +112,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('Mandar cobrança', () {
+  group('Mandar link para pagar', () {
     testWidgets('hidden without Asaas', (tester) async {
       await pump(tester);
-      expect(find.byKey(const Key('receiveCustomerSendCharge')), findsNothing);
-      expect(find.byKey(const Key('receiveCustomerChargeMenu')), findsNothing);
+      expect(find.byKey(const Key('receiveCustomerMenu')), findsNothing);
+      expect(find.text('Mandar cobrança'), findsNothing);
     });
 
     testWidgets('creates one link for the orders and shares it', (
@@ -137,8 +134,12 @@ void main() {
         },
       );
 
-      expect(find.text('Mandar cobrança'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('receiveCustomerSendCharge')));
+      // Not in the content: it lives in the "…" of the top bar.
+      expect(find.text('Mandar link para pagar…'), findsNothing);
+      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
+      await tester.pumpAndSettle();
+      expect(find.text('Mandar link para pagar…'), findsOneWidget);
+      await tester.tap(find.text('Mandar link para pagar…'));
       await tester.pumpAndSettle();
 
       expect(calls.single.$1, ['a', 'b']);
@@ -165,6 +166,10 @@ void main() {
 
       expect(find.text('Link aberto de ${brl(950)}'), findsOneWidget);
       expect(find.text('OS 182, 190 · vence 20/10/2026'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
+      await tester.pumpAndSettle();
+      // With a link open, the "…" shares it again instead of a new one.
+      expect(find.text('Mandar link para pagar…'), findsNothing);
       await tester.tap(find.text('Mandar o link de novo'));
       await tester.pumpAndSettle();
       expect(created, 0);
@@ -193,7 +198,7 @@ void main() {
         openCharge: Stream.value(_charge()),
       );
 
-      await tester.tap(find.byKey(const Key('receiveCustomerChargeMenu')));
+      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancelar o link').last);
       await tester.pumpAndSettle();
@@ -233,7 +238,9 @@ void main() {
       expect(find.text('Outras OS de João'), findsOneWidget);
       expect(find.byKey(const Key('receiveCustomerOther_x')), findsOneWidget);
       expect(find.byKey(const Key('receiveCustomerOther_a')), findsNothing);
-      expect(find.text('OS 175 · continua ${brl(200)}'), findsNothing);
+      // Unchecked and not openable (no ⓘ).
+      expect(find.byKey(const Key('receiveCustomerInfo_x')), findsNothing);
+      expect(find.byKey(const Key('receiveCustomerLine_x')), findsNothing);
 
       await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
       await tester.pumpAndSettle(const Duration(seconds: 5));
@@ -248,22 +255,21 @@ void main() {
       tester,
     ) async {
       final service = _FakeService();
-      List<String>? offered;
-      await pump(
-        tester,
-        service: service,
-        others: others,
-        pickOrders: (_, orders, _) async {
-          offered = [for (final o in orders) o.id!];
-          return {'x', 'a'};
-        },
-      );
+      await pump(tester, service: service, others: others);
 
-      await tester.tap(find.byKey(const Key('receiveCustomerChoose')));
-      await tester.pumpAndSettle();
-      expect(offered, ['x', 'a', 'b']);
-      expect(find.text('OS 175 · quita ${brl(200)}'), findsOneWidget);
-      expect(find.text('Outras OS de João'), findsNothing);
+      // Check 175 (someone else's) and uncheck 190.
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_x')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
+      await tester.pump();
+      // The amount followed the checked orders: 200 + 450.
+      expect(find.textContaining('650,00'), findsOneWidget);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('receiveCustomerLine_x')))
+            .data,
+        'Quita',
+      );
 
       await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
       await tester.pumpAndSettle(const Duration(seconds: 5));
@@ -275,14 +281,11 @@ void main() {
 
     testWidgets('offline: toast and keeps what was typed', (tester) async {
       final service = _FakeService(failOnline: CustomerReceiptFailure.offline);
-      await pump(
-        tester,
-        service: service,
-        others: others,
-        pickOrders: (_, _, _) async => {'x'},
-      );
-      await tester.tap(find.byKey(const Key('receiveCustomerChoose')));
-      await tester.pumpAndSettle();
+      await pump(tester, service: service, others: others);
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_x')));
+      await tester.pump();
       await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
       await tester.pump();
 
@@ -337,7 +340,7 @@ void main() {
           .first,
     );
     expect(tester.takeException(), isNull);
-    expect(find.text('Mandar o link de novo'), findsOneWidget);
+    expect(find.byKey(const Key('receiveCustomerMenu')), findsOneWidget);
   });
 
   test('customerChargeReady needs permission, pilot, connection, customer', () {

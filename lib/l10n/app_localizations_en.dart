@@ -2855,11 +2855,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiveAllDone => 'All received';
 
   @override
-  String receiveButton(String amount) {
-    return 'Received $amount';
-  }
-
-  @override
   String get receiveAttachReceipt => 'Attach receipt';
 
   @override
@@ -2920,50 +2915,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiveWhen => 'When';
 
   @override
-  String receiveCustomerTitle(String name) {
-    return 'Receive from $name';
-  }
+  String get receiveConfirmButton => 'Confirm payment';
 
   @override
-  String receiveCustomerOwes(String amount, int count) {
+  String receiveCustomerOpenCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count orders',
-      one: '1 order',
+      other: '$count open orders. Check the ones that were paid.',
+      one: '1 open order.',
     );
-    return 'Owes $amount on $_temp0';
+    return '$_temp0';
+  }
+
+  @override
+  String get receiveCustomerPartHint =>
+      'If you got only part of it, type how much.';
+
+  @override
+  String get receiveCustomerPaying => 'Paying for';
+
+  @override
+  String receiveCustomerOrderRow(int number, String description) {
+    return 'Order $number · $description';
+  }
+
+  @override
+  String get receiveCustomerRowSettles => 'Pays it off';
+
+  @override
+  String receiveCustomerRowPartial(String amount, String left) {
+    return 'Gets $amount · $left left';
+  }
+
+  @override
+  String get receiveCustomerRowLater => 'Left for later';
+
+  @override
+  String get receiveCustomerNoneChecked => 'Check at least one order.';
+
+  @override
+  String get receiveCustomerSendLink => 'Send payment link…';
+
+  @override
+  String receiveCustomerOpenOrder(int number) {
+    return 'Open order $number';
+  }
+
+  @override
+  String get receiveAttach => 'Attach';
+
+  @override
+  String receiveCustomerTitle(String name) {
+    return 'Receive from $name';
   }
 
   @override
   String get receiveCustomerAmountLabel => 'How much you got';
 
   @override
-  String get receiveCustomerHowItGoes => 'How it splits';
-
-  @override
   String get receiveCustomerOldestFirst =>
-      'The amount goes to the oldest orders first.';
-
-  @override
-  String receiveCustomerSettles(int number, String amount) {
-    return 'Order $number · paid off with $amount';
-  }
-
-  @override
-  String receiveCustomerPartial(int number, String amount, String left) {
-    return 'Order $number · gets $amount, $left left';
-  }
-
-  @override
-  String receiveCustomerUntouched(int number, String amount) {
-    return 'Order $number · still $amount';
-  }
-
-  @override
-  String receiveCustomerTooMuch(String total) {
-    return 'That is more than they owe ($total).';
-  }
+      'If the amount doesn\'t cover everything, the oldest are paid first.';
 
   @override
   String get receiveCustomerZero => 'Type how much you got.';
@@ -2976,9 +2988,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get receiveCustomerUploadFailed =>
       'Could not send the receipt. Check the internet and try again.';
-
-  @override
-  String get receiveCustomerSendCharge => 'Send charge';
 
   @override
   String receiveCustomerChargeIntro(String name, int count, String numbers) {
@@ -3007,9 +3016,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get receiveCustomerChargeMenu => 'Link actions';
-
-  @override
   String get receiveCustomerShareCharge => 'Send the link again';
 
   @override
@@ -3027,31 +3033,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiveCustomerOthersNote =>
-      'Created by someone else. To include them, tap Choose the orders.';
+      'Created by someone else. Check one to include it; saving needs internet.';
 
   @override
   String get receiveCustomerOffline =>
       'No internet. To receive on someone else\'s orders you need to be online.';
 
   @override
-  String get receiveCustomerChooseOrders => 'Choose the orders';
-
-  @override
-  String get receiveCustomerPickTitle => 'Which orders is this for?';
-
-  @override
   String receiveCustomerPickRow(int number) {
     return 'Order $number';
   }
-
-  @override
-  String receiveCustomerPickSubtitle(String amount, String date) {
-    return '$amount open · $date';
-  }
-
-  @override
-  String get receiveCustomerChosenOnly =>
-      'The amount goes only to the chosen orders, oldest first.';
 
   @override
   String receiveCustomerTooMuchChosen(String total) {

@@ -1478,14 +1478,6 @@
   "receiveTitle": "Receive",
   "receiveMissing": "Left to receive",
   "receiveAllDone": "All received",
-  "receiveButton": "Received {amount}",
-  "@receiveButton": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "receiveAttachReceipt": "Attach receipt",
   "receiveAlreadyReceived": "Already received",
   "receiveWithReceipt": "with receipt",
@@ -1531,6 +1523,18 @@
   "receiveMoreOptions": "More options",
   "receiveRemoveReceipt": "Remove receipt",
   "receiveWhen": "When",
+  "receiveConfirmButton": "Confirm payment",
+  "receiveCustomerOpenCount": "{count, plural, =1{1 open order.} other{{count} open orders. Check the ones that were paid.}}",
+  "receiveCustomerPartHint": "If you got only part of it, type how much.",
+  "receiveCustomerPaying": "Paying for",
+  "receiveCustomerOrderRow": "Order {number} · {description}",
+  "receiveCustomerRowSettles": "Pays it off",
+  "receiveCustomerRowPartial": "Gets {amount} · {left} left",
+  "receiveCustomerRowLater": "Left for later",
+  "receiveCustomerNoneChecked": "Check at least one order.",
+  "receiveCustomerSendLink": "Send payment link…",
+  "receiveCustomerOpenOrder": "Open order {number}",
+  "receiveAttach": "Attach",
   "receiveCustomerTitle": "Receive from {name}",
   "@receiveCustomerTitle": {
     "placeholders": {
@@ -1539,64 +1543,8 @@
       }
     }
   },
-  "receiveCustomerOwes": "Owes {amount} on {count, plural, =1{1 order} other{{count} orders}}",
-  "@receiveCustomerOwes": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "receiveCustomerAmountLabel": "How much you got",
-  "receiveCustomerHowItGoes": "How it splits",
-  "receiveCustomerOldestFirst": "The amount goes to the oldest orders first.",
-  "receiveCustomerSettles": "Order {number} · paid off with {amount}",
-  "@receiveCustomerSettles": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerPartial": "Order {number} · gets {amount}, {left} left",
-  "@receiveCustomerPartial": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "left": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerUntouched": "Order {number} · still {amount}",
-  "@receiveCustomerUntouched": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerTooMuch": "That is more than they owe ({total}).",
-  "@receiveCustomerTooMuch": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      }
-    }
-  },
+  "receiveCustomerOldestFirst": "If the amount doesn't cover everything, the oldest are paid first.",
   "receiveCustomerZero": "Type how much you got.",
   "receiveCustomerDone": "Got {amount} from {name}",
   "@receiveCustomerDone": {
@@ -1610,23 +1558,17 @@
     }
   },
   "receiveCustomerUploadFailed": "Could not send the receipt. Check the internet and try again.",
-  "receiveCustomerSendCharge": "Send charge",
   "receiveCustomerChargeIntro": "{name} gets one link to pay {count, plural, =1{order {numbers}} other{orders {numbers}}} by Pix, boleto or card.",
   "receiveCustomerChargeOwedHint": "Open on these orders: {value}",
   "receiveCustomerOpenCharge": "Open link for {amount}",
   "receiveCustomerOpenChargeDetail": "Orders {numbers} · due {date}",
-  "receiveCustomerChargeMenu": "Link actions",
   "receiveCustomerShareCharge": "Send the link again",
   "receiveCustomerChargeCancelTitle": "Cancel the {amount} link?",
   "receiveCustomerChargeCanceled": "Link canceled",
   "receiveCustomerOthersTitle": "Other orders of {name}",
-  "receiveCustomerOthersNote": "Created by someone else. To include them, tap Choose the orders.",
+  "receiveCustomerOthersNote": "Created by someone else. Check one to include it; saving needs internet.",
   "receiveCustomerOffline": "No internet. To receive on someone else's orders you need to be online.",
-  "receiveCustomerChooseOrders": "Choose the orders",
-  "receiveCustomerPickTitle": "Which orders is this for?",
   "receiveCustomerPickRow": "Order {number}",
-  "receiveCustomerPickSubtitle": "{amount} open · {date}",
-  "receiveCustomerChosenOnly": "The amount goes only to the chosen orders, oldest first.",
   "receiveCustomerTooMuchChosen": "That is more than is open on these orders ({total}).",
   "receiptTitle": "Payment",
   "receiptRowSettled": "Order {number} · {amount} · paid off",

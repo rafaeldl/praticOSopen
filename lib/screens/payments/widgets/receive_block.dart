@@ -11,7 +11,7 @@ import 'package:praticos/utils/currency_input.dart';
 /// "Did the customer pay?" block of the Receber screen.
 ///
 /// Three states: open (amount already filled with what is missing, receipt
-/// link, one blue "Recebi R$ X" button that follows the typed amount), paid
+/// link, one blue "Confirmar recebimento" button, off with 0), paid
 /// ("Tudo recebido", no button) and blocked (quote/canceled order, [blockedMessage]).
 /// The payment method is never asked here.
 class ReceiveBlock extends StatelessWidget {
@@ -152,9 +152,7 @@ class ReceiveBlock extends StatelessWidget {
             valueListenable: controller,
             builder: (context, value, _) {
               final amount = parseCurrencyInput(value.text);
-              final label = context.l10n.receiveButton(
-                ReceiveAmountField.textFor(amount),
-              );
+              final label = context.l10n.receiveConfirmButton;
               return SizedBox(
                 width: double.infinity,
                 height: AppSizes.primaryButtonHeight,
