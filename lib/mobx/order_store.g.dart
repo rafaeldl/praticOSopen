@@ -1536,6 +1536,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void mergeAttachments(Order saved) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.mergeAttachments',
+    );
+    try {
+      return super.mergeAttachments(saved);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setPhotoCover(int index) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setPhotoCover',

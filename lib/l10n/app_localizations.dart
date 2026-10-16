@@ -5716,6 +5716,36 @@ abstract class AppLocalizations {
   /// **'Abrir a OS'**
   String get receivedOpenOrder;
 
+  /// No description provided for @sharedFileQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que é este arquivo?'**
+  String get sharedFileQuestion;
+
+  /// No description provided for @sharedFileReceiptOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante do pagamento de {amount} · {date}'**
+  String sharedFileReceiptOf(String amount, String date);
+
+  /// No description provided for @sharedFileNewPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante de um pagamento novo'**
+  String get sharedFileNewPayment;
+
+  /// No description provided for @sharedFileJustKeep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só guardar na OS'**
+  String get sharedFileJustKeep;
+
+  /// No description provided for @sharedFileReceiptSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante guardado na OS {number}'**
+  String sharedFileReceiptSaved(String number);
+
   /// No description provided for @inviteGenericError.
   ///
   /// In pt, this message translates to:

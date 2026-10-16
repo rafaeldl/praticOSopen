@@ -100,6 +100,7 @@ class PickerScaffold<T> extends StatefulWidget {
     required this.itemCount,
     this.subtitle,
     this.previousTitle,
+    this.leading,
     this.searchPlaceholder,
     this.alwaysShowSearch = false,
     this.autofocusSearch = false,
@@ -129,6 +130,9 @@ class PickerScaffold<T> extends StatefulWidget {
   final String title;
   final String? subtitle;
   final String? previousTitle;
+
+  /// Replaces the back button (e.g. an "X" when the picker is a sheet).
+  final Widget? leading;
 
   /// Rows for the (trimmed) query. The caller filters.
   final List<PickerSection<T>> Function(String query) sections;
@@ -250,6 +254,7 @@ class _PickerScaffoldState<T> extends State<PickerScaffold<T>> {
               ),
             ),
             previousTitle: widget.previousTitle,
+            leading: widget.leading,
             trailing: widget.multiple
                 ? PickerConfirmButton(
                     onPressed: widget.enabled ? widget.onConfirm : null,

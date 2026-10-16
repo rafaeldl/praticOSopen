@@ -1129,6 +1129,37 @@ abstract class _OrderStore with Store {
     }
   }
 
+  /// Adds the photos and documents of [saved] (this same order, saved
+  /// elsewhere, e.g. files shared from another app) that are not here yet.
+  /// The payment fields (a receipt linked to a payment, a new payment) come
+  /// from [saved] too: they are never written by a regular save, so taking
+  /// the server state does not touch what is being edited. Nothing else
+  /// changes, so the next save of this screen no longer drops them.
+  @action
+  void mergeAttachments(Order saved) {
+    if (order == null || saved.id == null || saved.id != order!.id) return;
+    if (saved.transactions != null) _applyPaymentState(saved);
+    String? keyOf(String? storagePath, String? url, String? id) =>
+        storagePath ?? url ?? id;
+
+    for (final p in saved.photos ?? const <OrderPhoto>[]) {
+      final key = keyOf(p.storagePath, p.url, p.id);
+      if (key == null) continue;
+      bool has(OrderPhoto x) => keyOf(x.storagePath, x.url, x.id) == key;
+      final local = order!.photos ??= [];
+      if (!local.any(has)) local.add(p);
+      if (!photos.any(has)) photos.add(p);
+    }
+    for (final d in saved.documents ?? const <OrderDocument>[]) {
+      final key = keyOf(d.storagePath, d.url, d.id);
+      if (key == null) continue;
+      bool has(OrderDocument x) => keyOf(x.storagePath, x.url, x.id) == key;
+      final local = order!.documents ??= [];
+      if (!local.any(has)) local.add(d);
+      if (!documents.any(has)) documents.add(d);
+    }
+  }
+
   /// Remove uma foto pelo índice
   @action
   Future<bool> deletePhoto(int index) async {
