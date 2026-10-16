@@ -1880,6 +1880,22 @@
   },
   "receivedSaveFailed": "Não deu para guardar. Tente de novo.",
   "receivedOpenOrder": "Abrir a OS",
+  "sharedFileQuestion": "O que é este arquivo?",
+  "sharedFileReceiptOf": "Comprovante do pagamento de {amount} · {date}",
+  "@sharedFileReceiptOf": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "sharedFileNewPayment": "Comprovante de um pagamento novo",
+  "sharedFileJustKeep": "Só guardar na OS",
+  "sharedFileReceiptSaved": "Comprovante guardado na OS {number}",
+  "@sharedFileReceiptSaved": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
   "inviteGenericError": "Não deu para concluir. Confira a internet e tente de novo.",
   "inviteLoadError": "Não deu para carregar os convites. Confira a internet.",
   "inviteTitleOne": "{company} chamou você para a equipe",

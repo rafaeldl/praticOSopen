@@ -105,6 +105,8 @@ class PaymentManagementScreen extends StatefulWidget {
     this.canOpenReceiptGroup,
     this.onSendReceipt,
     this.onOpenReceipt,
+    this.initialReceipt,
+    this.onInitialReceiptUsed,
   });
 
   /// Order store. When null it comes from the route arguments (`orderStore`).
@@ -148,6 +150,15 @@ class PaymentManagementScreen extends StatefulWidget {
   final Future<bool> Function(BuildContext context, String receiptId)?
   onOpenReceipt;
 
+  /// Receipt already attached when the screen opens (a file shared from
+  /// another app, "Comprovante de um pagamento novo"). When null it comes
+  /// from the route arguments (`receipt`).
+  final PickedReceiptFile? initialReceipt;
+
+  /// Called once [initialReceipt] is saved as the receipt of a new payment.
+  /// When null it comes from the route arguments (`onReceiptUsed`).
+  final VoidCallback? onInitialReceiptUsed;
+
   @override
   State<PaymentManagementScreen> createState() =>
       _PaymentManagementScreenState();
@@ -156,6 +167,10 @@ class PaymentManagementScreen extends StatefulWidget {
 class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _initialized = false;
   OrderStore? _store;
+
+  /// See [PaymentManagementScreen.initialReceipt].
+  PickedReceiptFile? _initialReceipt;
+  VoidCallback? _onInitialReceiptUsed;
 
   /// True while a payment operation is running: the buttons are disabled so
   /// the same payment can't be sent twice.
@@ -193,6 +208,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       _store = widget.store;
+      _initialReceipt = widget.initialReceipt;
+      _onInitialReceiptUsed = widget.onInitialReceiptUsed;
       if (_store == null) {
         final args =
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -200,7 +217,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           _store = args['orderStore'];
         }
         _fromOrder = args?['fromOrder'] == true;
+        _initialReceipt ??= args?['receipt'] as PickedReceiptFile?;
+        _onInitialReceiptUsed ??= args?['onReceiptUsed'] as VoidCallback?;
       }
+      _receipt = _initialReceipt;
       _prefillValue();
       final store = _store;
       if (store != null) {
@@ -725,6 +745,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           receipt.contentType,
           receipt.name,
         );
+        if (receiptOk && identical(receipt, _initialReceipt)) {
+          _initialReceipt = null;
+          _onInitialReceiptUsed?.call();
+        }
       }
     }
     if (!mounted) return;

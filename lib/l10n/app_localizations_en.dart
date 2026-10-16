@@ -3294,6 +3294,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receivedOpenOrder => 'Open the order';
 
   @override
+  String get sharedFileQuestion => 'What is this file?';
+
+  @override
+  String sharedFileReceiptOf(String amount, String date) {
+    return 'Receipt for the $amount payment · $date';
+  }
+
+  @override
+  String get sharedFileNewPayment => 'Receipt for a new payment';
+
+  @override
+  String get sharedFileJustKeep => 'Just keep it in the order';
+
+  @override
+  String sharedFileReceiptSaved(String number) {
+    return 'Receipt saved in order $number';
+  }
+
+  @override
   String get inviteGenericError =>
       'Could not finish. Check your internet and try again.';
 

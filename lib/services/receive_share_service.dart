@@ -5,15 +5,19 @@ import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/screens/order/order_route.dart';
+import 'package:praticos/screens/share/receipt_question.dart';
 import 'package:praticos/screens/share/which_order_sheet.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/services/order_saved_elsewhere.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/received_share.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Receives photos and PDFs shared from other apps and asks "Em qual OS?".
@@ -83,11 +87,16 @@ class ReceiveShareService {
         try {
           orderId = await _createOrder(context);
         } on TimeoutException {
-          if (context.mounted) await _confirm(context, null, batch);
+          if (context.mounted) await _confirm(context, null, null);
           return;
         }
       }
       if (orderId == null || !context.mounted) return;
+      if (!choice.isNewOrder &&
+          await _saveAsReceipt(context, companyId, orderId, batch)) {
+        return;
+      }
+      if (!context.mounted) return;
       await _saveAndConfirm(context, companyId, orderId, batch);
     } finally {
       // Only now: the files were used (saved, or the order was not created).
@@ -117,6 +126,66 @@ class ReceiveShareService {
     return newOrderIdAfter(closed, created.future);
   }
 
+  /// "O que é este arquivo?" after picking an existing order (one file
+  /// shared, see [shouldAskWhatFileIs]). Returns true when the file was
+  /// handled as a receipt; false to save it as a plain file (the question
+  /// was skipped, "Só guardar na OS", or Receber closed without using it).
+  ///
+  /// Uses the same code as the Receber screen: [OrderStore.attachReceiptToTransaction]
+  /// for a payment without receipt, and the Receber screen itself, with the
+  /// file already attached, for a new payment.
+  Future<bool> _saveAsReceipt(BuildContext context, String companyId,
+      String orderId, ReceivedBatch batch) async {
+    final file = receiptFileOf(batch);
+    if (file == null) return false;
+    Order? order;
+    try {
+      order = await TenantOrderRepository().getFromServer(companyId, orderId);
+    } catch (e) {
+      debugPrint('ReceiveShare: order read failed: $e');
+    }
+    if (order == null || !context.mounted) return false;
+    if (!shouldAskWhatFileIs(
+      batch: batch,
+      order: order,
+      canReceive: AuthorizationService.instance.canReceiveOnOrder(order),
+    )) {
+      return false;
+    }
+    final use = await askWhatFileIs(context, order);
+    if (use.isKeep || !context.mounted) return false;
+
+    final store = OrderStore()..setOrder(order);
+    final payment = use.payment;
+    if (payment != null) {
+      final index = store.transactions
+          .indexWhere((t) => OrderPaymentMath.sameTransaction(t, payment));
+      final ok = index >= 0 &&
+          await store.attachReceiptToTransaction(
+              index, file.file, file.contentType, file.name);
+      if (ok) OrderSavedElsewhere.notify(store.order!);
+      if (!context.mounted) return true;
+      final l10n = context.l10n;
+      await _confirm(
+        context,
+        ok ? store.order : null,
+        ok ? l10n.sharedFileReceiptSaved('${order.number ?? ''}') : null,
+      );
+      return true;
+    }
+
+    // "Comprovante de um pagamento novo": the Receber screen, file attached.
+    var used = false;
+    await Navigator.of(context).pushNamed('/payment_management', arguments: {
+      'orderStore': store,
+      'fromOrder': true,
+      'receipt': file,
+      'onReceiptUsed': () => used = true,
+    });
+    if (store.order != null) OrderSavedElsewhere.notify(store.order!);
+    return used;
+  }
+
   Future<void> _saveAndConfirm(BuildContext context, String companyId,
       String orderId, ReceivedBatch batch) async {
     Order? saved;
@@ -126,18 +195,25 @@ class ReceiveShareService {
       debugPrint('ReceiveShare: save failed: $e');
     }
     if (!context.mounted) return;
-    await _confirm(context, saved, batch);
+    final l10n = context.l10n;
+    await _confirm(
+      context,
+      saved,
+      saved == null
+          ? null
+          : l10n.receivedSavedInOrder(
+              '${saved.number ?? ''}', summarizeBatch(l10n, batch)),
+    );
   }
 
-  /// "Guardado na OS 193 · 1 foto" with "Abrir a OS", or the failure.
+  /// [savedMessage] ("Guardado na OS 193 · 1 foto") with "Abrir a OS", or
+  /// the failure when [order] is null.
   Future<void> _confirm(
-      BuildContext context, Order? order, ReceivedBatch batch) async {
+      BuildContext context, Order? order, String? savedMessage) async {
     final l10n = context.l10n;
     final ok = order != null;
-    final message = ok
-        ? l10n.receivedSavedInOrder(
-            '${order.number ?? ''}', summarizeBatch(l10n, batch))
-        : l10n.receivedSaveFailed;
+    final message =
+        ok ? savedMessage ?? l10n.receivedOpenOrder : l10n.receivedSaveFailed;
     await showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(

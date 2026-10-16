@@ -20,6 +20,7 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/models/payment_settings.dart';
+import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
@@ -538,6 +539,48 @@ void main() {
         expect(store.photos.length, 2);
         expect(store.order!.photos!.length, 2);
         expect(store.order!.documents!.single.fileName, 'recibo.pdf');
+      },
+    );
+
+    testWidgets(
+      'a receipt linked through the share flow updates the open order payments',
+      (tester) async {
+        final store = OrderStore();
+        final payment = PaymentTransaction.payment(amount: 50)..id = 't1';
+        await _pump(
+          tester,
+          screen(store),
+          args: {
+            'order': _order()
+              ..transactions = [payment]
+              ..paidAmount = 50,
+          },
+        );
+        expect(store.transactions.single.receiptDocumentId, isNull);
+
+        OrderSavedElsewhere.notify(
+          _order()
+            ..transactions = [
+              PaymentTransaction.payment(amount: 50)
+                ..id = 't1'
+                ..receiptDocumentId = 'd1',
+              PaymentTransaction.payment(amount: 30)..id = 't2',
+            ]
+            ..paidAmount = 80
+            ..documents = [
+              OrderDocument()
+                ..id = 'd1'
+                ..storagePath = 'a/d1'
+                ..fileName = 'pix.pdf'
+                ..type = OrderDocumentType.receipt,
+            ],
+        );
+        await tester.pumpAndSettle();
+
+        expect(store.transactions.map((t) => t.id), ['t1', 't2']);
+        expect(store.transactions.first.receiptDocumentId, 'd1');
+        expect(store.paidAmount, 80);
+        expect(store.order!.documents!.single.id, 'd1');
       },
     );
 

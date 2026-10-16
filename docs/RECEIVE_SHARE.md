@@ -11,7 +11,12 @@ Receber fotos e PDFs compartilhados de outros apps (Android e iOS). Pergunta "Em
   - Consultor e técnico só leem as OS que criaram (regras do Firestore): uma consulta por `createdBy.id` (igualdade, ordenada no app) serve para a lista e para a busca.
   - "+" aparece com a mesma regra do "+" ao lado das abas (`createOrder`, não técnico).
 - `lib/screens/order/order_route.dart` (`openNewOrder(onCreated:)`): o "+" abre a Nova OS de sempre. No "✓" a OS é criada, sobe as fotos da própria Nova OS e então chama `onCreated` com o id; o serviço grava os arquivos compartilhados com `saveToOrder` (depois das fotos, para uma gravação não apagar a outra) e mostra o "Guardado na OS". No "X" nada é criado. Se a OS não for criada em 2 minutos (sem internet), aparece o aviso de falha.
-- `lib/services/order_saved_elsewhere.dart`: depois do `saveToOrder`, avisa a OS aberta. A `OrderScreenV2` de uma OS existente escuta e chama `OrderStore.mergeAttachments`, que só acrescenta as fotos e documentos que faltam (por `storagePath`/`url`). O resto do que está na tela não muda, e o próximo salvamento da tela já inclui os arquivos (antes, a foto só aparecia ao reabrir e podia sumir no próximo salvamento).
+- `lib/screens/share/receipt_question.dart`: "O que é este arquivo?" (`pickOne`), perguntado depois de tocar numa OS existente (não no "+"):
+  - Só quando foi compartilhado **um** arquivo (foto ou PDF), a pessoa recebe nessa OS (`AuthorizationService.canReceiveOnOrder`, que já é falso com "Valores e cobrança" desligado) e a OS tem pagamento sem comprovante ou ainda falta receber (`shouldAskWhatFileIs`). Com vários arquivos, não pergunta: guarda como sempre.
+  - Uma linha por pagamento sem comprovante (`paymentsWithoutReceipt`: o mesmo critério do "Anexar comprovante" do Receber; fora Asaas com comprovante próprio e parte de recebimento do cliente): "Comprovante do pagamento de R$ 200 · 12/10". Guarda com `OrderStore.attachReceiptToTransaction` (o mesmo do Receber: `OrderDocument` tipo `receipt` com `linkedTransactionId`, e `receiptDocumentId` no pagamento via `updatePayments`) e mostra "Comprovante guardado na OS 193".
+  - "Comprovante de um pagamento novo" (só se falta receber): abre o Receber da OS (`/payment_management`, argumentos `receipt` e `onReceiptUsed`) com o arquivo já anexado. Se a pessoa voltar sem registrar o pagamento com ele, o arquivo é guardado como foto/documento comum da OS.
+  - "Só guardar na OS" ou voltar: o comportamento de sempre.
+- `lib/services/order_saved_elsewhere.dart`: depois do `saveToOrder`, avisa a OS aberta. A `OrderScreenV2` de uma OS existente escuta e chama `OrderStore.mergeAttachments`, que só acrescenta as fotos e documentos que faltam (por `storagePath`/`url`). Os campos de pagamento (comprovante ligado, pagamento novo) também vêm da cópia salva: um salvamento comum nunca os grava. O resto do que está na tela não muda, e o próximo salvamento da tela já inclui os arquivos (antes, a foto só aparecia ao reabrir e podia sumir no próximo salvamento).
 - `lib/services/receive_share_service.dart`: fotos via `PhotoService.uploadOrderPhoto` (`tenants/{companyId}/orders/{orderId}/photos/`, conta na cota); PDFs via `uploadOrderDocument`; grava com `TenantOrderRepository.updateItem`.
 
 ### Android
@@ -30,8 +35,9 @@ Receber fotos e PDFs compartilhados de outros apps (Android e iOS). Pergunta "Em
 
 ## Regras
 - Tocar na OS já guarda (sem confirmar). Sem usuário/empresa logada, o compartilhamento é ignorado.
-- "+" cria a OS e guarda nela; fechar a Nova OS sem salvar não cria nada.
-- Fora do escopo: sugestão por IA (`aiMatchOrder`); pôr a foto compartilhada na Nova OS antes de salvar (para a IA "Foto" ler); anexar como comprovante de pagamento.
+- "+" cria a OS e guarda nela; fechar a Nova OS sem salvar não cria nada (no "+" não se pergunta se é comprovante).
+- Comprovante: só com um arquivo compartilhado; nunca registra pagamento sozinho (o pagamento novo é registrado pela pessoa no Receber).
+- Fora do escopo: sugestão por IA (`aiMatchOrder`); pôr a foto compartilhada na Nova OS antes de salvar (para a IA "Foto" ler).
 
 ## Limitações conhecidas (iOS)
 - Imagens que um app entrega só como `UIImage` (sem arquivo) são gravadas pelo plugin sempre como `TempImage.png`; se vierem várias assim no mesmo compartilhamento, só a última sobra. A maioria dos apps (Fotos, Arquivos, WhatsApp) entrega arquivo.

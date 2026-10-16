@@ -3304,6 +3304,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get receivedOpenOrder => 'Abrir la OS';
 
   @override
+  String get sharedFileQuestion => '¿Qué es este archivo?';
+
+  @override
+  String sharedFileReceiptOf(String amount, String date) {
+    return 'Comprobante del pago de $amount · $date';
+  }
+
+  @override
+  String get sharedFileNewPayment => 'Comprobante de un pago nuevo';
+
+  @override
+  String get sharedFileJustKeep => 'Solo guardar en la OS';
+
+  @override
+  String sharedFileReceiptSaved(String number) {
+    return 'Comprobante guardado en la OS $number';
+  }
+
+  @override
   String get inviteGenericError =>
       'No se pudo completar. Revisa tu internet e inténtalo de nuevo.';
 
