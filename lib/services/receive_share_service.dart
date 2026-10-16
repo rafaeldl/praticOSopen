@@ -8,8 +8,10 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/share/which_order_sheet.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
+import 'package:praticos/services/order_saved_elsewhere.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/received_share.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -74,11 +76,21 @@ class ReceiveShareService {
       final companyId = Global.companyAggr?.id;
       final context = NotificationTapHandler.navigatorKey.currentContext;
       if (companyId == null || context == null) return;
-      final order = await WhichOrderSheet.show(context, batch: batch);
-      if (order?.id == null) return;
-      if (!context.mounted) return;
-      await _saveAndConfirm(context, companyId, order!, batch);
+      final choice = await WhichOrderSheet.show(context, batch: batch);
+      if (choice == null || !context.mounted) return;
+      String? orderId = choice.order?.id;
+      if (choice.isNewOrder) {
+        try {
+          orderId = await _createOrder(context);
+        } on TimeoutException {
+          if (context.mounted) await _confirm(context, null, batch);
+          return;
+        }
+      }
+      if (orderId == null || !context.mounted) return;
+      await _saveAndConfirm(context, companyId, orderId, batch);
     } finally {
+      // Only now: the files were used (saved, or the order was not created).
       _busy = false;
       _deleteExtensionCopies(files);
     }
@@ -95,17 +107,33 @@ class ReceiveShareService {
     }
   }
 
+  /// "+" in "Em qual OS?": opens the Nova OS and returns its id once saved,
+  /// or null when it is closed without saving.
+  Future<String?> _createOrder(BuildContext context) {
+    final created = Completer<String>();
+    final closed = openNewOrder(context, onCreated: (id) {
+      if (!created.isCompleted) created.complete(id);
+    });
+    return newOrderIdAfter(closed, created.future);
+  }
+
   Future<void> _saveAndConfirm(BuildContext context, String companyId,
-      Order order, ReceivedBatch batch) async {
-    final l10n = context.l10n;
-    bool ok;
+      String orderId, ReceivedBatch batch) async {
+    Order? saved;
     try {
-      ok = await saveToOrder(companyId, order.id!, batch);
+      saved = await saveToOrder(companyId, orderId, batch);
     } catch (e) {
       debugPrint('ReceiveShare: save failed: $e');
-      ok = false;
     }
     if (!context.mounted) return;
+    await _confirm(context, saved, batch);
+  }
+
+  /// "Guardado na OS 193 · 1 foto" with "Abrir a OS", or the failure.
+  Future<void> _confirm(
+      BuildContext context, Order? order, ReceivedBatch batch) async {
+    final l10n = context.l10n;
+    final ok = order != null;
     final message = ok
         ? l10n.receivedSavedInOrder(
             '${order.number ?? ''}', summarizeBatch(l10n, batch))
@@ -137,13 +165,14 @@ class ReceiveShareService {
 
   /// Uploads [batch] to the order and saves it. Photos go to the order photos
   /// (counting in the plan quota like any photo); PDFs become [OrderDocument]s.
-  /// Returns true when at least one file was saved.
-  Future<bool> saveToOrder(
+  /// Returns the saved order when at least one file was saved (an open OS
+  /// screen is told, see [OrderSavedElsewhere]); null otherwise.
+  Future<Order?> saveToOrder(
       String companyId, String orderId, ReceivedBatch batch) async {
     final repository = TenantOrderRepository();
     final photoService = PhotoService();
     final fresh = await repository.getFromServer(companyId, orderId);
-    if (fresh == null) return false;
+    if (fresh == null) return null;
 
     var saved = 0;
     for (final f in batch.photos) {
@@ -173,8 +202,24 @@ class ReceiveShareService {
         saved++;
       }
     }
-    if (saved == 0) return false;
+    if (saved == 0) return null;
     await repository.updateItem(companyId, fresh);
-    return true;
+    OrderSavedElsewhere.notify(fresh);
+    return fresh;
   }
+}
+
+/// Id of the Nova OS opened from "Em qual OS?": null when the sheet [closed]
+/// without saving ("X"); after "✓" ([closed] resolves with `true`), waits for
+/// the order to be [created] (it is written after the sheet closes). Throws
+/// [TimeoutException] when it is not created within [timeout].
+@visibleForTesting
+Future<String?> newOrderIdAfter(
+  Future<Object?> closed,
+  Future<String> created, {
+  Duration timeout = const Duration(minutes: 2),
+}) async {
+  final result = await closed;
+  if (result != true) return null;
+  return created.timeout(timeout);
 }

@@ -55,6 +55,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/order_saved_elsewhere.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
@@ -275,8 +276,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// "O que o cliente pediu" (new order only; saved as the first comment).
   final TextEditingController _requestController = TextEditingController();
 
+  /// Saves of this order made elsewhere (files shared from another app).
+  StreamSubscription<Order>? _savedElsewhere;
+
+  /// Nova OS opened to hold files shared from another app: called with the
+  /// new order id once it is saved (after its own photos are uploaded).
+  void Function(String orderId)? _onCreated;
+
   @override
   void dispose() {
+    _savedElsewhere?.cancel();
     if (_nfseListening) _nfse.removeListener(_onNfse);
     if (widget.nfse == null) _nfse.dispose();
     if (_barMode == AssistantBarMode.listening) _speech.stop();
@@ -363,7 +372,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (order != null && (order.id != null || order.number != null)) {
       _isNew = false;
       _loadExisting(order);
+      // Shows photos/documents saved to this order while it is open, and
+      // keeps them in the store so its next save does not drop them.
+      _savedElsewhere = OrderSavedElsewhere.stream.listen(
+        _store.mergeAttachments,
+      );
     } else {
+      _onCreated = args?['onCreated'] as void Function(String)?;
       _startNew(order);
       if (args?['repeat'] == true) {
         // From Contratos: the order starts as a contract, with the
@@ -1309,6 +1324,22 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         ),
       ],
     );
+  }
+
+  /// Uploads the photos of the new order, then hands its id to whoever
+  /// opened it (files shared from another app are saved after, so the two
+  /// writes do not overwrite each other).
+  Future<void> _afterCreated(
+    String orderId,
+    List<AiPhoto> photos,
+    void Function(String orderId)? onCreated,
+  ) async {
+    try {
+      if (photos.isNotEmpty) await _uploadPhotos(photos);
+    } catch (e) {
+      debugPrint('New order photos upload failed: $e');
+    }
+    onCreated?.call(orderId);
   }
 
   /// Writes the attached photos to temp files and uploads them.
@@ -2359,6 +2390,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
     final companyId = _store.companyId;
     final photos = List<AiPhoto>.of(_photos);
+    final onCreated = _onCreated;
     _store.deferSave = false;
     _store.updateTotal();
     _registerNew();
@@ -2371,7 +2403,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             text: request,
           );
         }
-        if (photos.isNotEmpty) _uploadPhotos(photos);
+        _afterCreated(orderId, photos, onCreated);
       },
     );
     setState(() => _leaving = true);

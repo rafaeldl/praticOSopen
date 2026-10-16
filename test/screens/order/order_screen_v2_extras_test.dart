@@ -25,6 +25,7 @@ import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/order_saved_elsewhere.dart';
 import 'package:praticos/theme/status_style.dart';
 import 'package:provider/provider.dart';
 
@@ -489,6 +490,56 @@ void main() {
       await tester.pumpAndSettle();
       expect(actions.calls, ['photo:1', 'doc:nota.pdf']);
     });
+
+    testWidgets(
+      'files shared from another app show in the open order right away',
+      (tester) async {
+        final store = OrderStore();
+        await _pump(
+          tester,
+          screen(store),
+          args: {
+            'order': _order()..photos = [OrderPhoto()..storagePath = 'a/p1'],
+          },
+        );
+        expect(find.text('Detalhes'), findsNothing);
+
+        // Another order saved elsewhere: ignored.
+        OrderSavedElsewhere.notify(
+          _order()
+            ..id = 'other'
+            ..photos = [OrderPhoto()..url = 'x'],
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('thumb x'), findsNothing);
+
+        // This order saved by the share flow: server copy + the new files.
+        OrderSavedElsewhere.notify(
+          _order()
+            ..photos = [
+              OrderPhoto()..storagePath = 'a/p1',
+              OrderPhoto()
+                ..storagePath = 'a/p2'
+                ..url = 'p2',
+            ]
+            ..documents = [
+              OrderDocument()
+                ..storagePath = 'a/d1'
+                ..fileName = 'recibo.pdf'
+                ..contentType = 'application/pdf'
+                ..type = OrderDocumentType.other,
+            ],
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('thumb p2'), findsOneWidget);
+        expect(find.text('recibo.pdf'), findsOneWidget);
+        // No duplicates, and the store's order keeps them for its next save.
+        expect(store.photos.length, 2);
+        expect(store.order!.photos!.length, 2);
+        expect(store.order!.documents!.single.fileName, 'recibo.pdf');
+      },
+    );
 
     testWidgets('swipe removes a document after confirming', (tester) async {
       final store = OrderStore();

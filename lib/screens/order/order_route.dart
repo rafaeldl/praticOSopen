@@ -23,8 +23,14 @@ class OrderRoute extends StatelessWidget {
 /// knows the app's named routes.
 ///
 /// [repeat] starts the order with "Repetir" turned on (from Contratos).
-Future<Object?> openNewOrder(BuildContext context, {bool repeat = false}) {
-  final arguments = repeat ? const {'repeat': true} : null;
+/// [onCreated] gets the new order id once it is saved (files shared from
+/// another app are attached then). Resolves with `true` on "✓".
+Future<Object?> openNewOrder(
+  BuildContext context, {
+  bool repeat = false,
+  void Function(String orderId)? onCreated,
+}) {
+  final arguments = newOrderArguments(repeat: repeat, onCreated: onCreated);
   return Navigator.of(context, rootNavigator: true).push<Object?>(
     CupertinoSheetRoute<Object?>(
       enableDrag: false,
@@ -49,4 +55,16 @@ Future<Object?> openNewOrder(BuildContext context, {bool repeat = false}) {
       ),
     ),
   );
+}
+
+/// Route arguments of the "Nova OS" ([OrderScreenV2] reads them).
+Map<String, dynamic>? newOrderArguments({
+  bool repeat = false,
+  void Function(String orderId)? onCreated,
+}) {
+  if (!repeat && onCreated == null) return null;
+  return {
+    if (repeat) 'repeat': true,
+    if (onCreated != null) 'onCreated': onCreated,
+  };
 }
