@@ -6295,7 +6295,7 @@ abstract class AppLocalizations {
   /// No description provided for @receiveAmountHint.
   ///
   /// In pt, this message translates to:
-  /// **'Recebeu só uma parte? Mude o valor.'**
+  /// **'Recebeu só uma parte? Toque no valor e digite quanto.'**
   String get receiveAmountHint;
 
   /// No description provided for @orderAddContractMonthly.

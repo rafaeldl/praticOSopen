@@ -22,10 +22,10 @@ Empurrada (age sobre o que já existe). `lib/screens/payments/receive_customer_s
 |---|---|
 | Título | "Receber de João" (quebra linha, sem reticências) |
 | Frase | "Deve R$ 1.250 em 3 OS" |
-| Bloco `accentSoft` | Valor (pré-preenchido com tudo o que deve), dica ou motivo do botão desligado, "Quando · Hoje ›", "Anexar comprovante" |
-| Como fica | Uma linha por OS, ao vivo: "OS 182 · quita R$ 450", "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Sem toque na fase 1 |
+| Cartão `accentSoft` (um só) | Valor num campo com cara de campo (caixa opaca, borda azul, lápis; toque abre o teclado), pré-preenchido com tudo o que deve; dica ou motivo do botão desligado; "Quando · Hoje ›"; "Anexar comprovante"; no fim, o botão azul "Recebi R$ X" (desligado com 0, "Digite quanto recebeu.", ou acima do que deve, "Passa do que ele deve (R$ 1.250).") |
+| Link | "Mandar cobrança", logo abaixo do cartão |
+| Como fica | Uma linha por OS, ao vivo: "OS 182 · quita R$ 450", "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Cada OS do cliente abre a OS (›); ao voltar, o valor digitado fica e a OS é relida |
 | Nota | "O valor vai primeiro para as OS mais antigas." |
-| Botão azul | "Recebi R$ X"; desligado com 0 ("Digite quanto recebeu.") ou acima do que deve ("Passa do que ele deve (R$ 1.250).") |
 
 Sucesso: aviso opaco (`showAppToast`) e volta; o Financeiro recarrega. Erro: aviso, a tela fica.
 

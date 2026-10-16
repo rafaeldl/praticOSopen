@@ -1891,7 +1891,7 @@
   "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
   "receiveOrderLink": "Order {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
-  "receiveAmountHint": "Got only part of it? Change the amount.",
+  "receiveAmountHint": "Got only part of it? Tap the amount and type how much.",
   "orderAddContractMonthly": "Repeat every month (contract)",
   "ratingsSubtitle": "What customers thought",
   "ratingsLatest": "Latest",

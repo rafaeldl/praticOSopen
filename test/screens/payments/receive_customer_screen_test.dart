@@ -52,6 +52,8 @@ void main() {
     List<bool>? popped,
     Future<Set<String>?> Function(BuildContext, List<Order>, Set<String>)?
     pickOrders,
+    List<Object?>? openedOrders,
+    Future<Order?> Function(String id)? reloadOrder,
   }) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
@@ -62,6 +64,21 @@ void main() {
         locale: const Locale('pt'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        onGenerateRoute: (settings) {
+          if (settings.name != '/order') return null;
+          openedOrders?.add(settings.arguments);
+          return CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (context) => CupertinoPageScaffold(
+              child: Center(
+                child: CupertinoButton(
+                  child: const Text('tela da OS'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+          );
+        },
         home: Builder(
           builder: (context) => CupertinoPageScaffold(
             child: Center(
@@ -77,6 +94,7 @@ void main() {
                         service: fake,
                         canAttachReceipt: true,
                         pickOrders: pickOrders,
+                        reloadOrder: reloadOrder ?? (_) async => null,
                       ),
                     ),
                   );
@@ -345,6 +363,115 @@ void main() {
     // A consultant (no viewFinancialReports) gets no "Receber de ...".
     expect(find.byType(ReceiveCustomerScreen), findsNothing);
     expect(find.byType(AccessDeniedScreen), findsOneWidget);
+  });
+
+  group('one card', () {
+    testWidgets('the amount is an editable field that drives the button', (
+      tester,
+    ) async {
+      await pump(tester);
+      final card = find.byKey(const Key('receiveCustomerCard'));
+      // Looks like a field: a pencil next to the amount.
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.byKey(const Key('receiveAmountEditIcon')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Recebeu só uma parte? Toque no valor e digite quanto.'),
+        findsOneWidget,
+      );
+
+      // Tapping the pencil focuses the field with the numeric keyboard.
+      await tester.tap(find.byKey(const Key('receiveAmountEditIcon')));
+      await tester.pump();
+      final field = tester.widget<CupertinoTextField>(
+        find.byKey(const Key('receiveAmountField')),
+      );
+      expect(field.focusNode?.hasFocus, isTrue);
+      expect(field.keyboardType.decimal, isTrue);
+
+      await typeAmount(tester, 320);
+      final button = tester.widget<PrimaryButton>(
+        find.byKey(const Key('receiveCustomerConfirm')),
+      );
+      expect(button.label, 'Recebi ${brl(320)}');
+    });
+
+    testWidgets('amount, Quando, receipt and the blue button share the card', (
+      tester,
+    ) async {
+      await pump(tester);
+      final card = find.byKey(const Key('receiveCustomerCard'));
+      for (final key in [
+        'receiveAmountField',
+        'receiveDateRow',
+        'receiveCustomerAttach',
+        'receiveCustomerConfirm',
+      ]) {
+        expect(
+          find.descendant(of: card, matching: find.byKey(Key(key))),
+          findsOneWidget,
+          reason: key,
+        );
+      }
+      // "Como fica" comes after the card.
+      final cardBottom = tester.getBottomLeft(card).dy;
+      expect(
+        tester.getTopLeft(find.text('Como fica')).dy,
+        greaterThan(cardBottom),
+      );
+    });
+  });
+
+  group('"Como fica" rows open the order', () {
+    testWidgets('tapping a row pushes /order with that order', (tester) async {
+      final opened = <Object?>[];
+      await pump(tester, openedOrders: opened);
+      final row = find.byKey(const Key('receiveCustomerRow_b'));
+      expect(
+        find.descendant(
+          of: row,
+          matching: find.byIcon(CupertinoIcons.chevron_forward),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.getSize(row).height, greaterThanOrEqualTo(44));
+
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.text('tela da OS'), findsOneWidget);
+      final args = opened.single as Map<String, dynamic>;
+      expect((args['order'] as Order).id, 'b');
+    });
+
+    testWidgets('coming back keeps the typed amount and refreshes the debt', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        // Someone received 200 on OS 190 inside the order.
+        reloadOrder: (id) async => _order('b', 190, 600, paid: 300),
+      );
+      await typeAmount(tester, 700);
+      await tester.tap(find.byKey(const Key('receiveCustomerRow_b')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('tela da OS'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Receber de João'), findsOneWidget);
+      expect(find.text('Deve ${brl(1050)} em 3 OS'), findsOneWidget);
+      final button = tester.widget<PrimaryButton>(
+        find.byKey(const Key('receiveCustomerConfirm')),
+      );
+      expect(button.label, 'Recebi ${brl(700)}');
+      expect(
+        find.text('OS 190 · recebe ${brl(250)}, fica ${brl(50)}'),
+        findsOneWidget,
+      );
+    });
   });
 
   group('Escolher as OS', () {
