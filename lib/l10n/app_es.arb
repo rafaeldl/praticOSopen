@@ -1891,7 +1891,7 @@
   "@receiveSubtitleNoCustomer": {"placeholders": {"total": {"type": "String"}}},
   "receiveOrderLink": "Orden {number}",
   "@receiveOrderLink": {"placeholders": {"number": {"type": "int"}}},
-  "receiveAmountHint": "¿Recibió solo una parte? Cambie el valor.",
+  "receiveAmountHint": "¿Recibió solo una parte? Toque el valor y escriba cuánto.",
   "orderAddContractMonthly": "Repetir cada mes (contrato)",
   "ratingsSubtitle": "Lo que opinaron los clientes",
   "ratingsLatest": "Últimas",

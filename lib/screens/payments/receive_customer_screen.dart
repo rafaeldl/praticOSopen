@@ -11,6 +11,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/repositories/tenant/customer_charge_repository.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
+import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/payments/asaas_error_text.dart';
@@ -82,7 +83,12 @@ class ReceiveCustomerScreen extends StatefulWidget {
     this.shareLink,
     this.api,
     this.otherOrdersLoader,
+    this.reloadOrder,
   });
+
+  /// Reads an order again after it was opened from "Como fica" (tests).
+  /// Defaults to Firestore.
+  final Future<Order?> Function(String orderId)? reloadOrder;
 
   /// Whether "Mandar cobrança" is available (tests). Defaults to the
   /// `chargeOrder` permission plus the company's `settings/payments`.
@@ -178,10 +184,14 @@ class ReceiveCustomerScreen extends StatefulWidget {
 }
 
 class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
-  late final List<OpenBalance> _balances = [
-    for (final order in widget.orders) OpenBalance.ofOrder(order),
+  /// The customer's orders, refreshed after one is opened from "Como fica".
+  late final List<Order> _orders = List.of(widget.orders);
+
+  List<OpenBalance> get _balances => [
+    for (final order in _orders) OpenBalance.ofOrder(order),
   ].where((b) => b.open > 0).toList();
-  late final double _owed = totalOpen(_balances);
+
+  double get _owed => totalOpen(_balances);
   late final TextEditingController _amount = TextEditingController(
     text: ReceiveAmountField.textFor(_owed),
   );
@@ -202,7 +212,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   List<Order> get _allOrders {
     final own = [
       for (final b in _balances)
-        for (final o in widget.orders)
+        for (final o in _orders)
           if (o.id == b.orderId) o,
     ];
     if (_others.isEmpty) return own;
@@ -510,6 +520,43 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     });
   }
 
+  /// Opens the order of a "Como fica" row (only the customer's own orders on
+  /// the screen; "Outras OS" cannot be read). Coming back keeps what was
+  /// typed and reads the order again, so a change made there (a payment, a
+  /// new total) shows in the debt and in the split.
+  Future<void> _openOrder(Order order) async {
+    final id = order.id;
+    if (id == null) return;
+    await Navigator.of(
+      context,
+    ).pushNamed('/order', arguments: {'order': order});
+    if (!mounted) return;
+    Order? fresh;
+    try {
+      fresh = await (widget.reloadOrder ?? _defaultReload)(id);
+    } catch (_) {
+      // Offline or no access: keep what the screen had.
+      return;
+    }
+    if (fresh == null || !mounted) return;
+    final index = _orders.indexWhere((o) => o.id == id);
+    if (index < 0) return;
+    setState(() => _orders[index] = fresh!);
+  }
+
+  static Future<Order?> _defaultReload(String orderId) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    return OrderRepositoryV2().getSingle(companyId, orderId);
+  }
+
+  Order? _ownOrder(String? id) {
+    for (final order in _orders) {
+      if (order.id == id) return order;
+    }
+    return null;
+  }
+
   Future<void> _confirm() async {
     final value = parseCurrencyInput(_amount.text);
     if (_busy || value <= 0 || _cents(value) > _cents(_max)) return;
@@ -519,7 +566,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     final service = widget.service ?? CustomerReceiptService();
     final request = CustomerReceiptRequest(
       customer: widget.customer,
-      orders: widget.orders,
+      orders: _orders,
       allocations: allocations,
       paidAt: paidAtFor(_paidDay),
       file: _receipt,
@@ -627,19 +674,32 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                     ),
                   ),
                   if (_openCharge != null) _buildOpenCharge(_openCharge!),
-                  _buildAmountCard(amount, tooMuch),
+                  _buildAmountCard(amount, tooMuch, canSave),
+                  if (_chargeReady && widget.customer?.id != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.pageMargin,
+                      ),
+                      child: Center(
+                        child: TextLink(
+                          key: const Key('receiveCustomerSendCharge'),
+                          label: _openCharge != null
+                              ? l10n.receiveCustomerShareCharge
+                              : l10n.receiveCustomerSendCharge,
+                          onPressed: _busy ? null : _sendCharge,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: AppSpacing.md),
                   SectionLabel(l10n.receiveCustomerHowItGoes),
                   for (final preview in previews)
-                    AppListRow(
-                      key: Key('receiveCustomerRow_${preview.balance.orderId}'),
-                      title: _previewLine(preview, format),
-                    ),
+                    _buildPreviewRow(preview, format),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.pageMargin,
                       AppSpacing.sm,
                       AppSpacing.pageMargin,
-                      AppSpacing.lg,
+                      0,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -660,41 +720,6 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.blockMargin,
-                    ),
-                    child: _busy
-                        ? const SizedBox(
-                            height: AppSizes.primaryButtonHeight,
-                            child: Center(child: CupertinoActivityIndicator()),
-                          )
-                        : PrimaryButton(
-                            key: const Key('receiveCustomerConfirm'),
-                            label: l10n.receiveButton(
-                              ReceiveAmountField.textFor(amount),
-                            ),
-                            onPressed: canSave ? _confirm : null,
-                          ),
-                  ),
-                  if (_chargeReady && widget.customer?.id != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.pageMargin,
-                        AppSpacing.sm,
-                        AppSpacing.pageMargin,
-                        0,
-                      ),
-                      child: Center(
-                        child: TextLink(
-                          key: const Key('receiveCustomerSendCharge'),
-                          label: _openCharge != null
-                              ? l10n.receiveCustomerShareCharge
-                              : l10n.receiveCustomerSendCharge,
-                          onPressed: _busy ? null : _sendCharge,
-                        ),
-                      ),
-                    ),
                   ..._buildOthers(format),
                 ],
               );
@@ -705,9 +730,22 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     );
   }
 
-  /// accentSoft block: amount, hint (or why the button is off), "Quando"
-  /// and the receipt.
-  Widget _buildAmountCard(double amount, bool tooMuch) {
+  /// One "Como fica" line. The customer's own orders open the order screen
+  /// (chevron); "Outras OS" are not readable, so they are plain lines.
+  Widget _buildPreviewRow(AllocationPreview preview, FormatService format) {
+    final order = _ownOrder(preview.balance.orderId);
+    return AppListRow(
+      key: Key('receiveCustomerRow_${preview.balance.orderId}'),
+      title: _previewLine(preview, format),
+      onTap: order == null || _busy ? null : () => _openOrder(order),
+      showChevron: order != null,
+    );
+  }
+
+  /// The one accentSoft card: amount field, hint (or why the button is
+  /// off), "Quando", the receipt and the blue "Recebi R$ X" that follows
+  /// the typed amount.
+  Widget _buildAmountCard(double amount, bool tooMuch, bool canSave) {
     final l10n = context.l10n;
     final onSoft = AppColors.onAccentSoft.resolveFrom(context);
     final String hint;
@@ -725,6 +763,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     }
 
     return Container(
+      key: const Key('receiveCustomerCard'),
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.blockMargin,
         vertical: AppSpacing.sm,
@@ -742,7 +781,11 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
             style: AppTypography.label.copyWith(color: onSoft),
           ),
           const SizedBox(height: AppSpacing.xs),
-          ReceiveAmountField(controller: _amount),
+          ReceiveAmountField(
+            controller: _amount,
+            semanticLabel: l10n.receiveCustomerAmountLabel,
+            enabled: !_busy,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             hint,
@@ -787,6 +830,18 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                   ),
                 ],
               ),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          if (_busy)
+            const SizedBox(
+              height: AppSizes.primaryButtonHeight,
+              child: Center(child: CupertinoActivityIndicator()),
+            )
+          else
+            PrimaryButton(
+              key: const Key('receiveCustomerConfirm'),
+              label: l10n.receiveButton(ReceiveAmountField.textFor(amount)),
+              onPressed: canSave ? _confirm : null,
             ),
         ],
       ),

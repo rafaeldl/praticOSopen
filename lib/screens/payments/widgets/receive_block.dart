@@ -102,6 +102,8 @@ class ReceiveBlock extends StatelessWidget {
           ReceiveAmountField(
             controller: controller,
             onChanged: onAmountChanged,
+            semanticLabel: context.l10n.receiveMissing,
+            enabled: !busy,
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(

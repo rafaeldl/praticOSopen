@@ -414,7 +414,10 @@ void main() {
       find.text('Ana Ribeiro · total ${FormatService().formatCurrency(1250)}'),
       findsOneWidget,
     );
-    expect(find.text('Recebeu só uma parte? Mude o valor.'), findsOneWidget);
+    expect(
+      find.text('Recebeu só uma parte? Toque no valor e digite quanto.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('from Financeiro, "‹ OS 42" replaces Receber with the order', (

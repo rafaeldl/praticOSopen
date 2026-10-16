@@ -3677,7 +3677,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get receiveAmountHint => '¿Recibió solo una parte? Cambie el valor.';
+  String get receiveAmountHint =>
+      '¿Recibió solo una parte? Toque el valor y escriba cuánto.';
 
   @override
   String get orderAddContractMonthly => 'Repetir cada mes (contrato)';

@@ -76,11 +76,17 @@ A tela unificada permite:
 Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart`), empurrada:
 
 - Título "Receber de João" (quebra linha, sem reticências) e a frase "Deve R$ 1.250 em 3 OS".
-- Valor pré-preenchido com tudo o que o cliente deve; "Quando" (como acima); "Anexar comprovante".
-- **Como fica**: uma linha por OS, recalculada a cada tecla: "OS 182 · quita R$ 450",
-  "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Linhas sem toque.
-- Botão azul "Recebi R$ X", desligado com 0 ou acima do que deve (com uma linha explicando).
+- **Um cartão só** (`accentSoft`): "Quanto recebeu", o valor num campo com cara de campo
+  (`ReceiveAmountField`: caixa opaca com borda azul e lápis; tocar em qualquer parte abre o
+  teclado numérico), pré-preenchido com tudo o que o cliente deve, a dica "Recebeu só uma
+  parte? Toque no valor e digite quanto.", "Quando" (como acima), "Anexar comprovante" e, no
+  fim do mesmo cartão, o botão azul "Recebi R$ X" (segue o valor digitado), desligado com 0
+  ou acima do que deve (a dica vira o motivo). "Mandar cobrança" fica como link logo abaixo.
   Sucesso: aviso (`showAppToast`) e volta; o Financeiro recarrega.
+- **Como fica** (embaixo do cartão): uma linha por OS, recalculada a cada tecla: "OS 182 ·
+  quita R$ 450", "OS 190 · recebe R$ 300, fica R$ 200", "OS 201 · continua R$ 500". Cada OS
+  do cliente abre a OS (`/order`, com ›); ao voltar, o valor digitado fica e a OS é lida de
+  novo, então a dívida e a divisão se atualizam. "Outras OS" (de outro vendedor) não abrem.
 - O valor vai **primeiro para as OS mais antigas** (`allocatePayment` em
   `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
 - **Escolher as OS** (link embaixo de "Como fica", só com 2+ OS em aberto): tela de escolher
