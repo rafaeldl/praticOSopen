@@ -16,6 +16,7 @@ import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/utils/startup_company.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
@@ -233,19 +234,30 @@ class _AuthWrapperState extends State<AuthWrapper> {
         return _CompanyCheckResult(hasCompany: false, needsOnboarding: true);
       }
 
-      // Pega a primeira empresa (ou a empresa já carregada no store)
-      final companyId = widget.authStore.companyAggr?.id ??
-          companies[0]['company']['id'] as String;
+      // The company already loaded by the store comes first, then the user's
+      // list. Deleted or left companies are skipped (they answer
+      // permission-denied), so the user lands on onboarding, not on an error.
+      final companyIds = [
+        if (widget.authStore.companyAggr?.id != null)
+          widget.authStore.companyAggr!.id!,
+        for (final c in companies)
+          if (c is Map && c['company'] is Map && c['company']['id'] is String)
+            c['company']['id'] as String,
+      ];
 
-      final companyDoc = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .get();
+      final companyDoc = await firstAccessibleCompany(companyIds, (id) async {
+        final doc = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(id)
+            .get();
+        return doc.exists ? doc : null;
+      });
 
-      if (!companyDoc.exists) {
+      if (companyDoc == null) {
         return _CompanyCheckResult(hasCompany: false, needsOnboarding: true);
       }
 
+      final companyId = companyDoc.id;
       final companyData = companyDoc.data()!;
 
       final segment = companyData['segment'] as String?;
