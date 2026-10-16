@@ -125,18 +125,20 @@ Future<void> pumpFlow(
   Harness h, {
   String? companyId,
   String? initialName,
+  String? ownerName,
 }) async {
   await tester.pumpWidget(app(OnboardingFlow(
     deps: h.deps,
     companyId: companyId,
     initialName: initialName,
+    ownerName: ownerName,
   )));
   await tester.pumpAndSettle();
 }
 
 Future<void> openBusiness(WidgetTester tester, Harness h,
-    {String segment = 'electronics'}) async {
-  await pumpFlow(tester, h);
+    {String segment = 'electronics', String? ownerName}) async {
+  await pumpFlow(tester, h, ownerName: ownerName);
   await tester.tap(find.byKey(ValueKey('segment_$segment')));
   await tester.pumpAndSettle();
 }
@@ -283,7 +285,32 @@ void main() {
       expect(toggle.value, isTrue);
     });
 
-    testWidgets('name is required; nothing is created without it',
+    testWidgets('blank name uses the person\'s own name (no business to '
+        'register)', (tester) async {
+      final h = Harness();
+      await openBusiness(tester, h, ownerName: ' Ana Souza ');
+
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+
+      expect(find.text(pt.onboardingBusinessNameRequired), findsNothing);
+      expect(h.setup.saves.single.data.name, 'Ana Souza');
+      expect(h.finished, 1);
+    });
+
+    testWidgets('a typed name wins over the person\'s own name',
+        (tester) async {
+      final h = Harness();
+      await openBusiness(tester, h, ownerName: 'Ana Souza');
+      await typeName(tester, 'Refrigeração Silva');
+      await tapKey(tester, 'business_create');
+      await tester.pumpAndSettle();
+
+      expect(h.setup.saves.single.data.name, 'Refrigeração Silva');
+    });
+
+    testWidgets('without the person\'s name, the name is required; nothing '
+        'is created without it',
         (tester) async {
       final h = Harness();
       await openBusiness(tester, h);

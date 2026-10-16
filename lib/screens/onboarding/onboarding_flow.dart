@@ -101,6 +101,7 @@ class OnboardingSession {
     this.companyId,
     this.initialName,
     this.initialPhone,
+    this.ownerName,
   });
 
   final OnboardingDeps deps;
@@ -109,6 +110,10 @@ class OnboardingSession {
   final String? companyId;
   final String? initialName;
   final String? initialPhone;
+
+  /// Name of the person signing up: used when the name shown on the order
+  /// is left blank, so nobody has to "register a business" to start.
+  final String? ownerName;
 
   /// Company saved by a previous attempt that failed later: a retry completes
   /// it instead of creating a second one.
@@ -125,7 +130,7 @@ class OnboardingSession {
 }
 
 /// First access of an owner without a company: Ramo -> [Especialidades] ->
-/// Seu negócio -> Início.
+/// Para o cliente -> Início.
 class OnboardingFlow extends StatefulWidget {
   const OnboardingFlow({
     super.key,
@@ -133,12 +138,14 @@ class OnboardingFlow extends StatefulWidget {
     this.companyId,
     this.initialName,
     this.initialPhone,
+    this.ownerName,
   });
 
   final OnboardingDeps deps;
   final String? companyId;
   final String? initialName;
   final String? initialPhone;
+  final String? ownerName;
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -150,6 +157,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     companyId: widget.companyId,
     initialName: widget.initialName,
     initialPhone: widget.initialPhone,
+    ownerName: widget.ownerName,
   );
 
   @override

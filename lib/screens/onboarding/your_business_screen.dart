@@ -14,8 +14,9 @@ import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 
-/// Last step of the first access: "Seu negócio". Name (required), phone
-/// (optional), "Como você trabalha" with "Valores e cobrança"
+/// Last step of the first access: "Para o cliente". Name shown on the order
+/// (optional when the person's own name is known, see
+/// [OnboardingSession.ownerName]), phone (optional), "Como você trabalha" with "Valores e cobrança"
 /// (`Company.useFinancial`, segment default), then creates the company and
 /// goes straight to Início. Replaces Welcome, Contatos and "Quase lá".
 class YourBusinessScreen extends StatefulWidget {
@@ -72,10 +73,16 @@ class _YourBusinessScreenState extends State<YourBusinessScreen> {
     super.dispose();
   }
 
+  /// The person's own name, when known: a blank name falls back to it.
+  String? get _ownerName {
+    final name = widget.session.ownerName?.trim();
+    return name == null || name.isEmpty ? null : name;
+  }
+
   OnboardingBusiness get _business => OnboardingBusiness(
         segment: widget.segment,
         subspecialties: widget.subspecialties,
-        name: _name.text.trim(),
+        name: _name.text.trim().isEmpty ? _ownerName ?? '' : _name.text.trim(),
         phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
         useFinancial: _useFinancial,
       );
@@ -175,9 +182,10 @@ class _YourBusinessScreenState extends State<YourBusinessScreen> {
                   placeholder: l10n.onboardingBusinessNamePlaceholder,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
-                  validator: (text) => text.trim().isEmpty
-                      ? l10n.onboardingBusinessNameRequired
-                      : null,
+                  validator: (text) =>
+                      text.trim().isEmpty && _ownerName == null
+                          ? l10n.onboardingBusinessNameRequired
+                          : null,
                 ),
                 AppFormField(
                   key: ValueKey('business_phone_${_phoneMasks.length}'),

@@ -14,7 +14,9 @@ import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/theme/app_colors.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 /// What the member screen ([showMemberPicker]) returned.
 sealed class MemberChoice {
@@ -135,6 +137,13 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       invite.name ?? invite.email ?? invite.phone ?? '';
 
   Future<void> _invite() async {
+    // Team is a paid feature: at the plan limit, offer the plans before
+    // asking for the person's details.
+    final gate = FeatureGateService.canAddCollaborator(Global.subscription);
+    if (!gate.isAllowed) {
+      showFeatureLimitDialog(context, gate);
+      return;
+    }
     final result = await FormSheet.show<bool>(
       context,
       (_) => const CollaboratorFormScreen(),

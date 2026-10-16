@@ -121,7 +121,7 @@ void main() {
 
     expect(find.text('Ver planos'), findsNothing);
     expect(find.text('Gerenciar assinatura'), findsNothing);
-    expect(find.text('Peça ao administrador da empresa para mudar de plano.'),
+    expect(find.text('Peça ao administrador da conta para mudar de plano.'),
         findsOneWidget);
   });
 
