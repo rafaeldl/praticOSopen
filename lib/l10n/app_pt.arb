@@ -1513,14 +1513,6 @@
   "receiveTitle": "Receber",
   "receiveMissing": "Falta receber",
   "receiveAllDone": "Tudo recebido",
-  "receiveButton": "Recebi {amount}",
-  "@receiveButton": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "receiveAttachReceipt": "Anexar comprovante",
   "receiveAlreadyReceived": "Já recebido",
   "receiveWithReceipt": "com comprovante",
@@ -1566,6 +1558,22 @@
   "receiveMoreOptions": "Mais opções",
   "receiveRemoveReceipt": "Tirar comprovante",
   "receiveWhen": "Quando",
+  "receiveConfirmButton": "Confirmar recebimento",
+  "receiveCustomerOpenCount": "{count, plural, =1{1 OS em aberto.} other{{count} OS em aberto. Marque as OS que foram pagas.}}",
+  "@receiveCustomerOpenCount": {"placeholders": {"count": {"type": "int"}}},
+  "receiveCustomerPartHint": "Se recebeu só uma parte, digite quanto.",
+  "receiveCustomerPaying": "Está pagando",
+  "receiveCustomerOrderRow": "OS {number} · {description}",
+  "@receiveCustomerOrderRow": {"placeholders": {"number": {"type": "int"}, "description": {"type": "String"}}},
+  "receiveCustomerRowSettles": "Quita",
+  "receiveCustomerRowPartial": "Recebe {amount} · fica {left}",
+  "@receiveCustomerRowPartial": {"placeholders": {"amount": {"type": "String"}, "left": {"type": "String"}}},
+  "receiveCustomerRowLater": "Fica para depois",
+  "receiveCustomerNoneChecked": "Marque pelo menos uma OS.",
+  "receiveCustomerSendLink": "Mandar link para pagar…",
+  "receiveCustomerOpenOrder": "Abrir OS {number}",
+  "@receiveCustomerOpenOrder": {"placeholders": {"number": {"type": "int"}}},
+  "receiveAttach": "Anexar",
   "receiveCustomerTitle": "Receber de {name}",
   "@receiveCustomerTitle": {
     "placeholders": {
@@ -1574,64 +1582,8 @@
       }
     }
   },
-  "receiveCustomerOwes": "Deve {amount} em {count, plural, =1{1 OS} other{{count} OS}}",
-  "@receiveCustomerOwes": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "receiveCustomerAmountLabel": "Quanto recebeu",
-  "receiveCustomerHowItGoes": "Como fica",
-  "receiveCustomerOldestFirst": "O valor vai primeiro para as OS mais antigas.",
-  "receiveCustomerSettles": "OS {number} · quita {amount}",
-  "@receiveCustomerSettles": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerPartial": "OS {number} · recebe {amount}, fica {left}",
-  "@receiveCustomerPartial": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "left": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerUntouched": "OS {number} · continua {amount}",
-  "@receiveCustomerUntouched": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerTooMuch": "Passa do que ele deve ({total}).",
-  "@receiveCustomerTooMuch": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      }
-    }
-  },
+  "receiveCustomerOldestFirst": "Se o valor não der para tudo, as mais antigas são pagas primeiro.",
   "receiveCustomerZero": "Digite quanto recebeu.",
   "receiveCustomerDone": "Recebido {amount} de {name}",
   "@receiveCustomerDone": {
@@ -1645,7 +1597,6 @@
     }
   },
   "receiveCustomerUploadFailed": "Não deu para enviar o comprovante. Confira a internet e tente de novo.",
-  "receiveCustomerSendCharge": "Mandar cobrança",
   "receiveCustomerChargeIntro": "{name} recebe um link só para pagar {count, plural, =1{a OS {numbers}} other{as OS {numbers}}} por Pix, boleto ou cartão.",
   "@receiveCustomerChargeIntro": {"placeholders": {"name": {"type": "String"}, "count": {"type": "int"}, "numbers": {"type": "String"}}},
   "receiveCustomerChargeOwedHint": "Em aberto nessas OS: {value}",
@@ -1654,17 +1605,14 @@
   "@receiveCustomerOpenCharge": {"placeholders": {"amount": {"type": "String"}}},
   "receiveCustomerOpenChargeDetail": "OS {numbers} · vence {date}",
   "@receiveCustomerOpenChargeDetail": {"placeholders": {"numbers": {"type": "String"}, "date": {"type": "String"}}},
-  "receiveCustomerChargeMenu": "Ações do link",
   "receiveCustomerShareCharge": "Mandar o link de novo",
   "receiveCustomerChargeCancelTitle": "Cancelar o link de {amount}?",
   "@receiveCustomerChargeCancelTitle": {"placeholders": {"amount": {"type": "String"}}},
   "receiveCustomerChargeCanceled": "Link cancelado",
   "receiveCustomerOthersTitle": "Outras OS de {name}",
   "@receiveCustomerOthersTitle": {"placeholders": {"name": {"type": "String"}}},
-  "receiveCustomerOthersNote": "Feitas por outra pessoa. Para incluir, toque em Escolher as OS.",
+  "receiveCustomerOthersNote": "Feitas por outra pessoa. Marque para incluir; para salvar, precisa de internet.",
   "receiveCustomerOffline": "Sem internet. Para receber em OS de outra pessoa, precisa estar conectado.",
-  "receiveCustomerChooseOrders": "Escolher as OS",
-  "receiveCustomerPickTitle": "Quais OS ele está pagando?",
   "receiveCustomerPickRow": "OS {number}",
   "@receiveCustomerPickRow": {
     "placeholders": {
@@ -1673,18 +1621,6 @@
       }
     }
   },
-  "receiveCustomerPickSubtitle": "Falta {amount} · {date}",
-  "@receiveCustomerPickSubtitle": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerChosenOnly": "O valor vai só para as OS escolhidas, primeiro a mais antiga.",
   "receiveCustomerTooMuchChosen": "Passa do que falta nessas OS ({total}).",
   "@receiveCustomerTooMuchChosen": {
     "placeholders": {

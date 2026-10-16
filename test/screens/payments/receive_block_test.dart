@@ -33,7 +33,7 @@ void main() {
       )));
 
       expect(find.text('Falta receber'), findsOneWidget);
-      expect(find.textContaining('Recebi'), findsOneWidget);
+      expect(find.text('Confirmar recebimento'), findsOneWidget);
       expect(find.textContaining('950,00'), findsWidgets);
       expect(find.text('Anexar comprovante'), findsOneWidget);
       // "Como pagou" does not exist.

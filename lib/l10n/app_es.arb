@@ -1478,14 +1478,6 @@
   "receiveTitle": "Cobrar",
   "receiveMissing": "Falta por cobrar",
   "receiveAllDone": "Todo cobrado",
-  "receiveButton": "Recibí {amount}",
-  "@receiveButton": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "receiveAttachReceipt": "Adjuntar comprobante",
   "receiveAlreadyReceived": "Ya cobrado",
   "receiveWithReceipt": "con comprobante",
@@ -1531,6 +1523,18 @@
   "receiveMoreOptions": "Más opciones",
   "receiveRemoveReceipt": "Quitar comprobante",
   "receiveWhen": "Cuándo",
+  "receiveConfirmButton": "Confirmar cobro",
+  "receiveCustomerOpenCount": "{count, plural, =1{1 OS abierta.} other{{count} OS abiertas. Marque las que se pagaron.}}",
+  "receiveCustomerPartHint": "Si recibió solo una parte, escriba cuánto.",
+  "receiveCustomerPaying": "Está pagando",
+  "receiveCustomerOrderRow": "OS {number} · {description}",
+  "receiveCustomerRowSettles": "Salda",
+  "receiveCustomerRowPartial": "Recibe {amount} · quedan {left}",
+  "receiveCustomerRowLater": "Queda para después",
+  "receiveCustomerNoneChecked": "Marque al menos una OS.",
+  "receiveCustomerSendLink": "Enviar enlace de pago…",
+  "receiveCustomerOpenOrder": "Abrir OS {number}",
+  "receiveAttach": "Adjuntar",
   "receiveCustomerTitle": "Recibir de {name}",
   "@receiveCustomerTitle": {
     "placeholders": {
@@ -1539,64 +1543,8 @@
       }
     }
   },
-  "receiveCustomerOwes": "Debe {amount} en {count, plural, =1{1 OS} other{{count} OS}}",
-  "@receiveCustomerOwes": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "receiveCustomerAmountLabel": "Cuánto recibió",
-  "receiveCustomerHowItGoes": "Cómo queda",
-  "receiveCustomerOldestFirst": "El valor va primero a las OS más antiguas.",
-  "receiveCustomerSettles": "OS {number} · se salda con {amount}",
-  "@receiveCustomerSettles": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerPartial": "OS {number} · recibe {amount}, quedan {left}",
-  "@receiveCustomerPartial": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "left": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerUntouched": "OS {number} · sigue {amount}",
-  "@receiveCustomerUntouched": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      },
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "receiveCustomerTooMuch": "Supera lo que debe ({total}).",
-  "@receiveCustomerTooMuch": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      }
-    }
-  },
+  "receiveCustomerOldestFirst": "Si el valor no alcanza para todo, se pagan primero las más antiguas.",
   "receiveCustomerZero": "Escriba cuánto recibió.",
   "receiveCustomerDone": "Recibido {amount} de {name}",
   "@receiveCustomerDone": {
@@ -1610,23 +1558,17 @@
     }
   },
   "receiveCustomerUploadFailed": "No se pudo enviar el comprobante. Revise la conexión e intente de nuevo.",
-  "receiveCustomerSendCharge": "Enviar cobro",
   "receiveCustomerChargeIntro": "{name} recibe un solo enlace para pagar {count, plural, =1{la OS {numbers}} other{las OS {numbers}}} con Pix, boleto o tarjeta.",
   "receiveCustomerChargeOwedHint": "Pendiente en esas OS: {value}",
   "receiveCustomerOpenCharge": "Enlace abierto de {amount}",
   "receiveCustomerOpenChargeDetail": "OS {numbers} · vence {date}",
-  "receiveCustomerChargeMenu": "Acciones del enlace",
   "receiveCustomerShareCharge": "Enviar el enlace de nuevo",
   "receiveCustomerChargeCancelTitle": "¿Cancelar el enlace de {amount}?",
   "receiveCustomerChargeCanceled": "Enlace cancelado",
   "receiveCustomerOthersTitle": "Otras OS de {name}",
-  "receiveCustomerOthersNote": "Hechas por otra persona. Para incluirlas, toque Elegir las OS.",
+  "receiveCustomerOthersNote": "Hechas por otra persona. Márquela para incluirla; para guardar, necesita internet.",
   "receiveCustomerOffline": "Sin internet. Para recibir en OS de otra persona necesita estar conectado.",
-  "receiveCustomerChooseOrders": "Elegir las OS",
-  "receiveCustomerPickTitle": "¿Qué OS está pagando?",
   "receiveCustomerPickRow": "OS {number}",
-  "receiveCustomerPickSubtitle": "Falta {amount} · {date}",
-  "receiveCustomerChosenOnly": "El valor va solo a las OS elegidas, primero la más antigua.",
   "receiveCustomerTooMuchChosen": "Supera lo que falta en estas OS ({total}).",
   "receiptTitle": "Cobro",
   "receiptRowSettled": "OS {number} · {amount} · saldada",

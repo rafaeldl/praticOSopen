@@ -78,7 +78,7 @@ class PaymentManagementRoute extends StatelessWidget {
 }
 
 /// "Receber" screen of an order: one block answering "did the customer pay?"
-/// (amount already filled, one "Recebi R$ X" button), the received payments
+/// (amount already filled, one "Confirmar recebimento" button), the received payments
 /// list ("Já recebido") and, for Asaas companies, the payment link: an open
 /// link takes the top block ("Link mandado em…") and gets its own row, and
 /// its actions (copy, send again, cancel) live in the "…" menu.
@@ -88,7 +88,7 @@ class PaymentManagementRoute extends StatelessWidget {
 /// opens its sheet (send recibo, view/attach receipt, remove); a payment that
 /// is a share of a customer receipt opens the "Recebimento" screen instead.
 /// No success dialogs: after
-/// "Recebi" the block turns into "Tudo recebido" or shows the new balance.
+/// "Confirmar recebimento" the block turns into "Tudo recebido" or shows the new balance.
 class PaymentManagementScreen extends StatefulWidget {
   const PaymentManagementScreen({
     super.key,

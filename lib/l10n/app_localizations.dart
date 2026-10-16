@@ -5074,12 +5074,6 @@ abstract class AppLocalizations {
   /// **'Tudo recebido'**
   String get receiveAllDone;
 
-  /// No description provided for @receiveButton.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recebi {amount}'**
-  String receiveButton(String amount);
-
   /// No description provided for @receiveAttachReceipt.
   ///
   /// In pt, this message translates to:
@@ -5188,17 +5182,83 @@ abstract class AppLocalizations {
   /// **'Quando'**
   String get receiveWhen;
 
+  /// No description provided for @receiveConfirmButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar recebimento'**
+  String get receiveConfirmButton;
+
+  /// No description provided for @receiveCustomerOpenCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 OS em aberto.} other{{count} OS em aberto. Marque as OS que foram pagas.}}'**
+  String receiveCustomerOpenCount(int count);
+
+  /// No description provided for @receiveCustomerPartHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se recebeu só uma parte, digite quanto.'**
+  String get receiveCustomerPartHint;
+
+  /// No description provided for @receiveCustomerPaying.
+  ///
+  /// In pt, this message translates to:
+  /// **'Está pagando'**
+  String get receiveCustomerPaying;
+
+  /// No description provided for @receiveCustomerOrderRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {description}'**
+  String receiveCustomerOrderRow(int number, String description);
+
+  /// No description provided for @receiveCustomerRowSettles.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quita'**
+  String get receiveCustomerRowSettles;
+
+  /// No description provided for @receiveCustomerRowPartial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebe {amount} · fica {left}'**
+  String receiveCustomerRowPartial(String amount, String left);
+
+  /// No description provided for @receiveCustomerRowLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica para depois'**
+  String get receiveCustomerRowLater;
+
+  /// No description provided for @receiveCustomerNoneChecked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marque pelo menos uma OS.'**
+  String get receiveCustomerNoneChecked;
+
+  /// No description provided for @receiveCustomerSendLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar link para pagar…'**
+  String get receiveCustomerSendLink;
+
+  /// No description provided for @receiveCustomerOpenOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir OS {number}'**
+  String receiveCustomerOpenOrder(int number);
+
+  /// No description provided for @receiveAttach.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexar'**
+  String get receiveAttach;
+
   /// No description provided for @receiveCustomerTitle.
   ///
   /// In pt, this message translates to:
   /// **'Receber de {name}'**
   String receiveCustomerTitle(String name);
-
-  /// No description provided for @receiveCustomerOwes.
-  ///
-  /// In pt, this message translates to:
-  /// **'Deve {amount} em {count, plural, =1{1 OS} other{{count} OS}}'**
-  String receiveCustomerOwes(String amount, int count);
 
   /// No description provided for @receiveCustomerAmountLabel.
   ///
@@ -5206,41 +5266,11 @@ abstract class AppLocalizations {
   /// **'Quanto recebeu'**
   String get receiveCustomerAmountLabel;
 
-  /// No description provided for @receiveCustomerHowItGoes.
-  ///
-  /// In pt, this message translates to:
-  /// **'Como fica'**
-  String get receiveCustomerHowItGoes;
-
   /// No description provided for @receiveCustomerOldestFirst.
   ///
   /// In pt, this message translates to:
-  /// **'O valor vai primeiro para as OS mais antigas.'**
+  /// **'Se o valor não der para tudo, as mais antigas são pagas primeiro.'**
   String get receiveCustomerOldestFirst;
-
-  /// No description provided for @receiveCustomerSettles.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · quita {amount}'**
-  String receiveCustomerSettles(int number, String amount);
-
-  /// No description provided for @receiveCustomerPartial.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · recebe {amount}, fica {left}'**
-  String receiveCustomerPartial(int number, String amount, String left);
-
-  /// No description provided for @receiveCustomerUntouched.
-  ///
-  /// In pt, this message translates to:
-  /// **'OS {number} · continua {amount}'**
-  String receiveCustomerUntouched(int number, String amount);
-
-  /// No description provided for @receiveCustomerTooMuch.
-  ///
-  /// In pt, this message translates to:
-  /// **'Passa do que ele deve ({total}).'**
-  String receiveCustomerTooMuch(String total);
 
   /// No description provided for @receiveCustomerZero.
   ///
@@ -5259,12 +5289,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não deu para enviar o comprovante. Confira a internet e tente de novo.'**
   String get receiveCustomerUploadFailed;
-
-  /// No description provided for @receiveCustomerSendCharge.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mandar cobrança'**
-  String get receiveCustomerSendCharge;
 
   /// No description provided for @receiveCustomerChargeIntro.
   ///
@@ -5289,12 +5313,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS {numbers} · vence {date}'**
   String receiveCustomerOpenChargeDetail(String numbers, String date);
-
-  /// No description provided for @receiveCustomerChargeMenu.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ações do link'**
-  String get receiveCustomerChargeMenu;
 
   /// No description provided for @receiveCustomerShareCharge.
   ///
@@ -5323,7 +5341,7 @@ abstract class AppLocalizations {
   /// No description provided for @receiveCustomerOthersNote.
   ///
   /// In pt, this message translates to:
-  /// **'Feitas por outra pessoa. Para incluir, toque em Escolher as OS.'**
+  /// **'Feitas por outra pessoa. Marque para incluir; para salvar, precisa de internet.'**
   String get receiveCustomerOthersNote;
 
   /// No description provided for @receiveCustomerOffline.
@@ -5332,35 +5350,11 @@ abstract class AppLocalizations {
   /// **'Sem internet. Para receber em OS de outra pessoa, precisa estar conectado.'**
   String get receiveCustomerOffline;
 
-  /// No description provided for @receiveCustomerChooseOrders.
-  ///
-  /// In pt, this message translates to:
-  /// **'Escolher as OS'**
-  String get receiveCustomerChooseOrders;
-
-  /// No description provided for @receiveCustomerPickTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quais OS ele está pagando?'**
-  String get receiveCustomerPickTitle;
-
   /// No description provided for @receiveCustomerPickRow.
   ///
   /// In pt, this message translates to:
   /// **'OS {number}'**
   String receiveCustomerPickRow(int number);
-
-  /// No description provided for @receiveCustomerPickSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta {amount} · {date}'**
-  String receiveCustomerPickSubtitle(String amount, String date);
-
-  /// No description provided for @receiveCustomerChosenOnly.
-  ///
-  /// In pt, this message translates to:
-  /// **'O valor vai só para as OS escolhidas, primeiro a mais antiga.'**
-  String get receiveCustomerChosenOnly;
 
   /// No description provided for @receiveCustomerTooMuchChosen.
   ///

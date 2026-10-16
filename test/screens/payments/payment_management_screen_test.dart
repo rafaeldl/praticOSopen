@@ -163,7 +163,8 @@ void main() {
 
     expect(find.text('Receber'), findsWidgets);
     expect(find.text('Falta receber'), findsOneWidget);
-    expect(find.textContaining('Recebi'), findsOneWidget);
+    expect(find.text('Confirmar recebimento'), findsOneWidget);
+    expect(find.textContaining('Recebi '), findsNothing);
     expect(find.textContaining('950,00'), findsWidgets);
     expect(find.text('Anexar comprovante'), findsOneWidget);
     expect(find.textContaining('Como pagou'), findsNothing);
