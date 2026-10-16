@@ -6,6 +6,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/utils/startup_company.dart';
 import 'package:praticos/services/account_deletion_api_service.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -91,29 +92,25 @@ abstract class _AuthStore with Store {
           });
         }
       }
-      Company? company;
-
-      // Check if there is a last selected company saved
+      // The saved company comes first if the user still belongs to it, then
+      // the others in the user's list. Companies that were deleted or left
+      // are skipped instead of failing the whole sign-in.
       String? lastCompanyId = prefs.getString('companyId');
-
-      if (lastCompanyId != null &&
-          dbUser != null &&
-          dbUser.companies != null &&
-          dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
-        // Load the saved company if the user still belongs to it
-        company = await companyStore.retrieveCompany(lastCompanyId);
-      } else if (dbUser != null &&
-          dbUser.companies != null &&
-          dbUser.companies!.isNotEmpty &&
-          dbUser.companies!.first.company != null &&
-          dbUser.companies!.first.company!.id != null) {
-        // Retrieve the first company associated with the user
-        company = await companyStore
-            .retrieveCompany(dbUser.companies!.first.company!.id!);
-      } else {
-        // Fallback for legacy or owner-only logic
-        company = await companyStore.getCompanyByOwnerId(user.uid);
+      final memberCompanyIds = <String>[
+        ...?dbUser?.companies?.map((c) => c.company?.id).whereType<String>(),
+      ];
+      if (lastCompanyId != null && memberCompanyIds.contains(lastCompanyId)) {
+        memberCompanyIds.insert(0, lastCompanyId);
       }
+
+      Company? company = await firstAccessibleCompany<Company>(
+        memberCompanyIds,
+        (id) async => await companyStore.retrieveCompany(id),
+      );
+      // Fallback for legacy or owner-only logic
+      company ??= await loadIfAccessible(
+        () => companyStore.getCompanyByOwnerId(user.uid),
+      );
 
       Global.currentUser = user;
 
@@ -126,6 +123,9 @@ abstract class _AuthStore with Store {
 
       // Se não encontrou empresa, usuário vai para onboarding
       if (company == null) {
+        // Forget a company that no longer exists so the next start is clean
+        await prefs.remove('companyId');
+        await prefs.remove('companyName');
         companyAggr = null;
         Global.companyAggr = null;
         _isCompanyLoaded = true;
