@@ -1,46 +1,45 @@
-PraticOS es la app de gestión de órdenes de servicio más práctica del mercado. Controle OS, clientes, agenda y finanzas en un solo lugar. Con integración WhatsApp y enlaces de seguimiento, sus clientes acompañan todo en tiempo real.
+PraticOS es la app de órdenes de servicio para profesionales y pequeños negocios de servicios: técnicos de aire acondicionado, mecánicos, electricistas, fontaneros, reparación de móviles, mantenimiento y muchos más. Di lo que vas a hacer y la IA rellena la orden por ti. Del presupuesto al cobro, todo queda en tu móvil.
 
-GESTIÓN DE ÓRDENES DE SERVICIO
-• Cree y rastree órdenes de servicio con facilidad
-• Controle el estado: presupuesto, aprobado, en progreso, completado
-• Agregue servicios, productos y observaciones
-• Visualice el historial completo de cada orden
-• Adjunte fotos con compresión inteligente
+DILO Y LA ORDEN SE RELLENA SOLA
+• Toca Hablar y di el trabajo: "El Clio de Julia, cambio de aceite y alineación"
+• O haz una foto de la matrícula o de un pedido apuntado
+• La IA rellena cliente, vehículo, servicios y piezas, con los precios de tu catálogo
+• Lo que rellenó la IA queda marcado para que lo revises, y se puede deshacer
+• Corrige también hablando: "la alineación son 100", "quita el equilibrado"
 
-REGISTRO DE CLIENTES
-• Mantenga su base de clientes organizada
-• Acceda rápidamente a la información de contacto
-• Visualice el historial de servicios por cliente
-• Búsqueda rápida e intuitiva
+QUÉ HACER AHORA
+• Inicio muestra tus órdenes y el siguiente paso de cada una
+• Abre una orden nueva en segundos con el botón "Nueva OS"
+• Estado claro: presupuesto, aprobada, en curso, completada
 
-AGENDA Y RECORDATORIOS
-• Visualice sus citas en el calendario
-• Reciba recordatorios automáticos antes de los horarios
-• Filtre por técnico para organizar el equipo
-• Programe servicios con fecha y hora definidos
+PRESUPUESTOS Y ÓRDENES
+• Servicios, piezas y precios en la misma pantalla
+• Fotos del trabajo y checklists de inspección
+• PDF de la orden con fotos, listo para enviar o imprimir
 
-WHATSAPP Y COMPARTIR
-• Comparta órdenes de servicio por WhatsApp
-• Envíe enlaces seguros para que los clientes sigan el servicio
-• Reciba evaluaciones de los clientes tras la finalización
-• Asistente de IA para comunicación con clientes
+EL CLIENTE SIGUE TODO POR ENLACE
+• Envía la orden por WhatsApp con un enlace seguro
+• El cliente ve el avance y aprueba el presupuesto desde el enlace
+• Recibe la valoración del cliente al terminar el trabajo
 
-PANEL FINANCIERO
-• Acompañe sus resultados en tiempo real
-• Visualice ingresos y métricas importantes
-• Tenga control total sobre su facturación
+AGENDA
+• Tus citas en el calendario
+• Un recordatorio antes de cada una
 
-FORMULARIOS Y CHECKLISTS
-• Cree checklists personalizados para inspecciones
-• Adjunte fotos con compresión automática
-• Control de permisos por perfil de acceso
+FINANCIERO
+• Mira cuánto te falta cobrar y a quién
+• Registra lo que pagó el cliente, de una vez o en partes
 
-INTERFAZ MODERNA
-• Diseño limpio e intuitivo
-• Modo oscuro disponible
-• Navegación simple y rápida
-• Funciona offline
+CLIENTES
+• Historial de servicios, vehículos y aparatos de cada cliente
+• Cuánto debe cada cliente
 
-Ideal para proveedores de servicios, talleres, asistencia técnica, profesionales autónomos y pequeñas empresas que buscan organización y practicidad en el día a día.
+A TU MANERA
+• Elige tu oficio y la app usa tus palabras: vehículo, aparato, equipo
+• Modo oscuro y texto grande
+• Inicia sesión con Google o email
 
-¡Descargue ahora y transforme la gestión de su negocio!
+PLANES Y SUSCRIPCIONES
+PraticOS es gratuito para empezar. El plan Gratuito tiene límites mensuales de fotos, checklists, uso de la IA y personas en la cuenta. Los planes Starter, Pro y Business aumentan esos límites y son suscripciones mensuales con renovación automática, compradas dentro de la app a través de Google Play. Cancela cuando quieras en Pagos y suscripciones de Google Play.
+
+Política de Privacidad: https://praticos.web.app/privacy.html

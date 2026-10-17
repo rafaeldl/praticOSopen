@@ -324,7 +324,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String _heard = '';
   final TextEditingController _typedController = TextEditingController();
   late final SpeechListener _speech =
-      widget.speechListener ?? DeviceSpeechListener();
+      widget.speechListener ??
+      (const bool.fromEnvironment('SCREENSHOT_MODE')
+          ? ScriptedSpeechListener()
+          : DeviceSpeechListener());
 
   /// Note above the bar (what the assistant did, or why it could not).
   String? _note;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -187,4 +189,41 @@ class _PhoneSpeechEngine implements SpeechEngine {
     _listening = false;
     return _speech.stop();
   }
+}
+
+/// Store screenshots and video only (`--dart-define=SCREENSHOT_MODE=true`):
+/// "hears" a fixed sentence about the demo account's data, word by word,
+/// so the real assistant fills the order without a microphone.
+class ScriptedSpeechListener implements SpeechListener {
+  static const sentences = {
+    'pt': 'Onix da Juliana Costa, troca de óleo com filtro, '
+        'alinhamento e balanceamento',
+    'en': "Julia Carter's Civic, oil change with oil filter, "
+        'wheel alignment and wheel balancing',
+    'es': 'El Clio de Julia Martín, cambio de aceite con filtro, '
+        'alineación y balanceo',
+  };
+
+  Timer? _timer;
+
+  @override
+  Future<bool> start({
+    required String localeId,
+    required void Function(String words) onWords,
+    required void Function() onDone,
+  }) async {
+    final words = (sentences[localeId.split(RegExp('[-_]')).first] ??
+            sentences['pt']!)
+        .split(' ');
+    var heard = 0;
+    _timer = Timer.periodic(const Duration(milliseconds: 280), (timer) {
+      heard++;
+      onWords(words.take(heard).join(' '));
+      if (heard >= words.length) timer.cancel();
+    });
+    return true;
+  }
+
+  @override
+  Future<void> stop() async => _timer?.cancel();
 }

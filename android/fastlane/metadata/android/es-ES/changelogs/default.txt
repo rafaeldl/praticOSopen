@@ -1,13 +1,9 @@
-Novedades:
+Novedades en esta versión:
 
-• Agenda con Calendario: Visualice y gestione citas con filtro por técnico
-
-• Recordatorios Inteligentes: Notificaciones automáticas antes de las citas
-
-• Integración WhatsApp: Comparta órdenes por WhatsApp con asistente de IA
-
-• Enlaces de Seguimiento: Clientes siguen el servicio y dejan evaluaciones
-
-• Mejoras de Rendimiento: Carga más rápida y diversas correcciones
-
-¡Felicidades por elegir la mejor app de gestión de órdenes de servicio!
+• Nuevo diseño: Inicio muestra tus órdenes y el siguiente paso de cada una
+• Pestañas Inicio, Agenda y Financiero, con el botón "Nueva OS" siempre a mano
+• Financiero muestra cuánto te falta cobrar y a quién
+• Registrar el pago del cliente es más sencillo, también en partes
+• Empieza sin registrar una empresa: elige tu oficio y abre tu primera orden
+• Los archivos compartidos desde otras apps van directo a una orden
+• Correcciones y mejoras

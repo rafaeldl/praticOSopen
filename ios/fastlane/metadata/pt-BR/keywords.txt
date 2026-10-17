@@ -1,1 +1,1 @@
-ordem de serviço,OS,gestão,clientes,agenda,calendário,whatsapp,lembretes,checklist,vistoria
+IA,voz,OS,orçamento,checklist,vistoria,agenda,clientes,técnico,autônomo,mecânico,refrigeração

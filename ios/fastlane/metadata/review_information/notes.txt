@@ -4,7 +4,7 @@ PraticOS is a personal work-order tool for independent service professionals (ai
 
 All paid features are sold only through In-App Purchase:
 - The Free plan has monthly limits on photos, checklist templates and people on the account. Paid plans raise these limits and remove the watermark from PDF work orders.
-- Inviting another person to work on the same account ("Equipe") is a paid feature. On the Free plan, tapping "Convidar" opens the In-App Purchase plans.
+- Inviting another person to work on the same account ("Equipe") is a paid feature. On the Free plan, tapping "Convidar" shows the plan limit with a "Ver planos" (View plans) button that opens the In-App Purchase plans.
 - Paid plans are auto-renewable monthly subscriptions sold through In-App Purchase: Starter, Pro and Business (subscription group "PraticOS").
 - Paid plans cannot be bought anywhere else from the app: the app has no external purchase links or calls to action, and the website shows no prices.
 
@@ -19,15 +19,10 @@ The payment features in work orders let the professional record and charge their
 
 ----------
 
-Para fazer login com a conta demo:
+Signing in with the demo account:
 
-1. Na tela de login, toque no link "Entrar com email" abaixo dos botões de login social
-2. Digite o email e senha fornecidos nos campos correspondentes
-3. Toque no botão "Entrar"
+1. On the sign-in screen, tap "Entrar com e-mail e senha" (Sign in with email and password) below the Apple and Google buttons.
+2. Enter the demo email and password.
+3. Tap "Entrar" (Sign in).
 
-A conta demo possui dados de exemplo incluindo:
-- 5 clientes cadastrados
-- 5 ordens de serviço com diferentes status (orçamento, aprovado, em andamento, concluído)
-- Dados financeiros para visualização no painel
-
-Todas as funcionalidades do app podem ser testadas com esta conta.
+The demo account has fictional sample data: 6 customers with their vehicles, 8 work orders in every status (quote, approved, in progress, completed), a completed vehicle check-in checklist with photos, and payments in the "Financeiro" tab. All features can be tested with it.

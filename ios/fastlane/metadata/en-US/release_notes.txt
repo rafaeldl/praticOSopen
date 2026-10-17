@@ -1,7 +1,9 @@
 What's new in this version:
 
-• Photos in the work order PDF: photos attached to a work order now appear in the PDF and printouts, along with the service details.
-
-• Stability improvements and bug fixes.
-
-Congratulations on choosing the best work order management app!
+• A fresh new look: Home shows your work orders and the next step for each one
+• Home, Schedule and Financial tabs, with the "New order" button always at hand
+• Financial shows how much you still have to collect, and from whom
+• Receiving a customer payment is simpler, including partial payments
+• Start without registering a business: pick your line of work and open your first work order
+• Files shared from other apps go straight into a work order
+• Fixes and improvements

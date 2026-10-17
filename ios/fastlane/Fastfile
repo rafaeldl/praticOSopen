@@ -406,7 +406,7 @@ platform :ios do
 
   desc "Gera screenshots automaticamente usando Flutter integration tests"
   lane :screenshots do |options|
-    device = options[:device] || "iPhone 16e"
+    device = options[:device] || "iPhone 17 Pro Max"
     locale = options[:locale] || "pt-BR"
     force_logout = options[:force_logout]
     brightness = options[:brightness] || "light"
@@ -419,8 +419,10 @@ platform :ios do
     force_logout = options[:force_logout]
     brightness = options[:brightness] || "light"
     parallel = options[:parallel] == true  # Default: false (changed for debugging)
-    locales = ["pt-BR", "en-US", "es-ES"]
-    devices = ["iPhone 16e", "iPhone 17", "iPhone 17 Pro Max"]
+    locales = options[:locales] ? options[:locales].split(",") : ["pt-BR", "en-US", "es-ES"]
+    # 6.9" is the only size App Store Connect requires; it scales it down for
+    # the smaller iPhones.
+    devices = options[:devices] ? options[:devices].split(",") : ["iPhone 17 Pro Max"]
 
     UI.message("🎨 Brightness mode: #{brightness}")
 
@@ -521,6 +523,68 @@ platform :ios do
     UI.success("✅ Website screenshots updated and site rebuilt!")
   end
 
+  desc "Grava o vídeo da loja (prévia do app na App Store) no simulador"
+  # Saída: fastlane/app_previews/{locale}/{device}.mp4, 886x1920, até 30 s,
+  # com faixa de áudio muda (a App Store exige áudio). O deliver não envia
+  # vídeo: subir à mão no App Store Connect. Ver docs/STORE_LISTING.md.
+  lane :store_video do |options|
+    device = options[:device] || "iPhone 17 Pro Max"
+    locale = options[:locale] || "pt-BR"
+    out_dir = File.expand_path("app_previews/#{locale}", __dir__)
+    FileUtils.mkdir_p(out_dir)
+    raw = File.join(Dir.tmpdir, "praticos_store_video_#{locale}.mov")
+    out = File.join(out_dir, "#{device}.mp4")
+
+    sh("xcrun simctl shutdown '#{device}' || true")
+    sh("xcrun", "simctl", "erase", device)
+    sh("xcrun", "simctl", "boot", device)
+    sh("open", "-a", "Simulator")
+    sleep(10)
+    sh("xcrun", "simctl", "ui", device, "appearance", "light") rescue nil
+    sh("xcrun", "simctl", "status_bar", device, "override", "--time", "9:41",
+       "--batteryState", "charged", "--batteryLevel", "100",
+       "--cellularBars", "4", "--wifiBars", "3")
+
+    log = nil
+    recorder = nil
+    rec_start = nil
+    Dir.chdir("..") do
+      ENV['FLUTTER_TEST_PLATFORM'] = 'ios'
+      ENV['TEST_LOCALE'] = locale
+      # Records the build too; the 🎬 marks cut it out.
+      recorder = Process.spawn("xcrun", "simctl", "io", device, "recordVideo",
+                               "--codec=h264", "--force", raw)
+      rec_start = (Time.now.to_f * 1000).to_i
+      log = sh("fvm", "flutter", "drive",
+               "--driver=test_driver/integration_test.dart",
+               "--target=integration_test/screenshot_test.dart",
+               "--dart-define=TEST_LOCALE=#{locale}",
+               "--dart-define=SCREENSHOT_MODE=true",
+               "--dart-define=STORE_VIDEO=true",
+               "--dart-define=FORCE_LOGOUT=true",
+               "--dart-define=API_BASE_URL=https://southamerica-east1-praticos.cloudfunctions.net/api",
+               "-d", device)
+    end
+    Process.kill("INT", recorder)
+    Process.wait(recorder)
+
+    start_ms = log[/🎬 start (\d+)/, 1]&.to_i
+    end_ms = log[/🎬 end (\d+)/, 1]&.to_i
+    UI.user_error!("❌ No 🎬 marks in the test output") unless start_ms && end_ms
+    offset = (start_ms - rec_start) / 1000.0
+    length = (end_ms - start_ms) / 1000.0
+    # App previews are 15–30 s: a longer take is sped up to fit.
+    speed = length > 29.5 ? length / 29.5 : 1.0
+    UI.message("🎬 #{length.round(1)} s from #{offset.round(1)} s, speed x#{speed.round(2)}")
+
+    sh("ffmpeg", "-y", "-ss", offset.to_s, "-t", length.to_s, "-i", raw,
+       "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+       "-filter:v", "setpts=PTS/#{speed},scale=886:1920:flags=lanczos,fps=30,format=yuv420p",
+       "-c:v", "libx264", "-profile:v", "high", "-crf", "18",
+       "-c:a", "aac", "-b:a", "128k", "-shortest", "-movflags", "+faststart", out)
+    UI.success("✅ Store video: #{out}")
+  end
+
   desc "Gera screenshots apenas para pt-BR (backwards compatibility)"
   lane :screenshots_pt_br do |options|
     force_logout = options[:force_logout]
@@ -533,14 +597,15 @@ platform :ios do
 
   # Helper function for iOS screenshots
   # brightness: "light" (default) or "dark"
-  # Dark screenshots are saved to a separate directory: screenshots/{locale}_dark/
+  # Dark screenshots are saved outside the App Store upload path:
+  # screenshots_dark/{locale}/ (kept for the website, see docs/STORE_LISTING.md)
   def capture_ios_screenshots(device:, locale:, force_logout:, brightness: "light")
     UI.message("📸 Capturing #{brightness} screenshots on device: #{device}, locale: #{locale}")
 
     # Dark mode saves to a separate directory to avoid overwriting light screenshots
     # Use absolute path because Dir.chdir("..") changes CWD for flutter drive
     screenshots_dir = if brightness == "dark"
-      File.expand_path("screenshots/#{locale}_dark", __dir__)
+      File.expand_path("screenshots_dark/#{locale}", __dir__)
     else
       File.expand_path("screenshots/#{locale}", __dir__)
     end
@@ -597,6 +662,8 @@ platform :ios do
         "--dart-define=TEST_LOCALE=#{locale}",
         "--dart-define=TEST_BRIGHTNESS=#{brightness}",
         "--dart-define=SCREENSHOT_MODE=true",
+        # Debug builds point at a local API; the demo accounts live in production.
+        "--dart-define=API_BASE_URL=https://southamerica-east1-praticos.cloudfunctions.net/api",
         "-d", device
       ]
 

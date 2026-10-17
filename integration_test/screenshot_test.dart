@@ -4,809 +4,412 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:praticos/main.dart' as app;
 
+/// Store screenshots (App Store and Google Play) of the redesigned app.
+///
+/// Signs in with the demo account of [TEST_LOCALE] (docs/DEMO_ACCOUNTS.md)
+/// and captures, in store order:
+///
+/// 01_ai_order   "Nova OS" filled by the assistant from what was said
+/// 02_home       Início: the orders and what to do next
+/// 03_order      An order: customer, status, next step
+/// 04_agenda     Agenda
+/// 05_financial  Financeiro ("Falta receber")
+/// 06_checklist  A checklist of the order, with photos
+/// 07_customer   The customer, with their orders
+///
+/// A screen that cannot be reached is skipped (logged with ⚠️), never
+/// replaced by another one, so a file name always means the same screen.
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Screenshot Tests', () {
-    testWidgets('capture all 8 screenshots for App Store', (WidgetTester tester) async {
-      // Get locale from environment (default: pt-BR)
-      const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
+  testWidgets('capture store screenshots', (WidgetTester tester) async {
+    const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
+    const brightness = String.fromEnvironment(
+      'TEST_BRIGHTNESS',
+      defaultValue: 'light',
+    );
+    const forceLogout = bool.fromEnvironment(
+      'FORCE_LOGOUT',
+      defaultValue: true,
+    );
+    print('📱 Store screenshots · $locale · $brightness');
 
-      print('\n========================================');
-      print('📱 Starting screenshot tests');
-      print('🌍 Locale: $locale');
-      print('========================================\n');
+    tester.platformDispatcher.platformBrightnessTestValue = brightness == 'dark'
+        ? Brightness.dark
+        : Brightness.light;
 
-      // Get brightness from environment (default: light)
-      const themeBrightness = String.fromEnvironment('TEST_BRIGHTNESS', defaultValue: 'light');
-      tester.platformDispatcher.platformBrightnessTestValue =
-          themeBrightness == 'dark' ? Brightness.dark : Brightness.light;
+    app.main();
+    await _wait(tester, 6);
 
-      // Initialize the app
-      print('🚀 Initializing app...');
-      app.main();
-      await tester.pumpAndSettle();
-
-      // Wait for app to fully load
-      print('⏳ Waiting for app initialization...');
-      await Future.delayed(const Duration(seconds: 5));
-      await tester.pumpAndSettle();
-      print('✅ App initialized');
-
-      // Check if already logged in and logout if requested
-      const forceLogout = bool.fromEnvironment('FORCE_LOGOUT', defaultValue: true);
-
-      final emailLoginLink = find.textContaining('email');
-      if (forceLogout && emailLoginLink.evaluate().isEmpty) {
-        print('📱 App already logged in, forcing logout to start fresh...');
+    if (_byId('email_login_link').evaluate().isEmpty) {
+      if (forceLogout) {
+        print('Already signed in: signing out to use the demo account');
         await _performLogout(tester);
+      } else {
+        print('Already signed in: keeping the current account');
       }
+    }
 
-      // Android specific: Enable screenshot capture
-      await binding.convertFlutterSurfaceToImage();
+    // The video records the screen itself: keep the live surface.
+    if (!_videoMode) await binding.convertFlutterSurfaceToImage();
 
-      // ========== SCREENSHOT 7: Login Screen (captured before login) ==========
-      print('\n--- Screenshot 7: Login Screen ---');
-      print('Waiting for login screen to be ready...');
-      await Future.delayed(const Duration(seconds: 4));
-      await tester.pumpAndSettle();
-      print('📸 Capturing Screenshot 7: Login');
-      await binding.takeScreenshot('07_login');
-
-      // ========== LOGIN WITH DEMO ACCOUNT ==========
-      print('🔐 Logging in with demo account for locale: $locale...');
+    if (_byId('email_login_link').evaluate().isNotEmpty) {
       await _performLogin(tester, locale);
+    }
 
-      // ========== SCREENSHOT 1: Home (Order List) ==========
-      print('\n--- Screenshot 1: Home ---');
-      print('Waiting for home screen to load...');
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(seconds: 5));
-      await tester.pumpAndSettle();
-      print('Home screen loaded');
+    await _waitFor(tester, () => _byIdPrefix(tester, 'order_card_') != null);
+    await _wait(tester, 3);
+    await _dismissBanners(tester);
 
-      // Dismiss WhatsApp setup banner if present
-      print('Checking for WhatsApp setup banner...');
-      final xmarkIcon = find.byIcon(CupertinoIcons.xmark);
-      if (xmarkIcon.evaluate().isNotEmpty) {
-        print('Dismissing WhatsApp banner...');
-        await tester.tap(xmarkIcon.first);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
-        print('✅ WhatsApp banner dismissed');
+    if (_videoMode) {
+      await _videoFlow(tester, locale);
+      return;
+    }
+
+    // 02 Início
+    await _shot(binding, tester, '02_home');
+
+    // 02 Order, 06 checklist and 07 customer all start from one order.
+    // The order of the demo's first customer (it has the checklist).
+    final hero = find.text(_heroCustomer[locale] ?? '');
+    final orderCard = hero.evaluate().isNotEmpty ? hero.first : _pickOrderCard(tester);
+    if (orderCard != null) {
+      await tester.tap(orderCard);
+      await _waitImages(tester);
+      await _shot(binding, tester, '03_order');
+
+      final form = _firstKeyPrefix(tester, 'form_');
+      if (form != null) {
+        await tester.ensureVisible(form);
+        await _wait(tester, 1);
+        await tester.tap(form);
+        await _waitImages(tester);
+        await _shot(binding, tester, '06_checklist');
+        await _pop(tester);
+      } else {
+        print('⚠️ Order has no checklist: skipping 06_checklist');
       }
 
-      // Debug: print widget tree to see what's actually on screen
-      print('\n=== WIDGET TREE DEBUG ===');
-      final widgets = tester.allWidgets.toList();
-      print('Total widgets: ${widgets.length}');
+      await _pop(tester);
+    } else {
+      print('⚠️ No order on Início: skipping 03 and 06');
+    }
 
-      // Check for common widgets
-      final inkWells = widgets.where((w) => w.runtimeType.toString() == 'InkWell').length;
-      final tabBars = widgets.where((w) => w.runtimeType.toString() == 'CupertinoTabBar').length;
-      final buttons = widgets.where((w) => w.runtimeType.toString().contains('Button')).length;
-      final icons = widgets.where((w) => w.runtimeType.toString() == 'Icon').length;
-
-      print('InkWell widgets: $inkWells');
-      print('CupertinoTabBar widgets: $tabBars');
-      print('Button widgets: $buttons');
-      print('Icon widgets: $icons');
-      print('=========================\n');
-
-        print('📸 Capturing Screenshot 1: Home');
-        await binding.takeScreenshot('01_home');
-
-      // ========== SCREENSHOT 2, 5, 6: Enter OS once and capture Detail, Payments, Forms ==========
-      print('\n--- Entering OS to capture Order Detail, Payments, and Forms ---');
-      print('Looking for order cards with semantic identifiers...');
-
-      // Find all Semantics widgets and filter for order_card_ identifiers
-      final allSemanticsOrder = find.byType(Semantics);
-      Finder? orderCard;
-
-      for (var i = 0; i < allSemanticsOrder.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemanticsOrder.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier.startsWith('order_card_')) {
-          orderCard = allSemanticsOrder.at(i);
-          print('Found order card: $identifier');
-          break;
-        }
-      }
-
-      print('Order cards found: ${orderCard != null ? 1 : 0}');
-
-      if (orderCard != null) {
-        print('Tapping order card...');
-        await tester.tap(orderCard);
-        // Order form has continuous Firestore streams/MobX observers
-        // that prevent pumpAndSettle from completing.
-        // Pump frames to complete the iOS page transition animation (~500ms),
-        // then wait for data to load.
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pump(const Duration(milliseconds: 500));
-        // Wait for Firestore data + Firebase Storage images to load.
-        // First wait a minimum time for the page to render and CachedNetworkImage
-        // to start downloading (avoids race condition where polling exits early
-        // before the placeholder spinner even appears).
-        print('Waiting for order data and images to start loading...');
-        await Future.delayed(const Duration(seconds: 5));
-        await tester.pump();
-
-        // Now poll for CircularProgressIndicator (CachedNetworkImage placeholder)
-        // to disappear, meaning images have finished loading.
-        print('Polling for image loading completion...');
-        int imgAttempts = 0;
-        const maxImgAttempts = 15; // max ~15 more seconds (total ~20s)
-        while (imgAttempts < maxImgAttempts) {
-          final spinners = find.byType(CircularProgressIndicator);
-          final count = spinners.evaluate().length;
-          if (count == 0) {
-            print('✅ Order images loaded (no CircularProgressIndicator)');
-            break;
-          }
-          imgAttempts++;
-          print('  Still loading images... ($count spinners, attempt $imgAttempts/$maxImgAttempts)');
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-        }
-        if (imgAttempts >= maxImgAttempts) {
-          print('⚠️ Timed out waiting for order images, capturing anyway');
-        }
-        print('Order detail opened');
-
-          // Extra delay to ensure fade-in animation completes and image fully renders
-          await Future.delayed(const Duration(seconds: 3));
-          await tester.pump();
-
-          // SCREENSHOT 2: Order Detail (top of screen)
-          print('📸 Capturing Screenshot 2: Order Detail');
-          await binding.takeScreenshot('02_order_detail');
-
-        // SCREENSHOT 5: Payments (scroll down to payments section)
-        print('\n--- Screenshot 5: Payments ---');
-        print('Scrolling to payments section...');
-        final orderScroll = find.byType(CustomScrollView);
-        if (orderScroll.evaluate().isNotEmpty) {
-          await tester.drag(orderScroll.first, const Offset(0, -350));
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-        }
-
-        // Look for payment button using semantic identifier
-        print('Looking for payment button by semantic identifier...');
-        final paymentSemantics = find.byType(Semantics);
-        Finder? paymentButton;
-
-        for (var i = 0; i < paymentSemantics.evaluate().length; i++) {
-          final widget = tester.widget<Semantics>(paymentSemantics.at(i));
-          final identifier = widget.properties.identifier?.toString() ?? '';
-          if (identifier == 'payment_button') {
-            paymentButton = paymentSemantics.at(i);
-            print('Found payment button with semantic identifier');
-            break;
-          }
-        }
-
-        if (paymentButton != null) {
-          print('Tapping payment button...');
-          await tester.tap(paymentButton);
-          // Pump frames to complete page transition animation
-          await tester.pump();
-          await tester.pump(const Duration(milliseconds: 500));
-          await tester.pump(const Duration(milliseconds: 500));
-          await Future.delayed(const Duration(seconds: 2));
-          await tester.pump();
-          print('Payments screen opened');
-
-          print('📸 Capturing Screenshot 5: Payments');
-          await binding.takeScreenshot('05_payments');
-
-          // Go back to order detail
-          print('Navigating back to order detail...');
-          final navPayments = tester.state<NavigatorState>(find.byType(Navigator).first);
-          navPayments.pop();
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-          print('✅ Back to order detail');
+    // 07 Customer: profile button → Clientes → the customer of the first
+    // order (the order header's name opens the customer picker instead).
+    final profile = _byId('home_profile_button');
+    if (profile.evaluate().isNotEmpty) {
+      await tester.tap(profile.first);
+      await _wait(tester, 2);
+      final customers = find.byKey(const ValueKey('more_row_customers'));
+      if (customers.evaluate().isNotEmpty) {
+        await tester.tap(customers.first);
+        await _wait(tester, 3);
+        final name = find.text(_heroCustomer[locale] ?? '');
+        if (name.evaluate().isNotEmpty) {
+          await tester.tap(name.first);
+          await _waitImages(tester);
+          await _shot(binding, tester, '07_customer');
+          await _pop(tester);
         } else {
-          print('⚠️ Could not find payment button, skipping screenshot 5');
+          print('⚠️ Customer not in the list: skipping 07_customer');
         }
+        await _pop(tester);
+      }
+      await _pop(tester);
+    } else {
+      print('⚠️ Profile button not found: skipping 07_customer');
+    }
 
-        // SCREENSHOT 6: Forms (scroll down further to forms section)
-        print('\n--- Screenshot 6: Forms ---');
-        print('Scrolling to forms section...');
-        final orderScrollForms = find.byType(CustomScrollView);
-        if (orderScrollForms.evaluate().isNotEmpty) {
-          await tester.drag(orderScrollForms.first, const Offset(0, -400));
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-        }
-
-        // Form items have a clock or checkmark icon inside a colored circle.
-        // Find form rows by looking for the clock icon (pending forms)
-        // or checkmark icon (completed forms), NOT the "Adicione itens" button.
-        print('Looking for form items by status icon...');
-        Finder? formToTap;
-
-        // Try pending forms first (clock icon)
-        final clockIcons = find.byIcon(CupertinoIcons.clock);
-        if (clockIcons.evaluate().isNotEmpty) {
-          // Find the parent GestureDetector of the first clock icon
-          final formRow = find.ancestor(
-            of: clockIcons.first,
-            matching: find.byType(GestureDetector),
-          );
-          if (formRow.evaluate().isNotEmpty) {
-            formToTap = formRow.first;
-            print('  ✅ Found pending form item (clock icon)');
-          }
-        }
-
-        // Fallback: try completed forms (checkmark icon)
-        if (formToTap == null) {
-          final checkIcons = find.byIcon(CupertinoIcons.checkmark);
-          if (checkIcons.evaluate().isNotEmpty) {
-            final formRow = find.ancestor(
-              of: checkIcons.first,
-              matching: find.byType(GestureDetector),
-            );
-            if (formRow.evaluate().isNotEmpty) {
-              formToTap = formRow.first;
-              print('  ✅ Found completed form item (checkmark icon)');
-            }
-          }
-        }
-
-        if (formToTap != null && formToTap.evaluate().isNotEmpty) {
-          print('Tapping form item to open it...');
-          await tester.tap(formToTap);
-          // Pump frames to complete page transition animation
-          await tester.pump();
-          await tester.pump(const Duration(milliseconds: 500));
-          await tester.pump(const Duration(milliseconds: 500));
-          await Future.delayed(const Duration(seconds: 2));
-          await tester.pump();
-          print('Form opened');
-
-          // Wait for form to render and images to start downloading
-          print('Waiting for form data and images to start loading...');
-          await Future.delayed(const Duration(seconds: 5));
-          await tester.pump();
-
-          // Poll for CupertinoActivityIndicator (Image.network loadingBuilder)
-          // to disappear, meaning images have finished loading.
-          print('Polling for form image loading completion...');
-          int attempts = 0;
-          const maxAttempts = 15; // max ~15 more seconds (total ~20s)
-          while (attempts < maxAttempts) {
-            final indicators = find.byType(CupertinoActivityIndicator);
-            final count = indicators.evaluate().length;
-            if (count == 0) {
-              print('✅ All form images loaded (no activity indicators)');
-              break;
-            }
-            attempts++;
-            print('  Still loading... ($count activity indicators, attempt $attempts/$maxAttempts)');
-          }
-          if (attempts >= maxAttempts) {
-            print('⚠️ Timed out waiting for images, capturing anyway');
-          }
-
-          // Extra delay to ensure fade-in animation completes and image fully renders
-          await Future.delayed(const Duration(seconds: 3));
-          await tester.pump();
-
-          print('Form fully rendered, ready to capture');
-          print('📸 Capturing Screenshot 6: Forms');
-          await binding.takeScreenshot('06_forms');
-
-          // Go back to order detail
-          print('Navigating back to order detail...');
-          final navForms = tester.state<NavigatorState>(find.byType(Navigator).first);
-          navForms.pop();
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-          print('✅ Back to order detail');
-        } else {
-          print('⚠️ Form items not found, skipping screenshot 6');
-        }
-
-        // Go back to home
-        print('Navigating back to home...');
-        final navHome = tester.state<NavigatorState>(find.byType(Navigator).first);
-        navHome.pop();
-        await Future.delayed(const Duration(seconds: 1));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 500));
-        print('✅ Back to home');
+    // 01 Nova OS filled by the assistant: "Falar" hears a fixed sentence
+    // (ScriptedSpeechListener, SCREENSHOT_MODE) and the real assistant
+    // fills customer, vehicle, services and parts.
+    final add = _byId('add_order_button');
+    if (add.evaluate().isNotEmpty) {
+      await tester.tap(add.first);
+      await _wait(tester, 3);
+      // "Falar" shows once the server says the assistant is on.
+      final talk = find.byKey(const ValueKey('assistant_talk'));
+      await _waitFor(tester, () => talk.evaluate().isNotEmpty, seconds: 12);
+      if (talk.evaluate().isEmpty) {
+        print('⚠️ Assistant off: no "Falar", skipping 01_ai_order');
       } else {
-        print('⚠️ No order items found, skipping order detail, payments, and forms screenshots');
+        await tester.tap(talk.first);
+        await _wait(tester, 7);
+        await tester.tap(find.byKey(const ValueKey('assistant_stop')).first);
+        await _wait(tester, 2);
+        await _waitFor(
+          tester,
+          () => find.byKey(const ValueKey('assistant_busy')).evaluate().isEmpty,
+          seconds: 60,
+        );
+        await _waitImages(tester);
+        await _shot(binding, tester, '01_ai_order');
       }
-
-      // ========== SCREENSHOT 4: Dashboard (via Financeiro tab) ==========
-      print('\n--- Screenshot 4: Dashboard ---');
-      print('Looking for financial tab...');
-
-      final allSemanticsTabsForDashboard = find.byType(Semantics);
-      Finder? financialTab;
-
-      for (var i = 0; i < allSemanticsTabsForDashboard.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemanticsTabsForDashboard.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier == 'tab_financial') {
-          financialTab = allSemanticsTabsForDashboard.at(i);
-          print('Found financial tab with semantic identifier');
-          break;
-        }
-      }
-
-      if (financialTab != null) {
-        print('Tapping financial tab...');
-        await tester.tap(financialTab);
-        // Dashboard has continuous Firestore streams, avoid pumpAndSettle
-        await Future.delayed(const Duration(seconds: 3));
-        await tester.pump();
-        print('Dashboard opened');
-
-        // Select "Year" period to show annual values
-        print('Selecting year period...');
-        final yearTexts = ['Ano', 'Year', 'Año'];
-        for (final text in yearTexts) {
-          final yearButton = find.text(text);
-          if (yearButton.evaluate().isNotEmpty) {
-            await tester.tap(yearButton.first);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 2));
-            print('✅ Year period selected ($text)');
-            break;
-          }
-        }
-
-        print('Waiting for dashboard to load data...');
-        await Future.delayed(const Duration(seconds: 2));
-
-        print('📸 Capturing Screenshot 4: Dashboard');
-        await binding.takeScreenshot('04_dashboard');
-
-        // Navigate back to home tab
-        print('Navigating back to home tab...');
-        final allSemanticsTabsBackHomeDash = find.byType(Semantics);
-        for (var i = 0; i < allSemanticsTabsBackHomeDash.evaluate().length; i++) {
-          final widget = tester.widget<Semantics>(allSemanticsTabsBackHomeDash.at(i));
-          final identifier = widget.properties.identifier?.toString() ?? '';
-          if (identifier == 'tab_home') {
-            await tester.tap(allSemanticsTabsBackHomeDash.at(i));
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-            print('✅ Back to home tab');
-            break;
-          }
-        }
+      final close = find.byIcon(CupertinoIcons.xmark);
+      if (close.evaluate().isNotEmpty) {
+        await tester.tap(close.first);
       } else {
-        print('⚠️ Financial tab not found, skipping screenshot 4');
+        await tester.state<NavigatorState>(find.byType(Navigator).first).maybePop();
       }
-
-      // ========== SCREENSHOT 3: Agenda ==========
-      print('\n--- Screenshot 3: Agenda ---');
-      print('Looking for agenda tab...');
-
-      final allSemanticsTabsForAgenda = find.byType(Semantics);
-      Finder? agendaTab;
-
-      for (var i = 0; i < allSemanticsTabsForAgenda.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemanticsTabsForAgenda.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier == 'tab_agenda') {
-          agendaTab = allSemanticsTabsForAgenda.at(i);
-          print('Found agenda tab with semantic identifier');
-          break;
-        }
+      await _wait(tester, 2);
+      // Filled: "Descartar?" asks first.
+      final discard = find.byType(CupertinoDialogAction);
+      if (discard.evaluate().isNotEmpty) {
+        await tester.tap(discard.last);
+        await _wait(tester, 2);
       }
+    } else {
+      print('⚠️ "+" not found: skipping 01_ai_order');
+    }
 
-      if (agendaTab != null) {
-        await tester.tap(agendaTab);
-        // Agenda has continuous Firestore streams, avoid pumpAndSettle
-        await Future.delayed(const Duration(seconds: 3));
-        await tester.pump();
-        print('Agenda tab opened');
+    // 04 Agenda
+    if (await _openTab(tester, 'tab_agenda')) {
+      await _wait(tester, 3);
+      await _shot(binding, tester, '04_agenda');
+    }
 
-        print('📸 Capturing Screenshot 3: Agenda');
-        await binding.takeScreenshot('03_agenda');
+    // 05 Financeiro
+    if (await _openTab(tester, 'tab_financial')) {
+      await _wait(tester, 4);
+      await _shot(binding, tester, '05_financial');
+    }
 
-        // Navigate back to home tab
-        print('Navigating back to home tab...');
-        final allSemanticsTabsBackHome = find.byType(Semantics);
-        for (var i = 0; i < allSemanticsTabsBackHome.evaluate().length; i++) {
-          final widget = tester.widget<Semantics>(allSemanticsTabsBackHome.at(i));
-          final identifier = widget.properties.identifier?.toString() ?? '';
-          if (identifier == 'tab_home') {
-            await tester.tap(allSemanticsTabsBackHome.at(i));
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-            print('✅ Back to home tab');
-            break;
-          }
-        }
-      } else {
-        print('⚠️ Agenda tab not found, skipping screenshot 3');
-      }
-
-      // ========== SCREENSHOT 9: Segments Screen (Onboarding) ==========
-      print('\n--- Screenshot 9: Segments Screen ---');
-      print('Navigating to settings to trigger re-onboarding...');
-
-      // Go to settings tab using semantic identifier
-      print('Looking for settings tab...');
-      final allSemanticsTabsForSegments = find.byType(Semantics);
-      Finder? settingsTabForSegments;
-
-      for (var i = 0; i < allSemanticsTabsForSegments.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemanticsTabsForSegments.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier == 'tab_settings') {
-          settingsTabForSegments = allSemanticsTabsForSegments.at(i);
-          print('Found settings tab with semantic identifier');
-          break;
-        }
-      }
-
-      if (settingsTabForSegments != null) {
-        await tester.tap(settingsTabForSegments);
-        await Future.delayed(const Duration(seconds: 2));
-        await tester.pump();
-        print('Settings tab opened');
-
-        // Scroll down to reveal the Reopen Onboarding button (off-screen)
-        print('Scrolling down in settings...');
-        final settingsScroll = find.byType(CustomScrollView);
-        if (settingsScroll.evaluate().isNotEmpty) {
-          await tester.drag(settingsScroll.first, const Offset(0, -300));
-          await Future.delayed(const Duration(seconds: 1));
-          await tester.pump();
-        }
-
-        // Find "Reopen Onboarding" button using semantic identifier
-        print('Looking for Reopen Onboarding button by semantic identifier...');
-        final allSemanticsForReopen = find.byType(Semantics);
-        Finder? reopenButton;
-
-        for (var i = 0; i < allSemanticsForReopen.evaluate().length; i++) {
-          final widget = tester.widget<Semantics>(allSemanticsForReopen.at(i));
-          final identifier = widget.properties.identifier?.toString() ?? '';
-          if (identifier == 'reopen_onboarding_button') {
-            reopenButton = allSemanticsForReopen.at(i);
-            print('  ✅ Found reopen onboarding button with semantic identifier');
-            break;
-          }
-        }
-
-        if (reopenButton != null) {
-          print('Tapping Reopen Onboarding button...');
-          await tester.ensureVisible(reopenButton);
-          await tester.pump();
-          await tester.tap(reopenButton);
-          await Future.delayed(const Duration(seconds: 2));
-          await tester.pump();
-          print('Company Info screen opened');
-
-          // Navigate through onboarding: Company Info -> Company Contact -> Segments
-
-          // Step 1: Company Info Screen - scroll down and tap "Next" button
-          print('Step 1: Looking for Next button in Company Info by semantic identifier...');
-
-          // Scroll down to reveal Next button (may be off-screen)
-          final companyInfoScroll = find.byType(CustomScrollView);
-          if (companyInfoScroll.evaluate().isNotEmpty) {
-            await tester.drag(companyInfoScroll.first, const Offset(0, -300));
-            await Future.delayed(const Duration(seconds: 1));
-            await tester.pump();
-          }
-
-          final allSemanticsInfo = find.byType(Semantics);
-          Finder? nextButton1;
-
-          for (var i = 0; i < allSemanticsInfo.evaluate().length; i++) {
-            final widget = tester.widget<Semantics>(allSemanticsInfo.at(i));
-            final identifier = widget.properties.identifier?.toString() ?? '';
-            if (identifier == 'next_button_company_info') {
-              nextButton1 = allSemanticsInfo.at(i);
-              print('  ✅ Found Next button (Company Info) with semantic identifier');
-              break;
-            }
-          }
-
-          if (nextButton1 != null) {
-            print('Tapping Next button (Company Info)...');
-            await tester.ensureVisible(nextButton1);
-            await tester.pump();
-            await tester.tap(nextButton1);
-            await Future.delayed(const Duration(seconds: 2));
-            await tester.pump();
-            print('Company Contact screen opened');
-
-            // Step 2: Company Contact Screen - scroll down and tap "Next" button
-            print('Step 2: Looking for Next button in Company Contact by semantic identifier...');
-
-            // Scroll down to reveal Next button
-            final companyContactScroll = find.byType(CustomScrollView);
-            if (companyContactScroll.evaluate().isNotEmpty) {
-              await tester.drag(companyContactScroll.first, const Offset(0, -300));
-              await Future.delayed(const Duration(seconds: 1));
-              await tester.pump();
-            }
-
-            final allSemanticsContact = find.byType(Semantics);
-            Finder? nextButton2;
-
-            for (var i = 0; i < allSemanticsContact.evaluate().length; i++) {
-              final widget = tester.widget<Semantics>(allSemanticsContact.at(i));
-              final identifier = widget.properties.identifier?.toString() ?? '';
-              if (identifier == 'next_button_company_contact') {
-                nextButton2 = allSemanticsContact.at(i);
-                print('  ✅ Found Next button (Company Contact) with semantic identifier');
-                break;
-              }
-            }
-
-            if (nextButton2 != null) {
-              print('Tapping Next button (Company Contact)...');
-              await tester.ensureVisible(nextButton2);
-              await tester.pump();
-              await tester.tap(nextButton2);
-              await Future.delayed(const Duration(seconds: 2));
-              await tester.pump();
-              print('Segments screen opened!');
-
-              // Now we're on the Segments screen - capture it!
-              print('Waiting for segments screen to fully load...');
-              await Future.delayed(const Duration(seconds: 2));
-
-              print('📸 Capturing Screenshot 9: Segments Screen');
-              await binding.takeScreenshot('09_segments');
-
-              print('✅ Segments screenshot captured');
-            } else {
-              print('⚠️ Next button not found in Company Contact screen');
-            }
-          } else {
-            print('⚠️ Next button not found in Company Info screen');
-          }
-        } else {
-          print('⚠️ Reopen Onboarding button not found, skipping segments screenshot');
-        }
-      } else {
-        print('⚠️ Settings tab not found, skipping segments screenshot');
-      }
-
-      print('\n✅ All screenshots captured successfully (locale: $locale)');
-    });
+    await _openTab(tester, 'tab_home');
+    print('✅ Store screenshots done ($locale · $brightness)');
   });
 }
 
-/// Performs logout flow
+// ------------------------------------------------------------ store video
+
+/// `--dart-define=STORE_VIDEO=true`: instead of screenshots, walks the
+/// store video at a watchable pace while the simulator records the screen
+/// (ios/fastlane `store_video`). Prints 🎬 marks where the video starts and
+/// ends, to cut the recording.
+const _videoMode = bool.fromEnvironment('STORE_VIDEO');
+
+Future<void> _videoFlow(WidgetTester tester, String locale) async {
+  print('🎬 start ${DateTime.now().millisecondsSinceEpoch}');
+  await _wait(tester, 2);
+
+  // Nova OS: Falar, the sentence shows up as it is "heard", then the
+  // assistant fills the order.
+  final add = _byId('add_order_button');
+  if (add.evaluate().isEmpty) throw StateError('"+" not found');
+  await tester.tap(add.first);
+  await _wait(tester, 2);
+  final talk = find.byKey(const ValueKey('assistant_talk'));
+  await _waitFor(tester, () => talk.evaluate().isNotEmpty, seconds: 12);
+  if (talk.evaluate().isEmpty) throw StateError('Assistant off: no "Falar"');
+  await tester.tap(talk.first);
+  await _wait(tester, 5);
+  await tester.tap(find.byKey(const ValueKey('assistant_stop')).first);
+  await _wait(tester, 1);
+  await _waitFor(
+    tester,
+    () => find.byKey(const ValueKey('assistant_busy')).evaluate().isEmpty,
+    seconds: 60,
+  );
+  await _wait(tester, 5);
+  await tester.tap(find.byIcon(CupertinoIcons.xmark).first);
+  await _wait(tester, 1);
+  final discard = find.byType(CupertinoDialogAction);
+  if (discard.evaluate().isNotEmpty) await tester.tap(discard.last);
+  await _wait(tester, 2);
+
+  // An order, then what is left to collect.
+  final hero = find.text(_heroCustomer[locale] ?? '');
+  if (hero.evaluate().isNotEmpty) {
+    await tester.tap(hero.first);
+    await _wait(tester, 4);
+    await _pop(tester);
+    await _wait(tester, 1);
+  }
+  if (await _openTab(tester, 'tab_financial')) await _wait(tester, 3);
+  print('🎬 end ${DateTime.now().millisecondsSinceEpoch}');
+}
+
+// ---------------------------------------------------------------- helpers
+
+/// Customer of the first order of each demo account
+/// (firebase/scripts/seed_demo_store_data.js).
+const _heroCustomer = {
+  'pt-BR': 'Marcos Pereira',
+  'en-US': 'Mark Peterson',
+  'es-ES': 'Marcos Pérez',
+};
+
+/// Pumps for [seconds] without waiting for the app to settle (Firestore
+/// streams and MobX observers keep it busy forever).
+Future<void> _wait(WidgetTester tester, int seconds) async {
+  for (var i = 0; i < seconds * 4; i++) {
+    await tester.pump(const Duration(milliseconds: 250));
+  }
+}
+
+Future<void> _waitFor(
+  WidgetTester tester,
+  bool Function() done, {
+  int seconds = 30,
+}) async {
+  for (var i = 0; i < seconds * 2 && !done(); i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+}
+
+/// Waits for the screen to open and its photos to load (spinners gone).
+Future<void> _waitImages(WidgetTester tester) async {
+  await _wait(tester, 5);
+  await _waitFor(
+    tester,
+    () =>
+        find.byType(CircularProgressIndicator).evaluate().isEmpty &&
+        find.byType(CupertinoActivityIndicator).evaluate().isEmpty,
+    seconds: 15,
+  );
+  await _wait(tester, 2);
+}
+
+Future<void> _shot(
+  IntegrationTestWidgetsFlutterBinding binding,
+  WidgetTester tester,
+  String name,
+) async {
+  await tester.pump();
+  print('📸 $name');
+  await binding.takeScreenshot(name);
+}
+
+Finder _byId(String identifier) => find.byWidgetPredicate(
+  (w) => w is Semantics && w.properties.identifier == identifier,
+);
+
+Finder? _byIdPrefix(WidgetTester tester, String prefix) {
+  final finder = find.byWidgetPredicate(
+    (w) =>
+        w is Semantics &&
+        (w.properties.identifier?.startsWith(prefix) ?? false),
+  );
+  return finder.evaluate().isEmpty ? null : finder.first;
+}
+
+Finder? _firstKeyPrefix(WidgetTester tester, String prefix) {
+  final finder = find.byWidgetPredicate(
+    (w) =>
+        w.key is ValueKey<String> &&
+        (w.key as ValueKey<String>).value.startsWith(prefix),
+    skipOffstage: false,
+  );
+  return finder.evaluate().isEmpty ? null : finder.first;
+}
+
+/// The order card to open: the first one on Início (the list puts what
+/// needs attention first).
+Finder? _pickOrderCard(WidgetTester tester) => _byIdPrefix(tester, 'order_card_');
+
+Future<bool> _openTab(WidgetTester tester, String id) async {
+  final tab = _byId(id);
+  if (tab.evaluate().isEmpty) {
+    print('⚠️ Tab $id not found');
+    return false;
+  }
+  await tester.tap(tab.first);
+  await _wait(tester, 1);
+  return true;
+}
+
+/// Back one screen on the navigator that is showing it.
+Future<void> _pop(WidgetTester tester) async {
+  final navigators = find.byType(Navigator);
+  for (final element in navigators.evaluate().toList().reversed) {
+    final state = (element as StatefulElement).state as NavigatorState;
+    if (state.canPop()) {
+      state.pop();
+      break;
+    }
+  }
+  await _wait(tester, 2);
+}
+
+/// Closes one-off banners (WhatsApp setup, tips) so Início shows the
+/// orders.
+Future<void> _dismissBanners(WidgetTester tester) async {
+  final close = find.byIcon(CupertinoIcons.xmark);
+  if (close.evaluate().isNotEmpty) {
+    await tester.tap(close.first);
+    await _wait(tester, 1);
+  }
+}
+
+/// Signs out from the profile screen (profile button on Início → "Sair").
 Future<void> _performLogout(WidgetTester tester) async {
-  // Navigate to settings tab using semantic identifier
-  final allSemantics = find.byType(Semantics);
-  Finder? settingsTab;
-  for (var i = 0; i < allSemantics.evaluate().length; i++) {
-    final widget = tester.widget<Semantics>(allSemantics.at(i));
-    final identifier = widget.properties.identifier?.toString() ?? '';
-    if (identifier == 'tab_settings') {
-      settingsTab = allSemantics.at(i);
-      break;
-    }
+  final profile = _byId('home_profile_button');
+  if (profile.evaluate().isEmpty) {
+    print('⚠️ Profile button not found for sign out');
+    return;
   }
+  await tester.tap(profile.first);
+  await _wait(tester, 2);
 
-  if (settingsTab != null) {
-    await tester.tap(settingsTab);
-    await tester.pumpAndSettle();
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Find logout button (try multiple possible texts for all locales)
-    final logoutTexts = ['Sair', 'Sign Out', 'Cerrar Sesión', 'Logout', 'Cerrar sesión'];
-    Finder? logoutTile;
-    for (final text in logoutTexts) {
-      final finder = find.text(text);
-      if (finder.evaluate().isNotEmpty) {
-        logoutTile = finder;
-        print('Found logout button: "$text"');
-        break;
-      }
-    }
-
-    if (logoutTile != null) {
-      await tester.tap(logoutTile.first);
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Confirm logout in CupertinoAlertDialog - the confirm button
-      // uses the same l10n.logout text: "Sair", "Sign Out", "Cerrar Sesión"
-      final dialog = find.byType(CupertinoAlertDialog);
-      if (dialog.evaluate().isNotEmpty) {
-        // The destructive action button is the last CupertinoDialogAction
-        final actions = find.descendant(
-          of: dialog,
-          matching: find.byType(CupertinoDialogAction),
-        );
-        if (actions.evaluate().length >= 2) {
-          // Last action is the confirm/destructive button
-          await tester.tap(actions.last);
-          await tester.pumpAndSettle();
-          print('✅ Logged out successfully');
-
-          await Future.delayed(const Duration(seconds: 3));
-          await tester.pumpAndSettle();
-        }
-      }
-    } else {
-      print('⚠️ Logout button not found');
-    }
-  } else {
-    print('⚠️ Settings tab not found for logout');
+  final logout = find.text('Sair', skipOffstage: false).evaluate().isNotEmpty
+      ? find.text('Sair', skipOffstage: false)
+      : find.text('Sign Out', skipOffstage: false).evaluate().isNotEmpty
+      ? find.text('Sign Out', skipOffstage: false)
+      : find.text('Cerrar Sesión', skipOffstage: false);
+  if (logout.evaluate().isEmpty) {
+    print('⚠️ Sign out row not found');
+    return;
   }
+  await tester.ensureVisible(logout.first);
+  await _wait(tester, 1);
+  await tester.tap(logout.first);
+  await _wait(tester, 1);
+
+  final actions = find.descendant(
+    of: find.byType(CupertinoAlertDialog),
+    matching: find.byType(CupertinoDialogAction),
+  );
+  if (actions.evaluate().isNotEmpty) {
+    await tester.tap(actions.last);
+  }
+  await _wait(tester, 4);
 }
 
-/// Performs login with demo account
-/// Get demo account email based on locale
-String _getEmailByLocale(String locale) {
-  switch (locale) {
-    case 'pt-BR':
-      return 'demo-pt@praticos.com.br';
-    case 'en-US':
-      return 'demo-en@praticos.com.br';
-    case 'es-ES':
-      return 'demo-es@praticos.com.br';
-    default:
-      return 'demo@praticos.com.br'; // Fallback
-  }
-}
+String _emailFor(String locale) => switch (locale) {
+  'en-US' => 'demo-en@praticos.com.br',
+  'es-ES' => 'demo-es@praticos.com.br',
+  _ => 'demo-pt@praticos.com.br',
+};
 
-/// Get demo account password (same for all locales)
-String _getPasswordByLocale(String locale) {
-  return 'Demo@2024!';
-}
-
-/// Performs login flow with locale-specific demo account
 Future<void> _performLogin(WidgetTester tester, String locale) async {
-  print('\n=== LOGIN FLOW DEBUG ===');
+  final email = _emailFor(locale);
+  print('🔐 Signing in as $email');
 
-  final email = _getEmailByLocale(locale);
-  final password = _getPasswordByLocale(locale);
-  print('Using account: $email');
+  await tester.tap(_byId('email_login_link').first);
+  await _wait(tester, 2);
 
-  // Find email login link by semantic identifier (locale-independent)
-  print('Step 1: Looking for email login link by semantic identifier...');
-  final allSemantics = find.byType(Semantics);
-  Finder? emailLink;
+  final emailField = find.descendant(
+    of: _byId('email_field'),
+    matching: find.byType(EditableText),
+  );
+  final passwordField = find.descendant(
+    of: _byId('password_field'),
+    matching: find.byType(EditableText),
+  );
+  await tester.enterText(emailField.first, email);
+  await tester.enterText(passwordField.first, 'Demo@2024!');
+  FocusManager.instance.primaryFocus?.unfocus();
+  await _wait(tester, 1);
 
-  for (var i = 0; i < allSemantics.evaluate().length; i++) {
-    final widget = tester.widget<Semantics>(allSemantics.at(i));
-    final identifier = widget.properties.identifier?.toString() ?? '';
-    if (identifier == 'email_login_link') {
-      emailLink = allSemantics.at(i);
-      print('  ✅ Found email login link with semantic identifier');
-      break;
-    }
-  }
-
-  // Fallback: search by text if semantic identifier not found
-  if (emailLink == null) {
-    print('  Semantic identifier not found, trying text search...');
-    final emailTexts = ['email', 'e-mail', 'correo'];
-    for (final text in emailTexts) {
-      final finder = find.textContaining(text, skipOffstage: false);
-      print('  Searching for text containing "$text": found ${finder.evaluate().length}');
-      if (finder.evaluate().isNotEmpty) {
-        emailLink = finder;
-        print('  ✅ Found email link with text: "$text"');
-        break;
-      }
-    }
-  }
-
-  if (emailLink != null) {
-    print('Step 2: Tapping email login link...');
-    await tester.tap(emailLink.first);
-    await tester.pumpAndSettle();
-    await Future.delayed(const Duration(seconds: 2));
-    print('  ✅ Email login screen opened');
-
-    // Enter email
-    print('Step 3: Looking for email field...');
-    final emailFields = find.byType(CupertinoTextFormFieldRow);
-    print('  Found ${emailFields.evaluate().length} text fields');
-
-    if (emailFields.evaluate().isNotEmpty) {
-      print('  Entering email: $email');
-      await tester.enterText(emailFields.first, email);
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(milliseconds: 500));
-      print('  ✅ Email entered');
-
-      // Enter password
-      print('Step 4: Entering password...');
-      if (emailFields.evaluate().length > 1) {
-        await tester.enterText(emailFields.at(1), password);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(milliseconds: 500));
-        print('  ✅ Password entered');
-      } else {
-        print('  ⚠️ Password field not found!');
-      }
-
-      // Dismiss keyboard
-      print('Step 5: Dismissing keyboard...');
-      FocusManager.instance.primaryFocus?.unfocus();
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(seconds: 1));
-      print('  ✅ Keyboard dismissed');
-
-      // Tap login button - scroll down first to ensure it's visible
-      print('Step 6: Scrolling down to reveal login button...');
-      await tester.drag(find.byType(CupertinoPageScaffold), const Offset(0, -150));
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(milliseconds: 500));
-      print('  ✅ Scrolled down');
-
-      print('Step 7: Looking for login button...');
-
-      // Find all CupertinoButtons
-      final allButtons = find.byType(CupertinoButton);
-      print('  Found ${allButtons.evaluate().length} CupertinoButtons total');
-
-      // The login button should be the last visible filled button in a Padding widget
-      // It's wrapped in Padding with horizontal: 20
-      Finder? loginButton;
-
-      for (var i = 0; i < allButtons.evaluate().length; i++) {
-        final button = allButtons.at(i);
-        final widget = tester.widget<CupertinoButton>(button);
-
-        // Check if button child is not an Icon (login button has Text, eye button has Icon)
-        final childIsNotIcon = widget.child.runtimeType.toString() != 'Icon';
-
-        print('  Button $i: child type=${widget.child.runtimeType}, color=${widget.color}');
-
-        if (childIsNotIcon) {
-          loginButton = button;
-          print('  ✅ Found login button at index $i (non-icon child)');
-          break;
-        }
-      }
-
-      if (loginButton != null) {
-        print('Step 8: Tapping login button...');
-        await tester.ensureVisible(loginButton);
-        await tester.tap(loginButton);
-        await tester.pumpAndSettle();
-        print('  ✅ Login button tapped');
-
-        // Wait for login to complete and data to load
-        print('Step 9: Waiting for login to complete...');
-        await Future.delayed(const Duration(seconds: 10));
-        await tester.pumpAndSettle();
-        print('  Initial wait complete');
-
-        // Ensure orders are loaded
-        final loadingIndicator = find.byType(CupertinoActivityIndicator);
-        print('  Loading indicators: ${loadingIndicator.evaluate().length}');
-        if (loadingIndicator.evaluate().isNotEmpty) {
-          print('  ⏳ Still loading data, waiting more...');
-          await Future.delayed(const Duration(seconds: 5));
-          await tester.pumpAndSettle();
-        }
-        print('  ✅ Login complete');
-      } else {
-        print('  ❌ Login button not found!');
-      }
-    } else {
-      print('  ❌ Email fields not found!');
-    }
-  } else {
-    print('  ❌ Email login link not found!');
-  }
-
-  print('=========================\n');
+  final button = _byId('email_login_button');
+  await tester.ensureVisible(button.first);
+  await tester.tap(button.first);
+  await _wait(tester, 10);
+  // A failed sign-in (no network on a fresh emulator) leaves the login
+  // screen up: stop here instead of saving it as every screenshot.
+  expect(
+    _byId('email_login_button'),
+    findsNothing,
+    reason: 'Sign-in failed for $email',
+  );
 }

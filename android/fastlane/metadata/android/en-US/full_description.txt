@@ -1,46 +1,45 @@
-PraticOS is the most practical work order management app on the market. Track work orders, customers, scheduling, and finances all in one place. With WhatsApp integration and share links, your customers can follow along in real time.
+PraticOS is the work order app for service professionals and small service businesses: HVAC technicians, mechanics, electricians, plumbers, phone repair, maintenance and many more. Say what you are going to do and AI fills in the work order for you. From quote to payment, everything stays on your phone.
 
-WORK ORDER MANAGEMENT
-• Create and track work orders with ease
-• Control status: quote, approved, in progress, completed
-• Add services, products, and notes
-• View complete history of each order
-• Attach photos with smart compression
+SAY IT AND THE WORK ORDER FILLS ITSELF
+• Tap Speak and say the job: "Julia's Civic, oil change and wheel alignment"
+• Or snap a photo of the license plate or a handwritten request
+• AI fills in customer, vehicle, services and parts, with the prices from your catalog
+• Everything AI filled in is marked for you to check, and you can undo it
+• Fix it by voice too: "alignment is 100", "remove the balancing"
 
-CUSTOMER REGISTRATION
-• Keep your customer base organized
-• Quickly access contact information
-• View service history per customer
-• Fast and intuitive search
+WHAT TO DO NEXT
+• Home shows your work orders and the next step for each one
+• Open a new work order in seconds with the "New order" button
+• Clear status: quote, approved, in progress, completed
 
-SCHEDULING & REMINDERS
-• View your appointments on the calendar
-• Receive automatic reminders before scheduled times
-• Filter by technician to organize your team
-• Schedule services with specific date and time
+QUOTES AND WORK ORDERS
+• Services, parts and prices on one screen
+• Job photos and inspection checklists
+• Work order PDF with photos, ready to send or print
 
-WHATSAPP & SHARING
-• Share work orders via WhatsApp
-• Send secure links so customers can track their service
-• Receive customer ratings after completion
-• AI assistant for customer communication
+CUSTOMERS FOLLOW ALONG BY LINK
+• Send the work order over WhatsApp with a secure link
+• The customer sees the progress and approves the quote through the link
+• Get the customer's rating when the job is done
 
-FINANCIAL DASHBOARD
-• Track your results in real time
-• View revenue and important metrics
-• Have total control over your billing
+SCHEDULE
+• Your appointments on a calendar
+• A reminder before each one
 
-FORMS & CHECKLISTS
-• Create custom checklists for inspections
-• Attach photos with automatic compression
-• Permission control by access profile
+FINANCIAL
+• See how much you still have to collect, and from whom
+• Record what the customer paid, all at once or in parts
 
-MODERN INTERFACE
-• Clean and intuitive design
-• Dark mode available
-• Simple and fast navigation
-• Works offline
+CUSTOMERS
+• Service history, vehicles and devices for each customer
+• How much each customer still owes
 
-Ideal for service providers, repair shops, technical assistance, freelancers, and small businesses looking for organization and practicality in their daily operations.
+YOUR WAY
+• Pick your line of work and the app uses your words: vehicle, device, equipment
+• Dark mode and large text
+• Sign in with Google or email
 
-Download now and transform your business management!
+PLANS AND SUBSCRIPTIONS
+PraticOS is free to start. The Free plan has monthly limits on photos, checklists, AI use and people on the account. The Starter, Pro and Business plans raise these limits and are auto-renewable monthly subscriptions purchased in the app through Google Play. Cancel anytime in Payments & subscriptions on Google Play.
+
+Privacy Policy: https://praticos.web.app/privacy.html

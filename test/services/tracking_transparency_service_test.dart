@@ -4,6 +4,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/services/tracking_transparency_service.dart';
 
 void main() {
+  group('TrackingTransparencyService.canAsk', () {
+    test('asks on iOS', () {
+      expect(
+        TrackingTransparencyService.canAsk(isIOS: true, screenshotMode: false),
+        isTrue,
+      );
+    });
+
+    test('never asks in store screenshot mode', () {
+      expect(
+        TrackingTransparencyService.canAsk(isIOS: true, screenshotMode: true),
+        isFalse,
+      );
+    });
+
+    test('never asks outside iOS', () {
+      expect(
+        TrackingTransparencyService.canAsk(isIOS: false, screenshotMode: false),
+        isFalse,
+      );
+    });
+  });
+
   group('TrackingTransparencyService.requestIfEligible', () {
     late int requests;
     late List<TrackingStatus> consentSyncs;

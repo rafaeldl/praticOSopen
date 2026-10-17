@@ -37,7 +37,7 @@ Retorna o próximo build number (último do TestFlight + 1)
 [bundle exec] fastlane ios beta
 ```
 
-Build + upload para TestFlight (sem match)
+Build + upload para TestFlight (assinatura via match)
 
 ### ios upload_last
 
@@ -110,6 +110,14 @@ Gera screenshots para todos dispositivos e idiomas
 ```
 
 Gera screenshots dark para o site (iPhone 16e, 3 idiomas) e copia light+dark para o site
+
+### ios store_video
+
+```sh
+[bundle exec] fastlane ios store_video
+```
+
+Grava o vídeo da loja (prévia do app na App Store) no simulador
 
 ### ios screenshots_pt_br
 
