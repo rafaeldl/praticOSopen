@@ -210,7 +210,7 @@ final draft = await AiOrderAssistService().assist(text: 'Revenda Sul, capô 500'
 - Ligar por empresa ou para todas: `npm run ai` ([Ligar e desligar](#ligar-e-desligar)).
 - ~~**Claude:** cadastrar a chave antes do deploy (sem ela o deploy da Function `api` falha): `firebase functions:secrets:set ANTHROPIC_API_KEY --project praticos`~~ feito em 2026-10-14.
 - **Claude no emulador:** o emulador lê a chave de `firebase/functions/.secret.local` (no `.gitignore`; o repositório é público). Para copiar do Secret Manager sem mostrar a chave: `echo "ANTHROPIC_API_KEY=$(firebase functions:secrets:access ANTHROPIC_API_KEY --project praticos)" >> firebase/functions/.secret.local && chmod 600 firebase/functions/.secret.local`.
-- Antes de abrir o Claude para todos: a política de privacidade precisa citar a Anthropic (dados processados fora do Brasil, LGPD art. 33).
+- ~~Antes de abrir o Claude para todos: a política de privacidade precisa citar a Anthropic (dados processados fora do Brasil, LGPD art. 33).~~ feito em 2026-10-17 (seção "Assistente de IA" em `privacy.html`).
 - Antes de abrir para todos: política de privacidade (fotos/texto processados pelo Google Vertex AI) e, quando houver gravação de áudio, `NSMicrophoneUsageDescription`/`RECORD_AUDIO` e rótulos de privacidade das lojas.
 
 ## Testes
