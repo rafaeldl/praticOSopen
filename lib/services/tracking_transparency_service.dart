@@ -19,7 +19,10 @@ import 'package:flutter/widgets.dart';
 /// usuario, entao a chamada fica no inicio do app (`main`), antes do login.
 class TrackingTransparencyService {
   TrackingTransparencyService._()
-      : _isIOS = Platform.isIOS,
+      : _isIOS = canAsk(
+          isIOS: Platform.isIOS,
+          screenshotMode: const bool.fromEnvironment('SCREENSHOT_MODE'),
+        ),
         _readStatus = _defaultReadStatus,
         _requestAuthorization = _defaultRequestAuthorization,
         _syncConsent = _defaultSyncConsent,
@@ -40,6 +43,12 @@ class TrackingTransparencyService {
         _syncConsent = syncConsent,
         _readLifecycle = readLifecycle,
         _wait = wait;
+
+  /// Store screenshots and video (SCREENSHOT_MODE) never ask: the video
+  /// records the whole screen, alert included.
+  @visibleForTesting
+  static bool canAsk({required bool isIOS, required bool screenshotMode}) =>
+      isIOS && !screenshotMode;
 
   static final TrackingTransparencyService instance =
       TrackingTransparencyService._();

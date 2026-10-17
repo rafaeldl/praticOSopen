@@ -1,7 +1,9 @@
 Novidades nesta versão:
 
-• Fotos no PDF da OS: as fotos anexadas à ordem de serviço agora saem no PDF e na impressão, junto com os dados do serviço.
-
-• Melhorias de estabilidade e correções.
-
-Parabéns por escolher o melhor app de gestão de ordens de serviço!
+• App de cara nova: o Início mostra suas OS e o próximo passo de cada uma
+• Abas Início, Agenda e Financeiro, com o botão "Nova OS" sempre à mão
+• Financeiro mostra quanto falta receber e de quem
+• Receber do cliente ficou mais simples, inclusive pagamento em partes
+• Comece sem cadastro de empresa: escolha o seu ramo e abra a primeira OS
+• Arquivos compartilhados de outros apps vão direto para uma OS
+• Correções e melhorias

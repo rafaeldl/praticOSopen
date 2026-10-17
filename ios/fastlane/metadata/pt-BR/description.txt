@@ -1,52 +1,46 @@
-Simplifique a gestão do seu negócio com o PraticOS, o app completo para gerenciar ordens de serviço, clientes, agenda e finanças em um só lugar. Com integração WhatsApp e links de compartilhamento, seus clientes acompanham tudo em tempo real.
+O PraticOS é o app de ordem de serviço para profissionais e pequenos negócios de serviço: técnico de ar-condicionado, mecânico, eletricista, encanador, assistência de celular, manutenção e muitos outros. Fale o que vai fazer e a IA preenche a OS para você. Do orçamento ao recebimento, tudo fica no seu celular.
 
-GESTÃO DE ORDENS DE SERVIÇO
-• Crie e acompanhe ordens de serviço com facilidade
-• Controle o status: orçamento, aprovado, em andamento, concluído
-• Adicione serviços, produtos e observações
-• Visualize o histórico completo de cada ordem
-• Anexe fotos com suporte a HEIC e compressão inteligente
+FALE E A OS SE PREENCHE
+• Toque em Falar e diga o serviço: "Onix da Juliana, troca de óleo e alinhamento"
+• Ou tire uma foto da placa ou do pedido anotado
+• A IA preenche cliente, veículo, serviços e peças, com os preços do seu catálogo
+• O que a IA preencheu fica marcado para você conferir, e dá para desfazer
+• Corrija falando também: "o alinhamento é 100", "tira o balanceamento"
 
-CADASTRO DE CLIENTES
-• Mantenha sua base de clientes organizada
-• Acesse rapidamente informações de contato
-• Visualize o histórico de serviços por cliente
-• Busca rápida e intuitiva
+O QUE FAZER AGORA
+• O Início mostra suas OS e o próximo passo de cada uma
+• Abra uma OS nova em segundos pelo botão "Nova OS"
+• Situação clara: orçamento, aprovada, em andamento, concluída
 
-AGENDA E LEMBRETES
-• Visualize seus agendamentos no calendário
-• Receba lembretes automáticos antes dos horários
-• Filtre por técnico para organizar a equipe
-• Agende serviços com data e horário definidos
+ORÇAMENTO E OS
+• Serviços, peças e valores na mesma tela
+• Fotos do serviço e checklists de vistoria
+• PDF da OS com as fotos, pronto para enviar ou imprimir
 
-WHATSAPP E COMPARTILHAMENTO
-• Compartilhe ordens de serviço via WhatsApp
-• Envie links seguros para clientes acompanharem o serviço
-• Receba avaliações dos clientes após a conclusão
-• Assistente de IA para comunicação com clientes
+O CLIENTE ACOMPANHA PELO LINK
+• Mande a OS pelo WhatsApp com um link seguro
+• O cliente vê o andamento e aprova o orçamento pelo link
+• Receba a avaliação do cliente quando o serviço termina
 
-PAINEL FINANCEIRO
-• Acompanhe seus resultados em tempo real
-• Visualize receitas e métricas importantes
-• Tenha controle total sobre seu faturamento
+AGENDA
+• Seus atendimentos no calendário
+• Lembrete antes de cada horário
 
-FORMULÁRIOS E CHECKLISTS
-• Crie checklists personalizados para vistorias
-• Anexe fotos com compressão automática
-• Controle de permissões por perfil de acesso
+FINANCEIRO
+• Veja quanto falta receber e de quem
+• Registre o que o cliente pagou, de uma vez ou em partes
 
-INTERFACE MODERNA
-• Design limpo e intuitivo seguindo as diretrizes da Apple
-• Modo escuro disponível
-• Navegação simples e rápida
-• Funciona offline
+CLIENTES
+• Histórico de serviços, veículos e aparelhos de cada cliente
+• Quanto cada cliente ainda deve
 
-Ideal para prestadores de serviço, oficinas, assistências técnicas, profissionais autônomos e pequenas empresas que buscam organização e praticidade no dia a dia.
-
-Baixe agora e transforme a gestão do seu negócio!
+DO SEU JEITO
+• Escolha o seu ramo e o app usa as palavras do seu trabalho: veículo, aparelho, equipamento
+• Modo escuro e texto grande
+• Entre com Apple, Google ou e-mail
 
 PLANOS E ASSINATURAS
-O PraticOS é gratuito para começar. O plano Gratuito tem limites mensais de fotos, checklists e usuários. Os planos Starter, Pro e Business aumentam esses limites e são assinaturas mensais com renovação automática, compradas dentro do app.
+O PraticOS é gratuito para começar. O plano Gratuito tem limites mensais de fotos, checklists e uso da IA. Os planos Starter, Pro e Business aumentam esses limites e são assinaturas mensais com renovação automática, compradas dentro do app.
 • O pagamento é cobrado na sua conta Apple ao confirmar a compra.
 • A assinatura renova automaticamente, a menos que seja cancelada pelo menos 24 horas antes do fim do período atual.
 • Gerencie ou cancele a assinatura a qualquer momento nos Ajustes da sua conta da App Store.

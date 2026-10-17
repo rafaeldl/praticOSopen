@@ -1,7 +1,9 @@
 Novedades en esta versión:
 
-• Fotos en el PDF de la orden de servicio: las fotos adjuntas a la orden de servicio ahora aparecen en el PDF y en la impresión, junto con los datos del servicio.
-
-• Mejoras de estabilidad y correcciones.
-
-¡Felicidades por elegir la mejor app de gestión de órdenes de servicio!
+• Nuevo diseño: Inicio muestra tus órdenes y el siguiente paso de cada una
+• Pestañas Inicio, Agenda y Financiero, con el botón "Nueva OS" siempre a mano
+• Financiero muestra cuánto te falta cobrar y a quién
+• Registrar el pago del cliente es más sencillo, también en partes
+• Empieza sin registrar una empresa: elige tu oficio y abre tu primera orden
+• Los archivos compartidos desde otras apps van directo a una orden
+• Correcciones y mejoras

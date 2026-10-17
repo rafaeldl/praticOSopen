@@ -1,1 +1,1 @@
-Manage work orders, scheduling, and customers with WhatsApp integration. Automatic reminders, share links, and customer ratings. Perfect for service businesses.
+Say the job or snap a photo and AI fills in the work order: customer, vehicle, services and parts. Then send the quote over WhatsApp and see what's left to collect.

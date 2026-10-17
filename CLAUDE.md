@@ -735,6 +735,7 @@ Antes de finalizar uma feature, verificar:
 ## Documentação Adicional
 
 - `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
+- `docs/STORE_LISTING.md` - Ficha das lojas: textos, prints (como gerar, dados demo), conta da revisão e envio sem publicar
 - `docs/APP_TRACKING_TRANSPARENCY.md` - Permissão de rastreamento no iOS (ATT) e exigências da App Review
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento

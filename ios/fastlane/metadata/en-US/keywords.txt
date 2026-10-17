@@ -1,1 +1,1 @@
-work order,management,customers,schedule,calendar,whatsapp,reminders,checklist,inspection
+AI,voice,job,quote,estimate,invoice,checklist,inspection,schedule,customers,technician,HVAC,mechanic

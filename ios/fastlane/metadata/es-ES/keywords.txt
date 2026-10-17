@@ -1,1 +1,1 @@
-orden de servicio,gestión,clientes,agenda,calendario,whatsapp,recordatorios,checklist,inspección
+IA,voz,OT,presupuesto,checklist,inspección,agenda,clientes,técnico,mecánico,climatización

@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/screens/order/assistant/speech_listener.dart';
 
@@ -89,5 +90,37 @@ void main() {
     engine.onEnded!();
     expect(done, 0);
     expect(engine.sessions, 1);
+  });
+
+  group('ScriptedSpeechListener', () {
+    test('hears the sentence of the locale word by word', () {
+      fakeAsync((async) {
+        final words = <String>[];
+        ScriptedSpeechListener().start(
+          localeId: 'es_ES',
+          onWords: words.add,
+          onDone: () {},
+        );
+        async.elapse(const Duration(seconds: 30));
+        final sentence = ScriptedSpeechListener.sentences['es']!;
+        expect(words.first, sentence.split(' ').first);
+        expect(words.last, sentence);
+        expect(words.length, sentence.split(' ').length);
+      });
+    });
+
+    test('falls back to Portuguese and stops when asked', () {
+      fakeAsync((async) {
+        final words = <String>[];
+        final listener = ScriptedSpeechListener();
+        listener.start(localeId: 'fr-FR', onWords: words.add, onDone: () {});
+        async.elapse(const Duration(milliseconds: 600));
+        listener.stop();
+        async.elapse(const Duration(seconds: 30));
+        expect(words, hasLength(2));
+        expect(ScriptedSpeechListener.sentences['pt']!,
+            startsWith(words.last));
+      });
+    });
   });
 }

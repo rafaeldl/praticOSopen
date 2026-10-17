@@ -138,6 +138,7 @@ platform :android do
     avd_name = options[:avd] || options[:avd_name]
     locale = options[:locale] || "pt-BR"
     force_logout = options[:force_logout]
+    folder_name = options[:folder] || "phoneScreenshots"
 
     # If AVD name provided, boot automatically. Otherwise use existing device.
     if avd_name
@@ -150,7 +151,7 @@ platform :android do
 
     capture_screenshots_for_device(
       device: device,
-      folder_name: "phoneScreenshots",
+      folder_name: folder_name,
       locale: locale,
       force_logout: force_logout,
       avd_name: avd_name
@@ -206,7 +207,7 @@ platform :android do
       if same_tablet_avd
         # Same AVD as 7" — copy screenshots instead of re-running
         # Use absolute paths to avoid working directory ambiguity
-        project_root = File.expand_path("../..", __FILE__)  # android/fastlane/Fastfile -> project root
+        project_root = File.expand_path("../../..", __FILE__)  # android/fastlane/Fastfile -> project root
         src_dir = File.join(project_root, "android", "fastlane", "metadata", "android", locale, "images", "sevenInchScreenshots")
         dst_dir = File.join(project_root, "android", "fastlane", "metadata", "android", locale, "images", "tenInchScreenshots")
 
@@ -328,7 +329,12 @@ platform :android do
     # 1. Kill emulator if already running
     UI.message("Killing any existing emulator instances...")
     sh("#{adb} devices | grep emulator | cut -f1 | xargs -I {} #{adb} -s {} emu kill || true")
-    sleep(2)
+    # Wait until the old emulator is gone, or the boot check below picks it
+    # up as the new one while it is still shutting down.
+    30.times do
+      break if `#{adb} devices | grep emulator`.strip.empty?
+      sleep(2)
+    end
 
     # 2. Start emulator fresh (no snapshot, wipe data for clean state)
     UI.message("🚀 Starting emulator: #{avd_name}")
@@ -449,6 +455,8 @@ platform :android do
         "--target=integration_test/screenshot_test.dart",
         "--dart-define=TEST_LOCALE=#{locale}",
         "--dart-define=SCREENSHOT_MODE=true",
+        # Debug builds point at a local API; the demo accounts live in production.
+        "--dart-define=API_BASE_URL=https://southamerica-east1-praticos.cloudfunctions.net/api",
         "-d", device
       ]
 

@@ -1,13 +1,9 @@
-What's new:
+What's new in this version:
 
-• Calendar Scheduling: View and manage appointments with technician filter
-
-• Smart Reminders: Automatic notifications before scheduled appointments
-
-• WhatsApp Integration: Share work orders via WhatsApp with AI assistant
-
-• Share Links: Customers can track service progress and leave ratings
-
-• Performance Improvements: Faster loading and various fixes
-
-Congratulations on choosing the best work order management app!
+• A fresh new look: Home shows your work orders and the next step for each one
+• Home, Schedule and Financial tabs, with the "New order" button always at hand
+• Financial shows how much you still have to collect, and from whom
+• Receiving a customer payment is simpler, including partial payments
+• Start right away: pick your line of work and open your first work order
+• Files shared from other apps go straight into a work order
+• Fixes and improvements
