@@ -104,6 +104,7 @@ O `Deliverfile` já trava `submit_for_review false`, `skip_binary_upload true` e
   empresa" nem equipe como foco (no iOS a descrição não fala de equipe).
 - Nada de números inventados (usuários, notas).
 - Nada de compra fora do app.
-- Não anunciar o que vem desligado por padrão: assistente de IA, Pix/boleto
-  (Asaas) e nota fiscal.
+- Não anunciar o que vem desligado por padrão: Pix/boleto (Asaas) e nota
+  fiscal. O assistente de IA está ligado para todos desde 2026-10-17 e é o
+  destaque da ficha; se ele for desligado, tirar dos textos, prints e vídeo.
 - Nomes de abas e botões iguais aos do app em cada idioma.
