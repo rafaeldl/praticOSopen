@@ -87,8 +87,17 @@ Sempre mostrar o que vai subir e pedir confirmação antes.
 
 ```bash
 cd ios
-bundle exec fastlane deliver --skip_binary_upload true --submit_for_review false --force
+bundle exec fastlane store_listing
 ```
+
+O lane entra com a chave da API (`APP_STORE_CONNECT_API_KEY_*`, as mesmas dos
+builds); o `deliver` direto tenta Apple ID e senha. Só textos:
+`store_listing skip_screenshots:true`. O vídeo de prévia não sobe pelo
+fastlane: enviar na App Store Connect (iPhone 6,9", pt-BR), arquivo em
+`ios/fastlane/app_previews/`.
+
+No Play a ficha não fica presa a uma versão e entra no ar depois da análise do
+Google. Só subir quando a versão de produção já tiver o que a ficha mostra.
 
 ```bash
 cd android
