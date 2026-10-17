@@ -244,6 +244,25 @@ platform :ios do
     )
   end
 
+  desc "Sobe textos e prints da ficha para a versão em preparação, sem build e sem enviar para revisão"
+  desc "Opções: skip_screenshots:true, skip_metadata:true"
+  lane :store_listing do |options|
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    upload_to_app_store(
+      force: true, # Pula confirmação de HTML preview
+      skip_binary_upload: true,
+      skip_screenshots: options[:skip_screenshots] || false,
+      skip_metadata: options[:skip_metadata] || false,
+      submit_for_review: false,
+      run_precheck_before_submit: false # Evita erro de API Key com IAP
+    )
+  end
+
   desc "Remove alpha channel from all screenshots (required by App Store)"
   lane :fix_screenshots_alpha do
     # Use absolute path to avoid working directory issues
