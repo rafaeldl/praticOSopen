@@ -4,10 +4,10 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Integrador Solar: instalação e OS | PraticOS",
-    "description": "App de ordem de serviço para energia solar: checklist NR10/NR35, comissionamento com tensão e corrente, fotos do inversor e orçamento aprovado por link.",
+    "description": "App de ordem de serviço para energia solar: fale a instalação e a IA abre a OS, checklist NR10/NR35, comissionamento com tensão e corrente, fotos do inversor e orçamento aprovado por link.",
     "keywords": "sistema para energia solar, software integrador solar, programa instalador fotovoltaico, app energia solar, ordem de serviço energia solar, checklist de comissionamento fotovoltaico",
     "ogTitle": "Sistema para Integrador Solar | PraticOS",
-    "ogDescription": "Instalações solares no celular: sistema com kWp e nº do inversor, checklists de segurança e comissionamento com fotos e orçamento aprovado por link.",
+    "ogDescription": "Instalações solares no celular: a IA abre a OS pelo que você fala, o sistema fica com kWp e nº do inversor, e os checklists de segurança e comissionamento vão com fotos.",
     "hero": {
       "title": "Do telhado ao inversor,",
       "titleMark": "tudo na mesma OS.",
@@ -20,16 +20,36 @@
         "title": "Ordem de serviço",
         "number": "Nº 0214",
         "rows": [
-          { "label": "Cliente", "value": "Marcos Andrade" },
-          { "label": "Sistema", "value": "6,6 kWp · 12 placas" },
-          { "label": "Nº do inversor", "value": "SN 2207-48213" },
-          { "label": "Serviço", "value": "Instalação em telhado cerâmico" },
-          { "label": "Fotos", "value": "12 anexadas" }
+          {
+            "label": "Cliente",
+            "value": "Marcos Andrade"
+          },
+          {
+            "label": "Sistema",
+            "value": "6,6 kWp · 12 placas"
+          },
+          {
+            "label": "Nº do inversor",
+            "value": "SN 2207-48213"
+          },
+          {
+            "label": "Serviço",
+            "value": "Instalação em telhado cerâmico"
+          },
+          {
+            "label": "Fotos",
+            "value": "12 anexadas"
+          }
         ],
         "totalLabel": "Total",
         "total": "R$ 21.800,00",
         "stamp": "Aprovado pelo cliente",
-        "steps": ["Orçamento", "Aprovado", "Em instalação", "Gerando", "Pago"],
+        "steps": [
+          "Orçamento",
+          "Aprovada",
+          "Em instalação",
+          "Gerando"
+        ],
         "current": 2
       }
     },
@@ -66,7 +86,7 @@
         {
           "problem": "Parcela esquecida",
           "detail": "Entrada paga, saldo na conclusão — e no fim do mês ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Receba a entrada e o saldo como pagamentos em partes na OS. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança."
         }
       ]
     },
@@ -76,30 +96,42 @@
       "stages": [
         {
           "number": "01",
-          "title": "Abra a OS do sistema",
-          "text": "Cadastre o cliente e o sistema com potência, quantidade de placas e nº do inversor. Equipamentos e mão de obra saem do seu catálogo, já com preço.",
+          "title": "Fale a instalação e a IA abre a OS",
+          "text": "Toque em Falar: “Sistema do Paulo, 12 placas de 550, inversor de 6 kW, instalação dia 20”. A IA preenche cliente, equipamentos e mão de obra com os preços do seu catálogo. Você confere e salva.",
           "facts": [
-            "Status do ramo: em instalação e gerando",
-            "Busca pelo nº do inversor na lista de OS",
-            "Data da instalação na agenda da equipe"
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “a mão de obra é 2.500”",
+            "Ou tire foto do pedido anotado"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
-          "title": "Mande o orçamento por link",
-          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê os itens e valores, aprova e deixa comentários.",
+          "title": "A instalação na agenda",
+          "text": "Com a data na OS, a instalação entra na Agenda, e o celular avisa antes do horário. Manutenção e limpeza de placas entram do mesmo jeito.",
           "facts": [
-            "Aprovação registrada na própria OS",
-            "Você vê quantas vezes o link foi aberto",
-            "PDF da OS para imprimir ou enviar"
+            "Semana no topo, atendimentos do dia embaixo",
+            "Lembrete no celular antes do horário",
+            "Resumo do dia às 9h, se você quiser"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
         },
         {
           "number": "03",
+          "title": "Mande o orçamento por link",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê os itens e valores, aprova e deixa comentários. Depois, acompanha a situação: em instalação, gerando.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "O cliente comenta direto na OS, sem ligar",
+            "PDF da OS para imprimir ou enviar"
+          ],
+          "image": "order.png",
+          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+        },
+        {
+          "number": "04",
           "title": "Instale com checklist",
           "text": "Segurança NR10/NR35 antes de subir, comissionamento ao ligar, entrega e orientações no final. Os modelos vêm prontos e você ajusta os itens.",
           "facts": [
@@ -107,20 +139,20 @@
             "Fotos do inversor e dos quadros",
             "Monitoramento configurado e orientações repassadas"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido com fotos dentro de uma OS"
         },
         {
-          "number": "04",
+          "number": "05",
           "title": "Entregue e receba",
-          "text": "Registre a entrada e o saldo como pagamentos parciais, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "text": "Registre a entrada e o saldo como pagamentos em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
-            "Quem ainda deve, numa lista só"
+            "Pagamento em partes e desconto na mesma OS",
+            "Quem deve há mais tempo aparece primeiro",
+            "Relatório do mês com o que entrou"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
         }
       ]
     },
@@ -130,7 +162,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "O PraticOS faz dimensionamento ou proposta comercial?",
@@ -146,7 +178,7 @@
         },
         {
           "question": "Os instaladores podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "answer": "Sim, se alguém trabalha com você. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa por um código de convite, que dá para mandar pelo WhatsApp, e ela entra com a própria conta no celular dela, com um papel como Técnico ou Gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         }
       ]
     }
@@ -155,10 +187,10 @@
     "lang": "en",
     "langCode": "en",
     "title": "Solar Installer Software: Jobs and Work Orders | PraticOS",
-    "description": "Work order app for solar installers: safety checklist, commissioning with DC voltage and current, inverter photos and quotes customers approve by link.",
+    "description": "Work order app for solar installers: say the install and AI opens the work order, safety checklist, commissioning with DC voltage and current, inverter photos and quotes approved by link.",
     "keywords": "solar installer software, solar installation app, solar company work order software, PV commissioning checklist app, solar contractor management",
     "ogTitle": "Solar Installer Software | PraticOS",
-    "ogDescription": "Solar installs on your phone: system with kWp and inverter serial, safety and commissioning checklists with photos and quotes approved by link.",
+    "ogDescription": "Solar installs on your phone: AI opens the work order from what you say, the system gets its kWp and inverter serial, and the safety and commissioning checklists get photos.",
     "hero": {
       "title": "From roof to inverter,",
       "titleMark": "on one work order.",
@@ -171,16 +203,36 @@
         "title": "Work order",
         "number": "No. 0214",
         "rows": [
-          { "label": "Customer", "value": "Mark Anderson" },
-          { "label": "System", "value": "6.6 kWp · 12 panels" },
-          { "label": "Inverter serial", "value": "SN 2207-48213" },
-          { "label": "Service", "value": "Install on asphalt shingle roof" },
-          { "label": "Photos", "value": "12 attached" }
+          {
+            "label": "Customer",
+            "value": "Mark Anderson"
+          },
+          {
+            "label": "System",
+            "value": "6.6 kWp · 12 panels"
+          },
+          {
+            "label": "Inverter serial",
+            "value": "SN 2207-48213"
+          },
+          {
+            "label": "Service",
+            "value": "Install on asphalt shingle roof"
+          },
+          {
+            "label": "Photos",
+            "value": "12 attached"
+          }
         ],
         "totalLabel": "Total",
         "total": "$16,500.00",
         "stamp": "Approved by customer",
-        "steps": ["Quote", "Approved", "Installing", "Generating", "Paid"],
+        "steps": [
+          "Quote",
+          "Approved",
+          "Installing",
+          "Generating"
+        ],
         "current": 2
       }
     },
@@ -217,7 +269,7 @@
         {
           "problem": "The forgotten balance",
           "detail": "Deposit paid, balance due on completion — and at month end nobody knows who still owes you.",
-          "answer": "Record partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Record the deposit and the balance as partial payments on the work order. Financial shows how much is left to collect and from whom, with a button to send the payment request."
         }
       ]
     },
@@ -227,51 +279,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Open the system's work order",
-          "text": "Add the customer and the system with size, panel count and inverter serial. Equipment and labor come from your catalog, already priced.",
+          "title": "Say the install and AI opens the order",
+          "text": "Tap Speak: “Paulo’s system, 12 panels of 550 W, 6 kW inverter, install on the 20th.” AI fills in the customer, equipment and labor with the prices from your catalog. You check it and save.",
           "facts": [
-            "Solar statuses: installing and generating",
-            "Search by inverter serial in the work order list",
-            "Install date on the crew's calendar"
+            "What AI filled in is marked with ✦",
+            "Fix it by speaking: “labor is 2,500”",
+            "Or take a photo of the written request"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
-          "title": "Send the quote as a link",
-          "text": "The customer opens the work order in a browser, nothing to install. They see items and prices, approve it and leave comments.",
+          "title": "The install on the schedule",
+          "text": "With a date on the work order, the install goes on the Schedule, and your phone reminds you before the appointment. Maintenance and panel cleaning go in the same way.",
           "facts": [
-            "Approval recorded on the work order",
-            "See how many times the link was opened",
-            "Work order PDF to print or send"
+            "The week on top, the day’s appointments below",
+            "Phone reminder before the appointment",
+            "Daily summary at 9 a.m., if you want it"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the appointments booked for the day"
         },
         {
           "number": "03",
-          "title": "Install with checklists",
-          "text": "Safety before going up, commissioning at power-on, handover and instructions at the end. The templates come ready and you adjust the items.",
+          "title": "Send the quote by link",
+          "text": "The customer opens the work order in the browser, with nothing to install. They see items and prices, approve and leave comments. Then they follow the status: installing, generating.",
           "facts": [
-            "DC voltage and current on the main string",
-            "Photos of the inverter and panels",
-            "Monitoring set up and instructions given"
+            "Approval recorded on the work order",
+            "The customer comments right on the order, no call needed",
+            "Work order PDF to print or send"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "order.png",
+          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
         },
         {
           "number": "04",
-          "title": "Hand over and get paid",
-          "text": "Record the deposit and the balance as partial payments, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "title": "Install with a checklist",
+          "text": "Safety before going up, commissioning at power-on, handover and guidance at the end. The templates come ready and you adjust the items.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
-            "Everyone who still owes you, in one list"
+            "DC voltage and current of the main string",
+            "Photos of the inverter and panels",
+            "Monitoring set up and guidance given"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in with photos inside a work order"
+        },
+        {
+          "number": "05",
+          "title": "Deliver and get paid",
+          "text": "Record the deposit and the balance as partial payments, with a discount if needed. Financial shows how much is left to collect and from whom.",
+          "facts": [
+            "Partial payments and discounts in the same order",
+            "Whoever has owed the longest shows up first",
+            "Monthly report of what came in"
+          ],
+          "image": "financial.png",
+          "alt": "Financial with how much is left to collect and the button to send a payment request"
         }
       ]
     },
@@ -281,7 +345,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does PraticOS do system design or sales proposals?",
@@ -297,7 +361,7 @@
         },
         {
           "question": "Can installers use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values."
+          "answer": "Yes, if someone works with you. Tap the profile button at the top of Home, go to Team and invite them with an invite code, which you can send over WhatsApp, and they sign in with their own account on their own phone, with a role such as Technician or Manager. Inviting someone requires a paid plan, subscribed inside the app."
         }
       ]
     }
@@ -306,10 +370,10 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Instalador Solar: obras y órdenes | PraticOS",
-    "description": "App de órdenes de servicio para energía solar: checklist de seguridad, puesta en marcha con tensión y corriente, fotos del inversor y presupuesto por link.",
+    "description": "App de órdenes de servicio para energía solar: dices la instalación y la IA abre la OS, checklist de seguridad, puesta en marcha con tensión y corriente, fotos del inversor y presupuesto por link.",
     "keywords": "sistema para energía solar, software para instalador solar, programa instalador fotovoltaico, app energía solar, orden de servicio energía solar, checklist de puesta en marcha fotovoltaica",
     "ogTitle": "Sistema para Instalador Solar | PraticOS",
-    "ogDescription": "Instalaciones solares en el celular: sistema con kWp y n.º del inversor, checklists de seguridad y puesta en marcha con fotos y presupuesto por link.",
+    "ogDescription": "Instalaciones solares en el celular: la IA abre la OS con lo que dices, el sistema queda con kWp y n.º del inversor, y los checklists de seguridad y puesta en marcha van con fotos.",
     "hero": {
       "title": "Del techo al inversor,",
       "titleMark": "todo en la misma orden.",
@@ -322,16 +386,36 @@
         "title": "Orden de servicio",
         "number": "N.º 0214",
         "rows": [
-          { "label": "Cliente", "value": "Marcos Andrade" },
-          { "label": "Sistema", "value": "6,6 kWp · 12 paneles" },
-          { "label": "N.º del inversor", "value": "SN 2207-48213" },
-          { "label": "Servicio", "value": "Instalación en techo de teja" },
-          { "label": "Fotos", "value": "12 adjuntas" }
+          {
+            "label": "Cliente",
+            "value": "Marcos Andrade"
+          },
+          {
+            "label": "Sistema",
+            "value": "6,6 kWp · 12 paneles"
+          },
+          {
+            "label": "N.º del inversor",
+            "value": "SN 2207-48213"
+          },
+          {
+            "label": "Servicio",
+            "value": "Instalación en techo de teja"
+          },
+          {
+            "label": "Fotos",
+            "value": "12 adjuntas"
+          }
         ],
         "totalLabel": "Total",
         "total": "$ 16.500,00",
         "stamp": "Aprobado por el cliente",
-        "steps": ["Presupuesto", "Aprobado", "En instalación", "Generando", "Cobrado"],
+        "steps": [
+          "Presupuesto",
+          "Aprobada",
+          "En instalación",
+          "Generando"
+        ],
         "current": 2
       }
     },
@@ -368,7 +452,7 @@
         {
           "problem": "La cuota olvidada",
           "detail": "Anticipo pagado, saldo al terminar — y a fin de mes nadie sabe quién todavía debe.",
-          "answer": "Registra pagos parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra el anticipo y el saldo como pagos en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro."
         }
       ]
     },
@@ -378,51 +462,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Abre la orden del sistema",
-          "text": "Registra al cliente y el sistema con potencia, cantidad de paneles y n.º del inversor. Equipos y mano de obra salen de tu catálogo, con precio.",
+          "title": "Di la instalación y la IA abre la OS",
+          "text": "Toca Hablar: “Sistema de Paulo, 12 paneles de 550, inversor de 6 kW, instalación el día 20”. La IA completa cliente, equipos y mano de obra con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "Estados del rubro: en instalación y generando",
-            "Búsqueda por n.º del inversor en la lista de órdenes",
-            "Fecha de instalación en la agenda del equipo"
+            "Lo que la IA completó queda marcado con ✦",
+            "Corrige hablando: “la mano de obra es 2.500”",
+            "O saca una foto del pedido anotado"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
-          "title": "Envía el presupuesto por link",
-          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve los ítems y valores, aprueba y deja comentarios.",
+          "title": "La instalación en la agenda",
+          "text": "Con la fecha en la OS, la instalación entra en la Agenda, y el celular avisa antes del horario. Mantenimiento y limpieza de paneles entran igual.",
           "facts": [
-            "Aprobación registrada en la propia orden",
-            "Ves cuántas veces se abrió el link",
-            "PDF de la orden para imprimir o enviar"
+            "La semana arriba, las citas del día abajo",
+            "Aviso en el celular antes del horario",
+            "Resumen del día a las 9 h, si lo quieres"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y las citas marcadas del día"
         },
         {
           "number": "03",
-          "title": "Instala con checklist",
-          "text": "Seguridad antes de subir, puesta en marcha al encender, entrega y orientaciones al final. Las plantillas vienen listas y tú ajustas los ítems.",
+          "title": "Envía el presupuesto por link",
+          "text": "El cliente abre la OS en el navegador, sin instalar nada. Ve los ítems y valores, aprueba y deja comentarios. Después sigue la situación: en instalación, generando.",
           "facts": [
-            "Tensión y corriente CC del string principal",
-            "Fotos del inversor y los tableros",
-            "Monitoreo configurado y orientaciones entregadas"
+            "Aprobación registrada en la propia OS",
+            "El cliente comenta en la orden, sin llamar",
+            "PDF de la OS para imprimir o enviar"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "order.png",
+          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
         },
         {
           "number": "04",
-          "title": "Entrega y cobra",
-          "text": "Registra el anticipo y el saldo como pagos parciales, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "title": "Instala con checklist",
+          "text": "Seguridad antes de subir, puesta en marcha al encender, entrega y orientaciones al final. Los modelos vienen listos y tú ajustas los ítems.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
-            "Quién todavía debe, en una sola lista"
+            "Tensión y corriente CC del string principal",
+            "Fotos del inversor y de los tableros",
+            "Monitoreo configurado y orientaciones dadas"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado con fotos dentro de una OS"
+        },
+        {
+          "number": "05",
+          "title": "Entrega y cobra",
+          "text": "Registra el anticipo y el saldo como pagos en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién.",
+          "facts": [
+            "Pago en partes y descuento en la misma OS",
+            "Quien debe hace más tiempo aparece primero",
+            "Informe del mes con lo que entró"
+          ],
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
         }
       ]
     },
@@ -432,7 +528,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿PraticOS hace dimensionamiento o propuestas comerciales?",
@@ -448,7 +544,7 @@
         },
         {
           "question": "¿Los instaladores pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros."
+          "answer": "Sí, si alguien trabaja contigo. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invita a la persona con un código de invitación, que puedes enviar por WhatsApp, y ella entra con su propia cuenta en su celular, con un rol como Técnico o Gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         }
       ]
     }

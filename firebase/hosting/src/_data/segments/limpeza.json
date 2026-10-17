@@ -4,14 +4,14 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Empresa de Limpeza: OS e checklist | PraticOS",
-    "description": "App de ordem de serviço para empresa de limpeza: agenda da equipe, checklist por ambiente, fotos de antes e depois e orçamento aprovado por link.",
+    "description": "App de ordem de serviço para limpeza: fale o serviço e a IA abre a OS, agenda, checklist por ambiente, fotos de antes e depois e orçamento aprovado por link.",
     "keywords": "sistema para empresa de limpeza, software limpeza comercial, app limpeza profissional, gestão equipe limpeza, checklist de limpeza, ordem de serviço limpeza",
     "ogTitle": "Sistema para Empresa de Limpeza | PraticOS",
-    "ogDescription": "Serviços de limpeza no celular: agenda por pessoa da equipe, checklist por ambiente, fotos de antes e depois e orçamento aprovado por link.",
+    "ogDescription": "Serviços de limpeza no celular: a IA abre a OS pelo que você fala, o serviço entra na agenda, o checklist vai por ambiente com fotos de antes e depois e o cliente aprova por link.",
     "hero": {
       "title": "Antes, depois e checklist",
       "titleMark": "em cada serviço.",
-      "lede": "PraticOS é o app de ordem de serviço para empresas de limpeza e conservação. Agende o serviço para a equipe, siga o checklist por ambiente com fotos de antes e depois, mande o orçamento por link para o cliente aprovar e registre o pagamento — pelo celular.",
+      "lede": "PraticOS é o app de ordem de serviço para quem trabalha com limpeza e conservação. Agende o serviço, siga o checklist por ambiente com fotos de antes e depois, mande o orçamento por link para o cliente aprovar e registre o pagamento — pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo cliente",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Concluído",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -72,17 +71,17 @@
         {
           "problem": "Escala perdida no grupo",
           "detail": "Quem vai aonde amanhã? A resposta está no meio de cem mensagens.",
-          "answer": "Cada serviço é uma OS com dia, hora e endereço do cliente. A agenda mostra o mês, filtra por pessoa e o celular avisa antes do horário."
+          "answer": "Cada serviço é uma OS com dia, hora e endereço do cliente. A Agenda mostra a semana e o dia, o celular avisa antes do horário e, se alguém trabalha com você, dá para ver a agenda de cada pessoa."
         },
         {
           "problem": "Orçamento combinado por áudio",
           "detail": "O cliente lembra de um preço, você lembra de outro.",
-          "answer": "O orçamento fica na OS, com os serviços do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+          "answer": "Fale o serviço e a IA monta a OS com os itens e preços do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
         },
         {
           "problem": "Serviço feito e não cobrado",
           "detail": "A faxina extra de sábado não entrou na conta do mês.",
-          "answer": "Cada serviço entra na OS com preço. Registre pagamentos inteiros ou parciais e veja no painel quem ainda deve."
+          "answer": "Cada serviço entra na OS com preço. Receba inteiro ou em partes, e o Financeiro mostra quem ainda deve, com o botão para mandar a cobrança."
         },
         {
           "problem": "Cliente perguntando se a equipe já foi",
@@ -97,61 +96,73 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agende o serviço",
-          "text": "Crie a OS com o cliente, o endereço e os serviços do catálogo e marque dia e hora. O serviço aparece na agenda de quem vai executar.",
+          "title": "Fale o serviço e a IA abre a OS",
+          "text": "Toque em Falar: “Faxina pós-obra no apartamento da Luciana, sábado às 8, com limpeza de vidros”. A IA preenche cliente, serviços e preços do seu catálogo. Você confere e salva.",
           "facts": [
-            "Agenda do mês filtrada por pessoa",
-            "Lembrete no celular antes do horário",
-            "“Dia todo” para serviços sem hora marcada"
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “os vidros são 180”",
+            "Ou tire foto do pedido anotado"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda do mês com as OS marcadas no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
-          "title": "Siga o checklist com fotos",
-          "text": "No local, a equipe abre a OS e segue o checklist do tipo de serviço, ambiente por ambiente, com fotos de antes e depois.",
+          "title": "O serviço na agenda",
+          "text": "Com dia e hora na OS, o serviço entra na Agenda. Se alguém da equipe vai executar, ele aparece na agenda dessa pessoa, e o celular avisa antes do horário.",
           "facts": [
-            "Itens com verificação, texto ou foto",
-            "Um modelo por tipo de limpeza",
-            "Checklist concluído só reabre com Admin, Gerente ou Supervisor"
+            "Semana no topo, serviços do dia embaixo",
+            "Lembrete no celular antes do horário",
+            "Com equipe, agenda filtrada por pessoa"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
         },
         {
           "number": "03",
-          "title": "Mande o link ao cliente",
-          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele aprova o orçamento, acompanha o status, vê as fotos e deixa comentários.",
+          "title": "Siga o checklist com fotos",
+          "text": "No local, abra a OS e siga o checklist do tipo de serviço, ambiente por ambiente, com fotos de antes e depois.",
           "facts": [
-            "Aprovação registrada na própria OS",
-            "Avaliação do cliente depois de concluído",
-            "PDF da OS com checklist e fotos"
+            "Itens com verificação, texto ou foto",
+            "Um modelo por tipo de limpeza",
+            "Checklist concluído só reabre com Administrador, Gerente ou Supervisor"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido com fotos dentro de uma OS"
         },
         {
           "number": "04",
-          "title": "Receba pelo serviço",
-          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "title": "Mande o link ao cliente",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele aprova o orçamento, acompanha a situação, vê as fotos e deixa comentários.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
-            "Quem ainda deve, numa lista só"
+            "Aprovação registrada na própria OS",
+            "Avaliação do cliente depois de concluída",
+            "PDF da OS com checklist e fotos"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "order.png",
+          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+        },
+        {
+          "number": "05",
+          "title": "Receba pelo serviço",
+          "text": "Receba o valor inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança.",
+          "facts": [
+            "Pagamento em partes e desconto na mesma OS",
+            "Quem deve há mais tempo aparece primeiro",
+            "Relatório do mês com o que entrou"
+          ],
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
         }
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem empresa de limpeza",
+      "title": "Perguntas de quem trabalha com limpeza",
       "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "O app registra a localização da equipe?",
@@ -163,7 +174,7 @@
         },
         {
           "question": "A equipe pode usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Quem executa não vê valores financeiros."
+          "answer": "Sim, se você trabalha com equipe. Toque no botão do perfil, no topo do Início, vá em Equipe e chame cada pessoa por um código de convite, que dá para mandar pelo WhatsApp. Ela entra com a própria conta no celular dela, com um papel como Técnico ou Gerente, e vê os serviços na Agenda. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -176,14 +187,14 @@
     "lang": "en",
     "langCode": "en",
     "title": "Cleaning Business Software: Jobs and Checklists | PraticOS",
-    "description": "Work order app for cleaning companies: crew schedule, room-by-room checklists, before and after photos and quotes customers approve by link. Start free. Paid plans available in the app.",
+    "description": "Work order app for cleaning services: say the job and AI opens the work order, schedule, room-by-room checklists, before and after photos and quotes customers approve by link.",
     "keywords": "cleaning business software, cleaning company app, janitorial work order software, cleaning checklist app, commercial cleaning scheduling",
     "ogTitle": "Cleaning Business Software | PraticOS",
-    "ogDescription": "Cleaning jobs on your phone: schedule by crew member, room-by-room checklists, before and after photos and quotes approved by link.",
+    "ogDescription": "Cleaning jobs on your phone: AI opens the work order from what you say, the job goes on the schedule, the checklist goes room by room with before and after photos and the customer approves by link.",
     "hero": {
       "title": "Before, after and checklist",
       "titleMark": "on every job.",
-      "lede": "PraticOS is the work order app for cleaning and janitorial companies. Schedule the job for your crew, follow a room-by-room checklist with before and after photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "lede": "PraticOS is the work order app for people who do cleaning and janitorial work. Schedule the job, follow a room-by-room checklist with before and after photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -220,8 +231,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Done",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -244,17 +254,17 @@
         {
           "problem": "Schedule lost in the group chat",
           "detail": "Who's going where tomorrow? The answer is buried under a hundred messages.",
-          "answer": "Each job is a work order with a date, time and the customer's address. The calendar shows the month, filters by person and the phone alerts before the job."
+          "answer": "Each job is a work order with a date, time and customer address. The Schedule shows the week and the day, your phone reminds you before the job and, if someone works with you, you can see each person’s schedule."
         },
         {
           "problem": "Prices agreed over a voice note",
           "detail": "The customer remembers one price, you remember another.",
-          "answer": "The quote lives on the work order, with services from your catalog. The customer approves it by link and the approval is recorded."
+          "answer": "Say the job and AI builds the work order with the items and prices from your catalog. The customer approves by link and the approval is recorded."
         },
         {
           "problem": "Work done but never billed",
           "detail": "The extra Saturday clean never made it onto the monthly invoice.",
-          "answer": "Each service goes on the work order with a price. Record full or partial payments and see on the dashboard who still owes you."
+          "answer": "Every job goes on the work order with a price. Receive in full or in parts, and Financial shows who still owes, with a button to send the payment request."
         },
         {
           "problem": "Customers asking if the crew showed up",
@@ -269,61 +279,73 @@
       "stages": [
         {
           "number": "01",
-          "title": "Schedule the job",
-          "text": "Create the work order with the customer, address and catalog services, and set the date and time. The job shows up on the calendar of whoever is doing it.",
+          "title": "Say the job and AI opens the order",
+          "text": "Tap Speak: “Post-construction clean at Luciana’s apartment, Saturday at 8, with window cleaning.” AI fills in the customer, services and prices from your catalog. You check it and save.",
           "facts": [
-            "Monthly calendar filtered by person",
-            "Phone reminder before the start time",
-            "“All day” for jobs with no set time"
+            "What AI filled in is marked with ✦",
+            "Fix it by speaking: “the windows are 180”",
+            "Or take a photo of the written request"
           ],
-          "image": "agenda.png",
-          "alt": "Monthly calendar with scheduled work orders in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
-          "title": "Follow the checklist with photos",
-          "text": "On site, the crew opens the work order and follows the checklist for that job type, room by room, with before and after photos.",
+          "title": "The job on the schedule",
+          "text": "With a date and time on the work order, the job goes on the Schedule. If someone on your crew is doing it, it shows on that person’s schedule, and the phone reminds them before the time.",
           "facts": [
-            "Items with check, text or photo",
-            "One template per type of clean",
-            "Completed checklists reopen only for Admin, Manager or Supervisor"
+            "The week on top, the day’s jobs below",
+            "Phone reminder before the job",
+            "With a crew, schedule filtered by person"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the appointments booked for the day"
         },
         {
           "number": "03",
-          "title": "Send the customer a link",
-          "text": "The customer opens the work order in a browser, nothing to install. They approve the quote, follow the status, see the photos and leave comments.",
+          "title": "Follow the checklist with photos",
+          "text": "On site, open the work order and follow the checklist for that type of job, room by room, with before and after photos.",
           "facts": [
-            "Approval recorded on the work order",
-            "Customer rating once the job is done",
-            "Work order PDF with checklist and photos"
+            "Items with a check, text or photo",
+            "One template per type of cleaning",
+            "Completed checklists reopen only for Admin, Manager or Supervisor"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "checklist.png",
+          "alt": "Checklist filled in with photos inside a work order"
         },
         {
           "number": "04",
-          "title": "Get paid for the job",
-          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "title": "Send the link to the customer",
+          "text": "The customer opens the work order in the browser, with nothing to install. They approve the quote, follow the status, see the photos and leave comments.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
-            "Everyone who still owes you, in one list"
+            "Approval recorded on the work order",
+            "Customer rating after completion",
+            "Work order PDF with checklist and photos"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "order.png",
+          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+        },
+        {
+          "number": "05",
+          "title": "Get paid for the job",
+          "text": "Receive the full amount or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
+          "facts": [
+            "Partial payments and discounts in the same order",
+            "Whoever has owed the longest shows up first",
+            "Monthly report of what came in"
+          ],
+          "image": "financial.png",
+          "alt": "Financial with how much is left to collect and the button to send a payment request"
         }
       ]
     },
     "faq": {
-      "title": "Questions from cleaning companies",
+      "title": "Questions from people in the cleaning business",
       "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does the app track my crew's location?",
@@ -335,7 +357,7 @@
         },
         {
           "question": "Can my crew use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Crew members don't see financial values."
+          "answer": "Yes, if you work with a crew. Tap the profile button at the top of Home, go to Team and invite each person with an invite code, which you can send over WhatsApp. They sign in with their own account on their own phone, with a role such as Technician or Manager, and see their jobs on the Schedule. Inviting someone requires a paid plan, subscribed inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -348,14 +370,14 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Empresa de Limpieza y Checklist | PraticOS",
-    "description": "App de órdenes de servicio para empresas de limpieza: agenda del equipo, checklist por ambiente, fotos de antes y después y presupuesto aprobado por link.",
+    "description": "App de órdenes de servicio para limpieza: dices el servicio y la IA abre la OS, agenda, checklist por ambiente, fotos de antes y después y presupuesto aprobado por link.",
     "keywords": "sistema para empresa de limpieza, software de limpieza comercial, app limpieza profesional, gestión de equipo de limpieza, checklist de limpieza, orden de servicio limpieza",
     "ogTitle": "Sistema para Empresa de Limpieza | PraticOS",
-    "ogDescription": "Servicios de limpieza en el celular: agenda por persona del equipo, checklist por ambiente, fotos de antes y después y presupuesto aprobado por link.",
+    "ogDescription": "Servicios de limpieza en el celular: la IA abre la OS con lo que dices, el servicio entra en la agenda, el checklist va por ambiente con fotos de antes y después y el cliente aprueba por link.",
     "hero": {
       "title": "Antes, después y checklist",
       "titleMark": "en cada servicio.",
-      "lede": "PraticOS es la app de órdenes de servicio para empresas de limpieza y mantenimiento. Agenda el servicio para el equipo, sigue el checklist por ambiente con fotos de antes y después, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — desde el celular.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien trabaja en limpieza y mantenimiento. Agenda el servicio, sigue el checklist por ambiente con fotos de antes y después, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -390,10 +412,9 @@
         "stamp": "Aprobado por el cliente",
         "steps": [
           "Presupuesto",
-          "Aprobado",
+          "Aprobada",
           "En curso",
-          "Terminado",
-          "Cobrado"
+          "Completada"
         ],
         "current": 2
       }
@@ -416,17 +437,17 @@
         {
           "problem": "Turnos perdidos en el grupo",
           "detail": "¿Quién va adónde mañana? La respuesta está entre cien mensajes.",
-          "answer": "Cada servicio es una orden con día, hora y dirección del cliente. La agenda muestra el mes, filtra por persona y el celular avisa antes del horario."
+          "answer": "Cada servicio es una OS con día, hora y dirección del cliente. La Agenda muestra la semana y el día, el celular avisa antes del horario y, si alguien trabaja contigo, puedes ver la agenda de cada persona."
         },
         {
           "problem": "Precios acordados por audio",
           "detail": "El cliente recuerda un precio y tú recuerdas otro.",
-          "answer": "El presupuesto queda en la orden, con los servicios de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+          "answer": "Di el servicio y la IA arma la OS con los ítems y precios de tu catálogo. El cliente aprueba por link y la aprobación queda registrada."
         },
         {
           "problem": "Trabajo hecho y no cobrado",
           "detail": "La limpieza extra del sábado no entró en la cuenta del mes.",
-          "answer": "Cada servicio entra en la orden con precio. Registra pagos totales o parciales y ve en el panel quién todavía debe."
+          "answer": "Cada servicio entra en la OS con precio. Cobra completo o en partes, y Financiero muestra quién todavía debe, con el botón para enviar el cobro."
         },
         {
           "problem": "Clientes preguntando si el equipo fue",
@@ -441,61 +462,73 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agenda el servicio",
-          "text": "Crea la orden con el cliente, la dirección y los servicios del catálogo, y marca día y hora. El servicio aparece en la agenda de quien lo va a hacer.",
+          "title": "Di el servicio y la IA abre la OS",
+          "text": "Toca Hablar: “Limpieza de fin de obra en el departamento de Luciana, sábado a las 8, con limpieza de vidrios”. La IA completa cliente, servicios y precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "Agenda del mes filtrada por persona",
-            "Recordatorio en el celular antes del horario",
-            "“Todo el día” para servicios sin hora fija"
+            "Lo que la IA completó queda marcado con ✦",
+            "Corrige hablando: “los vidrios son 180”",
+            "O saca una foto del pedido anotado"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda del mes con órdenes marcadas en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
-          "title": "Sigue el checklist con fotos",
-          "text": "En el lugar, el equipo abre la orden y sigue el checklist de ese tipo de servicio, ambiente por ambiente, con fotos de antes y después.",
+          "title": "El servicio en la agenda",
+          "text": "Con día y hora en la OS, el servicio entra en la Agenda. Si alguien del equipo lo va a hacer, aparece en la agenda de esa persona, y el celular avisa antes del horario.",
           "facts": [
-            "Ítems con verificación, texto o foto",
-            "Una plantilla por tipo de limpieza",
-            "Un checklist terminado solo se reabre con Admin, Gerente o Supervisor"
+            "La semana arriba, los servicios del día abajo",
+            "Aviso en el celular antes del horario",
+            "Con equipo, agenda filtrada por persona"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y las citas marcadas del día"
         },
         {
           "number": "03",
-          "title": "Envía el link al cliente",
-          "text": "El cliente abre la orden en el navegador, sin instalar nada. Aprueba el presupuesto, sigue el estado, ve las fotos y deja comentarios.",
+          "title": "Sigue el checklist con fotos",
+          "text": "En el lugar, abre la OS y sigue el checklist del tipo de servicio, ambiente por ambiente, con fotos de antes y después.",
           "facts": [
-            "Aprobación registrada en la propia orden",
-            "Calificación del cliente al terminar",
-            "PDF de la orden con checklist y fotos"
+            "Ítems con verificación, texto o foto",
+            "Un modelo por tipo de limpieza",
+            "El checklist completado solo se reabre con Administrador, Gerente o Supervisor"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "checklist.png",
+          "alt": "Checklist completado con fotos dentro de una OS"
         },
         {
           "number": "04",
-          "title": "Cobra el servicio",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "title": "Envía el link al cliente",
+          "text": "El cliente abre la OS en el navegador, sin instalar nada. Aprueba el presupuesto, sigue la situación, ve las fotos y deja comentarios.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
-            "Quién todavía debe, en una sola lista"
+            "Aprobación registrada en la propia OS",
+            "Calificación del cliente al completar",
+            "PDF de la OS con checklist y fotos"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "order.png",
+          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+        },
+        {
+          "number": "05",
+          "title": "Cobra por el servicio",
+          "text": "Cobra el valor completo o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro.",
+          "facts": [
+            "Pago en partes y descuento en la misma OS",
+            "Quien debe hace más tiempo aparece primero",
+            "Informe del mes con lo que entró"
+          ],
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
         }
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene empresa de limpieza",
+      "title": "Preguntas de quien trabaja en limpieza",
       "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿La app registra la ubicación del equipo?",
@@ -507,7 +540,7 @@
         },
         {
           "question": "¿El equipo puede usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Quien ejecuta no ve valores financieros."
+          "answer": "Sí, si trabajas con equipo. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invita a cada persona con un código de invitación, que puedes enviar por WhatsApp. Ella entra con su propia cuenta en su celular, con un rol como Técnico o Gerente, y ve los servicios en la Agenda. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

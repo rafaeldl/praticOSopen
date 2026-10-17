@@ -2,9 +2,9 @@
   "hub": {
     "pt": {
       "title": "Central de ajuda",
-      "subtitle": "Como cada parte do PraticOS funciona no dia a dia: agendar uma OS, mandar o link para o cliente aprovar, registrar o pagamento e definir o que cada pessoa da equipe pode ver.",
+      "subtitle": "Como cada parte do PraticOS funciona no dia a dia: agendar uma OS, mandar o link para o cliente aprovar, receber o pagamento e, se alguém trabalha com você, definir o que cada pessoa pode ver.",
       "filterLabel": "Filtrar artigos",
-      "filterPlaceholder": "Ex.: lembrete, pagamento, técnico…",
+      "filterPlaceholder": "Ex.: lembrete, pagamento, checklist…",
       "countOne": "1 artigo encontrado",
       "countMany": "{n} artigos encontrados",
       "emptyLead": "Nenhum artigo com esse termo. Tente as",
@@ -17,7 +17,7 @@
           "items": [
             {
               "title": "Agenda",
-              "description": "Calendário do mês com as OS agendadas, horário de cada atendimento e filtro por técnico.",
+              "description": "A semana no topo, os atendimentos de cada dia com horário e o lembrete antes de cada um.",
               "href": "agenda.html"
             },
             {
@@ -27,22 +27,22 @@
             },
             {
               "title": "Compartilhar OS",
-              "description": "Envie um link para o cliente ver a OS, aprovar o orçamento e comentar, sem criar conta.",
+              "description": "Mande ao cliente um link para ver a OS, aprovar o orçamento, comentar e avaliar, sem criar conta.",
               "href": "compartilhar.html"
             },
             {
-              "title": "Procedimentos",
-              "description": "Checklists e formulários próprios, preenchidos dentro da OS durante o serviço.",
+              "title": "Checklists",
+              "description": "Modelos de checklist que você responde na OS, com fotos, durante o serviço.",
               "href": "procedimentos.html"
             },
             {
               "title": "Financeiro",
-              "description": "Pagamentos parciais, descontos, histórico de cada OS e o painel com o que falta receber.",
+              "description": "Receber de uma vez ou em partes, com desconto, e ver quanto falta receber de cada cliente.",
               "href": "financeiro.html"
             },
             {
               "title": "Cobrança com Asaas",
-              "description": "Cobre o cliente da OS por Pix, boleto ou cartão parcelado pela sua conta Asaas, com pagamento no link da OS e baixa automática.",
+              "description": "Cobre o cliente da OS por Pix, boleto ou cartão parcelado pela sua conta Asaas. O cliente paga pelo link da OS e o pagamento entra sozinho.",
               "href": "cobranca-asaas.html"
             }
           ]
@@ -51,8 +51,8 @@
           "title": "Equipe e acesso",
           "items": [
             {
-              "title": "Perfis de usuário",
-              "description": "O que Administrador, Gerente, Supervisor, Consultor e Técnico podem ver e fazer.",
+              "title": "Equipe e papéis",
+              "description": "Se alguém trabalha com você: o que Administrador, Gerente, Supervisor, Consultor e Técnico podem ver e fazer.",
               "href": "perfis.html"
             }
           ]
@@ -78,7 +78,7 @@
           "items": [
             {
               "title": "Obras públicas",
-              "description": "Contratos, medições e vistorias de obras para prefeituras, usando OS, procedimentos e perfis.",
+              "description": "Contratos, medições e vistorias de obras para prefeituras, usando OS, checklists e os papéis da equipe.",
               "href": "obras-publicas.html"
             }
           ]
@@ -105,9 +105,9 @@
     },
     "en": {
       "title": "Help center",
-      "subtitle": "How each part of PraticOS works on a normal day: scheduling a job, sending the link for the customer to approve, recording the payment and deciding what each person on the team can see.",
+      "subtitle": "How each part of PraticOS works on a normal day: scheduling a job, sending the link for the customer to approve, receiving the payment and, if someone works with you, deciding what each person can see.",
       "filterLabel": "Filter articles",
-      "filterPlaceholder": "e.g. reminder, payment, technician…",
+      "filterPlaceholder": "e.g. reminder, payment, checklist…",
       "countOne": "1 article found",
       "countMany": "{n} articles found",
       "emptyLead": "No article matches that term. Try the",
@@ -120,7 +120,7 @@
           "items": [
             {
               "title": "Schedule",
-              "description": "Monthly calendar of scheduled work orders, the time of each visit and a filter by technician.",
+              "description": "The week at the top, each day’s visits with their time and the reminder before each one.",
               "href": "agenda-en.html"
             },
             {
@@ -130,22 +130,22 @@
             },
             {
               "title": "Share a work order",
-              "description": "Send a link so the customer can view the order, approve the quote and comment — no account needed.",
+              "description": "Send the customer a link to view the order, approve the quote, comment and rate the job, no account needed.",
               "href": "compartilhar-en.html"
             },
             {
-              "title": "Procedures",
-              "description": "Your own checklists and forms, filled in on the work order during the job.",
+              "title": "Checklists",
+              "description": "Checklist templates you fill in on the order, with photos, during the job.",
               "href": "procedimentos-en.html"
             },
             {
-              "title": "Payments",
-              "description": "Partial payments, discounts, each order’s history and a dashboard of what is still owed.",
+              "title": "Financial",
+              "description": "Receive in full or in parts, with a discount, and see how much each customer still owes.",
               "href": "financeiro-en.html"
             },
             {
               "title": "Asaas charges",
-              "description": "Charge the customer of a work order by Pix, boleto or card installments through your Asaas account, with payment on the order link and automatic settlement.",
+              "description": "Charge the customer of an order by Pix, boleto or card installments through your Asaas account. The customer pays on the order link and the payment is recorded on its own.",
               "href": "cobranca-asaas-en.html"
             }
           ]
@@ -154,8 +154,8 @@
           "title": "Team and access",
           "items": [
             {
-              "title": "User profiles",
-              "description": "What Administrator, Manager, Supervisor, Consultant and Technician can see and do.",
+              "title": "Team and roles",
+              "description": "If someone works with you: what Administrator, Manager, Supervisor, Consultant and Technician can see and do.",
               "href": "perfis-en.html"
             }
           ]
@@ -181,7 +181,7 @@
           "items": [
             {
               "title": "Public works",
-              "description": "Contracts, measurements and site inspections for city governments, using orders, procedures and profiles.",
+              "description": "Contracts, measurements and site inspections for city governments, using orders, checklists and team roles.",
               "href": "obras-publicas-en.html"
             }
           ]
@@ -208,9 +208,9 @@
     },
     "es": {
       "title": "Centro de ayuda",
-      "subtitle": "Cómo funciona cada parte de PraticOS en el día a día: programar una OS, enviar el enlace para que el cliente apruebe, registrar el pago y definir qué puede ver cada persona del equipo.",
+      "subtitle": "Cómo funciona cada parte de PraticOS en el día a día: programar una OS, enviar el enlace para que el cliente apruebe, recibir el pago y, si alguien trabaja contigo, definir qué puede ver cada persona.",
       "filterLabel": "Filtrar artículos",
-      "filterPlaceholder": "Ej.: recordatorio, pago, técnico…",
+      "filterPlaceholder": "Ej.: recordatorio, pago, checklist…",
       "countOne": "1 artículo encontrado",
       "countMany": "{n} artículos encontrados",
       "emptyLead": "Ningún artículo con ese término. Prueba las",
@@ -223,7 +223,7 @@
           "items": [
             {
               "title": "Agenda",
-              "description": "Calendario del mes con las OS programadas, la hora de cada visita y filtro por técnico.",
+              "description": "La semana arriba, las visitas de cada día con su hora y el recordatorio antes de cada una.",
               "href": "agenda-es.html"
             },
             {
@@ -233,22 +233,22 @@
             },
             {
               "title": "Compartir OS",
-              "description": "Envía un enlace para que el cliente vea la OS, apruebe el presupuesto y comente, sin crear cuenta.",
+              "description": "Envía al cliente un enlace para ver la OS, aprobar el presupuesto, comentar y calificar, sin crear cuenta.",
               "href": "compartilhar-es.html"
             },
             {
-              "title": "Procedimientos",
-              "description": "Checklists y formularios propios, que se llenan dentro de la OS durante el servicio.",
+              "title": "Checklists",
+              "description": "Modelos de checklist que respondes en la OS, con fotos, durante el servicio.",
               "href": "procedimentos-es.html"
             },
             {
-              "title": "Finanzas",
-              "description": "Pagos parciales, descuentos, historial de cada OS y el panel con lo que falta cobrar.",
+              "title": "Financiero",
+              "description": "Recibir de una vez o en partes, con descuento, y ver cuánto falta cobrar a cada cliente.",
               "href": "financeiro-es.html"
             },
             {
               "title": "Cobro con Asaas",
-              "description": "Cobra al cliente de la orden por Pix, boleto o tarjeta en cuotas con tu cuenta Asaas, con pago en el enlace de la orden y registro automático.",
+              "description": "Cobra al cliente de la OS por Pix, boleto o tarjeta en cuotas con tu cuenta Asaas. El cliente paga en el enlace de la OS y el pago se registra solo.",
               "href": "cobranca-asaas-es.html"
             }
           ]
@@ -257,8 +257,8 @@
           "title": "Equipo y acceso",
           "items": [
             {
-              "title": "Perfiles de usuario",
-              "description": "Qué pueden ver y hacer Administrador, Gerente, Supervisor, Consultor y Técnico.",
+              "title": "Equipo y roles",
+              "description": "Si alguien trabaja contigo: qué pueden ver y hacer Administrador, Gerente, Supervisor, Consultor y Técnico.",
               "href": "perfis-es.html"
             }
           ]
@@ -284,7 +284,7 @@
           "items": [
             {
               "title": "Obras públicas",
-              "description": "Contratos, mediciones e inspecciones de obras para municipios, usando OS, procedimientos y perfiles.",
+              "description": "Contratos, mediciones e inspecciones de obras para municipios, usando OS, checklists y los roles del equipo.",
               "href": "obras-publicas-es.html"
             }
           ]

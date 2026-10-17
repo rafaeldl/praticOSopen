@@ -4,107 +4,115 @@
       {
         "id": "visao-geral",
         "title": "Como o financeiro funciona",
-        "intro": "Cada OS guarda quanto já foi pago e quanto falta. Você registra o pagamento quando o cliente paga — tudo de uma vez ou em partes — e aplica descontos na tela <strong>Pagamentos</strong> da OS. A aba <strong>Financeiro</strong> soma tudo por período.",
+        "intro": "Cada OS guarda quanto já entrou e quanto falta. Quando o cliente paga, você anota na tela <strong>Receber</strong> da OS: tudo de uma vez ou em partes. A aba <strong>Financeiro</strong> mostra quem ainda falta pagar e o que entrou no mês.",
         "features": [
           {
-            "title": "Pagamento em partes",
-            "description": "Registre o sinal na aprovação e o restante na entrega. A OS mostra quanto ainda falta."
+            "title": "Receber em partes",
+            "description": "Anote o sinal na aprovação e o resto na entrega. A OS mostra quanto ainda falta receber."
           },
           {
             "title": "Desconto",
-            "description": "Lançado com uma descrição. Reduz o total da OS."
+            "description": "Diminui o total da OS. O app mostra o total antes e depois."
           },
           {
             "title": "Comprovante",
-            "description": "Anexe uma foto, uma imagem da galeria ou um arquivo a cada pagamento."
+            "description": "Anexe uma foto ou um arquivo ao pagamento, se quiser guardar."
           },
           {
-            "title": "Painel Financeiro",
-            "description": "Faturamento, valor recebido e valor a receber do período, com ranking de clientes, serviços e produtos."
+            "title": "Aba Financeiro",
+            "description": "Quanto falta receber e de quem, o botão para mandar a cobrança e o que entrou no mês."
           }
         ],
         "infoCard": {
-          "title": "Quem vê valores",
-          "content": "Técnico e Supervisor não veem preços nem a tela de pagamentos. A regra completa está em <a href=\"#permissoes\">Quem vê o quê</a>."
+          "title": "Não usa valores no app?",
+          "content": "Toque no botão do perfil, no topo do Início, e desligue <strong>Valores e cobrança</strong>. Preços, total, receber e a aba Financeiro somem. Nada é apagado: os valores voltam se você religar."
         }
       },
       {
         "id": "status",
-        "title": "Situação de pagamento",
-        "intro": "A situação aparece na OS, na linha <strong>Pagamento</strong>, e muda sozinha conforme você registra os valores.",
+        "title": "Quanto falta em cada OS",
+        "intro": "Na OS, abaixo do Total, aparece <strong>Falta receber</strong> com o valor em aberto. Ele muda sozinho conforme você anota o que entrou.",
         "statusCards": [
           {
             "color": "orange",
-            "title": "A Receber",
-            "description": "Nenhum pagamento registrado. O total da OS está em aberto."
+            "title": "Nada recebido",
+            "description": "Nenhum pagamento anotado. Falta receber o total da OS."
           },
           {
             "color": "blue",
-            "title": "Parcialmente Pago",
-            "description": "Parte do valor já entrou. Ainda há saldo a receber."
+            "title": "Recebido em parte",
+            "description": "Parte já entrou e aparece em <strong>Já recebido</strong>. Ainda falta o resto."
           },
           {
             "color": "green",
-            "title": "Pago",
-            "description": "Pagamentos e descontos cobrem o total. Não há saldo."
+            "title": "Tudo recebido",
+            "description": "Pagamentos e desconto cobrem o total. Não falta nada."
           }
         ]
       },
       {
         "id": "pagamentos",
-        "title": "Registrar um pagamento",
-        "intro": "Por exemplo: o cliente deixa um sinal ao aprovar o conserto e paga o resto na retirada. Registre cada valor no dia em que ele entrar.",
+        "title": "Receber um pagamento",
+        "intro": "Por exemplo: o cliente deixa um sinal ao aprovar o conserto e paga o resto na retirada. Anote cada valor quando ele entrar.",
         "subsections": [
           {
-            "title": "Pagamento",
+            "title": "Receber na OS",
             "steps": [
-              "Abra a OS. Ela precisa estar em Aprovado, Em Andamento ou Concluído.",
-              "Toque em <strong>Pagamento</strong> ou em <strong>Total</strong>, junto aos dados da OS. Também dá para ir por <strong>⋯ → Pagamentos</strong>.",
-              "Com <strong>Pagamento</strong> selecionado no topo, informe o valor. O campo já vem com o saldo restante; para quitar tudo, use <strong>Pagar valor total</strong>.",
-              "Se quiser, escreva uma <strong>Observação</strong> (ex.: “Pagamento em dinheiro”) e toque em <strong>Anexar Comprovante</strong>.",
-              "Toque em <strong>Registrar Pagamento</strong>. O valor entra no <strong>Histórico</strong> e a situação da OS é atualizada."
+              "Abra a OS. Ela precisa estar Aprovada, Em andamento ou Concluída.",
+              "Toque em <strong>Falta receber</strong>, abaixo do Total. Com a OS concluída, o botão azul do topo já é <strong>Receber R$ …</strong>.",
+              "O valor já vem com o que falta. Se recebeu só uma parte, toque no valor e digite quanto.",
+              "Se quiser, mude o dia em <strong>Quando</strong> e toque em <strong>Anexar comprovante</strong>.",
+              "Toque em <strong>Confirmar recebimento</strong>. O valor vai para <strong>Já recebido</strong> e o que falta diminui."
             ]
           },
           {
-            "title": "Desconto",
+            "title": "Dar desconto",
             "steps": [
-              "Na mesma tela, troque o seletor do topo para <strong>Desconto</strong>.",
-              "Informe o valor e uma descrição (ex.: “Desconto de fidelidade”).",
-              "Toque em <strong>Aplicar Desconto</strong>. O total da OS diminui no mesmo valor."
+              "Na OS, toque em <strong>…</strong> e em <strong>Desconto</strong>. Na tela Receber, o caminho é <strong>…</strong> › <strong>Dar desconto</strong>.",
+              "Digite o valor. O app mostra o total antes e depois.",
+              "Confirme. O total da OS diminui no mesmo valor."
+            ]
+          },
+          {
+            "title": "Cliente com várias OS em aberto",
+            "steps": [
+              "Abra o cliente (em Clientes ou na lista da aba Financeiro) e toque em <strong>Receber</strong>.",
+              "Marque as OS que ele está pagando e digite quanto recebeu.",
+              "Toque em <strong>Confirmar recebimento</strong>. Se o valor não der para tudo, as OS mais antigas são pagas primeiro. Depois, dá para mandar o recibo para o cliente."
             ]
           },
           {
             "title": "Corrigir um lançamento",
             "steps": [
-              "No <strong>Histórico</strong>, deslize o lançamento para a esquerda e confirme a remoção.",
-              "Para zerar tudo de uma vez numa OS já paga, toque em <strong>A Receber</strong>, abaixo do selo de Pago. Todos os pagamentos e descontos são removidos depois da confirmação."
+              "Em <strong>Já recebido</strong>, toque no pagamento e escolha <strong>Remover este pagamento</strong>.",
+              "Para apagar todos os pagamentos da OS de uma vez, toque em <strong>…</strong> › <strong>Desfazer pagamentos</strong> e confirme."
             ]
           }
         ],
         "warningCard": {
           "title": "Precisa de internet",
-          "content": "Registrar, aplicar desconto e remover lançamentos exige conexão. Sem internet, o app avisa e nada é salvo; tente de novo quando o sinal voltar."
+          "content": "Receber, dar desconto e remover lançamentos pedem conexão. Sem internet, o app avisa e nada é salvo. Tente de novo quando o sinal voltar."
         }
       },
       {
         "id": "regras",
         "title": "O que o app não deixa lançar",
-        "intro": "As travas evitam saldo negativo e pagamento em OS que ainda não foi fechada com o cliente.",
+        "intro": "As travas evitam saldo negativo e pagamento em OS que o cliente ainda não aprovou.",
         "subsections": [
           {
             "title": "Regras",
             "validationList": [
               {
-                "label": "Orçamento ou Cancelado",
-                "text": "A OS não aceita pagamentos. Aprove o orçamento primeiro."
+                "label": "Orçamento ou Cancelada",
+                "text": "A tela Receber não aceita pagamento. Aprove o orçamento primeiro."
               },
               {
                 "label": "Valor zero",
-                "text": "Pagamento e desconto precisam ser maiores que zero."
+                "text": "O botão Confirmar recebimento só acende com um valor maior que zero."
               },
               {
-                "label": "Acima do saldo",
-                "text": "Nem pagamento nem desconto pode passar do que falta receber da OS."
+                "label": "Acima do que falta",
+                "text": "Nem pagamento nem desconto pode passar do que falta receber na OS."
               }
             ]
           }
@@ -112,52 +120,48 @@
       },
       {
         "id": "dashboard",
-        "title": "Painel Financeiro",
-        "intro": "Na aba <strong>Financeiro</strong>, escolha o período — <strong>Hoje</strong>, <strong>Semana</strong>, <strong>Mês</strong>, <strong>Ano</strong> ou datas próprias em <strong>Período</strong> — e veja os números das OS desse período. Orçamentos ficam de fora.",
+        "title": "A aba Financeiro",
+        "intro": "A aba <strong>Financeiro</strong> responde \"quem me deve?\". No topo fica o mês, com ‹ › para trocar. Logo abaixo, a frase <strong>Falta receber R$ … de N clientes</strong>, quem deve há mais tempo e o botão azul <strong>Mandar cobrança para …</strong>, que manda para esse cliente o link da OS mais antiga em aberto.",
         "metrics": [
           {
-            "title": "Faturamento Total",
-            "description": "Soma do total das OS do período."
+            "title": "Falta receber",
+            "description": "Todos os clientes que ainda devem, de qualquer mês, o mais antigo primeiro. Toque no nome para receber."
           },
           {
-            "title": "Recebido",
-            "description": "O que já foi pago dessas OS, incluindo pagamentos parciais."
-          },
-          {
-            "title": "A Receber",
-            "description": "O saldo em aberto das OS que ainda não estão pagas."
+            "title": "Recebido no mês",
+            "description": "O que já entrou nas OS do mês escolhido. Toque para abrir o relatório."
           }
         ],
         "subsections": [
           {
-            "title": "Abaixo dos totais",
-            "content": "Rankings de clientes, de serviços e de produtos, e a lista de OS recentes. O ícone de compartilhar no topo gera o <strong>Relatório Financeiro</strong> em PDF para mandar ao contador ou ao sócio."
+            "title": "No menu …",
+            "content": "<strong>Relatório</strong> traz gráficos, ranking de clientes, serviços e produtos e as OS recentes, com o botão <strong>Mandar relatório em PDF</strong> para enviar ao contador ou ao sócio. <strong>Outro período</strong> troca o mês por esta semana, este ano ou datas que você escolher."
           }
         ],
         "warningCard": {
-          "title": "O período segue a data de criação da OS",
-          "content": "Uma OS aberta em março e paga em abril conta em março, tanto no faturamento quanto no recebido. O painel mostra o resultado das OS do período, não o dinheiro que entrou no caixa naquelas datas."
+          "title": "O mês segue a data da OS",
+          "content": "\"Recebido\" soma o que entrou nas OS abertas naquele mês. Uma OS de março paga em abril conta em março. Já \"Falta receber\" mostra tudo o que está em aberto, seja de que mês for."
         }
       },
       {
         "id": "pdf",
         "title": "Valores no PDF da OS",
-        "intro": "Em <strong>⋯ → Compartilhar PDF</strong>, o PDF da OS traz o subtotal de serviços, o subtotal de produtos, o desconto (quando houver), o total e, se algum pagamento foi registrado, o valor pago.",
+        "intro": "Na OS, toque em <strong>…</strong> › <strong>Ver PDF</strong>. O PDF traz os serviços e as peças com os valores, o desconto (quando houver), o total e o que já foi pago.",
         "infoCard": {
           "title": "Quem gera o PDF",
-          "content": "A opção só aparece para quem vê valores. Técnico e Supervisor não têm acesso a ela."
+          "content": "A opção só aparece para quem vê valores. Técnico e Supervisor não têm acesso a ela, a não ser que Valores e cobrança esteja desligado."
         }
       },
       {
         "id": "permissoes",
         "title": "Quem vê o quê",
-        "intro": "O acesso ao dinheiro segue o perfil de cada pessoa na empresa.",
+        "intro": "Se alguém trabalha com você, o acesso ao dinheiro segue o papel da pessoa na equipe. Trabalhando sozinho, você vê tudo.",
         "table": {
           "headers": [
-            "Perfil",
+            "Papel",
             "Ver valores",
-            "Registrar pagamento",
-            "Painel"
+            "Receber",
+            "Aba Financeiro"
           ],
           "rows": [
             {
@@ -231,7 +235,7 @@
               ]
             }
           ],
-          "note": "O Consultor só enxerga as OS que ele mesmo criou; nelas, vê valores e registra pagamentos."
+          "note": "O Consultor só enxerga as OS que ele mesmo criou; nelas, vê valores e anota pagamentos. Desconto, só Administrador e Gerente."
         }
       },
       {
@@ -239,24 +243,28 @@
         "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "Posso registrar um sinal antes de aprovar o orçamento?",
-            "answer": "Não. Mude a OS para Aprovado e depois registre o sinal como pagamento parcial."
+            "question": "Posso anotar um sinal antes de aprovar o orçamento?",
+            "answer": "Não. Aprove a OS primeiro e depois anote o sinal em Receber, digitando só a parte que entrou."
           },
           {
-            "question": "Como lanço um desconto?",
-            "answer": "Na tela <strong>Pagamentos</strong> da OS, troque o seletor para <strong>Desconto</strong>, informe o valor e a descrição e toque em <strong>Aplicar Desconto</strong>."
+            "question": "Como dou desconto?",
+            "answer": "Na OS, toque em <strong>…</strong> › <strong>Desconto</strong>, digite o valor e confirme."
           },
           {
-            "question": "Registrei um valor errado. Como corrijo?",
-            "answer": "No <strong>Histórico</strong> da tela de pagamentos, deslize o lançamento para a esquerda, confirme a remoção e registre o valor certo."
+            "question": "Anotei um valor errado. Como corrijo?",
+            "answer": "Em <strong>Já recebido</strong>, toque no pagamento, escolha <strong>Remover este pagamento</strong> e anote o valor certo."
+          },
+          {
+            "question": "Como cobro quem está devendo?",
+            "answer": "Na aba Financeiro, toque em <strong>Mandar cobrança para …</strong>. O cliente recebe o link da OS e vê quanto falta. Com a cobrança pelo Asaas ligada, o link também tem Pix, boleto e cartão."
           },
           {
             "question": "O técnico vê quanto o cliente pagou?",
-            "answer": "Não. Técnico e Supervisor não veem preços, pagamentos nem o painel financeiro."
+            "answer": "Não. Técnico e Supervisor não veem preços, pagamentos nem a aba Financeiro."
           },
           {
             "question": "Por que o Recebido do mês não bate com o meu caixa?",
-            "answer": "Porque o painel conta as OS criadas no período, não a data em que cada pagamento entrou. Uma OS do mês passado paga hoje aparece no mês passado."
+            "answer": "Porque ele soma as OS abertas no mês, não o dia em que cada pagamento entrou. Uma OS do mês passado paga hoje conta no mês passado."
           }
         ]
       }
@@ -266,108 +274,116 @@
     "sections": [
       {
         "id": "overview",
-        "title": "How payments work",
-        "intro": "Each work order keeps track of what has been paid and what is still owed. When the customer pays — all at once or in parts — you record it and add any discount on the order’s <strong>Payments</strong> screen. The <strong>Financial</strong> tab adds it all up by period.",
+        "title": "How the money side works",
+        "intro": "Each order keeps how much has come in and how much is left. When the customer pays, you note it on the order's <strong>Receive</strong> screen: all at once or in parts. The <strong>Financial</strong> tab shows who still has to pay and what came in this month.",
         "features": [
           {
-            "title": "Partial payments",
-            "description": "Record a deposit at approval and the rest at pickup. The order shows what is still owed."
+            "title": "Receive in parts",
+            "description": "Note the deposit on approval and the rest on delivery. The order shows how much is left to receive."
           },
           {
             "title": "Discount",
-            "description": "Entered with a description. It lowers the order total."
+            "description": "Lowers the order total. The app shows the total before and after."
           },
           {
             "title": "Receipt",
-            "description": "Attach a photo, an image from the gallery or a file to each payment."
+            "description": "Attach a photo or a file to the payment if you want to keep it."
           },
           {
-            "title": "Financial Dashboard",
-            "description": "Billing, received and receivable for the period, with customer, service and product rankings."
+            "title": "Financial tab",
+            "description": "How much is left to collect and from whom, the button to send the payment request and what came in this month."
           }
         ],
         "infoCard": {
-          "title": "Who sees prices",
-          "content": "Technicians and Supervisors see neither prices nor the payments screen. The full rule is in <a href=\"#permissions\">Who sees what</a>."
+          "title": "Don't use prices in the app?",
+          "content": "Tap the profile button at the top of Home and turn off <strong>Prices and billing</strong>. Prices, totals, receiving and the Financial tab disappear. Nothing is deleted: values come back if you turn it on again."
         }
       },
       {
         "id": "status",
-        "title": "Payment status",
-        "intro": "The status shows on the order, in the <strong>Payment</strong> row, and updates as you record amounts.",
+        "title": "How much is left on each order",
+        "intro": "On the order, below the Total, you see <strong>Left to receive</strong> with the open amount. It updates by itself as you note what came in.",
         "statusCards": [
           {
             "color": "orange",
-            "title": "Receivable",
-            "description": "No payment recorded. The full order total is open."
+            "title": "Nothing received",
+            "description": "No payment noted. The whole order total is left to receive."
           },
           {
             "color": "blue",
-            "title": "Partially Paid",
-            "description": "Part of the amount is in. There is still a balance due."
+            "title": "Partly received",
+            "description": "Part came in and shows under <strong>Already received</strong>. The rest is still open."
           },
           {
             "color": "green",
-            "title": "Paid",
-            "description": "Payments and discounts cover the total. No balance left."
+            "title": "All received",
+            "description": "Payments and discount cover the total. Nothing is left."
           }
         ]
       },
       {
         "id": "payments",
-        "title": "Record a payment",
-        "intro": "Say the customer leaves a deposit when approving the repair and pays the rest at pickup. Record each amount on the day it comes in.",
+        "title": "Receive a payment",
+        "intro": "For example: the customer leaves a deposit when approving the repair and pays the rest on pickup. Note each amount when it comes in.",
         "subsections": [
           {
-            "title": "Payment",
+            "title": "Receive on the order",
             "steps": [
-              "Open the order. It has to be Approved, In Progress or Completed.",
-              "Tap <strong>Payment</strong> or <strong>Total</strong> in the order details. You can also go through <strong>⋯ → Payments</strong>.",
-              "With <strong>Payment</strong> selected at the top, enter the amount. The field starts with the remaining balance; to settle everything, use <strong>Pay total amount</strong>.",
-              "Optionally add an <strong>Observation</strong> (e.g. “Cash payment”) and tap <strong>Attach Receipt</strong>.",
-              "Tap <strong>Register Payment</strong>. The amount goes into <strong>History</strong> and the order’s status updates."
+              "Open the order. It must be Approved, In progress or Completed.",
+              "Tap <strong>Left to receive</strong>, below the Total. On a completed order, the blue button at the top is already <strong>Receive $…</strong>.",
+              "The amount comes filled with what is left. If you got only part of it, tap the amount and type how much.",
+              "If you want, change the day under <strong>When</strong> and tap <strong>Attach receipt</strong>.",
+              "Tap <strong>Confirm payment</strong>. The amount goes to <strong>Already received</strong> and what is left goes down."
             ]
           },
           {
-            "title": "Discount",
+            "title": "Give a discount",
             "steps": [
-              "On the same screen, switch the selector at the top to <strong>Discount</strong>.",
-              "Enter the amount and a description (e.g. “Loyalty discount”).",
-              "Tap <strong>Apply Discount</strong>. The order total drops by that amount."
+              "On the order, tap <strong>…</strong> and <strong>Discount</strong>. On the Receive screen, it's <strong>…</strong> › <strong>Give a discount</strong>.",
+              "Type the amount. The app shows the total before and after.",
+              "Confirm. The order total goes down by the same amount."
+            ]
+          },
+          {
+            "title": "Customer with several open orders",
+            "steps": [
+              "Open the customer (in Customers or in the Financial tab list) and tap <strong>Receive</strong>.",
+              "Check the orders they are paying and type how much you got.",
+              "Tap <strong>Confirm payment</strong>. If the amount doesn't cover everything, the oldest orders are paid first. Then you can send the receipt to the customer."
             ]
           },
           {
             "title": "Fix an entry",
             "steps": [
-              "In <strong>History</strong>, swipe the entry to the left and confirm the removal.",
-              "To clear everything on an order that is already paid, tap <strong>Receivable</strong> under the Paid badge. Every payment and discount is removed once you confirm."
+              "Under <strong>Already received</strong>, tap the payment and choose <strong>Remove this payment</strong>.",
+              "To remove every payment on the order at once, tap <strong>…</strong> › <strong>Undo payments</strong> and confirm."
             ]
           }
         ],
         "warningCard": {
-          "title": "Needs a connection",
-          "content": "Recording, discounting and removing entries require internet. Offline, the app tells you and nothing is saved; try again once you have signal."
+          "title": "Needs internet",
+          "content": "Receiving, giving a discount and removing entries need a connection. Offline, the app warns you and nothing is saved. Try again when you have signal."
         }
       },
       {
         "id": "rules",
-        "title": "What the app won’t accept",
-        "intro": "These checks prevent negative balances and payments on orders the customer hasn’t agreed to.",
+        "title": "What the app won't let you enter",
+        "intro": "These checks prevent a negative balance and payments on orders the customer hasn't approved yet.",
         "subsections": [
           {
             "title": "Rules",
             "validationList": [
               {
-                "label": "Quote or Cancelled",
-                "text": "The order takes no payments. Approve the quote first."
+                "label": "Quote or Canceled",
+                "text": "The Receive screen doesn't take payments. Approve the quote first."
               },
               {
                 "label": "Zero amount",
-                "text": "Payments and discounts must be greater than zero."
+                "text": "The Confirm payment button only lights up with an amount above zero."
               },
               {
-                "label": "Over the balance",
-                "text": "Neither a payment nor a discount can exceed what is still owed on the order."
+                "label": "More than what's left",
+                "text": "Neither a payment nor a discount can be more than what is left to receive on the order."
               }
             ]
           }
@@ -375,52 +391,48 @@
       },
       {
         "id": "dashboard",
-        "title": "Financial Dashboard",
-        "intro": "In the <strong>Financial</strong> tab, pick the period — <strong>Today</strong>, <strong>Week</strong>, <strong>Month</strong>, <strong>Year</strong> or your own dates under <strong>Period</strong> — and see the numbers for that period’s orders. Quotes are left out.",
+        "title": "The Financial tab",
+        "intro": "The <strong>Financial</strong> tab answers \"who owes me?\". At the top is the month, with ‹ › to change it. Right below, the line <strong>$… to collect from N customers</strong>, who has owed the longest and the blue button <strong>Send payment request to …</strong>, which sends that customer the link of their oldest open order.",
         "metrics": [
           {
-            "title": "Total Billing",
-            "description": "Sum of the totals of the period’s orders."
+            "title": "To collect",
+            "description": "Every customer who still owes, from any month, oldest first. Tap the name to receive."
           },
           {
-            "title": "Received",
-            "description": "What has been paid on those orders, partial payments included."
-          },
-          {
-            "title": "Receivable",
-            "description": "The open balance on orders not yet fully paid."
+            "title": "Received this month",
+            "description": "What came in on the orders of the chosen month. Tap to open the report."
           }
         ],
         "subsections": [
           {
-            "title": "Below the totals",
-            "content": "Customer, service and product rankings, plus a list of recent orders. The share icon at the top creates the <strong>Financial Report</strong> PDF to send to your accountant or business partner."
+            "title": "In the … menu",
+            "content": "<strong>Report</strong> has charts, customer, service and product rankings and recent orders, with the <strong>Send report as PDF</strong> button for your accountant or partner. <strong>Other period</strong> swaps the month for this week, this year or dates you pick."
           }
         ],
         "warningCard": {
-          "title": "The period follows the order’s creation date",
-          "content": "An order opened in March and paid in April counts in March, for both billing and received. The dashboard shows how the period’s orders turned out, not the cash that came in on those dates."
+          "title": "The month follows the order date",
+          "content": "\"Received\" adds up what came in on orders opened that month. An order from March paid in April counts in March. \"To collect\" shows everything still open, from any month."
         }
       },
       {
         "id": "pdf",
-        "title": "Amounts on the order PDF",
-        "intro": "Under <strong>⋯ → Share PDF</strong>, the order PDF shows the services subtotal, the products subtotal, the discount (if any), the total and, once a payment is recorded, the amount paid.",
+        "title": "Prices on the order PDF",
+        "intro": "On the order, tap <strong>…</strong> › <strong>View PDF</strong>. The PDF has the services and parts with prices, the discount (if any), the total and what has already been paid.",
         "infoCard": {
-          "title": "Who can create the PDF",
-          "content": "The option only shows for people who can see prices. Technicians and Supervisors don’t have it."
+          "title": "Who can make the PDF",
+          "content": "The option only shows for people who see prices. Technician and Supervisor don't have it, unless Prices and billing is turned off."
         }
       },
       {
         "id": "permissions",
         "title": "Who sees what",
-        "intro": "Access to money follows each person’s profile in the company.",
+        "intro": "If someone works with you, access to money follows that person's role on the team. Working alone, you see everything.",
         "table": {
           "headers": [
-            "Profile",
+            "Role",
             "See prices",
-            "Record payments",
-            "Dashboard"
+            "Receive",
+            "Financial tab"
           ],
           "rows": [
             {
@@ -494,7 +506,7 @@
               ]
             }
           ],
-          "note": "Consultants only see the orders they created; on those, they see prices and record payments."
+          "note": "A Consultant only sees the orders they created; on those, they see prices and note payments. Discounts: Administrator and Manager only."
         }
       },
       {
@@ -502,24 +514,28 @@
         "title": "FAQ",
         "faq": [
           {
-            "question": "Can I record a deposit before the quote is approved?",
-            "answer": "No. Move the order to Approved, then record the deposit as a partial payment."
+            "question": "Can I note a deposit before the quote is approved?",
+            "answer": "No. Approve the order first, then note the deposit in Receive, typing only the part that came in."
           },
           {
-            "question": "How do I add a discount?",
-            "answer": "On the order’s <strong>Payments</strong> screen, switch the selector to <strong>Discount</strong>, enter the amount and description, and tap <strong>Apply Discount</strong>."
+            "question": "How do I give a discount?",
+            "answer": "On the order, tap <strong>…</strong> › <strong>Discount</strong>, type the amount and confirm."
           },
           {
-            "question": "I recorded the wrong amount. How do I fix it?",
-            "answer": "In <strong>History</strong> on the payments screen, swipe the entry to the left, confirm the removal and record the right amount."
+            "question": "I noted the wrong amount. How do I fix it?",
+            "answer": "Under <strong>Already received</strong>, tap the payment, choose <strong>Remove this payment</strong> and note the right amount."
           },
           {
-            "question": "Can technicians see what the customer paid?",
-            "answer": "No. Technicians and Supervisors see neither prices, payments nor the financial dashboard."
+            "question": "How do I collect from someone who owes me?",
+            "answer": "In the Financial tab, tap <strong>Send payment request to …</strong>. The customer gets the order link and sees what is left. With Asaas billing turned on, the link also has Pix, boleto and card."
           },
           {
-            "question": "Why doesn’t this month’s Received match my cash?",
-            "answer": "Because the dashboard counts orders created in the period, not the date each payment came in. An order from last month paid today shows up in last month."
+            "question": "Does the technician see how much the customer paid?",
+            "answer": "No. Technician and Supervisor don't see prices, payments or the Financial tab."
+          },
+          {
+            "question": "Why doesn't Received this month match my cash?",
+            "answer": "Because it adds up orders opened that month, not the day each payment came in. An order from last month paid today counts in last month."
           }
         ]
       }
@@ -529,108 +545,116 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Cómo funcionan los pagos",
-        "intro": "Cada OS guarda cuánto se pagó y cuánto falta. Cuando el cliente paga — todo junto o en partes — registras el pago y aplicas descuentos en la pantalla <strong>Pagos</strong> de la OS. La pestaña <strong>Financiero</strong> lo suma todo por período.",
+        "title": "Cómo funciona lo financiero",
+        "intro": "Cada OS guarda cuánto ya entró y cuánto falta. Cuando el cliente paga, lo anotas en la pantalla <strong>Cobrar</strong> de la OS: todo de una vez o en partes. La pestaña <strong>Financiero</strong> muestra quién falta pagar y lo que entró en el mes.",
         "features": [
           {
-            "title": "Pagos parciales",
-            "description": "Registra el anticipo al aprobar y el resto al entregar. La OS muestra cuánto falta."
+            "title": "Cobrar en partes",
+            "description": "Anota el anticipo al aprobar y el resto al entregar. La OS muestra cuánto falta cobrar."
           },
           {
             "title": "Descuento",
-            "description": "Se registra con una descripción. Reduce el total de la OS."
+            "description": "Baja el total de la OS. La app muestra el total antes y después."
           },
           {
             "title": "Comprobante",
-            "description": "Adjunta una foto, una imagen de la galería o un archivo a cada pago."
+            "description": "Adjunta una foto o un archivo al pago, si quieres guardarlo."
           },
           {
-            "title": "Panel Financiero",
-            "description": "Facturación, cobrado y por cobrar del período, con ranking de clientes, servicios y productos."
+            "title": "Pestaña Financiero",
+            "description": "Cuánto falta cobrar y a quién, el botón para enviar el cobro y lo que entró en el mes."
           }
         ],
         "infoCard": {
-          "title": "Quién ve los valores",
-          "content": "Técnico y Supervisor no ven precios ni la pantalla de pagos. La regla completa está en <a href=\"#permisos\">Quién ve qué</a>."
+          "title": "¿No usas valores en la app?",
+          "content": "Toca el botón del perfil, arriba en Inicio, y apaga <strong>Valores y cobros</strong>. Precios, total, cobros y la pestaña Financiero desaparecen. No se borra nada: los valores vuelven si lo activas de nuevo."
         }
       },
       {
         "id": "status",
-        "title": "Estado de pago",
-        "intro": "El estado aparece en la OS, en la fila <strong>Pago</strong>, y cambia solo a medida que registras valores.",
+        "title": "Cuánto falta en cada OS",
+        "intro": "En la OS, debajo del Total, aparece <strong>Falta cobrar</strong> con el valor pendiente. Cambia solo a medida que anotas lo que entró.",
         "statusCards": [
           {
             "color": "orange",
-            "title": "Por Cobrar",
-            "description": "Sin pagos registrados. El total de la OS está pendiente."
+            "title": "Nada cobrado",
+            "description": "Ningún pago anotado. Falta cobrar el total de la OS."
           },
           {
             "color": "blue",
-            "title": "Parcialmente Pagado",
-            "description": "Ya entró una parte. Todavía queda saldo por cobrar."
+            "title": "Cobrado en parte",
+            "description": "Una parte ya entró y aparece en <strong>Ya cobrado</strong>. Todavía falta el resto."
           },
           {
             "color": "green",
-            "title": "Pagado",
-            "description": "Pagos y descuentos cubren el total. No queda saldo."
+            "title": "Todo cobrado",
+            "description": "Pagos y descuento cubren el total. No falta nada."
           }
         ]
       },
       {
         "id": "pagos",
-        "title": "Registrar un pago",
-        "intro": "Por ejemplo: el cliente deja un anticipo al aprobar la reparación y paga el resto al retirar. Registra cada monto el día en que entra.",
+        "title": "Cobrar un pago",
+        "intro": "Por ejemplo: el cliente deja un anticipo al aprobar la reparación y paga el resto al retirar. Anota cada valor cuando entre.",
         "subsections": [
           {
-            "title": "Pago",
+            "title": "Cobrar en la OS",
             "steps": [
-              "Abre la OS. Tiene que estar en Aprobado, En Progreso o Completado.",
-              "Toca <strong>Pago</strong> o <strong>Total</strong>, en los datos de la OS. También puedes ir por <strong>⋯ → Pagos</strong>.",
-              "Con <strong>Pago</strong> seleccionado arriba, ingresa el monto. El campo ya trae el saldo restante; para saldar todo, usa <strong>Pagar importe total</strong>.",
-              "Si quieres, escribe una <strong>Observación</strong> (ej.: “Pago en efectivo”) y toca <strong>Adjuntar Comprobante</strong>.",
-              "Toca <strong>Registrar Pago</strong>. El monto queda en el <strong>Historial</strong> y el estado de la OS se actualiza."
+              "Abre la OS. Tiene que estar Aprobada, En curso o Completada.",
+              "Toca <strong>Falta cobrar</strong>, debajo del Total. Con la OS completada, el botón azul de arriba ya es <strong>Cobrar $…</strong>.",
+              "El valor ya viene con lo que falta. Si recibiste solo una parte, toca el valor y escribe cuánto.",
+              "Si quieres, cambia el día en <strong>Cuándo</strong> y toca <strong>Adjuntar comprobante</strong>.",
+              "Toca <strong>Confirmar cobro</strong>. El valor pasa a <strong>Ya cobrado</strong> y lo que falta baja."
             ]
           },
           {
-            "title": "Descuento",
+            "title": "Dar descuento",
             "steps": [
-              "En la misma pantalla, cambia el selector de arriba a <strong>Descuento</strong>.",
-              "Ingresa el monto y una descripción (ej.: “Descuento de fidelidad”).",
-              "Toca <strong>Aplicar Descuento</strong>. El total de la OS baja en ese monto."
+              "En la OS, toca <strong>…</strong> y <strong>Descuento</strong>. En la pantalla Cobrar, es <strong>…</strong> › <strong>Dar descuento</strong>.",
+              "Escribe el valor. La app muestra el total antes y después.",
+              "Confirma. El total de la OS baja en el mismo valor."
+            ]
+          },
+          {
+            "title": "Cliente con varias OS pendientes",
+            "steps": [
+              "Abre el cliente (en Clientes o en la lista de la pestaña Financiero) y toca <strong>Cobrar</strong>.",
+              "Marca las OS que está pagando y escribe cuánto recibiste.",
+              "Toca <strong>Confirmar cobro</strong>. Si el valor no alcanza para todo, se pagan primero las OS más antiguas. Después puedes enviar el recibo al cliente."
             ]
           },
           {
             "title": "Corregir un registro",
             "steps": [
-              "En el <strong>Historial</strong>, desliza el registro hacia la izquierda y confirma la eliminación.",
-              "Para borrar todo de una vez en una OS ya pagada, toca <strong>Por Cobrar</strong>, debajo del sello de Pagado. Todos los pagos y descuentos se eliminan al confirmar."
+              "En <strong>Ya cobrado</strong>, toca el pago y elige <strong>Quitar este pago</strong>.",
+              "Para borrar todos los pagos de la OS de una vez, toca <strong>…</strong> › <strong>Deshacer pagos</strong> y confirma."
             ]
           }
         ],
         "warningCard": {
           "title": "Necesita internet",
-          "content": "Registrar, aplicar descuentos y eliminar registros requiere conexión. Sin internet, la app avisa y no se guarda nada; inténtalo de nuevo cuando vuelva la señal."
+          "content": "Cobrar, dar descuento y quitar registros piden conexión. Sin internet, la app avisa y no se guarda nada. Inténtalo de nuevo cuando vuelva la señal."
         }
       },
       {
         "id": "reglas",
         "title": "Lo que la app no deja registrar",
-        "intro": "Estos límites evitan saldos negativos y pagos en una OS que el cliente todavía no aceptó.",
+        "intro": "Estos controles evitan saldo negativo y pagos en OS que el cliente todavía no aprobó.",
         "subsections": [
           {
             "title": "Reglas",
             "validationList": [
               {
-                "label": "Presupuesto o Cancelado",
-                "text": "La OS no acepta pagos. Aprueba el presupuesto primero."
+                "label": "Presupuesto o Cancelada",
+                "text": "La pantalla Cobrar no acepta pagos. Aprueba el presupuesto primero."
               },
               {
-                "label": "Monto cero",
-                "text": "Pagos y descuentos tienen que ser mayores que cero."
+                "label": "Valor cero",
+                "text": "El botón Confirmar cobro solo se activa con un valor mayor que cero."
               },
               {
-                "label": "Más que el saldo",
-                "text": "Ni el pago ni el descuento pueden superar lo que falta cobrar de la OS."
+                "label": "Más de lo que falta",
+                "text": "Ni el pago ni el descuento pueden pasar de lo que falta cobrar en la OS."
               }
             ]
           }
@@ -638,52 +662,48 @@
       },
       {
         "id": "dashboard",
-        "title": "Panel Financiero",
-        "intro": "En la pestaña <strong>Financiero</strong>, elige el período — <strong>Hoy</strong>, <strong>Semana</strong>, <strong>Mes</strong>, <strong>Año</strong> o tus propias fechas en <strong>Período</strong> — y ve los números de las OS de ese período. Los presupuestos quedan fuera.",
+        "title": "La pestaña Financiero",
+        "intro": "La pestaña <strong>Financiero</strong> responde \"¿quién me debe?\". Arriba está el mes, con ‹ › para cambiarlo. Justo debajo, la frase <strong>Falta cobrar $… de N clientes</strong>, quién debe desde hace más tiempo y el botón azul <strong>Enviar cobro a …</strong>, que le manda a ese cliente el enlace de su OS pendiente más antigua.",
         "metrics": [
           {
-            "title": "Facturación Total",
-            "description": "Suma del total de las OS del período."
+            "title": "Falta cobrar",
+            "description": "Todos los clientes que todavía deben, de cualquier mes, el más antiguo primero. Toca el nombre para cobrar."
           },
           {
-            "title": "Recibido",
-            "description": "Lo que ya se pagó de esas OS, incluidos los pagos parciales."
-          },
-          {
-            "title": "Por Cobrar",
-            "description": "El saldo pendiente de las OS que aún no están pagadas."
+            "title": "Recibido en el mes",
+            "description": "Lo que ya entró en las OS del mes elegido. Toca para abrir el informe."
           }
         ],
         "subsections": [
           {
-            "title": "Debajo de los totales",
-            "content": "Rankings de clientes, servicios y productos, y la lista de OS recientes. El ícono de compartir arriba genera el <strong>Informe Financiero</strong> en PDF para enviarlo al contador o a tu socio."
+            "title": "En el menú …",
+            "content": "<strong>Informe</strong> trae gráficos, ranking de clientes, servicios y productos y las OS recientes, con el botón <strong>Enviar informe en PDF</strong> para mandarlo al contador o al socio. <strong>Otro período</strong> cambia el mes por esta semana, este año o las fechas que elijas."
           }
         ],
         "warningCard": {
-          "title": "El período usa la fecha de creación de la OS",
-          "content": "Una OS abierta en marzo y pagada en abril cuenta en marzo, tanto en la facturación como en lo recibido. El panel muestra el resultado de las OS del período, no el dinero que entró a la caja en esas fechas."
+          "title": "El mes sigue la fecha de la OS",
+          "content": "\"Recibido\" suma lo que entró en las OS abiertas ese mes. Una OS de marzo pagada en abril cuenta en marzo. \"Falta cobrar\" muestra todo lo pendiente, sea del mes que sea."
         }
       },
       {
         "id": "pdf",
         "title": "Valores en el PDF de la OS",
-        "intro": "En <strong>⋯ → Compartir PDF</strong>, el PDF de la OS trae el subtotal de servicios, el subtotal de productos, el descuento (si lo hay), el total y, si se registró algún pago, el monto pagado.",
+        "intro": "En la OS, toca <strong>…</strong> › <strong>Ver PDF</strong>. El PDF trae los servicios y las piezas con los valores, el descuento (si hay), el total y lo que ya se pagó.",
         "infoCard": {
           "title": "Quién genera el PDF",
-          "content": "La opción solo aparece para quien ve valores. Técnico y Supervisor no la tienen."
+          "content": "La opción solo aparece para quien ve valores. Técnico y Supervisor no la tienen, salvo que Valores y cobros esté apagado."
         }
       },
       {
         "id": "permisos",
         "title": "Quién ve qué",
-        "intro": "El acceso al dinero sigue el perfil de cada persona en la empresa.",
+        "intro": "Si alguien trabaja contigo, el acceso al dinero sigue el rol de esa persona en el equipo. Trabajando solo, ves todo.",
         "table": {
           "headers": [
-            "Perfil",
+            "Rol",
             "Ver valores",
-            "Registrar pagos",
-            "Panel"
+            "Cobrar",
+            "Pestaña Financiero"
           ],
           "rows": [
             {
@@ -757,7 +777,7 @@
               ]
             }
           ],
-          "note": "El Consultor solo ve las OS que él mismo creó; en ellas, ve valores y registra pagos."
+          "note": "El Consultor solo ve las OS que él mismo creó; en ellas ve valores y anota pagos. Descuento, solo Administrador y Gerente."
         }
       },
       {
@@ -765,24 +785,28 @@
         "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "¿Puedo registrar un anticipo antes de aprobar el presupuesto?",
-            "answer": "No. Pasa la OS a Aprobado y luego registra el anticipo como pago parcial."
+            "question": "¿Puedo anotar un anticipo antes de aprobar el presupuesto?",
+            "answer": "No. Aprueba la OS primero y después anota el anticipo en Cobrar, escribiendo solo la parte que entró."
           },
           {
-            "question": "¿Cómo aplico un descuento?",
-            "answer": "En la pantalla <strong>Pagos</strong> de la OS, cambia el selector a <strong>Descuento</strong>, ingresa el monto y la descripción y toca <strong>Aplicar Descuento</strong>."
+            "question": "¿Cómo doy un descuento?",
+            "answer": "En la OS, toca <strong>…</strong> › <strong>Descuento</strong>, escribe el valor y confirma."
           },
           {
-            "question": "Registré un monto equivocado. ¿Cómo lo corrijo?",
-            "answer": "En el <strong>Historial</strong> de la pantalla de pagos, desliza el registro hacia la izquierda, confirma la eliminación y registra el monto correcto."
+            "question": "Anoté un valor equivocado. ¿Cómo lo corrijo?",
+            "answer": "En <strong>Ya cobrado</strong>, toca el pago, elige <strong>Quitar este pago</strong> y anota el valor correcto."
+          },
+          {
+            "question": "¿Cómo le cobro a quien me debe?",
+            "answer": "En la pestaña Financiero, toca <strong>Enviar cobro a …</strong>. El cliente recibe el enlace de la OS y ve cuánto falta. Con el cobro por Asaas activado, el enlace también tiene Pix, boleto y tarjeta."
           },
           {
             "question": "¿El técnico ve cuánto pagó el cliente?",
-            "answer": "No. Técnico y Supervisor no ven precios, pagos ni el panel financiero."
+            "answer": "No. Técnico y Supervisor no ven precios, pagos ni la pestaña Financiero."
           },
           {
-            "question": "¿Por qué lo Recibido del mes no coincide con mi caja?",
-            "answer": "Porque el panel cuenta las OS creadas en el período, no la fecha en que entró cada pago. Una OS del mes pasado pagada hoy aparece en el mes pasado."
+            "question": "¿Por qué el Recibido del mes no coincide con mi caja?",
+            "answer": "Porque suma las OS abiertas en el mes, no el día en que entró cada pago. Una OS del mes pasado pagada hoy cuenta en el mes pasado."
           }
         ]
       }

@@ -4,14 +4,14 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Obras Públicas e Prefeituras | PraticOS",
-    "description": "App para prefeituras acompanharem obras públicas: contrato, medições e vistorias com fotos, fiscal sem acesso a valores e saldo a liberar por contrato.",
+    "description": "App para prefeituras e prestadores de obras públicas: contrato, medições e vistorias com fotos no celular e saldo a liberar por contrato.",
     "keywords": "sistema obras públicas, software gestão de obras prefeitura, app fiscalização de obras, sistema medição de obras, programa controle de obras públicas, gestão de contratos de obras municipais",
     "ogTitle": "Sistema para Obras Públicas e Prefeituras | PraticOS",
     "ogDescription": "Contratos de obra no celular: medição por etapa, vistoria de andamento com fotos, termo de recebimento e valor contratado, liberado e a liberar.",
     "hero": {
       "title": "Contrato, medição e vistoria",
       "titleMark": "na mesma tela.",
-      "lede": "PraticOS ajuda a secretaria de obras a acompanhar a execução dos contratos. Cada contrato tem a obra, a empresa contratada e o fiscal; as medições e vistorias são feitas no celular, com fotos, e o saldo a liberar fica sempre à vista.",
+      "lede": "PraticOS ajuda a secretaria de obras, e quem executa a obra, a acompanhar cada contrato. Cada contrato tem a obra, a empresa contratada e o fiscal; as medições e vistorias são feitas no celular, com fotos, e o saldo a liberar fica sempre à vista.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -70,7 +70,7 @@
         {
           "problem": "Fotos espalhadas em celulares",
           "detail": "As fotos da obra estão no aparelho do fiscal. Quando ele sai de férias, ninguém encontra.",
-          "answer": "As fotos ficam dentro do contrato, em cada item da medição ou vistoria, disponíveis para toda a equipe."
+          "answer": "As fotos ficam dentro do contrato, em cada item da medição ou vistoria, e não dependem do celular de ninguém."
         },
         {
           "problem": "Dados do contrato em pastas diferentes",
@@ -78,9 +78,9 @@
           "answer": "O contrato guarda modalidade e número da licitação, número do contrato, prazo, base legal, fiscal designado e etapa atual."
         },
         {
-          "problem": "Empresa contratada vendo o que não deve",
-          "detail": "Compartilhar a planilha geral expõe valores e contratos de outras empresas.",
-          "answer": "A empresa contratada entra com acesso limitado e só vê os contratos atribuídos a ela. O fiscal acompanha medições e vistorias sem ver valores financeiros."
+          "problem": "Contratada sem saber o que foi medido",
+          "detail": "A empresa contratada liga para saber o que foi aprovado na medição, e a resposta depende de quem atende.",
+          "answer": "Mande o link do contrato: a contratada acompanha o andamento, vê as fotos e comenta pelo navegador, sem instalar nada e sem ver os outros contratos."
         },
         {
           "problem": "Recebimento sem termo",
@@ -95,15 +95,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Cadastre o contrato e a obra",
-          "text": "Cada contrato é uma ordem de serviço com a empresa contratada e a obra. O app já usa os termos da administração pública.",
+          "title": "Fale o contrato e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Construtora Vale Verde, recapeamento da Rua das Acácias, medição da etapa de drenagem”. Ou fotografe a ordem de serviço em papel. A IA preenche contratada, obra e itens do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "Modalidade e nº da licitação, nº do contrato, prazo e base legal",
             "Secretaria responsável, localização e objeto da obra",
-            "Status: em licitação, contratado, em execução, concluído, rescindido"
+            "Nada é salvo sem você conferir"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
@@ -114,8 +114,8 @@
             "Cronograma no prazo, atrasado ou adiantado",
             "Seguro, certidões negativas e licença ambiental"
           ],
-          "image": "forms.png",
-          "alt": "Formulário de vistoria preenchido dentro de um contrato"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
           "number": "03",
@@ -126,25 +126,25 @@
             "Glosa registrada quando houver",
             "Valor contratado, total liberado e a liberar"
           ],
-          "image": "payments.png",
-          "alt": "Tela de medições financeiras de um contrato"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
         },
         {
           "number": "04",
           "title": "Receba a obra e acompanhe o todo",
-          "text": "Feche o contrato com o termo de recebimento. O painel mostra os contratos do período e o que ainda falta liberar.",
+          "text": "Feche o contrato com o termo de recebimento. No Início, os filtros Em aberto e Concluídas mostram em que pé está cada contrato.",
           "facts": [
             "Recebimento provisório ou definitivo",
             "PDF do contrato com o histórico de medições",
-            "Painel com valores contratados e liberados"
+            "Relatório do mês no Financeiro"
           ],
-          "image": "dashboard.png",
-          "alt": "Painel financeiro do PraticOS"
+          "image": "home.png",
+          "alt": "Início com as ordens de serviço em aberto e os filtros"
         }
       ]
     },
     "faq": {
-      "title": "Perguntas de secretarias de obras",
+      "title": "Perguntas de quem acompanha obras públicas",
       "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
         {
@@ -157,15 +157,15 @@
         },
         {
           "question": "O fiscal de obra vê os valores do contrato?",
-          "answer": "Não. Com o perfil de supervisor, o fiscal faz vistorias e medições físicas sem acesso a valores. Só administradores e gerentes veem a parte financeira."
+          "answer": "Não, se ele entrar na sua Equipe (botão do perfil, no topo do Início) como Supervisor: ele faz vistorias e medições físicas sem ver os valores. Chamar outras pessoas para a Equipe pede um plano pago, assinado dentro do app."
         },
         {
           "question": "A empresa contratada pode usar o app?",
-          "answer": "Sim, sem precisar de conta: envie o link do contrato e ela acompanha o andamento, vê as fotos e comenta pelo navegador. Se ela entrar como Técnico, só vê os contratos que ela mesma criou e não vê valores."
+          "answer": "Sim, sem precisar de conta: envie o link do contrato e ela acompanha o andamento, vê as fotos e comenta pelo navegador. Se ela também usa o PraticOS para as próprias obras, cada um fica na sua conta."
         },
         {
           "question": "Quanto custa?",
-          "answer": "Comece grátis. Planos pagos disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         }
       ]
     }
@@ -174,14 +174,14 @@
     "lang": "en",
     "langCode": "en",
     "title": "Public Works Contract Management Software | PraticOS",
-    "description": "App for city governments to track public works: contracts, progress measurements and site inspections with photos, and the balance left on each contract.",
+    "description": "App for city governments and public works contractors: contracts, progress measurements and site inspections with photos, and the balance left on each contract.",
     "keywords": "public works management software, municipal construction contract software, public works inspection app, construction progress measurement app, government project tracking",
     "ogTitle": "Public Works Contract Management Software | PraticOS",
     "ogDescription": "Public works contracts on your phone: progress measurements by milestone, site inspections with photos, acceptance forms and the balance on each contract.",
     "hero": {
       "title": "Contract, measurement, inspection",
       "titleMark": "on one screen.",
-      "lede": "PraticOS helps public works departments track how contracts are carried out. Each contract has the project, the contractor and the inspector; measurements and inspections are done on a phone, with photos, and the balance left to release is always in view.",
+      "lede": "PraticOS helps public works departments, and the people who build the work, keep track of each contract. Each contract has the project, the contractor and the inspector; measurements and inspections are done on a phone, with photos, and the balance left to release is always in view.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -240,7 +240,7 @@
         {
           "problem": "Photos scattered across phones",
           "detail": "The site photos are on the inspector's phone. When they go on leave, nobody can find them.",
-          "answer": "Photos live inside the contract, on each item of the measurement or inspection, available to the whole team."
+          "answer": "Photos live inside the contract, on each item of the measurement or inspection, and don't depend on anyone's phone."
         },
         {
           "problem": "Contract details in different folders",
@@ -248,9 +248,9 @@
           "answer": "The contract holds bid type and number, contract number, deadline, legal basis, assigned inspector and current milestone."
         },
         {
-          "problem": "Contractors seeing what they shouldn't",
-          "detail": "Sharing the master spreadsheet exposes prices and other companies' contracts.",
-          "answer": "Contractors sign in with limited access and only see the contracts assigned to them. Inspectors follow measurements and inspections without seeing financial figures."
+          "problem": "Contractors who don't know what was measured",
+          "detail": "The contractor calls to ask what was approved in the measurement, and the answer depends on who picks up.",
+          "answer": "Send the contract link: the contractor follows progress, sees the photos and comments from a browser, with nothing to install and without seeing other contracts."
         },
         {
           "problem": "Handover with no acceptance form",
@@ -265,15 +265,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Add the contract and the project",
-          "text": "Each contract is a work order with the contractor and the project. The app already uses public-sector terms.",
+          "title": "Say the contract and the AI opens the order",
+          "text": "Tap Speak and say something like: “Greenvale Construction, repaving of Acacia Street, drainage milestone measurement”. Or photograph the paper work order. The AI fills in contractor, project and catalog items and marks what it filled with ✦.",
           "facts": [
             "Bid type and number, contract number, deadline and legal basis",
             "Responsible department, location and project scope",
-            "Statuses: bidding, contracted, in execution, completed, terminated"
+            "Nothing is saved until you check it"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
@@ -284,8 +284,8 @@
             "Schedule on time, late or ahead",
             "Insurance, tax clearance certificates and environmental permit"
           ],
-          "image": "forms.png",
-          "alt": "Completed inspection form inside a contract"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
           "number": "03",
@@ -296,25 +296,25 @@
             "Deductions recorded when they apply",
             "Contract value, amount released and balance to release"
           ],
-          "image": "payments.png",
-          "alt": "Financial measurements screen of a contract"
+          "image": "financial.png",
+          "alt": "Financial tab showing how much is still due and from which customers"
         },
         {
           "number": "04",
           "title": "Accept the work and see the big picture",
-          "text": "Close the contract with the acceptance form. The dashboard shows the period's contracts and what's still to be released.",
+          "text": "Close the contract with the acceptance form. On Home, the Open and Completed filters show where each contract stands.",
           "facts": [
             "Provisional or final acceptance",
             "Contract PDF with the measurement history",
-            "Dashboard with contracted and released amounts"
+            "Monthly report in Financial"
           ],
-          "image": "dashboard.png",
-          "alt": "PraticOS financial dashboard"
+          "image": "home.png",
+          "alt": "Home with the open work orders and the filters"
         }
       ]
     },
     "faq": {
-      "title": "Questions from public works departments",
+      "title": "Questions from people who track public works",
       "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
         {
@@ -327,15 +327,15 @@
         },
         {
           "question": "Can the site inspector see contract values?",
-          "answer": "No. With the supervisor role, inspectors run inspections and physical measurements without access to figures. Only administrators and managers see the financial side."
+          "answer": "Not if they join your Team (profile button at the top of Home) as a Supervisor: they run inspections and physical measurements without seeing figures. Adding other people to the Team takes a paid plan, subscribed inside the app."
         },
         {
           "question": "Can the contractor use the app?",
-          "answer": "Yes, without an account: send them the contract link and they follow progress, see photos and comment from a browser. If they sign in as a Technician, they only see contracts they created themselves, with no figures."
+          "answer": "Yes, without an account: send them the contract link and they follow progress, see photos and comment from a browser. If they also use PraticOS for their own projects, each of you keeps your own account."
         },
         {
           "question": "How much does it cost?",
-          "answer": "Start free. Paid plans available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         }
       ]
     }
@@ -344,14 +344,14 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Obras Públicas y Municipios | PraticOS",
-    "description": "App para que los municipios sigan sus obras públicas: contratos, mediciones e inspecciones con fotos, fiscal sin acceso a montos y saldo por contrato.",
+    "description": "App para municipios y prestadores de obras públicas: contratos, mediciones e inspecciones con fotos en el celular y saldo por liberar en cada contrato.",
     "keywords": "sistema obras públicas, software gestión de obras municipio, app fiscalización de obras, sistema medición de obras, programa control de obras públicas, gestión de contratos de obras municipales",
     "ogTitle": "Sistema para Obras Públicas y Municipios | PraticOS",
     "ogDescription": "Contratos de obra en el celular: medición por etapa, inspección de avance con fotos, acta de recepción y monto contratado, liberado y por liberar.",
     "hero": {
       "title": "Medición e inspección",
       "titleMark": "en el mismo contrato.",
-      "lede": "PraticOS ayuda a la secretaría de obras a seguir la ejecución de los contratos. Cada contrato tiene la obra, la empresa contratada y el fiscal; las mediciones e inspecciones se hacen en el celular, con fotos, y el saldo por liberar siempre está a la vista.",
+      "lede": "PraticOS ayuda a la secretaría de obras, y a quien ejecuta la obra, a seguir cada contrato. Cada contrato tiene la obra, la empresa contratada y el fiscal; las mediciones e inspecciones se hacen en el celular, con fotos, y el saldo por liberar siempre está a la vista.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -410,7 +410,7 @@
         {
           "problem": "Fotos repartidas en celulares",
           "detail": "Las fotos de la obra están en el teléfono del fiscal. Cuando se va de vacaciones, nadie las encuentra.",
-          "answer": "Las fotos quedan dentro del contrato, en cada ítem de la medición o inspección, disponibles para todo el equipo."
+          "answer": "Las fotos quedan dentro del contrato, en cada ítem de la medición o inspección, y no dependen del celular de nadie."
         },
         {
           "problem": "Datos del contrato en carpetas distintas",
@@ -418,9 +418,9 @@
           "answer": "El contrato guarda modalidad y número de licitación, número de contrato, plazo, base legal, fiscal designado y etapa actual."
         },
         {
-          "problem": "Empresa contratada viendo lo que no debe",
-          "detail": "Compartir la planilla general expone montos y contratos de otras empresas.",
-          "answer": "La empresa contratada entra con acceso limitado y solo ve los contratos asignados a ella. El fiscal sigue mediciones e inspecciones sin ver montos."
+          "problem": "Contratada sin saber qué se midió",
+          "detail": "La empresa contratada llama para saber qué se aprobó en la medición, y la respuesta depende de quién atiende.",
+          "answer": "Envía el link del contrato: la contratada sigue el avance, ve las fotos y comenta desde el navegador, sin instalar nada y sin ver los otros contratos."
         },
         {
           "problem": "Recepción sin acta",
@@ -435,15 +435,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registra el contrato y la obra",
-          "text": "Cada contrato es una orden de servicio con la empresa contratada y la obra. La app ya usa los términos de la administración pública.",
+          "title": "Di el contrato y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Constructora Valle Verde, pavimentación de la calle Las Acacias, medición de la etapa de drenaje”. O fotografía la orden de servicio en papel. La IA completa contratada, obra e ítems de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "Modalidad y n.º de licitación, n.º de contrato, plazo y base legal",
             "Secretaría responsable, ubicación y objeto de la obra",
-            "Estados: en licitación, contratado, en ejecución, concluido, rescindido"
+            "Nada se guarda sin que lo revises"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
@@ -454,8 +454,8 @@
             "Cronograma en plazo, atrasado o adelantado",
             "Seguro, certificados de deuda y licencia ambiental"
           ],
-          "image": "forms.png",
-          "alt": "Formulario de inspección completado dentro de un contrato"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
           "number": "03",
@@ -466,25 +466,25 @@
             "Descuentos registrados cuando correspondan",
             "Monto contratado, total liberado y por liberar"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de mediciones financieras de un contrato"
+          "image": "financial.png",
+          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
         },
         {
           "number": "04",
           "title": "Recibe la obra y mira el conjunto",
-          "text": "Cierra el contrato con el acta de recepción. El panel muestra los contratos del período y lo que falta liberar.",
+          "text": "Cierra el contrato con el acta de recepción. En Inicio, los filtros Abiertas y Terminadas muestran en qué está cada contrato.",
           "facts": [
             "Recepción provisoria o definitiva",
             "PDF del contrato con el historial de mediciones",
-            "Panel con montos contratados y liberados"
+            "Informe del mes en Financiero"
           ],
-          "image": "dashboard.png",
-          "alt": "Panel financiero de PraticOS"
+          "image": "home.png",
+          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
         }
       ]
     },
     "faq": {
-      "title": "Preguntas de secretarías de obras",
+      "title": "Preguntas de quien sigue obras públicas",
       "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
         {
@@ -497,15 +497,15 @@
         },
         {
           "question": "¿El fiscal de obra ve los montos del contrato?",
-          "answer": "No. Con el perfil de supervisor, el fiscal hace inspecciones y mediciones físicas sin acceso a montos. Solo administradores y gerentes ven la parte financiera."
+          "answer": "No, si entra en tu Equipo (botón del perfil, arriba en Inicio) como Supervisor: hace inspecciones y mediciones físicas sin ver los montos. Sumar a otras personas al Equipo requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿La empresa contratada puede usar la app?",
-          "answer": "Sí, sin necesidad de cuenta: envíale el link del contrato y sigue el avance, ve las fotos y comenta desde el navegador. Si entra como Técnico, solo ve los contratos que ella misma creó y no ve montos."
+          "answer": "Sí, sin necesidad de cuenta: envíale el link del contrato y sigue el avance, ve las fotos y comenta desde el navegador. Si también usa PraticOS para sus propias obras, cada uno queda en su cuenta."
         },
         {
           "question": "¿Cuánto cuesta?",
-          "answer": "Empieza gratis. Planes pagos disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         }
       ]
     }

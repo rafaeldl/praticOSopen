@@ -4,14 +4,14 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Manutenção de Elevadores | PraticOS",
-    "description": "App de ordem de serviço para empresas de elevadores: visitas na agenda, checklist de preventiva com fotos, histórico por equipamento e PDF para o síndico.",
+    "description": "App de ordem de serviço para manutenção de elevadores: fale a visita e a IA abre a OS, agenda, checklist de preventiva com fotos, histórico por equipamento e PDF para o síndico.",
     "keywords": "sistema para manutenção de elevadores, programa para empresa de elevadores, software manutenção elevadores, ordem de serviço elevadores, app manutenção elevadores, checklist de manutenção de elevador",
     "ogTitle": "Sistema para Manutenção de Elevadores | PraticOS",
-    "ogDescription": "Visitas de preventiva e chamados no celular: agenda por técnico, checklist com fotos, histórico por elevador e orçamento aprovado pelo síndico por link.",
+    "ogDescription": "Preventivas e chamados no celular: a IA abre a OS pelo que você fala, a visita entra na agenda, o checklist vai com fotos e o síndico aprova o reparo extra por link.",
     "hero": {
       "title": "Cada visita ao elevador",
       "titleMark": "registrada na OS.",
-      "lede": "PraticOS é o app de ordem de serviço para empresas de manutenção de elevadores. Agende a visita, faça o checklist de preventiva com fotos no celular, registre as peças trocadas e mande ao síndico o link da OS para ele ver o serviço e aprovar o reparo extra.",
+      "lede": "PraticOS é o app de ordem de serviço para quem faz manutenção de elevadores. Agende a visita, faça o checklist de preventiva com fotos no celular, registre as peças trocadas e mande ao síndico o link da OS para ele ver o serviço e aprovar o reparo extra.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo síndico",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Concluído",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -72,12 +71,12 @@
         {
           "problem": "Histórico na cabeça do técnico",
           "detail": "Outro técnico atende o chamado e não sabe o que já foi trocado naquele elevador.",
-          "answer": "Cadastre cada elevador com fabricante, modelo e número de série. Busque pelo equipamento na lista de OS e veja as visitas anteriores."
+          "answer": "Cadastre cada elevador com fabricante, modelo e número de série. Na tela do cliente você vê os equipamentos do condomínio e as últimas OS de cada um."
         },
         {
           "problem": "Agenda espalhada",
           "detail": "Preventivas e chamados anotados em planilha, papel e grupo de mensagens.",
-          "answer": "Cada visita é uma OS com dia e hora. A agenda mostra o mês, filtra por técnico e o celular avisa antes do atendimento."
+          "answer": "Cada visita é uma OS com dia e hora. A Agenda mostra a semana e o dia, o celular avisa antes do atendimento e, com equipe, dá para ver a agenda de cada técnico."
         },
         {
           "problem": "Prédio com vários elevadores",
@@ -97,30 +96,42 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agende a visita",
-          "text": "Crie a OS do condomínio com o elevador e marque dia e hora. A visita aparece na agenda, e o técnico recebe o aviso no celular.",
+          "title": "Fale a visita e a IA abre a OS",
+          "text": "Toque em Falar e diga: “Condomínio Solar, elevador 2, preventiva mensal na quinta às 8”. A IA preenche cliente, equipamento, serviço e preço do seu catálogo. Você confere e salva.",
           "facts": [
-            "Preventiva e chamado no mesmo calendário",
-            "Agenda filtrada por técnico",
-            "Lembrete de 15 minutos a 2 horas antes"
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “troca do contato da porta, 350”",
+            "Ou tire foto da ordem anotada"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda do mês com as OS marcadas no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
-          "title": "Faça o checklist no local",
-          "text": "Monte uma vez o checklist de preventiva da sua empresa e use em todas as visitas. O técnico marca sim, não ou não se aplica e fotografa o que encontrou.",
+          "title": "A visita na agenda",
+          "text": "Com dia e hora na OS, a visita entra na Agenda. Preventiva e chamado ficam no mesmo lugar, e o celular avisa antes do horário.",
           "facts": [
-            "Itens com verificação, texto ou foto",
-            "Os mesmos itens em todas as visitas",
-            "Checklist concluído só reabre com Admin, Gerente ou Supervisor"
+            "Semana no topo, visitas do dia embaixo",
+            "Lembrete de 15 minutos a 2 horas antes",
+            "Com equipe, agenda filtrada por técnico"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
         },
         {
           "number": "03",
+          "title": "Faça o checklist no local",
+          "text": "Monte uma vez o seu checklist de preventiva e use em todas as visitas. Marque sim, não ou não se aplica e fotografe o que encontrou na casa de máquinas, na cabina e no poço.",
+          "facts": [
+            "Itens com verificação, texto ou foto",
+            "Os mesmos itens em todas as visitas",
+            "Checklist concluído só reabre com Administrador, Gerente ou Supervisor"
+          ],
+          "image": "checklist.png",
+          "alt": "Checklist preenchido com fotos dentro de uma OS"
+        },
+        {
+          "number": "04",
           "title": "Mande o link ao síndico",
           "text": "O síndico abre a OS no navegador, sem instalar nada. Ele vê fotos e checklist, aprova o reparo extra quando houver e deixa comentários.",
           "facts": [
@@ -128,20 +139,20 @@
             "PDF da OS para o arquivo do condomínio",
             "Comentários do síndico no histórico da OS"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
         },
         {
-          "number": "04",
+          "number": "05",
           "title": "Receba pelo que foi feito",
-          "text": "Registre o pagamento de reparos e peças, inteiro ou em parcelas. O painel mostra quanto entrou e quais condomínios ainda devem.",
+          "text": "Receba reparos e peças, inteiro ou em partes. O Financeiro mostra quanto falta receber e de quais condomínios, com o botão para mandar a cobrança.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
-            "Quem ainda deve, numa lista só"
+            "Pagamento em partes e desconto na mesma OS",
+            "Quem deve há mais tempo aparece primeiro",
+            "Relatório do mês com o que entrou"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
         }
       ]
     },
@@ -151,19 +162,19 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "O app cria as preventivas do mês sozinho?",
-          "answer": "Não. Cada visita é uma OS com data agendada: você cria a OS, ela entra na agenda e o técnico recebe o lembrete. O checklist de preventiva é o mesmo modelo em todas as visitas."
+          "answer": "Não. Cada visita é uma OS com data marcada: você cria a OS (falando, se quiser), ela entra na Agenda e o celular avisa antes do horário. O checklist de preventiva é o mesmo modelo em todas as visitas."
         },
         {
-          "question": "Posso usar o checklist da minha empresa?",
-          "answer": "Sim. Você monta o checklist com os itens que a sua equipe verifica — casa de máquinas, cabina, portas, poço — e ele fica disponível em todas as OS. O conteúdo técnico é definido por você."
+          "question": "Posso usar o meu próprio checklist?",
+          "answer": "Sim. Você monta o checklist com os itens que verifica (casa de máquinas, cabina, portas, poço) e ele fica disponível em todas as OS. Os modelos ficam em Checklists, no botão do perfil, no topo do Início. O conteúdo técnico é definido por você."
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "answer": "Sim, se alguém trabalha com você. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa por um código de convite, que dá para mandar pelo WhatsApp, e ela entra com a própria conta no celular dela, com um papel como Técnico ou Gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O síndico precisa instalar algum app?",
@@ -176,14 +187,14 @@
     "lang": "en",
     "langCode": "en",
     "title": "Elevator Maintenance Software | PraticOS",
-    "description": "Work order app for elevator service companies: visits on a schedule, maintenance checklists with photos, history per elevator and a PDF for the client.",
+    "description": "Work order app for elevator maintenance: say the visit and AI opens the work order, schedule, maintenance checklists with photos, history per elevator and a PDF for the client.",
     "keywords": "elevator maintenance software, elevator service company app, elevator work order software, elevator inspection checklist app, lift maintenance management",
     "ogTitle": "Elevator Maintenance Software | PraticOS",
-    "ogDescription": "Preventive visits and callbacks on your phone: schedule by technician, checklists with photos, history per elevator and quotes approved by link.",
+    "ogDescription": "Maintenance visits and service calls on your phone: AI opens the work order from what you say, the visit goes on the schedule, the checklist gets photos and the property manager approves extra repairs by link.",
     "hero": {
       "title": "Every elevator visit",
       "titleMark": "on a work order.",
-      "lede": "PraticOS is the work order app for elevator maintenance companies. Schedule the visit, run the maintenance checklist with photos on your phone, log replaced parts and send the property manager a link to review the job and approve extra repairs.",
+      "lede": "PraticOS is the work order app for elevator maintenance technicians. Schedule the visit, run the maintenance checklist with photos on your phone, log replaced parts and send the property manager a link to review the job and approve extra repairs.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -220,8 +231,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Done",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -244,12 +254,12 @@
         {
           "problem": "History in one technician's head",
           "detail": "Another technician takes the callback and has no idea what was already replaced on that elevator.",
-          "answer": "Register each elevator with manufacturer, model and serial number. Search the work order list by equipment and see past visits."
+          "answer": "Register each elevator with manufacturer, model and serial number. On the customer screen you see the building’s equipment and the recent work orders for each one."
         },
         {
           "problem": "A scattered schedule",
           "detail": "Routine visits and callbacks noted in spreadsheets, on paper and in group chats.",
-          "answer": "Each visit is a work order with a date and time. The calendar shows the month, filters by technician and the phone alerts before the visit."
+          "answer": "Each visit is a work order with a date and time. The Schedule shows the week and the day, your phone reminds you before the visit and, with a team, you can see each technician’s schedule."
         },
         {
           "problem": "Buildings with several elevators",
@@ -269,51 +279,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Schedule the visit",
-          "text": "Create the building's work order with the elevator and set the date and time. The visit shows up on the calendar and the technician gets a reminder on their phone.",
+          "title": "Say the visit and AI opens the order",
+          "text": "Tap Speak and say: “Solar Building, elevator 2, monthly maintenance on Thursday at 8.” AI fills in the customer, equipment, service and the price from your catalog. You check it and save.",
           "facts": [
-            "Routine visits and callbacks on one calendar",
-            "Calendar filtered by technician",
-            "Reminder from 15 minutes to 2 hours before"
+            "What AI filled in is marked with ✦",
+            "Fix it by speaking: “door contact replacement, 350”",
+            "Or take a photo of the written order"
           ],
-          "image": "agenda.png",
-          "alt": "Monthly calendar with scheduled work orders in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
-          "title": "Run the checklist on site",
-          "text": "Build your company's maintenance checklist once and use it on every visit. The technician marks yes, no or not applicable and photographs what they find.",
+          "title": "The visit on the schedule",
+          "text": "With a date and time on the work order, the visit goes on the Schedule. Maintenance and service calls sit in the same place, and your phone reminds you before the appointment.",
           "facts": [
-            "Items with check, text or photo",
-            "The same items on every visit",
-            "Completed checklists reopen only for Admin, Manager or Supervisor"
+            "The week on top, the day’s visits below",
+            "Reminder 15 minutes to 2 hours before",
+            "With a team, schedule filtered by technician"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the appointments booked for the day"
         },
         {
           "number": "03",
-          "title": "Send the manager a link",
-          "text": "The property manager opens the work order in a browser, nothing to install. They see photos and the checklist, approve extra repairs and leave comments.",
+          "title": "Run the checklist on site",
+          "text": "Build your maintenance checklist once and use it on every visit. Mark yes, no or not applicable and photograph what you found in the machine room, the car and the shaft.",
           "facts": [
-            "Approval recorded on the work order",
-            "Work order PDF for the building's files",
-            "Manager comments in the work order history"
+            "Items with a check, text or photo",
+            "The same items on every visit",
+            "Completed checklists reopen only for Admin, Manager or Supervisor"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "checklist.png",
+          "alt": "Checklist filled in with photos inside a work order"
         },
         {
           "number": "04",
-          "title": "Get paid for the work",
-          "text": "Record payment for repairs and parts, in full or in parts. The dashboard shows what came in and which buildings still owe you.",
+          "title": "Send the link to the property manager",
+          "text": "The property manager opens the work order in the browser, with nothing to install. They see photos and the checklist, approve extra repairs when needed and leave comments.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
-            "Everyone who still owes you, in one list"
+            "Approval recorded on the work order",
+            "Work order PDF for the building’s records",
+            "Manager comments in the order history"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "order.png",
+          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+        },
+        {
+          "number": "05",
+          "title": "Get paid for the work",
+          "text": "Receive repairs and parts in full or in parts. Financial shows how much is left to collect and from which buildings, with a button to send the payment request.",
+          "facts": [
+            "Partial payments and discounts in the same order",
+            "Whoever has owed the longest shows up first",
+            "Monthly report of what came in"
+          ],
+          "image": "financial.png",
+          "alt": "Financial with how much is left to collect and the button to send a payment request"
         }
       ]
     },
@@ -323,19 +345,19 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does the app create monthly maintenance visits on its own?",
-          "answer": "No. Each visit is a work order with a scheduled date: you create it, it goes on the calendar and the technician gets a reminder. The maintenance checklist is the same template on every visit."
+          "answer": "No. Each visit is a work order with a scheduled date: you create the order (by speaking, if you like), it goes on the Schedule and your phone reminds you before the appointment. The maintenance checklist is the same template on every visit."
         },
         {
-          "question": "Can I use my company's own checklist?",
-          "answer": "Yes. You build the checklist with the items your team inspects — machine room, car, doors, hoistway — and it's available on every work order. You define the technical content."
+          "question": "Can I use my own checklist?",
+          "answer": "Yes. You build the checklist with the items you check (machine room, car, doors, shaft) and it is available on every work order. Templates are in Checklists, from the profile button at the top of Home. The technical content is up to you."
         },
         {
           "question": "Can my technicians use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values."
+          "answer": "Yes, if someone works with you. Tap the profile button at the top of Home, go to Team and invite them with an invite code, which you can send over WhatsApp, and they sign in with their own account on their own phone, with a role such as Technician or Manager. Inviting someone requires a paid plan, subscribed inside the app."
         },
         {
           "question": "Does the property manager need to install an app?",
@@ -348,14 +370,14 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Mantenimiento de Ascensores | PraticOS",
-    "description": "App de órdenes de servicio para empresas de ascensores: visitas en agenda, checklist con fotos, historial por equipo y PDF para el administrador.",
+    "description": "App de órdenes de servicio para mantenimiento de ascensores: dices la visita y la IA abre la OS, agenda, checklist con fotos, historial por equipo y PDF para el administrador.",
     "keywords": "sistema para mantenimiento de ascensores, software empresa de ascensores, orden de servicio ascensores, app mantenimiento de ascensores, checklist de mantenimiento de ascensor",
     "ogTitle": "Sistema para Mantenimiento de Ascensores | PraticOS",
-    "ogDescription": "Visitas preventivas y llamados en el celular: agenda por técnico, checklist con fotos, historial por ascensor y presupuesto aprobado por link.",
+    "ogDescription": "Mantenimientos y llamados en el celular: la IA abre la OS con lo que dices, la visita entra en la agenda, el checklist va con fotos y el administrador aprueba la reparación extra por link.",
     "hero": {
       "title": "Cada visita al ascensor",
       "titleMark": "registrada en la orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para empresas de mantenimiento de ascensores. Agenda la visita, haz el checklist de mantenimiento con fotos en el celular, registra los repuestos cambiados y envía al administrador el link de la orden para que vea el trabajo y apruebe las reparaciones extra.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien hace mantenimiento de ascensores. Agenda la visita, haz el checklist de mantenimiento con fotos en el celular, registra los repuestos cambiados y envía al administrador el link de la orden para que vea el trabajo y apruebe las reparaciones extra.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -390,10 +412,9 @@
         "stamp": "Aprobado por el administrador",
         "steps": [
           "Presupuesto",
-          "Aprobado",
+          "Aprobada",
           "En curso",
-          "Terminado",
-          "Cobrado"
+          "Completada"
         ],
         "current": 2
       }
@@ -416,12 +437,12 @@
         {
           "problem": "Historial en la cabeza del técnico",
           "detail": "Otro técnico atiende el llamado y no sabe qué ya se cambió en ese ascensor.",
-          "answer": "Registra cada ascensor con fabricante, modelo y número de serie. Busca por equipo en la lista de órdenes y ve las visitas anteriores."
+          "answer": "Registra cada ascensor con fabricante, modelo y número de serie. En la pantalla del cliente ves los equipos del edificio y las últimas OS de cada uno."
         },
         {
           "problem": "Agenda desparramada",
           "detail": "Preventivas y llamados anotados en planillas, papel y grupos de mensajes.",
-          "answer": "Cada visita es una orden con día y hora. La agenda muestra el mes, filtra por técnico y el celular avisa antes de la visita."
+          "answer": "Cada visita es una OS con día y hora. La Agenda muestra la semana y el día, el celular avisa antes de la cita y, con equipo, puedes ver la agenda de cada técnico."
         },
         {
           "problem": "Edificios con varios ascensores",
@@ -441,51 +462,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agenda la visita",
-          "text": "Crea la orden del edificio con el ascensor y marca día y hora. La visita aparece en la agenda y el técnico recibe el aviso en el celular.",
+          "title": "Di la visita y la IA abre la OS",
+          "text": "Toca Hablar y di: “Edificio Solar, ascensor 2, mantenimiento mensual el jueves a las 8”. La IA completa cliente, equipo, servicio y precio de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "Preventivas y llamados en el mismo calendario",
-            "Agenda filtrada por técnico",
-            "Recordatorio de 15 minutos a 2 horas antes"
+            "Lo que la IA completó queda marcado con ✦",
+            "Corrige hablando: “cambio del contacto de puerta, 350”",
+            "O saca una foto de la orden anotada"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda del mes con órdenes marcadas en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
-          "title": "Haz el checklist en el lugar",
-          "text": "Arma una vez el checklist de mantenimiento de tu empresa y úsalo en todas las visitas. El técnico marca sí, no o no aplica y fotografía lo que encuentra.",
+          "title": "La visita en la agenda",
+          "text": "Con día y hora en la OS, la visita entra en la Agenda. Mantenimiento y llamados quedan en el mismo lugar, y el celular avisa antes del horario.",
           "facts": [
-            "Ítems con verificación, texto o foto",
-            "Los mismos ítems en todas las visitas",
-            "Un checklist terminado solo se reabre con Admin, Gerente o Supervisor"
+            "La semana arriba, las visitas del día abajo",
+            "Aviso de 15 minutos a 2 horas antes",
+            "Con equipo, agenda filtrada por técnico"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y las citas marcadas del día"
         },
         {
           "number": "03",
-          "title": "Envía el link al administrador",
-          "text": "El administrador abre la orden en el navegador, sin instalar nada. Ve fotos y checklist, aprueba la reparación extra cuando la hay y deja comentarios.",
+          "title": "Haz el checklist en el lugar",
+          "text": "Arma una vez tu checklist de mantenimiento y úsalo en todas las visitas. Marca sí, no o no aplica y fotografía lo que encontraste en la sala de máquinas, la cabina y el pozo.",
           "facts": [
-            "Aprobación registrada en la orden",
-            "PDF de la orden para el archivo del edificio",
-            "Comentarios del administrador en el historial"
+            "Ítems con verificación, texto o foto",
+            "Los mismos ítems en todas las visitas",
+            "El checklist completado solo se reabre con Administrador, Gerente o Supervisor"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "checklist.png",
+          "alt": "Checklist completado con fotos dentro de una OS"
         },
         {
           "number": "04",
-          "title": "Cobra lo que se hizo",
-          "text": "Registra el pago de reparaciones y repuestos, total o en partes. El panel muestra cuánto entró y qué edificios todavía deben.",
+          "title": "Envía el link al administrador",
+          "text": "El administrador abre la OS en el navegador, sin instalar nada. Ve fotos y checklist, aprueba la reparación extra cuando la hay y deja comentarios.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
-            "Quién todavía debe, en una sola lista"
+            "Aprobación registrada en la OS",
+            "PDF de la OS para el archivo del edificio",
+            "Comentarios del administrador en el historial de la OS"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "order.png",
+          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+        },
+        {
+          "number": "05",
+          "title": "Cobra por lo que hiciste",
+          "text": "Cobra reparaciones y repuestos, completo o en partes. Financiero muestra cuánto falta cobrar y de qué edificios, con el botón para enviar el cobro.",
+          "facts": [
+            "Pago en partes y descuento en la misma OS",
+            "Quien debe hace más tiempo aparece primero",
+            "Informe del mes con lo que entró"
+          ],
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
         }
       ]
     },
@@ -495,19 +528,19 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿La app crea sola las visitas preventivas del mes?",
-          "answer": "No. Cada visita es una orden con fecha agendada: tú creas la orden, entra en la agenda y el técnico recibe el recordatorio. El checklist de mantenimiento es la misma plantilla en todas las visitas."
+          "answer": "No. Cada visita es una OS con fecha marcada: creas la OS (hablando, si quieres), entra en la Agenda y el celular avisa antes del horario. El checklist de mantenimiento es el mismo modelo en todas las visitas."
         },
         {
-          "question": "¿Puedo usar el checklist de mi empresa?",
-          "answer": "Sí. Armas el checklist con lo que revisa tu equipo — sala de máquinas, cabina, puertas, pozo — y queda disponible en todas las órdenes. El contenido técnico lo defines tú."
+          "question": "¿Puedo usar mi propio checklist?",
+          "answer": "Sí. Armas el checklist con los ítems que revisas (sala de máquinas, cabina, puertas, pozo) y queda disponible en todas las OS. Los modelos están en Checklists, en el botón del perfil, arriba en Inicio. El contenido técnico lo defines tú."
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros."
+          "answer": "Sí, si alguien trabaja contigo. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invita a la persona con un código de invitación, que puedes enviar por WhatsApp, y ella entra con su propia cuenta en su celular, con un rol como Técnico o Gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El administrador tiene que instalar una app?",

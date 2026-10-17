@@ -38,13 +38,12 @@
           {
             "title": "Passo a Passo",
             "steps": [
-              "Abra o app PraticOS e vá em <strong>Configurações</strong>",
-              "Toque em <strong>Vincular WhatsApp</strong>",
-              "Um QR Code será exibido na tela",
-              "Abra a câmera do seu celular e escaneie o QR Code",
-              "O WhatsApp abrirá automaticamente com uma mensagem pronta",
-              "Envie a mensagem para confirmar a vinculação",
-              "Pronto! Seu WhatsApp está vinculado"
+              "No app, toque no ícone do <strong>WhatsApp</strong>, no topo do Início",
+              "Abre <strong>Vincular WhatsApp</strong>, com um QR Code",
+              "Escaneie o QR Code com a câmera do celular, ou toque em <strong>Abrir WhatsApp</strong>",
+              "O WhatsApp abre com uma mensagem pronta",
+              "Envie a mensagem para confirmar",
+              "Pronto: seu WhatsApp está vinculado"
             ]
           }
         ],
@@ -61,10 +60,9 @@
           {
             "title": "Como Compartilhar",
             "steps": [
-              "Abra a Ordem de Serviço que deseja enviar",
-              "Toque no botão <strong>Compartilhar</strong> no canto superior",
-              "Selecione <strong>WhatsApp</strong> na lista de opções",
-              "O WhatsApp abrirá com a conversa do cliente e mensagem pronta",
+              "Abra a OS e toque no ícone de compartilhar, no topo da tela",
+              "Em <strong>Mandar para o cliente</strong>, toque em <strong>Mandar pelo WhatsApp</strong>",
+              "O WhatsApp abre na conversa com o cliente, com a mensagem e o link prontos",
               "Toque em enviar"
             ]
           }
@@ -101,26 +99,6 @@
         }
       },
       {
-        "id": "desvincular",
-        "title": "Desvincular WhatsApp",
-        "intro": "Você pode remover a vinculação do WhatsApp a qualquer momento.",
-        "subsections": [
-          {
-            "title": "Como Desvincular",
-            "steps": [
-              "Vá em <strong>Configurações</strong> no app",
-              "Toque em <strong>WhatsApp Vinculado</strong>",
-              "Toque em <strong>Desvincular</strong>",
-              "Confirme a ação no diálogo que aparece"
-            ]
-          }
-        ],
-        "warningCard": {
-          "title": "Notificações Interrompidas",
-          "content": "Ao desvincular, você deixará de receber notificações via WhatsApp. Você pode vincular novamente quando quiser."
-        }
-      },
-      {
         "id": "faq",
         "title": "Perguntas Frequentes",
         "faq": [
@@ -130,7 +108,7 @@
           },
           {
             "question": "Posso vincular mais de um número de WhatsApp?",
-            "answer": "Atualmente, cada usuário pode vincular apenas um número de WhatsApp. Se precisar trocar, desvincule o atual e vincule o novo."
+            "answer": "Hoje cada pessoa vincula só um número de WhatsApp."
           },
           {
             "question": "O cliente precisa ter conta no PraticOS?",
@@ -191,13 +169,12 @@
           {
             "title": "Step by Step",
             "steps": [
-              "Open the PraticOS app and go to <strong>Settings</strong>",
-              "Tap <strong>Link WhatsApp</strong>",
-              "A QR Code will be displayed on screen",
-              "Open your phone's camera and scan the QR Code",
-              "WhatsApp will open automatically with a ready message",
-              "Send the message to confirm the link",
-              "Done! Your WhatsApp is now linked"
+              "In the app, tap the <strong>WhatsApp</strong> icon at the top of Home",
+              "<strong>Link WhatsApp</strong> opens, with a QR Code",
+              "Scan the QR Code with your phone camera, or tap <strong>Open WhatsApp</strong>",
+              "WhatsApp opens with a ready message",
+              "Send the message to confirm",
+              "Done: your WhatsApp is linked"
             ]
           }
         ],
@@ -214,10 +191,9 @@
           {
             "title": "How to Share",
             "steps": [
-              "Open the Service Order you want to send",
-              "Tap the <strong>Share</strong> button in the top corner",
-              "Select <strong>WhatsApp</strong> from the options list",
-              "WhatsApp will open with the customer's chat and ready message",
+              "Open the order and tap the share icon at the top of the screen",
+              "In <strong>Send to the customer</strong>, tap <strong>Send on WhatsApp</strong>",
+              "WhatsApp opens the chat with the customer, with the message and link ready",
               "Tap send"
             ]
           }
@@ -254,26 +230,6 @@
         }
       },
       {
-        "id": "unlink",
-        "title": "Unlink WhatsApp",
-        "intro": "You can remove the WhatsApp link at any time.",
-        "subsections": [
-          {
-            "title": "How to Unlink",
-            "steps": [
-              "Go to <strong>Settings</strong> in the app",
-              "Tap <strong>Linked WhatsApp</strong>",
-              "Tap <strong>Unlink</strong>",
-              "Confirm the action in the dialog that appears"
-            ]
-          }
-        ],
-        "warningCard": {
-          "title": "Notifications Stopped",
-          "content": "When you unlink, you will stop receiving WhatsApp notifications. You can link again whenever you want."
-        }
-      },
-      {
         "id": "faq",
         "title": "Frequently Asked Questions",
         "faq": [
@@ -283,7 +239,7 @@
           },
           {
             "question": "Can I link more than one WhatsApp number?",
-            "answer": "Currently, each user can link only one WhatsApp number. If you need to change, unlink the current one and link the new one."
+            "answer": "Right now each person can link only one WhatsApp number."
           },
           {
             "question": "Does the customer need a PraticOS account?",
@@ -344,13 +300,12 @@
           {
             "title": "Paso a Paso",
             "steps": [
-              "Abra la app PraticOS y vaya a <strong>Configuraciones</strong>",
-              "Toque en <strong>Vincular WhatsApp</strong>",
-              "Un código QR se mostrará en la pantalla",
-              "Abra la cámara de su celular y escanee el código QR",
-              "WhatsApp se abrirá automáticamente con un mensaje listo",
-              "Envíe el mensaje para confirmar la vinculación",
-              "¡Listo! Su WhatsApp está vinculado"
+              "En la app, toca el ícono de <strong>WhatsApp</strong>, arriba en Inicio",
+              "Se abre <strong>Vincular WhatsApp</strong>, con un código QR",
+              "Escanea el código QR con la cámara del celular, o toca <strong>Abrir WhatsApp</strong>",
+              "WhatsApp se abre con un mensaje listo",
+              "Envía el mensaje para confirmar",
+              "Listo: tu WhatsApp está vinculado"
             ]
           }
         ],
@@ -367,11 +322,10 @@
           {
             "title": "Cómo Compartir",
             "steps": [
-              "Abra la Orden de Servicio que desea enviar",
-              "Toque el botón <strong>Compartir</strong> en la esquina superior",
-              "Seleccione <strong>WhatsApp</strong> de la lista de opciones",
-              "WhatsApp se abrirá con el chat del cliente y mensaje listo",
-              "Toque enviar"
+              "Abre la OS y toca el ícono de compartir, arriba en la pantalla",
+              "En <strong>Enviar al cliente</strong>, toca <strong>Enviar por WhatsApp</strong>",
+              "WhatsApp abre la conversación con el cliente, con el mensaje y el enlace listos",
+              "Toca enviar"
             ]
           }
         ],
@@ -407,26 +361,6 @@
         }
       },
       {
-        "id": "desvincular",
-        "title": "Desvincular WhatsApp",
-        "intro": "Puede remover la vinculación de WhatsApp en cualquier momento.",
-        "subsections": [
-          {
-            "title": "Cómo Desvincular",
-            "steps": [
-              "Vaya a <strong>Configuraciones</strong> en la app",
-              "Toque en <strong>WhatsApp Vinculado</strong>",
-              "Toque en <strong>Desvincular</strong>",
-              "Confirme la acción en el diálogo que aparece"
-            ]
-          }
-        ],
-        "warningCard": {
-          "title": "Notificaciones Detenidas",
-          "content": "Al desvincular, dejará de recibir notificaciones via WhatsApp. Puede vincular nuevamente cuando quiera."
-        }
-      },
-      {
         "id": "faq",
         "title": "Preguntas Frecuentes",
         "faq": [
@@ -436,7 +370,7 @@
           },
           {
             "question": "¿Puedo vincular más de un número de WhatsApp?",
-            "answer": "Actualmente, cada usuario puede vincular solo un número de WhatsApp. Si necesita cambiar, desvincule el actual y vincule el nuevo."
+            "answer": "Hoy cada persona vincula solo un número de WhatsApp."
           },
           {
             "question": "¿El cliente necesita cuenta en PraticOS?",

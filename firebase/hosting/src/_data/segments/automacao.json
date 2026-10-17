@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo cliente",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Concluído",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -82,12 +81,12 @@
         {
           "problem": "Entrada paga, saldo esquecido",
           "detail": "O cliente paga uma parte para comprar o material e o restante fica para depois. Depois, ninguém lembra quanto falta.",
-          "answer": "Registre cada pagamento parcial na OS. O painel mostra o faturamento do período e quem ainda deve."
+          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
         },
         {
-          "problem": "Equipe em várias obras ao mesmo tempo",
+          "problem": "Várias obras na mesma semana",
           "detail": "Dois técnicos marcados no mesmo dia, um cliente esperando e ninguém avisado.",
-          "answer": "A data da OS coloca a instalação na agenda. Dá para filtrar por técnico, e o celular avisa antes de cada atendimento."
+          "answer": "A data da OS coloca a instalação na Agenda, com a semana no topo e o horário de cada atendimento. O celular avisa antes de cada visita."
         }
       ]
     },
@@ -97,6 +96,18 @@
       "stages": [
         {
           "number": "01",
+          "title": "Fale a obra e a proposta se preenche",
+          "text": "Na Nova OS, toque em Falar e diga “apartamento do Ricardo, seis interruptores inteligentes e programação”, ou tire uma foto do que você anotou. A IA preenche cliente, equipamentos e serviços com os preços do seu catálogo. Você confere e salva.",
+          "facts": [
+            "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
+            "Corrija falando: “a programação é 800”",
+            "Equipamentos e programação em itens separados"
+          ],
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+        },
+        {
+          "number": "02",
           "title": "Faça a visita técnica",
           "text": "Monte um checklist de vistoria com o que você confere em toda obra — infraestrutura de rede, pontos de energia, quadro, ambientes — e use em todas as visitas.",
           "facts": [
@@ -104,11 +115,11 @@
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as obras"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Mande a proposta por link",
           "text": "Equipamentos e serviços saem do seu catálogo, já com preço. O cliente abre a OS no navegador, vê os itens e as fotos, aprova e deixa comentários.",
           "facts": [
@@ -116,32 +127,32 @@
             "Equipamentos e programação discriminados",
             "PDF da OS para enviar ou imprimir"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
-        },
-        {
-          "number": "03",
-          "title": "Agende a instalação",
-          "text": "A data da OS coloca a obra no calendário. Quem coordena vê o mês inteiro e filtra por técnico.",
-          "facts": [
-            "Calendário do mês com as OS de cada dia",
-            "Filtro por técnico",
-            "Lembrete no celular antes do atendimento"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda do PraticOS com OS marcadas no mês"
+          "image": "order.png",
+          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
         },
         {
           "number": "04",
+          "title": "Agende a instalação",
+          "text": "A data da OS coloca a obra na Agenda. Você vê a semana no topo e o que está marcado em cada dia, com horário.",
+          "facts": [
+            "Semana no topo e os atendimentos de cada dia, com horário",
+            "Resumo do dia às 9h, se você ligar",
+            "Lembrete no celular antes do atendimento"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+        },
+        {
+          "number": "05",
           "title": "Entregue a obra e receba",
           "text": "Registre o que foi instalado com fotos e receba em etapas: entrada, parcelas e saldo, com desconto se precisar.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
+            "Pagamento em partes e desconto na mesma OS",
+            "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
         }
       ]
     },
@@ -151,7 +162,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Para começar, não. Você usa grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Planos pagos, com mais de tudo isso e com equipe, estão disponíveis no app."
         },
         {
           "question": "Existe um segmento de automação no app?",
@@ -163,7 +174,7 @@
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente."
+          "answer": "Se alguém trabalha com você, sim. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa com um código de convite, mandado pelo WhatsApp, e ela usa o app no próprio celular com um papel, como técnico ou gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -220,8 +231,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Done",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -254,12 +264,12 @@
         {
           "problem": "Deposit paid, balance forgotten",
           "detail": "The customer pays part up front for materials and the rest comes later. Later, nobody knows how much is left.",
-          "answer": "Record each partial payment on the work order. The dashboard shows revenue for the period and who still owes you."
+          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
         },
         {
-          "problem": "One crew, several jobs at once",
+          "problem": "Several jobs in the same week",
           "detail": "Two techs booked on the same day, a customer waiting and nobody told.",
-          "answer": "The work order date puts the install on the calendar. You can filter by technician, and the phone sends a reminder before each visit."
+          "answer": "The work order date puts the install on the Schedule, with the week on top and the time of each visit. The phone sends a reminder before each one."
         }
       ]
     },
@@ -269,6 +279,18 @@
       "stages": [
         {
           "number": "01",
+          "title": "Say the job and the proposal fills itself in",
+          "text": "On New order, tap Speak and say “Ricardo's apartment, six smart switches and programming”, or take a photo of your notes. The AI fills in the customer, equipment and services with your catalog prices. You check it and save.",
+          "facts": [
+            "Everything the AI filled in is marked with ✦, and you can undo it",
+            "Fix it by speaking: “programming is 800”",
+            "Equipment and programming as separate items"
+          ],
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+        },
+        {
+          "number": "02",
           "title": "Do the site survey",
           "text": "Build a survey checklist with what you check on every job — network, power outlets, electrical panel, rooms — and reuse it on every visit.",
           "facts": [
@@ -276,11 +298,11 @@
             "Photos on every checklist item",
             "One template for every job"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Intake checklist with damage photos and the checked items"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Send the proposal as a link",
           "text": "Equipment and services come from your catalog, already priced. The customer opens the work order in a browser, sees items and photos, approves it and leaves comments.",
           "facts": [
@@ -288,32 +310,32 @@
             "Equipment and programming itemized",
             "Work order PDF to send or print"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
-        },
-        {
-          "number": "03",
-          "title": "Schedule the install",
-          "text": "The work order date puts the job on the calendar. Whoever coordinates sees the whole month and filters by technician.",
-          "facts": [
-            "Monthly calendar with each day's work orders",
-            "Filter by technician",
-            "Phone reminder before each visit"
-          ],
-          "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled for the month"
+          "image": "order.png",
+          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
         },
         {
           "number": "04",
+          "title": "Schedule the install",
+          "text": "The work order date puts the job on the Schedule. You see the week on top and what is booked each day, with times.",
+          "facts": [
+            "The week on top and each day's appointments, with times",
+            "Daily summary at 9 a.m., if you turn it on",
+            "Phone reminder before each visit"
+          ],
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the day's appointments"
+        },
+        {
+          "number": "05",
           "title": "Hand over the job and get paid",
           "text": "Record what was installed with photos and get paid in stages: deposit, installments and balance, with a discount if needed.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
+            "Payment in parts and discount on the same work order",
+            "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
         }
       ]
     },
@@ -323,7 +345,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "Not to get started. You can use it free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, with more of each and a team, are available in the app."
         },
         {
           "question": "Is there a home automation segment in the app?",
@@ -335,7 +357,7 @@
         },
         {
           "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager."
+          "answer": "If someone works with you, yes. Tap the profile button at the top of Home, go to Team and invite them with a code sent over WhatsApp, and they use the app on their own phone with a role, such as technician or manager. Inviting someone needs a paid plan, purchased inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -390,10 +412,9 @@
         "stamp": "Aprobado por el cliente",
         "steps": [
           "Presupuesto",
-          "Aprobado",
+          "Aprobada",
           "En curso",
-          "Terminado",
-          "Cobrado"
+          "Completada"
         ],
         "current": 2
       }
@@ -426,12 +447,12 @@
         {
           "problem": "Anticipo cobrado, saldo olvidado",
           "detail": "El cliente paga una parte para comprar el material y el resto queda para después. Después, nadie sabe cuánto falta.",
-          "answer": "Registra cada pago parcial en la orden. El panel muestra la facturación del período y quién todavía debe."
+          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
         },
         {
-          "problem": "Un equipo en varias obras a la vez",
+          "problem": "Varias obras en la misma semana",
           "detail": "Dos técnicos agendados el mismo día, un cliente esperando y nadie avisado.",
-          "answer": "La fecha de la orden pone la instalación en la agenda. Puedes filtrar por técnico, y el celular avisa antes de cada visita."
+          "answer": "La fecha de la orden pone la instalación en la Agenda, con la semana arriba y el horario de cada visita. El celular avisa antes de cada una."
         }
       ]
     },
@@ -441,6 +462,18 @@
       "stages": [
         {
           "number": "01",
+          "title": "Di la obra y la propuesta se completa",
+          "text": "En Nueva OS, toca Hablar y di “departamento de Ricardo, seis interruptores inteligentes y programación”, o saca una foto de lo que anotaste. La IA completa cliente, equipos y servicios con los precios de tu catálogo. Tú revisas y guardas.",
+          "facts": [
+            "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
+            "Corrige hablando: “la programación es 800”",
+            "Equipos y programación en ítems separados"
+          ],
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+        },
+        {
+          "number": "02",
           "title": "Haz la visita técnica",
           "text": "Arma un checklist de relevamiento con lo que revisas en toda obra — red, tomas de energía, tablero, ambientes — y úsalo en todas las visitas.",
           "facts": [
@@ -448,11 +481,11 @@
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las obras"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Envía la propuesta por link",
           "text": "Equipos y servicios salen de tu catálogo, con precio. El cliente abre la orden en el navegador, ve los ítems y las fotos, aprueba y deja comentarios.",
           "facts": [
@@ -460,32 +493,32 @@
             "Equipos y programación detallados",
             "PDF de la orden para enviar o imprimir"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
-        },
-        {
-          "number": "03",
-          "title": "Agenda la instalación",
-          "text": "La fecha de la orden pone la obra en el calendario. Quien coordina ve todo el mes y filtra por técnico.",
-          "facts": [
-            "Calendario del mes con las órdenes de cada día",
-            "Filtro por técnico",
-            "Aviso en el celular antes de la visita"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes del mes"
+          "image": "order.png",
+          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
         },
         {
           "number": "04",
+          "title": "Agenda la instalación",
+          "text": "La fecha de la orden pone la obra en la Agenda. Ves la semana arriba y lo que está marcado cada día, con horario.",
+          "facts": [
+            "La semana arriba y las visitas de cada día, con horario",
+            "Resumen del día a las 9 h, si lo activas",
+            "Aviso en el celular antes de la visita"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y las visitas marcadas en el día"
+        },
+        {
+          "number": "05",
           "title": "Entrega la obra y cobra",
           "text": "Registra lo instalado con fotos y cobra por etapas: anticipo, cuotas y saldo, con descuento si hace falta.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
+            "Pago en partes y descuento en la misma orden",
+            "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
         }
       ]
     },
@@ -495,7 +528,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Para empezar, no. Lo usas gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y una plantilla de checklist. Los planes pagos, con más de todo eso y con equipo, están disponibles en la app."
         },
         {
           "question": "¿Hay un segmento de automatización en la app?",
@@ -507,7 +540,7 @@
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente."
+          "answer": "Si alguien trabaja contigo, sí. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invítalo con un código enviado por WhatsApp, y usa la app en su propio celular con un rol, como técnico o gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

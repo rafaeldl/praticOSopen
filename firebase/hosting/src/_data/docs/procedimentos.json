@@ -3,126 +3,260 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Como os procedimentos funcionam",
-        "intro": "Procedimento é um checklist que você monta uma vez e usa em várias OS — a vistoria de entrada de um carro, a lista de testes de um celular antes da entrega, as medições finais de um ar-condicionado. O técnico preenche no celular, durante o serviço, e anexa fotos em cada item.",
+        "title": "Como os checklists funcionam",
+        "intro": "Checklist é uma lista de perguntas que você monta uma vez e usa em várias OS: a entrada de um carro na oficina, os testes de um celular antes da entrega, as medições finais de um ar-condicionado. Você responde no celular, durante o serviço, e pode pôr foto nas perguntas.",
         "features": [
           {
             "title": "Modelo",
-            "description": "A lista de itens que você monta em <strong>Mais → Procedimentos</strong>. Vale para a empresa toda."
+            "description": "A lista de perguntas que você monta em <strong>Checklists</strong>, nos Ajustes. Vale para todas as suas OS."
           },
           {
             "title": "Na OS",
-            "description": "Uma cópia do modelo, adicionada na seção <strong>Formulários</strong> da OS e preenchida ali."
+            "description": "Uma cópia do modelo, adicionada à OS e respondida ali. Aparece em <strong>Checklists</strong>, na tela da OS, com quantas perguntas já foram respondidas."
           },
           {
             "title": "No PDF",
-            "description": "Cada procedimento da OS vira uma página no PDF, com as respostas e as fotos."
+            "description": "Os checklists da OS entram no PDF, com as respostas e as fotos."
           }
         ],
         "infoCard": {
-          "title": "Modelos prontos do seu segmento",
-          "content": "Em <strong>Mais → Procedimentos</strong>, a lista <strong>Procedimentos Globais</strong> traz modelos prontos para o segmento da empresa. Dá para usar direto na OS ou importar com <strong>Importar para Minha Empresa</strong> e ajustar do seu jeito."
+          "title": "Modelos prontos do seu ramo",
+          "content": "Em <strong>Checklists</strong>, a parte <strong>Prontos para usar</strong> traz modelos para o seu ramo. Toque em <strong>Usar</strong> para copiar um deles para <strong>Seus checklists</strong> e ajustar do seu jeito."
         }
       },
       {
         "id": "tipos",
-        "title": "Tipos de item",
-        "intro": "Cada item do procedimento tem um tipo, que define como o técnico responde. Escolha pelo que você quer conferir depois.",
+        "title": "Tipos de resposta",
+        "intro": "Cada pergunta tem um tipo de resposta, que define como ela é respondida. Escolha pelo que você quer conferir depois.",
         "table": {
-          "headers": ["Tipo", "Como se responde", "Exemplo"],
+          "headers": [
+            "Tipo",
+            "Como se responde",
+            "Exemplo"
+          ],
           "rows": [
-            { "label": "Texto", "cells": [{ "text": "Escrevendo livremente" }, { "text": "Defeito relatado pelo cliente" }] },
-            { "label": "Número", "cells": [{ "text": "Digitando um número" }, { "text": "Quilometragem, pressão do gás" }] },
-            { "label": "Sim/Não", "cells": [{ "text": "Tocando em Sim ou Não" }, { "text": "O aparelho liga?" }] },
-            { "label": "Seleção única", "cells": [{ "text": "Escolhendo uma opção da lista" }, { "text": "Estado da tela: perfeita, riscada, trincada" }] },
-            { "label": "Múltipla escolha", "cells": [{ "text": "Marcando uma ou mais opções" }, { "text": "Acessórios entregues: carregador, capa, chip" }] },
-            { "label": "Apenas foto", "cells": [{ "text": "Anexando fotos, sem texto" }, { "text": "Foto do painel com a quilometragem" }] }
+            {
+              "label": "Sim ou não",
+              "cells": [
+                {
+                  "text": "Tocando em Sim ou Não"
+                },
+                {
+                  "text": "O aparelho liga?"
+                }
+              ]
+            },
+            {
+              "label": "Escolher uma opção",
+              "cells": [
+                {
+                  "text": "Escolhendo uma opção da lista"
+                },
+                {
+                  "text": "Nível de combustível: reserva, 1/4, 1/2, cheio"
+                }
+              ]
+            },
+            {
+              "label": "Escolher várias opções",
+              "cells": [
+                {
+                  "text": "Marcando uma ou mais opções"
+                },
+                {
+                  "text": "Pertences deixados: carregador, capa, chip"
+                }
+              ]
+            },
+            {
+              "label": "Texto",
+              "cells": [
+                {
+                  "text": "Escrevendo livremente"
+                },
+                {
+                  "text": "Defeito que o cliente contou"
+                }
+              ]
+            },
+            {
+              "label": "Número",
+              "cells": [
+                {
+                  "text": "Digitando um número"
+                },
+                {
+                  "text": "Quilometragem, pressão do gás"
+                }
+              ]
+            },
+            {
+              "label": "Só foto",
+              "cells": [
+                {
+                  "text": "Tirando ou escolhendo fotos, sem texto"
+                },
+                {
+                  "text": "Fotos da lataria na chegada"
+                }
+              ]
+            }
           ]
         },
         "infoCard": {
-          "title": "Fotos em qualquer item",
-          "content": "Todo item pode receber fotos, não só os do tipo Apenas foto. Basta deixar <strong>Permitir fotos</strong> ligado no item. Em Seleção única e Múltipla escolha, digite uma opção por linha — são pelo menos duas."
+          "title": "Foto em qualquer pergunta",
+          "content": "Qualquer pergunta pode receber foto, não só as do tipo Só foto. Basta ligar <strong>Pode pôr foto</strong> na pergunta. Em Escolher uma opção e Escolher várias opções, digite uma opção por linha."
         }
       },
       {
         "id": "templates",
         "title": "Criar um modelo",
-        "intro": "Só Administrador e Supervisor criam e editam modelos.",
+        "intro": "Se alguém trabalha com você, só Administrador e Supervisor criam e mudam modelos.",
         "steps": [
-          "Toque na aba <strong>Mais</strong> e depois em <strong>Procedimentos</strong>.",
-          "Toque em <strong>+</strong> e preencha <strong>Título</strong> e, se quiser, a descrição.",
-          "Toque em <strong>Adicionar Item</strong>. Escreva o texto do item, escolha o <strong>Tipo</strong> e ligue <strong>Obrigatório</strong> se o técnico não puder pular.",
-          "Repita para cada item. Arraste os itens para mudar a ordem; deslize para a esquerda para remover.",
-          "Toque em <strong>Salvar</strong>."
+          "Toque no botão do perfil, no topo do Início, e vá em <strong>Checklists</strong>.",
+          "Toque em <strong>+</strong> (Novo checklist) e escreva o <strong>Nome do checklist</strong>.",
+          "Toque em <strong>Adicionar pergunta</strong>. Escreva a pergunta, escolha o <strong>Tipo de resposta</strong> e ligue <strong>Obrigatória</strong> se o checklist não pode ser concluído sem ela. Toque em <strong>Pronto</strong>.",
+          "Repita para cada pergunta. Para tirar uma, deslize para a esquerda.",
+          "Toque no <strong>✓</strong>, no topo, para salvar. Ele fica azul quando o checklist tem nome e pelo menos uma pergunta."
         ],
         "subsections": [
           {
-            "title": "Tirar um modelo de uso",
-            "content": "Desligue <strong>Ativo</strong> no modelo. Ele some da lista na hora de adicionar à OS, mas continua guardado — e as OS que já usaram o modelo não mudam."
+            "title": "Mudar ou tirar um modelo de uso",
+            "content": "Toque no modelo para mudar o nome ou as perguntas; segure e arraste uma pergunta para mudar a ordem. No <strong>…</strong> do modelo, <strong>Não usar na empresa</strong> tira o modelo da lista na hora de adicionar à OS, sem apagar. As OS que já usaram o modelo não mudam."
           }
         ],
         "warningCard": {
-          "title": "Editar o modelo não muda as OS antigas",
-          "content": "Quando o procedimento entra na OS, ele leva uma cópia dos itens. Se você mudar o modelo depois, a mudança só vale para as próximas OS."
+          "title": "Mudar o modelo não muda as OS antigas",
+          "content": "Quando o checklist entra na OS, ele leva uma cópia das perguntas. Se você mudar o modelo depois, a mudança só vale para as próximas OS."
         }
       },
       {
         "id": "preenchimento",
-        "title": "Preencher na OS",
-        "intro": "Na OS, os procedimentos ficam na seção <strong>Formulários</strong>. Cada resposta é salva assim que o técnico toca nela — não existe botão de salvar.",
+        "title": "Responder na OS",
+        "intro": "As respostas são salvas na hora; não existe botão de salvar.",
         "steps": [
-          "Abra a OS e vá até a seção <strong>Formulários</strong>.",
-          "Toque em <strong>Adicionar</strong> e escolha o procedimento. Se a OS tiver mais de um dispositivo, o app pergunta a qual deles o procedimento se refere.",
-          "Toque no procedimento e responda os itens, na ordem que for mais prática no serviço.",
-          "No fim, toque em <strong>Completo</strong>. Se faltar algum item obrigatório, o app mostra a lista do que falta."
+          "Na OS, toque em <strong>…</strong>, depois em <strong>Adicionar à OS</strong> e em <strong>Checklist</strong>.",
+          "Em <strong>Qual checklist?</strong>, escolha o modelo. Se a OS tiver mais de um veículo ou aparelho, o app pergunta a qual deles o checklist se refere.",
+          "Toque em <strong>Começar</strong>. As perguntas aparecem uma de cada vez: responda e toque em <strong>Próxima</strong>, ou em <strong>Pular por agora</strong> para voltar a ela depois.",
+          "Quando tudo estiver respondido, toque em <strong>Concluir checklist</strong>. Se só faltarem perguntas que não são obrigatórias, aparece <strong>Concluir assim mesmo</strong>. Se faltar alguma obrigatória, o app mostra o que falta."
         ],
         "warningCard": {
-          "title": "Depois de completo, só reabrindo",
-          "content": "Um procedimento completo não aceita mais mudanças nem exclusão de fotos. Para corrigir, toque em <strong>Reabrir</strong> no topo do procedimento — o botão aparece só para Administrador, Gerente e Supervisor."
+          "title": "Depois de concluído, só reabrindo",
+          "content": "Um checklist concluído não aceita mais mudanças nem retirada de fotos. Para corrigir, abra o checklist, toque em <strong>…</strong> e em <strong>Reabrir</strong>. A OS também só pode ser marcada como pronta quando todos os checklists dela estão concluídos."
         }
       },
       {
         "id": "fotos",
-        "title": "Fotos nos procedimentos",
-        "intro": "A foto mostra o estado em que o carro ou o aparelho chegou e como ficou depois do serviço — e entra no PDF da OS.",
+        "title": "Fotos no checklist",
+        "intro": "A foto mostra como o carro ou o aparelho chegou e como ficou depois do serviço, e entra no PDF da OS.",
         "subsections": [
           {
             "title": "Como funciona",
             "validationList": [
               {
-                "label": "Tirar Foto",
-                "text": "Abre a câmera e anexa uma foto ao item."
+                "label": "Tirar foto",
+                "text": "Abre a câmera e põe a foto na pergunta."
               },
               {
-                "label": "Escolher da Galeria",
+                "label": "Escolher da galeria",
                 "text": "Permite escolher várias fotos de uma vez."
               },
               {
-                "label": "Ver e remover",
-                "text": "Toque na miniatura para ver em tela cheia. É ali que você remove uma foto, enquanto o procedimento não está completo."
+                "label": "Ver e tirar",
+                "text": "Toque na foto para ver em tela cheia. É ali que você tira uma foto, enquanto o checklist não está concluído."
               }
             ]
           }
         ],
         "infoCard": {
-          "title": "Fotos ficam na nuvem",
-          "content": "As fotos são enviadas para o armazenamento da empresa no PraticOS. Quem abrir a OS em outro celular vê as mesmas fotos."
+          "title": "Fotos ficam guardadas na sua conta",
+          "content": "As fotos vão para o armazenamento do PraticOS. Quem abrir a OS em outro celular vê as mesmas fotos. O plano grátis tem limite mensal de fotos e um modelo de checklist; os planos pagos, assinados no app, aumentam esses limites."
         }
       },
       {
         "id": "permissoes",
-        "title": "Quem pode o quê",
-        "intro": "Qualquer pessoa que abre a OS pode preencher os procedimentos dela. O que muda por perfil é quem cria modelos, quem adiciona procedimentos e quem reabre.",
+        "title": "Se alguém trabalha com você",
+        "intro": "Trabalhando sozinho, você faz tudo. Com equipe, qualquer pessoa que abre a OS pode responder os checklists dela. O que muda por papel é quem cria modelos, quem adiciona checklists à OS e quem reabre.",
         "table": {
-          "headers": ["Perfil", "Criar modelos", "Adicionar ou remover na OS", "Reabrir completo"],
-          "rows": [
-            { "label": "Administrador", "cells": [{ "class": "yes" }, { "text": "Em qualquer status" }, { "class": "yes" }] },
-            { "label": "Gerente", "cells": [{ "class": "no" }, { "text": "Em qualquer status" }, { "class": "yes" }] },
-            { "label": "Supervisor", "cells": [{ "class": "yes" }, { "text": "Até a OS ser concluída" }, { "class": "yes" }] },
-            { "label": "Consultor", "cells": [{ "class": "no" }, { "text": "Nas OS dele, em qualquer status" }, { "class": "no" }] },
-            { "label": "Técnico", "cells": [{ "class": "no" }, { "text": "Só em Orçamento" }, { "class": "no" }] }
+          "headers": [
+            "Papel",
+            "Criar modelos",
+            "Adicionar ou tirar da OS",
+            "Reabrir concluído"
           ],
-          "note": "As regras completas de cada perfil estão em <a href=\"perfis.html\">Perfis de usuário</a>."
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "Em qualquer situação"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "Em qualquer situação"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "Até a OS ser concluída"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "Nas OS dele, em qualquer situação"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "Só em Orçamento"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ],
+          "note": "O que cada papel pode fazer está em <a href=\"perfis.html\">Equipe e papéis</a>."
         }
       },
       {
@@ -130,24 +264,28 @@
         "title": "Perguntas frequentes",
         "faq": [
           {
-            "question": "Posso editar um modelo que já foi usado?",
-            "answer": "Pode. A edição vale para as próximas OS. Os procedimentos que já estão nas OS guardam os itens de quando foram adicionados."
+            "question": "Posso mudar um modelo que já foi usado?",
+            "answer": "Pode. A mudança vale para as próximas OS. Os checklists que já estão nas OS guardam as perguntas de quando foram adicionados."
           },
           {
-            "question": "Como reabro um procedimento completo?",
-            "answer": "Abra o procedimento na OS e toque em <strong>Reabrir</strong>, no topo da tela. Só Administrador, Gerente e Supervisor veem esse botão."
+            "question": "Como reabro um checklist concluído?",
+            "answer": "Abra o checklist na OS, toque em <strong>…</strong> e em <strong>Reabrir</strong>. Com equipe, só Administrador, Gerente e Supervisor veem essa opção."
           },
           {
             "question": "Posso usar o mesmo modelo em várias OS?",
-            "answer": "Sim, em quantas quiser. Cada OS recebe a própria cópia, preenchida de forma independente."
+            "answer": "Sim, em quantas quiser. Cada OS recebe a própria cópia, respondida à parte."
           },
           {
-            "question": "Por que o técnico não consegue adicionar um procedimento?",
-            "answer": "Depois que a OS sai de Orçamento, o Técnico só preenche os procedimentos que já estão nela. Adicione antes de aprovar, ou peça a um Supervisor ou Administrador."
+            "question": "Por que não consigo marcar a OS como pronta?",
+            "answer": "Algum checklist da OS ainda não foi concluído. Abra o checklist e conclua antes de marcar a OS como pronta."
           },
           {
-            "question": "O procedimento aparece no PDF da OS?",
-            "answer": "Sim. Cada procedimento vira uma página no PDF, com as respostas e as fotos dos itens."
+            "question": "Por que o técnico não consegue adicionar um checklist?",
+            "answer": "Depois que a OS sai de Orçamento, o Técnico só responde os checklists que já estão nela. Adicione antes de aprovar, ou peça a um Supervisor ou Administrador."
+          },
+          {
+            "question": "O checklist aparece no PDF da OS?",
+            "answer": "Sim. Os checklists entram no PDF, com as respostas e as fotos das perguntas."
           }
         ]
       }
@@ -157,126 +295,260 @@
     "sections": [
       {
         "id": "overview",
-        "title": "How procedures work",
-        "intro": "A procedure is a checklist you build once and reuse on many work orders — a vehicle check-in, the tests you run on a phone before handing it back, the final readings on an AC unit. The technician fills it in on the phone during the job and attaches photos to each item.",
+        "title": "How checklists work",
+        "intro": "A checklist is a list of questions you build once and use on many work orders: a car’s check-in at the shop, the tests on a phone before hand-off, the final readings on an air conditioner. You answer it on your phone during the job, and you can add photos to the questions.",
         "features": [
           {
             "title": "Template",
-            "description": "The list of items you build in <strong>More → Procedures</strong>. It applies to the whole company."
+            "description": "The list of questions you build in <strong>Checklists</strong>, in Settings. It works for all your orders."
           },
           {
             "title": "On the order",
-            "description": "A copy of the template, added in the order’s <strong>Forms</strong> section and filled in there."
+            "description": "A copy of the template, added to the order and answered there. It shows under <strong>Checklists</strong> on the order screen, with how many questions are answered."
           },
           {
             "title": "In the PDF",
-            "description": "Each procedure on the order becomes a page in the PDF, with the answers and photos."
+            "description": "The order’s checklists go into the PDF, with the answers and photos."
           }
         ],
         "infoCard": {
-          "title": "Ready-made templates for your segment",
-          "content": "In <strong>More → Procedures</strong>, the <strong>Global Procedures</strong> list has ready-made templates for your company’s segment. Use one straight on an order, or bring it in with <strong>Import to My Company</strong> and adjust it."
+          "title": "Ready-made templates for your trade",
+          "content": "In <strong>Checklists</strong>, the <strong>Ready to use</strong> part has templates for your trade. Tap <strong>Use</strong> to copy one to <strong>Your checklists</strong> and adjust it your way."
         }
       },
       {
         "id": "types",
-        "title": "Item types",
-        "intro": "Each item has a type, which sets how the technician answers it. Pick based on what you want to check later.",
+        "title": "Types of answer",
+        "intro": "Each question has a type of answer, which sets how it’s answered. Pick it by what you want to check later.",
         "table": {
-          "headers": ["Type", "How it’s answered", "Example"],
+          "headers": [
+            "Type",
+            "How it’s answered",
+            "Example"
+          ],
           "rows": [
-            { "label": "Text", "cells": [{ "text": "Free-form writing" }, { "text": "Problem reported by the customer" }] },
-            { "label": "Number", "cells": [{ "text": "Typing a number" }, { "text": "Mileage, refrigerant pressure" }] },
-            { "label": "Yes/No", "cells": [{ "text": "Tapping Yes or No" }, { "text": "Does the device turn on?" }] },
-            { "label": "Single choice", "cells": [{ "text": "Picking one option from a list" }, { "text": "Screen condition: perfect, scratched, cracked" }] },
-            { "label": "Multiple choice", "cells": [{ "text": "Checking one or more options" }, { "text": "Accessories left: charger, case, SIM" }] },
-            { "label": "Photo only", "cells": [{ "text": "Attaching photos, no text" }, { "text": "Photo of the dashboard odometer" }] }
+            {
+              "label": "Yes or no",
+              "cells": [
+                {
+                  "text": "Tapping Yes or No"
+                },
+                {
+                  "text": "Does the device turn on?"
+                }
+              ]
+            },
+            {
+              "label": "Pick one option",
+              "cells": [
+                {
+                  "text": "Choosing one option from the list"
+                },
+                {
+                  "text": "Fuel level: reserve, 1/4, 1/2, full"
+                }
+              ]
+            },
+            {
+              "label": "Pick several options",
+              "cells": [
+                {
+                  "text": "Checking one or more options"
+                },
+                {
+                  "text": "Belongings left: charger, case, SIM card"
+                }
+              ]
+            },
+            {
+              "label": "Text",
+              "cells": [
+                {
+                  "text": "Writing freely"
+                },
+                {
+                  "text": "Problem the customer described"
+                }
+              ]
+            },
+            {
+              "label": "Number",
+              "cells": [
+                {
+                  "text": "Typing a number"
+                },
+                {
+                  "text": "Mileage, gas pressure"
+                }
+              ]
+            },
+            {
+              "label": "Photo only",
+              "cells": [
+                {
+                  "text": "Taking or choosing photos, no text"
+                },
+                {
+                  "text": "Body photos at check-in"
+                }
+              ]
+            }
           ]
         },
         "infoCard": {
-          "title": "Photos on any item",
-          "content": "Any item can take photos, not just Photo only items. Keep <strong>Allow photos</strong> on for that item. For Single choice and Multiple choice, type one option per line — at least two."
+          "title": "Photos on any question",
+          "content": "Any question can take photos, not just Photo only ones. Just turn on <strong>Can add a photo</strong> on the question. For Pick one option and Pick several options, type one option per line."
         }
       },
       {
         "id": "templates",
         "title": "Create a template",
-        "intro": "Only Administrators and Supervisors create and edit templates.",
+        "intro": "If someone works with you, only Administrator and Supervisor create and change templates.",
         "steps": [
-          "Tap the <strong>More</strong> tab, then <strong>Procedures</strong>.",
-          "Tap <strong>+</strong> and fill in the <strong>Title</strong> and, if you like, a description.",
-          "Tap the add item button. Write the item’s text, pick its <strong>Type</strong> and turn on <strong>Required</strong> if the technician can’t skip it.",
-          "Repeat for each item. Drag items to reorder them; swipe left to remove one.",
-          "Tap <strong>Save</strong>."
+          "Tap the profile button at the top of Home and go to <strong>Checklists</strong>.",
+          "Tap <strong>+</strong> (New checklist) and type the <strong>Checklist name</strong>.",
+          "Tap <strong>Add question</strong>. Write the question, pick the <strong>Type of answer</strong> and turn on <strong>Required</strong> if the checklist can’t be finished without it. Tap <strong>Done</strong>.",
+          "Repeat for each question. To remove one, swipe left.",
+          "Tap the <strong>✓</strong> at the top to save. It turns blue once the checklist has a name and at least one question."
         ],
         "subsections": [
           {
-            "title": "Retire a template",
-            "content": "Turn off <strong>Active</strong> on the template. It disappears from the list when adding to an order but stays saved — and orders that already used it don’t change."
+            "title": "Change a template or stop using it",
+            "content": "Tap the template to change the name or questions; touch and hold a question and drag it to reorder. In the template’s <strong>…</strong>, <strong>Stop using in the company</strong> takes it off the list when adding to an order, without deleting it. Orders that already used it don’t change."
           }
         ],
         "warningCard": {
-          "title": "Editing a template doesn’t change past orders",
-          "content": "When a procedure is added to an order, it takes a copy of the items. If you change the template later, the change only applies to future orders."
+          "title": "Changing the template doesn’t change past orders",
+          "content": "When the checklist goes into the order, it takes a copy of the questions. If you change the template later, the change only applies to the next orders."
         }
       },
       {
         "id": "filling",
-        "title": "Fill it in on the order",
-        "intro": "On the order, procedures live in the <strong>Forms</strong> section. Each answer is saved as soon as the technician taps it — there is no save button.",
+        "title": "Answer it on the order",
+        "intro": "Answers are saved right away; there’s no save button.",
         "steps": [
-          "Open the order and scroll to <strong>Forms</strong>.",
-          "Tap <strong>Add</strong> and pick the procedure. If the order has more than one device, the app asks which one the procedure is for.",
-          "Tap the procedure and answer the items in whatever order works on the job.",
-          "When you’re done, tap <strong>Complete</strong>. If a required item is missing, the app lists what’s left."
+          "On the order, tap <strong>…</strong>, then <strong>Add to the order</strong> and <strong>Checklist</strong>.",
+          "In <strong>Which checklist?</strong>, pick the template. If the order has more than one vehicle or device, the app asks which one the checklist is for.",
+          "Tap <strong>Start</strong>. Questions show one at a time: answer and tap <strong>Next</strong>, or <strong>Skip for now</strong> to come back to it later.",
+          "When everything is answered, tap <strong>Finish checklist</strong>. If only optional questions are left, <strong>Finish anyway</strong> shows. If a required one is missing, the app shows what’s left."
         ],
         "warningCard": {
-          "title": "Once complete, it has to be reopened",
-          "content": "A completed procedure no longer accepts changes or photo removals. To fix something, tap <strong>Reopen</strong> at the top of the procedure — the button only shows for Administrators, Managers and Supervisors."
+          "title": "Once finished, only by reopening",
+          "content": "A finished checklist no longer takes changes or photo removals. To fix something, open the checklist, tap <strong>…</strong> and <strong>Reopen</strong>. The order can also only be marked as ready when all its checklists are finished."
         }
       },
       {
         "id": "photos",
-        "title": "Photos in procedures",
-        "intro": "A photo shows the condition the car or device came in and how it left after the job — and it goes into the order PDF.",
+        "title": "Photos on checklists",
+        "intro": "A photo shows how the car or device arrived and how it looked after the job, and it goes into the order’s PDF.",
         "subsections": [
           {
             "title": "How it works",
             "validationList": [
               {
-                "label": "Take Photo",
-                "text": "Opens the camera and attaches one photo to the item."
+                "label": "Take a photo",
+                "text": "Opens the camera and adds the photo to the question."
               },
               {
-                "label": "Choose from Gallery",
+                "label": "Choose from library",
                 "text": "Lets you pick several photos at once."
               },
               {
                 "label": "View and remove",
-                "text": "Tap a thumbnail to see it full screen. That’s where you remove a photo, as long as the procedure isn’t complete."
+                "text": "Tap the photo to see it full screen. That’s where you remove a photo, while the checklist isn’t finished."
               }
             ]
           }
         ],
         "infoCard": {
-          "title": "Photos live in the cloud",
-          "content": "Photos are uploaded to your company’s storage in PraticOS. Anyone who opens the order on another phone sees the same photos."
+          "title": "Photos are kept in your account",
+          "content": "Photos go to PraticOS storage. Anyone who opens the order on another phone sees the same photos. The free plan has a monthly photo limit and one checklist template; paid plans, bought in the app, raise those limits."
         }
       },
       {
         "id": "permissions",
-        "title": "Who can do what",
-        "intro": "Anyone who can open the order can fill in its procedures. What changes by profile is who creates templates, who adds procedures and who reopens them.",
+        "title": "If someone works with you",
+        "intro": "Working alone, you do everything. With a team, anyone who can open the order can answer its checklists. What changes by role is who creates templates, who adds checklists to the order and who reopens them.",
         "table": {
-          "headers": ["Profile", "Create templates", "Add or remove on an order", "Reopen completed"],
-          "rows": [
-            { "label": "Administrator", "cells": [{ "class": "yes" }, { "text": "In any status" }, { "class": "yes" }] },
-            { "label": "Manager", "cells": [{ "class": "no" }, { "text": "In any status" }, { "class": "yes" }] },
-            { "label": "Supervisor", "cells": [{ "class": "yes" }, { "text": "Until the order is completed" }, { "class": "yes" }] },
-            { "label": "Consultant", "cells": [{ "class": "no" }, { "text": "On their own orders, in any status" }, { "class": "no" }] },
-            { "label": "Technician", "cells": [{ "class": "no" }, { "text": "Only in Quote" }, { "class": "no" }] }
+          "headers": [
+            "Role",
+            "Create templates",
+            "Add to or remove from the order",
+            "Reopen finished"
           ],
-          "note": "The full rules for each profile are in <a href=\"perfis-en.html\">User profiles</a>."
+          "rows": [
+            {
+              "label": "Administrator",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "In any status"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Manager",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "In any status"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "Until the order is completed"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Consultant",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "On their own orders, in any status"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Technician",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "Only in Quote"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ],
+          "note": "What each role can do is in <a href=\"perfis-en.html\">Team and roles</a>."
         }
       },
       {
@@ -284,24 +556,28 @@
         "title": "FAQ",
         "faq": [
           {
-            "question": "Can I edit a template that’s already in use?",
-            "answer": "Yes. The edit applies to future orders. Procedures already on orders keep the items they had when they were added."
+            "question": "Can I change a template that’s already been used?",
+            "answer": "Yes. The change applies to the next orders. Checklists already on orders keep the questions from when they were added."
           },
           {
-            "question": "How do I reopen a completed procedure?",
-            "answer": "Open the procedure on the order and tap <strong>Reopen</strong> at the top of the screen. Only Administrators, Managers and Supervisors see that button."
+            "question": "How do I reopen a finished checklist?",
+            "answer": "Open the checklist on the order, tap <strong>…</strong> and <strong>Reopen</strong>. With a team, only Administrator, Manager and Supervisor see that option."
           },
           {
             "question": "Can I use the same template on many orders?",
-            "answer": "Yes, as many as you like. Each order gets its own copy, filled in independently."
+            "answer": "Yes, as many as you like. Each order gets its own copy, answered separately."
           },
           {
-            "question": "Why can’t the technician add a procedure?",
-            "answer": "Once the order leaves Quote, Technicians can only fill in the procedures already on it. Add them before approval, or ask a Supervisor or Administrator."
+            "question": "Why can’t I mark the order as ready?",
+            "answer": "One of the order’s checklists isn’t finished yet. Open it and finish it before marking the order as ready."
           },
           {
-            "question": "Does the procedure show up in the order PDF?",
-            "answer": "Yes. Each procedure becomes a page in the PDF, with the answers and the item photos."
+            "question": "Why can’t the technician add a checklist?",
+            "answer": "Once the order leaves Quote, the Technician only answers the checklists already on it. Add them before approving, or ask a Supervisor or Administrator."
+          },
+          {
+            "question": "Does the checklist show in the order’s PDF?",
+            "answer": "Yes. Checklists go into the PDF, with the answers and the photos on the questions."
           }
         ]
       }
@@ -311,126 +587,260 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Cómo funcionan los procedimientos",
-        "intro": "Un procedimiento es un checklist que armas una vez y usas en muchas OS — la revisión de entrada de un auto, las pruebas de un celular antes de entregarlo, las mediciones finales de un aire acondicionado. El técnico lo llena en el celular durante el trabajo y adjunta fotos en cada ítem.",
+        "title": "Cómo funcionan los checklists",
+        "intro": "Un checklist es una lista de preguntas que armas una vez y usas en muchas OS: la entrada de un auto al taller, las pruebas de un celular antes de entregarlo, las mediciones finales de un aire acondicionado. Lo respondes en el celular, durante el servicio, y puedes poner fotos en las preguntas.",
         "features": [
           {
             "title": "Plantilla",
-            "description": "La lista de ítems que armas en <strong>Más → Procedimientos</strong>. Vale para toda la empresa."
+            "description": "La lista de preguntas que armas en <strong>Checklists</strong>, en Ajustes. Vale para todas tus OS."
           },
           {
             "title": "En la OS",
-            "description": "Una copia de la plantilla, agregada en la sección <strong>Formularios</strong> de la OS y llenada ahí."
+            "description": "Una copia de la plantilla, agregada a la OS y respondida ahí. Aparece en <strong>Checklists</strong>, en la pantalla de la OS, con cuántas preguntas ya se respondieron."
           },
           {
             "title": "En el PDF",
-            "description": "Cada procedimiento de la OS se vuelve una página del PDF, con las respuestas y las fotos."
+            "description": "Los checklists de la OS entran en el PDF, con las respuestas y las fotos."
           }
         ],
         "infoCard": {
-          "title": "Plantillas listas para tu segmento",
-          "content": "En <strong>Más → Procedimientos</strong>, la lista <strong>Procedimientos Globales</strong> trae plantillas listas para el segmento de la empresa. Puedes usarlas directo en la OS o traerlas con <strong>Importar a Mi Empresa</strong> y ajustarlas a tu manera."
+          "title": "Plantillas listas para tu rubro",
+          "content": "En <strong>Checklists</strong>, la parte <strong>Listos para usar</strong> trae plantillas para tu rubro. Toca <strong>Usar</strong> para copiar una a <strong>Tus checklists</strong> y ajustarla a tu manera."
         }
       },
       {
         "id": "tipos",
-        "title": "Tipos de ítem",
-        "intro": "Cada ítem tiene un tipo, que define cómo responde el técnico. Elige según lo que quieras revisar después.",
+        "title": "Tipos de respuesta",
+        "intro": "Cada pregunta tiene un tipo de respuesta, que define cómo se responde. Elígelo según lo que quieras revisar después.",
         "table": {
-          "headers": ["Tipo", "Cómo se responde", "Ejemplo"],
+          "headers": [
+            "Tipo",
+            "Cómo se responde",
+            "Ejemplo"
+          ],
           "rows": [
-            { "label": "Texto", "cells": [{ "text": "Escribiendo libremente" }, { "text": "Falla reportada por el cliente" }] },
-            { "label": "Número", "cells": [{ "text": "Escribiendo un número" }, { "text": "Kilometraje, presión del gas" }] },
-            { "label": "Sí/No", "cells": [{ "text": "Tocando Sí o No" }, { "text": "¿El equipo enciende?" }] },
-            { "label": "Selección única", "cells": [{ "text": "Eligiendo una opción de la lista" }, { "text": "Estado de la pantalla: perfecta, rayada, rota" }] },
-            { "label": "Opción múltiple", "cells": [{ "text": "Marcando una o más opciones" }, { "text": "Accesorios entregados: cargador, funda, chip" }] },
-            { "label": "Solo foto", "cells": [{ "text": "Adjuntando fotos, sin texto" }, { "text": "Foto del tablero con el kilometraje" }] }
+            {
+              "label": "Sí o no",
+              "cells": [
+                {
+                  "text": "Tocando Sí o No"
+                },
+                {
+                  "text": "¿El equipo enciende?"
+                }
+              ]
+            },
+            {
+              "label": "Elegir una opción",
+              "cells": [
+                {
+                  "text": "Eligiendo una opción de la lista"
+                },
+                {
+                  "text": "Nivel de combustible: reserva, 1/4, 1/2, lleno"
+                }
+              ]
+            },
+            {
+              "label": "Elegir varias opciones",
+              "cells": [
+                {
+                  "text": "Marcando una o más opciones"
+                },
+                {
+                  "text": "Pertenencias dejadas: cargador, funda, chip"
+                }
+              ]
+            },
+            {
+              "label": "Texto",
+              "cells": [
+                {
+                  "text": "Escribiendo libremente"
+                },
+                {
+                  "text": "Falla que contó el cliente"
+                }
+              ]
+            },
+            {
+              "label": "Número",
+              "cells": [
+                {
+                  "text": "Escribiendo un número"
+                },
+                {
+                  "text": "Kilometraje, presión del gas"
+                }
+              ]
+            },
+            {
+              "label": "Solo foto",
+              "cells": [
+                {
+                  "text": "Sacando o eligiendo fotos, sin texto"
+                },
+                {
+                  "text": "Fotos de la carrocería a la llegada"
+                }
+              ]
+            }
           ]
         },
         "infoCard": {
-          "title": "Fotos en cualquier ítem",
-          "content": "Cualquier ítem puede recibir fotos, no solo los de tipo Solo foto. Deja <strong>Permitir fotos</strong> activado en el ítem. En Selección única y Opción múltiple, escribe una opción por línea — al menos dos."
+          "title": "Foto en cualquier pregunta",
+          "content": "Cualquier pregunta puede llevar fotos, no solo las de tipo Solo foto. Basta con encender <strong>Puede poner foto</strong> en la pregunta. En Elegir una opción y Elegir varias opciones, escribe una opción por línea."
         }
       },
       {
         "id": "templates",
         "title": "Crear una plantilla",
-        "intro": "Solo Administrador y Supervisor crean y editan plantillas.",
+        "intro": "Si alguien trabaja contigo, solo Administrador y Supervisor crean y cambian plantillas.",
         "steps": [
-          "Toca la pestaña <strong>Más</strong> y luego <strong>Procedimientos</strong>.",
-          "Toca <strong>+</strong> y llena el <strong>Título</strong> y, si quieres, la descripción.",
-          "Toca el botón para agregar un ítem. Escribe el texto, elige el <strong>Tipo</strong> y activa <strong>Obligatorio</strong> si el técnico no puede saltarlo.",
-          "Repite para cada ítem. Arrastra los ítems para cambiar el orden; desliza a la izquierda para quitar uno.",
-          "Toca <strong>Guardar</strong>."
+          "Toca el botón del perfil, arriba en Inicio, y ve a <strong>Checklists</strong>.",
+          "Toca <strong>+</strong> (Nuevo checklist) y escribe el <strong>Nombre del checklist</strong>.",
+          "Toca <strong>Agregar pregunta</strong>. Escribe la pregunta, elige el <strong>Tipo de respuesta</strong> y enciende <strong>Obligatoria</strong> si el checklist no puede terminarse sin ella. Toca <strong>Listo</strong>.",
+          "Repite para cada pregunta. Para quitar una, desliza a la izquierda.",
+          "Toca el <strong>✓</strong> de arriba para guardar. Se pone azul cuando el checklist tiene nombre y al menos una pregunta."
         ],
         "subsections": [
           {
-            "title": "Dejar de usar una plantilla",
-            "content": "Desactiva <strong>Activo</strong> en la plantilla. Deja de aparecer al agregar a una OS, pero queda guardada — y las OS que ya la usaron no cambian."
+            "title": "Cambiar una plantilla o dejar de usarla",
+            "content": "Toca la plantilla para cambiar el nombre o las preguntas; mantén presionada una pregunta y arrástrala para cambiar el orden. En el <strong>…</strong> de la plantilla, <strong>No usar en la empresa</strong> la saca de la lista al agregar a la OS, sin borrarla. Las OS que ya la usaron no cambian."
           }
         ],
         "warningCard": {
-          "title": "Editar la plantilla no cambia las OS anteriores",
-          "content": "Cuando el procedimiento entra a la OS, se lleva una copia de los ítems. Si cambias la plantilla después, el cambio solo vale para las próximas OS."
+          "title": "Cambiar la plantilla no cambia las OS anteriores",
+          "content": "Cuando el checklist entra en la OS, lleva una copia de las preguntas. Si cambias la plantilla después, el cambio solo vale para las próximas OS."
         }
       },
       {
         "id": "llenado",
-        "title": "Llenar en la OS",
-        "intro": "En la OS, los procedimientos están en la sección <strong>Formularios</strong>. Cada respuesta se guarda en cuanto el técnico la toca — no hay botón de guardar.",
+        "title": "Responder en la OS",
+        "intro": "Las respuestas se guardan al instante; no hay botón de guardar.",
         "steps": [
-          "Abre la OS y baja hasta <strong>Formularios</strong>.",
-          "Toca <strong>Agregar</strong> y elige el procedimiento. Si la OS tiene más de un dispositivo, la app pregunta a cuál corresponde.",
-          "Toca el procedimiento y responde los ítems en el orden que te resulte más práctico.",
-          "Al terminar, toca <strong>Completo</strong>. Si falta algún ítem obligatorio, la app muestra la lista de lo que falta."
+          "En la OS, toca <strong>…</strong>, luego <strong>Agregar a la OS</strong> y <strong>Checklist</strong>.",
+          "En <strong>¿Qué checklist?</strong>, elige la plantilla. Si la OS tiene más de un vehículo o equipo, la app pregunta a cuál se refiere el checklist.",
+          "Toca <strong>Empezar</strong>. Las preguntas aparecen de a una: responde y toca <strong>Siguiente</strong>, u <strong>Omitir por ahora</strong> para volver a ella después.",
+          "Cuando todo esté respondido, toca <strong>Terminar checklist</strong>. Si solo faltan preguntas no obligatorias, aparece <strong>Terminar de todos modos</strong>. Si falta alguna obligatoria, la app muestra lo que falta."
         ],
         "warningCard": {
-          "title": "Una vez completo, hay que reabrirlo",
-          "content": "Un procedimiento completo ya no acepta cambios ni eliminar fotos. Para corregir, toca <strong>Reabrir</strong> arriba del procedimiento — el botón solo aparece para Administrador, Gerente y Supervisor."
+          "title": "Una vez terminado, solo reabriendo",
+          "content": "Un checklist terminado ya no acepta cambios ni que se quiten fotos. Para corregir, abre el checklist, toca <strong>…</strong> y <strong>Reabrir</strong>. La OS también solo puede marcarse como lista cuando todos sus checklists están terminados."
         }
       },
       {
         "id": "fotos",
-        "title": "Fotos en los procedimientos",
-        "intro": "La foto muestra en qué estado llegó el auto o el equipo y cómo quedó después del trabajo — y entra en el PDF de la OS.",
+        "title": "Fotos en el checklist",
+        "intro": "La foto muestra cómo llegó el auto o el equipo y cómo quedó después del servicio, y entra en el PDF de la OS.",
         "subsections": [
           {
             "title": "Cómo funciona",
             "validationList": [
               {
-                "label": "Tomar Foto",
-                "text": "Abre la cámara y adjunta una foto al ítem."
+                "label": "Sacar una foto",
+                "text": "Abre la cámara y pone la foto en la pregunta."
               },
               {
-                "label": "Elegir de la Galería",
+                "label": "Elegir de la galería",
                 "text": "Permite elegir varias fotos a la vez."
               },
               {
-                "label": "Ver y eliminar",
-                "text": "Toca la miniatura para verla en pantalla completa. Ahí eliminas una foto, mientras el procedimiento no esté completo."
+                "label": "Ver y quitar",
+                "text": "Toca la foto para verla en pantalla completa. Ahí puedes quitar una foto, mientras el checklist no esté terminado."
               }
             ]
           }
         ],
         "infoCard": {
-          "title": "Las fotos quedan en la nube",
-          "content": "Las fotos se suben al almacenamiento de la empresa en PraticOS. Quien abra la OS en otro celular ve las mismas fotos."
+          "title": "Las fotos quedan guardadas en tu cuenta",
+          "content": "Las fotos van al almacenamiento de PraticOS. Quien abra la OS en otro celular ve las mismas fotos. El plan gratis tiene un límite mensual de fotos y una plantilla de checklist; los planes pagos, contratados en la app, amplían esos límites."
         }
       },
       {
         "id": "permisos",
-        "title": "Quién puede qué",
-        "intro": "Cualquier persona que abre la OS puede llenar sus procedimientos. Lo que cambia por perfil es quién crea plantillas, quién agrega procedimientos y quién los reabre.",
+        "title": "Si alguien trabaja contigo",
+        "intro": "Si trabajas solo, haces todo. Con equipo, cualquiera que abra la OS puede responder sus checklists. Lo que cambia según el rol es quién crea plantillas, quién agrega checklists a la OS y quién los reabre.",
         "table": {
-          "headers": ["Perfil", "Crear plantillas", "Agregar o quitar en la OS", "Reabrir completo"],
-          "rows": [
-            { "label": "Administrador", "cells": [{ "class": "yes" }, { "text": "En cualquier estado" }, { "class": "yes" }] },
-            { "label": "Gerente", "cells": [{ "class": "no" }, { "text": "En cualquier estado" }, { "class": "yes" }] },
-            { "label": "Supervisor", "cells": [{ "class": "yes" }, { "text": "Hasta que la OS se complete" }, { "class": "yes" }] },
-            { "label": "Consultor", "cells": [{ "class": "no" }, { "text": "En sus OS, en cualquier estado" }, { "class": "no" }] },
-            { "label": "Técnico", "cells": [{ "class": "no" }, { "text": "Solo en Presupuesto" }, { "class": "no" }] }
+          "headers": [
+            "Rol",
+            "Crear plantillas",
+            "Agregar o quitar de la OS",
+            "Reabrir terminado"
           ],
-          "note": "Las reglas completas de cada perfil están en <a href=\"perfis-es.html\">Perfiles de usuario</a>."
+          "rows": [
+            {
+              "label": "Administrador",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "En cualquier estado"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Gerente",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "En cualquier estado"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Supervisor",
+              "cells": [
+                {
+                  "class": "yes"
+                },
+                {
+                  "text": "Hasta que la OS se complete"
+                },
+                {
+                  "class": "yes"
+                }
+              ]
+            },
+            {
+              "label": "Consultor",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "En sus propias OS, en cualquier estado"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            },
+            {
+              "label": "Técnico",
+              "cells": [
+                {
+                  "class": "no"
+                },
+                {
+                  "text": "Solo en Presupuesto"
+                },
+                {
+                  "class": "no"
+                }
+              ]
+            }
+          ],
+          "note": "Lo que puede hacer cada rol está en <a href=\"perfis-es.html\">Equipo y roles</a>."
         }
       },
       {
@@ -438,24 +848,28 @@
         "title": "Preguntas frecuentes",
         "faq": [
           {
-            "question": "¿Puedo editar una plantilla que ya se usó?",
-            "answer": "Sí. La edición vale para las próximas OS. Los procedimientos que ya están en las OS guardan los ítems que tenían cuando se agregaron."
+            "question": "¿Puedo cambiar una plantilla que ya se usó?",
+            "answer": "Sí. El cambio vale para las próximas OS. Los checklists que ya están en las OS guardan las preguntas de cuando se agregaron."
           },
           {
-            "question": "¿Cómo reabro un procedimiento completo?",
-            "answer": "Abre el procedimiento en la OS y toca <strong>Reabrir</strong>, arriba en la pantalla. Solo Administrador, Gerente y Supervisor ven ese botón."
+            "question": "¿Cómo reabro un checklist terminado?",
+            "answer": "Abre el checklist en la OS, toca <strong>…</strong> y <strong>Reabrir</strong>. Con equipo, solo Administrador, Gerente y Supervisor ven esa opción."
           },
           {
             "question": "¿Puedo usar la misma plantilla en varias OS?",
-            "answer": "Sí, en todas las que quieras. Cada OS recibe su propia copia, que se llena por separado."
+            "answer": "Sí, en todas las que quieras. Cada OS recibe su propia copia, respondida por separado."
           },
           {
-            "question": "¿Por qué el técnico no puede agregar un procedimiento?",
-            "answer": "Cuando la OS sale de Presupuesto, el Técnico solo llena los procedimientos que ya están en ella. Agrégalos antes de aprobar, o pídeselo a un Supervisor o Administrador."
+            "question": "¿Por qué no puedo marcar la OS como lista?",
+            "answer": "Algún checklist de la OS todavía no está terminado. Ábrelo y termínalo antes de marcar la OS como lista."
           },
           {
-            "question": "¿El procedimiento aparece en el PDF de la OS?",
-            "answer": "Sí. Cada procedimiento se vuelve una página del PDF, con las respuestas y las fotos de los ítems."
+            "question": "¿Por qué el técnico no puede agregar un checklist?",
+            "answer": "Cuando la OS sale de Presupuesto, el Técnico solo responde los checklists que ya están en ella. Agrégalos antes de aprobar, o pide a un Supervisor o Administrador."
+          },
+          {
+            "question": "¿El checklist aparece en el PDF de la OS?",
+            "answer": "Sí. Los checklists entran en el PDF, con las respuestas y las fotos de las preguntas."
           }
         ]
       }

@@ -4,10 +4,10 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Assistência Técnica de Informática | PraticOS",
-    "description": "App de ordem de serviço para assistência de informática: entrada com fotos e senha, diagnóstico de hardware, orçamento por link e busca por nº de série.",
+    "description": "App de ordem de serviço para assistência de informática: fale o equipamento e a IA abre a OS, entrada com fotos e senha, diagnóstico de hardware, orçamento por link e busca por nº de série.",
     "keywords": "sistema para assistência técnica de informática, app para técnico de informática, programa ordem de serviço computador, controle de OS informática, software assistência técnica grátis, sistema para loja de informática",
     "ogTitle": "Sistema para Assistência Técnica de Informática | PraticOS",
-    "ogDescription": "OS da bancada no celular: computador com especificações, entrada com fotos, diagnóstico de hardware, backup confirmado e orçamento aprovado por link.",
+    "ogDescription": "OS da bancada no celular: a IA abre a OS pelo que você fala, entrada com fotos, diagnóstico de hardware, backup confirmado e orçamento aprovado por link.",
     "hero": {
       "title": "Notebook, senha e diagnóstico",
       "titleMark": "na mesma OS.",
@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo cliente",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Concluído",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -87,7 +86,7 @@
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Pix, cartão e dinheiro anotados em lugares diferentes. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Receba o valor inteiro ou em partes na OS. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
         }
       ]
     },
@@ -97,51 +96,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registre a entrada",
-          "text": "Cadastre o cliente e o computador com processador, memória e armazenamento. O checklist de entrada vem pronto e você ajusta os itens.",
+          "title": "Fale o equipamento e a IA abre a OS",
+          "text": "No balcão, toque em Falar: “Notebook Dell do Ricardo, lento e esquentando, limpeza interna e troca de pasta térmica”. A IA preenche cliente, equipamento, serviços e preços do seu catálogo. Você confere e salva.",
           "facts": [
-            "Liga? Tela funciona? Avarias e acessórios",
-            "Senha de acesso registrada na OS",
-            "Busca pelo número de série na lista de OS"
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “a limpeza é 150”",
+            "Ou tire foto da etiqueta ou do pedido anotado"
           ],
-          "image": "forms.png",
-          "alt": "Checklist de entrada preenchido dentro de uma OS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
+          "title": "Registre a entrada",
+          "text": "O checklist de entrada vem pronto e você ajusta os itens: liga, tela, avarias, acessórios deixados e a senha de acesso, com fotos.",
+          "facts": [
+            "Liga? Tela funciona? Avarias e acessórios",
+            "Senha de acesso registrada na OS",
+            "Processador, memória e armazenamento no equipamento"
+          ],
+          "image": "checklist.png",
+          "alt": "Checklist preenchido com fotos dentro de uma OS"
+        },
+        {
+          "number": "03",
           "title": "Diagnostique e orce por link",
-          "text": "Faça o diagnóstico de hardware e monte o orçamento com serviços e peças do catálogo. O cliente abre a OS no navegador, vê tudo e aprova.",
+          "text": "Faça o diagnóstico de hardware e monte o orçamento com serviços e peças do catálogo. O cliente abre a OS no navegador, vê tudo, lê seus termos e aprova.",
           "facts": [
             "Aprovação registrada na própria OS",
             "Seus termos de garantia e retirada antes da aprovação",
             "PDF da OS para imprimir ou enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
-        },
-        {
-          "number": "03",
-          "title": "Execute com checklist",
-          "text": "Formatação, limpeza interna e upgrade têm checklists prontos. A lista de OS mostra o que está em orçamento, aprovado, em execução ou concluído.",
-          "facts": [
-            "Backup, sistema, drivers e dados restaurados",
-            "Temperatura antes e depois da limpeza",
-            "Teste de periféricos na entrega"
-          ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço com status no app PraticOS"
+          "image": "order.png",
+          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
         },
         {
           "number": "04",
-          "title": "Entregue e receba",
-          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "title": "Execute com checklist",
+          "text": "Formatação, limpeza interna e upgrade têm checklists prontos. O Início mostra o que está em orçamento, aprovado, em andamento ou concluído.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
-            "Quem ainda deve, numa lista só"
+            "Backup, sistema, drivers e dados restaurados",
+            "Temperatura antes e depois da limpeza",
+            "Busca pelo número de série no Início"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "home.png",
+          "alt": "Início com as ordens de serviço em aberto e os filtros"
+        },
+        {
+          "number": "05",
+          "title": "Entregue e receba",
+          "text": "Receba o valor inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança.",
+          "facts": [
+            "Pagamento em partes e desconto na mesma OS",
+            "Quem deve há mais tempo aparece primeiro",
+            "Relatório do mês com o que entrou"
+          ],
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
         }
       ]
     },
@@ -151,19 +162,19 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "Serve para redes e servidores?",
-          "answer": "Sim. O segmento de informática cobre desktops, notebooks, redes e servidores. Para atender na empresa do cliente, agende a OS e ela aparece na agenda do técnico."
+          "answer": "Sim. O ramo de informática cobre desktops, notebooks, redes e servidores. Para atender no local do cliente, marque dia e hora na OS e o atendimento entra na Agenda."
         },
         {
           "question": "Posso colocar minhas regras de garantia e retirada?",
-          "answer": "Sim. Em Termos e Condições há um texto padrão para informática — retirada, backup, senhas, garantia — que você edita. O cliente vê os termos antes de aprovar o orçamento, e eles saem no PDF da OS."
+          "answer": "Sim. Em Termos para o cliente (no botão do perfil, no topo do Início) há um texto padrão para informática (retirada, backup, senhas, garantia) que você edita. O cliente vê os termos antes de aprovar o orçamento, e eles saem no PDF da OS."
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "answer": "Sim, se alguém trabalha com você. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa por um código de convite, que dá para mandar pelo WhatsApp, e ela entra com a própria conta no celular dela, com um papel como Técnico ou Gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -176,10 +187,10 @@
     "lang": "en",
     "langCode": "en",
     "title": "Computer Repair Shop Software | PraticOS",
-    "description": "Work order app for computer repair shops: check-in with photos and password, hardware diagnosis, quotes approved by link and search by serial number.",
+    "description": "Work order app for computer repair: say the machine and AI opens the work order, check-in with photos and password, hardware diagnosis, quotes approved by link and search by serial number.",
     "keywords": "computer repair shop software, PC repair work order app, laptop repair shop management, computer technician app, IT repair ticketing software",
     "ogTitle": "Computer Repair Shop Software | PraticOS",
-    "ogDescription": "Your bench on your phone: computers with specs, check-in photos, hardware diagnosis, confirmed backups and quotes approved by link.",
+    "ogDescription": "Your repair bench on your phone: AI opens the work order from what you say, check-in with photos, hardware diagnosis, confirmed backup and quotes approved by link.",
     "hero": {
       "title": "Laptop, password and diagnosis",
       "titleMark": "on one work order.",
@@ -220,8 +231,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Done",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -259,7 +269,7 @@
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Card, cash and transfers noted in different places. Nobody knows who still owes you.",
-          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Receive the full amount or in parts on the work order. Financial shows how much is left to collect and from whom, and the monthly report shows what came in."
         }
       ]
     },
@@ -269,51 +279,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Log the check-in",
-          "text": "Add the customer and the computer with processor, memory and storage. The check-in checklist comes ready and you adjust the items.",
+          "title": "Say the machine and AI opens the order",
+          "text": "At the counter, tap Speak: “Ricardo’s Dell laptop, slow and overheating, internal cleaning and thermal paste.” AI fills in the customer, machine, services and prices from your catalog. You check it and save.",
           "facts": [
-            "Powers on? Display works? Damage and accessories",
-            "Login password recorded on the work order",
-            "Search by serial number in the work order list"
+            "What AI filled in is marked with ✦",
+            "Fix it by speaking: “the cleaning is 150”",
+            "Or take a photo of the label or the written request"
           ],
-          "image": "forms.png",
-          "alt": "A completed check-in checklist inside a work order"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
-          "title": "Diagnose and quote by link",
-          "text": "Run the hardware diagnosis and build the quote from catalog services and parts. The customer opens the work order in a browser, reviews it and approves.",
+          "title": "Log the check-in",
+          "text": "The check-in checklist comes ready and you adjust the items: powers on, screen, damage, accessories left and the login password, with photos.",
           "facts": [
-            "Approval recorded on the work order",
-            "Your warranty and pickup terms shown before approval",
-            "Work order PDF to print or send"
+            "Powers on? Screen works? Damage and accessories",
+            "Login password recorded on the order",
+            "Processor, memory and storage on the machine"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "checklist.png",
+          "alt": "Checklist filled in with photos inside a work order"
         },
         {
           "number": "03",
-          "title": "Do the work with checklists",
-          "text": "OS install, internal cleaning and upgrades have ready-made checklists. The work order list shows what's quoted, approved, in progress or done.",
+          "title": "Diagnose and quote by link",
+          "text": "Run the hardware diagnosis and build the quote with services and parts from your catalog. The customer opens the work order in the browser, sees everything, reads your terms and approves.",
           "facts": [
-            "Backup, OS, drivers and data restored",
-            "Temperature before and after cleaning",
-            "Peripheral test at handover"
+            "Approval recorded on the work order",
+            "Your warranty and pickup terms before approval",
+            "Work order PDF to print or send"
           ],
-          "image": "home.png",
-          "alt": "Work order list with statuses in the PraticOS app"
+          "image": "order.png",
+          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
         },
         {
           "number": "04",
-          "title": "Hand it back and get paid",
-          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "title": "Do the job with a checklist",
+          "text": "Reinstalls, internal cleaning and upgrades have ready-made checklists. Home shows what is in quote, approved, in progress or completed.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
-            "Everyone who still owes you, in one list"
+            "Backup, OS, drivers and data restored",
+            "Temperature before and after cleaning",
+            "Search by serial number on Home"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "home.png",
+          "alt": "Home with the open work orders and the filters"
+        },
+        {
+          "number": "05",
+          "title": "Deliver and get paid",
+          "text": "Receive the full amount or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
+          "facts": [
+            "Partial payments and discounts in the same order",
+            "Whoever has owed the longest shows up first",
+            "Monthly report of what came in"
+          ],
+          "image": "financial.png",
+          "alt": "Financial with how much is left to collect and the button to send a payment request"
         }
       ]
     },
@@ -323,19 +345,19 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does it work for networks and servers?",
-          "answer": "Yes. The computers segment covers desktops, laptops, networks and servers. For on-site jobs, schedule the work order and it shows up on the technician's calendar."
+          "answer": "Yes. The computer trade covers desktops, laptops, networks and servers. To work at the customer’s site, set a date and time on the work order and the appointment goes on the Schedule."
         },
         {
           "question": "Can I add my own warranty and pickup rules?",
-          "answer": "Yes. Terms and Conditions comes with a default text for computer repair — pickup, backup, passwords, warranty — that you can edit. The customer sees it before approving the quote, and it prints on the work order PDF."
+          "answer": "Yes. In Terms for the customer (from the profile button at the top of Home) there is a default text for computer repair (pickup, backup, passwords, warranty) that you edit. The customer sees the terms before approving the quote, and they print on the work order PDF."
         },
         {
           "question": "Can my technicians use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values."
+          "answer": "Yes, if someone works with you. Tap the profile button at the top of Home, go to Team and invite them with an invite code, which you can send over WhatsApp, and they sign in with their own account on their own phone, with a role such as Technician or Manager. Inviting someone requires a paid plan, subscribed inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -348,10 +370,10 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Servicio Técnico de Computadoras | PraticOS",
-    "description": "App de órdenes de servicio para servicio técnico de computadoras: ingreso con fotos y contraseña, diagnóstico de hardware y presupuesto aprobado por link.",
+    "description": "App de órdenes de servicio para servicio técnico de computadoras: dices el equipo y la IA abre la OS, ingreso con fotos y contraseña, diagnóstico de hardware y presupuesto aprobado por link.",
     "keywords": "sistema para servicio técnico de computadoras, app para técnico en informática, programa orden de servicio computadoras, software servicio técnico informática, sistema para tienda de informática",
     "ogTitle": "Sistema para Servicio Técnico de Computadoras | PraticOS",
-    "ogDescription": "El taller en el celular: computadoras con especificaciones, ingreso con fotos, diagnóstico de hardware, backup confirmado y presupuesto por link.",
+    "ogDescription": "El banco de trabajo en el celular: la IA abre la OS con lo que dices, ingreso con fotos, diagnóstico de hardware, backup confirmado y presupuesto aprobado por link.",
     "hero": {
       "title": "Notebook, clave y diagnóstico",
       "titleMark": "en una sola orden.",
@@ -390,10 +412,9 @@
         "stamp": "Aprobado por el cliente",
         "steps": [
           "Presupuesto",
-          "Aprobado",
+          "Aprobada",
           "En curso",
-          "Terminado",
-          "Cobrado"
+          "Completada"
         ],
         "current": 2
       }
@@ -431,7 +452,7 @@
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Tarjeta, efectivo y transferencias anotados en lugares distintos. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Cobra el valor completo o en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, y el informe del mes muestra lo que entró."
         }
       ]
     },
@@ -441,51 +462,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registra el ingreso",
-          "text": "Registra al cliente y la computadora con procesador, memoria y almacenamiento. El checklist de ingreso viene listo y tú ajustas los ítems.",
+          "title": "Di el equipo y la IA abre la OS",
+          "text": "En el mostrador, toca Hablar: “Notebook Dell de Ricardo, lenta y calentando, limpieza interna y cambio de pasta térmica”. La IA completa cliente, equipo, servicios y precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
-            "Contraseña de acceso registrada en la orden",
-            "Búsqueda por número de serie en la lista de órdenes"
+            "Lo que la IA completó queda marcado con ✦",
+            "Corrige hablando: “la limpieza es 150”",
+            "O saca una foto de la etiqueta o del pedido anotado"
           ],
-          "image": "forms.png",
-          "alt": "Checklist de ingreso completado dentro de una orden"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
-          "title": "Diagnostica y cotiza por link",
-          "text": "Haz el diagnóstico de hardware y arma el presupuesto con servicios y repuestos del catálogo. El cliente abre la orden en el navegador, la revisa y aprueba.",
+          "title": "Registra el ingreso",
+          "text": "El checklist de ingreso viene listo y tú ajustas los ítems: enciende, pantalla, daños, accesorios dejados y la contraseña de acceso, con fotos.",
           "facts": [
-            "Aprobación registrada en la propia orden",
-            "Tus términos de garantía y retiro antes de aprobar",
-            "PDF de la orden para imprimir o enviar"
+            "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
+            "Contraseña de acceso registrada en la OS",
+            "Procesador, memoria y almacenamiento en el equipo"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "checklist.png",
+          "alt": "Checklist completado con fotos dentro de una OS"
         },
         {
           "number": "03",
-          "title": "Trabaja con checklist",
-          "text": "Formateo, limpieza interna y upgrade tienen checklists listos. La lista de órdenes muestra qué está en presupuesto, aprobado, en curso o terminado.",
+          "title": "Diagnostica y presupuesta por link",
+          "text": "Haz el diagnóstico de hardware y arma el presupuesto con servicios y repuestos del catálogo. El cliente abre la OS en el navegador, ve todo, lee tus términos y aprueba.",
           "facts": [
-            "Backup, sistema, drivers y datos restaurados",
-            "Temperatura antes y después de la limpieza",
-            "Prueba de periféricos en la entrega"
+            "Aprobación registrada en la propia OS",
+            "Tus términos de garantía y retiro antes de aprobar",
+            "PDF de la OS para imprimir o enviar"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio con estados en la app PraticOS"
+          "image": "order.png",
+          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
         },
         {
           "number": "04",
-          "title": "Entrega y cobra",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "title": "Ejecuta con checklist",
+          "text": "Formateo, limpieza interna y upgrade tienen checklists listos. Inicio muestra lo que está en presupuesto, aprobado, en curso o completado.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
-            "Quién todavía debe, en una sola lista"
+            "Backup, sistema, drivers y datos restaurados",
+            "Temperatura antes y después de la limpieza",
+            "Búsqueda por número de serie en Inicio"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "home.png",
+          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
+        },
+        {
+          "number": "05",
+          "title": "Entrega y cobra",
+          "text": "Cobra el valor completo o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro.",
+          "facts": [
+            "Pago en partes y descuento en la misma OS",
+            "Quien debe hace más tiempo aparece primero",
+            "Informe del mes con lo que entró"
+          ],
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
         }
       ]
     },
@@ -495,19 +528,19 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿Sirve para redes y servidores?",
-          "answer": "Sí. El segmento de informática cubre computadoras de escritorio, notebooks, redes y servidores. Para atender en la empresa del cliente, agenda la orden y aparece en la agenda del técnico."
+          "answer": "Sí. El rubro de informática cubre computadoras de escritorio, notebooks, redes y servidores. Para atender en el lugar del cliente, marca día y hora en la OS y la cita entra en la Agenda."
         },
         {
           "question": "¿Puedo poner mis reglas de garantía y retiro?",
-          "answer": "Sí. Términos y Condiciones trae un texto estándar para informática — retiro, backup, contraseñas, garantía — que puedes editar. El cliente lo ve antes de aprobar el presupuesto y sale en el PDF de la orden."
+          "answer": "Sí. En Términos para el cliente (en el botón del perfil, arriba en Inicio) hay un texto estándar para informática (retiro, backup, contraseñas, garantía) que tú editas. El cliente ve los términos antes de aprobar el presupuesto, y salen en el PDF de la OS."
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros."
+          "answer": "Sí, si alguien trabaja contigo. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invita a la persona con un código de invitación, que puedes enviar por WhatsApp, y ella entra con su propia cuenta en su celular, con un rol como Técnico o Gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

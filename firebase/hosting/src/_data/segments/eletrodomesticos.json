@@ -4,10 +4,10 @@
     "lang": "pt-BR",
     "langCode": "pt",
     "title": "Sistema para Assistência de Eletrodomésticos | PraticOS",
-    "description": "App de OS para assistência técnica de eletrodomésticos: agenda de visitas por técnico, diagnóstico de geladeira e lavadora, garantia na OS. Comece grátis. Planos pagos disponíveis no app.",
+    "description": "App de OS para assistência técnica de eletrodomésticos: fale o chamado e a IA abre a OS, visita na agenda, diagnóstico de geladeira e lavadora e garantia na OS. Comece grátis.",
     "keywords": "sistema assistência técnica eletrodomésticos, software técnico linha branca, app técnico geladeira, ordem de serviço eletrodomésticos, sistema para conserto de máquina de lavar",
     "ogTitle": "Sistema para Assistência de Eletrodomésticos | PraticOS",
-    "ogDescription": "OS da linha branca no celular: visitas na agenda por técnico, checklists de diagnóstico, orçamento aprovado por link e garantia registrada.",
+    "ogDescription": "OS da linha branca no celular: a IA abre a OS pelo que você fala, a visita entra na agenda, o diagnóstico vai no checklist e o cliente aprova o orçamento por link.",
     "hero": {
       "title": "Visita, diagnóstico e garantia",
       "titleMark": "na mesma OS.",
@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo cliente",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Concluído",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -62,7 +61,7 @@
         {
           "problem": "Visita sem saber o que levar",
           "detail": "O técnico chega na casa do cliente sem saber o modelo, a voltagem nem o defeito, e precisa voltar outro dia.",
-          "answer": "A OS já sai com o cliente, o endereço, o eletrodoméstico, a voltagem e o defeito relatado no telefone."
+          "answer": "Fale o que o cliente contou no telefone e a IA abre a OS com o cliente, o endereço, o eletrodoméstico, a voltagem e o defeito relatado."
         },
         {
           "problem": "Diagnóstico de cabeça",
@@ -75,14 +74,14 @@
           "answer": "O checklist de entrega registra serviço executado, peças trocadas, teste final, orientações e prazo de garantia: 30, 60 ou 90 dias."
         },
         {
-          "problem": "Equipe sem agenda",
-          "detail": "Dois técnicos no mesmo bairro em horários diferentes e um cliente esperando a manhã inteira.",
-          "answer": "A data da OS coloca a visita na agenda. Quem coordena filtra o calendário por técnico, e o celular avisa antes de cada atendimento."
+          "problem": "Visita marcada de cabeça",
+          "detail": "Dois clientes no mesmo horário, um bairro de distância entre eles e alguém esperando a manhã inteira.",
+          "answer": "A data da OS coloca a visita na Agenda, e o celular avisa antes de cada atendimento. Se alguém trabalha com você, dá para ver a agenda de cada pessoa."
         },
         {
           "problem": "Técnico volta sem receber",
           "detail": "O cliente pede para pagar depois e, no fim do mês, ninguém lembra quem ficou devendo.",
-          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Receba o valor inteiro ou em partes na OS. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança."
         },
         {
           "problem": "“O técnico já saiu?”",
@@ -97,51 +96,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Abra o chamado e agende",
-          "text": "Cadastre o cliente com endereço e o eletrodoméstico com voltagem. A data da OS coloca a visita no calendário do técnico.",
+          "title": "Fale o chamado e a IA abre a OS",
+          "text": "Toque em Falar e diga o chamado: “Geladeira da dona Sandra, não está gelando, visita amanhã às 9”. A IA preenche cliente, aparelho, serviço e preço do seu catálogo. Você confere e salva.",
           "facts": [
-            "Voltagem: 110V, 220V ou bivolt",
-            "Calendário do mês com filtro por técnico",
-            "Lembrete no celular antes do atendimento"
+            "O que a IA preencheu fica marcado com ✦",
+            "Corrija falando: “a visita é 120”",
+            "Ou tire foto do pedido anotado"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda do PraticOS com OS marcadas no mês"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
+          "title": "Visita na agenda",
+          "text": "Com dia e hora na OS, a visita entra na Agenda. Você vê a semana, o dia e o que tem em cada horário, sem marcar dois clientes juntos.",
+          "facts": [
+            "Semana no topo, atendimentos do dia embaixo",
+            "Lembrete no celular antes do horário",
+            "Resumo do dia às 9h, se você quiser"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+        },
+        {
+          "number": "03",
           "title": "Diagnostique no local",
-          "text": "Os checklists de eletrodomésticos vêm prontos e você ajusta os itens: entrada do equipamento, diagnóstico por tipo de aparelho, segurança e teste final.",
+          "text": "Os checklists de eletrodomésticos vêm prontos e você ajusta os itens: entrada do aparelho, diagnóstico por tipo, segurança e teste final, com fotos.",
           "facts": [
             "Geladeira: compressor, gás, termostato, borracha, degelo",
             "Lavadora: enchimento, drenagem, centrifugação, motor, rolamentos",
             "Micro-ondas: magnetron, capacitor, trava da porta"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido com fotos dentro de uma OS"
         },
         {
-          "number": "03",
+          "number": "04",
           "title": "Mande o orçamento por link",
-          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários.",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários. Na OS, o botão azul mostra o próximo passo.",
           "facts": [
             "Aprovação registrada na própria OS",
             "Cliente acompanha o conserto sem ligar",
             "PDF da OS com checklists e fotos"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
         },
         {
-          "number": "04",
+          "number": "05",
           "title": "Entregue com garantia e receba",
-          "text": "Registre peças trocadas, teste final e prazo de garantia no checklist de entrega. Depois, o pagamento inteiro ou em parcelas.",
+          "text": "Registre peças trocadas, teste final e prazo de garantia no checklist de entrega. Depois receba, inteiro ou em partes. O Financeiro mostra quem ainda deve.",
           "facts": [
             "Garantia de 30, 60 ou 90 dias na OS",
-            "Pagamento parcial e desconto na mesma OS",
-            "Quem ainda deve, numa lista só"
+            "Pagamento em partes e desconto na mesma OS",
+            "Quem deve há mais tempo aparece primeiro"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro com quanto falta receber e o botão para mandar a cobrança"
         }
       ]
     },
@@ -151,19 +162,19 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "Quais aparelhos têm checklist pronto?",
           "answer": "Há checklists de diagnóstico para geladeira e freezer, máquina de lavar e micro-ondas, além de entrada, segurança, teste final e entrega, que servem para fogão, lava-louças e outros. Dá para editar os itens ou criar os seus."
         },
         {
-          "question": "Consigo ver a agenda de cada técnico?",
-          "answer": "Sim. A OS entra na agenda pela data da visita. Quem coordena a equipe filtra o calendário por técnico, e cada técnico recebe um aviso no celular antes do atendimento."
+          "question": "Como fica a agenda das visitas?",
+          "answer": "A OS entra na Agenda pela data da visita. Você vê a semana e o dia, e o celular avisa antes do horário. Se alguém trabalha com você, dá para filtrar a agenda por pessoa."
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente."
+          "answer": "Sim, se alguém trabalha com você. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa por um código de convite, que dá para mandar pelo WhatsApp, e ela entra com a própria conta no celular dela, com um papel como Técnico ou Gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -176,10 +187,10 @@
     "lang": "en",
     "langCode": "en",
     "title": "Appliance Repair Software: Work Orders | PraticOS",
-    "description": "Work order app for appliance repair: visits scheduled by technician, fridge and washer diagnostic checklists, warranty on the work order. Start free. Paid plans available in the app.",
+    "description": "Work order app for appliance repair: say the call and AI opens the work order, visits on the schedule, fridge and washer diagnostic checklists and warranty on the order. Start free.",
     "keywords": "appliance repair software, appliance repair work order app, appliance technician app, appliance service scheduling, refrigerator and washer repair software",
     "ogTitle": "Appliance Repair Software | PraticOS",
-    "ogDescription": "Appliance repair work orders on your phone: visits scheduled by technician, diagnostic checklists, quotes approved by link and warranty on record.",
+    "ogDescription": "Appliance repair on your phone: AI opens the work order from what you say, the visit goes on the schedule, the diagnosis goes on a checklist and the customer approves the quote by link.",
     "hero": {
       "title": "Visit, diagnosis and warranty",
       "titleMark": "on one work order.",
@@ -220,8 +231,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Done",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -234,7 +244,7 @@
         {
           "problem": "Visits without knowing what to bring",
           "detail": "The tech shows up without knowing the model, voltage or problem, and has to come back another day.",
-          "answer": "The work order already has the customer, address, appliance, voltage and the problem reported on the phone."
+          "answer": "Say what the customer told you on the phone and AI opens the work order with the customer, address, appliance, voltage and reported fault."
         },
         {
           "problem": "Diagnosis from memory",
@@ -247,14 +257,14 @@
           "answer": "The handover checklist records work done, parts replaced, final test, instructions and warranty period: 30, 60 or 90 days."
         },
         {
-          "problem": "A crew with no schedule",
-          "detail": "Two techs in the same neighborhood at different times and a customer waiting all morning.",
-          "answer": "The work order date puts the visit on the calendar. Whoever coordinates filters by technician, and the phone sends a reminder before each visit."
+          "problem": "Visits booked from memory",
+          "detail": "Two customers at the same time, a neighborhood apart, and someone waiting all morning.",
+          "answer": "The date on the work order puts the visit on the Schedule, and your phone reminds you before each appointment. If someone works with you, you can see each person’s schedule."
         },
         {
           "problem": "Techs coming back unpaid",
           "detail": "The customer asks to pay later and, by month-end, nobody remembers who still owes.",
-          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Receive the full amount or in parts on the work order. Financial shows how much is left to collect and from whom, with a button to send the payment request."
         },
         {
           "problem": "“Is the tech on the way?”",
@@ -269,51 +279,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Open the call and schedule",
-          "text": "Add the customer with their address and the appliance with its voltage. The work order date puts the visit on the tech's calendar.",
+          "title": "Say the call and AI opens the order",
+          "text": "Tap Speak and say the call: “Sandra’s fridge, not cooling, visit tomorrow at 9.” AI fills in the customer, appliance, service and the price from your catalog. You check it and save.",
           "facts": [
-            "Voltage: 110V, 220V or dual",
-            "Monthly calendar filtered by technician",
-            "Phone reminder before each visit"
+            "What AI filled in is marked with ✦",
+            "Fix it by speaking: “the visit is 120”",
+            "Or take a photo of the written request"
           ],
-          "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled for the month"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
-          "title": "Diagnose on site",
-          "text": "Appliance checklists come ready to use and you can adjust the items: intake, diagnosis by appliance type, safety and final test.",
+          "title": "The visit on the schedule",
+          "text": "With a date and time on the work order, the visit goes on the Schedule. You see the week, the day and what is booked at each hour, so two customers never land on the same slot.",
           "facts": [
-            "Fridge: compressor, refrigerant, thermostat, door gasket, defrost",
-            "Washer: fill, drain, spin, motor, bearings",
-            "Microwave: magnetron, capacitor, door latch"
+            "The week on top, the day’s appointments below",
+            "Phone reminder before the appointment",
+            "Daily summary at 9 a.m., if you want it"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the appointments booked for the day"
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
-          "text": "The customer opens the work order in a browser, nothing to install. They see photos, parts and labor, approve it and leave comments.",
+          "title": "Diagnose on site",
+          "text": "Appliance checklists come ready and you adjust the items: check-in, diagnosis by appliance type, safety and final test, with photos.",
+          "facts": [
+            "Fridge: compressor, gas, thermostat, door seal, defrost",
+            "Washer: filling, draining, spin, motor, bearings",
+            "Microwave: magnetron, capacitor, door latch"
+          ],
+          "image": "checklist.png",
+          "alt": "Checklist filled in with photos inside a work order"
+        },
+        {
+          "number": "04",
+          "title": "Send the quote by link",
+          "text": "The customer opens the work order in the browser, with nothing to install. They see the photos, parts and labor, approve and leave comments. On the order, the blue button shows the next step.",
           "facts": [
             "Approval recorded on the work order",
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
         },
         {
-          "number": "04",
-          "title": "Hand over with warranty and get paid",
-          "text": "Record parts replaced, final test and warranty period on the handover checklist. Then record the payment in full or in parts.",
+          "number": "05",
+          "title": "Deliver with warranty and get paid",
+          "text": "Record replaced parts, final test and warranty period on the delivery checklist. Then receive the payment, in full or in parts. Financial shows who still owes.",
           "facts": [
-            "30, 60 or 90-day warranty on the work order",
-            "Partial payment and discount on the same work order",
-            "Everyone who still owes you, in one list"
+            "30, 60 or 90-day warranty on the order",
+            "Partial payments and discounts in the same order",
+            "Whoever has owed the longest shows up first"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial with how much is left to collect and the button to send a payment request"
         }
       ]
     },
@@ -323,19 +345,19 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Which appliances have ready-made checklists?",
           "answer": "There are diagnostic checklists for fridge and freezer, washer and microwave, plus intake, safety, final test and handover checklists that work for ranges, dishwashers and more. You can edit the items or build your own."
         },
         {
-          "question": "Can I see each technician's schedule?",
-          "answer": "Yes. The work order goes on the calendar by its visit date. Whoever coordinates the team filters the calendar by technician, and each tech gets a phone reminder before the visit."
+          "question": "How does the visit schedule work?",
+          "answer": "The work order goes on the Schedule by its visit date. You see the week and the day, and your phone reminds you before the appointment. If someone works with you, you can filter the schedule by person."
         },
         {
           "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager."
+          "answer": "Yes, if someone works with you. Tap the profile button at the top of Home, go to Team and invite them with an invite code, which you can send over WhatsApp, and they sign in with their own account on their own phone, with a role such as Technician or Manager. Inviting someone requires a paid plan, subscribed inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -348,10 +370,10 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Técnico de Electrodomésticos | PraticOS",
-    "description": "App de órdenes de servicio para técnicos de electrodomésticos: agenda por técnico, checklists de refrigerador y lavadora, y garantía. Empieza gratis. Planes pagos disponibles en la app.",
+    "description": "App de órdenes de servicio para técnicos de electrodomésticos: dices el llamado y la IA abre la OS, visitas en la agenda, checklists de refrigerador y lavadora y garantía. Empieza gratis.",
     "keywords": "sistema servicio técnico electrodomésticos, software técnico línea blanca, app técnico refrigerador, orden de servicio electrodomésticos, sistema para reparación de lavadoras",
     "ogTitle": "Sistema para Técnico de Electrodomésticos | PraticOS",
-    "ogDescription": "Las órdenes de línea blanca en el celular: visitas en la agenda por técnico, checklists de diagnóstico, presupuesto por link y garantía registrada.",
+    "ogDescription": "Línea blanca en el celular: la IA abre la OS con lo que dices, la visita entra en la agenda, el diagnóstico va en el checklist y el cliente aprueba el presupuesto por link.",
     "hero": {
       "title": "Visita, diagnóstico y garantía",
       "titleMark": "en una orden.",
@@ -390,10 +412,9 @@
         "stamp": "Aprobado por el cliente",
         "steps": [
           "Presupuesto",
-          "Aprobado",
+          "Aprobada",
           "En curso",
-          "Terminado",
-          "Cobrado"
+          "Completada"
         ],
         "current": 2
       }
@@ -406,7 +427,7 @@
         {
           "problem": "Visitas sin saber qué llevar",
           "detail": "El técnico llega a la casa del cliente sin saber el modelo, el voltaje ni la falla, y tiene que volver otro día.",
-          "answer": "La orden ya sale con el cliente, la dirección, el electrodoméstico, el voltaje y la falla que contó por teléfono."
+          "answer": "Di lo que el cliente contó por teléfono y la IA abre la OS con el cliente, la dirección, el electrodoméstico, el voltaje y la falla reportada."
         },
         {
           "problem": "Diagnóstico de memoria",
@@ -419,14 +440,14 @@
           "answer": "El checklist de entrega registra el servicio hecho, repuestos cambiados, prueba final, indicaciones y plazo de garantía: 30, 60 o 90 días."
         },
         {
-          "problem": "Un equipo sin agenda",
-          "detail": "Dos técnicos en el mismo barrio a horas distintas y un cliente esperando toda la mañana.",
-          "answer": "La fecha de la orden pone la visita en la agenda. Quien coordina filtra por técnico, y el celular avisa antes de cada visita."
+          "problem": "Visitas agendadas de memoria",
+          "detail": "Dos clientes a la misma hora, a un barrio de distancia, y alguien esperando toda la mañana.",
+          "answer": "La fecha de la OS pone la visita en la Agenda, y el celular avisa antes de cada cita. Si alguien trabaja contigo, puedes ver la agenda de cada persona."
         },
         {
           "problem": "El técnico vuelve sin cobrar",
           "detail": "El cliente pide pagar después y, a fin de mes, nadie recuerda quién quedó debiendo.",
-          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Cobra el valor completo o en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro."
         },
         {
           "problem": "“¿Ya salió el técnico?”",
@@ -441,51 +462,63 @@
       "stages": [
         {
           "number": "01",
-          "title": "Abre el llamado y agenda",
-          "text": "Registra al cliente con su dirección y el electrodoméstico con su voltaje. La fecha de la orden pone la visita en el calendario del técnico.",
+          "title": "Di el llamado y la IA abre la OS",
+          "text": "Toca Hablar y di el llamado: “Refrigerador de la señora Sandra, no enfría, visita mañana a las 9”. La IA completa cliente, aparato, servicio y precio de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "Voltaje: 110V, 220V o doble voltaje",
-            "Calendario del mes con filtro por técnico",
-            "Aviso en el celular antes de la visita"
+            "Lo que la IA completó queda marcado con ✦",
+            "Corrige hablando: “la visita es 120”",
+            "O saca una foto del pedido anotado"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes del mes"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
-          "title": "Diagnostica en el lugar",
-          "text": "Los checklists de electrodomésticos vienen listos y tú ajustas los ítems: ingreso del equipo, diagnóstico por tipo de aparato, seguridad y prueba final.",
+          "title": "La visita en la agenda",
+          "text": "Con día y hora en la OS, la visita entra en la Agenda. Ves la semana, el día y lo que hay en cada horario, sin poner dos clientes juntos.",
           "facts": [
-            "Refrigerador: compresor, gas, termostato, empaque de la puerta, descongelamiento",
-            "Lavadora: llenado, desagüe, centrifugado, motor, rodamientos",
-            "Microondas: magnetrón, capacitor, traba de la puerta"
+            "La semana arriba, las citas del día abajo",
+            "Aviso en el celular antes del horario",
+            "Resumen del día a las 9 h, si lo quieres"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y las citas marcadas del día"
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
-          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios.",
+          "title": "Diagnostica en el lugar",
+          "text": "Los checklists de electrodomésticos vienen listos y tú ajustas los ítems: ingreso del aparato, diagnóstico por tipo, seguridad y prueba final, con fotos.",
           "facts": [
-            "Aprobación registrada en la propia orden",
-            "El cliente sigue la reparación sin llamar",
-            "PDF de la orden con checklists y fotos"
+            "Refrigerador: compresor, gas, termostato, burlete, descongelamiento",
+            "Lavadora: llenado, desagote, centrifugado, motor, rodamientos",
+            "Microondas: magnetrón, capacitor, traba de puerta"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "checklist.png",
+          "alt": "Checklist completado con fotos dentro de una OS"
         },
         {
           "number": "04",
-          "title": "Entrega con garantía y cobra",
-          "text": "Registra repuestos cambiados, prueba final y plazo de garantía en el checklist de entrega. Después, el pago total o en partes.",
+          "title": "Envía el presupuesto por link",
+          "text": "El cliente abre la OS en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios. En la OS, el botón azul muestra el próximo paso.",
           "facts": [
-            "Garantía de 30, 60 o 90 días en la orden",
-            "Pago parcial y descuento en la misma orden",
-            "Quién todavía debe, en una sola lista"
+            "Aprobación registrada en la propia OS",
+            "El cliente sigue la reparación sin llamar",
+            "PDF de la OS con checklists y fotos"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "order.png",
+          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+        },
+        {
+          "number": "05",
+          "title": "Entrega con garantía y cobra",
+          "text": "Registra repuestos cambiados, prueba final y plazo de garantía en el checklist de entrega. Después cobra, completo o en partes. Financiero muestra quién todavía debe.",
+          "facts": [
+            "Garantía de 30, 60 o 90 días en la OS",
+            "Pago en partes y descuento en la misma OS",
+            "Quien debe hace más tiempo aparece primero"
+          ],
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar y el botón para enviar el cobro"
         }
       ]
     },
@@ -495,19 +528,19 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de OS ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿Qué aparatos tienen checklist listo?",
           "answer": "Hay checklists de diagnóstico para refrigerador y freezer, lavadora y microondas, además de ingreso, seguridad, prueba final y entrega, que sirven para cocinas, lavavajillas y otros. Puedes editar los ítems o crear los tuyos."
         },
         {
-          "question": "¿Puedo ver la agenda de cada técnico?",
-          "answer": "Sí. La orden entra en la agenda por la fecha de la visita. Quien coordina el equipo filtra el calendario por técnico, y cada técnico recibe un aviso en el celular antes de la visita."
+          "question": "¿Cómo funciona la agenda de visitas?",
+          "answer": "La OS entra en la Agenda por la fecha de la visita. Ves la semana y el día, y el celular avisa antes del horario. Si alguien trabaja contigo, puedes filtrar la agenda por persona."
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente."
+          "answer": "Sí, si alguien trabaja contigo. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invita a la persona con un código de invitación, que puedes enviar por WhatsApp, y ella entra con su propia cuenta en su celular, con un rol como Técnico o Gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",
