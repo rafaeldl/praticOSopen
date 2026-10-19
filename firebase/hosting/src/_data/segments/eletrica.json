@@ -46,10 +46,9 @@
         "stamp": "Aprovado pelo cliente",
         "steps": [
           "Orçamento",
-          "Aprovado",
-          "Em execução",
-          "Liberado",
-          "Pago"
+          "Aprovada",
+          "Em andamento",
+          "Concluída"
         ],
         "current": 2
       }
@@ -87,7 +86,7 @@
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Sinal para comprar material, saldo no fim da obra e cliente que pede para pagar depois.",
-          "answer": "Registre pagamentos inteiros ou parciais. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
         }
       ]
     },
@@ -97,15 +96,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Visite e faça o orçamento",
-          "text": "Cadastre o cliente e a instalação com a tensão do local e o disjuntor geral. Materiais e serviços saem do seu catálogo, já com preço.",
+          "title": "Fale o serviço e o orçamento se preenche",
+          "text": "Na visita, toque em Falar na Nova OS e diga “casa do Rogério, troca do quadro e três tomadas novas”, ou tire uma foto do que você anotou. A IA preenche cliente, serviços e materiais com os preços do seu catálogo. Você confere e salva.",
           "facts": [
-            "Tensão: 110V, 220V, bivolt ou trifásico",
-            "Disjuntor geral em amperes",
-            "Status claros: orçamento, aprovado, em execução, liberado"
+            "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
+            "Corrija falando: “cada tomada é 60”",
+            "Tensão do local (110V, 220V, bivolt ou trifásico) e disjuntor geral em amperes"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
@@ -116,8 +115,8 @@
             "Cliente acompanha o andamento sem ligar",
             "PDF da OS para imprimir ou enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
         },
         {
           "number": "03",
@@ -128,20 +127,20 @@
             "Tensão e corrente medidas, DR e aterramento",
             "Circuitos identificados e teste dos pontos"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
         },
         {
           "number": "04",
           "title": "Libere e receba",
-          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
+            "Pagamento em partes e desconto na mesma OS",
+            "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
         }
       ]
     },
@@ -151,19 +150,19 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Para começar, não. Você usa grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Planos pagos, com mais de tudo isso e com equipe, estão disponíveis no app."
         },
         {
-          "question": "Serve para eletricista autônomo e para empresa?",
-          "answer": "Sim. Quem trabalha sozinho usa com 1 usuário. Na empresa, cada eletricista entra com o próprio usuário e um perfil de acesso, como técnico ou gerente."
+          "question": "Serve para eletricista que trabalha sozinho?",
+          "answer": "Sim. O app é feito para quem atende sozinho: você abre a OS, faz o checklist e recebe pelo celular. Se alguém trabalha com você, dá para chamar a pessoa: toque no botão do perfil, no topo do Início, e vá em Equipe, com plano pago assinado dentro do app."
         },
         {
           "question": "O checklist NR10 substitui a documentação da norma?",
-          "answer": "Não. Ele registra na OS os passos de segurança de cada serviço, com foto. O treinamento e os documentos exigidos pela NR10 continuam sendo responsabilidade da empresa."
+          "answer": "Não. Ele registra na OS os passos de segurança de cada serviço, com foto. O treinamento e os documentos exigidos pela NR10 continuam sendo sua responsabilidade."
         },
         {
           "question": "Consigo organizar minha agenda?",
-          "answer": "Sim. A OS entra na agenda pela data do serviço, e o celular avisa um pouco antes de cada atendimento. Quem coordena a equipe filtra o calendário por técnico."
+          "answer": "Sim. A OS entra na Agenda pela data e hora do serviço, e o celular avisa um pouco antes de cada atendimento. Para receber também o resumo do dia às 9h, toque no botão do perfil, no topo do Início, e vá em Lembretes."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -220,8 +219,7 @@
           "Quote",
           "Approved",
           "In progress",
-          "Released",
-          "Paid"
+          "Completed"
         ],
         "current": 2
       }
@@ -254,12 +252,12 @@
         {
           "problem": "Jobs booked on top of each other",
           "detail": "Two visits at the same time and a customer waiting at home with no word.",
-          "answer": "The work order date puts the job on the calendar, and the phone sends a reminder before each visit."
+          "answer": "The work order date puts the job on the Schedule, and the phone sends a reminder before each visit."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "A deposit to buy materials, the balance at the end and a customer who asks to pay later.",
-          "answer": "Record full or partial payments. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
         }
       ]
     },
@@ -269,15 +267,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Visit and quote",
-          "text": "Add the customer and the installation with site voltage and main breaker. Materials and services come from your catalog, already priced.",
+          "title": "Say the job and the quote fills itself in",
+          "text": "At the visit, tap Speak on New order and say “Rogério's house, panel replacement and three new outlets”, or take a photo of your notes. The AI fills in the customer, services and materials with your catalog prices. You check it and save.",
           "facts": [
-            "Voltage: 110V, 220V, dual or three-phase",
-            "Main breaker in amps",
-            "Clear statuses: quote, approved, in progress, released"
+            "Everything the AI filled in is marked with ✦, and you can undo it",
+            "Fix it by speaking: “each outlet is 60”",
+            "Site voltage (110V, 220V, dual or three-phase) and main breaker in amps"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
@@ -288,8 +286,8 @@
             "Customers follow progress without calling",
             "Work order PDF to print or send"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
         },
         {
           "number": "03",
@@ -300,20 +298,20 @@
             "Measured voltage and current, GFCI and grounding",
             "Circuits labeled and outlets tested"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Intake checklist with damage photos and the checked items"
         },
         {
           "number": "04",
           "title": "Sign off and get paid",
-          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
+            "Payment in parts and discount on the same work order",
+            "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
         }
       ]
     },
@@ -323,19 +321,19 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "Not to get started. You can use it free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, with more of each and a team, are available in the app."
         },
         {
-          "question": "Does it work for solo electricians and contractors?",
-          "answer": "Yes. If you work alone, 1 user is enough. In a company, each electrician signs in with their own user and an access role, such as technician or manager."
+          "question": "Does it work for electricians who work alone?",
+          "answer": "Yes. The app is made for people who work on their own: you open the work order, run the checklist and get paid from your phone. If someone works with you, you can invite them: tap the profile button at the top of Home and go to Team, with a paid plan purchased inside the app."
         },
         {
           "question": "Does the safety checklist replace required safety paperwork?",
-          "answer": "No. It records each job's safety steps on the work order, with photos. Training and the documents your local electrical safety rules require are still the company's responsibility."
+          "answer": "No. It records each job's safety steps on the work order, with photos. Training and the documents your local electrical safety rules require are still your responsibility."
         },
         {
           "question": "Can I organize my schedule?",
-          "answer": "Yes. The work order goes on the calendar by its service date, and the phone reminds you shortly before each visit. Whoever coordinates the team can filter the calendar by technician."
+          "answer": "Yes. The work order goes on the Schedule by its service date and time, and the phone reminds you shortly before each visit. For a daily summary at 9 a.m., tap the profile button at the top of Home and go to Reminders."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -390,10 +388,9 @@
         "stamp": "Aprobado por el cliente",
         "steps": [
           "Presupuesto",
-          "Aprobado",
-          "En progreso",
-          "Liberado",
-          "Cobrado"
+          "Aprobada",
+          "En curso",
+          "Completada"
         ],
         "current": 2
       }
@@ -431,7 +428,7 @@
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Un anticipo para comprar material, el saldo al final y un cliente que pide pagar después.",
-          "answer": "Registra pagos totales o parciales. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
         }
       ]
     },
@@ -441,15 +438,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Visita y presupuesta",
-          "text": "Registra al cliente y la instalación con el voltaje del lugar y el interruptor general. Materiales y servicios salen de tu catálogo, con precio.",
+          "title": "Di el trabajo y el presupuesto se completa",
+          "text": "En la visita, toca Hablar en Nueva OS y di “casa de Rogério, cambio del tablero y tres tomas nuevas”, o saca una foto de lo que anotaste. La IA completa cliente, servicios y materiales con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
-            "Voltaje: 110V, 220V, doble voltaje o trifásico",
-            "Interruptor general en amperes",
-            "Estados claros: presupuesto, aprobado, en progreso, liberado"
+            "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
+            "Corrige hablando: “cada toma es 60”",
+            "Voltaje del lugar (110V, 220V, doble voltaje o trifásico) e interruptor general en amperes"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
@@ -460,8 +457,8 @@
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
         },
         {
           "number": "03",
@@ -472,20 +469,20 @@
             "Tensión y corriente medidas, diferencial y puesta a tierra",
             "Circuitos identificados y prueba de los puntos"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
         },
         {
           "number": "04",
           "title": "Libera y cobra",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
+            "Pago en partes y descuento en la misma orden",
+            "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
         }
       ]
     },
@@ -495,19 +492,19 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Para empezar, no. Lo usas gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y una plantilla de checklist. Los planes pagos, con más de todo eso y con equipo, están disponibles en la app."
         },
         {
-          "question": "¿Sirve para electricista independiente y para empresa?",
-          "answer": "Sí. Si trabajas solo, alcanza con 1 usuario. En una empresa, cada electricista entra con su propio usuario y un perfil de acceso, como técnico o gerente."
+          "question": "¿Sirve para el electricista que trabaja solo?",
+          "answer": "Sí. La app está hecha para quien trabaja solo: abres la orden, haces el checklist y cobras desde el celular. Si alguien trabaja contigo, puedes invitarlo: toca el botón del perfil, arriba en Inicio, y ve a Equipo, con un plan pago contratado dentro de la app."
         },
         {
           "question": "¿El checklist de seguridad reemplaza la documentación obligatoria?",
-          "answer": "No. Registra en la orden los pasos de seguridad de cada trabajo, con foto. La capacitación y los documentos que exige la normativa de tu país siguen siendo responsabilidad de la empresa."
+          "answer": "No. Registra en la orden los pasos de seguridad de cada trabajo, con foto. La capacitación y los documentos que exige la normativa de tu país siguen siendo tu responsabilidad."
         },
         {
           "question": "¿Puedo organizar mi agenda?",
-          "answer": "Sí. La orden entra en la agenda por la fecha del servicio, y el celular avisa un poco antes de cada visita. Quien coordina el equipo filtra el calendario por técnico."
+          "answer": "Sí. La orden entra en la Agenda por la fecha y hora del servicio, y el celular avisa un poco antes de cada visita. Para recibir también el resumen del día a las 9 h, toca el botón del perfil, arriba en Inicio, y ve a Recordatorios."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

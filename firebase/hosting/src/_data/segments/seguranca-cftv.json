@@ -3,15 +3,15 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Empresa de CFTV e Segurança | PraticOS",
-    "description": "App de OS para empresa de CFTV, alarme e controle de acesso: vistoria pré-instalação, comissionamento com fotos e orçamento aprovado por link.",
+    "title": "Sistema para Instalador de CFTV e Segurança | PraticOS",
+    "description": "App de OS para quem instala CFTV, alarme e controle de acesso: a IA abre a OS, vistoria pré-instalação, comissionamento com fotos e orçamento aprovado por link.",
     "keywords": "sistema para empresa de cftv, software empresa de segurança, programa para instalador de câmeras, ordem de serviço cftv, app instalação de câmeras, gestão empresa de segurança eletrônica",
-    "ogTitle": "Sistema para Empresa de CFTV e Segurança | PraticOS",
+    "ogTitle": "Sistema para Instalador de CFTV e Segurança | PraticOS",
     "ogDescription": "OS de segurança eletrônica no celular: vistoria antes da instalação, checklist de comissionamento com fotos, histórico por sistema e aprovação por link.",
     "hero": {
       "title": "Da vistoria à entrega",
       "titleMark": "com cada câmera registrada.",
-      "lede": "PraticOS é o app de ordem de serviço para empresas de CFTV, alarme, controle de acesso e cerca elétrica. Faça a vistoria do local, mande o orçamento por link, registre o comissionamento com fotos e receba — pelo celular.",
+      "lede": "PraticOS é o app de ordem de serviço para quem instala CFTV, alarme, controle de acesso e cerca elétrica. Fale o serviço e a IA abre a OS. Faça a vistoria do local, mande o orçamento por link, registre o comissionamento com fotos e receba — pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,7 +54,7 @@
       }
     },
     "problems": {
-      "title": "Onde a empresa de segurança perde dinheiro",
+      "title": "Onde o instalador de segurança perde dinheiro",
       "lede": "Não é falta de instalação. É a visita técnica que não virou orçamento, a senha que ninguém anotou e o chamado de “câmera parada” sem histórico.",
       "answerLabel": "No PraticOS",
       "items": [
@@ -80,13 +80,13 @@
         },
         {
           "problem": "Responsabilidade sobre senhas e gravação",
-          "detail": "O cliente perde a senha do NVR ou questiona o uso das imagens, e a culpa cai na empresa.",
+          "detail": "O cliente perde a senha do NVR ou questiona o uso das imagens, e a culpa cai em você.",
           "answer": "O termo de autorização e privacidade registra o responsável do cliente e a ciência sobre guarda de senhas e uso da gravação."
         },
         {
           "problem": "Mensalidades e serviços sem controle",
           "detail": "Instalação parcelada, manutenção avulsa e cliente que paga atrasado no mesmo caderno.",
-          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Registre pagamentos inteiros ou em partes na OS. O Financeiro mostra quanto falta receber, de quais clientes, e o relatório do mês com o que entrou."
         }
       ]
     },
@@ -96,18 +96,30 @@
       "stages": [
         {
           "number": "01",
+          "title": "Fale o serviço e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Mercado Bom Preço, instalação de 8 câmeras e um NVR de 8 canais, vistoria na quinta”. Ou fotografe o pedido anotado. A IA preenche cliente, sistema, equipamentos e mão de obra com os preços do seu catálogo e marca com ✦ o que preencheu.",
+          "facts": [
+            "Sistema com tipo e número de canais",
+            "Corrija falando: “a mão de obra é 900”",
+            "Nada é salvo sem você conferir"
+          ],
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+        },
+        {
+          "number": "02",
           "title": "Faça a vistoria do local",
-          "text": "Abra a OS com o cliente e o sistema. O checklist de vistoria vem pronto e você ajusta os itens.",
+          "text": "Na OS, abra o checklist de vistoria: ele vem pronto e você ajusta os itens.",
           "facts": [
             "Tipo de sistema: CFTV, alarme, controle de acesso, interfonia",
             "Internet e pontos de energia no local",
             "Fotos dos pontos de instalação"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Mande o orçamento por link",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Vê as fotos da vistoria, os equipamentos e a mão de obra, aprova e deixa comentários.",
           "facts": [
@@ -115,23 +127,23 @@
             "Notificação quando o cliente aprova ou comenta",
             "PDF da OS para imprimir ou enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
-        },
-        {
-          "number": "03",
-          "title": "Agende a instalação",
-          "text": "Marque dia e hora na OS. Ela aparece na agenda da equipe e o celular avisa antes do atendimento.",
-          "facts": [
-            "Agenda do mês com as OS de cada dia",
-            "Filtro por técnico para quem coordena a equipe",
-            "Status do ramo: em instalação, operacional"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+          "image": "order.png",
+          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
         },
         {
           "number": "04",
+          "title": "Agende a instalação",
+          "text": "Marque dia e hora na OS. Ela aparece na Agenda, no dia escolhido, e o celular avisa antes do atendimento.",
+          "facts": [
+            "Semana no topo e os atendimentos do dia",
+            "Resumo do dia às 9h, se você quiser",
+            "Situações do ramo: em instalação, operacional"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
+        },
+        {
+          "number": "05",
           "title": "Comissione, entregue e receba",
           "text": "Registre os testes do sistema e o termo do cliente. Depois lance o pagamento inteiro ou em parcelas.",
           "facts": [
@@ -139,18 +151,18 @@
             "Senhas padrão alteradas e acesso remoto configurado",
             "Pagamento parcial e desconto na mesma OS"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
         }
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem empresa de segurança",
+      "title": "Perguntas de quem trabalha com segurança eletrônica",
       "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "Serve para alarme, controle de acesso e cerca elétrica?",
@@ -162,7 +174,7 @@
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "answer": "Sim. Se alguém trabalha com você, toque no botão do perfil, no topo do Início, e vá em Equipe: o convite vai por um código, pelo WhatsApp, e cada pessoa entra no próprio celular. O plano grátis é para uma pessoa; para chamar mais gente, assine um plano pago dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -175,14 +187,14 @@
     "lang": "en",
     "langCode": "en",
     "title": "CCTV and Security Installer Software | PraticOS",
-    "description": "Work order app for CCTV, alarm and access control installers: site survey, commissioning checklist with photos and quotes approved by link.",
+    "description": "Work order app for CCTV, alarm and access control installers: the AI opens the order, site survey, commissioning checklist with photos and quotes approved by link.",
     "keywords": "cctv company software, security installer software, work order system cctv, camera installation app, security business software, alarm installer app",
     "ogTitle": "CCTV and Security Installer Software | PraticOS",
     "ogDescription": "Security work orders on your phone: pre-install site survey, commissioning checklist with photos, history by system and approval by link.",
     "hero": {
       "title": "From survey to handover,",
       "titleMark": "every camera on file.",
-      "lede": "PraticOS is the work order app for CCTV, alarm, access control and electric fence companies. Survey the site, send the quote as a link, record commissioning with photos and get paid — from your phone.",
+      "lede": "PraticOS is the work order app for people who install CCTV, alarms, access control and electric fences. Say the job and the AI opens the order. Survey the site, send the quote as a link, record commissioning with photos and get paid — from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -225,7 +237,7 @@
       }
     },
     "problems": {
-      "title": "Where a security company loses money",
+      "title": "Where a security installer loses money",
       "lede": "It's not a lack of installs. It's the site visit that never became a quote, the password nobody wrote down and the “camera's down” call with no history.",
       "answerLabel": "In PraticOS",
       "items": [
@@ -257,7 +269,7 @@
         {
           "problem": "Installments and service calls untracked",
           "detail": "Install paid in parts, one-off maintenance and late payers all in the same notebook.",
-          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still to collect."
+          "answer": "Record full or partial payments on the order. Financial shows how much is still due, from which customers, and the monthly report of what came in."
         }
       ]
     },
@@ -267,18 +279,30 @@
       "stages": [
         {
           "number": "01",
+          "title": "Say the job and the AI opens the order",
+          "text": "Tap Speak and say something like: “Good Price Market, install 8 cameras and an 8-channel NVR, site survey on Thursday”. Or photograph the written request. The AI fills in customer, system, equipment and labor with your catalog prices and marks what it filled with ✦.",
+          "facts": [
+            "System with type and number of channels",
+            "Fix it by voice: “labor is 900”",
+            "Nothing is saved until you check it"
+          ],
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+        },
+        {
+          "number": "02",
           "title": "Survey the site",
-          "text": "Open the work order with the customer and the system. The site survey checklist comes ready to use and you can adjust the items.",
+          "text": "On the order, open the site survey checklist: it comes ready to use and you can adjust the items.",
           "facts": [
             "System type: CCTV, alarm, access control, intercom",
             "Internet and power available on site",
             "Photos of each mounting point"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Send the quote as a link",
           "text": "The customer opens the work order in a browser, nothing to install. They see the survey photos, equipment and labor, approve it and leave comments.",
           "facts": [
@@ -286,23 +310,23 @@
             "Notification when the customer approves or comments",
             "Work order PDF to print or send"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
-        },
-        {
-          "number": "03",
-          "title": "Schedule the install",
-          "text": "Set the day and time on the work order. It shows up on the team calendar and your phone reminds you before the visit.",
-          "facts": [
-            "Monthly calendar with each day's work orders",
-            "Filter by technician if you coordinate the crew",
-            "Statuses in your trade's words: installing, operational"
-          ],
-          "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled across the month"
+          "image": "order.png",
+          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
         },
         {
           "number": "04",
+          "title": "Schedule the install",
+          "text": "Set the day and time on the order. It shows up on the Schedule on that day and your phone reminds you before the visit.",
+          "facts": [
+            "The week on top and the day's visits",
+            "Daily summary at 9am, if you want it",
+            "Statuses in your trade's words: installing, operational"
+          ],
+          "image": "agenda.png",
+          "alt": "Schedule with the week on top and the visit booked for the day"
+        },
+        {
+          "number": "05",
           "title": "Commission, hand over and get paid",
           "text": "Record the system tests and the customer's sign-off form. Then log the payment in full or in parts.",
           "facts": [
@@ -310,18 +334,18 @@
             "Default passwords changed and remote access set up",
             "Partial payment and discount on the same work order"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing how much is still due and from which customers"
         }
       ]
     },
     "faq": {
-      "title": "Questions from security company owners",
+      "title": "Questions from security installers",
       "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does it work for alarms, access control and electric fences?",
@@ -333,7 +357,7 @@
         },
         {
           "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see prices."
+          "answer": "Yes. If someone works with you, tap the profile button at the top of Home and go to Team: the invite goes out as a code over WhatsApp, and each person signs in on their own phone. The free plan is for one person; to add more people, subscribe to a paid plan inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -345,15 +369,15 @@
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Empresas de CCTV y Seguridad | PraticOS",
-    "description": "App de órdenes para empresas de CCTV, alarmas y control de acceso: relevamiento previo, checklist de puesta en marcha con fotos y presupuesto por link.",
+    "title": "Sistema para Instaladores de CCTV y Seguridad | PraticOS",
+    "description": "App de órdenes para quien instala CCTV, alarmas y control de acceso: la IA abre la orden, relevamiento previo, puesta en marcha con fotos y presupuesto por link.",
     "keywords": "sistema para empresa de cctv, software empresa de seguridad, programa para instalador de cámaras, orden de servicio cctv, app instalación de cámaras, gestión empresa de seguridad electrónica",
-    "ogTitle": "Sistema para Empresas de CCTV y Seguridad | PraticOS",
+    "ogTitle": "Sistema para Instaladores de CCTV y Seguridad | PraticOS",
     "ogDescription": "Órdenes de seguridad electrónica en el celular: relevamiento antes de instalar, puesta en marcha con fotos, historial por sistema y aprobación por link.",
     "hero": {
       "title": "De la visita a la entrega,",
       "titleMark": "cada cámara registrada.",
-      "lede": "PraticOS es la app de órdenes de servicio para empresas de CCTV, alarmas, control de acceso y cerco eléctrico. Haz el relevamiento del lugar, envía el presupuesto por link, registra la puesta en marcha con fotos y cobra — desde el celular.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien instala CCTV, alarmas, control de acceso y cerco eléctrico. Di el trabajo y la IA abre la orden. Haz el relevamiento del lugar, envía el presupuesto por link, registra la puesta en marcha con fotos y cobra — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -396,7 +420,7 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata la empresa de seguridad",
+      "title": "Dónde pierde plata el instalador de seguridad",
       "lede": "No es falta de instalaciones. Es la visita técnica que nunca se volvió presupuesto, la contraseña que nadie anotó y el llamado de “la cámara no graba” sin historial.",
       "answerLabel": "En PraticOS",
       "items": [
@@ -422,13 +446,13 @@
         },
         {
           "problem": "Responsabilidad sobre contraseñas y grabaciones",
-          "detail": "El cliente pierde la contraseña del NVR o cuestiona el uso de las imágenes, y la culpa recae en la empresa.",
+          "detail": "El cliente pierde la contraseña del NVR o cuestiona el uso de las imágenes, y la culpa recae en ti.",
           "answer": "El formulario de autorización y privacidad registra al responsable del cliente y su conformidad sobre la guarda de contraseñas y el uso de la grabación."
         },
         {
           "problem": "Cuotas y servicios sin control",
           "detail": "Instalación en cuotas, mantenimiento suelto y clientes que pagan tarde en el mismo cuaderno.",
-          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra pagos totales o en partes en la orden. Financiero muestra cuánto falta cobrar, de qué clientes, y el informe del mes con lo que entró."
         }
       ]
     },
@@ -438,18 +462,30 @@
       "stages": [
         {
           "number": "01",
+          "title": "Di el trabajo y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Mercado Buen Precio, instalación de 8 cámaras y un NVR de 8 canales, relevamiento el jueves”. O fotografía el pedido anotado. La IA completa cliente, sistema, equipos y mano de obra con los precios de tu catálogo y marca con ✦ lo que completó.",
+          "facts": [
+            "Sistema con tipo y número de canales",
+            "Corrige hablando: “la mano de obra es 900”",
+            "Nada se guarda sin que lo revises"
+          ],
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+        },
+        {
+          "number": "02",
           "title": "Haz el relevamiento del lugar",
-          "text": "Abre la orden con el cliente y el sistema. El checklist de relevamiento viene listo y tú ajustas los ítems.",
+          "text": "En la orden, abre el checklist de relevamiento: viene listo y tú ajustas los ítems.",
           "facts": [
             "Tipo de sistema: CCTV, alarma, control de acceso, intercomunicador",
             "Internet y puntos de energía en el lugar",
             "Fotos de los puntos de instalación"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
-          "number": "02",
+          "number": "03",
           "title": "Envía el presupuesto por link",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos del relevamiento, los equipos y la mano de obra, aprueba y deja comentarios.",
           "facts": [
@@ -457,23 +493,23 @@
             "Notificación cuando el cliente aprueba o comenta",
             "PDF de la orden para imprimir o enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
-        },
-        {
-          "number": "03",
-          "title": "Agenda la instalación",
-          "text": "Marca día y hora en la orden. Aparece en la agenda del equipo y el celular te avisa antes de la visita.",
-          "facts": [
-            "Agenda del mes con las órdenes de cada día",
-            "Filtro por técnico para quien coordina el equipo",
-            "Estados del rubro: en instalación, operativo"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+          "image": "order.png",
+          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
         },
         {
           "number": "04",
+          "title": "Agenda la instalación",
+          "text": "Marca día y hora en la orden. Aparece en la Agenda, en el día elegido, y el celular avisa antes de la visita.",
+          "facts": [
+            "La semana arriba y las visitas del día",
+            "Resumen del día a las 9, si lo quieres",
+            "Estados del rubro: en instalación, operativo"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda con la semana arriba y la visita marcada del día"
+        },
+        {
+          "number": "05",
           "title": "Pon en marcha, entrega y cobra",
           "text": "Registra las pruebas del sistema y la conformidad del cliente. Después carga el pago total o en partes.",
           "facts": [
@@ -481,18 +517,18 @@
             "Contraseñas de fábrica cambiadas y acceso remoto configurado",
             "Pago parcial y descuento en la misma orden"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
         }
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene empresa de seguridad",
+      "title": "Preguntas de quien trabaja con seguridad electrónica",
       "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿Sirve para alarmas, control de acceso y cerco eléctrico?",
@@ -504,7 +540,7 @@
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores."
+          "answer": "Sí. Si alguien trabaja contigo, toca el botón del perfil, arriba en Inicio, y ve a Equipo: la invitación va con un código por WhatsApp y cada persona entra en su propio celular. El plan gratis es para una persona; para sumar a más gente, contrata un plan pago dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

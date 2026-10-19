@@ -4,7 +4,7 @@
       {
         "id": "visao-geral",
         "title": "O que a integração faz",
-        "intro": "Conectado ao <strong>ChatGPT</strong> ou ao <strong>Claude</strong>, o PraticOS vira uma fonte de dados do assistente. Você pergunta em texto — “quais orçamentos estão parados?”, “quanto faturei este mês?” — e pede ações, como abrir uma OS ou marcar uma como concluída, sem abrir o app.",
+        "intro": "Conectado ao <strong>ChatGPT</strong> ou ao <strong>Claude</strong>, o PraticOS vira uma fonte de dados do assistente. Você pergunta em texto, como “quais orçamentos estão parados?” ou “quanto entrou este mês?”, e pede ações, como abrir uma OS ou marcar uma como concluída, sem abrir o app.",
         "features": [
           {
             "title": "Consultar",
@@ -15,13 +15,13 @@
             "description": "Criar OS, mudar o status, incluir serviço ou produto, comentar, anexar foto e cadastrar clientes."
           },
           {
-            "title": "Uma empresa por conexão",
-            "description": "Cada URL dá acesso só aos dados da empresa que a gerou. Cada alteração feita pelo assistente fica registrada no PraticOS."
+            "title": "Uma conta por conexão",
+            "description": "Cada URL dá acesso só aos dados da conta que a criou. Cada mudança feita pelo assistente fica registrada no PraticOS."
           }
         ],
         "infoCard": {
           "title": "Onde fica no app",
-          "content": "Em <strong>Mais → Integrações</strong>. É lá que você cria e revoga as conexões."
+          "content": "No app, toque no botão do perfil, no topo do Início, e vá em <strong>Avançado → Integrações</strong>. É lá que você cria e desliga as conexões. Isso é diferente da IA da Nova OS (Foto e Falar), que já vem no app e não precisa de conexão."
         }
       },
       {
@@ -29,18 +29,18 @@
         "title": "Gerar a conexão",
         "intro": "A conexão é uma URL criada no app. Você cola essa URL uma vez no ChatGPT ou no Claude e pronto.",
         "steps": [
-          "No app, toque em <strong>Mais → Integrações</strong>.",
-          "Toque em <strong>+</strong> e dê um nome à conexão, por exemplo “Meu ChatGPT”.",
+          "No app, toque no botão do perfil, no topo do Início, e vá em <strong>Avançado → Integrações</strong>.",
+          "Toque em <strong>+</strong> (Nova conexão) e dê um nome a ela, por exemplo “Meu ChatGPT”.",
           "Toque em <strong>Salvar</strong>.",
           "A URL aparece na tela uma única vez. Toque em <strong>Copiar URL</strong> e cole no assistente em seguida."
         ],
         "infoCard": {
-          "title": "Quem pode gerar",
-          "content": "Só o dono da empresa e quem tem perfil de Administrador. Se você é o dono e não vê <strong>Integrações</strong> no menu, fale com o suporte."
+          "title": "Quem pode criar",
+          "content": "Você, como dono da conta. Se alguém trabalha com você, também quem tem papel de Administrador. Os outros papéis não veem <strong>Integrações</strong>."
         },
         "warningCard": {
           "title": "A URL funciona como uma senha",
-          "content": "Quem tiver a URL consegue ler e alterar os dados da sua empresa. Não mande por mensagem nem guarde em lugar aberto. Ela vence em 90 dias e pode ser revogada a qualquer momento em <strong>Mais → Integrações</strong>. Enquanto estiver em uso, o endereço completo aparece nos registros técnicos da infraestrutura do PraticOS (Google Cloud)."
+          "content": "Quem tiver a URL consegue ler e mudar os seus dados no PraticOS. Não mande por mensagem nem guarde em lugar aberto. Ela vence em 90 dias e pode ser desligada a qualquer momento em <strong>Ajustes → Avançado → Integrações</strong>. Enquanto estiver em uso, o endereço completo aparece nos registros técnicos da infraestrutura do PraticOS (Google Cloud)."
         }
       },
       {
@@ -76,7 +76,7 @@
       {
         "id": "o-que-faz",
         "title": "O que o assistente consegue fazer",
-        "intro": "Com o conector ativo, o assistente consulta e altera os dados da empresa a seu pedido. Peça como pediria a alguém do escritório.",
+        "intro": "Com o conector ativo, o assistente consulta e muda os seus dados a seu pedido. Peça como pediria a alguém que trabalha com você.",
         "features": [
           {
             "title": "Ordens de serviço",
@@ -126,19 +126,19 @@
         "faq": [
           {
             "question": "Por quanto tempo a conexão vale?",
-            "answer": "90 dias a partir da criação. Depois, gere outra em <strong>Mais → Integrações</strong> e troque a URL no assistente."
+            "answer": "90 dias a partir da criação. Depois, crie outra em <strong>Ajustes → Avançado → Integrações</strong> e troque a URL no assistente."
           },
           {
-            "question": "Posso cancelar antes?",
-            "answer": "Sim. Em <strong>Mais → Integrações</strong>, toque em <strong>Revogar</strong> na conexão. Quem estiver usando aquela URL perde o acesso na hora."
+            "question": "Posso desligar antes?",
+            "answer": "Sim. Em <strong>Ajustes → Avançado → Integrações</strong>, toque na conexão e em <strong>Desligar conexão</strong>. Quem estiver usando aquela URL perde o acesso na hora."
           },
           {
             "question": "Perdi a URL. Dá para ver de novo?",
-            "answer": "Não. Ela só aparece ao criar a conexão. Revogue a antiga e gere uma nova."
+            "answer": "Não. Ela só aparece ao criar a conexão. Desligue a antiga e crie uma nova."
           },
           {
             "question": "Como sei se a conexão está sendo usada?",
-            "answer": "A lista em <strong>Mais → Integrações</strong> mostra a data do último uso de cada conexão."
+            "answer": "A lista em <strong>Ajustes → Avançado → Integrações</strong> mostra a data do último uso de cada conexão."
           },
           {
             "question": "O assistente vê o telefone dos meus clientes?",
@@ -153,7 +153,7 @@
       {
         "id": "overview",
         "title": "What the integration does",
-        "intro": "Once connected to <strong>ChatGPT</strong> or <strong>Claude</strong>, PraticOS becomes a data source for the assistant. Ask in plain words — “which quotes are stuck?”, “how much did I bill this month?” — and ask for actions, like opening a work order or marking one complete, without opening the app.",
+        "intro": "Once connected to <strong>ChatGPT</strong> or <strong>Claude</strong>, PraticOS becomes a data source for the assistant. Ask in plain words, like “which quotes are stuck?” or “how much came in this month?”, and ask for actions, like opening a work order or marking one complete, without opening the app.",
         "features": [
           {
             "title": "Look things up",
@@ -164,13 +164,13 @@
             "description": "Create orders, change status, add a service or product, comment, attach photos and add customers."
           },
           {
-            "title": "One company per connection",
-            "description": "Each URL only reaches the data of the company that created it. Every change the assistant makes is logged in PraticOS."
+            "title": "One account per connection",
+            "description": "Each URL only reaches the data of the account that created it. Every change the assistant makes is logged in PraticOS."
           }
         ],
         "infoCard": {
           "title": "Where it lives in the app",
-          "content": "Under <strong>More → Integrations</strong>. That is where you create and revoke connections."
+          "content": "In the app, tap the profile button at the top of Home and go to <strong>Advanced → Integrations</strong>. That’s where you create and turn off connections. This is different from the AI on New order (Photo and Speak), which comes with the app and needs no connection."
         }
       },
       {
@@ -178,18 +178,18 @@
         "title": "Create the connection",
         "intro": "The connection is a URL created in the app. You paste it once into ChatGPT or Claude and you’re set.",
         "steps": [
-          "In the app, tap <strong>More → Integrations</strong>.",
-          "Tap <strong>+</strong> and name the connection, for example “My ChatGPT”.",
+          "In the app, tap the profile button at the top of Home and go to <strong>Advanced → Integrations</strong>.",
+          "Tap <strong>+</strong> (New connection) and give it a name, for example “My ChatGPT”.",
           "Tap <strong>Save</strong>.",
           "The URL appears on screen only once. Tap <strong>Copy URL</strong> and paste it into the assistant right away."
         ],
         "infoCard": {
           "title": "Who can create it",
-          "content": "Only the company owner and people with the Administrator profile. If you are the owner and don’t see <strong>Integrations</strong> in the menu, contact support."
+          "content": "You, as the account owner. If someone works with you, also people with the Administrator role. Other roles don’t see <strong>Integrations</strong>."
         },
         "warningCard": {
           "title": "Treat the URL like a password",
-          "content": "Anyone with the URL can read and change your company’s data. Don’t send it in a chat or leave it lying around. It expires after 90 days and can be revoked any time under <strong>More → Integrations</strong>. While in use, the full address shows up in the technical logs of PraticOS’s infrastructure (Google Cloud)."
+          "content": "Anyone with the URL can read and change your data in PraticOS. Don’t send it in a chat or leave it lying around. It expires after 90 days and can be turned off any time in <strong>Settings → Advanced → Integrations</strong>. While in use, the full address shows up in the technical logs of PraticOS’s infrastructure (Google Cloud)."
         }
       },
       {
@@ -225,7 +225,7 @@
       {
         "id": "what-it-can-do",
         "title": "What the assistant can do",
-        "intro": "With the connector on, the assistant reads and changes your company’s data when you ask. Ask the way you would ask someone at the office.",
+        "intro": "With the connector on, the assistant looks up and changes your data when you ask. Ask the way you’d ask someone who works with you.",
         "features": [
           {
             "title": "Work orders",
@@ -275,19 +275,19 @@
         "faq": [
           {
             "question": "How long does a connection last?",
-            "answer": "90 days from creation. After that, create a new one under <strong>More → Integrations</strong> and replace the URL in the assistant."
+            "answer": "90 days from creation. After that, create another one in <strong>Settings → Advanced → Integrations</strong> and replace the URL in the assistant."
           },
           {
-            "question": "Can I cancel it sooner?",
-            "answer": "Yes. Under <strong>More → Integrations</strong>, tap <strong>Revoke</strong> on the connection. Anyone using that URL loses access right away."
+            "question": "Can I turn it off sooner?",
+            "answer": "Yes. In <strong>Settings → Advanced → Integrations</strong>, tap the connection and <strong>Turn off connection</strong>. Whoever is using that URL loses access right away."
           },
           {
             "question": "I lost the URL. Can I see it again?",
-            "answer": "No. It only shows when the connection is created. Revoke the old one and create a new one."
+            "answer": "No. It only shows when you create the connection. Turn off the old one and create a new one."
           },
           {
             "question": "How do I know whether a connection is in use?",
-            "answer": "The list under <strong>More → Integrations</strong> shows when each connection was last used."
+            "answer": "The list in <strong>Settings → Advanced → Integrations</strong> shows the last time each connection was used."
           },
           {
             "question": "Does the assistant see my customers’ phone numbers?",
@@ -302,7 +302,7 @@
       {
         "id": "vision-general",
         "title": "Qué hace la integración",
-        "intro": "Conectado a <strong>ChatGPT</strong> o a <strong>Claude</strong>, PraticOS se vuelve una fuente de datos del asistente. Preguntas con tus palabras — “¿qué presupuestos están detenidos?”, “¿cuánto facturé este mes?” — y pides acciones, como abrir una OS o marcarla como completada, sin abrir la app.",
+        "intro": "Conectado a <strong>ChatGPT</strong> o a <strong>Claude</strong>, PraticOS se vuelve una fuente de datos del asistente. Preguntas en texto, como “¿qué presupuestos están parados?” o “¿cuánto entró este mes?”, y pides acciones, como abrir una OS o marcar una como completada, sin abrir la app.",
         "features": [
           {
             "title": "Consultar",
@@ -313,13 +313,13 @@
             "description": "Crear OS, cambiar el estado, agregar servicios o productos, comentar, adjuntar fotos y registrar clientes."
           },
           {
-            "title": "Una empresa por conexión",
-            "description": "Cada URL solo accede a los datos de la empresa que la generó. Cada cambio que hace el asistente queda registrado en PraticOS."
+            "title": "Una cuenta por conexión",
+            "description": "Cada URL da acceso solo a los datos de la cuenta que la creó. Cada cambio que hace el asistente queda registrado en PraticOS."
           }
         ],
         "infoCard": {
           "title": "Dónde está en la app",
-          "content": "En <strong>Más → Integraciones</strong>. Ahí creas y revocas las conexiones."
+          "content": "En la app, toca el botón del perfil, arriba en Inicio, y ve a <strong>Avanzado → Integraciones</strong>. Ahí creas y desactivas las conexiones. Esto es distinto de la IA de Nueva OS (Foto y Hablar), que ya viene en la app y no necesita conexión."
         }
       },
       {
@@ -327,18 +327,18 @@
         "title": "Generar la conexión",
         "intro": "La conexión es una URL creada en la app. La pegas una vez en ChatGPT o en Claude y listo.",
         "steps": [
-          "En la app, toca <strong>Más → Integraciones</strong>.",
-          "Toca <strong>+</strong> y ponle un nombre a la conexión, por ejemplo “Mi ChatGPT”.",
+          "En la app, toca el botón del perfil, arriba en Inicio, y ve a <strong>Avanzado → Integraciones</strong>.",
+          "Toca <strong>+</strong> (Nueva conexión) y ponle un nombre, por ejemplo “Mi ChatGPT”.",
           "Toca <strong>Guardar</strong>.",
           "La URL aparece en pantalla una sola vez. Toca <strong>Copiar URL</strong> y pégala en el asistente enseguida."
         ],
         "infoCard": {
-          "title": "Quién puede generarla",
-          "content": "Solo el dueño de la empresa y quienes tienen perfil de Administrador. Si eres el dueño y no ves <strong>Integraciones</strong> en el menú, escribe a soporte."
+          "title": "Quién puede crearla",
+          "content": "Tú, como dueño de la cuenta. Si alguien trabaja contigo, también quien tiene el rol de Administrador. Los demás roles no ven <strong>Integraciones</strong>."
         },
         "warningCard": {
           "title": "La URL funciona como una contraseña",
-          "content": "Quien tenga la URL puede leer y cambiar los datos de tu empresa. No la mandes por mensaje ni la dejes a la vista. Vence a los 90 días y se puede revocar en cualquier momento en <strong>Más → Integraciones</strong>. Mientras esté en uso, la dirección completa aparece en los registros técnicos de la infraestructura de PraticOS (Google Cloud)."
+          "content": "Quien tenga la URL puede leer y cambiar tus datos en PraticOS. No la envíes por mensaje ni la dejes a la vista. Vence a los 90 días y puede desactivarse en cualquier momento en <strong>Ajustes → Avanzado → Integraciones</strong>. Mientras esté en uso, la dirección completa aparece en los registros técnicos de la infraestructura de PraticOS (Google Cloud)."
         }
       },
       {
@@ -374,7 +374,7 @@
       {
         "id": "que-puede-hacer",
         "title": "Qué puede hacer el asistente",
-        "intro": "Con el conector activo, el asistente consulta y cambia los datos de tu empresa cuando se lo pides. Pídelo como se lo pedirías a alguien de la oficina.",
+        "intro": "Con el conector activo, el asistente consulta y cambia tus datos cuando se lo pides. Pide como le pedirías a alguien que trabaja contigo.",
         "features": [
           {
             "title": "Órdenes de servicio",
@@ -424,19 +424,19 @@
         "faq": [
           {
             "question": "¿Cuánto dura una conexión?",
-            "answer": "90 días desde que se crea. Después, genera otra en <strong>Más → Integraciones</strong> y cambia la URL en el asistente."
+            "answer": "90 días desde que se crea. Después, crea otra en <strong>Ajustes → Avanzado → Integraciones</strong> y cambia la URL en el asistente."
           },
           {
-            "question": "¿Puedo cancelarla antes?",
-            "answer": "Sí. En <strong>Más → Integraciones</strong>, toca <strong>Revocar</strong> en la conexión. Quien use esa URL pierde el acceso de inmediato."
+            "question": "¿Puedo desactivarla antes?",
+            "answer": "Sí. En <strong>Ajustes → Avanzado → Integraciones</strong>, toca la conexión y <strong>Desactivar conexión</strong>. Quien esté usando esa URL pierde el acceso al instante."
           },
           {
             "question": "Perdí la URL. ¿Puedo verla otra vez?",
-            "answer": "No. Solo aparece al crear la conexión. Revoca la anterior y genera una nueva."
+            "answer": "No. Solo aparece al crear la conexión. Desactiva la anterior y crea una nueva."
           },
           {
             "question": "¿Cómo sé si una conexión se está usando?",
-            "answer": "La lista en <strong>Más → Integraciones</strong> muestra la fecha del último uso de cada conexión."
+            "answer": "La lista en <strong>Ajustes → Avanzado → Integraciones</strong> muestra la fecha del último uso de cada conexión."
           },
           {
             "question": "¿El asistente ve el teléfono de mis clientes?",

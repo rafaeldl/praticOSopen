@@ -4,7 +4,7 @@
       {
         "id": "visao-geral",
         "title": "O que o cliente vê no link",
-        "intro": "O link abre no navegador do cliente uma página com a OS: serviços, produtos, valores, fotos e status, além do nome e do telefone da sua empresa. Ele não precisa criar conta nem baixar o app.",
+        "intro": "O link abre no navegador do cliente uma página com a OS: serviços, peças, valores, fotos e situação, além do seu nome e telefone (os de <strong>Dados para o cliente</strong>). Ele não precisa criar conta nem baixar o app.",
         "features": [
           {
             "title": "Ver a OS",
@@ -25,36 +25,32 @@
         ],
         "infoCard": {
           "title": "O que fica de fora",
-          "content": "Comentários internos da equipe não aparecem no link. O nome e o telefone do cliente e o número de série do equipamento aparecem parcialmente ocultos."
+          "content": "Comentários marcados como <strong>Só a equipe vê</strong> não aparecem no link. O nome e o telefone do cliente e o número de série do aparelho aparecem parcialmente ocultos."
         }
       },
       {
         "id": "como-compartilhar",
         "title": "Enviar o link",
-        "intro": "Há dois caminhos. O botão de compartilhar é o mais rápido; o menu da OS dá mais opções. Nos dois, a OS precisa estar salva.",
+        "intro": "O link sai da própria OS, depois que ela está salva.",
         "subsections": [
           {
             "title": "Pelo botão de compartilhar",
             "steps": [
-              "Abra a OS.",
-              "Toque no ícone de compartilhar, no topo da tela.",
-              "O app reaproveita o link ativo da OS ou cria um novo, com validade de 7 dias, e abre o menu de compartilhamento do celular com uma mensagem pronta.",
-              "Escolha o WhatsApp, o e-mail ou outro app e envie."
+              "Abra a OS e toque no ícone de compartilhar, no topo da tela.",
+              "Abre <strong>Mandar para o cliente</strong>, com uma frase dizendo o que o cliente pode fazer e até quando o link vale. O app reaproveita o link que ainda está valendo ou cria um novo, de 7 dias.",
+              "Se o cliente tem telefone, toque em <strong>Mandar pelo WhatsApp</strong>: a conversa com ele abre com a mensagem e o link prontos. Para outro app, toque em <strong>Mandar de outro jeito</strong>.",
+              "Sem telefone, o botão é <strong>Mandar o link</strong>, que abre o menu de compartilhar do celular.",
+              "Para colar o link em outro lugar, toque em <strong>Copiar o link</strong>."
             ]
           },
           {
             "title": "Pelo menu da OS",
-            "steps": [
-              "Na OS, toque em <strong>⋯</strong> e depois em <strong>Compartilhar com Cliente</strong>.",
-              "Se o cliente tem telefone cadastrado, toque em <strong>Enviar via WhatsApp</strong>: a conversa com ele abre com a mensagem e o link prontos.",
-              "Sem telefone, use <strong>Compartilhar</strong> para escolher o app.",
-              "Para colar o link em outro lugar, toque em <strong>Copiar Link</strong>, ao lado da validade."
-            ]
+            "content": "No <strong>…</strong> do topo da OS, <strong>Copiar link</strong> copia o mesmo link, e <strong>Ver PDF</strong> abre o PDF da OS para mandar ou imprimir."
           }
         ],
         "infoCard": {
-          "title": "Ao mudar o status",
-          "content": "Quando a OS passa para Aprovado, Em Andamento ou Concluído, o cliente tem telefone e ainda não há link ativo, o app pergunta se você quer enviar a atualização. <strong>Enviar via WhatsApp</strong> abre o menu de compartilhamento com o link e uma mensagem sobre o novo status; <strong>Agora não</strong> fecha o aviso."
+          "title": "Ao mudar a situação",
+          "content": "Quando a OS passa para Aprovada, Em andamento ou Concluída, o cliente tem telefone e ainda não há link valendo, aparece um aviso embaixo da tela, como \"Aprovada. Avisar Ana?\". Toque em <strong>Avisar</strong> para mandar o link com uma mensagem sobre a nova situação. Se não tocar, o aviso some sozinho."
         },
         "warningCard": {
           "title": "Telefone com DDI",
@@ -64,16 +60,16 @@
       {
         "id": "permissoes",
         "title": "Escolher o que o cliente pode fazer",
-        "intro": "Os links nascem com <strong>Pode aprovar</strong> e <strong>Pode comentar</strong> ligados. Desligue quando quiser só mostrar a OS — por exemplo, um serviço já combinado por telefone, em que o cliente só precisa acompanhar.",
+        "intro": "O link nasce com <strong>Ver, aprovar e comentar</strong>. Escolha <strong>Só ver</strong> quando o cliente só precisa acompanhar, por exemplo num serviço já combinado por telefone.",
         "steps": [
-          "Na OS, toque em <strong>⋯ → Compartilhar com Cliente</strong>.",
-          "Toque em <strong>Opções avançadas</strong>.",
-          "Em <strong>Permissões do Link</strong>, ligue ou desligue <strong>Pode aprovar</strong> e <strong>Pode comentar</strong>.",
-          "Cada mudança cria um link novo. Envie esse link ao cliente."
+          "Na OS, toque no ícone de compartilhar.",
+          "Em <strong>Mandar para o cliente</strong>, toque em <strong>…</strong> (Opções do link) e depois em <strong>O que o cliente pode fazer</strong>.",
+          "Escolha <strong>Ver, aprovar e comentar</strong>, <strong>Ver e aprovar</strong>, <strong>Ver e comentar</strong> ou <strong>Só ver</strong>.",
+          "O app cria um link novo com essa escolha. Envie esse link ao cliente."
         ],
         "warningCard": {
-          "title": "Link ativo encontrado",
-          "content": "Se a OS já tem um link valendo, as opções aparecem travadas. Toque em <strong>Gerar novo</strong> para mudar permissões ou validade. O link anterior continua funcionando até vencer; se ele não deve mais funcionar, revogue-o antes de gerar o novo."
+          "title": "O link antigo continua valendo",
+          "content": "Mudar o que o cliente pode fazer, ou a validade, cria outro link. O anterior continua funcionando até vencer. Se ele não deve mais funcionar, desative-o antes."
         }
       },
       {
@@ -101,15 +97,15 @@
           {
             "title": "Escolher a validade",
             "steps": [
-              "Em <strong>Compartilhar com Cliente</strong>, toque em <strong>Opções avançadas</strong>.",
-              "Toque em <strong>Validade do Link</strong> e escolha o prazo.",
-              "O prazo vale para o link que está sendo criado. Se aparecer <strong>Link ativo encontrado</strong>, toque em <strong>Gerar novo</strong> primeiro."
+              "Em <strong>Mandar para o cliente</strong>, toque em <strong>…</strong> e depois em <strong>Mudar a validade</strong>.",
+              "Em <strong>Vale por quanto tempo?</strong>, escolha o prazo.",
+              "O app cria um link novo com esse prazo, e a frase da tela mostra até quando ele vale."
             ]
           }
         ],
         "infoCard": {
           "title": "Link vencido",
-          "content": "Basta compartilhar a OS de novo: sem link ativo, o app cria um novo e você envia ao cliente."
+          "content": "Basta compartilhar a OS de novo: sem link valendo, o app cria um novo e você envia ao cliente."
         }
       },
       {
@@ -122,11 +118,11 @@
             "validationList": [
               {
                 "label": "Aprovou",
-                "text": "A OS passa para Aprovado e um comentário registra a aprovação."
+                "text": "A OS passa para Aprovada e um comentário registra a aprovação."
               },
               {
                 "label": "Recusou",
-                "text": "A OS passa para Cancelado e o comentário traz o motivo, se o cliente escreveu."
+                "text": "A OS passa para Cancelada e o comentário traz o motivo, se o cliente escreveu."
               },
               {
                 "label": "Comentou",
@@ -136,32 +132,32 @@
           },
           {
             "title": "Responder ao cliente",
-            "content": "Escreva em <strong>Comentários</strong>, na OS. Com <strong>Comentário público</strong>, a resposta aparece no link. Ligue a chave para <strong>Comentário interno</strong> quando o recado for só para a equipe."
+            "content": "Na OS, abra <strong>Comentários</strong> e escreva. Com a chave <strong>Só a equipe vê</strong> desligada, o cliente também vê a resposta, pelo link da OS. Ligue a chave quando o recado for só para a equipe."
           }
         ],
         "warningCard": {
           "title": "Aprovar só vale em Orçamento",
-          "content": "O cliente só consegue aprovar ou recusar enquanto a OS está em Orçamento. Se você mudar o status antes, o link deixa de aceitar a resposta."
+          "content": "O cliente só consegue aprovar ou recusar enquanto a OS está em Orçamento. Se você mudar a situação antes, o link deixa de aceitar a resposta."
         }
       },
       {
         "id": "revogar",
-        "title": "Cancelar um link",
-        "intro": "Revogue quando o link foi para a pessoa errada ou a OS não deve mais ser vista. O link para de funcionar na hora, mesmo antes de vencer.",
+        "title": "Desativar um link",
+        "intro": "Desative quando o link foi para a pessoa errada ou a OS não deve mais ser vista. O link para de funcionar na hora, mesmo antes de vencer.",
         "steps": [
-          "Na OS, toque em <strong>⋯ → Compartilhar com Cliente</strong>.",
-          "Toque em <strong>Opções avançadas</strong>.",
-          "Toque em <strong>Revogar Link</strong> e confirme."
+          "Na OS, toque no ícone de compartilhar.",
+          "Em <strong>Mandar para o cliente</strong>, toque em <strong>…</strong>.",
+          "Toque em <strong>Desativar o link</strong> e confirme."
         ],
         "warningCard": {
           "title": "Não dá para desfazer",
-          "content": "Um link revogado não volta a funcionar. Para o cliente acessar de novo, compartilhe a OS outra vez e envie o link novo."
+          "content": "Um link desativado não volta a funcionar. Para o cliente acessar de novo, compartilhe a OS outra vez e envie o link novo."
         }
       },
       {
         "id": "notificacoes",
-        "title": "Avisos para a equipe",
-        "intro": "Quando o cliente responde pelo link, o PraticOS manda uma notificação no celular de quem precisa saber.",
+        "title": "Avisos no celular",
+        "intro": "Quando o cliente responde pelo link, o PraticOS manda uma notificação no celular.",
         "subsections": [
           {
             "title": "Quando chega aviso",
@@ -186,7 +182,7 @@
           },
           {
             "title": "Quem recebe",
-            "content": "O técnico responsável pela OS, quem criou a OS, o dono da empresa e quem tem perfil de Administrador, Gerente ou Supervisor."
+            "content": "Você, como dono da conta. Se alguém trabalha com você, também recebem o responsável pela OS, quem criou a OS e quem tem papel de Administrador, Gerente ou Supervisor."
           }
         ],
         "infoCard": {
@@ -197,16 +193,16 @@
       {
         "id": "avaliacao",
         "title": "Avaliação do cliente",
-        "intro": "Quando a OS chega a Concluído, o mesmo link passa a mostrar a avaliação. É um bom momento para mandar o link de novo, junto com o aviso de que o serviço ficou pronto.",
+        "intro": "Quando a OS chega a Concluída, o mesmo link passa a mostrar a avaliação. É um bom momento para mandar o link de novo, junto com o aviso de que o serviço ficou pronto.",
         "steps": [
-          "Marque a OS como <strong>Concluído</strong>.",
+          "Marque a OS como pronta (Concluída).",
           "O cliente abre o link e escolhe de 1 a 5 estrelas.",
           "Se quiser, ele escreve um comentário de até 500 caracteres.",
-          "A avaliação entra nos comentários da OS e a equipe recebe o aviso."
+          "A avaliação aparece na OS e você recebe o aviso."
         ],
         "infoCard": {
           "title": "Ver todas as avaliações",
-          "content": "Em <strong>Mais → Avaliações</strong>, o Administrador vê a média, o total e cada avaliação com o comentário. Cada OS só pode ser avaliada uma vez."
+          "content": "Em <strong>Ajustes → Avaliações</strong> você vê a média e cada avaliação com o comentário. Cada OS só pode ser avaliada uma vez."
         }
       },
       {
@@ -223,19 +219,19 @@
           },
           {
             "question": "Se eu compartilhar a mesma OS de novo, o link muda?",
-            "answer": "Não, enquanto o link estiver valendo: o app reaproveita o mesmo. Um link novo só é criado quando o anterior vence, é revogado ou você toca em <strong>Gerar novo</strong>."
+            "answer": "Não, enquanto o link estiver valendo: o app reaproveita o mesmo. Um link novo só é criado quando o anterior vence ou é desativado, ou quando você toca em <strong>Gerar link novo</strong>, muda a validade ou o que o cliente pode fazer."
           },
           {
             "question": "Mandei o link para a pessoa errada. E agora?",
-            "answer": "Revogue o link em <strong>⋯ → Compartilhar com Cliente → Opções avançadas → Revogar Link</strong> e envie um novo para o cliente certo."
+            "answer": "Na OS, toque no ícone de compartilhar, depois em <strong>… → Desativar o link</strong>, e envie um novo para o cliente certo."
           },
           {
             "question": "O link mostra os valores?",
-            "answer": "Sim. A página mostra os serviços, os produtos, o desconto e o total da OS."
+            "answer": "Sim. A página mostra os serviços, as peças, o desconto e o total da OS."
           },
           {
             "question": "O cliente recusou por engano. Dá para voltar?",
-            "answer": "A recusa leva a OS para Cancelado. Combine com o cliente e mude o status direto na OS."
+            "answer": "A recusa leva a OS para Cancelada. Combine com o cliente e mude a situação direto na OS."
           }
         ]
       }
@@ -245,90 +241,86 @@
     "sections": [
       {
         "id": "overview",
-        "title": "What the customer sees",
-        "intro": "The link opens a page in the customer’s browser with the work order: services, products, prices, photos and status, plus your company’s name and phone number. They don’t need an account or the app.",
+        "title": "What the customer sees on the link",
+        "intro": "The link opens a page with the work order in the customer’s browser: services, parts, prices, photos and status, plus your name and phone (the ones in <strong>Details for customers</strong>). They don’t need an account or the app.",
         "features": [
           {
             "title": "View the order",
-            "description": "Every link shows the order. That is the minimum and can’t be turned off."
+            "description": "Every link shows the work order. That’s the minimum; it can’t be turned off."
           },
           {
             "title": "Approve or decline",
-            "description": "While the order is a Quote, the customer answers from the link. When declining, they can add a reason."
+            "description": "While the order is a Quote, the customer answers on the link itself. When declining, they can write a reason."
           },
           {
             "title": "Comment",
-            "description": "The customer’s questions and notes land in the order’s comments."
+            "description": "The customer’s questions and notes go into the order’s comments."
           },
           {
             "title": "Rate",
-            "description": "Once the order is completed, the customer gives it 1 to 5 stars."
+            "description": "Once the order is completed, the customer gives 1 to 5 stars."
           }
         ],
         "infoCard": {
-          "title": "What stays hidden",
-          "content": "Internal team comments never show on the link. The customer’s name and phone and the equipment serial number are partly masked."
+          "title": "What stays out",
+          "content": "Comments marked <strong>Team only</strong> don’t show on the link. The customer’s name and phone and the device serial number are partly hidden."
         }
       },
       {
         "id": "how-to-share",
         "title": "Send the link",
-        "intro": "There are two ways. The share button is the quickest; the order menu has more options. Either way, the order has to be saved first.",
+        "intro": "The link comes from the work order itself, once it’s saved.",
         "subsections": [
           {
             "title": "With the share button",
             "steps": [
-              "Open the order.",
-              "Tap the share icon at the top of the screen.",
-              "The app reuses the order’s active link or creates a new one, valid for 7 days, and opens your phone’s share sheet with a message ready.",
-              "Pick WhatsApp, email or another app and send it."
+              "Open the order and tap the share icon at the top of the screen.",
+              "<strong>Send to the customer</strong> opens, with a sentence saying what the customer can do and how long the link lasts. The app reuses the link that is still valid or makes a new one that lasts 7 days.",
+              "If the customer has a phone, tap <strong>Send on WhatsApp</strong>: the chat opens with the message and link ready. For another app, tap <strong>Send another way</strong>.",
+              "Without a phone, the button is <strong>Send the link</strong>, which opens the phone’s share menu.",
+              "To paste the link somewhere else, tap <strong>Copy the link</strong>."
             ]
           },
           {
             "title": "From the order menu",
-            "steps": [
-              "On the order, tap <strong>⋯</strong>, then <strong>Share with Customer</strong>.",
-              "If the customer has a phone number on file, tap <strong>Send via WhatsApp</strong>: the chat opens with the message and link filled in.",
-              "With no phone number, use <strong>Share</strong> to pick an app.",
-              "To paste the link somewhere else, tap <strong>Copy Link</strong>, next to the validity."
-            ]
+            "content": "In the <strong>…</strong> at the top of the order, <strong>Copy link</strong> copies the same link, and <strong>View PDF</strong> opens the order’s PDF to send or print."
           }
         ],
         "infoCard": {
           "title": "When the status changes",
-          "content": "When an order moves to Approved, In Progress or Completed, the customer has a phone number and there is no active link yet, the app asks whether to send the update. <strong>Send via WhatsApp</strong> opens the share sheet with the link and a message about the new status; <strong>Not now</strong> closes the prompt."
+          "content": "When the order moves to Approved, In progress or Completed, the customer has a phone and there’s no valid link yet, a note shows at the bottom of the screen, like \"Approved. Let Ana know?\". Tap <strong>Let know</strong> to send the link with a message about the new status. If you don’t, the note goes away on its own."
         },
         "warningCard": {
-          "title": "Include the country code",
-          "content": "The WhatsApp button treats numbers without a country code as Brazilian. Save your customers’ phone numbers with the country code (for example, +1 for the US)."
+          "title": "Phone with country code",
+          "content": "The WhatsApp button treats numbers without a country code as Brazilian. If the customer is in another country, save the phone with the country code."
         }
       },
       {
         "id": "permissions",
         "title": "Choose what the customer can do",
-        "intro": "Links start with <strong>Can approve</strong> and <strong>Can comment</strong> turned on. Turn them off when you only want to show the order — say, a job already agreed on the phone that the customer just wants to follow.",
+        "intro": "A new link starts as <strong>View, approve and comment</strong>. Pick <strong>View only</strong> when the customer just needs to follow along, for example on a job already agreed by phone.",
         "steps": [
-          "On the order, tap <strong>⋯ → Share with Customer</strong>.",
-          "Tap <strong>Advanced options</strong>.",
-          "Under <strong>Link Permissions</strong>, switch <strong>Can approve</strong> and <strong>Can comment</strong> on or off.",
-          "Each change creates a new link. Send that one to the customer."
+          "On the order, tap the share icon.",
+          "In <strong>Send to the customer</strong>, tap <strong>…</strong> (Link options), then <strong>What the customer can do</strong>.",
+          "Pick <strong>View, approve and comment</strong>, <strong>View and approve</strong>, <strong>View and comment</strong> or <strong>View only</strong>.",
+          "The app makes a new link with that choice. Send that link to the customer."
         ],
         "warningCard": {
-          "title": "Active link found",
-          "content": "If the order already has a live link, the options are locked. Tap <strong>Generate new</strong> to change permissions or validity. The previous link keeps working until it expires; if it shouldn’t, revoke it before generating the new one."
+          "title": "The old link still works",
+          "content": "Changing what the customer can do, or how long the link lasts, makes another link. The previous one keeps working until it expires. If it shouldn’t work anymore, turn it off first."
         }
       },
       {
         "id": "validity",
-        "title": "Link validity",
-        "intro": "Every link expires. After that, the customer sees a notice that access has ended.",
+        "title": "How long the link lasts",
+        "intro": "Every link expires. After that, the customer sees a notice that access has expired.",
         "subsections": [
           {
             "title": "Options",
             "validationList": [
               {
                 "label": "7 days",
-                "text": "Default. Works for most quotes."
+                "text": "Default. Fits most quotes."
               },
               {
                 "label": "14 days",
@@ -341,23 +333,23 @@
             ]
           },
           {
-            "title": "Set the validity",
+            "title": "Pick how long it lasts",
             "steps": [
-              "In <strong>Share with Customer</strong>, tap <strong>Advanced options</strong>.",
-              "Tap <strong>Link Validity</strong> and pick the period.",
-              "It applies to the link being created. If you see <strong>Active link found</strong>, tap <strong>Generate new</strong> first."
+              "In <strong>Send to the customer</strong>, tap <strong>…</strong>, then <strong>Change how long it lasts</strong>.",
+              "In <strong>How long should it last?</strong>, pick the period.",
+              "The app makes a new link with that period, and the sentence on the screen shows the date it’s valid until."
             ]
           }
         ],
         "infoCard": {
           "title": "Expired link",
-          "content": "Just share the order again: with no active link, the app creates a new one for you to send."
+          "content": "Just share the order again: with no valid link, the app makes a new one and you send it to the customer."
         }
       },
       {
         "id": "tracking",
         "title": "See the customer’s answer",
-        "intro": "Whatever the customer does on the link shows up on the order itself, so you don’t have to chase them.",
+        "intro": "What the customer does on the link shows up on the order itself, without you having to ask.",
         "subsections": [
           {
             "title": "What changes on the order",
@@ -368,45 +360,45 @@
               },
               {
                 "label": "Declined",
-                "text": "The order moves to Cancelled and the comment includes the reason, if the customer gave one."
+                "text": "The order moves to Canceled and the comment has the reason, if the customer wrote one."
               },
               {
                 "label": "Commented",
-                "text": "The message lands in <strong>Comments</strong>, tagged Customer."
+                "text": "The message goes into <strong>Comments</strong>, tagged as Customer."
               }
             ]
           },
           {
             "title": "Reply to the customer",
-            "content": "Write in <strong>Comments</strong> on the order. With <strong>Public comment</strong>, your reply shows on the link. Flip the switch to <strong>Internal comment</strong> when the note is for the team only."
+            "content": "On the order, open <strong>Comments</strong> and write. With the <strong>Team only</strong> switch off, the customer also sees the reply, on the order link. Turn the switch on when the note is just for the team."
           }
         ],
         "warningCard": {
           "title": "Approval only works on a Quote",
-          "content": "The customer can only approve or decline while the order is a Quote. If you change the status first, the link stops accepting an answer."
+          "content": "The customer can only approve or decline while the order is a Quote. If you change the status first, the link stops taking the answer."
         }
       },
       {
         "id": "revoke",
-        "title": "Revoke a link",
-        "intro": "Revoke a link that went to the wrong person or an order that should no longer be seen. It stops working right away, even before it expires.",
+        "title": "Turn off a link",
+        "intro": "Turn it off when the link went to the wrong person or the order shouldn’t be seen anymore. The link stops working right away, even before it expires.",
         "steps": [
-          "On the order, tap <strong>⋯ → Share with Customer</strong>.",
-          "Tap <strong>Advanced options</strong>.",
-          "Tap <strong>Revoke Link</strong> and confirm."
+          "On the order, tap the share icon.",
+          "In <strong>Send to the customer</strong>, tap <strong>…</strong>.",
+          "Tap <strong>Turn off the link</strong> and confirm."
         ],
         "warningCard": {
-          "title": "There is no undo",
-          "content": "A revoked link never works again. To give the customer access, share the order again and send the new link."
+          "title": "It can’t be undone",
+          "content": "A link that was turned off doesn’t work again. For the customer to open the order again, share it once more and send the new link."
         }
       },
       {
         "id": "notifications",
-        "title": "Alerts for the team",
-        "intro": "When the customer answers on the link, PraticOS sends a phone notification to the people who need to know.",
+        "title": "Phone alerts",
+        "intro": "When the customer answers on the link, PraticOS sends a notification to your phone.",
         "subsections": [
           {
-            "title": "What triggers an alert",
+            "title": "When an alert arrives",
             "validationList": [
               {
                 "label": "Approval",
@@ -414,7 +406,7 @@
               },
               {
                 "label": "Decline",
-                "text": "The customer declined, with the reason if they gave one."
+                "text": "The customer declined, with the reason, if they wrote one."
               },
               {
                 "label": "Comment",
@@ -428,27 +420,27 @@
           },
           {
             "title": "Who gets it",
-            "content": "The technician assigned to the order, whoever created it, the company owner and anyone with the Administrator, Manager or Supervisor profile."
+            "content": "You, as the account owner. If someone works with you, the person responsible for the order, whoever created it and anyone with the Administrator, Manager or Supervisor role get it too."
           }
         ],
         "infoCard": {
-          "title": "Nothing arrived?",
-          "content": "Check that PraticOS notifications are allowed in the phone’s settings."
+          "title": "Didn’t get it?",
+          "content": "Check that PraticOS notifications are allowed in your phone’s settings."
         }
       },
       {
         "id": "rating",
         "title": "Customer rating",
-        "intro": "When the order reaches Completed, the same link starts showing the rating. It is a good moment to send the link again with a note that the job is done.",
+        "intro": "When the order reaches Completed, the same link starts showing the rating. It’s a good moment to send the link again, along with word that the job is done.",
         "steps": [
-          "Mark the order as <strong>Completed</strong>.",
+          "Mark the order as ready (Completed).",
           "The customer opens the link and picks 1 to 5 stars.",
-          "If they want, they add a comment of up to 500 characters.",
-          "The rating is added to the order’s comments and the team gets an alert."
+          "If they want, they write a comment of up to 500 characters.",
+          "The rating shows on the order and you get the alert."
         ],
         "infoCard": {
-          "title": "See every rating",
-          "content": "In <strong>More → Ratings</strong>, Administrators see the average, the total and each rating with its comment. Each order can be rated only once."
+          "title": "See all ratings",
+          "content": "In <strong>Settings → Ratings</strong> you see the average and each rating with its comment. Each order can be rated only once."
         }
       },
       {
@@ -457,7 +449,7 @@
         "faq": [
           {
             "question": "Does the customer need an account?",
-            "answer": "No. They open the link in their phone or computer browser and see the order right away."
+            "answer": "No. They open the link in the browser on their phone or computer and see the order right away."
           },
           {
             "question": "Can I tell whether the customer opened the link?",
@@ -465,19 +457,19 @@
           },
           {
             "question": "If I share the same order again, does the link change?",
-            "answer": "Not while it is still valid: the app reuses it. A new link is only created when the old one expires, is revoked or you tap <strong>Generate new</strong>."
+            "answer": "Not while the link is valid: the app reuses it. A new link is only made when the previous one expires or is turned off, or when you tap <strong>Make a new link</strong>, change how long it lasts or what the customer can do."
           },
           {
-            "question": "I sent the link to the wrong person. What now?",
-            "answer": "Revoke it in <strong>⋯ → Share with Customer → Advanced options → Revoke Link</strong> and send a new one to the right customer."
+            "question": "I sent the link to the wrong person. Now what?",
+            "answer": "On the order, tap the share icon, then <strong>… → Turn off the link</strong>, and send a new one to the right customer."
           },
           {
             "question": "Does the link show prices?",
-            "answer": "Yes. The page shows the services, products, discount and order total."
+            "answer": "Yes. The page shows the services, parts, discount and total of the order."
           },
           {
             "question": "The customer declined by mistake. Can it be undone?",
-            "answer": "Declining moves the order to Cancelled. Check with the customer and change the status on the order yourself."
+            "answer": "Declining moves the order to Canceled. Agree with the customer and change the status right on the order."
           }
         ]
       }
@@ -488,19 +480,19 @@
       {
         "id": "vision-general",
         "title": "Qué ve el cliente en el enlace",
-        "intro": "El enlace abre en el navegador del cliente una página con la OS: servicios, productos, valores, fotos y estado, además del nombre y el teléfono de tu empresa. No necesita crear cuenta ni descargar la app.",
+        "intro": "El enlace abre en el navegador del cliente una página con la OS: servicios, repuestos, precios, fotos y estado, además de tu nombre y teléfono (los de <strong>Datos para el cliente</strong>). No necesita crear cuenta ni descargar la app.",
         "features": [
           {
             "title": "Ver la OS",
-            "description": "Todo enlace muestra la OS. Es lo mínimo; no se puede desactivar."
+            "description": "Todo enlace muestra la OS. Es lo mínimo; no se puede apagar."
           },
           {
             "title": "Aprobar o rechazar",
-            "description": "Mientras la OS está en Presupuesto, el cliente responde desde el enlace. Al rechazar, puede escribir el motivo."
+            "description": "Mientras la OS está en Presupuesto, el cliente responde en el propio enlace. Al rechazar, puede escribir el motivo."
           },
           {
             "title": "Comentar",
-            "description": "Las preguntas y mensajes del cliente quedan en los comentarios de la OS."
+            "description": "Las preguntas y los mensajes del cliente entran en los comentarios de la OS."
           },
           {
             "title": "Calificar",
@@ -508,56 +500,52 @@
           }
         ],
         "infoCard": {
-          "title": "Lo que no se muestra",
-          "content": "Los comentarios internos del equipo no aparecen en el enlace. El nombre y el teléfono del cliente y el número de serie del equipo aparecen parcialmente ocultos."
+          "title": "Lo que queda fuera",
+          "content": "Los comentarios marcados como <strong>Solo el equipo lo ve</strong> no aparecen en el enlace. El nombre y el teléfono del cliente y el número de serie del equipo aparecen parcialmente ocultos."
         }
       },
       {
         "id": "como-compartir",
         "title": "Enviar el enlace",
-        "intro": "Hay dos caminos. El botón de compartir es el más rápido; el menú de la OS tiene más opciones. En ambos, la OS tiene que estar guardada.",
+        "intro": "El enlace sale de la propia OS, una vez guardada.",
         "subsections": [
           {
             "title": "Con el botón de compartir",
             "steps": [
-              "Abre la OS.",
-              "Toca el ícono de compartir, arriba en la pantalla.",
-              "La app reutiliza el enlace activo de la OS o crea uno nuevo, válido por 7 días, y abre el menú de compartir del celular con un mensaje listo.",
-              "Elige WhatsApp, correo u otra app y envíalo."
+              "Abre la OS y toca el ícono de compartir, arriba en la pantalla.",
+              "Se abre <strong>Enviar al cliente</strong>, con una frase que dice qué puede hacer el cliente y hasta cuándo vale el enlace. La app reutiliza el enlace que sigue vigente o crea uno nuevo, de 7 días.",
+              "Si el cliente tiene teléfono, toca <strong>Enviar por WhatsApp</strong>: la conversación se abre con el mensaje y el enlace listos. Para otra app, toca <strong>Enviar de otra forma</strong>.",
+              "Sin teléfono, el botón es <strong>Enviar el enlace</strong>, que abre el menú de compartir del celular.",
+              "Para pegar el enlace en otro lugar, toca <strong>Copiar el enlace</strong>."
             ]
           },
           {
             "title": "Desde el menú de la OS",
-            "steps": [
-              "En la OS, toca <strong>⋯</strong> y luego <strong>Compartir con Cliente</strong>.",
-              "Si el cliente tiene teléfono registrado, toca <strong>Enviar vía WhatsApp</strong>: se abre el chat con el mensaje y el enlace listos.",
-              "Sin teléfono, usa <strong>Compartir</strong> para elegir la app.",
-              "Para pegar el enlace en otro lugar, toca <strong>Copiar Enlace</strong>, junto a la validez."
-            ]
+            "content": "En el <strong>…</strong> de arriba de la OS, <strong>Copiar enlace</strong> copia el mismo enlace y <strong>Ver PDF</strong> abre el PDF de la OS para enviar o imprimir."
           }
         ],
         "infoCard": {
           "title": "Al cambiar el estado",
-          "content": "Cuando la OS pasa a Aprobado, En Progreso o Completado, el cliente tiene teléfono y todavía no hay enlace activo, la app pregunta si quieres enviar la actualización. <strong>Enviar vía WhatsApp</strong> abre el menú de compartir con el enlace y un mensaje sobre el nuevo estado; <strong>Ahora no</strong> cierra el aviso."
+          "content": "Cuando la OS pasa a Aprobada, En curso o Completada, el cliente tiene teléfono y todavía no hay enlace vigente, aparece un aviso abajo en la pantalla, como \"Aprobada. ¿Avisar a Ana?\". Toca <strong>Avisar</strong> para enviar el enlace con un mensaje sobre el nuevo estado. Si no lo tocas, el aviso desaparece solo."
         },
         "warningCard": {
           "title": "Teléfono con código de país",
-          "content": "El botón de WhatsApp trata los números sin código de país como brasileños. Registra el teléfono de tus clientes con el código de país (por ejemplo, +52 para México)."
+          "content": "El botón de WhatsApp trata los números sin código de país como brasileños. Si el cliente es de otro país, registra el teléfono con el código de país."
         }
       },
       {
         "id": "permisos",
         "title": "Elegir qué puede hacer el cliente",
-        "intro": "Los enlaces se crean con <strong>Puede aprobar</strong> y <strong>Puede comentar</strong> activados. Desactívalos cuando solo quieras mostrar la OS — por ejemplo, un trabajo ya acordado por teléfono que el cliente solo quiere seguir.",
+        "intro": "El enlace nace con <strong>Ver, aprobar y comentar</strong>. Elige <strong>Solo ver</strong> cuando el cliente solo necesita seguir la OS, por ejemplo en un servicio ya acordado por teléfono.",
         "steps": [
-          "En la OS, toca <strong>⋯ → Compartir con Cliente</strong>.",
-          "Toca <strong>Opciones avanzadas</strong>.",
-          "En <strong>Permisos del Enlace</strong>, activa o desactiva <strong>Puede aprobar</strong> y <strong>Puede comentar</strong>.",
-          "Cada cambio crea un enlace nuevo. Envía ese enlace al cliente."
+          "En la OS, toca el ícono de compartir.",
+          "En <strong>Enviar al cliente</strong>, toca <strong>…</strong> (Opciones del enlace) y luego <strong>Qué puede hacer el cliente</strong>.",
+          "Elige <strong>Ver, aprobar y comentar</strong>, <strong>Ver y aprobar</strong>, <strong>Ver y comentar</strong> o <strong>Solo ver</strong>.",
+          "La app crea un enlace nuevo con esa elección. Envía ese enlace al cliente."
         ],
         "warningCard": {
-          "title": "Enlace activo encontrado",
-          "content": "Si la OS ya tiene un enlace vigente, las opciones aparecen bloqueadas. Toca <strong>Generar nuevo</strong> para cambiar permisos o validez. El enlace anterior sigue funcionando hasta que vence; si ya no debe funcionar, revócalo antes de generar el nuevo."
+          "title": "El enlace anterior sigue vigente",
+          "content": "Cambiar lo que puede hacer el cliente, o la validez, crea otro enlace. El anterior sigue funcionando hasta vencer. Si ya no debe funcionar, desactívalo antes."
         }
       },
       {
@@ -578,74 +566,74 @@
               },
               {
                 "label": "30 días",
-                "text": "Para trabajos largos, en los que el cliente sigue la OS hasta la entrega."
+                "text": "Para servicios largos, en los que el cliente sigue la OS hasta la entrega."
               }
             ]
           },
           {
             "title": "Elegir la validez",
             "steps": [
-              "En <strong>Compartir con Cliente</strong>, toca <strong>Opciones avanzadas</strong>.",
-              "Toca <strong>Validez del Enlace</strong> y elige el plazo.",
-              "El plazo vale para el enlace que se está creando. Si aparece <strong>Enlace activo encontrado</strong>, toca primero <strong>Generar nuevo</strong>."
+              "En <strong>Enviar al cliente</strong>, toca <strong>…</strong> y luego <strong>Cambiar la validez</strong>.",
+              "En <strong>¿Por cuánto tiempo vale?</strong>, elige el plazo.",
+              "La app crea un enlace nuevo con ese plazo, y la frase de la pantalla muestra hasta cuándo vale."
             ]
           }
         ],
         "infoCard": {
           "title": "Enlace vencido",
-          "content": "Solo comparte la OS otra vez: sin enlace activo, la app crea uno nuevo para que lo envíes."
+          "content": "Basta con compartir la OS de nuevo: sin enlace vigente, la app crea uno nuevo y lo envías al cliente."
         }
       },
       {
         "id": "seguimiento",
         "title": "Ver la respuesta del cliente",
-        "intro": "Lo que el cliente hace en el enlace aparece en la propia OS, sin que tengas que preguntarle.",
+        "intro": "Lo que el cliente hace en el enlace aparece en la propia OS, sin que tengas que preguntar.",
         "subsections": [
           {
             "title": "Qué cambia en la OS",
             "validationList": [
               {
                 "label": "Aprobó",
-                "text": "La OS pasa a Aprobado y un comentario registra la aprobación."
+                "text": "La OS pasa a Aprobada y un comentario registra la aprobación."
               },
               {
                 "label": "Rechazó",
-                "text": "La OS pasa a Cancelado y el comentario incluye el motivo, si el cliente lo escribió."
+                "text": "La OS pasa a Cancelada y el comentario trae el motivo, si el cliente lo escribió."
               },
               {
                 "label": "Comentó",
-                "text": "El mensaje queda en <strong>Comentarios</strong>, marcado como Cliente."
+                "text": "El mensaje entra en <strong>Comentarios</strong>, marcado como Cliente."
               }
             ]
           },
           {
             "title": "Responder al cliente",
-            "content": "Escribe en <strong>Comentarios</strong>, en la OS. Con <strong>Comentario público</strong>, la respuesta aparece en el enlace. Cambia el interruptor a <strong>Comentario interno</strong> cuando el mensaje sea solo para el equipo."
+            "content": "En la OS, abre <strong>Comentarios</strong> y escribe. Con el interruptor <strong>Solo el equipo lo ve</strong> apagado, el cliente también ve la respuesta, en el enlace de la OS. Enciéndelo cuando el mensaje sea solo para el equipo."
           }
         ],
         "warningCard": {
-          "title": "Aprobar solo funciona en Presupuesto",
+          "title": "Aprobar solo vale en Presupuesto",
           "content": "El cliente solo puede aprobar o rechazar mientras la OS está en Presupuesto. Si cambias el estado antes, el enlace deja de aceptar la respuesta."
         }
       },
       {
         "id": "revocar",
-        "title": "Revocar un enlace",
-        "intro": "Revoca el enlace cuando llegó a la persona equivocada o la OS ya no debe verse. Deja de funcionar al instante, aunque no haya vencido.",
+        "title": "Desactivar un enlace",
+        "intro": "Desactívalo cuando el enlace llegó a la persona equivocada o la OS ya no debe verse. El enlace deja de funcionar al instante, incluso antes de vencer.",
         "steps": [
-          "En la OS, toca <strong>⋯ → Compartir con Cliente</strong>.",
-          "Toca <strong>Opciones avanzadas</strong>.",
-          "Toca <strong>Revocar Enlace</strong> y confirma."
+          "En la OS, toca el ícono de compartir.",
+          "En <strong>Enviar al cliente</strong>, toca <strong>…</strong>.",
+          "Toca <strong>Desactivar el enlace</strong> y confirma."
         ],
         "warningCard": {
           "title": "No se puede deshacer",
-          "content": "Un enlace revocado no vuelve a funcionar. Para que el cliente acceda de nuevo, comparte la OS otra vez y envía el enlace nuevo."
+          "content": "Un enlace desactivado no vuelve a funcionar. Para que el cliente acceda de nuevo, comparte la OS otra vez y envía el enlace nuevo."
         }
       },
       {
         "id": "notificaciones",
-        "title": "Avisos para el equipo",
-        "intro": "Cuando el cliente responde en el enlace, PraticOS manda una notificación al celular de quien necesita saberlo.",
+        "title": "Avisos en el celular",
+        "intro": "Cuando el cliente responde en el enlace, PraticOS envía una notificación al celular.",
         "subsections": [
           {
             "title": "Cuándo llega un aviso",
@@ -656,7 +644,7 @@
               },
               {
                 "label": "Rechazo",
-                "text": "El cliente rechazó, con el motivo si lo escribió."
+                "text": "El cliente rechazó, con el motivo, si lo escribió."
               },
               {
                 "label": "Comentario",
@@ -670,7 +658,7 @@
           },
           {
             "title": "Quién lo recibe",
-            "content": "El técnico asignado a la OS, quien la creó, el dueño de la empresa y quienes tienen perfil de Administrador, Gerente o Supervisor."
+            "content": "Tú, como dueño de la cuenta. Si alguien trabaja contigo, también lo reciben el responsable de la OS, quien la creó y quien tiene el rol de Administrador, Gerente o Supervisor."
           }
         ],
         "infoCard": {
@@ -681,16 +669,16 @@
       {
         "id": "calificacion",
         "title": "Calificación del cliente",
-        "intro": "Cuando la OS llega a Completado, el mismo enlace empieza a mostrar la calificación. Es un buen momento para volver a enviar el enlace junto con el aviso de que el trabajo está listo.",
+        "intro": "Cuando la OS llega a Completada, el mismo enlace pasa a mostrar la calificación. Es un buen momento para enviar el enlace de nuevo, junto con el aviso de que el servicio está listo.",
         "steps": [
-          "Marca la OS como <strong>Completado</strong>.",
+          "Marca la OS como lista (Completada).",
           "El cliente abre el enlace y elige de 1 a 5 estrellas.",
           "Si quiere, escribe un comentario de hasta 500 caracteres.",
-          "La calificación queda en los comentarios de la OS y el equipo recibe el aviso."
+          "La calificación aparece en la OS y recibes el aviso."
         ],
         "infoCard": {
           "title": "Ver todas las calificaciones",
-          "content": "En <strong>Más → Calificaciones</strong>, el Administrador ve el promedio, el total y cada calificación con su comentario. Cada OS se puede calificar una sola vez."
+          "content": "En <strong>Ajustes → Calificaciones</strong> ves el promedio y cada calificación con su comentario. Cada OS solo puede calificarse una vez."
         }
       },
       {
@@ -699,7 +687,7 @@
         "faq": [
           {
             "question": "¿El cliente necesita crear cuenta?",
-            "answer": "No. Abre el enlace en el navegador del celular o de la computadora y ve la OS de inmediato."
+            "answer": "No. Abre el enlace en el navegador del celular o de la computadora y ya ve la OS."
           },
           {
             "question": "¿Puedo saber si el cliente abrió el enlace?",
@@ -707,19 +695,19 @@
           },
           {
             "question": "Si comparto la misma OS otra vez, ¿cambia el enlace?",
-            "answer": "No, mientras siga vigente: la app reutiliza el mismo. Solo se crea uno nuevo cuando el anterior vence, se revoca o tocas <strong>Generar nuevo</strong>."
+            "answer": "No, mientras el enlace esté vigente: la app reutiliza el mismo. Solo se crea uno nuevo cuando el anterior vence o se desactiva, o cuando tocas <strong>Generar enlace nuevo</strong>, cambias la validez o lo que puede hacer el cliente."
           },
           {
-            "question": "Envié el enlace a la persona equivocada. ¿Qué hago?",
-            "answer": "Revócalo en <strong>⋯ → Compartir con Cliente → Opciones avanzadas → Revocar Enlace</strong> y envía uno nuevo al cliente correcto."
+            "question": "Envié el enlace a la persona equivocada. ¿Y ahora?",
+            "answer": "En la OS, toca el ícono de compartir, luego <strong>… → Desactivar el enlace</strong>, y envía uno nuevo al cliente correcto."
           },
           {
-            "question": "¿El enlace muestra los valores?",
-            "answer": "Sí. La página muestra los servicios, los productos, el descuento y el total de la OS."
+            "question": "¿El enlace muestra los precios?",
+            "answer": "Sí. La página muestra los servicios, los repuestos, el descuento y el total de la OS."
           },
           {
-            "question": "El cliente rechazó por error. ¿Se puede revertir?",
-            "answer": "El rechazo pasa la OS a Cancelado. Confírmalo con el cliente y cambia el estado directamente en la OS."
+            "question": "El cliente rechazó por error. ¿Se puede volver atrás?",
+            "answer": "El rechazo lleva la OS a Cancelada. Acuérdalo con el cliente y cambia el estado directamente en la OS."
           }
         ]
       }

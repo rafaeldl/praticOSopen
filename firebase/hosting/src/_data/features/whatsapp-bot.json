@@ -9,13 +9,13 @@
       "ctaSecondaryOff": "Ver onde fica cada coisa no app",
       "demoAlt": "Gravação de uma conversa no WhatsApp em que o assistente cria uma OS com cliente, serviço e valor",
       "demoCaption": "Gravação real: uma OS aberta pela conversa",
-      "shotAlt": "Tela de detalhes de uma OS no app PraticOS, com cliente, serviços, valores e status",
-      "shotCaption": "No app: a OS com cliente, serviços, fotos e status"
+      "shotAlt": "Nova OS no app PraticOS preenchida pelo assistente de IA, com os itens marcados e a barra Foto e Falar",
+      "shotCaption": "No app: fale o serviço e a IA preenche a OS"
     },
     "notice": {
       "label": "Aviso",
       "title": "O assistente está fora do ar por enquanto.",
-      "text": "Abrir OS, anexar fotos, preencher checklists, mandar o link ao cliente e ver o faturamento continuam no app — comece grátis no iOS e no Android.",
+      "text": "O que ele fazia agora está dentro do app: na Nova OS, toque em Falar ou Foto e a IA preenche cliente, serviços e peças. Fotos, checklists, link para o cliente e o que falta receber continuam no app — comece grátis no iOS e no Android.",
       "cta": "Baixar o app grátis"
     },
     "inApp": {
@@ -28,30 +28,30 @@
       "rows": [
         {
           "assistant": "Abrir uma OS pela conversa",
-          "app": "Crie a OS com cliente, aparelho ou veículo, serviços e valores."
+          "app": "Toque no + (Nova OS) e em Falar: diga o serviço e a IA preenche a OS para você conferir."
         },
         {
-          "assistant": "Mandar fotos para a OS",
-          "app": "Tire ou anexe as fotos dentro da própria OS."
+          "assistant": "Mandar foto ou áudio para a OS",
+          "app": "Na OS, use Foto ou Falar na barra de baixo. A foto entra na OS e a fala vira itens."
         },
         {
           "assistant": "Preencher checklists e vistorias",
-          "app": "Preencha os procedimentos da OS: texto, foto, sim ou não, múltipla escolha.",
+          "app": "Abra o checklist dentro da OS e responda: texto, foto, sim ou não, múltipla escolha.",
           "guide": "docs/procedimentos.html"
         },
         {
           "assistant": "Gerar o link para o cliente",
-          "app": "Compartilhe a OS. O cliente vê, aprova o orçamento e comenta pelo navegador.",
+          "app": "Na OS, toque em compartilhar. O cliente vê, aprova o orçamento e comenta pelo navegador.",
           "guide": "docs/compartilhar.html"
         },
         {
-          "assistant": "Perguntar “quanto fiz hoje?”",
-          "app": "Abra o painel financeiro e veja o faturamento do período.",
+          "assistant": "Perguntar “quanto falta receber?”",
+          "app": "Abra a aba Financeiro: ela mostra quanto falta receber e de quem.",
           "guide": "docs/financeiro.html"
         },
         {
-          "assistant": "Convidar a equipe",
-          "app": "Convide colaboradores e escolha o perfil de cada um.",
+          "assistant": "Chamar quem trabalha com você",
+          "app": "Em Ajustes > Equipe, convide a pessoa e escolha o papel dela.",
           "guide": "docs/perfis.html"
         }
       ]
@@ -180,13 +180,13 @@
       "ctaSecondaryOff": "See where each task lives in the app",
       "demoAlt": "Recording of a WhatsApp chat in which the assistant creates a work order with customer, service and price",
       "demoCaption": "Real recording: a work order opened by chat",
-      "shotAlt": "Work order detail screen in the PraticOS app, with customer, services, prices and status",
-      "shotCaption": "In the app: the work order with customer, services, photos and status"
+      "shotAlt": "New work order in the PraticOS app filled in by the AI assistant, with the filled items marked and the Photo and Speak bar",
+      "shotCaption": "In the app: say the job and AI fills in the work order"
     },
     "notice": {
       "label": "Notice",
       "title": "The assistant is offline for now.",
-      "text": "Opening work orders, attaching photos, filling in checklists, sending the customer link and checking revenue all still work in the app — start free on iOS and Android.",
+      "text": "What it did now lives inside the app: in New order, tap Speak or Photo and AI fills in the customer, services and parts. Photos, checklists, the customer link and what's left to collect are all in the app — start free on iOS and Android.",
       "cta": "Download the app free"
     },
     "inApp": {
@@ -198,31 +198,31 @@
       "guideLabel": "Read guide",
       "rows": [
         {
-          "assistant": "Open a work order by chat",
-          "app": "Create the work order with customer, device or vehicle, services and prices."
+          "assistant": "Open a work order by chatting",
+          "app": "Tap + (New order) and Speak: say the job and AI fills in the order for you to check."
         },
         {
-          "assistant": "Send photos to the work order",
-          "app": "Take or attach photos right inside the work order."
+          "assistant": "Send a photo or voice note to the order",
+          "app": "In the order, use Photo or Speak on the bottom bar. The photo goes into the order and your words become items."
         },
         {
           "assistant": "Fill in checklists and inspections",
-          "app": "Fill in the work order’s procedures: text, photo, yes or no, multiple choice.",
+          "app": "Open the checklist inside the order and answer: text, photo, yes or no, multiple choice.",
           "guide": "docs/procedimentos-en.html"
         },
         {
-          "assistant": "Create the customer link",
-          "app": "Share the work order. The customer views it, approves the quote and comments in the browser.",
+          "assistant": "Get the link for the customer",
+          "app": "In the order, tap share. The customer views it, approves the quote and comments in the browser.",
           "guide": "docs/compartilhar-en.html"
         },
         {
-          "assistant": "Ask “how much did I make today?”",
-          "app": "Open the financial dashboard and see revenue for the period.",
+          "assistant": "Ask “how much is left to collect?”",
+          "app": "Open the Financial tab: it shows what's left to collect and from whom.",
           "guide": "docs/financeiro-en.html"
         },
         {
-          "assistant": "Invite your team",
-          "app": "Invite team members and pick a role for each one.",
+          "assistant": "Bring in someone who works with you",
+          "app": "In Settings > Team, invite the person and pick their role.",
           "guide": "docs/perfis-en.html"
         }
       ]
@@ -351,13 +351,13 @@
       "ctaSecondaryOff": "Ver dónde está cada cosa en la app",
       "demoAlt": "Grabación de un chat de WhatsApp en el que el asistente crea una orden de servicio con cliente, servicio y precio",
       "demoCaption": "Grabación real: una orden abierta por chat",
-      "shotAlt": "Pantalla de detalle de una orden de servicio en la app PraticOS, con cliente, servicios, precios y estado",
-      "shotCaption": "En la app: la orden con cliente, servicios, fotos y estado"
+      "shotAlt": "Nueva orden en la app PraticOS rellenada por el asistente de IA, con los ítems marcados y la barra Foto y Hablar",
+      "shotCaption": "En la app: di el servicio y la IA rellena la orden"
     },
     "notice": {
       "label": "Aviso",
       "title": "El asistente no está disponible por ahora.",
-      "text": "Abrir órdenes, adjuntar fotos, llenar checklists, enviar el enlace al cliente y ver la facturación siguen en la app — empieza gratis en iOS y Android.",
+      "text": "Lo que hacía ahora está dentro de la app: en Nueva OS, toca Hablar o Foto y la IA rellena el cliente, los servicios y las piezas. Fotos, checklists, el enlace para el cliente y lo que falta cobrar siguen en la app — empieza gratis en iOS y Android.",
       "cta": "Descargar la app gratis"
     },
     "inApp": {
@@ -369,31 +369,31 @@
       "guideLabel": "Ver guía",
       "rows": [
         {
-          "assistant": "Abrir una orden por chat",
-          "app": "Crea la orden con cliente, equipo o vehículo, servicios y precios."
+          "assistant": "Abrir una orden conversando",
+          "app": "Toca + (Nueva OS) y Hablar: di el servicio y la IA rellena la orden para que la revises."
         },
         {
-          "assistant": "Enviar fotos a la orden",
-          "app": "Toma o adjunta las fotos dentro de la misma orden."
+          "assistant": "Mandar foto o audio a la orden",
+          "app": "En la orden, usa Foto o Hablar en la barra de abajo. La foto entra en la orden y lo que dices se vuelve ítems."
         },
         {
-          "assistant": "Llenar checklists e inspecciones",
-          "app": "Completa los procedimientos de la orden: texto, foto, sí o no, opción múltiple.",
+          "assistant": "Rellenar checklists e inspecciones",
+          "app": "Abre el checklist dentro de la orden y responde: texto, foto, sí o no, opción múltiple.",
           "guide": "docs/procedimentos-es.html"
         },
         {
           "assistant": "Generar el enlace para el cliente",
-          "app": "Comparte la orden. El cliente la ve, aprueba el presupuesto y comenta desde el navegador.",
+          "app": "En la orden, toca compartir. El cliente la ve, aprueba el presupuesto y comenta en el navegador.",
           "guide": "docs/compartilhar-es.html"
         },
         {
-          "assistant": "Preguntar “¿cuánto hice hoy?”",
-          "app": "Abre el panel financiero y mira la facturación del período.",
+          "assistant": "Preguntar “¿cuánto falta cobrar?”",
+          "app": "Abre la pestaña Financiero: muestra cuánto falta cobrar y a quién.",
           "guide": "docs/financeiro-es.html"
         },
         {
-          "assistant": "Invitar al equipo",
-          "app": "Invita colaboradores y elige el perfil de cada uno.",
+          "assistant": "Llamar a quien trabaja contigo",
+          "app": "En Ajustes > Equipo, invita a la persona y elige su rol.",
           "guide": "docs/perfis-es.html"
         }
       ]

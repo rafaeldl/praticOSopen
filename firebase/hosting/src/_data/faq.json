@@ -22,7 +22,7 @@
           },
           {
             "question": "Como excluo minha conta?",
-            "answer": "No app, vá em Mais › Sua conta › Apagar minha conta. A exclusão é permanente e apaga seus dados, inclusive ordens de serviço, clientes e configurações. Se você for o único dono da empresa, a empresa também é apagada."
+            "answer": "No app, toque no botão do perfil, no topo do Início, e vá em Ajustes › Sua conta › Apagar minha conta. A exclusão é permanente e apaga seus dados, inclusive ordens de serviço, clientes e ajustes. Se você tiver assinatura, cancele antes nos ajustes da App Store ou do Google Play."
           }
         ]
       },
@@ -32,23 +32,23 @@
         "items": [
           {
             "question": "Como abro uma OS nova?",
-            "answer": "Na tela inicial, toque no “+” no canto superior. Escolha o cliente, descreva o serviço, anexe fotos se quiser e lance os valores. Toque em “Salvar” e a OS está criada."
+            "answer": "Toque no “+” azul ao lado das abas. Toque em Falar e diga o serviço (“Onix da Juliana, troca de óleo e alinhamento”) ou tire uma foto da placa ou do pedido anotado: a IA preenche cliente, veículo ou aparelho, serviços e peças. Confira o que ficou marcado e salve. Se preferir, preencha à mão."
           },
           {
             "question": "Dá para anexar fotos na OS?",
             "answer": "Dá, várias por OS. Use para registrar como o equipamento chegou, a peça trocada e o serviço pronto."
           },
           {
-            "question": "O que o painel financeiro mostra?",
-            "answer": "O faturamento, o que já foi recebido e o que falta receber. Você filtra por hoje, semana, mês ou ano e vê quanto veio de serviços e quanto veio de produtos."
+            "question": "O que a aba Financeiro mostra?",
+            "answer": "Quanto falta receber e de quem, com quem deve há mais tempo primeiro. Dali você manda a cobrança para o cliente e registra o que ele pagou, de uma vez ou em partes. O relatório do mês mostra o que entrou."
           },
           {
             "question": "Consigo gerar o PDF da OS para mandar ao cliente?",
             "answer": "Consegue. Gere o PDF na própria OS e mande ao cliente ou imprima."
           },
           {
-            "question": "Tenho mais de uma empresa ou filial. Uso uma conta só?",
-            "answer": "Sim. Cada empresa fica com clientes, OS e financeiro separados, e você alterna entre elas no app. Serve para franquias e para quem toca mais de um negócio."
+            "question": "Trabalho em mais de um lugar. Uso o mesmo login?",
+            "answer": "Sim. Cada conta fica com seus clientes, OS e financeiro separados, e você troca entre elas em Ajustes › Trocar de conta. Serve para quem toca mais de um negócio ou também trabalha na equipe de outra pessoa."
           }
         ]
       },
@@ -58,7 +58,7 @@
         "items": [
           {
             "question": "Meus dados estão seguros?",
-            "answer": "Os dados ficam no Firebase, do Google, com criptografia na transmissão e no armazenamento, e cada empresa só enxerga os próprios dados. Os detalhes estão na <a href=\"privacy.html\">Política de Privacidade</a>."
+            "answer": "Os dados ficam no Firebase, do Google, com criptografia na transmissão e no armazenamento, e cada conta só enxerga os próprios dados. Os detalhes estão na <a href=\"privacy.html\">Política de Privacidade</a>."
           }
         ]
       },
@@ -107,7 +107,7 @@
           },
           {
             "question": "How do I delete my account?",
-            "answer": "In the app, go to More › Your account › Delete my account. Deletion is permanent and removes your data, including work orders, customers and settings. If you’re the company’s only owner, the company is deleted too."
+            "answer": "In the app, tap the profile button at the top of Home and go to Settings › Your account › Delete my account. Deletion is permanent and erases your data, including work orders, customers and settings. If you have a subscription, cancel it first in your App Store or Google Play settings."
           }
         ]
       },
@@ -117,23 +117,23 @@
         "items": [
           {
             "question": "How do I open a new work order?",
-            "answer": "On the home screen, tap “+” in the top corner. Pick the customer, describe the job, attach photos if you like and enter the amounts. Tap “Save” and the work order is created."
+            "answer": "Tap the blue “+” next to the tabs. Tap Speak and say the job (“Julia's Civic, oil change and alignment”) or take a photo of the plate or a handwritten request: AI fills in the customer, vehicle or device, services and parts. Check what's marked and save. You can also fill it in by hand."
           },
           {
             "question": "Can I attach photos to a work order?",
             "answer": "Yes, several per order. Use them to record how the equipment came in, the part you replaced and the finished job."
           },
           {
-            "question": "What does the finance dashboard show?",
-            "answer": "Your revenue, what’s been paid and what’s still owed. Filter by today, week, month or year and see how much came from services and how much from products."
+            "question": "What does the Financial tab show?",
+            "answer": "What's left to collect and from whom, with whoever has owed the longest first. From there you send the payment request to the customer and record what they paid, all at once or in parts. The monthly report shows what came in."
           },
           {
             "question": "Can I send the customer a PDF of the work order?",
             "answer": "Yes. Create the PDF from the work order and send it to the customer or print it."
           },
           {
-            "question": "I run more than one company or branch. Can I use one account?",
-            "answer": "Yes. Each company keeps its own customers, work orders and finances, and you switch between them in the app. It fits franchises and anyone running more than one business."
+            "question": "I work in more than one place. Do I use the same login?",
+            "answer": "Yes. Each account keeps its own customers, work orders and finances, and you switch between them in Settings › Switch account. It works if you run more than one business or also work on someone else's team."
           }
         ]
       },
@@ -143,7 +143,7 @@
         "items": [
           {
             "question": "Is my data safe?",
-            "answer": "Data is stored on Google’s Firebase, encrypted in transit and at rest, and each company only sees its own data. Details are in our <a href=\"privacy-en.html\">Privacy Policy</a>."
+            "answer": "Data is stored on Google’s Firebase, encrypted in transit and at rest, and each account only sees its own data. The details are in the <a href=\"privacy-en.html\">Privacy Policy</a>."
           }
         ]
       },
@@ -192,7 +192,7 @@
           },
           {
             "question": "¿Cómo elimino mi cuenta?",
-            "answer": "En la app, ve a Más › Tu cuenta › Eliminar mi cuenta. La eliminación es permanente y borra tus datos, incluidas órdenes de servicio, clientes y configuraciones. Si eres el único dueño de la empresa, la empresa también se borra."
+            "answer": "En la app, toca el botón del perfil, arriba en Inicio, y ve a Ajustes › Tu cuenta › Eliminar mi cuenta. La eliminación es permanente y borra tus datos, incluidas órdenes de servicio, clientes y ajustes. Si tienes una suscripción, cancélala antes en los ajustes de App Store o Google Play."
           }
         ]
       },
@@ -202,23 +202,23 @@
         "items": [
           {
             "question": "¿Cómo abro una orden nueva?",
-            "answer": "En la pantalla de inicio, toca el “+” en la esquina superior. Elige el cliente, describe el trabajo, adjunta fotos si quieres y carga los valores. Toca “Guardar” y la orden queda creada."
+            "answer": "Toca el “+” azul junto a las pestañas. Toca Hablar y di el servicio (“El Corolla de Julia, cambio de aceite y alineación”) o saca una foto de la matrícula o del pedido anotado: la IA rellena cliente, vehículo o equipo, servicios y piezas. Revisa lo que quedó marcado y guarda. También puedes rellenarla a mano."
           },
           {
             "question": "¿Puedo adjuntar fotos a la orden?",
             "answer": "Sí, varias por orden. Úsalas para registrar cómo llegó el equipo, la pieza que cambiaste y el trabajo terminado."
           },
           {
-            "question": "¿Qué muestra el panel financiero?",
-            "answer": "La facturación, lo que ya cobraste y lo que falta cobrar. Filtras por hoy, semana, mes o año y ves cuánto vino de servicios y cuánto de productos."
+            "question": "¿Qué muestra la pestaña Financiero?",
+            "answer": "Cuánto falta cobrar y a quién, con quien debe hace más tiempo primero. Desde ahí mandas el cobro al cliente y registras lo que pagó, de una vez o en partes. El informe del mes muestra lo que entró."
           },
           {
             "question": "¿Puedo generar el PDF de la orden para enviarlo al cliente?",
             "answer": "Sí. Genera el PDF desde la orden y envíalo al cliente o imprímelo."
           },
           {
-            "question": "Tengo más de una empresa o sucursal. ¿Uso una sola cuenta?",
-            "answer": "Sí. Cada empresa tiene sus propios clientes, órdenes y finanzas, y cambias entre ellas en la app. Sirve para franquicias y para quien lleva más de un negocio."
+            "question": "Trabajo en más de un lugar. ¿Uso el mismo acceso?",
+            "answer": "Sí. Cada cuenta tiene sus propios clientes, órdenes y finanzas, y cambias entre ellas en Ajustes › Cambiar de cuenta. Sirve si llevas más de un negocio o también trabajas en el equipo de otra persona."
           }
         ]
       },
@@ -228,7 +228,7 @@
         "items": [
           {
             "question": "¿Mis datos están seguros?",
-            "answer": "Los datos se guardan en Firebase, de Google, cifrados en tránsito y en reposo, y cada empresa solo ve sus propios datos. Los detalles están en la <a href=\"privacy-es.html\">Política de Privacidad</a>."
+            "answer": "Los datos se guardan en Firebase, de Google, cifrados en tránsito y en reposo, y cada cuenta solo ve sus propios datos. Los detalles están en la <a href=\"privacy-es.html\">Política de Privacidad</a>."
           }
         ]
       },

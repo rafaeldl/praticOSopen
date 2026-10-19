@@ -20,16 +20,37 @@
         "title": "Ordem de serviço",
         "number": "Nº 0731",
         "rows": [
-          { "label": "Cliente", "value": "Patrícia Lemos" },
-          { "label": "Móvel", "value": "Guarda-roupa 6 portas" },
-          { "label": "Agendado", "value": "Sexta, 14h" },
-          { "label": "Serviço", "value": "Montagem e fixação na parede" },
-          { "label": "Fotos", "value": "4 anexadas" }
+          {
+            "label": "Cliente",
+            "value": "Patrícia Lemos"
+          },
+          {
+            "label": "Móvel",
+            "value": "Guarda-roupa 6 portas"
+          },
+          {
+            "label": "Agendado",
+            "value": "Sexta, 14h"
+          },
+          {
+            "label": "Serviço",
+            "value": "Montagem e fixação na parede"
+          },
+          {
+            "label": "Fotos",
+            "value": "4 anexadas"
+          }
         ],
         "totalLabel": "Total",
         "total": "R$ 280,00",
         "stamp": "Aprovado pelo cliente",
-        "steps": ["Orçamento", "Aprovado", "Em execução", "Concluído", "Pago"],
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em execução",
+          "Concluído",
+          "Pago"
+        ],
         "current": 2
       }
     },
@@ -56,7 +77,7 @@
         {
           "problem": "Loja que paga sem conferir",
           "detail": "Você atende três lojas e particulares. No fim do mês, ninguém sabe quais montagens já foram pagas.",
-          "answer": "Cada OS tem status de pagamento: a receber, parcial ou pago. O painel mostra o que entrou e quanto falta receber."
+          "answer": "Cada OS mostra o total e o que falta receber. O Financeiro junta quem ainda deve, de quem há mais tempo, e tem o botão para mandar a cobrança."
         },
         {
           "problem": "Valor combinado de boca",
@@ -71,15 +92,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agende a montagem",
-          "text": "Crie a OS com o cliente — loja ou particular — e o móvel. Marque dia e hora: ela entra na agenda e o lembrete é programado no celular.",
+          "title": "Fale a montagem e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Loja Casa Bela, guarda-roupa de 6 portas na casa da Ana, amanhã às 9”. Ou fotografe o pedido da loja. A IA preenche cliente, móvel e serviços com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
-            "Agenda do mês com as montagens de cada dia",
-            "Montagem sem hora marcada aparece como “dia todo”",
-            "Serviços do seu catálogo, já com preço"
+            "Com dia e hora, a montagem entra na Agenda",
+            "Corrija falando: “a montagem é 250”",
+            "Nada é salvo sem você conferir"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
@@ -90,8 +111,8 @@
             "Descrição do móvel e defeitos visíveis",
             "Observações sobre o local de montagem"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
           "number": "03",
@@ -102,20 +123,20 @@
             "Prazo de garantia registrado na OS",
             "PDF da OS para enviar à loja ou ao cliente"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
         },
         {
           "number": "04",
           "title": "Receba e confira",
-          "text": "Registre o pagamento inteiro ou em parcelas. O painel mostra o faturamento do período e quem ainda deve.",
+          "text": "Registre o pagamento inteiro ou em partes. O Financeiro mostra quanto falta receber, de quais clientes, e o que entrou no mês.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
+            "Pagamento em partes e desconto na mesma OS",
+            "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
         }
       ]
     },
@@ -125,10 +146,10 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
-          "question": "Que ramo eu escolho ao criar a empresa?",
+          "question": "Que ramo eu escolho no primeiro acesso?",
           "answer": "Ainda não há um ramo específico para montagem de móveis. Escolha “Outro”: ele já traz checklists de entrada, registro do serviço e entrega ao cliente, que você ajusta para cada tipo de móvel."
         },
         {
@@ -136,8 +157,8 @@
           "answer": "Sim. Cada loja e cada cliente particular é um cliente no app. Busque pelo nome na lista de OS e veja todas as montagens dele, com o status de pagamento de cada uma."
         },
         {
-          "question": "Minha equipe pode usar no próprio celular?",
-          "answer": "Sim. Cada montador entra com o próprio usuário e um perfil de acesso. Quem coordena filtra a agenda por montador."
+          "question": "Quem monta comigo pode usar no próprio celular?",
+          "answer": "Sim. Se alguém trabalha com você, toque no botão do perfil, no topo do Início, e vá em Equipe: o convite vai por um código, pelo WhatsApp, e cada pessoa entra no próprio celular. O plano grátis é para uma pessoa; para chamar mais gente, assine um plano pago dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -166,16 +187,37 @@
         "title": "Work order",
         "number": "No. 0731",
         "rows": [
-          { "label": "Customer", "value": "Patricia Lane" },
-          { "label": "Item", "value": "6-door wardrobe" },
-          { "label": "Scheduled", "value": "Friday, 2 PM" },
-          { "label": "Service", "value": "Assembly and wall anchoring" },
-          { "label": "Photos", "value": "4 attached" }
+          {
+            "label": "Customer",
+            "value": "Patricia Lane"
+          },
+          {
+            "label": "Item",
+            "value": "6-door wardrobe"
+          },
+          {
+            "label": "Scheduled",
+            "value": "Friday, 2 PM"
+          },
+          {
+            "label": "Service",
+            "value": "Assembly and wall anchoring"
+          },
+          {
+            "label": "Photos",
+            "value": "4 attached"
+          }
         ],
         "totalLabel": "Total",
         "total": "$180.00",
         "stamp": "Approved by customer",
-        "steps": ["Quote", "Approved", "In progress", "Done", "Paid"],
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Done",
+          "Paid"
+        ],
         "current": 2
       }
     },
@@ -202,7 +244,7 @@
         {
           "problem": "Stores that pay without checking",
           "detail": "You work for three stores plus homeowners. At month's end, nobody knows which jobs were paid.",
-          "answer": "Each work order has a payment status: due, partial or paid. The dashboard shows what came in and what's still owed."
+          "answer": "Each order shows the total and what is still due. Financial lists everyone who still owes you, oldest first, with a button to send them a payment reminder."
         },
         {
           "problem": "Prices agreed by word of mouth",
@@ -217,15 +259,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Schedule the job",
-          "text": "Create the work order with the customer — store or homeowner — and the piece. Set the day and time: it goes on the calendar and the reminder is set on your phone.",
+          "title": "Say the job and the AI opens the order",
+          "text": "Tap Speak and say something like: “Casa Bela store, 6-door wardrobe at Ana's place, tomorrow at 9”. Or photograph the store's order. The AI fills in customer, piece and services with your catalog prices and marks what it filled with ✦.",
           "facts": [
-            "Monthly calendar with each day's jobs",
-            "Jobs without a set time show as “all day”",
-            "Services from your catalog, already priced"
+            "With a date and time, the job goes on the Schedule",
+            "Fix it by voice: “assembly is 250”",
+            "Nothing is saved until you check it"
           ],
-          "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled across the month"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
@@ -236,8 +278,8 @@
             "Description of the piece and visible defects",
             "Notes about the installation spot"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
           "number": "03",
@@ -248,20 +290,20 @@
             "Warranty period recorded on the work order",
             "Work order PDF to send to the store or customer"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
         },
         {
           "number": "04",
           "title": "Get paid and keep track",
-          "text": "Record the payment in full or in parts. The dashboard shows revenue for the period and who still owes you.",
+          "text": "Record the payment in full or in parts. Financial shows how much is still due, from which customers, and what came in this month.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
+            "Partial payment and discount on the same order",
+            "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing how much is still due and from which customers"
         }
       ]
     },
@@ -271,10 +313,10 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
-          "question": "Which trade do I pick when I set up my company?",
+          "question": "Which trade do I pick when I first sign in?",
           "answer": "There's no trade specific to furniture assembly yet. Pick “Other”: it comes with intake, service record and customer handover checklists that you can adjust for each type of piece."
         },
         {
@@ -282,8 +324,8 @@
           "answer": "Yes. Each store and each homeowner is a customer in the app. Search by name in the work order list to see all their jobs, with the payment status of each."
         },
         {
-          "question": "Can my crew use it on their own phones?",
-          "answer": "Yes. Each assembler signs in with their own user and an access role. Whoever coordinates can filter the calendar by assembler."
+          "question": "Can the people who work with me use it on their own phones?",
+          "answer": "Yes. If someone works with you, tap the profile button at the top of Home and go to Team: the invite goes out as a code over WhatsApp, and each person signs in on their own phone. The free plan is for one person; to add more people, subscribe to a paid plan inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -312,16 +354,37 @@
         "title": "Orden de servicio",
         "number": "N.º 0731",
         "rows": [
-          { "label": "Cliente", "value": "Patricia Lemus" },
-          { "label": "Mueble", "value": "Clóset de 6 puertas" },
-          { "label": "Agendado", "value": "Viernes, 14 h" },
-          { "label": "Servicio", "value": "Armado y fijación a la pared" },
-          { "label": "Fotos", "value": "4 adjuntas" }
+          {
+            "label": "Cliente",
+            "value": "Patricia Lemus"
+          },
+          {
+            "label": "Mueble",
+            "value": "Clóset de 6 puertas"
+          },
+          {
+            "label": "Agendado",
+            "value": "Viernes, 14 h"
+          },
+          {
+            "label": "Servicio",
+            "value": "Armado y fijación a la pared"
+          },
+          {
+            "label": "Fotos",
+            "value": "4 adjuntas"
+          }
         ],
         "totalLabel": "Total",
         "total": "$ 180,00",
         "stamp": "Aprobado por el cliente",
-        "steps": ["Presupuesto", "Aprobado", "En curso", "Terminado", "Cobrado"],
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En curso",
+          "Terminado",
+          "Cobrado"
+        ],
         "current": 2
       }
     },
@@ -348,7 +411,7 @@
         {
           "problem": "Tiendas que pagan sin revisar",
           "detail": "Trabajas para tres tiendas y para particulares. A fin de mes nadie sabe qué armados ya se pagaron.",
-          "answer": "Cada orden tiene estado de pago: por cobrar, parcial o pagado. El panel muestra lo que entró y cuánto falta cobrar."
+          "answer": "Cada orden muestra el total y lo que falta cobrar. Financiero junta a quien todavía debe, el más atrasado primero, con el botón para mandar el cobro."
         },
         {
           "problem": "Precio acordado de palabra",
@@ -363,15 +426,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agenda el armado",
-          "text": "Crea la orden con el cliente — tienda o particular — y el mueble. Marca día y hora: entra en la agenda y el recordatorio queda programado en el celular.",
+          "title": "Di el armado y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Tienda Casa Bela, ropero de 6 puertas en la casa de Ana, mañana a las 9”. O fotografía el pedido de la tienda. La IA completa cliente, mueble y servicios con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
-            "Agenda del mes con los armados de cada día",
-            "Un armado sin hora fija aparece como “todo el día”",
-            "Servicios de tu catálogo, con precio"
+            "Con día y hora, el armado entra en la Agenda",
+            "Corrige hablando: “el armado es 250”",
+            "Nada se guarda sin que lo revises"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
@@ -382,8 +445,8 @@
             "Descripción del mueble y defectos visibles",
             "Notas sobre el lugar de armado"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
           "number": "03",
@@ -394,20 +457,20 @@
             "Plazo de garantía registrado en la orden",
             "PDF de la orden para enviar a la tienda o al cliente"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
         },
         {
           "number": "04",
           "title": "Cobra y lleva la cuenta",
-          "text": "Registra el pago total o en partes. El panel muestra la facturación del período y quién todavía debe.",
+          "text": "Registra el pago total o en partes. Financiero muestra cuánto falta cobrar, de qué clientes, y lo que entró en el mes.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
+            "Pago en partes y descuento en la misma orden",
+            "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
         }
       ]
     },
@@ -417,10 +480,10 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
-          "question": "¿Qué rubro elijo al crear la empresa?",
+          "question": "¿Qué rubro elijo la primera vez que entro?",
           "answer": "Todavía no hay un rubro específico para armado de muebles. Elige “Otro”: trae checklists de ingreso, registro del servicio y entrega al cliente, que ajustas para cada tipo de mueble."
         },
         {
@@ -428,8 +491,8 @@
           "answer": "Sí. Cada tienda y cada particular es un cliente en la app. Busca por nombre en la lista de órdenes y ve todos sus armados, con el estado de pago de cada uno."
         },
         {
-          "question": "¿Mi equipo puede usarlo en su propio celular?",
-          "answer": "Sí. Cada armador entra con su propio usuario y un perfil de acceso. Quien coordina filtra la agenda por armador."
+          "question": "¿Quien arma conmigo puede usarlo en su propio celular?",
+          "answer": "Sí. Si alguien trabaja contigo, toca el botón del perfil, arriba en Inicio, y ve a Equipo: la invitación va con un código por WhatsApp y cada persona entra en su propio celular. El plan gratis es para una persona; para sumar a más gente, contrata un plan pago dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

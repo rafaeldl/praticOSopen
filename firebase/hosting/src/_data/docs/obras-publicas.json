@@ -4,19 +4,19 @@
       {
         "id": "visao-geral",
         "title": "Como o PraticOS atende obras públicas",
-        "intro": "Para secretarias de obras e prefeituras que acompanham a execução de contratos. Cada obra fica cadastrada, cada contrato vira uma OS, e quem está no canteiro registra medições e vistorias pelo celular, com fotos. O PraticOS não conduz a licitação — ele acompanha o contrato.",
+        "intro": "Para secretarias de obras e prefeituras que acompanham a execução de contratos. Cada contrato é uma OS, ligada à obra e à empresa contratada, e quem vai ao canteiro registra medições e vistorias pelo celular, com fotos. O PraticOS acompanha o contrato; ele não conduz a licitação.",
         "features": [
           {
             "title": "Contratos",
-            "description": "Número, modalidade, base legal, prazo e fiscal de cada contrato, com o status de cada fase."
+            "description": "Número, modalidade, base legal, prazo e fiscal de cada contrato, e a situação de cada um."
           },
           {
-            "title": "Medições",
-            "description": "Formulário de medição preenchido na obra e o valor liberado lançado no contrato."
+            "title": "Medições e vistorias",
+            "description": "Checklists prontos de medição, vistoria e recebimento, respondidos na obra e com fotos."
           },
           {
-            "title": "Vistorias",
-            "description": "Vistoria de andamento, termo de recebimento e checklist de conformidade, com fotos."
+            "title": "Quem vê valores",
+            "description": "Se alguém trabalha com você, o fiscal de obra pode registrar tudo sem ver os valores."
           }
         ],
         "infoCard": {
@@ -27,52 +27,105 @@
       {
         "id": "conceitos",
         "title": "Como os nomes mudam",
-        "intro": "Com o segmento <strong>Obras Públicas / Prefeituras</strong>, o app troca os nomes das telas para o vocabulário da prefeitura. Por baixo, são as mesmas funções que os outros segmentos usam — por isso o resto da central de ajuda também vale para você.",
+        "intro": "Com o ramo <strong>Obras Públicas / Prefeituras</strong>, o app usa o vocabulário da prefeitura. Por baixo, são as mesmas telas dos outros ramos, por isso o resto da central de ajuda também vale para você.",
         "table": {
-          "headers": ["Na prefeitura", "Nome no app", "Nos outros segmentos"],
+          "headers": [
+            "Na prefeitura",
+            "Nome no app",
+            "Nos outros ramos"
+          ],
           "rows": [
-            { "label": "Obra", "cells": [{ "text": "Obra" }, { "text": "Dispositivo (veículo, aparelho…)" }] },
-            { "label": "Contrato", "cells": [{ "text": "Contrato" }, { "text": "Ordem de serviço" }] },
-            { "label": "Empresa contratada", "cells": [{ "text": "Empresa Contratada" }, { "text": "Cliente" }] },
-            { "label": "Medição", "cells": [{ "text": "Medição" }, { "text": "Pagamento da OS" }] },
-            { "label": "Vistoria", "cells": [{ "text": "Vistoria de Andamento" }, { "text": "Procedimento" }] },
-            { "label": "Valor do contrato", "cells": [{ "text": "Valor Contratado" }, { "text": "Total da OS" }] }
+            {
+              "label": "Obra",
+              "cells": [
+                {
+                  "text": "Obra"
+                },
+                {
+                  "text": "Veículo, aparelho…"
+                }
+              ]
+            },
+            {
+              "label": "Contrato",
+              "cells": [
+                {
+                  "text": "Contrato"
+                },
+                {
+                  "text": "OS"
+                }
+              ]
+            },
+            {
+              "label": "Empresa contratada",
+              "cells": [
+                {
+                  "text": "Empresa Contratada"
+                },
+                {
+                  "text": "Cliente"
+                }
+              ]
+            },
+            {
+              "label": "Situação",
+              "cells": [
+                {
+                  "text": "Em Licitação, Contratado, Em Execução, Concluído / Recebido, Rescindido"
+                },
+                {
+                  "text": "Orçamento, Aprovada, Em andamento, Concluída, Cancelada"
+                }
+              ]
+            },
+            {
+              "label": "Valor liberado",
+              "cells": [
+                {
+                  "text": "Total Liberado e A Liberar, no Relatório do Financeiro"
+                },
+                {
+                  "text": "Recebido e A receber"
+                }
+              ]
+            }
           ]
         }
       },
       {
         "id": "configuracao",
         "title": "Configurar a prefeitura",
-        "intro": "Leva o tempo de cadastrar as empresas e as obras que você já tem. Faça nesta ordem, porque o contrato puxa os dois cadastros.",
+        "intro": "Faça nesta ordem, porque o contrato puxa a empresa contratada e a obra.",
         "subsections": [
           {
-            "title": "1. Escolher o segmento",
+            "title": "1. Escolher o ramo",
             "steps": [
-              "Baixe o PraticOS e crie a conta com o e-mail da secretaria.",
-              "No cadastro da empresa, preencha os dados do órgão e escolha o segmento <strong>Obras Públicas / Prefeituras</strong>.",
-              "Se a conta já existe, troque em <strong>Mais → Dados da Empresa → Segmento</strong>."
+              "Baixe o PraticOS e entre com Apple, Google ou e-mail.",
+              "No primeiro acesso, escolha o ramo <strong>Obras Públicas / Prefeituras</strong> e, se quiser, as especialidades. Em <strong>Para o cliente</strong>, escreva o nome do órgão em <strong>Nome que aparece na OS</strong>: ele sai no contrato e no PDF.",
+              "Se você já usa o app, toque no botão do perfil, no topo do Início, vá em <strong>Dados para o cliente</strong> e toque em <strong>Ramo</strong>."
             ]
           },
           {
             "title": "2. Cadastrar as empresas contratadas",
             "steps": [
-              "Toque na aba <strong>Clientes</strong> e em <strong>+</strong>.",
-              "Cadastre cada empresa com nome, CNPJ, telefone e e-mail do responsável."
+              "Toque no botão do perfil, no topo do Início, e vá em <strong>Clientes</strong>.",
+              "Toque em <strong>+</strong> e cadastre cada empresa com nome, telefone e e-mail do responsável."
             ]
           },
           {
             "title": "3. Cadastrar as obras",
             "steps": [
-              "Em <strong>Mais → Obras</strong>, toque em <strong>+</strong>.",
-              "Dê um nome que a equipe reconheça no campo — “Ponte do Rio Claro”, “UBS Jardim Europa” — e preencha os dados da obra."
+              "Toque no botão do perfil, no topo do Início, e vá em <strong>Avançado › Obras</strong>. Se a opção não aparece, ligue <strong>Controle de Obras</strong> em <strong>Dados para o cliente</strong>.",
+              "Toque em <strong>+</strong>. Dê um nome que a equipe reconheça no campo, como “Ponte do Rio Claro” ou “UBS Jardim Europa”, e preencha <strong>Nº do Contrato</strong>, <strong>Secretaria Responsável</strong>, <strong>Localização da Obra</strong> e <strong>Objeto do Contrato</strong>.",
+              "Também dá para cadastrar a obra na hora de abrir o contrato, pelo <strong>+</strong> da tela de escolher."
             ]
           },
           {
-            "title": "4. Montar a equipe",
+            "title": "4. Chamar a equipe (se houver)",
             "steps": [
-              "Em <strong>Mais → Colaboradores</strong>, convide cada pessoa.",
-              "Fiscais de obra entram como <strong>Supervisor</strong>; quem cuida do dinheiro, como <strong>Gerente</strong>; o secretário ou gestor, como <strong>Administrador</strong>.",
-              "Antes de dar acesso a alguém de fora da prefeitura, leia <a href=\"#permissoes\">Perfis e permissões</a>."
+              "Toque no botão do perfil, no topo do Início, vá em <strong>Equipe</strong> e toque em <strong>Convidar uma pessoa</strong>. Chamar alguém pede um plano pago, assinado no app.",
+              "Fiscais de obra costumam entrar como <strong>Supervisor</strong>; quem cuida do dinheiro, como <strong>Gerente</strong>. Veja <a href=\"#permissoes\">Equipe e papéis</a>."
             ]
           }
         ]
@@ -80,31 +133,69 @@
       {
         "id": "contratos",
         "title": "Cadastrar um contrato",
-        "intro": "Cada contrato é uma OS. O status mostra em que fase ele está:",
+        "intro": "A situação do contrato mostra em que fase ele está:",
         "statusCards": [
-          { "color": "blue", "title": "Em Licitação", "description": "O contrato ainda não foi assinado." },
-          { "color": "orange", "title": "Contratado", "description": "Contrato assinado, obra ainda não começou." },
-          { "color": "yellow", "title": "Em Execução", "description": "Obra em andamento, com medições e vistorias." },
-          { "color": "green", "title": "Concluído / Recebido", "description": "Obra entregue e recebida." },
-          { "color": "red", "title": "Rescindido", "description": "Contrato encerrado antes do fim." }
+          {
+            "color": "purple",
+            "title": "Em Licitação",
+            "description": "O contrato ainda não foi assinado. Nesta fase não dá para lançar valor liberado."
+          },
+          {
+            "color": "blue",
+            "title": "Contratado",
+            "description": "Contrato assinado, obra ainda não começou."
+          },
+          {
+            "color": "orange",
+            "title": "Em Execução",
+            "description": "Obra em andamento, com medições e vistorias."
+          },
+          {
+            "color": "green",
+            "title": "Concluído / Recebido",
+            "description": "Obra entregue e recebida."
+          },
+          {
+            "color": "purple",
+            "title": "Rescindido",
+            "description": "Contrato encerrado antes do fim."
+          }
         ],
         "steps": [
-          "Na aba <strong>Início</strong>, toque em <strong>+</strong> para abrir um <strong>Novo Contrato</strong>.",
-          "Escolha a <strong>Empresa Contratada</strong> e adicione a <strong>Obra</strong>.",
-          "Lance os serviços ou etapas do contrato com seus valores. A soma aparece como <strong>Valor Contratado</strong>.",
-          "Preencha a seção <strong>Dados do Contrato</strong> e salve. O contrato começa em <strong>Em Licitação</strong>; mude o status conforme a fase."
+          "Toque no <strong>+</strong> azul, ao lado das abas, para abrir um contrato novo.",
+          "Escolha a <strong>Empresa Contratada</strong> e a <strong>Obra</strong>.",
+          "Lance os serviços ou etapas do contrato com seus valores. A soma aparece no <strong>Total</strong>.",
+          "Preencha <strong>Dados do Contrato</strong> e <strong>Execução</strong> e salve. Mude a situação conforme a fase."
         ],
         "subsections": [
           {
             "title": "Campos do contrato",
-            "intro": "O segmento acrescenta duas seções à OS. Nenhum campo é obrigatório — preencha o que a secretaria usa.",
+            "intro": "O ramo acrescenta duas partes ao contrato. Nenhum campo é obrigatório: preencha o que a secretaria usa.",
             "validationList": [
-              { "label": "Modalidade de Licitação", "text": "Pregão Eletrônico, Concorrência, Convite, Dispensa, Inexigibilidade ou Diálogo Competitivo." },
-              { "label": "Nº da Licitação e Nº do Contrato", "text": "Os números do processo licitatório e do contrato." },
-              { "label": "Prazo Contratual", "text": "Data-limite da execução." },
-              { "label": "Base Legal", "text": "Lei 14.133/2021, Lei 8.666/1993 ou Outra." },
-              { "label": "% de Execução e Etapa Atual", "text": "Na seção <strong>Execução</strong>. Atualize a cada medição, para quem abre o contrato saber onde a obra está." },
-              { "label": "Fiscal do Contrato", "text": "O nome do fiscal responsável, também na seção <strong>Execução</strong>." }
+              {
+                "label": "Modalidade de Licitação",
+                "text": "Pregão Eletrônico, Concorrência, Convite, Dispensa, Inexigibilidade ou Diálogo Competitivo."
+              },
+              {
+                "label": "Nº da Licitação e Nº do Contrato",
+                "text": "Os números do processo licitatório e do contrato."
+              },
+              {
+                "label": "Prazo Contratual",
+                "text": "Data-limite da execução."
+              },
+              {
+                "label": "Base Legal",
+                "text": "Lei 14.133/2021, Lei 8.666/1993 ou Outra."
+              },
+              {
+                "label": "% de Execução e Etapa Atual",
+                "text": "Em <strong>Execução</strong>. Atualize a cada medição, para quem abre o contrato saber onde a obra está."
+              },
+              {
+                "label": "Fiscal do Contrato",
+                "text": "O nome do fiscal responsável, também em <strong>Execução</strong>."
+              }
             ]
           }
         ]
@@ -112,11 +203,11 @@
       {
         "id": "medicoes",
         "title": "Medições e vistorias",
-        "intro": "O segmento traz quatro procedimentos prontos. Eles aparecem como <strong>Globais</strong> quando você adiciona um procedimento ao contrato, e os três primeiros exigem pelo menos uma foto.",
+        "intro": "O ramo traz quatro checklists prontos. Os três primeiros só podem ser concluídos com pelo menos uma foto.",
         "features": [
           {
             "title": "Medição de Obra",
-            "description": "Etapa medida, % previsto e % executado, avaliação de qualidade, materiais, segurança, conformidade ambiental e evidência fotográfica."
+            "description": "Etapa medida, % previsto e % executado, avaliação de qualidade, materiais, segurança, conformidade ambiental e fotos."
           },
           {
             "title": "Vistoria de Andamento",
@@ -135,50 +226,104 @@
           {
             "title": "Registrar uma medição ou vistoria",
             "steps": [
-              "Abra o contrato e vá até a seção <strong>Formulários</strong>.",
-              "Toque em <strong>Adicionar</strong> e escolha <strong>Medição de Obra</strong> ou <strong>Vistoria de Andamento</strong>.",
-              "Preencha os itens na obra e tire as fotos pelo próprio app. Cada resposta é salva na hora.",
-              "Toque em <strong>Completo</strong>. Depois disso, só Administrador, Gerente ou Supervisor reabrem para corrigir."
+              "Antes da primeira vez, toque no botão do perfil, no topo do Início, vá em <strong>Checklists</strong> e, em <strong>Prontos para usar</strong>, toque em <strong>Usar</strong> no modelo que a secretaria vai usar.",
+              "No contrato, toque em <strong>…</strong>, depois em <strong>Adicionar à OS</strong> e em <strong>Checklist</strong>, e escolha o modelo.",
+              "Toque em <strong>Começar</strong>, responda na obra e tire as fotos pelo próprio app. Cada resposta é salva na hora.",
+              "Toque em <strong>Concluir checklist</strong>. Depois disso, para corrigir, é preciso reabrir o checklist."
             ]
           }
         ],
         "infoCard": {
-          "title": "Ajustar os formulários",
-          "content": "Se a secretaria usa outro modelo de medição, importe o procedimento em <strong>Mais → Procedimentos</strong> e edite os itens. Como funciona: <a href=\"procedimentos.html\">Procedimentos</a>."
+          "title": "Ajustar os modelos",
+          "content": "Se a secretaria usa outro modelo de medição, mude as perguntas do modelo em <strong>Checklists</strong>. Como funciona: <a href=\"procedimentos.html\">Checklists</a>."
         }
       },
       {
         "id": "financeiro",
-        "title": "Lançar o valor medido",
-        "intro": "O formulário de medição registra o que foi executado; o valor liberado entra no contrato como <strong>Medição</strong>. Só quem vê valores — Administrador e Gerente — faz esse lançamento.",
+        "title": "Lançar o valor liberado",
+        "intro": "O checklist de medição registra o que foi executado; o valor liberado é anotado no contrato como um recebimento. Só quem vê valores faz esse lançamento.",
         "steps": [
           "Abra o contrato. Ele precisa ter saído de <strong>Em Licitação</strong>.",
-          "Toque em <strong>Valor Contratado</strong>.",
-          "Registre a medição com o valor aprovado.",
-          "Repita a cada medição. O pagamento do contrato mostra se o valor já foi liberado por inteiro ou em parte."
+          "Toque em <strong>Falta receber</strong>, abaixo do Total.",
+          "Digite o valor aprovado na medição e, se quiser, anexe o comprovante.",
+          "Toque em <strong>Confirmar recebimento</strong>. Repita a cada medição: o contrato mostra quanto já foi liberado e quanto falta."
         ],
         "infoCard": {
           "title": "Visão de todos os contratos",
-          "content": "Na aba <strong>Financeiro</strong>, Administrador e Gerente veem o total do período, o <strong>Total Liberado</strong> e o que está <strong>A Liberar</strong>, com o ranking por empresa contratada. Detalhes em <a href=\"financeiro.html\">Financeiro</a>."
+          "content": "Na aba <strong>Financeiro</strong>, toque em <strong>…</strong> › <strong>Relatório</strong> para ver o <strong>Total Liberado</strong> e o que está <strong>A Liberar</strong> no período, com o ranking por empresa contratada. Detalhes em <a href=\"financeiro.html\">Financeiro</a>."
         }
       },
       {
         "id": "permissoes",
-        "title": "Perfis e permissões",
-        "intro": "Os perfis são os mesmos de qualquer empresa no PraticOS. Esta é a forma mais comum de usá-los numa secretaria:",
+        "title": "Equipe e papéis",
+        "intro": "Se outras pessoas trabalham com você, os papéis são os mesmos de qualquer conta do PraticOS. Esta é a forma mais comum de usá-los numa secretaria:",
         "table": {
-          "headers": ["Função", "Perfil", "O que faz no app"],
+          "headers": [
+            "Função",
+            "Papel",
+            "O que faz no app"
+          ],
           "rows": [
-            { "label": "Secretário ou gestor", "cells": [{ "text": "Administrador" }, { "text": "Tudo, inclusive equipe, valores e Financeiro" }] },
-            { "label": "Responsável financeiro", "cells": [{ "text": "Gerente" }, { "text": "Valores, medições e Financeiro; não abre contratos" }] },
-            { "label": "Fiscal de obra", "cells": [{ "text": "Supervisor" }, { "text": "Contratos, obras e vistorias, sem ver valores" }] },
-            { "label": "Equipe de campo", "cells": [{ "text": "Técnico" }, { "text": "Preenche vistorias e tira fotos, sem ver valores" }] },
-            { "label": "Empresa contratada", "cells": [{ "text": "Sem acesso ao app" }, { "text": "Recebe o link do próprio contrato" }] }
+            {
+              "label": "Secretário ou gestor",
+              "cells": [
+                {
+                  "text": "Administrador"
+                },
+                {
+                  "text": "Tudo, inclusive Equipe, Plano, valores e Financeiro"
+                }
+              ]
+            },
+            {
+              "label": "Responsável financeiro",
+              "cells": [
+                {
+                  "text": "Gerente"
+                },
+                {
+                  "text": "Valores, lançamentos e Financeiro; não abre contrato novo"
+                }
+              ]
+            },
+            {
+              "label": "Fiscal de obra",
+              "cells": [
+                {
+                  "text": "Supervisor"
+                },
+                {
+                  "text": "Contratos, obras, empresas e checklists, sem ver valores"
+                }
+              ]
+            },
+            {
+              "label": "Equipe de campo",
+              "cells": [
+                {
+                  "text": "Técnico"
+                },
+                {
+                  "text": "Abre contratos, preenche checklists e tira fotos, sem ver valores; só vê os contratos que ele abriu"
+                }
+              ]
+            },
+            {
+              "label": "Empresa contratada",
+              "cells": [
+                {
+                  "text": "Fora da equipe"
+                },
+                {
+                  "text": "Recebe o link do próprio contrato"
+                }
+              ]
+            }
           ]
         },
-        "warningCard": {
-          "title": "O Técnico vê todos os contratos",
-          "content": "O perfil Técnico esconde valores, mas não esconde contratos: quem entra como Técnico vê todos os contratos da prefeitura. Se uma empresa contratada não deve ver os contratos das outras, não a convide como colaboradora — mande o link do contrato dela pelo <strong>Compartilhar com Cliente</strong>."
+        "infoCard": {
+          "title": "A empresa contratada não precisa entrar no app",
+          "content": "Para mostrar o contrato à empresa, abra o contrato e toque no ícone de compartilhar, no topo. Ela recebe um link com o contrato, sem instalar nada. Detalhes em <a href=\"compartilhar.html\">Compartilhar OS</a>."
         }
       },
       {
@@ -187,27 +332,23 @@
         "faq": [
           {
             "question": "Preciso de um sistema de licitação para usar o PraticOS?",
-            "answer": "Não, e ele não substitui um. O PraticOS acompanha a execução do contrato. O status <strong>Em Licitação</strong> só serve para você já cadastrar o contrato enquanto o processo corre."
+            "answer": "Não, e ele não substitui um. O PraticOS acompanha a execução do contrato. A situação <strong>Em Licitação</strong> só serve para você já cadastrar o contrato enquanto o processo corre."
           },
           {
             "question": "Posso cadastrar contratos que já estão em execução?",
-            "answer": "Pode. Cadastre o contrato, mude o status para <strong>Em Execução</strong> e preencha <strong>% de Execução</strong> e <strong>Etapa Atual</strong>. Daí em diante, as medições e vistorias ficam registradas no app."
+            "answer": "Pode. Cadastre o contrato, mude a situação para <strong>Em Execução</strong> e preencha <strong>% de Execução</strong> e <strong>Etapa Atual</strong>. Daí em diante, as medições e vistorias ficam registradas no app."
           },
           {
             "question": "O fiscal de obra vê os valores?",
-            "answer": "Não. Fiscais com perfil Supervisor veem contratos, obras e procedimentos, mas nenhum valor. Só Administrador e Gerente lançam medições e acessam o Financeiro."
-          },
-          {
-            "question": "A empresa contratada pode acessar o app?",
-            "answer": "Pode, mas como Técnico ela veria todos os contratos da prefeitura, ainda que sem valores. Na maioria dos casos é melhor mandar o link do contrato dela."
+            "answer": "Não, se ele entrar na equipe como Supervisor. Ele vê contratos, obras e checklists, mas nenhum valor. Valores e Financeiro ficam com Administrador e Gerente."
           },
           {
             "question": "Dá para gerar um relatório da medição?",
-            "answer": "Sim. O PDF do contrato traz uma página para cada procedimento preenchido — medições, vistorias, termo de recebimento — com as respostas e as fotos. Quem vê valores gera o PDF pelo menu do contrato."
+            "answer": "Sim. No contrato, toque em <strong>…</strong> › <strong>Ver PDF</strong>. O PDF traz os checklists preenchidos, com as respostas e as fotos. A opção aparece para quem vê valores."
           },
           {
             "question": "Posso mostrar o andamento da obra para a população?",
-            "answer": "O link de <strong>Compartilhar com Cliente</strong> foi feito para a empresa contratada: ele expira, mostra os valores e permite aprovar e comentar. Não é um portal de transparência."
+            "answer": "O link do contrato foi feito para a empresa contratada: ele vence, mostra os valores e permite aprovar e comentar. Não é um portal de transparência."
           }
         ]
       }
@@ -218,75 +359,128 @@
       {
         "id": "overview",
         "title": "How PraticOS works for public works",
-        "intro": "For Brazilian city public works departments that track how contracts are carried out. Each project is registered, each contract becomes a work order, and whoever is on site records measurements and inspections from their phone, with photos. PraticOS doesn’t run the bidding — it follows the contract.",
+        "intro": "For public works departments and city halls that follow contracts as they are carried out. Each contract is an order, tied to the project and the contractor, and whoever goes to the site records measurements and inspections from the phone, with photos. PraticOS follows the contract; it doesn’t run the bidding.",
         "features": [
           {
             "title": "Contracts",
-            "description": "Number, bid modality, legal basis, deadline and inspector for each contract, with a status for each phase."
+            "description": "Number, bid modality, legal basis, deadline and inspector of each contract, plus its status."
           },
           {
-            "title": "Measurements",
-            "description": "A measurement form filled in on site, and the released amount recorded on the contract."
+            "title": "Measurements and inspections",
+            "description": "Ready-made measurement, inspection and acceptance checklists, answered on site with photos."
           },
           {
-            "title": "Inspections",
-            "description": "Progress inspection, acceptance certificate and compliance checklist, with photos."
+            "title": "Who sees amounts",
+            "description": "If other people work with you, the site inspector can record everything without seeing amounts."
           }
         ],
         "infoCard": {
           "title": "What about Law 14,133/2021?",
-          "content": "Contracts have a <strong>Legal Basis</strong> field with Law 14,133/2021, Law 8,666/1993 or Other. PraticOS keeps the history of measurements, inspections and photos for each contract, but it doesn’t replace a bidding system or, on its own, guarantee legal compliance."
+          "content": "The contract has a <strong>Legal Basis</strong> field, with Law 14,133/2021, Law 8,666/1993 or Other. PraticOS keeps the history of measurements, inspections and photos of each contract, but it doesn’t replace the bidding system or, on its own, ensure compliance with the law."
         }
       },
       {
         "id": "concepts",
         "title": "How the names change",
-        "intro": "With the <strong>Public Works / Municipalities</strong> segment, the app renames its screens to match city government language. Underneath, these are the same features other segments use — so the rest of the help center applies to you too.",
+        "intro": "With the <strong>Public Works / Municipalities</strong> line of business, the app uses city hall vocabulary. Underneath, they are the same screens as in other trades, so the rest of the help center applies to you too.",
         "table": {
-          "headers": ["At the city", "Name in the app", "In other segments"],
+          "headers": [
+            "At the city",
+            "Name in the app",
+            "In other trades"
+          ],
           "rows": [
-            { "label": "Project", "cells": [{ "text": "Project" }, { "text": "Device (vehicle, phone…)" }] },
-            { "label": "Contract", "cells": [{ "text": "Contract" }, { "text": "Work order" }] },
-            { "label": "Contractor", "cells": [{ "text": "Contractor" }, { "text": "Customer" }] },
-            { "label": "Measurement", "cells": [{ "text": "Measurement" }, { "text": "Order payment" }] },
-            { "label": "Inspection", "cells": [{ "text": "Progress Inspection" }, { "text": "Procedure" }] },
-            { "label": "Contract amount", "cells": [{ "text": "Contract Value" }, { "text": "Order total" }] }
+            {
+              "label": "Project",
+              "cells": [
+                {
+                  "text": "Project"
+                },
+                {
+                  "text": "Vehicle, device…"
+                }
+              ]
+            },
+            {
+              "label": "Contract",
+              "cells": [
+                {
+                  "text": "Contract"
+                },
+                {
+                  "text": "Work order"
+                }
+              ]
+            },
+            {
+              "label": "Contractor",
+              "cells": [
+                {
+                  "text": "Contractor"
+                },
+                {
+                  "text": "Customer"
+                }
+              ]
+            },
+            {
+              "label": "Status",
+              "cells": [
+                {
+                  "text": "Bidding, Contracted, In Execution, Completed / Received, Terminated"
+                },
+                {
+                  "text": "Quote, Approved, In progress, Completed, Canceled"
+                }
+              ]
+            },
+            {
+              "label": "Released amount",
+              "cells": [
+                {
+                  "text": "Total Released and Pending Release, in the Financial report"
+                },
+                {
+                  "text": "Received and To receive"
+                }
+              ]
+            }
           ]
         }
       },
       {
         "id": "setup",
         "title": "Set up your department",
-        "intro": "It takes as long as entering the contractors and projects you already have. Go in this order, since a contract pulls in both.",
+        "intro": "Do it in this order, because the contract pulls in the contractor and the project.",
         "subsections": [
           {
-            "title": "1. Pick the segment",
+            "title": "1. Pick the line of business",
             "steps": [
-              "Download PraticOS and sign up with the department’s email.",
-              "When creating the company, fill in the department’s details and pick the <strong>Public Works / Municipalities</strong> segment.",
-              "If the account already exists, change it in <strong>More → Company Data → Segment</strong>."
+              "Download PraticOS and sign in with Apple, Google or email.",
+              "On first access, pick <strong>Public Works / Municipalities</strong> and, if you want, the specialties. In <strong>For your customers</strong>, type the department’s name under <strong>Name shown on orders</strong>: it shows on the contract and the PDF.",
+              "If you already use the app, tap the profile button at the top of Home, go to <strong>Details for customers</strong> and tap <strong>Line of business</strong>."
             ]
           },
           {
             "title": "2. Add the contractors",
             "steps": [
-              "Tap the <strong>Customers</strong> tab, then <strong>+</strong>.",
-              "Add each company with its name, tax ID (CNPJ), phone and the contact person’s email."
+              "Tap the profile button at the top of Home and go to <strong>Customers</strong>.",
+              "Tap <strong>+</strong> and add each company with the name, phone and email of the person in charge."
             ]
           },
           {
             "title": "3. Add the projects",
             "steps": [
-              "In <strong>More → Projects</strong>, tap <strong>+</strong>.",
-              "Use a name the field team will recognize — “Rio Claro Bridge”, “Jardim Europa Clinic” — and fill in the project details."
+              "Tap the profile button at the top of Home and go to <strong>Advanced › Projects</strong>. If it isn’t there, turn on <strong>Projects tracking</strong> in <strong>Details for customers</strong>.",
+              "Tap <strong>+</strong>. Use a name the team will recognize on site, like “Rio Claro Bridge” or “Jardim Europa Health Unit”, and fill in <strong>Contract Number</strong>, <strong>Responsible Department</strong>, <strong>Project Location</strong> and <strong>Contract Object</strong>.",
+              "You can also add the project while opening the contract, with the <strong>+</strong> on the picking screen."
             ]
           },
           {
-            "title": "4. Build the team",
+            "title": "4. Bring in the team (if any)",
             "steps": [
-              "In <strong>More → Collaborators</strong>, invite each person.",
-              "Site inspectors join as <strong>Supervisor</strong>; whoever handles the money, as <strong>Manager</strong>; the department head, as <strong>Administrator</strong>.",
-              "Before giving access to anyone outside the department, read <a href=\"#permissions\">Profiles and permissions</a>."
+              "Tap the profile button at the top of Home, go to <strong>Team</strong> and tap <strong>Invite someone</strong>. Bringing someone in takes a paid plan, subscribed inside the app.",
+              "Site inspectors usually come in as <strong>Supervisor</strong>; whoever handles the money, as <strong>Manager</strong>. See <a href=\"#permissions\">Team and roles</a>."
             ]
           }
         ]
@@ -294,31 +488,69 @@
       {
         "id": "contracts",
         "title": "Add a contract",
-        "intro": "Each contract is a work order. Its status shows which phase it’s in:",
+        "intro": "The contract’s status shows which stage it is in:",
         "statusCards": [
-          { "color": "blue", "title": "Bidding", "description": "The contract hasn’t been signed yet." },
-          { "color": "orange", "title": "Contracted", "description": "Contract signed, work hasn’t started." },
-          { "color": "yellow", "title": "In Execution", "description": "Work under way, with measurements and inspections." },
-          { "color": "green", "title": "Completed / Received", "description": "Project delivered and accepted." },
-          { "color": "red", "title": "Terminated", "description": "Contract ended early." }
+          {
+            "color": "purple",
+            "title": "Bidding",
+            "description": "The contract hasn’t been signed yet. At this stage you can’t record a released amount."
+          },
+          {
+            "color": "blue",
+            "title": "Contracted",
+            "description": "Contract signed, work hasn’t started."
+          },
+          {
+            "color": "orange",
+            "title": "In Execution",
+            "description": "Work in progress, with measurements and inspections."
+          },
+          {
+            "color": "green",
+            "title": "Completed / Received",
+            "description": "Work delivered and accepted."
+          },
+          {
+            "color": "purple",
+            "title": "Terminated",
+            "description": "Contract ended early."
+          }
         ],
         "steps": [
-          "On the <strong>Home</strong> tab, tap <strong>+</strong> to open a <strong>New Contract</strong>.",
-          "Pick the <strong>Contractor</strong> and add the <strong>Project</strong>.",
-          "Enter the contract’s services or phases with their amounts. The sum shows as <strong>Contract Value</strong>.",
-          "Fill in the <strong>Contract Data</strong> section and save. The contract starts in <strong>Bidding</strong>; change the status as it moves through each phase."
+          "Tap the blue <strong>+</strong> next to the tabs to open a new contract.",
+          "Pick the <strong>Contractor</strong> and the <strong>Project</strong>.",
+          "Add the contract’s services or stages with their amounts. The sum shows in the <strong>Total</strong>.",
+          "Fill in <strong>Contract Data</strong> and <strong>Execution</strong> and save. Change the status as the stage changes."
         ],
         "subsections": [
           {
             "title": "Contract fields",
-            "intro": "The segment adds two sections to the order. None of the fields are required — fill in what your department uses.",
+            "intro": "The line of business adds two parts to the contract. No field is required: fill in what your department uses.",
             "validationList": [
-              { "label": "Bid Modality", "text": "Electronic Auction, Competition, Invitation, Waiver, Unenforceability or Competitive Dialogue." },
-              { "label": "Bid Number and Contract Number", "text": "The bidding process and contract numbers." },
-              { "label": "Contractual Deadline", "text": "The date the work must be done by." },
-              { "label": "Legal Basis", "text": "Law 14,133/2021, Law 8,666/1993 or Other." },
-              { "label": "Execution % and Current Milestone", "text": "In the <strong>Execution</strong> section. Update them with each measurement so anyone who opens the contract knows where the work stands." },
-              { "label": "Contract Inspector", "text": "The responsible inspector’s name, also in <strong>Execution</strong>." }
+              {
+                "label": "Bid Modality",
+                "text": "Electronic Auction, Competition, Invitation, Waiver, Unenforceability or Competitive Dialogue."
+              },
+              {
+                "label": "Bid Number and Contract Number",
+                "text": "The numbers of the bidding process and of the contract."
+              },
+              {
+                "label": "Contractual Deadline",
+                "text": "Deadline for the work."
+              },
+              {
+                "label": "Legal Basis",
+                "text": "Law 14,133/2021, Law 8,666/1993 or Other."
+              },
+              {
+                "label": "Execution % and Current Milestone",
+                "text": "Under <strong>Execution</strong>. Update them at each measurement, so whoever opens the contract knows where the work stands."
+              },
+              {
+                "label": "Contract Inspector",
+                "text": "The name of the inspector in charge, also under <strong>Execution</strong>."
+              }
             ]
           }
         ]
@@ -326,73 +558,127 @@
       {
         "id": "measurements",
         "title": "Measurements and inspections",
-        "intro": "The segment comes with four ready-made procedures. They show up under <strong>Global</strong> when you add a procedure to a contract, and the first three require at least one photo.",
+        "intro": "The line of business comes with four ready-made checklists. The first three can only be finished with at least one photo.",
         "features": [
           {
             "title": "Work Measurement",
-            "description": "Phase measured, planned and executed %, quality assessment, materials, safety, environmental compliance and photo evidence."
+            "description": "Stage measured, planned % and executed %, quality, materials, safety, environmental compliance and photos."
           },
           {
             "title": "Progress Inspection",
-            "description": "Site access, number of workers, equipment on site, schedule compliance, delay justification and photos."
+            "description": "Site access, number of workers, equipment, schedule compliance, reason for delay and photos."
           },
           {
             "title": "Acceptance Certificate",
-            "description": "Provisional or final acceptance, scope and specifications met, pending fixes, final assessment and photos."
+            "description": "Provisional or final acceptance, scope and specs met, pending fixes, final assessment and photos."
           },
           {
             "title": "Legal Compliance Checklist",
-            "description": "Paperwork, insurance, safety plan, environmental license, worker registration, tax clearance certificates and company registration status."
+            "description": "Documents, insurance, safety plan, environmental license, employee records, clearance certificates and company registration in good standing."
           }
         ],
         "subsections": [
           {
             "title": "Record a measurement or inspection",
             "steps": [
-              "Open the contract and scroll to <strong>Forms</strong>.",
-              "Tap <strong>Add</strong> and pick <strong>Work Measurement</strong> or <strong>Progress Inspection</strong>.",
-              "Fill in the items on site and take the photos from the app. Each answer is saved right away.",
-              "Tap <strong>Complete</strong>. After that, only an Administrator, Manager or Supervisor can reopen it to fix something."
+              "Before the first time, tap the profile button at the top of Home, go to <strong>Checklists</strong> and, under <strong>Ready to use</strong>, tap <strong>Use</strong> on the template your department will use.",
+              "On the contract, tap <strong>…</strong>, then <strong>Add to the order</strong> and <strong>Checklist</strong>, and pick the template.",
+              "Tap <strong>Start</strong>, answer on site and take the photos in the app. Each answer is saved right away.",
+              "Tap <strong>Finish checklist</strong>. After that, to fix something, you have to reopen the checklist."
             ]
           }
         ],
         "infoCard": {
-          "title": "Adjust the forms",
-          "content": "If your department uses a different measurement form, import the procedure in <strong>More → Procedures</strong> and edit its items. How it works: <a href=\"procedimentos-en.html\">Procedures</a>."
+          "title": "Adjust the templates",
+          "content": "If your department uses another measurement form, change the template’s questions in <strong>Checklists</strong>. How it works: <a href=\"procedimentos-en.html\">Checklists</a>."
         }
       },
       {
         "id": "financial",
-        "title": "Record the measured amount",
-        "intro": "The measurement form records what was done; the released amount goes on the contract as a <strong>Measurement</strong>. Only people who see prices — Administrators and Managers — record it.",
+        "title": "Record the released amount",
+        "intro": "The measurement checklist records what was done; the released amount goes on the contract as a payment received. Only people who see amounts can record it.",
         "steps": [
           "Open the contract. It must have left <strong>Bidding</strong>.",
-          "Tap <strong>Contract Value</strong>.",
-          "Record the measurement with the approved amount.",
-          "Repeat for each measurement. The contract’s payment line shows whether the amount has been released in full or in part."
+          "Tap <strong>Left to receive</strong>, below the Total.",
+          "Type the amount approved in the measurement and, if you want, attach the receipt.",
+          "Tap <strong>Confirm payment</strong>. Repeat at each measurement: the contract shows how much has been released and how much is left."
         ],
         "infoCard": {
           "title": "All contracts at a glance",
-          "content": "In the <strong>Financial</strong> tab, Administrators and Managers see the period total, the <strong>Total Released</strong> and what’s <strong>Pending Release</strong>, with a ranking by contractor. Details in <a href=\"financeiro-en.html\">Payments</a>."
+          "content": "On the <strong>Financial</strong> tab, tap <strong>…</strong> › <strong>Report</strong> to see the <strong>Total Released</strong> and what is <strong>Pending Release</strong> in the period, with the ranking by contractor. Details in <a href=\"financeiro-en.html\">Financial</a>."
         }
       },
       {
         "id": "permissions",
-        "title": "Profiles and permissions",
-        "intro": "Profiles are the same as for any company on PraticOS. This is the most common way to use them in a public works department:",
+        "title": "Team and roles",
+        "intro": "If other people work with you, the roles are the same as in any PraticOS account. This is the most common way to use them in a department:",
         "table": {
-          "headers": ["Role", "Profile", "What they do in the app"],
+          "headers": [
+            "Job",
+            "Role",
+            "What they do in the app"
+          ],
           "rows": [
-            { "label": "Department head", "cells": [{ "text": "Administrator" }, { "text": "Everything, including team, prices and Financial" }] },
-            { "label": "Finance lead", "cells": [{ "text": "Manager" }, { "text": "Prices, measurements and Financial; doesn’t open contracts" }] },
-            { "label": "Site inspector", "cells": [{ "text": "Supervisor" }, { "text": "Contracts, projects and inspections, without prices" }] },
-            { "label": "Field team", "cells": [{ "text": "Technician" }, { "text": "Fills in inspections and takes photos, without prices" }] },
-            { "label": "Contractor", "cells": [{ "text": "No app access" }, { "text": "Gets the link to their own contract" }] }
+            {
+              "label": "Secretary or director",
+              "cells": [
+                {
+                  "text": "Administrator"
+                },
+                {
+                  "text": "Everything, including Team, Plan, amounts and Financial"
+                }
+              ]
+            },
+            {
+              "label": "Finance lead",
+              "cells": [
+                {
+                  "text": "Manager"
+                },
+                {
+                  "text": "Amounts, payments and Financial; doesn’t open new contracts"
+                }
+              ]
+            },
+            {
+              "label": "Site inspector",
+              "cells": [
+                {
+                  "text": "Supervisor"
+                },
+                {
+                  "text": "Contracts, projects, contractors and checklists, without seeing amounts"
+                }
+              ]
+            },
+            {
+              "label": "Field crew",
+              "cells": [
+                {
+                  "text": "Technician"
+                },
+                {
+                  "text": "Opens contracts, fills in checklists and takes photos, without seeing amounts; sees only the contracts they opened"
+                }
+              ]
+            },
+            {
+              "label": "Contractor",
+              "cells": [
+                {
+                  "text": "Outside the team"
+                },
+                {
+                  "text": "Gets the link to its own contract"
+                }
+              ]
+            }
           ]
         },
-        "warningCard": {
-          "title": "Technicians see every contract",
-          "content": "The Technician profile hides prices, not contracts: anyone added as a Technician sees every contract in the department. If a contractor shouldn’t see other contractors’ work, don’t invite them as a collaborator — send them their contract with <strong>Share with Customer</strong>."
+        "infoCard": {
+          "title": "The contractor doesn’t need to join the app",
+          "content": "To show the contract to the company, open the contract and tap the share icon at the top. They get a link to the contract, with nothing to install. Details in <a href=\"compartilhar-en.html\">Share a work order</a>."
         }
       },
       {
@@ -401,27 +687,23 @@
         "faq": [
           {
             "question": "Do I need a bidding system to use PraticOS?",
-            "answer": "No, and it doesn’t replace one. PraticOS follows how the contract is carried out. The <strong>Bidding</strong> status is just there so you can register the contract while the process runs."
+            "answer": "No, and it doesn’t replace one. PraticOS follows how the contract is carried out. The <strong>Bidding</strong> status is just so you can add the contract while the process runs."
           },
           {
             "question": "Can I add contracts that are already under way?",
-            "answer": "Yes. Add the contract, set the status to <strong>In Execution</strong> and fill in <strong>Execution %</strong> and <strong>Current Milestone</strong>. From then on, measurements and inspections are recorded in the app."
+            "answer": "Yes. Add the contract, change the status to <strong>In Execution</strong> and fill in <strong>Execution %</strong> and <strong>Current Milestone</strong>. From then on, measurements and inspections are recorded in the app."
           },
           {
-            "question": "Can site inspectors see prices?",
-            "answer": "No. Inspectors with the Supervisor profile see contracts, projects and procedures, but no amounts. Only Administrators and Managers record measurements and open the Financial tab."
+            "question": "Does the site inspector see the amounts?",
+            "answer": "No, if they join the team as Supervisor. They see contracts, projects and checklists, but no amounts. Amounts and Financial stay with Administrator and Manager."
           },
           {
-            "question": "Can a contractor use the app?",
-            "answer": "They can, but as a Technician they’d see every contract in the department, even without prices. In most cases it’s better to send them the link to their contract."
+            "question": "Can I make a measurement report?",
+            "answer": "Yes. On the contract, tap <strong>…</strong> › <strong>View PDF</strong>. The PDF has the filled-in checklists, with answers and photos. The option shows for people who see amounts."
           },
           {
-            "question": "Can I get a measurement report?",
-            "answer": "Yes. The contract PDF has a page for each completed procedure — measurements, inspections, acceptance certificate — with the answers and photos. People who see prices generate it from the contract’s menu."
-          },
-          {
-            "question": "Can I show project progress to the public?",
-            "answer": "The <strong>Share with Customer</strong> link is meant for the contractor: it expires, shows amounts and lets them approve and comment. It isn’t a transparency portal."
+            "question": "Can I show the work’s progress to the public?",
+            "answer": "The contract link is meant for the contractor: it expires, shows amounts and allows approving and commenting. It isn’t a transparency portal."
           }
         ]
       }
@@ -431,76 +713,129 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Cómo PraticOS sirve a obras públicas",
-        "intro": "Para secretarías de obras y municipios de Brasil que siguen la ejecución de contratos. Cada obra queda registrada, cada contrato se vuelve una OS, y quien está en la obra registra mediciones e inspecciones desde el celular, con fotos. PraticOS no conduce la licitación — sigue el contrato.",
+        "title": "Cómo PraticOS sirve para obras públicas",
+        "intro": "Para secretarías de obras y municipios que siguen la ejecución de contratos. Cada contrato es una OS, ligada a la obra y a la empresa contratada, y quien va a la obra carga mediciones e inspecciones desde el celular, con fotos. PraticOS sigue el contrato; no conduce la licitación.",
         "features": [
           {
             "title": "Contratos",
-            "description": "Número, modalidad, base legal, plazo y fiscal de cada contrato, con el estado de cada fase."
+            "description": "Número, modalidad, base legal, plazo y fiscal de cada contrato, y su estado."
           },
           {
-            "title": "Mediciones",
-            "description": "El formulario de medición llenado en la obra y el valor liberado cargado en el contrato."
+            "title": "Mediciones e inspecciones",
+            "description": "Checklists listos de medición, inspección y recepción, respondidos en la obra y con fotos."
           },
           {
-            "title": "Inspecciones",
-            "description": "Inspección de avance, acta de recepción y checklist de conformidad, con fotos."
+            "title": "Quién ve valores",
+            "description": "Si alguien trabaja contigo, el fiscal de obra puede cargar todo sin ver los valores."
           }
         ],
         "infoCard": {
           "title": "¿Y la Ley 14.133/2021?",
-          "content": "El contrato tiene el campo <strong>Base Legal</strong>, con las opciones Ley 14.133/2021, Ley 8.666/1993 u Otra. PraticOS guarda el historial de mediciones, inspecciones y fotos de cada contrato, pero no reemplaza el sistema de licitación ni garantiza, por sí solo, el cumplimiento de la ley."
+          "content": "El contrato tiene el campo <strong>Base Legal</strong>, con Ley 14.133/2021, Ley 8.666/1993 u Otra. PraticOS guarda el historial de mediciones, inspecciones y fotos de cada contrato, pero no reemplaza el sistema de licitación ni garantiza, por sí solo, el cumplimiento de la ley."
         }
       },
       {
         "id": "conceptos",
         "title": "Cómo cambian los nombres",
-        "intro": "Con el segmento <strong>Obras Públicas / Municipios</strong>, la app cambia los nombres de las pantallas al vocabulario municipal. Por debajo son las mismas funciones que usan los demás segmentos — por eso el resto del centro de ayuda también vale para ti.",
+        "intro": "Con el rubro <strong>Obras Públicas / Municipios</strong>, la app usa el vocabulario del municipio. Por debajo, son las mismas pantallas de los otros rubros, por eso el resto del centro de ayuda también vale para ti.",
         "table": {
-          "headers": ["En el municipio", "Nombre en la app", "En otros segmentos"],
+          "headers": [
+            "En el municipio",
+            "Nombre en la app",
+            "En otros rubros"
+          ],
           "rows": [
-            { "label": "Obra", "cells": [{ "text": "Obra" }, { "text": "Dispositivo (vehículo, celular…)" }] },
-            { "label": "Contrato", "cells": [{ "text": "Contrato" }, { "text": "Orden de servicio" }] },
-            { "label": "Empresa contratada", "cells": [{ "text": "Empresa Contratada" }, { "text": "Cliente" }] },
-            { "label": "Medición", "cells": [{ "text": "Medición" }, { "text": "Pago de la OS" }] },
-            { "label": "Inspección", "cells": [{ "text": "Inspección de Avance" }, { "text": "Procedimiento" }] },
-            { "label": "Valor del contrato", "cells": [{ "text": "Valor Contratado" }, { "text": "Total de la OS" }] }
+            {
+              "label": "Obra",
+              "cells": [
+                {
+                  "text": "Obra"
+                },
+                {
+                  "text": "Vehículo, equipo…"
+                }
+              ]
+            },
+            {
+              "label": "Contrato",
+              "cells": [
+                {
+                  "text": "Contrato"
+                },
+                {
+                  "text": "OS"
+                }
+              ]
+            },
+            {
+              "label": "Empresa contratada",
+              "cells": [
+                {
+                  "text": "Empresa Contratada"
+                },
+                {
+                  "text": "Cliente"
+                }
+              ]
+            },
+            {
+              "label": "Estado",
+              "cells": [
+                {
+                  "text": "En Licitación, Contratado, En Ejecución, Concluido / Recibido, Rescindido"
+                },
+                {
+                  "text": "Presupuesto, Aprobada, En curso, Completada, Cancelada"
+                }
+              ]
+            },
+            {
+              "label": "Valor liberado",
+              "cells": [
+                {
+                  "text": "Total Liberado y Por Liberar, en el Informe de Financiero"
+                },
+                {
+                  "text": "Cobrado y Por cobrar"
+                }
+              ]
+            }
           ]
         }
       },
       {
         "id": "configuracion",
         "title": "Configurar el municipio",
-        "intro": "Toma el tiempo de registrar las empresas y las obras que ya tienes. Hazlo en este orden, porque el contrato usa los dos registros.",
+        "intro": "Hazlo en este orden, porque el contrato toma la empresa contratada y la obra.",
         "subsections": [
           {
-            "title": "1. Elegir el segmento",
+            "title": "1. Elegir el rubro",
             "steps": [
-              "Descarga PraticOS y crea la cuenta con el correo de la secretaría.",
-              "Al registrar la empresa, llena los datos del organismo y elige el segmento <strong>Obras Públicas / Municipios</strong>.",
-              "Si la cuenta ya existe, cámbialo en <strong>Más → Datos de la Empresa → Segmento</strong>."
+              "Descarga PraticOS y entra con Apple, Google o e-mail.",
+              "En el primer acceso, elige el rubro <strong>Obras Públicas / Municipios</strong> y, si quieres, las especialidades. En <strong>Para tus clientes</strong>, escribe el nombre del organismo en <strong>Nombre que aparece en la OS</strong>: sale en el contrato y en el PDF.",
+              "Si ya usas la app, toca el botón del perfil, arriba en Inicio, ve a <strong>Datos para el cliente</strong> y toca <strong>Rubro</strong>."
             ]
           },
           {
             "title": "2. Registrar las empresas contratadas",
             "steps": [
-              "Toca la pestaña <strong>Clientes</strong> y luego <strong>+</strong>.",
-              "Registra cada empresa con nombre, CNPJ, teléfono y correo del responsable."
+              "Toca el botón del perfil, arriba en Inicio, y ve a <strong>Clientes</strong>.",
+              "Toca <strong>+</strong> y registra cada empresa con nombre, teléfono y e-mail del responsable."
             ]
           },
           {
             "title": "3. Registrar las obras",
             "steps": [
-              "En <strong>Más → Obras</strong>, toca <strong>+</strong>.",
-              "Usa un nombre que el equipo reconozca en el campo — “Puente del Río Claro”, “Centro de Salud Jardim Europa” — y llena los datos de la obra."
+              "Toca el botón del perfil, arriba en Inicio, y ve a <strong>Avanzado › Obras</strong>. Si no aparece, activa <strong>Control de Obras</strong> en <strong>Datos para el cliente</strong>.",
+              "Toca <strong>+</strong>. Usa un nombre que el equipo reconozca en la obra, como “Puente del Río Claro” o “Centro de Salud Jardim Europa”, y completa <strong>Nº del Contrato</strong>, <strong>Secretaría Responsable</strong>, <strong>Ubicación de la Obra</strong> y <strong>Objeto del Contrato</strong>.",
+              "También puedes registrar la obra al abrir el contrato, con el <strong>+</strong> de la pantalla de elegir."
             ]
           },
           {
-            "title": "4. Armar el equipo",
+            "title": "4. Sumar al equipo (si hay)",
             "steps": [
-              "En <strong>Más → Colaboradores</strong>, invita a cada persona.",
-              "Los fiscales de obra entran como <strong>Supervisor</strong>; quien maneja el dinero, como <strong>Gerente</strong>; el secretario o gestor, como <strong>Administrador</strong>.",
-              "Antes de dar acceso a alguien de fuera del municipio, lee <a href=\"#permisos\">Perfiles y permisos</a>."
+              "Toca el botón del perfil, arriba en Inicio, ve a <strong>Equipo</strong> y toca <strong>Invitar a una persona</strong>. Sumar a alguien requiere un plan pago, contratado en la app.",
+              "Los fiscales de obra suelen entrar como <strong>Supervisor</strong>; quien maneja el dinero, como <strong>Gerente</strong>. Mira <a href=\"#permisos\">Equipo y roles</a>."
             ]
           }
         ]
@@ -508,31 +843,69 @@
       {
         "id": "contratos",
         "title": "Registrar un contrato",
-        "intro": "Cada contrato es una OS. El estado muestra en qué fase está:",
+        "intro": "El estado del contrato muestra en qué etapa está:",
         "statusCards": [
-          { "color": "blue", "title": "En Licitación", "description": "El contrato todavía no se firmó." },
-          { "color": "orange", "title": "Contratado", "description": "Contrato firmado, la obra aún no empieza." },
-          { "color": "yellow", "title": "En Ejecución", "description": "Obra en curso, con mediciones e inspecciones." },
-          { "color": "green", "title": "Concluido / Recibido", "description": "Obra entregada y recibida." },
-          { "color": "red", "title": "Rescindido", "description": "Contrato terminado antes de tiempo." }
+          {
+            "color": "purple",
+            "title": "En Licitación",
+            "description": "El contrato aún no se firmó. En esta etapa no se puede cargar valor liberado."
+          },
+          {
+            "color": "blue",
+            "title": "Contratado",
+            "description": "Contrato firmado, la obra aún no empezó."
+          },
+          {
+            "color": "orange",
+            "title": "En Ejecución",
+            "description": "Obra en marcha, con mediciones e inspecciones."
+          },
+          {
+            "color": "green",
+            "title": "Concluido / Recibido",
+            "description": "Obra entregada y recibida."
+          },
+          {
+            "color": "purple",
+            "title": "Rescindido",
+            "description": "Contrato terminado antes de tiempo."
+          }
         ],
         "steps": [
-          "En la pestaña <strong>Inicio</strong>, toca <strong>+</strong> para abrir un <strong>Nuevo Contrato</strong>.",
-          "Elige la <strong>Empresa Contratada</strong> y agrega la <strong>Obra</strong>.",
-          "Carga los servicios o etapas del contrato con sus valores. La suma aparece como <strong>Valor Contratado</strong>.",
-          "Llena la sección <strong>Datos del Contrato</strong> y guarda. El contrato empieza en <strong>En Licitación</strong>; cambia el estado según la fase."
+          "Toca el <strong>+</strong> azul, al lado de las pestañas, para abrir un contrato nuevo.",
+          "Elige la <strong>Empresa Contratada</strong> y la <strong>Obra</strong>.",
+          "Carga los servicios o etapas del contrato con sus valores. La suma aparece en el <strong>Total</strong>.",
+          "Completa <strong>Datos del Contrato</strong> y <strong>Ejecución</strong> y guarda. Cambia el estado según la etapa."
         ],
         "subsections": [
           {
             "title": "Campos del contrato",
-            "intro": "El segmento agrega dos secciones a la OS. Ningún campo es obligatorio — llena lo que usa tu secretaría.",
+            "intro": "El rubro agrega dos partes al contrato. Ningún campo es obligatorio: completa lo que usa la secretaría.",
             "validationList": [
-              { "label": "Modalidad de Licitación", "text": "Subasta Electrónica, Concurrencia, Invitación, Dispensa, Inexigibilidad o Diálogo Competitivo." },
-              { "label": "Nº de Licitación y Nº del Contrato", "text": "Los números del proceso de licitación y del contrato." },
-              { "label": "Plazo Contractual", "text": "Fecha límite de la ejecución." },
-              { "label": "Base Legal", "text": "Ley 14.133/2021, Ley 8.666/1993 u Otra." },
-              { "label": "% de Ejecución y Etapa Actual", "text": "En la sección <strong>Ejecución</strong>. Actualízalos en cada medición, para que quien abra el contrato sepa en qué punto está la obra." },
-              { "label": "Fiscal del Contrato", "text": "El nombre del fiscal responsable, también en <strong>Ejecución</strong>." }
+              {
+                "label": "Modalidad de Licitación",
+                "text": "Subasta Electrónica, Concurrencia, Invitación, Dispensa, Inexigibilidad o Diálogo Competitivo."
+              },
+              {
+                "label": "Nº de Licitación y Nº del Contrato",
+                "text": "Los números del proceso licitatorio y del contrato."
+              },
+              {
+                "label": "Plazo Contractual",
+                "text": "Fecha límite de la ejecución."
+              },
+              {
+                "label": "Base Legal",
+                "text": "Ley 14.133/2021, Ley 8.666/1993 u Otra."
+              },
+              {
+                "label": "% de Ejecución y Etapa Actual",
+                "text": "En <strong>Ejecución</strong>. Actualízalos en cada medición, para que quien abra el contrato sepa en qué punto está la obra."
+              },
+              {
+                "label": "Fiscal del Contrato",
+                "text": "El nombre del fiscal responsable, también en <strong>Ejecución</strong>."
+              }
             ]
           }
         ]
@@ -540,11 +913,11 @@
       {
         "id": "mediciones",
         "title": "Mediciones e inspecciones",
-        "intro": "El segmento trae cuatro procedimientos listos. Aparecen como <strong>Globales</strong> cuando agregas un procedimiento al contrato, y los tres primeros exigen al menos una foto.",
+        "intro": "El rubro trae cuatro checklists listos. Los tres primeros solo se pueden terminar con al menos una foto.",
         "features": [
           {
             "title": "Medición de Obra",
-            "description": "Etapa medida, % previsto y % ejecutado, evaluación de calidad, materiales, seguridad, conformidad ambiental y evidencia fotográfica."
+            "description": "Etapa medida, % previsto y % ejecutado, calidad, materiales, seguridad, cumplimiento ambiental y fotos."
           },
           {
             "title": "Inspección de Avance",
@@ -552,61 +925,115 @@
           },
           {
             "title": "Acta de Recepción",
-            "description": "Recepción provisoria o definitiva, alcance y especificaciones cumplidos, correcciones pendientes, evaluación final y fotos."
+            "description": "Recepción provisional o definitiva, alcance y especificaciones cumplidos, correcciones pendientes, evaluación final y fotos."
           },
           {
             "title": "Checklist de Conformidad Legal",
-            "description": "Documentación, seguro, plan de seguridad, licencia ambiental, registro de trabajadores, certificados de deuda y CNPJ regular."
+            "description": "Documentación, seguro, plan de seguridad, licencia ambiental, registro de empleados, certificados negativos y registro de la empresa al día."
           }
         ],
         "subsections": [
           {
-            "title": "Registrar una medición o inspección",
+            "title": "Cargar una medición o inspección",
             "steps": [
-              "Abre el contrato y baja hasta <strong>Formularios</strong>.",
-              "Toca <strong>Agregar</strong> y elige <strong>Medición de Obra</strong> o <strong>Inspección de Avance</strong>.",
-              "Llena los ítems en la obra y toma las fotos desde la app. Cada respuesta se guarda al instante.",
-              "Toca <strong>Completo</strong>. Después, solo Administrador, Gerente o Supervisor lo reabren para corregir."
+              "Antes de la primera vez, toca el botón del perfil, arriba en Inicio, ve a <strong>Checklists</strong> y, en <strong>Listos para usar</strong>, toca <strong>Usar</strong> en la plantilla que va a usar la secretaría.",
+              "En el contrato, toca <strong>…</strong>, luego <strong>Agregar a la OS</strong> y <strong>Checklist</strong>, y elige la plantilla.",
+              "Toca <strong>Empezar</strong>, responde en la obra y saca las fotos desde la app. Cada respuesta se guarda al instante.",
+              "Toca <strong>Terminar checklist</strong>. Después, para corregir, hay que reabrir el checklist."
             ]
           }
         ],
         "infoCard": {
-          "title": "Ajustar los formularios",
-          "content": "Si tu secretaría usa otro modelo de medición, importa el procedimiento en <strong>Más → Procedimientos</strong> y edita los ítems. Cómo funciona: <a href=\"procedimentos-es.html\">Procedimientos</a>."
+          "title": "Ajustar las plantillas",
+          "content": "Si la secretaría usa otro modelo de medición, cambia las preguntas de la plantilla en <strong>Checklists</strong>. Cómo funciona: <a href=\"procedimentos-es.html\">Checklists</a>."
         }
       },
       {
         "id": "financiero",
-        "title": "Cargar el valor medido",
-        "intro": "El formulario de medición registra lo ejecutado; el valor liberado entra al contrato como <strong>Medición</strong>. Solo quien ve precios — Administrador y Gerente — hace esa carga.",
+        "title": "Cargar el valor liberado",
+        "intro": "El checklist de medición registra lo ejecutado; el valor liberado se anota en el contrato como un cobro. Solo quien ve valores hace esta carga.",
         "steps": [
           "Abre el contrato. Tiene que haber salido de <strong>En Licitación</strong>.",
-          "Toca <strong>Valor Contratado</strong>.",
-          "Registra la medición con el valor aprobado.",
-          "Repite en cada medición. El pago del contrato muestra si el valor ya se liberó por completo o en parte."
+          "Toca <strong>Falta cobrar</strong>, debajo del Total.",
+          "Escribe el valor aprobado en la medición y, si quieres, adjunta el comprobante.",
+          "Toca <strong>Confirmar cobro</strong>. Repite en cada medición: el contrato muestra cuánto ya se liberó y cuánto falta."
         ],
         "infoCard": {
           "title": "Todos los contratos de un vistazo",
-          "content": "En la pestaña <strong>Financiero</strong>, Administrador y Gerente ven el total del período, el <strong>Total Liberado</strong> y lo que está <strong>Por Liberar</strong>, con el ranking por empresa contratada. Detalles en <a href=\"financeiro-es.html\">Finanzas</a>."
+          "content": "En la pestaña <strong>Financiero</strong>, toca <strong>…</strong> › <strong>Informe</strong> para ver el <strong>Total Liberado</strong> y lo que está <strong>Por Liberar</strong> en el período, con el ranking por empresa contratada. Detalles en <a href=\"financeiro-es.html\">Financiero</a>."
         }
       },
       {
         "id": "permisos",
-        "title": "Perfiles y permisos",
-        "intro": "Los perfiles son los mismos de cualquier empresa en PraticOS. Esta es la forma más común de usarlos en una secretaría:",
+        "title": "Equipo y roles",
+        "intro": "Si otras personas trabajan contigo, los roles son los mismos de cualquier cuenta de PraticOS. Esta es la forma más común de usarlos en una secretaría:",
         "table": {
-          "headers": ["Función", "Perfil", "Qué hace en la app"],
+          "headers": [
+            "Función",
+            "Rol",
+            "Qué hace en la app"
+          ],
           "rows": [
-            { "label": "Secretario o gestor", "cells": [{ "text": "Administrador" }, { "text": "Todo, incluido equipo, precios y Financiero" }] },
-            { "label": "Responsable financiero", "cells": [{ "text": "Gerente" }, { "text": "Precios, mediciones y Financiero; no abre contratos" }] },
-            { "label": "Fiscal de obra", "cells": [{ "text": "Supervisor" }, { "text": "Contratos, obras e inspecciones, sin ver precios" }] },
-            { "label": "Equipo de campo", "cells": [{ "text": "Técnico" }, { "text": "Llena inspecciones y toma fotos, sin ver precios" }] },
-            { "label": "Empresa contratada", "cells": [{ "text": "Sin acceso a la app" }, { "text": "Recibe el enlace de su propio contrato" }] }
+            {
+              "label": "Secretario o gestor",
+              "cells": [
+                {
+                  "text": "Administrador"
+                },
+                {
+                  "text": "Todo, incluso Equipo, Plan, valores y Financiero"
+                }
+              ]
+            },
+            {
+              "label": "Responsable financiero",
+              "cells": [
+                {
+                  "text": "Gerente"
+                },
+                {
+                  "text": "Valores, cobros y Financiero; no abre contratos nuevos"
+                }
+              ]
+            },
+            {
+              "label": "Fiscal de obra",
+              "cells": [
+                {
+                  "text": "Supervisor"
+                },
+                {
+                  "text": "Contratos, obras, empresas y checklists, sin ver valores"
+                }
+              ]
+            },
+            {
+              "label": "Equipo de campo",
+              "cells": [
+                {
+                  "text": "Técnico"
+                },
+                {
+                  "text": "Abre contratos, completa checklists y saca fotos, sin ver valores; solo ve los contratos que abrió"
+                }
+              ]
+            },
+            {
+              "label": "Empresa contratada",
+              "cells": [
+                {
+                  "text": "Fuera del equipo"
+                },
+                {
+                  "text": "Recibe el enlace de su propio contrato"
+                }
+              ]
+            }
           ]
         },
-        "warningCard": {
-          "title": "El Técnico ve todos los contratos",
-          "content": "El perfil Técnico oculta precios, pero no contratos: quien entra como Técnico ve todos los contratos del municipio. Si una empresa contratada no debe ver los contratos de las demás, no la invites como colaboradora — envíale el enlace de su contrato con <strong>Compartir con Cliente</strong>."
+        "infoCard": {
+          "title": "La empresa contratada no necesita entrar a la app",
+          "content": "Para mostrarle el contrato a la empresa, abre el contrato y toca el ícono de compartir, arriba. Recibe un enlace con el contrato, sin instalar nada. Detalles en <a href=\"compartilhar-es.html\">Compartir OS</a>."
         }
       },
       {
@@ -615,27 +1042,23 @@
         "faq": [
           {
             "question": "¿Necesito un sistema de licitación para usar PraticOS?",
-            "answer": "No, y PraticOS no reemplaza uno. Sigue la ejecución del contrato. El estado <strong>En Licitación</strong> solo sirve para que registres el contrato mientras corre el proceso."
+            "answer": "No, y no reemplaza uno. PraticOS sigue la ejecución del contrato. El estado <strong>En Licitación</strong> solo sirve para que registres el contrato mientras corre el proceso."
           },
           {
             "question": "¿Puedo registrar contratos que ya están en ejecución?",
-            "answer": "Sí. Registra el contrato, cambia el estado a <strong>En Ejecución</strong> y llena <strong>% de Ejecución</strong> y <strong>Etapa Actual</strong>. Desde ahí, las mediciones e inspecciones quedan registradas en la app."
+            "answer": "Sí. Registra el contrato, cambia el estado a <strong>En Ejecución</strong> y completa <strong>% de Ejecución</strong> y <strong>Etapa Actual</strong>. Desde ahí, las mediciones e inspecciones quedan registradas en la app."
           },
           {
-            "question": "¿El fiscal de obra ve los precios?",
-            "answer": "No. Los fiscales con perfil Supervisor ven contratos, obras y procedimientos, pero ningún valor. Solo Administrador y Gerente cargan mediciones y abren Financiero."
+            "question": "¿El fiscal de obra ve los valores?",
+            "answer": "No, si entra al equipo como Supervisor. Ve contratos, obras y checklists, pero ningún valor. Valores y Financiero quedan con Administrador y Gerente."
           },
           {
-            "question": "¿La empresa contratada puede usar la app?",
-            "answer": "Puede, pero como Técnico vería todos los contratos del municipio, aunque sin precios. En la mayoría de los casos es mejor enviarle el enlace de su contrato."
-          },
-          {
-            "question": "¿Puedo sacar un informe de la medición?",
-            "answer": "Sí. El PDF del contrato trae una página por cada procedimiento llenado — mediciones, inspecciones, acta de recepción — con las respuestas y las fotos. Quien ve precios lo genera desde el menú del contrato."
+            "question": "¿Se puede generar un informe de la medición?",
+            "answer": "Sí. En el contrato, toca <strong>…</strong> › <strong>Ver PDF</strong>. El PDF trae los checklists completados, con respuestas y fotos. La opción aparece para quien ve valores."
           },
           {
             "question": "¿Puedo mostrar el avance de la obra a la población?",
-            "answer": "El enlace de <strong>Compartir con Cliente</strong> está hecho para la empresa contratada: vence, muestra los valores y permite aprobar y comentar. No es un portal de transparencia."
+            "answer": "El enlace del contrato es para la empresa contratada: vence, muestra los valores y permite aprobar y comentar. No es un portal de transparencia."
           }
         ]
       }

@@ -20,16 +20,37 @@
         "title": "Ordem de serviço",
         "number": "Nº 0427",
         "rows": [
-          { "label": "Cliente", "value": "Clínica Bem Viver" },
-          { "label": "Equipamento", "value": "Split Hi-Wall 12000 BTUs · 220V" },
-          { "label": "Gás", "value": "R-410A" },
-          { "label": "Serviço", "value": "Preventiva com higienização" },
-          { "label": "Fotos", "value": "8 anexadas" }
+          {
+            "label": "Cliente",
+            "value": "Clínica Bem Viver"
+          },
+          {
+            "label": "Equipamento",
+            "value": "Split Hi-Wall 12000 BTUs · 220V"
+          },
+          {
+            "label": "Gás",
+            "value": "R-410A"
+          },
+          {
+            "label": "Serviço",
+            "value": "Preventiva com higienização"
+          },
+          {
+            "label": "Fotos",
+            "value": "8 anexadas"
+          }
         ],
         "totalLabel": "Total",
         "total": "R$ 380,00",
         "stamp": "Aprovado pelo cliente",
-        "steps": ["Orçamento", "Aprovado", "Em manutenção", "Concluído", "Pago"],
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em manutenção",
+          "Concluído",
+          "Pago"
+        ],
         "current": 2
       }
     },
@@ -66,7 +87,7 @@
         {
           "problem": "Fim do mês sem saber quem pagou",
           "detail": "Contrato de manutenção, serviço avulso e fiado misturados. Ninguém sabe o que falta receber.",
-          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que está a receber."
+          "answer": "Registre pagamentos inteiros ou em partes na OS. O Financeiro mostra quanto falta receber, de quais clientes, e tem o botão para mandar a cobrança."
         }
       ]
     },
@@ -76,15 +97,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agende e cadastre o equipamento",
-          "text": "Crie a OS com o cliente e o equipamento. Marque dia e hora: ela aparece na agenda e o lembrete é programado no celular.",
+          "title": "Fale o serviço e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Split 12 mil da Juliana, limpeza completa e recarga de gás, amanhã às 14h”. Ou fotografe a etiqueta do aparelho. A IA preenche cliente, equipamento, serviços e peças com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "BTUs, voltagem, tipo de gás e data de instalação",
-            "Busca pelo nome ou número de série do aparelho",
-            "Status de acordo com o ramo: orçamento, aprovado, em manutenção, concluído"
+            "Com dia e hora, a OS entra na Agenda e o celular avisa antes",
+            "Nada é salvo sem você conferir"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
@@ -95,8 +116,8 @@
             "Preventiva, diagnóstico e recarga de gás",
             "Segurança do técnico (NR10/NR35) e comissionamento com tensão, corrente e ΔT"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
           "number": "03",
@@ -107,20 +128,20 @@
             "Você recebe uma notificação quando o cliente aprova",
             "PDF da OS para imprimir ou enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
         },
         {
           "number": "04",
           "title": "Conclua e receba",
-          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. O painel mostra quanto entrou e quem ainda deve.",
+          "text": "Registre o pagamento inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quais clientes.",
           "facts": [
-            "Pagamento parcial e desconto na mesma OS",
-            "Faturamento por período",
+            "Pagamento em partes e desconto na mesma OS",
+            "Relatório do mês com o que entrou",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber e de quais clientes"
         }
       ]
     },
@@ -130,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "Serve para residencial, comercial e ar automotivo?",
@@ -141,8 +162,8 @@
           "answer": "Não gera o documento do plano. O que ele faz é registrar cada manutenção preventiva por equipamento, com checklist, fotos e data — o histórico que você precisa para cumprir o plano."
         },
         {
-          "question": "Meus técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "question": "Quem trabalha comigo pode usar no próprio celular?",
+          "answer": "Sim. Se alguém trabalha com você, toque no botão do perfil, no topo do Início, e vá em Equipe: o convite vai por um código, pelo WhatsApp, e cada pessoa entra no próprio celular. O plano grátis é para uma pessoa; para chamar mais gente, assine um plano pago dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -171,16 +192,37 @@
         "title": "Work order",
         "number": "No. 0427",
         "rows": [
-          { "label": "Customer", "value": "Oakridge Dental" },
-          { "label": "Equipment", "value": "Ductless mini-split 12,000 BTU · 220V" },
-          { "label": "Refrigerant", "value": "R-410A" },
-          { "label": "Service", "value": "Maintenance and coil cleaning" },
-          { "label": "Photos", "value": "8 attached" }
+          {
+            "label": "Customer",
+            "value": "Oakridge Dental"
+          },
+          {
+            "label": "Equipment",
+            "value": "Ductless mini-split 12,000 BTU · 220V"
+          },
+          {
+            "label": "Refrigerant",
+            "value": "R-410A"
+          },
+          {
+            "label": "Service",
+            "value": "Maintenance and coil cleaning"
+          },
+          {
+            "label": "Photos",
+            "value": "8 attached"
+          }
         ],
         "totalLabel": "Total",
         "total": "$240.00",
         "stamp": "Approved by customer",
-        "steps": ["Quote", "Approved", "Under maintenance", "Done", "Paid"],
+        "steps": [
+          "Quote",
+          "Approved",
+          "Under maintenance",
+          "Done",
+          "Paid"
+        ],
         "current": 2
       }
     },
@@ -217,7 +259,7 @@
         {
           "problem": "Closing the month without knowing who paid",
           "detail": "Maintenance contracts, one-off jobs and IOUs all mixed together. Nobody knows what's still outstanding.",
-          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still to collect."
+          "answer": "Record full or partial payments on the order. Financial shows how much is still due, from which customers, with a button to send a payment reminder."
         }
       ]
     },
@@ -227,15 +269,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Schedule the visit and add the unit",
-          "text": "Create the work order with the customer and the unit. Set the day and time: it shows up on the calendar and the reminder is set on your phone.",
+          "title": "Say the job and the AI opens the order",
+          "text": "Tap Speak and say something like: “Juliana's 12,000 BTU split, full cleaning and refrigerant recharge, tomorrow at 2pm”. Or photograph the unit's label. The AI fills in customer, unit, services and parts with your catalog prices and marks what it filled with ✦.",
           "facts": [
             "BTUs, voltage, refrigerant type and install date",
-            "Search by unit name or serial number",
-            "Statuses in your trade's words: quote, approved, under maintenance, done"
+            "With a date and time, the order goes on the Schedule and your phone reminds you",
+            "Nothing is saved until you check it"
           ],
-          "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled across the month"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
@@ -246,8 +288,8 @@
             "Preventive maintenance, diagnosis and refrigerant recharge",
             "Technician safety and commissioning with voltage, amperage and ΔT"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
           "number": "03",
@@ -258,20 +300,20 @@
             "You get a notification when the customer approves",
             "Work order PDF to print or send"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
         },
         {
           "number": "04",
           "title": "Finish the job and get paid",
-          "text": "Record the payment in full or in parts, with a discount if needed. The dashboard shows what came in and who still owes you.",
+          "text": "Record the payment in full or in parts, with a discount if needed. Financial shows how much is still due and from which customers.",
           "facts": [
-            "Partial payment and discount on the same work order",
-            "Revenue by period",
+            "Partial payment and discount on the same order",
+            "Monthly report of what came in",
             "Everyone who still owes you, in one list"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing how much is still due and from which customers"
         }
       ]
     },
@@ -281,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does it work for residential, commercial and automotive AC?",
@@ -292,8 +334,8 @@
           "answer": "Yes. Every preventive visit is a work order tied to the unit, with the checklist, photos and date. Search the unit's name or serial number in the work order list to see its full service history."
         },
         {
-          "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see prices."
+          "question": "Can the people who work with me use it on their own phones?",
+          "answer": "Yes. If someone works with you, tap the profile button at the top of Home and go to Team: the invite goes out as a code over WhatsApp, and each person signs in on their own phone. The free plan is for one person; to add more people, subscribe to a paid plan inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -322,16 +364,37 @@
         "title": "Orden de servicio",
         "number": "N.º 0427",
         "rows": [
-          { "label": "Cliente", "value": "Consultorio Santa Fe" },
-          { "label": "Equipo", "value": "Minisplit 12.000 BTU · 220V" },
-          { "label": "Gas", "value": "R-410A" },
-          { "label": "Servicio", "value": "Mantenimiento con limpieza" },
-          { "label": "Fotos", "value": "8 adjuntas" }
+          {
+            "label": "Cliente",
+            "value": "Consultorio Santa Fe"
+          },
+          {
+            "label": "Equipo",
+            "value": "Minisplit 12.000 BTU · 220V"
+          },
+          {
+            "label": "Gas",
+            "value": "R-410A"
+          },
+          {
+            "label": "Servicio",
+            "value": "Mantenimiento con limpieza"
+          },
+          {
+            "label": "Fotos",
+            "value": "8 adjuntas"
+          }
         ],
         "totalLabel": "Total",
         "total": "$ 240,00",
         "stamp": "Aprobado por el cliente",
-        "steps": ["Presupuesto", "Aprobado", "En mantenimiento", "Terminado", "Cobrado"],
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En mantenimiento",
+          "Terminado",
+          "Cobrado"
+        ],
         "current": 2
       }
     },
@@ -368,7 +431,7 @@
         {
           "problem": "Cerrar el mes sin saber quién pagó",
           "detail": "Contratos de mantenimiento, trabajos sueltos y fiado mezclados. Nadie sabe cuánto falta cobrar.",
-          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra pagos totales o en partes en la orden. Financiero muestra cuánto falta cobrar, de qué clientes, y tiene el botón para mandar el cobro."
         }
       ]
     },
@@ -378,15 +441,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Agenda la visita y registra el equipo",
-          "text": "Crea la orden con el cliente y el equipo. Marca día y hora: aparece en la agenda y el recordatorio queda programado en el celular.",
+          "title": "Di el trabajo y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Split de 12 mil de Juliana, limpieza completa y recarga de gas, mañana a las 14”. O fotografía la etiqueta del equipo. La IA completa cliente, equipo, servicios y repuestos con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "BTU, voltaje, tipo de gas y fecha de instalación",
-            "Búsqueda por nombre o número de serie del equipo",
-            "Estados del rubro: presupuesto, aprobado, en mantenimiento, terminado"
+            "Con día y hora, la orden entra en la Agenda y el celular avisa antes",
+            "Nada se guarda sin que lo revises"
           ],
-          "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
@@ -397,8 +460,8 @@
             "Mantenimiento preventivo, diagnóstico y recarga de gas",
             "Seguridad del técnico y puesta en marcha con voltaje, corriente y ΔT"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
           "number": "03",
@@ -409,20 +472,20 @@
             "Recibes una notificación cuando el cliente aprueba",
             "PDF de la orden para imprimir o enviar"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
         },
         {
           "number": "04",
           "title": "Termina y cobra",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. El panel muestra cuánto entró y quién todavía debe.",
+          "text": "Registra el pago total o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y de qué clientes.",
           "facts": [
-            "Pago parcial y descuento en la misma orden",
-            "Facturación por período",
+            "Pago en partes y descuento en la misma orden",
+            "Informe del mes con lo que entró",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con cuánto falta cobrar y de qué clientes"
         }
       ]
     },
@@ -432,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿Sirve para residencial, comercial y aire automotriz?",
@@ -443,8 +506,8 @@
           "answer": "Sí. Cada visita preventiva es una orden vinculada al equipo, con el checklist, las fotos y la fecha. Busca el nombre o número de serie del equipo en la lista de órdenes y ves todo su historial."
         },
         {
-          "question": "¿Mis técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores."
+          "question": "¿Quien trabaja conmigo puede usarlo en su propio celular?",
+          "answer": "Sí. Si alguien trabaja contigo, toca el botón del perfil, arriba en Inicio, y ve a Equipo: la invitación va con un código por WhatsApp y cada persona entra en su propio celular. El plan gratis es para una persona; para sumar a más gente, contrata un plan pago dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

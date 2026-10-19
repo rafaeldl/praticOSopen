@@ -4,45 +4,46 @@
       {
         "id": "visao-geral",
         "title": "Como funciona",
-        "intro": "Cobre o cliente da OS por Pix, boleto ou cartão usando a conta Asaas da sua empresa. O cliente paga pelo link da OS e, quando o pagamento é confirmado, ele entra na OS sozinho. O dinheiro cai direto na sua conta Asaas.",
+        "intro": "Cobre o cliente da OS por Pix, boleto ou cartão usando a sua conta Asaas. O cliente recebe um link para pagar e, quando o pagamento é confirmado, ele entra na OS sozinho. O dinheiro cai direto na sua conta Asaas.",
         "features": [
           {
             "title": "Pix, boleto ou cartão",
             "description": "À vista, o cliente escolhe como pagar na fatura do Asaas."
           },
           {
-            "title": "Cartão parcelado",
-            "description": "De 2 a 12 vezes, com o número de parcelas definido por você."
+            "title": "Parcelado no cartão",
+            "description": "De 2 a 12 vezes, com o número de parcelas escolhido por você."
           },
           {
-            "title": "Baixa automática",
-            "description": "O pagamento confirmado entra na OS e a equipe recebe um aviso no celular."
+            "title": "Baixa sozinha",
+            "description": "O pagamento confirmado entra na OS e você recebe um aviso no celular."
           }
         ],
         "infoCard": {
-          "title": "Programa piloto",
-          "content": "A cobrança com Asaas é liberada por empresa e exige uma conta Asaas. Se a opção não aparece para você, fale com o suporte."
+          "title": "Liberado aos poucos",
+          "content": "A cobrança com Asaas é liberada por conta e exige uma conta no Asaas. Se a opção não aparece para você, fale com o suporte."
         }
       },
       {
         "id": "conectar",
         "title": "Conectar sua conta Asaas",
-        "intro": "A conexão é feita uma vez por empresa, pelo dono ou por um administrador, com a chave de API da sua conta Asaas.",
+        "intro": "A conexão é feita uma vez, com a chave de API da sua conta Asaas.",
         "subsections": [
           {
             "title": "Gerar a chave no Asaas",
             "steps": [
-              "Entre no painel do Asaas com a conta da sua empresa",
-              "Abra <strong>Integrações</strong> > <strong>Chaves de API</strong>",
-              "Gere uma nova chave e copie"
+              "Entre no painel do Asaas com a sua conta.",
+              "Abra <strong>Integrações → Chaves de API</strong>.",
+              "Gere uma nova chave e copie."
             ]
           },
           {
             "title": "Conectar no PraticOS",
             "steps": [
-              "No app, abra <strong>Configurações</strong> > <strong>Integrações</strong> > <strong>Asaas</strong>",
-              "Cole a chave no campo <strong>Chave de API</strong> e toque em <strong>Conectar</strong>",
-              "Pronto: o app mostra o nome da conta e o ambiente, <strong>Teste</strong> ou <strong>Produção</strong>"
+              "No app, toque no botão do perfil, no topo do Início, e vá em <strong>Avançado → Integrações</strong>.",
+              "Em <strong>Pagamentos</strong>, toque em <strong>Asaas</strong>.",
+              "Cole a chave em <strong>Chave de API</strong> e toque em <strong>Conectar</strong>.",
+              "Pronto: o app mostra a conta e o ambiente, <strong>Teste</strong> ou <strong>Produção</strong>."
             ]
           }
         ],
@@ -58,34 +59,38 @@
       {
         "id": "cobrar",
         "title": "Cobrar o cliente da OS",
-        "intro": "Dono, administradores e gerentes geram a cobrança na tela de pagamentos da OS. A seção <strong>Cobrança</strong> não aparece em orçamentos nem em OS canceladas.",
+        "intro": "O link para pagar sai da tela <strong>Receber</strong> da OS. Orçamento e OS cancelada não podem ser cobrados.",
         "subsections": [
           {
-            "title": "Gerar a cobrança",
+            "title": "Mandar o link para pagar",
             "steps": [
-              "Abra a OS, entre em <strong>Pagamentos</strong> e toque em <strong>Cobrar com Asaas</strong>",
-              "Confira o valor. Ele vem com o saldo da OS e pode ser menor (para cobrar uma entrada), mas nunca maior que o saldo",
-              "Escolha <strong>À vista</strong> (o cliente escolhe Pix, boleto ou cartão) ou <strong>Parcelado no cartão</strong> (de 2 a 12 parcelas)",
-              "Ajuste o vencimento, se precisar",
-              "Se o cliente não tiver CPF ou CNPJ no cadastro, informe agora. O Asaas exige o documento, e o CNPJ com letras também é aceito",
-              "Toque em <strong>Gerar cobrança</strong>"
+              "Na OS, toque em <strong>Falta receber</strong> (ou no botão azul <strong>Receber</strong>, quando a OS está pronta).",
+              "Toque em <strong>Mandar link para (cliente) pagar</strong>.",
+              "Em <strong>Link para pagar</strong>, confira o <strong>Valor</strong>. Ele vem com o que falta na OS e pode ser menor (para cobrar uma entrada), mas nunca maior.",
+              "Se precisar, mude o <strong>Vencimento</strong> e escolha <strong>Parcelar no cartão</strong> (de 2x a 12x). Sem parcelar, o cliente escolhe Pix, boleto ou cartão.",
+              "Se o cliente não tem CPF ou CNPJ no cadastro, informe agora. O Asaas exige o documento, e ele fica salvo no cadastro do cliente.",
+              "Toque no <strong>✓</strong> e mande o link ao cliente."
             ]
           },
           {
+            "title": "Pelo Financeiro e pelo cliente",
+            "content": "Na aba <strong>Financeiro</strong>, <strong>Mandar cobrança para (cliente)</strong> cria o link (ou reaproveita o que está aberto) e já abre o envio. Em <strong>Receber de (cliente)</strong>, aberto pelo Financeiro ou pela tela do cliente, <strong>Mandar link para pagar…</strong> junta várias OS do mesmo cliente num link só."
+          },
+          {
             "title": "Entrada e restante",
-            "content": "Exemplo: cobre R$ 300 de entrada no Pix. Depois que for paga, gere outra cobrança com os R$ 700 restantes em 3x no cartão."
+            "content": "Exemplo: cobre R$ 300 de entrada no Pix. Depois que for pago, mande outro link com os R$ 700 restantes em 3x no cartão."
           }
         ],
         "statusCards": [
           {
             "color": "blue",
             "title": "Aguardando pagamento",
-            "description": "Cobrança gerada, esperando o cliente pagar."
+            "description": "Link mandado, esperando o cliente pagar."
           },
           {
             "color": "red",
             "title": "Vencida",
-            "description": "Passou do vencimento sem pagamento. Gere uma nova cobrança."
+            "description": "Passou do vencimento sem pagamento. Mande um link novo."
           },
           {
             "color": "green",
@@ -94,70 +99,74 @@
           }
         ],
         "infoCard": {
-          "title": "Uma cobrança aberta por vez",
-          "content": "Gerar uma nova cobrança cancela a anterior que ainda não foi paga. Você também pode usar <strong>Cancelar cobrança</strong> no card da cobrança. Se o saldo da OS ficar menor que a cobrança, o app avisa e oferece <strong>Gerar nova cobrança</strong> com o valor atualizado. Cancelar a OS cancela a cobrança em aberto."
+          "title": "Um link aberto por vez",
+          "content": "Um link novo cancela o anterior que ainda não foi pago. No <strong>…</strong> da tela Receber ficam <strong>Copiar o link</strong>, <strong>Mandar de novo pelo WhatsApp</strong> e <strong>Cancelar o link</strong>. Se a OS mudar de valor, o app avisa e oferece <strong>Gerar link novo</strong> com o valor certo. Cancelar a OS cancela o link aberto."
         }
       },
       {
         "id": "cliente-paga",
         "title": "Como o cliente paga",
-        "intro": "O cliente paga pelo mesmo link da OS que você já compartilha.",
+        "intro": "O cliente paga pela fatura do Asaas, aberta pelo link que você mandou ou pelo link da OS.",
         "subsections": [
           {
             "title": "Passo a passo",
             "steps": [
-              "No card da cobrança, toque em <strong>Compartilhar link da OS</strong> e envie ao cliente, por exemplo pelo WhatsApp",
-              "O cliente abre o link e vê o botão <strong>Pagar</strong> com o valor",
-              "O botão abre a fatura do Asaas, onde ele paga",
-              "Ao voltar para o link da OS, aparece o aviso de pago"
+              "Você manda o link pelo WhatsApp ou de outro jeito.",
+              "O cliente abre o link da OS e vê o botão <strong>Pagar</strong> com o valor.",
+              "O botão abre a fatura do Asaas, onde ele paga.",
+              "Ao voltar para o link da OS, aparece que está pago."
             ]
           }
         ],
         "paragraphs": [
-          "Se preferir, toque em <strong>Copiar link da fatura</strong> no card da cobrança e envie a fatura direto.",
-          "Se a cobrança vencer, o link da OS mostra <strong>Cobrança vencida</strong> e orienta o cliente a falar com a empresa. Gere uma nova cobrança na OS."
+          "Enquanto o cliente não paga, a tela Receber mostra quando o link foi mandado e até quando vale. Toque em <strong>Lembrar pelo WhatsApp também</strong> para mandar de novo.",
+          "Se o link vencer, a página da OS mostra que a cobrança venceu e orienta o cliente a falar com você. Mande um link novo pela OS."
         ]
       },
       {
         "id": "baixa-automatica",
         "title": "Pagamento na OS",
-        "intro": "Quando o Asaas confirma o pagamento, o PraticOS lança o valor na OS e atualiza o saldo, sem você digitar nada.",
+        "intro": "Quando o Asaas confirma o pagamento, o PraticOS lança o valor na OS e atualiza o que falta receber, sem você digitar nada.",
         "subsections": [
           {
             "title": "O que acontece",
             "validationList": [
               {
                 "label": "Pagamento confirmado",
-                "text": "Entra na OS como pagamento, identificado como Asaas • Pix, Asaas • Boleto ou Asaas • Cartão"
+                "text": "Entra na OS como Pix pelo link, Boleto pelo link ou Cartão pelo link."
               },
               {
                 "label": "Parcelado",
-                "text": "Cada parcela confirmada entra como um pagamento"
+                "text": "Cada parcela confirmada entra como um pagamento."
               },
               {
                 "label": "Aviso",
-                "text": "A equipe com acesso a pagamentos recebe a notificação <strong>Pagamento recebido</strong> no celular"
+                "text": "Você recebe a notificação de pagamento recebido no celular."
+              },
+              {
+                "label": "Recebeu de outro jeito",
+                "text": "Se o cliente pagou em dinheiro, toque em <strong>Recebi de outro jeito</strong> e registre. O link é ajustado ou cancelado, para ninguém pagar duas vezes."
               },
               {
                 "label": "Estorno",
-                "text": "Se você estornar a cobrança no painel do Asaas, o pagamento sai da OS e o saldo volta"
+                "text": "Se você estornar a cobrança no painel do Asaas, o pagamento sai da OS e o valor volta a faltar."
               }
             ]
           }
         ],
         "warningCard": {
           "title": "Pagamentos do Asaas não são apagados no app",
-          "content": "Para desfazer um pagamento recebido pelo Asaas, estorne a cobrança no painel do Asaas. O PraticOS não trata estorno parcial nem contestação (chargeback): se acontecer, ajuste o pagamento da OS manualmente."
+          "content": "Para desfazer um pagamento recebido pelo Asaas, estorne a cobrança no painel do Asaas. O PraticOS não trata estorno parcial nem contestação (chargeback): se acontecer, ajuste o pagamento da OS à mão."
         }
       },
       {
         "id": "permissoes",
-        "title": "Quem pode fazer o quê",
-        "intro": "Conectar a conta e cobrar dependem do perfil de cada pessoa.",
+        "title": "Se alguém trabalha com você",
+        "intro": "Trabalhando sozinho, você faz tudo. Com equipe, conectar a conta e cobrar dependem do papel de cada pessoa.",
         "table": {
           "headers": [
-            "Perfil",
-            "Conectar conta Asaas",
+            "Papel",
+            "Conectar a conta Asaas",
             "Cobrar na OS"
           ],
           "rows": [
@@ -217,7 +226,7 @@
               ]
             }
           ],
-          "note": "O dono da empresa tem todas as permissões."
+          "note": "Você, como dono da conta, pode tudo."
         }
       },
       {
@@ -226,23 +235,23 @@
         "faq": [
           {
             "question": "O PraticOS cobra taxa sobre os pagamentos?",
-            "answer": "Não. Valem apenas as tarifas da sua conta Asaas, cobradas pelo próprio Asaas."
+            "answer": "Não. Valem só as tarifas da sua conta Asaas, cobradas pelo próprio Asaas."
           },
           {
             "question": "Preciso ter conta no Asaas?",
-            "answer": "Sim. A cobrança usa a conta Asaas da sua empresa."
+            "answer": "Sim. A cobrança usa a sua conta Asaas, e o dinheiro cai nela."
           },
           {
             "question": "O cliente escolhe o número de parcelas?",
-            "answer": "Não. Você define de 2 a 12 parcelas ao gerar a cobrança."
+            "answer": "Não. Você escolhe de 2 a 12 parcelas ao criar o link."
           },
           {
             "question": "E se eu desconectar a conta?",
-            "answer": "As cobranças em aberto continuam no Asaas, mas os pagamentos deixam de dar baixa na OS. Registre-os manualmente ou cancele as cobranças no painel do Asaas."
+            "answer": "Os links em aberto continuam no Asaas, mas os pagamentos deixam de entrar na OS sozinhos. Registre-os à mão ou cancele as cobranças no painel do Asaas."
           },
           {
             "question": "Não vejo a opção Asaas no app. E agora?",
-            "answer": "A cobrança com Asaas está em piloto e é liberada por empresa. Fale com o suporte para participar."
+            "answer": "A cobrança com Asaas é liberada por conta, e só aparece para quem pode mexer em Integrações. Fale com o suporte para participar."
           }
         ]
       }
@@ -253,160 +262,169 @@
       {
         "id": "overview",
         "title": "How it works",
-        "intro": "Charge your customer for a work order by Pix, boleto or card using your company's Asaas account. The customer pays through the order link and, once the payment is confirmed, it is added to the order automatically. The money goes straight to your Asaas account.",
+        "intro": "Charge the customer on a work order by Pix, boleto or card through your Asaas account. The customer gets a link to pay and, once the payment is confirmed, it goes into the order on its own. The money lands straight in your Asaas account.",
         "features": [
           {
             "title": "Pix, boleto or card",
-            "description": "For one-time charges, the customer picks how to pay on the Asaas invoice."
+            "description": "Paying in full, the customer picks how to pay on the Asaas invoice."
           },
           {
             "title": "Card installments",
-            "description": "2 to 12 installments, with the number set by you."
+            "description": "From 2 to 12 installments, with the number picked by you."
           },
           {
-            "title": "Automatic settlement",
-            "description": "The confirmed payment is added to the order and the team gets a push notification."
+            "title": "Settles on its own",
+            "description": "The confirmed payment goes into the order and you get a phone alert."
           }
         ],
         "infoCard": {
-          "title": "Pilot program",
-          "content": "Asaas charges are enabled per company and require an Asaas account. If you don't see the option, contact support."
+          "title": "Rolling out gradually",
+          "content": "Asaas charges are turned on per account and need an Asaas account. If you don’t see the option, contact support."
         }
       },
       {
         "id": "connect",
         "title": "Connect your Asaas account",
-        "intro": "The connection is made once per company, by the owner or an administrator, using the API key of your Asaas account.",
+        "intro": "You connect once, with the API key of your Asaas account.",
         "subsections": [
           {
             "title": "Create the key in Asaas",
             "steps": [
-              "Sign in to the Asaas dashboard with your company account",
-              "Open <strong>Integrations</strong> > <strong>API Keys</strong>",
-              "Generate a new key and copy it"
+              "Log in to the Asaas dashboard with your account.",
+              "Open <strong>Integrações → Chaves de API</strong> (Integrations → API keys).",
+              "Create a new key and copy it."
             ]
           },
           {
             "title": "Connect in PraticOS",
             "steps": [
-              "In the app, open <strong>Settings</strong> > <strong>Integrations</strong> > <strong>Asaas</strong>",
-              "Paste the key in the <strong>API key</strong> field and tap <strong>Connect</strong>",
-              "Done: the app shows the account name and the environment, <strong>Test</strong> or <strong>Production</strong>"
+              "In the app, tap the profile button at the top of Home and go to <strong>Advanced → Integrations</strong>.",
+              "Under <strong>Payments</strong>, tap <strong>Asaas</strong>.",
+              "Paste the key into <strong>API key</strong> and tap <strong>Connect</strong>.",
+              "Done: the app shows the account and the environment, <strong>Test</strong> or <strong>Production</strong>."
             ]
           }
         ],
         "infoCard": {
-          "title": "Try it before charging for real",
-          "content": "A key from the Asaas test account (sandbox) connects in <strong>Test</strong> mode: nothing is actually charged. A key from your real account connects in <strong>Production</strong>."
+          "title": "Test before charging for real",
+          "content": "A key from the Asaas test account (sandbox) connects in <strong>Test</strong> mode: nothing is actually charged. A key from the real account connects in <strong>Production</strong>."
         },
         "warningCard": {
           "title": "Keep the key safe",
-          "content": "The key gives access to your Asaas account. Paste it only in the PraticOS app: it is stored encrypted and never shown again. If you suspect a leak, create a new key in Asaas and connect again."
+          "content": "The key gives access to your Asaas account. Paste it only into the PraticOS app: it is stored encrypted and never shown again. If you think it leaked, create another key in Asaas and connect again."
         }
       },
       {
         "id": "charge",
         "title": "Charge the customer",
-        "intro": "Owners, administrators and managers create the charge on the order's payments screen. The <strong>Charge</strong> section does not appear on quotes or canceled orders.",
+        "intro": "The payment link comes from the order’s <strong>Receive</strong> screen. Quotes and canceled orders can’t be charged.",
         "subsections": [
           {
-            "title": "Create the charge",
+            "title": "Send the payment link",
             "steps": [
-              "Open the order, go to <strong>Payments</strong> and tap <strong>Charge with Asaas</strong>",
-              "Check the amount. It defaults to the order balance and can be lower (to charge a down payment), but never higher than the balance",
-              "Choose <strong>One-time</strong> (the customer picks Pix, boleto or card) or <strong>Card installments</strong> (2 to 12 installments)",
-              "Adjust the due date if needed",
-              "If the customer has no CPF or CNPJ on file, enter it now. Asaas requires the document, and CNPJs with letters are accepted",
-              "Tap <strong>Create charge</strong>"
+              "On the order, tap <strong>Left to receive</strong> (or the blue <strong>Receive</strong> button, once the order is ready).",
+              "Tap <strong>Send (customer) a link to pay</strong>.",
+              "In <strong>Payment link</strong>, check the <strong>Amount</strong>. It starts with what’s left on the order and can be lower (to charge a down payment), but never higher.",
+              "If needed, change the <strong>Due date</strong> and pick <strong>Split on the card</strong> (2x to 12x). Without splitting, the customer picks Pix, boleto or card.",
+              "If the customer has no CPF or CNPJ on file, enter it now. Asaas requires it, and it’s saved on the customer’s record.",
+              "Tap the <strong>✓</strong> and send the link to the customer."
             ]
           },
           {
-            "title": "Down payment and balance",
-            "content": "Example: charge R$ 300 down by Pix. Once it is paid, create another charge for the remaining R$ 700 in 3 card installments."
+            "title": "From Financial and from the customer",
+            "content": "On the <strong>Financial</strong> tab, <strong>Send payment request to (customer)</strong> creates the link (or reuses the open one) and opens sending right away. In <strong>Receive from (customer)</strong>, opened from Financial or the customer screen, <strong>Send payment link…</strong> puts several orders from the same customer into one link."
+          },
+          {
+            "title": "Down payment and the rest",
+            "content": "Example: charge R$ 300 up front by Pix. Once it’s paid, send another link for the remaining R$ 700 in 3 card installments."
           }
         ],
         "statusCards": [
           {
             "color": "blue",
             "title": "Awaiting payment",
-            "description": "Charge created, waiting for the customer to pay."
+            "description": "Link sent, waiting for the customer to pay."
           },
           {
             "color": "red",
             "title": "Overdue",
-            "description": "Past the due date without payment. Create a new charge."
+            "description": "Past the due date without payment. Send a new link."
           },
           {
             "color": "green",
             "title": "Paid",
-            "description": "Payment confirmed by Asaas and added to the order."
+            "description": "Payment confirmed by Asaas and recorded on the order."
           }
         ],
         "infoCard": {
-          "title": "One open charge at a time",
-          "content": "Creating a new charge cancels the previous unpaid one. You can also tap <strong>Cancel charge</strong> on the charge card. If the order balance becomes smaller than the charge, the app warns you and offers <strong>Create new charge</strong> with the updated amount. Canceling the order cancels the open charge."
+          "title": "One open link at a time",
+          "content": "A new link cancels the previous unpaid one. The <strong>…</strong> on the Receive screen has <strong>Copy the link</strong>, <strong>Send again on WhatsApp</strong> and <strong>Cancel the link</strong>. If the order total changes, the app tells you and offers <strong>Create a new link</strong> with the right amount. Canceling the order cancels the open link."
         }
       },
       {
         "id": "customer-pays",
         "title": "How the customer pays",
-        "intro": "The customer pays through the same order link you already share.",
+        "intro": "The customer pays on the Asaas invoice, opened from the link you sent or from the order link.",
         "subsections": [
           {
             "title": "Step by step",
             "steps": [
-              "On the charge card, tap <strong>Share order link</strong> and send it to the customer, for example on WhatsApp",
-              "The customer opens the link and sees the <strong>Pay</strong> button with the amount",
-              "The button opens the Asaas invoice, where they pay",
-              "Back on the order link, a paid notice appears"
+              "You send the link on WhatsApp or another way.",
+              "The customer opens the order link and sees the <strong>Pay</strong> button with the amount.",
+              "The button opens the Asaas invoice, where they pay.",
+              "Back on the order link, it shows as paid."
             ]
           }
         ],
         "paragraphs": [
-          "Prefer to send the invoice directly? Tap <strong>Copy invoice link</strong> on the charge card.",
-          "If the charge becomes overdue, the order link shows <strong>Payment overdue. Please contact the company</strong>. Create a new charge on the order."
+          "Until the customer pays, the Receive screen shows when the link was sent and how long it lasts. Tap <strong>Also remind on WhatsApp</strong> to send it again.",
+          "If the link expires, the order page shows the charge is overdue and tells the customer to contact you. Send a new link from the order."
         ]
       },
       {
         "id": "auto-settlement",
         "title": "Payment on the order",
-        "intro": "When Asaas confirms the payment, PraticOS adds the amount to the order and updates the balance, with no typing.",
+        "intro": "When Asaas confirms the payment, PraticOS records it on the order and updates what’s left to receive, without you typing anything.",
         "subsections": [
           {
             "title": "What happens",
             "validationList": [
               {
-                "label": "Confirmed payment",
-                "text": "Added to the order as a payment, labeled Asaas • Pix, Asaas • Boleto or Asaas • Card"
+                "label": "Payment confirmed",
+                "text": "Shows on the order as Pix via link, Boleto via link or Card via link."
               },
               {
                 "label": "Installments",
-                "text": "Each confirmed installment is added as a payment"
+                "text": "Each confirmed installment is recorded as a payment."
               },
               {
-                "label": "Notification",
-                "text": "Team members with access to payments get a push notification titled <strong>Pagamento recebido</strong> (it arrives in Portuguese)"
+                "label": "Alert",
+                "text": "You get a payment received notification on your phone."
+              },
+              {
+                "label": "Got paid another way",
+                "text": "If the customer paid in cash, tap <strong>I got paid another way</strong> and record it. The link is adjusted or canceled, so nobody pays twice."
               },
               {
                 "label": "Refund",
-                "text": "If you refund the charge in the Asaas dashboard, the payment is removed from the order and the balance comes back"
+                "text": "If you refund the charge in the Asaas dashboard, the payment comes off the order and the amount is owed again."
               }
             ]
           }
         ],
         "warningCard": {
-          "title": "Asaas payments can't be deleted in the app",
-          "content": "To undo a payment received through Asaas, refund the charge in the Asaas dashboard. PraticOS does not handle partial refunds or chargebacks: if one happens, adjust the order's payment manually."
+          "title": "Asaas payments can’t be deleted in the app",
+          "content": "To undo a payment received through Asaas, refund the charge in the Asaas dashboard. PraticOS doesn’t handle partial refunds or chargebacks: if one happens, adjust the order’s payment by hand."
         }
       },
       {
         "id": "permissions",
-        "title": "Who can do what",
-        "intro": "Connecting the account and charging depend on each person's role.",
+        "title": "If someone works with you",
+        "intro": "Working alone, you do everything. With a team, connecting the account and charging depend on each person’s role.",
         "table": {
           "headers": [
             "Role",
-            "Connect Asaas account",
+            "Connect the Asaas account",
             "Charge on the order"
           ],
           "rows": [
@@ -466,7 +484,7 @@
               ]
             }
           ],
-          "note": "The company owner has all permissions."
+          "note": "You, as the account owner, can do everything."
         }
       },
       {
@@ -474,24 +492,24 @@
         "title": "FAQ",
         "faq": [
           {
-            "question": "Does PraticOS charge a fee on payments?",
-            "answer": "No. Only the fees of your Asaas account apply, charged by Asaas itself."
+            "question": "Does PraticOS take a fee on payments?",
+            "answer": "No. Only your Asaas account fees apply, charged by Asaas itself."
           },
           {
             "question": "Do I need an Asaas account?",
-            "answer": "Yes. Charges use your company's Asaas account."
+            "answer": "Yes. Charges use your Asaas account, and the money lands there."
           },
           {
-            "question": "Can the customer choose the number of installments?",
-            "answer": "No. You set 2 to 12 installments when creating the charge."
+            "question": "Does the customer choose the number of installments?",
+            "answer": "No. You pick 2 to 12 installments when creating the link."
           },
           {
             "question": "What if I disconnect the account?",
-            "answer": "Open charges stay in Asaas, but payments no longer update the order. Record them manually or cancel the charges in the Asaas dashboard."
+            "answer": "Open links stay in Asaas, but payments stop going into the order on their own. Record them by hand or cancel the charges in the Asaas dashboard."
           },
           {
-            "question": "I don't see the Asaas option in the app. What now?",
-            "answer": "Asaas charges are in a pilot and enabled per company. Contact support to join."
+            "question": "I don’t see the Asaas option in the app. What now?",
+            "answer": "Asaas charges are turned on per account, and only show for people who can manage Integrations. Contact support to join."
           }
         ]
       }
@@ -502,161 +520,170 @@
       {
         "id": "resumen",
         "title": "Cómo funciona",
-        "intro": "Cobra al cliente de la orden por Pix, boleto o tarjeta usando la cuenta Asaas de tu empresa. El cliente paga desde el enlace de la orden y, cuando se confirma el pago, este entra solo en la orden. El dinero llega directo a tu cuenta Asaas.",
+        "intro": "Cobra al cliente de la OS por Pix, boleto o tarjeta con tu cuenta Asaas. El cliente recibe un enlace para pagar y, cuando el pago se confirma, entra solo en la OS. El dinero cae directo en tu cuenta Asaas.",
         "features": [
           {
             "title": "Pix, boleto o tarjeta",
-            "description": "Al contado, el cliente elige cómo pagar en la factura de Asaas."
+            "description": "En un solo pago, el cliente elige cómo pagar en la factura de Asaas."
           },
           {
-            "title": "Tarjeta en cuotas",
-            "description": "De 2 a 12 cuotas, con el número definido por ti."
+            "title": "En cuotas con tarjeta",
+            "description": "De 2 a 12 cuotas, con el número que elijas tú."
           },
           {
-            "title": "Registro automático",
-            "description": "El pago confirmado entra en la orden y el equipo recibe un aviso en el celular."
+            "title": "Se registra solo",
+            "description": "El pago confirmado entra en la OS y recibes un aviso en el celular."
           }
         ],
         "infoCard": {
-          "title": "Programa piloto",
-          "content": "El cobro con Asaas se habilita por empresa y requiere una cuenta Asaas. Si no ves la opción, habla con soporte."
+          "title": "Se habilita de a poco",
+          "content": "El cobro con Asaas se habilita por cuenta y requiere una cuenta en Asaas. Si no ves la opción, escribe a soporte."
         }
       },
       {
         "id": "conectar",
         "title": "Conectar tu cuenta Asaas",
-        "intro": "La conexión se hace una vez por empresa, por el dueño o un administrador, con la clave de API de tu cuenta Asaas.",
+        "intro": "La conexión se hace una vez, con la clave de API de tu cuenta Asaas.",
         "subsections": [
           {
             "title": "Generar la clave en Asaas",
             "steps": [
-              "Entra al panel de Asaas con la cuenta de tu empresa",
-              "Abre <strong>Integraciones</strong> > <strong>Claves de API</strong>",
-              "Genera una nueva clave y cópiala"
+              "Entra al panel de Asaas con tu cuenta.",
+              "Abre <strong>Integrações → Chaves de API</strong> (Integraciones → Claves de API).",
+              "Genera una clave nueva y cópiala."
             ]
           },
           {
             "title": "Conectar en PraticOS",
             "steps": [
-              "En la app, abre <strong>Configuración</strong> > <strong>Integraciones</strong> > <strong>Asaas</strong>",
-              "Pega la clave en el campo <strong>Clave de API</strong> y toca <strong>Conectar</strong>",
-              "Listo: la app muestra el nombre de la cuenta y el entorno, <strong>Prueba</strong> o <strong>Producción</strong>"
+              "En la app, toca el botón del perfil, arriba en Inicio, y ve a <strong>Avanzado → Integraciones</strong>.",
+              "En <strong>Pagos</strong>, toca <strong>Asaas</strong>.",
+              "Pega la clave en <strong>Clave de API</strong> y toca <strong>Conectar</strong>.",
+              "Listo: la app muestra la cuenta y el entorno, <strong>Prueba</strong> o <strong>Producción</strong>."
             ]
           }
         ],
         "infoCard": {
           "title": "Prueba antes de cobrar de verdad",
-          "content": "Una clave de la cuenta de pruebas de Asaas (sandbox) conecta en modo <strong>Prueba</strong>: no se cobra nada de verdad. Una clave de tu cuenta real conecta en <strong>Producción</strong>."
+          "content": "Una clave de la cuenta de prueba de Asaas (sandbox) conecta en modo <strong>Prueba</strong>: no se cobra nada de verdad. Una clave de la cuenta real conecta en <strong>Producción</strong>."
         },
         "warningCard": {
-          "title": "Guarda bien la clave",
-          "content": "La clave da acceso a tu cuenta Asaas. Pégala solo en la app de PraticOS: se guarda cifrada y no vuelve a mostrarse. Si sospechas de una filtración, genera otra clave en Asaas y conecta de nuevo."
+          "title": "Cuida la clave",
+          "content": "La clave da acceso a tu cuenta Asaas. Pégala solo en la app de PraticOS: se guarda cifrada y no vuelve a mostrarse. Si sospechas que se filtró, genera otra clave en Asaas y conecta de nuevo."
         }
       },
       {
         "id": "cobrar",
-        "title": "Cobrar al cliente de la orden",
-        "intro": "El dueño, los administradores y los gerentes generan el cobro en la pantalla de pagos de la orden. La sección <strong>Cobro</strong> no aparece en presupuestos ni en órdenes canceladas.",
+        "title": "Cobrar al cliente de la OS",
+        "intro": "El enlace de pago sale de la pantalla <strong>Cobrar</strong> de la OS. Un presupuesto o una OS cancelada no se pueden cobrar.",
         "subsections": [
           {
-            "title": "Generar el cobro",
+            "title": "Enviar el enlace de pago",
             "steps": [
-              "Abre la orden, entra en <strong>Pagos</strong> y toca <strong>Cobrar con Asaas</strong>",
-              "Revisa el monto. Viene con el saldo de la orden y puede ser menor (para cobrar un anticipo), pero nunca mayor que el saldo",
-              "Elige <strong>Al contado</strong> (el cliente elige Pix, boleto o tarjeta) o <strong>En cuotas con tarjeta</strong> (de 2 a 12 cuotas)",
-              "Ajusta el vencimiento si hace falta",
-              "Si el cliente no tiene CPF o CNPJ en su registro, ingrésalo ahora. Asaas exige el documento y también acepta CNPJ con letras",
-              "Toca <strong>Generar cobro</strong>"
+              "En la OS, toca <strong>Falta cobrar</strong> (o el botón azul <strong>Cobrar</strong>, cuando la OS está lista).",
+              "Toca <strong>Enviar a (cliente) un enlace para pagar</strong>.",
+              "En <strong>Enlace de pago</strong>, revisa el <strong>Monto</strong>. Viene con lo que falta en la OS y puede ser menor (para cobrar un anticipo), pero nunca mayor.",
+              "Si hace falta, cambia el <strong>Vencimiento</strong> y elige <strong>En cuotas con tarjeta</strong> (de 2x a 12x). Sin cuotas, el cliente elige Pix, boleto o tarjeta.",
+              "Si el cliente no tiene CPF o CNPJ registrado, ingrésalo ahora. Asaas lo exige, y queda guardado en el registro del cliente.",
+              "Toca el <strong>✓</strong> y envía el enlace al cliente."
             ]
           },
           {
+            "title": "Desde Financiero y desde el cliente",
+            "content": "En la pestaña <strong>Financiero</strong>, <strong>Enviar cobro a (cliente)</strong> crea el enlace (o reutiliza el que está abierto) y abre el envío al momento. En <strong>Recibir de (cliente)</strong>, abierto desde Financiero o desde la pantalla del cliente, <strong>Enviar enlace de pago…</strong> junta varias OS del mismo cliente en un solo enlace."
+          },
+          {
             "title": "Anticipo y resto",
-            "content": "Ejemplo: cobra R$ 300 de anticipo por Pix. Cuando se pague, genera otro cobro con los R$ 700 restantes en 3 cuotas con tarjeta."
+            "content": "Ejemplo: cobra R$ 300 de anticipo por Pix. Cuando se pague, envía otro enlace con los R$ 700 restantes en 3 cuotas con tarjeta."
           }
         ],
         "statusCards": [
           {
             "color": "blue",
             "title": "Esperando pago",
-            "description": "Cobro generado, esperando que el cliente pague."
+            "description": "Enlace enviado, esperando que el cliente pague."
           },
           {
             "color": "red",
             "title": "Vencido",
-            "description": "Pasó el vencimiento sin pago. Genera un nuevo cobro."
+            "description": "Pasó el vencimiento sin pago. Envía un enlace nuevo."
           },
           {
             "color": "green",
             "title": "Pagado",
-            "description": "Pago confirmado por Asaas y registrado en la orden."
+            "description": "Pago confirmado por Asaas y registrado en la OS."
           }
         ],
         "infoCard": {
-          "title": "Un cobro abierto a la vez",
-          "content": "Generar un nuevo cobro cancela el anterior que aún no se pagó. También puedes tocar <strong>Cancelar cobro</strong> en la tarjeta del cobro. Si el saldo de la orden queda menor que el cobro, la app avisa y ofrece <strong>Generar nuevo cobro</strong> con el monto actualizado. Cancelar la orden cancela el cobro abierto."
+          "title": "Un enlace abierto a la vez",
+          "content": "Un enlace nuevo cancela el anterior que todavía no se pagó. En el <strong>…</strong> de la pantalla Cobrar están <strong>Copiar el enlace</strong>, <strong>Enviar de nuevo por WhatsApp</strong> y <strong>Cancelar el enlace</strong>. Si la OS cambia de valor, la app avisa y ofrece <strong>Generar un enlace nuevo</strong> con el monto correcto. Cancelar la OS cancela el enlace abierto."
         }
       },
       {
         "id": "cliente-paga",
         "title": "Cómo paga el cliente",
-        "intro": "El cliente paga desde el mismo enlace de la orden que ya compartes.",
+        "intro": "El cliente paga en la factura de Asaas, abierta desde el enlace que enviaste o desde el enlace de la OS.",
         "subsections": [
           {
             "title": "Paso a paso",
             "steps": [
-              "En la tarjeta del cobro, toca <strong>Compartir enlace de la orden</strong> y envíalo al cliente, por ejemplo por WhatsApp",
-              "El cliente abre el enlace y ve el botón <strong>Pagar</strong> con el monto",
-              "El botón abre la factura de Asaas, donde paga",
-              "Al volver al enlace de la orden, aparece el aviso de pagado"
+              "Envías el enlace por WhatsApp o de otra forma.",
+              "El cliente abre el enlace de la OS y ve el botón <strong>Pagar</strong> con el monto.",
+              "El botón abre la factura de Asaas, donde paga.",
+              "Al volver al enlace de la OS, aparece como pagado."
             ]
           }
         ],
         "paragraphs": [
-          "Si prefieres, toca <strong>Copiar enlace de la factura</strong> en la tarjeta del cobro y envía la factura directamente.",
-          "Si el cobro vence, el enlace de la orden muestra <strong>Cobro vencido. Contacta a la empresa</strong>. Genera un nuevo cobro en la orden."
+          "Mientras el cliente no paga, la pantalla Cobrar muestra cuándo se envió el enlace y hasta cuándo vale. Toca <strong>Recordar también por WhatsApp</strong> para enviarlo de nuevo.",
+          "Si el enlace vence, la página de la OS muestra que el cobro venció y le indica al cliente que hable contigo. Envía un enlace nuevo desde la OS."
         ]
       },
       {
         "id": "registro-automatico",
-        "title": "Pago en la orden",
-        "intro": "Cuando Asaas confirma el pago, PraticOS registra el monto en la orden y actualiza el saldo, sin que escribas nada.",
+        "title": "Pago en la OS",
+        "intro": "Cuando Asaas confirma el pago, PraticOS lo registra en la OS y actualiza lo que falta cobrar, sin que escribas nada.",
         "subsections": [
           {
             "title": "Qué pasa",
             "validationList": [
               {
                 "label": "Pago confirmado",
-                "text": "Entra en la orden como pago, identificado como Asaas • Pix, Asaas • Boleto o Asaas • Tarjeta"
+                "text": "Aparece en la OS como Pix por enlace, Boleto por enlace o Tarjeta por enlace."
               },
               {
                 "label": "En cuotas",
-                "text": "Cada cuota confirmada entra como un pago"
+                "text": "Cada cuota confirmada entra como un pago."
               },
               {
                 "label": "Aviso",
-                "text": "El equipo con acceso a pagos recibe en el celular la notificación <strong>Pagamento recebido</strong> (llega en portugués)"
+                "text": "Recibes la notificación de pago recibido en el celular."
+              },
+              {
+                "label": "Cobraste de otra forma",
+                "text": "Si el cliente pagó en efectivo, toca <strong>Cobré de otra forma</strong> y regístralo. El enlace se ajusta o se cancela, para que nadie pague dos veces."
               },
               {
                 "label": "Reembolso",
-                "text": "Si reembolsas el cobro en el panel de Asaas, el pago sale de la orden y el saldo vuelve"
+                "text": "Si reembolsas el cobro en el panel de Asaas, el pago sale de la OS y el monto vuelve a faltar."
               }
             ]
           }
         ],
         "warningCard": {
           "title": "Los pagos de Asaas no se borran en la app",
-          "content": "Para deshacer un pago recibido por Asaas, reembolsa el cobro en el panel de Asaas. PraticOS no trata reembolsos parciales ni contracargos: si ocurre uno, ajusta el pago de la orden manualmente."
+          "content": "Para deshacer un pago recibido por Asaas, reembolsa el cobro en el panel de Asaas. PraticOS no maneja reembolsos parciales ni contracargos: si ocurre, ajusta el pago de la OS a mano."
         }
       },
       {
         "id": "permisos",
-        "title": "Quién puede hacer qué",
-        "intro": "Conectar la cuenta y cobrar dependen del perfil de cada persona.",
+        "title": "Si alguien trabaja contigo",
+        "intro": "Si trabajas solo, haces todo. Con equipo, conectar la cuenta y cobrar dependen del rol de cada persona.",
         "table": {
           "headers": [
-            "Perfil",
-            "Conectar cuenta Asaas",
-            "Cobrar en la orden"
+            "Rol",
+            "Conectar la cuenta Asaas",
+            "Cobrar en la OS"
           ],
           "rows": [
             {
@@ -715,7 +742,7 @@
               ]
             }
           ],
-          "note": "El dueño de la empresa tiene todos los permisos."
+          "note": "Tú, como dueño de la cuenta, puedes todo."
         }
       },
       {
@@ -728,19 +755,19 @@
           },
           {
             "question": "¿Necesito una cuenta en Asaas?",
-            "answer": "Sí. El cobro usa la cuenta Asaas de tu empresa."
+            "answer": "Sí. El cobro usa tu cuenta Asaas, y el dinero cae ahí."
           },
           {
             "question": "¿El cliente elige el número de cuotas?",
-            "answer": "No. Tú defines de 2 a 12 cuotas al generar el cobro."
+            "answer": "No. Tú eliges de 2 a 12 cuotas al crear el enlace."
           },
           {
             "question": "¿Y si desconecto la cuenta?",
-            "answer": "Los cobros abiertos siguen en Asaas, pero los pagos dejan de registrarse en la orden. Regístralos manualmente o cancela los cobros en el panel de Asaas."
+            "answer": "Los enlaces abiertos siguen en Asaas, pero los pagos dejan de entrar solos en la OS. Regístralos a mano o cancela los cobros en el panel de Asaas."
           },
           {
-            "question": "No veo la opción Asaas en la app. ¿Qué hago?",
-            "answer": "El cobro con Asaas está en piloto y se habilita por empresa. Habla con soporte para participar."
+            "question": "No veo la opción Asaas en la app. ¿Y ahora?",
+            "answer": "El cobro con Asaas se habilita por cuenta, y solo aparece para quien puede manejar Integraciones. Escribe a soporte para participar."
           }
         ]
       }

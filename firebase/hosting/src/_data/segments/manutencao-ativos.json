@@ -11,7 +11,7 @@
     "hero": {
       "title": "Cada ativo com tag,",
       "titleMark": "histórico e fotos.",
-      "lede": "PraticOS é o app de ordem de serviço para empresas de manutenção de equipamentos. Cadastre cada ativo com tag, fabricante, localização e horas de operação, registre preventivas e corretivas com checklist e fotos e mande ao cliente o link da OS — pelo celular.",
+      "lede": "PraticOS é o app de ordem de serviço para quem faz manutenção de equipamentos. Fale o serviço e a IA abre a OS. Cada ativo fica com tag, fabricante, localização e horas de operação, as preventivas e corretivas ficam com checklist e fotos, e o cliente recebe o link da OS — tudo pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -77,7 +77,7 @@
         {
           "problem": "Próxima preventiva na memória",
           "detail": "Ninguém lembra quando aquele gerador passou pela última revisão.",
-          "answer": "O cadastro guarda a última manutenção e as horas de operação. Agende a próxima visita na OS e o técnico recebe o lembrete no celular."
+          "answer": "O cadastro guarda a última manutenção e as horas de operação. Marque a próxima visita na OS: ela entra na Agenda e o celular avisa antes do horário."
         },
         {
           "problem": "Peça fora do escopo sem aprovação",
@@ -87,7 +87,7 @@
         {
           "problem": "Fim do mês sem números",
           "detail": "Contratos, chamados e peças em lugares diferentes. Ninguém sabe quanto entrou.",
-          "answer": "Registre pagamentos inteiros ou parciais na OS. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Registre pagamentos inteiros ou em partes na OS. O Financeiro mostra quanto falta receber, de quem, e o relatório do mês com o que entrou."
         }
       ]
     },
@@ -97,39 +97,39 @@
       "stages": [
         {
           "number": "01",
-          "title": "Cadastre os ativos",
-          "text": "Registre cada equipamento do cliente com tag, fabricante, número de série, localização e categoria. A OS já nasce ligada ao ativo.",
+          "title": "Fale o serviço e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Metalúrgica Vale Verde, gerador GER-004, preventiva com troca de óleo e filtros”. Ou tire uma foto do pedido anotado. A IA preenche cliente, ativo, serviços e peças com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
-            "Mecânico, elétrico, hidráulico, pneumático, térmico ou eletrônico",
-            "Data de instalação e vencimento da garantia",
-            "Status do ramo: em manutenção e operacional"
+            "Ativo com tag, fabricante, número de série, localização e categoria",
+            "Corrija falando: “o filtro é 180”",
+            "Nada é salvo sem você conferir"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
           "title": "Agende preventivas e chamados",
-          "text": "Marque dia e hora em cada OS. A agenda mostra o mês por técnico, e cada um recebe o aviso no celular antes do atendimento.",
+          "text": "Marque dia e hora em cada OS. Ela aparece na Agenda, no dia escolhido, e o celular avisa antes do atendimento.",
           "facts": [
-            "Preventiva e corretiva no mesmo calendário",
-            "Agenda filtrada por técnico",
-            "Aviso de OS parada há mais de 7 dias"
+            "Preventiva e corretiva na mesma agenda",
+            "Resumo do dia às 9h, se você quiser",
+            "Aviso de orçamento parado há 7 dias"
           ],
           "image": "agenda.png",
-          "alt": "Agenda do mês com as OS marcadas no app PraticOS"
+          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
         },
         {
           "number": "03",
           "title": "Execute com checklist",
-          "text": "Monte um checklist para cada tipo de equipamento e use em todas as visitas. O técnico marca os itens, anota leituras e fotografa antes e depois.",
+          "text": "Monte um checklist para cada tipo de equipamento e use em todas as visitas. Marque os itens, anote leituras e fotografe antes e depois.",
           "facts": [
             "Itens com verificação, texto ou foto",
             "Leituras e observações em campo de texto",
-            "Checklist concluído só reabre com Admin, Gerente ou Supervisor"
+            "Modelos em Checklists, pelo botão do perfil no Início"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
           "number": "04",
@@ -138,10 +138,10 @@
           "facts": [
             "Aprovação registrada na própria OS",
             "PDF com uma página por checklist",
-            "Pagamentos parciais e faturamento por período"
+            "Total e o que falta receber na tela da OS"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
         }
       ]
     },
@@ -151,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "O PraticOS é um CMMS?",
@@ -163,7 +163,7 @@
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente. Técnicos não veem valores financeiros."
+          "answer": "Sim. Se alguém trabalha com você, toque no botão do perfil, no topo do Início, e vá em Equipe: o convite vai por um código, pelo WhatsApp, e cada pessoa entra no próprio celular. O plano grátis é para uma pessoa; para chamar mais gente, assine um plano pago dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -183,7 +183,7 @@
     "hero": {
       "title": "Every asset with a tag,",
       "titleMark": "history and photos.",
-      "lede": "PraticOS is the work order app for equipment maintenance companies. Register each asset with tag, manufacturer, location and run hours, log preventive and corrective work with checklists and photos and send the customer a link to the work order — all from your phone.",
+      "lede": "PraticOS is the work order app for people who maintain equipment. Say the job and the AI opens the order. Each asset keeps its tag, manufacturer, location and run hours, preventive and corrective work gets a checklist and photos, and the customer gets a link to the order — all from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -249,7 +249,7 @@
         {
           "problem": "Next service date in someone's head",
           "detail": "Nobody remembers when that generator was last serviced.",
-          "answer": "The asset record keeps the last maintenance date and run hours. Schedule the next visit on the work order and the technician gets a phone reminder."
+          "answer": "The asset record keeps the last service and run hours. Set the next visit on the order: it goes on the Schedule and your phone reminds you before it."
         },
         {
           "problem": "Out-of-scope parts with no approval",
@@ -259,7 +259,7 @@
         {
           "problem": "Month end with no numbers",
           "detail": "Contracts, callouts and parts tracked in different places. Nobody knows what came in.",
-          "answer": "Record full or partial payments on the work order. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Record full or partial payments on the order. Financial shows how much is still due, from whom, and the monthly report of what came in."
         }
       ]
     },
@@ -269,61 +269,61 @@
       "stages": [
         {
           "number": "01",
-          "title": "Register the assets",
-          "text": "Add each piece of the customer's equipment with tag, manufacturer, serial number, location and category. Work orders link straight to the asset.",
+          "title": "Say the job and the AI opens the order",
+          "text": "Tap Speak and say something like: “Vale Verde Metalworks, generator GER-004, preventive service with oil and filter change”. Or take a photo of a written request. The AI fills in customer, asset, services and parts with your catalog prices and marks what it filled with ✦.",
           "facts": [
-            "Mechanical, electrical, hydraulic, pneumatic, thermal or electronic",
-            "Install date and warranty expiration",
-            "Trade statuses: under maintenance and operational"
+            "Asset with tag, manufacturer, serial number, location and category",
+            "Fix it by voice: “the filter is 180”",
+            "Nothing is saved until you check it"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
           "title": "Schedule preventive and corrective work",
-          "text": "Set a date and time on each work order. The calendar shows the month by technician, and each one gets a phone reminder before the visit.",
+          "text": "Set a date and time on each order. It shows up on the Schedule on that day, and your phone reminds you before the visit.",
           "facts": [
-            "Preventive and corrective on one calendar",
-            "Calendar filtered by technician",
-            "Reminder for work orders idle over 7 days"
+            "Preventive and corrective on one schedule",
+            "Daily summary at 9am, if you want it",
+            "Reminder for quotes with no answer for 7 days"
           ],
           "image": "agenda.png",
-          "alt": "Monthly calendar with scheduled work orders in the PraticOS app"
+          "alt": "Schedule with the week on top and the visit booked for the day"
         },
         {
           "number": "03",
           "title": "Work from a checklist",
-          "text": "Build a checklist for each type of equipment and use it on every visit. The technician marks items, notes readings and takes before and after photos.",
+          "text": "Build a checklist for each type of equipment and use it on every visit. Check off items, note readings and take before and after photos.",
           "facts": [
             "Items with check, text or photo",
             "Readings and notes in text fields",
-            "Completed checklists reopen only for Admin, Manager or Supervisor"
+            "Templates in Checklists, from the profile button on Home"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
           "number": "04",
           "title": "Send the report as a link",
-          "text": "The customer opens the work order in a browser, nothing to install. They see photos and the checklist, approve extra parts and leave comments.",
+          "text": "The customer opens the order in a browser, nothing to install. They see photos and the checklist, approve extra parts and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "Approval recorded on the order",
             "PDF with a page per checklist",
-            "Partial payments and revenue by period"
+            "Total and amount still due on the order screen"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
         }
       ]
     },
     "faq": {
-      "title": "Questions from maintenance companies",
+      "title": "Questions from people who maintain equipment",
       "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Is PraticOS a CMMS?",
@@ -335,7 +335,7 @@
         },
         {
           "question": "Can my technicians use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager. Technicians don't see financial values."
+          "answer": "Yes. If someone works with you, tap the profile button at the top of Home and go to Team: the invite goes out as a code over WhatsApp, and each person signs in on their own phone. The free plan is for one person; to add more people, subscribe to a paid plan inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -355,7 +355,7 @@
     "hero": {
       "title": "Cada activo con etiqueta,",
       "titleMark": "historial y fotos.",
-      "lede": "PraticOS es la app de órdenes de servicio para empresas de mantenimiento de equipos. Registra cada activo con etiqueta, fabricante, ubicación y horas de operación, documenta preventivos y correctivos con checklist y fotos y envía al cliente el link de la orden — desde el celular.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien hace mantenimiento de equipos. Di el trabajo y la IA abre la orden. Cada activo queda con etiqueta, fabricante, ubicación y horas de operación, los preventivos y correctivos quedan con checklist y fotos, y el cliente recibe el link de la orden — desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -421,7 +421,7 @@
         {
           "problem": "El próximo preventivo de memoria",
           "detail": "Nadie recuerda cuándo fue la última revisión de ese generador.",
-          "answer": "La ficha guarda el último mantenimiento y las horas de operación. Agenda la próxima visita en la orden y el técnico recibe el recordatorio en el celular."
+          "answer": "El registro guarda el último mantenimiento y las horas de operación. Marca la próxima visita en la orden: entra en la Agenda y el celular avisa antes de la hora."
         },
         {
           "problem": "Repuestos fuera de alcance sin aprobación",
@@ -431,7 +431,7 @@
         {
           "problem": "Fin de mes sin números",
           "detail": "Contratos, llamados y repuestos en lugares distintos. Nadie sabe cuánto entró.",
-          "answer": "Registra pagos totales o parciales en la orden. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra pagos totales o en partes en la orden. Financiero muestra cuánto falta cobrar, de quién, y el informe del mes con lo que entró."
         }
       ]
     },
@@ -441,39 +441,39 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registra los activos",
-          "text": "Registra cada equipo del cliente con etiqueta, fabricante, número de serie, ubicación y categoría. La orden nace vinculada al activo.",
+          "title": "Di el trabajo y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Metalúrgica Vale Verde, generador GER-004, preventivo con cambio de aceite y filtros”. O saca una foto del pedido anotado. La IA completa cliente, activo, servicios y repuestos con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
-            "Mecánico, eléctrico, hidráulico, neumático, térmico o electrónico",
-            "Fecha de instalación y vencimiento de la garantía",
-            "Estados del rubro: en mantenimiento y operativo"
+            "Activo con etiqueta, fabricante, número de serie, ubicación y categoría",
+            "Corrige hablando: “el filtro es 180”",
+            "Nada se guarda sin que lo revises"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
           "title": "Agenda preventivos y llamados",
-          "text": "Marca día y hora en cada orden. La agenda muestra el mes por técnico, y cada uno recibe el aviso en el celular antes de la visita.",
+          "text": "Marca día y hora en cada orden. Aparece en la Agenda, en el día elegido, y el celular avisa antes de la visita.",
           "facts": [
-            "Preventivo y correctivo en el mismo calendario",
-            "Agenda filtrada por técnico",
-            "Aviso de órdenes detenidas más de 7 días"
+            "Preventivo y correctivo en la misma agenda",
+            "Resumen del día a las 9, si lo quieres",
+            "Aviso de presupuesto sin respuesta hace 7 días"
           ],
           "image": "agenda.png",
-          "alt": "Agenda del mes con órdenes marcadas en la app PraticOS"
+          "alt": "Agenda con la semana arriba y la visita marcada del día"
         },
         {
           "number": "03",
           "title": "Trabaja con checklist",
-          "text": "Arma un checklist para cada tipo de equipo y úsalo en todas las visitas. El técnico marca los ítems, anota lecturas y toma fotos de antes y después.",
+          "text": "Arma un checklist para cada tipo de equipo y úsalo en todas las visitas. Marca los ítems, anota lecturas y toma fotos de antes y después.",
           "facts": [
             "Ítems con verificación, texto o foto",
             "Lecturas y observaciones en campos de texto",
-            "Un checklist terminado solo se reabre con Admin, Gerente o Supervisor"
+            "Modelos en Checklists, desde el botón del perfil en Inicio"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
           "number": "04",
@@ -482,10 +482,10 @@
           "facts": [
             "Aprobación registrada en la propia orden",
             "PDF con una página por checklist",
-            "Pagos parciales y facturación por período"
+            "Total y lo que falta cobrar en la pantalla de la OS"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
         }
       ]
     },
@@ -495,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿PraticOS es un CMMS?",
@@ -507,7 +507,7 @@
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente. Los técnicos no ven valores financieros."
+          "answer": "Sí. Si alguien trabaja contigo, toca el botón del perfil, arriba en Inicio, y ve a Equipo: la invitación va con un código por WhatsApp y cada persona entra en su propio celular. El plan gratis es para una persona; para sumar a más gente, contrata un plan pago dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

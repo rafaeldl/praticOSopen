@@ -20,16 +20,36 @@
         "title": "Ordem de serviço",
         "number": "Nº 0427",
         "rows": [
-          { "label": "Cliente", "value": "Rafaela Nunes" },
-          { "label": "Aparelho", "value": "iPhone 12 · 128GB · azul" },
-          { "label": "IMEI", "value": "356789104523871" },
-          { "label": "Serviço", "value": "Troca de tela e película" },
-          { "label": "Fotos", "value": "4 anexadas" }
+          {
+            "label": "Cliente",
+            "value": "Rafaela Nunes"
+          },
+          {
+            "label": "Aparelho",
+            "value": "iPhone 12 · 128GB · azul"
+          },
+          {
+            "label": "IMEI",
+            "value": "356789104523871"
+          },
+          {
+            "label": "Serviço",
+            "value": "Troca de tela e película"
+          },
+          {
+            "label": "Fotos",
+            "value": "4 anexadas"
+          }
         ],
         "totalLabel": "Total",
         "total": "R$ 690,00",
         "stamp": "Aprovado pelo cliente",
-        "steps": ["Orçamento", "Aprovado", "Em reparo", "Concluído", "Pago"],
+        "steps": [
+          "Orçamento",
+          "Aprovada",
+          "Em conserto",
+          "Concluída"
+        ],
         "current": 2
       }
     },
@@ -66,7 +86,7 @@
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Pix, cartão e dinheiro anotados em lugares diferentes. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou parciais. O painel mostra o faturamento do período e o que falta receber."
+          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
         }
       ]
     },
@@ -76,15 +96,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Receba o aparelho",
-          "text": "Abra a OS com o cliente e o aparelho: fabricante, modelo, cor, armazenamento, saúde da bateria e IMEI. Serviços e peças saem do seu catálogo, já com preço.",
+          "title": "Fale o conserto e a OS se preenche",
+          "text": "Na Nova OS, toque em Falar e diga “iPhone 13 da Carla, troca de tela e bateria”, ou tire uma foto do pedido anotado. A IA preenche cliente, aparelho, serviços e peças com os preços do seu catálogo. Você confere, completa o IMEI e salva.",
           "facts": [
-            "Campo de IMEI com 15 dígitos",
-            "Busca pelo IMEI traz as OS anteriores do aparelho",
-            "Status do reparo: aguardando orçamento, aprovado, em reparo, concluído"
+            "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
+            "Corrija falando: “a bateria é 250”",
+            "Aparelho com fabricante, modelo, cor e IMEI, e a busca pelo IMEI traz as OS anteriores"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
@@ -95,8 +115,8 @@
             "Display, touch, câmeras, áudio, Wi-Fi, Bluetooth e carregamento",
             "Senha de desbloqueio e acessórios deixados"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
         },
         {
           "number": "03",
@@ -107,8 +127,8 @@
             "Cliente acompanha o reparo sem ligar",
             "PDF da OS com checklists e fotos"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
         },
         {
           "number": "04",
@@ -116,11 +136,11 @@
           "text": "Antes de devolver, o teste final confere se o aparelho liga, carrega e se câmeras, áudio e sensores funcionam. Depois, registre o pagamento.",
           "facts": [
             "Foto do aparelho pronto na OS",
-            "Pagamento parcial e desconto na mesma OS",
+            "Pagamento em partes e desconto na mesma OS",
             "Quem ainda deve, numa lista só"
           ],
-          "image": "payments.png",
-          "alt": "Tela de pagamentos de uma OS"
+          "image": "financial.png",
+          "alt": "Financeiro mostrando quanto falta receber, o botão de mandar cobrança e a lista de clientes"
         }
       ]
     },
@@ -130,7 +150,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Para começar, não. Você usa grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Planos pagos, com mais de tudo isso e com equipe, estão disponíveis no app."
         },
         {
           "question": "Os checklists de celular já vêm prontos?",
@@ -142,7 +162,7 @@
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
-          "answer": "Sim. Cada pessoa entra com o próprio usuário e um perfil de acesso, como técnico ou gerente."
+          "answer": "Se alguém trabalha com você, sim. Toque no botão do perfil, no topo do Início, vá em Equipe e chame a pessoa com um código de convite, mandado pelo WhatsApp, e ela usa o app no próprio celular com um papel, como técnico ou gerente. Chamar alguém pede um plano pago, assinado dentro do app."
         },
         {
           "question": "O cliente precisa instalar algum app?",
@@ -171,16 +191,36 @@
         "title": "Work order",
         "number": "No. 0427",
         "rows": [
-          { "label": "Customer", "value": "Rachel Nolan" },
-          { "label": "Device", "value": "iPhone 12 · 128GB · blue" },
-          { "label": "IMEI", "value": "356789104523871" },
-          { "label": "Service", "value": "Screen replacement and protector" },
-          { "label": "Photos", "value": "4 attached" }
+          {
+            "label": "Customer",
+            "value": "Rachel Nolan"
+          },
+          {
+            "label": "Device",
+            "value": "iPhone 12 · 128GB · blue"
+          },
+          {
+            "label": "IMEI",
+            "value": "356789104523871"
+          },
+          {
+            "label": "Service",
+            "value": "Screen replacement and protector"
+          },
+          {
+            "label": "Photos",
+            "value": "4 attached"
+          }
         ],
         "totalLabel": "Total",
         "total": "$189.00",
         "stamp": "Approved by customer",
-        "steps": ["Quote", "Approved", "Under repair", "Done", "Paid"],
+        "steps": [
+          "Quote",
+          "Approved",
+          "In progress",
+          "Completed"
+        ],
         "current": 2
       }
     },
@@ -217,7 +257,7 @@
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Cash, card and transfers written down in different places. Nobody knows who still owes you.",
-          "answer": "Record full or partial payments. The dashboard shows revenue for the period and what's still outstanding."
+          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
         }
       ]
     },
@@ -227,15 +267,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Check the device in",
-          "text": "Open the work order with the customer and the device: manufacturer, model, color, storage, battery health and IMEI. Services and parts come from your catalog, already priced.",
+          "title": "Say the repair and the work order fills itself in",
+          "text": "On New order, tap Speak and say “Carla's iPhone 13, screen and battery replacement”, or take a photo of the written order. The AI fills in the customer, device, services and parts with your catalog prices. You check it, add the IMEI and save.",
           "facts": [
-            "15-digit IMEI field",
-            "Searching by IMEI brings up the device's past work orders",
-            "Repair statuses: awaiting quote, approved, under repair, done"
+            "Everything the AI filled in is marked with ✦, and you can undo it",
+            "Fix it by speaking: “the battery is 250”",
+            "Device with manufacturer, model, color and IMEI; searching by IMEI brings up its past work orders"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
@@ -246,8 +286,8 @@
             "Display, touch, cameras, audio, Wi-Fi, Bluetooth and charging",
             "Unlock passcode and accessories left"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Intake checklist with damage photos and the checked items"
         },
         {
           "number": "03",
@@ -258,8 +298,8 @@
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
         },
         {
           "number": "04",
@@ -267,11 +307,11 @@
           "text": "Before pickup, the final test checks that the phone powers on, charges and that cameras, audio and sensors work. Then record the payment.",
           "facts": [
             "Photo of the finished device on the work order",
-            "Partial payment and discount on the same work order",
+            "Payment in parts and discount on the same work order",
             "Everyone who still owes you, in one list"
           ],
-          "image": "payments.png",
-          "alt": "Payments screen of a work order"
+          "image": "financial.png",
+          "alt": "Financial tab showing what is still owed, the button to send a payment request and the customer list"
         }
       ]
     },
@@ -281,7 +321,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "Not to get started. You can use it free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, with more of each and a team, are available in the app."
         },
         {
           "question": "Do the phone checklists come ready to use?",
@@ -293,7 +333,7 @@
         },
         {
           "question": "Can my techs use it on their own phones?",
-          "answer": "Yes. Each person signs in with their own user and an access role, such as technician or manager."
+          "answer": "If someone works with you, yes. Tap the profile button at the top of Home, go to Team and invite them with a code sent over WhatsApp, and they use the app on their own phone with a role, such as technician or manager. Inviting someone needs a paid plan, purchased inside the app."
         },
         {
           "question": "Does the customer need to install an app?",
@@ -322,16 +362,36 @@
         "title": "Orden de servicio",
         "number": "N.º 0427",
         "rows": [
-          { "label": "Cliente", "value": "Rafaela Núñez" },
-          { "label": "Equipo", "value": "iPhone 12 · 128GB · azul" },
-          { "label": "IMEI", "value": "356789104523871" },
-          { "label": "Servicio", "value": "Cambio de pantalla y mica" },
-          { "label": "Fotos", "value": "4 adjuntas" }
+          {
+            "label": "Cliente",
+            "value": "Rafaela Núñez"
+          },
+          {
+            "label": "Equipo",
+            "value": "iPhone 12 · 128GB · azul"
+          },
+          {
+            "label": "IMEI",
+            "value": "356789104523871"
+          },
+          {
+            "label": "Servicio",
+            "value": "Cambio de pantalla y mica"
+          },
+          {
+            "label": "Fotos",
+            "value": "4 adjuntas"
+          }
         ],
         "totalLabel": "Total",
         "total": "$ 189,00",
         "stamp": "Aprobado por el cliente",
-        "steps": ["Presupuesto", "Aprobado", "En reparación", "Terminado", "Cobrado"],
+        "steps": [
+          "Presupuesto",
+          "Aprobada",
+          "En curso",
+          "Completada"
+        ],
         "current": 2
       }
     },
@@ -368,7 +428,7 @@
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Efectivo, tarjeta y transferencias anotados en lugares distintos. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o parciales. El panel muestra la facturación del período y lo que falta cobrar."
+          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
         }
       ]
     },
@@ -378,15 +438,15 @@
       "stages": [
         {
           "number": "01",
-          "title": "Recibe el equipo",
-          "text": "Abre la orden con el cliente y el equipo: fabricante, modelo, color, almacenamiento, salud de la batería e IMEI. Servicios y repuestos salen de tu catálogo, con precio.",
+          "title": "Di la reparación y la orden se completa",
+          "text": "En Nueva OS, toca Hablar y di “iPhone 13 de Carla, cambio de pantalla y batería”, o saca una foto del pedido anotado. La IA completa cliente, equipo, servicios y repuestos con los precios de tu catálogo. Tú revisas, agregas el IMEI y guardas.",
           "facts": [
-            "Campo de IMEI de 15 dígitos",
-            "Buscar por IMEI trae las órdenes anteriores del equipo",
-            "Estados de la reparación: esperando presupuesto, aprobado, en reparación, terminado"
+            "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
+            "Corrige hablando: “la batería es 250”",
+            "Equipo con fabricante, modelo, color e IMEI; buscar por IMEI trae sus órdenes anteriores"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
@@ -397,8 +457,8 @@
             "Pantalla, touch, cámaras, audio, Wi-Fi, Bluetooth y carga",
             "Contraseña de desbloqueo y accesorios que quedaron"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
         },
         {
           "number": "03",
@@ -409,8 +469,8 @@
             "El cliente sigue la reparación sin llamar",
             "PDF de la orden con checklists y fotos"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
         },
         {
           "number": "04",
@@ -418,11 +478,11 @@
           "text": "Antes de devolverlo, la prueba final confirma que el equipo enciende, carga y que cámaras, audio y sensores funcionan. Después, registra el pago.",
           "facts": [
             "Foto del equipo listo en la orden",
-            "Pago parcial y descuento en la misma orden",
+            "Pago en partes y descuento en la misma orden",
             "Quién todavía debe, en una sola lista"
           ],
-          "image": "payments.png",
-          "alt": "Pantalla de pagos de una orden"
+          "image": "financial.png",
+          "alt": "Financiero con lo que falta cobrar, el botón para enviar el cobro y la lista de clientes"
         }
       ]
     },
@@ -432,7 +492,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Para empezar, no. Lo usas gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y una plantilla de checklist. Los planes pagos, con más de todo eso y con equipo, están disponibles en la app."
         },
         {
           "question": "¿Los checklists de celular vienen listos?",
@@ -444,7 +504,7 @@
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",
-          "answer": "Sí. Cada persona entra con su propio usuario y un perfil de acceso, como técnico o gerente."
+          "answer": "Si alguien trabaja contigo, sí. Toca el botón del perfil, arriba en Inicio, ve a Equipo e invítalo con un código enviado por WhatsApp, y usa la app en su propio celular con un rol, como técnico o gerente. Invitar a alguien requiere un plan pago, contratado dentro de la app."
         },
         {
           "question": "¿El cliente tiene que instalar una app?",

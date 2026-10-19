@@ -4,41 +4,41 @@
       {
         "id": "visao-geral",
         "title": "Quais avisos o app manda",
-        "intro": "O PraticOS manda quatro tipos de aviso no celular. Todos são programados no próprio aparelho: chegam com o app fechado e não dependem de internet na hora em que tocam.",
+        "intro": "O PraticOS manda quatro avisos no celular. Eles ficam marcados no próprio aparelho: chegam com o app fechado e tocam mesmo sem internet na hora.",
         "features": [
           {
-            "title": "Lembrete de agendamento",
-            "description": "Antes de cada OS agendada, com o número da OS e o nome do cliente."
+            "title": "Antes do horário marcado",
+            "description": "Antes de cada atendimento marcado, com o número da OS e o nome do cliente."
           },
           {
-            "title": "Lembrete diário",
-            "description": "Todo dia às 9h, para registrar as OS do dia."
+            "title": "Resumo do dia às 9h",
+            "description": "Todo dia às 9h, para lembrar de lançar as OS do dia."
           },
           {
-            "title": "Lembrete de inatividade",
-            "description": "Depois de 3, 5 e 7 dias sem abrir o app."
+            "title": "Se eu ficar dias sem abrir o app",
+            "description": "Depois de 3, 5 e 7 dias sem abrir o PraticOS."
           },
           {
-            "title": "Lembrete de OS pendentes",
-            "description": "Às 10h, quando há orçamentos ou OS aprovadas abertos há mais de 7 dias."
+            "title": "OS paradas",
+            "description": "Às 10h, quando há OS em Orçamento ou Aprovada abertas há mais de 7 dias."
           }
         ],
         "infoCard": {
-          "title": "O app programa os avisos quando é aberto",
-          "content": "Cada vez que você abre o PraticOS, ele refaz a programação no celular. Os avisos já marcados tocam mesmo sem internet; a contagem de OS pendentes, porém, precisa de conexão no momento em que o app é aberto."
+          "title": "O app refaz os avisos quando é aberto",
+          "content": "Cada vez que você abre o PraticOS, ele marca os avisos de novo no celular. Os já marcados tocam sem internet; a contagem de OS paradas, porém, precisa de conexão na hora em que o app é aberto."
         }
       },
       {
         "id": "agendamento",
-        "title": "Lembrete de agendamento",
-        "intro": "Avisa um pouco antes do horário marcado em <strong>Agendado</strong> na OS — por exemplo, 1 hora antes de uma visita de manutenção do outro lado da cidade. O passo a passo para agendar está em <a href=\"agenda.html\">Agenda</a>.",
+        "title": "Antes do horário marcado",
+        "intro": "Avisa um pouco antes do dia e hora marcados na OS. Por exemplo, 1 hora antes de uma visita do outro lado da cidade. O aviso mostra \"Agendamento em breve\", o número da OS e o cliente. Como marcar o horário está em <a href=\"agenda.html\">Agenda</a>.",
         "subsections": [
           {
-            "title": "Antecedência",
+            "title": "Quanto tempo antes",
             "validationList": [
               {
                 "label": "Desativado",
-                "text": "Nenhum aviso de agendamento neste celular."
+                "text": "Nenhum aviso de atendimento neste celular."
               },
               {
                 "label": "15 min antes",
@@ -46,7 +46,7 @@
               },
               {
                 "label": "30 min antes",
-                "text": "Padrão do app."
+                "text": "Já vem assim."
               },
               {
                 "label": "1 hora antes",
@@ -54,29 +54,29 @@
               },
               {
                 "label": "2 horas antes",
-                "text": "Para atendimentos longe ou que exigem separar peças."
+                "text": "Para atendimentos longe ou que pedem separar peças."
               }
             ]
           }
         ],
         "warningCard": {
           "title": "Em qual celular o aviso toca",
-          "content": "O aviso é programado no celular de quem salva a OS. Nos outros celulares da equipe, ele é programado quando a pessoa abre a aba <strong>Agenda</strong> no mês da OS. Se o escritório agenda e o técnico precisa do aviso, peça que ele abra a Agenda ao começar o dia."
+          "content": "O aviso é marcado no celular de quem salva a OS. Se alguém trabalha com você, no celular dessa pessoa ele é marcado quando ela abre a aba <strong>Agenda</strong> no mês do atendimento. Se você marca e outra pessoa vai ao cliente, peça que ela abra a Agenda ao começar o dia."
         }
       },
       {
         "id": "diario",
-        "title": "Lembrete diário",
-        "intro": "Todo dia às 9h o celular mostra “Bom dia! Registre as OS do dia no PraticOS”. Serve para quem costuma anotar o serviço no papel e passar para o app depois — o aviso lembra de lançar enquanto o dia ainda está fresco.",
+        "title": "Resumo do dia às 9h",
+        "intro": "Todo dia às 9h o celular mostra \"Bom dia! Registre as OS do dia no PraticOS\". Serve para quem anota o serviço no papel e passa para o app depois: o aviso lembra de lançar enquanto o dia ainda está fresco.",
         "infoCard": {
           "title": "Não quer o aviso?",
-          "content": "Desligue <strong>Lembrete diário</strong> em <strong>Mais → Lembretes</strong>. Os outros avisos continuam."
+          "content": "Toque no botão do perfil, no topo do Início, vá em <strong>Lembretes</strong> e desligue <strong>Resumo do dia às 9h</strong>. Os outros avisos continuam."
         }
       },
       {
         "id": "inatividade",
-        "title": "Lembrete de inatividade",
-        "intro": "Se você passa alguns dias sem abrir o app, ele avisa três vezes, contando a partir da última vez em que foi aberto.",
+        "title": "Se eu ficar dias sem abrir o app",
+        "intro": "Se você passa alguns dias sem abrir o app, ele avisa três vezes, contando da última vez em que foi aberto.",
         "subsections": [
           {
             "title": "Quando toca",
@@ -98,40 +98,40 @@
         ],
         "infoCard": {
           "title": "Quem usa todo dia não recebe",
-          "content": "Abrir o app zera a contagem. Os avisos só tocam se o app realmente ficar parado."
+          "content": "Abrir o app zera a contagem. Os avisos só tocam se o app ficar mesmo parado."
         }
       },
       {
         "id": "os-pendentes",
-        "title": "Lembrete de OS pendentes",
-        "intro": "Avisa quantas OS estão em <strong>Orçamento</strong> ou <strong>Aprovado</strong> e foram criadas há mais de 7 dias — o orçamento que o cliente não respondeu, o serviço aprovado que ninguém começou.",
+        "title": "OS paradas",
+        "intro": "Avisa quantas OS estão em <strong>Orçamento</strong> ou <strong>Aprovada</strong> e foram abertas há mais de 7 dias: o orçamento que o cliente não respondeu, o serviço aprovado que ninguém começou.",
         "steps": [
-          "Ao abrir o app, ele conta as OS da empresa em Orçamento ou Aprovado criadas há mais de 7 dias.",
-          "Se houver alguma, programa um aviso para as 10h do dia seguinte com a quantidade.",
+          "Ao abrir o app, ele conta as OS em Orçamento ou Aprovada abertas há mais de 7 dias.",
+          "Se houver alguma, marca um aviso para as 10h do dia seguinte com a quantidade.",
           "Cada vez que você abre o app, a contagem é refeita e o aviso passa para o dia seguinte."
         ],
         "infoCard": {
           "title": "Na prática",
-          "content": "O aviso chega nos dias em que você ainda não abriu o app até as 10h. Para ele parar, dê andamento às OS: mude o status ou cancele o orçamento que não vai sair."
+          "content": "O aviso chega nos dias em que você ainda não abriu o app até as 10h. Para ele parar, dê andamento às OS: mude a situação ou cancele o orçamento que não vai sair."
         }
       },
       {
         "id": "configurar",
         "title": "Ligar e desligar os avisos",
-        "intro": "Todos os avisos vêm ligados. Cada um tem a sua chave.",
+        "intro": "Todos os avisos já vêm ligados. Cada um tem a sua chave.",
         "steps": [
-          "Toque na aba <strong>Mais</strong>.",
-          "Na seção <strong>Lembretes</strong>, toque em <strong>Lembrete de agendamento</strong> para escolher a antecedência, ou em <strong>Desativado</strong> para não receber.",
-          "Ligue ou desligue <strong>Lembrete diário</strong>, <strong>Lembrete de inatividade</strong> e <strong>Lembrete de OS pendentes</strong>.",
-          "A mudança vale na hora; não há botão de salvar."
+          "Toque no botão do perfil, no topo do Início, e vá em <strong>Lembretes</strong>.",
+          "Toque em <strong>Antes do horário marcado</strong> para escolher quanto tempo antes, ou em <strong>Desativado</strong> para não receber.",
+          "Ligue ou desligue <strong>Resumo do dia às 9h</strong>, <strong>Se eu ficar dias sem abrir o app</strong> e <strong>OS paradas</strong>.",
+          "A mudança vale na hora; não tem botão de salvar."
         ],
         "infoCard": {
-          "title": "Vale só para este celular",
-          "content": "As escolhas ficam salvas no aparelho, não na conta. Cada pessoa da equipe ajusta as suas, e quem troca de celular precisa ajustar de novo."
+          "title": "Vale só neste celular",
+          "content": "As escolhas ficam no aparelho, não na conta. Quem troca de celular precisa ajustar de novo. Se alguém trabalha com você, cada pessoa ajusta as suas."
         },
         "warningCard": {
           "title": "Permissão de notificação",
-          "content": "Se o celular pedir permissão para o PraticOS enviar notificações, toque em <strong>Permitir</strong>. Sem ela, nenhum aviso aparece. Se você negou antes, libere nos ajustes do celular."
+          "content": "Se o celular pedir permissão para o PraticOS mandar notificações, toque em <strong>Permitir</strong>. Sem ela, nenhum aviso aparece. Se você negou antes, libere nos ajustes do celular."
         }
       },
       {
@@ -140,7 +140,7 @@
         "faq": [
           {
             "question": "Os lembretes gastam bateria?",
-            "answer": "Quase nada. O aviso fica marcado no sistema do celular, que dispara na hora certa; o app não precisa ficar rodando."
+            "answer": "Quase nada. O aviso fica marcado no sistema do celular, que dispara na hora certa; o app não precisa ficar aberto."
           },
           {
             "question": "Funcionam com o app fechado?",
@@ -148,15 +148,15 @@
           },
           {
             "question": "Funcionam sem internet?",
-            "answer": "Os avisos já programados tocam sem internet. Para programar o aviso de OS pendentes, o app precisa de conexão no momento em que é aberto."
+            "answer": "Os avisos já marcados tocam sem internet. Para contar as OS paradas, o app precisa de conexão na hora em que é aberto."
           },
           {
-            "question": "Posso desligar só um tipo?",
-            "answer": "Sim. Cada aviso tem a sua chave em <strong>Mais → Lembretes</strong>."
+            "question": "Posso desligar só um?",
+            "answer": "Sim. Cada aviso tem a sua chave em <strong>Lembretes</strong>, nos Ajustes."
           },
           {
             "question": "Reiniciei o celular. Perdi os avisos?",
-            "answer": "Abra o app: ele programa os avisos de novo. Os de agendamento voltam quando você abre a aba <strong>Agenda</strong>."
+            "answer": "Abra o app: ele marca os avisos de novo. Os de atendimento voltam quando você abre a aba <strong>Agenda</strong>."
           },
           {
             "question": "Funcionam no iPhone e no Android?",
@@ -171,78 +171,78 @@
       {
         "id": "overview",
         "title": "Which alerts the app sends",
-        "intro": "PraticOS sends four kinds of alerts to your phone. All of them are set on the device itself: they go off with the app closed and don’t need internet when they fire.",
+        "intro": "PraticOS sends four alerts on your phone. They are set on the phone itself: they arrive with the app closed and fire even without internet at that moment.",
         "features": [
           {
-            "title": "Schedule reminder",
-            "description": "Before each scheduled order, with the order number and the customer’s name."
+            "title": "Before the scheduled time",
+            "description": "Before each booked visit, with the order number and the customer's name."
           },
           {
-            "title": "Daily reminder",
-            "description": "Every day at 9 a.m., to log the day’s orders."
+            "title": "Daily summary at 9am",
+            "description": "Every day at 9am, to remind you to log the day's orders."
           },
           {
-            "title": "Inactivity reminder",
-            "description": "After 3, 5 and 7 days without opening the app."
+            "title": "If I go days without opening the app",
+            "description": "After 3, 5 and 7 days without opening PraticOS."
           },
           {
-            "title": "Pending orders reminder",
-            "description": "At 10 a.m., when quotes or approved orders have been open for more than 7 days."
+            "title": "Stalled orders",
+            "description": "At 10am, when there are orders in Quote or Approved open for more than 7 days."
           }
         ],
         "infoCard": {
-          "title": "The app sets the alerts when it opens",
-          "content": "Every time you open PraticOS, it redoes the schedule on the phone. Alerts already set fire without internet; counting pending orders, though, needs a connection when the app opens."
+          "title": "The app resets the alerts when it opens",
+          "content": "Every time you open PraticOS, it sets the alerts on the phone again. Alerts already set fire without internet; the stalled order count, though, needs a connection when the app is opened."
         }
       },
       {
         "id": "appointment",
-        "title": "Schedule reminder",
-        "intro": "It alerts you shortly before the time set in <strong>Scheduled</strong> on the order — say, 1 hour before a maintenance visit across town. How to schedule an order is covered in <a href=\"agenda-en.html\">Schedule</a>.",
+        "title": "Before the scheduled time",
+        "intro": "Alerts you a little before the day and time set on the order. For example, 1 hour before a visit across town. The alert shows the order number and the customer. How to set the time is in <a href=\"agenda-en.html\">Schedule</a>.",
         "subsections": [
           {
-            "title": "Lead time",
+            "title": "How long before",
             "validationList": [
               {
                 "label": "Disabled",
-                "text": "No schedule alerts on this phone."
+                "text": "No visit alerts on this phone."
               },
               {
                 "label": "15 min before",
-                "text": "When you are already near the customer or working at the shop."
+                "text": "For when you're already near the customer or work at the shop."
               },
               {
                 "label": "30 min before",
-                "text": "The app’s default."
+                "text": "The default."
               },
               {
                 "label": "1 hour before",
-                "text": "For short drives."
+                "text": "For short trips."
               },
               {
                 "label": "2 hours before",
-                "text": "For far-off jobs or ones that need parts picked first."
+                "text": "For far-away visits or ones where you need to gather parts."
               }
             ]
           }
         ],
         "warningCard": {
           "title": "Which phone gets the alert",
-          "content": "The alert is set on the phone of whoever saves the order. On the rest of the team’s phones, it is set when that person opens the <strong>Schedule</strong> tab on the order’s month. If the office books jobs and the technician needs the alert, ask them to open the Schedule at the start of the day."
+          "content": "The alert is set on the phone of whoever saves the order. If someone works with you, on that person's phone it's set when they open the <strong>Schedule</strong> tab in the month of the visit. If you book and someone else goes to the customer, ask them to open the Schedule at the start of the day."
         }
       },
       {
         "id": "daily",
-        "title": "Daily reminder",
-        "intro": "Every day at 9 a.m. the phone shows a nudge to log the day’s orders in PraticOS. It helps if you jot jobs on paper and enter them later — the alert reminds you while the day is still fresh.",
+        "title": "Daily summary at 9am",
+        "intro": "Every day at 9am the phone shows \"Good morning! Log today's work orders on PraticOS\". It's for people who jot the job on paper and enter it later: the alert reminds you to log it while the day is still fresh.",
         "infoCard": {
-          "title": "Don’t want it?",
-          "content": "Turn off <strong>Daily reminder</strong> under <strong>More → Reminders</strong>. The other alerts keep working."
+          "title": "Don't want it?",
+          "content": "Tap the profile button at the top of Home, go to <strong>Reminders</strong> and turn off <strong>Daily summary at 9am</strong>. The other alerts keep working."
         }
       },
       {
         "id": "inactivity",
-        "title": "Inactivity reminder",
+        "title": "If I go days without opening the app",
         "intro": "If you go a few days without opening the app, it alerts you three times, counting from the last time it was opened.",
         "subsections": [
           {
@@ -264,41 +264,41 @@
           }
         ],
         "infoCard": {
-          "title": "Daily users never see it",
-          "content": "Opening the app resets the count. The alerts only fire if the app really sits unused."
+          "title": "Daily users don't get it",
+          "content": "Opening the app resets the count. These alerts only fire if the app really sits unused."
         }
       },
       {
         "id": "pending-orders",
-        "title": "Pending orders reminder",
-        "intro": "It tells you how many orders are in <strong>Quote</strong> or <strong>Approved</strong> and were created more than 7 days ago — the quote the customer never answered, the approved job nobody started.",
+        "title": "Stalled orders",
+        "intro": "Tells you how many orders are in <strong>Quote</strong> or <strong>Approved</strong> and were opened more than 7 days ago: the quote the customer never answered, the approved job nobody started.",
         "steps": [
-          "When you open the app, it counts the company’s orders in Quote or Approved created more than 7 days ago.",
-          "If there are any, it sets an alert for 10 a.m. the next day with the count.",
+          "When you open the app, it counts orders in Quote or Approved opened more than 7 days ago.",
+          "If there are any, it sets an alert for 10am the next day with the count.",
           "Each time you open the app, the count is redone and the alert moves to the next day."
         ],
         "infoCard": {
           "title": "In practice",
-          "content": "The alert arrives on days you haven’t opened the app by 10 a.m. To make it stop, move those orders along: change their status or cancel the quote that won’t happen."
+          "content": "The alert arrives on days you haven't opened the app by 10am. To make it stop, move the orders along: change the status or cancel the quote that won't go ahead."
         }
       },
       {
         "id": "setup",
         "title": "Turn alerts on and off",
-        "intro": "Every alert starts on. Each one has its own switch.",
+        "intro": "All alerts come turned on. Each one has its own switch.",
         "steps": [
-          "Tap the <strong>More</strong> tab.",
-          "Under <strong>Reminders</strong>, tap <strong>Schedule reminder</strong> to pick the lead time, or <strong>Disabled</strong> to stop it.",
-          "Switch <strong>Daily reminder</strong>, <strong>Inactivity reminder</strong> and <strong>Pending orders reminder</strong> on or off.",
-          "Changes apply right away; there is no save button."
+          "Tap the profile button at the top of Home and go to <strong>Reminders</strong>.",
+          "Tap <strong>Before the scheduled time</strong> to choose how long before, or <strong>Disabled</strong> to turn it off.",
+          "Turn <strong>Daily summary at 9am</strong>, <strong>If I go days without opening the app</strong> and <strong>Stalled orders</strong> on or off.",
+          "Changes apply right away; there's no save button."
         ],
         "infoCard": {
-          "title": "Set per phone",
-          "content": "Your choices are saved on the device, not the account. Everyone on the team sets their own, and a new phone needs setting up again."
+          "title": "Only on this phone",
+          "content": "Your choices are stored on the device, not in the account. If you switch phones, set them again. If someone works with you, each person sets their own."
         },
         "warningCard": {
           "title": "Notification permission",
-          "content": "If the phone asks to let PraticOS send notifications, tap <strong>Allow</strong>. Without it, no alert shows. If you declined earlier, turn it on in the phone’s settings."
+          "content": "If the phone asks whether PraticOS may send notifications, tap <strong>Allow</strong>. Without it, no alert shows up. If you denied it before, turn it on in the phone's settings."
         }
       },
       {
@@ -307,27 +307,27 @@
         "faq": [
           {
             "question": "Do reminders drain the battery?",
-            "answer": "Barely. The alert is set in the phone’s system, which fires it on time; the app doesn’t need to keep running."
+            "answer": "Barely. The alert is set in the phone's system, which fires it at the right time; the app doesn't need to stay open."
           },
           {
             "question": "Do they work with the app closed?",
-            "answer": "Yes. They are the phone’s own notifications and fire with the app closed."
+            "answer": "Yes. They are the phone's own notifications and fire with the app closed."
           },
           {
-            "question": "Do they work offline?",
-            "answer": "Alerts already set fire without internet. To set the pending orders alert, the app needs a connection when it opens."
+            "question": "Do they work without internet?",
+            "answer": "Alerts already set fire without internet. To count stalled orders, the app needs a connection when it's opened."
           },
           {
-            "question": "Can I turn off just one kind?",
-            "answer": "Yes. Each alert has its own switch under <strong>More → Reminders</strong>."
+            "question": "Can I turn off just one?",
+            "answer": "Yes. Each alert has its own switch under <strong>Reminders</strong>, in Settings."
           },
           {
             "question": "I restarted my phone. Did I lose the alerts?",
-            "answer": "Open the app and it sets them again. Schedule reminders come back when you open the <strong>Schedule</strong> tab."
+            "answer": "Open the app: it sets the alerts again. Visit alerts come back when you open the <strong>Schedule</strong> tab."
           },
           {
             "question": "Do they work on iPhone and Android?",
-            "answer": "Yes, on both, using the system’s own notifications."
+            "answer": "Yes, on both, using the system's own notifications."
           }
         ]
       }
@@ -337,50 +337,50 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Qué avisos envía la app",
-        "intro": "PraticOS envía cuatro tipos de aviso al celular. Todos se programan en el propio equipo: llegan con la app cerrada y no dependen de internet en el momento en que suenan.",
+        "title": "Qué avisos manda la app",
+        "intro": "PraticOS manda cuatro avisos en el celular. Quedan marcados en el propio aparato: llegan con la app cerrada y suenan aunque no haya internet en ese momento.",
         "features": [
           {
-            "title": "Recordatorio de cita",
-            "description": "Antes de cada OS programada, con el número de la OS y el nombre del cliente."
+            "title": "Antes de la hora marcada",
+            "description": "Antes de cada visita marcada, con el número de la OS y el nombre del cliente."
           },
           {
-            "title": "Recordatorio diario",
-            "description": "Todos los días a las 9 h, para registrar las OS del día."
+            "title": "Resumen del día a las 9h",
+            "description": "Todos los días a las 9h, para recordarte cargar las OS del día."
           },
           {
-            "title": "Recordatorio de inactividad",
-            "description": "Después de 3, 5 y 7 días sin abrir la app."
+            "title": "Si paso días sin abrir la app",
+            "description": "Después de 3, 5 y 7 días sin abrir PraticOS."
           },
           {
-            "title": "Recordatorio de OS pendientes",
-            "description": "A las 10 h, cuando hay presupuestos u OS aprobadas abiertos hace más de 7 días."
+            "title": "OS paradas",
+            "description": "A las 10h, cuando hay OS en Presupuesto o Aprobada abiertas hace más de 7 días."
           }
         ],
         "infoCard": {
-          "title": "La app programa los avisos al abrirse",
-          "content": "Cada vez que abres PraticOS, rehace la programación en el celular. Los avisos ya programados suenan sin internet; el conteo de OS pendientes, en cambio, necesita conexión cuando se abre la app."
+          "title": "La app rehace los avisos al abrirse",
+          "content": "Cada vez que abres PraticOS, vuelve a marcar los avisos en el celular. Los ya marcados suenan sin internet; el conteo de OS paradas, en cambio, necesita conexión cuando se abre la app."
         }
       },
       {
         "id": "cita",
-        "title": "Recordatorio de cita",
-        "intro": "Avisa poco antes de la hora indicada en <strong>Programado</strong> en la OS — por ejemplo, 1 hora antes de una visita de mantenimiento al otro lado de la ciudad. Cómo programar una OS está en <a href=\"agenda-es.html\">Agenda</a>.",
+        "title": "Antes de la hora marcada",
+        "intro": "Avisa un poco antes del día y la hora marcados en la OS. Por ejemplo, 1 hora antes de una visita al otro lado de la ciudad. El aviso muestra el número de la OS y el cliente. Cómo marcar la hora está en <a href=\"agenda-es.html\">Agenda</a>.",
         "subsections": [
           {
-            "title": "Anticipación",
+            "title": "Cuánto tiempo antes",
             "validationList": [
               {
                 "label": "Desactivado",
-                "text": "Sin avisos de cita en este celular."
+                "text": "Ningún aviso de visita en este celular."
               },
               {
                 "label": "15 min antes",
-                "text": "Si ya estás cerca del cliente o trabajas en el taller."
+                "text": "Para quien ya está cerca del cliente o trabaja en el taller."
               },
               {
                 "label": "30 min antes",
-                "text": "Valor por defecto de la app."
+                "text": "Viene así."
               },
               {
                 "label": "1 hora antes",
@@ -388,29 +388,29 @@
               },
               {
                 "label": "2 horas antes",
-                "text": "Para visitas lejanas o que requieren preparar repuestos."
+                "text": "Para visitas lejanas o que piden separar piezas."
               }
             ]
           }
         ],
         "warningCard": {
           "title": "En qué celular suena el aviso",
-          "content": "El aviso se programa en el celular de quien guarda la OS. En los demás celulares del equipo, se programa cuando la persona abre la pestaña <strong>Agenda</strong> en el mes de la OS. Si la oficina programa y el técnico necesita el aviso, pídele que abra la Agenda al empezar el día."
+          "content": "El aviso se marca en el celular de quien guarda la OS. Si alguien trabaja contigo, en el celular de esa persona se marca cuando abre la pestaña <strong>Agenda</strong> en el mes de la visita. Si tú marcas y otra persona va al cliente, pídele que abra la Agenda al empezar el día."
         }
       },
       {
         "id": "diario",
-        "title": "Recordatorio diario",
-        "intro": "Todos los días a las 9 h el celular muestra un aviso para registrar las OS del día en PraticOS. Sirve si anotas los trabajos en papel y los pasas a la app después — el aviso te lo recuerda mientras el día está fresco.",
+        "title": "Resumen del día a las 9h",
+        "intro": "Todos los días a las 9h el celular muestra \"¡Buenos días! Registre las OS del día en PraticOS\". Sirve para quien anota el trabajo en papel y lo pasa a la app después: el aviso recuerda cargarlo mientras el día está fresco.",
         "infoCard": {
-          "title": "¿No lo quieres?",
-          "content": "Desactiva <strong>Recordatorio diario</strong> en <strong>Más → Recordatorios</strong>. Los otros avisos siguen funcionando."
+          "title": "¿No quieres el aviso?",
+          "content": "Toca el botón del perfil, arriba en Inicio, ve a <strong>Recordatorios</strong> y apaga <strong>Resumen del día a las 9h</strong>. Los otros avisos siguen."
         }
       },
       {
         "id": "inactividad",
-        "title": "Recordatorio de inactividad",
-        "intro": "Si pasas algunos días sin abrir la app, te avisa tres veces, contando desde la última vez que la abriste.",
+        "title": "Si paso días sin abrir la app",
+        "intro": "Si pasas algunos días sin abrir la app, avisa tres veces, contando desde la última vez que se abrió.",
         "subsections": [
           {
             "title": "Cuándo suena",
@@ -431,41 +431,41 @@
           }
         ],
         "infoCard": {
-          "title": "Si la usas a diario, no llega",
-          "content": "Abrir la app reinicia el conteo. Los avisos solo suenan si la app de verdad queda sin uso."
+          "title": "Quien la usa todos los días no lo recibe",
+          "content": "Abrir la app pone el conteo en cero. Los avisos solo suenan si la app queda realmente sin usar."
         }
       },
       {
         "id": "os-pendientes",
-        "title": "Recordatorio de OS pendientes",
-        "intro": "Avisa cuántas OS están en <strong>Presupuesto</strong> o <strong>Aprobado</strong> y se crearon hace más de 7 días — el presupuesto que el cliente no respondió, el trabajo aprobado que nadie empezó.",
+        "title": "OS paradas",
+        "intro": "Avisa cuántas OS están en <strong>Presupuesto</strong> o <strong>Aprobada</strong> y se abrieron hace más de 7 días: el presupuesto que el cliente no respondió, el trabajo aprobado que nadie empezó.",
         "steps": [
-          "Al abrir la app, cuenta las OS de la empresa en Presupuesto o Aprobado creadas hace más de 7 días.",
-          "Si hay alguna, programa un aviso para las 10 h del día siguiente con la cantidad.",
+          "Al abrir la app, cuenta las OS en Presupuesto o Aprobada abiertas hace más de 7 días.",
+          "Si hay alguna, marca un aviso para las 10h del día siguiente con la cantidad.",
           "Cada vez que abres la app, el conteo se rehace y el aviso pasa al día siguiente."
         ],
         "infoCard": {
           "title": "En la práctica",
-          "content": "El aviso llega los días en que todavía no abriste la app antes de las 10 h. Para que deje de llegar, avanza esas OS: cambia el estado o cancela el presupuesto que no va a salir."
+          "content": "El aviso llega los días en que todavía no abriste la app antes de las 10h. Para que pare, avanza con las OS: cambia la situación o cancela el presupuesto que no va a salir."
         }
       },
       {
         "id": "configurar",
         "title": "Activar y desactivar los avisos",
-        "intro": "Todos los avisos vienen activados. Cada uno tiene su propio interruptor.",
+        "intro": "Todos los avisos vienen activados. Cada uno tiene su interruptor.",
         "steps": [
-          "Toca la pestaña <strong>Más</strong>.",
-          "En <strong>Recordatorios</strong>, toca <strong>Recordatorio de cita</strong> para elegir la anticipación, o <strong>Desactivado</strong> para no recibirlo.",
-          "Activa o desactiva <strong>Recordatorio diario</strong>, <strong>Recordatorio de inactividad</strong> y <strong>Recordatorio de OS pendientes</strong>.",
-          "El cambio se aplica al instante; no hay botón de guardar."
+          "Toca el botón del perfil, arriba en Inicio, y ve a <strong>Recordatorios</strong>.",
+          "Toca <strong>Antes de la hora marcada</strong> para elegir cuánto tiempo antes, o <strong>Desactivado</strong> para no recibirlo.",
+          "Activa o desactiva <strong>Resumen del día a las 9h</strong>, <strong>Si paso días sin abrir la app</strong> y <strong>OS paradas</strong>.",
+          "El cambio vale al instante; no hay botón de guardar."
         ],
         "infoCard": {
-          "title": "Se guarda en cada celular",
-          "content": "Las opciones quedan en el equipo, no en la cuenta. Cada persona del equipo ajusta las suyas, y al cambiar de celular hay que ajustarlas de nuevo."
+          "title": "Vale solo en este celular",
+          "content": "Lo que elijas queda en el aparato, no en la cuenta. Si cambias de celular, tienes que ajustarlo de nuevo. Si alguien trabaja contigo, cada persona ajusta lo suyo."
         },
         "warningCard": {
           "title": "Permiso de notificaciones",
-          "content": "Si el celular pide permiso para que PraticOS envíe notificaciones, toca <strong>Permitir</strong>. Sin él, no aparece ningún aviso. Si lo negaste antes, actívalo en los ajustes del celular."
+          "content": "Si el celular pide permiso para que PraticOS mande notificaciones, toca <strong>Permitir</strong>. Sin él no aparece ningún aviso. Si lo negaste antes, actívalo en los ajustes del celular."
         }
       },
       {
@@ -474,7 +474,7 @@
         "faq": [
           {
             "question": "¿Los recordatorios gastan batería?",
-            "answer": "Casi nada. El aviso queda programado en el sistema del celular, que lo dispara a la hora indicada; la app no necesita seguir abierta."
+            "answer": "Casi nada. El aviso queda marcado en el sistema del celular, que lo dispara a la hora justa; la app no necesita quedar abierta."
           },
           {
             "question": "¿Funcionan con la app cerrada?",
@@ -482,19 +482,19 @@
           },
           {
             "question": "¿Funcionan sin internet?",
-            "answer": "Los avisos ya programados suenan sin internet. Para programar el aviso de OS pendientes, la app necesita conexión al abrirse."
+            "answer": "Los avisos ya marcados suenan sin internet. Para contar las OS paradas, la app necesita conexión cuando se abre."
           },
           {
-            "question": "¿Puedo desactivar solo un tipo?",
-            "answer": "Sí. Cada aviso tiene su interruptor en <strong>Más → Recordatorios</strong>."
+            "question": "¿Puedo apagar solo uno?",
+            "answer": "Sí. Cada aviso tiene su interruptor en <strong>Recordatorios</strong>, en los Ajustes."
           },
           {
             "question": "Reinicié el celular. ¿Perdí los avisos?",
-            "answer": "Abre la app y los vuelve a programar. Los de cita vuelven cuando abres la pestaña <strong>Agenda</strong>."
+            "answer": "Abre la app: vuelve a marcar los avisos. Los de visita vuelven cuando abres la pestaña <strong>Agenda</strong>."
           },
           {
             "question": "¿Funcionan en iPhone y Android?",
-            "answer": "Sí, en ambos, con las notificaciones del propio sistema."
+            "answer": "Sí, en los dos, con las notificaciones del propio sistema."
           }
         ]
       }

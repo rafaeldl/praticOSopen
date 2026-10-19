@@ -20,16 +20,37 @@
         "title": "Ordem de serviço",
         "number": "Nº 0214",
         "rows": [
-          { "label": "Cliente", "value": "Condomínio Jardim das Flores" },
-          { "label": "Unidade", "value": "Torre B · Apto 1204 · 12º andar" },
-          { "label": "Sistema afetado", "value": "Impermeabilização" },
-          { "label": "Serviço", "value": "Infiltração no teto do banheiro" },
-          { "label": "Fotos", "value": "5 anexadas" }
+          {
+            "label": "Cliente",
+            "value": "Condomínio Jardim das Flores"
+          },
+          {
+            "label": "Unidade",
+            "value": "Torre B · Apto 1204 · 12º andar"
+          },
+          {
+            "label": "Sistema afetado",
+            "value": "Impermeabilização"
+          },
+          {
+            "label": "Serviço",
+            "value": "Infiltração no teto do banheiro"
+          },
+          {
+            "label": "Fotos",
+            "value": "5 anexadas"
+          }
         ],
         "totalLabel": "Total",
         "total": "R$ 940,00",
         "stamp": "Aprovado pelo cliente",
-        "steps": ["Orçamento", "Aprovado", "Em reparo", "Resolvido", "Pago"],
+        "steps": [
+          "Orçamento",
+          "Aprovado",
+          "Em reparo",
+          "Resolvido",
+          "Pago"
+        ],
         "current": 2
       }
     },
@@ -64,9 +85,9 @@
           "answer": "Fotos do antes e do depois ficam anexadas à OS. O morador ou síndico abre o link e vê o andamento, sem ligar."
         },
         {
-          "problem": "Equipe sem agenda",
-          "detail": "Três técnicos, dois empreendimentos, chamados de urgência no meio. Ninguém sabe quem vai aonde.",
-          "answer": "Cada OS agendada entra na agenda da equipe, com filtro por técnico para quem coordena e aviso no celular antes do atendimento."
+          "problem": "Agenda na cabeça",
+          "detail": "Dois empreendimentos, chamados de urgência no meio e visitas marcadas por mensagem. Alguém fica esperando.",
+          "answer": "Cada OS com dia e hora entra na Agenda e o celular avisa antes do atendimento. Se alguém trabalha com você, a visita aparece para ele também."
         }
       ]
     },
@@ -76,27 +97,27 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registre o chamado na unidade",
-          "text": "Abra a OS com o cliente — condomínio, construtora ou morador — e a unidade. Serviços e materiais saem do seu catálogo, já com preço.",
+          "title": "Fale o chamado e a IA abre a OS",
+          "text": "Toque em Falar e diga, por exemplo: “Condomínio Jardim das Flores, torre B, apto 1204, infiltração no teto do banheiro”. Ou fotografe o pedido anotado. A IA preenche cliente, unidade e serviços com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "Empreendimento, bloco ou torre, número e andar",
             "Sistema afetado e data de entrega da unidade",
-            "Status do ramo: em reparo, resolvido"
+            "Nada é salvo sem você conferir"
           ],
-          "image": "home.png",
-          "alt": "Lista de ordens de serviço no app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
           "title": "Agende a visita",
-          "text": "Marque dia e hora na OS. Ela aparece na agenda do mês e o técnico recebe o aviso no celular antes do atendimento.",
+          "text": "Marque dia e hora na OS. Ela aparece na Agenda, no dia escolhido, e o celular avisa antes do atendimento.",
           "facts": [
-            "Agenda com as OS de cada dia",
-            "Filtro por técnico para quem coordena a equipe",
+            "Semana no topo e os atendimentos do dia",
+            "Resumo do dia às 9h, se você quiser",
             "Aviso antes do atendimento, mesmo com o app fechado"
           ],
           "image": "agenda.png",
-          "alt": "Agenda do PraticOS com ordens de serviço marcadas no mês"
+          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
         },
         {
           "number": "03",
@@ -107,8 +128,8 @@
             "Fotos do antes e do depois na mesma OS",
             "PDF da OS para enviar ao síndico ou à construtora"
           ],
-          "image": "forms.png",
-          "alt": "Checklist preenchido dentro de uma OS"
+          "image": "checklist.png",
+          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
         },
         {
           "number": "04",
@@ -117,10 +138,10 @@
           "facts": [
             "Aprovação registrada na própria OS",
             "Pagamento parcial e desconto na mesma OS",
-            "Faturamento e valores a receber no painel"
+            "Quanto falta receber de cada cliente no Financeiro"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalhe de uma OS com fotos, cliente e status"
+          "image": "order.png",
+          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
         }
       ]
     },
@@ -130,7 +151,7 @@
       "items": [
         {
           "question": "Preciso pagar para usar?",
-          "answer": "Para começar, não. O plano Free é grátis e tem OS e clientes ilimitados. Planos pagos, com mais fotos, formulários e usuários, estão disponíveis no app."
+          "answer": "Pode começar grátis, sem limite de OS nem de clientes. O plano grátis tem limite mensal de fotos e de uso da IA e um modelo de checklist. Os planos pagos, assinados no app, aumentam esses limites e liberam a equipe."
         },
         {
           "question": "Serve para assistência técnica de construtora?",
@@ -171,16 +192,37 @@
         "title": "Work order",
         "number": "No. 0214",
         "rows": [
-          { "label": "Customer", "value": "Maple Court HOA" },
-          { "label": "Unit", "value": "Building B · Apt 1204 · 12th floor" },
-          { "label": "Affected system", "value": "Waterproofing" },
-          { "label": "Service", "value": "Leak in bathroom ceiling" },
-          { "label": "Photos", "value": "5 attached" }
+          {
+            "label": "Customer",
+            "value": "Maple Court HOA"
+          },
+          {
+            "label": "Unit",
+            "value": "Building B · Apt 1204 · 12th floor"
+          },
+          {
+            "label": "Affected system",
+            "value": "Waterproofing"
+          },
+          {
+            "label": "Service",
+            "value": "Leak in bathroom ceiling"
+          },
+          {
+            "label": "Photos",
+            "value": "5 attached"
+          }
         ],
         "totalLabel": "Total",
         "total": "$680.00",
         "stamp": "Approved by customer",
-        "steps": ["Quote", "Approved", "Under repair", "Resolved", "Paid"],
+        "steps": [
+          "Quote",
+          "Approved",
+          "Under repair",
+          "Resolved",
+          "Paid"
+        ],
         "current": 2
       }
     },
@@ -215,9 +257,9 @@
           "answer": "Before and after photos are attached to the work order. The resident or manager opens the link and follows progress without calling."
         },
         {
-          "problem": "A crew without a schedule",
-          "detail": "Three techs, two properties, urgent calls in between. Nobody knows who's going where.",
-          "answer": "Every scheduled work order goes on the team calendar, with a filter by technician for whoever coordinates and a phone reminder before each visit."
+          "problem": "A schedule kept in your head",
+          "detail": "Two developments, urgent calls in between and visits booked by text. Someone ends up waiting.",
+          "answer": "Every order with a date and time goes on the Schedule and your phone reminds you before the visit. If someone works with you, they see the visit too."
         }
       ]
     },
@@ -227,27 +269,27 @@
       "stages": [
         {
           "number": "01",
-          "title": "Log the request on the unit",
-          "text": "Open the work order with the customer — HOA, builder or resident — and the unit. Services and materials come from your catalog, already priced.",
+          "title": "Say the request and the AI opens the order",
+          "text": "Tap Speak and say something like: “Jardim das Flores condo, tower B, unit 1204, leak in the bathroom ceiling”. Or photograph the written request. The AI fills in customer, unit and services with your catalog prices and marks what it filled with ✦.",
           "facts": [
             "Development, building or tower, number and floor",
             "Affected system and unit handover date",
-            "Statuses in your trade's words: under repair, resolved"
+            "Nothing is saved until you check it"
           ],
-          "image": "home.png",
-          "alt": "Work order list in the PraticOS app"
+          "image": "ai-order.png",
+          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
         },
         {
           "number": "02",
           "title": "Schedule the visit",
-          "text": "Set the day and time on the work order. It shows up on the monthly calendar and the tech gets a reminder on their phone before the visit.",
+          "text": "Set the day and time on the order. It shows up on the Schedule on that day and your phone reminds you before the visit.",
           "facts": [
-            "Calendar with each day's work orders",
-            "Filter by technician if you coordinate the crew",
+            "The week on top and the day's visits",
+            "Daily summary at 9am, if you want it",
             "Reminder before the visit, even with the app closed"
           ],
           "image": "agenda.png",
-          "alt": "PraticOS calendar with work orders scheduled across the month"
+          "alt": "Schedule with the week on top and the visit booked for the day"
         },
         {
           "number": "03",
@@ -258,8 +300,8 @@
             "Before and after photos on the same work order",
             "Work order PDF to send to the manager or builder"
           ],
-          "image": "forms.png",
-          "alt": "A completed checklist inside a work order"
+          "image": "checklist.png",
+          "alt": "Checklist filled in on the order, with photos and checked items"
         },
         {
           "number": "04",
@@ -268,10 +310,10 @@
           "facts": [
             "Approval recorded on the work order",
             "Partial payment and discount on the same work order",
-            "Revenue and amounts due on the dashboard"
+            "What each customer still owes, in Financial"
           ],
-          "image": "order-detail.png",
-          "alt": "Work order detail with photos, customer and status"
+          "image": "order.png",
+          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
         }
       ]
     },
@@ -281,7 +323,7 @@
       "items": [
         {
           "question": "Do I have to pay to use it?",
-          "answer": "Not to get started. The Free plan costs nothing and has unlimited work orders and customers. Paid plans, with more photos, forms and users, are available in the app."
+          "answer": "You can start free, with no limit on work orders or customers. The free plan has a monthly limit on photos and AI use, and one checklist template. Paid plans, subscribed in the app, raise those limits and unlock your team."
         },
         {
           "question": "Does it work for builder warranty service?",
@@ -322,16 +364,37 @@
         "title": "Orden de servicio",
         "number": "N.º 0214",
         "rows": [
-          { "label": "Cliente", "value": "Condominio Los Álamos" },
-          { "label": "Unidad", "value": "Torre B · Depto 1204 · piso 12" },
-          { "label": "Sistema afectado", "value": "Impermeabilización" },
-          { "label": "Servicio", "value": "Filtración en el techo del baño" },
-          { "label": "Fotos", "value": "5 adjuntas" }
+          {
+            "label": "Cliente",
+            "value": "Condominio Los Álamos"
+          },
+          {
+            "label": "Unidad",
+            "value": "Torre B · Depto 1204 · piso 12"
+          },
+          {
+            "label": "Sistema afectado",
+            "value": "Impermeabilización"
+          },
+          {
+            "label": "Servicio",
+            "value": "Filtración en el techo del baño"
+          },
+          {
+            "label": "Fotos",
+            "value": "5 adjuntas"
+          }
         ],
         "totalLabel": "Total",
         "total": "$ 680,00",
         "stamp": "Aprobado por el cliente",
-        "steps": ["Presupuesto", "Aprobado", "En reparación", "Resuelto", "Cobrado"],
+        "steps": [
+          "Presupuesto",
+          "Aprobado",
+          "En reparación",
+          "Resuelto",
+          "Cobrado"
+        ],
         "current": 2
       }
     },
@@ -366,9 +429,9 @@
           "answer": "Las fotos del antes y el después quedan en la orden. El vecino o el administrador abre el link y sigue el avance sin llamar."
         },
         {
-          "problem": "Equipo sin agenda",
-          "detail": "Tres técnicos, dos edificios y urgencias en el medio. Nadie sabe quién va a dónde.",
-          "answer": "Cada orden programada entra en la agenda del equipo, con filtro por técnico para quien coordina y aviso en el celular antes de cada visita."
+          "problem": "La agenda en la cabeza",
+          "detail": "Dos proyectos, urgencias en el medio y visitas marcadas por mensaje. Alguien se queda esperando.",
+          "answer": "Cada orden con día y hora entra en la Agenda y el celular avisa antes de la visita. Si alguien trabaja contigo, también ve la visita."
         }
       ]
     },
@@ -378,27 +441,27 @@
       "stages": [
         {
           "number": "01",
-          "title": "Registra la solicitud en la unidad",
-          "text": "Abre la orden con el cliente — condominio, constructora o propietario — y la unidad. Servicios y materiales salen de tu catálogo, con precio.",
+          "title": "Di la solicitud y la IA abre la orden",
+          "text": "Toca Hablar y di, por ejemplo: “Condominio Jardim das Flores, torre B, depto 1204, filtración en el techo del baño”. O fotografía el pedido anotado. La IA completa cliente, unidad y servicios con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "Proyecto, bloque o torre, número y piso",
             "Sistema afectado y fecha de entrega de la unidad",
-            "Estados del rubro: en reparación, resuelto"
+            "Nada se guarda sin que lo revises"
           ],
-          "image": "home.png",
-          "alt": "Lista de órdenes de servicio en la app PraticOS"
+          "image": "ai-order.png",
+          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
         },
         {
           "number": "02",
           "title": "Agenda la visita",
-          "text": "Marca día y hora en la orden. Aparece en la agenda del mes y el técnico recibe el aviso en el celular antes de la visita.",
+          "text": "Marca día y hora en la orden. Aparece en la Agenda, en el día elegido, y el celular avisa antes de la visita.",
           "facts": [
-            "Agenda con las órdenes de cada día",
-            "Filtro por técnico para quien coordina el equipo",
+            "La semana arriba y las visitas del día",
+            "Resumen del día a las 9, si lo quieres",
             "Aviso antes de la visita, incluso con la app cerrada"
           ],
           "image": "agenda.png",
-          "alt": "Agenda de PraticOS con órdenes programadas en el mes"
+          "alt": "Agenda con la semana arriba y la visita marcada del día"
         },
         {
           "number": "03",
@@ -409,8 +472,8 @@
             "Fotos del antes y el después en la misma orden",
             "PDF de la orden para enviar al administrador o a la constructora"
           ],
-          "image": "forms.png",
-          "alt": "Checklist completado dentro de una orden"
+          "image": "checklist.png",
+          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
         },
         {
           "number": "04",
@@ -419,10 +482,10 @@
           "facts": [
             "Aprobación registrada en la propia orden",
             "Pago parcial y descuento en la misma orden",
-            "Facturación y saldos por cobrar en el panel"
+            "Cuánto falta cobrar a cada cliente en Financiero"
           ],
-          "image": "order-detail.png",
-          "alt": "Detalle de una orden con fotos, cliente y estado"
+          "image": "order.png",
+          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
         }
       ]
     },
@@ -432,7 +495,7 @@
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
-          "answer": "Para empezar, no. El plan Free es gratis y tiene órdenes y clientes ilimitados. Los planes pagos, con más fotos, formularios y usuarios, están disponibles en la app."
+          "answer": "Puedes empezar gratis, sin límite de órdenes ni de clientes. El plan gratis tiene un límite mensual de fotos y de uso de la IA, y un modelo de checklist. Los planes pagos, contratados en la app, amplían esos límites y habilitan el equipo."
         },
         {
           "question": "¿Sirve para la posventa de una constructora?",
