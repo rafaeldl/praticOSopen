@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/order/order_route.dart';
@@ -77,7 +78,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
       child: CustomScrollView(
         slivers: [
           AppNavBar(
-            largeTitle: Text(l10n.contracts),
+            largeTitle: Text(contractsTitleOf(context)),
             previousTitle: l10n.myCompany,
             trailing: GlassBarButton(
               key: const ValueKey('contract_new'),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
@@ -149,7 +150,7 @@ class MyCompanyScreen extends StatelessWidget {
             ),
             feature(
               CompanyFeature.useContracts,
-              l10n.contracts,
+              contractsTitleOf(context),
               l10n.contractsRowHint,
             ),
             if (devicesLabel != null)

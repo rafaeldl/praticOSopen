@@ -5625,4 +5625,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseAutoErrorTaxId => 'The customer has no tax ID on file.';
+
+  @override
+  String recurringOrdersTitle(String orders) {
+    return 'Recurring $orders';
+  }
 }

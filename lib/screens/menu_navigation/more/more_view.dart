@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -127,7 +128,7 @@ class MoreView extends StatelessWidget {
       case MoreDestination.customers:
         return l10n.customers;
       case MoreDestination.contracts:
-        return l10n.contracts;
+        return contractsTitleOf(context);
       case MoreDestination.company:
         return l10n.yourCompany;
       case MoreDestination.team:
@@ -152,8 +153,10 @@ class MoreView extends StatelessWidget {
       case MoreDestination.account:
         final name = accountName;
         if (name == null || name.isEmpty) return companyName;
-        return [context.l10n.yourAccount, if (companyName != null) companyName]
-            .join(' · ');
+        return [
+          context.l10n.yourAccount,
+          if (companyName != null) companyName,
+        ].join(' · ');
       case MoreDestination.company:
         return context.l10n.moreCompanySubtitle;
       case MoreDestination.catalog:
@@ -206,9 +209,7 @@ class MoreView extends StatelessWidget {
       final visible = sections[i].where(visibility.isVisible).toList();
       if (visible.isEmpty) continue;
       if (labels[i] != null) children.add(SectionLabel(labels[i]!));
-      children.add(MoreRows(rows: [
-        for (final d in visible) _row(context, d),
-      ]));
+      children.add(MoreRows(rows: [for (final d in visible) _row(context, d)]));
     }
 
     return MorePage(

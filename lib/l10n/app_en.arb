@@ -2414,5 +2414,6 @@
   "nfseAutoIssueCompletedHint": "Goes out by itself when the order is completed, before payment.",
   "nfseHeadAutoError": "The invoice did not go out by itself. Fix the reason below and issue it from the order menu.",
   "nfseAutoReasonLabel": "Why it did not go out",
-  "nfseAutoErrorTaxId": "The customer has no tax ID on file."
+  "nfseAutoErrorTaxId": "The customer has no tax ID on file.",
+  "recurringOrdersTitle": "Recurring {orders}"
 }

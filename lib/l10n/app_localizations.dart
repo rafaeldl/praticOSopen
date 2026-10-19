@@ -9385,6 +9385,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O cliente não tem CPF ou CNPJ no cadastro.'**
   String get nfseAutoErrorTaxId;
+
+  /// Recurring orders title when the segment already names each order Contract
+  ///
+  /// In pt, this message translates to:
+  /// **'{orders} que se repetem'**
+  String recurringOrdersTitle(String orders);
 }
 
 class _AppLocalizationsDelegate

@@ -2414,5 +2414,6 @@
   "nfseAutoIssueCompletedHint": "Sale sola cuando la OS se concluye, antes de cobrar.",
   "nfseHeadAutoError": "La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.",
   "nfseAutoReasonLabel": "Por qué no salió",
-  "nfseAutoErrorTaxId": "El cliente no tiene documento fiscal registrado."
+  "nfseAutoErrorTaxId": "El cliente no tiene documento fiscal registrado.",
+  "recurringOrdersTitle": "{orders} que se repiten"
 }

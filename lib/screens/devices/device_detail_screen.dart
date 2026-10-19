@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/device_store.dart';
@@ -92,7 +93,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     setState(() {
       if (deviceId != null && companyId != null) {
         _orderStream = _orderRepo.streamOrdersByDevice(companyId, deviceId);
-        _contractStream = _orderRepo.streamContractsByDevice(companyId, deviceId);
+        _contractStream = _orderRepo.streamContractsByDevice(
+          companyId,
+          deviceId,
+        );
       }
     });
   }
@@ -117,8 +121,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Future<void> _confirmDelete() async {
     final l10n = context.l10n;
-    if (!AuthorizationService.instance
-        .hasPermission(PermissionType.manageDevices)) {
+    if (!AuthorizationService.instance.hasPermission(
+      PermissionType.manageDevices,
+    )) {
       await showCupertinoDialog<void>(
         context: context,
         builder: (dialogContext) => CupertinoAlertDialog(
@@ -298,7 +303,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       if (subtitle.isNotEmpty || (device.photo?.isNotEmpty ?? false))
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pageMargin, 0, AppSpacing.pageMargin, AppSpacing.md,
+            AppSpacing.pageMargin,
+            0,
+            AppSpacing.pageMargin,
+            AppSpacing.md,
           ),
           child: Row(
             children: [
@@ -339,8 +347,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                                   child: Text(
                                     ownerName,
                                     style: subtitleStyle.copyWith(
-                                      color: AppColors.accentText
-                                          .resolveFrom(context),
+                                      color: AppColors.accentText.resolveFrom(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -354,7 +363,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         ),
       Padding(
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
+          AppSpacing.blockMargin,
+          AppSpacing.sm,
+          AppSpacing.blockMargin,
+          0,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,17 +435,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     return data.entries
         .where((e) => e.value != null && e.value.toString().isNotEmpty)
         .map((entry) {
-      final label = labelMap[entry.key] ?? entry.key;
-      final value = entry.value.toString();
-      final field = fields.cast<CustomField?>().firstWhere(
+          final label = labelMap[entry.key] ?? entry.key;
+          final value = entry.value.toString();
+          final field = fields.cast<CustomField?>().firstWhere(
             (f) => f!.key == entry.key || f.fieldName == entry.key,
             orElse: () => null,
           );
-      final display = (field != null && field.type == 'select')
-          ? field.getOptionLabel(value, locale)
-          : value;
-      return AppListRow(title: label, trailing: display);
-    }).toList();
+          final display = (field != null && field.type == 'select')
+              ? field.getOptionLabel(value, locale)
+              : value;
+          return AppListRow(title: label, trailing: display);
+        })
+        .toList();
   }
 
   void _openOwner(Customer owner) {
@@ -450,21 +463,20 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       showPrices: _showPrices,
       showDate: true,
       statusLabel: config.getStatus,
-      onTap: () => Navigator.pushNamed(
-        context,
-        '/order',
-        arguments: {'order': order},
-      ),
+      onTap: () =>
+          Navigator.pushNamed(context, '/order', arguments: {'order': order}),
     );
   }
 
   Widget _buildContractsSection() {
     final stream = _contractStream;
-    if (stream == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (stream == null)
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
     return StreamBuilder<List<Order?>>(
       stream: stream,
       builder: (context, snapshot) {
-        final contracts = snapshot.data
+        final contracts =
+            snapshot.data
                 ?.whereType<Order>()
                 .where((o) => o.contract?.active == true)
                 .toList() ??
@@ -476,7 +488,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         final format = FormatService()..setLocale(l10n.localeName);
         return SliverList(
           delegate: SliverChildListDelegate([
-            SectionLabel(l10n.contracts),
+            SectionLabel(contractsTitleOf(context)),
             for (final order in contracts)
               AppListRow(
                 leading: Icon(
