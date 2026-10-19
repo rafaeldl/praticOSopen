@@ -136,45 +136,41 @@ class AccountView extends StatelessWidget {
     return MorePage(
       title: l10n.yourAccount,
       children: [
-        MoreRows(
-          rows: [
+        MoreRows(rows: [
+          AppListRow(
+            key: const ValueKey('account_profile'),
+            leading: _avatar(context),
+            title: name,
+            subtitle: subtitleParts.isEmpty ? null : subtitleParts.join('\n'),
+            onTap: onEditProfile,
+          ),
+          if (companies.length > 1)
             AppListRow(
-              key: const ValueKey('account_profile'),
-              leading: _avatar(context),
-              title: name,
-              subtitle: subtitleParts.isEmpty ? null : subtitleParts.join('\n'),
-              onTap: onEditProfile,
+              key: const ValueKey('account_switch_company'),
+              title: l10n.switchCompany,
+              onTap: () => _pickCompany(context),
             ),
-            if (companies.length > 1)
-              AppListRow(
-                key: const ValueKey('account_switch_company'),
-                title: l10n.switchCompany,
-                onTap: () => _pickCompany(context),
-              ),
-            AppListRow(
-              key: const ValueKey('account_join_code'),
-              title: l10n.joinWithInviteCode,
-              onTap: onJoinWithCode,
-            ),
-          ],
-        ),
+          AppListRow(
+            key: const ValueKey('account_join_code'),
+            title: l10n.joinWithInviteCode,
+            onTap: onJoinWithCode,
+          ),
+        ]),
         const SizedBox(height: AppSpacing.xl),
-        MoreRows(
-          rows: [
-            _ActionRow(
-              key: const ValueKey('account_sign_out'),
-              label: l10n.logout,
-              color: accent,
-              onTap: () => _confirmSignOut(context),
-            ),
-            _ActionRow(
-              key: const ValueKey('account_delete'),
-              label: l10n.deleteMyAccount,
-              color: AppColors.danger.resolveFrom(context),
-              onTap: () => deletion.start(context),
-            ),
-          ],
-        ),
+        MoreRows(rows: [
+          _ActionRow(
+            key: const ValueKey('account_sign_out'),
+            label: l10n.logout,
+            color: accent,
+            onTap: () => _confirmSignOut(context),
+          ),
+          _ActionRow(
+            key: const ValueKey('account_delete'),
+            label: l10n.deleteMyAccount,
+            color: AppColors.danger.resolveFrom(context),
+            onTap: () => deletion.start(context),
+          ),
+        ]),
       ],
     );
   }
@@ -252,9 +248,8 @@ class _AccountScreenState extends State<AccountScreen> {
           photoUrl: user?.photo ?? Global.currentUser?.photoURL,
           companyName: authStore.companyAggr?.name,
           currentCompanyId: authStore.companyAggr?.id,
-          roleLabel: AuthorizationService.instance.getRoleLabelLocalized(
-            context.l10n,
-          ),
+          roleLabel:
+              AuthorizationService.instance.getRoleLabelLocalized(context.l10n),
           companies: companies,
           deletion: AccountDeletionFlow(
             deleteAccount: authStore.deleteAccount,
@@ -274,10 +269,7 @@ class _AccountScreenState extends State<AccountScreen> {
             CupertinoPageRoute(
               builder: (_) => AcceptInviteScreen(
                 onInviteAccepted: () => Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/',
-                  (route) => false,
-                ),
+                    context, '/', (route) => false),
                 onCancel: () => Navigator.pop(context),
               ),
             ),

@@ -69,68 +69,61 @@ class RemindersScreen extends StatelessWidget {
       subtitle: l10n.remindersSubtitle,
       children: [
         Observer(
-          builder: (_) => MoreRows(
-            rows: [
-              AppListRow(
-                key: const ValueKey('reminder_before'),
-                title: l10n.reminderBeforeTitle,
-                trailing: _beforeText(context, reminderStore.reminderMinutes),
-                onTap: () => _pickBefore(context, reminderStore),
-              ),
-              MoreSwitchRow(
-                key: const ValueKey('reminder_daily'),
-                title: l10n.reminderDailyTitle,
-                subtitle: l10n.reminderDailySubtitle,
-                value: engagement.dailyEnabled,
-                onChanged: (value) {
-                  engagement.setDailyEnabled(value);
-                  if (!value)
-                    NotificationService.instance.cancelDailyReminder();
-                },
-              ),
-              MoreSwitchRow(
-                key: const ValueKey('reminder_inactivity'),
-                title: l10n.reminderInactivityTitle,
-                value: engagement.inactivityEnabled,
-                onChanged: (value) {
-                  engagement.setInactivityEnabled(value);
-                  if (!value) {
-                    NotificationService.instance.cancelInactivityReminders();
-                  }
-                },
-              ),
-              MoreSwitchRow(
-                key: const ValueKey('reminder_pending_os'),
-                title: l10n.reminderPendingTitle,
-                subtitle: l10n.reminderPendingSubtitle,
-                value: engagement.pendingOsEnabled,
-                onChanged: (value) {
-                  engagement.setPendingOsEnabled(value);
-                  if (!value) {
-                    NotificationService.instance.cancelPendingOsReminders();
-                  }
-                },
-              ),
-            ],
-          ),
+          builder: (_) => MoreRows(rows: [
+            AppListRow(
+              key: const ValueKey('reminder_before'),
+              title: l10n.reminderBeforeTitle,
+              trailing: _beforeText(context, reminderStore.reminderMinutes),
+              onTap: () => _pickBefore(context, reminderStore),
+            ),
+            MoreSwitchRow(
+              key: const ValueKey('reminder_daily'),
+              title: l10n.reminderDailyTitle,
+              subtitle: l10n.reminderDailySubtitle,
+              value: engagement.dailyEnabled,
+              onChanged: (value) {
+                engagement.setDailyEnabled(value);
+                if (!value) NotificationService.instance.cancelDailyReminder();
+              },
+            ),
+            MoreSwitchRow(
+              key: const ValueKey('reminder_inactivity'),
+              title: l10n.reminderInactivityTitle,
+              value: engagement.inactivityEnabled,
+              onChanged: (value) {
+                engagement.setInactivityEnabled(value);
+                if (!value) {
+                  NotificationService.instance.cancelInactivityReminders();
+                }
+              },
+            ),
+            MoreSwitchRow(
+              key: const ValueKey('reminder_pending_os'),
+              title: l10n.reminderPendingTitle,
+              subtitle: l10n.reminderPendingSubtitle,
+              value: engagement.pendingOsEnabled,
+              onChanged: (value) {
+                engagement.setPendingOsEnabled(value);
+                if (!value) {
+                  NotificationService.instance.cancelPendingOsReminders();
+                }
+              },
+            ),
+          ]),
         ),
         if (showLanguage)
           Observer(
             builder: (_) {
-              final localeStore = Provider.of<LocaleStore>(
-                context,
-                listen: false,
-              );
-              return MoreRows(
-                rows: [
-                  AppListRow(
-                    key: const ValueKey('reminder_language'),
-                    title: l10n.language,
-                    trailing: localeStore.currentLocaleDisplayName,
-                    onTap: () => _pickLanguage(context, localeStore),
-                  ),
-                ],
-              );
+              final localeStore =
+                  Provider.of<LocaleStore>(context, listen: false);
+              return MoreRows(rows: [
+                AppListRow(
+                  key: const ValueKey('reminder_language'),
+                  title: l10n.language,
+                  trailing: localeStore.currentLocaleDisplayName,
+                  onTap: () => _pickLanguage(context, localeStore),
+                ),
+              ]);
             },
           )
         else if (defaultTargetPlatform == TargetPlatform.iOS)

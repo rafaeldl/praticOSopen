@@ -45,16 +45,9 @@ class PlanUsage {
     final usage = subscription.usage;
     return [
       PlanUsage(PlanResource.team, usage.usersActive, limits.users),
+      PlanUsage(PlanResource.photos, usage.photosThisMonth, limits.photosPerMonth),
       PlanUsage(
-        PlanResource.photos,
-        usage.photosThisMonth,
-        limits.photosPerMonth,
-      ),
-      PlanUsage(
-        PlanResource.checklists,
-        usage.formTemplatesActive,
-        limits.formTemplates,
-      ),
+          PlanResource.checklists, usage.formTemplatesActive, limits.formTemplates),
     ];
   }
 }
@@ -71,12 +64,8 @@ class PlanScreen extends StatelessWidget {
   final VoidCallback? onOpenChecklists;
 
   /// "Starter · renova em 10/11/2026"; just the plan name on Free.
-  String _header(
-    BuildContext context,
-    Subscription subscription,
-    SubscriptionPlan plan,
-    DateTime now,
-  ) {
+  String _header(BuildContext context, Subscription subscription,
+      SubscriptionPlan plan, DateTime now) {
     final expiresAt = subscription.expiresAt;
     final date = expiresAt == null
         ? null
@@ -136,11 +125,7 @@ class PlanScreen extends StatelessWidget {
         Padding(
           // Lined up with the large title (16 from the edge).
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.blockMargin,
-            0,
-            AppSpacing.pageMargin,
-            AppSpacing.lg,
-          ),
+              AppSpacing.blockMargin, 0, AppSpacing.pageMargin, AppSpacing.lg),
           child: Text(
             _header(context, subscription, plan, now),
             key: const ValueKey('plan_current'),
@@ -166,50 +151,33 @@ class PlanScreen extends StatelessWidget {
           ),
         if (paid) ...[
           SectionLabel(l10n.planUsageSection),
-          MoreRows(
-            rows: [
-              for (final usage in usages)
-                _UsageRow(
-                  key: ValueKey('plan_usage_${usage.resource.name}'),
-                  usage: usage,
-                  title: switch (usage.resource) {
-                    PlanResource.team => l10n.planUsageTeam,
-                    PlanResource.photos => l10n.planUsagePhotos,
-                    PlanResource.checklists => l10n.planUsageChecklists,
-                  },
-                  value: usage.level == PlanUsageLevel.unlimited
-                      ? _count(usage.used)
-                      : l10n.planUsageOf(
-                          _count(usage.used),
-                          _count(usage.limit),
-                        ),
-                  onTap: switch (usage.resource) {
-                    PlanResource.team =>
-                      onOpenTeam ??
-                          () => Navigator.pushNamed(
-                            context,
-                            '/collaborator_list',
-                          ),
-                    PlanResource.photos => null,
-                    PlanResource.checklists =>
-                      onOpenChecklists ??
-                          () => Navigator.pushNamed(
-                            context,
-                            '/form_template_list',
-                          ),
-                  },
-                ),
-            ],
-          ),
+          MoreRows(rows: [
+            for (final usage in usages)
+              _UsageRow(
+                key: ValueKey('plan_usage_${usage.resource.name}'),
+                usage: usage,
+                title: switch (usage.resource) {
+                  PlanResource.team => l10n.planUsageTeam,
+                  PlanResource.photos => l10n.planUsagePhotos,
+                  PlanResource.checklists => l10n.planUsageChecklists,
+                },
+                value: usage.level == PlanUsageLevel.unlimited
+                    ? _count(usage.used)
+                    : l10n.planUsageOf(_count(usage.used), _count(usage.limit)),
+                onTap: switch (usage.resource) {
+                  PlanResource.team => onOpenTeam ??
+                      () => Navigator.pushNamed(context, '/collaborator_list'),
+                  PlanResource.photos => null,
+                  PlanResource.checklists => onOpenChecklists ??
+                      () => Navigator.pushNamed(context, '/form_template_list'),
+                },
+              ),
+          ]),
         ],
         if (canPurchase)
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.pageMargin,
-              AppSpacing.lg,
-              AppSpacing.pageMargin,
-              0,
-            ),
+                AppSpacing.pageMargin, AppSpacing.lg, AppSpacing.pageMargin, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -273,10 +241,9 @@ class _UsageRow extends StatelessWidget {
     final l10n = context.l10n;
     final level = usage.level;
     final status = switch (level) {
-      PlanUsageLevel.atLimit =>
-        usage.resource == PlanResource.team
-            ? l10n.planUsageAtLimitInvites
-            : l10n.planUsageAtLimit,
+      PlanUsageLevel.atLimit => usage.resource == PlanResource.team
+          ? l10n.planUsageAtLimitInvites
+          : l10n.planUsageAtLimit,
       PlanUsageLevel.near => l10n.planUsageNearLimit,
       PlanUsageLevel.unlimited => l10n.planUsageUnlimited,
       PlanUsageLevel.ok => null,

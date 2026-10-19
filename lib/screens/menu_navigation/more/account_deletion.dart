@@ -16,9 +16,9 @@ class AccountDeletionFlow {
     required this.reauthenticate,
     bool? paidPlansEnabled,
     Future<void> Function()? openStoreSettings,
-  }) : paidPlansEnabled =
-           paidPlansEnabled ?? SubscriptionService.paidPlansEnabled,
-       openStoreSettings = openStoreSettings ?? openStoreSubscriptionSettings;
+  })  : paidPlansEnabled =
+            paidPlansEnabled ?? SubscriptionService.paidPlansEnabled,
+        openStoreSettings = openStoreSettings ?? openStoreSubscriptionSettings;
 
   final Future<void> Function() deleteAccount;
   final Future<void> Function() reauthenticate;
@@ -104,8 +104,7 @@ class AccountDeletionFlow {
       _showMessage(
         context,
         title: context.l10n.errorDeletingAccount,
-        message:
-            '${context.l10n.couldNotDeleteAccount}\n\n'
+        message: '${context.l10n.couldNotDeleteAccount}\n\n'
             '${formatError(context, e.toString())}',
       );
     }
@@ -148,8 +147,7 @@ class AccountDeletionFlow {
       _showMessage(
         context,
         title: context.l10n.reauthenticationFailed,
-        message:
-            '${context.l10n.couldNotReauthenticate}\n\n'
+        message: '${context.l10n.couldNotReauthenticate}\n\n'
             '${formatError(context, e.toString())}',
       );
     }
@@ -159,8 +157,7 @@ class AccountDeletionFlow {
     showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) =>
-          const Center(child: CupertinoActivityIndicator(radius: 20)),
+      builder: (_) => const Center(child: CupertinoActivityIndicator(radius: 20)),
     );
   }
 
