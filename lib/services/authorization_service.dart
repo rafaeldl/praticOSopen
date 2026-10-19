@@ -578,27 +578,31 @@ class AuthorizationService {
   }
 
   /// Filtra uma lista de OS baseado nas permissões do usuário.
-  List<Order> filterOrdersByPermission(List<Order> orders) {
-    final role = normalizedRole;
-    if (role == null) return [];
-    if (Global.currentUser == null) return [];
+  List<Order> filterOrdersByPermission(List<Order> orders) => filterOrdersFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    orders: orders,
+  );
 
-    final currentUserId = Global.currentUser!.uid;
+  /// Pure version of [filterOrdersByPermission]. Mirrors the Firestore order
+  /// read rule: consultant and technician only see the orders they created.
+  static List<Order> filterOrdersFor({
+    required RolesType? role,
+    required String? userId,
+    required List<Order> orders,
+  }) {
+    if (role == null || userId == null) return [];
 
     switch (role) {
       case RolesType.admin:
       case RolesType.manager:
       case RolesType.supervisor:
-        // Retorna todas as OS
         return orders;
 
       case RolesType.consultant:
-        // Apenas OS que criou
-        return orders.where((o) => o.createdBy?.id == currentUserId).toList();
-
       case RolesType.technician:
-        // Retorna todas as OS (assignedTo ainda não implementado restritivamente)
-        return orders;
+        // assignedTo ainda não existe; quando existir, incluir aqui e nas rules
+        return orders.where((o) => o.createdBy?.id == userId).toList();
     }
   }
 }

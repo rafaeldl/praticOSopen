@@ -4421,7 +4421,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não deu para salvar o checklist. Tente de novo.';
 
   @override
-  String get checklistStopUsing => 'Não usar na empresa';
+  String get checklistStopUsing => 'Parar de usar';
 
   @override
   String get checklistUseAgain => 'Voltar a usar';

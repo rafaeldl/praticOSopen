@@ -2039,7 +2039,7 @@
   "checklistNameLabel": "Checklist name",
   "checklistSave": "Save checklist",
   "checklistSaveError": "Couldn't save the checklist. Try again.",
-  "checklistStopUsing": "Stop using in the company",
+  "checklistStopUsing": "Stop using",
   "checklistUseAgain": "Use again",
   "checklistDelete": "Delete checklist",
   "checklistDeleteTitle": "Delete this checklist?",
