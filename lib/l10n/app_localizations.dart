@@ -7375,7 +7375,7 @@ abstract class AppLocalizations {
   /// No description provided for @checklistStopUsing.
   ///
   /// In pt, this message translates to:
-  /// **'Não usar na empresa'**
+  /// **'Parar de usar'**
   String get checklistStopUsing;
 
   /// No description provided for @checklistUseAgain.

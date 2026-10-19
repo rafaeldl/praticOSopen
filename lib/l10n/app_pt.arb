@@ -2308,7 +2308,7 @@
   "checklistNameLabel": "Nome do checklist",
   "checklistSave": "Salvar checklist",
   "checklistSaveError": "Não deu para salvar o checklist. Tente de novo.",
-  "checklistStopUsing": "Não usar na empresa",
+  "checklistStopUsing": "Parar de usar",
   "checklistUseAgain": "Voltar a usar",
   "checklistDelete": "Apagar checklist",
   "checklistDeleteTitle": "Apagar este checklist?",

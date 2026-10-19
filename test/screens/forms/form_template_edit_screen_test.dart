@@ -290,10 +290,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('checklist_more')));
     await tester.pumpAndSettle();
-    expect(find.text('Não usar na empresa'), findsOneWidget);
+    expect(find.text('Parar de usar'), findsOneWidget);
     expect(find.text('Apagar checklist'), findsOneWidget);
 
-    await tester.tap(find.text('Não usar na empresa'));
+    await tester.tap(find.text('Parar de usar'));
     await tester.pumpAndSettle();
     expect(h.activeCalls, [false]);
     expect(find.text('Desligado · 3 perguntas'), findsOneWidget);

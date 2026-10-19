@@ -122,7 +122,7 @@
         "subsections": [
           {
             "title": "Mudar ou tirar um modelo de uso",
-            "content": "Toque no modelo para mudar o nome ou as perguntas; segure e arraste uma pergunta para mudar a ordem. No <strong>…</strong> do modelo, <strong>Não usar na empresa</strong> tira o modelo da lista na hora de adicionar à OS, sem apagar. As OS que já usaram o modelo não mudam."
+            "content": "Toque no modelo para mudar o nome ou as perguntas; segure e arraste uma pergunta para mudar a ordem. No <strong>…</strong> do modelo, <strong>Parar de usar</strong> tira o modelo da lista na hora de adicionar à OS, sem apagar. As OS que já usaram o modelo não mudam."
           }
         ],
         "warningCard": {
@@ -414,7 +414,7 @@
         "subsections": [
           {
             "title": "Change a template or stop using it",
-            "content": "Tap the template to change the name or questions; touch and hold a question and drag it to reorder. In the template’s <strong>…</strong>, <strong>Stop using in the company</strong> takes it off the list when adding to an order, without deleting it. Orders that already used it don’t change."
+            "content": "Tap the template to change the name or questions; touch and hold a question and drag it to reorder. In the template’s <strong>…</strong>, <strong>Stop using</strong> takes it off the list when adding to an order, without deleting it. Orders that already used it don’t change."
           }
         ],
         "warningCard": {
@@ -706,7 +706,7 @@
         "subsections": [
           {
             "title": "Cambiar una plantilla o dejar de usarla",
-            "content": "Toca la plantilla para cambiar el nombre o las preguntas; mantén presionada una pregunta y arrástrala para cambiar el orden. En el <strong>…</strong> de la plantilla, <strong>No usar en la empresa</strong> la saca de la lista al agregar a la OS, sin borrarla. Las OS que ya la usaron no cambian."
+            "content": "Toca la plantilla para cambiar el nombre o las preguntas; mantén presionada una pregunta y arrástrala para cambiar el orden. En el <strong>…</strong> de la plantilla, <strong>Dejar de usar</strong> la saca de la lista al agregar a la OS, sin borrarla. Las OS que ya la usaron no cambian."
           }
         ],
         "warningCard": {

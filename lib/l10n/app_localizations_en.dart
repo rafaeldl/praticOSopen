@@ -4424,7 +4424,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistSaveError => 'Couldn\'t save the checklist. Try again.';
 
   @override
-  String get checklistStopUsing => 'Stop using in the company';
+  String get checklistStopUsing => 'Stop using';
 
   @override
   String get checklistUseAgain => 'Use again';

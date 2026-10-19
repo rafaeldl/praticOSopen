@@ -4432,7 +4432,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo guardar el checklist. Inténtalo de nuevo.';
 
   @override
-  String get checklistStopUsing => 'No usar en la empresa';
+  String get checklistStopUsing => 'Dejar de usar';
 
   @override
   String get checklistUseAgain => 'Volver a usar';
