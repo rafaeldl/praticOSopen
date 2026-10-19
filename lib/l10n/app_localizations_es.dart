@@ -5642,4 +5642,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get nfseAutoErrorTaxId =>
       'El cliente no tiene documento fiscal registrado.';
+
+  @override
+  String recurringOrdersTitle(String orders) {
+    return '$orders que se repiten';
+  }
 }

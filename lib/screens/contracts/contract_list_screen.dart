@@ -13,6 +13,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 
 enum _ContractTab { active, ended }
 
@@ -77,7 +78,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
       child: CustomScrollView(
         slivers: [
           AppNavBar(
-            largeTitle: Text(l10n.contracts),
+            largeTitle: Text(contractsTitleOf(context)),
             previousTitle: l10n.myCompany,
             trailing: GlassBarButton(
               key: const ValueKey('contract_new'),

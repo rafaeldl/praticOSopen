@@ -5624,4 +5624,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseAutoErrorTaxId => 'O cliente não tem CPF ou CNPJ no cadastro.';
+
+  @override
+  String recurringOrdersTitle(String orders) {
+    return '$orders que se repetem';
+  }
 }

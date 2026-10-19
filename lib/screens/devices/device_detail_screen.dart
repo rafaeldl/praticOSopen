@@ -22,6 +22,7 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
 
 /// Vehicle (device) screen (`/device_detail`, arguments `device` and
@@ -476,7 +477,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         final format = FormatService()..setLocale(l10n.localeName);
         return SliverList(
           delegate: SliverChildListDelegate([
-            SectionLabel(l10n.contracts),
+            SectionLabel(contractsTitleOf(context)),
             for (final order in contracts)
               AppListRow(
                 leading: Icon(

@@ -2709,5 +2709,10 @@
   "nfseAutoIssueCompletedHint": "Sai sozinha quando a OS é concluída, antes de receber.",
   "nfseHeadAutoError": "A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.",
   "nfseAutoReasonLabel": "Por que não saiu",
-  "nfseAutoErrorTaxId": "O cliente não tem CPF ou CNPJ no cadastro."
+  "nfseAutoErrorTaxId": "O cliente não tem CPF ou CNPJ no cadastro.",
+  "recurringOrdersTitle": "{orders} que se repetem",
+  "@recurringOrdersTitle": {
+    "description": "Recurring orders title when the segment already names each order Contract",
+    "placeholders": { "orders": { "type": "String" } }
+  }
 }

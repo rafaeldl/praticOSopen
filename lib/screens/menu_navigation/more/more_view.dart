@@ -6,6 +6,7 @@ import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 
 /// Where a row of the profile screen (former "Mais" tab) leads.
 enum MoreDestination {
@@ -127,7 +128,7 @@ class MoreView extends StatelessWidget {
       case MoreDestination.customers:
         return l10n.customers;
       case MoreDestination.contracts:
-        return l10n.contracts;
+        return contractsTitleOf(context);
       case MoreDestination.company:
         return l10n.yourCompany;
       case MoreDestination.team:
