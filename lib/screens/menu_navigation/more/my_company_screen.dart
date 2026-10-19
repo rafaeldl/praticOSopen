@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
@@ -11,6 +10,7 @@ import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/services/onboarding_service.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
 
 /// Company switches of "Como você trabalha" besides "Valores e cobrança",
