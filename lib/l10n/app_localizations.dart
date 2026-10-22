@@ -4462,6 +4462,18 @@ abstract class AppLocalizations {
   /// **'Pode deixar em branco: o item fica sem valor e fora do total.'**
   String get orderItemPriceHint;
 
+  /// No description provided for @orderItemDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get orderItemDescription;
+
+  /// No description provided for @orderItemDescriptionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional: o que é só deste item, como a peça ou o lado. Aparece na OS e no PDF.'**
+  String get orderItemDescriptionHint;
+
   /// No description provided for @orderItemQuantity.
   ///
   /// In pt, this message translates to:

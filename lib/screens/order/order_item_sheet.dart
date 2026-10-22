@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
@@ -9,30 +10,40 @@ import 'package:praticos/theme/app_typography.dart';
 
 /// Result of [OrderItemSheet].
 class OrderItemEdit {
-  const OrderItemEdit({this.value, this.quantity = 1, this.remove = false});
+  const OrderItemEdit({
+    this.value,
+    this.quantity = 1,
+    this.description,
+    this.remove = false,
+  });
 
   /// Null means "sem valor" (left out of the total).
   final double? value;
   final int quantity;
 
+  /// What only this line has ("para-choque dianteiro"); null when blank.
+  final String? description;
+
   /// "Tirar da OS".
   final bool remove;
 }
 
-/// Adjusts one item of the order: price (blank = "sem valor"), quantity
-/// (products only) and "Tirar da OS". Pops with an [OrderItemEdit], or null
+/// Adjusts one item of the order: description (which part, which side),
+/// price (blank = "sem valor"), quantity (products only) and "Tirar da OS". Pops with an [OrderItemEdit], or null
 /// when cancelled.
 class OrderItemSheet extends StatefulWidget {
   const OrderItemSheet({
     super.key,
     required this.name,
     required this.value,
+    this.description,
     this.quantity,
     this.showPrice = true,
   });
 
   final String name;
   final double? value;
+  final String? description;
 
   /// Null for services (no quantity).
   final int? quantity;
@@ -48,10 +59,18 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late double? _value = widget.value;
   late int _quantity = widget.quantity ?? 1;
+  late String? _description = widget.description;
 
   void _done() {
     _formKey.currentState?.save();
-    Navigator.pop(context, OrderItemEdit(value: _value, quantity: _quantity));
+    Navigator.pop(
+      context,
+      OrderItemEdit(
+        value: _value,
+        quantity: _quantity,
+        description: _description,
+      ),
+    );
   }
 
   @override
@@ -67,6 +86,20 @@ class _OrderItemSheetState extends State<OrderItemSheet> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.blockMargin,
+              ),
+              child: AppFormField(
+                label: l10n.orderItemDescription,
+                initialValue: widget.description,
+                hint: l10n.orderItemDescriptionHint,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 3,
+                onSaved: (text) =>
+                    _description = text.trim().isEmpty ? null : text.trim(),
+              ),
+            ),
             if (widget.showPrice)
               Padding(
                 padding: const EdgeInsets.symmetric(

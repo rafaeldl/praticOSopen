@@ -2429,6 +2429,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Pode deixar em branco: o item fica sem valor e fora do total.';
 
   @override
+  String get orderItemDescription => 'Descrição';
+
+  @override
+  String get orderItemDescriptionHint =>
+      'Opcional: o que é só deste item, como a peça ou o lado. Aparece na OS e no PDF.';
+
+  @override
   String get orderItemQuantity => 'Quantidade';
 
   @override

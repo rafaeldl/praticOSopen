@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
@@ -922,9 +923,7 @@ void main() {
       expect(registration.customers, isEmpty);
     });
 
-    testWidgets('plate not registered: new vehicle saved on ✓', (
-      tester,
-    ) async {
+    testWidgets('plate not registered: new vehicle saved on ✓', (tester) async {
       final store = OrderStore();
       final registration = FakeRegistration();
       await _pump(
@@ -1350,6 +1349,40 @@ void main() {
       await tester.pumpAndSettle();
       expect(store.services, isEmpty);
       expect(find.text('Troca de óleo'), findsNothing);
+    });
+
+    testWidgets('the item sheet writes the description of the line', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(tester, screen(store));
+      await tester.tap(find.byKey(const ValueKey('new_order_add_item')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      expect(find.text('Descrição'), findsOneWidget);
+      final description = find.descendant(
+        of: find.widgetWithText(AppFormField, 'Descrição'),
+        matching: find.byType(CupertinoTextField),
+      );
+      await tester.enterText(description, 'Eixo dianteiro');
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
+
+      expect(store.services!.single.description, 'Eixo dianteiro');
+      expect(find.textContaining('Eixo dianteiro'), findsOneWidget);
+
+      // Opens again with what was written; blank takes it out.
+      await tester.tap(find.text('Alinhamento'));
+      await tester.pumpAndSettle();
+      expect(find.text('Eixo dianteiro'), findsWidgets);
+      await tester.enterText(description, '');
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
+      expect(store.services!.single.description, isNull);
     });
 
     testWidgets('exact name match hides the create row', (tester) async {

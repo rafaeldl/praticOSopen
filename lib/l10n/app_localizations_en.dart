@@ -2430,6 +2430,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can leave it blank: the item has no price and stays out of the total.';
 
   @override
+  String get orderItemDescription => 'Description';
+
+  @override
+  String get orderItemDescriptionHint =>
+      'Optional: what is specific to this item, such as the part or the side. Shows on the order and the PDF.';
+
+  @override
   String get orderItemQuantity => 'Quantity';
 
   @override

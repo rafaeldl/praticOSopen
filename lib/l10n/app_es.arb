@@ -1119,6 +1119,8 @@
   },
   "orderItemPrice": "Precio",
   "orderItemPriceHint": "Puede dejarlo en blanco: el ítem queda sin valor y fuera del total.",
+  "orderItemDescription": "Descripción",
+  "orderItemDescriptionHint": "Opcional: lo propio de este ítem, como la pieza o el lado. Aparece en la OS y en el PDF.",
   "orderItemQuantity": "Cantidad",
   "orderItemLess": "Uno menos",
   "orderItemMore": "Uno más",

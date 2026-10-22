@@ -546,6 +546,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       (_) => OrderItemSheet(
         name: _serviceName(item),
         value: item.value,
+        description: item.service == null ? null : item.description,
         showPrice: _permissions.canViewPrices(),
       ),
     );
@@ -555,6 +556,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       return;
     }
     item.value = edit.value;
+    if (item.service != null) item.description = edit.description;
     _store.updateOrder();
   }
 
@@ -565,6 +567,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       (_) => OrderItemSheet(
         name: _productName(item),
         value: item.value,
+        description: item.product == null ? null : item.description,
         quantity: item.quantity ?? 1,
         showPrice: _permissions.canViewPrices(),
       ),
@@ -574,6 +577,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       _store.deleteProduct(index);
       return;
     }
+    if (item.product != null) item.description = edit.description;
     item
       ..value = edit.value
       ..quantity = edit.quantity
@@ -584,6 +588,18 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String _serviceName(OrderService s) => s.service?.name ?? s.description ?? '';
 
   String _productName(OrderProduct p) => p.product?.name ?? p.description ?? '';
+
+  /// The description written for this line ("para-choque dianteiro"), shown
+  /// under the name. Null when the description already is the name.
+  String? _serviceDetail(OrderService s) =>
+      s.service == null || (s.description?.isEmpty ?? true)
+      ? null
+      : s.description;
+
+  String? _productDetail(OrderProduct p) =>
+      p.product == null || (p.description?.isEmpty ?? true)
+      ? null
+      : p.description;
 
   // ─── Status ──────────────────────────────────────────────────────────────
 
@@ -2156,7 +2172,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           FormRow(
             icon: CupertinoIcons.wrench,
             title: _serviceName(services[i]),
-            subtitle: l10n.orderItemKindService,
+            subtitle: [
+              ?_serviceDetail(services[i]),
+              l10n.orderItemKindService,
+            ].join(' · '),
             value: price(services[i].value),
             trailing: noPrice(services[i].value),
             marked: _marked.contains(services[i]),
@@ -2167,9 +2186,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           FormRow(
             icon: CupertinoIcons.cube_box,
             title: _productName(products[i]),
-            subtitle: (products[i].quantity ?? 1) > 1
-                ? '${l10n.orderItemKindProduct} · ${l10n.orderItemQuantityValue('${products[i].quantity}')}'
-                : l10n.orderItemKindProduct,
+            subtitle: [
+              ?_productDetail(products[i]),
+              l10n.orderItemKindProduct,
+              if ((products[i].quantity ?? 1) > 1)
+                l10n.orderItemQuantityValue('${products[i].quantity}'),
+            ].join(' · '),
             value: price(productLineTotal(products[i])),
             trailing: noPrice(products[i].value),
             marked: _marked.contains(products[i]),
@@ -2991,9 +3013,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   /// One item of "Serviços e peças": name in bold with the value at the
-  /// right; "peça" under products only.
+  /// right; under it the description of the line, then "peça" (products
+  /// only).
   Widget _itemRow({
     required String title,
+    String? detail,
     String? kind,
     String? value,
     bool noPrice = false,
@@ -3049,6 +3073,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                   ],
                 ],
               ),
+              if (detail != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    detail,
+                    style: AppTypography.body.copyWith(color: text),
+                  ),
+                ),
               if (kind != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
@@ -3068,6 +3100,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final value = services[i].value;
     return _itemRow(
       title: _serviceName(services[i]),
+      detail: _serviceDetail(services[i]),
       value: money && value != null ? _format.formatCurrency(value) : null,
       noPrice: money && value == null,
       marked: _marked.contains(services[i]),
@@ -3082,6 +3115,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final total = productLineTotal(product);
     return _itemRow(
       title: _productName(product),
+      detail: _productDetail(product),
       kind: quantity > 1
           ? '${l10n.orderItemKindPart} · ${l10n.orderItemQuantityValue('$quantity')}'
           : l10n.orderItemKindPart,
