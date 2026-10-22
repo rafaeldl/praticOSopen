@@ -208,12 +208,16 @@ class _LineBefore {
   _LineBefore(this.line)
     : value = line is OrderProduct ? line.value : (line as OrderService).value,
       quantity = line is OrderProduct ? line.quantity : null,
-      total = line is OrderProduct ? line.total : null;
+      total = line is OrderProduct ? line.total : null,
+      description = line is OrderProduct
+          ? line.description
+          : (line as OrderService).description;
 
   final Object line;
   final double? value;
   final int? quantity;
   final double? total;
+  final String? description;
 
   void restore() {
     final l = line;
@@ -221,9 +225,12 @@ class _LineBefore {
       l
         ..value = value
         ..quantity = quantity
-        ..total = total;
+        ..total = total
+        ..description = description;
     } else if (l is OrderService) {
-      l.value = value;
+      l
+        ..value = value
+        ..description = description;
     }
   }
 }
@@ -1577,14 +1584,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         services: [
           for (final s in services)
             AiOrderLine(
-              name: s.service?.name ?? s.description ?? '',
+              name: _serviceName(s),
+              description: _serviceDetail(s),
               value: s.value,
             ),
         ],
         products: [
           for (final p in products)
             AiOrderLine(
-              name: p.product?.name ?? p.description ?? '',
+              name: _productName(p),
+              description: _productDetail(p),
               value: p.value,
               quantity: p.quantity,
             ),
@@ -1654,17 +1663,24 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         if (!toRemove.any((l) => identical(l, line))) toRemove.add(line);
         continue;
       }
-      if (change.value == null && change.quantity == null) continue;
+      if (change.value == null &&
+          change.quantity == null &&
+          change.description == null) {
+        continue;
+      }
       undo.changed.add(_LineBefore(line));
       if (line is OrderProduct) {
         line
           ..value = change.value ?? line.value
-          ..quantity = change.quantity ?? line.quantity;
+          ..quantity = change.quantity ?? line.quantity
+          ..description = change.description ?? line.description;
         line.total = line.value == null
             ? null
             : line.value! * (line.quantity ?? 1);
       } else if (line is OrderService) {
-        line.value = change.value ?? line.value;
+        line
+          ..value = change.value ?? line.value
+          ..description = change.description ?? line.description;
       }
       _marked.add(line);
       changed = true;
@@ -1930,6 +1946,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..product = (ProductAggr()
             ..id = item.catalogId
             ..name = item.name)
+          ..description = item.description
           ..value = item.value
           ..quantity = item.quantity
           ..total = item.value == null ? null : item.value! * item.quantity;
@@ -1941,6 +1958,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ..service = (ServiceAggr()
             ..id = item.catalogId
             ..name = item.name)
+          ..description = item.description
           ..value = item.value;
         _store.addService(line);
         _marked.add(line);

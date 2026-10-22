@@ -33,6 +33,7 @@ class AiDraftItem {
   const AiDraftItem({
     required this.kind,
     required this.name,
+    this.description,
     this.value,
     this.quantity = 1,
     this.catalogId,
@@ -42,6 +43,9 @@ class AiDraftItem {
   /// 'service' or 'product'.
   final String kind;
   final String name;
+
+  /// What only this line has ("Para-choque dianteiro"), apart from the name.
+  final String? description;
 
   /// Null = "sem valor".
   final double? value;
@@ -57,6 +61,7 @@ class AiDraftItem {
   factory AiDraftItem.fromJson(Map<String, dynamic> json) => AiDraftItem(
     kind: json['kind'] == 'product' ? 'product' : 'service',
     name: json['name'] as String? ?? '',
+    description: _text(json['description']),
     value: (json['value'] as num?)?.toDouble(),
     quantity: (json['quantity'] as num?)?.toInt() ?? 1,
     catalogId: json['catalogId'] as String?,
@@ -70,9 +75,15 @@ class AiDraftItem {
 /// One line already in the order, sent so the assistant can change or remove
 /// it ("a pintura é 300", "tira a lavação") instead of adding a new one.
 class AiOrderLine {
-  const AiOrderLine({required this.name, this.value, this.quantity});
+  const AiOrderLine({
+    required this.name,
+    this.description,
+    this.value,
+    this.quantity,
+  });
 
   final String name;
+  final String? description;
   final double? value;
 
   /// Parts only.
@@ -80,6 +91,8 @@ class AiOrderLine {
 
   Map<String, dynamic> toJson() => {
     'name': name,
+    if (_text(description) case final d?)
+      'description': d.length > 200 ? d.substring(0, 200) : d,
     if (value != null) 'value': value,
     if (quantity != null && quantity! > 0) 'quantity': quantity,
   };
@@ -103,6 +116,7 @@ class AiOrderSnapshot {
             name: l.name.trim().length > 200
                 ? l.name.trim().substring(0, 200)
                 : l.name.trim(),
+            description: l.description,
             value: l.value,
             quantity: l.quantity,
           ).toJson(),
@@ -141,9 +155,11 @@ class AiDraftChange {
     this.candidates = const [],
     this.value,
     this.quantity,
+    this.description,
   });
 
-  /// True = take the line out; false = change [value] and/or [quantity].
+  /// True = take the line out; false = change [value], [quantity] and/or
+  /// [description].
   final bool remove;
   final String name;
 
@@ -152,6 +168,7 @@ class AiDraftChange {
   final List<AiLineRef> candidates;
   final double? value;
   final int? quantity;
+  final String? description;
 
   static AiDraftChange? fromJson(Map<String, dynamic> json) {
     final action = json['action'];
@@ -169,9 +186,14 @@ class AiDraftChange {
       candidates: line == null ? candidates : const [],
       value: (json['value'] as num?)?.toDouble(),
       quantity: (json['quantity'] as num?)?.toInt(),
+      description: _text(json['description']),
     );
   }
 }
+
+/// Trimmed text, or null when blank or not a string.
+String? _text(Object? value) =>
+    value is String && value.trim().isNotEmpty ? value.trim() : null;
 
 /// Customer registered in the company that the assistant matched.
 class AiCustomerHit {
@@ -283,7 +305,8 @@ class AiOrderDraft {
           ? const []
           : [
               for (final a in (customer?['alternatives'] as List? ?? const []))
-                if (a is Map) AiCustomerHit.fromJson(Map<String, dynamic>.from(a)),
+                if (a is Map)
+                  AiCustomerHit.fromJson(Map<String, dynamic>.from(a)),
             ],
       device: deviceMatch == null ? null : AiDeviceHit.fromJson(deviceMatch),
       deviceGuessName: deviceGuess?['name'] as String?,
@@ -293,7 +316,8 @@ class AiOrderDraft {
           ? const []
           : [
               for (final a in (device?['alternatives'] as List? ?? const []))
-                if (a is Map) AiDeviceHit.fromJson(Map<String, dynamic>.from(a)),
+                if (a is Map)
+                  AiDeviceHit.fromJson(Map<String, dynamic>.from(a)),
             ],
       items: [
         for (final i in (json['items'] as List? ?? const []))

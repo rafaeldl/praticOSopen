@@ -108,9 +108,11 @@ O app manda as linhas que estão na tela (`order.services` e `order.products`: n
 
 | `action` | Quando | Campos |
 |---|---|---|
-| `add` | Item novo ("põe um alinhamento") | `kind`, `name`, `value`, `quantity` |
-| `update` | Mudar valor ou quantidade de uma linha ("a pintura é 300", "são 3 litros") | `line` + `value`/`quantity` |
+| `add` | Item novo ("põe um alinhamento") | `kind`, `name`, `description`, `value`, `quantity` |
+| `update` | Mudar valor, quantidade ou descrição de uma linha ("a pintura é 300", "são 3 litros", "a pintura é no capô") | `line` + `value`/`quantity`/`description` |
 | `remove` | Tirar uma linha ("tira a lavação") | `line` |
+
+**Descrição:** a parte ou o detalhe do item vai em `description`, e o nome fica o do catálogo ("pintura do para-choque" → `Pintura` / `Para-choque`; "farol esquerdo" → `Farol` / `Esquerdo`). A descrição também ajuda a achar a linha ("a pintura do capô é 400" com duas Pintura). No app, entra no campo "Descrição" do item, aparece embaixo do nome e sai no PDF.
 
 Quando duas linhas servem ("a pintura" com duas Pintura na OS), o modelo deixa `line: null` e lista as duas em `candidates`.
 
@@ -122,6 +124,10 @@ No app (`_applyDraft` em `order_screen_v2.dart`):
 - **Tirar:** tira na hora. É pedido do usuário, não ideia da IA, e o "Desfazer" põe de volta no mesmo lugar.
 - **Duas linhas iguais:** abre a tela de escolher (`pickOne`) com a pergunta "Qual Pintura?" e o valor de cada uma. Voltar sem escolher ignora essa mudança.
 - O app guarda as linhas que mandou; se a lista mudar enquanto a IA responde, a mudança vai para a linha certa ou é ignorada.
+
+### Teste de descrição (2026-10-22)
+
+6 frases de funilaria/pintura (parte do carro no item, dois itens com parte, sem parte, duas Pintura em partes diferentes, mudar a parte, mudar o valor pela parte), 2 rodadas. Claude 12/12; Gemini 11/12 (numa rodada não mudou a descrição, sem aplicar nada errado).
 
 ### Teste de intenção (2026-10-15)
 

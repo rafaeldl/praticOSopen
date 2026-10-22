@@ -795,6 +795,58 @@ void main() {
       expect(store.order!.total, closeTo(191, 0.001));
     });
 
+    testWidgets(
+      '"pintura do para-choque": the description goes with the line',
+      (tester) async {
+        final store = OrderStore();
+        final assistant = FakeAssistant(
+          const AiOrderDraft(
+            items: [
+              AiDraftItem(
+                kind: 'service',
+                name: 'Pintura',
+                description: 'Para-choque dianteiro',
+                value: 300,
+                catalogId: 's9',
+              ),
+            ],
+          ),
+        );
+        await _pump(tester, assistantScreen(store, assistant));
+        await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+        await tester.pumpAndSettle();
+
+        expect(store.services!.single.service?.name, 'Pintura');
+        expect(store.services!.single.description, 'Para-choque dianteiro');
+        expect(find.textContaining('Para-choque dianteiro'), findsOneWidget);
+
+        // "a pintura é na porta": the line goes out with its description and
+        // only the description changes; "Desfazer" puts it back.
+        assistant.draft = const AiOrderDraft(
+          changes: [
+            AiDraftChange(
+              remove: false,
+              name: 'Pintura',
+              line: AiLineRef(kind: 'service', index: 0),
+              description: 'Porta traseira',
+            ),
+          ],
+        );
+        await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+        await tester.pumpAndSettle();
+        final sent = assistant.orders.last!.services.single;
+        expect(sent.name, 'Pintura');
+        expect(sent.description, 'Para-choque dianteiro');
+        expect(sent.toJson()['description'], 'Para-choque dianteiro');
+        expect(store.services!.single.description, 'Porta traseira');
+        expect(store.services!.single.value, 300);
+
+        await tester.tap(find.text('Desfazer'));
+        await tester.pumpAndSettle();
+        expect(store.services!.single.description, 'Para-choque dianteiro');
+      },
+    );
+
     testWidgets('two lines with the same name: asks which one', (tester) async {
       final store = OrderStore();
       final assistant = FakeAssistant(

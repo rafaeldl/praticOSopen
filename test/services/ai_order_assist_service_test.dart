@@ -78,6 +78,7 @@ void main() {
               {
                 'kind': 'service',
                 'name': 'Pintura de capô',
+                'description': ' Lado direito ',
                 'value': 500,
                 'quantity': 1,
                 'catalogId': 's2',
@@ -103,6 +104,8 @@ void main() {
       expect(draft.customerGuess, 'Ana');
       expect(draft.device!.id, 'd1');
       expect(draft.items.first.value, 500.0);
+      expect(draft.items.first.description, 'Lado direito');
+      expect(draft.items.last.description, isNull);
       expect(draft.items.first.alternatives.single.name, 'Pintura');
       expect(draft.items.last.isProduct, isTrue);
       expect(draft.items.last.value, isNull);
