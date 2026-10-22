@@ -153,6 +153,20 @@ describe('prompt', () => {
     expect(text).toContain('P1: Óleo, value 40, quantity 4');
     expect(buildUserText({ text: 'x' }, CATALOG)).toContain('(none: new order)');
   });
+
+  it('shows the description of a line so two "Pintura" can be told apart', () => {
+    const text = buildUserText(
+      { text: 'x', order: { services: [{ name: 'Pintura', description: 'Para-choque', value: 300 }], products: [] } },
+      CATALOG,
+    );
+    expect(text).toContain('S1: Pintura (Para-choque), value 300');
+  });
+
+  it('asks for the description apart from the name', () => {
+    expect(buildSystemPrompt('pt')).toContain('name "Pintura", description "Para-choque dianteiro"');
+    const operation = (LLM_RESPONSE_SCHEMA.properties as any).operations.items.properties;
+    expect(operation.description).toEqual({ type: 'string' });
+  });
 });
 
 describe('runOrderAssist', () => {
@@ -161,7 +175,7 @@ describe('runOrderAssist', () => {
     customer: { name: 'Revenda Sul' },
     device: { name: 'Classic', serial: 'nxs 8620', manufacturer: 'Chevrolet' },
     operations: [
-      { action: 'add', kind: 'service', name: 'pintura de capo', value: 500 },
+      { action: 'add', kind: 'service', name: 'pintura de capo', description: 'Lado direito', value: 500 },
       { action: 'add', kind: 'service', name: 'polimento' },
       { action: 'add', kind: 'product', name: 'Para-choque dianteiro', quantity: 2 },
       { action: 'add', kind: 'service', name: 'Alinhamento' },
@@ -205,7 +219,7 @@ describe('runOrderAssist', () => {
     expect(draft.device?.match?.id).toBe('d1');
     expect(draft.device?.guess?.serial).toBe('NXS8620');
     expect(draft.items).toEqual([
-      expect.objectContaining({ name: 'Pintura de capô', catalogId: 's2', value: 500, quantity: 1 }),
+      expect.objectContaining({ name: 'Pintura de capô', description: 'Lado direito', catalogId: 's2', value: 500, quantity: 1 }),
       expect.objectContaining({ name: 'Polimento', catalogId: 's1', value: 450 }),
       expect.objectContaining({ kind: 'product', catalogId: 'p1', value: 850, quantity: 2 }),
       expect.objectContaining({ name: 'Alinhamento', catalogId: null, value: null }),
@@ -301,6 +315,13 @@ describe('runOrderAssist', () => {
       ]);
     });
 
+    it('"o farol é o esquerdo" changes only the description', async () => {
+      const draft = await run([{ action: 'update', line: 'S2', kind: 'service', name: 'Pintura', description: ' Capô ' }]);
+      expect(draft.changes).toEqual([
+        { action: 'update', line: { kind: 'service', index: 1 }, candidates: [], name: 'Pintura', description: 'Capô' },
+      ]);
+    });
+
     it('quantity of a part is rounded and kept at least 1', async () => {
       const draft = await run([{ action: 'update', line: 'P1', kind: 'product', name: 'Óleo', quantity: 2.6 }]);
       expect(draft.changes[0]).toMatchObject({ line: { kind: 'product', index: 0 }, quantity: 3 });
@@ -342,7 +363,7 @@ describe('runOrderAssist', () => {
       });
       const draft = await runOrderAssist('c1', { text: 'x' }, d);
       expect(draft.changes).toEqual([]);
-      expect(draft.items).toEqual([expect.objectContaining({ name: 'Polimento', catalogId: 's1' })]);
+      expect(draft.items).toEqual([expect.objectContaining({ name: 'Polimento', catalogId: 's1', description: null })]);
     });
   });
 });

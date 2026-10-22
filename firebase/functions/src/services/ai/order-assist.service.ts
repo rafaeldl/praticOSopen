@@ -38,6 +38,8 @@ const MAX_OPERATIONS = 30;
 const orderLineSchema = z
   .object({
     name: z.string().trim().min(1).max(200),
+    /** What only this line has ("para-choque dianteiro"). */
+    description: z.string().trim().max(200).optional(),
     value: z.number().finite().nullable().optional(),
     quantity: z.number().finite().positive().optional(),
   })
@@ -122,6 +124,8 @@ const draftOperationSchema = z.object({
     .catch([]),
   kind: z.enum(['service', 'product']).catch('service'),
   name: z.string().trim().min(1).max(200),
+  /** What only this line has: the part, the side, the color ("Para-choque dianteiro"). */
+  description: optionalText,
   value: z.number().finite().nonnegative().nullable().optional(),
   quantity: z.number().finite().positive().nullable().optional(),
 });
@@ -167,6 +171,7 @@ export const LLM_RESPONSE_SCHEMA: Record<string, unknown> = {
           candidates: { type: 'array', items: STRING },
           kind: { type: 'string', enum: ['service', 'product'] },
           name: STRING,
+          description: STRING,
           value: { type: ['number', 'null'] },
           quantity: { type: ['number', 'null'] },
         },
@@ -247,7 +252,10 @@ export function buildSystemPrompt(locale: string, deviceLabel?: string, today: s
     '  (S1, S2… services; P1, P2… parts). Each operation has an "action":',
     '  "add": a new service or part. Prefer the exact name from the catalog lists below when one clearly',
     '  matches; otherwise use a short name.',
-    '  "update": change the unit price ("value") and/or the "quantity" of a line already in the order. Set',
+    '  "description": what only this line has, such as the part, the side or the color, kept out of "name"',
+    '  ("pintura do para-choque dianteiro" → name "Pintura", description "Para-choque dianteiro"). Leave it out',
+    '  when nothing specific was said. An "update" may set it too ("o farol é o esquerdo").',
+    '  "update": change the unit price ("value"), the "quantity" and/or the "description" of a line already in the order. Set',
     '  "line" to its id, "name" to its name, and leave the field that does not change null.',
     '  "remove": take a line out of the order. Set "line" to its id and "name" to its name.',
     '  Never add again something that is already a line just because it was mentioned: change it or leave it.',
@@ -277,7 +285,8 @@ export function buildUserText(input: OrderAssistInput, catalog: CompanyCatalog):
     entries.map((l, i) => {
       const value = typeof l.value === 'number' ? `, value ${l.value}` : ', no value';
       const quantity = prefix === 'P' ? `, quantity ${l.quantity ?? 1}` : '';
-      return `${prefix}${i + 1}: ${l.name}${value}${quantity}`;
+      const description = l.description ? ` (${l.description})` : '';
+      return `${prefix}${i + 1}: ${l.name}${description}${value}${quantity}`;
     });
   const current = [...lines('S', input.order?.services ?? []), ...lines('P', input.order?.products ?? [])];
   const parts = [
@@ -376,6 +385,8 @@ export interface DraftItem {
   kind: 'service' | 'product';
   /** Catalog name when matched, else what the model said. */
   name: string;
+  /** What only this line has ("Para-choque dianteiro"); null when nothing was said. */
+  description: string | null;
   /** Price to put in the order: spoken value, else catalog value, else null ("sem valor"). */
   value: number | null;
   quantity: number;
@@ -401,6 +412,8 @@ export interface DraftChange {
   value?: number;
   /** New quantity (parts only), when it changes. */
   quantity?: number;
+  /** New description of the line, when it changes. */
+  description?: string;
 }
 
 export interface OrderDraft {
@@ -449,6 +462,7 @@ function toItem(item: LlmDraft['operations'][number], catalog: CompanyCatalog): 
   return {
     kind: item.kind,
     name: match?.name ?? item.name,
+    description: item.description?.slice(0, 200) ?? null,
     value: spoken ?? catalogValue,
     quantity,
     catalogId: match?.id ?? null,
@@ -481,7 +495,8 @@ export function toChanges(operations: LlmDraft['operations'], order: OrderAssist
       if (typeof op.quantity === 'number' && (line?.kind ?? 'product') === 'product') {
         change.quantity = Math.max(1, Math.round(op.quantity));
       }
-      if (change.value === undefined && change.quantity === undefined) return [];
+      if (op.description) change.description = op.description.slice(0, 200);
+      if (change.value === undefined && change.quantity === undefined && change.description === undefined) return [];
     }
     return [change];
   });

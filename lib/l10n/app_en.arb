@@ -1119,6 +1119,8 @@
   },
   "orderItemPrice": "Price",
   "orderItemPriceHint": "You can leave it blank: the item has no price and stays out of the total.",
+  "orderItemDescription": "Description",
+  "orderItemDescriptionHint": "Optional: what is specific to this item, such as the part or the side. Shows on the order and the PDF.",
   "orderItemQuantity": "Quantity",
   "orderItemLess": "One less",
   "orderItemMore": "One more",

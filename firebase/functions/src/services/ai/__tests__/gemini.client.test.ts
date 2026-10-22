@@ -22,6 +22,7 @@ describe('toGeminiSchema', () => {
               candidates: { type: 'ARRAY', items: { type: 'STRING' } },
               kind: { type: 'STRING', enum: ['service', 'product'] },
               name: { type: 'STRING' },
+              description: { type: 'STRING' },
               value: { type: 'NUMBER', nullable: true },
               quantity: { type: 'NUMBER', nullable: true },
             },
