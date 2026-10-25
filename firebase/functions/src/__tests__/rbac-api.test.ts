@@ -26,7 +26,9 @@ jest.mock('../services/order.service', () => ({
   getOrder: jest.fn(async (_c: string, id: string) => ({
     id, number: 1, status: 'approved', total: 100, discount: 0, paidAmount: 0,
     customer: { id: 'cust1', name: 'Ana', phone: '+5511999990000' },
-    createdBy: { id: 'ghost', name: 'Ghost' },
+    services: [{ service: { id: 's1', name: 'Polimento', value: 80 }, value: 100 }],
+    // `own_<uid>` is an order created by that user; any other id, by someone else.
+    createdBy: id.startsWith('own_') ? { id: id.slice(4), name: 'Own' } : { id: 'ghost', name: 'Ghost' },
   })),
   createOrder: jest.fn(async () => ({ id: 'new1', number: 2, status: 'quote' })),
   updateOrder: jest.fn(async () => true),
@@ -136,6 +138,7 @@ import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
 import nfseRoutes from '../routes/v1/nfse.routes';
 import aiRoutes from '../routes/v1/ai.routes';
 import appPermissions from './rbac/app-permissions.json';
+import { APP_ROLE_PERMISSIONS, FINANCIAL_APP_PERMISSIONS } from '../middleware/app-permission.middleware';
 import { API_CASES, API_ROLES, type ApiCase, type ApiRole, type CompanyKey } from './rbac/api-matrix';
 
 const UID: Record<ApiRole, string> = {
@@ -200,6 +203,13 @@ describe('API RBAC matrix (offline checks)', () => {
   const appRoleOf = (role: ApiRole): AppRole => (role === 'owner' ? 'admin' : role);
   const known = new Set(Object.values(appPermissions.roles).flat());
 
+  it('server permission table equals the app (permission.dart)', () => {
+    const sorted = (xs: readonly string[]) => [...xs].sort();
+    expect(Object.fromEntries(Object.entries(APP_ROLE_PERMISSIONS).map(([r, ps]) => [r, sorted(ps)])))
+      .toEqual(Object.fromEntries(Object.entries(appPermissions.roles).map(([r, ps]) => [r, sorted(ps)])));
+    expect(sorted(FINANCIAL_APP_PERMISSIONS)).toEqual(sorted(appPermissions.financialPermissions));
+  });
+
   it('case ids are unique', () => {
     const ids = API_CASES.map((c) => c.id);
     expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
@@ -252,8 +262,58 @@ describe('API RBAC matrix', () => {
   }
 });
 
-describe('Known auth gaps outside the matrix', () => {
-  it('GAP bug 1: botAuth accepts the public fallback key when BOT_API_KEY is unset (auth.middleware.ts:16)', async () => {
+describe('Consultant and technician on the orders they created', () => {
+  for (const role of ['consultant', 'technician'] as const) {
+    const id = `own_${UID[role]}`;
+    const call = (method: 'get' | 'post' | 'patch' | 'delete', path: string, body?: object) => {
+      const req = request(app)[method](path).set('Authorization', `Bearer ${UID[role]}`).set('X-Company-ID', 'c1');
+      return body ? req.send(body) : req;
+    };
+
+    it(`${role}: opens, edits and shares their own order`, async () => {
+      const results = {
+        get: (await call('get', `/v1/app/orders/${id}`)).status,
+        patch: (await call('patch', `/v1/app/orders/${id}`, { status: 'progress' })).status,
+        service: (await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1' })).status,
+        shareCreate: (await call('post', `/v1/app/orders/${id}/share`, { permissions: ['view'] })).status,
+        shareList: (await call('get', `/v1/app/orders/${id}/share`)).status,
+        shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/t1`)).status,
+      };
+      expect(results).toEqual({ get: 200, patch: 200, service: 200, shareCreate: 201, shareList: 200, shareRevoke: 200 });
+    });
+
+    it(`${role}: cannot set their own price (no editPrices)`, async () => {
+      const res = await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1', value: 1 });
+      expect(res.status).toBe(403);
+    });
+  }
+
+  it('technician sees no amounts in the order (no viewPrices)', async () => {
+    const res = await request(app).get('/v1/app/orders/own_tech1')
+      .set('Authorization', 'Bearer tech1').set('X-Company-ID', 'c1');
+    expect(res.status).toBe(200);
+    expect(res.body.data).not.toHaveProperty('total');
+    expect(res.body.data).not.toHaveProperty('paidAmount');
+    expect(res.body.data.services).toEqual([{ service: { id: 's1', name: 'Polimento' } }]);
+  });
+
+  it('consultant sees the amounts of their own order', async () => {
+    const res = await request(app).get('/v1/app/orders/own_cons1')
+      .set('Authorization', 'Bearer cons1').set('X-Company-ID', 'c1');
+    expect(res.body.data.total).toBe(100);
+    expect(res.body.data.services[0].value).toBe(100);
+  });
+
+  it('with values turned off nobody sees amounts, not even the owner', async () => {
+    const res = await request(app).get('/v1/app/orders/o1')
+      .set('Authorization', 'Bearer owner1').set('X-Company-ID', 'nofin');
+    expect(res.status).toBe(200);
+    expect(res.body.data).not.toHaveProperty('total');
+  });
+});
+
+describe('Auth checks outside the matrix', () => {
+  it('bug 1: botAuth refuses every key when BOT_API_KEY is unset', async () => {
     const saved = process.env.BOT_API_KEY;
     delete process.env.BOT_API_KEY;
     try {
@@ -284,16 +344,15 @@ describe('Known auth gaps outside the matrix', () => {
       const res = await request(bot).get('/')
         .set('X-API-Key', 'bot_praticos_dev_key')
         .set('X-WhatsApp-Number', '+55 11 99999-0000');
-      // When fixed (fail closed without BOT_API_KEY), expect 401/500 here and drop "GAP" from the title.
-      expect({ status: res.status, role: res.body.role, hint: 'GAP: chave padrão pública vira o usuário ligado ao número' })
-        .toEqual({ status: 200, role: 'admin', hint: expect.any(String) });
+      expect(res.status).toBe(401);
+      expect(res.body.role).toBeUndefined();
     } finally {
       if (saved === undefined) delete process.env.BOT_API_KEY;
       else process.env.BOT_API_KEY = saved;
     }
   });
 
-  it('GAP bug 4: apiKeyAuth accepts an MCP token as a full API key, as admin, without re-checking membership (auth.middleware.ts:47)', async () => {
+  it('bug 4: apiKeyAuth refuses MCP tokens and keys whose creator left the company', async () => {
     // Token minted by someone who is no longer in the company (no membership, no user doc).
     seed('apiKeys/k1', {
       key: 'mcp_abc', type: 'mcp', active: true, companyId: 'c1', userId: 'gone1', name: 'Claude',
@@ -307,9 +366,30 @@ describe('Known auth gaps outside the matrix', () => {
     expect(unknown.status).toBe(401); // control: the check runs
 
     const res = await request(api).post('/v1/customers').set('X-API-Key', 'mcp_abc').send({ name: 'X' });
-    // When fixed (apiKeyAuth rejects type 'mcp'), expect 401 here and drop "GAP" from the title.
-    expect({ status: res.status, hint: 'GAP: token MCP de quem saiu da empresa escreve em /v1/* como admin' })
-      .toEqual({ status: 201, hint: expect.any(String) });
+    expect(res.status).toBe(401);
+
+    // Even from someone still in the company, an MCP token is not an API key.
+    seed('apiKeys/k4', {
+      key: 'mcp_member', type: 'mcp', active: true, companyId: 'c1', userId: 'admin1', name: 'Claude',
+      permissions: ['read:all', 'write:all'],
+    });
+    const mcpMember = await request(api).post('/v1/customers').set('X-API-Key', 'mcp_member').send({ name: 'X' });
+    expect(mcpMember.status).toBe(401);
+
+    // Integration key: works while its creator is a member, stops when they leave.
+    seed('apiKeys/k2', {
+      key: 'int_abc', type: 'integration', active: true, companyId: 'c1', userId: 'admin1', name: 'ERP',
+      permissions: ['read:all', 'write:all'],
+    });
+    const member = await request(api).post('/v1/customers').set('X-API-Key', 'int_abc').send({ name: 'X' });
+    expect(member.status).toBe(201);
+
+    seed('apiKeys/k3', {
+      key: 'int_gone', type: 'integration', active: true, companyId: 'c1', userId: 'gone1', name: 'ERP',
+      permissions: ['read:all', 'write:all'],
+    });
+    const gone = await request(api).post('/v1/customers').set('X-API-Key', 'int_gone').send({ name: 'X' });
+    expect(gone.status).toBe(401);
   });
 });
 

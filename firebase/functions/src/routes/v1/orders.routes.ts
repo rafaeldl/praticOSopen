@@ -6,6 +6,12 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
+import {
+  can,
+  forbidden,
+  requireAppPermission,
+  requireOrderAccess,
+} from '../../middleware/app-permission.middleware';
 import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
@@ -26,7 +32,7 @@ const router: Router = Router();
  * GET /api/v1/orders
  * List orders with optional filtering
  */
-router.get('/', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/', requireAppPermission('viewAllOrders'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -41,6 +47,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     const paginationResult = validateInput(paginationSchema, req.query);
     const pagination = paginationResult.success ? paginationResult.data : { limit: 20, offset: 0 };
 
+    const showPrices = await can(req, res, 'viewPrices');
     const result = await orderService.listOrders(companyId, {
       status: req.query.status as OrderStatus,
       customerId: req.query.customerId as string,
@@ -60,7 +67,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
         customer: o.customer,
         device: o.device,
         status: o.status,
-        total: o.total,
+        total: showPrices ? o.total : undefined,
         dueDate: timestampToDate(o.dueDate)?.toISOString(),
         createdAt: timestampToDate(o.createdAt)?.toISOString(),
       })),
@@ -84,7 +91,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
  * GET /api/v1/orders/:id
  * Get a single order by ID
  */
-router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:id', requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -105,7 +112,20 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const remainingBalance = orderService.calculateRemainingBalance(order);
+    // Without viewPrices (technician, supervisor, or values turned off) no amounts
+    const showPrices = await can(req, res, 'viewPrices');
+    const remainingBalance = showPrices ? orderService.calculateRemainingBalance(order) : undefined;
+    const withoutValue = <T extends object>(items: T[] | undefined, aggr: 'service' | 'product') =>
+      showPrices ? items : items?.map((item) => {
+        const copy = { ...item } as Record<string, unknown>;
+        delete copy.value;
+        if (copy[aggr]) {
+          const inner = { ...(copy[aggr] as Record<string, unknown>) };
+          delete inner.value;
+          copy[aggr] = inner;
+        }
+        return copy;
+      });
 
     res.json({
       success: true,
@@ -114,12 +134,12 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
         number: order.number,
         customer: order.customer,
         device: order.device,
-        services: order.services,
-        products: order.products,
+        services: withoutValue(order.services, 'service'),
+        products: withoutValue(order.products, 'product'),
         status: order.status,
-        total: order.total,
-        discount: order.discount,
-        paidAmount: order.paidAmount,
+        total: showPrices ? order.total : undefined,
+        discount: showPrices ? order.discount : undefined,
+        paidAmount: showPrices ? order.paidAmount : undefined,
         remainingBalance,
         dueDate: timestampToDate(order.dueDate)?.toISOString(),
         createdAt: timestampToDate(order.createdAt)?.toISOString(),
@@ -139,7 +159,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/orders
  * Create a new order
  */
-router.post('/', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', requireAppPermission('createOrder'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -225,7 +245,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
  * PATCH /api/v1/orders/:id
  * Update an existing order
  */
-router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -301,7 +321,7 @@ router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/orders/:id/services
  * Add a service to an order
  */
-router.post('/:id/services', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/services', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -322,6 +342,12 @@ router.post('/:id/services', async (req: AuthenticatedRequest, res: Response) =>
           message: validation.errors.join(', '),
         },
       });
+      return;
+    }
+
+    // Without editPrices the catalog price is used: no value of one's own
+    if (validation.data.value !== undefined && !(await can(req, res, 'editPrices'))) {
+      forbidden(res, "Permission 'editPrices' is required");
       return;
     }
 
@@ -364,7 +390,7 @@ router.post('/:id/services', async (req: AuthenticatedRequest, res: Response) =>
  * POST /api/v1/orders/:id/products
  * Add a product to an order
  */
-router.post('/:id/products', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/products', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -385,6 +411,11 @@ router.post('/:id/products', async (req: AuthenticatedRequest, res: Response) =>
           message: validation.errors.join(', '),
         },
       });
+      return;
+    }
+
+    if (validation.data.value !== undefined && !(await can(req, res, 'editPrices'))) {
+      forbidden(res, "Permission 'editPrices' is required");
       return;
     }
 
@@ -428,7 +459,7 @@ router.post('/:id/products', async (req: AuthenticatedRequest, res: Response) =>
  * POST /api/v1/orders/:id/payments
  * Add a payment or discount to an order
  */
-router.post('/:id/payments', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/payments', requireAppPermission('chargeOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {

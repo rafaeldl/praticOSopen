@@ -5,6 +5,7 @@
 
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, ShareTokenPermission, Order } from '../../models/types';
+import { requireOrderAccess } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import * as shareTokenService from '../../services/share-token.service';
 import * as orderService from '../../services/order.service';
@@ -15,7 +16,7 @@ const router: Router = Router();
  * POST /v1/orders/:orderId/share
  * Generate a share link for an order
  */
-router.post('/:orderId/share', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:orderId/share', requireOrderAccess('orderId'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -107,7 +108,7 @@ router.post('/:orderId/share', async (req: AuthenticatedRequest, res: Response) 
  * GET /v1/orders/:orderId/share
  * List share tokens for an order
  */
-router.get('/:orderId/share', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/:orderId/share', requireOrderAccess('orderId'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -154,7 +155,7 @@ router.get('/:orderId/share', async (req: AuthenticatedRequest, res: Response) =
  * DELETE /v1/orders/:orderId/share/:token
  * Revoke a share token
  */
-router.delete('/:orderId/share/:token', async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:orderId/share/:token', requireOrderAccess('orderId'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {

@@ -3,6 +3,7 @@
  * Handles API Key, Bot, and Bearer token authentication
  */
 
+import { timingSafeEqual } from 'crypto';
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, ApiKeyData, ChannelLink, RoleType, toDate } from '../models/types';
 import { db, auth } from '../services/firestore.service';
@@ -12,8 +13,12 @@ import {
   verifyUserMemberships,
 } from '../services/membership.service';
 
-// Environment variables
-const BOT_API_KEY = process.env.BOT_API_KEY || 'bot_praticos_dev_key';
+/** Constant-time comparison of two secrets. */
+function sameSecret(given: string, expected: string): boolean {
+  const a = Buffer.from(given);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 // ============================================================================
 // API Key Authentication (for external integrations)
@@ -64,6 +69,19 @@ export async function apiKeyAuth(
 
     const keyData = keySnapshot.docs[0].data() as ApiKeyData;
 
+    // Only integration keys. MCP tokens (and anything else in apiKeys) go
+    // through their own auth, bound to the user who created them.
+    if (keyData.type !== undefined && keyData.type !== 'integration') {
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'INVALID_API_KEY',
+          message: 'Invalid or inactive API key',
+        },
+      });
+      return;
+    }
+
     // Verify secret if provided in key data
     if (keyData.secret && keyData.secret !== apiSecret) {
       res.status(401).json({
@@ -84,6 +102,18 @@ export async function apiKeyAuth(
         error: {
           code: 'TOKEN_EXPIRED',
           message: 'API key has expired',
+        },
+      });
+      return;
+    }
+
+    // A key created by a user stops working when that user leaves the company
+    if (keyData.userId && !(await verifyMembership(keyData.userId, keyData.companyId))) {
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'INVALID_API_KEY',
+          message: 'Invalid or inactive API key',
         },
       });
       return;
@@ -126,8 +156,9 @@ export async function botAuth(
     const apiKey = req.headers['x-api-key'] as string;
     const whatsappNumber = req.headers['x-whatsapp-number'] as string;
 
-    // Validate bot API key
-    if (!apiKey || apiKey !== BOT_API_KEY) {
+    // Validate bot API key (no BOT_API_KEY configured: every request is refused)
+    const botApiKey = process.env.BOT_API_KEY;
+    if (!botApiKey || !apiKey || !sameSecret(apiKey, botApiKey)) {
       res.status(401).json({
         success: false,
         error: {

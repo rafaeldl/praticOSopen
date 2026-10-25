@@ -4,7 +4,7 @@
  * GET  /status        →  is the assistant on for this company? (docs/AI_ORDER_ASSIST.md)
  * 200  { success: true, data: { enabled, usage?: { used, limit } } }
  *      The app shows Foto / Falar only when enabled. Counts nothing.
- * 403  INSUFFICIENT_PERMISSIONS (no write:orders: the app hides the buttons)
+ * 403  INSUFFICIENT_PERMISSIONS (no editOrder: the app hides the buttons)
  *
  * POST /order-assist  →  aiOrderAssist (docs/AI_ORDER_ASSIST.md)
  * Body: { text?, audio?: {mimeType, data(base64)}, photos?: [{mimeType, data}], locale? }
@@ -18,7 +18,7 @@
 
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
-import { requirePermission } from '../../middleware/auth.middleware';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { validateInput } from '../../utils/validation.utils';
 import {
   ORDER_ASSIST_HTTP_STATUS,
@@ -32,7 +32,7 @@ import { defaultOrderAssistDeps } from '../../services/ai/order-assist.deps';
 export function createAiRouter(depsFactory: () => OrderAssistDeps = defaultOrderAssistDeps): Router {
   const router: Router = Router();
 
-  router.get('/status', requirePermission('write:orders'), async (req: AuthenticatedRequest, res: Response) => {
+  router.get('/status', requireAppPermission('editOrder'), async (req: AuthenticatedRequest, res: Response) => {
     const companyId = req.userContext?.companyId;
     if (!companyId) {
       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context is required' } });
@@ -50,7 +50,7 @@ export function createAiRouter(depsFactory: () => OrderAssistDeps = defaultOrder
     }
   });
 
-  router.post('/order-assist', requirePermission('write:orders'), async (req: AuthenticatedRequest, res: Response) => {
+  router.post('/order-assist', requireAppPermission('editOrder'), async (req: AuthenticatedRequest, res: Response) => {
     const companyId = req.userContext?.companyId;
     if (!companyId) {
       res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context is required' } });

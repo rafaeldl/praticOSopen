@@ -2,6 +2,10 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
 jest.mock('../../../services/asaas/charge.service');
+jest.mock('../../../services/firestore.service', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('../../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
+);
 
 import * as chargeService from '../../../services/asaas/charge.service';
 import { AsaasServiceError } from '../../../services/asaas/errors';
@@ -9,13 +13,14 @@ import router from '../charges.routes';
 
 const mockService = chargeService as jest.Mocked<typeof chargeService>;
 
-function buildApp(permissions: string[]) {
+/** Role of the caller; charging follows chargeOrder in permission.dart. */
+function buildApp(role: string) {
   const app = express();
   app.use(express.json());
   app.use((req: Request, _res: Response, next: NextFunction) => {
     const r = req as any;
     r.auth = { type: 'bearer', companyId: 'comp1', userId: 'user1' };
-    r.userContext = { userId: 'user1', userName: 'Ana', companyId: 'comp1', role: 'manager', permissions };
+    r.userContext = { userId: 'user1', userName: 'Ana', companyId: 'comp1', role, permissions: [] };
     next();
   });
   app.use('/', router);
@@ -38,10 +43,10 @@ const CHARGE = {
 describe('charges.routes', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('cria cobrança com manage:payments', async () => {
+  it('cria cobrança com chargeOrder (gerente)', async () => {
     mockService.createOrderCharge.mockResolvedValue(CHARGE);
 
-    const res = await request(buildApp(['manage:payments']))
+    const res = await request(buildApp('manager'))
       .post('/o1/charges')
       .send({ value: 100, mode: 'single' });
 
@@ -55,8 +60,8 @@ describe('charges.routes', () => {
     );
   });
 
-  it('sem manage:payments → 403', async () => {
-    const res = await request(buildApp(['read:all', 'write:orders']))
+  it('sem chargeOrder (supervisor) → 403', async () => {
+    const res = await request(buildApp('supervisor'))
       .post('/o1/charges')
       .send({ value: 100, mode: 'single' });
     expect(res.status).toBe(403);
@@ -65,7 +70,7 @@ describe('charges.routes', () => {
   });
 
   it('valida corpo com zod', async () => {
-    const app = buildApp(['manage:payments']);
+    const app = buildApp('manager');
     const cases = [
       {},
       { value: -1, mode: 'single' },
@@ -86,7 +91,7 @@ describe('charges.routes', () => {
     mockService.createOrderCharge.mockRejectedValue(
       new AsaasServiceError('INVALID_VALUE', 'Value exceeds the order remaining balance'),
     );
-    const res = await request(buildApp(['manage:payments']))
+    const res = await request(buildApp('manager'))
       .post('/o1/charges')
       .send({ value: 5000, mode: 'single' });
     expect(res.status).toBe(400);
@@ -95,7 +100,7 @@ describe('charges.routes', () => {
 
   it('cancela cobrança', async () => {
     mockService.cancelOrderCharge.mockResolvedValue({ ...CHARGE, status: 'canceled' });
-    const res = await request(buildApp(['manage:payments'])).delete('/o1/charges/ch1');
+    const res = await request(buildApp('manager')).delete('/o1/charges/ch1');
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe('canceled');
     expect(mockService.cancelOrderCharge).toHaveBeenCalledWith('comp1', 'o1', 'ch1');
@@ -103,17 +108,17 @@ describe('charges.routes', () => {
 
   it('cancelar cobrança inexistente → 404', async () => {
     mockService.cancelOrderCharge.mockRejectedValue(new AsaasServiceError('CHARGE_NOT_FOUND', 'Charge not found'));
-    const res = await request(buildApp(['manage:payments'])).delete('/o1/charges/nope');
+    const res = await request(buildApp('manager')).delete('/o1/charges/nope');
     expect(res.status).toBe(404);
   });
 
   it('cancelar sem permissão → 403', async () => {
-    const res = await request(buildApp(['read:all'])).delete('/o1/charges/ch1');
+    const res = await request(buildApp('technician')).delete('/o1/charges/ch1');
     expect(res.status).toBe(403);
   });
 
   it('orderId inválido → 404 ORDER_NOT_FOUND sem chamar o serviço', async () => {
-    const app = buildApp(['manage:payments']);
+    const app = buildApp('manager');
     for (const id of ['bad.id', 'bad%20id', 'a'.repeat(129)]) {
       const created = await request(app).post(`/${id}/charges`).send({ value: 100, mode: 'single' });
       expect(created.status).toBe(404);
@@ -128,7 +133,7 @@ describe('charges.routes', () => {
   });
 
   it('chargeId inválido → 404 CHARGE_NOT_FOUND sem chamar o serviço', async () => {
-    const app = buildApp(['manage:payments']);
+    const app = buildApp('manager');
     for (const id of ['bad.id', 'bad%20id', 'a'.repeat(129)]) {
       const res = await request(app).delete(`/o1/charges/${id}`);
       expect(res.status).toBe(404);
@@ -139,7 +144,7 @@ describe('charges.routes', () => {
 
   it('ids válidos com _ e - passam', async () => {
     mockService.cancelOrderCharge.mockResolvedValue({ ...CHARGE, status: 'canceled' });
-    const res = await request(buildApp(['manage:payments'])).delete('/o_1-A/charges/ch_1-B');
+    const res = await request(buildApp('manager')).delete('/o_1-A/charges/ch_1-B');
     expect(res.status).toBe(200);
     expect(mockService.cancelOrderCharge).toHaveBeenCalledWith('comp1', 'o_1-A', 'ch_1-B');
   });

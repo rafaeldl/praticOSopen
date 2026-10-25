@@ -1,11 +1,11 @@
 /**
  * Role × path matrix against storage.rules.
  *
- * `allow` is what the rules do TODAY (the test enforces it). `shouldAllow` is
- * what they should do: only members of the company (custom claim
- * roles[companyId]) touch tenants/{companyId}/**. While the two differ the
- * case is a documented gap (see docs/E2E_ROLES_TESTING.md). Whoever fixes
- * storage.rules updates `allow` here and the gap disappears.
+ * `allow` is who the rules let through (the test enforces it); only members
+ * of the company (custom claim roles[companyId]) touch tenants/{companyId}/**
+ * and companies/{companyId}/**. `allow` equals `shouldAllow` in every case;
+ * if a rule ever has to differ, write why next to the case
+ * (docs/E2E_ROLES_TESTING.md).
  *
  * Run with the emulator: `npm run test:rules`. Skipped without
  * FIREBASE_STORAGE_EMULATOR_HOST.
@@ -22,7 +22,6 @@ const describeEmulator = emulatorHost ? describe : describe.skip;
 const RULES_FILE = process.env.STORAGE_RULES_FILE || resolve(__dirname, '../../../storage.rules');
 
 const MEMBERS: Actor[] = [...ROLE_ACTORS];
-const SIGNED_IN: Actor[] = [...ROLE_ACTORS, 'otherCompany', 'noCompany'];
 
  
 type Storage = any;
@@ -43,29 +42,39 @@ const read = (path: string) => (s: Storage) => s.ref(path).getMetadata();
 const upload = (path: string, meta = PNG) => (s: Storage) => s.ref(path).putString('x', 'raw', meta);
 const remove = (path: string) => (s: Storage) => s.ref(path).delete();
 const list = (path: string) => (s: Storage) => s.ref(path).listAll();
+// clearStorage does not always finish before the next case: a new receipt needs a fresh name.
+let uploads = 0;
+const uniqueName = () => `new_${Date.now()}_${uploads++}`;
+
+const ADMINS: Actor[] = ['owner', 'admin'];
 
 export const STORAGE_CASES: StorageCase[] = [
-  { id: 'orderPhoto.read', title: 'ver foto de OS', run: read(`${T}/orders/o1/photos/p1.png`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'orderPhoto.upload', title: 'enviar foto para OS', run: upload(`${T}/orders/o1/photos/new.png`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'orderPhoto.delete', title: 'apagar foto de OS', run: remove(`${T}/orders/o1/photos/p1.png`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'orderPhotos.list', title: 'listar fotos de OS', run: list(`${T}/orders/o1/photos`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'tenant.list', title: 'listar todos os arquivos da empresa', run: list(T), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'orderDocument.read', title: 'baixar documento da OS', run: read(`${T}/orders/o1/documents/d1.pdf`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'orderDocument.upload', title: 'anexar documento na OS', run: upload(`${T}/orders/o1/documents/new.pdf`, PDF), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'paymentProof.read', title: 'ver comprovante de pagamento da OS', run: read(`${T}/orders/o1/payments/t1/f1.pdf`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'formPhoto.upload', title: 'enviar foto de checklist', run: upload(`${T}/orders/o1/forms/f1/new.png`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'productPhoto.upload', title: 'trocar foto de produto', run: upload(`${T}/products/prod1/new.png`), allow: SIGNED_IN, shouldAllow: ['owner', 'admin'] },
-  { id: 'devicePhoto.upload', title: 'trocar foto de aparelho', run: upload(`${T}/devices/dev1/new.png`), allow: SIGNED_IN, shouldAllow: ['owner', 'admin', 'supervisor'] },
-  { id: 'tenantLogo.upload', title: 'trocar logo da empresa', run: upload(`${T}/logo/new.png`), allow: SIGNED_IN, shouldAllow: ['owner', 'admin'] },
-  { id: 'companyLogo.upload', title: 'trocar logo (caminho do cadastro)', run: upload('companies/c1/logo.png'), allow: SIGNED_IN, shouldAllow: ['owner', 'admin'] },
-  { id: 'companyLogo.delete', title: 'apagar logo da empresa', run: remove('companies/c1/logo/l1.png'), allow: SIGNED_IN, shouldAllow: ['owner', 'admin'] },
-  { id: 'userPhoto.upload', title: 'trocar foto de perfil de colega', run: upload(`${T}/users/tech1/new.png`), allow: SIGNED_IN, shouldAllow: ['owner', 'admin'] },
-  // Recibos: a regra própria checa a empresa, mas o curinga tenants/** (read)
-  // libera a leitura para todos, e a sobrescrita passa como create.
-  { id: 'receipt.read', title: 'ver comprovante de recebimento', run: read(`${T}/receipts/r1/f1.pdf`), allow: SIGNED_IN, shouldAllow: MEMBERS },
-  { id: 'receipt.upload', title: 'enviar comprovante de recebimento', run: upload(`${T}/receipts/r1/new.pdf`, PDF), allow: MEMBERS, shouldAllow: MEMBERS },
-  { id: 'receipt.overwrite', title: 'sobrescrever comprovante de recebimento', run: upload(`${T}/receipts/r1/f1.pdf`, PDF), allow: MEMBERS, shouldAllow: [] },
+  { id: 'orderPhoto.read', title: 'ver foto de OS', run: read(`${T}/orders/o1/photos/p1.png`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'orderPhoto.upload', title: 'enviar foto para OS', run: upload(`${T}/orders/o1/photos/new.png`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'orderPhoto.delete', title: 'apagar foto de OS', run: remove(`${T}/orders/o1/photos/p1.png`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'orderPhotos.list', title: 'listar fotos de OS', run: list(`${T}/orders/o1/photos`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'tenant.list', title: 'listar todos os arquivos da empresa', run: list(T), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'tenant.delete', title: 'apagar arquivo qualquer da empresa (exclusão de conta antiga)', run: remove(`${T}/orders/o1/documents/d1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'tenant.deleteOther', title: 'apagar arquivo fora dos caminhos conhecidos', run: remove(`${T}/legacy/x.png`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'orderDocument.read', title: 'baixar documento da OS', run: read(`${T}/orders/o1/documents/d1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'orderDocument.upload', title: 'anexar documento na OS', run: upload(`${T}/orders/o1/documents/new.pdf`, PDF), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'paymentProof.read', title: 'ver comprovante de pagamento da OS', run: read(`${T}/orders/o1/payments/t1/f1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'paymentProof.upload', title: 'enviar comprovante de pagamento da OS', run: upload(`${T}/orders/o1/payments/t1/new.pdf`, PDF), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'formPhoto.upload', title: 'enviar foto de checklist', run: upload(`${T}/orders/o1/forms/f1/new.png`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'productPhoto.upload', title: 'trocar foto de produto', run: upload(`${T}/products/prod1/new.png`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'servicePhoto.upload', title: 'trocar foto de serviço', run: upload(`${T}/services/serv1/new.png`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'devicePhoto.upload', title: 'trocar foto de aparelho', run: upload(`${T}/devices/dev1/new.png`), allow: ['owner', 'admin', 'supervisor'], shouldAllow: ['owner', 'admin', 'supervisor'] },
+  { id: 'tenantLogo.upload', title: 'trocar logo da empresa', run: upload(`${T}/logo/new.png`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'companyLogo.read', title: 'ver logo (caminho do cadastro)', run: read('companies/c1/logo/l1.png'), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'companyLogo.upload', title: 'trocar logo (caminho do cadastro)', run: upload('companies/c1/logo.png'), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'companyLogo.delete', title: 'apagar logo da empresa', run: remove('companies/c1/logo/l1.png'), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'userPhoto.upload', title: 'trocar foto de perfil de colega', run: upload(`${T}/users/ghost/new.png`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'userPhoto.own', title: 'trocar a própria foto de perfil (técnico)', run: upload(`${T}/users/tech1/new.png`), allow: [...ADMINS, 'technician'], shouldAllow: [...ADMINS, 'technician'] },
+  { id: 'receipt.read', title: 'ver comprovante de recebimento', run: read(`${T}/receipts/r1/f1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'receipt.upload', title: 'enviar comprovante de recebimento', run: (s) => upload(`${T}/receipts/r1/${uniqueName()}.pdf`, PDF)(s), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'receipt.overwrite', title: 'sobrescrever comprovante de recebimento', run: upload(`${T}/receipts/r1/f1.pdf`, PDF), allow: [], shouldAllow: [] },
   { id: 'unknown.path', title: 'gravar fora dos caminhos conhecidos', run: upload('anything/else.png'), allow: [], shouldAllow: [] },
+  { id: 'tenant.unknownWrite', title: 'gravar caminho desconhecido dentro da empresa', run: upload(`${T}/legacy/new.png`), allow: [], shouldAllow: [] },
 ];
 
 const SEED_FILES: [string, { contentType: string }][] = [
@@ -73,6 +82,7 @@ const SEED_FILES: [string, { contentType: string }][] = [
   [`${T}/orders/o1/documents/d1.pdf`, PDF],
   [`${T}/orders/o1/payments/t1/f1.pdf`, PDF],
   [`${T}/receipts/r1/f1.pdf`, PDF],
+  [`${T}/legacy/x.png`, PNG],
   ['companies/c1/logo/l1.png', PNG],
 ];
 
@@ -121,9 +131,9 @@ describeEmulator('storage.rules matrix', () => {
     });
   }
 
-  it('lista os caminhos abertos para quem não é da empresa (gaps conhecidos)', () => {
-    const open = STORAGE_CASES.filter((c) => c.allow.includes('otherCompany')).map((c) => c.id);
-    // Só diminui. Se crescer, alguém abriu um caminho novo para outras empresas.
-    expect(open.length).toBeLessThanOrEqual(16);
+  it('nenhum caminho fica aberto para quem não é da empresa, e allow segue shouldAllow', () => {
+    const outsiders: Actor[] = ['otherCompany', 'noCompany', 'anonymous'];
+    expect(STORAGE_CASES.filter((c) => c.allow.some((a) => outsiders.includes(a))).map((c) => c.id)).toEqual([]);
+    expect(STORAGE_CASES.filter((c) => c.allow.join() !== c.shouldAllow.join()).map((c) => c.id)).toEqual([]);
   });
 });

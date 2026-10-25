@@ -22,8 +22,6 @@ const MEMBERS: ApiRole[] = [...API_ROLES];
 const ADMINS: ApiRole[] = ['owner', 'admin'];
 const FINANCIAL: ApiRole[] = ['owner', 'admin', 'manager'];
 const SEE_ALL_ORDERS: ApiRole[] = ['owner', 'admin', 'manager', 'supervisor'];
-/** Roles with `write:orders` on the server (getRolePermissions). */
-const SERVER_WRITE_ORDERS: ApiRole[] = ['owner', 'admin', 'supervisor', 'manager', 'consultant'];
 
 export type CompanyKey = 'c1' | 'nofin';
 
@@ -59,57 +57,41 @@ export const API_CASES: ApiCase[] = [
     id: 'orders.list', area: 'OS', title: 'listar todas as OS (com total)',
     method: 'get', path: O,
     allow: SEE_ALL_ORDERS, permission: 'viewAllOrders',
-    current: MEMBERS,
-    gap: 'Consultor e técnico listam todas as OS da empresa, com total (orders.routes.ts:29, sem checar papel).',
   },
   {
     id: 'orders.get.others', area: 'OS', title: 'abrir OS de outra pessoa (com valores)',
     method: 'get', path: `${O}/o1`,
     allow: SEE_ALL_ORDERS, permission: 'viewAllOrders',
-    current: MEMBERS,
-    gap: 'Consultor e técnico abrem OS de outra pessoa com valores, desconto e pago (orders.routes.ts:87).',
   },
   {
     id: 'orders.create', area: 'OS', title: 'criar OS',
     method: 'post', path: O, body: { customerId: 'cust1' },
     allow: ['owner', 'admin', 'supervisor', 'consultant', 'technician'], permission: 'createOrder',
-    current: MEMBERS,
-    gap: 'O gerente cria OS pela API, e as regras e o app não deixam (orders.routes.ts:142).',
   },
   {
     id: 'orders.update.others', area: 'OS', title: 'mudar situação/responsável de OS de outra pessoa',
     method: 'patch', path: `${O}/o1`, body: { status: 'progress', assignedTo: 'tech1' },
     allow: SEE_ALL_ORDERS,
-    current: MEMBERS,
-    gap: 'Consultor e técnico mudam situação e responsável de OS que não podem abrir (orders.routes.ts:228).',
   },
   {
     id: 'orders.services.price', area: 'OS', title: 'pôr serviço com valor na OS',
     method: 'post', path: `${O}/o1/services`, body: { serviceId: 's1', value: 999 },
     allow: FINANCIAL, permission: 'editPrices',
-    current: MEMBERS,
-    gap: 'Qualquer membro muda o valor dos serviços da OS, sem editPrices (orders.routes.ts:304).',
   },
   {
     id: 'orders.products.price', area: 'OS', title: 'pôr produto com valor na OS',
     method: 'post', path: `${O}/o1/products`, body: { productId: 'p1', quantity: 1, value: 999 },
     allow: FINANCIAL, permission: 'editPrices',
-    current: MEMBERS,
-    gap: 'Qualquer membro muda o valor dos produtos da OS, sem editPrices (orders.routes.ts:367).',
   },
   {
     id: 'orders.payment', area: 'OS', title: 'lançar pagamento na OS',
     method: 'post', path: `${O}/o1/payments`, body: { amount: 10 },
     allow: FINANCIAL, permission: 'chargeOrder',
-    current: MEMBERS,
-    gap: 'Qualquer membro lança pagamento na OS, sem chargeOrder (orders.routes.ts:431).',
   },
   {
     id: 'orders.discount', area: 'OS', title: 'dar desconto na OS',
     method: 'post', path: `${O}/o1/payments`, body: { amount: 10, type: 'discount' },
     allow: FINANCIAL, permission: 'chargeOrder',
-    current: MEMBERS,
-    gap: 'Qualquer membro dá desconto na OS, sem chargeOrder (orders.routes.ts:431).',
   },
 
   // ─── Link do cliente ───────────────────────────────────────────────────
@@ -117,22 +99,16 @@ export const API_CASES: ApiCase[] = [
     id: 'share.create.others', area: 'Link do cliente', title: 'criar link de OS de outra pessoa',
     method: 'post', path: `${O}/o1/share`, body: { permissions: ['view', 'approve'] },
     allow: SEE_ALL_ORDERS,
-    current: MEMBERS,
-    gap: 'Consultor e técnico criam link (com aprovar) de OS que não podem abrir e veem os valores na página pública (share.routes.ts:18).',
   },
   {
     id: 'share.list.others', area: 'Link do cliente', title: 'listar links de OS de outra pessoa',
     method: 'get', path: `${O}/o1/share`,
     allow: SEE_ALL_ORDERS,
-    current: MEMBERS,
-    gap: 'Consultor e técnico listam os links (tokens) de qualquer OS (share.routes.ts:110).',
   },
   {
     id: 'share.revoke.others', area: 'Link do cliente', title: 'revogar link de OS de outra pessoa',
     method: 'delete', path: `${O}/o1/share/t1`,
     allow: SEE_ALL_ORDERS,
-    current: MEMBERS,
-    gap: 'Consultor e técnico revogam o link de qualquer OS (share.routes.ts:157).',
   },
 
   // ─── Cobrança ──────────────────────────────────────────────────────────
@@ -189,29 +165,21 @@ export const API_CASES: ApiCase[] = [
     id: 'nofin.orders.charge', area: 'Sem valores', title: 'gerar cobrança da OS com valores desligados',
     method: 'post', path: `${O}/o1/charges`, body: { value: 10, mode: 'single' }, company: 'nofin',
     allow: [],
-    current: FINANCIAL,
-    gap: 'Com "Valores e cobrança" desligado a API ainda gera cobrança Asaas (charges.routes.ts:48, não lê useFinancial).',
   },
   {
     id: 'nofin.customers.charge', area: 'Sem valores', title: 'gerar cobrança do cliente com valores desligados',
     method: 'post', path: `${CU}/cust1/charges`, body: { orderIds: ['o1'], value: 10 }, company: 'nofin',
     allow: [],
-    current: FINANCIAL,
-    gap: 'Com valores desligados a API ainda gera cobrança de várias OS (customer-payments.routes.ts:125).',
   },
   {
     id: 'nofin.nfse.invoice', area: 'Sem valores', title: 'emitir nota com valores desligados',
     method: 'post', path: `${NF}/invoices`, body: { orderIds: ['o1'] }, company: 'nofin',
     allow: [],
-    current: FINANCIAL,
-    gap: 'Com valores desligados a API ainda emite nota fiscal (nfse.routes.ts:178).',
   },
   {
     id: 'nofin.orders.payment', area: 'Sem valores', title: 'lançar pagamento com valores desligados',
     method: 'post', path: `${O}/o1/payments`, body: { amount: 10 }, company: 'nofin',
     allow: [],
-    current: MEMBERS,
-    gap: 'Com valores desligados qualquer membro lança pagamento na OS (orders.routes.ts:431).',
   },
   {
     id: 'nofin.customers.receipt', area: 'Sem valores', title: 'registrar recebimento com valores desligados',
@@ -224,29 +192,21 @@ export const API_CASES: ApiCase[] = [
     id: 'customers.create', area: 'Cadastros', title: 'cadastrar cliente',
     method: 'post', path: CU, body: { name: 'Novo' },
     allow: ['owner', 'admin', 'supervisor', 'consultant'], permission: 'manageCustomers',
-    current: MEMBERS,
-    gap: 'Gerente e técnico cadastram cliente pela API (customers.routes.ts:119, sem checar papel).',
   },
   {
     id: 'customers.update', area: 'Cadastros', title: 'editar cliente',
     method: 'patch', path: `${CU}/cust1`, body: { name: 'Outro' },
     allow: ['owner', 'admin', 'supervisor', 'consultant'], permission: 'manageCustomers',
-    current: MEMBERS,
-    gap: 'Gerente e técnico editam cliente pela API (customers.routes.ts:173).',
   },
   {
     id: 'devices.create', area: 'Cadastros', title: 'cadastrar aparelho/veículo',
     method: 'post', path: '/v1/app/devices', body: { name: 'Uno' },
     allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
-    current: MEMBERS,
-    gap: 'Gerente, consultor e técnico cadastram aparelho/veículo pela API (devices.routes.ts:120).',
   },
   {
     id: 'devices.update', area: 'Cadastros', title: 'editar aparelho/veículo',
     method: 'patch', path: '/v1/app/devices/d1', body: { name: 'Uno 2' },
     allow: ['owner', 'admin', 'supervisor'], permission: 'manageDevices',
-    current: MEMBERS,
-    gap: 'Gerente, consultor e técnico editam aparelho/veículo pela API (devices.routes.ts:174).',
   },
 
   // ─── Equipe ────────────────────────────────────────────────────────────
@@ -322,14 +282,10 @@ export const API_CASES: ApiCase[] = [
     id: 'ai.status', area: 'IA', title: 'ver se a IA está ligada',
     method: 'get', path: '/v1/app/ai/status',
     allow: MEMBERS, permission: 'editOrder',
-    current: SERVER_WRITE_ORDERS,
-    gap: 'O técnico não usa a IA na OS (403), mas tem createOrder/editOrder no app (ai.routes.ts:35, write:orders).',
   },
   {
     id: 'ai.orderAssist', area: 'IA', title: 'preencher a OS com a IA',
     method: 'post', path: '/v1/app/ai/order-assist', body: { text: 'polimento' },
     allow: MEMBERS, permission: 'editOrder',
-    current: SERVER_WRITE_ORDERS,
-    gap: 'O técnico não usa a IA na OS (403), mas tem createOrder/editOrder no app (ai.routes.ts:53, write:orders).',
   },
 ];

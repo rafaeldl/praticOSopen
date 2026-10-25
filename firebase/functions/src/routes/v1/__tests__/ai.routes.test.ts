@@ -16,11 +16,11 @@ function fakeDeps(overrides: Partial<OrderAssistDeps> = {}): OrderAssistDeps {
   };
 }
 
-function buildApp(permissions: string[], deps: OrderAssistDeps, companyId = 'comp1') {
+function buildApp(permissions: string[], deps: OrderAssistDeps, companyId = 'comp1', role = 'admin') {
   const app = express();
   app.use(express.json({ limit: '15mb' }));
   app.use((req: Request, _res: Response, next: NextFunction) => {
-    (req as any).userContext = { userId: 'u1', userName: 'Ana', companyId, role: 'admin', permissions };
+    (req as any).userContext = { userId: 'u1', userName: 'Ana', companyId, role, permissions };
     next();
   });
   app.use('/', createAiRouter(() => deps));
@@ -44,8 +44,13 @@ describe('GET /status', () => {
     expect(deps.getUsage).not.toHaveBeenCalled();
   });
 
-  it('technician (no write:orders) → 403', async () => {
-    const res = await request(buildApp(['read:assigned'], fakeDeps())).get('/status');
+  it('technician uses it too (editOrder in the app)', async () => {
+    const res = await request(buildApp([], fakeDeps(), 'comp1', 'technician')).get('/status');
+    expect(res.status).toBe(200);
+  });
+
+  it('unknown role → 403', async () => {
+    const res = await request(buildApp([], fakeDeps(), 'comp1', 'viewer')).get('/status');
     expect(res.status).toBe(403);
   });
 
@@ -65,9 +70,14 @@ describe('POST /order-assist', () => {
     expect(res.body.data.usage).toEqual({ used: 1, limit: 10 });
   });
 
-  it('technician (no write:orders) → 403', async () => {
+  it('technician fills the order with the AI (editOrder in the app)', async () => {
+    const res = await request(buildApp([], fakeDeps(), 'comp1', 'technician')).post('/order-assist').send({ text: 'polimento' });
+    expect(res.status).toBe(200);
+  });
+
+  it('unknown role → 403, nothing counted', async () => {
     const deps = fakeDeps();
-    const res = await request(buildApp(['read:assigned', 'write:orders:status'], deps)).post('/order-assist').send({ text: 'x' });
+    const res = await request(buildApp([], deps, 'comp1', 'viewer')).post('/order-assist').send({ text: 'x' });
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('INSUFFICIENT_PERMISSIONS');
     expect(deps.reserve).not.toHaveBeenCalled();
