@@ -3,6 +3,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/receipt.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/segment_config_service.dart';
 
@@ -68,13 +69,41 @@ class AuthorizationService {
       return null;
     }
 
-    // Find the CompanyRoleAggr for current company
-    final companyRole = user!.companies!.firstWhere(
-      (cr) => cr.company?.id == Global.companyAggr!.id,
-      orElse: () => CompanyRoleAggr(),
-    );
+    return roleIn(user, Global.companyAggr!.id);
+  }
 
-    return companyRole.role;
+  /// Role of [user] in [companyId], or null when not a member.
+  static RolesType? roleIn(User? user, String? companyId) {
+    if (user?.companies == null || companyId == null) return null;
+    for (final cr in user!.companies!) {
+      if (cr.company?.id == companyId) return cr.role;
+    }
+    return null;
+  }
+
+  /// [currentUserRole], waiting for the user document when it hasn't loaded
+  /// yet (right after the app opens). Null when it doesn't arrive in
+  /// [timeout] or the user has no role in the company.
+  Future<RolesType?> resolveCurrentRole({
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final known = currentUserRole;
+    if (known != null) return known;
+    final companyId = Global.companyAggr?.id;
+    if (Global.currentUser == null || companyId == null) return null;
+    final store = _activeUserStore;
+    if (store == null) return null;
+    if (store.user == null) await store.findCurrentUser();
+    final stream = store.user;
+    if (stream == null) return null;
+    try {
+      final user = await stream
+          .firstWhere((u) => roleIn(u, companyId) != null)
+          .timeout(timeout);
+      return roleIn(user, companyId);
+    } catch (_) {
+      return currentUserRole;
+    }
   }
 
   /// Returns the current user role.
@@ -144,32 +173,47 @@ class AuthorizationService {
 
   /// Verifica se o usuário atual pode visualizar uma OS específica.
   ///
-  /// Regras:
-  /// - Admin/Manager/Supervisor: todas as OS
-  /// - Consultant: apenas OS que criou
-  /// - Technician: apenas OS atribuídas
-  bool canAccessOrder(Order order) {
-    final role = normalizedRole;
-    if (role == null) return false;
-    if (Global.currentUser == null) return false;
+  /// Same rule as the Firestore order read rule: admin, manager and
+  /// supervisor read every order; consultant and technician only the ones
+  /// they created (assignedTo isn't in the rules yet).
+  bool canAccessOrder(Order order) => canAccessOrderFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    order: order,
+  );
 
-    final currentUserId = Global.currentUser!.uid;
-
-    switch (role) {
-      case RolesType.admin:
-      case RolesType.manager:
-      case RolesType.supervisor:
-        // Acesso a todas as OS
-        return true;
-
-      case RolesType.consultant:
-        // Apenas OS que criou
-        return order.createdBy?.id == currentUserId;
-
-      case RolesType.technician:
-        // Acesso a todas as OS (assignedTo ainda não implementado restritivamente)
-        return true;
+  /// Pure version of [canAccessOrder].
+  static bool canAccessOrderFor({
+    required RolesType? role,
+    required String? userId,
+    required Order order,
+  }) {
+    if (role == null || userId == null) return false;
+    if (RolePermissions.hasPermission(role, PermissionType.viewAllOrders)) {
+      return true;
     }
+    return order.createdBy?.id == userId;
+  }
+
+  /// Uid that every order list query must filter `createdBy.id` by, or null
+  /// when the user reads every order. Without the filter the Firestore rules
+  /// deny the whole query for consultant and technician.
+  Future<String?> orderCreatorFilter() async => orderCreatorFilterFor(
+    role: await resolveCurrentRole(),
+    userId: Global.currentUser?.uid,
+  );
+
+  /// Pure version of [orderCreatorFilter]. An unknown role filters too: the
+  /// filtered query is allowed for every member.
+  static String? orderCreatorFilterFor({
+    required RolesType? role,
+    required String? userId,
+  }) {
+    if (role != null &&
+        RolePermissions.hasPermission(role, PermissionType.viewAllOrders)) {
+      return null;
+    }
+    return userId;
   }
 
   /// Verifica se o usuário pode editar uma OS específica.
@@ -549,6 +593,10 @@ class AuthorizationService {
 
   /// Verifica se o usuário pode gerenciar perfis.
   bool get canManageRoles => hasPermission(PermissionType.manageRoles);
+
+  /// Usage counters live on the company document, which only an admin may
+  /// write (Firestore rules); other roles skip the write.
+  bool get canWriteUsageCounters => isAdmin;
 
   /// Verifica se o usuário pode gerenciar a empresa.
   bool get canManageCompany => hasPermission(PermissionType.manageCompany);

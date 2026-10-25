@@ -20,14 +20,20 @@ import 'package:praticos/theme/status_style.dart';
 import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/models/permission.dart';
 
 /// Clientes tab: searchable list (name, phone or vehicle plate) grouped by
 /// initial. A row opens the customer screen; "+" opens the new-customer sheet.
 class HomeCustomerList extends StatefulWidget {
-  const HomeCustomerList({super.key, this.directory});
+  const HomeCustomerList({super.key, this.directory, this.canAdd});
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
+
+  /// Whether "+" (new customer) shows. Defaults to the `manageCustomers`
+  /// permission (the Firestore rules deny the write otherwise). Test seam.
+  final bool? canAdd;
 
   @override
   State<HomeCustomerList> createState() => _HomeCustomerListState();
@@ -36,8 +42,16 @@ class HomeCustomerList extends StatefulWidget {
 class _HomeCustomerListState extends State<HomeCustomerList> {
   late final CustomerDirectory _directory =
       widget.directory ?? FirestoreCustomerDirectory();
-  late final PlateLookup _plates =
-      PlateLookup(_directory, onChanged: () => setState(() {}));
+  bool get _canAdd =>
+      widget.canAdd ??
+      AuthorizationService.instance.hasPermission(
+        PermissionType.manageCustomers,
+      );
+
+  late final PlateLookup _plates = PlateLookup(
+    _directory,
+    onChanged: () => setState(() {}),
+  );
   final TextEditingController _searchController = TextEditingController();
 
   StreamSubscription<List<Customer>>? _subscription;
@@ -51,9 +65,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     super.initState();
     _listen();
     _plates.load();
-    _directory.openOrdersByCustomer().then((summary) {
-      if (mounted) setState(() => _openOrders = summary);
-    }).catchError((_) {});
+    _directory
+        .openOrdersByCustomer()
+        .then((summary) {
+          if (mounted) setState(() => _openOrders = summary);
+        })
+        .catchError((_) {});
   }
 
   void _listen() {
@@ -107,11 +124,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         slivers: [
           AppNavBar(
             largeTitle: Text(config.customerPlural),
-            trailing: GlassBarButton(
-              label: l10n.newCustomer,
-              icon: CupertinoIcons.add,
-              onPressed: _addCustomer,
-            ),
+            trailing: _canAdd
+                ? GlassBarButton(
+                    label: l10n.newCustomer,
+                    icon: CupertinoIcons.add,
+                    onPressed: _addCustomer,
+                  )
+                : null,
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -146,7 +165,10 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: ErrorState(message: l10n.customerLookupError, onRetry: _listen),
+          child: ErrorState(
+            message: l10n.customerLookupError,
+            onRetry: _listen,
+          ),
         ),
       ];
     }
@@ -163,18 +185,21 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           hasScrollBody: false,
           child: EmptyState(
             title: l10n.noCustomersYet,
-            actionLabel: l10n.addFirstCustomer,
-            onAction: _addCustomer,
+            actionLabel: _canAdd ? l10n.addFirstCustomer : null,
+            onAction: _canAdd ? _addCustomer : null,
           ),
         ),
       ];
     }
 
-    final hits = query.isEmpty ? const <PlateHit>[] : _plates.hits(query, customers);
+    final hits = query.isEmpty
+        ? const <PlateHit>[]
+        : _plates.hits(query, customers);
     final hitIds = hits.map((h) => h.customer.id).toSet();
-    final matches = filterCustomers(customers, query)
-        .where((c) => !hitIds.contains(c.id))
-        .toList();
+    final matches = filterCustomers(
+      customers,
+      query,
+    ).where((c) => !hitIds.contains(c.id)).toList();
 
     if (hits.isEmpty && matches.isEmpty) {
       return [
@@ -188,7 +213,10 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     final children = <Widget>[
       Padding(
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.pageMargin, AppSpacing.xs, AppSpacing.pageMargin, 0,
+          AppSpacing.pageMargin,
+          AppSpacing.xs,
+          AppSpacing.pageMargin,
+          0,
         ),
         child: Text(
           l10n.customersCount(customers.length),
@@ -200,7 +228,8 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       for (final hit in hits)
         _row(
           hit.customer,
-          plate: '${l10n.plateValue(hit.device.serial ?? '')} · ${hit.device.name ?? ''}',
+          plate:
+              '${l10n.plateValue(hit.device.serial ?? '')} · ${hit.device.name ?? ''}',
         ),
     ];
     for (final entry in groupByInitial(matches).entries) {
@@ -222,8 +251,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       status = l10n.openOrdersCount(summary.open);
       dot = AppColors.warning;
     }
-    final phone =
-        (customer.phone?.isNotEmpty ?? false) ? formatPhone(customer.phone) : null;
+    final phone = (customer.phone?.isNotEmpty ?? false)
+        ? formatPhone(customer.phone)
+        : null;
     final subtitle = [?plate, ?status, ?phone].join(' · ');
     return AppListRow(
       leading: dot == null ? null : StatusDot(color: dot),

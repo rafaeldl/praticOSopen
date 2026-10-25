@@ -78,8 +78,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     String orderId,
     Order Function(Order fresh) mutate, {
     UserAggr? actor,
-  }) =>
-      _tenant.updatePayments(companyId, orderId, mutate, actor: actor);
+  }) => _tenant.updatePayments(companyId, orderId, mutate, actor: actor);
 
   /// Lê a OS do servidor, ignorando o cache local.
   /// Ver [TenantOrderRepository.getFromServer].
@@ -94,8 +93,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     Map<String, dynamic> update, {
     UserAggr? actor,
   }) =>
-      _tenant.applyPaymentFieldUpdate(companyId, orderId, update,
-          actor: actor);
+      _tenant.applyPaymentFieldUpdate(companyId, orderId, update, actor: actor);
 
   // ═══════════════════════════════════════════════════════════════════
   // Ratings Support
@@ -108,13 +106,16 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
 
     // Query simples sem filtro de rating - filtro feito client-side
     // Isso evita a necessidade de criar índice composto para rating.score
-    final snapshot = await db
+    Query<Map<String, dynamic>> query = db
         .collection('companies')
         .doc(companyId)
         .collection('orders')
-        .where('status', isEqualTo: 'done')
-        .orderBy('createdAt', descending: true)
-        .get();
+        .where('status', isEqualTo: 'done');
+    final creator = await TenantOrderRepository.creatorScope();
+    if (creator != null) {
+      query = query.where('createdBy.id', isEqualTo: creator);
+    }
+    final snapshot = await query.orderBy('createdAt', descending: true).get();
 
     final orders = snapshot.docs
         .map((doc) {
@@ -149,8 +150,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   }) async {
     final FirebaseFirestore db = FirebaseFirestore.instance;
 
-    Query<Map<String, dynamic>> query =
-        db.collection('companies').doc(companyId).collection('orders');
+    Query<Map<String, dynamic>> query = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders');
 
     // Aplicar filtros
     if (status != null) {
@@ -159,7 +162,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       } else if (status == 'open') {
         // "Em aberto": everything not done/canceled. Uses the existing
         // (status, createdAt) index.
-        query = query.where('status', whereIn: ['quote', 'approved', 'progress']);
+        query = query.where(
+          'status',
+          whereIn: ['quote', 'approved', 'progress'],
+        );
       } else if (status == 'due_date') {
         query = query.where('status', whereIn: ['approved', 'progress']);
         query = query.orderBy('dueDate');
@@ -172,6 +178,12 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
 
     if (customerId != null) {
       query = query.where('customer.id', isEqualTo: customerId);
+    }
+
+    // Consultant/technician: only their own orders (Firestore rules).
+    final creator = await TenantOrderRepository.creatorScope();
+    if (creator != null) {
+      query = query.where('createdBy.id', isEqualTo: creator);
     }
 
     // Ordenação padrão (se não for due_date nem contract)

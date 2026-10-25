@@ -12,6 +12,8 @@ import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/plate_lookup.dart';
 import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/utils/phone_format.dart';
+import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/models/permission.dart';
 
 /// Result of the customer picker: the customer and, when known, the vehicle.
 ///
@@ -37,10 +39,15 @@ class CustomerPick {
 /// - "Recentes" first, then "Todos". The order's customer has the ✓.
 /// - No swipe actions: this is a choice, not a management list.
 class CustomerListScreen extends StatefulWidget {
-  const CustomerListScreen({super.key, this.directory});
+  const CustomerListScreen({super.key, this.directory, this.canAdd});
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
+
+  /// Whether "Novo cliente"/"Cadastrar “x”" show. Defaults to the
+  /// `manageCustomers` permission (the Firestore rules deny the write
+  /// otherwise). Test seam.
+  final bool? canAdd;
 
   @override
   State<CustomerListScreen> createState() => _CustomerListScreenState();
@@ -49,8 +56,10 @@ class CustomerListScreen extends StatefulWidget {
 class _CustomerListScreenState extends State<CustomerListScreen> {
   late final CustomerDirectory _directory =
       widget.directory ?? FirestoreCustomerDirectory();
-  late final PlateLookup _plates =
-      PlateLookup(_directory, onChanged: () => setState(() {}));
+  late final PlateLookup _plates = PlateLookup(
+    _directory,
+    onChanged: () => setState(() {}),
+  );
 
   StreamSubscription<List<Customer>>? _subscription;
   List<Customer>? _customers;
@@ -65,9 +74,12 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     super.initState();
     _listen();
     _plates.load();
-    _directory.recentCustomerIds().then((ids) {
-      if (mounted) setState(() => _recentIds = ids);
-    }).catchError((_) {});
+    _directory
+        .recentCustomerIds()
+        .then((ids) {
+          if (mounted) setState(() => _recentIds = ids);
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -149,6 +161,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     final l10n = context.l10n;
     final customers = _customers ?? const <Customer>[];
     final selectedId = currentCustomerId(_order?.customer, customers);
+    final canAdd =
+        widget.canAdd ??
+        AuthorizationService.instance.hasPermission(
+          PermissionType.manageCustomers,
+        );
     return PickerScaffold<CustomerPick>(
       title: l10n.pickerCustomerTitle,
       itemCount: customers.length,
@@ -159,9 +176,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       hasError: _hasError,
       errorMessage: l10n.customerLookupError,
       onRetry: _listen,
-      addLabel: l10n.pickerNewCustomer,
-      onAdd: _addCustomer,
-      onCreate: _addCustomer,
+      addLabel: canAdd ? l10n.pickerNewCustomer : null,
+      onAdd: canAdd ? _addCustomer : null,
+      onCreate: canAdd ? _addCustomer : null,
       canCreate: (query) =>
           !customers.any((c) => pickerSameText(c.name, query)),
       noMatchText: l10n.noCustomerMatching,

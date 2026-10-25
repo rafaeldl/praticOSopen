@@ -187,11 +187,13 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           slivers: [
             AppNavBar(
               largeTitle: Text(title),
-              trailing: GlassBarButton(
-                label: l10n.add,
-                icon: CupertinoIcons.add,
-                onPressed: _create,
-              ),
+              trailing: _canManage
+                  ? GlassBarButton(
+                      label: l10n.add,
+                      icon: CupertinoIcons.add,
+                      onPressed: _create,
+                    )
+                  : null,
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -253,9 +255,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             errorMessage:
                 '${l10n.errorLoading} ${config.devicePlural.toLowerCase()}',
             onRetry: _retry,
-            addLabel: l10n.pickerNewDevice(device),
-            onAdd: _create,
-            onCreate: _create,
+            addLabel: _canManage ? l10n.pickerNewDevice(device) : null,
+            onAdd: _canManage ? _create : null,
+            onCreate: _canManage ? _create : null,
             noMatchText: (q) => l10n.pickerNoDeviceWith(device, q),
             emptyIcon: config.deviceIcon,
             emptyTitle: '${l10n.no} $device ${l10n.registered}',
@@ -274,9 +276,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               final filtered = all.where((d) => _matchesQuery(d, query));
               final mine = filtered.where((d) => mineIds.contains(d.id));
               if (mine.isEmpty) {
-                return [
-                  PickerSection(items: filtered.map(item).toList()),
-                ];
+                return [PickerSection(items: filtered.map(item).toList())];
               }
               return [
                 PickerSection(
