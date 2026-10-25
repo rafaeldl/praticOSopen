@@ -347,7 +347,7 @@ async function removeUserFromCompany(
 /**
  * Update role in linked channels
  */
-async function updateLinkedChannelRole(
+export async function updateLinkedChannelRole(
   userId: string,
   companyId: string,
   newRole: RoleType
@@ -371,7 +371,7 @@ async function updateLinkedChannelRole(
 /**
  * Unlink user's channels for a specific company
  */
-async function unlinkUserChannels(
+export async function unlinkUserChannels(
   userId: string,
   companyId: string
 ): Promise<void> {

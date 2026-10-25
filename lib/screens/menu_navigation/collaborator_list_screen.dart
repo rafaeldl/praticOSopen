@@ -326,6 +326,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
         return context.l10n.invalidInviteCompanyNotFound;
       case CollaboratorErrorCode.userNotFound:
         return context.l10n.userNotFound;
+      case CollaboratorErrorCode.cannotChangeOwner:
+        return context.l10n.cannotChangeOwner;
+      case CollaboratorErrorCode.notAllowed:
+        return context.l10n.teamActionNotAllowed;
+      case CollaboratorErrorCode.requestFailed:
+        return context.l10n.teamActionFailed;
     }
   }
 

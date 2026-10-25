@@ -10,10 +10,10 @@ import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
-import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/invite_api_service.dart';
+import 'package:praticos/services/team_api_service.dart';
 import 'package:praticos/utils/invite_utils.dart' as invite_utils;
 
 part 'collaborator_store.g.dart';
@@ -21,8 +21,10 @@ part 'collaborator_store.g.dart';
 /// Store para gerenciamento de colaboradores da empresa.
 ///
 /// Arquitetura:
-/// - Source of Truth: `user.companies` (alimenta os Claims)
-/// - Índice Reverso: `/companies/{companyId}/memberships/{userId}`
+/// - Leitura: índice `/companies/{companyId}/memberships/{userId}`
+/// - Escrita: pelo servidor. Convite em `/v1/app/invites`; troca de papel e
+///   remoção em `/v1/app/team` (o app não pode gravar `users/{colega}`, e o
+///   servidor atualiza membership, `users/{uid}.companies` e o claim juntos).
 ///
 /// Use [CollaboratorStore.instance] para acessar a instância singleton.
 class CollaboratorStore extends _CollaboratorStore with _$CollaboratorStore {
@@ -35,9 +37,11 @@ class CollaboratorStore extends _CollaboratorStore with _$CollaboratorStore {
 
 abstract class _CollaboratorStore with Store {
   final TenantMembershipRepository _membershipRepo = TenantMembershipRepository();
-  final UserRepository _userRepository = UserRepository();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  // Note: InviteApiService is used instead of InviteRepository for API-based operations
+
+  /// Server API for role change and removal (replaceable in tests).
+  @visibleForTesting
+  TeamApiService teamApi = TeamApiService.instance;
 
   @observable
   ObservableList<Membership> collaborators = ObservableList<Membership>();
@@ -192,20 +196,13 @@ abstract class _CollaboratorStore with Store {
   // Write Operations
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Adiciona um colaborador à empresa.
+  /// Adiciona um colaborador à empresa por convite (criado no servidor).
   ///
-  /// Se o usuário já existir no sistema:
-  /// 1. Verifica se já é membro (em memberships e user.companies)
-  /// 2. Se não for, cria os vínculos necessários (atualiza user.companies e cria membership)
-  /// 3. Se houver inconsistência, corrige automaticamente
+  /// Quem já tem conta vê o convite ao entrar e aceita; o servidor registra o
+  /// membership e atualiza `user.companies` e os claims ao aceitar.
   ///
-  /// Se o usuário não existir:
-  /// 1. Cria um convite pendente na collection `/links/invites/{token}`
-  /// 2. Quando o usuário se registrar, verá o convite para aceitar
-  ///
-  /// Retorna uma tupla (wasAddedDirectly, inviteToken):
-  /// - `wasAddedDirectly`: true se foi adicionado diretamente, false se foi criado convite
-  /// - `inviteToken`: o token do convite criado (null se adicionado diretamente)
+  /// Retorna (wasAddedDirectly, inviteToken). `wasAddedDirectly` é sempre
+  /// false: o app não grava `users/{colega}` (as regras não deixam).
   ///
   /// Lança [FeatureGateLimitException] se o limite de colaboradores foi atingido.
   @action
@@ -216,8 +213,6 @@ abstract class _CollaboratorStore with Store {
     RolesType roleType, {
     Subscription? subscription,
   }) async {
-    debugPrint('[CollaboratorStore] addCollaborator called - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
-
     if (Global.companyAggr?.id == null) {
       debugPrint('[CollaboratorStore] Error: companyAggr is null');
       return (false, null);
@@ -233,100 +228,22 @@ abstract class _CollaboratorStore with Store {
 
     isLoading = true;
     try {
-      final companyId = Global.companyAggr!.id!;
       final normalizedEmail = email?.toLowerCase().trim();
       final normalizedPhone = phone?.replaceAll(RegExp(r'\D'), '').trim();
-      debugPrint('[CollaboratorStore] Normalized - email: $normalizedEmail, phone: $normalizedPhone');
 
-      // 1. Search user by email (phone-only search skipped — security rules
-      //    don't allow client-side queries on the users collection by phone;
-      //    phone-based invites are resolved server-side by the bot).
-      dynamic user;
-      try {
-        if (normalizedEmail != null && normalizedEmail.isNotEmpty) {
-          debugPrint('[CollaboratorStore] Searching user by email: $normalizedEmail');
-          user = await _userRepository.findUserByEmail(normalizedEmail);
-        }
-        debugPrint('[CollaboratorStore] User search result: ${user?.id ?? 'not found'}');
-      } catch (e) {
-        debugPrint('[CollaboratorStore] Error searching user: $e');
-        user = null;
-      }
-
-      // Se o usuário não existe, cria um convite
-      if (user == null) {
-        debugPrint('[CollaboratorStore] User not found, creating invite...');
-        final inviteToken = await _createInvite(
-          name,
-          normalizedEmail,
-          normalizedPhone,
-          roleType,
-        );
-        debugPrint('[CollaboratorStore] Invite created with token: $inviteToken');
-        AnalyticsService.instance.logCollaboratorInvited(
-          method: 'invite',
-          role: roleType.name,
-        );
-        // Atualiza contador (convite conta como colaborador pendente)
-        await _updateCollaboratorCounter();
-        return (false, inviteToken);
-      }
-
-      debugPrint('[CollaboratorStore] User found: ${user.id}');
-
-      // 2. Verifica se o usuário já está na empresa
-      final existingCompanyIndex = user.companies?.indexWhere(
-        (c) => c.company?.id == companyId
-      ) ?? -1;
-      final alreadyInCompanies = existingCompanyIndex >= 0;
-
-      // 3. Usa batch para garantir atomicidade
-      final batch = _db.batch();
-
-      // 3a. Atualiza user.companies (source of truth)
-      final userRef = _db.collection('users').doc(user.id);
-
-      if (alreadyInCompanies) {
-        // Já existe - apenas atualiza o role
-        user.companies![existingCompanyIndex].role = roleType;
-      } else {
-        // Não existe - adiciona nova entrada
-        final newCompanyRole = CompanyRoleAggr()
-          ..company = Global.companyAggr
-          ..role = roleType;
-        user.companies ??= [];
-        user.companies!.add(newCompanyRole);
-      }
-      batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
-
-      // 3b. Atualiza ou cria membership (índice reverso)
-      final membershipRef = _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('memberships')
-          .doc(user.id);
-
-      final membership = Membership(
-        userId: user.id!,
-        user: user.toAggr(),
-        role: roleType,
+      final inviteToken = await _createInvite(
+        name,
+        normalizedEmail,
+        normalizedPhone,
+        roleType,
       );
-
-      // Usa set com merge para atualizar se existir ou criar se não existir
-      batch.set(membershipRef, membership.toFirestore(), SetOptions(merge: true));
-
-      // 4. Commit atômico
-      await batch.commit();
-
-      // 5. Atualiza contador de colaboradores
-      await _updateCollaboratorCounter();
-
       AnalyticsService.instance.logCollaboratorInvited(
-        method: 'direct',
+        method: 'invite',
         role: roleType.name,
       );
-      return (true, null); // Adicionado diretamente
-
+      // Atualiza contador (convite conta como colaborador pendente)
+      await _updateCollaboratorCounter();
+      return (false, inviteToken);
     } catch (e) {
       errorMessage = e.toString();
       rethrow;
@@ -385,10 +302,10 @@ abstract class _CollaboratorStore with Store {
     }
   }
 
-  /// Atualiza a role de um colaborador.
+  /// Atualiza o perfil de um colaborador pelo servidor (`PATCH /v1/app/team`).
   ///
-  /// Atualiza em ambos os lugares atomicamente.
-  /// Não permite alterar o perfil do único administrador para outro perfil.
+  /// Não permite alterar o perfil do único administrador (checado aqui e no
+  /// servidor, que também protege o dono da empresa).
   @action
   Future<void> updateCollaboratorRole(String userId, RolesType newRoleType) async {
     if (Global.companyAggr?.id == null) return;
@@ -401,48 +318,14 @@ abstract class _CollaboratorStore with Store {
 
     isLoading = true;
     try {
-      final companyId = Global.companyAggr!.id!;
+      await teamApi.changeRole(userId, newRoleType);
 
-      // 1. Busca o usuário
-      final user = await _userRepository.findUserById(userId);
-      if (user == null) {
-        throw CollaboratorException(CollaboratorErrorCode.userNotFound);
-      }
-
-      // 2. Usa batch para garantir atomicidade
-      final batch = _db.batch();
-
-      // 2a. Atualiza user.companies
-      final userRef = _db.collection('users').doc(userId);
-      final companyRole = user.companies?.firstWhere(
-        (c) => c.company?.id == companyId,
-        orElse: () => CompanyRoleAggr(),
-      );
-
-      if (companyRole != null && companyRole.company != null) {
-        companyRole.role = newRoleType;
-        batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
-      }
-
-      // 2b. Atualiza membership
-      final membershipRef = _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('memberships')
-          .doc(userId);
-      batch.update(membershipRef, {'role': newRoleType.name});
-
-      // 3. Commit atômico
-      await batch.commit();
-
-      // 4. Se o usuário afetado for o atual, força refresh do token
+      // Se o usuário afetado for o atual, força refresh do token
       if (userId == Global.currentUser?.uid) {
         await _refreshCurrentUserToken();
       }
 
-      // 5. Recarrega lista
       await loadCollaborators();
-
     } catch (e) {
       errorMessage = e.toString();
       rethrow;
@@ -451,10 +334,9 @@ abstract class _CollaboratorStore with Store {
     }
   }
 
-  /// Remove um colaborador da empresa.
+  /// Remove um colaborador da empresa pelo servidor (`DELETE /v1/app/team`).
   ///
-  /// Remove de ambos os lugares atomicamente.
-  /// Não permite remover o único administrador da empresa.
+  /// Não permite remover a si mesmo nem o único administrador.
   @action
   Future<void> removeCollaborator(String userId) async {
     if (Global.companyAggr?.id == null) return;
@@ -472,39 +354,12 @@ abstract class _CollaboratorStore with Store {
 
     isLoading = true;
     try {
-      final companyId = Global.companyAggr!.id!;
+      await teamApi.removeMember(userId);
 
-      // 1. Busca o usuário
-      final user = await _userRepository.findUserById(userId);
-      if (user == null) {
-        throw CollaboratorException(CollaboratorErrorCode.userNotFound);
-      }
-
-      // 2. Usa batch para garantir atomicidade
-      final batch = _db.batch();
-
-      // 2a. Remove de user.companies
-      final userRef = _db.collection('users').doc(userId);
-      user.companies?.removeWhere((c) => c.company?.id == companyId);
-      batch.update(userRef, {'companies': user.companies?.map((c) => c.toJson()).toList() ?? []});
-
-      // 2b. Remove membership
-      final membershipRef = _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('memberships')
-          .doc(userId);
-      batch.delete(membershipRef);
-
-      // 3. Commit atômico
-      await batch.commit();
-
-      // 4. Atualiza contador de colaboradores
+      // Atualiza contador de colaboradores
       await _updateCollaboratorCounter();
 
-      // 5. Recarrega lista
       await loadCollaborators();
-
     } catch (e) {
       errorMessage = e.toString();
       rethrow;

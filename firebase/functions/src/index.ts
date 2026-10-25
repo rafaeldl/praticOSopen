@@ -319,6 +319,7 @@ import chargesRoutes from './routes/v1/charges.routes';
 import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
+import teamRoutes from './routes/v1/team.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
 import { auth as adminAuth } from './services/firestore.service';
@@ -527,6 +528,7 @@ app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyCont
 app.use('/v1/app/nfse', apiCoreLimiter, bearerAuth, resolveCompanyContext, nfseRoutes);
 // AI assistant (aiOrderAssist). Off unless companies/{cid}/settings/ai.enabled == true — docs/AI_ORDER_ASSIST.md
 app.use('/v1/app/ai', apiCoreLimiter, bearerAuth, resolveCompanyContext, aiRoutes);
+app.use('/v1/app/team', apiCoreLimiter, bearerAuth, resolveCompanyContext, teamRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);

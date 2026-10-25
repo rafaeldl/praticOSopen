@@ -296,12 +296,11 @@ export const CASES: RulesCase[] = [
     allow: ADMINS, permission: 'manageRoles',
   },
   {
-    // CollaboratorStore.updateCollaboratorRole/removeCollaborator also batch-write
-    // users/{otherUid}.companies, which only the user itself may write.
+    // Nobody writes a colleague's users/{uid}. The app no longer does: role change
+    // and removal go through PATCH/DELETE /v1/app/team/members/:userId (#457).
     id: 'team.changeRole.userDoc', area: 'Equipe', title: 'mudar o papel (perfil do colega em /users)',
     run: ({ db, fs }) => fs.updateDoc(fs.doc(db, 'users/ghost'), { companies: [] }),
-    allow: [], permission: 'manageRoles',
-    gap: 'BUG: o app grava users/{colega} ao trocar papel ou remover alguém, e as regras só deixam o próprio usuário gravar. A troca de papel falha para o admin.',
+    allow: [],
   },
   {
     id: 'memberships.selfPromote', area: 'Equipe', title: 'se promover a admin',

@@ -3016,6 +3016,24 @@ abstract class AppLocalizations {
   /// **'Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.'**
   String get cannotChangeOnlyAdminRole;
 
+  /// No description provided for @cannotChangeOwner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não dá para mudar o perfil nem tirar o dono da empresa.'**
+  String get cannotChangeOwner;
+
+  /// No description provided for @teamActionNotAllowed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só o dono ou um administrador pode mudar a equipe.'**
+  String get teamActionNotAllowed;
+
+  /// No description provided for @teamActionFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar a mudança na equipe. Tente de novo.'**
+  String get teamActionFailed;
+
   /// No description provided for @cannotRemoveSelf.
   ///
   /// In pt, this message translates to:
