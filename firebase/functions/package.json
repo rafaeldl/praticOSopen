@@ -23,7 +23,8 @@
     "subscriptions:grace": "ts-node scripts/grant-grace-period.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-praticos --config ../firebase.json \"jest src/__tests__/firestore.rules.test.ts\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-praticos --config ../firebase.json \"jest src/__tests__/firestore.rules.test.ts\"",
+    "test:rbac": "firebase emulators:exec --only firestore,storage --project demo-praticos --config ../firebase.test.json \"jest src/__tests__/rbac-app-consistency.test.ts src/__tests__/rbac-firestore.rules.test.ts src/__tests__/storage.rules.test.ts\""
   },
   "engines": {
     "node": "22"
