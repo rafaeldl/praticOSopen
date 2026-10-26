@@ -2234,9 +2234,32 @@ abstract class _OrderStore with Store {
     ordersLoadFailed = false;
     orders.clear();
 
+    // Resolved alongside the page's own query (same wait), to know which
+    // `createdBy.id` filter the page was read with.
+    final scope = TenantOrderRepository.creatorScope();
     await _fetchOrdersInfinite(status, generation);
+    final usedScope = await scope;
 
-    if (generation == _ordersGeneration) isLoading = false;
+    if (generation == _ordersGeneration) {
+      isLoading = false;
+      _reloadWhenScopeChanges(status, usedScope);
+    }
+  }
+
+  StreamSubscription<String?>? _scopeWatch;
+
+  /// The page may have been read with the provisional `createdBy.id` filter
+  /// (role not loaded in time). When the role arrives and the filter is
+  /// different, reload instead of keeping owner/admin filtered.
+  void _reloadWhenScopeChanges(String? status, String? usedScope) {
+    _scopeWatch?.cancel();
+    _scopeWatch = TenantOrderRepository.creatorScopeChanges()
+        .where((scope) => scope != usedScope)
+        .listen((_) {
+          _scopeWatch?.cancel();
+          _scopeWatch = null;
+          loadOrdersInfinite(status);
+        });
   }
 
   @action

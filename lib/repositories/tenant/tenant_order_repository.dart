@@ -7,6 +7,7 @@ import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/switch_stream.dart';
 
 /// Repository para Orders usando subcollections por tenant.
 ///
@@ -34,6 +35,12 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   /// reads every order. Replaceable in tests.
   static Future<String?> Function() creatorScope = () =>
       AuthorizationService.instance.orderCreatorFilter();
+
+  /// [creatorScope] now and again whenever it changes (the role arrives
+  /// after the query started). Live queries resubscribe on each value.
+  /// Replaceable in tests.
+  static Stream<String?> Function() creatorScopeChanges = () =>
+      AuthorizationService.instance.orderCreatorFilterChanges();
 
   /// [args] plus `createdBy.id == creatorId` (when [creatorId] is set and
   /// the query doesn't already filter by it).
@@ -70,8 +77,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     List<QueryArgs>? args,
     int? limit,
   }) {
-    return Stream.fromFuture(creatorScope()).asyncExpand(
-      (creator) => super.streamQueryList(
+    return switchStream(
+      creatorScopeChanges(),
+      (String? creator) => super.streamQueryList(
         companyId,
         orderBy: orderBy,
         args: scopedArgs(args, creator),
@@ -110,8 +118,9 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     DateTime to, {
     List<QueryArgs> args = const [],
   }) {
-    return Stream.fromFuture(creatorScope()).asyncExpand(
-      (creator) => super.streamListFromTo(
+    return switchStream(
+      creatorScopeChanges(),
+      (String? creator) => super.streamListFromTo(
         companyId,
         field,
         from,

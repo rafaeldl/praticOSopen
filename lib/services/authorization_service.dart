@@ -203,6 +203,46 @@ class AuthorizationService {
     userId: Global.currentUser?.uid,
   );
 
+  /// [orderCreatorFilter] now and again whenever the user's role changes.
+  /// While the role is unknown (user document not loaded yet) it filters,
+  /// and switches to "no filter" as soon as an owner/admin role arrives, so
+  /// a live query doesn't stay stuck on the provisional filter.
+  Stream<String?> orderCreatorFilterChanges() async* {
+    final userId = Global.currentUser?.uid;
+    final companyId = Global.companyAggr?.id;
+    // Same wait as [orderCreatorFilter], so `.first` keeps its answer.
+    final initial = await resolveCurrentRole();
+    final users = _activeUserStore?.user;
+    yield* creatorFilterChanges(
+      initial: initial,
+      roles: users == null
+          ? const Stream.empty()
+          : users.map((u) => roleIn(u, companyId)),
+      userId: userId,
+    );
+  }
+
+  /// Pure version of [orderCreatorFilterChanges]: the filter for [initial],
+  /// then for each value of [roles], without repeating a value. A null role
+  /// after a known one (user doc briefly missing) keeps the last filter.
+  static Stream<String?> creatorFilterChanges({
+    required RolesType? initial,
+    required Stream<RolesType?> roles,
+    required String? userId,
+  }) async* {
+    var current = orderCreatorFilterFor(role: initial, userId: userId);
+    var known = initial != null;
+    yield current;
+    await for (final role in roles) {
+      if (role == null && known) continue;
+      known = known || role != null;
+      final next = orderCreatorFilterFor(role: role, userId: userId);
+      if (next == current) continue;
+      current = next;
+      yield current;
+    }
+  }
+
   /// Pure version of [orderCreatorFilter]. An unknown role filters too: the
   /// filtered query is allowed for every member.
   static String? orderCreatorFilterFor({

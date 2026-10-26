@@ -140,4 +140,32 @@ void main() {
       expect(canGenerateContractOrders(role), isTrue, reason: '$role');
     }
   });
+
+  group('creatorFilterChanges (role arrives late)', () {
+    Future<List<String?>> run(RolesType? initial, List<RolesType?> roles) =>
+        AuthorizationService.creatorFilterChanges(
+          initial: initial,
+          roles: Stream.fromIterable(roles),
+          userId: 'me',
+        ).toList();
+
+    test('unknown role filters, then drops the filter for an admin', () async {
+      expect(await run(null, [null, RolesType.admin]), ['me', null]);
+    });
+
+    test('unknown role that turns out technician keeps the filter', () async {
+      expect(await run(null, [RolesType.technician]), ['me']);
+    });
+
+    test('known role stays put when the user doc is briefly missing', () async {
+      expect(await run(RolesType.admin, [null, RolesType.admin]), [null]);
+    });
+
+    test('a role change after load updates the filter', () async {
+      expect(
+        await run(RolesType.admin, [RolesType.technician]),
+        [null, 'me'],
+      );
+    });
+  });
 }

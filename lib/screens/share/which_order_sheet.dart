@@ -283,7 +283,8 @@ class _WhichOrderLoaderState extends State<_WhichOrderLoader> {
   }
 
   /// The latest orders of the company, loaded once on the first search.
-  /// Ordered by `createdAt` only: no composite index.
+  /// Ordered by `createdAt`; for consultant/technician the repository adds
+  /// `createdBy.id`, served by the (createdBy.id, createdAt) index.
   Future<void> _loadPool() async {
     final companyId = Global.companyAggr?.id;
     var pool = <Order>[];
