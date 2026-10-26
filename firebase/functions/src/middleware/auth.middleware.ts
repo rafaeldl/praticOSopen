@@ -83,7 +83,7 @@ export async function apiKeyAuth(
     }
 
     // Verify secret if provided in key data
-    if (keyData.secret && keyData.secret !== apiSecret) {
+    if (keyData.secret && (!apiSecret || !sameSecret(apiSecret, keyData.secret))) {
       res.status(401).json({
         success: false,
         error: {
