@@ -33,6 +33,7 @@ import 'package:praticos/utils/financial_summary.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/models/permission.dart';
 
 /// Customer screen (`/customer_detail`, arguments `customer` and optionally
 /// `previousTitle`, the label of the back button): phone with "gastou R$ X"
@@ -57,6 +58,7 @@ class CustomerDetailScreen extends StatefulWidget {
     this.receipts,
     this.onOpenReceipt,
     this.nfse,
+    this.can,
   });
 
   /// Falls back to the `customer` route argument.
@@ -96,6 +98,11 @@ class CustomerDetailScreen extends StatefulWidget {
   /// [NfseController] that stays off unless the company has `nfseEnabled`.
   final NfseController? nfse;
 
+  /// Permission check (edit/delete need `manageCustomers`, a new vehicle
+  /// `manageDevices`: the Firestore rules deny them otherwise). Defaults to
+  /// [AuthorizationService.hasPermission]. Test seam.
+  final bool Function(PermissionType permission)? can;
+
   @override
   State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
 }
@@ -129,6 +136,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     if (widget.nfse == null) _nfse.dispose();
     super.dispose();
   }
+
+  bool _can(PermissionType permission) =>
+      widget.can?.call(permission) ??
+      AuthorizationService.instance.hasPermission(permission);
 
   bool get _showPrices =>
       widget.showPrices ?? AuthorizationService.instance.canViewPrices;
@@ -331,21 +342,23 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               },
               child: Text(l10n.nfseIssueSeveralAction),
             ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _edit();
-            },
-            child: Text(l10n.edit),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _confirmDelete();
-            },
-            child: Text(l10n.deleteAction),
-          ),
+          if (_can(PermissionType.manageCustomers)) ...[
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                _edit();
+              },
+              child: Text(l10n.edit),
+            ),
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                _confirmDelete();
+              },
+              child: Text(l10n.deleteAction),
+            ),
+          ],
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(sheetContext),
@@ -381,11 +394,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               AppNavBar(
                 largeTitle: Text(customer.name ?? ''),
                 previousTitle: _previousTitle ?? config.customerPlural,
-                trailing: GlassBarButton(
-                  label: l10n.customerActions,
-                  icon: CupertinoIcons.ellipsis,
-                  onPressed: _showMenu,
-                ),
+                trailing: _nfse.enabled || _can(PermissionType.manageCustomers)
+                    ? GlassBarButton(
+                        label: l10n.customerActions,
+                        icon: CupertinoIcons.ellipsis,
+                        onPressed: _showMenu,
+                      )
+                    : null,
               ),
               ..._buildHeader(customer, orders),
               if (snapshot.hasError)
@@ -553,10 +568,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     return [
       SectionLabel(l10n.devicesOfCustomer(config.devicePlural, name)),
       for (final v in vehicles) _vehicleRow(v, orders),
-      AddRow(
-        label: l10n.addAnotherDevice(config.device.toLowerCase()),
-        onTap: _addDevice,
-      ),
+      if (_can(PermissionType.manageDevices))
+        AddRow(
+          label: l10n.addAnotherDevice(config.device.toLowerCase()),
+          onTap: _addDevice,
+        ),
       if (orders.isNotEmpty) ...[
         SectionLabel(l10n.latestOrders),
         for (final o in orders) _orderRow(o),

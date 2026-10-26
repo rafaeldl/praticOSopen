@@ -136,6 +136,37 @@ export const CASES: RulesCase[] = [
     allow: SEE_ALL_ORDERS,
   },
   {
+    // The Home tab query as the app runs it since #456: consultant and
+    // technician add createdBy.id == uid (OrderRepositoryV2.getOrdersWithPagination).
+    id: 'orders.list.homeQueryScoped', area: 'OS', title: 'abrir a Início com o filtro do perfil (createdBy)',
+    run: ({ db, fs, uid }) =>
+      fs.getDocs(fs.query(fs.collection(db, `${C}/orders`),
+        fs.where('status', 'in', ['quote', 'approved', 'progress']), fs.where('createdBy.id', '==', uid),
+        fs.orderBy('createdAt', 'desc'), fs.limit(10))),
+    allow: MEMBERS,
+  },
+  {
+    // Agenda by scheduled date (TenantOrderRepository.streamOrdersByScheduledDateRange
+    // + creator scope).
+    id: 'orders.list.agendaScheduledScoped', area: 'OS', title: 'abrir a Agenda (agendadas) com o filtro do perfil',
+    run: ({ db, fs, uid }) =>
+      fs.getDocs(fs.query(fs.collection(db, `${C}/orders`),
+        fs.where('scheduledDate', '>=', '2026-10-01T00:00:00.000'),
+        fs.where('scheduledDate', '<', '2026-11-01T00:00:00.000'),
+        fs.where('createdBy.id', '==', uid), fs.orderBy('scheduledDate'))),
+    allow: MEMBERS,
+  },
+  {
+    // Agenda by due date (streamOrdersByDueDateRange + creator scope).
+    id: 'orders.list.agendaDueScoped', area: 'OS', title: 'abrir a Agenda (prazos) com o filtro do perfil',
+    run: ({ db, fs, uid }) =>
+      fs.getDocs(fs.query(fs.collection(db, `${C}/orders`),
+        fs.where('dueDate', '>=', '2026-10-01T00:00:00.000'),
+        fs.where('dueDate', '<', '2026-11-01T00:00:00.000'),
+        fs.where('createdBy.id', '==', uid), fs.orderBy('dueDate'))),
+    allow: MEMBERS,
+  },
+  {
     id: 'orders.create', area: 'OS', title: 'criar OS',
     run: ({ db, fs, uid }) =>
       fs.setDoc(fs.doc(db, `${C}/orders/new_${uid}`), {

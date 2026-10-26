@@ -3,7 +3,6 @@ import 'package:praticos/models/accumulated_value.dart';
 import 'package:praticos/repositories/accumulated_value_repository.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
-import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
@@ -190,15 +189,9 @@ class _AccumulatedValueListScreenState
   bool get _mayDelete {
     final type = _fieldType ?? '';
     if (widget.canDelete != null) return widget.canDelete!(type);
-    final PermissionType permission;
-    if (type.startsWith('service')) {
-      permission = PermissionType.manageServices;
-    } else if (type.startsWith('product')) {
-      permission = PermissionType.manageProducts;
-    } else {
-      permission = PermissionType.manageDevices;
-    }
-    return AuthorizationService.instance.hasPermission(permission);
+    // Firestore rules: deleting an autocomplete value needs manageCompany
+    // (admin), whatever the field.
+    return AuthorizationService.instance.canManageCompany;
   }
 
   @override

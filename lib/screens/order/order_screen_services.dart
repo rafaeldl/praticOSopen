@@ -48,6 +48,8 @@ class OrderPermissions {
     this.canAttachMedia = _always,
     this.canReceivePayments = _anyOrderOrNone,
     this.canGiveDiscount = _always,
+    this.canRegisterCustomers = _always,
+    this.canRegisterDevices = _always,
   });
 
   static bool _anyOrder(Order order) => true;
@@ -67,6 +69,10 @@ class OrderPermissions {
       canAttachMedia: () => auth.hasPermission(PermissionType.attachPhotos),
       canReceivePayments: auth.canReceiveOnOrder,
       canGiveDiscount: () => auth.canViewFinancialReports,
+      canRegisterCustomers: () =>
+          auth.hasPermission(PermissionType.manageCustomers),
+      canRegisterDevices: () =>
+          auth.hasPermission(PermissionType.manageDevices),
     );
   }
 
@@ -92,6 +98,13 @@ class OrderPermissions {
 
   /// "Desconto" in the "…" menu: financial access only.
   final bool Function() canGiveDiscount;
+
+  /// The assistant may register a customer it heard (`manageCustomers`; the
+  /// Firestore rules deny the write otherwise).
+  final bool Function() canRegisterCustomers;
+
+  /// The assistant may register a vehicle it heard (`manageDevices`).
+  final bool Function() canRegisterDevices;
 }
 
 /// Side effects of the order screen that leave it (other screens, sharing,

@@ -14,6 +14,7 @@ import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/models/user_role.dart';
 import 'package:praticos/utils/order_items.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
@@ -37,6 +38,12 @@ part 'order_store.g.dart';
 const int kOpenOrdersLimit = 500;
 
 class OrderStore = _OrderStore with _$OrderStore;
+
+/// Whether [role] may auto-generate the due contract orders (creating orders
+/// needs `createOrder`; the manager doesn't have it).
+bool canGenerateContractOrders(RolesType? role) =>
+    role != null &&
+    RolePermissions.hasPermission(role, PermissionType.createOrder);
 
 abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
@@ -681,6 +688,12 @@ abstract class _OrderStore with Store {
       print('[Contracts] companyId is null, skipping');
       return 0;
     }
+
+    // Generating creates orders: only for who can create them (the manager
+    // can't). Consultant and technician generate from their own contracts
+    // (the contract query is scoped to them in TenantOrderRepository).
+    final role = await _authService.resolveCurrentRole();
+    if (!canGenerateContractOrders(role)) return 0;
 
     try {
       final tenantRepo = TenantOrderRepository();
@@ -2221,9 +2234,32 @@ abstract class _OrderStore with Store {
     ordersLoadFailed = false;
     orders.clear();
 
+    // Resolved alongside the page's own query (same wait), to know which
+    // `createdBy.id` filter the page was read with.
+    final scope = TenantOrderRepository.creatorScope();
     await _fetchOrdersInfinite(status, generation);
+    final usedScope = await scope;
 
-    if (generation == _ordersGeneration) isLoading = false;
+    if (generation == _ordersGeneration) {
+      isLoading = false;
+      _reloadWhenScopeChanges(status, usedScope);
+    }
+  }
+
+  StreamSubscription<String?>? _scopeWatch;
+
+  /// The page may have been read with the provisional `createdBy.id` filter
+  /// (role not loaded in time). When the role arrives and the filter is
+  /// different, reload instead of keeping owner/admin filtered.
+  void _reloadWhenScopeChanges(String? status, String? usedScope) {
+    _scopeWatch?.cancel();
+    _scopeWatch = TenantOrderRepository.creatorScopeChanges()
+        .where((scope) => scope != usedScope)
+        .listen((_) {
+          _scopeWatch?.cancel();
+          _scopeWatch = null;
+          loadOrdersInfinite(status);
+        });
   }
 
   @action

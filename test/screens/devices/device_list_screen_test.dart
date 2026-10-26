@@ -226,4 +226,21 @@ void main() {
     await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno]);
     expect(find.textContaining(RegExp(r'^Nenhum ')), findsNothing);
   });
+
+  testWidgets('without manageDevices there is no "Novo veículo"', (
+    tester,
+  ) async {
+    await pumpList(
+      tester,
+      args: {'order': orderOf('c1')},
+      devices: [uno],
+      canManage: false,
+    );
+    expect(find.byKey(const ValueKey('picker-add')), findsNothing);
+  });
+
+  testWidgets('with manageDevices "Novo veículo" shows', (tester) async {
+    await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno]);
+    expect(find.byKey(const ValueKey('picker-add')), findsOneWidget);
+  });
 }

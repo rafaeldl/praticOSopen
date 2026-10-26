@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
 import 'package:praticos/screens/forms/form_template_form_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:provider/provider.dart';
 
@@ -21,10 +23,14 @@ class FormSelectionScreen extends StatefulWidget {
   final Future<(List<FormDefinition>, List<FormDefinition>)> Function()?
   loadTemplates;
 
+  /// Whether "Novo checklist" shows (`manageForms`); injected in tests.
+  final bool Function()? canCreateTemplate;
+
   const FormSelectionScreen({
     super.key,
     required this.companyId,
     this.loadTemplates,
+    this.canCreateTemplate,
   });
 
   @override
@@ -66,8 +72,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       _hasError = false;
     });
     try {
-      final (company, global) =
-          await (widget.loadTemplates ?? _defaultLoad)();
+      final (company, global) = await (widget.loadTemplates ?? _defaultLoad)();
       if (!mounted) return;
       setState(() {
         _companyTemplates = company;
@@ -83,6 +88,10 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       }
     }
   }
+
+  bool get _canCreate =>
+      widget.canCreateTemplate?.call() ??
+      AuthorizationService.instance.hasPermission(PermissionType.manageForms);
 
   void _newTemplate() {
     FormSheet.show<FormDefinition>(
@@ -122,8 +131,8 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       loading: _isLoading,
       hasError: _hasError,
       onRetry: _loadTemplates,
-      addLabel: l10n.pickerNewChecklist,
-      onAdd: _newTemplate,
+      addLabel: _canCreate ? l10n.pickerNewChecklist : null,
+      onAdd: _canCreate ? _newTemplate : null,
       emptyTitle: l10n.noProceduresAvailable,
       sections: (query) {
         final mine = company.where((t) => _matches(t, query));

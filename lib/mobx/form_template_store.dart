@@ -5,6 +5,7 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/repositories/v2/form_template_repository_v2.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -201,6 +202,9 @@ abstract class _FormTemplateStore with Store {
   /// 2. Local: Global.subscription.usage.formTemplatesActive
   Future<void> _updateFormTemplateCounter() async {
     if (companyId == null) return;
+    // TODO(#458): move usage counters to the server (Function); only an admin
+    // may write the company document.
+    if (!AuthorizationService.instance.canWriteUsageCounters) return;
 
     try {
       // Conta templates ativos

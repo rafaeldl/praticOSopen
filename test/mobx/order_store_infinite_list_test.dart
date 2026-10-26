@@ -7,6 +7,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
@@ -35,8 +36,57 @@ void main() {
     await Firebase.initializeApp();
   });
 
-  setUp(() => Global.companyAggr = CompanyAggr()..id = 'c1');
-  tearDown(() => Global.companyAggr = null);
+  late Future<String?> Function() defaultScope;
+  late Stream<String?> Function() defaultScopeChanges;
+  setUpAll(() {
+    defaultScope = TenantOrderRepository.creatorScope;
+    defaultScopeChanges = TenantOrderRepository.creatorScopeChanges;
+  });
+
+  setUp(() {
+    Global.companyAggr = CompanyAggr()..id = 'c1';
+    TenantOrderRepository.creatorScope = () async => null;
+    TenantOrderRepository.creatorScopeChanges = () => Stream.value(null);
+  });
+  tearDown(() {
+    Global.companyAggr = null;
+    TenantOrderRepository.creatorScope = defaultScope;
+    TenantOrderRepository.creatorScopeChanges = defaultScopeChanges;
+  });
+
+  test('reloads when the role arrives after a provisionally filtered page',
+      () async {
+    // Role not loaded in time: the page was read filtered by the own uid.
+    TenantOrderRepository.creatorScope = () async => 'me';
+    final changes = StreamController<String?>.broadcast();
+    TenantOrderRepository.creatorScopeChanges = () => changes.stream;
+    final store = OrderStore();
+    var fetches = 0;
+    store.fetchOrdersPage = (_, __, ___, ____, _____) async {
+      fetches++;
+      return (orders: [_order('o$fetches')], last: null);
+    };
+
+    await store.loadOrdersInfinite('open');
+    expect(fetches, 1);
+
+    changes.add('me'); // same filter: nothing to do
+    await pumpEventQueue();
+    expect(fetches, 1);
+
+    // Owner role arrives: the filter goes away and the list reloads.
+    TenantOrderRepository.creatorScope = () async => null;
+    changes.add(null);
+    await pumpEventQueue();
+    expect(fetches, 2);
+    expect(store.orders.map((o) => o!.id), ['o2']);
+
+    // The reload watches the new scope; no reload loop.
+    changes.add(null);
+    await pumpEventQueue();
+    expect(fetches, 2);
+    await changes.close();
+  });
 
   test('two loads in flight show each order once (Início duplicated OS)',
       () async {

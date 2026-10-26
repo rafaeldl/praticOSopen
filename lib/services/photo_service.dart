@@ -13,6 +13,7 @@ import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 /// Serviço centralizado para gerenciamento de fotos
 /// - Seleção de imagens (galeria/câmera)
@@ -204,6 +205,9 @@ class PhotoService {
 
   /// Incrementa o contador de fotos do mês em companies/{companyId}.
   Future<void> _incrementPhotoCounter(String companyId) async {
+    // TODO(#458): move usage counters to the server (Function); only an admin
+    // may write the company document, so other roles' photos go uncounted.
+    if (!AuthorizationService.instance.canWriteUsageCounters) return;
     try {
       final companyRef = FirebaseFirestore.instance
           .collection(SubscriptionUsagePaths.collection)

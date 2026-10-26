@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -197,7 +198,10 @@ void main() {
     testWidgets('titles the screen as a task and offers to add a customer', (
       tester,
     ) async {
-      await Harness().pump(tester, CustomerListScreen(directory: directory()));
+      await Harness().pump(
+        tester,
+        CustomerListScreen(canAdd: true, directory: directory()),
+      );
       expect(find.text('Qual cliente?'), findsOneWidget);
       expect(find.byKey(const ValueKey('picker-add')), findsOneWidget);
       expect(find.text('Ana Ribeiro'), findsOneWidget);
@@ -205,10 +209,22 @@ void main() {
       expect(find.byType(CupertinoSearchTextField), findsNothing);
     });
 
+    testWidgets('without manageCustomers the picker offers no new customer', (
+      tester,
+    ) async {
+      await Harness().pump(
+        tester,
+        CustomerListScreen(canAdd: false, directory: directory()),
+      );
+      expect(find.text('Ana Ribeiro'), findsOneWidget);
+      expect(find.byKey(const ValueKey('picker-add')), findsNothing);
+    });
+
     testWidgets('above 10 customers the search shows', (tester) async {
       await Harness().pump(
         tester,
         CustomerListScreen(
+          canAdd: true,
           directory: FakeDirectory(
             customers: [
               for (var i = 0; i < 11; i++) customer('x$i', 'Cliente $i'),
@@ -225,7 +241,7 @@ void main() {
     testWidgets('the order customer has the check mark', (tester) async {
       await Harness().pump(
         tester,
-        CustomerListScreen(directory: directory()),
+        CustomerListScreen(canAdd: true, directory: directory()),
         args: {'order': Order()..customer = (CustomerAggr()..id = 'c2')},
       );
       final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
@@ -240,7 +256,7 @@ void main() {
     ) async {
       await Harness().pump(
         tester,
-        CustomerListScreen(directory: directory()),
+        CustomerListScreen(canAdd: true, directory: directory()),
         args: {
           'order': Order()
             ..customer = (CustomerAggr()
@@ -258,7 +274,10 @@ void main() {
     testWidgets('has no swipe actions and no chevron while choosing', (
       tester,
     ) async {
-      await Harness().pump(tester, CustomerListScreen(directory: directory()));
+      await Harness().pump(
+        tester,
+        CustomerListScreen(canAdd: true, directory: directory()),
+      );
       expect(find.byType(Dismissible), findsNothing);
       expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
     });
@@ -269,7 +288,7 @@ void main() {
       final h = Harness();
       await h.pump(
         tester,
-        CustomerListScreen(directory: directory(many: true)),
+        CustomerListScreen(canAdd: true, directory: directory(many: true)),
       );
       await tester.enterText(find.byType(CupertinoSearchTextField), 'abc1');
       await tester.pumpAndSettle();
@@ -290,6 +309,7 @@ void main() {
       await h.pump(
         tester,
         CustomerListScreen(
+          canAdd: true,
           directory: directory(
             orders: {
               'c1': [
@@ -313,6 +333,7 @@ void main() {
       await h.pump(
         tester,
         CustomerListScreen(
+          canAdd: true,
           directory: directory(
             orders: {
               'c1': [
@@ -336,6 +357,7 @@ void main() {
       await h.pump(
         tester,
         CustomerListScreen(
+          canAdd: true,
           directory: directory(
             orders: {
               'c1': [
@@ -354,7 +376,7 @@ void main() {
     testWidgets('empty search shows the no-match sentence', (tester) async {
       await Harness().pump(
         tester,
-        CustomerListScreen(directory: directory(many: true)),
+        CustomerListScreen(canAdd: true, directory: directory(many: true)),
       );
       await tester.enterText(find.byType(CupertinoSearchTextField), 'zzzz');
       await tester.pumpAndSettle();
@@ -365,7 +387,10 @@ void main() {
 
     testWidgets('"Novo cliente" opens the sheet with X and ✓', (tester) async {
       final h = Harness();
-      await h.pump(tester, CustomerListScreen(directory: directory()));
+      await h.pump(
+        tester,
+        CustomerListScreen(canAdd: true, directory: directory()),
+      );
       await tester.tap(find.byKey(const ValueKey('picker-add')));
       await tester.pumpAndSettle();
       expect(find.byType(FormSheet), findsOneWidget);
@@ -529,11 +554,13 @@ void main() {
       WidgetTester tester,
       FakeDirectory dir, {
       bool showPrices = true,
+      bool Function(PermissionType)? can,
     }) async {
       final h = Harness();
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: can ?? (_) => true,
           customer: ana,
           directory: dir,
           showPrices: showPrices,
@@ -551,6 +578,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: raw,
           directory: FakeDirectory(
             orders: {
@@ -609,6 +637,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(
             orders: {
@@ -654,6 +683,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(),
           showPrices: true,
@@ -725,6 +755,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(
             orders: {
@@ -771,6 +802,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(
             orders: {
@@ -800,6 +832,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(
             orders: {
@@ -826,6 +859,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(
             orders: {
@@ -899,6 +933,15 @@ void main() {
       expect(arg.customer?.id, 'c1');
     });
 
+    testWidgets('without manageCustomers there is no edit or delete', (
+      tester,
+    ) async {
+      // Technician: no manageCustomers nor manageDevices (Firestore rules).
+      await pumpDetail(tester, FakeDirectory(), can: (_) => false);
+      expect(find.byIcon(CupertinoIcons.ellipsis), findsNothing);
+      expect(find.textContaining('Cadastrar outro'), findsNothing);
+    });
+
     testWidgets('delete asks before removing and says orders stay', (
       tester,
     ) async {
@@ -921,6 +964,7 @@ void main() {
       await h.pump(
         tester,
         CustomerDetailScreen(
+          can: (_) => true,
           customer: ana,
           directory: FakeDirectory(),
           showPrices: true,
@@ -973,6 +1017,7 @@ void main() {
       await h.pump(
         tester,
         HomeCustomerList(
+          canAdd: true,
           directory: FakeDirectory(
             customers: [alice, ana, bruno],
             open: {'c1': const OpenOrdersSummary(open: 2, late: 1)},
@@ -998,6 +1043,7 @@ void main() {
       await Harness().pump(
         tester,
         HomeCustomerList(
+          canAdd: true,
           directory: FakeDirectory(
             customers: [customer('c9', 'Carla', phone: '+5548984087801')],
           ),
@@ -1012,6 +1058,7 @@ void main() {
       await Harness().pump(
         tester,
         HomeCustomerList(
+          canAdd: true,
           directory: FakeDirectory(
             customers: [ana, bruno],
             devices: [device('d1', 'Fiat Uno', 'ABC1D23')],
@@ -1027,12 +1074,25 @@ void main() {
       expect(find.textContaining('ABC1D23'), findsOneWidget);
     });
 
+    testWidgets('without manageCustomers there is no way to add one', (
+      tester,
+    ) async {
+      await Harness().pump(
+        tester,
+        HomeCustomerList(canAdd: false, directory: FakeDirectory()),
+        direct: true,
+      );
+      expect(find.text('Você ainda não tem clientes'), findsOneWidget);
+      expect(find.text('Cadastrar o primeiro cliente'), findsNothing);
+      expect(find.byIcon(CupertinoIcons.add), findsNothing);
+    });
+
     testWidgets('empty company shows the sentence and the action', (
       tester,
     ) async {
       await Harness().pump(
         tester,
-        HomeCustomerList(directory: FakeDirectory()),
+        HomeCustomerList(canAdd: true, directory: FakeDirectory()),
         direct: true,
       );
       expect(find.text('Você ainda não tem clientes'), findsOneWidget);

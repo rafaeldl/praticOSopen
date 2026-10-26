@@ -1748,13 +1748,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 ? formatPhone(c.phone)
                 : null,
           ),
-        PickerItem(
-          value: newOne,
-          title: context.l10n.orderAssistantRegisterNewCustomer(ask.name),
-          subtitle: (ask.phone?.isNotEmpty ?? false)
-              ? formatPhone(ask.phone)
-              : null,
-        ),
+        if (_permissions.canRegisterCustomers())
+          PickerItem(
+            value: newOne,
+            title: context.l10n.orderAssistantRegisterNewCustomer(ask.name),
+            subtitle: (ask.phone?.isNotEmpty ?? false)
+                ? formatPhone(ask.phone)
+                : null,
+          ),
         PickerItem(
           value: other,
           title: context.l10n.orderAssistantOtherCustomer,
@@ -1798,10 +1799,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       options: [
         for (final d in ask.options)
           PickerItem(value: d, title: d.name, subtitle: d.serial),
-        PickerItem(
-          value: newOne,
-          title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
-        ),
+        if (_permissions.canRegisterDevices())
+          PickerItem(
+            value: newOne,
+            title: context.l10n.orderAssistantRegisterNewDevice(ask.label),
+          ),
         PickerItem(
           value: other,
           title: context.l10n.orderAssistantOtherDevice(label),
@@ -1837,11 +1839,14 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// order (the user may have picked someone else).
   void _registerNew() {
     final customer = _newCustomer;
-    if (customer != null && _store.customer?.id == customer.id) {
+    if (customer != null &&
+        _store.customer?.id == customer.id &&
+        _permissions.canRegisterCustomers()) {
       unawaited(_registration.saveCustomer(customer));
     }
     for (final device in _newDevices) {
-      if (_store.devices.any((d) => d.id == device.id)) {
+      if (_store.devices.any((d) => d.id == device.id) &&
+          _permissions.canRegisterDevices()) {
         unawaited(_registration.saveDevice(device));
       }
     }
@@ -1877,8 +1882,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           undo,
         );
         used = true;
-      } else if (guess.isNotEmpty && draft.customerOptions.isEmpty && _isNew) {
+      } else if (guess.isNotEmpty &&
+          draft.customerOptions.isEmpty &&
+          _isNew &&
+          _permissions.canRegisterCustomers()) {
         // Nobody close: a new customer, registered when the order is saved.
+        // Without `manageCustomers` the row asks instead (no "Cadastrar"):
+        // the registration would be denied.
         final customer = _registration.newCustomer(
           guess,
           draft.customerGuessPhone,
@@ -1913,6 +1923,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       );
       used = true;
     } else if (_isNew &&
+        _permissions.canRegisterDevices() &&
         (serial.isNotEmpty
             ? !_store.devices.any((e) => e.serial?.toUpperCase() == serial)
             : (draft.deviceGuessName?.trim().isNotEmpty ?? false) &&

@@ -5,7 +5,9 @@ import 'package:praticos/utils/merge_order_streams.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/switch_stream.dart';
 
 /// Repository para Orders usando subcollections por tenant.
 ///
@@ -20,6 +22,131 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
   @override
   Map<String, dynamic> toJson(Order? order) => order!.toJson();
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Query scope (Firestore rules)
+  // ═══════════════════════════════════════════════════════════════════
+  //
+  // Consultant and technician read only the orders they created, and the
+  // rules deny any list query that could return someone else's order. So
+  // every list query here gets `createdBy.id == uid` for them.
+
+  /// Uid to filter list queries by (`createdBy.id`), or null when the user
+  /// reads every order. Replaceable in tests.
+  static Future<String?> Function() creatorScope = () =>
+      AuthorizationService.instance.orderCreatorFilter();
+
+  /// [creatorScope] now and again whenever it changes (the role arrives
+  /// after the query started). Live queries resubscribe on each value.
+  /// Replaceable in tests.
+  static Stream<String?> Function() creatorScopeChanges = () =>
+      AuthorizationService.instance.orderCreatorFilterChanges();
+
+  /// [args] plus `createdBy.id == creatorId` (when [creatorId] is set and
+  /// the query doesn't already filter by it).
+  static List<QueryArgs> scopedArgs(List<QueryArgs>? args, String? creatorId) {
+    final list = [...?args];
+    if (creatorId == null || list.any((a) => a.key == 'createdBy.id')) {
+      return list;
+    }
+    return list..add(QueryArgs('createdBy.id', creatorId));
+  }
+
+  @override
+  Future<List<Order?>> getQueryList(
+    String companyId, {
+    List<OrderBy>? orderBy,
+    List<QueryArgs>? args,
+    int? limit,
+    dynamic startAfter,
+  }) async {
+    final creator = await creatorScope();
+    return super.getQueryList(
+      companyId,
+      orderBy: orderBy,
+      args: scopedArgs(args, creator),
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  @override
+  Stream<List<Order?>> streamQueryList(
+    String companyId, {
+    List<OrderBy>? orderBy,
+    List<QueryArgs>? args,
+    int? limit,
+  }) {
+    return switchStream(
+      creatorScopeChanges(),
+      (String? creator) => super.streamQueryList(
+        companyId,
+        orderBy: orderBy,
+        args: scopedArgs(args, creator),
+        limit: limit,
+      ),
+    );
+  }
+
+  @override
+  Stream<List<Order?>> streamList(String companyId) =>
+      streamQueryList(companyId);
+
+  @override
+  Future<List<Order?>> getListFromTo(
+    String companyId,
+    String field,
+    DateTime from,
+    DateTime to, {
+    List<QueryArgs> args = const [],
+  }) async {
+    final creator = await creatorScope();
+    return super.getListFromTo(
+      companyId,
+      field,
+      from,
+      to,
+      args: scopedArgs(args, creator),
+    );
+  }
+
+  @override
+  Stream<List<Order?>> streamListFromTo(
+    String companyId,
+    String field,
+    DateTime from,
+    DateTime to, {
+    List<QueryArgs> args = const [],
+  }) {
+    return switchStream(
+      creatorScopeChanges(),
+      (String? creator) => super.streamListFromTo(
+        companyId,
+        field,
+        from,
+        to,
+        args: scopedArgs(args, creator),
+      ),
+    );
+  }
+
+  @override
+  Future<QuerySnapshot<Map<String, dynamic>>> getQueryWithPagination(
+    String companyId, {
+    List<OrderBy>? orderBy,
+    List<QueryArgs>? args,
+    int? limit,
+    DocumentSnapshot? startAfterDocument,
+  }) async {
+    final creator = await creatorScope();
+    return super.getQueryWithPagination(
+      companyId,
+      orderBy: orderBy,
+      args: scopedArgs(args, creator),
+      limit: limit,
+      startAfterDocument: startAfterDocument,
+    );
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   // Payments-safe writes
