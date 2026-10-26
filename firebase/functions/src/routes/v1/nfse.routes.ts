@@ -19,7 +19,7 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../../models/types';
-import { requirePermission } from '../../middleware/auth.middleware';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { validateInput } from '../../utils/validation.utils';
 import { toHttpError } from '../../services/asaas/errors';
@@ -161,7 +161,7 @@ router.put('/setup/service', async (req: AuthenticatedRequest, res: Response) =>
 
 router.post(
   '/invoices/preview',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const validation = validateInput(previewSchema, req.body);
     if (!validation.success) return badRequest(res, validation.errors);
@@ -175,7 +175,7 @@ router.post(
   },
 );
 
-router.post('/invoices', requirePermission('manage:payments'), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/invoices', requireAppPermission('chargeOrder'), async (req: AuthenticatedRequest, res: Response) => {
   const validation = validateInput(createInvoiceSchema, req.body);
   if (!validation.success) return badRequest(res, validation.errors);
   try {
@@ -189,7 +189,7 @@ router.post('/invoices', requirePermission('manage:payments'), async (req: Authe
 
 router.post(
   '/invoices/:invoiceId/cancel',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const invoiceId = String(req.params.invoiceId);
     if (!ID_PATTERN.test(invoiceId)) {

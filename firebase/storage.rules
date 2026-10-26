@@ -2,11 +2,6 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Função auxiliar para verificar se o usuário está autenticado
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
     // Função para validar tipo e tamanho de imagem
     function isValidImage() {
       // Permite se não houver contentType OU se for uma imagem
@@ -25,48 +20,21 @@ service firebase.storage {
              request.resource.size < 10 * 1024 * 1024; // 10MB max
     }
 
-    // NOTA: Validação completa de tenant requer Custom Claims ou subcoleção
-    // Por enquanto, a validação de tenant é feita client-side no PhotoService
-    // TODO: Implementar Custom Claims com companyId no Firebase Auth token
-
-    // Regra para permitir listar e deletar toda a pasta de um tenant (para delete account)
-    match /tenants/{companyId}/{allPaths=**} {
-      allow read, list: if isAuthenticated();
-      allow delete: if isAuthenticated();
-    }
-
-    // Regra para logo da empresa (usado no onboarding e delete account)
-    match /companies/{companyId}/{allPaths=**} {
-      allow read, list: if isAuthenticated();
-      allow create, update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
-    }
-
-    // Regras para fotos de ordens de serviço organizadas por tenant
-    match /tenants/{companyId}/orders/{orderId}/photos/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
-    }
-
-    match /tenants/{companyId}/orders/{orderId}/photos {
-      allow list: if isAuthenticated();
-    }
-
-    // Regras para comprovantes de pagamento de transações
-    match /tenants/{companyId}/orders/{orderId}/payments/{txnId}/{fileId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidDocument();
-      allow update: if isAuthenticated() && isValidDocument();
-      allow delete: if isAuthenticated();
-    }
-
-    // Membro da empresa (custom claims, como no firestore.rules)
+    // Membro da empresa (custom claim roles[companyId], como no firestore.rules)
     function belongsToCompany(companyId) {
       return request.auth != null
         && request.auth.token.roles != null
         && request.auth.token.roles[companyId] != null;
+    }
+
+    // Membro com um destes papéis ('owner' vale como 'admin')
+    function hasAnyRole(companyId, roles) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in roles;
+    }
+
+    function isCompanyAdmin(companyId) {
+      return hasAnyRole(companyId, ['owner', 'admin']);
     }
 
     // Imagem ou PDF até 10MB (comprovante)
@@ -77,75 +45,76 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024;
     }
 
+    // Tudo da empresa: leitura e listagem só para membros. Apagar a pasta
+    // inteira (exclusão de conta feita pelo app até a versão de out/2026)
+    // só para dono/admin. Os caminhos abaixo liberam o resto.
+    match /tenants/{companyId}/{allPaths=**} {
+      allow read: if belongsToCompany(companyId);
+      allow delete: if isCompanyAdmin(companyId);
+    }
+
+    // Logo pelo caminho antigo do cadastro (app até out/2026)
+    match /companies/{companyId}/{allPaths=**} {
+      allow read: if belongsToCompany(companyId);
+      allow create, update: if isCompanyAdmin(companyId) && isValidImage();
+      allow delete: if isCompanyAdmin(companyId);
+    }
+
+    // ─── OS: fotos, documentos, checklist e comprovantes (todos os membros) ───
+    match /tenants/{companyId}/orders/{orderId}/photos/{photoId} {
+      allow create, update: if belongsToCompany(companyId) && isValidImage();
+      allow delete: if belongsToCompany(companyId);
+    }
+
+    match /tenants/{companyId}/orders/{orderId}/payments/{txnId}/{fileId} {
+      allow create, update: if belongsToCompany(companyId) && isValidDocument();
+      allow delete: if belongsToCompany(companyId);
+    }
+
+    match /tenants/{companyId}/orders/{orderId}/documents/{docId} {
+      allow create, update: if belongsToCompany(companyId) && isValidDocument();
+      allow delete: if belongsToCompany(companyId);
+    }
+
+    match /tenants/{companyId}/orders/{orderId}/forms/{formId}/{photoId} {
+      allow create, update: if belongsToCompany(companyId) && isValidImage();
+      allow delete: if belongsToCompany(companyId);
+    }
+
     // Comprovante de um recebimento de cliente (vale para várias OS):
     // enviado uma vez, nunca sobrescrito
     match /tenants/{companyId}/receipts/{receiptId}/{fileId} {
-      allow read: if belongsToCompany(companyId);
-      allow create: if belongsToCompany(companyId) && isValidReceipt();
+      allow create: if belongsToCompany(companyId) && resource == null && isValidReceipt();
     }
 
-    // Regras para documentos anexados à OS
-    match /tenants/{companyId}/orders/{orderId}/documents/{docId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidDocument();
-      allow update: if isAuthenticated() && isValidDocument();
-      allow delete: if isAuthenticated();
-    }
-
-    match /tenants/{companyId}/orders/{orderId}/documents {
-      allow list: if isAuthenticated();
-    }
-
-    // Regras para fotos de formulários dentro de ordens de serviço
-    match /tenants/{companyId}/orders/{orderId}/forms/{formId}/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
-    }
-
-    match /tenants/{companyId}/orders/{orderId}/forms/{formId} {
-      allow list: if isAuthenticated();
-    }
-
-    // Regras para fotos de produtos
+    // ─── Cadastros (mesmos papéis do firestore.rules) ───
     match /tenants/{companyId}/products/{productId}/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
+      allow create, update: if isCompanyAdmin(companyId) && isValidImage();
+      allow delete: if isCompanyAdmin(companyId);
     }
 
-    // Regras para fotos de serviços
     match /tenants/{companyId}/services/{serviceId}/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
+      allow create, update: if isCompanyAdmin(companyId) && isValidImage();
+      allow delete: if isCompanyAdmin(companyId);
     }
 
-    // Regras para fotos de veículos/dispositivos
     match /tenants/{companyId}/devices/{deviceId}/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
+      allow create, update: if hasAnyRole(companyId, ['owner', 'admin', 'supervisor']) && isValidImage();
+      allow delete: if hasAnyRole(companyId, ['owner', 'admin', 'supervisor']);
     }
 
-    // Regras para logo da empresa
     match /tenants/{companyId}/logo/{logoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
+      allow create, update: if isCompanyAdmin(companyId) && isValidImage();
+      allow delete: if isCompanyAdmin(companyId);
     }
 
-    // Regras para fotos de perfil de usuários
+    // Foto de perfil: a própria pessoa, ou dono/admin
     match /tenants/{companyId}/users/{userId}/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidImage();
-      allow update: if isAuthenticated() && isValidImage();
-      allow delete: if isAuthenticated();
+      allow create, update: if (isCompanyAdmin(companyId)
+          || (belongsToCompany(companyId) && request.auth.uid == userId))
+        && isValidImage();
+      allow delete: if isCompanyAdmin(companyId)
+        || (belongsToCompany(companyId) && request.auth.uid == userId);
     }
 
     // Bloqueia acesso a qualquer outro caminho não especificado

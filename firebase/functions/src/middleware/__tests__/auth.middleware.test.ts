@@ -174,9 +174,16 @@ describe('bearerAuth', () => {
 });
 
 describe('botAuth', () => {
+  const savedKey = process.env.BOT_API_KEY;
+  beforeAll(() => { process.env.BOT_API_KEY = 'test_bot_key'; });
+  afterAll(() => {
+    if (savedKey === undefined) delete process.env.BOT_API_KEY;
+    else process.env.BOT_API_KEY = savedKey;
+  });
+
   const botReq = () =>
     ({
-      headers: { 'x-api-key': 'bot_praticos_dev_key', 'x-whatsapp-number': '+55 48 99999-0000' },
+      headers: { 'x-api-key': 'test_bot_key', 'x-whatsapp-number': '+55 48 99999-0000' },
     }) as unknown as AuthenticatedRequest;
 
   const link = {

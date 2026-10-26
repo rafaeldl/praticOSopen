@@ -4,8 +4,8 @@
  *
  * - GET  /:customerId/open-orders            open orders of the customer (number, open amount, date)
  * - POST /:customerId/receipts               receipt over orders incl. others' (consultant)
- * - POST /:customerId/charges                one Asaas charge for several orders ('manage:payments')
- * - DELETE /:customerId/charges/:chargeId    cancel it ('manage:payments')
+ * - POST /:customerId/charges                one Asaas charge for several orders ('chargeOrder')
+ * - DELETE /:customerId/charges/:chargeId    cancel it ('chargeOrder')
  *
  * Receiving: owner, admin, manager, or consultant, when the company uses
  * values and billing (same as the app's `canReceivePayments`).
@@ -13,7 +13,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../../models/types';
-import { requirePermission } from '../../middleware/auth.middleware';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { validateInput } from '../../utils/validation.utils';
 import { db } from '../../services/firestore.service';
@@ -124,7 +124,7 @@ router.post('/:customerId/receipts', requireReceive, async (req: AuthenticatedRe
 
 router.post(
   '/:customerId/charges',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const customerId = param(req.params.customerId);
     if (!ID_PATTERN.test(customerId)) return customerNotFound(res);
@@ -148,7 +148,7 @@ router.post(
 
 router.delete(
   '/:customerId/charges/:chargeId',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const customerId = param(req.params.customerId);
     const chargeId = param(req.params.chargeId);

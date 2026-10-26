@@ -5,6 +5,7 @@
 
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, toDate } from '../../models/types';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import * as customerService from '../../services/customer.service';
 import {
@@ -116,7 +117,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/customers
  * Create a new customer
  */
-router.post('/', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', requireAppPermission('manageCustomers'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -170,7 +171,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
  * PATCH /api/v1/customers/:id
  * Update an existing customer
  */
-router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id', requireAppPermission('manageCustomers'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {

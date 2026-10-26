@@ -5,6 +5,7 @@
 
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import * as deviceService from '../../services/device.service';
 import {
@@ -117,7 +118,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
  * POST /api/v1/devices
  * Create a new device
  */
-router.post('/', async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', requireAppPermission('manageDevices'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -171,7 +172,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
  * PATCH /api/v1/devices/:id
  * Update an existing device
  */
-router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
+router.patch('/:id', requireAppPermission('manageDevices'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {

@@ -1,12 +1,12 @@
 /**
  * Order charge routes (Flutter app, bearer auth).
- * Mounted at /v1/app/orders. Requires permission 'manage:payments'.
+ * Mounted at /v1/app/orders. Requires the app permission 'chargeOrder' (off when the company has no values).
  */
 
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest } from '../../models/types';
-import { requirePermission } from '../../middleware/auth.middleware';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { validateInput } from '../../utils/validation.utils';
 import { cancelOrderCharge, createOrderCharge } from '../../services/asaas/charge.service';
@@ -47,7 +47,7 @@ function notFound(res: Response, code: 'ORDER_NOT_FOUND' | 'CHARGE_NOT_FOUND'): 
 
 router.post(
   '/:orderId/charges',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const orderId = param(req.params.orderId);
     if (!isValidId(orderId)) {
@@ -81,7 +81,7 @@ router.post(
 
 router.delete(
   '/:orderId/charges/:chargeId',
-  requirePermission('manage:payments'),
+  requireAppPermission('chargeOrder'),
   async (req: AuthenticatedRequest, res: Response) => {
     const orderId = param(req.params.orderId);
     const chargeId = param(req.params.chargeId);
