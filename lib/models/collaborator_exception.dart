@@ -5,6 +5,9 @@ enum CollaboratorErrorCode {
   cannotRemoveSelf,
   invalidInvite,
   userNotFound,
+  cannotChangeOwner,
+  notAllowed,
+  requestFailed,
 }
 
 /// Typed exception for collaborator operations.

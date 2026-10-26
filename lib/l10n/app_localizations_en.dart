@@ -1583,6 +1583,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot change the only administrator\'s role. Promote another collaborator to administrator first.';
 
   @override
+  String get cannotChangeOwner =>
+      'The company owner\'s role can\'t be changed and the owner can\'t be removed.';
+
+  @override
+  String get teamActionNotAllowed =>
+      'Only the owner or an administrator can change the team.';
+
+  @override
+  String get teamActionFailed =>
+      'Couldn\'t save the team change. Please try again.';
+
+  @override
   String get cannotRemoveSelf => 'You cannot remove yourself from the team.';
 
   @override

@@ -1579,6 +1579,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.';
 
   @override
+  String get cannotChangeOwner =>
+      'Não dá para mudar o perfil nem tirar o dono da empresa.';
+
+  @override
+  String get teamActionNotAllowed =>
+      'Só o dono ou um administrador pode mudar a equipe.';
+
+  @override
+  String get teamActionFailed =>
+      'Não deu para salvar a mudança na equipe. Tente de novo.';
+
+  @override
   String get cannotRemoveSelf => 'Você não pode tirar a si mesmo da equipe.';
 
   @override

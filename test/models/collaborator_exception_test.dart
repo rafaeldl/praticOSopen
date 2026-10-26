@@ -71,8 +71,8 @@ void main() {
   });
 
   group('CollaboratorErrorCode', () {
-    test('has exactly 5 values', () {
-      expect(CollaboratorErrorCode.values.length, equals(5));
+    test('has exactly 8 values', () {
+      expect(CollaboratorErrorCode.values.length, equals(8));
     });
 
     test('all expected codes exist', () {
@@ -82,6 +82,9 @@ void main() {
         CollaboratorErrorCode.cannotRemoveSelf,
         CollaboratorErrorCode.invalidInvite,
         CollaboratorErrorCode.userNotFound,
+        CollaboratorErrorCode.cannotChangeOwner,
+        CollaboratorErrorCode.notAllowed,
+        CollaboratorErrorCode.requestFailed,
       ]));
     });
   });

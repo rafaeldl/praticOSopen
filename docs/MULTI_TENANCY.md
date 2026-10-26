@@ -71,8 +71,10 @@ Gerencia as operações relacionadas à entidade empresa e colaboradores.
   - Atualiza o documento `Company`: Adiciona o usuário à lista `users`.
   - Atualiza o documento `User`: Adiciona a empresa à lista `companies`.
 
-- **Remover/Editar Colaborador:**
-  - Métodos `removeCollaborator` e `updateCollaboratorRole` mantêm a consistência nas duas pontas do relacionamento.
+- **Trocar papel / remover colaborador (`CollaboratorStore`):**
+  - O app chama o servidor (`TeamApiService`): `PATCH /v1/app/team/members/{userId}` com `{ role }` e `DELETE /v1/app/team/members/{userId}`. O app não grava mais `users/{colega}` (as regras só deixam cada usuário gravar o próprio documento, e o batch antigo falhava inteiro).
+  - Só dono/admin da empresa (`manage:members`). Em uma transação o servidor atualiza `memberships/{uid}`, `users/{uid}.companies`, `private/membership` e `companies/{cid}.users[]`, e depois o custom claim `roles`.
+  - Regras: ninguém muda o papel do dono nem o remove (`OWNER_PROTECTED`, 403); o último admin não se rebaixa nem se remove (`LAST_ADMIN`, 409); membro inexistente → `MEMBER_NOT_FOUND` (404). O app mostra essas mensagens via l10n.
 
 ## 4. Fluxo de Uso
 
