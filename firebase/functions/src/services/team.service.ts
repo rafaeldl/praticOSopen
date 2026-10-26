@@ -93,6 +93,25 @@ async function refreshRolesClaim(userId: string, companies: CompanyEntry[]): Pro
   }
 }
 
+/**
+ * Side effects after the transaction committed (claim, WhatsApp links). The
+ * change is already saved, so a failure here is logged and the request still
+ * succeeds. The users/{uid} write in the transaction also fires the
+ * updateUserClaims trigger, which rebuilds the claim if this step failed.
+ */
+async function afterCommit(
+  step: string,
+  companyId: string,
+  userId: string,
+  fn: () => Promise<unknown>,
+): Promise<void> {
+  try {
+    await fn();
+  } catch (error) {
+    console.error(`[team] ${step} post-commit step failed`, { companyId, userId, error });
+  }
+}
+
 export async function changeMemberRole(
   companyId: string,
   targetUserId: string,
@@ -119,8 +138,11 @@ export async function changeMemberRole(
     return { companies, hasUser: s.userSnap.exists };
   });
 
-  if (result.hasUser) await refreshRolesClaim(targetUserId, result.companies);
-  await updateLinkedChannelRole(targetUserId, companyId, newRole);
+  await afterCommit('changeMemberRole', companyId, targetUserId, async () => {
+    if (result.hasUser) await refreshRolesClaim(targetUserId, result.companies);
+  });
+  await afterCommit('changeMemberRole', companyId, targetUserId, () =>
+    updateLinkedChannelRole(targetUserId, companyId, newRole));
 }
 
 export async function removeTeamMember(
@@ -148,6 +170,9 @@ export async function removeTeamMember(
     return { companies, hasUser: s.userSnap.exists };
   });
 
-  if (result.hasUser) await refreshRolesClaim(targetUserId, result.companies);
-  await unlinkUserChannels(targetUserId, companyId);
+  await afterCommit('removeTeamMember', companyId, targetUserId, async () => {
+    if (result.hasUser) await refreshRolesClaim(targetUserId, result.companies);
+  });
+  await afterCommit('removeTeamMember', companyId, targetUserId, () =>
+    unlinkUserChannels(targetUserId, companyId));
 }

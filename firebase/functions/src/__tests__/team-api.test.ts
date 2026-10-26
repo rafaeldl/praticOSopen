@@ -247,3 +247,27 @@ describe('team API: other companies', () => {
     expect(res.body.error.code).toBe('MEMBER_NOT_FOUND');
   });
 });
+
+describe('team API: failures after the commit', () => {
+  it('a claim failure after a role change is logged, not a 500', async () => {
+    mockSetClaims.mockRejectedValueOnce(new Error('auth down'));
+    const res = await patch(app, UID.admin, TARGET, 'supervisor');
+    expect(res.status).toBe(200);
+    expect(roleIn('companies/c1/private/membership', TARGET)).toBe('supervisor');
+    expect(console.error).toHaveBeenCalledWith(
+      '[team] changeMemberRole post-commit step failed', expect.objectContaining({ companyId: 'c1', userId: TARGET }),
+    );
+  });
+
+  it('a claim failure after a removal is logged, not a 500, and the WhatsApp link still goes', async () => {
+    seed('links/whatsapp/numbers/+551100', { userId: TARGET, companyId: 'c1', role: 'technician' });
+    mockSetClaims.mockRejectedValueOnce(new Error('auth down'));
+    const res = await del(app, UID.admin, TARGET);
+    expect(res.status).toBe(200);
+    expect(roleIn('companies/c1/private/membership', TARGET)).toBeUndefined();
+    expect(read('links/whatsapp/numbers/+551100')).toBeUndefined();
+    expect(console.error).toHaveBeenCalledWith(
+      '[team] removeTeamMember post-commit step failed', expect.objectContaining({ companyId: 'c1', userId: TARGET }),
+    );
+  });
+});
