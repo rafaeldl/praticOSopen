@@ -245,6 +245,8 @@ class NfsePreview {
     required this.customerHasTaxId,
     required this.invoicedOrders,
     required this.municipalServiceName,
+    this.customerContact = const {},
+    this.customerMissing = const [],
   });
 
   final double value;
@@ -258,6 +260,14 @@ class NfsePreview {
   /// Orders that already have an active nota (orderId → invoiceId).
   final Map<String, String> invoicedOrders;
   final String municipalServiceName;
+
+  /// E-mail and address of the customer as known (`email`, `postalCode`,
+  /// `address`, `addressNumber`, `complement`, `province`): fills the fields.
+  final Map<String, String> customerContact;
+
+  /// What the city needs and the customer lacks (same keys, never
+  /// `complement`): the sheet asks for it before the ✓.
+  final List<String> customerMissing;
 
   factory NfsePreview.fromJson(Map<String, dynamic> json) {
     final customer = json['customer'] is Map
@@ -282,6 +292,16 @@ class NfsePreview {
           if (e.value is String) e.key: e.value as String,
       },
       municipalServiceName: json['municipalServiceName'] as String? ?? '',
+      customerContact: {
+        if (customer['contact'] is Map)
+          for (final e in (customer['contact'] as Map).entries)
+            if (e.key is String && _str(e.value) != null)
+              e.key as String: e.value as String,
+      },
+      customerMissing: [
+        for (final field in (customer['missingData'] as List? ?? const []))
+          if (field is String) field,
+      ],
     );
   }
 }

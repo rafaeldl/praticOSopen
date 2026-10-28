@@ -10,6 +10,7 @@ import { Customer, Order, UserAggr } from '../../models/types';
 import {
   AsaasConnectionDoc,
   AsaasCreatePaymentInput,
+  AsaasCustomerContact,
   ChargeStatus,
   CreateChargeInput,
   OrderCharge,
@@ -27,7 +28,7 @@ const DEFAULT_DUE_DAYS = 3;
 const MIN_INSTALLMENTS = 2;
 const MAX_INSTALLMENTS = 12;
 const CENT_TOLERANCE = 0.005;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function companyRef(companyId: string) {
@@ -199,11 +200,32 @@ function mapEntryMatches(entry: Partial<AsaasCustomerMapEntry> | undefined, acco
   return true;
 }
 
+/**
+ * Asaas customer already linked to the PraticOS customer on the connected
+ * account (map entry, else by externalReference), without creating one.
+ */
+export async function findAsaasCustomerId(
+  client: AsaasClient,
+  companyId: string,
+  customerId: string,
+): Promise<string | null> {
+  const [mapped, account] = await Promise.all([asaasCustomerMapRef(companyId, customerId).get(), currentAccount(companyId)]);
+  const entry = mapped.data() as Partial<AsaasCustomerMapEntry> | undefined;
+  if (mapEntryMatches(entry, account)) return entry!.asaasCustomerId as string;
+  const existing = await client.findCustomerByExternalReference(customerId);
+  return existing?.id ?? null;
+}
+
+/**
+ * `contact`: extra fields for a new Asaas customer (e-mail and address the
+ * nota needs); an existing one is left as is.
+ */
 export async function findOrCreateAsaasCustomer(
   client: AsaasClient,
   companyId: string,
   customer: Customer,
   taxId: string,
+  contact: AsaasCustomerContact = {},
 ): Promise<string> {
   const mapRef = asaasCustomerMapRef(companyId, customer.id);
   const [mapped, account] = await Promise.all([mapRef.get(), currentAccount(companyId)]);
@@ -214,8 +236,10 @@ export async function findOrCreateAsaasCustomer(
   let asaasCustomerId = existing?.id;
 
   if (!asaasCustomerId) {
-    const email = customer.email && EMAIL_PATTERN.test(customer.email) ? customer.email : undefined;
+    const { email: contactEmail, ...address } = contact;
+    const email = [contactEmail, customer.email].find((e) => !!e && EMAIL_PATTERN.test(e)) ?? undefined;
     const created = await client.createCustomer({
+      ...address,
       name: customer.name,
       cpfCnpj: taxId,
       ...(email ? { email } : {}),

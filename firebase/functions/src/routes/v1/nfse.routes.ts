@@ -86,6 +86,17 @@ export const createInvoiceSchema = previewSchema.extend({
   serviceDescription: z.string().max(2000).optional(),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'effectiveDate must be YYYY-MM-DD').optional(),
   customerTaxId: z.string().max(20).optional(),
+  // Missing customer data for the nota (e-mail, address with CEP); see invoice-customer.service.
+  customerData: z
+    .object({
+      email: z.string().max(254).optional(),
+      postalCode: z.string().max(10).optional(),
+      address: z.string().max(200).optional(),
+      addressNumber: z.string().max(20).optional(),
+      complement: z.string().max(100).optional(),
+      province: z.string().max(100).optional(),
+    })
+    .optional(),
 });
 
 export const cancelSchema = z.object({

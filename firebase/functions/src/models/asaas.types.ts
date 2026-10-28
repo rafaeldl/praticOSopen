@@ -213,14 +213,24 @@ export interface AsaasWebhook {
   id: string;
 }
 
-export interface AsaasCustomer {
+/** Customer fields the city needs on a nota (e-mail and address with CEP). */
+export interface AsaasCustomerContact {
+  email?: string | null;
+  postalCode?: string | null;
+  address?: string | null;
+  addressNumber?: string | null;
+  complement?: string | null;
+  province?: string | null;
+}
+
+export interface AsaasCustomer extends AsaasCustomerContact {
   id: string;
   name: string;
   cpfCnpj?: string;
   externalReference?: string | null;
 }
 
-export interface AsaasCreateCustomerInput {
+export interface AsaasCreateCustomerInput extends AsaasCustomerContact {
   name: string;
   cpfCnpj: string;
   email?: string;
@@ -415,6 +425,8 @@ export interface CreateInvoiceInput {
   serviceDescription?: string;
   effectiveDate?: string;
   customerTaxId?: string;
+  /** Missing customer data typed in the issue sheet (sent to the Asaas customer). */
+  customerData?: AsaasCustomerContact;
 }
 
 export type AsaasInvoiceStatus =

@@ -1,6 +1,6 @@
 # Nota fiscal de serviço (NFS-e) pelo Asaas
 
-> Status: **pronta, desligada por padrão.** Só aparece numa empresa quando o servidor liga `nfseEnabled` em `settings/payments` (como o `asaasEnabled` do piloto de cobrança). Nenhum cliente usa ainda: falta o teste no sandbox (ver [Teste no sandbox](#teste-no-sandbox)).
+> Status: **pronta, desligada por padrão.** Só aparece numa empresa quando o servidor liga `nfseEnabled` em `settings/payments` (como o `asaasEnabled` do piloto de cobrança). Fluxo principal validado no sandbox em 2026-10-28 (ver [Teste no sandbox](#teste-no-sandbox)); falta o piloto com um cliente real.
 > Base: [`ASAAS_INTEGRATION.md`](ASAAS_INTEGRATION.md) (conexão, webhook, permissões). Doc do Asaas: https://docs.asaas.com/docs/notas-fiscais
 
 ## Visão Geral
@@ -41,8 +41,9 @@ OS sem valor de serviço (só peças, ou serviços sem preço) não pode ter not
 | Arquivo | O quê |
 |---------|-------|
 | `services/asaas/invoice.service.ts` | Regra do valor, descrição, prévia, emissão, cancelamento, status, conferência com o Asaas (`reconcileInvoice`) e o evento do webhook |
+| `services/asaas/invoice-customer.service.ts` | E-mail e endereço com CEP do cliente que a prefeitura exige: o que falta, envio ao cliente do Asaas e cópia no cadastro (ver [Dados do cliente](#dados-do-cliente)) |
 | `services/asaas/nfse-setup.service.ts` | Configuração fiscal (`/v3/fiscalInfo`), serviços municipais, serviço padrão e o que falta |
-| `services/asaas/asaas-client.ts` | `getFiscalInfo`, `saveFiscalInfo`, `getMunicipalOptions`, `listMunicipalServices`, `createInvoice`, `authorizeInvoice`, `cancelInvoice`, `getInvoice`, `listInvoicesByExternalReference` |
+| `services/asaas/asaas-client.ts` | `getCustomer`, `updateCustomer` (`PUT /v3/customers/{id}`), `getFiscalInfo`, `saveFiscalInfo`, `getMunicipalOptions`, `listMunicipalServices`, `createInvoice`, `authorizeInvoice`, `cancelInvoice`, `getInvoice`, `listInvoicesByExternalReference` |
 | `routes/v1/nfse.routes.ts` | Rotas do app em `/v1/app/nfse` |
 | `services/asaas/webhook.service.ts` | Encaminha `INVOICE_*` para `applyInvoiceEvent` |
 | `services/asaas/webhook-events.ts` | Eventos do webhook e `hasNfseWebhookEvents` (conexão tem os `INVOICE_*`?) |
@@ -59,8 +60,8 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a
 | `POST /setup/fiscal-info` | dono, admin | Salva a configuração fiscal no Asaas (`POST /v3/fiscalInfo`): e-mail, Simples Nacional, inscrição municipal, CNAE, regime especial, item da lista, RPS |
 | `GET /setup/municipal-services?q=` | dono, admin | Serviços municipais da cidade (`GET /v3/fiscalInfo/services`) |
 | `PUT /setup/service` | dono, admin | Serviço padrão das notas: serviço municipal (id ou código + nome), impostos (ISS retido, ISS, PIS, COFINS, CSLL, INSS, IR) e modelo da descrição (`{servicos}`, `{os}`) |
-| `POST /invoices/preview` | `manage:payments` | Valor, descrição, cliente e CPF/CNPJ de uma ou mais OS |
-| `POST /invoices` | `manage:payments` | Emite uma nota para uma ou mais OS (até 50) do mesmo cliente |
+| `POST /invoices/preview` | `manage:payments` | Valor, descrição, cliente, CPF/CNPJ e os dados do cliente que faltam para a nota (`customer.contact`, `customer.missingData`) de uma ou mais OS |
+| `POST /invoices` | `manage:payments` | Emite uma nota para uma ou mais OS (até 50) do mesmo cliente; `customerData` leva o e-mail/endereço digitados na folha |
 | `POST /invoices/{id}/cancel` | `manage:payments` | Cancela; `onlyOnAsaas` só para nota que a prefeitura não cancela |
 
 `manage:payments` = dono, admin e gerente. Consultor e técnico não emitem nem cancelam.
@@ -70,9 +71,26 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a
 1. Confere flag, conta, configuração pronta (`nfseReady`, senão `NFSE_NOT_READY`) e feita na conta conectada (`NFSE_SETUP_NEEDED`), OS do mesmo cliente (`ORDER_NOT_OF_CUSTOMER`), OS fora de orçamento/cancelada (`NFSE_ORDER_NOT_ALLOWED`) e valor de serviço (`NO_SERVICES`).
 2. CPF/CNPJ do cliente: o enviado (`customerTaxId`, que também é gravado no cliente) ou o do cadastro; sem ele, `TAX_ID_REQUIRED`.
 3. Confere com o Asaas as notas antigas que ainda travam essas OS (ver [Conferência com o Asaas](#conferência-com-o-asaas)). Numa transação: lê as travas `private/nfse/orders/{orderId}`; se alguma aponta para nota ativa, `ORDER_HAS_INVOICE`. Cria a nota `creating` e grava as travas.
-4. Acha ou cria o cliente no Asaas e chama `POST /v3/invoices` (avulsa) com `externalReference` = `{companyId}:nf:{invoiceId}`, `serviceDescription`, `observations` ("OS 182, 190"), `value`, `deductions: 0`, `effectiveDate`, serviço municipal e `taxes`.
+4. Acha ou cria o cliente no Asaas (já com o e-mail e o endereço digitados) e confere os [dados do cliente](#dados-do-cliente): faltando algo, `CUSTOMER_DATA_REQUIRED` antes de criar a nota. Depois chama `POST /v3/invoices` (avulsa) com `externalReference` = `{companyId}:nf:{invoiceId}`, `serviceDescription`, `observations` ("OS 182, 190"), `value`, `deductions: 0`, `effectiveDate`, serviço municipal e `taxes`.
 5. Grava o id do Asaas **logo que ele responde**, antes de qualquer outra coisa, e depois o status. Cada nota guarda a conta em que foi emitida (`asaasEnvironment`, `asaasWalletId`).
 6. Se o Asaas **recusar** (400, 401, 403, 404 ou 422), nada foi criado: a nota é apagada e as travas saem. **Sem resposta certa** (tempo esgotado, 408, 5xx, rede) o Asaas pode ter criado a nota: ela fica `creating` e a OS continua travada até a conferência (repetir na hora dá `ORDER_HAS_INVOICE`, nunca duas notas).
+7. Com data de hoje, chama `POST /v3/invoices/{id}/authorize` para emitir na hora. Se o Asaas **recusar a emissão** (400, 401, 403, 404 ou 422; por exemplo "E-mail do cliente incompleto.; Endereço do cliente incompleto.; CEP do cliente é inválido."):
+   - a nota agendada **é cancelada no Asaas** (agendada ainda não foi à prefeitura, cancelar é só no Asaas) e fica `error` com `errorCode` e o texto do Asaas em `statusDescription`. A OS fica livre: o usuário corrige e emite de novo;
+   - `errorCode` é `CUSTOMER_DATA_REQUIRED` quando o texto fala do cliente, senão `ASAAS_REJECTED`. O app recebe `CUSTOMER_DATA_REQUIRED` (400, a folha mostra os campos do cliente) ou `ASAAS_VALIDATION_ERROR`;
+   - eventos atrasados dessa nota do Asaas (`INVOICE_CANCELED`, `INVOICE_CREATED`) não mexem mais nela: o motivo fica;
+   - se o cancelamento falhar, a nota fica `scheduled` com o motivo e a OS travada (log `ALERT`): cancelar na tela da nota e emitir de novo.
+
+   Escolhemos cancelar em vez de manter agendada para tentar de novo: assim não precisa de rota de "tentar emitir de novo", a emissão repetida é a mesma de sempre e a nota recusada não fica parada como "Aguardando prefeitura" sem motivo. **Sem resposta certa** do authorize, a nota fica agendada (o Asaas emite na data).
+
+### Dados do cliente
+
+A prefeitura não aceita nota sem o **e-mail** e o **endereço com CEP** do cliente (teste no sandbox em 2026-10-28: com só nome e CPF, o `authorize` respondeu 400 "E-mail do cliente incompleto.; Endereço do cliente incompleto.; CEP do cliente é inválido."; com `email`, `postalCode`, `address`, `addressNumber` e `province` no cliente do Asaas, a mesma nota foi emitida). O cliente do PraticOS só tem `address` em texto livre, então o endereço da nota fica no **cliente do Asaas**:
+
+- **Prévia:** lê o cliente do Asaas já ligado (sem criar) e devolve `customer.contact` (o que ele tem; o e-mail do PraticOS completa) e `customer.missingData` (`email`, `postalCode`, `address`, `addressNumber`, `province`). Asaas fora do ar: conta só o e-mail do PraticOS.
+- **Folha:** pede o que falta (e-mail; ou CEP, rua, número, complemento e bairro). O ✓ só fica azul com e-mail válido e CEP de 8 dígitos.
+- **Emissão:** cliente novo no Asaas já é criado com esses dados. Depois o servidor junta o digitado, o que o Asaas tem e o e-mail do PraticOS; o que mudou vai por `PUT /v3/customers/{id}`. Ainda faltando: `CUSTOMER_DATA_REQUIRED` (400), nada é criado.
+- **No cadastro do PraticOS:** o digitado entra só onde está vazio (e-mail; endereço como texto "Rua, número, complemento - bairro - CEP 00000-000"). Nunca troca o que o usuário escreveu.
+- **Emissão automática:** cliente sem esses dados grava `auto-{orderId}` com `errorCode: CUSTOMER_DATA_REQUIRED`; o usuário emite pelo "…" e a folha pede os dados.
 
 ### Emissão automática
 
@@ -82,7 +100,7 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a
 2. `autoIssueInvoice` só segue com `nfseEnabled`, `nfseReady`, Asaas conectado e `autoIssue` igual ao momento.
 3. **Uma vez por OS:** se a OS já teve qualquer nota (até cancelada, com erro ou automática que falhou), fica com o usuário. Assim cancelar a nota e reabrir/concluir a OS de novo não emite outra.
 4. Emite como na emissão manual (`createInvoice`, uma nota só da OS, data de hoje), com `createdBy` `{ id: 'system', name: 'PraticOS' }` e `auto: true`.
-5. **Falha que o usuário resolve** (cliente sem CPF/CNPJ, OS só com peças, configuração feita em outra conta, recusa do Asaas): grava `invoices/auto-{orderId}` com `status: 'error'`, `errorCode` (e o texto do Asaas em `statusDescription` quando ele recusou, `ASAAS_REJECTED`). A OS mostra "Nota fiscal · Erro"; o detalhe diz "A nota não saiu sozinha" e o motivo. Não trava a OS: o usuário emite pelo "…".
+5. **Falha que o usuário resolve** (cliente sem CPF/CNPJ, sem e-mail ou endereço, OS só com peças, configuração feita em outra conta, recusa do Asaas): grava `invoices/auto-{orderId}` com `status: 'error'`, `errorCode` (e o texto do Asaas em `statusDescription` quando ele recusou, `ASAAS_REJECTED`). A OS mostra "Nota fiscal · Erro"; o detalhe diz "A nota não saiu sozinha" e o motivo. Não trava a OS: o usuário emite pelo "…". Se o Asaas recusou a **emissão** de uma nota já criada, a própria nota fica com o erro (item 7 da emissão) e não se grava `auto-{orderId}`.
 6. **Sem resposta do Asaas**: igual à manual, a nota fica `creating` e travada até a conferência. Erros que não são da OS (flag desligada, OS já com nota, orçamento/cancelada) não gravam nada.
 
 ### Conferência com o Asaas
@@ -112,7 +130,7 @@ Roda na prévia, na emissão e no cancelamento que tocam a OS; o webhook também
 | `canceled` | `CANCELED` | Cancelada (cinza) |
 | `error` | `ERROR` | Erro (vermelho), com o motivo |
 
-O status só anda para a frente (evento atrasado ou repetido não desfaz nota emitida ou cancelada); `canceled` é final; `error` pode ir para qualquer um (a nota foi corrigida e reagendada no Asaas).
+O status só anda para a frente (evento atrasado ou repetido não desfaz nota emitida ou cancelada); `canceled` é final; `error` pode ir para qualquer um (a nota foi corrigida e reagendada no Asaas), menos a `error` com `errorCode` (o PraticOS desistiu dela e cancelou no Asaas), que não muda mais.
 
 Saindo de `error`, a transação confere se a trava de cada OS ainda aponta para essa nota. Se alguma OS já tem outra nota, a situação é gravada mas a nota vira `conflict: true`: não trava a OS de novo, gera log `ALERT` e o detalhe mostra "Nota emitida fora do PraticOS, confira no Asaas.". Nota em conflito nunca conta como a nota da OS.
 
@@ -135,7 +153,7 @@ Eventos assinados na conexão (gravados em `private/asaas.webhookEvents`): `INVO
 | `companies/{cid}/invoices/{id}` | servidor (rotas e webhook) | `canViewCharges` |
 | `companies/{cid}/private/nfse/orders/{orderId}` | servidor (trava uma nota ativa por OS) | ninguém |
 
-`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`, `auto` (emitida sozinha), `errorCode` (por que a automática não saiu).
+`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`, `auto` (emitida sozinha), `errorCode` (por que não saiu: automática que falhou ou emissão recusada pelo Asaas).
 
 `settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`, `autoIssue` (`manual` | `paid` | `completed`), `asaasEnvironment`, `asaasWalletId`.
 
@@ -150,7 +168,7 @@ Tudo fica escondido sem `nfseEnabled` + Asaas conectado (`PaymentSettings.nfseAv
 | Conexão do Asaas | Linha "Nota fiscal" → configuração (`NfseSetupScreen`): o que falta, dados fiscais, acesso da prefeitura (aponta para o painel do Asaas), serviço padrão com impostos e modelo da descrição, e "Emitir a nota" (quando emitir sozinha) |
 | OS (`order_screen_v2.dart`) | "…" → "Emitir nota fiscal" (OS com serviço, fora de orçamento/cancelada, sem nota ativa). Linha "Nota fiscal · Aguardando prefeitura / Emitida / Erro / Cancelada" com ponto de status, que abre o detalhe |
 | Cliente | "…" → "Emitir uma nota com várias OS" → escolher as OS (`NfseOrdersPicker`) → mesma folha de emissão |
-| Folha de emissão (`NfseIssueSheet`) | Valor (serviços, peças fora, desconto), descrição editável, CPF/CNPJ (pede quando falta), data; ✓ emite |
+| Folha de emissão (`NfseIssueSheet`) | Valor (serviços, peças fora, desconto), descrição editável, CPF/CNPJ (pede quando falta), e-mail e endereço com CEP do cliente (pede o que falta), data; ✓ emite. Servidor respondendo `CUSTOMER_DATA_REQUIRED`: avisa e recarrega a prévia para mostrar os campos |
 | Detalhe (`NfseInvoiceScreen`) | Status, número, valor, OS, PDF e XML quando emitida, motivo do erro em português, aviso de nota em conflito; "…" → "Cancelar nota" em vermelho com confirmação |
 
 Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`showAppToast`), nunca a mensagem crua.
@@ -167,15 +185,21 @@ Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`
 
 ## Teste no sandbox
 
-Não testado contra o Asaas real. Antes de oferecer:
+Validado em 2026-10-28 com uma conta sandbox:
 
-- [ ] `GET/POST /v3/fiscalInfo` e `GET /v3/fiscalInfo/municipalOptions` com uma conta sandbox: campos aceitos e o que volta em `authenticationType` / `supportsCancellation`.
-- [ ] `GET /v3/fiscalInfo/services` com e sem `description`: formato e se a cidade de teste tem lista.
-- [ ] `POST /v3/invoices` avulsa com o payload montado (`taxes`, `deductions: 0`, `municipalServiceId` vs `municipalServiceCode`): aceita e agenda.
-- [ ] Webhooks `INVOICE_*` chegando na URL da empresa com o `externalReference`; nota passando a "Emitida" com PDF e XML.
-- [ ] `GET /v3/invoices?externalReference=` acha a nota agendada (conferência de create sem resposta).
+- [x] `GET/POST /v3/fiscalInfo` e `GET /v3/fiscalInfo/municipalOptions`: campos aceitos, `authenticationType` / `supportsCancellation` voltam.
+- [x] `GET /v3/fiscalInfo/services`: lista da cidade de teste.
+- [x] `POST /v3/invoices` avulsa com o payload montado: aceita e agenda (`SCHEDULED`).
+- [x] `POST /v3/invoices/{id}/authorize`: com o cliente só com nome e CPF, 400 (e-mail, endereço e CEP do cliente); com os dados completos, `SYNCHRONIZED` → `AUTHORIZED` com número e PDF. Deu a regra dos [dados do cliente](#dados-do-cliente).
+- [x] `GET /v3/invoices?externalReference=` acha a nota (conferência de create sem resposta).
+- [x] Cancelamento: `PROCESSING_CANCELLATION` → `CANCELED`.
+
+Falta:
+
+- [ ] Webhooks `INVOICE_*` chegando na URL da empresa com o `externalReference`; nota passando a "Emitida" com PDF e XML no app.
 - [ ] Recusa da prefeitura (`INVOICE_ERROR`): motivo em `statusDescription` e OS liberada para outra nota.
-- [ ] Cancelamento de nota agendada e de nota emitida; cidade sem cancelamento pela integração (`CANCEL_NOT_SUPPORTED`).
+- [ ] Cidade sem cancelamento pela integração (`CANCEL_NOT_SUPPORTED`).
+- [ ] Emissão pelo app com cliente sem endereço: folha pede os dados, servidor atualiza o cliente do Asaas e a nota sai.
 - [ ] Emissão automática: com "Quando a OS for concluída", concluir uma OS de teste e ver a nota sair sozinha; com cliente sem CPF, ver "Nota fiscal · Erro" com o motivo.
 - [ ] Nota com várias OS: descrição com uma linha por OS e observações "OS 182, 190".
 
@@ -185,6 +209,8 @@ Não testado contra o Asaas real. Antes de oferecer:
 - Uma nota ativa por OS; nota com erro ou cancelada libera a OS.
 - Uma nota com várias OS só junta OS do **mesmo cliente**, até 50.
 - Orçamento e OS cancelada não têm nota.
+- Nota só sai com o cliente tendo CPF/CNPJ, e-mail e endereço com CEP no Asaas; a folha pede o que falta.
+- Emissão recusada pelo Asaas: a nota agendada é cancelada no Asaas, fica com erro e o motivo, e a OS fica livre para emitir de novo.
 - Emissão automática: no momento escolhido (paga ou concluída), uma vez por OS, só com a configuração pronta. Nunca junta várias OS numa nota.
 - Data da nota: de hoje até 60 dias à frente (horário de São Paulo).
 - Emitir/cancelar: dono, admin, gerente. Configurar: dono, admin.
@@ -193,6 +219,8 @@ Não testado contra o Asaas real. Antes de oferecer:
 ## Limitações conhecidas
 
 - Sem push quando a nota é emitida ou recusada (só a linha na OS muda).
+- Sem busca de endereço pelo CEP na folha: o usuário digita rua e bairro.
+- Endereço do cliente no PraticOS continua texto livre; o endereço estruturado da nota fica só no cliente do Asaas (trocar de conta Asaas pede de novo).
 - Nota emitida pelo painel do Asaas, ou vinculada a cobrança pela configuração do Asaas, não aparece no PraticOS.
 - Deduções (`deductions`) sempre zero; retenções além do ISS seguem os percentuais do serviço padrão, iguais para todas as notas.
 - Estorno de um pagamento não cancela a nota: cancelar à mão se for o caso.

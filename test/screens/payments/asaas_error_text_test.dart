@@ -111,6 +111,7 @@ void main() {
 
     test('códigos de nota fiscal', () {
       expect(text('ORDER_HAS_INVOICE'), l10n.nfseErrorOrderHasInvoice);
+      expect(text('CUSTOMER_DATA_REQUIRED'), l10n.nfseErrorCustomerData);
       expect(text('CANCEL_NOT_SUPPORTED'), l10n.nfseErrorCancelNotSupported);
       expect(text('NO_SERVICES'), l10n.nfseErrorNoServices);
       expect(text('NFSE_NOT_READY'), l10n.nfseErrorNotReady);

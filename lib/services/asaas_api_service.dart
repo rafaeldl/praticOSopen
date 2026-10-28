@@ -396,9 +396,7 @@ class AsaasApiService {
   }
 
   /// Services of the city's list matching [query].
-  Future<List<NfseMunicipalService>> nfseMunicipalServices(
-    String query,
-  ) async {
+  Future<List<NfseMunicipalService>> nfseMunicipalServices(String query) async {
     final q = Uri.encodeQueryComponent(query.trim());
     final data = await _nfse(
       'GET',
@@ -433,13 +431,15 @@ class AsaasApiService {
   );
 
   /// Issues one nota for [orderIds]. [effectiveDate] defaults to today on
-  /// the server.
+  /// the server. [customerData]: e-mail/address the city needs, typed in the
+  /// sheet (the server sends it to the Asaas customer).
   Future<NfseInvoice> createInvoice(
     List<String> orderIds, {
     String? customerId,
     String? serviceDescription,
     DateTime? effectiveDate,
     String? customerTaxId,
+    Map<String, String>? customerData,
   }) async {
     final data = await _nfse(
       'POST',
@@ -452,6 +452,8 @@ class AsaasApiService {
         if (effectiveDate != null)
           'effectiveDate': DateFormat('yyyy-MM-dd').format(effectiveDate),
         if ((customerTaxId ?? '').isNotEmpty) 'customerTaxId': customerTaxId,
+        if (customerData != null && customerData.isNotEmpty)
+          'customerData': customerData,
       },
     );
     return NfseInvoice.fromJson(data);

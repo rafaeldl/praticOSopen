@@ -5347,6 +5347,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseTaxIdMissing => 'The customer\'s tax ID is missing';
 
   @override
+  String get nfseErrorCustomerData =>
+      'The city needs the customer\'s email and full address (with ZIP code). Fill them in and issue again.';
+
+  @override
+  String get nfseCustomerDataIntro =>
+      'The city needs the customer\'s email and address. They are saved on the customer.';
+
+  @override
+  String get nfseCustomerDataMissing =>
+      'The customer\'s email or address is missing';
+
+  @override
+  String get nfsePostalCode => 'ZIP code';
+
+  @override
+  String get nfseStreet => 'Street';
+
+  @override
+  String get nfseAddressComplement => 'Apt, suite';
+
+  @override
+  String get nfseDistrict => 'District';
+
+  @override
+  String get nfseHeadNotIssued =>
+      'The invoice did not go out. Fix the reason below and issue it again from the order menu.';
+
+  @override
   String get nfseNothingToIssue =>
       'Nothing to issue: the invoice would have no amount';
 

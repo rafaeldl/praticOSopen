@@ -30,6 +30,8 @@ const LOCK = (orderId: string) => `companies/c1/private/nfse/orders/${orderId}`;
 const client = {
   findCustomerByExternalReference: jest.fn(),
   createCustomer: jest.fn(),
+  getCustomer: jest.fn(),
+  updateCustomer: jest.fn(),
   createInvoice: jest.fn(),
   authorizeInvoice: jest.fn(),
   cancelInvoice: jest.fn(),
@@ -37,6 +39,16 @@ const client = {
   getInvoice: jest.fn(),
   listInvoicesByExternalReference: jest.fn(),
 };
+
+/** Asaas customer with everything the city needs on a nota. */
+const FULL_CONTACT = {
+  email: 'joao@example.com', postalCode: '01310000', address: 'Av. Paulista', addressNumber: '1000', province: 'Bela Vista',
+};
+const CUSTOMER_REFUSAL = [
+  { code: 'invalid_action', description: 'E-mail do cliente incompleto.' },
+  { code: 'invalid_action', description: 'Endereço do cliente incompleto.' },
+  { code: 'invalid_action', description: 'CEP do cliente é inválido.' },
+];
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000).toISOString();
 
@@ -82,6 +94,8 @@ describe('invoice.service', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     setAsaasCredentialProvider({ getClient: async () => client as any });
     client.findCustomerByExternalReference.mockResolvedValue({ id: 'cus_1' });
+    client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João', ...FULL_CONTACT });
+    client.updateCustomer.mockResolvedValue({ id: 'cus_1' });
     client.createInvoice.mockResolvedValue({ id: 'inv_1', status: 'SCHEDULED' });
     client.authorizeInvoice.mockResolvedValue({ id: 'inv_1', status: 'SYNCHRONIZED' });
     client.cancelInvoice.mockResolvedValue({ id: 'inv_1', status: 'PROCESSING_CANCELLATION' });
@@ -182,7 +196,9 @@ describe('invoice.service', () => {
       expect(preview.hasProducts).toBe(true);
       expect(preview.serviceDescription).toBe('Troca de óleo');
       expect(preview.observations).toBe('OS 182');
-      expect(preview.customer).toEqual({ id: 'cust1', name: 'João', hasTaxId: true });
+      expect(preview.customer).toEqual({
+        id: 'cust1', name: 'João', hasTaxId: true, contact: FULL_CONTACT, missingData: [],
+      });
       expect(preview.invoicedOrders).toEqual({});
     });
 
@@ -369,10 +385,61 @@ describe('invoice.service', () => {
       expect(read(LOCK('o182'))!.invoiceId).toBe(invoice.id);
     });
 
-    it('falha no authorize deixa a nota agendada (o Asaas emite na data)', async () => {
-      client.authorizeInvoice.mockRejectedValue(new AsaasApiError(400, [], '/invoices/inv_1/authorize'));
+    it('authorize sem resposta certa deixa a nota agendada (o Asaas emite na data)', async () => {
+      client.authorizeInvoice.mockRejectedValue(new AsaasApiError(503, [], '/invoices/inv_1/authorize'));
       const invoice = await createInvoice('c1', { orderIds: ['o182'] }, USER);
       expect(read(INV(invoice.id))!.status).toBe('scheduled');
+      expect(client.cancelInvoice).not.toHaveBeenCalled();
+    });
+
+    it('authorize recusado por dados do cliente: cancela a agendada, guarda o motivo e libera a OS', async () => {
+      client.authorizeInvoice.mockRejectedValue(new AsaasApiError(400, CUSTOMER_REFUSAL, '/invoices/inv_1/authorize'));
+      client.cancelInvoice.mockResolvedValue({ id: 'inv_1', status: 'CANCELED' });
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'CUSTOMER_DATA_REQUIRED',
+      });
+      expect(client.cancelInvoice).toHaveBeenCalledWith('inv_1');
+      const lock = read(LOCK('o182'))!;
+      expect(read(INV(lock.invoiceId as string))).toMatchObject({
+        status: 'error',
+        errorCode: 'CUSTOMER_DATA_REQUIRED',
+        statusDescription: 'E-mail do cliente incompleto. Endereço do cliente incompleto. CEP do cliente é inválido.',
+      });
+
+      // The late INVOICE_CANCELED of that Asaas nota keeps the reason.
+      await applyInvoiceEvent('c1', 'INVOICE_CANCELED', {
+        id: 'inv_1', status: 'CANCELED', externalReference: `c1:nf:${lock.invoiceId}`,
+      } as any);
+      expect(read(INV(lock.invoiceId as string))).toMatchObject({ status: 'error', errorCode: 'CUSTOMER_DATA_REQUIRED' });
+
+      // The order is free: fixed data, a new nota.
+      client.authorizeInvoice.mockResolvedValue({ id: 'inv_2', status: 'SYNCHRONIZED' });
+      client.createInvoice.mockResolvedValue({ id: 'inv_2', status: 'SCHEDULED' });
+      const second = await createInvoice('c1', { orderIds: ['o182'] }, USER);
+      expect(read(LOCK('o182'))!.invoiceId).toBe(second.id);
+    });
+
+    it('authorize recusado por outro motivo: devolve o erro do Asaas e guarda o texto dele', async () => {
+      const refusal = new AsaasApiError(400, [{ code: 'x', description: 'Alíquota inválida' }], '/invoices/inv_1/authorize');
+      client.authorizeInvoice.mockRejectedValue(refusal);
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toBe(refusal);
+      const lock = read(LOCK('o182'))!;
+      expect(read(INV(lock.invoiceId as string))).toMatchObject({
+        status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Alíquota inválida',
+      });
+    });
+
+    it('authorize recusado e cancelamento falhou: fica agendada com o motivo (OS presa até cancelar)', async () => {
+      client.authorizeInvoice.mockRejectedValue(new AsaasApiError(400, CUSTOMER_REFUSAL, '/invoices/inv_1/authorize'));
+      client.cancelInvoice.mockRejectedValue(new AsaasApiError(503, [], '/invoices/inv_1/cancel'));
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'CUSTOMER_DATA_REQUIRED',
+      });
+      const lock = read(LOCK('o182'))!;
+      expect(read(INV(lock.invoiceId as string))).toMatchObject({
+        status: 'scheduled', errorCode: 'CUSTOMER_DATA_REQUIRED',
+      });
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({ code: 'ORDER_HAS_INVOICE' });
     });
 
     it('não mexe em outra empresa', async () => {
@@ -384,6 +451,83 @@ describe('invoice.service', () => {
         municipalServiceId: 'x', municipalServiceName: 'x', taxes: TAXES, asaasEnvironment: 'sandbox', asaasWalletId: 'w9',
       });
       await expect(createInvoice('c2', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({ code: 'ORDER_NOT_FOUND' });
+    });
+  });
+
+  describe('dados do cliente para a nota', () => {
+    it('prévia diz o que falta no cliente do Asaas (e usa o e-mail do PraticOS)', async () => {
+      seed('companies/c1/customers/cust1', { name: 'João', taxId: CPF, email: 'joao@oficina.com' });
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João', postalCode: '01310-000' });
+      const preview = await previewInvoice('c1', ['o182']);
+      expect(preview.customer.contact).toEqual({ email: 'joao@oficina.com', postalCode: '01310000' });
+      expect(preview.customer.missingData).toEqual(['address', 'addressNumber', 'province']);
+    });
+
+    it('prévia com cliente ainda fora do Asaas pede tudo, sem criar nada', async () => {
+      client.findCustomerByExternalReference.mockResolvedValue(null);
+      const preview = await previewInvoice('c1', ['o182']);
+      expect(preview.customer.missingData).toEqual(['email', 'postalCode', 'address', 'addressNumber', 'province']);
+      expect(client.createCustomer).not.toHaveBeenCalled();
+      expect(client.getCustomer).not.toHaveBeenCalled();
+    });
+
+    it('prévia não cai se o Asaas não responder', async () => {
+      client.getCustomer.mockRejectedValue(new AsaasApiError(503, [], '/customers/cus_1'));
+      const preview = await previewInvoice('c1', ['o182']);
+      expect(preview.customer.missingData).toContain('postalCode');
+    });
+
+    it('sem e-mail ou endereço: recusa antes de criar a nota (CUSTOMER_DATA_REQUIRED)', async () => {
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João' });
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'CUSTOMER_DATA_REQUIRED',
+      });
+      expect(client.createInvoice).not.toHaveBeenCalled();
+      expect(client.updateCustomer).not.toHaveBeenCalled();
+      expect(read(LOCK('o182'))).toBeUndefined();
+    });
+
+    it('dados digitados vão para o cliente do Asaas (só o que mudou) e ficam no cadastro onde estava vazio', async () => {
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João', province: 'Bela Vista' });
+      await createInvoice('c1', {
+        orderIds: ['o182'],
+        customerData: {
+          email: ' joao@example.com ', postalCode: '01310-000', address: 'Av. Paulista', addressNumber: '1000',
+          complement: 'sala 2', province: 'Bela Vista',
+        },
+      }, USER);
+      expect(client.updateCustomer).toHaveBeenCalledWith('cus_1', {
+        email: 'joao@example.com', postalCode: '01310000', address: 'Av. Paulista', addressNumber: '1000', complement: 'sala 2',
+      });
+      expect(client.createInvoice).toHaveBeenCalledTimes(1);
+      expect(read('companies/c1/customers/cust1')).toMatchObject({
+        email: 'joao@example.com',
+        address: 'Av. Paulista, 1000, sala 2 - Bela Vista - CEP 01310-000',
+      });
+    });
+
+    it('não troca e-mail nem endereço já escritos no cadastro do PraticOS', async () => {
+      seed('companies/c1/customers/cust1', { name: 'João', taxId: CPF, email: 'antigo@x.com', address: 'Rua A, 1' });
+      await createInvoice('c1', { orderIds: ['o182'], customerData: { ...FULL_CONTACT, email: 'novo@x.com' } }, USER);
+      expect(client.updateCustomer).toHaveBeenCalledWith('cus_1', { email: 'novo@x.com' });
+      expect(read('companies/c1/customers/cust1')).toMatchObject({ email: 'antigo@x.com', address: 'Rua A, 1' });
+    });
+
+    it('dado inválido conta como faltando (CEP com menos de 8 dígitos, e-mail sem @)', async () => {
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João' });
+      await expect(createInvoice('c1', {
+        orderIds: ['o182'], customerData: { ...FULL_CONTACT, postalCode: '0131', email: 'joao' },
+      }, USER)).rejects.toMatchObject({ code: 'CUSTOMER_DATA_REQUIRED', message: expect.stringContaining('email, postalCode') });
+    });
+
+    it('cliente novo no Asaas já é criado com e-mail e endereço', async () => {
+      client.findCustomerByExternalReference.mockResolvedValue(null);
+      client.createCustomer.mockResolvedValue({ id: 'cus_9', name: 'João' });
+      client.getCustomer.mockResolvedValue({ id: 'cus_9', name: 'João', ...FULL_CONTACT });
+      await createInvoice('c1', { orderIds: ['o182'], customerData: FULL_CONTACT }, USER);
+      expect(client.createCustomer).toHaveBeenCalledWith(expect.objectContaining({ ...FULL_CONTACT, cpfCnpj: CPF }));
+      expect(client.updateCustomer).not.toHaveBeenCalled();
+      expect(client.createInvoice.mock.calls[0][0].customer).toBe('cus_9');
     });
   });
 
@@ -544,6 +688,30 @@ describe('invoice.service', () => {
       expect(invoices).toHaveLength(1);
       expect(invoices[0]).toMatchObject({
         id: 'auto-o182', status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Inscrição municipal inválida',
+      });
+    });
+
+    it('cliente sem e-mail ou endereço: registra o erro de dados do cliente, sem criar nota no Asaas', async () => {
+      setAuto('paid');
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João' });
+      await autoIssueInvoice('c1', 'o182', 'paid');
+
+      const invoices = await invoicesOf('o182');
+      expect(invoices).toHaveLength(1);
+      expect(invoices[0]).toMatchObject({ id: 'auto-o182', status: 'error', errorCode: 'CUSTOMER_DATA_REQUIRED' });
+      expect(client.createInvoice).not.toHaveBeenCalled();
+    });
+
+    it('emissão recusada depois de criada: fica só a nota com o motivo, sem registro duplicado', async () => {
+      setAuto('paid');
+      client.authorizeInvoice.mockRejectedValue(new AsaasApiError(400, CUSTOMER_REFUSAL, '/invoices/inv_1/authorize'));
+      client.cancelInvoice.mockResolvedValue({ id: 'inv_1', status: 'CANCELED' });
+      await autoIssueInvoice('c1', 'o182', 'paid');
+
+      const invoices = await invoicesOf('o182');
+      expect(invoices).toHaveLength(1);
+      expect(invoices[0]).toMatchObject({
+        status: 'error', errorCode: 'CUSTOMER_DATA_REQUIRED', auto: true, asaasInvoiceId: 'inv_1',
       });
     });
 

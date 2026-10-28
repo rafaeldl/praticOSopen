@@ -44,9 +44,8 @@ String nfseHeadline(AppLocalizations l10n, NfseInvoice invoice) {
     case NfseStatus.canceled:
       return l10n.nfseHeadCanceled;
     case NfseStatus.error:
-      return invoice.errorCode != null
-          ? l10n.nfseHeadAutoError
-          : l10n.nfseHeadError;
+      if (invoice.errorCode == null) return l10n.nfseHeadError;
+      return invoice.auto ? l10n.nfseHeadAutoError : l10n.nfseHeadNotIssued;
   }
 }
 

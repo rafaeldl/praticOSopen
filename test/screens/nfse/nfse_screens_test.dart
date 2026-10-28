@@ -117,6 +117,8 @@ Map<String, dynamic> _preview({
   bool hasProducts = true,
   Map<String, String> invoiced = const {},
   List<Map<String, dynamic>>? orders,
+  Map<String, String> contact = const {},
+  List<String> missingData = const [],
 }) => {
   'value': 270,
   'orders':
@@ -134,7 +136,13 @@ Map<String, dynamic> _preview({
   'hasProducts': hasProducts,
   'serviceDescription': 'OS 182: Troca de óleo',
   'effectiveDate': '2026-10-15',
-  'customer': {'id': 'c1', 'name': 'João Silva', 'hasTaxId': hasTaxId},
+  'customer': {
+    'id': 'c1',
+    'name': 'João Silva',
+    'hasTaxId': hasTaxId,
+    'contact': contact,
+    'missingData': missingData,
+  },
   'invoicedOrders': invoiced,
   'municipalServiceName': 'Manutenção de veículos',
 };
@@ -347,6 +355,78 @@ void main() {
       expect(server.calls.last.$3['customerTaxId'], '52998224725');
     });
 
+    testWidgets('asks the e-mail and address the city needs', (tester) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') {
+          return _preview(
+            contact: {'email': 'joao@example.com', 'province': 'Centro'},
+            missingData: ['postalCode', 'address', 'addressNumber'],
+          );
+        }
+        return _invoiceJson('scheduled');
+      });
+      await _openIssue(tester, server.api);
+
+      expect(find.byKey(const Key('nfseIssueContactIntro')), findsOneWidget);
+      // E-mail is known: only the address is asked, with the district filled.
+      expect(find.byKey(const Key('nfseIssueContact_email')), findsNothing);
+      expect(find.text('Centro'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(server.calls.where((c) => c.$2 == '/invoices'), isEmpty);
+
+      Future<void> type(String key, String text) async {
+        final field = find.descendant(
+          of: find.byKey(Key('nfseIssueContact_$key')),
+          matching: find.byType(CupertinoTextField),
+        );
+        await tester.ensureVisible(field);
+        await tester.enterText(field, text);
+        await tester.pump();
+      }
+
+      await type('postalCode', '01310-000');
+      await type('address', 'Av. Paulista');
+      await type('addressNumber', '1000');
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(server.calls.last.$2, '/invoices');
+      expect(server.calls.last.$3['customerData'], {
+        'postalCode': '01310-000',
+        'address': 'Av. Paulista',
+        'addressNumber': '1000',
+        'province': 'Centro',
+      });
+    });
+
+    testWidgets(
+      'server asks for customer data: says why and shows the fields',
+      (tester) async {
+        var previews = 0;
+        final server = _Server((method, path, body) {
+          if (path == '/invoices/preview') {
+            previews += 1;
+            return previews == 1
+                ? _preview()
+                : _preview(missingData: ['email']);
+          }
+          return _error('CUSTOMER_DATA_REQUIRED', status: 400);
+        });
+        await _openIssue(tester, server.api);
+        expect(find.byKey(const Key('nfseIssueContact_email')), findsNothing);
+
+        await tester.tap(find.byKey(const ValueKey('new_order_save')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('e-mail e o endereço completo do cliente'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('nfseIssueContact_email')), findsOneWidget);
+      },
+    );
+
     testWidgets('an order that already has a nota blocks it', (tester) async {
       final server = _Server(
         (method, path, body) => _preview(invoiced: {'o1': 'inv0'}),
@@ -516,6 +596,27 @@ void main() {
       expect(find.text('Por que não saiu'), findsOneWidget);
       expect(
         find.text('O cliente não tem CPF ou CNPJ no cadastro.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('refused for customer data: says why, not "sozinha"', (
+      tester,
+    ) async {
+      await pumpInvoice(
+        tester,
+        'error',
+        extra: {'errorCode': 'CUSTOMER_DATA_REQUIRED'},
+      );
+      expect(find.textContaining('A nota não saiu.'), findsOneWidget);
+      expect(find.textContaining('sozinha'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('nfseInvoiceReason')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.textContaining('e-mail e o endereço completo do cliente'),
         findsOneWidget,
       );
     });

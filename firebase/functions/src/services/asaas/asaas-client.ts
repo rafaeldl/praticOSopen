@@ -10,6 +10,7 @@ import {
   AsaasCreatePaymentInput,
   AsaasCreateWebhookInput,
   AsaasCustomer,
+  AsaasCustomerContact,
   AsaasEnvironment,
   AsaasErrorItem,
   AsaasFiscalInfo,
@@ -93,6 +94,15 @@ export class AsaasClient {
 
   createCustomer(input: AsaasCreateCustomerInput): Promise<AsaasCustomer> {
     return this.request<AsaasCustomer>('POST', '/customers', input);
+  }
+
+  getCustomer(id: string): Promise<AsaasCustomer> {
+    return this.request<AsaasCustomer>('GET', `/customers/${encodeURIComponent(id)}`);
+  }
+
+  /** PUT /customers/{id}: only the fields sent change. */
+  updateCustomer(id: string, input: AsaasCustomerContact): Promise<AsaasCustomer> {
+    return this.request<AsaasCustomer>('PUT', `/customers/${encodeURIComponent(id)}`, input);
   }
 
   createPayment(input: AsaasCreatePaymentInput): Promise<AsaasPayment> {

@@ -29,6 +29,8 @@ String asaasErrorText(
       return l10n.asaasErrorTaxIdRequired;
     case 'INVALID_TAX_ID':
       return l10n.invalidTaxId;
+    case 'CUSTOMER_DATA_REQUIRED':
+      return l10n.nfseErrorCustomerData;
     case 'CUSTOMER_REQUIRED':
       return l10n.asaasErrorCustomerRequired;
     case 'INSTALLMENTS_IN_PROGRESS':

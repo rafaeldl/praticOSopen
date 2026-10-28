@@ -5347,6 +5347,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseTaxIdMissing => 'Falta o CPF ou CNPJ do cliente';
 
   @override
+  String get nfseErrorCustomerData =>
+      'A prefeitura pede o e-mail e o endereço completo do cliente (com CEP). Preencha e emita de novo.';
+
+  @override
+  String get nfseCustomerDataIntro =>
+      'A prefeitura pede o e-mail e o endereço do cliente. Ficam salvos no cadastro dele.';
+
+  @override
+  String get nfseCustomerDataMissing =>
+      'Falta o e-mail ou o endereço do cliente';
+
+  @override
+  String get nfsePostalCode => 'CEP';
+
+  @override
+  String get nfseStreet => 'Rua';
+
+  @override
+  String get nfseAddressComplement => 'Complemento';
+
+  @override
+  String get nfseDistrict => 'Bairro';
+
+  @override
+  String get nfseHeadNotIssued =>
+      'A nota não saiu. Corrija o motivo abaixo e emita de novo pelo menu da OS.';
+
+  @override
   String get nfseNothingToIssue => 'Nada para emitir: a nota ficaria sem valor';
 
   @override

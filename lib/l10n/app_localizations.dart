@@ -8900,6 +8900,54 @@ abstract class AppLocalizations {
   /// **'Falta o CPF ou CNPJ do cliente'**
   String get nfseTaxIdMissing;
 
+  /// No description provided for @nfseErrorCustomerData.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura pede o e-mail e o endereço completo do cliente (com CEP). Preencha e emita de novo.'**
+  String get nfseErrorCustomerData;
+
+  /// No description provided for @nfseCustomerDataIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'A prefeitura pede o e-mail e o endereço do cliente. Ficam salvos no cadastro dele.'**
+  String get nfseCustomerDataIntro;
+
+  /// No description provided for @nfseCustomerDataMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta o e-mail ou o endereço do cliente'**
+  String get nfseCustomerDataMissing;
+
+  /// No description provided for @nfsePostalCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'CEP'**
+  String get nfsePostalCode;
+
+  /// No description provided for @nfseStreet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rua'**
+  String get nfseStreet;
+
+  /// No description provided for @nfseAddressComplement.
+  ///
+  /// In pt, this message translates to:
+  /// **'Complemento'**
+  String get nfseAddressComplement;
+
+  /// No description provided for @nfseDistrict.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bairro'**
+  String get nfseDistrict;
+
+  /// No description provided for @nfseHeadNotIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nota não saiu. Corrija o motivo abaixo e emita de novo pelo menu da OS.'**
+  String get nfseHeadNotIssued;
+
   /// No description provided for @nfseNothingToIssue.
   ///
   /// In pt, this message translates to:

@@ -17,6 +17,9 @@
  *   created the nota on Asaas: the invoice stays 'creating' and locked until
  *   it is reconciled with Asaas (`reconcileInvoice`, by the externalReference),
  *   on the next preview/emit/cancel touching the order or by the webhook.
+ * - The customer must have e-mail and address with CEP on Asaas
+ *   (invoice-customer.service); an issue Asaas refuses after the create is
+ *   canceled there and kept as 'error' with the reason (`giveUpRefusedInvoice`).
  * - The nota PDF/XML live only on the invoice doc; the order `documents`
  *   array belongs to the app (saved whole) and is never written here.
  */
@@ -26,6 +29,7 @@ import { Customer, Order, UserAggr } from '../../models/types';
 import {
   AsaasConnectionDoc,
   AsaasCreateInvoiceInput,
+  AsaasCustomerContact,
   AsaasEnvironment,
   AsaasInvoice,
   CreateInvoiceInput,
@@ -42,6 +46,13 @@ import { AsaasServiceError } from './errors';
 import { getPaymentSettings } from './connection.service';
 import { hasNfseWebhookEvents } from './webhook-events';
 import { findOrCreateAsaasCustomer, resolveTaxId, roundMoney, todayInSaoPaulo, addDays } from './charge.service';
+import {
+  cleanCustomerContact,
+  ensureInvoiceCustomer,
+  InvoiceCustomerField,
+  invoiceCustomerData,
+  saveContactOnCustomer,
+} from './invoice-customer.service';
 
 export const MAX_INVOICE_ORDERS = 50;
 /** Tag of the invoice externalReference `{companyId}:nf:{invoiceId}`. */
@@ -404,7 +415,15 @@ export interface InvoicePreview {
   serviceDescription: string;
   observations: string;
   effectiveDate: string;
-  customer: { id: string; name: string | null; hasTaxId: boolean };
+  customer: {
+    id: string;
+    name: string | null;
+    hasTaxId: boolean;
+    /** E-mail and address the nota needs, as known (to fill the sheet). */
+    contact: AsaasCustomerContact;
+    /** What the sheet must ask before the nota can go. */
+    missingData: InvoiceCustomerField[];
+  };
   /** Orders that already have an active nota (orderId → invoiceId). */
   invoicedOrders: Record<string, string>;
   municipalServiceName: string;
@@ -423,6 +442,7 @@ export async function previewInvoice(
   const customerSnap = await companyRef(companyId).collection('customers').doc(loaded.customerId).get();
   const customer = customerSnap.data() as Customer | undefined;
   const numbers = describeOrderNumbers(loaded.orders.map((o) => o.number));
+  const contactData = await invoiceCustomerData(client, companyId, loaded.customerId, customer);
   return {
     value: loaded.value,
     orders: loaded.parts,
@@ -434,6 +454,8 @@ export async function previewInvoice(
       id: loaded.customerId,
       name: customer?.name ?? loaded.customerName,
       hasTaxId: !!customer?.taxId,
+      contact: contactData.contact,
+      missingData: contactData.missing,
     },
     invoicedOrders: await activeInvoicesOf(companyId, loaded.orders.map((o) => o.id), client),
     municipalServiceName: service.municipalServiceName,
@@ -452,6 +474,9 @@ export function invoiceUpdateFrom(
 ): Partial<NfseInvoice> | null {
   const status = mapInvoiceStatus(asaas.status, eventName) ?? current.status;
   if (!canMoveInvoiceStatus(current.status, status)) return null;
+  // A nota PraticOS gave up on (issue refused, canceled on Asaas) keeps its
+  // reason: the late events of that Asaas nota do not bring it back.
+  if (current.status === 'error' && current.errorCode) return null;
   const now = new Date().toISOString();
   const update: Partial<NfseInvoice> = { status, updatedAt: now };
   if (asaas.id && !current.asaasInvoiceId) update.asaasInvoiceId = asaas.id;
@@ -459,7 +484,13 @@ export function invoiceUpdateFrom(
   if (asaas.xmlUrl) update.xmlUrl = asaas.xmlUrl;
   if (asaas.number) update.number = asaas.number;
   if (asaas.validationCode) update.validationCode = asaas.validationCode;
-  update.statusDescription = status === 'error' || status === 'cancellationDenied' ? asaas.statusDescription ?? null : null;
+  if (status === 'error' || status === 'cancellationDenied') {
+    update.statusDescription = asaas.statusDescription ?? null;
+  } else if (status !== current.status) {
+    // Same status: a reason PraticOS recorded (refused issue) stays.
+    update.statusDescription = null;
+    if (current.errorCode) update.errorCode = null;
+  }
   if (status === 'authorized' && !current.authorizedAt) update.authorizedAt = now;
   if (status === 'canceled' && !current.canceledAt) update.canceledAt = now;
   return update;
@@ -583,7 +614,11 @@ export async function createInvoice(
   if (Object.keys(invoiced).length > 0) {
     throw new AsaasServiceError('ORDER_HAS_INVOICE', 'An order already has an active nota');
   }
-  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId);
+  const typedContact = cleanCustomerContact(input.customerData);
+  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId, typedContact);
+  // The city refuses a nota without the customer's e-mail and address with CEP.
+  await ensureInvoiceCustomer(client, asaasCustomerId, customer, typedContact);
+  await saveContactOnCustomer(companyId, customer, typedContact);
 
   const numbers = describeOrderNumbers(loaded.orders.map((o) => o.number));
   const serviceDescription =
@@ -675,6 +710,11 @@ export async function createInvoice(
       const authorized = await client.authorizeInvoice(created.id);
       result = (await syncInvoice(companyId, invoiceRef.id, authorized))?.after ?? result;
     } catch (error) {
+      if (error instanceof AsaasApiError && DEFINITIVE_REJECTIONS.includes(error.status)) {
+        await giveUpRefusedInvoice(companyId, invoiceRef.id, created.id, error, client);
+        throw refusalError(error);
+      }
+      // No clear answer: the nota stays scheduled (Asaas issues it on the date).
       const status = error instanceof AsaasApiError ? error.status : 'unknown';
       console.warn(`[NFS-e] authorize of invoice ${invoiceRef.id} failed (status ${status}); left scheduled`);
     }
@@ -682,6 +722,54 @@ export async function createInvoice(
 
   console.log(`[NFS-e] Invoice ${invoiceRef.id} created for ${orderIds.length} order(s) of company ${companyId}`);
   return { ...result, id: invoiceRef.id };
+}
+
+/** Our code for an issue Asaas refused: the customer data, else Asaas's own text. */
+export function refusalCode(error: AsaasApiError): 'CUSTOMER_DATA_REQUIRED' | 'ASAAS_REJECTED' {
+  return error.errors.some((e) => /cliente/i.test(e.description ?? '')) ? 'CUSTOMER_DATA_REQUIRED' : 'ASAAS_REJECTED';
+}
+
+function refusalText(error: AsaasApiError): string | null {
+  const text = error.errors.map((e) => (e.description ?? '').trim()).filter((d) => d.length > 0).join(' ');
+  return text || null;
+}
+
+/** What the app gets when the issue was refused (the sheet asks for the customer data). */
+function refusalError(error: AsaasApiError): Error {
+  if (refusalCode(error) === 'CUSTOMER_DATA_REQUIRED') {
+    return new AsaasServiceError('CUSTOMER_DATA_REQUIRED', refusalText(error) ?? 'Customer data required');
+  }
+  return error;
+}
+
+/**
+ * Asaas refused to issue a nota it had just scheduled (customer data, fiscal
+ * data). A scheduled nota never reached the city, so it is canceled on Asaas
+ * and recorded as 'error' with the reason: the orders are free and the user
+ * fixes the data and issues again. If the cancel fails the nota stays
+ * scheduled (and locked) with the reason; the user cancels it on its screen.
+ */
+async function giveUpRefusedInvoice(
+  companyId: string,
+  invoiceId: string,
+  asaasInvoiceId: string,
+  error: AsaasApiError,
+  client: AsaasClient,
+): Promise<void> {
+  const update: Partial<NfseInvoice> = {
+    errorCode: refusalCode(error),
+    statusDescription: refusalText(error),
+    updatedAt: new Date().toISOString(),
+  };
+  try {
+    await client.cancelInvoice(asaasInvoiceId);
+    update.status = 'error';
+  } catch (cancelError) {
+    const status = cancelError instanceof AsaasApiError ? cancelError.status : 'unknown';
+    console.error(`[NFS-e] ALERT invoice ${invoiceId} of company ${companyId} refused and not canceled (status ${status}); left scheduled`);
+  }
+  await invoicesRef(companyId).doc(invoiceId).update(update as Record<string, unknown>);
+  console.warn(`[NFS-e] Invoice ${invoiceId} of company ${companyId} refused by Asaas (${update.errorCode}, status ${error.status})`);
 }
 
 // ----------------------------------------------------------------------------
@@ -705,7 +793,8 @@ export function autoIssueErrorId(orderId: string): string {
  *
  * - Only once per order: an order that ever had a nota (any status, including
  *   canceled or a failed automatic one) is left to the user.
- * - A failure the user can fix (no CPF, no services, city/Asaas rejection) is
+ * - A failure the user can fix (no CPF, no e-mail/address, no services,
+ *   city/Asaas rejection) is
  *   recorded as an invoice with status 'error' and `errorCode`, so the order
  *   shows "Nota fiscal · Erro" and the user can issue it by hand.
  * - No answer from Asaas: createInvoice keeps it 'creating' (reconciled later).
@@ -735,6 +824,9 @@ export async function autoIssueInvoice(companyId: string, orderId: string, momen
       throw error;
     }
     console.warn(`[NFS-e] Automatic nota of order ${orderId} of company ${companyId} not issued (${errorCode})`);
+    // Refused after it was created: createInvoice already left the nota with its reason.
+    const recorded = await invoicesRef(companyId).where('orderIds', 'array-contains', orderId).limit(1).get();
+    if (!recorded.empty) return;
     await recordAutoIssueError(companyId, orderId, errorCode, statusDescription, service?.municipalServiceName ?? '');
   }
 }
