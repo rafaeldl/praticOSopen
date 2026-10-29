@@ -191,8 +191,8 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
       expect(read(ORDER_PATH)).toMatchObject({ paid: true, payment: 'paid' });
     });
 
-    it('não mexe em orçamento, em OS antiga sem paidAmount, nem quando já está certo', async () => {
-      seed(ORDER_PATH, { status: 'quote', total: 300, paidAmount: 0, paid: false, payment: null });
+    it('orçamento fica sem status de pagamento; OS antiga sem paidAmount e status já certo não mudam', async () => {
+      seed(ORDER_PATH, { status: 'quote', total: 300, paidAmount: 300, paid: true, payment: 'paid' });
       await handleOrderUpdatedAsaas('c1', 'o1', { status: 'quote', total: 200 }, { status: 'quote', total: 300 });
       expect(read(ORDER_PATH)).toMatchObject({ payment: null, paid: false });
 
