@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart' show ReactionDisposer, reaction;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
@@ -179,6 +180,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   final TextEditingController _valueController = TextEditingController();
   PickedReceiptFile? _receipt;
 
+  /// What [_prefillValue] last wrote: while the field still shows it, a new
+  /// balance (a link paid by the webhook, a reload) replaces it.
+  String? _prefilledText;
+  ReactionDisposer? _balanceReaction;
+
   /// Day the money came in ("Quando"); today by default.
   DateTime _paidDay = DateTime.now();
 
@@ -224,6 +230,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       _prefillValue();
       final store = _store;
       if (store != null) {
+        _balanceReaction = reaction<double>((_) => store.remainingBalance, (_) {
+          if (mounted && _valueController.text == _prefilledText) {
+            _prefillValue();
+          }
+        });
         _charge = OrderChargeController(
           store: store,
           canCharge: widget.canCharge,
@@ -237,6 +248,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
   @override
   void dispose() {
+    _balanceReaction?.call();
     _valueController.dispose();
     _charge?.dispose();
     super.dispose();
@@ -257,6 +269,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     _valueController.text = remaining > 0
         ? ReceiveAmountField.textFor(remaining)
         : '';
+    _prefilledText = _valueController.text;
   }
 
   bool get _canAttach =>

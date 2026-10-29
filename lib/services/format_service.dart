@@ -62,7 +62,8 @@ class FormatService {
   /// Formata data com hora (ex: 09/01/2025 14:30, 01/09/2025 2:30 PM)
   String formatDateTime(DateTime? date) {
     if (date == null) return '';
-    return DateFormat.yMd(_intlLocale).add_Hm().format(date);
+    // The server writes UTC ('…Z'): show the time where the phone is.
+    return DateFormat.yMd(_intlLocale).add_Hm().format(date.toLocal());
   }
 
   /// Formata data no formato longo (ex: 9 de janeiro de 2025)
@@ -112,7 +113,7 @@ class FormatService {
   /// Formata apenas hora (ex: 14:30, 2:30 PM)
   String formatTime(DateTime? date) {
     if (date == null) return '';
-    return DateFormat.Hm(_intlLocale).format(date);
+    return DateFormat.Hm(_intlLocale).format(date.toLocal());
   }
 
   // ══════════════════════════════════════════════════════════

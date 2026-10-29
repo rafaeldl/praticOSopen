@@ -5,6 +5,7 @@ import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobx/mobx.dart' show runInAction;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:praticos/theme/app_glass.dart';
@@ -174,6 +175,39 @@ void main() {
     // Old segmented control and shortcut are gone.
     expect(find.byType(CupertinoSlidingSegmentedControl<int>), findsNothing);
     expect(find.textContaining('Pagar valor total'), findsNothing);
+  });
+
+  testWidgets(
+    'the suggested amount follows a new balance (a link paid meanwhile)',
+    (tester) async {
+      final store = storeWith(total: 1200);
+      await pumpScreen(tester, store);
+      expect(find.textContaining('1.200,00'), findsWidgets);
+
+      // reloadPayments after the webhook booked R$ 300 by the link.
+      runInAction(() => store.paidAmount = 300);
+      await tester.pump();
+
+      // Only the subtitle ("total R$ 1.200,00") still says 1.200,00.
+      expect(find.textContaining('900,00'), findsWidgets);
+      expect(find.textContaining('1.200,00'), findsOneWidget);
+    },
+  );
+
+  testWidgets('an amount the person typed is kept when the balance changes', (
+    tester,
+  ) async {
+    final store = storeWith(total: 1200);
+    await pumpScreen(tester, store);
+    await tester.enterText(find.byType(CupertinoTextField).first, '10000');
+    await tester.pump();
+    expect(find.textContaining('100,00'), findsWidgets);
+
+    runInAction(() => store.paidAmount = 300);
+    await tester.pump();
+
+    expect(find.textContaining('900,00'), findsNothing);
+    expect(find.textContaining('100,00'), findsWidgets);
   });
 
   testWidgets('manual receive asks when the money came in ("Hoje")', (
