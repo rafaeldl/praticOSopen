@@ -1,6 +1,6 @@
 # Guia de Deploy e Publicação - PraticOS
 
-Este documento detalha o processo de build, testes e deploy automatizado para Android (Google Play) e iOS (App Store) utilizando Fastlane e GitHub Actions.
+Este documento detalha o processo de build, testes e deploy automatizado para Android (Google Play) e iOS (App Store) utilizando Fastlane e GitHub Actions, e o deploy do Firebase (Functions, regras, índices e site).
 
 ## 📱 Visão Geral
 
@@ -147,6 +147,67 @@ fvm flutter drive \
 ```
 
 **Total:** 21 screenshots por plataforma (3 idiomas × 7 telas)
+
+---
+
+## 🔥 Firebase (Functions, regras, índices e site)
+
+Todos usam o secret `FIREBASE_SERVICE_ACCOUNT_PRATICOS` e publicam no projeto `praticos` em push na `master`.
+
+| O que muda | Workflow | Comando |
+|------------|----------|---------|
+| `firebase/functions/**` | `firebase-functions-deploy.yml` | `firebase deploy --only functions` |
+| `firebase/hosting/**`, `firebase/firebase.json` | `firebase-hosting-deploy.yml` | action `FirebaseExtended/action-hosting-deploy` |
+| `firebase/firestore.rules`, `firebase/firestore.indexes.json`, `firebase/storage.rules` | `firebase-rules-deploy.yml` | `firebase deploy --only firestore:rules,firestore:indexes,storage --non-interactive` |
+
+### Regras e índices
+
+Até 29/10/2026 as regras eram publicadas à mão e ficaram de 08/10 a 29/10 sem deploy, o que quebrou "Receber de cliente" e a NFS-e em produção. Agora o `firebase-rules-deploy.yml`:
+
+1. Roda os testes de regras (`npm run test:rules` e `npm run test:rbac` em `firebase/functions`). Se falharem, nada é publicado.
+2. Publica regras do Firestore, índices e regras do Storage.
+3. Confere que produção ficou igual ao repositório (`.github/scripts/check-rules-drift.sh`).
+
+Também roda manualmente (Actions → "Deploy Firestore/Storage Rules" → Run workflow). Um deploy de regras por vez (`concurrency`); não divide grupo com o de Functions porque mexem em coisas diferentes e o GitHub cancela execuções pendentes do mesmo grupo.
+
+**Índices nunca são apagados pelo CI.** Sem `--force` e com `--non-interactive`, o firebase-tools só cria o que falta: índice que existe em produção e não está no `firestore.indexes.json` aparece no log ("there are N indexes defined in your project that are not present...") e continua lá. Não colocar `--force` no workflow. Para apagar um índice, fazer à mão no console ou com `firebase deploy --only firestore:indexes --force` depois de conferir a lista. Para trazer um índice criado no console para o arquivo: `firebase firestore:indexes --project praticos > firebase/firestore.indexes.json`.
+
+### Conferência diária (drift)
+
+`firebase-rules-drift.yml` roda todo dia às 08:17 (Brasília) e manualmente. Compara o ruleset publicado (`projects/praticos/releases/cloud.firestore` e `firebase.storage/<bucket>` na API `firebaserules`) com `firebase/firestore.rules` e `firebase/storage.rules` da `master`. Se diferirem, o job falha com o diff e o GitHub manda e-mail. Causas comuns: deploy à mão de outro branch, ou o deploy de regras falhou.
+
+Rodar local (com `gcloud auth login`):
+
+```bash
+RULES_QUOTA_PROJECT=praticos .github/scripts/check-rules-drift.sh
+```
+
+Em repositório público, o GitHub desliga workflows agendados depois de 60 dias sem commits. Se isso acontecer, reativar em Actions → "Firestore/Storage Rules Drift" → Enable workflow.
+
+### Permissões da conta de serviço
+
+A conta do secret `FIREBASE_SERVICE_ACCOUNT_PRATICOS` precisa, no projeto `praticos`:
+
+| Papel | Para quê |
+|-------|----------|
+| Firebase Rules Admin (`roles/firebaserules.admin`) | Criar rulesets e trocar os releases do Firestore e do Storage; ler para o drift |
+| Cloud Datastore Index Admin (`roles/datastore.indexAdmin`) | Listar e criar índices e field overrides do Firestore |
+| Service Usage Consumer (`roles/serviceusage.serviceUsageConsumer`) | O firebase-tools confere se as APIs do Firestore e do Rules estão ligadas |
+| Firebase Viewer (`roles/firebase.viewer`) | Achar o bucket padrão do Storage |
+
+O Service Usage Consumer costuma já existir por causa do deploy de Functions. Para conferir:
+
+```bash
+gcloud projects get-iam-policy praticos --flatten="bindings[].members" --filter="bindings.members:serviceAccount:<EMAIL_DA_CONTA>" --format="table(bindings.role)"
+```
+
+O e-mail da conta é o `client_email` do JSON do secret. Se algum papel faltar (ou se a conta já tiver `roles/firebase.admin` ou `roles/editor`, que cobrem tudo isso):
+
+```bash
+gcloud projects add-iam-policy-binding praticos --member="serviceAccount:<EMAIL_DA_CONTA>" --role="roles/firebaserules.admin"
+```
+
+Repetir com `roles/datastore.indexAdmin` e os demais que faltarem.
 
 ---
 

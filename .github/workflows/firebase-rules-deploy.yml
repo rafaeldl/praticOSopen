@@ -1,0 +1,109 @@
+# .github/workflows/firebase-rules-deploy.yml
+#
+# Publishes Firestore rules, Firestore indexes and Storage rules to `praticos`
+# when they change on master. Before this workflow they were deployed by hand
+# and production stayed weeks behind the repo (see docs/DEPLOYMENT.md).
+#
+# Indexes: the deploy never passes --force and runs with --non-interactive, so
+# firebase-tools only creates missing indexes and field overrides. Indexes that
+# exist in production but not in firestore.indexes.json are listed in the log
+# and kept.
+
+name: Deploy Firestore/Storage Rules
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'firebase/firestore.rules'
+      - 'firebase/firestore.indexes.json'
+      - 'firebase/storage.rules'
+      - '.github/workflows/firebase-rules-deploy.yml'
+      - '.github/scripts/check-rules-drift.sh'
+  workflow_dispatch:
+
+# One rules deploy at a time; a newer push waits for the running one instead
+# of cancelling it halfway. Functions use their own group: both deploys touch
+# disjoint resources, and a shared group would let GitHub cancel a pending
+# functions deploy (it keeps only one pending run per group).
+concurrency:
+  group: firebase-rules-deploy-praticos
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Rules tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firebase/functions
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: firebase/functions/package-lock.json
+
+      # firebase-tools 15 requires JDK 21+ to run the Firestore emulator
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Firebase emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-v15
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools@15
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test rules
+        run: npm run test:rules
+
+      - name: Test RBAC matrix
+        run: npm run test:rbac
+
+  deploy:
+    name: Deploy to praticos
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Authenticate to Firebase
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
+
+      - name: Install gcloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools@15
+
+      # Never add --force here: with it, firebase-tools deletes production
+      # indexes and field overrides missing from firestore.indexes.json.
+      - name: Deploy rules and indexes
+        working-directory: firebase
+        run: firebase deploy --only firestore:rules,firestore:indexes,storage --project praticos --non-interactive
+
+      - name: Check production matches the repo
+        run: .github/scripts/check-rules-drift.sh praticos
