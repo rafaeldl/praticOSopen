@@ -28,9 +28,9 @@ void main() {
     ..paidAmount = 0
     ..customer = withCustomer
         ? (CustomerAggr()
-          ..id = 'c1'
-          ..name = 'Maria'
-          ..taxId = taxId)
+            ..id = 'c1'
+            ..name = 'Maria'
+            ..taxId = taxId)
         : null;
 
   AsaasApiService service(MockClientHandler handler) =>
@@ -57,15 +57,17 @@ void main() {
           builder: (context) => CupertinoButton(
             child: const Text('open'),
             onPressed: () async {
-              results.add(await FormSheet.show<OrderCharge>(
-                context,
-                (_) => CreateChargeScreen(
-                  order: order,
-                  remainingBalance: remaining,
-                  service: api,
-                  customerTaxIdLoader: () async => loadedTaxId,
+              results.add(
+                await FormSheet.show<OrderCharge>(
+                  context,
+                  (_) => CreateChargeScreen(
+                    order: order,
+                    remainingBalance: remaining,
+                    service: api,
+                    customerTaxIdLoader: () async => loadedTaxId,
+                  ),
                 ),
-              ));
+              );
             },
           ),
         ),
@@ -83,9 +85,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  bool saveEnabled(WidgetTester tester) => tester
-      .widget<CupertinoButton>(find.byKey(const ValueKey('new_order_save')))
-      .onPressed !=
+  bool saveEnabled(WidgetTester tester) =>
+      tester
+          .widget<CupertinoButton>(find.byKey(const ValueKey('new_order_save')))
+          .onPressed !=
       null;
 
   group('validateChargeInput', () {
@@ -95,14 +98,13 @@ void main() {
       double remaining = 1000,
       bool needsTaxId = false,
       String taxId = '',
-    }) =>
-        validateChargeInput(
-          hasCustomer: hasCustomer,
-          value: value,
-          remainingBalance: remaining,
-          needsTaxId: needsTaxId,
-          taxIdInput: taxId,
-        );
+    }) => validateChargeInput(
+      hasCustomer: hasCustomer,
+      value: value,
+      remainingBalance: remaining,
+      needsTaxId: needsTaxId,
+      taxIdInput: taxId,
+    );
 
     test('entrada válida', () {
       expect(validate(), isNull);
@@ -123,16 +125,20 @@ void main() {
 
     test('CPF/CNPJ obrigatório, vazio ou inválido', () {
       expect(validate(needsTaxId: true), ChargeFormError.taxIdRequired);
-      expect(validate(needsTaxId: true, taxId: '123.456.789-00'),
-          ChargeFormError.taxIdInvalid);
+      expect(
+        validate(needsTaxId: true, taxId: '123.456.789-00'),
+        ChargeFormError.taxIdInvalid,
+      );
       expect(validate(needsTaxId: true, taxId: '529.982.247-25'), isNull);
     });
 
     test('CNPJ alfanumérico é aceito', () {
       expect(validate(needsTaxId: true, taxId: '12.ABC.345/01DE-35'), isNull);
       expect(validate(needsTaxId: true, taxId: '12abc34501de35'), isNull);
-      expect(validate(needsTaxId: true, taxId: '12ABC34501DE36'),
-          ChargeFormError.taxIdInvalid);
+      expect(
+        validate(needsTaxId: true, taxId: '12ABC34501DE36'),
+        ChargeFormError.taxIdInvalid,
+      );
     });
 
     test('tolerância de meio centavo (CENT_TOLERANCE do servidor)', () {
@@ -142,26 +148,37 @@ void main() {
   });
 
   group('CreateChargeScreen', () {
-    testWidgets('preenche o valor com o saldo e não pede CPF se já existe',
-        (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => http.Response('{}', 500)));
+    testWidgets('preenche o valor com o saldo e não pede CPF se já existe', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
-      final field = tester.widget<CupertinoTextField>(find.descendant(
+      final field = tester.widget<CupertinoTextField>(
+        find.descendant(
           of: find.byKey(const Key('chargeValueField')),
-          matching: find.byType(CupertinoTextField)));
+          matching: find.byType(CupertinoTextField),
+        ),
+      );
       expect(field.controller!.text, format.formatCurrency(1000));
       expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
-      expect(find.text(l10n.chargeBalanceHint(format.formatCurrency(1000))),
-          findsOneWidget);
+      expect(
+        find.text(l10n.chargeBalanceHint(format.formatCurrency(1000))),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('abre em sheet com título, frase do cliente e ✓ azul',
-        (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => http.Response('{}', 500)));
+    testWidgets('abre em sheet com título, frase do cliente e ✓ azul', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       expect(find.byKey(const Key('createChargeSheet')), findsOneWidget);
       expect(find.text(l10n.chargeLinkTitle), findsOneWidget);
@@ -171,13 +188,16 @@ void main() {
     });
 
     testWidgets('"Não" na escolha volta para cobrança única', (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => http.Response('{}', 500)));
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       await tapKey(tester, 'chargeInstallmentsTile');
-      await tester.tap(find.text(
-          l10n.chargeInstallmentOption(4, format.formatCurrency(250))));
+      await tester.tap(
+        find.text(l10n.chargeInstallmentOption(4, format.formatCurrency(250))),
+      );
       await tester.pumpAndSettle();
       expect(
         find.text(l10n.chargeInstallmentOption(4, format.formatCurrency(250))),
@@ -190,59 +210,76 @@ void main() {
       expect(find.text(l10n.chargeSplitNo), findsOneWidget);
     });
 
-    testWidgets('usa o CPF do cadastro quando o agregado não tem',
-        (tester) async {
-      await pumpHost(tester,
-          order: order(),
-          loadedTaxId: '52998224725',
-          api: service((_) async => http.Response('{}', 500)));
+    testWidgets('usa o CPF do cadastro quando o agregado não tem', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        order: order(),
+        loadedTaxId: '52998224725',
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
     });
 
-    testWidgets('CPF antigo inválido no agregado e no cadastro pede o documento',
-        (tester) async {
-      await pumpHost(tester,
+    testWidgets(
+      'CPF antigo inválido no agregado e no cadastro pede o documento',
+      (tester) async {
+        await pumpHost(
+          tester,
           order: order(taxId: '12345678900'),
           loadedTaxId: '12345678900',
-          api: service((_) async => http.Response('{}', 500)));
+          api: service((_) async => http.Response('{}', 500)),
+        );
 
-      expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
-    });
+        expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
+      },
+    );
 
-    testWidgets('CPF inválido no agregado usa o válido do cadastro',
-        (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '12345678900'),
-          loadedTaxId: '52998224725',
-          api: service((_) async => http.Response('{}', 500)));
+    testWidgets('CPF inválido no agregado usa o válido do cadastro', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        order: order(taxId: '12345678900'),
+        loadedTaxId: '52998224725',
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsNothing);
     });
 
     testWidgets('valores em R\$ mesmo com o app em inglês', (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          remaining: 1234.5,
-          locale: const Locale('en'),
-          api: service((_) async => http.Response('{}', 500)));
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        remaining: 1234.5,
+        locale: const Locale('en'),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       final hint = AppLocalizationsEn().chargeBalanceHint('R\$\u00a01.234,50');
       expect(find.text(hint), findsOneWidget);
     });
 
-    testWidgets('valor acima do saldo mostra erro e não chama a API',
-        (tester) async {
+    testWidgets('valor acima do saldo mostra erro e não chama a API', (
+      tester,
+    ) async {
       var calls = 0;
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async {
-            calls++;
-            return http.Response('{}', 500);
-          }));
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async {
+          calls++;
+          return http.Response('{}', 500);
+        }),
+      );
 
       await tester.enterText(
-          find.byKey(const Key('chargeValueField')), '150000');
+        find.byKey(const Key('chargeValueField')),
+        '150000',
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.asaasErrorExceedsBalance), findsOneWidget);
@@ -251,9 +288,11 @@ void main() {
     });
 
     testWidgets('cliente sem CPF/CNPJ exige o documento', (tester) async {
-      await pumpHost(tester,
-          order: order(),
-          api: service((_) async => http.Response('{}', 500)));
+      await pumpHost(
+        tester,
+        order: order(),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       expect(find.byKey(const Key('chargeTaxIdField')), findsOneWidget);
       // Only the field's hint explains it; no second "Informe o CPF" line.
@@ -268,13 +307,17 @@ void main() {
     });
 
     testWidgets('CPF inválido mostra erro', (tester) async {
-      await pumpHost(tester,
-          order: order(),
-          api: service((_) async => http.Response('{}', 500)));
+      await pumpHost(
+        tester,
+        order: order(),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
-          find.byKey(const Key('chargeTaxIdField')), '12345678900');
+        find.byKey(const Key('chargeTaxIdField')),
+        '12345678900',
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.invalidTaxId), findsWidgets);
@@ -282,45 +325,50 @@ void main() {
     });
 
     testWidgets('OS sem cliente mostra erro', (tester) async {
-      await pumpHost(tester,
-          order: order(withCustomer: false),
-          api: service((_) async => http.Response('{}', 500)));
+      await pumpHost(
+        tester,
+        order: order(withCustomer: false),
+        api: service((_) async => http.Response('{}', 500)),
+      );
 
       expect(find.text(l10n.asaasErrorCustomerRequired), findsOneWidget);
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('parcelado em 3x envia parcelas, vencimento e CPF e fecha',
-        (tester) async {
+    testWidgets('parcelado em 3x envia parcelas, vencimento e CPF e fecha', (
+      tester,
+    ) async {
       final now = DateTime.now();
       final due = DateTime(now.year, now.month, now.day + 3);
 
-      final results = await pumpHost(tester,
-          order: order(),
-          api: service((request) async {
-            expect(request.url.path, endsWith('/v1/app/orders/o1/charges'));
-            expect(jsonDecode(request.body), {
-              'value': 1000,
-              'mode': 'cardInstallments',
-              'installmentCount': 3,
-              'dueDate': DateFormat('yyyy-MM-dd').format(due),
-              'customerTaxId': '52998224725',
-            });
-            return http.Response(
-              jsonEncode({
-                'success': true,
-                'data': {
-                  'id': 'ch1',
-                  'mode': 'cardInstallments',
-                  'installmentCount': 3,
-                  'value': 1000,
-                  'status': 'pending',
-                  'invoiceUrl': 'https://sandbox.asaas.com/i/abc',
-                },
-              }),
-              201,
-            );
-          }));
+      final results = await pumpHost(
+        tester,
+        order: order(),
+        api: service((request) async {
+          expect(request.url.path, endsWith('/v1/app/orders/o1/charges'));
+          expect(jsonDecode(request.body), {
+            'value': 1000,
+            'mode': 'cardInstallments',
+            'installmentCount': 3,
+            'dueDate': DateFormat('yyyy-MM-dd').format(due),
+            'customerTaxId': '52998224725',
+          });
+          return http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {
+                'id': 'ch1',
+                'mode': 'cardInstallments',
+                'installmentCount': 3,
+                'value': 1000,
+                'status': 'pending',
+                'invoiceUrl': 'https://sandbox.asaas.com/i/abc',
+              },
+            }),
+            201,
+          );
+        }),
+      );
 
       // "Parcelar no cartão" opens the "Escolher" screen: "Não" + 2x..12x.
       expect(find.text(l10n.chargeSplitNo), findsOneWidget);
@@ -330,18 +378,24 @@ void main() {
         find.text(l10n.chargeInstallmentOption(2, format.formatCurrency(500))),
         findsOneWidget,
       );
-      await tester.tap(find.text(
-          l10n.chargeInstallmentOption(3, format.formatCurrency(1000 / 3))));
+      await tester.tap(
+        find.text(
+          l10n.chargeInstallmentOption(3, format.formatCurrency(1000 / 3)),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
         find.text(
-            l10n.chargeInstallmentOption(3, format.formatCurrency(1000 / 3))),
+          l10n.chargeInstallmentOption(3, format.formatCurrency(1000 / 3)),
+        ),
         findsOneWidget,
       );
 
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
-          find.byKey(const Key('chargeTaxIdField')), '52998224725');
+        find.byKey(const Key('chargeTaxIdField')),
+        '52998224725',
+      );
       await tapKey(tester, 'new_order_save');
 
       expect(results, hasLength(1));
@@ -349,20 +403,25 @@ void main() {
       expect(find.byType(CreateChargeScreen), findsNothing);
     });
 
-    testWidgets('erro da API aparece traduzido e a tela continua aberta',
-        (tester) async {
-      await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => http.Response(
-                jsonEncode({
-                  'success': false,
-                  'error': {
-                    'code': 'ASAAS_NOT_CONNECTED',
-                    'message': 'raw backend text',
-                  },
-                }),
-                409,
-              )));
+    testWidgets('erro da API aparece traduzido e a tela continua aberta', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service(
+          (_) async => http.Response(
+            jsonEncode({
+              'success': false,
+              'error': {
+                'code': 'ASAAS_NOT_CONNECTED',
+                'message': 'raw backend text',
+              },
+            }),
+            409,
+          ),
+        ),
+      );
 
       await tapKey(tester, 'new_order_save');
 
@@ -372,22 +431,26 @@ void main() {
 
     testWidgets('CNPJ alfanumérico vai normalizado para a API', (tester) async {
       Map<String, dynamic>? sent;
-      final results = await pumpHost(tester,
-          order: order(),
-          api: service((request) async {
-            sent = jsonDecode(request.body) as Map<String, dynamic>;
-            return http.Response(
-              jsonEncode({
-                'success': true,
-                'data': {'id': 'ch2', 'mode': 'single', 'status': 'pending'},
-              }),
-              201,
-            );
-          }));
+      final results = await pumpHost(
+        tester,
+        order: order(),
+        api: service((request) async {
+          sent = jsonDecode(request.body) as Map<String, dynamic>;
+          return http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {'id': 'ch2', 'mode': 'single', 'status': 'pending'},
+            }),
+            201,
+          );
+        }),
+      );
 
       await tester.ensureVisible(find.byKey(const Key('chargeTaxIdField')));
       await tester.enterText(
-          find.byKey(const Key('chargeTaxIdField')), '12.abc.345/01de-35');
+        find.byKey(const Key('chargeTaxIdField')),
+        '12.abc.345/01de-35',
+      );
       await tapKey(tester, 'new_order_save');
 
       expect(sent?['customerTaxId'], '12ABC34501DE35');
@@ -396,47 +459,58 @@ void main() {
       expect(results.single?.id, 'ch2');
     });
 
-    testWidgets('botão fica desabilitado durante a requisição (sem duplo envio)',
-        (tester) async {
-      var calls = 0;
-      final response = Completer<http.Response>();
-      final results = await pumpHost(tester,
+    testWidgets(
+      'botão fica desabilitado durante a requisição (sem duplo envio)',
+      (tester) async {
+        var calls = 0;
+        final response = Completer<http.Response>();
+        final results = await pumpHost(
+          tester,
           order: order(taxId: '52998224725'),
           api: service((_) {
             calls++;
             return response.future;
-          }));
+          }),
+        );
 
-      // No pumpAndSettle while in flight: the spinner never settles and the
-      // fake clock would hit the service's 30s timeout.
-      await tester.ensureVisible(find.byKey(const ValueKey('new_order_save')));
-      await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('new_order_save')));
-      await tester.pump();
+        // No pumpAndSettle while in flight: the spinner never settles and the
+        // fake clock would hit the service's 30s timeout.
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('new_order_save')),
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('new_order_save')));
+        await tester.pump();
 
-      // Busy: the ✓ turns into a spinner, so there's nothing to tap again.
-      expect(find.byKey(const ValueKey('new_order_save')), findsNothing);
-      expect(find.byKey(const ValueKey('new_order_saving')), findsOneWidget);
-      expect(calls, 1);
+        // Busy: the ✓ turns into a spinner, so there's nothing to tap again.
+        expect(find.byKey(const ValueKey('new_order_save')), findsNothing);
+        expect(find.byKey(const ValueKey('new_order_saving')), findsOneWidget);
+        expect(calls, 1);
 
-      response.complete(http.Response(
-        jsonEncode({
-          'success': true,
-          'data': {'id': 'ch1', 'mode': 'single', 'status': 'pending'},
-        }),
-        201,
-      ));
-      await tester.pumpAndSettle();
+        response.complete(
+          http.Response(
+            jsonEncode({
+              'success': true,
+              'data': {'id': 'ch1', 'mode': 'single', 'status': 'pending'},
+            }),
+            201,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(calls, 1);
-      expect(results.single?.id, 'ch1');
-    });
+        expect(calls, 1);
+        expect(results.single?.id, 'ch1');
+      },
+    );
 
-    testWidgets('erro de rede mostra sem conexão, não fecha e reabilita',
-        (tester) async {
-      final results = await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => throw http.ClientException('offline')));
+    testWidgets('erro de rede mostra sem conexão, não fecha e reabilita', (
+      tester,
+    ) async {
+      final results = await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async => throw http.ClientException('offline')),
+      );
 
       await tapKey(tester, 'new_order_save');
 
@@ -449,11 +523,14 @@ void main() {
       expect(saveEnabled(tester), isTrue);
     });
 
-    testWidgets('resposta inesperada mostra erro genérico e não fecha',
-        (tester) async {
-      final results = await pumpHost(tester,
-          order: order(taxId: '52998224725'),
-          api: service((_) async => http.Response('not json', 201)));
+    testWidgets('resposta inesperada mostra erro genérico e não fecha', (
+      tester,
+    ) async {
+      final results = await pumpHost(
+        tester,
+        order: order(taxId: '52998224725'),
+        api: service((_) async => http.Response('not json', 201)),
+      );
 
       await tapKey(tester, 'new_order_save');
 

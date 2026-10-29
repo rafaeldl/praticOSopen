@@ -19,18 +19,18 @@ import 'package:provider/provider.dart';
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
-        CoreInitializeResponse(
-          name: defaultFirebaseAppName,
-          options: CoreFirebaseOptions(
-            apiKey: '123',
-            projectId: '123',
-            appId: '123',
-            messagingSenderId: '123',
-            storageBucket: 'test.appspot.com',
-          ),
-          pluginConstants: {},
-        ),
-      ];
+    CoreInitializeResponse(
+      name: defaultFirebaseAppName,
+      options: CoreFirebaseOptions(
+        apiKey: '123',
+        projectId: '123',
+        appId: '123',
+        messagingSenderId: '123',
+        storageBucket: 'test.appspot.com',
+      ),
+      pluginConstants: {},
+    ),
+  ];
 }
 
 /// Dashboard store that fills its totals from memory instead of Firestore.
@@ -40,7 +40,9 @@ class _FakeOrderStore extends OrderStore {
 
   @override
   Future<void> loadOrdersForDashboardCustomRange(
-      DateTime start, DateTime end) async {
+    DateTime start,
+    DateTime end,
+  ) async {
     loads.add('custom');
   }
 
@@ -81,8 +83,18 @@ class _FakeOrderStore extends OrderStore {
     customerRanking
       ..clear()
       ..addAll([
-        {'id': 'ana', 'name': 'Ana Ribeiro', 'total': 1000.0, 'unpaidTotal': 0.0},
-        {'id': 'bia', 'name': 'Bia Souza', 'total': 500.0, 'unpaidTotal': 500.0},
+        {
+          'id': 'ana',
+          'name': 'Ana Ribeiro',
+          'total': 1000.0,
+          'unpaidTotal': 0.0,
+        },
+        {
+          'id': 'bia',
+          'name': 'Bia Souza',
+          'total': 500.0,
+          'unpaidTotal': 500.0,
+        },
       ]);
   }
 }
@@ -132,8 +144,9 @@ void main() {
     return store;
   }
 
-  testWidgets('shows the report title, the totals and the customer ranking',
-      (tester) async {
+  testWidgets('shows the report title, the totals and the customer ranking', (
+    tester,
+  ) async {
     final store = await pumpReport(tester);
 
     expect(find.text(l10n.financialReport), findsWidgets);
@@ -145,8 +158,9 @@ void main() {
     expect(store.loads.first, 'mês/0');
   });
 
-  testWidgets('plain words: sentence case, "OS" count and no "Ticket"',
-      (tester) async {
+  testWidgets('plain words: sentence case, "OS" count and no "Ticket"', (
+    tester,
+  ) async {
     await pumpReport(tester);
 
     expect(find.text('Relatório financeiro'), findsWidgets);
@@ -158,8 +172,9 @@ void main() {
     expect(l10n.nOrdersCount(3), '3 OS');
   });
 
-  testWidgets('has the "Mandar relatório em PDF" button at the bottom',
-      (tester) async {
+  testWidgets('has the "Mandar relatório em PDF" button at the bottom', (
+    tester,
+  ) async {
     await pumpReport(tester);
 
     final button = find.byKey(const Key('financialSendReportPdf'));
@@ -171,8 +186,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(tester.getSize(button).height,
-        greaterThanOrEqualTo(AppSizes.primaryButtonHeight));
+    expect(
+      tester.getSize(button).height,
+      greaterThanOrEqualTo(AppSizes.primaryButtonHeight),
+    );
   });
 
   Future<void> openMenu(WidgetTester tester) async {
@@ -180,8 +197,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('no segmented control: other periods come from "…"',
-      (tester) async {
+  testWidgets('no segmented control: other periods come from "…"', (
+    tester,
+  ) async {
     await pumpReport(tester);
 
     expect(find.byType(CupertinoSlidingSegmentedControl<String>), findsNothing);
@@ -200,8 +218,9 @@ void main() {
     }
   });
 
-  testWidgets('picking "Este ano" in "…" reloads the dashboard',
-      (tester) async {
+  testWidgets('picking "Este ano" in "…" reloads the dashboard', (
+    tester,
+  ) async {
     final store = await pumpReport(tester);
 
     await openMenu(tester);
@@ -237,8 +256,9 @@ void main() {
     expect(store.loads.last, 'semana/-1');
   });
 
-  testWidgets('"Escolher datas" opens the X/✓ sheet and applies the range',
-      (tester) async {
+  testWidgets('"Escolher datas" opens the X/✓ sheet and applies the range', (
+    tester,
+  ) async {
     final store = await pumpReport(tester, width: 2400);
 
     await openMenu(tester);
@@ -254,8 +274,9 @@ void main() {
     expect(find.text(l10n.reportWhichPeriod), findsNothing);
   });
 
-  testWidgets('section labels are sentence case, not uppercase',
-      (tester) async {
+  testWidgets('section labels are sentence case, not uppercase', (
+    tester,
+  ) async {
     await pumpReport(tester);
 
     expect(find.text(l10n.billing), findsOneWidget);
@@ -263,8 +284,9 @@ void main() {
     expect(find.text(l10n.customers.toUpperCase()), findsNothing);
   });
 
-  testWidgets('tapping Recebido filters the rankings and shows a check',
-      (tester) async {
+  testWidgets('tapping Recebido filters the rankings and shows a check', (
+    tester,
+  ) async {
     await pumpReport(tester);
 
     await tester.tap(find.text(l10n.received).first);
@@ -274,8 +296,9 @@ void main() {
     expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
   });
 
-  testWidgets('empty period shows a single sentence and no sections',
-      (tester) async {
+  testWidgets('empty period shows a single sentence and no sections', (
+    tester,
+  ) async {
     await pumpReport(tester, empty: true);
 
     expect(find.text(l10n.noOrdersInPeriod), findsOneWidget);

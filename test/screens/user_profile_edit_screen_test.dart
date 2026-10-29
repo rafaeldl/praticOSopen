@@ -27,8 +27,9 @@ void main() {
     return saved;
   }
 
-  testWidgets('shows the new title, the name and the e-mail as a sentence',
-      (tester) async {
+  testWidgets('shows the new title, the name and the e-mail as a sentence', (
+    tester,
+  ) async {
     await pump(tester, user());
 
     expect(find.text('Seu perfil'), findsOneWidget);

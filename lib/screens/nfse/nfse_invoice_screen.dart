@@ -44,9 +44,8 @@ String nfseHeadline(AppLocalizations l10n, NfseInvoice invoice) {
     case NfseStatus.canceled:
       return l10n.nfseHeadCanceled;
     case NfseStatus.error:
-      return invoice.errorCode != null
-          ? l10n.nfseHeadAutoError
-          : l10n.nfseHeadError;
+      if (invoice.errorCode == null) return l10n.nfseHeadError;
+      return invoice.auto ? l10n.nfseHeadAutoError : l10n.nfseHeadNotIssued;
   }
 }
 
@@ -58,6 +57,8 @@ String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
       return invoice.statusDescription;
     case 'ASAAS_REJECTED':
       return invoice.statusDescription ?? l10n.nfseErrorAsaasValidation;
+    case 'NFSE_SETUP_REJECTED':
+      return invoice.statusDescription ?? l10n.nfseErrorSetupRejected;
     case 'TAX_ID_REQUIRED':
     case 'INVALID_TAX_ID':
       return l10n.nfseAutoErrorTaxId;

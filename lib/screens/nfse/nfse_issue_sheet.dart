@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/services/asaas_api_service.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -19,14 +23,22 @@ import 'package:praticos/utils/tax_id.dart';
 /// Shows what the server will send (POST /invoices/preview): the value
 /// (only services, minus their share of the discount), the text, the day
 /// and, when the customer has no CPF/CNPJ, a field for it (saved on the
-/// customer by the server). ✓ creates the nota; pops with the
+/// customer by the server). The city also needs the customer's e-mail and
+/// address with CEP: what the preview says is missing is asked here and the
+/// server sends it to the Asaas customer. ✓ creates the nota; pops with the
 /// [NfseInvoice].
+///
+/// When Asaas still refuses, the sheet opens what fixes it: the customer
+/// fields (all of them, filled with what Asaas has) for customer data, the
+/// nota setup for the service/fiscal data; anything else shows Asaas's text.
 class NfseIssueSheet extends StatefulWidget {
   const NfseIssueSheet({
     super.key,
     required this.orderIds,
     this.customerId,
     this.service,
+    this.sandbox = false,
+    this.canSetUp,
   });
 
   final List<String> orderIds;
@@ -37,18 +49,28 @@ class NfseIssueSheet extends StatefulWidget {
   /// Test seam; defaults to [AsaasApiService.instance].
   final AsaasApiService? service;
 
+  /// The Asaas connection is sandbox (passed to the nota setup).
+  final bool sandbox;
+
+  /// Who may open the nota setup; defaults to "manages the company".
+  final bool? canSetUp;
+
   /// Opens the sheet over the tab bar.
   static Future<NfseInvoice?> show(
     BuildContext context, {
     required List<String> orderIds,
     String? customerId,
     AsaasApiService? service,
+    bool sandbox = false,
+    bool? canSetUp,
   }) => FormSheet.show<NfseInvoice>(
     context,
     (_) => NfseIssueSheet(
       orderIds: orderIds,
       customerId: customerId,
       service: service,
+      sandbox: sandbox,
+      canSetUp: canSetUp,
     ),
   );
 
@@ -64,6 +86,13 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
   late DateTime _date = _today();
   String _taxIdInput = '';
   bool _submitting = false;
+
+  /// Customer e-mail/address typed here (keys as in [NfsePreview.customerMissing]).
+  final Map<String, String> _contact = {};
+
+  /// Asaas refused the customer data it has: every field is shown, not only
+  /// the missing ones.
+  bool _askAllContact = false;
 
   AsaasApiService get _service => widget.service ?? AsaasApiService.instance;
 
@@ -84,7 +113,9 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
     super.dispose();
   }
 
-  Future<void> _load() async {
+  /// [keepText]: reload after the server asked for customer data; the text
+  /// the user edited stays.
+  Future<void> _load({bool keepText = false}) async {
     setState(() => _loadError = null);
     try {
       final preview = await _service.previewInvoice(
@@ -92,7 +123,10 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
         customerId: widget.customerId,
       );
       if (!mounted) return;
-      _description.text = preview.serviceDescription;
+      if (!keepText) _description.text = preview.serviceDescription;
+      for (final e in preview.customerContact.entries) {
+        _contact.putIfAbsent(e.key, () => e.value);
+      }
       setState(() => _preview = preview);
     } on AsaasApiException catch (e) {
       if (!mounted) return;
@@ -118,7 +152,53 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
     if (!preview.customerHasTaxId && !isValidTaxId(_taxIdInput)) {
       return l10n.nfseTaxIdMissing;
     }
+    if (_askedContact(preview).any((field) => !_validContact(field))) {
+      return l10n.nfseCustomerDataMissing;
+    }
     return null;
+  }
+
+  static const _addressFields = [
+    'postalCode',
+    'address',
+    'addressNumber',
+    'province',
+  ];
+  static final _emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+
+  /// Required fields shown: the e-mail when missing, the whole address when
+  /// any part of it is missing.
+  List<String> _askedContact(NfsePreview preview) => [
+    if (_askAllContact || preview.customerMissing.contains('email')) 'email',
+    if (_askAllContact || _addressFields.any(preview.customerMissing.contains))
+      ..._addressFields,
+  ];
+
+  bool _validContact(String field) {
+    final value = (_contact[field] ?? '').trim();
+    switch (field) {
+      case 'email':
+        return _emailPattern.hasMatch(value);
+      case 'postalCode':
+        return value.replaceAll(RegExp(r'\D'), '').length == 8;
+      default:
+        return value.isNotEmpty;
+    }
+  }
+
+  /// What goes to the server: the fields asked (and the complement with the
+  /// address), trimmed.
+  Map<String, String>? _contactInput(NfsePreview preview) {
+    final asked = _askedContact(preview);
+    if (asked.isEmpty) return null;
+    return {
+      for (final field in [
+        ...asked,
+        if (asked.contains('address')) 'complement',
+      ])
+        if ((_contact[field] ?? '').trim().isNotEmpty)
+          field: _contact[field]!.trim(),
+    };
   }
 
   Future<void> _submit() async {
@@ -133,31 +213,88 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
         serviceDescription: _description.text,
         effectiveDate: _date == _today() ? null : _date,
         customerTaxId: preview.customerHasTaxId ? null : _taxIdInput,
+        customerData: _contactInput(preview),
       );
       if (!mounted) return;
       Navigator.pop(context, invoice);
       return;
     } on AsaasApiException catch (e) {
-      failure = asaasErrorText(context.l10n, e, nota: true);
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      await _showRefusal(e);
+      return;
     } catch (_) {
       failure = context.l10n.asaasErrorGeneric;
     }
     if (!mounted) return;
     setState(() => _submitting = false);
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text(failure),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.ok),
-          ),
-        ],
-      ),
-    );
+    await _alert(failure);
   }
+
+  /// Opens what fixes the refusal: the customer fields, the nota setup, or
+  /// just Asaas's text.
+  Future<void> _showRefusal(AsaasApiException e) async {
+    final l10n = context.l10n;
+    switch (e.code) {
+      case 'CUSTOMER_DATA_REQUIRED':
+        setState(() => _askAllContact = true);
+        unawaited(_load(keepText: true));
+        await _alert(
+          [
+            l10n.nfseErrorCustomerData,
+            if (e.detail != null) e.detail!,
+          ].join('\n\n'),
+        );
+      case 'NFSE_SETUP_REJECTED':
+      case 'NFSE_NOT_READY':
+      case 'NFSE_SETUP_NEEDED':
+        final admin =
+            widget.canSetUp ?? AuthorizationService.instance.canManageCompany;
+        final text = asaasErrorText(l10n, e, nota: true);
+        final setUp = await _alert(
+          admin ? text : '$text\n\n${l10n.nfseNotReadyOther}',
+          action: admin ? l10n.nfseSetupAction : null,
+        );
+        if (setUp != true || !mounted) return;
+        await Navigator.of(context, rootNavigator: true).push<void>(
+          CupertinoPageRoute<void>(
+            builder: (_) => NfseSetupScreen(
+              sandbox: widget.sandbox,
+              service: widget.service,
+            ),
+          ),
+        );
+      default:
+        await _alert(asaasErrorText(l10n, e, nota: true));
+    }
+  }
+
+  /// Alert with OK, or Cancel + [action] (true when [action] was tapped).
+  Future<bool?> _alert(String text, {String? action}) =>
+      showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          content: Text(text),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: action == null,
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                action == null
+                    ? dialogContext.l10n.ok
+                    : dialogContext.l10n.cancel,
+              ),
+            ),
+            if (action != null)
+              CupertinoDialogAction(
+                key: const Key('nfseIssueRefusalAction'),
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(action),
+              ),
+          ],
+        ),
+      );
 
   void _pickDate() {
     var selected = _date;
@@ -206,7 +343,7 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
       title: l10n.nfseRowTitle,
       canSave: preview != null && missing == null,
       missingHint: missing,
-      dirty: _taxIdInput.isNotEmpty,
+      dirty: _taxIdInput.isNotEmpty || _contactTyped,
       busy: _submitting,
       onSave: _submit,
       children: preview == null
@@ -327,6 +464,7 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
             ),
         ],
       ),
+      ..._buildContact(preview),
       FormCard(
         children: [
           FormRow(
@@ -345,6 +483,82 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
               subtitle: preview.municipalServiceName,
               showChevron: false,
             ),
+        ],
+      ),
+    ];
+  }
+
+  bool get _contactTyped {
+    final preview = _preview;
+    if (preview == null) return false;
+    return _contact.entries.any(
+      (e) => e.value.trim() != (preview.customerContact[e.key] ?? ''),
+    );
+  }
+
+  /// E-mail and address the city needs, when the customer lacks them.
+  List<Widget> _buildContact(NfsePreview preview) {
+    final asked = _askedContact(preview);
+    if (asked.isEmpty) return const [];
+    final l10n = context.l10n;
+    Widget field(
+      String key,
+      String label, {
+      TextInputType? keyboard,
+      TextCapitalization caps = TextCapitalization.words,
+    }) => AppFormField(
+      key: Key('nfseIssueContact_$key'),
+      label: label,
+      initialValue: _contact[key],
+      keyboardType: keyboard,
+      textCapitalization: caps,
+      onChanged: (text) => setState(() => _contact[key] = text),
+    );
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.pageMargin,
+          AppSpacing.lg,
+          AppSpacing.pageMargin,
+          0,
+        ),
+        child: Text(
+          l10n.nfseCustomerDataIntro,
+          key: const Key('nfseIssueContactIntro'),
+          style: AppTypography.callout.copyWith(
+            color: AppColors.textSecondary.resolveFrom(context),
+          ),
+        ),
+      ),
+      FormFieldsCard(
+        children: [
+          if (asked.contains('email'))
+            field(
+              'email',
+              l10n.email,
+              keyboard: TextInputType.emailAddress,
+              caps: TextCapitalization.none,
+            ),
+          if (asked.contains('postalCode')) ...[
+            field(
+              'postalCode',
+              l10n.nfsePostalCode,
+              keyboard: TextInputType.number,
+              caps: TextCapitalization.none,
+            ),
+            field('address', l10n.nfseStreet),
+            field(
+              'addressNumber',
+              l10n.number,
+              caps: TextCapitalization.characters,
+            ),
+            field(
+              'complement',
+              l10n.nfseAddressComplement,
+              caps: TextCapitalization.sentences,
+            ),
+            field('province', l10n.nfseDistrict),
+          ],
         ],
       ),
     ];

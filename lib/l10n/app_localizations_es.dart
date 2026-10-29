@@ -5362,6 +5362,43 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nfseTaxIdMissing => 'Falta el documento fiscal del cliente';
 
   @override
+  String get nfseErrorCustomerData =>
+      'La alcaldía pide el correo y la dirección completa del cliente (con código postal). Complétalos y emite de nuevo.';
+
+  @override
+  String nfseErrorAsaasSaid(String detail) {
+    return 'Asaas rechazó la factura: $detail';
+  }
+
+  @override
+  String get nfseErrorSetupRejected =>
+      'Asaas rechazó la configuración de la factura (servicio o datos fiscales). Revísala en Configurar.';
+
+  @override
+  String get nfseCustomerDataIntro =>
+      'La alcaldía pide el correo y la dirección del cliente. Quedan guardados en su registro.';
+
+  @override
+  String get nfseCustomerDataMissing =>
+      'Falta el correo o la dirección del cliente';
+
+  @override
+  String get nfsePostalCode => 'Código postal';
+
+  @override
+  String get nfseStreet => 'Calle';
+
+  @override
+  String get nfseAddressComplement => 'Complemento';
+
+  @override
+  String get nfseDistrict => 'Barrio';
+
+  @override
+  String get nfseHeadNotIssued =>
+      'La factura no salió. Corrige el motivo de abajo y emítela de nuevo desde el menú de la OS.';
+
+  @override
   String get nfseNothingToIssue =>
       'Nada que emitir: la factura quedaría sin valor';
 

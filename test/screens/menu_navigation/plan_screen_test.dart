@@ -54,18 +54,27 @@ void main() {
   });
 
   test('usage level: near from 80%, at limit when full, -1 is unlimited', () {
-    expect(const PlanUsage(PlanResource.photos, 180, 200).level,
-        PlanUsageLevel.near);
-    expect(const PlanUsage(PlanResource.team, 3, 3).level,
-        PlanUsageLevel.atLimit);
-    expect(const PlanUsage(PlanResource.photos, 10, 200).level,
-        PlanUsageLevel.ok);
-    expect(const PlanUsage(PlanResource.photos, 900, -1).level,
-        PlanUsageLevel.unlimited);
+    expect(
+      const PlanUsage(PlanResource.photos, 180, 200).level,
+      PlanUsageLevel.near,
+    );
+    expect(
+      const PlanUsage(PlanResource.team, 3, 3).level,
+      PlanUsageLevel.atLimit,
+    );
+    expect(
+      const PlanUsage(PlanResource.photos, 10, 200).level,
+      PlanUsageLevel.ok,
+    );
+    expect(
+      const PlanUsage(PlanResource.photos, 900, -1).level,
+      PlanUsageLevel.unlimited,
+    );
   });
 
-  testWidgets('shows plan, renewal and what is in use, in prototype order',
-      (tester) async {
+  testWidgets('shows plan, renewal and what is in use, in prototype order', (
+    tester,
+  ) async {
     await _pump(tester, _starter(users: 2, photos: 180, forms: 2));
 
     expect(find.textContaining('Starter · renova em'), findsOneWidget);
@@ -84,15 +93,19 @@ void main() {
     expect(find.text('Restaurar compras'), findsOneWidget);
   });
 
-  testWidgets('a full team shows the limit block with "Ver planos"',
-      (tester) async {
+  testWidgets('a full team shows the limit block with "Ver planos"', (
+    tester,
+  ) async {
     await _pump(tester, _starter(users: 3));
 
     expect(find.text('Limite do plano'), findsOneWidget);
     expect(
-        find.text('A equipe já tem 3 de 3 pessoas. Para chamar mais alguém, '
-            'mude de plano.'),
-        findsOneWidget);
+      find.text(
+        'A equipe já tem 3 de 3 pessoas. Para chamar mais alguém, '
+        'mude de plano.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('No limite · conta o convite'), findsOneWidget);
     expect(
       find.descendant(
@@ -106,8 +119,12 @@ void main() {
   testWidgets('team and checklists rows open their screens', (tester) async {
     var team = 0;
     var forms = 0;
-    await _pump(tester, _starter(),
-        onOpenTeam: () => team++, onOpenChecklists: () => forms++);
+    await _pump(
+      tester,
+      _starter(),
+      onOpenTeam: () => team++,
+      onOpenChecklists: () => forms++,
+    );
 
     await tester.tap(find.text('Pessoas na equipe'));
     await tester.tap(find.text('Checklists'));
@@ -121,8 +138,10 @@ void main() {
 
     expect(find.text('Ver planos'), findsNothing);
     expect(find.text('Gerenciar assinatura'), findsNothing);
-    expect(find.text('Peça ao administrador da conta para mudar de plano.'),
-        findsOneWidget);
+    expect(
+      find.text('Peça ao administrador da conta para mudar de plano.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('back button reads the screen below', (tester) async {
@@ -138,9 +157,9 @@ void main() {
             title: 'Oficina do Zé',
             builder: (context) => CupertinoButton(
               child: const Text('open'),
-              onPressed: () => Navigator.of(context).push(
-                CupertinoPageRoute(builder: (_) => const PlanScreen()),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).push(CupertinoPageRoute(builder: (_) => const PlanScreen())),
             ),
           ),
         ),

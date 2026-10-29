@@ -23,6 +23,8 @@ function seedConnection(companyId: string, data: Record<string, unknown> = {}) {
 const client = {
   findCustomerByExternalReference: jest.fn(),
   createCustomer: jest.fn(),
+  getCustomer: jest.fn(),
+  updateCustomer: jest.fn(),
   createInvoice: jest.fn(),
   authorizeInvoice: jest.fn(),
   cancelInvoice: jest.fn(),
@@ -56,6 +58,11 @@ describe('nfse.routes', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     setAsaasCredentialProvider({ getClient: async () => client as any });
     client.findCustomerByExternalReference.mockResolvedValue({ id: 'cus_1' });
+    client.getCustomer.mockResolvedValue({
+      id: 'cus_1', name: 'João', email: 'joao@example.com', postalCode: '01310000', address: 'Av. Paulista',
+      addressNumber: '1000', province: 'Bela Vista',
+    });
+    client.updateCustomer.mockResolvedValue({ id: 'cus_1' });
     client.createInvoice.mockResolvedValue({ id: 'inv_1', status: 'SCHEDULED' });
     client.authorizeInvoice.mockResolvedValue({ id: 'inv_1', status: 'SYNCHRONIZED' });
     client.cancelInvoice.mockResolvedValue({ id: 'inv_1', status: 'CANCELED' });
@@ -200,6 +207,25 @@ describe('nfse.routes', () => {
       expect((await request(app).post('/invoices').send({ orderIds: [] })).status).toBe(400);
       expect((await request(app).post('/invoices').send({ orderIds: ['a/b'] })).status).toBe(400);
       expect((await request(app).post('/invoices').send({ orderIds: ['o1'], effectiveDate: '15/10/2026' })).status).toBe(400);
+    });
+
+    it('cliente sem endereço → 400 CUSTOMER_DATA_REQUIRED; com os dados digitados emite', async () => {
+      client.getCustomer.mockResolvedValue({ id: 'cus_1', name: 'João', email: 'joao@example.com' });
+      const preview = await request(buildApp('owner', FINANCE)).post('/invoices/preview').send({ orderIds: ['o1'] });
+      expect(preview.body.data.customer.missingData).toEqual(['postalCode', 'address', 'addressNumber', 'province']);
+
+      const refused = await request(buildApp('owner', FINANCE)).post('/invoices').send({ orderIds: ['o1'] });
+      expect(refused.status).toBe(400);
+      expect(refused.body.error.code).toBe('CUSTOMER_DATA_REQUIRED');
+
+      const res = await request(buildApp('owner', FINANCE)).post('/invoices').send({
+        orderIds: ['o1'],
+        customerData: { postalCode: '01310-000', address: 'Av. Paulista', addressNumber: '1000', province: 'Bela Vista' },
+      });
+      expect(res.status).toBe(201);
+      expect(client.updateCustomer).toHaveBeenCalledWith('cus_1', {
+        postalCode: '01310000', address: 'Av. Paulista', addressNumber: '1000', province: 'Bela Vista',
+      });
     });
 
     it('erro de validação do Asaas vira ASAAS_VALIDATION_ERROR', async () => {

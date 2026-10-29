@@ -106,8 +106,8 @@ Future<void> _open(
 
 Finder _key(String k) => find.byKey(ValueKey(k));
 
-EditableText _editable(WidgetTester tester, String key) => tester
-    .widget<EditableText>(
+EditableText _editable(WidgetTester tester, String key) =>
+    tester.widget<EditableText>(
       find.descendant(of: _key(key), matching: find.byType(EditableText)),
     );
 
@@ -141,10 +141,14 @@ void main() {
         find.text('Troca de óleo do motor com filtro e revisão completa'),
         findsOneWidget,
       );
-      expect(_editable(tester, 'order_item_value').controller.text,
-          contains('120,00'));
-      expect(_editable(tester, 'order_item_notes').controller.text,
-          'Óleo 5W30');
+      expect(
+        _editable(tester, 'order_item_value').controller.text,
+        contains('120,00'),
+      );
+      expect(
+        _editable(tester, 'order_item_notes').controller.text,
+        'Óleo 5W30',
+      );
       expect(_key('order_item_more'), findsOneWidget);
       expect(find.text('Salvar'), findsOneWidget);
       // Sentence case labels.
@@ -228,8 +232,10 @@ void main() {
 
       expect(find.text('Alinhamento'), findsOneWidget);
       expect(_key('order_item_more'), findsNothing);
-      expect(_editable(tester, 'order_item_value').controller.text,
-          contains('80,00'));
+      expect(
+        _editable(tester, 'order_item_value').controller.text,
+        contains('80,00'),
+      );
     });
 
     testWidgets('without permission: no value, no "…", notes still edit', (
@@ -276,12 +282,10 @@ void main() {
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
-      await _open(
-        tester,
-        screen,
-        {'orderStore': _store(), 'orderServiceIndex': 0},
-        textScale: 2.2,
-      );
+      await _open(tester, screen, {
+        'orderStore': _store(),
+        'orderServiceIndex': 0,
+      }, textScale: 2.2);
       expect(tester.takeException(), isNull);
     });
   });
@@ -302,8 +306,10 @@ void main() {
 
       expect(find.text('Filtro de óleo'), findsOneWidget);
       expect(_editable(tester, 'order_item_quantity').controller.text, '2');
-      expect(_editable(tester, 'order_item_value').controller.text,
-          contains('35,50'));
+      expect(
+        _editable(tester, 'order_item_value').controller.text,
+        contains('35,50'),
+      );
       expect(
         tester.widget<Text>(_key('order_item_total')).data,
         contains('71,00'),
@@ -381,12 +387,10 @@ void main() {
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
-      await _open(
-        tester,
-        screen,
-        {'orderStore': _store(), 'orderProductIndex': 0},
-        textScale: 2.2,
-      );
+      await _open(tester, screen, {
+        'orderStore': _store(),
+        'orderProductIndex': 0,
+      }, textScale: 2.2);
       expect(tester.takeException(), isNull);
     });
   });

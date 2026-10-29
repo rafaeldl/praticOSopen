@@ -6,7 +6,9 @@ import 'package:praticos/screens/payments/widgets/payment_transaction_icon.dart'
 void main() {
   Future<void> pumpIcon(WidgetTester tester, PaymentTransaction txn) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: PaymentTransactionIcon(transaction: txn))),
+      CupertinoApp(
+        home: Center(child: PaymentTransactionIcon(transaction: txn)),
+      ),
     );
   }
 

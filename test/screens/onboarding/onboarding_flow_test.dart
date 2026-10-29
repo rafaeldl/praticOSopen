@@ -29,7 +29,10 @@ const automotive = OnboardingSegment(
   nameI18n: {'pt-BR': 'Mecânica', 'en-US': 'Automotive'},
   icon: '🚗',
   subspecialties: [
-    OnboardingSubspecialty(id: 'mechanical', names: {'pt-BR': 'Mecânica geral'}),
+    OnboardingSubspecialty(
+      id: 'mechanical',
+      names: {'pt-BR': 'Mecânica geral'},
+    ),
     OnboardingSubspecialty(id: 'carwash', names: {'pt-BR': 'Lava-jato'}),
   ],
 );
@@ -52,7 +55,10 @@ class FakeSetup implements OnboardingSetup {
   void started() => startedCount++;
 
   @override
-  Future<String> saveCompany(OnboardingBusiness data, {String? companyId}) async {
+  Future<String> saveCompany(
+    OnboardingBusiness data, {
+    String? companyId,
+  }) async {
     saves.add(SaveCall(data, companyId));
     if (holdSave != null) await holdSave!.future;
     return companyId ?? 'new-company';
@@ -81,7 +87,7 @@ class FakeSetup implements OnboardingSetup {
 
 class Harness {
   Harness({List<OnboardingSegment> segments = const [plain, automotive]})
-      : segmentsList = segments;
+    : segmentsList = segments;
 
   final List<OnboardingSegment> segmentsList;
   final setup = FakeSetup();
@@ -92,33 +98,31 @@ class Harness {
   Object? segmentsError;
 
   OnboardingDeps get deps => OnboardingDeps(
-        segments: () {
-          segmentLoads++;
-          final error = segmentsError;
-          return error != null
-              ? Stream.error(error)
-              : Stream.value(segmentsList);
-        },
-        setup: setup,
-        onSignOut: (_) => signOuts++,
-        onInviteCode: (_) => inviteCodes++,
-        onFinished: (context) {
-          finished++;
-          // Like the app: leave the flow for Início.
-          Navigator.of(context).pushAndRemoveUntil(
-            CupertinoPageRoute(builder: (_) => const Text('Início')),
-            (route) => false,
-          );
-        },
+    segments: () {
+      segmentLoads++;
+      final error = segmentsError;
+      return error != null ? Stream.error(error) : Stream.value(segmentsList);
+    },
+    setup: setup,
+    onSignOut: (_) => signOuts++,
+    onInviteCode: (_) => inviteCodes++,
+    onFinished: (context) {
+      finished++;
+      // Like the app: leave the flow for Início.
+      Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (_) => const Text('Início')),
+        (route) => false,
       );
+    },
+  );
 }
 
 Widget app(Widget home) => CupertinoApp(
-      locale: const Locale('pt', 'BR'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: home,
-    );
+  locale: const Locale('pt', 'BR'),
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: home,
+);
 
 Future<void> pumpFlow(
   WidgetTester tester,
@@ -127,17 +131,25 @@ Future<void> pumpFlow(
   String? initialName,
   String? ownerName,
 }) async {
-  await tester.pumpWidget(app(OnboardingFlow(
-    deps: h.deps,
-    companyId: companyId,
-    initialName: initialName,
-    ownerName: ownerName,
-  )));
+  await tester.pumpWidget(
+    app(
+      OnboardingFlow(
+        deps: h.deps,
+        companyId: companyId,
+        initialName: initialName,
+        ownerName: ownerName,
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
-Future<void> openBusiness(WidgetTester tester, Harness h,
-    {String segment = 'electronics', String? ownerName}) async {
+Future<void> openBusiness(
+  WidgetTester tester,
+  Harness h, {
+  String segment = 'electronics',
+  String? ownerName,
+}) async {
   await pumpFlow(tester, h, ownerName: ownerName);
   await tester.tap(find.byKey(ValueKey('segment_$segment')));
   await tester.pumpAndSettle();
@@ -161,8 +173,9 @@ Future<void> tapKey(WidgetTester tester, String key) async {
 
 void main() {
   group('Ramo', () {
-    testWidgets('lists the segments with the localized name and no button',
-        (tester) async {
+    testWidgets('lists the segments with the localized name and no button', (
+      tester,
+    ) async {
       final h = Harness();
       await pumpFlow(tester, h);
 
@@ -176,8 +189,9 @@ void main() {
       expect(find.text(pt.onboardingCreate), findsNothing);
     });
 
-    testWidgets('tapping a segment marks it with ✓ and goes on',
-        (tester) async {
+    testWidgets('tapping a segment marks it with ✓ and goes on', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h);
 
@@ -189,13 +203,17 @@ void main() {
       await tester.pumpAndSettle();
       final row = find.byKey(const ValueKey('segment_electronics'));
       expect(
-        find.descendant(of: row, matching: find.byIcon(CupertinoIcons.checkmark_alt)),
+        find.descendant(
+          of: row,
+          matching: find.byIcon(CupertinoIcons.checkmark_alt),
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('segment with specialties opens Especialidades',
-        (tester) async {
+    testWidgets('segment with specialties opens Especialidades', (
+      tester,
+    ) async {
       final h = Harness();
       await pumpFlow(tester, h);
       await tester.tap(find.byKey(const ValueKey('segment_automotive')));
@@ -213,9 +231,11 @@ void main() {
       expect(h.inviteCodes, 1);
     });
 
-    testWidgets('load error shows a fixed sentence and retries',
-        (tester) async {
-      final h = Harness()..segmentsError = Exception('[cloud_firestore/unavailable]');
+    testWidgets('load error shows a fixed sentence and retries', (
+      tester,
+    ) async {
+      final h = Harness()
+        ..segmentsError = Exception('[cloud_firestore/unavailable]');
       await pumpFlow(tester, h);
 
       expect(find.text(pt.onboardingSegmentsError), findsOneWidget);
@@ -230,8 +250,9 @@ void main() {
   });
 
   group('Especialidades', () {
-    testWidgets('all start checked and Continuar is always enabled',
-        (tester) async {
+    testWidgets('all start checked and Continuar is always enabled', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h, segment: 'automotive');
 
@@ -245,13 +266,15 @@ void main() {
 
       await tapKey(tester, 'subspecialties_continue');
       await tester.pumpAndSettle();
-      final business =
-          tester.widget<YourBusinessScreen>(find.byType(YourBusinessScreen));
+      final business = tester.widget<YourBusinessScreen>(
+        find.byType(YourBusinessScreen),
+      );
       expect(business.subspecialties, ['mechanical']);
     });
 
-    testWidgets('unchecking all still continues with an empty list',
-        (tester) async {
+    testWidgets('unchecking all still continues with an empty list', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h, segment: 'automotive');
       await tester.tap(find.text('Lava-jato'));
@@ -261,29 +284,34 @@ void main() {
 
       await tapKey(tester, 'subspecialties_continue');
       await tester.pumpAndSettle();
-      final business =
-          tester.widget<YourBusinessScreen>(find.byType(YourBusinessScreen));
+      final business = tester.widget<YourBusinessScreen>(
+        find.byType(YourBusinessScreen),
+      );
       expect(business.subspecialties, isEmpty);
     });
   });
 
   group('Seu negócio', () {
-    testWidgets('shows name, optional phone, "Valores e cobrança" and samples',
-        (tester) async {
-      final h = Harness();
-      await openBusiness(tester, h);
+    testWidgets(
+      'shows name, optional phone, "Valores e cobrança" and samples',
+      (tester) async {
+        final h = Harness();
+        await openBusiness(tester, h);
 
-      expect(find.text(pt.onboardingBusinessTitle), findsWidgets);
-      expect(find.text(pt.onboardingBusinessName), findsOneWidget);
-      expect(find.text(pt.onboardingPhoneLabel), findsOneWidget);
-      expect(find.text(pt.howYouWork), findsOneWidget);
-      expect(find.text(pt.valuesAndBilling), findsOneWidget);
-      expect(find.text(pt.onboardingSamplesInfo), findsOneWidget);
-      expect(find.text(pt.onboardingCreate), findsOneWidget);
-      expect(find.text(pt.onboardingStartWithoutSamples), findsOneWidget);
-      final toggle = tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch));
-      expect(toggle.value, isTrue);
-    });
+        expect(find.text(pt.onboardingBusinessTitle), findsWidgets);
+        expect(find.text(pt.onboardingBusinessName), findsOneWidget);
+        expect(find.text(pt.onboardingPhoneLabel), findsOneWidget);
+        expect(find.text(pt.howYouWork), findsOneWidget);
+        expect(find.text(pt.valuesAndBilling), findsOneWidget);
+        expect(find.text(pt.onboardingSamplesInfo), findsOneWidget);
+        expect(find.text(pt.onboardingCreate), findsOneWidget);
+        expect(find.text(pt.onboardingStartWithoutSamples), findsOneWidget);
+        final toggle = tester.widget<CupertinoSwitch>(
+          find.byType(CupertinoSwitch),
+        );
+        expect(toggle.value, isTrue);
+      },
+    );
 
     testWidgets('blank name uses the person\'s own name (no business to '
         'register)', (tester) async {
@@ -298,8 +326,9 @@ void main() {
       expect(h.finished, 1);
     });
 
-    testWidgets('a typed name wins over the person\'s own name',
-        (tester) async {
+    testWidgets('a typed name wins over the person\'s own name', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h, ownerName: 'Ana Souza');
       await typeName(tester, 'Refrigeração Silva');
@@ -310,8 +339,7 @@ void main() {
     });
 
     testWidgets('without the person\'s name, the name is required; nothing '
-        'is created without it',
-        (tester) async {
+        'is created without it', (tester) async {
       final h = Harness();
       await openBusiness(tester, h);
 
@@ -321,8 +349,9 @@ void main() {
       expect(h.setup.saves, isEmpty);
     });
 
-    testWidgets('creates with samples, phone left blank, then enters Início',
-        (tester) async {
+    testWidgets('creates with samples, phone left blank, then enters Início', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h);
       await typeName(tester, '  Oficina do Zé ');
@@ -342,8 +371,9 @@ void main() {
       expect(h.finished, 1);
     });
 
-    testWidgets('"Começar sem exemplos" does not create sample data',
-        (tester) async {
+    testWidgets('"Começar sem exemplos" does not create sample data', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h);
       await typeName(tester, 'Oficina');
@@ -410,8 +440,9 @@ void main() {
       expect(h.finished, 1);
     });
 
-    testWidgets('company without segment: prefilled name, completes it',
-        (tester) async {
+    testWidgets('company without segment: prefilled name, completes it', (
+      tester,
+    ) async {
       final h = Harness();
       await pumpFlow(tester, h, companyId: 'old-co', initialName: 'Antiga');
       await tester.tap(find.byKey(const ValueKey('segment_electronics')));
@@ -425,8 +456,9 @@ void main() {
     });
   });
 
-  testWidgets('full flow: Ramo -> Especialidades -> Seu negócio -> Início',
-      (tester) async {
+  testWidgets('full flow: Ramo -> Especialidades -> Seu negócio -> Início', (
+    tester,
+  ) async {
     final h = Harness();
     await pumpFlow(tester, h);
 
@@ -461,8 +493,9 @@ void main() {
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     }
 
-    testWidgets('Ramo: question as title, ✓ only on the picked segment',
-        (tester) async {
+    testWidgets('Ramo: question as title, ✓ only on the picked segment', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h);
       Navigator.of(tester.element(find.byType(YourBusinessScreen))).pop();
@@ -479,8 +512,9 @@ void main() {
       );
     });
 
-    testWidgets('steps name the previous one on the back button',
-        (tester) async {
+    testWidgets('steps name the previous one on the back button', (
+      tester,
+    ) async {
       final h = Harness();
       await pumpFlow(tester, h);
       await tester.tap(find.byKey(const ValueKey('segment_automotive')));
@@ -494,8 +528,9 @@ void main() {
       expect(find.text(pt.onboardingSpecialtiesTitle), findsOneWidget);
     });
 
-    testWidgets('Seu negócio: create does nothing until the name is filled',
-        (tester) async {
+    testWidgets('Seu negócio: create does nothing until the name is filled', (
+      tester,
+    ) async {
       final h = Harness();
       await openBusiness(tester, h);
 
@@ -514,8 +549,9 @@ void main() {
       expect(h.setup.saves, hasLength(1));
     });
 
-    testWidgets('Seu negócio error has a way out back to the form',
-        (tester) async {
+    testWidgets('Seu negócio error has a way out back to the form', (
+      tester,
+    ) async {
       final h = Harness();
       h.setup.failSeedTimes = 1;
       await openBusiness(tester, h);
@@ -533,8 +569,9 @@ void main() {
       expect(h.finished, 0);
     });
 
-    testWidgets('large text: Ramo, Especialidades and Seu negócio fit',
-        (tester) async {
+    testWidgets('large text: Ramo, Especialidades and Seu negócio fit', (
+      tester,
+    ) async {
       await largeText(tester);
       final h = Harness();
       await pumpFlow(tester, h);

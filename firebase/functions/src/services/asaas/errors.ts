@@ -19,6 +19,8 @@ export type AsaasErrorCode =
   | 'CUSTOMER_REQUIRED'
   | 'TAX_ID_REQUIRED'
   | 'INVALID_TAX_ID'
+  | 'CUSTOMER_DATA_REQUIRED'
+  | 'NFSE_SETUP_REJECTED'
   | 'CHARGE_NOT_FOUND'
   | 'CHARGE_NOT_OPEN'
   | 'INSTALLMENTS_IN_PROGRESS'
@@ -60,6 +62,8 @@ const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   CUSTOMER_REQUIRED: 400,
   TAX_ID_REQUIRED: 400,
   INVALID_TAX_ID: 400,
+  CUSTOMER_DATA_REQUIRED: 400,
+  NFSE_SETUP_REJECTED: 400,
   CHARGE_NOT_FOUND: 404,
   CHARGE_NOT_OPEN: 409,
   INSTALLMENTS_IN_PROGRESS: 409,
@@ -91,18 +95,36 @@ const HTTP_STATUS: Record<AsaasErrorCode, number> = {
 export class AsaasServiceError extends Error {
   readonly code: AsaasErrorCode;
   readonly httpStatus: number;
+  /** Asaas's own text (pt-BR), shown to the user when it explains a refusal. */
+  readonly detail?: string;
 
-  constructor(code: AsaasErrorCode, message: string) {
+  constructor(code: AsaasErrorCode, message: string, detail?: string | null) {
     super(message);
     this.name = 'AsaasServiceError';
     this.code = code;
     this.httpStatus = HTTP_STATUS[code];
+    if (detail) this.detail = detail;
   }
 }
 
 export interface HttpErrorBody {
   status: number;
-  body: { success: false; error: { code: string; message: string } };
+  body: { success: false; error: { code: string; message: string; detail?: string } };
+}
+
+/** Asaas's error texts joined ("E-mail do cliente incompleto. CEP ..."), or null. */
+export function asaasErrorDescription(error: AsaasApiError): string | null {
+  const text = error.errors.map((e) => (e.description ?? '').trim()).filter((d) => d.length > 0).join(' ');
+  return text || null;
+}
+
+/**
+ * Asaas error codes and texts for the log. They describe what is wrong
+ * ("CEP do cliente é inválido"), never echo the customer's data.
+ */
+export function asaasErrorLog(error: AsaasApiError): string {
+  const items = error.errors.map((e) => `${e.code ?? '?'}: ${(e.description ?? '').slice(0, 200)}`.trim());
+  return `status ${error.status}${items.length > 0 ? ` [${items.join(' | ')}]` : ''}`;
 }
 
 /** Raw fetch failures: timeout/abort (AbortSignal.timeout) and network errors ("fetch failed"). */
@@ -121,15 +143,19 @@ export function toHttpError(error: unknown, fallbackMessage: string): HttpErrorB
   if (error instanceof AsaasServiceError) {
     return {
       status: error.httpStatus,
-      body: { success: false, error: { code: error.code, message: error.message } },
+      body: {
+        success: false,
+        error: { code: error.code, message: error.message, ...(error.detail ? { detail: error.detail } : {}) },
+      },
     };
   }
   if (error instanceof AsaasApiError) {
     if (error.status === 400) {
+      const detail = asaasErrorDescription(error);
       const message = error.errors[0]?.description || 'Asaas rejected the request';
       return {
         status: 400,
-        body: { success: false, error: { code: 'ASAAS_VALIDATION_ERROR', message } },
+        body: { success: false, error: { code: 'ASAAS_VALIDATION_ERROR', message, ...(detail ? { detail } : {}) } },
       };
     }
     if (error.status === 401 || error.status === 403) {

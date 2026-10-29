@@ -54,8 +54,9 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('"before" row still opens the picker and changes the value',
-      (tester) async {
+  testWidgets('"before" row still opens the picker and changes the value', (
+    tester,
+  ) async {
     await pump(tester);
 
     await tester.tap(find.byKey(const ValueKey('reminder_before')));
@@ -67,8 +68,9 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('"before" opens the choose screen with ✓ on the current value',
-      (tester) async {
+  testWidgets('"before" opens the choose screen with ✓ on the current value', (
+    tester,
+  ) async {
     await pump(tester);
 
     await tester.tap(find.byKey(const ValueKey('reminder_before')));

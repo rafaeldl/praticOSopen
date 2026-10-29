@@ -41,6 +41,20 @@ describe('AsaasClient', () => {
     expect(headersOf(calls[0])['User-Agent']).toBe('PraticOS');
   });
 
+  it('lê e completa o cliente com GET e PUT /customers/{id}', async () => {
+    const { impl, calls } = fakeFetch(200, { id: 'cus_1', name: 'João' });
+    const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });
+
+    await client.getCustomer('cus_1');
+    await client.updateCustomer('cus_1', { postalCode: '01310000', addressNumber: '10' });
+
+    expect(calls[0].url).toBe('https://api-sandbox.asaas.com/v3/customers/cus_1');
+    expect(calls[0].init.method).toBe('GET');
+    expect(calls[1].url).toBe('https://api-sandbox.asaas.com/v3/customers/cus_1');
+    expect(calls[1].init.method).toBe('PUT');
+    expect(JSON.parse(calls[1].init.body as string)).toEqual({ postalCode: '01310000', addressNumber: '10' });
+  });
+
   it('altera o valor com PUT /payments/{id}', async () => {
     const { impl, calls } = fakeFetch(200, { id: 'pay_1', value: 80 });
     const client = new AsaasClient({ apiKey: '$aact_hmlg_k', environment: 'sandbox', fetchImpl: impl });

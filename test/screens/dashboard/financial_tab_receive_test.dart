@@ -15,18 +15,18 @@ import 'package:praticos/services/format_service.dart';
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
   Future<List<CoreInitializeResponse>> initializeCore() async => [
-        CoreInitializeResponse(
-          name: defaultFirebaseAppName,
-          options: CoreFirebaseOptions(
-            apiKey: '123',
-            projectId: '123',
-            appId: '123',
-            messagingSenderId: '123',
-            storageBucket: 'test.appspot.com',
-          ),
-          pluginConstants: {},
-        ),
-      ];
+    CoreInitializeResponse(
+      name: defaultFirebaseAppName,
+      options: CoreFirebaseOptions(
+        apiKey: '123',
+        projectId: '123',
+        appId: '123',
+        messagingSenderId: '123',
+        storageBucket: 'test.appspot.com',
+      ),
+      pluginConstants: {},
+    ),
+  ];
 }
 
 void main() {
@@ -59,17 +59,19 @@ void main() {
     Object? args;
     String? route;
 
-    await tester.pumpWidget(CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: FinancialTab(store: store),
-      onGenerateRoute: (settings) {
-        route = settings.name;
-        args = settings.arguments;
-        return CupertinoPageRoute<void>(builder: (_) => const SizedBox());
-      },
-    ));
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: FinancialTab(store: store),
+        onGenerateRoute: (settings) {
+          route = settings.name;
+          args = settings.arguments;
+          return CupertinoPageRoute<void>(builder: (_) => const SizedBox());
+        },
+      ),
+    );
     await tester.pump();
     await tester.pump();
 

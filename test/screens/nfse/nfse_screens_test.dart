@@ -43,14 +43,19 @@ class _Server {
   );
 }
 
-http.Response _error(String code, {int status = 409}) => http.Response(
-  jsonEncode({
-    'success': false,
-    'error': {'code': code, 'message': 'raw'},
-  }),
-  status,
-  headers: {'content-type': 'application/json'},
-);
+http.Response _error(String code, {int status = 409, String? detail}) =>
+    http.Response(
+      jsonEncode({
+        'success': false,
+        'error': {
+          'code': code,
+          'message': 'raw',
+          if (detail != null) 'detail': detail,
+        },
+      }),
+      status,
+      headers: {'content-type': 'application/json'},
+    );
 
 Future<void> _pump(
   WidgetTester tester,
@@ -84,6 +89,7 @@ Future<List<NfseInvoice?>> _openIssue(
   List<String> orderIds = const ['o1'],
   String? customerId,
   double textScale = 1,
+  bool? canSetUp,
 }) async {
   final results = <NfseInvoice?>[];
   await _pump(
@@ -99,6 +105,7 @@ Future<List<NfseInvoice?>> _openIssue(
                 orderIds: orderIds,
                 customerId: customerId,
                 service: api,
+                canSetUp: canSetUp,
               ),
             ),
           ),
@@ -117,6 +124,8 @@ Map<String, dynamic> _preview({
   bool hasProducts = true,
   Map<String, String> invoiced = const {},
   List<Map<String, dynamic>>? orders,
+  Map<String, String> contact = const {},
+  List<String> missingData = const [],
 }) => {
   'value': 270,
   'orders':
@@ -134,7 +143,13 @@ Map<String, dynamic> _preview({
   'hasProducts': hasProducts,
   'serviceDescription': 'OS 182: Troca de óleo',
   'effectiveDate': '2026-10-15',
-  'customer': {'id': 'c1', 'name': 'João Silva', 'hasTaxId': hasTaxId},
+  'customer': {
+    'id': 'c1',
+    'name': 'João Silva',
+    'hasTaxId': hasTaxId,
+    'contact': contact,
+    'missingData': missingData,
+  },
   'invoicedOrders': invoiced,
   'municipalServiceName': 'Manutenção de veículos',
 };
@@ -347,6 +362,147 @@ void main() {
       expect(server.calls.last.$3['customerTaxId'], '52998224725');
     });
 
+    testWidgets('asks the e-mail and address the city needs', (tester) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') {
+          return _preview(
+            contact: {'email': 'joao@example.com', 'province': 'Centro'},
+            missingData: ['postalCode', 'address', 'addressNumber'],
+          );
+        }
+        return _invoiceJson('scheduled');
+      });
+      await _openIssue(tester, server.api);
+
+      expect(find.byKey(const Key('nfseIssueContactIntro')), findsOneWidget);
+      // E-mail is known: only the address is asked, with the district filled.
+      expect(find.byKey(const Key('nfseIssueContact_email')), findsNothing);
+      expect(find.text('Centro'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(server.calls.where((c) => c.$2 == '/invoices'), isEmpty);
+
+      Future<void> type(String key, String text) async {
+        final field = find.descendant(
+          of: find.byKey(Key('nfseIssueContact_$key')),
+          matching: find.byType(CupertinoTextField),
+        );
+        await tester.ensureVisible(field);
+        await tester.enterText(field, text);
+        await tester.pump();
+      }
+
+      await type('postalCode', '01310-000');
+      await type('address', 'Av. Paulista');
+      await type('addressNumber', '1000');
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(server.calls.last.$2, '/invoices');
+      expect(server.calls.last.$3['customerData'], {
+        'postalCode': '01310-000',
+        'address': 'Av. Paulista',
+        'addressNumber': '1000',
+        'province': 'Centro',
+      });
+    });
+
+    testWidgets(
+      'Asaas refuses the customer data: says why and shows every field',
+      (tester) async {
+        var previews = 0;
+        final server = _Server((method, path, body) {
+          if (path == '/invoices/preview') {
+            previews += 1;
+            // Asaas has the data (nothing "missing"), it just refused it.
+            return _preview(
+              contact: {'email': 'joao@example.com', 'postalCode': '00000000'},
+            );
+          }
+          return _error(
+            'CUSTOMER_DATA_REQUIRED',
+            status: 400,
+            detail: 'CEP do cliente é inválido.',
+          );
+        });
+        await _openIssue(tester, server.api);
+        expect(find.byKey(const Key('nfseIssueContact_email')), findsNothing);
+
+        await tester.tap(find.byKey(const ValueKey('new_order_save')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('e-mail e o endereço completo do cliente'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('CEP do cliente é inválido.'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(previews, 2);
+        expect(find.byKey(const Key('nfseIssueContact_email')), findsOneWidget);
+        expect(
+          find.byKey(const Key('nfseIssueContact_postalCode')),
+          findsOneWidget,
+        );
+        expect(find.text('joao@example.com'), findsOneWidget);
+      },
+    );
+
+    testWidgets('Asaas refuses the setup: shows its text and opens the setup', (
+      tester,
+    ) async {
+      const said = 'A descrição do serviço deve ter no máximo 250 caracteres.';
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        if (path == '/invoices') {
+          return _error('NFSE_SETUP_REJECTED', status: 400, detail: said);
+        }
+        return _error('ASAAS_UNAVAILABLE', status: 502);
+      });
+      await _openIssue(tester, server.api, canSetUp: true);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(said), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('nfseIssueRefusalAction')));
+      await tester.pumpAndSettle();
+      expect(find.byType(NfseSetupScreen), findsOneWidget);
+      expect(server.calls.last.$2, '/setup');
+    });
+
+    testWidgets('setup refused and the user cannot set it up: says who can', (
+      tester,
+    ) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        return _error('NFSE_SETUP_REJECTED', status: 400, detail: 'x');
+      });
+      await _openIssue(tester, server.api, canSetUp: false);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('nfseIssueRefusalAction')), findsNothing);
+      expect(find.textContaining('Peça ao dono'), findsOneWidget);
+    });
+
+    testWidgets('unknown refusal shows what Asaas said', (tester) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        return _error(
+          'ASAAS_VALIDATION_ERROR',
+          status: 400,
+          detail: 'Valor acima do permitido',
+        );
+      });
+      await _openIssue(tester, server.api);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('O Asaas recusou a nota: Valor acima do permitido'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('an order that already has a nota blocks it', (tester) async {
       final server = _Server(
         (method, path, body) => _preview(invoiced: {'o1': 'inv0'}),
@@ -516,6 +672,27 @@ void main() {
       expect(find.text('Por que não saiu'), findsOneWidget);
       expect(
         find.text('O cliente não tem CPF ou CNPJ no cadastro.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('refused for customer data: says why, not "sozinha"', (
+      tester,
+    ) async {
+      await pumpInvoice(
+        tester,
+        'error',
+        extra: {'errorCode': 'CUSTOMER_DATA_REQUIRED'},
+      );
+      expect(find.textContaining('A nota não saiu.'), findsOneWidget);
+      expect(find.textContaining('sozinha'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('nfseInvoiceReason')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.textContaining('e-mail e o endereço completo do cliente'),
         findsOneWidget,
       );
     });

@@ -70,12 +70,14 @@ void main() {
           locale: const Locale('pt'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(builder: (context) {
-            texts = [
-              for (final c in contracts) ContractRepeat.describe(context, c),
-            ];
-            return const SizedBox();
-          }),
+          home: Builder(
+            builder: (context) {
+              texts = [
+                for (final c in contracts) ContractRepeat.describe(context, c),
+              ];
+              return const SizedBox();
+            },
+          ),
         ),
       );
       return texts;
@@ -95,7 +97,6 @@ void main() {
       expect(texts, ['Todo mês', 'A cada 2 meses', 'Toda semana', '']);
     });
   });
-
 
   testWidgets('shows the contract in everyday words', (tester) async {
     await _pump(tester);

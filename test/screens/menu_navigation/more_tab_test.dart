@@ -20,11 +20,11 @@ import 'package:provider/provider.dart';
 final pt = AppLocalizationsPt();
 
 Widget app(Widget home) => CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: home,
-    );
+  locale: const Locale('pt'),
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: home,
+);
 
 void tallScreen(WidgetTester tester) {
   tester.view.physicalSize = const Size(1170, 5000);
@@ -39,15 +39,16 @@ final _financialSwitch = find.descendant(
 
 void main() {
   group('MoreView', () {
-    testWidgets('shows the 11 rows in order, each opening a screen',
-        (tester) async {
+    testWidgets('shows the 11 rows in order, each opening a screen', (
+      tester,
+    ) async {
       tallScreen(tester);
       final opened = <MoreDestination>[];
-      await tester.pumpWidget(app(MoreView(
-        onOpen: opened.add,
-        planName: 'Starter',
-        version: '1.0.0',
-      )));
+      await tester.pumpWidget(
+        app(
+          MoreView(onOpen: opened.add, planName: 'Starter', version: '1.0.0'),
+        ),
+      );
 
       final titles = tester
           .widgetList<AppListRow>(find.byType(AppListRow))
@@ -78,13 +79,17 @@ void main() {
     testWidgets('groups rows under Cadastros, Seu trabalho and Você like the '
         'prototype, with the user as the account row', (tester) async {
       tallScreen(tester);
-      await tester.pumpWidget(app(MoreView(
-        onOpen: (_) {},
-        accountName: 'Rafael',
-        companyName: 'Oficina Exemplo',
-        catalogSubtitle: 'Serviços e peças',
-        planName: 'Pro',
-      )));
+      await tester.pumpWidget(
+        app(
+          MoreView(
+            onOpen: (_) {},
+            accountName: 'Rafael',
+            companyName: 'Oficina Exemplo',
+            catalogSubtitle: 'Serviços e peças',
+            planName: 'Pro',
+          ),
+        ),
+      );
 
       expect(find.text('Rafael'), findsOneWidget);
       expect(find.text('Sua conta · Oficina Exemplo'), findsOneWidget);
@@ -100,43 +105,50 @@ void main() {
     });
 
     testWidgets('titled with the company name', (tester) async {
-      await tester.pumpWidget(app(MoreView(
-        onOpen: (_) {},
-        title: 'Oficina do Zé',
-      )));
+      await tester.pumpWidget(
+        app(MoreView(onOpen: (_) {}, title: 'Oficina do Zé')),
+      );
       expect(find.text('Oficina do Zé'), findsOneWidget);
       expect(find.text('Mais'), findsNothing);
     });
 
     testWidgets('hides empty sections', (tester) async {
       tallScreen(tester);
-      await tester.pumpWidget(app(MoreView(
-        onOpen: (_) {},
-        visibility: const MoreVisibility(
-          customers: false,
-          contracts: false,
-          catalog: false,
-          checklists: false,
-          ratings: false,
+      await tester.pumpWidget(
+        app(
+          MoreView(
+            onOpen: (_) {},
+            visibility: const MoreVisibility(
+              customers: false,
+              contracts: false,
+              catalog: false,
+              checklists: false,
+              ratings: false,
+            ),
+          ),
         ),
-      )));
+      );
       expect(find.text('Cadastros'), findsNothing);
       expect(find.text('Seu trabalho'), findsOneWidget);
     });
 
     testWidgets('hides rows the role cannot see', (tester) async {
-      await tester.pumpWidget(app(MoreView(
-        onOpen: (_) {},
-        visibility: const MoreVisibility(
-          customers: false,
-          contracts: false,
-          company: false,
-          team: false,
-          checklists: false,
-          ratings: false,
-          advanced: false,
+      await tester.pumpWidget(
+        app(
+          MoreView(
+            onOpen: (_) {},
+            visibility: const MoreVisibility(
+              customers: false,
+              contracts: false,
+              company: false,
+              team: false,
+              checklists: false,
+              ratings: false,
+              advanced: false,
+            ),
+          ),
         ),
-      )));
+      );
       final titles = tester
           .widgetList<AppListRow>(find.byType(AppListRow))
           .map((row) => row.title)
@@ -152,24 +164,28 @@ void main() {
       Future<void> Function()? onReauth,
     }) async {
       final calls = <String>[];
-      await tester.pumpWidget(app(AccountView(
-        name: 'Maria',
-        email: 'maria@example.com',
-        companyName: 'Oficina',
-        roleLabel: 'Administrador',
-        onSignOut: () async => calls.add('signOut'),
-        deletion: AccountDeletionFlow(
-          paidPlansEnabled: false,
-          deleteAccount: () async {
-            calls.add('delete');
-            await onDelete?.call();
-          },
-          reauthenticate: () async {
-            calls.add('reauth');
-            await onReauth?.call();
-          },
+      await tester.pumpWidget(
+        app(
+          AccountView(
+            name: 'Maria',
+            email: 'maria@example.com',
+            companyName: 'Oficina',
+            roleLabel: 'Administrador',
+            onSignOut: () async => calls.add('signOut'),
+            deletion: AccountDeletionFlow(
+              paidPlansEnabled: false,
+              deleteAccount: () async {
+                calls.add('delete');
+                await onDelete?.call();
+              },
+              reauthenticate: () async {
+                calls.add('reauth');
+                await onReauth?.call();
+              },
+            ),
+          ),
         ),
-      )));
+      );
       return calls;
     }
 
@@ -183,25 +199,30 @@ void main() {
       expect(find.text(pt.switchCompany), findsNothing);
     });
 
-    testWidgets('switching company opens the choose screen with ✓',
-        (tester) async {
+    testWidgets('switching company opens the choose screen with ✓', (
+      tester,
+    ) async {
       final switched = <String>[];
-      await tester.pumpWidget(app(AccountView(
-        name: 'Maria',
-        companyName: 'Oficina',
-        currentCompanyId: 'c1',
-        companies: const [
-          AccountCompany(id: 'c1', name: 'Oficina'),
-          AccountCompany(id: 'c2', name: 'Loja'),
-        ],
-        onSwitchCompany: switched.add,
-        onSignOut: () async {},
-        deletion: AccountDeletionFlow(
-          paidPlansEnabled: false,
-          deleteAccount: () async {},
-          reauthenticate: () async {},
+      await tester.pumpWidget(
+        app(
+          AccountView(
+            name: 'Maria',
+            companyName: 'Oficina',
+            currentCompanyId: 'c1',
+            companies: const [
+              AccountCompany(id: 'c1', name: 'Oficina'),
+              AccountCompany(id: 'c2', name: 'Loja'),
+            ],
+            onSwitchCompany: switched.add,
+            onSignOut: () async {},
+            deletion: AccountDeletionFlow(
+              paidPlansEnabled: false,
+              deleteAccount: () async {},
+              reauthenticate: () async {},
+            ),
+          ),
         ),
-      )));
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(pt.switchCompany));
@@ -214,21 +235,28 @@ void main() {
       expect(switched, ['c2']);
     });
 
-    testWidgets('photo shows the person icon while loading, no spinner',
-        (tester) async {
-      await tester.pumpWidget(app(AccountView(
-        name: 'Maria',
-        photoUrl: 'https://example.com/photo.jpg',
-        onSignOut: () async {},
-        deletion: AccountDeletionFlow(
-          paidPlansEnabled: false,
-          deleteAccount: () async {},
-          reauthenticate: () async {},
+    testWidgets('photo shows the person icon while loading, no spinner', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          AccountView(
+            name: 'Maria',
+            photoUrl: 'https://example.com/photo.jpg',
+            onSignOut: () async {},
+            deletion: AccountDeletionFlow(
+              paidPlansEnabled: false,
+              deleteAccount: () async {},
+              reauthenticate: () async {},
+            ),
+          ),
         ),
-      )));
+      );
       await tester.pump();
-      expect(find.byKey(const ValueKey('account_avatar_fallback')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('account_avatar_fallback')),
+        findsOneWidget,
+      );
       expect(find.byType(CupertinoActivityIndicator), findsNothing);
     });
 
@@ -251,8 +279,9 @@ void main() {
       expect(calls, ['delete']);
     });
 
-    testWidgets('cancelling the first confirmation deletes nothing',
-        (tester) async {
+    testWidgets('cancelling the first confirmation deletes nothing', (
+      tester,
+    ) async {
       final calls = await pumpAccount(tester);
       await tester.tap(find.text('Apagar minha conta'));
       await tester.pumpAndSettle();
@@ -262,8 +291,9 @@ void main() {
       expect(calls, isEmpty);
     });
 
-    testWidgets('recent login required asks to sign in again and retries',
-        (tester) async {
+    testWidgets('recent login required asks to sign in again and retries', (
+      tester,
+    ) async {
       var attempts = 0;
       final calls = await pumpAccount(
         tester,
@@ -287,8 +317,9 @@ void main() {
       expect(find.text(pt.finalConfirmation), findsOneWidget);
     });
 
-    testWidgets('client timeout shows the "can take a few minutes" message',
-        (tester) async {
+    testWidgets('client timeout shows the "can take a few minutes" message', (
+      tester,
+    ) async {
       await pumpAccount(
         tester,
         onDelete: () async => throw AccountDeletionApiException(
@@ -318,13 +349,16 @@ void main() {
   });
 
   group('Sua empresa', () {
-    testWidgets('financial switch is disabled when not wired',
-        (tester) async {
-      await tester.pumpWidget(app(MyCompanyScreen(
-        onOpenCompanyData: () {},
-        onOpenTerms: () {},
-        onOpenSegment: () {},
-      )));
+    testWidgets('financial switch is disabled when not wired', (tester) async {
+      await tester.pumpWidget(
+        app(
+          MyCompanyScreen(
+            onOpenCompanyData: () {},
+            onOpenTerms: () {},
+            onOpenSegment: () {},
+          ),
+        ),
+      );
       expect(find.text('Dados para o cliente'), findsWidgets);
       expect(find.text('Como você trabalha'), findsOneWidget);
       expect(find.text('Valores e cobrança'), findsOneWidget);
@@ -336,28 +370,37 @@ void main() {
 
     testWidgets('switch works when the field is wired', (tester) async {
       bool? changed;
-      await tester.pumpWidget(app(MyCompanyScreen(
-        onOpenCompanyData: () {},
-        onOpenTerms: () {},
-        onOpenSegment: () {},
-        onFinancialChanged: (value) => changed = value,
-      )));
+      await tester.pumpWidget(
+        app(
+          MyCompanyScreen(
+            onOpenCompanyData: () {},
+            onOpenTerms: () {},
+            onOpenSegment: () {},
+            onFinancialChanged: (value) => changed = value,
+          ),
+        ),
+      );
       await tester.tap(_financialSwitch);
       expect(changed, isFalse);
     });
   });
 
   group('Sua empresa › layout and switches', () {
-    testWidgets('sections, rows and switches in prototype order',
-        (tester) async {
+    testWidgets('sections, rows and switches in prototype order', (
+      tester,
+    ) async {
       var opened = 0;
-      await tester.pumpWidget(app(MyCompanyScreen(
-        companyName: 'Oficina Exemplo',
-        devicesLabel: 'Veículos',
-        onOpenCompanyData: () => opened++,
-        onOpenTerms: () => opened++,
-        onOpenSegment: () => opened++,
-      )));
+      await tester.pumpWidget(
+        app(
+          MyCompanyScreen(
+            companyName: 'Oficina Exemplo',
+            devicesLabel: 'Veículos',
+            onOpenCompanyData: () => opened++,
+            onOpenTerms: () => opened++,
+            onOpenSegment: () => opened++,
+          ),
+        ),
+      );
       final order = [
         'Aparece na OS do cliente',
         'Oficina Exemplo',
@@ -372,8 +415,11 @@ void main() {
       ];
       // Short test surface: check every row exists (skipOffstage off).
       for (final text in order) {
-        expect(find.text(text, skipOffstage: false), findsOneWidget,
-            reason: text);
+        expect(
+          find.text(text, skipOffstage: false),
+          findsOneWidget,
+          reason: text,
+        );
       }
       await tester.tap(find.text('Oficina Exemplo'));
       await tester.tap(find.text('Termos para o cliente'));
@@ -393,12 +439,14 @@ void main() {
       await tester.pumpWidget(
         ChangeNotifierProvider<SegmentConfigProvider>.value(
           value: provider,
-          child: app(MyCompanySettings(
-            companyId: 'c1',
-            loadCompany: (_) async => null,
-            loadSegments: () async => const [],
-            writer: (id, fields) async => writes.add(fields),
-          )),
+          child: app(
+            MyCompanySettings(
+              companyId: 'c1',
+              loadCompany: (_) async => null,
+              loadSegments: () async => const [],
+              writer: (id, fields) async => writes.add(fields),
+            ),
+          ),
         ),
       );
       final contracts = find.descendant(
@@ -409,7 +457,7 @@ void main() {
       tester.widget<CupertinoSwitch>(contracts).onChanged!(true);
       await tester.pumpAndSettle();
       expect(writes, [
-        {'useContracts': true}
+        {'useContracts': true},
       ]);
       expect(provider.useContracts, isTrue);
       expect(provider.useScheduling, isTrue);
@@ -442,15 +490,17 @@ void main() {
       return tester.pumpWidget(
         ChangeNotifierProvider<SegmentConfigProvider>.value(
           value: provider,
-          child: app(MyCompanySettings(
-            companyId: companyId,
-            loadCompany: (_) async => null,
-            loadSegments: () async => const [],
-            writer: (id, fields) async {
-              if (fail) throw Exception('offline');
-              writes.add((id, fields));
-            },
-          )),
+          child: app(
+            MyCompanySettings(
+              companyId: companyId,
+              loadCompany: (_) async => null,
+              loadSegments: () async => const [],
+              writer: (id, fields) async {
+                if (fail) throw Exception('offline');
+                writes.add((id, fields));
+              },
+            ),
+          ),
         ),
       );
     }
@@ -464,8 +514,9 @@ void main() {
       expect(provider.useFinancial, isTrue);
     });
 
-    testWidgets('turning off asks first; cancel writes nothing',
-        (tester) async {
+    testWidgets('turning off asks first; cancel writes nothing', (
+      tester,
+    ) async {
       await pumpSettings(tester);
       await tester.tap(_financialSwitch);
       await tester.pumpAndSettle();
@@ -477,8 +528,9 @@ void main() {
       expect(provider.useFinancial, isTrue);
     });
 
-    testWidgets('confirming writes useFinancial=false and applies it',
-        (tester) async {
+    testWidgets('confirming writes useFinancial=false and applies it', (
+      tester,
+    ) async {
       await pumpSettings(tester);
       await tester.tap(_financialSwitch);
       await tester.pumpAndSettle();
@@ -505,8 +557,7 @@ void main() {
       expect(provider.useFinancial, isTrue);
     });
 
-    testWidgets('a failed write goes back and tells the user',
-        (tester) async {
+    testWidgets('a failed write goes back and tells the user', (tester) async {
       provider.setUseFinancial(false);
       await pumpSettings(tester, fail: true);
       await tester.tap(_financialSwitch);
@@ -517,8 +568,7 @@ void main() {
 
     testWidgets('without a company the switch is disabled', (tester) async {
       await pumpSettings(tester, companyId: null);
-      final toggle =
-          tester.widget<CupertinoSwitch>(_financialSwitch);
+      final toggle = tester.widget<CupertinoSwitch>(_financialSwitch);
       expect(toggle.onChanged, isNull);
     });
   });
@@ -539,31 +589,41 @@ void main() {
       );
     });
 
-    testWidgets('the "Avançado" row hides when it has nothing to show',
-        (tester) async {
+    testWidgets('the "Avançado" row hides when it has nothing to show', (
+      tester,
+    ) async {
       tallScreen(tester);
-      await tester.pumpWidget(app(MoreView(
-        onOpen: (_) {},
-        visibility: MoreVisibility(
-          advanced: AdvancedScreen.hasEntries(
-            showIntegrations: false,
-            showDevices: false,
+      await tester.pumpWidget(
+        app(
+          MoreView(
+            onOpen: (_) {},
+            visibility: MoreVisibility(
+              advanced: AdvancedScreen.hasEntries(
+                showIntegrations: false,
+                showDevices: false,
+              ),
+            ),
           ),
         ),
-      )));
+      );
       expect(find.text('Avançado'), findsNothing);
       expect(find.text('Lembretes'), findsOneWidget);
     });
 
-    testWidgets('lists the allowed entries in plain rows, no switch',
-        (tester) async {
-      await tester.pumpWidget(app(AdvancedScreen(
-        devicesLabel: 'Veículos',
-        showIntegrations: true,
-        showDevices: true,
-        onOpenIntegrations: () {},
-        onOpenDevices: () {},
-      )));
+    testWidgets('lists the allowed entries in plain rows, no switch', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          AdvancedScreen(
+            devicesLabel: 'Veículos',
+            showIntegrations: true,
+            showDevices: true,
+            onOpenIntegrations: () {},
+            onOpenDevices: () {},
+          ),
+        ),
+      );
       expect(find.byType(CupertinoListSection), findsNothing);
       expect(
         find.byKey(const ValueKey('advanced_integrations')),
@@ -583,28 +643,33 @@ void main() {
     /// Opens the form as the app does ([FormSheet.show]).
     Future<List<InviteFormData>> pumpForm(WidgetTester tester) async {
       final submitted = <InviteFormData>[];
-      await tester.pumpWidget(app(Builder(
-        builder: (context) => CupertinoPageScaffold(
-          child: Center(
-            child: CupertinoButton(
-              child: const Text('open'),
-              onPressed: () => FormSheet.show<bool>(
-                context,
-                (_) => InviteForm(
-                  onSubmit: (data) async => submitted.add(data),
+      await tester.pumpWidget(
+        app(
+          Builder(
+            builder: (context) => CupertinoPageScaffold(
+              child: Center(
+                child: CupertinoButton(
+                  child: const Text('open'),
+                  onPressed: () => FormSheet.show<bool>(
+                    context,
+                    (_) => InviteForm(
+                      onSubmit: (data) async => submitted.add(data),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      )));
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       return submitted;
     }
 
-    testWidgets('opens as a sheet with X and ✓; X with nothing typed closes',
-        (tester) async {
+    testWidgets('opens as a sheet with X and ✓; X with nothing typed closes', (
+      tester,
+    ) async {
       await pumpForm(tester);
       expect(find.byType(FormSheet), findsOneWidget);
       expect(find.text('Criar convite'), findsNothing);
@@ -614,8 +679,9 @@ void main() {
       expect(find.byType(FormSheet), findsNothing);
     });
 
-    testWidgets('✓ is gray with the hint until e-mail or WhatsApp is typed',
-        (tester) async {
+    testWidgets('✓ is gray with the hint until e-mail or WhatsApp is typed', (
+      tester,
+    ) async {
       final submitted = await pumpForm(tester);
       expect(saveEnabled(tester), isFalse);
       expect(find.text(pt.inviteSaveNeedsContact), findsOneWidget);
@@ -624,19 +690,22 @@ void main() {
       expect(submitted, isEmpty);
 
       await tester.enterText(
-          find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
-          '11 99999-9999');
+        find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
+        '11 99999-9999',
+      );
       await tester.pump();
       expect(saveEnabled(tester), isTrue);
       expect(find.text(pt.inviteSaveNeedsContact), findsNothing);
     });
 
-    testWidgets('with something typed, X asks before discarding',
-        (tester) async {
+    testWidgets('with something typed, X asks before discarding', (
+      tester,
+    ) async {
       final submitted = await pumpForm(tester);
       await tester.enterText(
-          find.widgetWithText(CupertinoTextField, pt.inviteWhoPlaceholder),
-          'Lucas');
+        find.widgetWithText(CupertinoTextField, pt.inviteWhoPlaceholder),
+        'Lucas',
+      );
       await tester.pumpAndSettle();
       await tester.tap(close);
       await tester.pumpAndSettle();
@@ -650,8 +719,9 @@ void main() {
     testWidgets('name is optional: only the e-mail is enough', (tester) async {
       final submitted = await pumpForm(tester);
       await tester.enterText(
-          find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
-          'lucas@example.com');
+        find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
+        'lucas@example.com',
+      );
       await tester.pump();
       await tester.tap(save);
       await tester.pump();
@@ -665,8 +735,9 @@ void main() {
     testWidgets('rejects an e-mail without @', (tester) async {
       final submitted = await pumpForm(tester);
       await tester.enterText(
-          find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
-          'lucas');
+        find.widgetWithText(CupertinoTextField, pt.emailPlaceholder),
+        'lucas',
+      );
       await tester.pump();
       await tester.tap(save);
       await tester.pump();
@@ -674,37 +745,40 @@ void main() {
       expect(find.text(pt.invalidEmail), findsOneWidget);
     });
 
-    testWidgets('role picker offers Supervisor and marks the choice with a check',
-        (tester) async {
-      tallScreen(tester);
-      final submitted = await pumpForm(tester);
-      await tester.tap(find.byKey(const ValueKey('invite_role')));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'role picker offers Supervisor and marks the choice with a check',
+      (tester) async {
+        tallScreen(tester);
+        final submitted = await pumpForm(tester);
+        await tester.tap(find.byKey(const ValueKey('invite_role')));
+        await tester.pumpAndSettle();
 
-      for (final role in RolePermissions5.all) {
-        expect(find.byKey(ValueKey('role_${role.name}')), findsOneWidget);
-      }
-      // "Escolher" screen with the question as title, not a small sheet.
-      expect(find.byType(PickerScaffold<RolesType>), findsOneWidget);
-      expect(find.text(pt.inviteRoleQuestion), findsWidgets);
-      expect(find.text(pt.roleSupervisor), findsOneWidget);
+        for (final role in RolePermissions5.all) {
+          expect(find.byKey(ValueKey('role_${role.name}')), findsOneWidget);
+        }
+        // "Escolher" screen with the question as title, not a small sheet.
+        expect(find.byType(PickerScaffold<RolesType>), findsOneWidget);
+        expect(find.text(pt.inviteRoleQuestion), findsWidgets);
+        expect(find.text(pt.roleSupervisor), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('role_supervisor')));
-      await tester.pumpAndSettle();
-      expect(find.byType(PickerScaffold<RolesType>), findsNothing);
-      // Role on the row's line, its sentence under the card.
-      expect(find.text(pt.roleSupervisor), findsOneWidget);
-      expect(find.text(pt.roleDescSupervisor), findsOneWidget);
+        await tester.tap(find.byKey(const ValueKey('role_supervisor')));
+        await tester.pumpAndSettle();
+        expect(find.byType(PickerScaffold<RolesType>), findsNothing);
+        // Role on the row's line, its sentence under the card.
+        expect(find.text(pt.roleSupervisor), findsOneWidget);
+        expect(find.text(pt.roleDescSupervisor), findsOneWidget);
 
-      await tester.enterText(
+        await tester.enterText(
           find.widgetWithText(CupertinoTextField, pt.phonePlaceholder),
-          '11 99999-9999');
-      await tester.pump();
-      await tester.tap(save);
-      await tester.pump();
-      expect(submitted.single.role, RolesType.supervisor);
-      expect(submitted.single.phone, '11 99999-9999');
-    });
+          '11 99999-9999',
+        );
+        await tester.pump();
+        await tester.tap(save);
+        await tester.pump();
+        expect(submitted.single.role, RolesType.supervisor);
+        expect(submitted.single.phone, '11 99999-9999');
+      },
+    );
   });
 }
 

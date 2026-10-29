@@ -317,6 +317,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       context,
       orderIds: ids,
       customerId: _customer?.id,
+      sandbox: _nfse.sandbox,
     );
     if (invoice != null && mounted) {
       showAppToast(

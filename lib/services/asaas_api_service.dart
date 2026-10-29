@@ -18,7 +18,11 @@ class AsaasApiException implements Exception {
   final String? code;
   final String message;
 
-  AsaasApiException(this.code, this.message);
+  /// Asaas's own text (pt-BR) when it refused something (`error.detail`):
+  /// shown on the nota screens, where it says what to fix.
+  final String? detail;
+
+  AsaasApiException(this.code, this.message, {this.detail});
 
   @override
   String toString() => message;
@@ -164,11 +168,14 @@ class AsaasApiService {
 
     String message = 'Request failed (${response.statusCode})';
     String? code;
+    String? detail;
     try {
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
       final error = decoded['error'] as Map<String, dynamic>?;
       if (error?['message'] is String) message = error!['message'] as String;
       if (error?['code'] is String) code = error!['code'] as String;
+      final text = error?['detail'];
+      if (text is String && text.trim().isNotEmpty) detail = text.trim();
     } catch (_) {
       // keep the default message and leave code as null
     }
@@ -178,7 +185,7 @@ class AsaasApiService {
       429 => 'RATE_LIMIT_EXCEEDED',
       _ => null,
     };
-    throw AsaasApiException(code, message);
+    throw AsaasApiException(code, message, detail: detail);
   }
 
   /// Validates and stores the company's Asaas API key on the server.
@@ -396,9 +403,7 @@ class AsaasApiService {
   }
 
   /// Services of the city's list matching [query].
-  Future<List<NfseMunicipalService>> nfseMunicipalServices(
-    String query,
-  ) async {
+  Future<List<NfseMunicipalService>> nfseMunicipalServices(String query) async {
     final q = Uri.encodeQueryComponent(query.trim());
     final data = await _nfse(
       'GET',
@@ -433,13 +438,15 @@ class AsaasApiService {
   );
 
   /// Issues one nota for [orderIds]. [effectiveDate] defaults to today on
-  /// the server.
+  /// the server. [customerData]: e-mail/address the city needs, typed in the
+  /// sheet (the server sends it to the Asaas customer).
   Future<NfseInvoice> createInvoice(
     List<String> orderIds, {
     String? customerId,
     String? serviceDescription,
     DateTime? effectiveDate,
     String? customerTaxId,
+    Map<String, String>? customerData,
   }) async {
     final data = await _nfse(
       'POST',
@@ -452,6 +459,8 @@ class AsaasApiService {
         if (effectiveDate != null)
           'effectiveDate': DateFormat('yyyy-MM-dd').format(effectiveDate),
         if ((customerTaxId ?? '').isNotEmpty) 'customerTaxId': customerTaxId,
+        if (customerData != null && customerData.isNotEmpty)
+          'customerData': customerData,
       },
     );
     return NfseInvoice.fromJson(data);

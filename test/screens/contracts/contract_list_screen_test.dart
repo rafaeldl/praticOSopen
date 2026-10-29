@@ -68,13 +68,15 @@ Widget _app(
 }
 
 final _orders = [
-  _order('a', 'Ana Ribeiro',
-      active: true,
-      interval: 6,
-      device: 'VW Gol 2018',
-      next: DateTime(2026, 11, 12)),
-  _order('b', 'Transportes Exemplo',
-      active: true, next: DateTime(2026, 11, 1)),
+  _order(
+    'a',
+    'Ana Ribeiro',
+    active: true,
+    interval: 6,
+    device: 'VW Gol 2018',
+    next: DateTime(2026, 11, 12),
+  ),
+  _order('b', 'Transportes Exemplo', active: true, next: DateTime(2026, 11, 1)),
   _order('c', 'Carlos Mendes', active: false, end: DateTime(2026, 6, 30)),
 ];
 
@@ -83,8 +85,9 @@ void main() {
     await initializeDateFormatting('pt_BR');
   });
 
-  testWidgets('layout: title, subtitle, tabs, active rows and footer',
-      (tester) async {
+  testWidgets('layout: title, subtitle, tabs, active rows and footer', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -108,8 +111,9 @@ void main() {
     expect(find.byIcon(CupertinoIcons.chevron_forward), findsNWidgets(2));
   });
 
-  testWidgets('Encerrados tab lists ended contracts with the end date',
-      (tester) async {
+  testWidgets('Encerrados tab lists ended contracts with the end date', (
+    tester,
+  ) async {
     await tester.pumpWidget(_app(_FakeDirectory(Stream.value(_orders)), []));
     await tester.pump();
     await tester.tap(find.text('Encerrados'));

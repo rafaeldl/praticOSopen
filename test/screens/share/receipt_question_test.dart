@@ -27,9 +27,7 @@ Order _order({
 final _onePdf = ReceivedBatch(const [
   ReceivedFile(path: '/c/pix.pdf', mimeType: 'application/pdf'),
 ]);
-final _onePhoto = ReceivedBatch(const [
-  ReceivedFile(path: '/c/pix.PNG'),
-]);
+final _onePhoto = ReceivedBatch(const [ReceivedFile(path: '/c/pix.PNG')]);
 final _two = ReceivedBatch(const [
   ReceivedFile(path: '/c/1.jpg', mimeType: 'image/jpeg'),
   ReceivedFile(path: '/c/2.pdf', mimeType: 'application/pdf'),
@@ -72,9 +70,11 @@ void main() {
 
   group('shouldAskWhatFileIs', () {
     test('asks for one file when there is a payment without receipt', () {
-      final order = _order(total: 200, paid: 200, transactions: [
-        _payment('t1', 200),
-      ]);
+      final order = _order(
+        total: 200,
+        paid: 200,
+        transactions: [_payment('t1', 200)],
+      );
       expect(
         shouldAskWhatFileIs(batch: _onePdf, order: order, canReceive: true),
         isTrue,
@@ -111,9 +111,11 @@ void main() {
       expect(
         shouldAskWhatFileIs(
           batch: _onePdf,
-          order: _order(total: 100, paid: 100, transactions: [
-            _payment('t1', 100, receipt: 'd1'),
-          ]),
+          order: _order(
+            total: 100,
+            paid: 100,
+            transactions: [_payment('t1', 100, receipt: 'd1')],
+          ),
           canReceive: true,
         ),
         isFalse,
@@ -136,9 +138,11 @@ void main() {
     expect(pdf.name, 'pix.pdf');
     expect(receiptFileOf(_onePhoto)!.contentType, 'image/png');
     expect(
-      receiptFileOf(ReceivedBatch(const [
-        ReceivedFile(path: '/c/a.jpg', mimeType: 'image/heic'),
-      ]))!.contentType,
+      receiptFileOf(
+        ReceivedBatch(const [
+          ReceivedFile(path: '/c/a.jpg', mimeType: 'image/heic'),
+        ]),
+      )!.contentType,
       'image/heic',
     );
   });
@@ -146,10 +150,14 @@ void main() {
   testWidgets('"O que é este arquivo?" lists payments, new payment and keep', (
     tester,
   ) async {
-    final order = _order(total: 500, paid: 200, transactions: [
-      _payment('t1', 200),
-      _payment('t2', 50, receipt: 'd1'),
-    ]);
+    final order = _order(
+      total: 500,
+      paid: 200,
+      transactions: [
+        _payment('t1', 200),
+        _payment('t2', 50, receipt: 'd1'),
+      ],
+    );
     SharedFileUse? chosen;
     await tester.pumpWidget(
       _app(
@@ -188,9 +196,11 @@ void main() {
 
   testWidgets('no "pagamento novo" when nothing is left to receive; back '
       'keeps the file in the OS', (tester) async {
-    final order = _order(total: 200, paid: 200, transactions: [
-      _payment('t1', 200),
-    ]);
+    final order = _order(
+      total: 200,
+      paid: 200,
+      transactions: [_payment('t1', 200)],
+    );
     SharedFileUse? chosen;
     await tester.pumpWidget(
       _app(

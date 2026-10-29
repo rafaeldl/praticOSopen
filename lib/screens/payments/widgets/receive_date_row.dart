@@ -112,11 +112,7 @@ class ReceiveDateRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            Icon(
-              CupertinoIcons.chevron_right,
-              size: 16,
-              color: onSoft,
-            ),
+            Icon(CupertinoIcons.chevron_right, size: 16, color: onSoft),
           ],
         ),
       ),

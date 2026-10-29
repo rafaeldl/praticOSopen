@@ -101,7 +101,10 @@ void main() {
     final sentence = tester.widget<Text>(
       find.byKey(const Key('shareLinkSentence')),
     );
-    expect(sentence.data, startsWith('Ana abre a OS pelo link, aprova e comenta.'));
+    expect(
+      sentence.data,
+      startsWith('Ana abre a OS pelo link, aprova e comenta.'),
+    );
     expect(sentence.data, contains('Vale até'));
 
     expect(find.text('Mandar pelo WhatsApp'), findsOneWidget);

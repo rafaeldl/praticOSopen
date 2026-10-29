@@ -176,8 +176,10 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     final companyId = widget.order.company?.id ?? Global.companyAggr?.id;
     final customerId = widget.order.customer?.id;
     if (companyId == null || customerId == null) return null;
-    final customer =
-        await TenantCustomerRepository().getSingle(companyId, customerId);
+    final customer = await TenantCustomerRepository().getSingle(
+      companyId,
+      customerId,
+    );
     return customer?.taxId;
   }
 
@@ -210,8 +212,9 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
         orderId,
         value: value,
         mode: _mode,
-        installmentCount:
-            _mode == ChargeMode.cardInstallments ? _installmentCount : null,
+        installmentCount: _mode == ChargeMode.cardInstallments
+            ? _installmentCount
+            : null,
         dueDate: _dueDate,
         customerTaxId: _needsTaxId ? normalizeTaxId(_taxIdInput) : null,
       );
@@ -235,8 +238,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
   Future<void> _pickInstallments() async {
     final l10n = context.l10n;
     final value = parseCurrencyInput(_valueController.text);
-    final current =
-        _mode == ChargeMode.single ? 1 : _installmentCount;
+    final current = _mode == ChargeMode.single ? 1 : _installmentCount;
     final picked = await pickOne<int>(
       context,
       title: l10n.chargeSplitQuestion,
@@ -325,12 +327,12 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
 
   /// What still blocks the "✓" (null when the link can be created).
   ChargeFormError? _currentError() => validateChargeInput(
-        hasCustomer: widget.order.customer?.id != null,
-        value: parseCurrencyInput(_valueController.text),
-        remainingBalance: widget.remainingBalance,
-        needsTaxId: _needsTaxId,
-        taxIdInput: _taxIdInput,
-      );
+    hasCustomer: widget.order.customer?.id != null,
+    value: parseCurrencyInput(_valueController.text),
+    remainingBalance: widget.remainingBalance,
+    needsTaxId: _needsTaxId,
+    taxIdInput: _taxIdInput,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -345,7 +347,8 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
       title: l10n.chargeLinkTitle,
       canSave: !_loadingTaxId && error == null,
       // An empty CPF/CNPJ is already explained by the field's own hint.
-      missingHint: _loadingTaxId ||
+      missingHint:
+          _loadingTaxId ||
               error == null ||
               error == ChargeFormError.taxIdRequired
           ? null

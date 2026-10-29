@@ -18,9 +18,11 @@ class FakeRepo extends AccumulatedValueRepository {
   final List<String> used = [];
 
   @override
-  Future<List<AccumulatedValue>> getAll(String companyId, String fieldType,
-          {String? group}) async =>
-      [...values];
+  Future<List<AccumulatedValue>> getAll(
+    String companyId,
+    String fieldType, {
+    String? group,
+  }) async => [...values];
 
   @override
   Future<void> remove(String companyId, String fieldType, String id) async {
@@ -29,8 +31,12 @@ class FakeRepo extends AccumulatedValueRepository {
   }
 
   @override
-  Future<String> use(String companyId, String fieldType, String value,
-      {String? group}) async {
+  Future<String> use(
+    String companyId,
+    String fieldType,
+    String value, {
+    String? group,
+  }) async {
     used.add(value);
     return 'id-$value';
   }
@@ -57,11 +63,13 @@ Future<Object? Function()> pumpScreen(
           onPressed: () async {
             popped = await Navigator.of(context).push(
               CupertinoPageRoute(
-                settings: RouteSettings(arguments: {
-                  'fieldType': 'deviceBrand',
-                  'title': 'Marca',
-                  ...?args,
-                }),
+                settings: RouteSettings(
+                  arguments: {
+                    'fieldType': 'deviceBrand',
+                    'title': 'Marca',
+                    ...?args,
+                  },
+                ),
                 builder: (_) => AccumulatedValueListScreen(
                   repository: repo,
                   canDelete: (_) => canDelete,
@@ -88,28 +96,34 @@ void main() {
   setUp(() => Global.companyAggr = CompanyAggr()..id = 'c1');
   tearDown(() => Global.companyAggr = null);
 
-  testWidgets('rows are AppListRow with a check on the current choice and no count',
-      (tester) async {
-    await pumpScreen(
-      tester,
-      FakeRepo([v('1', 'Fiat', usage: 9), v('2', 'Honda')]),
-      args: {'currentValue': 'Honda'},
-    );
-    expect(find.byType(AppListRow), findsNWidgets(2));
-    final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
-    expect(
-      {for (final r in rows) r.title: r.selected},
-      {'Fiat': false, 'Honda': true},
-    );
-    expect(find.text('9'), findsNothing);
-  });
+  testWidgets(
+    'rows are AppListRow with a check on the current choice and no count',
+    (tester) async {
+      await pumpScreen(
+        tester,
+        FakeRepo([v('1', 'Fiat', usage: 9), v('2', 'Honda')]),
+        args: {'currentValue': 'Honda'},
+      );
+      expect(find.byType(AppListRow), findsNWidgets(2));
+      final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
+      expect(
+        {for (final r in rows) r.title: r.selected},
+        {'Fiat': false, 'Honda': true},
+      );
+      expect(find.text('9'), findsNothing);
+    },
+  );
 
-  testWidgets('multiple choice: ✓ on top is gray until the choice changes',
-      (tester) async {
+  testWidgets('multiple choice: ✓ on top is gray until the choice changes', (
+    tester,
+  ) async {
     final get = await pumpScreen(
       tester,
       FakeRepo([v('1', 'Fiat'), v('2', 'Honda')]),
-      args: {'multiSelect': true, 'currentValues': ['Fiat']},
+      args: {
+        'multiSelect': true,
+        'currentValues': ['Fiat'],
+      },
     );
     CupertinoButton confirm() => tester.widget<CupertinoButton>(
       find.byKey(const ValueKey('picker_confirm')),
@@ -123,8 +137,9 @@ void main() {
     expect((get() as List).toSet(), {'Fiat', 'Honda'});
   });
 
-  testWidgets('typing a new value puts "Usar “X”" on top and returns it',
-      (tester) async {
+  testWidgets('typing a new value puts "Usar “X”" on top and returns it', (
+    tester,
+  ) async {
     final repo = FakeRepo([v('1', 'Fiat'), v('2', 'Ford')]);
     final get = await pumpScreen(tester, repo);
     await tester.enterText(find.byType(CupertinoSearchTextField), 'Fo');
@@ -139,8 +154,9 @@ void main() {
     expect(get(), 'Fo');
   });
 
-  testWidgets('"Deixar em branco" replaces the red Limpar and returns clear',
-      (tester) async {
+  testWidgets('"Deixar em branco" replaces the red Limpar and returns clear', (
+    tester,
+  ) async {
     final get = await pumpScreen(
       tester,
       FakeRepo([v('1', 'Fiat')]),

@@ -52,8 +52,9 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('light: shows title, Apple, Google, e-mail link and terms',
-      (tester) async {
+  testWidgets('light: shows title, Apple, Google, e-mail link and terms', (
+    tester,
+  ) async {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
 
@@ -67,13 +68,17 @@ void main() {
     final bg = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
     );
-    expect((bg.backgroundColor! as CupertinoDynamicColor).color,
-        const Color(0xFFE0F1FF));
+    expect(
+      (bg.backgroundColor! as CupertinoDynamicColor).color,
+      const Color(0xFFE0F1FF),
+    );
   });
 
   testWidgets('dark: dark blue background and dark panel', (tester) async {
     useTallScreen(tester);
-    await tester.pumpWidget(_app(_FakeAuthStore(), brightness: Brightness.dark));
+    await tester.pumpWidget(
+      _app(_FakeAuthStore(), brightness: Brightness.dark),
+    );
 
     final scaffold = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
@@ -81,7 +86,9 @@ void main() {
     final bg = scaffold.backgroundColor! as CupertinoDynamicColor;
     expect(bg.darkColor, const Color(0xFF142F4B));
 
-    final panel = tester.widget<Container>(find.byKey(const Key('login_panel')));
+    final panel = tester.widget<Container>(
+      find.byKey(const Key('login_panel')),
+    );
     final panelColor =
         (panel.decoration! as BoxDecoration).color! as CupertinoDynamicColor;
     expect(panelColor.darkColor, const Color(0xFF1C1C1E));
@@ -102,16 +109,19 @@ void main() {
     expect(auth.googleCalls, 1);
   });
 
-  testWidgets('Apple error shows a fixed phrase, cancel shows nothing',
-      (tester) async {
+  testWidgets('Apple error shows a fixed phrase, cancel shows nothing', (
+    tester,
+  ) async {
     useTallScreen(tester);
     final auth = _FakeAuthStore()
       ..appleError = Exception('[firebase_auth/network-request-failed] x');
     await tester.pumpWidget(_app(auth));
     await tester.tap(find.byType(SignInWithAppleButton));
     await tester.pumpAndSettle();
-    expect(find.text('Não deu para entrar com a Apple. Tente de novo.'),
-        findsOneWidget);
+    expect(
+      find.text('Não deu para entrar com a Apple. Tente de novo.'),
+      findsOneWidget,
+    );
     expect(find.textContaining('firebase_auth'), findsNothing);
 
     auth.appleError = const SignInWithAppleAuthorizationException(

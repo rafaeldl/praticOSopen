@@ -39,7 +39,8 @@ SendChargeAction decideSendChargeAction({
   required Order order,
   required OrderCharge? openCharge,
 }) {
-  final asaasReady = canCharge &&
+  final asaasReady =
+      canCharge &&
       settings.asaasEnabled &&
       settings.asaasConnected &&
       order.id != null &&
@@ -90,7 +91,8 @@ class SendChargeFlow {
     BuildContext context,
     Order order,
     double remainingBalance,
-  )? createCharge;
+  )?
+  createCharge;
 
   /// Shares the order link. Defaults to [ShareLinkSheet.show].
   final Future<void> Function(BuildContext context, Order order)? share;
@@ -101,7 +103,8 @@ class SendChargeFlow {
   /// Runs the flow and returns what was done. A charge the user gave up
   /// creating shares nothing.
   Future<SendChargeAction> send(BuildContext context, Order order) async {
-    final allowed = canCharge ??
+    final allowed =
+        canCharge ??
         AuthorizationService.instance.hasPermission(PermissionType.chargeOrder);
 
     var action = SendChargeAction.shareOrderLink;
@@ -167,16 +170,18 @@ class SendChargeFlow {
   static Future<PaymentSettings> _defaultSettings() {
     final companyId = Global.companyAggr?.id;
     if (companyId == null) return Future.value(PaymentSettings());
-    return safePaymentSettings(PaymentSettingsRepository().watch(companyId))
-        .first;
+    return safePaymentSettings(
+      PaymentSettingsRepository().watch(companyId),
+    ).first;
   }
 
   static Future<OrderCharge?> _defaultOpenCharge(Order order) async {
     final companyId = Global.companyAggr?.id;
     final orderId = order.id;
     if (companyId == null || orderId == null) return null;
-    final charges =
-        await OrderChargeRepository().watch(companyId, orderId).first;
+    final charges = await OrderChargeRepository()
+        .watch(companyId, orderId)
+        .first;
     final current = OrderCharge.current(charges);
     return current != null && current.isOpen ? current : null;
   }
@@ -188,10 +193,8 @@ class SendChargeFlow {
   ) {
     return FormSheet.show<OrderCharge>(
       context,
-      (_) => CreateChargeScreen(
-        order: order,
-        remainingBalance: remainingBalance,
-      ),
+      (_) =>
+          CreateChargeScreen(order: order, remainingBalance: remainingBalance),
     );
   }
 

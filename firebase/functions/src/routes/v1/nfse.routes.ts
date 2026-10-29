@@ -22,7 +22,8 @@ import { AuthenticatedRequest } from '../../models/types';
 import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { validateInput } from '../../utils/validation.utils';
-import { toHttpError } from '../../services/asaas/errors';
+import { AsaasServiceError, asaasErrorLog, toHttpError } from '../../services/asaas/errors';
+import { AsaasApiError } from '../../services/asaas/asaas-client';
 import {
   cancelInvoice,
   createInvoice,
@@ -86,6 +87,17 @@ export const createInvoiceSchema = previewSchema.extend({
   serviceDescription: z.string().max(2000).optional(),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'effectiveDate must be YYYY-MM-DD').optional(),
   customerTaxId: z.string().max(20).optional(),
+  // Missing customer data for the nota (e-mail, address with CEP); see invoice-customer.service.
+  customerData: z
+    .object({
+      email: z.string().max(254).optional(),
+      postalCode: z.string().max(10).optional(),
+      address: z.string().max(200).optional(),
+      addressNumber: z.string().max(20).optional(),
+      complement: z.string().max(100).optional(),
+      province: z.string().max(100).optional(),
+    })
+    .optional(),
 });
 
 export const cancelSchema = z.object({
@@ -109,8 +121,11 @@ function badRequest(res: Response, errors: string[]): void {
 }
 
 function fail(res: Response, error: unknown, label: string): void {
-  // Never log the error object: it may carry request details.
-  console.error(`${label} error:`, (error as Error).name);
+  // Never log the error object: it may carry request details. Asaas's codes
+  // and texts say what was refused without the customer's data.
+  if (error instanceof AsaasApiError) console.error(`${label} error: AsaasApiError ${asaasErrorLog(error)}`);
+  else if (error instanceof AsaasServiceError) console.error(`${label} error: ${error.code}${error.detail ? ` (${error.detail})` : ''}`);
+  else console.error(`${label} error:`, (error as Error).name);
   const { status, body } = toHttpError(error, `${label} failed`);
   res.status(status).json(body);
 }

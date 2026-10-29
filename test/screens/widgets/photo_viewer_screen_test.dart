@@ -10,7 +10,8 @@ void main() {
     ..injectL10n(lookupAppLocalizations(const Locale('pt')));
 
   List<OrderPhoto> photos(int n) => [
-    for (var i = 0; i < n; i++) OrderPhoto()..url = 'https://example.com/$i.jpg',
+    for (var i = 0; i < n; i++)
+      OrderPhoto()..url = 'https://example.com/$i.jpg',
   ];
 
   Future<void> pump(
@@ -159,7 +160,11 @@ void main() {
       textScale: 2,
     );
 
-    for (final k in ['photo_viewer_back', 'photo_viewer_share', 'photo_viewer_more']) {
+    for (final k in [
+      'photo_viewer_back',
+      'photo_viewer_share',
+      'photo_viewer_more',
+    ]) {
       final size = tester.getSize(key(k));
       expect(size.width >= 44 && size.height >= 44, isTrue, reason: k);
     }

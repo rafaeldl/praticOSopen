@@ -118,8 +118,7 @@ void main() {
         listener.stop();
         async.elapse(const Duration(seconds: 30));
         expect(words, hasLength(2));
-        expect(ScriptedSpeechListener.sentences['pt']!,
-            startsWith(words.last));
+        expect(ScriptedSpeechListener.sentences['pt']!, startsWith(words.last));
       });
     });
   });

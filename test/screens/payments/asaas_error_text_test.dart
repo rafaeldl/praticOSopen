@@ -109,8 +109,36 @@ void main() {
       );
     });
 
+    test('nas telas de nota mostra o texto do Asaas quando ele veio', () {
+      String nota(String code, String? detail) => asaasErrorText(
+        l10n,
+        AsaasApiException(code, 'raw', detail: detail),
+        nota: true,
+      );
+      const said = 'A descrição do serviço deve ter no máximo 250 caracteres.';
+      expect(
+        nota('ASAAS_VALIDATION_ERROR', said),
+        l10n.nfseErrorAsaasSaid(said),
+      );
+      expect(nota('NFSE_SETUP_REJECTED', said), l10n.nfseErrorAsaasSaid(said));
+      expect(
+        nota('ASAAS_VALIDATION_ERROR', null),
+        l10n.nfseErrorAsaasValidation,
+      );
+      // Charges keep the fixed text.
+      expect(
+        asaasErrorText(
+          l10n,
+          AsaasApiException('ASAAS_VALIDATION_ERROR', 'raw', detail: said),
+        ),
+        l10n.asaasErrorValidation,
+      );
+    });
+
     test('códigos de nota fiscal', () {
       expect(text('ORDER_HAS_INVOICE'), l10n.nfseErrorOrderHasInvoice);
+      expect(text('CUSTOMER_DATA_REQUIRED'), l10n.nfseErrorCustomerData);
+      expect(text('NFSE_SETUP_REJECTED'), l10n.nfseErrorSetupRejected);
       expect(text('CANCEL_NOT_SUPPORTED'), l10n.nfseErrorCancelNotSupported);
       expect(text('NO_SERVICES'), l10n.nfseErrorNoServices);
       expect(text('NFSE_NOT_READY'), l10n.nfseErrorNotReady);
