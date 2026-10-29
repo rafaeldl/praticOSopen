@@ -38,9 +38,12 @@ Stream<T> switchStream<S, T>(Stream<S> source, Stream<T> Function(S) inner) {
       outerSub?.resume();
       innerSub?.resume();
     },
-    onCancel: () async {
-      await innerSub?.cancel();
-      await outerSub?.cancel();
+    // Doesn't wait for the cancels: `.first` waits for the cancel to finish
+    // before returning its value, and a source that never finishes cancelling
+    // would hang it (the Nova OS customer picker did).
+    onCancel: () {
+      unawaited(innerSub?.cancel());
+      unawaited(outerSub?.cancel());
     },
   );
   return controller.stream;

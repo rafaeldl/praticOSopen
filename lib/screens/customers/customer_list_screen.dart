@@ -53,6 +53,10 @@ class CustomerListScreen extends StatefulWidget {
   State<CustomerListScreen> createState() => _CustomerListScreenState();
 }
 
+/// How long a tap waits for the customer's vehicles before choosing the
+/// customer without one.
+const _vehiclesTimeout = Duration(seconds: 3);
+
 class _CustomerListScreenState extends State<CustomerListScreen> {
   late final CustomerDirectory _directory =
       widget.directory ?? FirestoreCustomerDirectory();
@@ -122,12 +126,15 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     final orderHasVehicle = _order?.devices?.isNotEmpty ?? false;
     if (selected == null && !orderHasVehicle && customer.id != null) {
       try {
-        final vehicles = await _directory.vehiclesOf(customer.id!);
+        final vehicles = await _directory
+            .vehiclesOf(customer.id!)
+            .timeout(_vehiclesTimeout);
         if (vehicles.length == 1) {
           selected = Device.fromJson(vehicles.first.toJson());
         }
       } catch (_) {
-        // Vehicles are a convenience; the customer is still chosen.
+        // Vehicles are a convenience; the customer is still chosen (also
+        // when the lookup is slow or never answers).
       }
     }
     if (!mounted) return;
