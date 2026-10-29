@@ -1,5 +1,5 @@
 import { AsaasApiError } from '../asaas-client';
-import { AsaasServiceError, toHttpError } from '../errors';
+import { AsaasServiceError, asaasErrorLog, toHttpError } from '../errors';
 
 describe('toHttpError', () => {
   it('mapeia AsaasServiceError pelo código', () => {
@@ -18,8 +18,22 @@ describe('toHttpError', () => {
     const error = new AsaasApiError(400, [{ code: 'invalid_cpfCnpj', description: 'CPF inválido' }], '/customers');
     expect(toHttpError(error, 'x')).toEqual({
       status: 400,
-      body: { success: false, error: { code: 'ASAAS_VALIDATION_ERROR', message: 'CPF inválido' } },
+      body: { success: false, error: { code: 'ASAAS_VALIDATION_ERROR', message: 'CPF inválido', detail: 'CPF inválido' } },
     });
+  });
+
+  it('recusa da nota leva o texto do Asaas em detail', () => {
+    const result = toHttpError(new AsaasServiceError('NFSE_SETUP_REJECTED', 'm', 'Alíquota inválida'), 'x');
+    expect(result).toEqual({
+      status: 400,
+      body: { success: false, error: { code: 'NFSE_SETUP_REJECTED', message: 'm', detail: 'Alíquota inválida' } },
+    });
+  });
+
+  it('log com código e texto do Asaas', () => {
+    const error = new AsaasApiError(400, [{ code: 'invalid_name', description: 'Máximo 250 caracteres.' }], '/invoices');
+    expect(asaasErrorLog(error)).toBe('status 400 [invalid_name: Máximo 250 caracteres.]');
+    expect(asaasErrorLog(new AsaasApiError(503, [], '/invoices'))).toBe('status 503');
   });
 
   it('mapeia 401 do Asaas para chave recusada', () => {

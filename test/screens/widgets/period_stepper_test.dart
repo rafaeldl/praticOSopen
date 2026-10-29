@@ -43,10 +43,7 @@ void main() {
 
     final text = tester.widget<Text>(find.text('Outubro de 2026'));
     final context = tester.element(find.text('Outubro de 2026'));
-    expect(
-      text.style?.color,
-      AppColors.textSecondary.resolveFrom(context),
-    );
+    expect(text.style?.color, AppColors.textSecondary.resolveFrom(context));
   });
 
   testWidgets('next chevron is disabled when there is no later period', (

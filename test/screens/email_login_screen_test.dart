@@ -35,13 +35,15 @@ Widget _app(Widget home, {AuthStore? auth, Brightness? brightness}) {
     ],
     home: home,
   );
-  return auth == null ? app : Provider<AuthStore>.value(value: auth, child: app);
+  return auth == null
+      ? app
+      : Provider<AuthStore>.value(value: auth, child: app);
 }
 
 Finder _field(String key) => find.descendant(
-      of: find.byKey(ValueKey(key)),
-      matching: find.byType(CupertinoTextField),
-    );
+  of: find.byKey(ValueKey(key)),
+  matching: find.byType(CupertinoTextField),
+);
 
 void main() {
   void tall(WidgetTester tester) {
@@ -51,11 +53,13 @@ void main() {
   }
 
   group('EmailLoginScreen', () {
-    testWidgets('sentence-case title, one primary button, forgot link',
-        (tester) async {
+    testWidgets('sentence-case title, one primary button, forgot link', (
+      tester,
+    ) async {
       tall(tester);
       await tester.pumpWidget(
-          _app(const EmailLoginScreen(), auth: _FakeAuthStore()));
+        _app(const EmailLoginScreen(), auth: _FakeAuthStore()),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Entrar com e-mail'), findsWidgets);
@@ -65,8 +69,9 @@ void main() {
       expect(find.text('CREDENCIAIS'), findsNothing);
     });
 
-    testWidgets('empty fields show plain errors and do not sign in',
-        (tester) async {
+    testWidgets('empty fields show plain errors and do not sign in', (
+      tester,
+    ) async {
       tall(tester);
       final auth = _FakeAuthStore();
       await tester.pumpWidget(_app(const EmailLoginScreen(), auth: auth));
@@ -79,11 +84,13 @@ void main() {
       expect(auth.calls, isEmpty);
     });
 
-    testWidgets('a field error goes away as soon as the field is filled',
-        (tester) async {
+    testWidgets('a field error goes away as soon as the field is filled', (
+      tester,
+    ) async {
       tall(tester);
       await tester.pumpWidget(
-          _app(const EmailLoginScreen(), auth: _FakeAuthStore()));
+        _app(const EmailLoginScreen(), auth: _FakeAuthStore()),
+      );
 
       await tester.tap(find.byKey(const ValueKey('email_login_submit')));
       await tester.pump();
@@ -95,8 +102,9 @@ void main() {
       expect(find.text('Escreva a sua senha.'), findsNothing);
     });
 
-    testWidgets('wrong password shows a fixed sentence and keeps the form',
-        (tester) async {
+    testWidgets('wrong password shows a fixed sentence and keeps the form', (
+      tester,
+    ) async {
       tall(tester);
       final auth = _FakeAuthStore()
         ..error = Exception('[firebase_auth/invalid-credential] raw message');
@@ -118,7 +126,8 @@ void main() {
       expect(find.text('ana@exemplo.com'), findsOneWidget);
       expect(find.byKey(const ValueKey('email_login_forgot')), findsOneWidget);
       final button = tester.widget<PrimaryButton>(
-          find.byKey(const ValueKey('email_login_submit')));
+        find.byKey(const ValueKey('email_login_submit')),
+      );
       expect(button.onPressed, isNotNull);
     });
 
@@ -133,16 +142,20 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('email_login_submit')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sem internet. Confira a conexão e tente de novo.'),
-          findsOneWidget);
+      expect(
+        find.text('Sem internet. Confira a conexão e tente de novo.'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('eye button has a spoken label and a 44pt target',
-        (tester) async {
+    testWidgets('eye button has a spoken label and a 44pt target', (
+      tester,
+    ) async {
       tall(tester);
       final semantics = tester.ensureSemantics();
       await tester.pumpWidget(
-          _app(const EmailLoginScreen(), auth: _FakeAuthStore()));
+        _app(const EmailLoginScreen(), auth: _FakeAuthStore()),
+      );
 
       final eye = find.byKey(const ValueKey('email_login_toggle_password'));
       final size = tester.getSize(eye);
@@ -161,8 +174,9 @@ void main() {
       tester.platformDispatcher.textScaleFactorTestValue = 2.0;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       final auth = _FakeAuthStore()..error = Exception('unknown');
-      await tester.pumpWidget(_app(const EmailLoginScreen(),
-          auth: auth, brightness: Brightness.dark));
+      await tester.pumpWidget(
+        _app(const EmailLoginScreen(), auth: auth, brightness: Brightness.dark),
+      );
 
       await tester.enterText(_field('email_login_email'), 'ana@exemplo.com');
       await tester.enterText(_field('email_login_password'), 'segredo');

@@ -18,7 +18,9 @@ import {
   isActiveInvoice,
   mapInvoiceStatus,
   parseInvoiceReference,
+  municipalServiceNameForAsaas,
   previewInvoice,
+  refusalCode,
 } from '../invoice.service';
 
 const USER = { id: 'u1', name: 'Ana' };
@@ -49,6 +51,12 @@ const CUSTOMER_REFUSAL = [
   { code: 'invalid_action', description: 'Endereço do cliente incompleto.' },
   { code: 'invalid_action', description: 'CEP do cliente é inválido.' },
 ];
+
+/** Item 14.01 of LC 116 (mechanics): longer than the 250 characters Asaas accepts. */
+const LONG_SERVICE_NAME =
+  '14.01.01 - Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, ' +
+  'manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer ' +
+  'objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).';
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60 * 1000).toISOString();
 
@@ -281,6 +289,46 @@ describe('invoice.service', () => {
       expect(read(LOCK('o182'))!.invoiceId).toBe(invoice.id);
     });
 
+    it('nome do serviço com mais de 250 caracteres vai cortado (o Asaas recusa maior)', async () => {
+      expect(LONG_SERVICE_NAME.length).toBeGreaterThan(250);
+      seed('companies/c1/settings/nfse', { ...read('companies/c1/settings/nfse')!, municipalServiceName: LONG_SERVICE_NAME });
+      const invoice = await createInvoice('c1', { orderIds: ['o182'] }, USER);
+      const sent = client.createInvoice.mock.calls[0][0].municipalServiceName as string;
+      expect(sent).toHaveLength(250);
+      expect(sent.endsWith('…')).toBe(true);
+      expect(LONG_SERVICE_NAME.startsWith(sent.slice(0, -1))).toBe(true);
+      // The nota keeps the whole name for the app.
+      expect(read(INV(invoice.id))!.municipalServiceName).toBe(LONG_SERVICE_NAME);
+      expect(municipalServiceNameForAsaas('  Manutenção  ')).toBe('Manutenção');
+    });
+
+    it('classifica a recusa do Asaas: cliente, configuração da nota ou desconhecida', () => {
+      const refusal = (description: string) => new AsaasApiError(400, [{ code: 'x', description }], '/invoices');
+      expect(refusalCode(refusal('CEP do cliente é inválido.'))).toBe('CUSTOMER_DATA_REQUIRED');
+      expect(refusalCode(refusal('A descrição do serviço deve ter no máximo 250 caracteres.'))).toBe('NFSE_SETUP_REJECTED');
+      expect(refusalCode(refusal('Inscrição municipal inválida'))).toBe('NFSE_SETUP_REJECTED');
+      expect(refusalCode(refusal('Alíquota de ISS inválida'))).toBe('NFSE_SETUP_REJECTED');
+      expect(refusalCode(refusal('Valor acima do permitido'))).toBe('ASAAS_REJECTED');
+    });
+
+    it('create recusado por configuração: NFSE_SETUP_REJECTED com o texto do Asaas, OS livre', async () => {
+      client.createInvoice.mockRejectedValueOnce(new AsaasApiError(400, [
+        { code: 'invalid_name', description: 'A descrição do serviço deve ter no máximo 250 caracteres.' },
+      ], '/invoices'));
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'NFSE_SETUP_REJECTED', detail: 'A descrição do serviço deve ter no máximo 250 caracteres.',
+      });
+      expect(read(LOCK('o182'))).toBeUndefined();
+      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('invalid_name: A descrição do serviço'));
+    });
+
+    it('create recusado por dados do cliente: CUSTOMER_DATA_REQUIRED (a folha pede os dados)', async () => {
+      client.createInvoice.mockRejectedValueOnce(new AsaasApiError(400, CUSTOMER_REFUSAL, '/invoices'));
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'CUSTOMER_DATA_REQUIRED', detail: expect.stringContaining('CEP do cliente é inválido.'),
+      });
+    });
+
     it('com código digitado manda o código, nunca os dois', async () => {
       seed('companies/c1/settings/nfse', {
         municipalServiceId: null, municipalServiceCode: '14.01', municipalServiceName: 'Manutenção', taxes: TAXES,
@@ -419,14 +467,25 @@ describe('invoice.service', () => {
       expect(read(LOCK('o182'))!.invoiceId).toBe(second.id);
     });
 
-    it('authorize recusado por outro motivo: devolve o erro do Asaas e guarda o texto dele', async () => {
-      const refusal = new AsaasApiError(400, [{ code: 'x', description: 'Alíquota inválida' }], '/invoices/inv_1/authorize');
+    it('authorize recusado por motivo desconhecido: devolve o erro do Asaas e guarda o texto dele', async () => {
+      const refusal = new AsaasApiError(400, [{ code: 'x', description: 'Valor acima do permitido' }], '/invoices/inv_1/authorize');
       client.authorizeInvoice.mockRejectedValue(refusal);
       await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toBe(refusal);
       const lock = read(LOCK('o182'))!;
       expect(read(INV(lock.invoiceId as string))).toMatchObject({
-        status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Alíquota inválida',
+        status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Valor acima do permitido',
       });
+    });
+
+    it('authorize recusado pela configuração da nota: NFSE_SETUP_REJECTED (o app abre a configuração)', async () => {
+      client.authorizeInvoice.mockRejectedValue(
+        new AsaasApiError(400, [{ code: 'x', description: 'Alíquota inválida' }], '/invoices/inv_1/authorize'),
+      );
+      await expect(createInvoice('c1', { orderIds: ['o182'] }, USER)).rejects.toMatchObject({
+        code: 'NFSE_SETUP_REJECTED', detail: 'Alíquota inválida',
+      });
+      const lock = read(LOCK('o182'))!;
+      expect(read(INV(lock.invoiceId as string))).toMatchObject({ status: 'error', errorCode: 'NFSE_SETUP_REJECTED' });
     });
 
     it('authorize recusado e cancelamento falhou: fica agendada com o motivo (OS presa até cancelar)', async () => {
@@ -687,7 +746,7 @@ describe('invoice.service', () => {
       const invoices = await invoicesOf('o182');
       expect(invoices).toHaveLength(1);
       expect(invoices[0]).toMatchObject({
-        id: 'auto-o182', status: 'error', errorCode: 'ASAAS_REJECTED', statusDescription: 'Inscrição municipal inválida',
+        id: 'auto-o182', status: 'error', errorCode: 'NFSE_SETUP_REJECTED', statusDescription: 'Inscrição municipal inválida',
       });
     });
 

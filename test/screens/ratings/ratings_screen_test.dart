@@ -48,8 +48,9 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('title, subtitle, average and rows as in the prototype',
-      (tester) async {
+  testWidgets('title, subtitle, average and rows as in the prototype', (
+    tester,
+  ) async {
     await pump(
       tester,
       () async => [

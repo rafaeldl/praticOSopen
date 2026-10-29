@@ -45,9 +45,9 @@ class _Harness {
                     );
                     result = editing == null
                         ? await FormSheet.show<Device>(context, (_) => form)
-                        : await Navigator.of(context).push(
-                            CupertinoPageRoute(builder: (_) => form),
-                          );
+                        : await Navigator.of(
+                            context,
+                          ).push(CupertinoPageRoute(builder: (_) => form));
                   },
                 ),
               ),
@@ -96,8 +96,9 @@ void main() {
     expect(h.saved, isEmpty);
   });
 
-  testWidgets('✓ is gray with the hint until the plate is filled',
-      (tester) async {
+  testWidgets('✓ is gray with the hint until the plate is filled', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
 
@@ -114,8 +115,9 @@ void main() {
     expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
   });
 
-  testWidgets('with something typed, "X" asks and dragging is locked',
-      (tester) async {
+  testWidgets('with something typed, "X" asks and dragging is locked', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
     final route =
@@ -136,13 +138,17 @@ void main() {
     expect(h.saved, isEmpty);
   });
 
-  testWidgets('choosing a suggestion fills brand and category, then saves',
-      (tester) async {
+  testWidgets('choosing a suggestion fills brand and category, then saves', (
+    tester,
+  ) async {
     final h = _Harness();
-    await h.open(tester, devices: [
-      known('Fiat Uno 2015', 'Fiat', 'Carro'),
-      known('Gol 1.0', 'VW', 'Carro'),
-    ]);
+    await h.open(
+      tester,
+      devices: [
+        known('Fiat Uno 2015', 'Fiat', 'Carro'),
+        known('Gol 1.0', 'VW', 'Carro'),
+      ],
+    );
 
     await tester.enterText(find.byType(EditableText).first, 'uno');
     await tester.pumpAndSettle();
@@ -170,8 +176,9 @@ void main() {
     expect(h.result, same(device));
   });
 
-  testWidgets('typed model with no match offers "Usar" and is kept',
-      (tester) async {
+  testWidgets('typed model with no match offers "Usar" and is kept', (
+    tester,
+  ) async {
     final h = _Harness();
     await h.open(tester);
 

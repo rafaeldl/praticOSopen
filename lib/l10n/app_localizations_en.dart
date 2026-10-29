@@ -5351,6 +5351,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'The city needs the customer\'s email and full address (with ZIP code). Fill them in and issue again.';
 
   @override
+  String nfseErrorAsaasSaid(String detail) {
+    return 'Asaas refused the invoice: $detail';
+  }
+
+  @override
+  String get nfseErrorSetupRejected =>
+      'Asaas refused the invoice setup (service or tax data). Check it in Set up.';
+
+  @override
   String get nfseCustomerDataIntro =>
       'The city needs the customer\'s email and address. They are saved on the customer.';
 

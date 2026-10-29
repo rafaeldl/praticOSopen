@@ -5366,6 +5366,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'La alcaldía pide el correo y la dirección completa del cliente (con código postal). Complétalos y emite de nuevo.';
 
   @override
+  String nfseErrorAsaasSaid(String detail) {
+    return 'Asaas rechazó la factura: $detail';
+  }
+
+  @override
+  String get nfseErrorSetupRejected =>
+      'Asaas rechazó la configuración de la factura (servicio o datos fiscales). Revísala en Configurar.';
+
+  @override
   String get nfseCustomerDataIntro =>
       'La alcaldía pide el correo y la dirección del cliente. Quedan guardados en su registro.';
 

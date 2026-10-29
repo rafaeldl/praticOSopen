@@ -5,13 +5,16 @@ import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/payment_settings.dart';
 import 'package:praticos/screens/payments/send_charge_flow.dart';
 
-Order _order({String status = 'approved', double total = 950, double paid = 0}) =>
-    Order()
-      ..id = 'o1'
-      ..number = 42
-      ..status = status
-      ..total = total
-      ..paidAmount = paid;
+Order _order({
+  String status = 'approved',
+  double total = 950,
+  double paid = 0,
+}) => Order()
+  ..id = 'o1'
+  ..number = 42
+  ..status = status
+  ..total = total
+  ..paidAmount = paid;
 
 final _connected = PaymentSettings(asaasEnabled: true, asaasConnected: true);
 
@@ -22,20 +25,26 @@ void main() {
       PaymentSettings? settings,
       Order? order,
       OrderCharge? openCharge,
-    }) =>
-        decideSendChargeAction(
-          canCharge: canCharge,
-          settings: settings ?? _connected,
-          order: order ?? _order(),
-          openCharge: openCharge,
-        );
+    }) => decideSendChargeAction(
+      canCharge: canCharge,
+      settings: settings ?? _connected,
+      order: order ?? _order(),
+      openCharge: openCharge,
+    );
 
     test('without Asaas keeps sharing the order link', () {
-      expect(decide(settings: PaymentSettings()), SendChargeAction.shareOrderLink);
-      expect(decide(settings: PaymentSettings(asaasEnabled: true)),
-          SendChargeAction.shareOrderLink);
-      expect(decide(settings: PaymentSettings(asaasConnected: true)),
-          SendChargeAction.shareOrderLink);
+      expect(
+        decide(settings: PaymentSettings()),
+        SendChargeAction.shareOrderLink,
+      );
+      expect(
+        decide(settings: PaymentSettings(asaasEnabled: true)),
+        SendChargeAction.shareOrderLink,
+      );
+      expect(
+        decide(settings: PaymentSettings(asaasConnected: true)),
+        SendChargeAction.shareOrderLink,
+      );
     });
 
     test('without chargeOrder permission keeps sharing the order link', () {
@@ -43,23 +52,38 @@ void main() {
     });
 
     test('quote, canceled or nothing left to pay never creates a charge', () {
-      expect(decide(order: _order(status: 'quote')), SendChargeAction.shareOrderLink);
-      expect(decide(order: _order(status: 'canceled')), SendChargeAction.shareOrderLink);
+      expect(
+        decide(order: _order(status: 'quote')),
+        SendChargeAction.shareOrderLink,
+      );
+      expect(
+        decide(order: _order(status: 'canceled')),
+        SendChargeAction.shareOrderLink,
+      );
       expect(decide(order: _order(paid: 950)), SendChargeAction.shareOrderLink);
-      expect(decide(order: _order()..id = null), SendChargeAction.shareOrderLink);
+      expect(
+        decide(order: _order()..id = null),
+        SendChargeAction.shareOrderLink,
+      );
     });
 
     test('Asaas with an open charge reuses it', () {
-      expect(decide(openCharge: OrderCharge(status: ChargeStatus.pending)),
-          SendChargeAction.shareExistingCharge);
-      expect(decide(openCharge: OrderCharge(status: ChargeStatus.overdue)),
-          SendChargeAction.shareExistingCharge);
+      expect(
+        decide(openCharge: OrderCharge(status: ChargeStatus.pending)),
+        SendChargeAction.shareExistingCharge,
+      );
+      expect(
+        decide(openCharge: OrderCharge(status: ChargeStatus.overdue)),
+        SendChargeAction.shareExistingCharge,
+      );
     });
 
     test('Asaas without an open charge creates one first', () {
       expect(decide(), SendChargeAction.createChargeThenShare);
-      expect(decide(openCharge: OrderCharge(status: ChargeStatus.paid)),
-          SendChargeAction.createChargeThenShare);
+      expect(
+        decide(openCharge: OrderCharge(status: ChargeStatus.paid)),
+        SendChargeAction.createChargeThenShare,
+      );
     });
   });
 
@@ -68,12 +92,16 @@ void main() {
     late BuildContext ctx;
 
     Future<void> pumpHost(WidgetTester tester) async {
-      await tester.pumpWidget(CupertinoApp(
-        home: Builder(builder: (context) {
-          ctx = context;
-          return const SizedBox();
-        }),
-      ));
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Builder(
+            builder: (context) {
+              ctx = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
     }
 
     SendChargeFlow flow({
@@ -99,13 +127,16 @@ void main() {
 
     testWidgets('no Asaas: only shares, never creates', (tester) async {
       await pumpHost(tester);
-      final action = await flow(settings: () async => PaymentSettings())
-          .send(ctx, _order());
+      final action = await flow(
+        settings: () async => PaymentSettings(),
+      ).send(ctx, _order());
       expect(action, SendChargeAction.shareOrderLink);
       expect(calls, ['share:o1']);
     });
 
-    testWidgets('no permission: does not even read Asaas state', (tester) async {
+    testWidgets('no permission: does not even read Asaas state', (
+      tester,
+    ) async {
       await pumpHost(tester);
       var read = false;
       final action = await flow(
@@ -120,24 +151,28 @@ void main() {
       expect(calls, ['share:o1']);
     });
 
-    testWidgets('Asaas without charge: creates with the balance, then shares',
-        (tester) async {
+    testWidgets('Asaas without charge: creates with the balance, then shares', (
+      tester,
+    ) async {
       await pumpHost(tester);
-      final action = await flow(created: OrderCharge(id: 'ch1'))
-          .send(ctx, _order(total: 950, paid: 200));
+      final action = await flow(
+        created: OrderCharge(id: 'ch1'),
+      ).send(ctx, _order(total: 950, paid: 200));
       expect(action, SendChargeAction.createChargeThenShare);
       expect(calls, ['create:750.0', 'share:o1']);
     });
 
-    testWidgets('Asaas: giving up on the charge screen shares nothing',
-        (tester) async {
+    testWidgets('Asaas: giving up on the charge screen shares nothing', (
+      tester,
+    ) async {
       await pumpHost(tester);
       await flow(created: null).send(ctx, _order());
       expect(calls, ['create:950.0']);
     });
 
-    testWidgets('Asaas with open charge: shares without creating another',
-        (tester) async {
+    testWidgets('Asaas with open charge: shares without creating another', (
+      tester,
+    ) async {
       await pumpHost(tester);
       final action = await flow(
         openCharge: (_) async => OrderCharge(status: ChargeStatus.pending),
@@ -146,8 +181,9 @@ void main() {
       expect(calls, ['share:o1']);
     });
 
-    testWidgets('charges cannot be read: falls back to the order link',
-        (tester) async {
+    testWidgets('charges cannot be read: falls back to the order link', (
+      tester,
+    ) async {
       await pumpHost(tester);
       final action = await flow(
         openCharge: (_) async => throw Exception('permission-denied'),

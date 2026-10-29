@@ -5351,6 +5351,15 @@ class AppLocalizationsPt extends AppLocalizations {
       'A prefeitura pede o e-mail e o endereço completo do cliente (com CEP). Preencha e emita de novo.';
 
   @override
+  String nfseErrorAsaasSaid(String detail) {
+    return 'O Asaas recusou a nota: $detail';
+  }
+
+  @override
+  String get nfseErrorSetupRejected =>
+      'O Asaas recusou a configuração da nota (serviço ou dados fiscais). Confira em Configurar.';
+
+  @override
   String get nfseCustomerDataIntro =>
       'A prefeitura pede o e-mail e o endereço do cliente. Ficam salvos no cadastro dele.';
 

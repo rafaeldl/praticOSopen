@@ -959,7 +959,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       await showNfseNotReady(context, sandbox: _nfse.sandbox);
       return;
     }
-    final invoice = await NfseIssueSheet.show(context, orderIds: [order.id!]);
+    final invoice = await NfseIssueSheet.show(
+      context,
+      orderIds: [order.id!],
+      sandbox: _nfse.sandbox,
+    );
     if (invoice != null && mounted) {
       showAppToast(
         context,

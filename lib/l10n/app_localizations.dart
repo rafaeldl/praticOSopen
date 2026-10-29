@@ -8906,6 +8906,18 @@ abstract class AppLocalizations {
   /// **'A prefeitura pede o e-mail e o endereço completo do cliente (com CEP). Preencha e emita de novo.'**
   String get nfseErrorCustomerData;
 
+  /// No description provided for @nfseErrorAsaasSaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas recusou a nota: {detail}'**
+  String nfseErrorAsaasSaid(String detail);
+
+  /// No description provided for @nfseErrorSetupRejected.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Asaas recusou a configuração da nota (serviço ou dados fiscais). Confira em Configurar.'**
+  String get nfseErrorSetupRejected;
+
   /// No description provided for @nfseCustomerDataIntro.
   ///
   /// In pt, this message translates to:

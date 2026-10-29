@@ -7,7 +7,8 @@ import 'package:praticos/services/asaas_api_service.dart';
 /// generic text.
 ///
 /// [nota] is for the nota fiscal screens: an Asaas rejection there is about
-/// the fiscal data, not a charge.
+/// the fiscal data, not a charge, and Asaas's own text (`detail`, pt-BR)
+/// says what to fix, so it is shown when the server sent it.
 String asaasErrorText(
   AppLocalizations l10n,
   AsaasApiException e, {
@@ -52,7 +53,14 @@ String asaasErrorText(
     case 'CHARGE_NOT_OPEN':
       return l10n.asaasErrorChargeNotOpen;
     case 'ASAAS_VALIDATION_ERROR':
-      return nota ? l10n.nfseErrorAsaasValidation : l10n.asaasErrorValidation;
+      if (!nota) return l10n.asaasErrorValidation;
+      return e.detail != null
+          ? l10n.nfseErrorAsaasSaid(e.detail!)
+          : l10n.nfseErrorAsaasValidation;
+    case 'NFSE_SETUP_REJECTED':
+      return e.detail != null
+          ? l10n.nfseErrorAsaasSaid(e.detail!)
+          : l10n.nfseErrorSetupRejected;
     case 'NFSE_NOT_ENABLED':
       return l10n.nfseErrorNotEnabled;
     case 'NFSE_NOT_READY':

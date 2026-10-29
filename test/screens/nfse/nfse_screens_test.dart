@@ -43,14 +43,19 @@ class _Server {
   );
 }
 
-http.Response _error(String code, {int status = 409}) => http.Response(
-  jsonEncode({
-    'success': false,
-    'error': {'code': code, 'message': 'raw'},
-  }),
-  status,
-  headers: {'content-type': 'application/json'},
-);
+http.Response _error(String code, {int status = 409, String? detail}) =>
+    http.Response(
+      jsonEncode({
+        'success': false,
+        'error': {
+          'code': code,
+          'message': 'raw',
+          if (detail != null) 'detail': detail,
+        },
+      }),
+      status,
+      headers: {'content-type': 'application/json'},
+    );
 
 Future<void> _pump(
   WidgetTester tester,
@@ -84,6 +89,7 @@ Future<List<NfseInvoice?>> _openIssue(
   List<String> orderIds = const ['o1'],
   String? customerId,
   double textScale = 1,
+  bool? canSetUp,
 }) async {
   final results = <NfseInvoice?>[];
   await _pump(
@@ -99,6 +105,7 @@ Future<List<NfseInvoice?>> _openIssue(
                 orderIds: orderIds,
                 customerId: customerId,
                 service: api,
+                canSetUp: canSetUp,
               ),
             ),
           ),
@@ -400,17 +407,22 @@ void main() {
     });
 
     testWidgets(
-      'server asks for customer data: says why and shows the fields',
+      'Asaas refuses the customer data: says why and shows every field',
       (tester) async {
         var previews = 0;
         final server = _Server((method, path, body) {
           if (path == '/invoices/preview') {
             previews += 1;
-            return previews == 1
-                ? _preview()
-                : _preview(missingData: ['email']);
+            // Asaas has the data (nothing "missing"), it just refused it.
+            return _preview(
+              contact: {'email': 'joao@example.com', 'postalCode': '00000000'},
+            );
           }
-          return _error('CUSTOMER_DATA_REQUIRED', status: 400);
+          return _error(
+            'CUSTOMER_DATA_REQUIRED',
+            status: 400,
+            detail: 'CEP do cliente é inválido.',
+          );
         });
         await _openIssue(tester, server.api);
         expect(find.byKey(const Key('nfseIssueContact_email')), findsNothing);
@@ -421,11 +433,75 @@ void main() {
           find.textContaining('e-mail e o endereço completo do cliente'),
           findsOneWidget,
         );
+        expect(
+          find.textContaining('CEP do cliente é inválido.'),
+          findsOneWidget,
+        );
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
+        expect(previews, 2);
         expect(find.byKey(const Key('nfseIssueContact_email')), findsOneWidget);
+        expect(
+          find.byKey(const Key('nfseIssueContact_postalCode')),
+          findsOneWidget,
+        );
+        expect(find.text('joao@example.com'), findsOneWidget);
       },
     );
+
+    testWidgets('Asaas refuses the setup: shows its text and opens the setup', (
+      tester,
+    ) async {
+      const said = 'A descrição do serviço deve ter no máximo 250 caracteres.';
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        if (path == '/invoices') {
+          return _error('NFSE_SETUP_REJECTED', status: 400, detail: said);
+        }
+        return _error('ASAAS_UNAVAILABLE', status: 502);
+      });
+      await _openIssue(tester, server.api, canSetUp: true);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(said), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('nfseIssueRefusalAction')));
+      await tester.pumpAndSettle();
+      expect(find.byType(NfseSetupScreen), findsOneWidget);
+      expect(server.calls.last.$2, '/setup');
+    });
+
+    testWidgets('setup refused and the user cannot set it up: says who can', (
+      tester,
+    ) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        return _error('NFSE_SETUP_REJECTED', status: 400, detail: 'x');
+      });
+      await _openIssue(tester, server.api, canSetUp: false);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('nfseIssueRefusalAction')), findsNothing);
+      expect(find.textContaining('Peça ao dono'), findsOneWidget);
+    });
+
+    testWidgets('unknown refusal shows what Asaas said', (tester) async {
+      final server = _Server((method, path, body) {
+        if (path == '/invoices/preview') return _preview();
+        return _error(
+          'ASAAS_VALIDATION_ERROR',
+          status: 400,
+          detail: 'Valor acima do permitido',
+        );
+      });
+      await _openIssue(tester, server.api);
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('O Asaas recusou a nota: Valor acima do permitido'),
+        findsOneWidget,
+      );
+    });
 
     testWidgets('an order that already has a nota blocks it', (tester) async {
       final server = _Server(

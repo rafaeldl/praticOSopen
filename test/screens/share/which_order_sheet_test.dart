@@ -9,24 +9,23 @@ import 'package:praticos/screens/share/which_order_sheet.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/received_share.dart';
 
-Order _order(String id, int number, String status, String customer) =>
-    Order()
-      ..id = id
-      ..number = number
-      ..status = status
-      ..customer = (CustomerAggr()..name = customer);
+Order _order(String id, int number, String status, String customer) => Order()
+  ..id = id
+  ..number = number
+  ..status = status
+  ..customer = (CustomerAggr()..name = customer);
 
 Widget _app(Widget child) => CupertinoApp(
-      locale: const Locale('pt', 'BR'),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('pt', 'BR')],
-      home: child,
-    );
+  locale: const Locale('pt', 'BR'),
+  localizationsDelegates: const [
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: const [Locale('pt', 'BR')],
+  home: child,
+);
 
 final _batch = ReceivedBatch(const [
   ReceivedFile(path: '/c/1.jpg', mimeType: 'image/jpeg'),
@@ -46,13 +45,17 @@ void main() {
   });
 
   testWidgets('shows title, summary and rows with status dot', (tester) async {
-    await tester.pumpWidget(_app(WhichOrderSheet(
-      batch: _batch,
-      orders: [
-        _order('1', 12, 'progress', 'Maria'),
-        _order('2', 11, 'approved', 'João'),
-      ],
-    )));
+    await tester.pumpWidget(
+      _app(
+        WhichOrderSheet(
+          batch: _batch,
+          orders: [
+            _order('1', 12, 'progress', 'Maria'),
+            _order('2', 11, 'approved', 'João'),
+          ],
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Em qual OS?'), findsOneWidget);
     expect(find.text('1 foto e 1 PDF'), findsOneWidget);
@@ -64,21 +67,25 @@ void main() {
 
   testWidgets('tapping an order pops it right away', (tester) async {
     WhichOrderChoice? picked;
-    await tester.pumpWidget(_app(Builder(
-      builder: (context) => CupertinoButton(
-        child: const Text('open'),
-        onPressed: () async {
-          picked = await Navigator.of(context).push<WhichOrderChoice>(
-            CupertinoPageRoute(
-              builder: (_) => WhichOrderSheet(
-                batch: _batch,
-                orders: [_order('1', 12, 'progress', 'Maria')],
-              ),
-            ),
-          );
-        },
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) => CupertinoButton(
+            child: const Text('open'),
+            onPressed: () async {
+              picked = await Navigator.of(context).push<WhichOrderChoice>(
+                CupertinoPageRoute(
+                  builder: (_) => WhichOrderSheet(
+                    batch: _batch,
+                    orders: [_order('1', 12, 'progress', 'Maria')],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
-    )));
+    );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Maria'));
@@ -88,7 +95,9 @@ void main() {
   });
 
   testWidgets('empty list shows the no-open-orders state', (tester) async {
-    await tester.pumpWidget(_app(WhichOrderSheet(batch: _batch, orders: const [])));
+    await tester.pumpWidget(
+      _app(WhichOrderSheet(batch: _batch, orders: const [])),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Nenhuma OS em aberto.'), findsOneWidget);
   });
@@ -101,10 +110,12 @@ void main() {
           ..serial = serial,
       ];
 
-    test('matches number, customer (no accents/case) and vehicle or plate',
-        () {
+    test('matches number, customer (no accents/case) and vehicle or plate', () {
       final o = withDevice(
-          _order('1', 193, 'progress', 'João Pereira'), 'Gol 2018', 'ABC-1D23');
+        _order('1', 193, 'progress', 'João Pereira'),
+        'Gol 2018',
+        'ABC-1D23',
+      );
       expect(orderMatchesSearch(o, '193'), isTrue);
       expect(orderMatchesSearch(o, '#193'), isTrue);
       expect(orderMatchesSearch(o, '# 19'), isTrue);
@@ -117,30 +128,37 @@ void main() {
       expect(orderMatchesSearch(o, 'maria'), isFalse);
     });
 
-    test('searchOrders finds done orders, drops canceled, one row per order',
-        () {
-      final found = searchOrders([
-        _order('1', 10, 'done', 'Ana'),
-        _order('2', 12, 'canceled', 'Ana'),
-        _order('3', 11, 'progress', 'Ana'),
-        _order('3', 11, 'progress', 'Ana'),
-        null,
-      ], 'ana');
-      expect(found.map((o) => o.id), ['3', '1']);
-    });
+    test(
+      'searchOrders finds done orders, drops canceled, one row per order',
+      () {
+        final found = searchOrders([
+          _order('1', 10, 'done', 'Ana'),
+          _order('2', 12, 'canceled', 'Ana'),
+          _order('3', 11, 'progress', 'Ana'),
+          _order('3', 11, 'progress', 'Ana'),
+          null,
+        ], 'ana');
+        expect(found.map((o) => o.id), ['3', '1']);
+      },
+    );
 
-    testWidgets('typing searches the latest orders, not only the open ones',
-        (tester) async {
+    testWidgets('typing searches the latest orders, not only the open ones', (
+      tester,
+    ) async {
       final queries = <String>[];
-      await tester.pumpWidget(_app(WhichOrderSheet(
-        batch: _batch,
-        orders: [_order('1', 12, 'progress', 'Maria')],
-        searchPool: [
-          _order('9', 5, 'done', 'Paulo Antônio'),
-          _order('8', 4, 'canceled', 'Paulo Antônio'),
-        ],
-        onQueryChanged: queries.add,
-      )));
+      await tester.pumpWidget(
+        _app(
+          WhichOrderSheet(
+            batch: _batch,
+            orders: [_order('1', 12, 'progress', 'Maria')],
+            searchPool: [
+              _order('9', 5, 'done', 'Paulo Antônio'),
+              _order('8', 4, 'canceled', 'Paulo Antônio'),
+            ],
+            onQueryChanged: queries.add,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       // The search shows even with a short list: it reaches older orders.
       expect(find.byType(CupertinoSearchTextField), findsOneWidget);
@@ -155,11 +173,15 @@ void main() {
     });
 
     testWidgets('shows loading while the latest orders load', (tester) async {
-      await tester.pumpWidget(_app(WhichOrderSheet(
-        batch: _batch,
-        orders: [_order('1', 12, 'progress', 'Maria')],
-        searching: true,
-      )));
+      await tester.pumpWidget(
+        _app(
+          WhichOrderSheet(
+            batch: _batch,
+            orders: [_order('1', 12, 'progress', 'Maria')],
+            searching: true,
+          ),
+        ),
+      );
       await tester.pump();
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
     });
@@ -168,22 +190,26 @@ void main() {
   group('"+" Nova OS', () {
     Future<WhichOrderChoice?> openAndTapAdd(WidgetTester tester) async {
       WhichOrderChoice? picked;
-      await tester.pumpWidget(_app(Builder(
-        builder: (context) => CupertinoButton(
-          child: const Text('open'),
-          onPressed: () async {
-            picked = await Navigator.of(context).push<WhichOrderChoice>(
-              CupertinoPageRoute(
-                builder: (_) => WhichOrderSheet(
-                  batch: _batch,
-                  orders: [_order('1', 12, 'progress', 'Maria')],
-                  canCreate: true,
-                ),
-              ),
-            );
-          },
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => CupertinoButton(
+              child: const Text('open'),
+              onPressed: () async {
+                picked = await Navigator.of(context).push<WhichOrderChoice>(
+                  CupertinoPageRoute(
+                    builder: (_) => WhichOrderSheet(
+                      batch: _batch,
+                      orders: [_order('1', 12, 'progress', 'Maria')],
+                      canCreate: true,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
-      )));
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('picker-add')));
@@ -198,21 +224,24 @@ void main() {
     });
 
     testWidgets('hidden for who cannot create orders', (tester) async {
-      await tester.pumpWidget(_app(WhichOrderSheet(
-        batch: _batch,
-        orders: [_order('1', 12, 'progress', 'Maria')],
-      )));
+      await tester.pumpWidget(
+        _app(
+          WhichOrderSheet(
+            batch: _batch,
+            orders: [_order('1', 12, 'progress', 'Maria')],
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('picker-add')), findsNothing);
     });
 
-    testWidgets('no open orders: the empty state offers "Nova OS"',
-        (tester) async {
-      await tester.pumpWidget(_app(WhichOrderSheet(
-        batch: _batch,
-        orders: const [],
-        canCreate: true,
-      )));
+    testWidgets('no open orders: the empty state offers "Nova OS"', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(WhichOrderSheet(batch: _batch, orders: const [], canCreate: true)),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Nenhuma OS em aberto.'), findsOneWidget);
       expect(find.text('Nova OS'), findsOneWidget);

@@ -59,9 +59,7 @@ void main() {
     test('carries "repeat" and the onCreated callback', () {
       void onCreated(String id) {}
       expect(newOrderArguments(repeat: true), {'repeat': true});
-      expect(newOrderArguments(onCreated: onCreated), {
-        'onCreated': onCreated,
-      });
+      expect(newOrderArguments(onCreated: onCreated), {'onCreated': onCreated});
     });
   });
 }

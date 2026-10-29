@@ -32,17 +32,19 @@ void main() {
       );
     });
 
-    test('hides Financeiro when the company does not use values and billing',
-        () {
-      expect(
-        visibleAppTabs(
-          useScheduling: true,
-          canViewFinancialReports: true,
-          useFinancial: false,
-        ),
-        [AppTab.home, AppTab.agenda],
-      );
-    });
+    test(
+      'hides Financeiro when the company does not use values and billing',
+      () {
+        expect(
+          visibleAppTabs(
+            useScheduling: true,
+            canViewFinancialReports: true,
+            useFinancial: false,
+          ),
+          [AppTab.home, AppTab.agenda],
+        );
+      },
+    );
 
     test('every combination keeps the relative order of AppTab', () {
       for (final scheduling in [true, false]) {

@@ -15,10 +15,7 @@ import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:provider/provider.dart';
 
 class FakeSource implements CatalogSource {
-  FakeSource({
-    this.services = const [],
-    this.products = const [],
-  });
+  FakeSource({this.services = const [], this.products = const []});
 
   final List<CatalogItem> services;
   final List<CatalogItem> products;
@@ -41,8 +38,10 @@ class FakeSource implements CatalogSource {
 
   @override
   Future<String?> uploadPhoto(
-          CatalogKind kind, CatalogItem item, PhotoOrigin from) async =>
-      null;
+    CatalogKind kind,
+    CatalogItem item,
+    PhotoOrigin from,
+  ) async => null;
 }
 
 CatalogItem item(String id, String name, [double? value]) =>
@@ -111,8 +110,9 @@ void main() {
       products: [item('p1', 'Filtro de óleo', 35.5)],
     );
 
-    testWidgets('shows the most used items of the kind on top, then all',
-        (tester) async {
+    testWidgets('shows the most used items of the kind on top, then all', (
+      tester,
+    ) async {
       await pump(
         tester,
         CatalogListScreen(
@@ -133,8 +133,9 @@ void main() {
       expect(first, lessThan(troca));
     });
 
-    testWidgets('is hidden while searching and when nothing was used',
-        (tester) async {
+    testWidgets('is hidden while searching and when nothing was used', (
+      tester,
+    ) async {
       await pump(
         tester,
         CatalogListScreen(
@@ -159,8 +160,7 @@ void main() {
       expect(find.text('Mais usados'), findsNothing);
     });
 
-    testWidgets('a failure loading usage keeps the plain list',
-        (tester) async {
+    testWidgets('a failure loading usage keeps the plain list', (tester) async {
       await pump(
         tester,
         CatalogListScreen(
@@ -175,10 +175,13 @@ void main() {
   });
 
   group('catalog list: Serviços | Produtos', () {
-    testWidgets('segmented control switches between services and products',
-        (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
+    testWidgets('segmented control switches between services and products', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        CatalogListScreen(source: source, permissions: allPermissions),
+      );
       expect(find.text('Catálogo'), findsWidgets);
       expect(find.text('Troca de óleo'), findsOneWidget);
       expect(find.text('Filtro de óleo'), findsNothing);
@@ -190,14 +193,17 @@ void main() {
     });
 
     testWidgets('subtitle, segment counts and the footer tip', (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
+      await pump(
+        tester,
+        CatalogListScreen(source: source, permissions: allPermissions),
+      );
       expect(find.text('O que você coloca nas OS'), findsOneWidget);
       expect(find.text('Serviços (2)'), findsOneWidget);
       expect(find.text('Produtos (1)'), findsOneWidget);
       expect(
         find.text(
-            'Dica: dá para cadastrar direto na OS, digitando o nome na busca.'),
+          'Dica: dá para cadastrar direto na OS, digitando o nome na busca.',
+        ),
         findsOneWidget,
       );
 
@@ -207,13 +213,17 @@ void main() {
       expect(find.byKey(const Key('catalogTip')), findsNothing);
     });
 
-    testWidgets('item without price shows "sem valor"; priced one shows money',
-        (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
-      expect(find.text('sem valor'), findsOneWidget);
-      expect(find.textContaining('120,00'), findsOneWidget);
-    });
+    testWidgets(
+      'item without price shows "sem valor"; priced one shows money',
+      (tester) async {
+        await pump(
+          tester,
+          CatalogListScreen(source: source, permissions: allPermissions),
+        );
+        expect(find.text('sem valor'), findsOneWidget);
+        expect(find.textContaining('120,00'), findsOneWidget);
+      },
+    );
 
     testWidgets('prices are hidden without viewPrices', (tester) async {
       await pump(
@@ -232,8 +242,10 @@ void main() {
     });
 
     testWidgets('search filters the current segment', (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
+      await pump(
+        tester,
+        CatalogListScreen(source: source, permissions: allPermissions),
+      );
       await tester.enterText(find.byType(CupertinoSearchTextField), 'alinh');
       await tester.pumpAndSettle();
       expect(find.text('Alinhamento'), findsOneWidget);
@@ -244,15 +256,20 @@ void main() {
     });
 
     testWidgets('empty catalog explains what to do', (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: FakeSource(), permissions: allPermissions));
+      await pump(
+        tester,
+        CatalogListScreen(source: FakeSource(), permissions: allPermissions),
+      );
       expect(find.text('Você ainda não tem serviços'), findsOneWidget);
     });
 
-    testWidgets('tapping a row edits it (push with chevron, no swipe)',
-        (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
+    testWidgets('tapping a row edits it (push with chevron, no swipe)', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        CatalogListScreen(source: source, permissions: allPermissions),
+      );
       expect(find.byType(Dismissible), findsNothing);
       expect(find.byIcon(CupertinoIcons.chevron_forward), findsWidgets);
       await tester.tap(find.text('Troca de óleo'));
@@ -275,37 +292,43 @@ void main() {
   });
 
   group('catalog permissions', () {
-    testWidgets('manager sees the new button for the current kind',
-        (tester) async {
-      await pump(tester,
-          CatalogListScreen(source: source, permissions: allPermissions));
+    testWidgets('manager sees the new button for the current kind', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        CatalogListScreen(source: source, permissions: allPermissions),
+      );
       expect(find.text('Novo serviço'), findsOneWidget);
       await tester.tap(find.text('Produtos (1)'));
       await tester.pumpAndSettle();
       expect(find.text('Novo produto'), findsOneWidget);
     });
 
-    testWidgets('viewer has no create button, no chevron and rows do not open',
-        (tester) async {
-      await pump(
-        tester,
-        CatalogListScreen(
-          source: source,
-          permissions: only({
-            PermissionType.viewServices,
-            PermissionType.viewProducts,
-          }),
-        ),
-      );
-      expect(find.text('Novo serviço'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
-      await tester.tap(find.text('Troca de óleo'));
-      await tester.pumpAndSettle();
-      expect(find.byType(CatalogItemForm), findsNothing);
-    });
+    testWidgets(
+      'viewer has no create button, no chevron and rows do not open',
+      (tester) async {
+        await pump(
+          tester,
+          CatalogListScreen(
+            source: source,
+            permissions: only({
+              PermissionType.viewServices,
+              PermissionType.viewProducts,
+            }),
+          ),
+        );
+        expect(find.text('Novo serviço'), findsNothing);
+        expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
+        await tester.tap(find.text('Troca de óleo'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CatalogItemForm), findsNothing);
+      },
+    );
 
-    testWidgets('managing services does not allow creating products',
-        (tester) async {
+    testWidgets('managing services does not allow creating products', (
+      tester,
+    ) async {
       await pump(
         tester,
         CatalogListScreen(
@@ -323,8 +346,9 @@ void main() {
       expect(find.text('Novo produto'), findsNothing);
     });
 
-    testWidgets('only one viewable kind hides the segmented control',
-        (tester) async {
+    testWidgets('only one viewable kind hides the segmented control', (
+      tester,
+    ) async {
       await pump(
         tester,
         CatalogListScreen(
@@ -333,24 +357,29 @@ void main() {
           permissions: only({PermissionType.viewServices}),
         ),
       );
-      expect(find.byType(CupertinoSlidingSegmentedControl<CatalogKind>),
-          findsNothing);
+      expect(
+        find.byType(CupertinoSlidingSegmentedControl<CatalogKind>),
+        findsNothing,
+      );
       // Falls back to the kind the user can see.
       expect(find.text('Troca de óleo'), findsOneWidget);
     });
   });
 
   group('selection mode (from the order)', () {
-    testWidgets('titles the task, no segments/chevron/swipe, tap opens item',
-        (tester) async {
+    testWidgets('titles the task, no segments/chevron/swipe, tap opens item', (
+      tester,
+    ) async {
       final pushed = await pump(
         tester,
         CatalogListScreen(source: source, permissions: allPermissions),
         args: {'orderStore': 'store'},
       );
       expect(find.text('Qual serviço?'), findsOneWidget);
-      expect(find.byType(CupertinoSlidingSegmentedControl<CatalogKind>),
-          findsNothing);
+      expect(
+        find.byType(CupertinoSlidingSegmentedControl<CatalogKind>),
+        findsNothing,
+      );
       expect(find.byType(Dismissible), findsNothing);
       expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
       expect(find.text('Novo serviço'), findsOneWidget); // AddRow at the top
@@ -421,8 +450,9 @@ void main() {
       expect(find.byType(FormSheet), findsNothing);
     });
 
-    testWidgets('✓ is gray with the hint until the name is filled',
-        (tester) async {
+    testWidgets('✓ is gray with the hint until the name is filled', (
+      tester,
+    ) async {
       final src = FakeSource();
       await openSheet(tester, src);
       expect(saveEnabled(tester), isFalse);
@@ -437,8 +467,9 @@ void main() {
       expect(find.byKey(const ValueKey('form_sheet_missing')), findsNothing);
     });
 
-    testWidgets('with something typed, X asks before discarding',
-        (tester) async {
+    testWidgets('with something typed, X asks before discarding', (
+      tester,
+    ) async {
       final src = FakeSource(services: [item('s1', 'Troca de óleo', 120)]);
       await pump(
         tester,
@@ -480,8 +511,9 @@ void main() {
       expect(src2.saved.single.value, 150.0);
     });
 
-    testWidgets('product uses product labels; photo is in "Mais dados"',
-        (tester) async {
+    testWidgets('product uses product labels; photo is in "Mais dados"', (
+      tester,
+    ) async {
       await openSheet(tester, FakeSource(), kind: CatalogKind.product);
       expect(find.text('Novo produto'), findsOneWidget);
       expect(find.text('Ex.: Filtro de óleo'), findsOneWidget);
@@ -490,15 +522,19 @@ void main() {
       expect(find.text('+ Foto do produto'), findsOneWidget);
     });
 
-    testWidgets('english locale formats the price hint in dollars',
-        (tester) async {
+    testWidgets('english locale formats the price hint in dollars', (
+      tester,
+    ) async {
       await openSheet(tester, FakeSource(), locale: const Locale('en'));
       expect(find.text('New service'), findsOneWidget);
       expect(find.text(r'$0.00'), findsOneWidget);
     });
 
-    Future<void> pumpEdit(WidgetTester tester, FakeSource src,
-        CatalogPermissions perms) async {
+    Future<void> pumpEdit(
+      WidgetTester tester,
+      FakeSource src,
+      CatalogPermissions perms,
+    ) async {
       await pump(
         tester,
         CatalogItemForm(
@@ -510,8 +546,7 @@ void main() {
       );
     }
 
-    testWidgets('editing: "…" menu deletes after confirmation',
-        (tester) async {
+    testWidgets('editing: "…" menu deletes after confirmation', (tester) async {
       final src = FakeSource();
       await pumpEdit(tester, src, allPermissions);
       expect(find.text('Salvar serviço'), findsOneWidget);
@@ -527,24 +562,26 @@ void main() {
     });
 
     testWidgets(
-        'without viewPrices (values and billing off) the price field is '
-        'hidden and the stored price is kept on save', (tester) async {
-      final src = FakeSource();
-      await pumpEdit(
-        tester,
-        src,
-        CatalogPermissions((p) => p != PermissionType.viewPrices),
-      );
-      expect(find.text('Preço'), findsNothing);
-      await tester.tap(find.text('Salvar serviço'));
-      await tester.pumpAndSettle();
-      expect(src.saved.single.value, 120);
-    });
+      'without viewPrices (values and billing off) the price field is '
+      'hidden and the stored price is kept on save',
+      (tester) async {
+        final src = FakeSource();
+        await pumpEdit(
+          tester,
+          src,
+          CatalogPermissions((p) => p != PermissionType.viewPrices),
+        );
+        expect(find.text('Preço'), findsNothing);
+        await tester.tap(find.text('Salvar serviço'));
+        await tester.pumpAndSettle();
+        expect(src.saved.single.value, 120);
+      },
+    );
 
-    testWidgets('editing without manage permission has no delete menu',
-        (tester) async {
-      await pumpEdit(tester, FakeSource(),
-          only({PermissionType.viewServices}));
+    testWidgets('editing without manage permission has no delete menu', (
+      tester,
+    ) async {
+      await pumpEdit(tester, FakeSource(), only({PermissionType.viewServices}));
       expect(find.byIcon(CupertinoIcons.ellipsis_circle), findsNothing);
     });
   });
@@ -604,8 +641,9 @@ void main() {
       expect(picked?.item.name, 'Pastilha');
     });
 
-    testWidgets('with only one kind to create, opens the sheet directly',
-        (tester) async {
+    testWidgets('with only one kind to create, opens the sheet directly', (
+      tester,
+    ) async {
       await pump(
         tester,
         OrderItemSearchScreen(

@@ -58,17 +58,19 @@ void main() {
   }
 
   group('PendingInvitesScreen', () {
-    testWidgets('one invite: single primary button, decline is a text link',
-        (tester) async {
+    testWidgets('one invite: single primary button, decline is a text link', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([_invite('Oficina Exemplo', by: 'Ana')]);
-      await tester.pumpWidget(_app(PendingInvitesScreen(
-        loadOnInit: false,
-        onCreateCompany: () {},
-      )));
+      await tester.pumpWidget(
+        _app(PendingInvitesScreen(loadOnInit: false, onCreateCompany: () {})),
+      );
 
-      expect(find.text('Oficina Exemplo chamou você para a equipe'),
-          findsOneWidget);
+      expect(
+        find.text('Oficina Exemplo chamou você para a equipe'),
+        findsOneWidget,
+      );
       expect(find.text('Entrar na equipe'), findsOneWidget);
       expect(find.text('Recusar convite'), findsOneWidget);
       expect(find.text('Tenho outro código'), findsOneWidget);
@@ -76,22 +78,27 @@ void main() {
       // No filled Cupertino buttons anymore.
       expect(find.byType(CupertinoButton), findsWidgets);
       expect(
-          find.byWidgetPredicate(
-              (w) => w is CupertinoButton && w.color != null),
-          findsNothing);
+        find.byWidgetPredicate((w) => w is CupertinoButton && w.color != null),
+        findsNothing,
+      );
       expect(find.textContaining('Convidado por Ana'), findsOneWidget);
     });
 
-    testWidgets('accepting shows a quick notice and goes on, no alert',
-        (tester) async {
+    testWidgets('accepting shows a quick notice and goes on, no alert', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([_invite('Oficina Exemplo', by: 'Ana')]);
       var accepted = false;
-      await tester.pumpWidget(_app(PendingInvitesScreen(
-        loadOnInit: false,
-        acceptInviteOverride: (_) async {},
-        onInviteAccepted: () => accepted = true,
-      )));
+      await tester.pumpWidget(
+        _app(
+          PendingInvitesScreen(
+            loadOnInit: false,
+            acceptInviteOverride: (_) async {},
+            onInviteAccepted: () => accepted = true,
+          ),
+        ),
+      );
 
       await tester.tap(find.text('Entrar na equipe'));
       await tester.pump();
@@ -103,13 +110,14 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
     });
 
-    testWidgets('decline asks for confirmation with Recusar / Voltar',
-        (tester) async {
+    testWidgets('decline asks for confirmation with Recusar / Voltar', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([_invite('Oficina Exemplo')]);
-      await tester.pumpWidget(_app(const PendingInvitesScreen(
-        loadOnInit: false,
-      )));
+      await tester.pumpWidget(
+        _app(const PendingInvitesScreen(loadOnInit: false)),
+      );
 
       await tester.tap(find.text('Recusar convite'));
       await tester.pumpAndSettle();
@@ -123,16 +131,23 @@ void main() {
       expect(find.byType(CupertinoAlertDialog), findsNothing);
     });
 
-    testWidgets('several invites: a row opens the invite on its own screen',
-        (tester) async {
+    testWidgets('several invites: a row opens the invite on its own screen', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([_invite('Alfa'), _invite('Beta')]);
       await tester.pumpWidget(
-          _app(const PendingInvitesScreen(loadOnInit: false), brightness: Brightness.dark));
+        _app(
+          const PendingInvitesScreen(loadOnInit: false),
+          brightness: Brightness.dark,
+        ),
+      );
 
       expect(find.text('Você recebeu convites'), findsOneWidget);
-      expect(find.text('Toque num convite para ver e entrar na equipe.'),
-          findsOneWidget);
+      expect(
+        find.text('Toque num convite para ver e entrar na equipe.'),
+        findsOneWidget,
+      );
       expect(find.text('Entrar na equipe'), findsNothing);
 
       await tester.tap(find.text('Alfa'));
@@ -145,12 +160,14 @@ void main() {
       expect(find.text('Alfa chamou você para a equipe'), findsOneWidget);
     });
 
-    testWidgets('several invites: declining from the detail asks first',
-        (tester) async {
+    testWidgets('several invites: declining from the detail asks first', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([_invite('Alfa'), _invite('Beta')]);
       await tester.pumpWidget(
-          _app(const PendingInvitesScreen(loadOnInit: false)));
+        _app(const PendingInvitesScreen(loadOnInit: false)),
+      );
 
       await tester.tap(find.text('Alfa'));
       await tester.pumpAndSettle();
@@ -158,31 +175,39 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoAlertDialog), findsOneWidget);
 
-      await tester.tap(find.descendant(
+      await tester.tap(
+        find.descendant(
           of: find.byType(CupertinoAlertDialog),
-          matching: find.text('Voltar')));
+          matching: find.text('Voltar'),
+        ),
+      );
       await tester.pumpAndSettle();
       // Still on the invite: nothing was declined.
       expect(find.byKey(const ValueKey('invite_detail_join')), findsOneWidget);
     });
 
-    testWidgets('load failure shows a fixed sentence with retry',
-        (tester) async {
+    testWidgets('load failure shows a fixed sentence with retry', (
+      tester,
+    ) async {
       tall(tester);
       setInvites([], error: 'FirebaseException: [cloud_firestore/unavailable]');
       await tester.pumpWidget(
-          _app(const PendingInvitesScreen(loadOnInit: false)));
+        _app(const PendingInvitesScreen(loadOnInit: false)),
+      );
 
-      expect(find.text('Não deu para carregar os convites. Confira a internet.'),
-          findsOneWidget);
+      expect(
+        find.text('Não deu para carregar os convites. Confira a internet.'),
+        findsOneWidget,
+      );
       expect(find.text('Tentar novamente'), findsOneWidget);
       expect(find.textContaining('cloud_firestore'), findsNothing);
     });
   });
 
   group('AcceptInviteScreen', () {
-    testWidgets('shows example placeholder and one primary button',
-        (tester) async {
+    testWidgets('shows example placeholder and one primary button', (
+      tester,
+    ) async {
       tall(tester);
       await tester.pumpWidget(_app(AcceptInviteScreen(onCancel: () {})));
 
@@ -201,8 +226,10 @@ void main() {
       await tester.pump();
       expect(find.byKey(const Key('invite_error')), findsOneWidget);
       expect(find.text('Digite o código do convite'), findsWidgets);
-      expect(find.byIcon(CupertinoIcons.exclamationmark_circle),
-          findsOneWidget);
+      expect(
+        find.byIcon(CupertinoIcons.exclamationmark_circle),
+        findsOneWidget,
+      );
     });
   });
 
@@ -210,13 +237,20 @@ void main() {
     testWidgets('shows only the fixed sentence and retries', (tester) async {
       tall(tester);
       var retries = 0;
-      await tester.pumpWidget(_app(AuthLoadErrorView(
-        message: 'Não deu para abrir a sua empresa. Confira a internet e tente de novo.',
-        onRetry: () => retries++,
-      )));
+      await tester.pumpWidget(
+        _app(
+          AuthLoadErrorView(
+            message:
+                'Não deu para abrir a sua empresa. Confira a internet e tente de novo.',
+            onRetry: () => retries++,
+          ),
+        ),
+      );
 
-      expect(find.textContaining('Não deu para abrir a sua empresa'),
-          findsOneWidget);
+      expect(
+        find.textContaining('Não deu para abrir a sua empresa'),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Tentar novamente'));
       expect(retries, 1);
     });

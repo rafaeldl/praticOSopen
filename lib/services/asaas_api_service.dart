@@ -18,7 +18,11 @@ class AsaasApiException implements Exception {
   final String? code;
   final String message;
 
-  AsaasApiException(this.code, this.message);
+  /// Asaas's own text (pt-BR) when it refused something (`error.detail`):
+  /// shown on the nota screens, where it says what to fix.
+  final String? detail;
+
+  AsaasApiException(this.code, this.message, {this.detail});
 
   @override
   String toString() => message;
@@ -164,11 +168,14 @@ class AsaasApiService {
 
     String message = 'Request failed (${response.statusCode})';
     String? code;
+    String? detail;
     try {
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
       final error = decoded['error'] as Map<String, dynamic>?;
       if (error?['message'] is String) message = error!['message'] as String;
       if (error?['code'] is String) code = error!['code'] as String;
+      final text = error?['detail'];
+      if (text is String && text.trim().isNotEmpty) detail = text.trim();
     } catch (_) {
       // keep the default message and leave code as null
     }
@@ -178,7 +185,7 @@ class AsaasApiService {
       429 => 'RATE_LIMIT_EXCEEDED',
       _ => null,
     };
-    throw AsaasApiException(code, message);
+    throw AsaasApiException(code, message, detail: detail);
   }
 
   /// Validates and stores the company's Asaas API key on the server.

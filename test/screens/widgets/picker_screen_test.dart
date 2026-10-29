@@ -81,7 +81,9 @@ void main() {
             title: question,
             itemCount: 1,
             sections: (_) => [
-              PickerSection(items: [PickerItem(value: 'a', title: 'a')]),
+              PickerSection(
+                items: [PickerItem(value: 'a', title: 'a')],
+              ),
             ],
           ),
         ),
@@ -118,11 +120,7 @@ void main() {
     tester,
   ) async {
     String? created;
-    await openPicker(
-      tester,
-      items: names(11),
-      onCreate: (q) => created = q,
-    );
+    await openPicker(tester, items: names(11), onCreate: (q) => created = q);
     await tester.enterText(find.byType(CupertinoSearchTextField), 'cambagem');
     await tester.pumpAndSettle();
     expect(find.text('Novo item'), findsNothing);
@@ -210,7 +208,11 @@ void main() {
     DeviceAggr car(String id, String name) => DeviceAggr()
       ..id = id
       ..name = name;
-    final cars = [car('d1', 'Classic'), car('d2', 'Strada'), car('d3', 'Saveiro')];
+    final cars = [
+      car('d1', 'Classic'),
+      car('d2', 'Strada'),
+      car('d3', 'Saveiro'),
+    ];
 
     testWidgets('✓ on top goes gray → blue and returns the list', (
       tester,
@@ -229,10 +231,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(confirmButton(tester).onPressed, isNotNull);
       final rows = tester.widgetList<AppListRow>(find.byType(AppListRow));
-      expect(
-        {for (final r in rows) r.title: r.selected},
-        containsPair('Classic', true),
-      );
+      expect({
+        for (final r in rows) r.title: r.selected,
+      }, containsPair('Classic', true));
 
       await tester.tap(find.byKey(const ValueKey('picker_confirm')));
       await tester.pumpAndSettle();

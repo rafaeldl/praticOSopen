@@ -24,12 +24,16 @@ class _FakeOrderRepository extends TenantOrderRepository {
   final List<Order?> orders;
 
   @override
-  Stream<List<Order?>> streamOrdersByDevice(String companyId, String deviceId) =>
-      Stream.value(orders);
+  Stream<List<Order?>> streamOrdersByDevice(
+    String companyId,
+    String deviceId,
+  ) => Stream.value(orders);
 
   @override
-  Stream<List<Order?>> streamContractsByDevice(String companyId, String deviceId) =>
-      Stream.value(const []);
+  Stream<List<Order?>> streamContractsByDevice(
+    String companyId,
+    String deviceId,
+  ) => Stream.value(const []);
 }
 
 void main() {
@@ -44,8 +48,9 @@ void main() {
   setUp(() => Global.companyAggr = CompanyAggr()..id = 'c1');
   tearDown(() => Global.companyAggr = null);
 
-  testWidgets('tapping an order in the history opens it on the order route',
-      (tester) async {
+  testWidgets('tapping an order in the history opens it on the order route', (
+    tester,
+  ) async {
     final order = Order()
       ..id = 'o1'
       ..number = 42
@@ -143,8 +148,9 @@ void main() {
     return pushed;
   }
 
-  testWidgets('shows plate and owner, history rows and the Nova OS entry',
-      (tester) async {
+  testWidgets('shows plate and owner, history rows and the Nova OS entry', (
+    tester,
+  ) async {
     final owner = Customer()
       ..id = 'c1'
       ..name = 'Ana Ribeiro';
@@ -204,8 +210,10 @@ void main() {
     await tester.tap(find.text('Bruno Lima').last);
     await tester.pumpAndSettle();
     expect(pushed.single.name, '/customer_detail');
-    expect(((pushed.single.arguments as Map)['customer'] as Customer).id,
-        'c-new');
+    expect(
+      ((pushed.single.arguments as Map)['customer'] as Customer).id,
+      'c-new',
+    );
   });
 
   testWidgets('subtitle links the owner, the question precedes Nova OS, '
@@ -251,8 +259,7 @@ void main() {
     expect(args['previousTitle'], 'VW Gol 2018');
   });
 
-  testWidgets('vehicle without orders shows the empty history',
-      (tester) async {
+  testWidgets('vehicle without orders shows the empty history', (tester) async {
     final device = Device()
       ..id = 'd1'
       ..name = 'Fiat Uno';
@@ -262,8 +269,9 @@ void main() {
     expect(find.text('Nova OS'), findsOneWidget);
   });
 
-  testWidgets('history hides order totals without values and billing',
-      (tester) async {
+  testWidgets('history hides order totals without values and billing', (
+    tester,
+  ) async {
     final device = Device()
       ..id = 'd1'
       ..name = 'Fiat Uno';

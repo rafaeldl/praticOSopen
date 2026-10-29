@@ -101,19 +101,50 @@ void main() {
 
   // Ana owes 1.250 (OS 183, since 02/10), Bia 480 across two orders,
   // Caio 0 → not listed. Paid this month: OS 186.
-  final ana = _order('a1', 183, customer: 'Ana', total: 1250, createdAt: DateTime(2026, 10, 2));
-  final bia1 = _order('b1', 190, customer: 'Bia', total: 300, createdAt: DateTime(2026, 10, 9));
-  final bia2 = _order('b2', 191, customer: 'Bia', total: 180, createdAt: DateTime(2026, 10, 5));
-  final paid = _order('p1', 186, customer: 'Caio', total: 8300, paid: 8300, createdAt: DateTime(2026, 10, 8));
+  final ana = _order(
+    'a1',
+    183,
+    customer: 'Ana',
+    total: 1250,
+    createdAt: DateTime(2026, 10, 2),
+  );
+  final bia1 = _order(
+    'b1',
+    190,
+    customer: 'Bia',
+    total: 300,
+    createdAt: DateTime(2026, 10, 9),
+  );
+  final bia2 = _order(
+    'b2',
+    191,
+    customer: 'Bia',
+    total: 180,
+    createdAt: DateTime(2026, 10, 5),
+  );
+  final paid = _order(
+    'p1',
+    186,
+    customer: 'Caio',
+    total: 8300,
+    paid: 8300,
+    createdAt: DateTime(2026, 10, 8),
+  );
 
-  testWidgets('shows the title, month stepper, next step and both lists',
-      (tester) async {
-    await pumpTab(tester, storeWith(month: [paid, ana], open: [ana, bia1, bia2]));
+  testWidgets('shows the title, month stepper, next step and both lists', (
+    tester,
+  ) async {
+    await pumpTab(
+      tester,
+      storeWith(month: [paid, ana], open: [ana, bia1, bia2]),
+    );
 
     expect(find.text('Financeiro'), findsWidgets);
     expect(find.text('Outubro de 2026'), findsOneWidget);
     expect(
-      find.text('Falta receber ${FormatService().formatCurrency(1730)} de 2 clientes'),
+      find.text(
+        'Falta receber ${FormatService().formatCurrency(1730)} de 2 clientes',
+      ),
       findsOneWidget,
     );
     expect(find.textContaining('Ana deve há mais tempo'), findsOneWidget);
@@ -134,18 +165,20 @@ void main() {
     expect(ya, lessThan(yb));
   });
 
-  testWidgets('"Mandar cobrança" sends the oldest open order of the oldest debtor',
-      (tester) async {
-    final charged = <Order>[];
-    await pumpTab(
-      tester,
-      storeWith(open: [bia1, bia2, ana]),
-      charged: charged,
-    );
+  testWidgets(
+    '"Mandar cobrança" sends the oldest open order of the oldest debtor',
+    (tester) async {
+      final charged = <Order>[];
+      await pumpTab(
+        tester,
+        storeWith(open: [bia1, bia2, ana]),
+        charged: charged,
+      );
 
-    await tester.tap(find.byKey(const Key('financialSendCharge')));
-    expect(charged.single.id, 'a1');
-  });
+      await tester.tap(find.byKey(const Key('financialSendCharge')));
+      expect(charged.single.id, 'a1');
+    },
+  );
 
   testWidgets('with nothing owed there is no next step block', (tester) async {
     await pumpTab(tester, storeWith(month: [paid]));
@@ -167,8 +200,12 @@ void main() {
       'oldest order first (no "Qual OS?")', (tester) async {
     final opened = <Order>[];
     final received = <Debtor>[];
-    await pumpTab(tester, storeWith(open: [bia1, bia2]),
-        opened: opened, received: received);
+    await pumpTab(
+      tester,
+      storeWith(open: [bia1, bia2]),
+      opened: opened,
+      received: received,
+    );
 
     await tester.tap(find.byKey(const ValueKey('debtor-Bia')));
     await tester.pumpAndSettle();
@@ -182,16 +219,30 @@ void main() {
   testWidgets('orders without a customer still ask which one', (tester) async {
     final opened = <Order>[];
     final received = <Debtor>[];
-    final x1 = _order('x1', 300, customer: 'X', total: 100,
-        createdAt: DateTime(2026, 10, 3))
-      ..customer = null;
-    final x2 = _order('x2', 301, customer: 'X', total: 50,
-        createdAt: DateTime(2026, 10, 4))
-      ..customer = null;
-    await pumpTab(tester, storeWith(open: [x1, x2]),
-        opened: opened, received: received);
+    final x1 = _order(
+      'x1',
+      300,
+      customer: 'X',
+      total: 100,
+      createdAt: DateTime(2026, 10, 3),
+    )..customer = null;
+    final x2 = _order(
+      'x2',
+      301,
+      customer: 'X',
+      total: 50,
+      createdAt: DateTime(2026, 10, 4),
+    )..customer = null;
+    await pumpTab(
+      tester,
+      storeWith(open: [x1, x2]),
+      opened: opened,
+      received: received,
+    );
 
-    await tester.tap(find.byKey(const ValueKey('debtor-${Debtor.noCustomerKey}')));
+    await tester.tap(
+      find.byKey(const ValueKey('debtor-${Debtor.noCustomerKey}')),
+    );
     await tester.pumpAndSettle();
 
     // The "Escolher" screen: question as the title.
@@ -207,12 +258,27 @@ void main() {
     final received = <Debtor>[];
     final many = [
       for (var i = 1; i <= 6; i++)
-        _order('d$i', i, customer: 'Cliente $i', total: 100.0 * i,
-            createdAt: DateTime(2026, 10, i)),
-      _order('d7a', 70, customer: 'Cliente 7', total: 90,
-          createdAt: DateTime(2026, 10, 7)),
-      _order('d7b', 71, customer: 'Cliente 7', total: 40,
-          createdAt: DateTime(2026, 10, 8)),
+        _order(
+          'd$i',
+          i,
+          customer: 'Cliente $i',
+          total: 100.0 * i,
+          createdAt: DateTime(2026, 10, i),
+        ),
+      _order(
+        'd7a',
+        70,
+        customer: 'Cliente 7',
+        total: 90,
+        createdAt: DateTime(2026, 10, 7),
+      ),
+      _order(
+        'd7b',
+        71,
+        customer: 'Cliente 7',
+        total: 40,
+        createdAt: DateTime(2026, 10, 8),
+      ),
     ];
     await pumpTab(tester, storeWith(open: many), received: received);
 
@@ -226,8 +292,13 @@ void main() {
   testWidgets('shows 5 debtors and expands with "Ver todos"', (tester) async {
     final many = [
       for (var i = 1; i <= 7; i++)
-        _order('d$i', i, customer: 'Cliente $i', total: 100.0 * i,
-            createdAt: DateTime(2026, 10, i)),
+        _order(
+          'd$i',
+          i,
+          customer: 'Cliente $i',
+          total: 100.0 * i,
+          createdAt: DateTime(2026, 10, i),
+        ),
     ];
     await pumpTab(tester, storeWith(open: many));
 
@@ -240,8 +311,9 @@ void main() {
     expect(find.text('Ver menos'), findsOneWidget);
   });
 
-  testWidgets('month without orders and no debt shows only the empty state',
-      (tester) async {
+  testWidgets('month without orders and no debt shows only the empty state', (
+    tester,
+  ) async {
     await pumpTab(tester, storeWith());
 
     expect(find.text('Nenhuma OS em outubro de 2026.'), findsOneWidget);
@@ -250,7 +322,13 @@ void main() {
   });
 
   testWidgets('old debt still shows in an empty month', (tester) async {
-    final old = _order('o', 7, customer: 'Ana', total: 90, createdAt: DateTime(2026, 7, 1));
+    final old = _order(
+      'o',
+      7,
+      customer: 'Ana',
+      total: 90,
+      createdAt: DateTime(2026, 7, 1),
+    );
     await pumpTab(tester, storeWith(open: [old]));
 
     expect(find.text('Nenhuma OS em outubro de 2026.'), findsNothing);
@@ -259,8 +337,9 @@ void main() {
     expect(find.text('0 OS · ver todas'), findsOneWidget);
   });
 
-  testWidgets('loading shows an indicator under the title and month',
-      (tester) async {
+  testWidgets('loading shows an indicator under the title and month', (
+    tester,
+  ) async {
     final completer = Completer<List<Order?>>();
     await pumpTab(tester, storeWith(openLoader: () => completer.future));
 
@@ -276,10 +355,12 @@ void main() {
 
   testWidgets('error shows a fixed message and retries', (tester) async {
     var fail = true;
-    final store = storeWith(openLoader: () async {
-      if (fail) throw Exception('boom Exception: details');
-      return [];
-    });
+    final store = storeWith(
+      openLoader: () async {
+        if (fail) throw Exception('boom Exception: details');
+        return [];
+      },
+    );
     await pumpTab(tester, store);
 
     expect(find.text('Não deu para carregar o financeiro.'), findsOneWidget);
@@ -349,8 +430,20 @@ void main() {
   });
 
   testWidgets('dates from other years show the year', (tester) async {
-    final old = _order('o1', 90, customer: 'Dora', total: 500, createdAt: DateTime(2025, 10, 24));
-    final old2 = _order('o2', 91, customer: 'Dora', total: 100, createdAt: DateTime(2025, 11, 7));
+    final old = _order(
+      'o1',
+      90,
+      customer: 'Dora',
+      total: 500,
+      createdAt: DateTime(2025, 10, 24),
+    );
+    final old2 = _order(
+      'o2',
+      91,
+      customer: 'Dora',
+      total: 100,
+      createdAt: DateTime(2025, 11, 7),
+    );
     await pumpTab(tester, storeWith(open: [old, old2, ana]));
 
     expect(find.text('2 OS · desde 24/10/2025'), findsOneWidget);
@@ -386,53 +479,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('"Mandar cobrança" with Asaas: creates the charge, then shares, once',
-      (tester) async {
-    FormatService().setLocale('pt');
-    tester.view.physicalSize = const Size(800, 4000);
-    tester.view.devicePixelRatio = 2;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    '"Mandar cobrança" with Asaas: creates the charge, then shares, once',
+    (tester) async {
+      FormatService().setLocale('pt');
+      tester.view.physicalSize = const Size(800, 4000);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
 
-    final calls = <String>[];
-    final createGate = Completer<OrderCharge?>();
-    final flow = SendChargeFlow(
-      canCharge: true,
-      settingsLoader: () async =>
-          PaymentSettings(asaasEnabled: true, asaasConnected: true),
-      openChargeLoader: (_) async => null,
-      createCharge: (_, order, remaining) {
-        calls.add('create:${order.id}:$remaining');
-        return createGate.future;
-      },
-      share: (_, order) async => calls.add('share:${order.id}'),
-    );
+      final calls = <String>[];
+      final createGate = Completer<OrderCharge?>();
+      final flow = SendChargeFlow(
+        canCharge: true,
+        settingsLoader: () async =>
+            PaymentSettings(asaasEnabled: true, asaasConnected: true),
+        openChargeLoader: (_) async => null,
+        createCharge: (_, order, remaining) {
+          calls.add('create:${order.id}:$remaining');
+          return createGate.future;
+        },
+        share: (_, order) async => calls.add('share:${order.id}'),
+      );
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        locale: const Locale('pt'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: FinancialTab(
-          store: storeWith(open: [ana]),
-          sendChargeFlow: flow,
+      await tester.pumpWidget(
+        CupertinoApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: FinancialTab(
+            store: storeWith(open: [ana]),
+            sendChargeFlow: flow,
+          ),
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
+      );
+      await tester.pump();
+      await tester.pump();
 
-    await tester.tap(find.byKey(const Key('financialSendCharge')));
-    await tester.pump();
-    await tester.pump();
-    // Second tap while the charge screen is open is ignored.
-    await tester.tap(find.byKey(const Key('financialSendCharge')));
-    await tester.pump();
-    expect(calls, ['create:a1:1250.0']);
+      await tester.tap(find.byKey(const Key('financialSendCharge')));
+      await tester.pump();
+      await tester.pump();
+      // Second tap while the charge screen is open is ignored.
+      await tester.tap(find.byKey(const Key('financialSendCharge')));
+      await tester.pump();
+      expect(calls, ['create:a1:1250.0']);
 
-    createGate.complete(OrderCharge(id: 'ch1', status: ChargeStatus.pending));
-    await tester.pump();
-    await tester.pump();
-    expect(calls, ['create:a1:1250.0', 'share:a1']);
-    expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
-  });
+      createGate.complete(OrderCharge(id: 'ch1', status: ChargeStatus.pending));
+      await tester.pump();
+      await tester.pump();
+      expect(calls, ['create:a1:1250.0', 'share:a1']);
+      expect(find.text('Mandar cobrança para Ana'), findsOneWidget);
+    },
+  );
 }

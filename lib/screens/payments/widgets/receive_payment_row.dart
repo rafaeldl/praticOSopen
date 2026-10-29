@@ -56,7 +56,7 @@ class ReceivePaymentRow extends StatelessWidget {
     final isPayment = transaction.type == PaymentTransactionType.payment;
     final label = isPayment
         ? receiveBillingLabel(context, transaction) ??
-            transaction.typeLabel(context.l10n)
+              transaction.typeLabel(context.l10n)
         : transaction.typeLabel(context.l10n);
     final parts = <String>[
       paymentWhenLabel(transaction, format),
@@ -66,7 +66,9 @@ class ReceivePaymentRow extends StatelessWidget {
             : context.l10n.receiveNoReceipt,
     ];
     return AppListRow(
-      key: ValueKey('receivePayment_${transaction.createdAt.microsecondsSinceEpoch}'),
+      key: ValueKey(
+        'receivePayment_${transaction.createdAt.microsecondsSinceEpoch}',
+      ),
       title: label,
       subtitle: parts.join(' · '),
       trailing: isPayment

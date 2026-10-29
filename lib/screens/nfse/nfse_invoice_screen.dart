@@ -57,6 +57,8 @@ String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
       return invoice.statusDescription;
     case 'ASAAS_REJECTED':
       return invoice.statusDescription ?? l10n.nfseErrorAsaasValidation;
+    case 'NFSE_SETUP_REJECTED':
+      return invoice.statusDescription ?? l10n.nfseErrorSetupRejected;
     case 'TAX_ID_REQUIRED':
     case 'INVALID_TAX_ID':
       return l10n.nfseAutoErrorTaxId;

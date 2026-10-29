@@ -42,7 +42,7 @@ import {
 } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient } from './asaas-client';
 import { asaasConnectionRef, getAsaasCredentialProvider } from './credential-provider';
-import { AsaasServiceError } from './errors';
+import { AsaasServiceError, asaasErrorDescription, asaasErrorLog } from './errors';
 import { getPaymentSettings } from './connection.service';
 import { hasNfseWebhookEvents } from './webhook-events';
 import { findOrCreateAsaasCustomer, resolveTaxId, roundMoney, todayInSaoPaulo, addDays } from './charge.service';
@@ -68,6 +68,11 @@ const RECONCILE_STATUSES: InvoiceStatus[] = ['creating', 'scheduled', 'synchroni
 /** Asaas answers that prove the invoice was not created (anything else: unknown). */
 const DEFINITIVE_REJECTIONS = [400, 401, 403, 404, 422];
 const MAX_DESCRIPTION = 2000;
+/**
+ * Asaas refuses a longer municipalServiceName (400 invalid_name, sandbox
+ * 2026-10-29); the city list has longer names (14.01.01 has 297 characters).
+ */
+export const MAX_MUNICIPAL_SERVICE_NAME = 250;
 const MAX_OBSERVATIONS = 500;
 /** Furthest future date accepted for the issue date. */
 const MAX_FUTURE_DAYS = 60;
@@ -176,6 +181,13 @@ export function describeOrderNumbers(numbers: Array<number | null | undefined>):
     text = next;
   }
   return text;
+}
+
+/** The service name as Asaas accepts it (cut with "…" past 250 characters). */
+export function municipalServiceNameForAsaas(name: string): string {
+  const trimmed = (name || '').trim();
+  if (trimmed.length <= MAX_MUNICIPAL_SERVICE_NAME) return trimmed;
+  return `${trimmed.slice(0, MAX_MUNICIPAL_SERVICE_NAME - 1).trimEnd()}…`;
 }
 
 export function applyDescriptionTemplate(template: string | undefined, services: string, orderNumbers: string): string {
@@ -668,7 +680,7 @@ export async function createInvoice(
     value: loaded.value,
     deductions: 0,
     effectiveDate,
-    municipalServiceName: service.municipalServiceName,
+    municipalServiceName: municipalServiceNameForAsaas(service.municipalServiceName),
     taxes: service.taxes,
   };
   // Asaas: send the id OR the code, never both.
@@ -681,9 +693,11 @@ export async function createInvoice(
   } catch (error) {
     if (error instanceof AsaasApiError && DEFINITIVE_REJECTIONS.includes(error.status)) {
       // Asaas refused it: nothing was created, the orders are free again.
+      console.warn(`[NFS-e] create of invoice ${invoiceRef.id} of company ${companyId} refused (${asaasErrorLog(error)})`);
       await releaseInvoice(companyId, invoiceRef.id, orderIds).catch(() => {
         console.error(`[NFS-e] Could not release invoice ${invoiceRef.id} of company ${companyId}`);
       });
+      throw refusalError(error);
     } else {
       // No clear answer (timeout, 408, 5xx, network): Asaas may have created
       // it. Kept 'creating' and locked; reconcileInvoice or the webhook finds out.
@@ -724,22 +738,29 @@ export async function createInvoice(
   return { ...result, id: invoiceRef.id };
 }
 
-/** Our code for an issue Asaas refused: the customer data, else Asaas's own text. */
-export function refusalCode(error: AsaasApiError): 'CUSTOMER_DATA_REQUIRED' | 'ASAAS_REJECTED' {
-  return error.errors.some((e) => /cliente/i.test(e.description ?? '')) ? 'CUSTOMER_DATA_REQUIRED' : 'ASAAS_REJECTED';
+type RefusalCode = 'CUSTOMER_DATA_REQUIRED' | 'NFSE_SETUP_REJECTED' | 'ASAAS_REJECTED';
+
+/** Asaas texts about the nota setup (service, taxes, fiscal data of the company). */
+const SETUP_REFUSAL = /servi[cç]o|al[ií]quota|\biss\b|inscri[cç][aã]o municipal|cnae|regime|tribut|(informa[cç][oõ]es|dados) fisca/i;
+
+/**
+ * What a refusal is about, from Asaas's texts: the customer data (the sheet
+ * asks for it), the nota setup (the app opens the setup), else unknown (the
+ * app shows Asaas's text).
+ */
+export function refusalCode(error: AsaasApiError): RefusalCode {
+  const texts = error.errors.map((e) => e.description ?? '');
+  if (texts.some((t) => /cliente/i.test(t))) return 'CUSTOMER_DATA_REQUIRED';
+  if (texts.some((t) => SETUP_REFUSAL.test(t))) return 'NFSE_SETUP_REJECTED';
+  return 'ASAAS_REJECTED';
 }
 
-function refusalText(error: AsaasApiError): string | null {
-  const text = error.errors.map((e) => (e.description ?? '').trim()).filter((d) => d.length > 0).join(' ');
-  return text || null;
-}
-
-/** What the app gets when the issue was refused (the sheet asks for the customer data). */
+/** What the app gets for a refusal: our code with Asaas's text in `detail`, or the Asaas error. */
 function refusalError(error: AsaasApiError): Error {
-  if (refusalCode(error) === 'CUSTOMER_DATA_REQUIRED') {
-    return new AsaasServiceError('CUSTOMER_DATA_REQUIRED', refusalText(error) ?? 'Customer data required');
-  }
-  return error;
+  const code = refusalCode(error);
+  if (code === 'ASAAS_REJECTED') return error;
+  const detail = asaasErrorDescription(error);
+  return new AsaasServiceError(code, detail ?? 'Asaas refused the nota', detail);
 }
 
 /**
@@ -758,7 +779,7 @@ async function giveUpRefusedInvoice(
 ): Promise<void> {
   const update: Partial<NfseInvoice> = {
     errorCode: refusalCode(error),
-    statusDescription: refusalText(error),
+    statusDescription: asaasErrorDescription(error),
     updatedAt: new Date().toISOString(),
   };
   try {
@@ -769,7 +790,7 @@ async function giveUpRefusedInvoice(
     console.error(`[NFS-e] ALERT invoice ${invoiceId} of company ${companyId} refused and not canceled (status ${status}); left scheduled`);
   }
   await invoicesRef(companyId).doc(invoiceId).update(update as Record<string, unknown>);
-  console.warn(`[NFS-e] Invoice ${invoiceId} of company ${companyId} refused by Asaas (${update.errorCode}, status ${error.status})`);
+  console.warn(`[NFS-e] Invoice ${invoiceId} of company ${companyId} refused by Asaas (${update.errorCode}, ${asaasErrorLog(error)})`);
 }
 
 // ----------------------------------------------------------------------------
@@ -817,9 +838,10 @@ export async function autoIssueInvoice(companyId: string, orderId: string, momen
     if (error instanceof AsaasServiceError) {
       if (AUTO_ISSUE_SILENT.includes(error.code)) return;
       errorCode = error.code;
+      statusDescription = error.detail ?? null;
     } else if (error instanceof AsaasApiError && DEFINITIVE_REJECTIONS.includes(error.status)) {
       errorCode = 'ASAAS_REJECTED';
-      statusDescription = error.errors[0]?.description ?? null;
+      statusDescription = asaasErrorDescription(error);
     } else {
       throw error;
     }

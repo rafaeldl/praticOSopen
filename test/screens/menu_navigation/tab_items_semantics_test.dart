@@ -6,8 +6,9 @@ import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/menu_navigation/widgets/glass_tab_bar.dart';
 
 void main() {
-  testWidgets('every tab, selected or not, is announced as a button',
-      (tester) async {
+  testWidgets('every tab, selected or not, is announced as a button', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
       CupertinoApp(
@@ -28,9 +29,11 @@ void main() {
     );
 
     for (final label in ['Início', 'Agenda', 'Financeiro']) {
-      expect(tester.getSemantics(find.text(label)),
-          containsSemantics(isButton: true),
-          reason: label);
+      expect(
+        tester.getSemantics(find.text(label)),
+        containsSemantics(isButton: true),
+        reason: label,
+      );
     }
     handle.dispose();
   });

@@ -17,7 +17,11 @@ void main() {
   group('shouldOfferStatusShare', () {
     test('approved, in progress and done offer to tell the customer', () {
       for (final status in ['approved', 'progress', 'done']) {
-        expect(shouldOfferStatusShare(_order(), status), isTrue, reason: status);
+        expect(
+          shouldOfferStatusShare(_order(), status),
+          isTrue,
+          reason: status,
+        );
       }
     });
 
@@ -54,17 +58,17 @@ void main() {
 
   test('checklistMissing counts unanswered questions, never below zero', () {
     of_model.OrderForm form(int items, int answered) => of_model.OrderForm(
-          id: 'f',
-          formDefinitionId: 'd',
-          title: 'Entrada',
-          items: [
-            for (var i = 0; i < items; i++)
-              FormItemDefinition(id: '$i', label: 'P$i', type: FormItemType.text),
-          ],
-          responses: [
-            for (var i = 0; i < answered; i++) of_model.FormResponse(itemId: '$i'),
-          ],
-        );
+      id: 'f',
+      formDefinitionId: 'd',
+      title: 'Entrada',
+      items: [
+        for (var i = 0; i < items; i++)
+          FormItemDefinition(id: '$i', label: 'P$i', type: FormItemType.text),
+      ],
+      responses: [
+        for (var i = 0; i < answered; i++) of_model.FormResponse(itemId: '$i'),
+      ],
+    );
     expect(checklistMissing(form(5, 2)), 3);
     expect(checklistMissing(form(2, 2)), 0);
     expect(checklistMissing(form(1, 3)), 0);

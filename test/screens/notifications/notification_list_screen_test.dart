@@ -79,14 +79,29 @@ void main() {
     expect(NotificationType.paymentReceived, 'payment_received');
   });
 
-  testWidgets('shows count, sections, relative time and order number',
-      (tester) async {
-    await tester.pumpWidget(_app(_view([
-      _n('1', 'Ana aprovou o orçamento'),
-      _n('2', 'Carlos comentou', ago: const Duration(hours: 1), number: '184'),
-      _n('3', 'Cláudia deu nota 5',
-          read: true, ago: const Duration(days: 2), number: '170'),
-    ])));
+  testWidgets('shows count, sections, relative time and order number', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _view([
+          _n('1', 'Ana aprovou o orçamento'),
+          _n(
+            '2',
+            'Carlos comentou',
+            ago: const Duration(hours: 1),
+            number: '184',
+          ),
+          _n(
+            '3',
+            'Cláudia deu nota 5',
+            read: true,
+            ago: const Duration(days: 2),
+            number: '170',
+          ),
+        ]),
+      ),
+    );
     expect(find.text('Avisos'), findsWidgets);
     expect(find.text('2 novos'), findsOneWidget);
     expect(find.text('Marcar todos como lidos'), findsOneWidget);
@@ -107,8 +122,9 @@ void main() {
     expect(find.textContaining('💰'), findsNothing);
   });
 
-  testWidgets('without unread: no count, no mark-all, only "Antes"',
-      (tester) async {
+  testWidgets('without unread: no count, no mark-all, only "Antes"', (
+    tester,
+  ) async {
     await tester.pumpWidget(_app(_view([_n('1', 'Ana aprovou', read: true)])));
     expect(find.textContaining('novo'), findsNothing);
     expect(find.text('Marcar todos como lidos'), findsNothing);
@@ -118,26 +134,27 @@ void main() {
 
   testWidgets('mark all as read calls the callback', (tester) async {
     var calls = 0;
-    await tester.pumpWidget(_app(_view(
-      [_n('1', 'Ana aprovou')],
-      onMarkAll: () => calls++,
-    )));
+    await tester.pumpWidget(
+      _app(_view([_n('1', 'Ana aprovou')], onMarkAll: () => calls++)),
+    );
     await tester.tap(find.text('Marcar todos como lidos'));
     expect(calls, 1);
   });
 
-  testWidgets('rows are buttons and report the tapped notification',
-      (tester) async {
+  testWidgets('rows are buttons and report the tapped notification', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
     final opened = <String?>[];
-    await tester.pumpWidget(_app(_view(
-      [_n('1', 'Ana aprovou'), _n('2', 'Carlos comentou')],
-      onOpen: (n) => opened.add(n.id),
-    )));
-    expect(
-      tester.getSemantics(find.text('Ana aprovou')),
-      isNotNull,
+    await tester.pumpWidget(
+      _app(
+        _view([
+          _n('1', 'Ana aprovou'),
+          _n('2', 'Carlos comentou'),
+        ], onOpen: (n) => opened.add(n.id)),
+      ),
     );
+    expect(tester.getSemantics(find.text('Ana aprovou')), isNotNull);
     await tester.tap(find.text('Carlos comentou'));
     expect(opened, ['2']);
     handle.dispose();
@@ -154,17 +171,22 @@ void main() {
     expect(find.text('Tentar novamente'), findsOneWidget);
   });
 
-  testWidgets('any notification, comments included, opens the order',
-      (tester) async {
+  testWidgets('any notification, comments included, opens the order', (
+    tester,
+  ) async {
     final log = <Object?>[];
     late BuildContext ctx;
-    await tester.pumpWidget(_app(
-      Builder(builder: (c) {
-        ctx = c;
-        return const SizedBox();
-      }),
-      log: log,
-    ));
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (c) {
+            ctx = c;
+            return const SizedBox();
+          },
+        ),
+        log: log,
+      ),
+    );
 
     openNotificationOrder(ctx, _n('1', 'Ana aprovou'));
     await tester.pumpAndSettle();
@@ -176,8 +198,12 @@ void main() {
 
     openNotificationOrder(
       ctx,
-      _n('2', 'Carlos comentou',
-          type: NotificationType.newComment, data: {'commentId': 'c9'}),
+      _n(
+        '2',
+        'Carlos comentou',
+        type: NotificationType.newComment,
+        data: {'commentId': 'c9'},
+      ),
     );
     await tester.pumpAndSettle();
     settings = log.last as RouteSettings;
@@ -189,34 +215,52 @@ void main() {
   });
 
   testWidgets('renders in dark mode', (tester) async {
-    await tester.pumpWidget(CupertinoTheme(
-      data: const CupertinoThemeData(brightness: Brightness.dark),
-      child: _app(_view([_n('1', 'Ana aprovou')])),
-    ));
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(brightness: Brightness.dark),
+        child: _app(_view([_n('1', 'Ana aprovou')])),
+      ),
+    );
     expect(find.text('Ana aprovou'), findsOneWidget);
   });
 
   testWidgets('rows read the body as a sentence, without "OS #N"', (
     tester,
   ) async {
-    await tester.pumpWidget(_app(_view([
-      _n('1', 'Orçamento Aprovado! ✅',
-          type: NotificationType.orderApproved,
-          body: 'Ana Ribeiro aprovou o orçamento da OS #183'),
-      _n('2', 'Nova mensagem na OS #184 💬',
-          type: NotificationType.newComment,
-          number: '184',
-          body: 'Carlos Mendes: Pode trocar o filtro de ar também?'),
-      _n('3', 'Pagamento recebido',
-          type: NotificationType.paymentReceived,
-          number: '186',
-          body: 'OS #186 – R\$ 350,00'),
-      _n('4', 'Nova Avaliação! ⭐⭐⭐⭐⭐',
-          type: NotificationType.orderRated,
-          read: true,
-          body: 'Cláudia Lopes avaliou a OS #170 com 5 estrelas'),
-      _n('5', 'Orçamento Aprovado! ✅', read: true),
-    ])));
+    await tester.pumpWidget(
+      _app(
+        _view([
+          _n(
+            '1',
+            'Orçamento Aprovado! ✅',
+            type: NotificationType.orderApproved,
+            body: 'Ana Ribeiro aprovou o orçamento da OS #183',
+          ),
+          _n(
+            '2',
+            'Nova mensagem na OS #184 💬',
+            type: NotificationType.newComment,
+            number: '184',
+            body: 'Carlos Mendes: Pode trocar o filtro de ar também?',
+          ),
+          _n(
+            '3',
+            'Pagamento recebido',
+            type: NotificationType.paymentReceived,
+            number: '186',
+            body: 'OS #186 – R\$ 350,00',
+          ),
+          _n(
+            '4',
+            'Nova Avaliação! ⭐⭐⭐⭐⭐',
+            type: NotificationType.orderRated,
+            read: true,
+            body: 'Cláudia Lopes avaliou a OS #170 com 5 estrelas',
+          ),
+          _n('5', 'Orçamento Aprovado! ✅', read: true),
+        ]),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Ana Ribeiro aprovou o orçamento'), findsOneWidget);
@@ -232,14 +276,18 @@ void main() {
   });
 
   testWidgets('back button says "Início"', (tester) async {
-    await tester.pumpWidget(_app(Builder(
-      builder: (context) => CupertinoButton(
-        onPressed: () => Navigator.of(context).push(
-          CupertinoPageRoute<void>(builder: (_) => _view([])),
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) => CupertinoButton(
+            onPressed: () => Navigator.of(
+              context,
+            ).push(CupertinoPageRoute<void>(builder: (_) => _view([]))),
+            child: const Text('open'),
+          ),
         ),
-        child: const Text('open'),
       ),
-    )));
+    );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 

@@ -9,28 +9,33 @@ import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
 import 'package:praticos/services/format_service.dart';
 
 Widget app(Widget child) => CupertinoApp(
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: CupertinoPageScaffold(child: SafeArea(child: child)),
-    );
+  locale: const Locale('pt'),
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: CupertinoPageScaffold(child: SafeArea(child: child)),
+);
 
 void main() {
   setUp(() => FormatService().setLocale('pt-BR'));
 
   group('ReceiveBlock', () {
-    testWidgets('open: amount prefilled and button follows the amount',
-        (tester) async {
+    testWidgets('open: amount prefilled and button follows the amount', (
+      tester,
+    ) async {
       final controller = TextEditingController(
         text: FormatService().formatCurrency(950),
       );
       var confirmed = 0;
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: controller,
-        onConfirm: () => confirmed++,
-        onAttachReceipt: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: controller,
+            onConfirm: () => confirmed++,
+            onAttachReceipt: () {},
+          ),
+        ),
+      );
 
       expect(find.text('Falta receber'), findsOneWidget);
       expect(find.text('Confirmar recebimento'), findsOneWidget);
@@ -47,16 +52,21 @@ void main() {
       expect(confirmed, 1);
     });
 
-    testWidgets('"Quando" row shows the day and opens the picker',
-        (tester) async {
+    testWidgets('"Quando" row shows the day and opens the picker', (
+      tester,
+    ) async {
       var picks = 0;
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: TextEditingController(text: 'R\$ 10,00'),
-        onConfirm: () {},
-        paidDay: DateTime.now(),
-        onPickDay: () => picks++,
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: TextEditingController(text: 'R\$ 10,00'),
+            onConfirm: () {},
+            paidDay: DateTime.now(),
+            onPickDay: () => picks++,
+          ),
+        ),
+      );
       expect(find.text('Quando'), findsOneWidget);
       expect(find.text('Hoje'), findsOneWidget);
       await tester.tap(find.byKey(const Key('receiveDateRow')));
@@ -64,34 +74,47 @@ void main() {
     });
 
     testWidgets('without a day there is no "Quando" row', (tester) async {
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: TextEditingController(text: 'R\$ 10,00'),
-        onConfirm: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: TextEditingController(text: 'R\$ 10,00'),
+            onConfirm: () {},
+          ),
+        ),
+      );
       expect(find.text('Quando'), findsNothing);
     });
 
-    testWidgets('open without attach permission hides "Anexar comprovante"',
-        (tester) async {
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: TextEditingController(text: 'R\$ 10,00'),
-        onConfirm: () {},
-      )));
+    testWidgets('open without attach permission hides "Anexar comprovante"', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: TextEditingController(text: 'R\$ 10,00'),
+            onConfirm: () {},
+          ),
+        ),
+      );
       expect(find.text('Anexar comprovante'), findsNothing);
     });
 
     testWidgets('picked receipt shows chip with x', (tester) async {
       var removed = false;
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: TextEditingController(text: 'R\$ 10,00'),
-        onConfirm: () {},
-        onAttachReceipt: () {},
-        receiptName: 'pix.jpg',
-        onRemoveReceipt: () => removed = true,
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: TextEditingController(text: 'R\$ 10,00'),
+            onConfirm: () {},
+            onAttachReceipt: () {},
+            receiptName: 'pix.jpg',
+            onRemoveReceipt: () => removed = true,
+          ),
+        ),
+      );
       expect(find.text('pix.jpg'), findsOneWidget);
       expect(find.text('Anexar comprovante'), findsNothing);
       await tester.tap(find.byKey(const Key('receiveRemoveReceipt')));
@@ -99,11 +122,15 @@ void main() {
     });
 
     testWidgets('empty amount disables the button', (tester) async {
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        controller: TextEditingController(),
-        onConfirm: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            controller: TextEditingController(),
+            onConfirm: () {},
+          ),
+        ),
+      );
       final button = tester.widget<CupertinoButton>(
         find.byKey(const Key('receiveConfirm')),
       );
@@ -111,22 +138,30 @@ void main() {
     });
 
     testWidgets('paid: "Tudo recebido" and no button', (tester) async {
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: true,
-        controller: TextEditingController(),
-        onConfirm: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: true,
+            controller: TextEditingController(),
+            onConfirm: () {},
+          ),
+        ),
+      );
       expect(find.text('Tudo recebido'), findsOneWidget);
       expect(find.byKey(const Key('receiveConfirm')), findsNothing);
     });
 
     testWidgets('blocked shows the message', (tester) async {
-      await tester.pumpWidget(app(ReceiveBlock(
-        isPaid: false,
-        blockedMessage: 'Cancelada',
-        controller: TextEditingController(),
-        onConfirm: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceiveBlock(
+            isPaid: false,
+            blockedMessage: 'Cancelada',
+            controller: TextEditingController(),
+            onConfirm: () {},
+          ),
+        ),
+      );
       expect(find.text('Cancelada'), findsOneWidget);
       expect(find.byKey(const Key('receiveConfirm')), findsNothing);
     });
@@ -134,27 +169,27 @@ void main() {
 
   group('ReceivePaymentRow', () {
     PaymentTransaction manual({String? receipt}) => PaymentTransaction(
-          id: '1728000000000',
-          type: PaymentTransactionType.payment,
-          amount: 300,
-          receiptDocumentId: receipt,
-        );
+      id: '1728000000000',
+      type: PaymentTransactionType.payment,
+      amount: 300,
+      receiptDocumentId: receipt,
+    );
 
-    Future<void> pump(WidgetTester tester, PaymentTransaction tx) =>
-        tester.pumpWidget(app(
-          ReceivePaymentRow(transaction: tx, onTap: () {}),
-        ));
+    Future<void> pump(WidgetTester tester, PaymentTransaction tx) => tester
+        .pumpWidget(app(ReceivePaymentRow(transaction: tx, onTap: () {})));
 
-    testWidgets('manual payment: no payment method, "sem comprovante"',
-        (tester) async {
+    testWidgets('manual payment: no payment method, "sem comprovante"', (
+      tester,
+    ) async {
       await pump(tester, manual());
       expect(find.text('Pagamento'), findsOneWidget);
       expect(find.textContaining('pelo link'), findsNothing);
       expect(find.textContaining('sem comprovante'), findsOneWidget);
     });
 
-    testWidgets('manual payment with receipt says "com comprovante"',
-        (tester) async {
+    testWidgets('manual payment with receipt says "com comprovante"', (
+      tester,
+    ) async {
       await pump(tester, manual(receipt: 'doc1'));
       expect(find.textContaining('com comprovante'), findsOneWidget);
     });
@@ -198,23 +233,32 @@ void main() {
     });
 
     testWidgets('receipt state hidden without view permission', (tester) async {
-      await tester.pumpWidget(app(ReceivePaymentRow(
-        transaction: manual(),
-        showReceiptState: false,
-        onTap: () {},
-      )));
+      await tester.pumpWidget(
+        app(
+          ReceivePaymentRow(
+            transaction: manual(),
+            showReceiptState: false,
+            onTap: () {},
+          ),
+        ),
+      );
       expect(find.textContaining('comprovante'), findsNothing);
     });
 
-    testWidgets('discount row is negative and has no receipt state',
-        (tester) async {
-      await tester.pumpWidget(app(ReceivePaymentRow(
-        transaction: PaymentTransaction(
-          type: PaymentTransactionType.discount,
-          amount: 50,
+    testWidgets('discount row is negative and has no receipt state', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(
+          ReceivePaymentRow(
+            transaction: PaymentTransaction(
+              type: PaymentTransactionType.discount,
+              amount: 50,
+            ),
+            onTap: () {},
+          ),
         ),
-        onTap: () {},
-      )));
+      );
       expect(find.text('Desconto'), findsOneWidget);
       expect(find.textContaining('- '), findsOneWidget);
       expect(find.textContaining('comprovante'), findsNothing);
@@ -224,16 +268,20 @@ void main() {
   group('ReceiveDiscountSheet', () {
     testWidgets('tells the new total and returns the amount', (tester) async {
       double? result;
-      await tester.pumpWidget(app(Builder(
-        builder: (context) => CupertinoButton(
-          onPressed: () async => result = await showReceiveDiscountSheet(
-            context,
-            currentTotal: 1250,
-            maxDiscount: 950,
+      await tester.pumpWidget(
+        app(
+          Builder(
+            builder: (context) => CupertinoButton(
+              onPressed: () async => result = await showReceiveDiscountSheet(
+                context,
+                currentTotal: 1250,
+                maxDiscount: 950,
+              ),
+              child: const Text('open'),
+            ),
           ),
-          child: const Text('open'),
         ),
-      )));
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
@@ -242,11 +290,12 @@ void main() {
       expect(find.byType(FormSheet), findsOneWidget);
       expect(find.byKey(const Key('receiveDiscountHint')), findsNothing);
       await tester.enterText(
-          find.descendant(
-            of: find.byKey(const Key('receiveDiscountField')),
-            matching: find.byType(CupertinoTextField),
-          ),
-          '5000');
+        find.descendant(
+          of: find.byKey(const Key('receiveDiscountField')),
+          matching: find.byType(CupertinoTextField),
+        ),
+        '5000',
+      );
       await tester.pump();
       expect(find.textContaining('1.200,00'), findsOneWidget);
 
@@ -255,30 +304,36 @@ void main() {
       expect(result, 50);
     });
 
-    testWidgets('too big keeps ✓ off; closing returns null',
-        (tester) async {
+    testWidgets('too big keeps ✓ off; closing returns null', (tester) async {
       double? result = -1;
-      await tester.pumpWidget(app(Builder(
-        builder: (context) => CupertinoButton(
-          onPressed: () async => result = await showReceiveDiscountSheet(
-            context,
-            currentTotal: 100,
-            maxDiscount: 100,
+      await tester.pumpWidget(
+        app(
+          Builder(
+            builder: (context) => CupertinoButton(
+              onPressed: () async => result = await showReceiveDiscountSheet(
+                context,
+                currentTotal: 100,
+                maxDiscount: 100,
+              ),
+              child: const Text('open'),
+            ),
           ),
-          child: const Text('open'),
         ),
-      )));
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       await tester.enterText(
-          find.descendant(
-            of: find.byKey(const Key('receiveDiscountField')),
-            matching: find.byType(CupertinoTextField),
-          ),
-          '20000');
+        find.descendant(
+          of: find.byKey(const Key('receiveDiscountField')),
+          matching: find.byType(CupertinoTextField),
+        ),
+        '20000',
+      );
       await tester.pump();
-      expect(find.text('Desconto não pode ser maior que o saldo'),
-          findsOneWidget);
+      expect(
+        find.text('Desconto não pode ser maior que o saldo'),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(const ValueKey('new_order_save')));
       await tester.pumpAndSettle();
       expect(find.byType(FormSheet), findsOneWidget);

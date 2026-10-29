@@ -4,11 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/nfse/nfse_setup_screen.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/services/asaas_api_service.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -25,12 +27,18 @@ import 'package:praticos/utils/tax_id.dart';
 /// address with CEP: what the preview says is missing is asked here and the
 /// server sends it to the Asaas customer. ✓ creates the nota; pops with the
 /// [NfseInvoice].
+///
+/// When Asaas still refuses, the sheet opens what fixes it: the customer
+/// fields (all of them, filled with what Asaas has) for customer data, the
+/// nota setup for the service/fiscal data; anything else shows Asaas's text.
 class NfseIssueSheet extends StatefulWidget {
   const NfseIssueSheet({
     super.key,
     required this.orderIds,
     this.customerId,
     this.service,
+    this.sandbox = false,
+    this.canSetUp,
   });
 
   final List<String> orderIds;
@@ -41,18 +49,28 @@ class NfseIssueSheet extends StatefulWidget {
   /// Test seam; defaults to [AsaasApiService.instance].
   final AsaasApiService? service;
 
+  /// The Asaas connection is sandbox (passed to the nota setup).
+  final bool sandbox;
+
+  /// Who may open the nota setup; defaults to "manages the company".
+  final bool? canSetUp;
+
   /// Opens the sheet over the tab bar.
   static Future<NfseInvoice?> show(
     BuildContext context, {
     required List<String> orderIds,
     String? customerId,
     AsaasApiService? service,
+    bool sandbox = false,
+    bool? canSetUp,
   }) => FormSheet.show<NfseInvoice>(
     context,
     (_) => NfseIssueSheet(
       orderIds: orderIds,
       customerId: customerId,
       service: service,
+      sandbox: sandbox,
+      canSetUp: canSetUp,
     ),
   );
 
@@ -71,6 +89,10 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
 
   /// Customer e-mail/address typed here (keys as in [NfsePreview.customerMissing]).
   final Map<String, String> _contact = {};
+
+  /// Asaas refused the customer data it has: every field is shown, not only
+  /// the missing ones.
+  bool _askAllContact = false;
 
   AsaasApiService get _service => widget.service ?? AsaasApiService.instance;
 
@@ -147,8 +169,9 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
   /// Required fields shown: the e-mail when missing, the whole address when
   /// any part of it is missing.
   List<String> _askedContact(NfsePreview preview) => [
-    if (preview.customerMissing.contains('email')) 'email',
-    if (_addressFields.any(preview.customerMissing.contains)) ..._addressFields,
+    if (_askAllContact || preview.customerMissing.contains('email')) 'email',
+    if (_askAllContact || _addressFields.any(preview.customerMissing.contains))
+      ..._addressFields,
   ];
 
   bool _validContact(String field) {
@@ -196,28 +219,82 @@ class _NfseIssueSheetState extends State<NfseIssueSheet> {
       Navigator.pop(context, invoice);
       return;
     } on AsaasApiException catch (e) {
-      failure = asaasErrorText(context.l10n, e, nota: true);
-      // The server found data missing: show the fields for it.
-      if (e.code == 'CUSTOMER_DATA_REQUIRED') unawaited(_load(keepText: true));
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      await _showRefusal(e);
+      return;
     } catch (_) {
       failure = context.l10n.asaasErrorGeneric;
     }
     if (!mounted) return;
     setState(() => _submitting = false);
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text(failure),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.ok),
-          ),
-        ],
-      ),
-    );
+    await _alert(failure);
   }
+
+  /// Opens what fixes the refusal: the customer fields, the nota setup, or
+  /// just Asaas's text.
+  Future<void> _showRefusal(AsaasApiException e) async {
+    final l10n = context.l10n;
+    switch (e.code) {
+      case 'CUSTOMER_DATA_REQUIRED':
+        setState(() => _askAllContact = true);
+        unawaited(_load(keepText: true));
+        await _alert(
+          [
+            l10n.nfseErrorCustomerData,
+            if (e.detail != null) e.detail!,
+          ].join('\n\n'),
+        );
+      case 'NFSE_SETUP_REJECTED':
+      case 'NFSE_NOT_READY':
+      case 'NFSE_SETUP_NEEDED':
+        final admin =
+            widget.canSetUp ?? AuthorizationService.instance.canManageCompany;
+        final text = asaasErrorText(l10n, e, nota: true);
+        final setUp = await _alert(
+          admin ? text : '$text\n\n${l10n.nfseNotReadyOther}',
+          action: admin ? l10n.nfseSetupAction : null,
+        );
+        if (setUp != true || !mounted) return;
+        await Navigator.of(context, rootNavigator: true).push<void>(
+          CupertinoPageRoute<void>(
+            builder: (_) => NfseSetupScreen(
+              sandbox: widget.sandbox,
+              service: widget.service,
+            ),
+          ),
+        );
+      default:
+        await _alert(asaasErrorText(l10n, e, nota: true));
+    }
+  }
+
+  /// Alert with OK, or Cancel + [action] (true when [action] was tapped).
+  Future<bool?> _alert(String text, {String? action}) =>
+      showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          content: Text(text),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: action == null,
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                action == null
+                    ? dialogContext.l10n.ok
+                    : dialogContext.l10n.cancel,
+              ),
+            ),
+            if (action != null)
+              CupertinoDialogAction(
+                key: const Key('nfseIssueRefusalAction'),
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(action),
+              ),
+          ],
+        ),
+      );
 
   void _pickDate() {
     var selected = _date;

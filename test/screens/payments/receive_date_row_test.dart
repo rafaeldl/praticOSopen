@@ -18,14 +18,18 @@ void main() {
   test('paymentDayLabel: Hoje, Ontem or the date', () {
     expect(paymentDayLabel(l10n, DateTime(2026, 10, 14), now: now), 'Hoje');
     expect(paymentDayLabel(l10n, DateTime(2026, 10, 13), now: now), 'Ontem');
-    expect(paymentDayLabel(l10n, DateTime(2026, 10, 2), now: now),
-        FormatService().formatDate(DateTime(2026, 10, 2)));
+    expect(
+      paymentDayLabel(l10n, DateTime(2026, 10, 2), now: now),
+      FormatService().formatDate(DateTime(2026, 10, 2)),
+    );
   });
 
   test('paidAtFor: now when today, noon of the day otherwise', () {
     expect(paidAtFor(DateTime(2026, 10, 14), now: now), now);
-    expect(paidAtFor(DateTime(2026, 10, 10, 8), now: now),
-        DateTime(2026, 10, 10, 12));
+    expect(
+      paidAtFor(DateTime(2026, 10, 10, 8), now: now),
+      DateTime(2026, 10, 10, 12),
+    );
   });
 
   test('a single-order payment carries paidAt into the order update', () {
@@ -41,8 +45,10 @@ void main() {
     );
     final json = (update['transactions'] as ArrayUnionOp).values.single as Map;
     expect(json['paidAt'], isNotNull);
-    expect(PaymentTransaction.fromJson(Map<String, dynamic>.from(json)).paidAt,
-        DateTime(2026, 10, 10, 12));
+    expect(
+      PaymentTransaction.fromJson(Map<String, dynamic>.from(json)).paidAt,
+      DateTime(2026, 10, 10, 12),
+    );
   });
 
   test('the payment row shows the chosen day when it differs', () {
@@ -54,7 +60,10 @@ void main() {
       createdAt: DateTime(2026, 10, 14, 9),
       paidAt: DateTime(2026, 10, 10, 12),
     );
-    expect(paymentWhenLabel(late, format), format.formatDate(DateTime(2026, 10, 10)));
+    expect(
+      paymentWhenLabel(late, format),
+      format.formatDate(DateTime(2026, 10, 10)),
+    );
     final sameDay = PaymentTransaction(
       id: 't',
       type: PaymentTransactionType.payment,
@@ -62,8 +71,10 @@ void main() {
       createdAt: DateTime(2026, 10, 14, 9),
       paidAt: DateTime(2026, 10, 14, 9),
     );
-    expect(paymentWhenLabel(sameDay, format),
-        format.formatDateTime(DateTime(2026, 10, 14, 9)));
+    expect(
+      paymentWhenLabel(sameDay, format),
+      format.formatDateTime(DateTime(2026, 10, 14, 9)),
+    );
   });
 
   test('"Recebido em" uses paidAt over createdAt', () {
