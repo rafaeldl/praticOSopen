@@ -6,6 +6,7 @@ import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/segment_config_service.dart';
+import 'package:praticos/utils/observe_stream.dart';
 
 /// Serviço de autorização centralizado para o PraticOS.
 ///
@@ -94,13 +95,10 @@ class AuthorizationService {
     final store = _activeUserStore;
     if (store == null) return null;
     if (store.user == null) await store.findCurrentUser();
-    final stream = store.user;
-    if (stream == null) return null;
     try {
-      final user = await stream
-          .firstWhere((u) => roleIn(u, companyId) != null)
+      return await observeAsStream(() => roleIn(store.user?.value, companyId))
+          .firstWhere((role) => role != null)
           .timeout(timeout);
-      return roleIn(user, companyId);
     } catch (_) {
       return currentUserRole;
     }
@@ -212,12 +210,12 @@ class AuthorizationService {
     final companyId = Global.companyAggr?.id;
     // Same wait as [orderCreatorFilter], so `.first` keeps its answer.
     final initial = await resolveCurrentRole();
-    final users = _activeUserStore?.user;
+    final store = _activeUserStore;
     yield* creatorFilterChanges(
       initial: initial,
-      roles: users == null
+      roles: store == null
           ? const Stream.empty()
-          : users.map((u) => roleIn(u, companyId)),
+          : observeAsStream(() => roleIn(store.user?.value, companyId)),
       userId: userId,
     );
   }

@@ -30,4 +30,23 @@ void main() {
     await sub.cancel();
     expect(inners['b']!.hasListener, isFalse);
   });
+
+  test('.first answers even when the source never finishes cancelling', () async {
+    // The role stream behind the order queries did this (a MobX
+    // ObservableStream), and `.first` waits for the cancel: the Nova OS
+    // customer picker stayed open on every tap.
+    final source = StreamController<String>(
+      onCancel: () => Completer<void>().future,
+    );
+    final inner = StreamController<int>();
+    final first = switchStream(source.stream, (_) => inner.stream).first;
+    source.add('a');
+    await pumpEventQueue();
+    inner.add(7);
+    expect(
+      await first.timeout(const Duration(seconds: 1), onTimeout: () => -1),
+      7,
+    );
+    expect(inner.hasListener, isFalse);
+  });
 }

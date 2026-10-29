@@ -81,6 +81,16 @@ class FakeDirectory implements CustomerDirectory {
   Future<void> deleteCustomer(Customer customer) async => deleted.add(customer);
 }
 
+/// [FakeDirectory] whose vehicle lookup is [vehicles] (e.g. never answers).
+class SlowVehiclesDirectory extends FakeDirectory {
+  SlowVehiclesDirectory({super.customers, required this.vehicles});
+
+  final Future<List<DeviceAggr>> Function() vehicles;
+
+  @override
+  Future<List<DeviceAggr>> vehiclesOf(String customerId) => vehicles();
+}
+
 Customer customer(String id, String name, {String? phone}) => Customer()
   ..id = id
   ..name = name
@@ -324,6 +334,48 @@ void main() {
       final pick = h.result as CustomerPick;
       expect(pick.customer.id, 'c1');
       expect(pick.device?.id, 'd1');
+    });
+
+    testWidgets('a vehicle lookup that never answers still chooses the '
+        'customer', (tester) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerListScreen(
+          canAdd: true,
+          directory: SlowVehiclesDirectory(
+            customers: [ana, bruno],
+            vehicles: () => Completer<List<DeviceAggr>>().future,
+          ),
+        ),
+      );
+      await tester.tap(find.text('Ana Ribeiro'));
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      final pick = h.result as CustomerPick;
+      expect(pick.customer.id, 'c1');
+      expect(pick.device, isNull);
+    });
+
+    testWidgets('a vehicle lookup that fails still chooses the customer', (
+      tester,
+    ) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerListScreen(
+          canAdd: true,
+          directory: SlowVehiclesDirectory(
+            customers: [ana, bruno],
+            vehicles: () async => throw StateError('permission-denied'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Bruno Lima'));
+      await tester.pumpAndSettle();
+      final pick = h.result as CustomerPick;
+      expect(pick.customer.id, 'c2');
+      expect(pick.device, isNull);
     });
 
     testWidgets('a customer with several vehicles gets none auto-selected', (
