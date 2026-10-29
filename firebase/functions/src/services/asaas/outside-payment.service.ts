@@ -26,7 +26,10 @@
  *   the customer can never pay more than is owed;
  * - same or more → nothing.
  *
- * Installment plans are left alone (a part of them may be paid already).
+ * Installment plans can't be lowered or received in cash: one with nothing
+ * paid yet is canceled once the orders owe less than it (a plan with a paid
+ * installment is left alone). A quote owes nothing, so its link is canceled
+ * like any link with nothing left to charge.
  *
  * Concurrency: a short lease (`adjustingUntil`) on the charge. An invocation
  * that finds the lease taken bumps `dirtyCount` and returns; the holder
@@ -91,9 +94,22 @@ export function openForLink(order: Pick<Order, 'status' | 'total' | 'paidAmount'
   return calculateRemainingBalance(order);
 }
 
+/** An ISO string that ends with 'Z' or an offset ('+02:00', '-0300'). */
+const ZONED_ISO = /(?:[zZ]|[+-]\d{2}:?\d{2})$/;
+
+/**
+ * The app writes `createdAt` as the phone's local time without a zone
+ * ('2026-10-29T17:39:47.433185'); Date.parse would read it as UTC here and
+ * put a payment made right after the link three hours before it. Such
+ * strings are read as Brazil time (UTC-3, no daylight saving since 2019).
+ */
+export function parseTransactionTime(value: string): number {
+  return Date.parse(ZONED_ISO.test(value.trim()) ? value : `${value}-03:00`);
+}
+
 function toMillis(value: unknown): number {
   if (!value) return NaN;
-  if (typeof value === 'string') return Date.parse(value);
+  if (typeof value === 'string') return parseTransactionTime(value);
   if (value instanceof Date) return value.getTime();
   const maybe = value as { toMillis?: () => number; toDate?: () => Date };
   if (typeof maybe.toMillis === 'function') return maybe.toMillis();
@@ -315,13 +331,25 @@ async function reconcileOrderCharge(
     if (!chargeSnap.exists) return { again: false, dirty: 0 };
     const charge = chargeSnap.data() as OrderCharge;
     const stop = { again: false, dirty: charge.dirtyCount ?? 0 };
-    if (!OPEN_STATUSES.includes(charge.status) || charge.mode !== 'single' || hasPaidInstallments(charge)) return stop;
+    if (!OPEN_STATUSES.includes(charge.status) || hasPaidInstallments(charge)) return stop;
+    const order = orderSnap.exists ? (orderSnap.data() as Order) : undefined;
+    // A canceled order: its charges are canceled by handleOrderStatusChange.
+    // A quote owes nothing (openForLink): its link is canceled below.
+    if (!order || order.status === 'canceled') return stop;
+    if (charge.mode !== 'single') {
+      // An installment plan can't be lowered or received in cash: once the
+      // order owes less than the plan (paid by hand, total lowered, back to
+      // quote), the link is canceled, or the customer could pay it all again.
+      if (toCents(openForLink(order)) >= toCents(charge.value)) return stop;
+      await cancelLink(await client(), ref, charge);
+      console.log('[AsaasOutside] order owes less than the installment plan; link canceled', {
+        companyId, orderId, chargeId,
+      });
+      return stop;
+    }
     if (charge.settlingOutsideAt) {
       if ((await confirmPendingSettlement(await client(), ref, charge.asaasPaymentId)) !== 'cleared') return stop;
     }
-    const order = orderSnap.exists ? (orderSnap.data() as Order) : undefined;
-    // A quote/canceled order: its charges are canceled by handleOrderStatusChange.
-    if (!order || order.status === 'quote' || order.status === 'canceled') return stop;
     const owed = Math.min(charge.value, openForLink(order));
     const decision = decideOutsideAction(charge.value, owed, paidOutsideSince(order, charge.createdAt));
     if (decision.action === 'none') return stop;
@@ -408,13 +436,11 @@ export async function reconcileOutsidePayments(companyId: string, orderId: strin
   let cached: AsaasClient | null = null;
   const client = async () => (cached ??= await getAsaasCredentialProvider().getClient(companyId));
 
-  const singles = (await listCharges(companyId, orderId)).filter(
-    (c) => OPEN_STATUSES.includes(c.status) && c.mode === 'single',
-  );
+  const orderCharges = (await listCharges(companyId, orderId)).filter((c) => OPEN_STATUSES.includes(c.status));
   const customerCharges = await listOpenCustomerChargesForOrder(companyId, orderId);
 
   const failures: unknown[] = [];
-  for (const charge of singles) {
+  for (const charge of orderCharges) {
     await reconcileOrderCharge(client, companyId, orderId, charge.id).catch((e) => failures.push(e));
   }
   for (const charge of customerCharges) {
