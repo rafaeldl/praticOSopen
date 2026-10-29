@@ -3007,6 +3007,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get receiveCustomerZero => 'Escriba cuánto recibió.';
 
   @override
+  String get receiveCustomerBalanceChanged =>
+      'Los valores cambiaron desde que se abrió la pantalla. Revísalos y confirma de nuevo.';
+
+  @override
   String receiveCustomerDone(String amount, String name) {
     return 'Recibido $amount de $name';
   }

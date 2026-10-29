@@ -2998,6 +2998,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get receiveCustomerZero => 'Digite quanto recebeu.';
 
   @override
+  String get receiveCustomerBalanceChanged =>
+      'Os valores mudaram desde que a tela abriu. Confira e confirme de novo.';
+
+  @override
   String receiveCustomerDone(String amount, String name) {
     return 'Recebido $amount de $name';
   }

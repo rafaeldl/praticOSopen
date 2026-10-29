@@ -125,6 +125,31 @@ class CustomerReceiptService {
     return plan.receipt;
   }
 
+  /// The orders [orderIds] as the server has them now, or null when they
+  /// can't all be read (offline): the caller then goes on with what it has.
+  ///
+  /// The screen's orders come from a snapshot (Financeiro), and [record]
+  /// writes increments without reading: a payment booked meanwhile (an
+  /// Asaas link paid, someone else receiving) would be paid again.
+  Future<Map<String, Order>?> readFromServer(Iterable<String> orderIds) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null) return null;
+    try {
+      final orders = <String, Order>{};
+      await Future.wait(
+        orderIds.toSet().map((id) async {
+          final order = await _orders
+              .getFromServer(companyId, id)
+              .timeout(const Duration(seconds: 8));
+          if (order != null) orders[id] = order;
+        }),
+      );
+      return orders;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Uploads the picked receipt file under [receiptId] (needs connection).
   Future<ReceiptFile?> _upload(
     String companyId,

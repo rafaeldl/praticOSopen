@@ -1551,6 +1551,7 @@
   "receiveCustomerAmountLabel": "How much you got",
   "receiveCustomerOldestFirst": "If the amount doesn't cover everything, the oldest are paid first.",
   "receiveCustomerZero": "Type how much you got.",
+  "receiveCustomerBalanceChanged": "The amounts changed since this screen opened. Check them and confirm again.",
   "receiveCustomerDone": "Got {amount} from {name}",
   "@receiveCustomerDone": {
     "placeholders": {

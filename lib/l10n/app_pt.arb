@@ -1590,6 +1590,7 @@
   "receiveCustomerAmountLabel": "Quanto recebeu",
   "receiveCustomerOldestFirst": "Se o valor não der para tudo, as mais antigas são pagas primeiro.",
   "receiveCustomerZero": "Digite quanto recebeu.",
+  "receiveCustomerBalanceChanged": "Os valores mudaram desde que a tela abriu. Confira e confirme de novo.",
   "receiveCustomerDone": "Recebido {amount} de {name}",
   "@receiveCustomerDone": {
     "placeholders": {

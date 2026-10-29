@@ -3000,6 +3000,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiveCustomerZero => 'Type how much you got.';
 
   @override
+  String get receiveCustomerBalanceChanged =>
+      'The amounts changed since this screen opened. Check them and confirm again.';
+
+  @override
   String receiveCustomerDone(String amount, String name) {
     return 'Got $amount from $name';
   }
