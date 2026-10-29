@@ -576,3 +576,32 @@ function stableJson(value: unknown): string {
       : v,
   );
 }
+
+/**
+ * Brings `paid`/`payment` in line with the order total after it changed
+ * (items added or removed after a payment). The app's full save writes
+ * `total` but never the payment fields, so a paid order that grew stayed
+ * `paid` and left Financeiro ("Falta receber" only lists `unpaid`), and a
+ * partly paid one that shrank stayed `unpaid`. Runs for every company
+ * (Asaas or not). Legacy orders without `paidAmount` are left alone, and
+ * only `paid`/`payment` are written (no updatedAt/updatedBy: amounts did
+ * not change), so the trigger does not loop.
+ */
+export async function syncPaymentStatusWithTotal(companyId: string, orderId: string): Promise<boolean> {
+  const oRef = orderRef(companyId, orderId);
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(oRef);
+    if (!snap.exists) return false;
+    const order = snap.data() as OrderPaymentState & { paid?: unknown; payment?: unknown };
+    if (order.paidAmount === undefined || order.paidAmount === null) return false;
+    const { paid, payment } = paymentStatusFields(
+      order.status,
+      Number(order.total ?? 0),
+      roundMoney(Number(order.paidAmount) || 0),
+    );
+    if ((order.paid === true) === paid && (order.payment ?? null) === payment) return false;
+    tx.update(oRef, { paid, payment });
+    console.log('[OrderPayment] payment status follows the new total', { companyId, orderId, payment });
+    return true;
+  });
+}
