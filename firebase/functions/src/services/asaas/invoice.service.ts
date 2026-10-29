@@ -48,7 +48,9 @@ import { hasNfseWebhookEvents } from './webhook-events';
 import { findOrCreateAsaasCustomer, resolveTaxId, roundMoney, todayInSaoPaulo, addDays } from './charge.service';
 import {
   cleanCustomerContact,
+  contactRefusalError,
   ensureInvoiceCustomer,
+  isContactRefusal,
   InvoiceCustomerField,
   invoiceCustomerData,
   saveContactOnCustomer,
@@ -486,9 +488,10 @@ export function invoiceUpdateFrom(
 ): Partial<NfseInvoice> | null {
   const status = mapInvoiceStatus(asaas.status, eventName) ?? current.status;
   if (!canMoveInvoiceStatus(current.status, status)) return null;
-  // A nota PraticOS gave up on (issue refused, canceled on Asaas) keeps its
-  // reason: the late events of that Asaas nota do not bring it back.
-  if (current.status === 'error' && current.errorCode) return null;
+  // A nota PraticOS gave up on and canceled on Asaas keeps its reason: the
+  // late events of that dead Asaas nota do not bring it back. One whose
+  // cancel failed is still alive on Asaas and follows it.
+  if (current.status === 'error' && current.canceledOnAsaas) return null;
   const now = new Date().toISOString();
   const update: Partial<NfseInvoice> = { status, updatedAt: now };
   if (asaas.id && !current.asaasInvoiceId) update.asaasInvoiceId = asaas.id;
@@ -503,6 +506,8 @@ export function invoiceUpdateFrom(
     update.statusDescription = null;
     if (current.errorCode) update.errorCode = null;
   }
+  // Asaas's own error replaces the reason PraticOS recorded.
+  if (status === 'error' && current.status !== 'error' && current.errorCode) update.errorCode = null;
   if (status === 'authorized' && !current.authorizedAt) update.authorizedAt = now;
   if (status === 'canceled' && !current.canceledAt) update.canceledAt = now;
   return update;
@@ -627,7 +632,13 @@ export async function createInvoice(
     throw new AsaasServiceError('ORDER_HAS_INVOICE', 'An order already has an active nota');
   }
   const typedContact = cleanCustomerContact(input.customerData);
-  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId, typedContact);
+  // A new Asaas customer is created with the typed address; Asaas refusing it
+  // reopens the customer fields.
+  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId, typedContact).catch(
+    (error) => {
+      throw contactRefusalError(error);
+    },
+  );
   // The city refuses a nota without the customer's e-mail and address with CEP.
   await ensureInvoiceCustomer(client, asaasCustomerId, customer, typedContact);
   await saveContactOnCustomer(companyId, customer, typedContact);
@@ -740,19 +751,26 @@ export async function createInvoice(
 
 type RefusalCode = 'CUSTOMER_DATA_REQUIRED' | 'NFSE_SETUP_REJECTED' | 'ASAAS_REJECTED';
 
-/** Asaas texts about the nota setup (service, taxes, fiscal data of the company). */
-const SETUP_REFUSAL = /servi[cç]o|al[ií]quota|\biss\b|inscri[cç][aã]o municipal|cnae|regime|tribut|(informa[cç][oõ]es|dados) fisca/i;
+/**
+ * Asaas texts about the nota setup (municipal service, taxes, fiscal data of
+ * the company). Not a bare "serviço": the free-text service description is
+ * edited on the sheet itself.
+ */
+const SETUP_REFUSAL =
+  /servi[cç]o municipal|al[ií]quota|\biss\b|inscri[cç][aã]o municipal|cnae|regime|tribut|(informa[cç][oõ]es|dados) fisca/i;
+/** Asaas error codes about the municipal service (`invalid_name` is its name). */
+const SETUP_CODES = /^invalid_(name|municipalService\w*)$/i;
 
 /**
- * What a refusal is about, from Asaas's texts: the customer data (the sheet
- * asks for it), the nota setup (the app opens the setup), else unknown (the
- * app shows Asaas's text).
+ * What a refusal is about: the customer's e-mail/address (the sheet asks for
+ * it), the nota setup (the app opens the setup), else unknown (the app shows
+ * Asaas's text). "CPF do cliente inválido" is unknown: the sheet cannot edit
+ * a stored CPF.
  */
 export function refusalCode(error: AsaasApiError): RefusalCode {
-  const texts = error.errors.map((e) => e.description ?? '');
-  if (texts.some((t) => /cliente/i.test(t))) return 'CUSTOMER_DATA_REQUIRED';
-  if (texts.some((t) => SETUP_REFUSAL.test(t))) return 'NFSE_SETUP_REJECTED';
-  return 'ASAAS_REJECTED';
+  if (isContactRefusal(error, true)) return 'CUSTOMER_DATA_REQUIRED';
+  const setup = error.errors.some((e) => SETUP_CODES.test(e.code ?? '') || SETUP_REFUSAL.test(e.description ?? ''));
+  return setup ? 'NFSE_SETUP_REJECTED' : 'ASAAS_REJECTED';
 }
 
 /** What the app gets for a refusal: our code with Asaas's text in `detail`, or the Asaas error. */
@@ -785,6 +803,8 @@ async function giveUpRefusedInvoice(
   try {
     await client.cancelInvoice(asaasInvoiceId);
     update.status = 'error';
+    // Dead on Asaas: later events of it are ignored (see invoiceUpdateFrom).
+    update.canceledOnAsaas = true;
   } catch (cancelError) {
     const status = cancelError instanceof AsaasApiError ? cancelError.status : 'unknown';
     console.error(`[NFS-e] ALERT invoice ${invoiceId} of company ${companyId} refused and not canceled (status ${status}); left scheduled`);

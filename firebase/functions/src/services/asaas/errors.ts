@@ -123,7 +123,7 @@ export function asaasErrorDescription(error: AsaasApiError): string | null {
  * ("CEP do cliente é inválido"), never echo the customer's data.
  */
 export function asaasErrorLog(error: AsaasApiError): string {
-  const items = error.errors.map((e) => `${e.code ?? '?'}: ${e.description ?? ''}`.trim());
+  const items = error.errors.map((e) => `${e.code ?? '?'}: ${(e.description ?? '').slice(0, 200)}`.trim());
   return `status ${error.status}${items.length > 0 ? ` [${items.join(' | ')}]` : ''}`;
 }
 

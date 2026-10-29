@@ -404,6 +404,8 @@ export interface NfseInvoice {
   errorCode?: string | null;
   /** Issued by the server on its own (NfseServiceSettings.autoIssue). */
   auto?: boolean;
+  /** PraticOS gave up on it (issue refused) and canceled it on Asaas: its events are ignored. */
+  canceledOnAsaas?: boolean;
   createdBy: UserAggr;
   createdAt: string;
   updatedAt?: string;

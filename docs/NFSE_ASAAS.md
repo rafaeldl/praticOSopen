@@ -77,8 +77,8 @@ Todos respondem `NFSE_NOT_ENABLED` (403) sem a flag, `ASAAS_NOT_CONNECTED` sem a
 7. Com data de hoje, chama `POST /v3/invoices/{id}/authorize` para emitir na hora. Se o Asaas **recusar a emissão** (400, 401, 403, 404 ou 422; por exemplo "E-mail do cliente incompleto.; Endereço do cliente incompleto.; CEP do cliente é inválido."):
    - a nota agendada **é cancelada no Asaas** (agendada ainda não foi à prefeitura, cancelar é só no Asaas) e fica `error` com `errorCode` e o texto do Asaas em `statusDescription`. A OS fica livre: o usuário corrige e emite de novo;
    - `errorCode` e o que o app recebe seguem a [Recusa do Asaas](#recusa-do-asaas);
-   - eventos atrasados dessa nota do Asaas (`INVOICE_CANCELED`, `INVOICE_CREATED`) não mexem mais nela: o motivo fica;
-   - se o cancelamento falhar, a nota fica `scheduled` com o motivo e a OS travada (log `ALERT`): cancelar na tela da nota e emitir de novo.
+   - com o cancelamento feito, a nota ganha `canceledOnAsaas: true` e eventos atrasados dessa nota do Asaas (`INVOICE_CANCELED`, `INVOICE_CREATED`) não mexem mais nela: o motivo fica;
+   - se o cancelamento falhar, a nota fica `scheduled` com o motivo e a OS travada (log `ALERT`): cancelar na tela da nota e emitir de novo. Ela **continua viva no Asaas** e segue os eventos dele: `INVOICE_ERROR` troca o nosso motivo pelo do Asaas, e se o Asaas emitir depois (cliente corrigido no painel), `INVOICE_AUTHORIZED` a deixa emitida e a OS travada de novo (ou em `conflict`, se a OS já tiver outra nota).
 
    Escolhemos cancelar em vez de manter agendada para tentar de novo: assim não precisa de rota de "tentar emitir de novo", a emissão repetida é a mesma de sempre e a nota recusada não fica parada como "Aguardando prefeitura" sem motivo. **Sem resposta certa** do authorize, a nota fica agendada (o Asaas emite na data).
 
@@ -88,11 +88,13 @@ Quando o Asaas recusa o create ou o authorize, o texto dele diz o que corrigir. 
 
 | Texto do Asaas fala de | Código | Na folha de emissão |
 |---|---|---|
-| cliente ("CEP do cliente é inválido") | `CUSTOMER_DATA_REQUIRED` | Aviso com o texto do Asaas e **todos** os campos do cliente abertos (preenchidos com o que o Asaas tem), não só os que faltam |
-| serviço, alíquota, ISS, inscrição municipal, CNAE, regime, tributação, dados fiscais | `NFSE_SETUP_REJECTED` | Aviso com o texto do Asaas e "Configurar", que abre a configuração da nota (`NfseSetupScreen`). Quem não configura (gerente) vê "Peça ao dono…". `NFSE_NOT_READY` e `NFSE_SETUP_NEEDED` fazem o mesmo |
-| outra coisa | `ASAAS_VALIDATION_ERROR` (nota gravada `ASAAS_REJECTED`) | Aviso "O Asaas recusou a nota: {texto do Asaas}" |
+| e-mail, endereço, CEP, bairro ou número **do cliente** ("CEP do cliente é inválido") | `CUSTOMER_DATA_REQUIRED` | Aviso com o texto do Asaas e **todos** os campos do cliente abertos (preenchidos com o que o Asaas tem), não só os que faltam |
+| serviço municipal (texto, ou código `invalid_name`/`invalid_municipalService*`), alíquota, ISS, inscrição municipal, CNAE, regime, tributação, dados fiscais | `NFSE_SETUP_REJECTED` | Aviso com o texto do Asaas e "Configurar", que abre a configuração da nota (`NfseSetupScreen`). Quem não configura (gerente) vê "Peça ao dono…". `NFSE_NOT_READY` e `NFSE_SETUP_NEEDED` fazem o mesmo |
+| outra coisa (inclusive "CPF/CNPJ do cliente inválido", que a folha não edita, e a descrição livre do serviço, que a folha já mostra) | `ASAAS_VALIDATION_ERROR` (nota gravada `ASAAS_REJECTED`) | Aviso "O Asaas recusou a nota: {texto do Asaas}" |
 
-O texto do Asaas vai na resposta em `error.detail` (`toHttpError`), e o app o mostra só nas telas da nota. O log do servidor grava o status e os pares `código: texto` do Asaas (`asaasErrorLog`), nunca o payload nem os dados do cliente.
+O Asaas recusar **salvar o cliente** (400 no `PUT /v3/customers/{id}` ou na criação com o endereço digitado) com texto sobre e-mail/endereço também vira `CUSTOMER_DATA_REQUIRED` com o texto dele: a folha reabre os campos.
+
+O texto do Asaas vai na resposta em `error.detail` (`toHttpError`), e o app o mostra só nas telas da nota. O log do servidor grava o status e os pares `código: texto` do Asaas (`asaasErrorLog`, texto até 200 caracteres), nunca o payload nem os dados do cliente.
 
 ### Dados do cliente
 
@@ -142,7 +144,7 @@ Roda na prévia, na emissão e no cancelamento que tocam a OS; o webhook também
 | `canceled` | `CANCELED` | Cancelada (cinza) |
 | `error` | `ERROR` | Erro (vermelho), com o motivo |
 
-O status só anda para a frente (evento atrasado ou repetido não desfaz nota emitida ou cancelada); `canceled` é final; `error` pode ir para qualquer um (a nota foi corrigida e reagendada no Asaas), menos a `error` com `errorCode` (o PraticOS desistiu dela e cancelou no Asaas), que não muda mais.
+O status só anda para a frente (evento atrasado ou repetido não desfaz nota emitida ou cancelada); `canceled` é final; `error` pode ir para qualquer um (a nota foi corrigida e reagendada no Asaas), menos a `error` com `canceledOnAsaas` (o PraticOS desistiu dela e a cancelou no Asaas), que não muda mais.
 
 Saindo de `error`, a transação confere se a trava de cada OS ainda aponta para essa nota. Se alguma OS já tem outra nota, a situação é gravada mas a nota vira `conflict: true`: não trava a OS de novo, gera log `ALERT` e o detalhe mostra "Nota emitida fora do PraticOS, confira no Asaas.". Nota em conflito nunca conta como a nota da OS.
 
@@ -165,7 +167,7 @@ Eventos assinados na conexão (gravados em `private/asaas.webhookEvents`): `INVO
 | `companies/{cid}/invoices/{id}` | servidor (rotas e webhook) | `canViewCharges` |
 | `companies/{cid}/private/nfse/orders/{orderId}` | servidor (trava uma nota ativa por OS) | ninguém |
 
-`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`, `auto` (emitida sozinha), `errorCode` (por que não saiu: automática que falhou ou emissão recusada pelo Asaas).
+`invoices/{id}`: `asaasInvoiceId`, `status`, `customer {id, name}`, `orderIds`, `orders [{id, number, servicesTotal, productsTotal, discount, value}]`, `value`, `serviceDescription`, `observations`, `effectiveDate`, `municipalServiceName`, `number`, `validationCode`, `pdfUrl`, `xmlUrl`, `statusDescription`, `createdBy`, `createdAt`, `updatedAt`, `authorizedAt`, `canceledAt`, `asaasEnvironment`, `asaasWalletId`, `conflict`, `auto` (emitida sozinha), `errorCode` (por que não saiu: automática que falhou ou emissão recusada pelo Asaas), `canceledOnAsaas` (recusada e cancelada no Asaas pelo PraticOS).
 
 `settings/nfse`: `municipalServiceId`, `municipalServiceCode`, `municipalServiceName`, `taxes {retainIss, iss, pis, cofins, csll, inss, ir}`, `descriptionTemplate`, `autoIssue` (`manual` | `paid` | `completed`), `asaasEnvironment`, `asaasWalletId`.
 
@@ -203,6 +205,7 @@ Validado em 2026-10-28 com uma conta sandbox:
 - [x] `GET /v3/fiscalInfo/services`: lista da cidade de teste.
 - [x] `POST /v3/invoices` avulsa com o payload montado: aceita e agenda (`SCHEDULED`). Com o nome do serviço 14.01.01 inteiro (297 caracteres), 400 `invalid_name` "A descrição do serviço deve ter no máximo 250 caracteres." (2026-10-29): daí o corte em 250.
 - [x] `POST /v3/invoices/{id}/authorize`: com o cliente só com nome e CPF, 400 (e-mail, endereço e CEP do cliente); com os dados completos, `SYNCHRONIZED` → `AUTHORIZED` com número e PDF. Deu a regra dos [dados do cliente](#dados-do-cliente).
+- [x] `PUT /v3/customers/{id}` é atualização parcial: mandar só o e-mail e depois só o endereço manteve o e-mail.
 - [x] `GET /v3/invoices?externalReference=` acha a nota (conferência de create sem resposta).
 - [x] Cancelamento: `PROCESSING_CANCELLATION` → `CANCELED`.
 

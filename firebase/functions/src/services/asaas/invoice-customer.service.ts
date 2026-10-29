@@ -13,7 +13,7 @@ import { db } from '../firestore.service';
 import { Customer } from '../../models/types';
 import { AsaasCustomerContact } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient } from './asaas-client';
-import { AsaasServiceError } from './errors';
+import { asaasErrorDescription, AsaasServiceError } from './errors';
 import { EMAIL_PATTERN, findAsaasCustomerId } from './charge.service';
 
 /** Fields a nota cannot go without (complement is optional). */
@@ -29,6 +29,33 @@ const MAX_LENGTH: Record<keyof AsaasCustomerContact, number> = {
   province: 100,
 };
 const CONTACT_FIELDS = Object.keys(MAX_LENGTH) as Array<keyof AsaasCustomerContact>;
+
+/** Asaas texts about the contact fields the issue sheet edits. */
+const CONTACT_REFUSAL = /e-?mail|endere[cç]o|\bcep\b|bairro|n[úu]mero (do endere[cç]o|do im[óo]vel|do cliente)/i;
+
+/**
+ * The refusal is about the e-mail/address the sheet can fix. `aboutCustomer`:
+ * the text must also say it is the customer's (a nota refusal could be about
+ * the company's e-mail); not needed for a refused customer save.
+ */
+export function isContactRefusal(error: AsaasApiError, aboutCustomer: boolean): boolean {
+  return error.errors.some((e) => {
+    const text = e.description ?? '';
+    return CONTACT_REFUSAL.test(text) && (!aboutCustomer || /cliente/i.test(text));
+  });
+}
+
+/**
+ * A 400 saving the customer's e-mail/address on Asaas becomes
+ * CUSTOMER_DATA_REQUIRED with Asaas's text, so the sheet reopens the fields.
+ */
+export function contactRefusalError(error: unknown): unknown {
+  if (error instanceof AsaasApiError && error.status === 400 && isContactRefusal(error, false)) {
+    const detail = asaasErrorDescription(error);
+    return new AsaasServiceError('CUSTOMER_DATA_REQUIRED', detail ?? 'Asaas refused the customer data', detail);
+  }
+  return error;
+}
 
 /** Trimmed valid fields only (CEP as 8 digits, e-mail checked); the rest is dropped. */
 export function cleanCustomerContact(input?: AsaasCustomerContact | null): AsaasCustomerContact {
@@ -105,7 +132,11 @@ export async function ensureInvoiceCustomer(
   for (const key of CONTACT_FIELDS) {
     if (merged[key] && merged[key] !== current[key]) changes[key] = merged[key];
   }
-  if (Object.keys(changes).length > 0) await client.updateCustomer(asaasCustomerId, changes);
+  if (Object.keys(changes).length > 0) {
+    await client.updateCustomer(asaasCustomerId, changes).catch((error) => {
+      throw contactRefusalError(error);
+    });
+  }
   return merged;
 }
 
