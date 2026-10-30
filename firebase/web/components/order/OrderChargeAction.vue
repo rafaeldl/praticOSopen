@@ -65,7 +65,8 @@ const detailLabel = computed(() => {
   const how = v.installmentCount
     ? t.value.chargeInstallments.replace('{count}', String(v.installmentCount))
     : t.value.chargeMethods
-  const due = t.value.chargeDue.replace('{date}', formatChargeDueDate(v.dueDate, lang.value))
+  const label = v.overdue ? t.value.chargeOverdueOn : t.value.chargeDue
+  const due = label.replace('{date}', formatChargeDueDate(v.dueDate, lang.value))
   return `${how} · ${due}`
 })
 </script>

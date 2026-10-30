@@ -374,6 +374,23 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return getQueryList(companyId, args: [QueryArgs('payment', 'unpaid')]);
   }
 
+  /// Orders changed since [since]: every payment stamps `updatedAt`, so this
+  /// covers the orders paid from [since] on, whenever they were created.
+  /// Single-field range: needs no composite index. Errors are not swallowed
+  /// so callers can show a retry state.
+  Future<List<Order?>> getOrdersUpdatedSince(String companyId, DateTime since) {
+    return getQueryList(
+      companyId,
+      args: [
+        QueryArgs(
+          'updatedAt',
+          since.toIso8601String(),
+          oper: 'isGreaterThanOrEqualTo',
+        ),
+      ],
+    );
+  }
+
   /// Busca orders por intervalo de scheduledDate.
   Future<List<Order?>> getOrdersByScheduledDateRange(
     String companyId,

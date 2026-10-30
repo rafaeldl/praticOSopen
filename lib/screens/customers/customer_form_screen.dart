@@ -139,10 +139,33 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       } else {
         await (_store ??= CustomerStore()).saveCustomer(_customer!);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        await _showSaveError();
+      }
+      return;
     }
-    if (mounted) Navigator.pop(context, _customer);
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    Navigator.pop(context, _customer);
+  }
+
+  Future<void> _showSaveError() {
+    final l10n = context.l10n;
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        content: Text(l10n.customerSaveError),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -64,6 +64,27 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'paid');
   });
 
+  it('OS ficou paga só porque o total mudou: não tenta a nota automática', async () => {
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid' },
+      { status: 'approved', payment: 'paid', paymentSyncedAt: '2026-10-30T12:00:00.000Z' },
+    );
+    expect(autoIssue).not.toHaveBeenCalled();
+  });
+
+  it('OS ajustada pelo total antes e paga de verdade depois: tenta a nota', async () => {
+    const paymentSyncedAt = '2026-10-30T12:00:00.000Z';
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid', paymentSyncedAt },
+      { status: 'approved', payment: 'paid', paymentSyncedAt },
+    );
+    expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'paid');
+  });
+
   it('OS foi concluída: tenta a nota automática do momento "concluída"', async () => {
     await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress' }, { status: 'done' });
     expect(autoIssue).toHaveBeenCalledTimes(1);
@@ -189,6 +210,7 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
       await handleOrderUpdatedAsaas('c1', 'o1', { status: 'approved', total: 500 }, { status: 'approved', total: 300 });
 
       expect(read(ORDER_PATH)).toMatchObject({ paid: true, payment: 'paid' });
+      expect(read(ORDER_PATH)!.paymentSyncedAt).toEqual(expect.any(String));
     });
 
     it('orçamento fica sem status de pagamento; OS antiga sem paidAmount e status já certo não mudam', async () => {

@@ -23,6 +23,7 @@ test('pending charge renders the pay button with the invoice url', () => {
     dueDate: '2026-10-07',
     invoiceUrl: 'https://sandbox.asaas.com/i/abc123',
     installmentCount: null,
+    overdue: false,
   })
 })
 
@@ -51,8 +52,14 @@ test('isSafeInvoiceUrl accepts only https on asaas.com or its subdomains', () =>
   assert.equal(isSafeInvoiceUrl(undefined), false)
 })
 
-test('overdue and paid charges render their messages', () => {
-  assert.deepEqual(getChargeView({ ...pending, status: 'overdue' }), { kind: 'overdue' })
+test('an overdue charge keeps the pay button: Asaas still takes Pix and boleto', () => {
+  const view = getChargeView({ ...pending, status: 'overdue' })
+  assert.equal(view.kind, 'pay')
+  assert.equal(view.kind === 'pay' && view.overdue, true)
+})
+
+test('overdue without a safe link and paid charges render their messages', () => {
+  assert.deepEqual(getChargeView({ ...pending, status: 'overdue', invoiceUrl: 'https://evil.example/x' }), { kind: 'overdue' })
   assert.deepEqual(getChargeView({ ...pending, status: 'paid' }), { kind: 'paid', value: pending.value })
 })
 

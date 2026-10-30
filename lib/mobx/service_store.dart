@@ -28,8 +28,12 @@ abstract class _ServiceStore with Store {
 
   String? companyId;
 
+  /// Completes once [companyId] was read: a store created right before a
+  /// write must wait for it, or there is no company to write in.
+  late final Future<void> _companyLoaded;
+
   _ServiceStore() {
-    SharedPreferences.getInstance().then((value) {
+    _companyLoaded = SharedPreferences.getInstance().then((value) {
       companyId = value.getString('companyId');
       retrieveServices();
     });
@@ -46,6 +50,7 @@ abstract class _ServiceStore with Store {
 
   @action
   saveService(Service service) async {
+    await _companyLoaded;
     if (companyId == null) return;
     User? user = await userStore.getSingleUserById();
     service.createdAt = DateTime.now();
@@ -59,12 +64,14 @@ abstract class _ServiceStore with Store {
 
   @action
   deleteService(Service service) async {
+    await _companyLoaded;
     if (companyId == null) return;
     await repository.removeItem(companyId!, service.id);
   }
 
   @action
   Future<String?> uploadServicePhoto(File file, Service service) async {
+    await _companyLoaded;
     if (companyId == null) return null;
 
     if (service.id == null) {

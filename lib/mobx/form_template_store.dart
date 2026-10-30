@@ -37,10 +37,16 @@ abstract class _FormTemplateStore with Store {
   @observable
   String? segmentId;
 
-  _FormTemplateStore() {
-    SharedPreferences.getInstance().then((value) async {
-      companyId = value.getString('companyId');
+  /// Completes once [companyId] was read: a store created right before a
+  /// write must wait for it, or there is no company to write in.
+  late final Future<void> _companyLoaded;
 
+  _FormTemplateStore() {
+    final loaded = SharedPreferences.getInstance().then((value) {
+      companyId = value.getString('companyId');
+    });
+    _companyLoaded = loaded;
+    loaded.then((_) async {
       retrieveTemplates();
 
       // Busca o segmentId da company
@@ -95,6 +101,7 @@ abstract class _FormTemplateStore with Store {
   /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
   Future<void> saveTemplate(FormDefinition template, {Subscription? subscription}) async {
+    await _companyLoaded;
     if (companyId == null) return;
 
     // Verifica limite de formulários
@@ -114,6 +121,7 @@ abstract class _FormTemplateStore with Store {
 
   @action
   Future<void> updateTemplate(FormDefinition template) async {
+    await _companyLoaded;
     if (companyId == null) return;
     template.updatedAt = DateTime.now();
     await repository.updateItem(companyId!, template);
@@ -121,6 +129,7 @@ abstract class _FormTemplateStore with Store {
 
   @action
   Future<void> deleteTemplate(FormDefinition template) async {
+    await _companyLoaded;
     if (companyId == null) return;
     await repository.removeItem(companyId!, template.id);
 
@@ -136,6 +145,7 @@ abstract class _FormTemplateStore with Store {
   /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
   Future<void> toggleTemplateStatus(FormDefinition template, {Subscription? subscription}) async {
+    await _companyLoaded;
     if (companyId == null) return;
 
     // Se estiver ativando, verifica limite
@@ -163,6 +173,7 @@ abstract class _FormTemplateStore with Store {
   /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
   Future<void> importGlobalTemplate(FormDefinition globalTemplate, {Subscription? subscription}) async {
+    await _companyLoaded;
     if (companyId == null) return;
 
     // Verifica limite de formulários

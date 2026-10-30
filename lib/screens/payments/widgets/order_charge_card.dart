@@ -9,6 +9,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 
 /// Status dot color: amber pending, red overdue, green paid, grey closed.
 /// Returns the dynamic role; callers resolve it (e.g. [StatusDot]).
@@ -80,11 +81,16 @@ class ChargeLinkBlock extends StatelessWidget {
     required this.charge,
     required this.customerName,
     required this.onRemind,
+    this.remaining = 0,
   });
 
   final OrderCharge charge;
   final String? customerName;
   final VoidCallback onRemind;
+
+  /// What the order still owes; above the link value, the block says how
+  /// much is missing outside the link.
+  final double remaining;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +119,7 @@ class ChargeLinkBlock extends StatelessWidget {
     if (!overdue && due.isNotEmpty) {
       sentence = '$sentence ${l10n.chargeLinkValidUntil(due)}';
     }
+    final outside = remaining - (charge.value ?? 0);
 
     return _BlockCard(
       key: const Key('chargeLinkBlock'),
@@ -130,6 +137,14 @@ class ChargeLinkBlock extends StatelessWidget {
               fontFeatures: AppTypography.tabular,
             ),
           ),
+          if (outside > OrderPaymentMath.centTolerance) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.chargeMissingOutsideLink(format.formatCurrency(outside)),
+              key: const Key('chargeMissingOutsideLink'),
+              style: AppTypography.callout.copyWith(color: onSoft),
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           CupertinoButton(
             key: const Key('chargeRemindWhatsApp'),
@@ -208,6 +223,55 @@ class ChargeChangedBlock extends StatelessWidget {
               onPressed: busy ? null : onGenerate,
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Top block after the server canceled an installment plan the order no
+/// longer owes in full: says so and offers a link with what is missing.
+class ChargeCanceledBlock extends StatelessWidget {
+  const ChargeCanceledBlock({
+    super.key,
+    required this.remaining,
+    required this.onSend,
+    this.busy = false,
+  });
+
+  final double remaining;
+  final VoidCallback onSend;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final onSoft = AppColors.onWarningSoft.resolveFrom(context);
+    final remainingText = FormatService().formatCurrency(remaining);
+    return _BlockCard(
+      key: const Key('chargeCanceledBlock'),
+      background: AppColors.warningSoft.resolveFrom(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.chargeInstallmentsCanceled,
+            style: AppTypography.label.copyWith(color: onSoft),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.chargeSendNewLink(remainingText),
+            style: AppTypography.highlight.copyWith(
+              color: onSoft,
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PrimaryButton(
+            key: const Key('chargeSendNewLinkButton'),
+            label: l10n.chargeGenerateNew(remainingText),
+            onPressed: busy ? null : onSend,
+          ),
         ],
       ),
     );

@@ -13,9 +13,9 @@
  *   while a link is open: settle or lower the link, outside-payment.service);
  * - `total` changed (and `transactions` did not) → `syncPaymentStatusWithTotal`
  *   (every company: `paid`/`payment` follow the new total);
- * - the order became paid (`payment` → 'paid') or done (`status` → 'done') →
- *   `autoIssueInvoice`, which issues the nota when the company chose that
- *   moment (settings/nfse.autoIssue);
+ * - the order became paid (`payment` → 'paid', unless only the total changed:
+ *   no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
+ *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -32,7 +32,12 @@ import {
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
 
-export type OrderUpdateSnapshot = OrderPaymentState & { status?: string; payment?: string | null };
+export type OrderUpdateSnapshot = OrderPaymentState & {
+  status?: string;
+  payment?: string | null;
+  /** Stamped by `syncPaymentStatusWithTotal`. */
+  paymentSyncedAt?: string;
+};
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
 async function paymentsChangedIfConnected(companyId: string, orderId: string, repair: boolean): Promise<void> {
@@ -70,7 +75,8 @@ export async function handleOrderUpdatedAsaas(
   if (totalChanged && !repair) {
     tasks.push(syncPaymentStatusWithTotal(companyId, orderId).then(() => undefined));
   }
-  if (after.payment === 'paid' && before?.payment !== 'paid') {
+  const syncedFromTotal = !!after.paymentSyncedAt && after.paymentSyncedAt !== before?.paymentSyncedAt;
+  if (after.payment === 'paid' && before?.payment !== 'paid' && !syncedFromTotal) {
     tasks.push(autoIssueInvoice(companyId, orderId, 'paid'));
   }
   if (after.status === 'done' && before?.status !== 'done') {

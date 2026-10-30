@@ -117,7 +117,7 @@ Quando entra um pagamento manual numa OS que está numa cobrança aberta (Recebe
 | Falta uma parte | `PUT /v3/payments/{id}` com o que falta (só `PENDING`/`OVERDUE`); o link continua o mesmo; na de várias OS, a repartição é refeita. Se o Asaas recusar o valor (ex.: abaixo do mínimo), o link é cancelado, para o cliente nunca pagar mais do que deve |
 | Falta tudo ainda | Nada |
 | OS voltou a orçamento (mesmo com pagamento à mão) | Cancela o link, nunca dá baixa em dinheiro: orçamento não deve nada |
-| Parcelamento no cartão sem parcela paga e a OS passou a dever menos que ele (pago à mão, total baixou, voltou a orçamento) | Antes, `GET /installments/{id}/payments`: se alguma parcela já está `CONFIRMED`/`RECEIVED` (cartão aprovado, webhook a caminho), não faz nada e o webhook lança. Senão cancela o parcelamento (não dá para baixar o valor nem dar baixa em dinheiro, e o cliente pagaria tudo de novo) e deixa um comentário interno na OS: "Parcelamento no cartão de R$ X cancelado: a OS passou a dever R$ Y. Mande um link novo." |
+| Parcelamento no cartão sem parcela paga e a OS passou a dever menos que ele (pago à mão, total baixou, voltou a orçamento) | Antes, `GET /installments/{id}/payments`: se alguma parcela já está `CONFIRMED`/`RECEIVED` (cartão aprovado, webhook a caminho), não faz nada e o webhook lança. Senão cancela o parcelamento (não dá para baixar o valor nem dar baixa em dinheiro, e o cliente pagaria tudo de novo) marca a cobrança `autoCanceled` e deixa um comentário interno na OS: "Parcelamento no cartão de R$ X cancelado: a OS passou a dever R$ Y. Mande um link novo." Se ainda falta dinheiro, a tela Receber mostra "Parcelamento cancelado" com o botão do link novo. |
 
 O que falta pelo link é recalculado das OS (cada parte limitada ao que falta na OS; orçamento e cancelada devem zero). Parcelamento com parcela já paga fica de fora. Cancelar um link só marca a cobrança `canceled` se ela ainda está aberta e sem pagamento lançado (um webhook que chegou no meio mantém o status dele).
 
@@ -257,7 +257,7 @@ Na página `/q/{token}` (`OrderChargeAction.vue`):
 | `charge` | Exibição |
 |----------|----------|
 | `pending` | Botão "Pagar R$ x" (abre a fatura em nova aba) + "Pix, boleto ou cartão" ou "Em Nx no cartão" + vencimento |
-| `overdue` | "Cobrança vencida. Fale com a empresa" (sem botão) |
+| `overdue` | Botão "Pagar R$ X" com "Venceu em DD/MM/AAAA": a fatura vencida do Asaas ainda aceita Pix e boleto. Sem link válido: "Cobrança vencida. Fale com a empresa" |
 | `paid` | "Pago R$ x ✓" |
 | `null` | nada |
 
@@ -357,7 +357,7 @@ Situação em 2026-10-04: Blocos A–C (código de Functions/rules) publicados; 
 Itens que o E2E automático não cobre:
 
 - [ ] **Parcelamento no cartão**: pagar uma vez pela fatura da primeira parcela no sandbox e confirmar que todas as parcelas ficam confirmadas (e que a cobrança na OS vira `paid` com N transações "Asaas • Cartão n/N").
-- [ ] **Fatura vencida**: verificar se uma cobrança `overdue` ainda pode ser paga pela fatura do Asaas. Hoje o link da OS mostra "Cobrança vencida" sem botão; se o Asaas aceitar pagamento após o vencimento, decidir se o botão deve continuar aparecendo.
+- [x] **Fatura vencida**: o link da OS mantém o botão "Pagar", porque a fatura vencida do Asaas ainda aceita Pix e boleto.
 - [ ] **Retorno à aba (Bloco E)**: com a página `/q/{token}` aberta, pagar em outra aba, voltar e conferir "Pago R$ x ✓" sem recarregar; depois de pago, voltar à aba não faz novo GET.
 - [ ] **Webhook ponta a ponta** com uma empresa sandbox conectada: `npm run e2e:asaas -- --with-api` contra o emulador (via túnel) ou a empresa de teste; conferir no app o card "Cobrança" pago e a transação na OS.
 - [ ] **`req.ip`** (exige as Functions de produção com uma empresa de teste conectada ao sandbox, não o emulador) nas chamadas diretas a `cloudfunctions.net` (caminho do webhook, sem rewrite do Hosting): conferir nos logs que o rate limit usa o IP real do Asaas e não um IP de proxy compartilhado.

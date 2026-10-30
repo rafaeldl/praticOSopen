@@ -104,6 +104,24 @@ mixin _$FinancialTabStore on _FinancialTabStore, Store {
     });
   }
 
+  late final _$paidOrdersAtom = Atom(
+    name: '_FinancialTabStore.paidOrders',
+    context: context,
+  );
+
+  @override
+  ObservableList<Order?> get paidOrders {
+    _$paidOrdersAtom.reportRead();
+    return super.paidOrders;
+  }
+
+  @override
+  set paidOrders(ObservableList<Order?> value) {
+    _$paidOrdersAtom.reportWrite(value, super.paidOrders, () {
+      super.paidOrders = value;
+    });
+  }
+
   late final _$loadAsyncAction = AsyncAction(
     '_FinancialTabStore.load',
     context: context,
@@ -131,6 +149,7 @@ status: ${status},
 monthOffset: ${monthOffset},
 monthOrders: ${monthOrders},
 openOrders: ${openOrders},
+paidOrders: ${paidOrders},
 month: ${month},
 isCurrentMonth: ${isCurrentMonth},
 summary: ${summary}

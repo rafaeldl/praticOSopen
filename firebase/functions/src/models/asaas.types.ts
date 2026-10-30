@@ -55,6 +55,8 @@ export interface OrderCharge {
   refundedAsaasPaymentIds?: string[];
   /** Paid outside Asaas: marked received in cash on Asaas by the server (no booking). */
   paidOutside?: boolean;
+  /** Installment plan canceled by the server: the order came to owe less than it. */
+  autoCanceled?: boolean;
   /**
    * Server-only: receiveInCash in progress or with an unknown outcome
    * (timeout/5xx); a RECEIVED_IN_CASH webhook for it must not book, and the

@@ -5689,4 +5689,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String recurringOrdersTitle(String orders) {
     return '$orders que se repetem';
   }
+
+  @override
+  String get customerSaveError =>
+      'Não deu para salvar o cliente. Tente de novo.';
+
+  @override
+  String chargeMissingOutsideLink(String value) {
+    return 'Falta mais $value fora do link.';
+  }
+
+  @override
+  String get chargeInstallmentsCanceled => 'Parcelamento cancelado';
+
+  @override
+  String chargeSendNewLink(String value) {
+    return 'Mande um link novo de $value.';
+  }
 }

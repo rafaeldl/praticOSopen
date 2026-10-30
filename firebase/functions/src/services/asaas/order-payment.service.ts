@@ -585,7 +585,9 @@ function stableJson(value: unknown): string {
  * partly paid one that shrank stayed `unpaid`. Runs for every company
  * (Asaas or not). Legacy orders without `paidAmount` are left alone, and
  * only `paid`/`payment` are written (no updatedAt/updatedBy: amounts did
- * not change), so the trigger does not loop.
+ * not change), so the trigger does not loop. `paymentSyncedAt` tells the
+ * trigger that no money came in: an order paid this way (items removed down
+ * to what was paid) does not issue the nota automatically.
  */
 export async function syncPaymentStatusWithTotal(companyId: string, orderId: string): Promise<boolean> {
   const oRef = orderRef(companyId, orderId);
@@ -600,7 +602,7 @@ export async function syncPaymentStatusWithTotal(companyId: string, orderId: str
       roundMoney(Number(order.paidAmount) || 0),
     );
     if ((order.paid === true) === paid && (order.payment ?? null) === payment) return false;
-    tx.update(oRef, { paid, payment });
+    tx.update(oRef, { paid, payment, paymentSyncedAt: new Date().toISOString() });
     console.log('[OrderPayment] payment status follows the new total', { companyId, orderId, payment });
     return true;
   });

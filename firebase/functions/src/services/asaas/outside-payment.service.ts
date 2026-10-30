@@ -322,6 +322,7 @@ async function cancelLink(
   client: AsaasClient,
   ref: FirebaseFirestore.DocumentReference,
   charge: Pick<OrderCharge, 'asaasPaymentId' | 'asaasInstallmentId'>,
+  extra: Record<string, unknown> = {},
 ): Promise<void> {
   await cancelInAsaas(client, charge);
   await db.runTransaction(async (tx) => {
@@ -329,7 +330,7 @@ async function cancelLink(
     if (!snap.exists) return;
     const current = snap.data() as Pick<OrderCharge, 'status' | 'paidAsaasPaymentIds'>;
     if (!OPEN_STATUSES.includes(current.status) || hasPaidInstallments(current)) return;
-    tx.update(ref, { status: 'canceled' });
+    tx.update(ref, { status: 'canceled', ...extra });
   });
 }
 
@@ -340,7 +341,8 @@ const TAKEN_STATUSES = new Set(['CONFIRMED', 'RECEIVED', 'RECEIVED_IN_CASH']);
  * Cancels an installment plan the order no longer owes in full, unless the
  * customer already paid it on Asaas (card confirmed, webhook not booked
  * yet): then nothing is done and the webhook books it. Leaves an internal
- * comment on the order so the technician knows to send a new link.
+ * comment on the order and marks the charge `autoCanceled`, so the Receber
+ * screen offers a new link.
  */
 async function cancelInstallmentPlan(
   client: AsaasClient,
@@ -356,7 +358,7 @@ async function cancelInstallmentPlan(
       return;
     }
   }
-  await cancelLink(client, ref, charge);
+  await cancelLink(client, ref, charge, { autoCanceled: true });
   const owed = fromCents(Math.max(0, toCents(stillOwed)));
   const text = owed > 0
     ? `Parcelamento no cartão de ${brl.format(charge.value)} cancelado: a OS passou a dever ${brl.format(owed)}. Mande um link novo.`

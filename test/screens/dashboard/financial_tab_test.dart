@@ -57,6 +57,7 @@ void main() {
         monthCalls?.add(offset);
         return month;
       },
+      paidLoader: (_) async => [],
       openLoader: openLoader ?? () async => open,
     );
   }

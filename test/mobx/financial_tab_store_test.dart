@@ -33,6 +33,7 @@ void main() {
         offsets.add(offset);
         return [_order('m1', 300, payment: 'paid')];
       },
+      paidLoader: (_) async => [],
       openLoader: () async => [_order('o1', 200, customer: 'ana')],
     );
 
@@ -55,6 +56,7 @@ void main() {
         offsets.add(offset);
         return [];
       },
+      paidLoader: (_) async => [],
       openLoader: () async => [],
     );
     await store.load();
@@ -76,6 +78,7 @@ void main() {
     final store = FinancialTabStore(
       clock: () => DateTime(2026, 1, 20),
       monthLoader: (_) async => [],
+      paidLoader: (_) async => [],
       openLoader: () async => [],
     );
     await store.previousMonth();
@@ -87,6 +90,7 @@ void main() {
     final store = FinancialTabStore(
       clock: () => now,
       monthLoader: (_) async => [],
+      paidLoader: (_) async => [],
       openLoader: () async {
         if (fail) throw Exception('offline');
         return [];
@@ -106,6 +110,7 @@ void main() {
     final store = FinancialTabStore(
       clock: () => now,
       monthLoader: (_) async => [],
+      paidLoader: (_) async => [],
       openLoader: () async {
         if (fail) throw Exception('offline');
         return [_order('o1', 80, customer: 'ana')];
@@ -126,6 +131,7 @@ void main() {
       clock: () => now,
       monthLoader: (offset) =>
           offset == -1 ? slow.future : Future.value([_order('cur', 10, payment: 'paid')]),
+      paidLoader: (_) async => [],
       openLoader: () async => [],
     );
     await store.load();

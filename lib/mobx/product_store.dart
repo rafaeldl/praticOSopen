@@ -28,8 +28,12 @@ abstract class _ProductStore with Store {
 
   String? companyId;
 
+  /// Completes once [companyId] was read: a store created right before a
+  /// write must wait for it, or there is no company to write in.
+  late final Future<void> _companyLoaded;
+
   _ProductStore() {
-    SharedPreferences.getInstance().then((value) {
+    _companyLoaded = SharedPreferences.getInstance().then((value) {
       companyId = value.getString('companyId');
       retrieveProducts();
     });
@@ -46,6 +50,7 @@ abstract class _ProductStore with Store {
 
   @action
   saveProduct(Product product) async {
+    await _companyLoaded;
     if (companyId == null) return;
     User? user = await (userStore.getSingleUserById());
     product.createdAt = DateTime.now();
@@ -59,12 +64,14 @@ abstract class _ProductStore with Store {
 
   @action
   deleteProduct(Product product) async {
+    await _companyLoaded;
     if (companyId == null) return;
     await repository.removeItem(companyId!, product.id);
   }
 
   @action
   Future<String?> uploadProductPhoto(File file, Product product) async {
+    await _companyLoaded;
     if (companyId == null) return null;
 
     if (product.id == null) {

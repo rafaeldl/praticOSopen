@@ -54,6 +54,7 @@ void main() {
     final store = FinancialTabStore(
       clock: () => DateTime(2026, 10, 15),
       monthLoader: (_) async => [],
+      paidLoader: (_) async => [],
       openLoader: () async => [order],
     );
     Object? args;
