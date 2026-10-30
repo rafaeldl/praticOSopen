@@ -240,7 +240,7 @@ describe('outside-payment.service', () => {
       expect(client.deleteInstallment).toHaveBeenCalledWith('ins_1');
       expect(client.receiveInCash).not.toHaveBeenCalled();
       expect(client.updatePayment).not.toHaveBeenCalled();
-      expect(read(CHARGE)!.status).toBe('canceled');
+      expect(read(CHARGE)).toMatchObject({ status: 'canceled', autoCanceled: true });
       const comments = commentsOf(ORDER);
       expect(comments).toHaveLength(1);
       expect(comments[0]).toMatchObject({ isInternal: true, source: 'asaas' });

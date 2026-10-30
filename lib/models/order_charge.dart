@@ -40,6 +40,10 @@ class OrderCharge {
   DateTime? createdAt;
   DateTime? paidAt;
 
+  /// Installment plan canceled by the server: the order came to owe less
+  /// than the plan. Who sees it should send a new link.
+  bool? autoCanceled;
+
   OrderCharge({
     this.id,
     this.asaasPaymentId,
@@ -54,6 +58,7 @@ class OrderCharge {
     this.createdBy,
     this.createdAt,
     this.paidAt,
+    this.autoCanceled,
   });
 
   factory OrderCharge.fromJson(Map<String, dynamic> json) =>

@@ -2432,5 +2432,11 @@
   "nfseHeadAutoError": "La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.",
   "nfseAutoReasonLabel": "Por qué no salió",
   "nfseAutoErrorTaxId": "El cliente no tiene documento fiscal registrado.",
-  "recurringOrdersTitle": "{orders} que se repiten"
+  "recurringOrdersTitle": "{orders} que se repiten",
+  "customerSaveError": "No se pudo guardar el cliente. Inténtalo de nuevo.",
+  "chargeMissingOutsideLink": "Faltan {value} más fuera del enlace.",
+  "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
+  "chargeInstallmentsCanceled": "Plan de cuotas cancelado",
+  "chargeSendNewLink": "Envía un enlace nuevo de {value}.",
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
 }

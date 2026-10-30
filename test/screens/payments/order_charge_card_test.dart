@@ -176,6 +176,39 @@ void main() {
       );
     });
 
+    testWidgets('link menor que o saldo: diz quanto falta fora dele', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        ChargeLinkBlock(
+          charge: charge(),
+          customerName: 'Ana Ribeiro',
+          onRemind: () {},
+          remaining: 1300,
+        ),
+      );
+      expect(
+        find.text(l10n.chargeMissingOutsideLink(format.formatCurrency(300))),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('link igual ao saldo: não fala de fora do link', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        ChargeLinkBlock(
+          charge: charge(),
+          customerName: 'Ana Ribeiro',
+          onRemind: () {},
+          remaining: 1000,
+        ),
+      );
+      expect(find.byKey(const Key('chargeMissingOutsideLink')), findsNothing);
+    });
+
     testWidgets('vencida: diz quando venceu, sem "vale até"', (tester) async {
       await pump(
         tester,

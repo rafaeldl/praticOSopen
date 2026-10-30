@@ -582,6 +582,22 @@ void main() {
       expect(find.byType(FormSheet), findsNothing);
     });
 
+    testWidgets('a failed save keeps the sheet and says so', (tester) async {
+      await pumpForm(
+        tester,
+        CustomerFormScreen(
+          asSheet: true,
+          onSave: (_) async => throw StateError('offline'),
+        ),
+      );
+      await tester.enterText(find.byType(CupertinoTextField).first, 'Ana');
+      await tester.pump();
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(find.byType(FormSheet), findsOneWidget);
+    });
+
     testWidgets('✓ shows a spinner while saving', (tester) async {
       final done = Completer<void>();
       await pumpForm(

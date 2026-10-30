@@ -38,6 +38,7 @@ void main() {
   group('FinancialSummary.compute', () {
     test('owed counts every open order, even from other months', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: [
           order('1', customerId: 'a', customerName: 'Ana', total: 300, paid: 100),
         ],
@@ -55,6 +56,7 @@ void main() {
 
     test('sums customers with many orders and orders them by oldest debt', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: [
           order('1', customerId: 'a', customerName: 'Ana', total: 100,
@@ -77,6 +79,7 @@ void main() {
 
     test('ignores quotes, canceled, paid and zero balance orders', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: [
           order('1', customerId: 'a', status: 'quote'),
@@ -93,6 +96,7 @@ void main() {
 
     test('orders without customer are grouped together', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: [order('1'), order('2')],
       );
@@ -106,11 +110,13 @@ void main() {
     test('entered sums payments of the month, legacy paid orders use total',
         () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: [
           order('1', total: 500, payment: 'paid', paid: 500),
           Order()
             ..id = '2'
             ..total = 300
+            ..createdAt = DateTime(2026, 10, 1)
             ..payment = 'paid', // legacy: no paidAmount
           order('3', total: 400, paid: 150), // partial
           order('4', total: 999, status: 'quote'),
@@ -125,6 +131,7 @@ void main() {
 
     test('received orders come latest paid first', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: [
           order('1', payment: 'paid', paid: 100, updatedAt: DateTime(2026, 10, 3)),
           order('2', payment: 'paid', paid: 100, updatedAt: DateTime(2026, 10, 9)),
@@ -148,8 +155,87 @@ void main() {
       expect(summary.receivedOrders.map((o) => o.id), ['3', '2', '1']);
     });
 
+    test('counts the money by payment date, on orders of any month', () {
+      PaymentTransaction pay(double amount, DateTime paidAt) =>
+          PaymentTransaction.payment(amount: amount, paidAt: paidAt);
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: [
+          order(
+            '1',
+            total: 300,
+            paid: 300,
+            payment: 'paid',
+            transactions: [pay(100, DateTime(2026, 11, 2)), pay(200, DateTime(2026, 10, 3))],
+          ),
+        ],
+        paidOrders: [
+          order(
+            '1',
+            total: 300,
+            paid: 300,
+            payment: 'paid',
+            transactions: [pay(100, DateTime(2026, 11, 2)), pay(200, DateTime(2026, 10, 3))],
+          ),
+          order(
+            '2',
+            total: 500,
+            paid: 500,
+            payment: 'paid',
+            createdAt: DateTime(2026, 8, 1),
+            transactions: [pay(500, DateTime(2026, 10, 20))],
+          ),
+          order(
+            '3',
+            total: 700,
+            paid: 700,
+            payment: 'paid',
+            createdAt: DateTime(2026, 8, 1),
+            transactions: [pay(700, DateTime(2026, 9, 20))],
+          ),
+        ],
+        openOrders: const [],
+      );
+
+      expect(summary.entered, 700);
+      expect(summary.receivedOrders.map((o) => o.id).toSet(), {'1', '2'});
+      expect(summary.monthOrderCount, 1);
+    });
+
+    test('old orders without transactions count in the month they were '
+        'created', () {
+      final old = order('1', total: 300, paid: 300, payment: 'paid');
+      expect(FinancialSummary.receivedIn(old, DateTime(2026, 10)), 300);
+      expect(FinancialSummary.receivedIn(old, DateTime(2026, 11)), 0);
+    });
+
+    test('a month with only money from older orders is not empty', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        paidOrders: [
+          order(
+            '2',
+            total: 500,
+            paid: 500,
+            payment: 'paid',
+            createdAt: DateTime(2026, 8, 1),
+            transactions: [
+              PaymentTransaction.payment(
+                amount: 500,
+                paidAt: DateTime(2026, 10, 20),
+              ),
+            ],
+          ),
+        ],
+        openOrders: const [],
+      );
+      expect(summary.isEmpty, isFalse);
+    });
+
     test('empty when there are no orders and no debt', () {
       final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: const [],
       );

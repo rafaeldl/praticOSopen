@@ -14,7 +14,7 @@ export interface PublicOrderCharge {
 }
 
 export type ChargeView =
-  | { kind: 'pay'; value: number; dueDate: string; invoiceUrl: string; installmentCount: number | null }
+  | { kind: 'pay'; value: number; dueDate: string; invoiceUrl: string; installmentCount: number | null; overdue: boolean }
   | { kind: 'overdue' }
   | { kind: 'paid'; value: number }
   | { kind: 'none' }
@@ -35,8 +35,10 @@ export function isSafeInvoiceUrl(url: string | undefined): boolean {
 export function getChargeView(charge: PublicOrderCharge | null | undefined): ChargeView {
   if (!charge) return { kind: 'none' }
   if (charge.status === 'paid') return { kind: 'paid', value: charge.value }
-  if (charge.status === 'overdue') return { kind: 'overdue' }
-  if (charge.status === 'pending' && isSafeInvoiceUrl(charge.invoiceUrl)) {
+  // Asaas keeps accepting Pix and boleto on an overdue invoice. Not confirmed
+  // for card installment plans, so those keep the "talk to the company" text.
+  const payableOverdue = charge.status === 'overdue' && charge.mode !== 'cardInstallments'
+  if ((charge.status === 'pending' || payableOverdue) && isSafeInvoiceUrl(charge.invoiceUrl)) {
     return {
       kind: 'pay',
       value: charge.value,
@@ -45,8 +47,10 @@ export function getChargeView(charge: PublicOrderCharge | null | undefined): Cha
       installmentCount: charge.mode === 'cardInstallments' && charge.installmentCount
         ? charge.installmentCount
         : null,
+      overdue: charge.status === 'overdue',
     }
   }
+  if (charge.status === 'overdue') return { kind: 'overdue' }
   return { kind: 'none' }
 }
 

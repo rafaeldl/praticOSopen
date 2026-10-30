@@ -64,6 +64,56 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'paid');
   });
 
+  it('OS ficou paga só porque o total mudou: não tenta a nota automática', async () => {
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid' },
+      { status: 'approved', payment: 'paid', paymentSyncedAt: '2026-10-30T12:00:00.000Z' },
+    );
+    expect(autoIssue).not.toHaveBeenCalled();
+  });
+
+  it('OS fechada por desconto: não tenta a nota automática', async () => {
+    seed(ORDER_PATH, { status: 'approved', payment: 'paid' });
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid', transactions: [] },
+      { status: 'approved', payment: 'paid', transactions: [{ id: 'd1', type: 'discount', amount: 50 } as never] },
+    );
+    expect(autoIssue).not.toHaveBeenCalled();
+  });
+
+  it('pagamento novo grava lastPaymentAt pela data do pagamento, em UTC', async () => {
+    seed(ORDER_PATH, { status: 'approved', payment: 'unpaid' });
+    const transaction = {
+      id: 't1',
+      type: 'payment',
+      amount: 50,
+      paidAt: '2026-10-29T22:00:00',
+      createdAt: '2026-10-30T09:00:00',
+    } as never;
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', transactions: [] },
+      { status: 'approved', transactions: [transaction] },
+    );
+    expect(read(ORDER_PATH)!.lastPaymentAt).toBe('2026-10-30T01:00:00.000Z');
+  });
+
+  it('OS ajustada pelo total antes e paga de verdade depois: tenta a nota', async () => {
+    const paymentSyncedAt = '2026-10-30T12:00:00.000Z';
+    await handleOrderUpdatedAsaas(
+      'c1',
+      'o1',
+      { status: 'approved', payment: 'unpaid', paymentSyncedAt },
+      { status: 'approved', payment: 'paid', paymentSyncedAt },
+    );
+    expect(autoIssue).toHaveBeenCalledWith('c1', 'o1', 'paid');
+  });
+
   it('OS foi concluída: tenta a nota automática do momento "concluída"', async () => {
     await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress' }, { status: 'done' });
     expect(autoIssue).toHaveBeenCalledTimes(1);
@@ -189,6 +239,7 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
       await handleOrderUpdatedAsaas('c1', 'o1', { status: 'approved', total: 500 }, { status: 'approved', total: 300 });
 
       expect(read(ORDER_PATH)).toMatchObject({ paid: true, payment: 'paid' });
+      expect(read(ORDER_PATH)!.paymentSyncedAt).toEqual(expect.any(String));
     });
 
     it('orçamento fica sem status de pagamento; OS antiga sem paidAmount e status já certo não mudam', async () => {

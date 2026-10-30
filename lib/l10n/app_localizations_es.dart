@@ -5707,4 +5707,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String recurringOrdersTitle(String orders) {
     return '$orders que se repiten';
   }
+
+  @override
+  String get customerSaveError =>
+      'No se pudo guardar el cliente. Inténtalo de nuevo.';
+
+  @override
+  String chargeMissingOutsideLink(String value) {
+    return 'Faltan $value más fuera del enlace.';
+  }
+
+  @override
+  String get chargeInstallmentsCanceled => 'Plan de cuotas cancelado';
+
+  @override
+  String chargeSendNewLink(String value) {
+    return 'Envía un enlace nuevo de $value.';
+  }
 }

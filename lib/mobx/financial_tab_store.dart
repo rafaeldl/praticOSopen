@@ -9,6 +9,9 @@ part 'financial_tab_store.g.dart';
 /// Loads the orders of one month.
 typedef MonthOrdersLoader = Future<List<Order?>> Function(int monthOffset);
 
+/// Loads the orders that may have been paid since a date, from any month.
+typedef PaidOrdersLoader = Future<List<Order?>> Function(DateTime since);
+
 /// Loads every order with an open payment, from any month.
 typedef OpenOrdersLoader = Future<List<Order?>> Function();
 
@@ -18,13 +21,14 @@ enum FinancialTabStatus { loading, ready, error }
 /// the open amounts of the whole company.
 ///
 /// Reuses the repository queries of the dashboard (`getOrdersByCustomPeriod`)
-/// and only adds the "everything open" query.
+/// and adds the "everything open" and "paid since" queries.
 class FinancialTabStore = _FinancialTabStore with _$FinancialTabStore;
 
 abstract class _FinancialTabStore with Store {
   _FinancialTabStore({
     MonthOrdersLoader? monthLoader,
     OpenOrdersLoader? openLoader,
+    PaidOrdersLoader? paidLoader,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     // Created on first use: tests inject loaders and never touch Firestore.
@@ -39,11 +43,15 @@ abstract class _FinancialTabStore with Store {
         );
     _openLoader =
         openLoader ?? () => repo().getUnpaidOrders(Global.companyAggr!.id!);
+    _paidLoader =
+        paidLoader ??
+        (since) => repo().getOrdersPaidSince(Global.companyAggr!.id!, since);
   }
 
   final DateTime Function() _clock;
   late final MonthOrdersLoader _monthLoader;
   late final OpenOrdersLoader _openLoader;
+  late final PaidOrdersLoader _paidLoader;
 
   @observable
   FinancialTabStatus status = FinancialTabStatus.loading;
@@ -58,19 +66,21 @@ abstract class _FinancialTabStore with Store {
   @observable
   ObservableList<Order?> openOrders = ObservableList<Order?>();
 
+  @observable
+  ObservableList<Order?> paidOrders = ObservableList<Order?>();
+
   @computed
-  DateTime get month {
-    final now = _clock();
-    return DateTime(now.year, now.month + monthOffset, 1);
-  }
+  DateTime get month => _monthAt(monthOffset);
 
   @computed
   bool get isCurrentMonth => monthOffset == 0;
 
   @computed
   FinancialSummary get summary => FinancialSummary.compute(
+    month: month,
     monthOrders: monthOrders,
     openOrders: openOrders,
+    paidOrders: paidOrders,
   );
 
   /// Loads the month and the open amounts.
@@ -78,8 +88,7 @@ abstract class _FinancialTabStore with Store {
   Future<void> load() async {
     status = FinancialTabStatus.loading;
     try {
-      final results = await Future.wait([_monthLoader(monthOffset), _openLoader()]);
-      _apply(results[0], results[1]);
+      _apply(await _fetch(monthOffset));
     } catch (_) {
       runInAction(() => status = FinancialTabStatus.error);
     }
@@ -90,8 +99,7 @@ abstract class _FinancialTabStore with Store {
   @action
   Future<void> refresh() async {
     try {
-      final results = await Future.wait([_monthLoader(monthOffset), _openLoader()]);
-      _apply(results[0], results[1]);
+      _apply(await _fetch(monthOffset));
     } catch (_) {
       if (status != FinancialTabStatus.ready) {
         runInAction(() => status = FinancialTabStatus.error);
@@ -117,10 +125,10 @@ abstract class _FinancialTabStore with Store {
       status = FinancialTabStatus.loading;
     });
     try {
-      final results = await Future.wait([_monthLoader(offset), _openLoader()]);
+      final results = await _fetch(offset);
       // Ignore a late answer for a month the user already left.
       if (offset != monthOffset) return;
-      _apply(results[0], results[1]);
+      _apply(results);
     } catch (_) {
       if (offset == monthOffset) {
         runInAction(() => status = FinancialTabStatus.error);
@@ -128,10 +136,22 @@ abstract class _FinancialTabStore with Store {
     }
   }
 
-  void _apply(List<Order?> month, List<Order?> open) {
+  DateTime _monthAt(int offset) {
+    final now = _clock();
+    return DateTime(now.year, now.month + offset, 1);
+  }
+
+  Future<List<List<Order?>>> _fetch(int offset) => Future.wait([
+    _monthLoader(offset),
+    _openLoader(),
+    _paidLoader(_monthAt(offset)),
+  ]);
+
+  void _apply(List<List<Order?>> results) {
     runInAction(() {
-      monthOrders = ObservableList.of(month);
-      openOrders = ObservableList.of(open);
+      monthOrders = ObservableList.of(results[0]);
+      openOrders = ObservableList.of(results[1]);
+      paidOrders = ObservableList.of(results[2]);
       status = FinancialTabStatus.ready;
     });
   }

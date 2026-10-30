@@ -451,7 +451,21 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
           final children = <Widget>[];
           var replacing = false;
+          final offerNewLink =
+              applies &&
+              _charge!.connected &&
+              _charge!.autoCanceledCharge != null &&
+              remaining > tolerance;
           if (open == null) {
+            if (offerNewLink) {
+              children.add(
+                ChargeCanceledBlock(
+                  remaining: remaining,
+                  busy: _creatingCharge,
+                  onSend: () => _onSendLinkPressed(remaining),
+                ),
+              );
+            }
             children.add(_buildReceiveBlock());
           } else {
             final value = open.value ?? 0.0;
@@ -490,6 +504,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   charge: open,
                   customerName: store!.customerName,
                   onRemind: _shareOrderLink,
+                  remaining: remaining,
                 ),
                 _linkPadding(
                   TextLink(
@@ -517,6 +532,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               open == null &&
               _charge!.connected &&
               remaining > tolerance &&
+              !offerNewLink &&
               !_charge!.blockedByInstallments;
           if (canSendLink) {
             final name = store.customerName;

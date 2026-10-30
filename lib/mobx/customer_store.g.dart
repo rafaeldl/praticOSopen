@@ -33,7 +33,7 @@ mixin _$CustomerStore on _CustomerStore, Store {
   );
 
   @override
-  Future saveCustomer(Customer customer) {
+  Future<void> saveCustomer(Customer customer) {
     return _$saveCustomerAsyncAction.run(() => super.saveCustomer(customer));
   }
 

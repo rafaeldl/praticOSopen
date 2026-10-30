@@ -36,6 +36,7 @@ OrderCharge _$OrderChargeFromJson(Map<String, dynamic> json) => OrderCharge(
   paidAt: json['paidAt'] == null
       ? null
       : DateTime.parse(json['paidAt'] as String),
+  autoCanceled: json['autoCanceled'] as bool?,
 );
 
 Map<String, dynamic> _$OrderChargeToJson(OrderCharge instance) =>
@@ -53,6 +54,7 @@ Map<String, dynamic> _$OrderChargeToJson(OrderCharge instance) =>
       'createdBy': instance.createdBy?.toJson(),
       'createdAt': instance.createdAt?.toIso8601String(),
       'paidAt': instance.paidAt?.toIso8601String(),
+      'autoCanceled': instance.autoCanceled,
     };
 
 const _$ChargeModeEnumMap = {

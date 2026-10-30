@@ -55,6 +55,9 @@ import {
 } from './customer-charge.service';
 import { ASAAS_TRANSACTION_PREFIX, chargeRef, orderRef } from './order-payment.service';
 import { fromCents, toCents } from '../../utils/payment-allocation';
+import { toMillis } from '../../utils/payment-time';
+
+export { parseTransactionTime } from '../../utils/payment-time';
 
 const LEASE_MS = 60 * 1000;
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -93,32 +96,6 @@ export function decideOutsideAction(chargeValue: number, stillOwed: number, paid
 export function openForLink(order: Pick<Order, 'status' | 'total' | 'paidAmount'> | undefined): number {
   if (!order || order.status === 'quote' || order.status === 'canceled') return 0;
   return calculateRemainingBalance(order);
-}
-
-/** An ISO string that ends with 'Z' or an offset ('+02:00', '-0300'). */
-const ZONED_ISO = /(?:[zZ]|[+-]\d{2}:?\d{2})$/;
-
-/**
- * The app writes `createdAt` as the phone's local time without a zone
- * ('2026-10-29T17:39:47.433185'); Date.parse would read it as UTC here and
- * put a payment made right after the link three hours before it. Such
- * strings are read as Brazil time (UTC-3, no daylight saving since 2019).
- */
-export function parseTransactionTime(value: string): number {
-  const trimmed = value.trim();
-  if (ZONED_ISO.test(trimmed)) return Date.parse(trimmed);
-  const withTime = /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? `${trimmed}T00:00:00` : trimmed;
-  return Date.parse(`${withTime}-03:00`);
-}
-
-function toMillis(value: unknown): number {
-  if (!value) return NaN;
-  if (typeof value === 'string') return parseTransactionTime(value);
-  if (value instanceof Date) return value.getTime();
-  const maybe = value as { toMillis?: () => number; toDate?: () => Date };
-  if (typeof maybe.toMillis === 'function') return maybe.toMillis();
-  if (typeof maybe.toDate === 'function') return maybe.toDate().getTime();
-  return NaN;
 }
 
 /**
@@ -322,6 +299,7 @@ async function cancelLink(
   client: AsaasClient,
   ref: FirebaseFirestore.DocumentReference,
   charge: Pick<OrderCharge, 'asaasPaymentId' | 'asaasInstallmentId'>,
+  extra: Record<string, unknown> = {},
 ): Promise<void> {
   await cancelInAsaas(client, charge);
   await db.runTransaction(async (tx) => {
@@ -329,7 +307,7 @@ async function cancelLink(
     if (!snap.exists) return;
     const current = snap.data() as Pick<OrderCharge, 'status' | 'paidAsaasPaymentIds'>;
     if (!OPEN_STATUSES.includes(current.status) || hasPaidInstallments(current)) return;
-    tx.update(ref, { status: 'canceled' });
+    tx.update(ref, { status: 'canceled', ...extra });
   });
 }
 
@@ -340,7 +318,8 @@ const TAKEN_STATUSES = new Set(['CONFIRMED', 'RECEIVED', 'RECEIVED_IN_CASH']);
  * Cancels an installment plan the order no longer owes in full, unless the
  * customer already paid it on Asaas (card confirmed, webhook not booked
  * yet): then nothing is done and the webhook books it. Leaves an internal
- * comment on the order so the technician knows to send a new link.
+ * comment on the order and marks the charge `autoCanceled`, so the Receber
+ * screen offers a new link.
  */
 async function cancelInstallmentPlan(
   client: AsaasClient,
@@ -356,7 +335,7 @@ async function cancelInstallmentPlan(
       return;
     }
   }
-  await cancelLink(client, ref, charge);
+  await cancelLink(client, ref, charge, { autoCanceled: true });
   const owed = fromCents(Math.max(0, toCents(stillOwed)));
   const text = owed > 0
     ? `Parcelamento no cartão de ${brl.format(charge.value)} cancelado: a OS passou a dever ${brl.format(owed)}. Mande um link novo.`

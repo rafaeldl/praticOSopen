@@ -675,6 +675,35 @@ void main() {
         expect(find.byType(FormSheet), findsOneWidget);
       });
 
+      testWidgets('parcelamento cancelado pelo servidor oferece link novo', (
+        tester,
+      ) async {
+        await pumpScreen(
+          tester,
+          countingStore([]),
+          canCharge: true,
+          charges: [
+            charge(status: ChargeStatus.canceled)..autoCanceled = true,
+          ],
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chargeCanceledBlock')), findsOneWidget);
+        expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
+        expect(find.byKey(const Key('chargeSendLink')), findsNothing);
+      });
+
+      testWidgets('link cancelado à mão não mostra o aviso', (tester) async {
+        await pumpScreen(
+          tester,
+          countingStore([]),
+          canCharge: true,
+          charges: [charge(status: ChargeStatus.canceled)],
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chargeCanceledBlock')), findsNothing);
+        expect(find.byKey(const Key('chargeSendLink')), findsOneWidget);
+      });
+
       testWidgets('hidden when disconnected', (tester) async {
         await pumpScreen(
           tester,

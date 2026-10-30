@@ -13,9 +13,10 @@
  *   while a link is open: settle or lower the link, outside-payment.service);
  * - `total` changed (and `transactions` did not) → `syncPaymentStatusWithTotal`
  *   (every company: `paid`/`payment` follow the new total);
- * - the order became paid (`payment` → 'paid') or done (`status` → 'done') →
- *   `autoIssueInvoice`, which issues the nota when the company chose that
- *   moment (settings/nfse.autoIssue);
+ * - `transactions` changed (every company) → `stampLastPayment`;
+ * - the order became paid (`payment` → 'paid', unless only the total changed
+ *   or a discount closed it: no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
+ *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -25,14 +26,22 @@ import { handleOrderStatusChange } from './charge.service';
 import { getPaymentSettings } from './connection.service';
 import {
   OrderPaymentState,
+  paymentCount,
   repairAsaasTransactions,
+  stampLastPayment,
   syncPaymentStatusWithTotal,
   transactionsChanged,
 } from './order-payment.service';
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
 
-export type OrderUpdateSnapshot = OrderPaymentState & { status?: string; payment?: string | null };
+export type OrderUpdateSnapshot = OrderPaymentState & {
+  status?: string;
+  payment?: string | null;
+  /** Stamped by `syncPaymentStatusWithTotal`. */
+  paymentSyncedAt?: string;
+  lastPaymentAt?: string;
+};
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
 async function paymentsChangedIfConnected(companyId: string, orderId: string, repair: boolean): Promise<void> {
@@ -55,6 +64,7 @@ export async function handleOrderUpdatedAsaas(
     tasks.push(handleOrderStatusChange(companyId, orderId, before?.status, after.status));
   }
   const repair = transactionsChanged(before, after);
+  if (repair) tasks.push(stampLastPayment(companyId, orderId, after));
   // Only what changes the amount owed: total, or the order leaving the
   // payable states (quote/canceled owe nothing). Other status moves read nothing.
   const owesNothing = (status?: string) => status === 'quote' || status === 'canceled';
@@ -70,7 +80,9 @@ export async function handleOrderUpdatedAsaas(
   if (totalChanged && !repair) {
     tasks.push(syncPaymentStatusWithTotal(companyId, orderId).then(() => undefined));
   }
-  if (after.payment === 'paid' && before?.payment !== 'paid') {
+  const syncedFromTotal = !!after.paymentSyncedAt && after.paymentSyncedAt !== before?.paymentSyncedAt;
+  const closedByDiscount = repair && paymentCount(after) <= paymentCount(before);
+  if (after.payment === 'paid' && before?.payment !== 'paid' && !syncedFromTotal && !closedByDiscount) {
     tasks.push(autoIssueInvoice(companyId, orderId, 'paid'));
   }
   if (after.status === 'done' && before?.status !== 'done') {

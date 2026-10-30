@@ -9487,6 +9487,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{orders} que se repetem'**
   String recurringOrdersTitle(String orders);
+
+  /// No description provided for @customerSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar o cliente. Tente de novo.'**
+  String get customerSaveError;
+
+  /// No description provided for @chargeMissingOutsideLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta mais {value} fora do link.'**
+  String chargeMissingOutsideLink(String value);
+
+  /// No description provided for @chargeInstallmentsCanceled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcelamento cancelado'**
+  String get chargeInstallmentsCanceled;
+
+  /// No description provided for @chargeSendNewLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mande um link novo de {value}.'**
+  String chargeSendNewLink(String value);
 }
 
 class _AppLocalizationsDelegate

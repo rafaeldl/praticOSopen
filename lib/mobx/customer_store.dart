@@ -14,16 +14,31 @@ part 'customer_store.g.dart';
 class CustomerStore = _CustomerStore with _$CustomerStore;
 
 abstract class _CustomerStore with Store {
-  final CustomerRepositoryV2 repository = CustomerRepositoryV2();
-  final UserStore userStore = UserStore();
+  final CustomerRepositoryV2 repository;
+  final UserStore userStore;
+  final void Function(Customer customer) _onCreated;
 
   @observable
   ObservableStream<List<Customer?>>? customerList;
 
   String? companyId;
 
-  _CustomerStore() {
-    SharedPreferences.getInstance().then((value) {
+  /// Completes once [companyId] was read: a store created right before a
+  /// save must wait for it, or there is no company to save in.
+  late final Future<void> _companyLoaded;
+
+  _CustomerStore({
+    CustomerRepositoryV2? repository,
+    UserStore? userStore,
+    void Function(Customer customer)? onCreated,
+  }) : repository = repository ?? CustomerRepositoryV2(),
+       userStore = userStore ?? UserStore(),
+       _onCreated =
+           onCreated ??
+           ((customer) => AnalyticsService.instance.logCustomerCreated(
+             customerId: customer.id,
+           )) {
+    _companyLoaded = SharedPreferences.getInstance().then((value) {
       companyId = value.getString('companyId');
       retrieveCustomers();
     });
@@ -42,8 +57,9 @@ abstract class _CustomerStore with Store {
   }
 
   @action
-  saveCustomer(Customer customer) async {
-    if (companyId == null) return;
+  Future<void> saveCustomer(Customer customer) async {
+    await _companyLoaded;
+    if (companyId == null) throw StateError('No company to save the customer');
     User? user = await (userStore.getSingleUserById());
     customer.createdAt = DateTime.now();
     customer.createdBy = user?.toAggr();
@@ -52,7 +68,7 @@ abstract class _CustomerStore with Store {
     customer.updatedBy = user?.toAggr();
     customer.keywords = generateKeywords(customer.name);
     await repository.createItem(companyId!, customer);
-    AnalyticsService.instance.logCustomerCreated(customerId: customer.id);
+    _onCreated(customer);
   }
 
   @action

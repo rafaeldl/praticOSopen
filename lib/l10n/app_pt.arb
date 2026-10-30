@@ -2731,5 +2731,11 @@
   "@recurringOrdersTitle": {
     "description": "Recurring orders title when the segment already names each order Contract",
     "placeholders": { "orders": { "type": "String" } }
-  }
+  },
+  "customerSaveError": "Não deu para salvar o cliente. Tente de novo.",
+  "chargeMissingOutsideLink": "Falta mais {value} fora do link.",
+  "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
+  "chargeInstallmentsCanceled": "Parcelamento cancelado",
+  "chargeSendNewLink": "Mande um link novo de {value}.",
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
 }

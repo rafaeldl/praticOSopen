@@ -31,10 +31,12 @@ class Debtor {
 
 /// Numbers behind the Financeiro tab ("Quem me deve").
 ///
-/// - [entered]: money received on the orders of the chosen month.
+/// - [entered]: money received in the chosen month, by payment date, on
+///   orders of any month.
 /// - [owed]: everything still open, in any month ("Falta receber").
 /// - [debtors]: customers who owe, longest-overdue first.
-/// - [receivedOrders]: orders of the month already paid, latest first.
+/// - [receivedOrders]: paid orders with money received in the month, latest
+///   first.
 class FinancialSummary {
   FinancialSummary({
     required this.entered,
@@ -61,31 +63,42 @@ class FinancialSummary {
   );
 
   bool get hasDebt => debtors.isNotEmpty;
-  bool get isEmpty => monthOrderCount == 0 && debtors.isEmpty;
+  bool get isEmpty => monthOrderCount == 0 && debtors.isEmpty && entered == 0;
 
   /// The debtor to charge first (the one owing for the longest).
   Debtor? get oldestDebtor => debtors.isEmpty ? null : debtors.first;
 
-  /// Builds the summary from the orders of the month and from every order
+  /// Builds the summary of [month] from the orders created in it, the orders
+  /// that may have been paid in it ([paidOrders], any month) and every order
   /// with an open payment (any month).
   factory FinancialSummary.compute({
+    required DateTime month,
     required Iterable<Order?> monthOrders,
     required Iterable<Order?> openOrders,
+    Iterable<Order?> paidOrders = const [],
   }) {
-    final month = monthOrders
+    final created = monthOrders
         .whereType<Order>()
         .where((o) => o.status != 'quote')
         .toList();
+    final createdIds = created.map((o) => o.id).toSet();
+    final candidates = [
+      ...created,
+      ...paidOrders.whereType<Order>().where(
+        (o) => o.status != 'quote' && !createdIds.contains(o.id),
+      ),
+    ];
 
-    // Same rule as the dashboard store: old paid orders may have no
-    // paidAmount, so they count their total.
-    final entered = month.fold<double>(0, (sum, o) {
-      if (o.payment == 'paid') return sum + (o.paidAmount ?? o.total ?? 0);
-      return sum + (o.paidAmount ?? 0);
-    });
+    final entered = candidates.fold<double>(
+      0,
+      (sum, o) => sum + receivedIn(o, month),
+    );
 
-    final received = month.where((o) => o.payment == 'paid').toList()
-      ..sort((a, b) => paidDate(b).compareTo(paidDate(a)));
+    final received =
+        candidates
+            .where((o) => o.payment == 'paid' && receivedIn(o, month) > 0)
+            .toList()
+          ..sort((a, b) => paidDate(b).compareTo(paidDate(a)));
 
     final byCustomer = <String, List<Order>>{};
     final names = <String, String?>{};
@@ -114,8 +127,32 @@ class FinancialSummary {
       owed: debtors.fold<double>(0, (sum, d) => sum + d.amount),
       debtors: debtors,
       receivedOrders: received,
-      monthOrderCount: month.length,
+      monthOrderCount: created.length,
     );
+  }
+
+  /// Money received on [order] in [month], by the date of each payment. Old
+  /// orders have no transactions (and old paid ones may have no paidAmount,
+  /// so they count their total): that money counts in the month the order
+  /// was created.
+  static double receivedIn(Order order, DateTime month) {
+    bool inMonth(DateTime? date) {
+      final local = date?.toLocal();
+      return local?.year == month.year && local?.month == month.month;
+    }
+
+    final payments = (order.transactions ?? const <PaymentTransaction>[]).where(
+      (t) => t.type == PaymentTransactionType.payment,
+    );
+    final tracked = payments.fold<double>(0, (sum, t) => sum + t.amount);
+    final dated = payments
+        .where((t) => inMonth(t.paidOn))
+        .fold<double>(0, (sum, t) => sum + t.amount);
+    final paid = order.payment == 'paid'
+        ? order.paidAmount ?? order.total ?? 0
+        : order.paidAmount ?? 0;
+    final untracked = paid - tracked;
+    return dated + (untracked > 0 && inMonth(order.createdAt) ? untracked : 0);
   }
 
   /// What is still open on [order].

@@ -75,6 +75,15 @@ class OrderChargeController extends ChangeNotifier {
     return null;
   }
 
+  /// The latest charge, when the server canceled it and no link replaced it.
+  OrderCharge? get autoCanceledCharge {
+    if (!enabled || openCharge != null) return null;
+    final latest = OrderCharge.current(_charges);
+    final canceled =
+        latest?.status == ChargeStatus.canceled && latest?.autoCanceled == true;
+    return canceled ? latest : null;
+  }
+
   /// A charge with paid installments can't be replaced nor canceled.
   bool get blockedByInstallments =>
       enabled && _charges.any(chargeHasPaidInstallments);

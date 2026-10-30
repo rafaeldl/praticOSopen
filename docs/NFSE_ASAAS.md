@@ -110,7 +110,7 @@ A prefeitura não aceita nota sem o **e-mail** e o **endereço com CEP** do clie
 
 `settings/nfse.autoIssue`: `manual` (padrão, campo ausente), `paid` ou `completed`. Escolhido na configuração da nota ("Emitir a nota"), salvo pelo mesmo `PUT /setup/service` (sem o campo, o servidor mantém o que estava).
 
-1. O gatilho único da OS (`onOrderUpdatedAsaas` → `handleOrderUpdatedAsaas`) chama `autoIssueInvoice` quando `payment` vira `paid` (momento `paid`) ou `status` vira `done` (momento `completed`). Só na virada: salvar de novo uma OS já paga ou concluída não emite.
+1. O gatilho único da OS (`onOrderUpdatedAsaas` → `handleOrderUpdatedAsaas`) chama `autoIssueInvoice` quando `payment` vira `paid` (momento `paid`) ou `status` vira `done` (momento `completed`). Só na virada: salvar de novo uma OS já paga ou concluída não emite. A OS que vira `paid` só porque o total caiu até o valor já pago não emite (`syncPaymentStatusWithTotal` grava `paymentSyncedAt`, e o gatilho reconhece a mudança por ele), e a fechada por desconto também não: nenhum dinheiro entrou nessa mudança. Se o sinal já pago cobre o novo total, a nota precisa ser emitida à mão.
 2. `autoIssueInvoice` só segue com `nfseEnabled`, `nfseReady`, Asaas conectado e `autoIssue` igual ao momento.
 3. **Uma vez por OS:** se a OS já teve qualquer nota (até cancelada, com erro ou automática que falhou), fica com o usuário. Assim cancelar a nota e reabrir/concluir a OS de novo não emite outra.
 4. Emite como na emissão manual (`createInvoice`, uma nota só da OS, data de hoje), com `createdBy` `{ id: 'system', name: 'PraticOS' }` e `auto: true`.

@@ -2432,5 +2432,11 @@
   "nfseHeadAutoError": "The invoice did not go out by itself. Fix the reason below and issue it from the order menu.",
   "nfseAutoReasonLabel": "Why it did not go out",
   "nfseAutoErrorTaxId": "The customer has no tax ID on file.",
-  "recurringOrdersTitle": "Recurring {orders}"
+  "recurringOrdersTitle": "Recurring {orders}",
+  "customerSaveError": "Couldn't save the customer. Try again.",
+  "chargeMissingOutsideLink": "{value} more is missing outside the link.",
+  "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
+  "chargeInstallmentsCanceled": "Installment plan canceled",
+  "chargeSendNewLink": "Send a new link for {value}.",
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
 }
