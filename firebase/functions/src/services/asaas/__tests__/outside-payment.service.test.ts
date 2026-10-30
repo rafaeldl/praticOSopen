@@ -1,11 +1,12 @@
 jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 
-import { read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
+import { list, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { AsaasApiError } from '../asaas-client';
 import { setAsaasCredentialProvider } from '../credential-provider';
 import {
   decideOutsideAction,
   paidOutsideSince,
+  parseTransactionTime,
   reconcileOutsidePayments,
 } from '../outside-payment.service';
 
@@ -15,6 +16,7 @@ const client = {
   updatePayment: jest.fn(),
   deletePayment: jest.fn(),
   deleteInstallment: jest.fn(),
+  listInstallmentPayments: jest.fn(),
 };
 
 const CREATED = '2026-10-10T10:00:00.000Z';
@@ -26,6 +28,10 @@ const CC = 'companies/c1/customerCharges/cc1';
 
 function pay(id: string, amount: number, createdAt = AFTER, type = 'payment') {
   return { id, type, amount, createdAt, createdBy: { id: 'u1', name: 'Ana' } };
+}
+
+function commentsOf(orderPath: string): Array<Record<string, any>> {
+  return (list(`${orderPath}/comments`) as Array<{ data: Record<string, any> }>).map((d) => d.data);
 }
 
 function seedOrder(path: string, data: Record<string, unknown>) {
@@ -62,6 +68,8 @@ describe('outside-payment.service', () => {
     client.updatePayment.mockResolvedValue({ id: 'pay_1', status: 'PENDING' });
     client.getPayment.mockResolvedValue({ id: 'pay_1', status: 'PENDING' });
     client.deletePayment.mockResolvedValue(undefined);
+    client.deleteInstallment.mockResolvedValue(undefined);
+    client.listInstallmentPayments.mockResolvedValue([{ id: 'pay_1', status: 'PENDING' }]);
     seed('companies/c1', { name: 'Oficina' });
   });
   afterEach(() => jest.restoreAllMocks());
@@ -82,6 +90,13 @@ describe('outside-payment.service', () => {
     it('não deve mais nada sem dinheiro entrar (desconto, OS cancelada): cancela o link', () => {
       expect(decideOutsideAction(100, 0, 0)).toEqual({ action: 'cancel' });
     });
+  });
+
+  it('hora sem fuso (gravada pelo app) é lida como horário de Brasília', () => {
+    expect(parseTransactionTime('2026-10-29T17:39:47.433185')).toBe(Date.parse('2026-10-29T20:39:47.433Z'));
+    expect(parseTransactionTime('2026-10-29T20:37:23.083Z')).toBe(Date.parse('2026-10-29T20:37:23.083Z'));
+    expect(parseTransactionTime('2026-10-29T17:39:00+00:00')).toBe(Date.parse('2026-10-29T17:39:00Z'));
+    expect(parseTransactionTime('2026-10-29')).toBe(Date.parse('2026-10-29T03:00:00Z'));
   });
 
   it('só conta pagamento registrado por fora depois do link', () => {
@@ -206,11 +221,7 @@ describe('outside-payment.service', () => {
       expect(client.receiveInCash).not.toHaveBeenCalled();
     });
 
-    it('parcelamento e OS cancelada ficam de fora', async () => {
-      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
-      seedSingle({ mode: 'installments', asaasInstallmentId: 'ins_1' });
-      await reconcileOutsidePayments('c1', 'o1');
-
+    it('OS cancelada fica de fora (o cancelamento da OS cuida do link)', async () => {
       seedOrder(ORDER, { status: 'canceled', paidAmount: 0 });
       seedSingle();
       await reconcileOutsidePayments('c1', 'o1');
@@ -218,6 +229,109 @@ describe('outside-payment.service', () => {
       expect(client.receiveInCash).not.toHaveBeenCalled();
       expect(client.updatePayment).not.toHaveBeenCalled();
       expect(client.deletePayment).not.toHaveBeenCalled();
+    });
+
+    it('parcelamento sem parcela paga e OS paga à mão: cancela o parcelamento (o cliente não paga de novo)', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({ mode: 'cardInstallments', installmentCount: 3, asaasInstallmentId: 'ins_1' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.deleteInstallment).toHaveBeenCalledWith('ins_1');
+      expect(client.receiveInCash).not.toHaveBeenCalled();
+      expect(client.updatePayment).not.toHaveBeenCalled();
+      expect(read(CHARGE)!.status).toBe('canceled');
+      const comments = commentsOf(ORDER);
+      expect(comments).toHaveLength(1);
+      expect(comments[0]).toMatchObject({ isInternal: true, source: 'asaas' });
+      expect(comments[0].text).toContain('não deve mais nada');
+    });
+
+    it('parcelamento já pago no Asaas (cartão confirmado, webhook a caminho): não cancela', async () => {
+      client.listInstallmentPayments.mockResolvedValue([
+        { id: 'pay_1', status: 'CONFIRMED' },
+        { id: 'pay_2', status: 'CONFIRMED' },
+      ]);
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({ mode: 'cardInstallments', installmentCount: 2, asaasInstallmentId: 'ins_1' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(read(CHARGE)!.status).toBe('pending');
+      expect(commentsOf(ORDER)).toHaveLength(0);
+    });
+
+    it('webhook pagou enquanto o link era cancelado: o status pago fica', async () => {
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({ mode: 'cardInstallments', installmentCount: 2, asaasInstallmentId: 'ins_1' });
+      client.deleteInstallment.mockImplementation(async () => {
+        seed(CHARGE, { ...read(CHARGE)!, status: 'paid', paidAsaasPaymentIds: ['pay_1', 'pay_2'] });
+      });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(read(CHARGE)!.status).toBe('paid');
+    });
+
+    it('parcelamento e OS passou a dever menos (pago em parte, total baixou): cancela', async () => {
+      seedOrder(ORDER, { total: 100, paidAmount: 30, transactions: [pay('t1', 30)] });
+      seedSingle({ mode: 'cardInstallments', installmentCount: 3, asaasInstallmentId: 'ins_1' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.deleteInstallment).toHaveBeenCalledWith('ins_1');
+      expect(read(CHARGE)!.status).toBe('canceled');
+      expect(commentsOf(ORDER)[0].text).toContain('passou a dever R$\u00a070,00');
+    });
+
+    it('parcelamento: OS ainda deve o valor dele, ou já tem parcela paga: nada muda', async () => {
+      seedOrder(ORDER, { total: 150, paidAmount: 0 });
+      seedSingle({ mode: 'cardInstallments', installmentCount: 3, asaasInstallmentId: 'ins_1' });
+      await reconcileOutsidePayments('c1', 'o1');
+
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle({
+        mode: 'cardInstallments', installmentCount: 3, asaasInstallmentId: 'ins_1', paidAsaasPaymentIds: ['pay_1'],
+      });
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(read(CHARGE)!.status).toBe('pending');
+    });
+
+    it('OS voltou a orçamento com o link aberto: cancela o link', async () => {
+      seedOrder(ORDER, { status: 'quote', paidAmount: 0 });
+      seedSingle();
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_1');
+      expect(client.receiveInCash).not.toHaveBeenCalled();
+      expect(read(CHARGE)!.status).toBe('canceled');
+    });
+
+    it('OS voltou a orçamento depois de um pagamento à mão: cancela, nunca dá baixa em dinheiro', async () => {
+      seedOrder(ORDER, { status: 'quote', paidAmount: 100, transactions: [pay('t1', 100)] });
+      seedSingle();
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.receiveInCash).not.toHaveBeenCalled();
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_1');
+      expect(read(CHARGE)!.status).toBe('canceled');
+    });
+
+    it('pagamento do app com hora local sem fuso logo depois do link: baixa (receiveInCash), não cancela', async () => {
+      // Link 20:37Z; the app wrote 17:39 local (= 20:39Z) without a zone.
+      seedOrder(ORDER, { paidAmount: 100, transactions: [pay('t1', 100, '2026-10-29T17:39:47.433185')] });
+      seedSingle({ createdAt: '2026-10-29T20:37:23.083Z' });
+
+      await reconcileOutsidePayments('c1', 'o1');
+
+      expect(client.receiveInCash).toHaveBeenCalledWith('pay_1', expect.objectContaining({ value: 100 }));
+      expect(client.deletePayment).not.toHaveBeenCalled();
+      expect(read(CHARGE)!).toMatchObject({ status: 'paid', paidOutside: true });
     });
 
     it('com a vez tomada por outra execução, não faz nada e marca a cobrança para a outra rodar de novo', async () => {

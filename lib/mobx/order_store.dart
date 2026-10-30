@@ -185,7 +185,10 @@ abstract class _OrderStore with Store {
   double get remainingBalance {
     final totalValue = total ?? 0.0;
     final paid = paidAmount ?? 0.0;
-    return totalValue - paid;
+    // Rounded: summing item prices leaves float noise (824.4200000000001)
+    // that showed "Falta receber R$ 0,00" or refused a payment of the
+    // balance shown on screen.
+    return OrderPaymentMath.roundMoney(totalValue - paid);
   }
 
   @computed
@@ -1774,9 +1777,32 @@ abstract class _OrderStore with Store {
     if (order?.discount == null) order!.discount = 0.0;
     discount = order?.discount;
     temp -= order!.discount!;
+    temp = OrderPaymentMath.roundMoney(temp);
 
+    final changed = order?.total != null && order!.total != temp;
     order?.total = temp;
     total = temp;
+    if (changed) _refreshPaymentStatusAfterTotalChange();
+  }
+
+  /// A paid order whose items grew owes again (and a partly paid one whose
+  /// items shrank is paid): the label follows the new total. Display only:
+  /// a full save never writes `payment`/`paid`, the server recomputes them
+  /// when `total` changes (onOrderUpdatedAsaas).
+  void _refreshPaymentStatusAfterTotalChange() {
+    final current = order;
+    if (current == null || current.id == null || current.paidAmount == null) {
+      return;
+    }
+    if (['quote', 'canceled'].contains(current.status)) return;
+    final status = OrderPaymentMath.paymentStatusFor(
+      total: current.total ?? 0.0,
+      paidAmount: current.paidAmount ?? 0.0,
+    );
+    if (status == current.payment) return;
+    current.payment = status;
+    current.paid = status == 'paid';
+    updatePayment();
   }
 
   /// [onCreated] runs once a new order has its id (used to add the

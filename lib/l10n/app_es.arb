@@ -1551,6 +1551,7 @@
   "receiveCustomerAmountLabel": "Cuánto recibió",
   "receiveCustomerOldestFirst": "Si el valor no alcanza para todo, se pagan primero las más antiguas.",
   "receiveCustomerZero": "Escriba cuánto recibió.",
+  "receiveCustomerBalanceChanged": "Los valores cambiaron desde que se abrió la pantalla. Revísalos y confirma de nuevo.",
   "receiveCustomerDone": "Recibido {amount} de {name}",
   "@receiveCustomerDone": {
     "placeholders": {

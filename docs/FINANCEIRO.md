@@ -115,6 +115,12 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
   viram `paid` na OS que fica quitada (mesma conta de `OrderPaymentMath.addPaymentUpdate`).
 - Recebimento + todas as OS num único **WriteBatch** (tudo ou nada, funciona offline; a tela
   não espera o servidor).
+- **Antes de gravar**, a tela lê as OS marcadas no servidor (`CustomerReceiptService.readFromServer`,
+  8 s). As OS vêm de uma leitura do Financeiro e o batch só soma (`increment`): se uma OS foi paga
+  depois (link do Asaas pago, outra pessoa recebeu), ela seria paga de novo. Se o que falta em
+  alguma mudou, nada é gravado, a tela mostra os valores novos e avisa "Os valores mudaram desde
+  que a tela abriu. Confira e confirme de novo.". Sem internet a leitura falha e o recebimento
+  segue como antes (offline).
 - Comprovante: enviado **uma vez** para `tenants/{companyId}/receipts/{receiptId}/{arquivo}`
   (precisa de internet; se falhar, nada é gravado). Cada OS ganha um `OrderDocument` do tipo
   `receipt` apontando para o mesmo arquivo, com `linkedTransactionId` = transação dela, e a

@@ -172,4 +172,37 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
     await handleOrderUpdatedAsaas('c1', 'o1', { total: 100, transactions: [] }, { total: 100, transactions: [{ id: 't1' }] as any });
     expect(reconcile).not.toHaveBeenCalled();
   });
+
+  describe('itens mudaram depois de um pagamento: paid/payment seguem o total (qualquer empresa)', () => {
+    it('OS paga que ganhou um item volta a "unpaid" (aparece no Financeiro)', async () => {
+      seed(SETTINGS_PATH, { asaasConnected: false });
+      seed(ORDER_PATH, { status: 'progress', total: 1280, paidAmount: 1200, paid: true, payment: 'paid', transactions: [] });
+
+      await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress', total: 1200 }, { status: 'progress', total: 1280 });
+
+      expect(read(ORDER_PATH)).toMatchObject({ paid: false, payment: 'unpaid' });
+    });
+
+    it('OS paga em parte que perdeu um item fica "paid"', async () => {
+      seed(ORDER_PATH, { status: 'approved', total: 300, paidAmount: 300, paid: false, payment: 'unpaid', transactions: [] });
+
+      await handleOrderUpdatedAsaas('c1', 'o1', { status: 'approved', total: 500 }, { status: 'approved', total: 300 });
+
+      expect(read(ORDER_PATH)).toMatchObject({ paid: true, payment: 'paid' });
+    });
+
+    it('orçamento fica sem status de pagamento; OS antiga sem paidAmount e status já certo não mudam', async () => {
+      seed(ORDER_PATH, { status: 'quote', total: 300, paidAmount: 300, paid: true, payment: 'paid' });
+      await handleOrderUpdatedAsaas('c1', 'o1', { status: 'quote', total: 200 }, { status: 'quote', total: 300 });
+      expect(read(ORDER_PATH)).toMatchObject({ payment: null, paid: false });
+
+      seed(ORDER_PATH, { status: 'done', total: 300, paid: true, payment: 'paid' });
+      await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', total: 200 }, { status: 'done', total: 300 });
+      expect(read(ORDER_PATH)).toMatchObject({ payment: 'paid', paid: true });
+
+      seed(ORDER_PATH, { status: 'done', total: 300, paidAmount: 100, paid: false, payment: 'unpaid', updatedAt: 'x' });
+      await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', total: 200 }, { status: 'done', total: 300 });
+      expect(read(ORDER_PATH)).toMatchObject({ payment: 'unpaid', updatedAt: 'x' });
+    });
+  });
 });

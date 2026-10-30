@@ -12,10 +12,20 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 
 class _FakeService extends CustomerReceiptService {
-  _FakeService({this.fail});
+  _FakeService({this.fail, this.fresh});
 
   final CustomerReceiptFailure? fail;
+
+  /// What the server has now; null = offline (the receipt goes on).
+  final Map<String, Order>? fresh;
   final requests = <CustomerReceiptRequest>[];
+  final freshReads = <List<String>>[];
+
+  @override
+  Future<Map<String, Order>?> readFromServer(Iterable<String> orderIds) async {
+    freshReads.add(orderIds.toList());
+    return fresh;
+  }
 
   @override
   Future<Receipt> record(CustomerReceiptRequest request) async {
@@ -340,6 +350,55 @@ void main() {
       expect(popped, [true]);
     },
   );
+
+  testWidgets(
+    'an order paid meanwhile (link, someone else): nothing is recorded, '
+    'the screen shows the new amounts',
+    (tester) async {
+      final popped = <bool>[];
+      // Server: OS 182 was paid by the Asaas link after the screen opened.
+      final service = _FakeService(
+        fresh: {
+          'a': _order('a', 182, 450, paid: 450),
+          'b': _order('b', 190, 600, paid: 100),
+          'c': _order('c', 201, 300),
+        },
+      );
+      await pump(tester, service: service, popped: popped);
+      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await tester.pump();
+
+      expect(service.freshReads.single, unorderedEquals(['a', 'b', 'c']));
+      expect(service.requests, isEmpty);
+      expect(find.textContaining('Os valores mudaram'), findsOneWidget);
+      expect(find.textContaining('800,00'), findsWidgets);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(popped, isEmpty);
+
+      // Confirming again with the fresh amounts records only what is open.
+      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await tester.pump();
+      final request = service.requests.single;
+      expect(request.allocations.map((a) => a.orderId), ['b', 'c']);
+      expect(request.allocations.map((a) => a.amount), [500, 300]);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+    },
+  );
+
+  testWidgets('same balances on the server: records right away', (
+    tester,
+  ) async {
+    final service = _FakeService(fresh: {for (final o in _orders()) o.id!: o});
+    await pump(tester, service: service);
+    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+    await tester.pump();
+    expect(service.requests.single.allocations.map((a) => a.amount), [
+      450,
+      500,
+      300,
+    ]);
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+  });
 
   testWidgets('a failure keeps the screen open', (tester) async {
     final popped = <bool>[];

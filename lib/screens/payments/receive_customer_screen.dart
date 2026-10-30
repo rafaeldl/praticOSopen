@@ -567,6 +567,43 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     return OrderRepositoryV2().getSingle(companyId, orderId);
   }
 
+  /// Reads the screen's own orders in [active] from the server and, when
+  /// what is open on any of them changed (a link paid, someone else
+  /// received), puts the fresh orders on screen and returns true: nothing
+  /// is written, the person checks the new amounts. Offline it returns
+  /// false and the receipt goes on as before.
+  Future<bool> _refreshChangedBalances(
+    CustomerReceiptService service,
+    List<OpenBalance> active,
+  ) async {
+    final ownIds = {for (final o in _orders) o.id};
+    final ids = [
+      for (final b in active)
+        if (ownIds.contains(b.orderId)) b.orderId,
+    ];
+    if (ids.isEmpty) return false;
+    final fresh = await service.readFromServer(ids);
+    if (fresh == null || !mounted) return false;
+    final before = {for (final b in active) b.orderId: _cents(b.open)};
+    var changed = false;
+    for (var i = 0; i < _orders.length; i++) {
+      final id = _orders[i].id;
+      if (!ids.contains(id)) continue;
+      final order = fresh[id];
+      final open = order == null ? 0 : _cents(OpenBalance.ofOrder(order).open);
+      if (open == before[id]) continue;
+      changed = true;
+      if (order != null) _orders[i] = order;
+    }
+    if (!changed) return false;
+    _orders.removeWhere((o) => ids.contains(o.id) && fresh[o.id] == null);
+    setState(() {
+      _typed = false;
+      _amount.text = ReceiveAmountField.textFor(_max);
+    });
+    return true;
+  }
+
   Future<void> _confirm() async {
     final value = parseCurrencyInput(_amount.text);
     final active = _active;
@@ -575,9 +612,20 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     }
     _amountFocus.unfocus();
     final l10n = context.l10n;
-    final allocations = allocatePayment(active, value);
     setState(() => _busy = true);
     final service = widget.service ?? CustomerReceiptService();
+    if (await _refreshChangedBalances(service, active)) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      showAppToast(
+        context,
+        l10n.receiveCustomerBalanceChanged,
+        icon: CupertinoIcons.exclamationmark_circle,
+      );
+      return;
+    }
+    if (!mounted) return;
+    final allocations = allocatePayment(active, value);
     final request = CustomerReceiptRequest(
       customer: widget.customer,
       orders: _orders,

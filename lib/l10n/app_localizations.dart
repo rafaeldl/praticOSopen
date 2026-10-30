@@ -5308,6 +5308,12 @@ abstract class AppLocalizations {
   /// **'Digite quanto recebeu.'**
   String get receiveCustomerZero;
 
+  /// No description provided for @receiveCustomerBalanceChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os valores mudaram desde que a tela abriu. Confira e confirme de novo.'**
+  String get receiveCustomerBalanceChanged;
+
   /// No description provided for @receiveCustomerDone.
   ///
   /// In pt, this message translates to:

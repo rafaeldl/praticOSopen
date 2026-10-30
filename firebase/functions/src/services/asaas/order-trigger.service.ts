@@ -11,6 +11,8 @@
  * - `transactions` or `total` changed, or the order became a quote/canceled, and the company has Asaas
  *   connected → `reconcileOutsidePayments` (money received outside Asaas
  *   while a link is open: settle or lower the link, outside-payment.service);
+ * - `total` changed (and `transactions` did not) → `syncPaymentStatusWithTotal`
+ *   (every company: `paid`/`payment` follow the new total);
  * - the order became paid (`payment` → 'paid') or done (`status` → 'done') →
  *   `autoIssueInvoice`, which issues the nota when the company chose that
  *   moment (settings/nfse.autoIssue);
@@ -21,7 +23,12 @@
  */
 import { handleOrderStatusChange } from './charge.service';
 import { getPaymentSettings } from './connection.service';
-import { OrderPaymentState, repairAsaasTransactions, transactionsChanged } from './order-payment.service';
+import {
+  OrderPaymentState,
+  repairAsaasTransactions,
+  syncPaymentStatusWithTotal,
+  transactionsChanged,
+} from './order-payment.service';
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
 
@@ -51,11 +58,17 @@ export async function handleOrderUpdatedAsaas(
   // Only what changes the amount owed: total, or the order leaving the
   // payable states (quote/canceled owe nothing). Other status moves read nothing.
   const owesNothing = (status?: string) => status === 'quote' || status === 'canceled';
+  const totalChanged = Number(before?.total ?? 0) !== Number(after.total ?? 0);
   const owedChanged =
-    Number(before?.total ?? 0) !== Number(after.total ?? 0) ||
+    totalChanged ||
     (owesNothing(after.status) && !owesNothing(before?.status));
   if (repair || owedChanged) {
     tasks.push(paymentsChangedIfConnected(companyId, orderId, repair));
+  }
+  // Items edited after a payment: `paid`/`payment` follow the new total
+  // (every company; the app's save never writes them).
+  if (totalChanged && !repair) {
+    tasks.push(syncPaymentStatusWithTotal(companyId, orderId).then(() => undefined));
   }
   if (after.payment === 'paid' && before?.payment !== 'paid') {
     tasks.push(autoIssueInvoice(companyId, orderId, 'paid'));
