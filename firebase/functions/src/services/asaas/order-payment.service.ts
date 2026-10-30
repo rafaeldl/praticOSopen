@@ -18,6 +18,7 @@
  */
 import { db, FieldValue } from '../firestore.service';
 import { applyPaymentTransaction, paymentStatusFields, roundMoney } from '../order.service';
+import { latestPaymentAt } from '../../utils/payment-time';
 import type { Order, PaymentTransaction, UserAggr } from '../../models/types';
 import type { AsaasPaymentEvent, CustomerCharge, OrderCharge } from '../../models/asaas.types';
 
@@ -562,6 +563,26 @@ export async function repairAsaasTransactions(
 }
 
 /** Deep comparison of `transactions` (key order inside each transaction is ignored). */
+export function paymentCount(state: OrderPaymentState | undefined): number {
+  return (state?.transactions ?? []).filter((t) => t.type === 'payment').length;
+}
+
+/**
+ * Keeps `lastPaymentAt` (UTC ISO) in line with the order's payments, whoever
+ * wrote them. "Recebido em {mês}" finds the orders paid in a month with this
+ * field: `updatedAt` does not work, a later full save from the app rewrites
+ * it. No app version writes this field, so their merges keep it.
+ */
+export async function stampLastPayment(
+  companyId: string,
+  orderId: string,
+  after: OrderPaymentState & { lastPaymentAt?: string },
+): Promise<void> {
+  const lastPaymentAt = latestPaymentAt(after.transactions);
+  if (lastPaymentAt === (after.lastPaymentAt ?? null)) return;
+  await orderRef(companyId, orderId).update({ lastPaymentAt: lastPaymentAt ?? FieldValue.delete() });
+}
+
 export function transactionsChanged(
   before: OrderPaymentState | undefined,
   after: OrderPaymentState | undefined,

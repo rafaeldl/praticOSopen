@@ -79,7 +79,9 @@ class OrderChargeController extends ChangeNotifier {
   OrderCharge? get autoCanceledCharge {
     if (!enabled || openCharge != null) return null;
     final latest = OrderCharge.current(_charges);
-    return latest?.autoCanceled == true ? latest : null;
+    final canceled =
+        latest?.status == ChargeStatus.canceled && latest?.autoCanceled == true;
+    return canceled ? latest : null;
   }
 
   /// A charge with paid installments can't be replaced nor canceled.

@@ -257,7 +257,7 @@ Na página `/q/{token}` (`OrderChargeAction.vue`):
 | `charge` | Exibição |
 |----------|----------|
 | `pending` | Botão "Pagar R$ x" (abre a fatura em nova aba) + "Pix, boleto ou cartão" ou "Em Nx no cartão" + vencimento |
-| `overdue` | Botão "Pagar R$ X" com "Venceu em DD/MM/AAAA": a fatura vencida do Asaas ainda aceita Pix e boleto. Sem link válido: "Cobrança vencida. Fale com a empresa" |
+| `overdue` | Botão "Pagar R$ X" com "Venceu em DD/MM/AAAA": a fatura vencida do Asaas ainda aceita Pix e boleto. Parcelamento no cartão ou sem link válido: "Cobrança vencida. Fale com a empresa" |
 | `paid` | "Pago R$ x ✓" |
 | `null` | nada |
 
@@ -357,7 +357,7 @@ Situação em 2026-10-04: Blocos A–C (código de Functions/rules) publicados; 
 Itens que o E2E automático não cobre:
 
 - [ ] **Parcelamento no cartão**: pagar uma vez pela fatura da primeira parcela no sandbox e confirmar que todas as parcelas ficam confirmadas (e que a cobrança na OS vira `paid` com N transações "Asaas • Cartão n/N").
-- [x] **Fatura vencida**: o link da OS mantém o botão "Pagar", porque a fatura vencida do Asaas ainda aceita Pix e boleto.
+- [x] **Fatura vencida**: o link da OS mantém o botão "Pagar", porque a fatura vencida do Asaas ainda aceita Pix e boleto. Falta confirmar no sandbox se o parcelamento no cartão vencido pode ser pago; até lá ele continua sem botão.
 - [ ] **Retorno à aba (Bloco E)**: com a página `/q/{token}` aberta, pagar em outra aba, voltar e conferir "Pago R$ x ✓" sem recarregar; depois de pago, voltar à aba não faz novo GET.
 - [ ] **Webhook ponta a ponta** com uma empresa sandbox conectada: `npm run e2e:asaas -- --with-api` contra o emulador (via túnel) ou a empresa de teste; conferir no app o card "Cobrança" pago e a transação na OS.
 - [ ] **`req.ip`** (exige as Functions de produção com uma empresa de teste conectada ao sandbox, não o emulador) nas chamadas diretas a `cloudfunctions.net` (caminho do webhook, sem rewrite do Hosting): conferir nos logs que o rate limit usa o IP real do Asaas e não um IP de proxy compartilhado.

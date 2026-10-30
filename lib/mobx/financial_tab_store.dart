@@ -45,8 +45,7 @@ abstract class _FinancialTabStore with Store {
         openLoader ?? () => repo().getUnpaidOrders(Global.companyAggr!.id!);
     _paidLoader =
         paidLoader ??
-        (since) =>
-            repo().getOrdersUpdatedSince(Global.companyAggr!.id!, since);
+        (since) => repo().getOrdersPaidSince(Global.companyAggr!.id!, since);
   }
 
   final DateTime Function() _clock;

@@ -58,6 +58,13 @@ test('an overdue charge keeps the pay button: Asaas still takes Pix and boleto',
   assert.equal(view.kind === 'pay' && view.overdue, true)
 })
 
+test('an overdue card plan shows the message: paying it after the due date is not confirmed', () => {
+  assert.deepEqual(
+    getChargeView({ ...pending, status: 'overdue', mode: 'cardInstallments', installmentCount: 3 }),
+    { kind: 'overdue' },
+  )
+})
+
 test('overdue without a safe link and paid charges render their messages', () => {
   assert.deepEqual(getChargeView({ ...pending, status: 'overdue', invoiceUrl: 'https://evil.example/x' }), { kind: 'overdue' })
   assert.deepEqual(getChargeView({ ...pending, status: 'paid' }), { kind: 'paid', value: pending.value })

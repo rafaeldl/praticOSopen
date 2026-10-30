@@ -56,9 +56,9 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     return _tenant.getUnpaidOrders(companyId);
   }
 
-  /// Orders changed since [since], whenever they were created.
-  Future<List<Order?>> getOrdersUpdatedSince(String companyId, DateTime since) {
-    return _tenant.getOrdersUpdatedSince(companyId, since);
+  /// Orders with a payment dated from [since] on, whenever they were created.
+  Future<List<Order?>> getOrdersPaidSince(String companyId, DateTime since) {
+    return _tenant.getOrdersPaidSince(companyId, since);
   }
 
   /// Stream de orders com filtros opcionais.

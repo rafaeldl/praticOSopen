@@ -13,8 +13,9 @@
  *   while a link is open: settle or lower the link, outside-payment.service);
  * - `total` changed (and `transactions` did not) → `syncPaymentStatusWithTotal`
  *   (every company: `paid`/`payment` follow the new total);
- * - the order became paid (`payment` → 'paid', unless only the total changed:
- *   no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
+ * - `transactions` changed (every company) → `stampLastPayment`;
+ * - the order became paid (`payment` → 'paid', unless only the total changed
+ *   or a discount closed it: no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
  *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
  * - anything else returns without reading Firestore.
  *
@@ -25,7 +26,9 @@ import { handleOrderStatusChange } from './charge.service';
 import { getPaymentSettings } from './connection.service';
 import {
   OrderPaymentState,
+  paymentCount,
   repairAsaasTransactions,
+  stampLastPayment,
   syncPaymentStatusWithTotal,
   transactionsChanged,
 } from './order-payment.service';
@@ -37,6 +40,7 @@ export type OrderUpdateSnapshot = OrderPaymentState & {
   payment?: string | null;
   /** Stamped by `syncPaymentStatusWithTotal`. */
   paymentSyncedAt?: string;
+  lastPaymentAt?: string;
 };
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
@@ -60,6 +64,7 @@ export async function handleOrderUpdatedAsaas(
     tasks.push(handleOrderStatusChange(companyId, orderId, before?.status, after.status));
   }
   const repair = transactionsChanged(before, after);
+  if (repair) tasks.push(stampLastPayment(companyId, orderId, after));
   // Only what changes the amount owed: total, or the order leaving the
   // payable states (quote/canceled owe nothing). Other status moves read nothing.
   const owesNothing = (status?: string) => status === 'quote' || status === 'canceled';
@@ -76,7 +81,8 @@ export async function handleOrderUpdatedAsaas(
     tasks.push(syncPaymentStatusWithTotal(companyId, orderId).then(() => undefined));
   }
   const syncedFromTotal = !!after.paymentSyncedAt && after.paymentSyncedAt !== before?.paymentSyncedAt;
-  if (after.payment === 'paid' && before?.payment !== 'paid' && !syncedFromTotal) {
+  const closedByDiscount = repair && paymentCount(after) <= paymentCount(before);
+  if (after.payment === 'paid' && before?.payment !== 'paid' && !syncedFromTotal && !closedByDiscount) {
     tasks.push(autoIssueInvoice(companyId, orderId, 'paid'));
   }
   if (after.status === 'done' && before?.status !== 'done') {

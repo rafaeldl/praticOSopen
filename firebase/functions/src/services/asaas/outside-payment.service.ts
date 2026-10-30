@@ -55,6 +55,9 @@ import {
 } from './customer-charge.service';
 import { ASAAS_TRANSACTION_PREFIX, chargeRef, orderRef } from './order-payment.service';
 import { fromCents, toCents } from '../../utils/payment-allocation';
+import { toMillis } from '../../utils/payment-time';
+
+export { parseTransactionTime } from '../../utils/payment-time';
 
 const LEASE_MS = 60 * 1000;
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -93,32 +96,6 @@ export function decideOutsideAction(chargeValue: number, stillOwed: number, paid
 export function openForLink(order: Pick<Order, 'status' | 'total' | 'paidAmount'> | undefined): number {
   if (!order || order.status === 'quote' || order.status === 'canceled') return 0;
   return calculateRemainingBalance(order);
-}
-
-/** An ISO string that ends with 'Z' or an offset ('+02:00', '-0300'). */
-const ZONED_ISO = /(?:[zZ]|[+-]\d{2}:?\d{2})$/;
-
-/**
- * The app writes `createdAt` as the phone's local time without a zone
- * ('2026-10-29T17:39:47.433185'); Date.parse would read it as UTC here and
- * put a payment made right after the link three hours before it. Such
- * strings are read as Brazil time (UTC-3, no daylight saving since 2019).
- */
-export function parseTransactionTime(value: string): number {
-  const trimmed = value.trim();
-  if (ZONED_ISO.test(trimmed)) return Date.parse(trimmed);
-  const withTime = /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? `${trimmed}T00:00:00` : trimmed;
-  return Date.parse(`${withTime}-03:00`);
-}
-
-function toMillis(value: unknown): number {
-  if (!value) return NaN;
-  if (typeof value === 'string') return parseTransactionTime(value);
-  if (value instanceof Date) return value.getTime();
-  const maybe = value as { toMillis?: () => number; toDate?: () => Date };
-  if (typeof maybe.toMillis === 'function') return maybe.toMillis();
-  if (typeof maybe.toDate === 'function') return maybe.toDate().getTime();
-  return NaN;
 }
 
 /**

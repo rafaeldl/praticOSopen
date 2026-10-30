@@ -265,12 +265,12 @@ Aba fixa na barra inferior (requer `viewFinancialReports`). Responde só "quem m
   Tocar no cliente: com uma OS abre o **Receber** dessa OS; com várias abre **Receber de {cliente}**
   (ver acima). OS sem cliente continuam abrindo a escolha "Qual OS?".
 - **Recebido em {mês}**: uma linha com o dinheiro que entrou no mês, pelo dia de cada pagamento
-  (`paidAt ?? createdAt`), em OS de qualquer mês (`getOrdersUpdatedSince`: todo pagamento grava
-  `updatedAt`). OS antigas sem transações contam no mês em que foram criadas. A linha abre o
+  (`paidAt ?? createdAt`), em OS de qualquer mês (`getOrdersPaidSince`, pelo campo `lastPaymentAt`
+  que o gatilho da OS mantém). OS antigas sem transações contam no mês em que foram criadas. A linha abre o
   Relatório, que continua listando as OS **criadas** no período.
 - OS ativas sem `payment` ou com o antigo `partial` ficam fora de "Falta receber". O script
-  `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses dados uma vez
-  (simula por padrão; `--apply` grava).
+  `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses dados e preenche
+  `lastPaymentAt` nas OS antigas (simula por padrão; `--apply` grava).
 - Mês sem OS, sem dívida e sem dinheiro recebido: `EmptyState`. Erro: mensagem fixa + "Tentar novamente".
 - "…" abre o Relatório e "Outro período" (seletor de datas).
 

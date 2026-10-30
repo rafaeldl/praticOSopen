@@ -35,8 +35,10 @@ export function isSafeInvoiceUrl(url: string | undefined): boolean {
 export function getChargeView(charge: PublicOrderCharge | null | undefined): ChargeView {
   if (!charge) return { kind: 'none' }
   if (charge.status === 'paid') return { kind: 'paid', value: charge.value }
-  // Asaas keeps accepting Pix and boleto on an overdue invoice.
-  if ((charge.status === 'pending' || charge.status === 'overdue') && isSafeInvoiceUrl(charge.invoiceUrl)) {
+  // Asaas keeps accepting Pix and boleto on an overdue invoice. Not confirmed
+  // for card installment plans, so those keep the "talk to the company" text.
+  const payableOverdue = charge.status === 'overdue' && charge.mode !== 'cardInstallments'
+  if ((charge.status === 'pending' || payableOverdue) && isSafeInvoiceUrl(charge.invoiceUrl)) {
     return {
       kind: 'pay',
       value: charge.value,
