@@ -4,11 +4,13 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
+import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/utils/financial_summary.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 
 class _FakeService extends CustomerReceiptService {
@@ -447,6 +449,37 @@ void main() {
     );
     expect(title.overflow, isNot(TextOverflow.ellipsis));
     expect(title.maxLines, isNull);
+  });
+
+  testWidgets('starts with only the given orders checked and their amount', (
+    tester,
+  ) async {
+    final orders = _orders();
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ReceiveCustomerScreen(
+          orders: orders,
+          checkedOrderIds: {orders.last.id!},
+          customerName: 'Maria',
+          service: _FakeService(),
+          canAttachReceipt: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<CupertinoTextField>(
+      find.byType(CupertinoTextField).first,
+    );
+    expect(
+      field.controller!.text,
+      ReceiveAmountField.textFor(
+        FinancialSummary.openAmount(orders.last),
+      ),
+    );
   });
 
   testWidgets('orders already paid are left out of the sentence', (

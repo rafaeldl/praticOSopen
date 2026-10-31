@@ -49,6 +49,7 @@ class Debtor {
 class FinancialSummary {
   FinancialSummary({
     required this.entered,
+    required this.receivedOrders,
     required this.sold,
     required this.soldOrders,
     required this.owed,
@@ -58,6 +59,10 @@ class FinancialSummary {
   });
 
   final double entered;
+
+  /// Orders with money received in the chosen month, latest payment first.
+  /// Their [receivedIn] adds up to [entered].
+  final List<Order> receivedOrders;
   final double sold;
 
   /// Orders opened in the chosen month, newest first.
@@ -71,6 +76,7 @@ class FinancialSummary {
 
   static final empty = FinancialSummary(
     entered: 0,
+    receivedOrders: const [],
     sold: 0,
     soldOrders: const [],
     owed: 0,
@@ -104,6 +110,9 @@ class FinancialSummary {
       0,
       (sum, o) => sum + receivedIn(o, month),
     );
+
+    final received = candidates.where((o) => receivedIn(o, month) != 0).toList()
+      ..sort((a, b) => receivedDate(b, month).compareTo(receivedDate(a, month)));
 
     final sold = created.where(isSold).toList()
       ..sort((a, b) => _oldestFirst(b, a));
@@ -140,6 +149,7 @@ class FinancialSummary {
 
     return FinancialSummary(
       entered: entered,
+      receivedOrders: received,
       sold: sold.fold<double>(0, (sum, o) => sum + (o.total ?? 0)),
       soldOrders: sold,
       owed: debtors.fold<double>(0, (sum, d) => sum + d.amount),
@@ -162,10 +172,7 @@ class FinancialSummary {
   /// so they count their total): that money counts in the month the order
   /// was created.
   static double receivedIn(Order order, DateTime month) {
-    bool inMonth(DateTime? date) {
-      final local = date?.toLocal();
-      return local?.year == month.year && local?.month == month.month;
-    }
+    bool inMonth(DateTime? date) => _isInMonth(date, month);
 
     final payments = (order.transactions ?? const <PaymentTransaction>[]).where(
       (t) => t.type == PaymentTransactionType.payment,
@@ -179,6 +186,24 @@ class FinancialSummary {
         : order.paidAmount ?? 0;
     final untracked = paid - tracked;
     return dated + (untracked > 0 && inMonth(order.createdAt) ? untracked : 0);
+  }
+
+  /// The last day money came in on [order] in [month]. Old orders without
+  /// transactions count on the day they were created (see [receivedIn]).
+  static DateTime receivedDate(Order order, DateTime month) {
+    final dates = (order.transactions ?? const <PaymentTransaction>[])
+        .where((t) => t.type == PaymentTransactionType.payment)
+        .map((t) => t.paidOn)
+        .where((date) => _isInMonth(date, month))
+        .toList()
+      ..sort();
+    if (dates.isNotEmpty) return dates.last;
+    return order.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
+  static bool _isInMonth(DateTime? date, DateTime month) {
+    final local = date?.toLocal();
+    return local?.year == month.year && local?.month == month.month;
   }
 
   /// What is still open on [order].

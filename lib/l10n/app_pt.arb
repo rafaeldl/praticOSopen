@@ -63,7 +63,7 @@
   "payment": "Pagamento",
   "paid": "Pago",
   "unpaid": "Não Pago",
-  "toReceive": "Falta receber",
+  "toReceive": "Falta pagar",
   "received": "Recebido",
   "pix": "PIX",
   "check": "Cheque",
@@ -393,10 +393,10 @@
   "currentYear": "Ano atual",
   "start": "Início",
   "end": "Fim",
-  "billing": "Faturamento",
+  "billing": "Vendido",
   "composition": "Composição",
-  "customersReceived": "Clientes - Recebido",
-  "customersToReceive": "Clientes - A Receber",
+  "customersReceived": "Clientes que já pagaram",
+  "customersToReceive": "Clientes com valor a pagar",
   "customerWithoutName": "Cliente sem nome",
   "serviceWithoutName": "Serviço sem nome",
   "productWithoutName": "Produto sem nome",
@@ -518,14 +518,14 @@
   "thisWillRemoveAllPayments": "Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?",
   "attention": "Atenção",
   "financialReport": "Relatório financeiro",
-  "totalBilling": "Faturamento Total",
+  "totalBilling": "Vendido",
   "financialSummary": "Resumo Financeiro",
   "averageTicket": "Média por OS",
   "customerRanking": "Ranking de Clientes",
   "serviceRanking": "Ranking de Serviços",
   "productRanking": "Ranking de Produtos",
   "paidOrders": "Ordens Pagas",
-  "ordersToReceive": "Ordens a Receber",
+  "ordersToReceive": "OS com valor a pagar",
   "vehicle": "Veículo",
   "valueColumn": "Valor",
   "statusColumn": "Status",
@@ -571,7 +571,7 @@
   },
   "preparingReport": "Preparando relatorio...",
   "appTagline": "Sistema de Gestao de Ordens de Servico",
-  "receivedWithPercent": "Recebido ({percent}%)",
+  "receivedWithPercent": "Já pago ({percent}%)",
   "@receivedWithPercent": {
     "placeholders": {
       "percent": {
@@ -579,7 +579,7 @@
       }
     }
   },
-  "toReceiveWithPercent": "A Receber ({percent}%)",
+  "toReceiveWithPercent": "Falta pagar ({percent}%)",
   "@toReceiveWithPercent": {
     "placeholders": {
       "percent": {
@@ -1428,6 +1428,15 @@
   "financialLoadError": "Não deu para carregar o financeiro.",
   "financialEmptyMonth": "Nenhuma OS em {month}.",
   "@financialEmptyMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "financialAlreadyPaid": "Já pago",
+  "financialEmptyReceived": "Nenhum pagamento em {month}.",
+  "@financialEmptyReceived": {
     "placeholders": {
       "month": {
         "type": "String"

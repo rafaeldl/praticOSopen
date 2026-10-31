@@ -270,6 +270,45 @@ void main() {
       expect(FinancialSummary.receivedIn(old, DateTime(2026, 11)), 0);
     });
 
+    test('receivedOrders adds up to Recebido, latest payment first, partial '
+        'and canceled orders included', () {
+      PaymentTransaction pay(double amount, DateTime paidAt) =>
+          PaymentTransaction.payment(amount: amount, paidAt: paidAt);
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: [order('9', total: 500)], // nothing received
+        paidOrders: [
+          order('1', total: 300, paid: 100, createdAt: DateTime(2026, 8, 1),
+              transactions: [pay(100, DateTime(2026, 10, 5))]),
+          order('2', total: 900, paid: 900, payment: 'paid', status: 'done',
+              createdAt: DateTime(2026, 8, 2),
+              transactions: [
+                pay(400, DateTime(2026, 9, 20)),
+                pay(200, DateTime(2026, 10, 20)),
+                pay(300, DateTime(2026, 11, 2)),
+              ]),
+          order('3', total: 50, paid: 50, status: 'canceled',
+              createdAt: DateTime(2026, 8, 3),
+              transactions: [pay(50, DateTime(2026, 10, 10))]),
+        ],
+        openOrders: const [],
+      );
+
+      expect(summary.receivedOrders.map((o) => o.id), ['2', '3', '1']);
+      expect(summary.entered, 350);
+      expect(
+        summary.receivedOrders.fold<double>(
+          0,
+          (sum, o) => sum + FinancialSummary.receivedIn(o, DateTime(2026, 10)),
+        ),
+        summary.entered,
+      );
+      expect(
+        FinancialSummary.receivedDate(summary.receivedOrders.first, DateTime(2026, 10)),
+        DateTime(2026, 10, 20),
+      );
+    });
+
     test('isSold leaves out quotes and canceled orders (Vendido and Relatório)', () {
       expect(FinancialSummary.isSold(order('1')), isTrue);
       expect(FinancialSummary.isSold(order('2', status: 'done')), isTrue);

@@ -72,6 +72,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
   const ReceiveCustomerScreen({
     super.key,
     required this.orders,
+    this.checkedOrderIds,
     this.customer,
     this.customerName,
     this.service,
@@ -117,8 +118,13 @@ class ReceiveCustomerScreen extends StatefulWidget {
   /// already get every order).
   final Future<List<CustomerOpenOrder>> Function()? otherOrdersLoader;
 
-  /// Open orders of the customer, oldest first (as `Debtor.orders`).
+  /// Open orders of the customer, oldest first (as `Debtor.openOrders`).
   final List<Order> orders;
+
+  /// Orders that start checked; null checks all of [orders]. Coming from A
+  /// receber it is the completed ones, so the screen opens with the amount of
+  /// the row that was tapped and the others stay one tap away.
+  final Set<String>? checkedOrderIds;
   final CustomerAggr? customer;
 
   /// Falls back to [customer]'s name.
@@ -141,6 +147,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
   static Future<bool> open(
     BuildContext context, {
     required List<Order> orders,
+    Set<String>? checkedOrderIds,
     CustomerAggr? customer,
     String? customerName,
     bool? canAttachReceipt,
@@ -152,6 +159,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
         builder: (context) {
           final screen = ReceiveCustomerScreen(
             orders: orders,
+            checkedOrderIds: checkedOrderIds,
             customer: customer,
             customerName: customerName,
             canAttachReceipt: canAttachReceipt,
@@ -183,9 +191,13 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     for (final order in _orders) OpenBalance.ofOrder(order),
   ].where((b) => b.open > 0).toList();
 
-  /// Orders checked in "Está pagando". Starts with all of the customer's
-  /// own open orders; "Outras OS" start unchecked.
-  late final Set<String> _checked = {for (final b in _balances) b.orderId};
+  /// Orders checked in "Está pagando". Starts with the customer's own open
+  /// orders ([ReceiveCustomerScreen.checkedOrderIds] when set); "Outras OS"
+  /// start unchecked.
+  late final Set<String> _checked = {
+    for (final b in _balances)
+      if (widget.checkedOrderIds?.contains(b.orderId) ?? true) b.orderId,
+  };
 
   late final TextEditingController _amount = TextEditingController(
     text: ReceiveAmountField.textFor(_max),

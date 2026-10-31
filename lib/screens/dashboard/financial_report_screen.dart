@@ -34,10 +34,17 @@ import 'package:praticos/theme/app_typography.dart';
 /// (Admin e Gerente): a aba e a rota `/financial_report` a protegem com
 /// `ProtectedRoute`.
 class FinancialReportScreen extends StatefulWidget {
-  const FinancialReportScreen({super.key, this.openCustomPeriod = false});
+  const FinancialReportScreen({
+    super.key,
+    this.openCustomPeriod = false,
+    this.initialMonthOffset = 0,
+  });
 
   /// Abre o seletor de "Outro período" assim que a tela carrega.
   final bool openCustomPeriod;
+
+  /// Mês em que abre: 0 = atual, -1 = anterior (o mês escolhido na aba).
+  final int initialMonthOffset;
 
   @override
   State<FinancialReportScreen> createState() => _FinancialReportScreenState();
@@ -45,7 +52,7 @@ class FinancialReportScreen extends StatefulWidget {
 
 class _FinancialReportScreenState extends State<FinancialReportScreen> {
   String selectedPeriod = 'mês';
-  int _periodOffset = 0;
+  late int _periodOffset = widget.initialMonthOffset;
   bool _isRankingExpanded = false;
   bool _isServicesExpanded = false;
   bool _isProductsExpanded = false;
@@ -382,7 +389,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     }
 
     final paidLabel =
-        segmentLabel('financial.total_paid', context.l10n.received);
+        segmentLabel('financial.total_paid', context.l10n.financialAlreadyPaid);
     final remainingLabel =
         segmentLabel('financial.remaining', context.l10n.toReceive);
 
@@ -414,7 +421,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
               const SizedBox(height: AppSpacing.lg),
               _StackedBar(
                 semanticsLabel:
-                    '${context.l10n.received} ${_convertToCurrency(paidAmount)}, '
+                    '${context.l10n.financialAlreadyPaid} ${_convertToCurrency(paidAmount)}, '
                     '${context.l10n.toReceive} ${_convertToCurrency(unpaidAmount)}',
                 segments: [
                   _BarSegment(
@@ -965,7 +972,7 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
     final l10nFinancialReport = _latinCharactersOnly(l10n.financialReport.toUpperCase());
     final l10nFinancialSummary = _latinCharactersOnly(l10n.financialSummary);
     final l10nTotalBilling = _latinCharactersOnly(l10n.totalBilling);
-    final l10nReceived = _latinCharactersOnly(l10n.received);
+    final l10nReceived = _latinCharactersOnly(l10n.financialAlreadyPaid);
     final l10nToReceive = _latinCharactersOnly(l10n.toReceive);
     final l10nAverageTicket = _latinCharactersOnly(l10n.averageTicket);
     final l10nCustomerRanking = _latinCharactersOnly(l10n.customerRanking);

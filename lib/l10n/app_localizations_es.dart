@@ -198,7 +198,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unpaid => 'No Pagado';
 
   @override
-  String get toReceive => 'Por recibir';
+  String get toReceive => 'Falta pagar';
 
   @override
   String get received => 'Recibido';
@@ -1079,16 +1079,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get end => 'Fin';
 
   @override
-  String get billing => 'Facturación';
+  String get billing => 'Vendido';
 
   @override
   String get composition => 'Composición';
 
   @override
-  String get customersReceived => 'Clientes - Recibido';
+  String get customersReceived => 'Clientes que ya pagaron';
 
   @override
-  String get customersToReceive => 'Clientes - Por Recibir';
+  String get customersToReceive => 'Clientes con saldo';
 
   @override
   String get customerWithoutName => 'Cliente sin nombre';
@@ -1324,7 +1324,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get financialReport => 'Informe financiero';
 
   @override
-  String get totalBilling => 'Facturación Total';
+  String get totalBilling => 'Vendido';
 
   @override
   String get financialSummary => 'Resumen Financiero';
@@ -1345,7 +1345,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paidOrders => 'Órdenes Pagadas';
 
   @override
-  String get ordersToReceive => 'Órdenes por Cobrar';
+  String get ordersToReceive => 'OS con saldo';
 
   @override
   String get vehicle => 'Vehículo';
@@ -1411,12 +1411,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String receivedWithPercent(String percent) {
-    return 'Recibido ($percent%)';
+    return 'Ya pagado ($percent%)';
   }
 
   @override
   String toReceiveWithPercent(String percent) {
-    return 'Por Recibir ($percent%)';
+    return 'Falta pagar ($percent%)';
   }
 
   @override
@@ -2816,6 +2816,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String financialEmptyMonth(String month) {
     return 'Ninguna orden en $month.';
+  }
+
+  @override
+  String get financialAlreadyPaid => 'Ya pagado';
+
+  @override
+  String financialEmptyReceived(String month) {
+    return 'Ningún pago en $month.';
   }
 
   @override

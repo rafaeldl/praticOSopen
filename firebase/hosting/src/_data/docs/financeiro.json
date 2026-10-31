@@ -125,7 +125,7 @@
         "metrics": [
           {
             "title": "Recebido",
-            "description": "Todo o dinheiro que entrou no mês, na data do pagamento, inclusive entrada e parcela. Toque para abrir o relatório."
+            "description": "Todo o dinheiro que entrou no mês, na data do pagamento, inclusive entrada e parcela. Toque para ver de quais OS veio."
           },
           {
             "title": "Vendido",
@@ -276,7 +276,7 @@
           },
           {
             "question": "Por que o Recebido do mês não bate com o meu caixa?",
-            "answer": "Porque ele soma as OS abertas no mês, não o dia em que cada pagamento entrou. Uma OS do mês passado paga hoje conta no mês passado."
+            "answer": "Porque ele soma só o que foi anotado no PráticOS, na data de cada pagamento. Se algo entrou e não foi anotado, ou foi anotado com outro dia, os valores não batem."
           }
         ]
       }
@@ -408,7 +408,7 @@
         "metrics": [
           {
             "title": "Received",
-            "description": "All the money that came in during the month, by payment date, including down payments and installments. Tap to open the report."
+            "description": "All the money that came in during the month, by payment date, including down payments and installments. Tap to see which orders it came from."
           },
           {
             "title": "Sold",
@@ -559,7 +559,7 @@
           },
           {
             "question": "Why doesn't Received this month match my cash?",
-            "answer": "Because it adds up orders opened that month, not the day each payment came in. An order from last month paid today counts in last month."
+            "answer": "Because it only adds what was recorded in PráticOS, on the date of each payment. If money came in and was not recorded, or was recorded on another day, the amounts will differ."
           }
         ]
       }
@@ -691,7 +691,7 @@
         "metrics": [
           {
             "title": "Recibido",
-            "description": "Todo el dinero que entró en el mes, en la fecha del pago, incluidos anticipos y cuotas. Toca para abrir el informe."
+            "description": "Todo el dinero que entró en el mes, en la fecha del pago, incluidos anticipos y cuotas. Toca para ver de qué OS vino."
           },
           {
             "title": "Vendido",
@@ -842,7 +842,7 @@
           },
           {
             "question": "¿Por qué el Recibido del mes no coincide con mi caja?",
-            "answer": "Porque suma las OS abiertas en el mes, no el día en que entró cada pago. Una OS del mes pasado pagada hoy cuenta en el mes pasado."
+            "answer": "Porque solo suma lo que se anotó en PráticOS, en la fecha de cada pago. Si entró dinero y no se anotó, o se anotó con otro día, los valores no coinciden."
           }
         ]
       }

@@ -264,7 +264,8 @@ fica como está.
 - **Recebido**: todo pagamento na data em que entrou (`paidAt ?? createdAt`), inclusive entrada e
   parcela, com a OS concluída ou não, em OS de qualquer mês (`getOrdersPaidSince`, pelo campo
   `lastPaymentAt` que o gatilho da OS mantém). OS antigas sem transações contam no mês em que foram
-  criadas. Abre o Relatório, que continua listando as OS **criadas** no período.
+  criadas. Abre a lista das OS com dinheiro no mês, pagamento mais recente primeiro, cada linha com o
+  que entrou nela naquele mês; a soma das linhas é o Recebido. Tocar abre a OS.
 - **Vendido**: soma de `total` das OS abertas no mês (`createdAt`), sem orçamento e sem cancelada
   (`FinancialSummary.isSold`, a mesma regra do Relatório). Abre a lista das OS do mês, mais nova
   primeiro; tocar abre a OS.
@@ -283,8 +284,9 @@ fica como está.
 **Receber não é filtrado:** o filtro por concluída vale só para o que aparece. `FinancialSummary.isOpen`
 e `openOrdersOldestFirst` continuam cobrindo toda OS ativa com saldo. Tocar num cliente de A receber
 vai por `Debtor.openOrders` (todas as OS em aberto dele, concluídas ou não): com uma OS abre o
-**Receber** dela; com várias abre **Receber de {cliente}** (ver acima), que pode mostrar um total maior
-que o da linha; OS sem cliente continuam abrindo a escolha "Qual OS?".
+**Receber** dela; com várias abre **Receber de {cliente}** (ver acima), que começa só com as OS de A
+receber marcadas (`checkedOrderIds`), então abre com o valor da linha; as outras ficam na lista,
+desmarcadas. OS sem cliente continuam abrindo a escolha "Qual OS?".
 
 **Próxima cobrança** (`lib/utils/next_charge.dart`): uma linha com cliente e valor. Tocar abre uma
 folha de ações com "{nome} deve {valor} desde {data}", **Mandar cobrança**, **Agora não** e Cancelar.
@@ -310,10 +312,16 @@ Outros pontos:
   `lastPaymentAt` nas OS antigas (simula por padrão; `--apply` grava).
 - Mês sem OS continua mostrando a tela inteira, com os valores zerados. Erro: mensagem fixa +
   "Tentar novamente".
-- "…" abre o Relatório e "Outro período" (seletor de datas).
+- "…" abre o Relatório, no mês escolhido na aba, e "Outro período" (seletor de datas).
+
+**Um nome, uma conta.** "Recebido" e "A receber" só aparecem com o sentido acima. O Relatório divide
+o Vendido das OS criadas no período, então usa outros nomes: **Já pago** e **Falta pagar** (as duas
+partes somam o Vendido, salvo OS paga a mais): Recebido é o dinheiro que entrou no mês, de qualquer OS,
+e Já pago é o que foi pago das OS abertas no mês. Na OS e na tela do cliente, "Falta receber" é o
+saldo daquela OS ou de todas as OS em aberto do cliente.
 
 Arquivos: `lib/screens/dashboard/financial_tab.dart`, `lib/screens/dashboard/financial_list_screen.dart`
-(as três listas), `lib/mobx/financial_tab_store.dart`, `lib/utils/financial_summary.dart` e
+(as quatro listas), `lib/mobx/financial_tab_store.dart`, `lib/utils/financial_summary.dart` e
 `lib/utils/next_charge.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`,
 `lib/screens/payments/receive_customer_screen.dart`.
 
@@ -340,7 +348,7 @@ ranking de clientes, serviços e produtos, OS do período e PDF para compartilha
 
 Considera as OS criadas no período, **sem orçamentos e sem canceladas** (`FinancialSummary.isSold`):
 vale para todos os totais, rankings, lista de OS e PDF, e o Faturamento do mês bate com o Vendido da aba.
-Dinheiro recebido em OS depois cancelada sai do "Valor Recebido" do Relatório, mas continua no Recebido
+Dinheiro recebido em OS depois cancelada sai do "Já pago" do Relatório, mas continua no Recebido
 da aba, que conta todo pagamento pela data em que entrou.
 
 ### Acesso
@@ -350,15 +358,15 @@ Aba Financeiro > Relatório Financeiro (requer permissão `viewFinancialReports`
 
 | Indicador | Descrição |
 |-----------|-----------|
-| Faturamento Total | Soma dos totais das OS filtradas (igual ao Vendido no mesmo mês) |
-| Valor Recebido | Soma de todos os `paidAmount` |
-| A Receber | Soma de `(total - paidAmount)` das OS não pagas |
+| Vendido | Soma dos totais das OS filtradas (igual ao Vendido da aba no mesmo mês) |
+| Já pago | Soma de todos os `paidAmount` das OS filtradas |
+| Falta pagar | Soma de `(total - paidAmount)` das OS não pagas, concluídas ou não |
 | OS Pagas | Quantidade de OS com status `paid` |
 
 ### Cálculo Considerando Pagamentos Parciais
 
 ```dart
-// Valor Recebido (considera pagamentos parciais)
+// Já pago (considera pagamentos parciais)
 totalPaidAmount = orders.fold(0.0, (sum, order) {
   if (order.payment == 'paid') {
     return sum + (order.paidAmount ?? order.total ?? 0.0);
@@ -366,7 +374,7 @@ totalPaidAmount = orders.fold(0.0, (sum, order) {
   return sum + (order.paidAmount ?? 0.0);
 });
 
-// A Receber (considera saldo restante)
+// Falta pagar (considera saldo restante)
 totalUnpaidAmount = orders
   .where((order) => order.payment != 'paid')
   .fold(0.0, (sum, order) {
@@ -548,7 +556,7 @@ Isso garante que:
 | `lib/mobx/order_store.dart` | Lógica de cálculo e ações |
 | `lib/services/pdf/pdf_main_os_builder.dart` | Geração do PDF |
 | `lib/screens/dashboard/financial_tab.dart` | Aba Financeiro |
-| `lib/screens/dashboard/financial_list_screen.dart` | Listas de A receber, Em andamento e Vendido |
+| `lib/screens/dashboard/financial_list_screen.dart` | Listas de Recebido, Vendido, A receber e Em andamento |
 | `lib/screens/dashboard/financial_report_screen.dart` | Relatório financeiro |
 
 ### Métodos do OrderStore

@@ -481,7 +481,7 @@ abstract class AppLocalizations {
   /// No description provided for @toReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Falta receber'**
+  /// **'Falta pagar'**
   String get toReceive;
 
   /// No description provided for @received.
@@ -2173,7 +2173,7 @@ abstract class AppLocalizations {
   /// No description provided for @billing.
   ///
   /// In pt, this message translates to:
-  /// **'Faturamento'**
+  /// **'Vendido'**
   String get billing;
 
   /// No description provided for @composition.
@@ -2185,13 +2185,13 @@ abstract class AppLocalizations {
   /// No description provided for @customersReceived.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes - Recebido'**
+  /// **'Clientes que já pagaram'**
   String get customersReceived;
 
   /// No description provided for @customersToReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes - A Receber'**
+  /// **'Clientes com valor a pagar'**
   String get customersToReceive;
 
   /// No description provided for @customerWithoutName.
@@ -2605,7 +2605,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalBilling.
   ///
   /// In pt, this message translates to:
-  /// **'Faturamento Total'**
+  /// **'Vendido'**
   String get totalBilling;
 
   /// No description provided for @financialSummary.
@@ -2647,7 +2647,7 @@ abstract class AppLocalizations {
   /// No description provided for @ordersToReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Ordens a Receber'**
+  /// **'OS com valor a pagar'**
   String get ordersToReceive;
 
   /// No description provided for @vehicle.
@@ -2737,13 +2737,13 @@ abstract class AppLocalizations {
   /// No description provided for @receivedWithPercent.
   ///
   /// In pt, this message translates to:
-  /// **'Recebido ({percent}%)'**
+  /// **'Já pago ({percent}%)'**
   String receivedWithPercent(String percent);
 
   /// No description provided for @toReceiveWithPercent.
   ///
   /// In pt, this message translates to:
-  /// **'A Receber ({percent}%)'**
+  /// **'Falta pagar ({percent}%)'**
   String toReceiveWithPercent(String percent);
 
   /// No description provided for @generatedByPraticos.
@@ -5019,6 +5019,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nenhuma OS em {month}.'**
   String financialEmptyMonth(String month);
+
+  /// No description provided for @financialAlreadyPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já pago'**
+  String get financialAlreadyPaid;
+
+  /// No description provided for @financialEmptyReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum pagamento em {month}.'**
+  String financialEmptyReceived(String month);
 
   /// No description provided for @financialReceivable.
   ///

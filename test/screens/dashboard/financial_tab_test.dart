@@ -447,12 +447,27 @@ void main() {
     expect(screens.single.id, 'p1');
   });
 
-  testWidgets('Recebido opens the report', (tester) async {
+  testWidgets('Recebido lists what adds up to it and opens the order', (
+    tester,
+  ) async {
+    final screens = <Order>[];
     final reports = <bool>[];
-    await pumpTab(tester, storeWith(open: [ana]), reports: reports);
+    await pumpTab(
+      tester,
+      storeWith(month: [paid, ana]),
+      screens: screens,
+      reports: reports,
+    );
 
     await tester.tap(find.byKey(const ValueKey('financialReceived')));
-    expect(reports, [false]);
+    await tester.pumpAndSettle();
+
+    expect(reports, isEmpty);
+    expect(find.text('Outubro de 2026 · ${money(8300)}'), findsOneWidget);
+    expect(find.text('OS 186 · 08/10'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('order-p1')));
+    await tester.pump();
+    expect(screens.single.id, 'p1');
   });
 
   group('Próxima cobrança', () {

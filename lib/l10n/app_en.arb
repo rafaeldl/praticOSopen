@@ -63,7 +63,7 @@
   "payment": "Payment",
   "paid": "Paid",
   "unpaid": "Unpaid",
-  "toReceive": "To receive",
+  "toReceive": "Still to pay",
   "received": "Received",
   "pix": "PIX",
   "check": "Check",
@@ -365,10 +365,10 @@
   "currentYear": "Current year",
   "start": "Start",
   "end": "End",
-  "billing": "Billing",
+  "billing": "Sold",
   "composition": "Composition",
-  "customersReceived": "Customers - Received",
-  "customersToReceive": "Customers - To Receive",
+  "customersReceived": "Customers who paid",
+  "customersToReceive": "Customers with a balance",
   "customerWithoutName": "Customer without name",
   "serviceWithoutName": "Service without name",
   "productWithoutName": "Product without name",
@@ -483,14 +483,14 @@
   "contacts": "Contacts",
   "preparing": "Preparing...",
   "financialReport": "Financial report",
-  "totalBilling": "Total Billing",
+  "totalBilling": "Sold",
   "financialSummary": "Financial Summary",
   "averageTicket": "Average per order",
   "customerRanking": "Customer Ranking",
   "serviceRanking": "Service Ranking",
   "productRanking": "Product Ranking",
   "paidOrders": "Paid Orders",
-  "ordersToReceive": "Orders to Receive",
+  "ordersToReceive": "Orders with a balance",
   "vehicle": "Vehicle",
   "valueColumn": "Value",
   "statusColumn": "Status",
@@ -536,7 +536,7 @@
   },
   "preparingReport": "Preparing report...",
   "appTagline": "Work Order Management System",
-  "receivedWithPercent": "Received ({percent}%)",
+  "receivedWithPercent": "Already paid ({percent}%)",
   "@receivedWithPercent": {
     "placeholders": {
       "percent": {
@@ -544,7 +544,7 @@
       }
     }
   },
-  "toReceiveWithPercent": "To Receive ({percent}%)",
+  "toReceiveWithPercent": "Still to pay ({percent}%)",
   "@toReceiveWithPercent": {
     "placeholders": {
       "percent": {
@@ -1399,6 +1399,8 @@
       }
     }
   },
+  "financialAlreadyPaid": "Already paid",
+  "financialEmptyReceived": "No payments in {month}.",
   "financialReceivable": "To receive",
   "financialInProgress": "In progress",
   "financialSold": "Sold",

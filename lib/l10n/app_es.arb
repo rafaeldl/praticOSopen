@@ -63,7 +63,7 @@
   "payment": "Pago",
   "paid": "Pagado",
   "unpaid": "No Pagado",
-  "toReceive": "Por recibir",
+  "toReceive": "Falta pagar",
   "received": "Recibido",
   "pix": "PIX",
   "check": "Cheque",
@@ -365,10 +365,10 @@
   "currentYear": "Año actual",
   "start": "Inicio",
   "end": "Fin",
-  "billing": "Facturación",
+  "billing": "Vendido",
   "composition": "Composición",
-  "customersReceived": "Clientes - Recibido",
-  "customersToReceive": "Clientes - Por Recibir",
+  "customersReceived": "Clientes que ya pagaron",
+  "customersToReceive": "Clientes con saldo",
   "customerWithoutName": "Cliente sin nombre",
   "serviceWithoutName": "Servicio sin nombre",
   "productWithoutName": "Producto sin nombre",
@@ -483,14 +483,14 @@
   "contacts": "Contactos",
   "preparing": "Preparando...",
   "financialReport": "Informe financiero",
-  "totalBilling": "Facturación Total",
+  "totalBilling": "Vendido",
   "financialSummary": "Resumen Financiero",
   "averageTicket": "Promedio por orden",
   "customerRanking": "Ranking de Clientes",
   "serviceRanking": "Ranking de Servicios",
   "productRanking": "Ranking de Productos",
   "paidOrders": "Órdenes Pagadas",
-  "ordersToReceive": "Órdenes por Cobrar",
+  "ordersToReceive": "OS con saldo",
   "vehicle": "Vehículo",
   "valueColumn": "Valor",
   "statusColumn": "Estado",
@@ -536,7 +536,7 @@
   },
   "preparingReport": "Preparando informe...",
   "appTagline": "Sistema de Gestion de Ordenes de Servicio",
-  "receivedWithPercent": "Recibido ({percent}%)",
+  "receivedWithPercent": "Ya pagado ({percent}%)",
   "@receivedWithPercent": {
     "placeholders": {
       "percent": {
@@ -544,7 +544,7 @@
       }
     }
   },
-  "toReceiveWithPercent": "Por Recibir ({percent}%)",
+  "toReceiveWithPercent": "Falta pagar ({percent}%)",
   "@toReceiveWithPercent": {
     "placeholders": {
       "percent": {
@@ -1399,6 +1399,8 @@
       }
     }
   },
+  "financialAlreadyPaid": "Ya pagado",
+  "financialEmptyReceived": "Ningún pago en {month}.",
   "financialReceivable": "Por cobrar",
   "financialInProgress": "En curso",
   "financialSold": "Vendido",

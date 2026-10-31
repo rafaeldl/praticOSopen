@@ -26,8 +26,9 @@ import 'package:praticos/utils/financial_summary.dart';
 /// Financeiro tab.
 ///
 /// Recebido and Vendido follow the chosen month; Hoje (A receber, Em
-/// andamento) and Próxima cobrança do not. Each value opens its own list;
-/// charts, rankings and other periods live in [FinancialReportScreen].
+/// andamento) and Próxima cobrança do not. Each value opens the list that adds
+/// up to it; charts, rankings and other periods live in
+/// [FinancialReportScreen], reached from the "…" menu.
 ///
 /// The `on*` callbacks default to the real navigation and exist so tests can
 /// observe what the tab asks for. Permission (`viewFinancialReports`) is
@@ -152,7 +153,10 @@ class _FinancialTabState extends State<FinancialTab> {
         builder: (_) => ProtectedRoute(
           permission: PermissionType.viewFinancialReports,
           accessDeniedMessage: context.l10n.financialAccessDenied,
-          child: FinancialReportScreen(openCustomPeriod: customPeriod),
+          child: FinancialReportScreen(
+            openCustomPeriod: customPeriod,
+            initialMonthOffset: _store.monthOffset,
+          ),
         ),
       ),
     );
@@ -175,6 +179,7 @@ class _FinancialTabState extends State<FinancialTab> {
           : await ReceiveCustomerScreen.open(
               context,
               orders: orders,
+              checkedOrderIds: {for (final o in debtor.orders) o.id!},
               customer: debtor.oldestOrder.customer,
               customerName: debtor.name,
             );
@@ -321,6 +326,33 @@ class _FinancialTabState extends State<FinancialTab> {
           ),
       ],
       emptyMessage: l10n.financialEmptyInProgress,
+    );
+  }
+
+  void _openReceived() {
+    final l10n = context.l10n;
+    final format = FormatService();
+    final month = _store.month;
+    _openList(
+      title: l10n.received,
+      subtitle: (summary) => l10n.financialMonthAmount(
+        format.formatMonthYearTitle(month),
+        format.formatCurrency(summary.entered),
+      ),
+      rows: (summary) => [
+        for (final order in summary.receivedOrders)
+          _orderRow(
+            order,
+            amount: FinancialSummary.receivedIn(order, month),
+            subtitle: l10n.financialOrderDate(
+              order.number ?? 0,
+              format.formatDayMonthOrDate(
+                FinancialSummary.receivedDate(order, month),
+              ),
+            ),
+          ),
+      ],
+      emptyMessage: l10n.financialEmptyReceived(format.formatMonthYear(month)),
     );
   }
 
@@ -474,7 +506,7 @@ class _FinancialTabState extends State<FinancialTab> {
                 value: monthLoading
                     ? null
                     : format.formatCurrency(summary.entered),
-                onTap: _openReport,
+                onTap: monthLoading ? null : _openReceived,
               ),
               second: _MonthBlock(
                 key: const ValueKey('financialSold'),
