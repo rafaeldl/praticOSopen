@@ -180,12 +180,28 @@ Tudo fica escondido sem `nfseEnabled` + Asaas conectado (`PaymentSettings.nfseAv
 | Onde | O quê |
 |------|-------|
 | Conexão do Asaas | Linha "Nota fiscal" → configuração (`NfseSetupScreen`): o que falta, dados fiscais, acesso da prefeitura (aponta para o painel do Asaas), serviço padrão com impostos e modelo da descrição, e "Emitir a nota" (quando emitir sozinha) |
-| OS (`order_screen_v2.dart`) | "…" → "Emitir nota fiscal" (OS com serviço, fora de orçamento/cancelada, sem nota ativa). Linha "Nota fiscal · Aguardando prefeitura / Emitida / Erro / Cancelada" com ponto de status, que abre o detalhe |
-| Cliente | "…" → "Emitir uma nota com várias OS" → escolher as OS (`NfseOrdersPicker`) → mesma folha de emissão |
+| Financeiro (`NfseMonthRow`) | Última linha da aba: "Notas fiscais" com a quantidade emitida no mês do seletor, nunca dinheiro (a nota só leva serviços, então o total não bate com o Vendido). Linha vermelha "1 precisa de atenção" quando há problema. Abre a lista |
+| Lista de notas (`NfseListScreen`) | Uma frase com o que saiu no mês, "Precisa de atenção" no topo, as notas (mais nova primeiro) e busca por cliente, número ou OS com mais de 10 notas. "…" → "Configurar nota fiscal" para dono e admin. Ver [Lista de notas](#lista-de-notas) |
+| OS (`order_screen_v2.dart`) | "…" → "Emitir nota fiscal" (OS com serviço, fora de orçamento/cancelada, sem nota ativa). OS concluída e paga: botão azul "Emitir nota fiscal", ou "Corrigir e emitir" se a nota foi recusada; depois de uma nota cancelada não insiste, fica no "…". Concluída faltando receber: o azul segue "Receber" e a linha "Nota fiscal" mostra o link "Emitir". Com nota, linha "Nota fiscal · Aguardando prefeitura / Emitida / Erro / Cancelada" com ponto de status, que abre o detalhe |
+| Cliente | Linha "Notas fiscais" com a quantidade emitida, só quando o cliente tem nota: abre a mesma lista, filtrada pelo cliente, no mês da nota mais recente. "…" → "Emitir uma nota com várias OS" → escolher as OS (`NfseOrdersPicker`) → mesma folha de emissão |
 | Folha de emissão (`NfseIssueSheet`) | Valor (serviços, peças fora, desconto), descrição editável, CPF/CNPJ (pede quando falta), e-mail e endereço com CEP do cliente (pede o que falta), data; ✓ emite. Servidor respondendo `CUSTOMER_DATA_REQUIRED`: avisa e recarrega a prévia para mostrar os campos |
-| Detalhe (`NfseInvoiceScreen`) | Status, número, valor, OS, PDF e XML quando emitida, motivo do erro em português, aviso de nota em conflito; "…" → "Cancelar nota" em vermelho com confirmação |
+| Detalhe (`NfseInvoiceScreen`) | Status, número, valor, OS, PDF e XML quando emitida, motivo do erro em português, aviso de nota em conflito; "…" → "Cancelar nota" em vermelho com confirmação. Botão azul: "Compartilhar PDF" (baixa e abre a folha do iPhone; se não baixar um PDF, compartilha o link) ou, com erro, "Corrigir e emitir" (abre a folha de emissão das mesmas OS) |
 
 Erros viram texto em pt/en/es por `asaasErrorText(..., nota: true)`, em aviso (`showAppToast`), nunca a mensagem crua.
+
+### Lista de notas
+
+`NfseInvoiceRepository.watchSince` lê `invoices` por `effectiveDate >= data` (texto `YYYY-MM-DD`): um filtro de intervalo em um campo só usa o índice automático, sem índice composto, e a regra de leitura é a mesma das outras consultas. Status, mês e busca ficam no app (`nfseMonthList`, `nfseMatches`, em `lib/models/nfse.dart`); uma empresa tem dezenas de notas por mês. O mês da nota é o da `effectiveDate`.
+
+A leitura começa em `nfseQuerySince`: o próprio mês ou o mês anterior a hoje, o que vier antes. Assim um problema não some na virada do mês. Abrir um mês antigo lê dali até hoje, porque a nota que resolve um erro pode ser de um mês depois.
+
+- **Total do mês:** soma `isIssued` (`authorized` ou `cancellationDenied`, que continua valendo), sem nota em `conflict`.
+- **Precisa de atenção:** `error` não resolvido, `cancellationDenied` e `conflict`, desde o mês anterior a hoje; mais antigo fica só na OS.
+- **Erro resolvido não aparece:** nota com erro nunca sai do banco; quando todas as OS dela têm nota ativa de novo, ela some. Nota com erro nunca existiu na prefeitura.
+- **`creating` velha não aparece** (`staleCreating`, 15 minutos): nunca chegou ao Asaas.
+- **Quem vê:** o mesmo público de sempre (`nfseAvailable` + `chargeOrder`). A linha mora na aba Financeiro, então empresa sem a aba (`useFinancial` falso) chega às notas pela OS e pelo cliente.
+
+Selecionar notas e mandar ao contador ou ao cliente: [issue #470](https://github.com/rafaeldl/praticOSopen/issues/470).
 
 ## Ligar para uma empresa (checklist)
 
@@ -235,7 +251,8 @@ Falta:
 
 ## Limitações conhecidas
 
-- Sem push quando a nota é emitida ou recusada (só a linha na OS muda).
+- Sem push quando a nota é emitida ou recusada (a linha na OS e a lista de notas mudam).
+- A lista só mostra a situação gravada: nota parada em "Aguardando prefeitura" só é conferida com o Asaas ao tocar a OS (prévia, emissão ou cancelamento).
 - A recusa do Asaas é classificada pelo texto (`refusalCode`): texto novo que não fala de cliente nem de configuração cai no aviso com o texto do Asaas.
 - Sem busca de endereço pelo CEP na folha: o usuário digita rua e bairro.
 - Endereço do cliente no PraticOS continua texto livre; o endereço estruturado da nota fica só no cliente do Asaas (trocar de conta Asaas pede de novo).

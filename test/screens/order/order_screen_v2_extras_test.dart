@@ -1046,6 +1046,71 @@ void main() {
       expect(_menuLabels(tester), isNot(contains('Emitir nota fiscal')));
     });
 
+    group('next step', () {
+      Finder blue() => find.byKey(const ValueKey('order_primary_button'));
+      Order paid() => _order(status: 'done')
+        ..total = 500
+        ..paidAmount = 500
+        ..payment = 'paid';
+
+      testWidgets('finished and paid: blue "Emitir nota fiscal"', (
+        tester,
+      ) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse()),
+          args: {'order': paid()},
+        );
+        expect(
+          find.descendant(
+            of: blue(),
+            matching: find.text('Emitir nota fiscal'),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Não emitida'), findsOneWidget);
+      });
+
+      testWidgets('money still to receive: the row keeps "Emitir"', (
+        tester,
+      ) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse()),
+          args: {'order': _order(status: 'done')..total = 500},
+        );
+        expect(
+          find.descendant(
+            of: blue(),
+            matching: find.text('Emitir nota fiscal'),
+          ),
+          findsNothing,
+        );
+        expect(find.byKey(const ValueKey('order_nfse_issue')), findsOneWidget);
+      });
+
+      testWidgets('refused nota: blue "Corrigir e emitir"', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse(invoices: [invoice('error')])),
+          args: {'order': paid()},
+        );
+        expect(
+          find.descendant(of: blue(), matching: find.text('Corrigir e emitir')),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('canceled on purpose: no blue button', (tester) async {
+        await _pump(
+          tester,
+          screen(OrderStore(), nfse: nfse(invoices: [invoice('canceled')])),
+          args: {'order': paid()},
+        );
+        expect(blue(), findsNothing);
+      });
+    });
+
     testWidgets('the nota shows as a row and blocks a second one', (
       tester,
     ) async {

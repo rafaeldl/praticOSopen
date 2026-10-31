@@ -276,6 +276,8 @@ desmarcadas. OS sem cliente continuam abrindo a escolha "Qual OS?".
 folha de ações com "{nome} deve {valor} desde {data}", **Mandar cobrança**, **Agora não** e Cancelar.
 Sem candidato, a seção some.
 
+**Notas fiscais** (`NfseMonthRow`): última linha da aba, só com a nota fiscal ligada (`docs/NFSE_ASAAS.md`). Mostra a quantidade emitida no mês do seletor, nunca dinheiro: a nota só leva serviços, então o total não bate com o Vendido.
+
 - Candidatos: clientes de A receber sem "Agora não" nos últimos 30 dias e sem link em aberto. O link é
   lido nas OS em aberto do cliente (`orders/{id}/charges`) e em `customerCharges`, um cliente por vez,
   só até achar o primeiro livre (`OrderChargeRepository.hasOpen`, `CustomerChargeRepository.hasOpen`).
