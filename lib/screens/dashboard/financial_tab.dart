@@ -112,6 +112,7 @@ class _FinancialTabState extends State<FinancialTab> {
     } else {
       await Navigator.of(
         context,
+        rootNavigator: true,
       ).pushNamed('/order', arguments: {'order': order});
     }
     if (mounted) _store.refresh();
