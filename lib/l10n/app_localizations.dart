@@ -9511,6 +9511,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mande um link novo de {value}.'**
   String chargeSendNewLink(String value);
+
+  /// No description provided for @orderAssistantUsesLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Acabaram os usos do assistente deste mês.} =1{Resta 1 uso do assistente este mês.} other{Restam {count} usos do assistente este mês.}}'**
+  String orderAssistantUsesLeft(int count);
+
+  /// No description provided for @planUsageAi.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistente este mês'**
+  String get planUsageAi;
+
+  /// No description provided for @planLimitAi.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você usou {used} de {limit} pedidos do assistente neste mês. Para continuar agora, veja os planos.'**
+  String planLimitAi(String used, String limit);
+
+  /// No description provided for @aiIntroTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Crie sua próxima {order} falando'**
+  String aiIntroTitle(String order);
+
+  /// No description provided for @aiIntroBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diga o cliente e o serviço, ou tire uma foto. O app preenche e você só confere antes de salvar.'**
+  String get aiIntroBody;
+
+  /// No description provided for @aiIntroTry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Experimentar agora'**
+  String get aiIntroTry;
+
+  /// No description provided for @aiIntroLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get aiIntroLater;
+
+  /// No description provided for @courtesyBannerLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cortesia do plano Pro'**
+  String get courtesyBannerLabel;
+
+  /// No description provided for @courtesyBannerEnds.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days, plural, =1{Acaba em 1 dia.} other{Acaba em {days} dias.}}'**
+  String courtesyBannerEnds(int days);
+
+  /// No description provided for @courtesyBannerAiUse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Neste mês você usou o assistente {used} vezes; no Free são {free}.'**
+  String courtesyBannerAiUse(int used, int free);
+
+  /// No description provided for @courtesyBannerToFree.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois disso, o app volta para o plano Free.'**
+  String get courtesyBannerToFree;
+
+  /// No description provided for @courtesyBannerPlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'O plano {plan} cobre o seu uso.'**
+  String courtesyBannerPlan(String plan);
+
+  /// No description provided for @courtesyBannerLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get courtesyBannerLater;
 }
 
 class _AppLocalizationsDelegate

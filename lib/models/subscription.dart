@@ -31,6 +31,14 @@ extension SubscriptionPlanName on SubscriptionPlan {
   }
 }
 
+/// Assistant requests per month by plan (same values as the server).
+const Map<SubscriptionPlan, int> kAiRequestsPerMonth = {
+  SubscriptionPlan.free: 10,
+  SubscriptionPlan.starter: 150,
+  SubscriptionPlan.pro: 400,
+  SubscriptionPlan.business: 1000,
+};
+
 /// Subscription status. Only the server (RevenueCat webhook) writes it.
 enum SubscriptionStatus {
   @JsonValue('active')

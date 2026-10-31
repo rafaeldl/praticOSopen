@@ -11,11 +11,14 @@ import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/mobx/whatsapp_setup_banner_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
+import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
+import 'package:praticos/screens/order/assistant/ai_intro.dart';
+import 'package:praticos/screens/widgets/courtesy_banner.dart';
 import 'package:praticos/screens/widgets/whatsapp_setup_banner.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +48,7 @@ class _HomeState extends State<Home> {
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
   bool _whatsappStatusLoaded = false;
+  bool _aiIntroChecked = false;
 
   @override
   void initState() {
@@ -83,6 +87,14 @@ class _HomeState extends State<Home> {
     if (!mounted) return;
     await orderStore.loadOrdersInfinite(_view.queryField);
     await _checkCompanyHasOrders();
+    _showAiIntroOnce();
+  }
+
+  /// After the first load, so the sheet opens over a settled Início.
+  void _showAiIntroOnce() {
+    if (_aiIntroChecked || !mounted || Global.companyAggr?.id == null) return;
+    _aiIntroChecked = true;
+    showAiIntroOnce(context);
   }
 
   /// Tells "no open orders" apart from "company never created an order".
@@ -174,7 +186,7 @@ class _HomeState extends State<Home> {
         onOpenNotifications: () => Navigator.of(context, rootNavigator: true)
             .pushNamed('/notifications'),
         leading: _buildWhatsAppNavButton(context),
-        banner: _buildWhatsAppBanner(),
+        banner: _buildCourtesyBanner() ?? _buildWhatsAppBanner(),
       ),
     );
   }
@@ -234,6 +246,13 @@ class _HomeState extends State<Home> {
         );
       },
     );
+  }
+
+  /// End of the Pro courtesy, for whoever can buy (see [CourtesyBanner]).
+  Widget? _buildCourtesyBanner() {
+    final subscription = context.read<SubscriptionStore>().subscription;
+    if (!CourtesyBanner.applies(subscription, DateTime.now())) return null;
+    return CourtesyBanner(subscription: subscription!);
   }
 
   Widget? _buildWhatsAppBanner() {

@@ -157,6 +157,7 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
 // ============================================================================
 
 import { expireSubscriptions, resetMonthlyUsage } from './services/subscription.service';
+import { sendCourtesyNotices } from './services/courtesy-notice.service';
 import { fetchSubscriber } from './services/revenuecat.client';
 
 /**
@@ -204,6 +205,25 @@ export const scheduledExpireSubscriptions = onSchedule(
       fetchSubscriber: (companyId) => fetchSubscriber(companyId, apiKey),
     });
     console.log(`[Scheduled] Subscription expiry completed. ${expired} companies moved to Free.`);
+  }
+);
+
+/**
+ * End-of-courtesy push, 15 and 3 days before `expiresAt` (docs/SUBSCRIPTION.md).
+ * The date comes from each company's subscription, so moving it needs no release.
+ */
+export const scheduledCourtesyNotices = onSchedule(
+  {
+    schedule: '0 9 * * *', // 09:00 America/Sao_Paulo, daily
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 1,
+    memory: '256MiB',
+    timeoutSeconds: 540,
+  },
+  async () => {
+    const { sent } = await sendCourtesyNotices(new Date());
+    console.log(`[Scheduled] Courtesy notices completed. ${sent} companies notified.`);
   }
 );
 

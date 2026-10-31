@@ -5706,4 +5706,70 @@ class AppLocalizationsPt extends AppLocalizations {
   String chargeSendNewLink(String value) {
     return 'Mande um link novo de $value.';
   }
+
+  @override
+  String orderAssistantUsesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Restam $count usos do assistente este mês.',
+      one: 'Resta 1 uso do assistente este mês.',
+      zero: 'Acabaram os usos do assistente deste mês.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planUsageAi => 'Assistente este mês';
+
+  @override
+  String planLimitAi(String used, String limit) {
+    return 'Você usou $used de $limit pedidos do assistente neste mês. Para continuar agora, veja os planos.';
+  }
+
+  @override
+  String aiIntroTitle(String order) {
+    return 'Crie sua próxima $order falando';
+  }
+
+  @override
+  String get aiIntroBody =>
+      'Diga o cliente e o serviço, ou tire uma foto. O app preenche e você só confere antes de salvar.';
+
+  @override
+  String get aiIntroTry => 'Experimentar agora';
+
+  @override
+  String get aiIntroLater => 'Agora não';
+
+  @override
+  String get courtesyBannerLabel => 'Cortesia do plano Pro';
+
+  @override
+  String courtesyBannerEnds(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Acaba em $days dias.',
+      one: 'Acaba em 1 dia.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courtesyBannerAiUse(int used, int free) {
+    return 'Neste mês você usou o assistente $used vezes; no Free são $free.';
+  }
+
+  @override
+  String get courtesyBannerToFree =>
+      'Depois disso, o app volta para o plano Free.';
+
+  @override
+  String courtesyBannerPlan(String plan) {
+    return 'O plano $plan cobre o seu uso.';
+  }
+
+  @override
+  String get courtesyBannerLater => 'Agora não';
 }

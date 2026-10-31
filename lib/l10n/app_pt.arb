@@ -2737,5 +2737,50 @@
   "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
   "chargeInstallmentsCanceled": "Parcelamento cancelado",
   "chargeSendNewLink": "Mande um link novo de {value}.",
-  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}},
+  "orderAssistantUsesLeft": "{count, plural, =0{Acabaram os usos do assistente deste mês.} =1{Resta 1 uso do assistente este mês.} other{Restam {count} usos do assistente este mês.}}",
+  "@orderAssistantUsesLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planUsageAi": "Assistente este mês",
+  "planLimitAi": "Você usou {used} de {limit} pedidos do assistente neste mês. Para continuar agora, veja os planos.",
+  "@planLimitAi": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "aiIntroTitle": "Crie sua próxima {order} falando",
+  "@aiIntroTitle": {
+    "placeholders": {
+      "order": { "type": "String" }
+    }
+  },
+  "aiIntroBody": "Diga o cliente e o serviço, ou tire uma foto. O app preenche e você só confere antes de salvar.",
+  "aiIntroTry": "Experimentar agora",
+  "aiIntroLater": "Agora não",
+  "courtesyBannerLabel": "Cortesia do plano Pro",
+  "courtesyBannerEnds": "{days, plural, =1{Acaba em 1 dia.} other{Acaba em {days} dias.}}",
+  "@courtesyBannerEnds": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "courtesyBannerAiUse": "Neste mês você usou o assistente {used} vezes; no Free são {free}.",
+  "@courtesyBannerAiUse": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "courtesyBannerToFree": "Depois disso, o app volta para o plano Free.",
+  "courtesyBannerPlan": "O plano {plan} cobre o seu uso.",
+  "@courtesyBannerPlan": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "courtesyBannerLater": "Agora não"
 }

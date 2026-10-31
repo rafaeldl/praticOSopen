@@ -33,6 +33,8 @@ import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -1270,6 +1272,103 @@ void main() {
       await tester.tap(find.text('Fechar'));
       await tester.pumpAndSettle();
       expect(find.text(message), findsNothing);
+    });
+
+    testWidgets('quota exceeded with paid plans: the note opens the plans', (
+      tester,
+    ) async {
+      SubscriptionService.debugPaidPlansEnabledOverride = true;
+      addTearDown(() => SubscriptionService.debugPaidPlansEnabledOverride = null);
+      final events = <String, Map<String, Object>>{};
+      AnalyticsService.debugAiEventSink = (name, parameters) =>
+          events[name] = parameters;
+      addTearDown(() => AnalyticsService.debugAiEventSink = null);
+      final assistant = FakeAssistant(
+        draft,
+        error: const AiOrderAssistException(
+          AiAssistError.quotaExceeded,
+          used: 10,
+          limit: 10,
+        ),
+      );
+      await _pump(tester, assistantScreen(OrderStore(), assistant));
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ver planos'), findsOneWidget);
+      expect(find.text('Fechar'), findsNothing);
+      expect(events['ai_assist_requested'], {'input': 'text'});
+      expect(events['ai_assist_result'], {'result': 'quota'});
+      expect(events['upgrade_modal_shown'], {'trigger': 'ai_limit_100'});
+    });
+
+    testWidgets('from 80% of the month the note says what is left', (
+      tester,
+    ) async {
+      final nearLimit = FakeAssistant(
+        AiOrderDraft(items: draft.items, used: 8, limit: 10),
+      );
+      await _pump(tester, assistantScreen(OrderStore(), nearLimit));
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('$filledNote Restam 2 usos do assistente este mês.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('below 80% the note says nothing about the limit', (
+      tester,
+    ) async {
+      await _pump(tester, assistantScreen(OrderStore(), FakeAssistant(draft)));
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(filledNote), findsOneWidget);
+    });
+
+    testWidgets('filled draft and undo reach the adoption funnel', (
+      tester,
+    ) async {
+      final names = <String>[];
+      final results = <Object?>[];
+      AnalyticsService.debugAiEventSink = (name, parameters) {
+        names.add(name);
+        results.add(parameters['result']);
+      };
+      addTearDown(() => AnalyticsService.debugAiEventSink = null);
+      await _pump(tester, assistantScreen(OrderStore(), FakeAssistant(draft)));
+
+      await tester.tap(find.byKey(const ValueKey('assistant_talk')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+
+      expect(names, [
+        'ai_assist_requested',
+        'ai_assist_result',
+        'ai_assist_undone',
+      ]);
+      expect(results[1], 'filled');
+    });
+
+    testWidgets('opened from the first-use sheet it starts listening', (
+      tester,
+    ) async {
+      final speech = FakeSpeech('Revenda Sul, troca de óleo');
+      final assistant = FakeAssistant(draft);
+      await _pump(
+        tester,
+        assistantScreen(OrderStore(), assistant, speech: speech),
+        args: const {'startTalking': true},
+      );
+      await tester.pumpAndSettle();
+
+      expect(assistant.texts, ['Revenda Sul, troca de óleo']);
     });
   });
 

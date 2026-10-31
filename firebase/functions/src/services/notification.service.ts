@@ -209,7 +209,10 @@ const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
  * Owner + users with a financial role. Unlike getNotificationRecipients, the
  * assigned technician and the order creator are not included.
  */
-async function getPaymentNotificationRecipients(companyId: string): Promise<NotificationRecipient[]> {
+async function getPaymentNotificationRecipients(
+  companyId: string,
+  roles: RoleType[] = PAYMENT_NOTIFICATION_ROLES,
+): Promise<NotificationRecipient[]> {
   const recipients: NotificationRecipient[] = [];
   const added = new Set<string>();
   const companyDoc = await db.collection('companies').doc(companyId).get();
@@ -221,12 +224,37 @@ async function getPaymentNotificationRecipients(companyId: string): Promise<Noti
     added.add(company.owner.id);
   }
   for (const userRole of company.users ?? []) {
-    if (userRole.user?.id && PAYMENT_NOTIFICATION_ROLES.includes(userRole.role) && !added.has(userRole.user.id)) {
+    if (userRole.user?.id && roles.includes(userRole.role) && !added.has(userRole.user.id)) {
       recipients.push({ userId: userRole.user.id, name: userRole.user.name });
       added.add(userRole.user.id);
     }
   }
   return recipients;
+}
+
+/**
+ * Notify whoever can buy a plan (owner/admin) that the courtesy is ending.
+ * Never throws: one company must not stop the daily job.
+ */
+export async function notifyCourtesyEnding(
+  companyId: string,
+  message: { title: string; body: string; days: number },
+): Promise<void> {
+  try {
+    const recipients = await getPaymentNotificationRecipients(companyId, ['owner', 'admin']);
+    if (recipients.length === 0) return;
+    await sendNotification(
+      recipients,
+      {
+        title: message.title,
+        body: message.body,
+        data: { type: 'courtesy_ending', days: String(message.days), companyId },
+      },
+      companyId,
+    );
+  } catch (error) {
+    console.error('Error sending courtesy ending notification:', error);
+  }
 }
 
 /**
