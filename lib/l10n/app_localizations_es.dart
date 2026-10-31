@@ -5357,6 +5357,88 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nfseStatusError => 'Rechazada por el municipio';
 
   @override
+  String get nfseListTitle => 'Facturas de servicio';
+
+  @override
+  String nfseListCustomerTitle(String name) {
+    return 'Facturas de $name';
+  }
+
+  @override
+  String nfseListSummary(int count, String month, String value) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'En $month salieron $count facturas, con un total de $value.',
+      one: 'En $month salió 1 factura, de $value.',
+      zero: 'Ninguna factura salió en $month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListEmpty(String month) {
+    return 'Ninguna factura en $month';
+  }
+
+  @override
+  String get nfseListEmptyHint => 'Para emitirla, abre la OS y toca “…”.';
+
+  @override
+  String get nfseListSearch => 'Cliente, número de factura u OS';
+
+  @override
+  String get nfseListAttention => 'Necesita atención';
+
+  @override
+  String nfseListAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count necesitan atención',
+      one: '1 necesita atención',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListNumber(String number) {
+    return 'Factura $number';
+  }
+
+  @override
+  String nfseListOrders(String numbers) {
+    return 'OS $numbers';
+  }
+
+  @override
+  String get nfseListOnlyServices =>
+      'Solo los servicios entran en la factura. Las piezas quedan fuera, por eso el total es distinto de lo Vendido.';
+
+  @override
+  String nfseListNoResults(String month) {
+    return 'Nada encontrado en $month.';
+  }
+
+  @override
+  String get nfseListMenu => 'Más opciones de facturas';
+
+  @override
+  String get nfseListSetup => 'Configurar factura';
+
+  @override
+  String get nfseNotIssued => 'No emitida';
+
+  @override
+  String get nfseIssueLink => 'Emitir';
+
+  @override
+  String get nfseFixAndIssue => 'Corregir y emitir';
+
+  @override
+  String get nfseSharePdf => 'Compartir PDF';
+
+  @override
   String get nfseRowTitle => 'Factura de servicio';
 
   @override
@@ -5432,7 +5514,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseHeadNotIssued =>
-      'La factura no salió. Corrige el motivo de abajo y emítela de nuevo desde el menú de la OS.';
+      'La factura no salió. Corrige el motivo de abajo y emítela de nuevo.';
 
   @override
   String get nfseNothingToIssue =>
@@ -5726,7 +5808,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseHeadAutoError =>
-      'La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.';
+      'La factura no salió sola. Corrige el motivo de abajo y emítela.';
 
   @override
   String get nfseAutoReasonLabel => 'Por qué no salió';

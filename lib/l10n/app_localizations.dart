@@ -8894,6 +8894,114 @@ abstract class AppLocalizations {
   /// **'Erro na prefeitura'**
   String get nfseStatusError;
 
+  /// No description provided for @nfseListTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas fiscais'**
+  String get nfseListTitle;
+
+  /// No description provided for @nfseListCustomerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas de {name}'**
+  String nfseListCustomerTitle(String name);
+
+  /// No description provided for @nfseListSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Nenhuma nota saiu em {month}.} =1{Em {month} saiu 1 nota, de {value}.} other{Em {month} saíram {count} notas, no total de {value}.}}'**
+  String nfseListSummary(int count, String month, String value);
+
+  /// No description provided for @nfseListEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma nota em {month}'**
+  String nfseListEmpty(String month);
+
+  /// No description provided for @nfseListEmptyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para emitir, abra a OS e toque em “…”.'**
+  String get nfseListEmptyHint;
+
+  /// No description provided for @nfseListSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente, número da nota ou OS'**
+  String get nfseListSearch;
+
+  /// No description provided for @nfseListAttention.
+  ///
+  /// In pt, this message translates to:
+  /// **'Precisa de atenção'**
+  String get nfseListAttention;
+
+  /// No description provided for @nfseListAttentionCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 precisa de atenção} other{{count} precisam de atenção}}'**
+  String nfseListAttentionCount(int count);
+
+  /// No description provided for @nfseListNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota {number}'**
+  String nfseListNumber(String number);
+
+  /// No description provided for @nfseListOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {numbers}'**
+  String nfseListOrders(String numbers);
+
+  /// No description provided for @nfseListOnlyServices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só os serviços entram na nota. As peças ficam de fora, por isso o total é diferente do Vendido.'**
+  String get nfseListOnlyServices;
+
+  /// No description provided for @nfseListNoResults.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada encontrado em {month}.'**
+  String nfseListNoResults(String month);
+
+  /// No description provided for @nfseListMenu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais opções das notas'**
+  String get nfseListMenu;
+
+  /// No description provided for @nfseListSetup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurar nota fiscal'**
+  String get nfseListSetup;
+
+  /// No description provided for @nfseNotIssued.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não emitida'**
+  String get nfseNotIssued;
+
+  /// No description provided for @nfseIssueLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitir'**
+  String get nfseIssueLink;
+
+  /// No description provided for @nfseFixAndIssue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir e emitir'**
+  String get nfseFixAndIssue;
+
+  /// No description provided for @nfseSharePdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar PDF'**
+  String get nfseSharePdf;
+
   /// No description provided for @nfseRowTitle.
   ///
   /// In pt, this message translates to:
@@ -9023,7 +9131,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseHeadNotIssued.
   ///
   /// In pt, this message translates to:
-  /// **'A nota não saiu. Corrija o motivo abaixo e emita de novo pelo menu da OS.'**
+  /// **'A nota não saiu. Corrija o motivo abaixo e emita de novo.'**
   String get nfseHeadNotIssued;
 
   /// No description provided for @nfseNothingToIssue.
@@ -9527,7 +9635,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseHeadAutoError.
   ///
   /// In pt, this message translates to:
-  /// **'A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.'**
+  /// **'A nota não saiu sozinha. Corrija o motivo abaixo e emita.'**
   String get nfseHeadAutoError;
 
   /// No description provided for @nfseAutoReasonLabel.

@@ -11,6 +11,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/repositories/tenant/tenant_receipt_repository.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/nfse/nfse_list_screen.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/nfse/nfse_orders_picker.dart';
 import 'package:praticos/screens/payments/receipt_detail_screen.dart';
@@ -574,12 +575,32 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           label: l10n.addAnotherDevice(config.device.toLowerCase()),
           onTap: _addDevice,
         ),
+      ?_nfseRow(),
       if (orders.isNotEmpty) ...[
         SectionLabel(l10n.latestOrders),
         for (final o in orders) _orderRow(o),
       ],
       if (_receipts != null && _canSeeReceipts) _receiptsSection(),
     ];
+  }
+
+  /// "Notas fiscais · 5": opens the notas of this customer. Only with notas.
+  Widget? _nfseRow() {
+    final invoices = _nfse.invoices;
+    if (!_nfse.enabled || invoices.isEmpty) return null;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: AppListRow(
+        key: const Key('customerNfse'),
+        title: context.l10n.nfseListTitle,
+        trailing: '${invoices.where((invoice) => invoice.isIssued).length}',
+        onTap: () => NfseListScreen.open(
+          context,
+          customerId: _customer?.id,
+          customerName: _customer?.name,
+        ),
+      ),
+    );
   }
 
   /// "Recebimentos": one row per active receipt ("R$ 700" / "14/10 · 2 OS").

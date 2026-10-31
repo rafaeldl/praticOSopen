@@ -1,17 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/nfse.dart';
 import 'package:praticos/repositories/tenant/nfse_invoice_repository.dart';
 import 'package:praticos/screens/menu_navigation/more/more_page.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -20,6 +25,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// One sentence on top of the nota screen ("A nota foi emitida.").
@@ -71,8 +77,42 @@ String? nfseReasonText(AppLocalizations l10n, NfseInvoice invoice) {
   }
 }
 
+/// Shares the nota's PDF as a file. If it cannot be downloaded, shares the
+/// link, so the customer still gets the nota.
+Future<void> shareNfsePdf(
+  BuildContext context,
+  NfseInvoice invoice, {
+  http.Client? client,
+}) async {
+  final url = invoice.pdfUrl;
+  if (url == null) return;
+  final box = context.findRenderObject() as RenderBox?;
+  final origin = box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+  XFile? file;
+  try {
+    final get = client?.get ?? http.get;
+    final response = await get(Uri.parse(url));
+    final isPdf = (response.headers['content-type'] ?? '').contains('pdf');
+    if (response.statusCode == 200 && isPdf) {
+      final directory = await getTemporaryDirectory();
+      final name = 'nota-${invoice.number ?? invoice.id}.pdf';
+      final saved = File('${directory.path}/$name');
+      await saved.writeAsBytes(response.bodyBytes);
+      file = XFile(saved.path, mimeType: 'application/pdf');
+    }
+  } catch (_) {
+    file = null;
+  }
+  await SharePlus.instance.share(
+    file == null
+        ? ShareParams(text: url, sharePositionOrigin: origin)
+        : ShareParams(files: [file], sharePositionOrigin: origin),
+  );
+}
+
 /// A nota: status, value, orders, text, the PDF/XML once the city issued
 /// it, the city's reason when it refused, and "Cancelar nota" in the "…".
+/// The blue button shares the PDF, or corrects a nota that did not go out.
 ///
 /// Watches the nota live (the webhook moves it). Pushed over the tab bar.
 class NfseInvoiceScreen extends StatefulWidget {
@@ -82,6 +122,7 @@ class NfseInvoiceScreen extends StatefulWidget {
     this.invoiceStream,
     this.service,
     this.openUrl,
+    this.sharePdf,
     this.previousPageTitle,
   });
 
@@ -95,6 +136,10 @@ class NfseInvoiceScreen extends StatefulWidget {
 
   /// Test seam; defaults to [launchUrl] (outside the app).
   final Future<void> Function(String url)? openUrl;
+
+  /// Test seam; defaults to [shareNfsePdf].
+  final Future<void> Function(BuildContext context, NfseInvoice invoice)?
+  sharePdf;
 
   final String? previousPageTitle;
 
@@ -148,6 +193,66 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
     final custom = widget.openUrl;
     if (custom != null) return custom(url);
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _sharePdf() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final share = widget.sharePdf ?? shareNfsePdf;
+    try {
+      await share(context, _invoice);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(
+          context,
+          context.l10n.asaasErrorGeneric,
+          icon: CupertinoIcons.exclamationmark_circle,
+        );
+      }
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  /// Emits again: the sheet asks for what is missing.
+  Future<void> _reissue() async {
+    final invoice = await NfseIssueSheet.show(
+      context,
+      orderIds: _invoice.orderIds,
+      customerId: _invoice.customerId,
+      service: widget.service,
+    );
+    if (invoice != null && mounted) {
+      showAppToast(
+        context,
+        context.l10n.nfseSent,
+        icon: CupertinoIcons.checkmark_circle,
+      );
+      Navigator.of(context).pop();
+    }
+  }
+
+  Widget? _floatingButton() {
+    final l10n = context.l10n;
+    final invoice = _invoice;
+    if (invoice.status == NfseStatus.authorized && invoice.pdfUrl != null) {
+      return PrimaryButton(
+        key: const Key('nfseSharePdf'),
+        label: l10n.nfseSharePdf,
+        floating: true,
+        onPressed: _busy ? null : _sharePdf,
+      );
+    }
+    if (invoice.status == NfseStatus.error &&
+        !invoice.conflict &&
+        invoice.orderIds.isNotEmpty) {
+      return PrimaryButton(
+        key: const Key('nfseReissue'),
+        label: l10n.nfseFixAndIssue,
+        floating: true,
+        onPressed: _reissue,
+      );
+    }
+    return null;
   }
 
   Future<void> _showMenu() async {
@@ -279,6 +384,7 @@ class _NfseInvoiceScreenState extends State<NfseInvoiceScreen> {
       title: l10n.nfseRowTitle,
       previousPageTitle: widget.previousPageTitle,
       subtitle: nfseHeadline(l10n, invoice),
+      floatingButton: _floatingButton(),
       trailing: _busy
           ? const CupertinoActivityIndicator()
           : invoice.canCancel
