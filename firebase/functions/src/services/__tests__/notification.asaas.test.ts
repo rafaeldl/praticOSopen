@@ -82,8 +82,8 @@ describe('notification.service - notifyCourtesyEnding', () => {
   it('saves the in-app copy with no order fields, only for who can buy', async () => {
     await notifyCourtesyEnding('c1', message);
     const rows = list('companies/c1/notifications');
-    expect(rows.map((row) => (row as { recipientId: string }).recipientId).sort()).toEqual(['adm1', 'owner1']);
-    expect(rows[0]).not.toHaveProperty('orderId');
+    expect(rows.map((row) => row.data.recipientId).sort()).toEqual(['adm1', 'owner1']);
+    expect(rows[0].data).not.toHaveProperty('orderId');
   });
 
   it('throws when the push fails, so the job retries', async () => {
