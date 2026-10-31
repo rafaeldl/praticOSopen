@@ -112,10 +112,13 @@ abstract class _FinancialTabStore with Store {
   @action
   Future<void> load() async {
     status = FinancialTabStatus.loading;
+    final offset = monthOffset;
     try {
       await _reload();
     } catch (_) {
-      runInAction(() => status = FinancialTabStatus.error);
+      if (offset == monthOffset) {
+        runInAction(() => status = FinancialTabStatus.error);
+      }
     }
   }
 
@@ -195,9 +198,19 @@ abstract class _FinancialTabStore with Store {
     final (results, open) = await (_fetchMonth(offset), _openLoader()).wait;
     runInAction(() {
       openOrders = ObservableList.of(open);
-      // The user may have moved to another month in the meantime.
-      if (offset == monthOffset) _applyMonth(results);
-      status = FinancialTabStatus.ready;
+      // The user may have moved to another month in the meantime: whoever
+      // loads that month settles the status.
+      if (offset == monthOffset) {
+        _applyMonth(results);
+        status = FinancialTabStatus.ready;
+      }
+      // Until the links are read, keep showing what is true now.
+      final current = nextCharge;
+      if (current != null) {
+        nextCharge = summary.debtors
+            .where((d) => d.key == current.key)
+            .firstOrNull;
+      }
     });
     await _resolveNextCharge();
   }

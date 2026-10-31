@@ -232,6 +232,31 @@ void main() {
     expect(store.summary.sold, 100);
   });
 
+  test('changing month during the first load does not show the new month '
+      'before its numbers arrive', () async {
+    final firstMonth = Completer<List<Order?>>();
+    final secondMonth = Completer<List<Order?>>();
+    final store = FinancialTabStore(
+      clock: () => now,
+      monthLoader: (offset) =>
+          offset == 0 ? firstMonth.future : secondMonth.future,
+      paidLoader: (_) async => [],
+      openLoader: () async => [],
+      openChargeChecker: (_) async => false,
+    );
+    final loading = store.load();
+
+    final stepping = store.previousMonth();
+    firstMonth.complete([_order('cur', 300)]);
+    await loading;
+    expect(store.status, FinancialTabStatus.loading);
+
+    secondMonth.complete([_order('old', 100)]);
+    await stepping;
+    expect(store.status, FinancialTabStatus.ready);
+    expect(store.summary.sold, 100);
+  });
+
   group('next charge', () {
     FinancialTabStore storeWith(
       List<Order> open, {
@@ -260,6 +285,34 @@ void main() {
       final store = storeWith([newer, old]);
       await store.load();
       expect(store.nextCharge?.key, 'old');
+    });
+
+    test('after a reload the suggestion is never stale while links are read',
+        () async {
+      var open = <Order>[old, newer];
+      final links = Completer<bool>();
+      var waitOnLinks = false;
+      final store = FinancialTabStore(
+        clock: () => now,
+        monthLoader: (_) async => [],
+        paidLoader: (_) async => [],
+        openLoader: () async => open,
+        openChargeChecker: (_) => waitOnLinks ? links.future : Future.value(false),
+        snoozes: NextChargeSnoozes(companyId: () => 'c1', clock: () => now),
+      );
+      await store.load();
+      expect(store.nextCharge?.key, 'old');
+
+      // "old" was received in the meantime.
+      open = [newer];
+      waitOnLinks = true;
+      final refreshing = store.refresh();
+      await Future<void>.delayed(Duration.zero);
+      expect(store.nextCharge, isNull);
+
+      links.complete(false);
+      await refreshing;
+      expect(store.nextCharge?.key, 'newer');
     });
 
     test('skips a customer with an open link', () async {

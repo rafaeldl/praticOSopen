@@ -21,8 +21,10 @@ function orderRef(companyId: string, orderId: string) {
 async function stamp(companyId: string, orderId: string, at: string): Promise<void> {
   const ref = orderRef(companyId, orderId);
   await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    if (snap.data()?.status !== 'done') return;
+    const data = (await tx.get(ref)).data();
+    if (data?.status !== 'done') return;
+    // A late event of an earlier completion never replaces a newer date.
+    if (data.completedAt && new Date(data.completedAt).getTime() >= new Date(at).getTime()) return;
     tx.update(ref, { completedAt: at });
   });
 }

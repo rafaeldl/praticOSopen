@@ -304,9 +304,10 @@ Sem candidato, a seção some.
 
 Outros pontos:
 
-- OS ativas sem `payment` ou com o antigo `partial` ficam fora, porque a consulta é `payment ==
-  'unpaid'`. O script `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses
-  dados e preenche `lastPaymentAt` nas OS antigas (simula por padrão; `--apply` grava).
+- A consulta (`getUnpaidOrders`) traz `payment` `unpaid`, `partial` ou `null`: OS aprovada pelo link
+  ou pela API grava só o status e pode ficar com `null`. OS sem o campo `payment` ficam de fora; o
+  script `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses dados e preenche
+  `lastPaymentAt` nas OS antigas (simula por padrão; `--apply` grava).
 - Mês sem OS continua mostrando a tela inteira, com os valores zerados. Erro: mensagem fixa +
   "Tentar novamente".
 - "…" abre o Relatório e "Outro período" (seletor de datas).
@@ -339,6 +340,8 @@ ranking de clientes, serviços e produtos, OS do período e PDF para compartilha
 
 Considera as OS criadas no período, **sem orçamentos e sem canceladas** (`FinancialSummary.isSold`):
 vale para todos os totais, rankings, lista de OS e PDF, e o Faturamento do mês bate com o Vendido da aba.
+Dinheiro recebido em OS depois cancelada sai do "Valor Recebido" do Relatório, mas continua no Recebido
+da aba, que conta todo pagamento pela data em que entrou.
 
 ### Acesso
 Aba Financeiro > Relatório Financeiro (requer permissão `viewFinancialReports`)

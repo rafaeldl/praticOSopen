@@ -42,7 +42,7 @@ describe('order-completion.service', () => {
     expect(read(ORDER_PATH)).not.toHaveProperty('completedAt');
   });
 
-  it('salvar a OS concluída sem o campo no payload mantém a data (app antigo, set merge)', async () => {
+  it('outra mudança na OS concluída não mexe na data', async () => {
     seed(ORDER_PATH, { status: 'done', completedAt: AT, total: 200 });
     await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done', completedAt: AT }, { status: 'done', completedAt: AT, total: 200 }, LATER);
     expect(read(ORDER_PATH)!.completedAt).toBe(AT);
@@ -57,6 +57,12 @@ describe('order-completion.service', () => {
   it('evento atrasado de reabertura não limpa OS que já foi concluída de novo', async () => {
     seed(ORDER_PATH, { status: 'done', completedAt: LATER });
     await handleOrderUpdatedAsaas('c1', 'o1', { status: 'done' }, { status: 'progress' }, LATER);
+    expect(read(ORDER_PATH)!.completedAt).toBe(LATER);
+  });
+
+  it('evento atrasado de uma conclusão anterior não troca a data mais nova', async () => {
+    seed(ORDER_PATH, { status: 'done', completedAt: LATER });
+    await handleOrderUpdatedAsaas('c1', 'o1', { status: 'progress' }, { status: 'done' }, AT);
     expect(read(ORDER_PATH)!.completedAt).toBe(LATER);
   });
 
