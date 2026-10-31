@@ -176,4 +176,28 @@ void main() {
       expect(parseDueDate(20261016), isNull);
     });
   });
+
+  group('parseAiStatus', () {
+    test('reads the use of the month', () {
+      final status = parseAiStatus(
+        200,
+        '{"data":{"enabled":true,"usage":{"used":7,"limit":400}}}',
+      );
+      expect(status.enabled, isTrue);
+      expect(status.used, 7);
+      expect(status.limit, 400);
+    });
+
+    test('off without usage or on failure', () {
+      expect(parseAiStatus(200, '{"data":{"enabled":false}}').enabled, isFalse);
+      expect(parseAiStatus(500, '').enabled, isFalse);
+      expect(parseAiStatus(200, 'nope').enabled, isFalse);
+    });
+
+    test('keeps working without the usage block', () {
+      final status = parseAiStatus(200, '{"data":{"enabled":true}}');
+      expect(status.enabled, isTrue);
+      expect(status.used, isNull);
+    });
+  });
 }

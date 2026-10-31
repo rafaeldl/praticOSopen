@@ -1,6 +1,7 @@
 import {
   graceExpiry,
   parseArgs,
+  planExtension,
   planGrace,
   resolveTarget,
   summarize,
@@ -19,6 +20,27 @@ describe('grant-grace-period', () => {
 
   it('parses --apply, --days and --project', () => {
     expect(parseArgs(['--apply', '--days=30', '--project=praticos'])).toEqual({ apply: true, days: 30, project: 'praticos' });
+  });
+
+  it('parses --until as the end of that day in Brazil', () => {
+    expect(parseArgs(['--until=2026-12-28']).until?.toISOString()).toBe('2026-12-29T03:00:00.000Z');
+    expect(() => parseArgs(['--until=amanha'])).toThrow('--until');
+    expect(() => parseArgs(['--until=2026-02-31'])).toThrow('--until');
+    expect(() => parseArgs(['--until=2026-12-28', '--days=30'])).toThrow('mutually exclusive');
+  });
+
+  it('moves only a running courtesy, and only its date', () => {
+    const until = new Date('2026-12-29T03:00:00.000Z');
+    const running = { plan: 'pro', status: 'active', source: 'grace', expiresAt: EXPIRES.toISOString(), usage: USAGE };
+    const plan = planExtension(running, until, NOW);
+    expect(plan.action === 'grant' && Object.keys(plan.update).sort()).toEqual([
+      'subscription.expiresAt',
+      'subscription.updatedAt',
+      'updatedAt',
+    ]);
+    expect(planExtension({ ...running, source: 'store' }, until, NOW).action).toBe('skip_paid');
+    expect(planExtension(running, until, new Date('2026-12-07T00:00:00.000Z')).action).toBe('skip_paid');
+    expect(planExtension(undefined, until, NOW).action).toBe('skip_paid');
   });
 
   it('rejects unknown arguments, invalid days and conflicting modes', () => {

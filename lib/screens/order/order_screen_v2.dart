@@ -54,9 +54,12 @@ import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/services/ai_order_assist_service.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/assistant_registration.dart';
 import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/order_saved_elsewhere.dart';
+import 'package:praticos/services/paywall_launcher.dart';
+import 'package:praticos/services/subscription_service.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
@@ -341,6 +344,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   String? _note;
   bool _noteFilled = false;
 
+  /// [_note] when the month's requests ran out: its action opens the plans.
+  String? _quotaNote;
+
+  /// Drafts that filled this order and were not undone, for the funnel.
+  int _draftsKept = 0;
+
+  /// Opened from the first-use sheet: starts listening once the assistant is
+  /// known to be on.
+  bool _startTalking = false;
+
   /// What the last draft added, for "Desfazer".
   _DraftUndo? _undo;
 
@@ -390,6 +403,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       );
     } else {
       _onCreated = args?['onCreated'] as void Function(String)?;
+      _startTalking = args?['startTalking'] == true;
+      if (widget.showAssistant != null) _talkIfAsked();
       _startNew(order);
       if (args?['repeat'] == true) {
         // From Contratos: the order starts as a contract, with the
@@ -405,6 +420,15 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final client = widget.assistant ?? AiOrderAssistService();
     final on = await client.isEnabled();
     if (mounted && on != _assistantOn) setState(() => _assistantOn = on);
+    _talkIfAsked();
+  }
+
+  void _talkIfAsked() {
+    if (!_startTalking || !_assistantOn) return;
+    _startTalking = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onTalk();
+    });
   }
 
   void _startNew(Order? prefill) {
@@ -1462,6 +1486,13 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           : l10n.orderAssistantReadingSpeech;
       _note = null;
     });
+    AnalyticsService.logAiEvent('ai_assist_requested', {
+      'input': photos.isEmpty
+          ? 'text'
+          : (text == null || text.isEmpty ? 'photo' : 'photo_text'),
+    });
+    var result = 'error';
+    var quotaHit = false;
     AiOrderDraft? draft;
     ({AiOrderSnapshot snapshot, List<Object> services, List<Object> products})?
     sent;
@@ -1476,6 +1507,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         order: sent.snapshot,
       );
     } on AiOrderAssistException catch (e) {
+      quotaHit = e.error == AiAssistError.quotaExceeded;
+      if (quotaHit) result = 'quota';
       error = switch (e.error) {
         AiAssistError.disabled => l10n.orderAssistantErrorDisabled,
         AiAssistError.quotaExceeded => l10n.orderAssistantErrorQuota(
@@ -1489,6 +1522,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     if (!mounted) return;
     final filled = error == null && await _applyDraft(draft!, sent!);
     if (!mounted) return;
+    if (error == null) result = filled ? 'filled' : 'nothing';
+    if (filled) _draftsKept++;
+    AnalyticsService.logAiEvent('ai_assist_result', {'result': result});
     setState(() {
       _barMode = AssistantBarMode.idle;
       _noteFilled = filled;
@@ -1502,8 +1538,31 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           : onlyChanged
           ? l10n.orderAssistantChanged
           : (_isNew ? l10n.orderAssistantFilled : l10n.orderAssistantApplied);
+      if (filled) _note = '$_note${_usesLeftSuffix(draft!)}';
+      _quotaNote = quotaHit ? _note : null;
     });
+    if (quotaHit) {
+      AnalyticsService.logAiEvent('upgrade_modal_shown', {
+        'trigger': 'ai_limit_100',
+      });
+    }
     if (filled) HapticFeedback.lightImpact();
+  }
+
+  /// From 80% of the month's requests on, the note also says what is left.
+  String _usesLeftSuffix(AiOrderDraft draft) {
+    final used = draft.used;
+    final limit = draft.limit;
+    if (used == null || limit == null || limit <= 0) return '';
+    if (used / limit < 0.8) return '';
+    final left = (limit - used).clamp(0, limit);
+    return ' ${context.l10n.orderAssistantUsesLeft(left)}';
+  }
+
+  /// The note has done its job once the paywall closes.
+  Future<void> _openPlansFromNote() async {
+    await PaywallLauncher.showPaywall(context);
+    if (mounted) _dismissNote();
   }
 
   void _dismissNote() => setState(() {
@@ -1515,6 +1574,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   void _undoDraft() {
     final undo = _undo;
     if (undo != null) {
+      _draftsKept--;
+      AnalyticsService.logAiEvent('ai_assist_undone');
       if (undo.customer) {
         runInAction(() {
           _store.order!.customer = null;
@@ -2517,6 +2578,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _registerNew();
     _store.createItem(
       onCreated: (orderId) {
+        if (_draftsKept > 0) AnalyticsService.logAiEvent('ai_order_saved');
         if (request.isNotEmpty && companyId != null) {
           addOrderComment(
             companyId: companyId,
@@ -2627,6 +2689,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   List<Widget> _buildFloating(Color fade) {
     final l10n = context.l10n;
     final canUndo = _noteFilled && _undo != null;
+    final showPlans = SubscriptionService.paidPlansEnabled &&
+        _note != null &&
+        _note == _quotaNote;
     return [
       Positioned(
         left: 0,
@@ -2670,10 +2735,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                     child: AssistantNote(
                       message: _note!,
                       filled: _noteFilled,
-                      actionLabel: canUndo
+                      actionLabel: showPlans
+                          ? l10n.viewPlans
+                          : canUndo
                           ? l10n.orderAssistantUndo
                           : l10n.close,
-                      onAction: canUndo ? _undoDraft : _dismissNote,
+                      onAction: showPlans
+                          ? _openPlansFromNote
+                          : canUndo
+                          ? _undoDraft
+                          : _dismissNote,
+                      onClose: showPlans ? _dismissNote : null,
                     ),
                   )
                 else if (_notifyStatus != null)

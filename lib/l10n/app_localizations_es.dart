@@ -5935,4 +5935,76 @@ class AppLocalizationsEs extends AppLocalizations {
   String chargeSendNewLink(String value) {
     return 'Envía un enlace nuevo de $value.';
   }
+
+  @override
+  String orderAssistantUsesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Quedan $count usos del asistente este mes.',
+      one: 'Queda 1 uso del asistente este mes.',
+      zero: 'Se acabaron los usos del asistente de este mes.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planUsageAi => 'Asistente este mes';
+
+  @override
+  String planLimitAi(String used, String limit) {
+    return 'Usaste $used de $limit pedidos del asistente este mes. Para seguir ahora, mira los planes.';
+  }
+
+  @override
+  String aiIntroTitle(String order) {
+    return 'Crea tu próxima $order hablando';
+  }
+
+  @override
+  String get aiIntroBody =>
+      'Di el cliente y el servicio, o toma una foto. La app lo completa y tú solo revisas antes de guardar.';
+
+  @override
+  String get aiIntroTry => 'Probar ahora';
+
+  @override
+  String get aiIntroLater => 'Ahora no';
+
+  @override
+  String get courtesyBannerLabel => 'Cortesía del plan Pro';
+
+  @override
+  String courtesyBannerEnds(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Termina en $days días.',
+      one: 'Termina en 1 día.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courtesyBannerAiUse(int used, int free) {
+    String _temp0 = intl.Intl.pluralLogic(
+      used,
+      locale: localeName,
+      other:
+          'Usaste el asistente $used veces este mes; el plan Free incluye $free.',
+      one: 'Usaste el asistente 1 vez este mes; el plan Free incluye $free.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courtesyBannerToFree => 'Después, la app vuelve al plan Free.';
+
+  @override
+  String courtesyBannerPlan(String plan) {
+    return 'El plan $plan cubre tu uso.';
+  }
+
+  @override
+  String get courtesyBannerLater => 'Ahora no';
 }

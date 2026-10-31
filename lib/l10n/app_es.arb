@@ -2463,5 +2463,50 @@
   "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
   "chargeInstallmentsCanceled": "Plan de cuotas cancelado",
   "chargeSendNewLink": "Envía un enlace nuevo de {value}.",
-  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}},
+  "orderAssistantUsesLeft": "{count, plural, =0{Se acabaron los usos del asistente de este mes.} =1{Queda 1 uso del asistente este mes.} other{Quedan {count} usos del asistente este mes.}}",
+  "@orderAssistantUsesLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planUsageAi": "Asistente este mes",
+  "planLimitAi": "Usaste {used} de {limit} pedidos del asistente este mes. Para seguir ahora, mira los planes.",
+  "@planLimitAi": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "aiIntroTitle": "Crea tu próxima {order} hablando",
+  "@aiIntroTitle": {
+    "placeholders": {
+      "order": { "type": "String" }
+    }
+  },
+  "aiIntroBody": "Di el cliente y el servicio, o toma una foto. La app lo completa y tú solo revisas antes de guardar.",
+  "aiIntroTry": "Probar ahora",
+  "aiIntroLater": "Ahora no",
+  "courtesyBannerLabel": "Cortesía del plan Pro",
+  "courtesyBannerEnds": "{days, plural, =1{Termina en 1 día.} other{Termina en {days} días.}}",
+  "@courtesyBannerEnds": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "courtesyBannerAiUse": "{used, plural, =1{Usaste el asistente 1 vez este mes; el plan Free incluye {free}.} other{Usaste el asistente {used} veces este mes; el plan Free incluye {free}.}}",
+  "@courtesyBannerAiUse": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "courtesyBannerToFree": "Después, la app vuelve al plan Free.",
+  "courtesyBannerPlan": "El plan {plan} cubre tu uso.",
+  "@courtesyBannerPlan": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "courtesyBannerLater": "Ahora no"
 }

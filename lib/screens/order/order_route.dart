@@ -24,13 +24,19 @@ class OrderRoute extends StatelessWidget {
 ///
 /// [repeat] starts the order with "Repetir" turned on (from Contratos).
 /// [onCreated] gets the new order id once it is saved (files shared from
-/// another app are attached then). Resolves with `true` on "✓".
+/// another app are attached then). [startTalking] opens it already listening,
+/// from the assistant's first-use sheet. Resolves with `true` on "✓".
 Future<Object?> openNewOrder(
   BuildContext context, {
   bool repeat = false,
+  bool startTalking = false,
   void Function(String orderId)? onCreated,
 }) {
-  final arguments = newOrderArguments(repeat: repeat, onCreated: onCreated);
+  final arguments = newOrderArguments(
+    repeat: repeat,
+    startTalking: startTalking,
+    onCreated: onCreated,
+  );
   return Navigator.of(context, rootNavigator: true).push<Object?>(
     CupertinoSheetRoute<Object?>(
       enableDrag: false,
@@ -60,11 +66,13 @@ Future<Object?> openNewOrder(
 /// Route arguments of the "Nova OS" ([OrderScreenV2] reads them).
 Map<String, dynamic>? newOrderArguments({
   bool repeat = false,
+  bool startTalking = false,
   void Function(String orderId)? onCreated,
 }) {
-  if (!repeat && onCreated == null) return null;
+  if (!repeat && !startTalking && onCreated == null) return null;
   return {
     if (repeat) 'repeat': true,
+    if (startTalking) 'startTalking': true,
     if (onCreated != null) 'onCreated': onCreated,
   };
 }

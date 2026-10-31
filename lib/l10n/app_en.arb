@@ -2463,5 +2463,50 @@
   "@chargeMissingOutsideLink": {"placeholders": {"value": {"type": "String"}}},
   "chargeInstallmentsCanceled": "Installment plan canceled",
   "chargeSendNewLink": "Send a new link for {value}.",
-  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}}
+  "@chargeSendNewLink": {"placeholders": {"value": {"type": "String"}}},
+  "orderAssistantUsesLeft": "{count, plural, =0{No assistant uses left this month.} =1{1 assistant use left this month.} other{{count} assistant uses left this month.}}",
+  "@orderAssistantUsesLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planUsageAi": "Assistant this month",
+  "planLimitAi": "You used {used} of {limit} assistant requests this month. To keep going now, see the plans.",
+  "@planLimitAi": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "aiIntroTitle": "Create your next {order} by talking",
+  "@aiIntroTitle": {
+    "placeholders": {
+      "order": { "type": "String" }
+    }
+  },
+  "aiIntroBody": "Say the customer and the service, or take a photo. The app fills it in and you just check it before saving.",
+  "aiIntroTry": "Try it now",
+  "aiIntroLater": "Not now",
+  "courtesyBannerLabel": "Pro plan courtesy",
+  "courtesyBannerEnds": "{days, plural, =1{Ends in 1 day.} other{Ends in {days} days.}}",
+  "@courtesyBannerEnds": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "courtesyBannerAiUse": "{used, plural, =1{You used the assistant once this month; Free includes {free}.} other{You used the assistant {used} times this month; Free includes {free}.}}",
+  "@courtesyBannerAiUse": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "free": { "type": "int" }
+    }
+  },
+  "courtesyBannerToFree": "After that, the app goes back to the Free plan.",
+  "courtesyBannerPlan": "The {plan} plan covers your use.",
+  "@courtesyBannerPlan": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "courtesyBannerLater": "Not now"
 }

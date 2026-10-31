@@ -155,12 +155,7 @@ class _NavigationControllerState extends State<NavigationController>
     super.dispose();
   }
 
-  /// The "+" beside the tabs. Technicians work on the orders they are given
-  /// (prototype "Início · técnico": no "+").
-  bool get _canCreateOrder {
-    final auth = AuthorizationService.instance;
-    return !auth.isTechnician && auth.hasPermission(PermissionType.createOrder);
-  }
+  bool get _canCreateOrder => AuthorizationService.instance.canCreateOrder;
 
   void _newOrder() {
     HapticFeedback.lightImpact();
