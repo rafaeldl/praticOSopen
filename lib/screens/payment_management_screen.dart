@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:mobx/mobx.dart' show ReactionDisposer, reaction;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
@@ -19,8 +18,9 @@ import 'package:praticos/screens/payments/receipt_share.dart';
 import 'package:praticos/screens/payments/widgets/receipt_image_viewer.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/order_charge_section.dart';
-import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
+import 'package:praticos/screens/payments/widgets/receive_payment_sheet.dart';
+import 'package:praticos/screens/payments/widgets/receive_summary.dart';
 import 'package:praticos/screens/payments/widgets/receive_block.dart';
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/services/customer_receipt_service.dart'
@@ -31,6 +31,8 @@ import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/secondary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -43,7 +45,6 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/utils/asaas_billing.dart';
-import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/widgets/permission_widgets.dart'
@@ -78,18 +79,20 @@ class PaymentManagementRoute extends StatelessWidget {
   }
 }
 
-/// "Receber" screen of an order: one block answering "did the customer pay?"
-/// (amount already filled, one "Confirmar recebimento" button), the received payments
-/// list ("Já recebido") and, for Asaas companies, the payment link: an open
-/// link takes the top block ("Link mandado em…") and gets its own row, and
-/// its actions (copy, send again, cancel) live in the "…" menu.
+/// "Receber" screen of an order: who owes and what is "A receber", then
+/// "Marcar como recebido" (blue) and "Mandar cobrança" (with Asaas). How much,
+/// when and the receipt are in [ReceivePaymentSheet]. Same structure as
+/// [ReceiveCustomerScreen]; below come the payments ("Já recebido").
+///
+/// With an open link its status replaces the blue button (the customer is the
+/// one who acts) until it is overdue. The link's other actions (copy, cancel)
+/// live in the "…" menu, with discount and "undo payments".
 ///
 /// Payment method is not asked: it is shown only for payments that came from
-/// Asaas. Discount and "undo payments" live in the "…" menu. Tapping a payment
-/// opens its sheet (send recibo, view/attach receipt, remove); a payment that
-/// is a share of a customer receipt opens the "Recebimento" screen instead.
-/// No success dialogs: after
-/// "Confirmar recebimento" the block turns into "Tudo recebido" or shows the new balance.
+/// Asaas. Tapping a payment opens its sheet (send recibo, view/attach receipt,
+/// remove); a payment that is a share of a customer receipt opens the
+/// "Recebimento" screen instead. No success dialogs: after confirming, the
+/// screen shows the new balance or "Tudo recebido".
 class PaymentManagementScreen extends StatefulWidget {
   const PaymentManagementScreen({
     super.key,
@@ -177,16 +180,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   /// the same payment can't be sent twice.
   bool _busy = false;
 
-  final TextEditingController _valueController = TextEditingController();
-  PickedReceiptFile? _receipt;
-
-  /// What [_prefillValue] last wrote: while the field still shows it, a new
-  /// balance (a link paid by the webhook, a reload) replaces it.
-  String? _prefilledText;
-  ReactionDisposer? _balanceReaction;
-
-  /// Day the money came in ("Quando"); today by default.
-  DateTime _paidDay = DateTime.now();
+  /// What was filled in the sheet: kept when saving fails.
+  ReceiveDraft? _draft;
 
   /// Opened from the order screen: "‹ OS 183" just goes back to it.
   bool _fromOrder = false;
@@ -198,10 +193,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _creatingCharge = false;
   bool _cancelingCharge = false;
   bool _confirmingReplace = false;
-
-  /// "Recebi de outro jeito": the manual receive block replaces the open
-  /// link block for this visit.
-  bool _receiveOtherWay = false;
 
   /// Open charge the user chose to keep after the order total changed.
   String? _keptChargeId;
@@ -226,15 +217,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         _initialReceipt ??= args?['receipt'] as PickedReceiptFile?;
         _onInitialReceiptUsed ??= args?['onReceiptUsed'] as VoidCallback?;
       }
-      _receipt = _initialReceipt;
-      _prefillValue();
       final store = _store;
       if (store != null) {
-        _balanceReaction = reaction<double>((_) => store.remainingBalance, (_) {
-          if (mounted && _valueController.text == _prefilledText) {
-            _prefillValue();
-          }
-        });
         _charge = OrderChargeController(
           store: store,
           canCharge: widget.canCharge,
@@ -243,13 +227,23 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         );
       }
       _initialized = true;
+      // A file shared from another app: the sheet opens with it attached.
+      final receipt = _initialReceipt;
+      if (receipt != null) {
+        _draft = ReceiveDraft(
+          amount: _store?.remainingBalance ?? 0,
+          paidDay: DateTime.now(),
+          receipt: receipt,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && (_store?.remainingBalance ?? 0) > 0) _openReceive();
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    _balanceReaction?.call();
-    _valueController.dispose();
     _charge?.dispose();
     super.dispose();
   }
@@ -262,14 +256,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-  }
-
-  void _prefillValue() {
-    final remaining = _store?.remainingBalance ?? 0.0;
-    _valueController.text = remaining > 0
-        ? ReceiveAmountField.textFor(remaining)
-        : '';
-    _prefilledText = _valueController.text;
   }
 
   bool get _canAttach =>
@@ -300,29 +286,20 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: AppColors.background.resolveFrom(context),
+      backgroundColor: AppColors.groupedBackground.resolveFrom(context),
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppNavBar.barBackground(context),
+        border: null,
+        leading: _buildOrderLink(),
+        trailing: _buildMoreButton(),
+      ),
       child: Material(
         type: MaterialType.transparency,
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverNavigationBar(
-              backgroundColor: AppNavBar.barBackground(context),
-              alwaysShowMiddle: false,
-              largeTitle: Text(context.l10n.receiveTitle),
-              leading: _buildOrderLink(),
-              trailing: _buildMoreButton(),
-            ),
-            SliverToBoxAdapter(child: _buildSubtitle()),
-            SliverSafeArea(
-              top: false,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildContent(),
-                  const SizedBox(height: 40),
-                ]),
-              ),
-            ),
-          ],
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            children: [_buildContent()],
+          ),
         ),
       ),
     );
@@ -345,49 +322,36 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  /// "Ana Ribeiro · total R$ 1.250" under the title, plus
-  /// " · desconto R$ 50" when the order has a discount.
-  Widget _buildSubtitle() {
-    return Observer(
-      builder: (_) {
-        final store = _store;
-        if (store == null) return const SizedBox.shrink();
-        final total = FormatService().formatCurrency(store.total ?? 0.0);
-        final name = store.customerName;
-        final discountValue = store.discount ?? 0.0;
-        final discount = FormatService().formatCurrency(discountValue);
-        final hasName = name != null && name.isNotEmpty;
-        final String text;
-        if (discountValue > 0) {
-          text = hasName
-              ? context.l10n.receiveSubtitleWithDiscount(name, total, discount)
-              : context.l10n.receiveSubtitleNoCustomerWithDiscount(
-                  total,
-                  discount,
-                );
-        } else {
-          text = hasName
-              ? context.l10n.receiveSubtitle(name, total)
-              : context.l10n.receiveSubtitleNoCustomer(total);
-        }
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pageMargin,
-            0,
-            AppSpacing.pageMargin,
-            AppSpacing.sm,
-          ),
-          child: Text(
-            text,
-            key: const Key('receiveSubtitle'),
-            style: AppTypography.callout.copyWith(
-              color: AppColors.textSecondary.resolveFrom(context),
-              fontFeatures: AppTypography.tabular,
-            ),
-          ),
-        );
-      },
+  /// "A receber · OS 18 · C180", the summary label.
+  String _summaryLabel() {
+    final l10n = context.l10n;
+    final order = _store?.order;
+    final number = order?.number;
+    if (order == null || number == null) return l10n.receiveSummaryPlain;
+    final description = orderShortDescription(order);
+    return l10n.receiveSummaryOrder(
+      description == null
+          ? l10n.receiveCustomerPickRow(number)
+          : l10n.receiveCustomerOrderRow(number, description),
     );
+  }
+
+  /// "total R$ 1.250", plus " · desconto R$ 50" when the order has a
+  /// discount; only when it says more than the amount does.
+  String? _summaryDetail(OrderStore store, double remaining) {
+    final format = FormatService();
+    final totalValue = store.total ?? 0.0;
+    final discountValue = store.discount ?? 0.0;
+    final total = format.formatCurrency(totalValue);
+    if (discountValue > 0) {
+      return context.l10n.receiveSubtitleNoCustomerWithDiscount(
+        total,
+        format.formatCurrency(discountValue),
+      );
+    }
+    final same =
+        (totalValue - remaining).abs() <= OrderPaymentMath.centTolerance;
+    return same ? null : context.l10n.receiveSubtitleNoCustomer(total);
   }
 
   Widget _buildMoreButton() {
@@ -433,124 +397,68 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return _charge?.openCharge;
   }
 
-  /// Everything below the subtitle: the top block (manual receive, open
-  /// link or "the order changed"), the open link row, the payments and the
-  /// "send a link" action.
+  /// The whole screen: summary, charge status, the actions and the payments.
   Widget _buildContent() {
     return ListenableBuilder(
       listenable: _charge ?? Listenable.merge(const <Listenable>[]),
       builder: (context, _) => Observer(
         builder: (_) {
           final store = _store;
+          final l10n = context.l10n;
           // Read the observables so the screen follows payment changes.
           final remaining = store?.remainingBalance ?? 0.0;
           final applies = store != null && _chargeApplies(store);
           if (applies) _charge!.reloadOnFirstShow();
           final open = applies ? _charge!.openCharge : null;
           const tolerance = OrderPaymentMath.centTolerance;
+          final name = store?.customerName;
+          final title = name == null || name.isEmpty ? l10n.receiveTitle : name;
+          final status = store?.status;
+          final blocked = status == 'quote'
+              ? l10n.statusQuote
+              : status == 'canceled'
+              ? l10n.statusCancelled
+              : null;
+          final paid = open != null
+              ? remaining <= tolerance
+              : store?.isFullyPaid ?? false;
 
           final children = <Widget>[];
-          var replacing = false;
-          final offerNewLink =
-              applies &&
-              _charge!.connected &&
-              _charge!.autoCanceledCharge != null &&
-              remaining > tolerance;
-          if (open == null) {
-            if (offerNewLink) {
-              children.add(
-                ChargeCanceledBlock(
-                  remaining: remaining,
-                  busy: _creatingCharge,
-                  onSend: () => _onSendLinkPressed(remaining),
-                ),
-              );
-            }
-            children.add(_buildReceiveBlock());
-          } else {
-            final value = open.value ?? 0.0;
-            final locked = chargeHasPaidInstallments(open);
-            if (remaining <= tolerance) {
-              children.add(_buildReceiveBlock(isPaid: true));
-            } else if (!locked &&
-                value > remaining + tolerance &&
-                _keptChargeId != open.id) {
-              // The order total dropped below the link value.
-              replacing = true;
-              children.addAll([
-                ChargeChangedBlock(
-                  remaining: remaining,
-                  chargeValue: value,
-                  busy: _creatingCharge,
-                  onGenerate: _charge!.connected
-                      ? () => _runCreateCharge(remaining)
-                      : null,
-                ),
-                _linkPadding(
-                  TextLink(
-                    key: const Key('chargeKeepLink'),
-                    label: context.l10n.chargeKeepLink(
-                      FormatService().formatCurrency(value),
-                    ),
-                    onPressed: () => setState(() => _keptChargeId = open.id),
-                  ),
-                ),
-              ]);
-            } else if (_receiveOtherWay) {
-              children.add(_buildReceiveBlock());
-            } else {
-              children.addAll([
-                ChargeLinkBlock(
-                  charge: open,
-                  customerName: store!.customerName,
-                  onRemind: _shareOrderLink,
-                  remaining: remaining,
-                ),
-                _linkPadding(
-                  TextLink(
-                    key: const Key('chargeReceivedOtherWay'),
-                    label: context.l10n.chargeReceivedOtherWay,
-                    onPressed: () => setState(() => _receiveOtherWay = true),
-                  ),
-                ),
-              ]);
-            }
-            children.addAll([
-              SectionLabel(context.l10n.chargeLinkSection),
-              ChargeLinkRow(
-                charge: open,
-                customerName: store!.customerName,
-                replacing: replacing,
-              ),
-            ]);
-          }
-
-          children.add(_buildPayments());
-
-          final canSendLink =
-              applies &&
-              open == null &&
-              _charge!.connected &&
-              remaining > tolerance &&
-              !offerNewLink &&
-              !_charge!.blockedByInstallments;
-          if (canSendLink) {
-            final name = store.customerName;
+          if (blocked != null || paid) {
             children.add(
-              _linkPadding(
-                TextLink(
-                  key: const Key('chargeSendLink'),
-                  label: name == null || name.isEmpty
-                      ? context.l10n.chargeSendLink
-                      : context.l10n.chargeSendLinkTo(name),
-                  onPressed: _creatingCharge
-                      ? null
-                      : () => _onSendLinkPressed(remaining),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.pageMargin,
+                  AppSpacing.sm,
+                  AppSpacing.pageMargin,
+                  0,
+                ),
+                child: Text(
+                  title,
+                  key: const Key('receiveTitle'),
+                  style: AppTypography.title.copyWith(
+                    color: AppColors.text.resolveFrom(context),
+                  ),
                 ),
               ),
             );
+            children.add(ReceiveBlock(blockedMessage: blocked));
+            if (open != null) {
+              children.add(OrderChargeStatus(charge: open, customerName: name));
+            }
+          } else {
+            children.add(
+              ReceiveSummary(
+                titleKey: const Key('receiveTitle'),
+                title: title,
+                label: _summaryLabel(),
+                amount: FormatService().formatCurrency(remaining),
+                detail: store == null ? null : _summaryDetail(store, remaining),
+              ),
+            );
+            children.addAll(_buildChargeAndActions(open, remaining, name));
           }
-
+          children.add(_buildPayments());
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: children,
@@ -560,39 +468,142 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
+  /// What can be done with [remaining] still owed: one blue button at most.
+  List<Widget> _buildChargeAndActions(
+    OrderCharge? open,
+    double remaining,
+    String? customerName,
+  ) {
+    final l10n = context.l10n;
+    final store = _store!;
+    final applies = _chargeApplies(store);
+    const tolerance = OrderPaymentMath.centTolerance;
+    final mark = _actionLink(
+      TextLink(
+        key: const Key('receiveConfirm'),
+        label: l10n.receiveMarkReceived,
+        onPressed: _busy ? null : _openReceive,
+      ),
+    );
+
+    if (open != null) {
+      final value = open.value ?? 0.0;
+      final locked = chargeHasPaidInstallments(open);
+      // The order total dropped below the link value.
+      if (!locked &&
+          value > remaining + tolerance &&
+          _keptChargeId != open.id) {
+        return [
+          ChargeChangedBlock(
+            remaining: remaining,
+            chargeValue: value,
+            busy: _creatingCharge,
+            onGenerate: _charge!.connected
+                ? () => _runCreateCharge(remaining)
+                : null,
+          ),
+          _linkPadding(
+            TextLink(
+              key: const Key('chargeKeepLink'),
+              label: l10n.chargeKeepLink(FormatService().formatCurrency(value)),
+              onPressed: () => setState(() => _keptChargeId = open.id),
+            ),
+          ),
+          mark,
+        ];
+      }
+      final overdue = open.status == ChargeStatus.overdue;
+      return [
+        OrderChargeStatus(
+          charge: open,
+          customerName: customerName,
+          remaining: remaining,
+        ),
+        _actionPadding(
+          overdue
+              ? PrimaryButton(
+                  key: const Key('chargeSendAgain'),
+                  label: l10n.chargeSendAgain,
+                  onPressed: _shareOrderLink,
+                )
+              : SecondaryButton(
+                  key: const Key('chargeSendAgain'),
+                  label: l10n.chargeSendAgain,
+                  onPressed: _shareOrderLink,
+                ),
+        ),
+        mark,
+      ];
+    }
+
+    final connected = applies && _charge!.connected;
+    if (connected &&
+        _charge!.autoCanceledCharge != null &&
+        remaining > tolerance) {
+      return [
+        ChargeCanceledBlock(
+          remaining: remaining,
+          busy: _creatingCharge,
+          onSend: () => _onSendLinkPressed(remaining),
+        ),
+        mark,
+      ];
+    }
+
+    return [
+      _actionPadding(
+        _busy
+            ? const SizedBox(
+                height: AppSizes.primaryButtonHeight,
+                child: Center(child: CupertinoActivityIndicator()),
+              )
+            : PrimaryButton(
+                key: const Key('receiveConfirm'),
+                label: l10n.receiveMarkReceived,
+                onPressed: _openReceive,
+              ),
+      ),
+      if (connected && !_charge!.blockedByInstallments)
+        _actionPadding(
+          SecondaryButton(
+            key: const Key('chargeSendLink'),
+            label: l10n.chargeSend,
+            onPressed: _creatingCharge
+                ? null
+                : () => _onSendLinkPressed(remaining),
+          ),
+        )
+      else if (!applies && store.order?.id != null)
+        _actionPadding(
+          SecondaryButton(
+            key: const Key('receiveShareOrderLink'),
+            label: l10n.chargeSendOrderLink,
+            onPressed: _shareOrderLink,
+          ),
+        ),
+    ];
+  }
+
+  Widget _actionPadding(Widget button) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.blockMargin,
+        0,
+        AppSpacing.blockMargin,
+        AppSpacing.sm,
+      ),
+      child: button,
+    );
+  }
+
+  Widget _actionLink(Widget link) => Center(child: link);
+
   /// Text link aligned with the page margin.
   Widget _linkPadding(Widget link) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
       child: Align(alignment: AlignmentDirectional.centerStart, child: link),
     );
-  }
-
-  /// Manual receive block. [isPaid] overrides the store (an open link whose
-  /// value is already covered within the cent tolerance).
-  Widget _buildReceiveBlock({bool? isPaid}) {
-    final status = _store?.status;
-    String? blocked;
-    // Payments are allowed from 'approved' on; not for quotes or canceled.
-    if (status == 'quote') blocked = context.l10n.statusQuote;
-    if (status == 'canceled') blocked = context.l10n.statusCancelled;
-    return ReceiveBlock(
-      isPaid: isPaid ?? _store?.isFullyPaid ?? false,
-      blockedMessage: blocked,
-      controller: _valueController,
-      busy: _busy,
-      onConfirm: _register,
-      receiptName: _receipt?.name,
-      onAttachReceipt: _canAttach ? _attachBeforeSaving : null,
-      onRemoveReceipt: () => setState(() => _receipt = null),
-      paidDay: _paidDay,
-      onPickDay: _pickPaidDay,
-    );
-  }
-
-  Future<void> _pickPaidDay() async {
-    final day = await pickPaymentDay(context, _paidDay);
-    if (day != null && mounted) setState(() => _paidDay = day);
   }
 
   /// "Já recebido": the payments, newest first. Paid charges are not listed
@@ -737,32 +748,55 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // REGISTER PAYMENT
   // ============================================================
 
-  String? _validateValue(double value) {
-    if (value <= 0) return context.l10n.valueMustBeGreaterThanZero;
-    if (_store != null && value > _store!.remainingBalance) {
-      return context.l10n.paymentCannotExceedBalance;
+  /// What the amount does: says what stays open on the order.
+  String? _preview(double amount, double remaining) {
+    final left = remaining - amount;
+    if (left <= OrderPaymentMath.centTolerance) {
+      return context.l10n.receivePreviewAll(1);
     }
-    return null;
+    return context.l10n.receivePreviewLeft(
+      FormatService().formatCurrency(left),
+    );
   }
 
-  void _register() => _runBusy(_doRegister);
+  /// "Marcar como recebido": the sheet, then saving what came back.
+  Future<void> _openReceive() async {
+    final store = _store;
+    if (store == null || _busy) return;
+    final remaining = store.remainingBalance;
+    final l10n = context.l10n;
+    final name = store.customerName;
+    final hasName = name != null && name.isNotEmpty;
+    final open = _visibleOpenCharge();
+    final draft = await ReceivePaymentSheet.show(
+      context,
+      title: hasName
+          ? l10n.receiveReceivedFrom(name)
+          : l10n.receiveReceivedTitle,
+      max: remaining,
+      preview: (amount) => _preview(amount, remaining),
+      initial: _draft,
+      canAttach: _canAttach,
+      note: open == null
+          ? null
+          : hasName
+          ? l10n.receiveChargeAdjusts(name)
+          : l10n.receiveChargeAdjustsNoName,
+    );
+    if (draft == null || !mounted) return;
+    _draft = draft;
+    await _runBusy(() => _doRegister(draft));
+  }
 
-  Future<void> _doRegister() async {
+  Future<void> _doRegister(ReceiveDraft draft) async {
     final store = _store;
     if (store == null) return;
-    final value = parseCurrencyInput(_valueController.text);
-    final error = _validateValue(value);
-    if (error != null) {
-      _showError(error);
-      return;
-    }
-
     final transaction = await store.addPayment(
-      value,
-      paidAt: paidAtFor(_paidDay),
+      draft.amount,
+      paidAt: paidAtFor(draft.paidDay),
     );
     var receiptOk = true;
-    final receipt = _receipt;
+    final receipt = draft.receipt;
     if (transaction != null && receipt != null) {
       final index = store.transactions.indexWhere(
         (t) => t.id == transaction.id,
@@ -785,11 +819,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       _showError(_paymentFailureMessage(store));
       return;
     }
-    setState(() {
-      _receipt = null;
-      _paidDay = DateTime.now();
-    });
-    _prefillValue();
+    _draft = null;
     if (!receiptOk) _showError(_paymentFailureMessage(store));
   }
 
@@ -821,18 +851,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final choice = await showPullDownMenu(
       context,
       groups: [
-        if (open != null)
+        if (hasInvoice)
           PullDownGroup([
-            if (hasInvoice)
-              PullDownItem(
-                value: 'copyLink',
-                label: context.l10n.chargeCopyLink,
-                icon: CupertinoIcons.doc_on_doc,
-              ),
             PullDownItem(
-              value: 'shareLink',
-              label: context.l10n.chargeSendAgainWhatsApp,
-              icon: CupertinoIcons.square_arrow_up,
+              value: 'copyLink',
+              label: context.l10n.chargeCopyLink,
+              icon: CupertinoIcons.doc_on_doc,
             ),
           ]),
         if (_canDiscount)
@@ -865,8 +889,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     switch (choice) {
       case 'copyLink':
         if (open != null) _copyChargeLink(open);
-      case 'shareLink':
-        _shareOrderLink();
       case 'cancelLink':
         if (open != null) _confirmCancelCharge(open);
       case 'discount':
@@ -894,7 +916,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         _showError(_paymentFailureMessage(store));
         return;
       }
-      _prefillValue();
     });
   }
 
@@ -940,7 +961,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       _showError(_paymentFailureMessage(store));
       return;
     }
-    _prefillValue();
   }
 
   // ============================================================
@@ -1061,7 +1081,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     // The undo writes to every order of the receipt; this screen still
     // holds the old payments of this one.
     if (undone) await _store?.reloadPayments();
-    if (mounted) _prefillValue();
   }
 
   /// "Mandar recibo" of one payment of this order (no receipt document).
@@ -1133,7 +1152,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   _showError(_paymentFailureMessage(store));
                   return;
                 }
-                _prefillValue();
               });
             },
             child: Text(context.l10n.remove),
@@ -1148,11 +1166,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // ============================================================
 
   Future<PickedReceiptFile?> _pickReceipt() => pickReceiptFile(context);
-
-  Future<void> _attachBeforeSaving() async {
-    final picked = await _pickReceipt();
-    if (picked != null && mounted) setState(() => _receipt = picked);
-  }
 
   Future<void> _attachToSaved(PaymentTransaction tx) async {
     final picked = await _pickReceipt();

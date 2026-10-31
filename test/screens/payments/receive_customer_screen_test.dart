@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
-import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
@@ -64,6 +66,7 @@ void main() {
     List<bool>? popped,
     List<Object?>? openedOrders,
     Future<Order?> Function(String id)? reloadOrder,
+    Future<PickedReceiptFile?> Function(BuildContext context)? pickReceipt,
   }) async {
     tester.view.physicalSize = const Size(430, 1400);
     tester.view.devicePixelRatio = 1;
@@ -104,6 +107,7 @@ void main() {
                         service: fake,
                         canAttachReceipt: true,
                         reloadOrder: reloadOrder ?? (_) async => null,
+                        pickReceipt: pickReceipt,
                       ),
                     ),
                   );
@@ -122,95 +126,81 @@ void main() {
 
   String brl(double v) => FormatService().formatCurrency(v);
 
+  Future<void> openSheet(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> typeAmount(WidgetTester tester, double value) async {
-    await tester.enterText(find.byType(CupertinoTextField).first, brl(value));
+    await tester.enterText(
+      find.byKey(const Key('receiveAmountField')),
+      brl(value),
+    );
     await tester.pump();
   }
 
-  bool buttonEnabled(WidgetTester tester) {
-    final button = tester.widget<PrimaryButton>(
-      find.byKey(const Key('receiveCustomerConfirm')),
-    );
-    return button.onPressed != null;
+  /// Taps "Marcar como recebido", optionally types and taps the ✓.
+  Future<void> receive(WidgetTester tester, {double? amount}) async {
+    await openSheet(tester);
+    if (amount != null) await typeAmount(tester, amount);
+    await tester.tap(find.byKey(const ValueKey('new_order_save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
   }
 
-  String? line(WidgetTester tester, String id) {
-    final f = find.byKey(Key('receiveCustomerLine_$id'));
-    if (f.evaluate().isEmpty) return null;
-    return tester.widget<Text>(f).data;
-  }
+  bool saveEnabled(WidgetTester tester) =>
+      tester.widget<NewOrderTopBar>(find.byType(NewOrderTopBar)).onSave != null;
 
-  testWidgets('title, sentence, amount once and every order settled', (
+  String summary(WidgetTester tester) =>
+      tester.widget<Text>(find.byKey(const Key('receiveSummaryLabel'))).data!;
+
+  String amountOnTop(WidgetTester tester) =>
+      tester.widget<Text>(find.byKey(const Key('receiveSummaryAmount'))).data!;
+
+  testWidgets('name, what is owed, one blue button and the orders', (
     tester,
   ) async {
     await pump(tester);
 
-    expect(find.text('Receber de João'), findsOneWidget);
-    expect(
-      find.text('3 OS em aberto. Marque as OS que foram pagas.'),
-      findsOneWidget,
-    );
-    // The total shows once: only in the field.
-    expect(find.textContaining('1.250,00'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('receiveAmountField')),
-        matching: find.textContaining('1.250,00'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Se recebeu só uma parte, digite quanto.'),
-      findsOneWidget,
-    );
-    expect(find.text('Está pagando'), findsOneWidget);
-    expect(
-      find.text(
-        'Se o valor não der para tudo, as mais antigas são pagas primeiro.',
-      ),
-      findsOneWidget,
-    );
-    expect(line(tester, 'a'), 'Quita');
-    expect(line(tester, 'b'), 'Quita');
-    expect(line(tester, 'c'), 'Quita');
-    expect(find.text('Comprovante'), findsOneWidget);
-    expect(find.text('Anexar'), findsOneWidget);
-    expect(find.text('Quando'), findsOneWidget);
-    expect(find.text('Hoje'), findsOneWidget);
-    expect(buttonEnabled(tester), isTrue);
-    // Gone: "Como fica", "Escolher as OS", the separate picker.
-    expect(find.text('Como fica'), findsNothing);
-    expect(find.text('Escolher as OS'), findsNothing);
+    expect(find.text('João'), findsOneWidget);
+    expect(summary(tester), 'A receber · 3 OS');
+    expect(amountOnTop(tester), brl(1250));
+    expect(find.text('Marcar como recebido'), findsOneWidget);
+    expect(find.byType(PrimaryButton), findsOneWidget);
+    expect(find.text('OS incluídas'), findsOneWidget);
+    // The form waits in the sheet; rows don't repeat what it does.
+    expect(find.byType(CupertinoTextField), findsNothing);
+    expect(find.text('Quando'), findsNothing);
+    expect(find.text('Quita'), findsNothing);
     expect(find.textContaining('Pix'), findsNothing);
   });
 
-  testWidgets('button says "Confirmar recebimento", without the amount', (
+  testWidgets('the sheet starts with the total and settles every order', (
     tester,
   ) async {
     await pump(tester);
-    await typeAmount(tester, 320);
-    final button = tester.widget<PrimaryButton>(
-      find.byKey(const Key('receiveCustomerConfirm')),
-    );
-    expect(button.label, 'Confirmar recebimento');
-    expect(find.textContaining('Recebi'), findsNothing);
-  });
+    await openSheet(tester);
 
-  testWidgets('standard field: numeric keyboard, clear button, no autofocus', (
-    tester,
-  ) async {
-    await pump(tester);
+    expect(find.text('Recebido de João'), findsOneWidget);
     final field = tester.widget<CupertinoTextField>(
       find.byKey(const Key('receiveAmountField')),
     );
+    expect(field.controller!.text, brl(1250));
     expect(field.keyboardType.decimal, isTrue);
     expect(field.clearButtonMode, OverlayVisibilityMode.editing);
-    expect(field.focusNode?.hasFocus, isFalse);
     expect(field.autofocus, isFalse);
-    expect(find.byKey(const Key('receiveAmountEditIcon')), findsNothing);
-    expect(find.byKey(const Key('receiveKeyboardDone')), findsNothing);
+    expect(find.text('Quita as 3 OS.'), findsOneWidget);
+    expect(find.text('Anexar'), findsOneWidget);
+    expect(find.text('Hoje'), findsOneWidget);
+    expect(saveEnabled(tester), isTrue);
+  });
 
-    // Focused: an "OK" bar dismisses the numeric keyboard.
+  testWidgets('focused, an "OK" dismisses the numeric keyboard', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openSheet(tester);
+    expect(find.byKey(const Key('receiveKeyboardDone')), findsNothing);
     await tester.tap(find.byKey(const Key('receiveAmountField')));
     await tester.pump();
     expect(find.byKey(const Key('receiveKeyboardDone')), findsOneWidget);
@@ -234,18 +224,20 @@ void main() {
     expect(find.text('OS 16 · Troca de óleo'), findsOneWidget);
   });
 
-  testWidgets('a partial payment tells what each order gets, oldest first', (
+  testWidgets('a partial payment says what it does, oldest first', (
     tester,
   ) async {
     await pump(tester);
+    await openSheet(tester);
     await typeAmount(tester, 750);
 
-    expect(line(tester, 'a'), 'Quita');
-    expect(line(tester, 'b'), 'Recebe ${brl(300)} · fica ${brl(200)}');
-    expect(line(tester, 'c'), 'Fica para depois');
+    expect(
+      find.text('Quita OS 182. Paga ${brl(300)} da OS 190. Ficam ${brl(500)}.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('tapping a row toggles the check and the amount follows', (
+  testWidgets('tapping a row toggles the check and the total follows', (
     tester,
   ) async {
     final service = await pump(tester);
@@ -258,54 +250,45 @@ void main() {
     await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
     await tester.pump();
     expect(tester.widget<Icon>(check).icon, CupertinoIcons.circle);
+    expect(summary(tester), 'A receber · 2 de 3 OS');
     // 1250 - 450.
-    expect(find.textContaining('800,00'), findsOneWidget);
-    expect(line(tester, 'a'), isNull);
+    expect(amountOnTop(tester), brl(800));
 
+    await openSheet(tester);
     await typeAmount(tester, 900);
-    expect(buttonEnabled(tester), isFalse);
+    expect(saveEnabled(tester), isFalse);
     expect(
       find.text('Passa do que falta nessas OS (${brl(800)}).'),
       findsOneWidget,
     );
-
     await typeAmount(tester, 600);
-    // Once typed, checking again does not rewrite the amount.
-    await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
+    await tester.tap(find.byKey(const ValueKey('new_order_save')));
     await tester.pump();
-    expect(find.textContaining('600,00'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     final request = service.requests.single;
-    expect(request.allocations.map((a) => a.orderId), ['a', 'b']);
-    expect(request.allocations.map((a) => a.amount), [450, 150]);
+    expect(request.allocations.map((a) => a.orderId), ['b', 'c']);
+    expect(request.allocations.map((a) => a.amount), [500, 100]);
     await tester.pumpAndSettle(const Duration(seconds: 5));
   });
 
-  testWidgets('nothing checked: button off with a hint', (tester) async {
+  testWidgets('nothing checked: buttons off with a hint', (tester) async {
     await pump(tester, orders: [_order('a', 1, 100), _order('b', 2, 50)]);
     await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
     await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
     await tester.pump();
-    expect(buttonEnabled(tester), isFalse);
+    final button = tester.widget<PrimaryButton>(
+      find.byKey(const Key('receiveCustomerConfirm')),
+    );
+    expect(button.onPressed, isNull);
     expect(find.text('Marque pelo menos uma OS.'), findsOneWidget);
   });
 
-  testWidgets('more than owed or zero disables the button with a hint', (
-    tester,
-  ) async {
+  testWidgets('zero in the sheet keeps the ✓ off with a hint', (tester) async {
     await pump(tester);
-
-    await typeAmount(tester, 1300);
-    expect(buttonEnabled(tester), isFalse);
-    expect(
-      find.text('Passa do que falta nessas OS (${brl(1250)}).'),
-      findsOneWidget,
-    );
-
-    await tester.enterText(find.byType(CupertinoTextField).first, '');
+    await openSheet(tester);
+    await tester.enterText(find.byKey(const Key('receiveAmountField')), '');
     await tester.pump();
-    expect(buttonEnabled(tester), isFalse);
+    expect(saveEnabled(tester), isFalse);
     expect(find.text('Digite quanto recebeu.'), findsOneWidget);
   });
 
@@ -313,6 +296,7 @@ void main() {
     tester,
   ) async {
     await pump(tester);
+    await openSheet(tester);
     await tester.tap(find.byKey(const Key('receiveDateRow')));
     await tester.pumpAndSettle();
 
@@ -330,28 +314,41 @@ void main() {
     expect(find.text('Hoje'), findsOneWidget);
   });
 
-  testWidgets(
-    '"Confirmar recebimento" records the split, toasts and pops with true',
-    (tester) async {
-      final popped = <bool>[];
-      final service = await pump(tester, popped: popped);
-      await typeAmount(tester, 750);
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-      await tester.pump();
+  testWidgets('the receipt picked in the sheet goes with the payment', (
+    tester,
+  ) async {
+    final picked = PickedReceiptFile(File('pix.jpg'), 'image/jpeg', 'pix.jpg');
+    final service = _FakeService();
+    await pump(tester, service: service, pickReceipt: (_) async => picked);
+    await openSheet(tester);
+    await tester.tap(find.byKey(const Key('receiveAttachReceipt')));
+    await tester.pumpAndSettle();
+    expect(find.text('pix.jpg'), findsOneWidget);
 
-      final request = service.requests.single;
-      expect(request.customer?.id, 'c1');
-      expect(request.allocations.map((a) => a.orderId), ['a', 'b']);
-      expect(request.allocations.map((a) => a.amount), [450, 300]);
-      expect(request.file, isNull);
-      final now = DateTime.now();
-      expect(request.paidAt.year, now.year);
-      expect(request.paidAt.day, now.day);
+    await tester.tap(find.byKey(const ValueKey('new_order_save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(service.requests.single.file, same(picked));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+  });
 
-      await tester.pumpAndSettle(const Duration(seconds: 5));
-      expect(popped, [true]);
-    },
-  );
+  testWidgets('✓ records the split, toasts and pops with true', (tester) async {
+    final popped = <bool>[];
+    final service = await pump(tester, popped: popped);
+    await receive(tester, amount: 750);
+
+    final request = service.requests.single;
+    expect(request.customer?.id, 'c1');
+    expect(request.allocations.map((a) => a.orderId), ['a', 'b']);
+    expect(request.allocations.map((a) => a.amount), [450, 300]);
+    expect(request.file, isNull);
+    final now = DateTime.now();
+    expect(request.paidAt.year, now.year);
+    expect(request.paidAt.day, now.day);
+
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+    expect(popped, [true]);
+  });
 
   testWidgets(
     'an order paid meanwhile (link, someone else): nothing is recorded, '
@@ -367,19 +364,17 @@ void main() {
         },
       );
       await pump(tester, service: service, popped: popped);
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-      await tester.pump();
+      await receive(tester);
 
       expect(service.freshReads.single, unorderedEquals(['a', 'b', 'c']));
       expect(service.requests, isEmpty);
       expect(find.textContaining('Os valores mudaram'), findsOneWidget);
-      expect(find.textContaining('800,00'), findsWidgets);
+      expect(amountOnTop(tester), brl(800));
       await tester.pumpAndSettle(const Duration(seconds: 5));
       expect(popped, isEmpty);
 
       // Confirming again with the fresh amounts records only what is open.
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-      await tester.pump();
+      await receive(tester);
       final request = service.requests.single;
       expect(request.allocations.map((a) => a.orderId), ['b', 'c']);
       expect(request.allocations.map((a) => a.amount), [500, 300]);
@@ -392,8 +387,7 @@ void main() {
   ) async {
     final service = _FakeService(fresh: {for (final o in _orders()) o.id!: o});
     await pump(tester, service: service);
-    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-    await tester.pump();
+    await receive(tester);
     expect(service.requests.single.allocations.map((a) => a.amount), [
       450,
       500,
@@ -402,19 +396,24 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 5));
   });
 
-  testWidgets('a failure keeps the screen open', (tester) async {
+  testWidgets('a failure keeps the screen and what was typed', (tester) async {
     final popped = <bool>[];
     await pump(
       tester,
       service: _FakeService(fail: CustomerReceiptFailure.upload),
       popped: popped,
     );
-    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-    await tester.pump();
+    await receive(tester, amount: 300);
     expect(find.textContaining('comprovante'), findsWidgets);
     await tester.pumpAndSettle(const Duration(seconds: 5));
     expect(popped, isEmpty);
-    expect(find.text('Receber de João'), findsOneWidget);
+    expect(find.text('João'), findsOneWidget);
+
+    await openSheet(tester);
+    final field = tester.widget<CupertinoTextField>(
+      find.byKey(const Key('receiveAmountField')),
+    );
+    expect(field.controller!.text, brl(300));
   });
 
   testWidgets('long name wraps and text scale 2 does not overflow', (
@@ -471,15 +470,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final field = tester.widget<CupertinoTextField>(
-      find.byType(CupertinoTextField).first,
+    final amount = tester.widget<Text>(
+      find.byKey(const Key('receiveSummaryAmount')),
     );
-    expect(
-      field.controller!.text,
-      ReceiveAmountField.textFor(
-        FinancialSummary.openAmount(orders.last),
-      ),
-    );
+    expect(amount.data, brl(FinancialSummary.openAmount(orders.last)));
   });
 
   testWidgets('orders already paid are left out of the sentence', (
@@ -493,10 +487,7 @@ void main() {
         _order('c', 3, 20),
       ],
     );
-    expect(
-      find.text('2 OS em aberto. Marque as OS que foram pagas.'),
-      findsOneWidget,
-    );
+    expect(summary(tester), 'A receber · 2 OS');
     expect(find.byKey(const Key('receiveCustomerRow_a')), findsNothing);
     expect(find.textContaining('100,00'), findsOneWidget);
   });
@@ -600,33 +591,27 @@ void main() {
       expect((args['order'] as Order).id, 'b');
     });
 
-    testWidgets('coming back keeps the typed amount and refreshes the debt', (
-      tester,
-    ) async {
+    testWidgets('coming back refreshes the debt', (tester) async {
       await pump(
         tester,
         // Someone received 200 on OS 190 inside the order.
         reloadOrder: (id) async => _order('b', 190, 600, paid: 300),
       );
-      await typeAmount(tester, 700);
       await tester.tap(find.byKey(const Key('receiveCustomerInfo_b')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('tela da OS'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Receber de João'), findsOneWidget);
-      expect(find.textContaining('700,00'), findsOneWidget);
-      expect(find.textContaining(brl(300)), findsWidgets);
-      expect(line(tester, 'b'), 'Recebe ${brl(250)} · fica ${brl(50)}');
+      expect(amountOnTop(tester), brl(1050));
     });
   });
 
   testWidgets('one open order: no check to toggle', (tester) async {
     await pump(tester, orders: [_order('a', 1, 100)]);
     expect(find.byKey(const Key('receiveCustomerCheck_a')), findsNothing);
-    expect(find.text('1 OS em aberto.'), findsOneWidget);
+    expect(summary(tester), 'A receber · 1 OS');
     await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
     await tester.pump();
-    expect(buttonEnabled(tester), isTrue);
+    expect(summary(tester), 'A receber · 1 OS');
   });
 }

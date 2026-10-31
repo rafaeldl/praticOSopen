@@ -19,151 +19,18 @@ void main() {
   setUp(() => FormatService().setLocale('pt-BR'));
 
   group('ReceiveBlock', () {
-    testWidgets('open: amount prefilled and button follows the amount', (
-      tester,
-    ) async {
-      final controller = TextEditingController(
-        text: FormatService().formatCurrency(950),
-      );
-      var confirmed = 0;
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: controller,
-            onConfirm: () => confirmed++,
-            onAttachReceipt: () {},
-          ),
-        ),
-      );
-
-      expect(find.text('Falta receber'), findsOneWidget);
-      expect(find.text('Confirmar recebimento'), findsOneWidget);
-      expect(find.textContaining('950,00'), findsWidgets);
-      expect(find.text('Anexar comprovante'), findsOneWidget);
-      // "Como pagou" does not exist.
-      expect(find.textContaining('Como pagou'), findsNothing);
-
-      controller.text = FormatService().formatCurrency(400);
-      await tester.pump();
-      expect(find.textContaining('400,00'), findsWidgets);
-
-      await tester.tap(find.byKey(const Key('receiveConfirm')));
-      expect(confirmed, 1);
-    });
-
-    testWidgets('"Quando" row shows the day and opens the picker', (
-      tester,
-    ) async {
-      var picks = 0;
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: TextEditingController(text: 'R\$ 10,00'),
-            onConfirm: () {},
-            paidDay: DateTime.now(),
-            onPickDay: () => picks++,
-          ),
-        ),
-      );
-      expect(find.text('Quando'), findsOneWidget);
-      expect(find.text('Hoje'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('receiveDateRow')));
-      expect(picks, 1);
-    });
-
-    testWidgets('without a day there is no "Quando" row', (tester) async {
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: TextEditingController(text: 'R\$ 10,00'),
-            onConfirm: () {},
-          ),
-        ),
-      );
-      expect(find.text('Quando'), findsNothing);
-    });
-
-    testWidgets('open without attach permission hides "Anexar comprovante"', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: TextEditingController(text: 'R\$ 10,00'),
-            onConfirm: () {},
-          ),
-        ),
-      );
-      expect(find.text('Anexar comprovante'), findsNothing);
-    });
-
-    testWidgets('picked receipt shows chip with x', (tester) async {
-      var removed = false;
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: TextEditingController(text: 'R\$ 10,00'),
-            onConfirm: () {},
-            onAttachReceipt: () {},
-            receiptName: 'pix.jpg',
-            onRemoveReceipt: () => removed = true,
-          ),
-        ),
-      );
-      expect(find.text('pix.jpg'), findsOneWidget);
-      expect(find.text('Anexar comprovante'), findsNothing);
-      await tester.tap(find.byKey(const Key('receiveRemoveReceipt')));
-      expect(removed, isTrue);
-    });
-
-    testWidgets('empty amount disables the button', (tester) async {
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            controller: TextEditingController(),
-            onConfirm: () {},
-          ),
-        ),
-      );
-      final button = tester.widget<CupertinoButton>(
-        find.byKey(const Key('receiveConfirm')),
-      );
-      expect(button.onPressed, isNull);
-    });
-
     testWidgets('paid: "Tudo recebido" and no button', (tester) async {
-      await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: true,
-            controller: TextEditingController(),
-            onConfirm: () {},
-          ),
-        ),
-      );
+      await tester.pumpWidget(app(const ReceiveBlock()));
       expect(find.text('Tudo recebido'), findsOneWidget);
-      expect(find.byKey(const Key('receiveConfirm')), findsNothing);
+      expect(find.byType(CupertinoButton), findsNothing);
     });
 
     testWidgets('blocked shows the message', (tester) async {
       await tester.pumpWidget(
-        app(
-          ReceiveBlock(
-            isPaid: false,
-            blockedMessage: 'Cancelada',
-            controller: TextEditingController(),
-            onConfirm: () {},
-          ),
-        ),
+        app(const ReceiveBlock(blockedMessage: 'Cancelada')),
       );
       expect(find.text('Cancelada'), findsOneWidget);
-      expect(find.byKey(const Key('receiveConfirm')), findsNothing);
+      expect(find.byKey(const Key('receiveAllDone')), findsNothing);
     });
   });
 

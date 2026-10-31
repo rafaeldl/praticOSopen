@@ -5,7 +5,6 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
-import 'package:praticos/theme/app_typography.dart';
 
 /// "Hoje", "Ontem" or the date.
 String paymentDayLabel(AppLocalizations l10n, DateTime day, {DateTime? now}) {
@@ -67,55 +66,4 @@ Future<DateTime?> pickPaymentDay(BuildContext context, DateTime current) {
       ),
     ),
   );
-}
-
-/// "Quando · Hoje ›" row of the receive blocks (on `accentSoft`).
-class ReceiveDateRow extends StatelessWidget {
-  const ReceiveDateRow({super.key, required this.day, required this.onTap});
-
-  final DateTime day;
-
-  /// Null disables the row (e.g. while saving).
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final onSoft = AppColors.onAccentSoft.resolveFrom(context);
-    final value = paymentDayLabel(context.l10n, day);
-    return Semantics(
-      button: true,
-      label: '${context.l10n.receiveWhen}: $value',
-      excludeSemantics: true,
-      child: CupertinoButton(
-        key: const Key('receiveDateRow'),
-        padding: EdgeInsets.zero,
-        minimumSize: const Size.fromHeight(AppSizes.minTouchTarget),
-        onPressed: onTap,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.receiveWhen,
-                style: AppTypography.callout.copyWith(color: onSoft),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                value,
-                key: const Key('receiveDateValue'),
-                textAlign: TextAlign.end,
-                style: AppTypography.callout.copyWith(
-                  color: AppColors.accentText.resolveFrom(context),
-                  fontFeatures: AppTypography.tabular,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(CupertinoIcons.chevron_right, size: 16, color: onSoft),
-          ],
-        ),
-      ),
-    );
-  }
 }

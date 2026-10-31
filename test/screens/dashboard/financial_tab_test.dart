@@ -80,6 +80,7 @@ void main() {
     List<Order>? charged,
     List<bool>? reports,
     List<Debtor>? received,
+    List<Debtor>? chargedCustomers,
     bool settle = true,
   }) async {
     FormatService().setLocale(locale);
@@ -104,6 +105,12 @@ void main() {
             received?.add(debtor);
             return true;
           },
+          onChargeCustomer: chargedCustomers == null
+              ? null
+              : (_, debtor) async {
+                  chargedCustomers.add(debtor);
+                  return false;
+                },
         ),
       ),
     );
@@ -437,10 +444,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('financialSold')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Outubro de 2026 · ${money(9550)}'),
-      findsOneWidget,
-    );
+    expect(find.text('Outubro de 2026 · ${money(9550)}'), findsOneWidget);
     expect(find.text('OS 183 · 02/10'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('order-p1')));
     await tester.pump();
@@ -478,10 +482,7 @@ void main() {
       await openNextCharge(tester);
 
       expect(find.byType(CupertinoActionSheet), findsOneWidget);
-      expect(
-        find.text('Ana deve ${money(1250)} desde 02/10'),
-        findsOneWidget,
-      );
+      expect(find.text('Ana deve ${money(1250)} desde 02/10'), findsOneWidget);
       expect(find.text('Agora não'), findsOneWidget);
       expect(find.text('Cancelar'), findsOneWidget);
 
@@ -505,6 +506,24 @@ void main() {
       await tester.tap(find.textContaining('OS 190'));
       await tester.pumpAndSettle();
       expect(charged.single.id, 'b1');
+    });
+
+    testWidgets('several orders with Asaas: one charge for the customer', (
+      tester,
+    ) async {
+      final charged = <Debtor>[];
+      await pumpTab(
+        tester,
+        storeWith(open: [bia1, bia2]),
+        chargedCustomers: charged,
+      );
+
+      await openNextCharge(tester);
+      await tester.tap(find.byKey(const Key('financialSendCharge')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Qual OS?'), findsNothing);
+      expect(charged.single.name, 'Bia');
     });
 
     testWidgets('"Qual OS?" does not offer orders that are still running', (
@@ -672,7 +691,11 @@ void main() {
   });
 
   testWidgets('english: no Portuguese text and US date format', (tester) async {
-    await pumpTab(tester, storeWith(open: [ana], month: [paid]), locale: 'en');
+    await pumpTab(
+      tester,
+      storeWith(open: [ana], month: [paid]),
+      locale: 'en',
+    );
 
     expect(find.text('October 2026'), findsOneWidget);
     expect(find.text('To receive'), findsOneWidget);

@@ -43,6 +43,7 @@ class FinancialTab extends StatefulWidget {
     this.onOpenReport,
     this.sendChargeFlow,
     this.onReceiveFromCustomer,
+    this.onChargeCustomer,
   });
 
   final FinancialTabStore? store;
@@ -56,7 +57,12 @@ class FinancialTab extends StatefulWidget {
   /// "Receber de João": one payment over the customer's open orders.
   /// Defaults to pushing [ReceiveCustomerScreen] (test seam).
   final Future<bool> Function(BuildContext context, Debtor debtor)?
-      onReceiveFromCustomer;
+  onReceiveFromCustomer;
+
+  /// "Mandar cobrança" for a customer with several orders. Defaults to
+  /// [ReceiveCustomerScreen] with the charge sheet open (test seam).
+  final Future<bool> Function(BuildContext context, Debtor debtor)?
+  onChargeCustomer;
 
   /// Sends the payment link of an order to its customer. Overrides
   /// [sendChargeFlow] entirely (test seam).
@@ -213,8 +219,38 @@ class _FinancialTabState extends State<FinancialTab> {
     );
   }
 
-  /// Próxima cobrança: "Mandar cobrança" (asking which order when there are
-  /// several) or "Agora não", which only pauses the suggestion.
+  /// "Mandar cobrança" of a customer with several orders: one charge, from
+  /// the same screen that receives, with the completed orders checked.
+  /// False when Asaas can't charge them, so the caller picks one order.
+  Future<bool> _chargeCustomer(Debtor debtor) async {
+    final charge = widget.onChargeCustomer;
+    if (charge != null) {
+      if (await charge(context, debtor) && mounted) _store.refresh();
+      return true;
+    }
+    final customer = debtor.oldestOrder.customer;
+    bool available;
+    try {
+      available = await ReceiveCustomerScreen.chargeAvailable(customer?.id);
+    } catch (_) {
+      available = false;
+    }
+    if (!available || !mounted) return false;
+    final done = await ReceiveCustomerScreen.open(
+      context,
+      orders: debtor.openOrders,
+      checkedOrderIds: {for (final o in debtor.orders) o.id!},
+      customer: customer,
+      customerName: debtor.name,
+      startCharge: true,
+    );
+    if (done && mounted) _store.refresh();
+    return true;
+  }
+
+  /// Próxima cobrança: "Mandar cobrança" or "Agora não", which only pauses
+  /// the suggestion. With Asaas, several orders of a customer go in one
+  /// charge; otherwise it asks which order, as only one link can be shared.
   Future<void> _showNextCharge(Debtor debtor) async {
     if (_sendingCharge) return;
     final l10n = context.l10n;
@@ -252,6 +288,12 @@ class _FinancialTabState extends State<FinancialTab> {
     if (choice == _NextChargeChoice.snooze) {
       await _store.snoozeNextCharge(debtor);
     } else if (choice == _NextChargeChoice.send) {
+      if (!debtor.hasSingleOrder &&
+          debtor.customerId != null &&
+          await _chargeCustomer(debtor)) {
+        return;
+      }
+      if (!mounted) return;
       final order = debtor.hasSingleOrder
           ? debtor.oldestOrder
           : await _pickOrder(debtor, debtor.orders);

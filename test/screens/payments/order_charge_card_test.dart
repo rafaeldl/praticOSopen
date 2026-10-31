@@ -45,8 +45,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  String due() => format.formatDayMonthOrDate(DateTime(2026, 10, 7));
-
   group('chargeStatusColor', () {
     test('âmbar pendente, vermelho vencida, verde paga, cinza encerrada', () {
       expect(chargeStatusColor(ChargeStatus.pending), AppColors.warning);
@@ -125,55 +123,50 @@ void main() {
     });
   });
 
-  group('ChargeLinkBlock', () {
-    testWidgets('pendente: quando mandou, o que falta e até quando vale', (
-      tester,
-    ) async {
-      var reminded = 0;
+  group('OrderChargeStatus', () {
+    String due() => format.formatDayMonthOrDate(DateTime(2026, 10, 7));
+    Color dotColor(WidgetTester tester) => tester
+        .widget<StatusDot>(find.byKey(const Key('chargeStatusDot')))
+        .color;
+
+    testWidgets('pendente: esperando o cliente, valor e prazo', (tester) async {
       await pump(
         tester,
-        ChargeLinkBlock(
-          charge: charge(createdAt: DateTime(2026, 10, 1)),
-          customerName: 'Ana Ribeiro',
-          onRemind: () => reminded++,
-        ),
+        OrderChargeStatus(charge: charge(), customerName: 'Ana Ribeiro'),
       );
-      final value = format.formatCurrency(1000);
+      expect(find.text('Esperando Ana Ribeiro pagar'), findsOneWidget);
       expect(
-        find.text(
-          l10n.chargeLinkSentOn(
-            format.formatDayMonthOrDate(DateTime(2026, 10, 1)),
-          ),
-        ),
+        find.text(l10n.chargeDetailUntil(format.formatCurrency(1000), due())),
         findsOneWidget,
       );
-      expect(
-        find.text(
-          '${l10n.chargeNotPaidYet('Ana Ribeiro', value)} '
-          '${l10n.chargeLinkValidUntil(due())}',
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(find.text(l10n.chargeRemindWhatsApp));
-      expect(reminded, 1);
-      expect(
-        tester.getSize(find.byKey(const Key('chargeRemindWhatsApp'))).height,
-        greaterThanOrEqualTo(44),
-      );
+      expect(dotColor(tester), AppColors.warning);
+      expect(find.byKey(const Key('chargeMissingOutsideLink')), findsNothing);
     });
 
-    testWidgets('sem data de criação: "Link mandado"', (tester) async {
+    testWidgets('sem cliente: frase neutra', (tester) async {
       await pump(
         tester,
-        ChargeLinkBlock(charge: charge(), customerName: null, onRemind: () {}),
+        OrderChargeStatus(charge: charge(), customerName: null),
       );
-      expect(find.text(l10n.chargeLinkSent), findsOneWidget);
-      expect(
-        find.textContaining(
-          l10n.chargeNotPaidYetNoCustomer(format.formatCurrency(1000)),
+      expect(find.text(l10n.chargeWaitingPayment), findsOneWidget);
+    });
+
+    testWidgets('vencida: vermelho, e diz que ainda dá para pagar', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        OrderChargeStatus(
+          charge: charge(status: ChargeStatus.overdue),
+          customerName: 'Ana Ribeiro',
         ),
+      );
+      expect(find.text(l10n.chargeExpiredOn(due())), findsOneWidget);
+      expect(
+        find.text(l10n.chargeDetailOverdue(format.formatCurrency(1000))),
         findsOneWidget,
       );
+      expect(dotColor(tester), AppColors.danger);
     });
 
     testWidgets('link menor que o saldo: diz quanto falta fora dele', (
@@ -181,50 +174,45 @@ void main() {
     ) async {
       await pump(
         tester,
-        ChargeLinkBlock(
-          charge: charge(),
-          customerName: 'Ana Ribeiro',
-          onRemind: () {},
-          remaining: 1300,
+        OrderChargeStatus(
+          charge: charge(value: 300),
+          customerName: 'Ana',
+          remaining: 1200,
         ),
       );
       expect(
-        find.text(l10n.chargeMissingOutsideLink(format.formatCurrency(300))),
+        find.text(l10n.chargeMissingOutsideLink(format.formatCurrency(900))),
         findsOneWidget,
       );
     });
 
-    testWidgets('link igual ao saldo: não fala de fora do link', (
-      tester,
-    ) async {
+    testWidgets('parcelado mostra Nx no cartão', (tester) async {
       await pump(
         tester,
-        ChargeLinkBlock(
-          charge: charge(),
-          customerName: 'Ana Ribeiro',
-          onRemind: () {},
-          remaining: 1000,
+        OrderChargeStatus(
+          charge: charge(
+            mode: ChargeMode.cardInstallments,
+            installmentCount: 3,
+          ),
+          customerName: 'Ana',
         ),
       );
-      expect(find.byKey(const Key('chargeMissingOutsideLink')), findsNothing);
+      expect(find.text(l10n.chargeInstallmentsUntil(3, due())), findsOneWidget);
     });
 
-    testWidgets('vencida: diz quando venceu, sem "vale até"', (tester) async {
+    testWidgets('com parcela paga mostra quantas foram pagas', (tester) async {
       await pump(
         tester,
-        ChargeLinkBlock(
-          charge: charge(status: ChargeStatus.overdue),
-          customerName: 'Ana Ribeiro',
-          onRemind: () {},
+        OrderChargeStatus(
+          charge: charge(
+            mode: ChargeMode.cardInstallments,
+            installmentCount: 3,
+            paidAsaasPaymentIds: ['pay_1'],
+          ),
+          customerName: 'Ana',
         ),
       );
-      expect(find.text(l10n.chargeLinkExpiredOn(due())), findsOneWidget);
-      expect(
-        find.text(
-          l10n.chargeNotPaidYet('Ana Ribeiro', format.formatCurrency(1000)),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text(l10n.chargeInstallmentsPaid(1, 3)), findsOneWidget);
     });
   });
 
@@ -267,84 +255,6 @@ void main() {
         ),
       );
       expect(find.byKey(const Key('chargeRegenerateButton')), findsNothing);
-    });
-  });
-
-  group('ChargeLinkRow', () {
-    Color dotColor(WidgetTester tester) => tester
-        .widget<StatusDot>(find.byKey(const Key('chargeStatusDot')))
-        .color;
-
-    testWidgets('pendente: esperando o cliente, formas e prazo', (
-      tester,
-    ) async {
-      await pump(
-        tester,
-        ChargeLinkRow(charge: charge(), customerName: 'Ana Ribeiro'),
-      );
-      expect(find.text(l10n.chargePaymentLink), findsOneWidget);
-      expect(find.text(format.formatCurrency(1000)), findsOneWidget);
-      expect(find.text(l10n.chargeWaitingFor('Ana Ribeiro')), findsOneWidget);
-      expect(find.text(l10n.chargeMethodsUntil(due())), findsOneWidget);
-      expect(dotColor(tester), AppColors.warning);
-      // Informational: no chevron.
-      expect(find.byIcon(CupertinoIcons.chevron_forward), findsNothing);
-    });
-
-    testWidgets('vencida: ponto e texto em vermelho', (tester) async {
-      await pump(
-        tester,
-        ChargeLinkRow(
-          charge: charge(status: ChargeStatus.overdue),
-          customerName: 'Ana Ribeiro',
-        ),
-      );
-      expect(find.text(l10n.chargeExpiredOn(due())), findsOneWidget);
-      expect(dotColor(tester), AppColors.danger);
-    });
-
-    testWidgets('parcelado mostra Nx no cartão', (tester) async {
-      await pump(
-        tester,
-        ChargeLinkRow(
-          charge: charge(
-            mode: ChargeMode.cardInstallments,
-            installmentCount: 3,
-          ),
-          customerName: null,
-        ),
-      );
-      expect(find.text(l10n.chargeWaitingPayment), findsOneWidget);
-      expect(find.text(l10n.chargeInstallmentsUntil(3, due())), findsOneWidget);
-    });
-
-    testWidgets('com parcela paga mostra quantas foram pagas', (tester) async {
-      await pump(
-        tester,
-        ChargeLinkRow(
-          charge: charge(
-            mode: ChargeMode.cardInstallments,
-            installmentCount: 3,
-            paidAsaasPaymentIds: ['pay_1'],
-          ),
-          customerName: 'Ana Ribeiro',
-        ),
-      );
-      expect(find.text(l10n.chargeInstallmentsPaid(1, 3)), findsOneWidget);
-    });
-
-    testWidgets('com link novo sugerido avisa que ele cancela este', (
-      tester,
-    ) async {
-      await pump(
-        tester,
-        ChargeLinkRow(
-          charge: charge(),
-          customerName: 'Ana Ribeiro',
-          replacing: true,
-        ),
-      );
-      expect(find.text(l10n.chargeUntilReplaced(due())), findsOneWidget);
     });
   });
 }
