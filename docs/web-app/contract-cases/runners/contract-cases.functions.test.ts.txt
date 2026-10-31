@@ -1,0 +1,42 @@
+// Proposed location: firebase/functions/src/__tests__/contract-cases.test.ts
+// Runs by `npm test` in firebase/functions. `divergesIn.functions` is today's
+// known difference: when it stops being true the test fails on purpose, and
+// the entry is deleted (same idea as `gap` in rbac/firestore-matrix.ts).
+import { readFileSync } from 'fs';
+import * as path from 'path';
+
+jest.mock('../services/firestore.service', () => ({
+  getTenantCollection: jest.fn(),
+  runTransaction: jest.fn(),
+}));
+
+import { applyPaymentTransaction, calculateRemainingBalance, paymentStatusFields } from '../services/order.service';
+
+const dir = path.join(__dirname, '../../../../docs/web-app/contract-cases');
+const cases = (file: string): any[] => JSON.parse(readFileSync(path.join(dir, file), 'utf8')).cases;
+
+describe('payment-status', () => {
+  for (const c of cases('payment-status.json')) {
+    it(c.id, () => {
+      const { status, total, paidAmount } = c.given;
+      expect({
+        ...paymentStatusFields(status, total, paidAmount),
+        remaining: calculateRemainingBalance({ total, paidAmount }),
+      }).toEqual(c.divergesIn?.functions ?? c.expect);
+    });
+  }
+});
+
+describe('payment-transactions (add payment and discount)', () => {
+  const adds = cases('payment-transactions.json').filter((c) => ['addPayment', 'addDiscount'].includes(c.given.op.kind));
+  for (const c of adds) {
+    it(c.id, () => {
+      const type = c.given.op.kind === 'addPayment' ? 'payment' : 'discount';
+      const { total, discount, paidAmount, payment, paid, remainingBalance } = applyPaymentTransaction(c.given.order, {
+        id: 't', type, amount: c.given.op.amount, createdAt: '2026-01-01T00:00:00.000Z', createdBy: { id: 'u', name: 'U' },
+      } as never);
+      expect({ total, discount, paidAmount, payment, paid, remaining: remainingBalance })
+        .toEqual(c.divergesIn?.functions ?? c.expect);
+    });
+  }
+});

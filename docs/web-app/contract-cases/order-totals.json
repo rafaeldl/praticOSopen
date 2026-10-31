@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generatedFrom": "fd9e64da",
+  "rule": "Total da OS: soma dos itens com preço, menos o desconto, arredondado a centavos.",
+  "sourceOfTruth": [
+    "lib/mobx/order_store.dart updateTotal",
+    "lib/utils/order_items.dart summarizeOrderItems, productLineTotal"
+  ],
+  "fields": {
+    "total": "updateTotal (o que a tela mostra e o save completo grava)",
+    "unpricedCount": "itens sem preço, mostrados como \"sem valor\"",
+    "paymentMathTotal": "OrderPaymentMath.computeTotal (o que remover desconto e zerar pagamentos gravam)"
+  },
+  "cases": [
+    {"id":"empty","given":{"services":[],"products":[],"discount":0},"expect":{"total":0,"unpricedCount":0,"paymentMathTotal":0}},
+    {"id":"services-only","given":{"services":[{"value":100},{"value":50.5}],"products":[],"discount":0},"expect":{"total":150.5,"unpricedCount":0,"paymentMathTotal":150.5}},
+    {"id":"product-with-line-total","given":{"services":[],"products":[{"value":10,"quantity":3,"total":30}],"discount":0},"expect":{"total":30,"unpricedCount":0,"paymentMathTotal":30}},
+    {"id":"line-total-wins-over-value-times-quantity","given":{"services":[],"products":[{"value":10,"quantity":3,"total":25}],"discount":0},"expect":{"total":25,"unpricedCount":0,"paymentMathTotal":25}},
+    {"id":"product-without-line-total-as-the-api-writes-it","given":{"services":[],"products":[{"value":10,"quantity":3}],"discount":0},"expect":{"total":30,"unpricedCount":0,"paymentMathTotal":0},"note":"A API e o MCP gravam produto sem `total`. computeTotal conta 0: remover desconto nessa OS grava total errado.","correct":{"total":30,"unpricedCount":0,"paymentMathTotal":30}},
+    {"id":"product-without-quantity-counts-one","given":{"services":[],"products":[{"value":10}],"discount":0},"expect":{"total":10,"unpricedCount":0,"paymentMathTotal":0},"correct":{"total":10,"unpricedCount":0,"paymentMathTotal":10}},
+    {"id":"unpriced-product-ignores-stale-line-total","given":{"services":[],"products":[{"quantity":2,"total":40}],"discount":0},"expect":{"total":0,"unpricedCount":1,"paymentMathTotal":40},"note":"Sem `value` o item é \"sem valor\", mesmo com `total` antigo. computeTotal soma o `total`.","correct":{"total":0,"unpricedCount":1,"paymentMathTotal":0}},
+    {"id":"unpriced-service","given":{"services":[{"value":null},{"value":80}],"products":[],"discount":0},"expect":{"total":80,"unpricedCount":1,"paymentMathTotal":80}},
+    {"id":"zero-is-a-price","given":{"services":[{"value":0}],"products":[{"value":0,"quantity":1,"total":0}],"discount":0},"expect":{"total":0,"unpricedCount":0,"paymentMathTotal":0}},
+    {"id":"float-noise-is-rounded","given":{"services":[{"value":0.1},{"value":0.2}],"products":[],"discount":0},"expect":{"total":0.3,"unpricedCount":0,"paymentMathTotal":0.3}},
+    {"id":"discount-lowers-total","given":{"services":[{"value":100}],"products":[{"value":25.5,"quantity":2,"total":51}],"discount":11.5},"expect":{"total":139.5,"unpricedCount":0,"paymentMathTotal":139.5}},
+    {"id":"discount-above-items-goes-negative","given":{"services":[{"value":50}],"products":[],"discount":80},"expect":{"total":-30,"unpricedCount":0,"paymentMathTotal":-30},"note":"O app não limita aqui. O servidor limita a 0 em applyPaymentTransaction."},
+    {"id":"half-cent-rounds-away-from-zero-when-negative","given":{"services":[{"value":0.125}],"products":[],"discount":0.25},"expect":{"total":-0.13,"unpricedCount":0,"paymentMathTotal":-0.13},"note":"Dart roundToDouble: -12.5 vira -13. Math.round do JS daria -12. Quem roda em JS usa arredondamento simétrico."}
+  ]
+}

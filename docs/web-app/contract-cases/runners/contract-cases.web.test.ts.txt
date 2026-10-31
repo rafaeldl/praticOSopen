@@ -1,0 +1,56 @@
+// Proposed location: firebase/web/tests/contract-cases.test.ts
+// Runs by `npm test` in firebase/web. A case with `correct` documents an app
+// bug: the web follows `correct`.
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import {
+  allowedTransitions, applyPaymentOp, orderPermissions, orderTotal, paymentStatus, remainingBalance,
+} from '../utils/order-rules.ts'
+
+const dir = new URL(process.env.CONTRACT_CASES_DIR ?? '../../../docs/web-app/contract-cases/', import.meta.url)
+const cases = (file: string): any[] => JSON.parse(readFileSync(new URL(file, dir), 'utf8')).cases
+
+for (const c of cases('order-totals.json')) {
+  test(`order-totals ${c.id}`, () => {
+    const want = c.correct ?? c.expect
+    const got = orderTotal(c.given.services, c.given.products, c.given.discount)
+    assert.deepEqual(got, { total: want.total, unpricedCount: want.unpricedCount })
+  })
+}
+
+for (const c of cases('payment-status.json')) {
+  test(`payment-status ${c.id}`, () => {
+    const { status, total, paidAmount } = c.given
+    assert.deepEqual(
+      { ...paymentStatus(status, total, paidAmount), remaining: remainingBalance(total, paidAmount) },
+      c.expect,
+    )
+  })
+}
+
+for (const c of cases('payment-transactions.json')) {
+  test(`payment-transactions ${c.id}`, () => {
+    const want = c.correct ?? c.expect
+    const got: any = applyPaymentOp(c.given.order, c.given.op)
+    if (want.error) return assert.equal(got.error, want.error)
+    const { transactionIds, transactionCount, ...values } = want
+    const { transactions, ...rest } = got
+    assert.deepEqual(rest, values)
+    if (transactionIds) assert.deepEqual(transactions.map((t: any) => t.id), transactionIds)
+    if (transactionCount !== undefined) assert.equal(transactions.length, transactionCount)
+  })
+}
+
+for (const c of cases('status-transitions.json')) {
+  test(`status-transitions ${c.id}`, () => {
+    const { role, isCreator, from } = c.given
+    assert.deepEqual([...allowedTransitions(role, isCreator, from)].sort(), [...c.expect.allowed].sort())
+  })
+}
+
+for (const c of cases('order-permissions.json')) {
+  test(`order-permissions ${c.id}`, () => {
+    assert.deepEqual(orderPermissions(c.given.role, c.given.isCreator, c.given.status), c.expect)
+  })
+}
