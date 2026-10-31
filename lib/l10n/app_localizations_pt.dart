@@ -5343,6 +5343,88 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nfseStatusError => 'Erro na prefeitura';
 
   @override
+  String get nfseListTitle => 'Notas fiscais';
+
+  @override
+  String nfseListCustomerTitle(String name) {
+    return 'Notas de $name';
+  }
+
+  @override
+  String nfseListSummary(int count, String month, String value) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Em $month saíram $count notas, no total de $value.',
+      one: 'Em $month saiu 1 nota, de $value.',
+      zero: 'Nenhuma nota saiu em $month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListEmpty(String month) {
+    return 'Nenhuma nota em $month';
+  }
+
+  @override
+  String get nfseListEmptyHint => 'Para emitir, abra a OS e toque em “…”.';
+
+  @override
+  String get nfseListSearch => 'Cliente, número da nota ou OS';
+
+  @override
+  String get nfseListAttention => 'Precisa de atenção';
+
+  @override
+  String nfseListAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count precisam de atenção',
+      one: '1 precisa de atenção',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListNumber(String number) {
+    return 'Nota $number';
+  }
+
+  @override
+  String nfseListOrders(String numbers) {
+    return 'OS $numbers';
+  }
+
+  @override
+  String get nfseListOnlyServices =>
+      'Só os serviços entram na nota. As peças ficam de fora, por isso o total é diferente do Vendido.';
+
+  @override
+  String nfseListNoResults(String month) {
+    return 'Nada encontrado em $month.';
+  }
+
+  @override
+  String get nfseListMenu => 'Mais opções das notas';
+
+  @override
+  String get nfseListSetup => 'Configurar nota fiscal';
+
+  @override
+  String get nfseNotIssued => 'Não emitida';
+
+  @override
+  String get nfseIssueLink => 'Emitir';
+
+  @override
+  String get nfseFixAndIssue => 'Corrigir e emitir';
+
+  @override
+  String get nfseSharePdf => 'Compartilhar PDF';
+
+  @override
   String get nfseRowTitle => 'Nota fiscal';
 
   @override

@@ -171,6 +171,13 @@ class NfseInvoice {
     return true;
   }
 
+  /// Issued and still valid: counts in the month's total. A nota whose
+  /// cancellation was denied keeps valid; one in conflict is not ours.
+  bool get isIssued =>
+      !conflict &&
+      (status == NfseStatus.authorized ||
+          status == NfseStatus.cancellationDenied);
+
   /// The user may ask to cancel it.
   bool get canCancel =>
       status == NfseStatus.scheduled ||
@@ -200,6 +207,135 @@ NfseInvoice? currentInvoiceOf(List<NfseInvoice> invoices, {DateTime? now}) {
   final latest = sorted.first;
   // A stale "creating" never reached Asaas: nothing to show.
   return latest.status == NfseStatus.creating ? null : latest;
+}
+
+/// The notas of one month, as the list shows them.
+class NfseMonthList {
+  const NfseMonthList({
+    required this.attention,
+    required this.rows,
+    required this.issuedCount,
+    required this.issuedTotal,
+  });
+
+  /// Problems waiting for the user, of the recent months (see
+  /// [nfseMonthList]).
+  final List<NfseInvoice> attention;
+
+  /// The month's notas, newest first, without the ones in [attention].
+  final List<NfseInvoice> rows;
+  final int issuedCount;
+  final double issuedTotal;
+
+  bool get isEmpty => attention.isEmpty && rows.isEmpty;
+}
+
+DateTime _monthOf(DateTime day) => DateTime(day.year, day.month);
+
+/// First day read for [month]: that month, or the month before today when
+/// it is earlier, so a problem does not vanish when the month turns.
+DateTime nfseQuerySince(DateTime month, {DateTime? now}) {
+  final today = now ?? DateTime.now();
+  final previous = DateTime(today.year, today.month - 1);
+  final start = _monthOf(month);
+  return start.isBefore(previous) ? start : previous;
+}
+
+/// Splits [invoices] for [month].
+///
+/// A refused nota stays in the database forever, so one whose orders all
+/// have an active nota again is hidden (it never was a nota). A `creating`
+/// nota past [NfseInvoice.staleCreating] never reached Asaas: hidden too.
+/// Problems older than the month before today leave the list and stay only
+/// on the order.
+NfseMonthList nfseMonthList(
+  List<NfseInvoice> invoices,
+  DateTime month, {
+  DateTime? now,
+}) {
+  final today = now ?? DateTime.now();
+  final attentionSince = DateTime(today.year, today.month - 1);
+  final covered = <String>{
+    for (final invoice in invoices)
+      if (invoice.isActive(now: today)) ...invoice.orderIds,
+  };
+  bool reissued(NfseInvoice invoice) =>
+      invoice.orderIds.isNotEmpty && invoice.orderIds.every(covered.contains);
+  bool problem(NfseInvoice invoice) =>
+      invoice.conflict ||
+      invoice.status == NfseStatus.cancellationDenied ||
+      (invoice.status == NfseStatus.error && !reissued(invoice));
+
+  final newestFirst = [...invoices]
+    ..sort((a, b) {
+      final day = (b.effectiveDate ?? '').compareTo(a.effectiveDate ?? '');
+      if (day != 0) return day;
+      return (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0));
+    });
+  final start = _monthOf(month);
+  final attention = <NfseInvoice>[];
+  final rows = <NfseInvoice>[];
+  var issuedCount = 0;
+  var cents = 0;
+  for (final invoice in newestFirst) {
+    final day = invoice.effectiveDay;
+    if (day == null) continue;
+    final inMonth = _monthOf(day) == start;
+    if (inMonth && invoice.isIssued) {
+      issuedCount++;
+      cents += (invoice.value * 100).round();
+    }
+    if (problem(invoice)) {
+      if (!day.isBefore(attentionSince)) attention.add(invoice);
+      continue;
+    }
+    if (!inMonth || invoice.status == NfseStatus.error) continue;
+    if (invoice.status == NfseStatus.creating &&
+        !invoice.isActive(now: today)) {
+      continue;
+    }
+    rows.add(invoice);
+  }
+  return NfseMonthList(
+    attention: attention,
+    rows: rows,
+    issuedCount: issuedCount,
+    issuedTotal: cents / 100,
+  );
+}
+
+String _searchable(String text) {
+  const accents = {
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ã': 'a',
+    'é': 'e',
+    'ê': 'e',
+    'í': 'i',
+    'ó': 'o',
+    'ô': 'o',
+    'õ': 'o',
+    'ú': 'u',
+    'ü': 'u',
+    'ç': 'c',
+    'ñ': 'n',
+  };
+  return text
+      .toLowerCase()
+      .split('')
+      .map((letter) => accents[letter] ?? letter)
+      .join();
+}
+
+/// The nota has [query] in the customer's name, its number or an order
+/// number. Accents and case do not matter.
+bool nfseMatches(NfseInvoice invoice, String query) {
+  final term = _searchable(query.trim());
+  if (term.isEmpty) return true;
+  return _searchable(invoice.customerName ?? '').contains(term) ||
+      (invoice.number ?? '').contains(term) ||
+      invoice.orders.any((o) => '${o.orderNumber ?? ''}'.contains(term));
 }
 
 /// One order of the preview.

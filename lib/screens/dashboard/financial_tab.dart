@@ -8,6 +8,8 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:praticos/screens/dashboard/financial_list_screen.dart';
 import 'package:praticos/screens/dashboard/financial_report_screen.dart';
+import 'package:praticos/screens/nfse/nfse_access.dart';
+import 'package:praticos/screens/nfse/nfse_list_screen.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
 import 'package:praticos/screens/payments/send_charge_flow.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -43,9 +45,14 @@ class FinancialTab extends StatefulWidget {
     this.onOpenReport,
     this.sendChargeFlow,
     this.onReceiveFromCustomer,
+    this.nfse,
   });
 
   final FinancialTabStore? store;
+
+  /// Notas of the month's row (tests); defaults to a new [NfseController]
+  /// that stays off unless the company has `nfseEnabled`.
+  final NfseController? nfse;
 
   /// Opens the Receber of one order.
   final void Function(BuildContext context, Order order)? onOpenOrder;
@@ -552,6 +559,11 @@ class _FinancialTabState extends State<FinancialTab> {
                   ),
                 ],
               ),
+            NfseMonthRow(
+              month: _store.month,
+              nfse: widget.nfse,
+              wrap: (row) => _GroupedSection(children: [row]),
+            ),
           ],
         ),
       ),
@@ -673,9 +685,9 @@ class _MonthBlock extends StatelessWidget {
 
 /// [SectionLabel] above an inset grouped list.
 class _GroupedSection extends StatelessWidget {
-  const _GroupedSection({required this.label, required this.children});
+  const _GroupedSection({this.label, required this.children});
 
-  final String label;
+  final String? label;
   final List<Widget> children;
 
   @override
@@ -683,7 +695,10 @@ class _GroupedSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(label),
+        if (label == null)
+          const SizedBox(height: AppSpacing.lg)
+        else
+          SectionLabel(label!),
         CupertinoListSection.insetGrouped(
           margin: const EdgeInsets.symmetric(
             horizontal: AppSpacing.blockMargin,

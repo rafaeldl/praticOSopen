@@ -47,10 +47,12 @@ bool orderCanHaveNfse(Order order) =>
     order.status != 'canceled' &&
     nfseValueOfOrder(order) > 0;
 
+enum _NfseScope { order, customer, since }
+
 /// Watches whether notas are on for the company and the user
 /// (`settings/payments` `nfseEnabled` + Asaas connected, and the
-/// `chargeOrder` permission) and, once [watchOrder]/[watchCustomer] is
-/// called, the notas of that order or customer.
+/// `chargeOrder` permission) and, once [watchOrder], [watchCustomer] or
+/// [watchMonth] is called, the notas of that order, customer or month.
 ///
 /// With the flag off nothing is read beyond the settings, and [enabled]
 /// stays false: nothing about notas shows. Firestore rules deny reading
@@ -80,7 +82,9 @@ class NfseController extends ChangeNotifier {
   PaymentSettings? _settings;
   List<NfseInvoice> _invoices = const [];
   String? _watching;
-  bool _byCustomer = false;
+  _NfseScope _scope = _NfseScope.order;
+  bool _loaded = false;
+  bool _failed = false;
   bool _disposed = false;
 
   /// Notas are on for this company and user.
@@ -95,6 +99,12 @@ class NfseController extends ChangeNotifier {
   /// Notas of the watched order or customer (empty while disabled).
   List<NfseInvoice> get invoices => enabled ? _invoices : const [];
 
+  /// The watched notas arrived (or failed to).
+  bool get loaded => _loaded;
+
+  /// The watched notas could not be read.
+  bool get failed => _failed;
+
   /// The nota that represents the watched order (see [currentInvoiceOf]).
   NfseInvoice? get current => currentInvoiceOf(invoices);
 
@@ -105,16 +115,25 @@ class NfseController extends ChangeNotifier {
   };
 
   /// Watches the notas of [orderId] (idempotent).
-  void watchOrder(String? orderId) => _watch(orderId, byCustomer: false);
+  void watchOrder(String? orderId) => _watch(orderId, _NfseScope.order);
 
   /// Watches the notas of [customerId] (idempotent).
   void watchCustomer(String? customerId) =>
-      _watch(customerId, byCustomer: true);
+      _watch(customerId, _NfseScope.customer);
 
-  void _watch(String? id, {required bool byCustomer}) {
-    if (id == null || (_watching == id && _byCustomer == byCustomer)) return;
+  /// Watches the notas [month] needs (see [nfseQuerySince], idempotent).
+  void watchMonth(DateTime month) =>
+      _watch(nfseDayKey(nfseQuerySince(month)), _NfseScope.since);
+
+  /// Reads again after [failed].
+  void retry() {
+    if (enabled) _subscribe();
+  }
+
+  void _watch(String? id, _NfseScope scope) {
+    if (id == null || (_watching == id && _scope == scope)) return;
     _watching = id;
-    _byCustomer = byCustomer;
+    _scope = scope;
     if (enabled) _subscribe();
   }
 
@@ -129,14 +148,19 @@ class NfseController extends ChangeNotifier {
   void _subscribe() {
     final id = _watching;
     if (id == null) return;
+    _loaded = false;
+    _failed = false;
     _invoicesSubscription?.cancel();
     _invoicesSubscription = _source(id).listen(
       (list) {
         _invoices = list;
+        _loaded = true;
         _notify();
       },
       onError: (Object _) {
         _invoices = const [];
+        _loaded = true;
+        _failed = true;
         _notify();
       },
     );
@@ -148,9 +172,14 @@ class NfseController extends ChangeNotifier {
     final companyId = Global.companyAggr?.id;
     if (companyId == null) return Stream.value(const []);
     final repository = NfseInvoiceRepository();
-    return _byCustomer
-        ? repository.watchOfCustomer(companyId, id)
-        : repository.watchOfOrder(companyId, id);
+    switch (_scope) {
+      case _NfseScope.order:
+        return repository.watchOfOrder(companyId, id);
+      case _NfseScope.customer:
+        return repository.watchOfCustomer(companyId, id);
+      case _NfseScope.since:
+        return repository.watchSince(companyId, DateTime.parse(id));
+    }
   }
 
   void _notify() {

@@ -15,6 +15,7 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/screens/device_form_screen.dart';
+import 'package:praticos/models/nfse.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_detail_screen.dart';
@@ -1048,6 +1049,50 @@ void main() {
       await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
       await tester.pumpAndSettle();
     }
+
+    testWidgets('notas of the customer: a row with the count', (tester) async {
+      final h = Harness();
+      await h.pump(
+        tester,
+        CustomerDetailScreen(
+          can: (_) => true,
+          customer: ana,
+          directory: FakeDirectory(),
+          showPrices: true,
+          canReceiveOn: (_) => true,
+          nfse: NfseController(
+            canIssue: true,
+            settingsStream: Stream.value(
+              PaymentSettings(
+                asaasEnabled: true,
+                asaasConnected: true,
+                nfseEnabled: true,
+              ),
+            ),
+            invoicesOf: (_) => Stream.value([
+              NfseInvoice.fromJson({'status': 'authorized'}, id: 'a'),
+              NfseInvoice.fromJson({'status': 'authorized'}, id: 'b'),
+              NfseInvoice.fromJson({'status': 'canceled'}, id: 'c'),
+            ]),
+          ),
+        ),
+        direct: true,
+      );
+      expect(find.byKey(const Key('customerNfse')), findsOneWidget);
+      expect(find.text('Notas fiscais'), findsOneWidget);
+    });
+
+    testWidgets('no notas: no row', (tester) async {
+      await pumpWithNfse(
+        tester,
+        PaymentSettings(
+          asaasEnabled: true,
+          asaasConnected: true,
+          nfseEnabled: true,
+        ),
+      );
+      expect(find.byKey(const Key('customerNfse')), findsNothing);
+    });
 
     testWidgets('"…" has no nota action while notas are off', (tester) async {
       await pumpWithNfse(

@@ -5349,6 +5349,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nfseStatusError => 'Refused by the city';
 
   @override
+  String get nfseListTitle => 'Service invoices';
+
+  @override
+  String nfseListCustomerTitle(String name) {
+    return 'Invoices for $name';
+  }
+
+  @override
+  String nfseListSummary(int count, String month, String value) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invoices went out in $month, for a total of $value.',
+      one: '1 invoice went out in $month, for $value.',
+      zero: 'No invoices went out in $month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListEmpty(String month) {
+    return 'No invoices in $month';
+  }
+
+  @override
+  String get nfseListEmptyHint => 'To issue one, open the order and tap “…”.';
+
+  @override
+  String get nfseListSearch => 'Customer, invoice or order number';
+
+  @override
+  String get nfseListAttention => 'Needs attention';
+
+  @override
+  String nfseListAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count need attention',
+      one: '1 needs attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nfseListNumber(String number) {
+    return 'Invoice $number';
+  }
+
+  @override
+  String nfseListOrders(String numbers) {
+    return 'Order $numbers';
+  }
+
+  @override
+  String get nfseListOnlyServices =>
+      'Only services go on the invoice. Parts stay out, so the total differs from Sold.';
+
+  @override
+  String nfseListNoResults(String month) {
+    return 'Nothing found in $month.';
+  }
+
+  @override
+  String get nfseListMenu => 'More invoice options';
+
+  @override
+  String get nfseListSetup => 'Set up invoices';
+
+  @override
+  String get nfseNotIssued => 'Not issued';
+
+  @override
+  String get nfseIssueLink => 'Issue';
+
+  @override
+  String get nfseFixAndIssue => 'Fix and issue';
+
+  @override
+  String get nfseSharePdf => 'Share PDF';
+
+  @override
   String get nfseRowTitle => 'Service invoice';
 
   @override

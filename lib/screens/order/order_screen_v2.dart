@@ -25,6 +25,7 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/catalog/catalog_source.dart';
+import 'package:praticos/models/nfse.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/screens/nfse/nfse_invoice_screen.dart';
 import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
@@ -954,6 +955,20 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       orderCanHaveNfse(order) &&
       (_nfse.current?.isActive() != true);
 
+  /// Next step of a finished, paid order: its nota. Not again after one was
+  /// canceled on purpose, and not before the setup is done.
+  (String, VoidCallback)? _nfseAction(Order order) {
+    if (!_nfse.ready || !_canIssueNfse(order)) return null;
+    final current = _nfse.current;
+    if (current != null && current.status != NfseStatus.error) return null;
+    return (
+      current == null
+          ? context.l10n.nfseIssueAction
+          : context.l10n.nfseFixAndIssue,
+      () => _issueNfse(order),
+    );
+  }
+
   Future<void> _issueNfse(Order order) async {
     if (!_nfse.ready) {
       await showNfseNotReady(context, sandbox: _nfse.sandbox);
@@ -973,10 +988,58 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
   }
 
+  /// A finished order without a nota: "Não emitida" when the blue button
+  /// already offers it, else the "Emitir" link (the nota may come before the
+  /// money). Other statuses keep it in the "…".
+  Widget? _buildNfseIssueRow() {
+    final order = _store.order;
+    if (order == null ||
+        _store.status != 'done' ||
+        !_nfse.ready ||
+        !_canIssueNfse(order)) {
+      return null;
+    }
+    final l10n = context.l10n;
+    final issuedByButton = _store.remainingBalance <= 0;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pageMargin),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.nfseRowTitle,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.text.resolveFrom(context),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              issuedByButton ? l10n.nfseNotIssued : l10n.nfseIssueLink,
+              style: AppTypography.body.copyWith(
+                color: issuedByButton
+                    ? AppColors.textSecondary.resolveFrom(context)
+                    : AppColors.accentText.resolveFrom(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (issuedByButton) return row;
+    return _tappable(
+      key: const ValueKey('order_nfse_issue'),
+      onTap: () => _issueNfse(order),
+      child: row,
+    );
+  }
+
   /// "Nota fiscal · Emitida": the nota of the order, when there is one.
   Widget? _buildNfseRow() {
     final invoice = _nfse.current;
-    if (invoice == null) return null;
+    if (invoice == null) return _buildNfseIssueRow();
     final secondary = AppColors.textSecondary.resolveFrom(context);
     return _tappable(
       key: const ValueKey('order_nfse'),
@@ -2823,7 +2886,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         return to(l10n.orderActionMarkReady, 'done');
       case 'done':
         final remaining = _store.remainingBalance;
-        if (!_canReceive(config) || remaining <= 0) return null;
+        if (remaining <= 0) return _nfseAction(order);
+        if (!_canReceive(config)) return null;
         return (
           l10n.orderNextStepReceive(_format.formatCurrency(remaining)),
           () => _actions.openPayments(context, _store),
