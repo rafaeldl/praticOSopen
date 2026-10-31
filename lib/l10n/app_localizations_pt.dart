@@ -5500,7 +5500,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseHeadNotIssued =>
-      'A nota não saiu. Corrija o motivo abaixo e emita de novo pelo menu da OS.';
+      'A nota não saiu. Corrija o motivo abaixo e emita de novo.';
 
   @override
   String get nfseNothingToIssue => 'Nada para emitir: a nota ficaria sem valor';
@@ -5792,7 +5792,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nfseHeadAutoError =>
-      'A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.';
+      'A nota não saiu sozinha. Corrija o motivo abaixo e emita.';
 
   @override
   String get nfseAutoReasonLabel => 'Por que não saiu';

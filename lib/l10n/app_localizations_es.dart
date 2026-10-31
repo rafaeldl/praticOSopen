@@ -5514,7 +5514,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseHeadNotIssued =>
-      'La factura no salió. Corrige el motivo de abajo y emítela de nuevo desde el menú de la OS.';
+      'La factura no salió. Corrige el motivo de abajo y emítela de nuevo.';
 
   @override
   String get nfseNothingToIssue =>
@@ -5808,7 +5808,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nfseHeadAutoError =>
-      'La factura no salió sola. Corrige el motivo de abajo y emítela desde el menú de la OS.';
+      'La factura no salió sola. Corrige el motivo de abajo y emítela.';
 
   @override
   String get nfseAutoReasonLabel => 'Por qué no salió';

@@ -9131,7 +9131,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseHeadNotIssued.
   ///
   /// In pt, this message translates to:
-  /// **'A nota não saiu. Corrija o motivo abaixo e emita de novo pelo menu da OS.'**
+  /// **'A nota não saiu. Corrija o motivo abaixo e emita de novo.'**
   String get nfseHeadNotIssued;
 
   /// No description provided for @nfseNothingToIssue.
@@ -9635,7 +9635,7 @@ abstract class AppLocalizations {
   /// No description provided for @nfseHeadAutoError.
   ///
   /// In pt, this message translates to:
-  /// **'A nota não saiu sozinha. Corrija o motivo abaixo e emita pelo menu da OS.'**
+  /// **'A nota não saiu sozinha. Corrija o motivo abaixo e emita.'**
   String get nfseHeadAutoError;
 
   /// No description provided for @nfseAutoReasonLabel.

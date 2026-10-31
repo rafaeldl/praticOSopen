@@ -5506,7 +5506,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseHeadNotIssued =>
-      'The invoice did not go out. Fix the reason below and issue it again from the order menu.';
+      'The invoice did not go out. Fix the reason below and issue it again.';
 
   @override
   String get nfseNothingToIssue =>
@@ -5799,7 +5799,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nfseHeadAutoError =>
-      'The invoice did not go out by itself. Fix the reason below and issue it from the order menu.';
+      'The invoice did not go out by itself. Fix the reason below and issue it.';
 
   @override
   String get nfseAutoReasonLabel => 'Why it did not go out';

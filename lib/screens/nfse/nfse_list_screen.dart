@@ -384,9 +384,14 @@ class _Problem extends StatelessWidget {
     final l10n = context.l10n;
     final reason = invoice.conflict
         ? l10n.nfseConflictNotice
-        : invoice.status == NfseStatus.error
-        ? nfseReasonText(l10n, invoice)
-        : null;
+        : invoice.status != NfseStatus.error
+        ? null
+        : invoice.errorCode == 'CUSTOMER_DATA_REQUIRED'
+        // The same long text on many rows is noise: the detail has it whole.
+        ? l10n.nfseCustomerDataMissing
+        : invoice.errorCode == 'TAX_ID_REQUIRED'
+        ? l10n.nfseTaxIdMissing
+        : nfseReasonText(l10n, invoice);
     if (reason == null) return NfseStatusLine(invoice: invoice);
     final danger = AppColors.danger.resolveFrom(context);
     return Row(
@@ -400,6 +405,8 @@ class _Problem extends StatelessWidget {
         Expanded(
           child: Text(
             reason,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: AppTypography.callout.copyWith(
               color: danger,
               fontWeight: FontWeight.w600,

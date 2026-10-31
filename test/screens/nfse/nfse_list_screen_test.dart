@@ -130,6 +130,24 @@ void main() {
     expect(top, lessThan(tester.getTopLeft(find.text('Ana Ribeiro')).dy));
   });
 
+  testWidgets('missing customer data reads short on the row', (tester) async {
+    await _pump(
+      tester,
+      _screen([
+        _nota(
+          'bad',
+          status: 'error',
+          number: null,
+          extra: {'errorCode': 'CUSTOMER_DATA_REQUIRED'},
+        ),
+      ]),
+    );
+    expect(
+      find.text('Falta o e-mail ou o endereço do cliente'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('the search appears past ten notas and filters', (tester) async {
     await _pump(tester, _screen([_nota('a')]));
     expect(find.byKey(const Key('nfseListSearch')), findsNothing);
