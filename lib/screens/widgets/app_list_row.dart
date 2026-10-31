@@ -29,6 +29,7 @@ class AppListRow extends StatelessWidget {
     this.marked = false,
     this.selected = false,
     this.valueBesideTitle = false,
+    this.horizontalPadding = AppSpacing.pageMargin,
   });
 
   final String title;
@@ -61,6 +62,9 @@ class AppListRow extends StatelessWidget {
   /// title line, in the text color, and the [subtitle] takes the full width
   /// under both ("Ana Ribeiro      R\$ 1.250" / "OS 183 · desde 02/10").
   final bool valueBesideTitle;
+
+  /// Side padding. Rows inside a card use a smaller one than the page margin.
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +132,8 @@ class AppListRow extends StatelessWidget {
     final row = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.pageMargin,
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
           vertical: AppSpacing.md,
         ),
         child: Row(

@@ -68,6 +68,24 @@ mixin _$FinancialTabStore on _FinancialTabStore, Store {
     });
   }
 
+  late final _$monthLoadingAtom = Atom(
+    name: '_FinancialTabStore.monthLoading',
+    context: context,
+  );
+
+  @override
+  bool get monthLoading {
+    _$monthLoadingAtom.reportRead();
+    return super.monthLoading;
+  }
+
+  @override
+  set monthLoading(bool value) {
+    _$monthLoadingAtom.reportWrite(value, super.monthLoading, () {
+      super.monthLoading = value;
+    });
+  }
+
   late final _$monthOrdersAtom = Atom(
     name: '_FinancialTabStore.monthOrders',
     context: context,
@@ -122,6 +140,24 @@ mixin _$FinancialTabStore on _FinancialTabStore, Store {
     });
   }
 
+  late final _$nextChargeAtom = Atom(
+    name: '_FinancialTabStore.nextCharge',
+    context: context,
+  );
+
+  @override
+  Debtor? get nextCharge {
+    _$nextChargeAtom.reportRead();
+    return super.nextCharge;
+  }
+
+  @override
+  set nextCharge(Debtor? value) {
+    _$nextChargeAtom.reportWrite(value, super.nextCharge, () {
+      super.nextCharge = value;
+    });
+  }
+
   late final _$loadAsyncAction = AsyncAction(
     '_FinancialTabStore.load',
     context: context,
@@ -147,9 +183,11 @@ mixin _$FinancialTabStore on _FinancialTabStore, Store {
     return '''
 status: ${status},
 monthOffset: ${monthOffset},
+monthLoading: ${monthLoading},
 monthOrders: ${monthOrders},
 openOrders: ${openOrders},
 paidOrders: ${paidOrders},
+nextCharge: ${nextCharge},
 month: ${month},
 isCurrentMonth: ${isCurrentMonth},
 summary: ${summary}

@@ -38,6 +38,10 @@ export const firestoreUpdateTenantOSNumber = functionsV1
   .firestore.document('companies/{companyId}/orders/{orderId}')
   .onCreate(async (snapshot: FirebaseFirestore.DocumentSnapshot, context: functionsV1.EventContext) => {
     const data = snapshot.data();
+    // Never blocks the numbering below.
+    await stampCompletedAtOnCreate(context.params.companyId, snapshot.id, data, context.timestamp).catch((error) =>
+      console.error('Could not stamp completedAt on order creation', error),
+    );
     if (!data || data.number) return;
 
     const companyId = context.params.companyId;
@@ -111,6 +115,7 @@ export const updateUserClaims = functionsV1
   });
 
 import { handleOrderUpdatedAsaas } from './services/asaas/order-trigger.service';
+import { stampCompletedAtOnCreate } from './services/order-completion.service';
 
 /**
  * Asaas master key (AES-256-GCM, base64 of 32 bytes) — see services/asaas/crypto.ts.
@@ -137,7 +142,8 @@ const revenuecatSecretApiKey = defineSecret('REVENUECAT_SECRET_API_KEY');
  * - status changed to `canceled` → cancels open charges on Asaas;
  * - `transactions` changed and Asaas connected → restores Asaas payments
  *   overwritten by old app versions and fixes inconsistent payment fields.
- * No-op unless the company has Asaas connected. Logic lives in
+ * - status entered or left `done` → keeps `completedAt` (every company).
+ * The Asaas branches are no-ops unless the company has Asaas connected. Logic lives in
  * services/asaas/order-trigger.service.ts.
  */
 export const onOrderUpdatedAsaas = onDocumentUpdated(
@@ -148,7 +154,7 @@ export const onOrderUpdatedAsaas = onDocumentUpdated(
   },
   async (event) => {
     const { companyId, orderId } = event.params;
-    await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data());
+    await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data(), event.time);
   }
 );
 

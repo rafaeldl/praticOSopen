@@ -99,7 +99,7 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
   `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
 
 **Entradas:**
-- Aba Financeiro: cliente com 2+ OS em aberto (também nas linhas de "Ver todos").
+- Aba Financeiro: na lista de A receber, cliente com 2+ OS em aberto.
   Com 1 OS vai direto ao Receber da OS. OS sem cliente continuam no "Qual OS?".
 - Tela do cliente: link "Receber" ao lado de "Falta receber R$ X" (mesma regra do Receber,
   `AuthorizationService.canReceiveOnOrder`: aparece se a pessoa pode receber em pelo menos uma
@@ -251,38 +251,105 @@ Cada transação registra:
 
 ---
 
-## Aba Financeiro ("Quem me deve")
+## Aba Financeiro
 
-Aba fixa na barra inferior (requer `viewFinancialReports`). Responde só "quem me deve":
+Aba fixa na barra inferior (requer `viewFinancialReports`). Separa o que muda com o mês do que é de
+hoje e mostra só 5 valores; o detalhe fica nas telas seguintes.
 
-- **Mês** com setas (`PeriodStepper`); o mês seguinte fica desabilitado no mês atual.
-- **Próximo passo**: quem deve há mais tempo e o botão azul "Mandar cobrança para ...". Com Asaas
-  conectado gera a cobrança da OS em aberto mais antiga desse cliente e depois compartilha o link
-  (uma vez só, toque duplo ignorado); sem Asaas compartilha o link da OS. Sem dívida, o bloco some.
-- **Falta receber**: **tudo** o que está em aberto, de qualquer mês (sem orçamento, sem OS
-  cancelada, sem OS paga), agrupado por cliente, mais antigo primeiro ("N OS · desde 02/10";
-  outro ano mostra o ano). 5 linhas + "Ver todos (N)".
-  Tocar no cliente: com uma OS abre o **Receber** dessa OS; com várias abre **Receber de {cliente}**
-  (ver acima). OS sem cliente continuam abrindo a escolha "Qual OS?".
-- **Recebido em {mês}**: uma linha com o dinheiro que entrou no mês, pelo dia de cada pagamento
-  (`paidAt ?? createdAt`), em OS de qualquer mês (`getOrdersPaidSince`, pelo campo `lastPaymentAt`
-  que o gatilho da OS mantém). OS antigas sem transações contam no mês em que foram criadas. A linha abre o
-  Relatório, que continua listando as OS **criadas** no período.
-- OS ativas sem `payment` ou com o antigo `partial` ficam fora de "Falta receber". O script
-  `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses dados e preenche
+**Muda com o mês** (`PeriodStepper`; o mês seguinte fica desabilitado no mês atual). Dois blocos lado
+a lado, só rótulo, valor e chevron; com letra grande de acessibilidade, um embaixo do outro. Ao trocar
+o mês só esses dois recarregam (`monthLoading` mostra o indicador no lugar do valor); o resto da tela
+fica como está.
+
+- **Recebido**: todo pagamento na data em que entrou (`paidAt ?? createdAt`), inclusive entrada e
+  parcela, com a OS concluída ou não, em OS de qualquer mês (`getOrdersPaidSince`, pelo campo
+  `lastPaymentAt` que o gatilho da OS mantém). OS antigas sem transações contam no mês em que foram
+  criadas. Abre a lista das OS com dinheiro no mês, pagamento mais recente primeiro, cada linha com o
+  que entrou nela naquele mês; a soma das linhas é o Recebido. Tocar abre a OS.
+- **Vendido**: soma de `total` das OS abertas no mês (`createdAt`), sem orçamento e sem cancelada
+  (`FinancialSummary.isSold`, a mesma regra do Relatório). Abre a lista das OS do mês, mais nova
+  primeiro; tocar abre a OS.
+
+**Hoje** (lista agrupada, não muda com o mês):
+
+- **A receber**: saldo (`total - paidAmount`) das OS com `status == 'done'`, `payment != 'paid'` e
+  saldo > 0 (`FinancialSummary.isReceivable`), sem limite de antiguidade. Abre a lista por cliente,
+  mais antigo primeiro: título "A receber", subtítulo "{valor} de {n} clientes", linhas com cliente,
+  valor e "desde {data}" (abertura da OS concluída mais antiga). OS sem cliente entram juntas como
+  "Cliente sem nome".
+- **Em andamento**: saldo das OS `approved` ou `progress` (`FinancialSummary.isInProgress`). Abre a
+  lista das OS, mais antiga primeiro; tocar abre a OS. Quando a OS é concluída, o saldo passa para A
+  receber.
+
+**Receber não é filtrado:** o filtro por concluída vale só para o que aparece. `FinancialSummary.isOpen`
+e `openOrdersOldestFirst` continuam cobrindo toda OS ativa com saldo. Tocar num cliente de A receber
+vai por `Debtor.openOrders` (todas as OS em aberto dele, concluídas ou não): com uma OS abre o
+**Receber** dela; com várias abre **Receber de {cliente}** (ver acima), que começa só com as OS de A
+receber marcadas (`checkedOrderIds`), então abre com o valor da linha; as outras ficam na lista,
+desmarcadas. OS sem cliente continuam abrindo a escolha "Qual OS?".
+
+**Próxima cobrança** (`lib/utils/next_charge.dart`): uma linha com cliente e valor. Tocar abre uma
+folha de ações com "{nome} deve {valor} desde {data}", **Mandar cobrança**, **Agora não** e Cancelar.
+Sem candidato, a seção some.
+
+- Candidatos: clientes de A receber sem "Agora não" nos últimos 30 dias e sem link em aberto. O link é
+  lido nas OS em aberto do cliente (`orders/{id}/charges`) e em `customerCharges`, um cliente por vez,
+  só até achar o primeiro livre (`OrderChargeRepository.hasOpen`, `CustomerChargeRepository.hasOpen`).
+  Se a leitura falhar a seção some: sugerir poderia duplicar uma cobrança.
+- Ordem: primeiro quem tem "desde" nos últimos 90 dias, da dívida mais antiga para a mais nova; só
+  depois as com mais de 90 dias, da mais nova para a mais antiga.
+- **Mandar cobrança**: usa o `SendChargeFlow` (com Asaas gera a cobrança e compartilha o link; sem
+  Asaas compartilha o link da OS). Cliente com mais de uma OS concluída escolhe antes em "Qual OS?".
+- **Agora não**: pausa o cliente por 30 dias e passa para o próximo. Fica em `SharedPreferences`, por
+  empresa e cliente (`NextChargeSnoozes`), só no aparelho, nada no banco. Nunca tira o cliente de A
+  receber.
+
+Outros pontos:
+
+- A consulta (`getUnpaidOrders`) traz `payment` `unpaid`, `partial` ou `null`: OS aprovada pelo link
+  ou pela API grava só o status e pode ficar com `null`. OS sem o campo `payment` ficam de fora; o
+  script `firebase/functions/scripts/backfill-order-payment-status.ts` corrige esses dados e preenche
   `lastPaymentAt` nas OS antigas (simula por padrão; `--apply` grava).
-- Mês sem OS, sem dívida e sem dinheiro recebido: `EmptyState`. Erro: mensagem fixa + "Tentar novamente".
-- "…" abre o Relatório e "Outro período" (seletor de datas).
+- Mês sem OS continua mostrando a tela inteira, com os valores zerados. Erro: mensagem fixa +
+  "Tentar novamente".
+- "…" abre o Relatório, no mês escolhido na aba, e "Outro período" (seletor de datas).
 
-Arquivos: `lib/screens/dashboard/financial_tab.dart`, `lib/mobx/financial_tab_store.dart`,
-`lib/utils/financial_summary.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`,
+**Um nome, uma conta.** "Recebido" e "A receber" só aparecem com o sentido acima. O Relatório divide
+o Vendido das OS criadas no período, então usa outros nomes: **Já pago** e **Falta pagar** (as duas
+partes somam o Vendido, salvo OS paga a mais): Recebido é o dinheiro que entrou no mês, de qualquer OS,
+e Já pago é o que foi pago das OS abertas no mês. Na OS e na tela do cliente, "Falta receber" é o
+saldo daquela OS ou de todas as OS em aberto do cliente.
+
+Arquivos: `lib/screens/dashboard/financial_tab.dart`, `lib/screens/dashboard/financial_list_screen.dart`
+(as quatro listas), `lib/mobx/financial_tab_store.dart`, `lib/utils/financial_summary.dart` e
+`lib/utils/next_charge.dart` (contas puras), `lib/screens/widgets/period_stepper.dart`,
 `lib/screens/payments/receive_customer_screen.dart`.
+
+### Data de conclusão da OS (`completedAt`)
+
+Quando a OS passou a `done`, em ISO UTC. Ainda não aparece na tela nem muda nenhuma regra.
+
+- **Só o servidor grava** (`firebase/functions/src/services/order-completion.service.ts`), nos gatilhos
+  `onOrderUpdatedAsaas` (mudança de status, para toda empresa) e `firestoreUpdateTenantOSNumber` (OS
+  criada já concluída). Assim vale para qualquer caminho: tela da OS, API, bot, MCP.
+- Reabrir (sair de `done`, inclusive cancelar) apaga o campo; concluir de novo grava a nova data.
+- O app lê, mas nunca envia: `Order.completedAt` tem `includeToJson: false`, então um save completo
+  com uma cópia velha não sobrescreve. Versões instaladas não conhecem o campo e salvam com
+  `set(merge)` só o que conhecem, o que o preserva.
+- Eventos de gatilho podem repetir ou chegar fora de ordem: cada gravação confere numa transação o
+  status atual da OS, e a data é a hora do evento.
+- OS concluídas antes do campo ficam sem data: não há backfill.
 
 ## Relatório Financeiro
 
 Tela aberta pela aba (`lib/screens/dashboard/financial_report_screen.dart`, rota `/financial_report`).
 Mantém tudo o que o antigo painel tinha: períodos (hoje, semana, mês, ano, outro), faturamento, composição,
 ranking de clientes, serviços e produtos, OS do período e PDF para compartilhar.
+
+Considera as OS criadas no período, **sem orçamentos e sem canceladas** (`FinancialSummary.isSold`):
+vale para todos os totais, rankings, lista de OS e PDF, e o Faturamento do mês bate com o Vendido da aba.
+Dinheiro recebido em OS depois cancelada sai do "Já pago" do Relatório, mas continua no Recebido
+da aba, que conta todo pagamento pela data em que entrou.
 
 ### Acesso
 Aba Financeiro > Relatório Financeiro (requer permissão `viewFinancialReports`)
@@ -291,15 +358,15 @@ Aba Financeiro > Relatório Financeiro (requer permissão `viewFinancialReports`
 
 | Indicador | Descrição |
 |-----------|-----------|
-| Faturamento Total | Soma dos totais de todas as OS filtradas |
-| Valor Recebido | Soma de todos os `paidAmount` |
-| A Receber | Soma de `(total - paidAmount)` das OS não pagas |
+| Vendido | Soma dos totais das OS filtradas (igual ao Vendido da aba no mesmo mês) |
+| Já pago | Soma de todos os `paidAmount` das OS filtradas |
+| Falta pagar | Soma de `(total - paidAmount)` das OS não pagas, concluídas ou não |
 | OS Pagas | Quantidade de OS com status `paid` |
 
 ### Cálculo Considerando Pagamentos Parciais
 
 ```dart
-// Valor Recebido (considera pagamentos parciais)
+// Já pago (considera pagamentos parciais)
 totalPaidAmount = orders.fold(0.0, (sum, order) {
   if (order.payment == 'paid') {
     return sum + (order.paidAmount ?? order.total ?? 0.0);
@@ -307,7 +374,7 @@ totalPaidAmount = orders.fold(0.0, (sum, order) {
   return sum + (order.paidAmount ?? 0.0);
 });
 
-// A Receber (considera saldo restante)
+// Falta pagar (considera saldo restante)
 totalUnpaidAmount = orders
   .where((order) => order.payment != 'paid')
   .fold(0.0, (sum, order) {
@@ -412,6 +479,7 @@ class Order {
   double? paidAmount;      // Total já pago
   String? payment;         // Status: 'unpaid' | 'paid'
   List<PaymentTransaction>? transactions;
+  DateTime? completedAt;   // Quando ficou `done` (só o servidor grava)
 }
 ```
 
@@ -487,7 +555,8 @@ Isso garante que:
 | `lib/models/order.dart` | Campos financeiros da OS |
 | `lib/mobx/order_store.dart` | Lógica de cálculo e ações |
 | `lib/services/pdf/pdf_main_os_builder.dart` | Geração do PDF |
-| `lib/screens/dashboard/financial_tab.dart` | Aba Financeiro (quem me deve) |
+| `lib/screens/dashboard/financial_tab.dart` | Aba Financeiro |
+| `lib/screens/dashboard/financial_list_screen.dart` | Listas de Recebido, Vendido, A receber e Em andamento |
 | `lib/screens/dashboard/financial_report_screen.dart` | Relatório financeiro |
 
 ### Métodos do OrderStore

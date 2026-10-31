@@ -63,7 +63,7 @@
   "payment": "Pagamento",
   "paid": "Pago",
   "unpaid": "Não Pago",
-  "toReceive": "Falta receber",
+  "toReceive": "Falta pagar",
   "received": "Recebido",
   "pix": "PIX",
   "check": "Cheque",
@@ -393,10 +393,10 @@
   "currentYear": "Ano atual",
   "start": "Início",
   "end": "Fim",
-  "billing": "Faturamento",
+  "billing": "Vendido",
   "composition": "Composição",
-  "customersReceived": "Clientes - Recebido",
-  "customersToReceive": "Clientes - A Receber",
+  "customersReceived": "Clientes que já pagaram",
+  "customersToReceive": "Clientes com valor a pagar",
   "customerWithoutName": "Cliente sem nome",
   "serviceWithoutName": "Serviço sem nome",
   "productWithoutName": "Produto sem nome",
@@ -518,14 +518,14 @@
   "thisWillRemoveAllPayments": "Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?",
   "attention": "Atenção",
   "financialReport": "Relatório financeiro",
-  "totalBilling": "Faturamento Total",
+  "totalBilling": "Vendido",
   "financialSummary": "Resumo Financeiro",
   "averageTicket": "Média por OS",
   "customerRanking": "Ranking de Clientes",
   "serviceRanking": "Ranking de Serviços",
   "productRanking": "Ranking de Produtos",
   "paidOrders": "Ordens Pagas",
-  "ordersToReceive": "Ordens a Receber",
+  "ordersToReceive": "OS com valor a pagar",
   "vehicle": "Veículo",
   "valueColumn": "Valor",
   "statusColumn": "Status",
@@ -571,7 +571,7 @@
   },
   "preparingReport": "Preparando relatorio...",
   "appTagline": "Sistema de Gestao de Ordens de Servico",
-  "receivedWithPercent": "Recebido ({percent}%)",
+  "receivedWithPercent": "Já pago ({percent}%)",
   "@receivedWithPercent": {
     "placeholders": {
       "percent": {
@@ -579,7 +579,7 @@
       }
     }
   },
-  "toReceiveWithPercent": "A Receber ({percent}%)",
+  "toReceiveWithPercent": "Falta pagar ({percent}%)",
   "@toReceiveWithPercent": {
     "placeholders": {
       "percent": {
@@ -1434,6 +1434,89 @@
       }
     }
   },
+  "financialAlreadyPaid": "Já pago",
+  "financialEmptyReceived": "Nenhum pagamento em {month}.",
+  "@financialEmptyReceived": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "financialReceivable": "A receber",
+  "financialInProgress": "Em andamento",
+  "financialSold": "Vendido",
+  "financialToday": "Hoje",
+  "financialNextCharge": "Próxima cobrança",
+  "financialNextChargeMessage": "{name} deve {amount} desde {date}",
+  "@financialNextChargeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialSendCharge": "Mandar cobrança",
+  "financialReceivableSummary": "{amount} de {count, plural, =1{1 cliente} other{{count} clientes}}",
+  "@financialReceivableSummary": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financialInProgressSummary": "{amount} em {count} OS",
+  "@financialInProgressSummary": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "financialMonthAmount": "{month} · {amount}",
+  "@financialMonthAmount": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "financialSince": "desde {date}",
+  "@financialSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialOrderDate": "OS {number} · {date}",
+  "@financialOrderDate": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "financialEmptyReceivable": "Ninguém com valor a receber.",
+  "financialEmptyInProgress": "Nenhuma OS em andamento com valor a receber.",
   "financialToReceive": "Falta receber",
   "financialOrderSince": "OS {number} · desde {date}",
   "@financialOrderSince": {
@@ -1446,53 +1529,9 @@
       }
     }
   },
-  "financialOrdersSince": "{count} OS · desde {date}",
-  "@financialOrdersSince": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "financialOtherPeriod": "Outro período",
   "financialPreviousMonth": "Mês anterior",
   "financialNextMonth": "Próximo mês",
-  "financialNextStep": "Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}",
-  "@financialNextStep": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "financialOldestDebt": "{name} deve há mais tempo: {amount} desde {date}.",
-  "@financialOldestDebt": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "financialSendChargeTo": "Mandar cobrança para {name}",
-  "@financialSendChargeTo": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "financialPickOrderTitle": "OS em aberto de {name}",
   "@financialPickOrderTitle": {
     "placeholders": {
@@ -2028,10 +2067,6 @@
   "@orderCountShort": {"placeholders": {"count": {"type": "int"}}},
   "deviceOwnerPrefix": "da ",
   "financialReportShort": "Relatório",
-  "financialReceivedIn": "Recebido em {month}",
-  "@financialReceivedIn": {"placeholders": {"month": {"type": "String"}}},
-  "financialReceivedSub": "{count} OS · ver todas",
-  "@financialReceivedSub": {"placeholders": {"count": {"type": "int"}}},
   "financialSendReportPdf": "Mandar relatório em PDF",
   "receiveSubtitle": "{customer} · total {total}",
   "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},

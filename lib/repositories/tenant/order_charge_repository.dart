@@ -38,4 +38,16 @@ class OrderChargeRepository {
         .map((snap) =>
             snap.docs.map((doc) => fromDoc(doc.id, doc.data())).toList());
   }
+
+  /// Whether the order has a link the customer can still pay.
+  Future<bool> hasOpen(String companyId, String orderId) async {
+    final snap = await _db
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders')
+        .doc(orderId)
+        .collection('charges')
+        .get();
+    return snap.docs.any((doc) => fromDoc(doc.id, doc.data()).isOpen);
+  }
 }

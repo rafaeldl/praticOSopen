@@ -367,11 +367,29 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     }
   }
 
-  /// Busca todas as orders com pagamento em aberto (`payment == 'unpaid'`),
-  /// de qualquer período. Equality-only filter: needs no composite index.
-  /// Errors are not swallowed so callers can show a retry state.
-  Future<List<Order?>> getUnpaidOrders(String companyId) {
-    return getQueryList(companyId, args: [QueryArgs('payment', 'unpaid')]);
+  /// Busca todas as orders que não estão pagas, de qualquer período. Covers
+  /// the legacy 'partial' and active orders with `payment: null`, which an
+  /// order approved outside the app keeps (that write sets only the status).
+  /// Orders without the field at all need the backfill script. Equality
+  /// filters only: no composite index. Errors are not swallowed so callers
+  /// can show a retry state.
+  Future<List<Order?>> getUnpaidOrders(String companyId) async {
+    final results = await Future.wait([
+      getQueryList(
+        companyId,
+        args: [
+          QueryArgs('payment', ['unpaid', 'partial'], oper: 'whereIn'),
+        ],
+      ),
+      getQueryList(
+        companyId,
+        args: [
+          QueryArgs('payment', true, oper: 'isNull'),
+          QueryArgs('status', ['approved', 'progress', 'done'], oper: 'whereIn'),
+        ],
+      ),
+    ]);
+    return results.expand((orders) => orders).toList();
   }
 
   /// Orders with a payment dated from [since] on, whenever they were

@@ -481,7 +481,7 @@ abstract class AppLocalizations {
   /// No description provided for @toReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Falta receber'**
+  /// **'Falta pagar'**
   String get toReceive;
 
   /// No description provided for @received.
@@ -2173,7 +2173,7 @@ abstract class AppLocalizations {
   /// No description provided for @billing.
   ///
   /// In pt, this message translates to:
-  /// **'Faturamento'**
+  /// **'Vendido'**
   String get billing;
 
   /// No description provided for @composition.
@@ -2185,13 +2185,13 @@ abstract class AppLocalizations {
   /// No description provided for @customersReceived.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes - Recebido'**
+  /// **'Clientes que já pagaram'**
   String get customersReceived;
 
   /// No description provided for @customersToReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Clientes - A Receber'**
+  /// **'Clientes com valor a pagar'**
   String get customersToReceive;
 
   /// No description provided for @customerWithoutName.
@@ -2605,7 +2605,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalBilling.
   ///
   /// In pt, this message translates to:
-  /// **'Faturamento Total'**
+  /// **'Vendido'**
   String get totalBilling;
 
   /// No description provided for @financialSummary.
@@ -2647,7 +2647,7 @@ abstract class AppLocalizations {
   /// No description provided for @ordersToReceive.
   ///
   /// In pt, this message translates to:
-  /// **'Ordens a Receber'**
+  /// **'OS com valor a pagar'**
   String get ordersToReceive;
 
   /// No description provided for @vehicle.
@@ -2737,13 +2737,13 @@ abstract class AppLocalizations {
   /// No description provided for @receivedWithPercent.
   ///
   /// In pt, this message translates to:
-  /// **'Recebido ({percent}%)'**
+  /// **'Já pago ({percent}%)'**
   String receivedWithPercent(String percent);
 
   /// No description provided for @toReceiveWithPercent.
   ///
   /// In pt, this message translates to:
-  /// **'A Receber ({percent}%)'**
+  /// **'Falta pagar ({percent}%)'**
   String toReceiveWithPercent(String percent);
 
   /// No description provided for @generatedByPraticos.
@@ -5020,6 +5020,102 @@ abstract class AppLocalizations {
   /// **'Nenhuma OS em {month}.'**
   String financialEmptyMonth(String month);
 
+  /// No description provided for @financialAlreadyPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já pago'**
+  String get financialAlreadyPaid;
+
+  /// No description provided for @financialEmptyReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum pagamento em {month}.'**
+  String financialEmptyReceived(String month);
+
+  /// No description provided for @financialReceivable.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber'**
+  String get financialReceivable;
+
+  /// No description provided for @financialInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em andamento'**
+  String get financialInProgress;
+
+  /// No description provided for @financialSold.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendido'**
+  String get financialSold;
+
+  /// No description provided for @financialToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get financialToday;
+
+  /// No description provided for @financialNextCharge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima cobrança'**
+  String get financialNextCharge;
+
+  /// No description provided for @financialNextChargeMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} deve {amount} desde {date}'**
+  String financialNextChargeMessage(String name, String amount, String date);
+
+  /// No description provided for @financialSendCharge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar cobrança'**
+  String get financialSendCharge;
+
+  /// No description provided for @financialReceivableSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
+  String financialReceivableSummary(String amount, int count);
+
+  /// No description provided for @financialInProgressSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{amount} em {count} OS'**
+  String financialInProgressSummary(String amount, int count);
+
+  /// No description provided for @financialMonthAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{month} · {amount}'**
+  String financialMonthAmount(String month, String amount);
+
+  /// No description provided for @financialSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'desde {date}'**
+  String financialSince(String date);
+
+  /// No description provided for @financialOrderDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS {number} · {date}'**
+  String financialOrderDate(int number, String date);
+
+  /// No description provided for @financialEmptyReceivable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ninguém com valor a receber.'**
+  String get financialEmptyReceivable;
+
+  /// No description provided for @financialEmptyInProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS em andamento com valor a receber.'**
+  String get financialEmptyInProgress;
+
   /// No description provided for @financialToReceive.
   ///
   /// In pt, this message translates to:
@@ -5031,12 +5127,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS {number} · desde {date}'**
   String financialOrderSince(int number, String date);
-
-  /// No description provided for @financialOrdersSince.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} OS · desde {date}'**
-  String financialOrdersSince(int count, String date);
 
   /// No description provided for @financialOtherPeriod.
   ///
@@ -5055,24 +5145,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Próximo mês'**
   String get financialNextMonth;
-
-  /// No description provided for @financialNextStep.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta receber {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}'**
-  String financialNextStep(String amount, int count);
-
-  /// No description provided for @financialOldestDebt.
-  ///
-  /// In pt, this message translates to:
-  /// **'{name} deve há mais tempo: {amount} desde {date}.'**
-  String financialOldestDebt(String name, String amount, String date);
-
-  /// No description provided for @financialSendChargeTo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mandar cobrança para {name}'**
-  String financialSendChargeTo(String name);
 
   /// No description provided for @financialPickOrderTitle.
   ///
@@ -6315,18 +6387,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Relatório'**
   String get financialReportShort;
-
-  /// No description provided for @financialReceivedIn.
-  ///
-  /// In pt, this message translates to:
-  /// **'Recebido em {month}'**
-  String financialReceivedIn(String month);
-
-  /// No description provided for @financialReceivedSub.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count} OS · ver todas'**
-  String financialReceivedSub(int count);
 
   /// No description provided for @financialSendReportPdf.
   ///

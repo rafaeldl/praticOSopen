@@ -121,15 +121,27 @@
       {
         "id": "dashboard",
         "title": "A aba Financeiro",
-        "intro": "A aba <strong>Financeiro</strong> responde \"quem me deve?\". No topo fica o mês, com ‹ › para trocar. Logo abaixo, a frase <strong>Falta receber R$ … de N clientes</strong>, quem deve há mais tempo e o botão azul <strong>Mandar cobrança para …</strong>, que manda para esse cliente o link da OS mais antiga em aberto.",
+        "intro": "A aba <strong>Financeiro</strong> separa o que muda com o mês do que é de hoje. No topo fica o mês, com ‹ › para trocar. <strong>Recebido</strong> e <strong>Vendido</strong> seguem o mês escolhido. Em <strong>Hoje</strong>, <strong>A receber</strong> e <strong>Em andamento</strong> mostram a situação de agora, seja qual for o mês. Toque em qualquer valor para ver a lista.",
         "metrics": [
           {
-            "title": "Falta receber",
-            "description": "Todos os clientes que ainda devem, de qualquer mês, o mais antigo primeiro. Toque no nome para receber."
+            "title": "Recebido",
+            "description": "Todo o dinheiro que entrou no mês, na data do pagamento, inclusive entrada e parcela. Toque para ver de quais OS veio."
           },
           {
-            "title": "Recebido no mês",
-            "description": "O que já entrou nas OS do mês escolhido. Toque para abrir o relatório."
+            "title": "Vendido",
+            "description": "Soma das OS abertas no mês, sem orçamentos e sem OS canceladas. Toque para ver as OS."
+          },
+          {
+            "title": "A receber",
+            "description": "O que falta receber das OS concluídas, por cliente, de qualquer mês. Toque no nome para receber."
+          },
+          {
+            "title": "Em andamento",
+            "description": "O saldo das OS aprovadas e em andamento. Quando a OS é concluída, o valor passa para A receber."
+          },
+          {
+            "title": "Próxima cobrança",
+            "description": "Um cliente para cobrar agora. Toque e escolha <strong>Mandar cobrança</strong> ou <strong>Agora não</strong>, que deixa esse cliente de fora da sugestão por 30 dias. Ele continua em A receber."
           }
         ],
         "subsections": [
@@ -139,8 +151,8 @@
           }
         ],
         "warningCard": {
-          "title": "O mês segue a data da OS",
-          "content": "\"Recebido\" soma o que entrou nas OS abertas naquele mês. Uma OS de março paga em abril conta em março. Já \"Falta receber\" mostra tudo o que está em aberto, seja de que mês for."
+          "title": "O que muda com o mês",
+          "content": "Recebido segue a data do pagamento: uma OS de março paga em abril conta em abril. Vendido segue a data de abertura da OS. A receber e Em andamento não mudam quando você troca o mês."
         }
       },
       {
@@ -264,7 +276,7 @@
           },
           {
             "question": "Por que o Recebido do mês não bate com o meu caixa?",
-            "answer": "Porque ele soma as OS abertas no mês, não o dia em que cada pagamento entrou. Uma OS do mês passado paga hoje conta no mês passado."
+            "answer": "Porque ele soma só o que foi anotado no PráticOS, na data de cada pagamento. Se algo entrou e não foi anotado, ou foi anotado com outro dia, os valores não batem."
           }
         ]
       }
@@ -392,15 +404,27 @@
       {
         "id": "dashboard",
         "title": "The Financial tab",
-        "intro": "The <strong>Financial</strong> tab answers \"who owes me?\". At the top is the month, with ‹ › to change it. Right below, the line <strong>$… to collect from N customers</strong>, who has owed the longest and the blue button <strong>Send payment request to …</strong>, which sends that customer the link of their oldest open order.",
+        "intro": "The <strong>Financial</strong> tab separates what changes with the month from what is true today. At the top is the month, with ‹ › to change it. <strong>Received</strong> and <strong>Sold</strong> follow the chosen month. Under <strong>Today</strong>, <strong>To receive</strong> and <strong>In progress</strong> show where things stand now, whatever the month. Tap any value to see the list.",
         "metrics": [
           {
-            "title": "To collect",
-            "description": "Every customer who still owes, from any month, oldest first. Tap the name to receive."
+            "title": "Received",
+            "description": "All the money that came in during the month, by payment date, including down payments and installments. Tap to see which orders it came from."
           },
           {
-            "title": "Received this month",
-            "description": "What came in on the orders of the chosen month. Tap to open the report."
+            "title": "Sold",
+            "description": "Total of the orders opened in the month, without quotes or canceled orders. Tap to see the orders."
+          },
+          {
+            "title": "To receive",
+            "description": "What is left to receive on completed orders, by customer, from any month. Tap a name to receive."
+          },
+          {
+            "title": "In progress",
+            "description": "The balance of approved and running orders. When an order is completed, it moves to To receive."
+          },
+          {
+            "title": "Next charge",
+            "description": "One customer to charge now. Tap it and choose <strong>Send charge</strong> or <strong>Not now</strong>, which leaves that customer out of the suggestion for 30 days. They stay in To receive."
           }
         ],
         "subsections": [
@@ -410,8 +434,8 @@
           }
         ],
         "warningCard": {
-          "title": "The month follows the order date",
-          "content": "\"Received\" adds up what came in on orders opened that month. An order from March paid in April counts in March. \"To collect\" shows everything still open, from any month."
+          "title": "What changes with the month",
+          "content": "Received follows the payment date: an order from March paid in April counts in April. Sold follows the date the order was opened. To receive and In progress do not change when you change the month."
         }
       },
       {
@@ -535,7 +559,7 @@
           },
           {
             "question": "Why doesn't Received this month match my cash?",
-            "answer": "Because it adds up orders opened that month, not the day each payment came in. An order from last month paid today counts in last month."
+            "answer": "Because it only adds what was recorded in PráticOS, on the date of each payment. If money came in and was not recorded, or was recorded on another day, the amounts will differ."
           }
         ]
       }
@@ -663,15 +687,27 @@
       {
         "id": "dashboard",
         "title": "La pestaña Financiero",
-        "intro": "La pestaña <strong>Financiero</strong> responde \"¿quién me debe?\". Arriba está el mes, con ‹ › para cambiarlo. Justo debajo, la frase <strong>Falta cobrar $… de N clientes</strong>, quién debe desde hace más tiempo y el botón azul <strong>Enviar cobro a …</strong>, que le manda a ese cliente el enlace de su OS pendiente más antigua.",
+        "intro": "La pestaña <strong>Financiero</strong> separa lo que cambia con el mes de lo que es de hoy. Arriba está el mes, con ‹ › para cambiarlo. <strong>Recibido</strong> y <strong>Vendido</strong> siguen el mes elegido. En <strong>Hoy</strong>, <strong>Por cobrar</strong> y <strong>En curso</strong> muestran la situación actual, sea cual sea el mes. Toca cualquier valor para ver la lista.",
         "metrics": [
           {
-            "title": "Falta cobrar",
-            "description": "Todos los clientes que todavía deben, de cualquier mes, el más antiguo primero. Toca el nombre para cobrar."
+            "title": "Recibido",
+            "description": "Todo el dinero que entró en el mes, en la fecha del pago, incluidos anticipos y cuotas. Toca para ver de qué OS vino."
           },
           {
-            "title": "Recibido en el mes",
-            "description": "Lo que ya entró en las OS del mes elegido. Toca para abrir el informe."
+            "title": "Vendido",
+            "description": "Suma de las OS abiertas en el mes, sin presupuestos ni OS canceladas. Toca para ver las OS."
+          },
+          {
+            "title": "Por cobrar",
+            "description": "Lo que falta cobrar de las OS concluidas, por cliente, de cualquier mes. Toca el nombre para cobrar."
+          },
+          {
+            "title": "En curso",
+            "description": "El saldo de las OS aprobadas y en curso. Cuando la OS se concluye, el valor pasa a Por cobrar."
+          },
+          {
+            "title": "Próximo cobro",
+            "description": "Un cliente para cobrar ahora. Tócalo y elige <strong>Enviar cobro</strong> o <strong>Ahora no</strong>, que deja a ese cliente fuera de la sugerencia durante 30 días. Sigue en Por cobrar."
           }
         ],
         "subsections": [
@@ -681,8 +717,8 @@
           }
         ],
         "warningCard": {
-          "title": "El mes sigue la fecha de la OS",
-          "content": "\"Recibido\" suma lo que entró en las OS abiertas ese mes. Una OS de marzo pagada en abril cuenta en marzo. \"Falta cobrar\" muestra todo lo pendiente, sea del mes que sea."
+          "title": "Qué cambia con el mes",
+          "content": "Recibido sigue la fecha del pago: una OS de marzo pagada en abril cuenta en abril. Vendido sigue la fecha de apertura de la OS. Por cobrar y En curso no cambian al cambiar de mes."
         }
       },
       {
@@ -806,7 +842,7 @@
           },
           {
             "question": "¿Por qué el Recibido del mes no coincide con mi caja?",
-            "answer": "Porque suma las OS abiertas en el mes, no el día en que entró cada pago. Una OS del mes pasado pagada hoy cuenta en el mes pasado."
+            "answer": "Porque solo suma lo que se anotó en PráticOS, en la fecha de cada pago. Si entró dinero y no se anotó, o se anotó con otro día, los valores no coinciden."
           }
         ]
       }

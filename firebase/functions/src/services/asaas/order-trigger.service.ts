@@ -17,6 +17,7 @@
  * - the order became paid (`payment` → 'paid', unless only the total changed
  *   or a discount closed it: no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
  *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
+ * - `status` entered or left `done` (every company) → `syncCompletedAt`;
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -34,6 +35,7 @@ import {
 } from './order-payment.service';
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
+import { syncCompletedAt } from '../order-completion.service';
 
 export type OrderUpdateSnapshot = OrderPaymentState & {
   status?: string;
@@ -41,6 +43,7 @@ export type OrderUpdateSnapshot = OrderPaymentState & {
   /** Stamped by `syncPaymentStatusWithTotal`. */
   paymentSyncedAt?: string;
   lastPaymentAt?: string;
+  completedAt?: string;
 };
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
@@ -56,6 +59,7 @@ export async function handleOrderUpdatedAsaas(
   orderId: string,
   before: OrderUpdateSnapshot | undefined,
   after: OrderUpdateSnapshot | undefined,
+  eventTime: string = new Date().toISOString(),
 ): Promise<void> {
   if (!after) return;
 
@@ -87,6 +91,9 @@ export async function handleOrderUpdatedAsaas(
   }
   if (after.status === 'done' && before?.status !== 'done') {
     tasks.push(autoIssueInvoice(companyId, orderId, 'completed'));
+  }
+  if ((after.status === 'done') !== (before?.status === 'done')) {
+    tasks.push(syncCompletedAt(companyId, orderId, before, after, eventTime));
   }
   if (tasks.length === 0) return;
 

@@ -198,7 +198,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unpaid => 'No Pagado';
 
   @override
-  String get toReceive => 'Por recibir';
+  String get toReceive => 'Falta pagar';
 
   @override
   String get received => 'Recibido';
@@ -1079,16 +1079,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get end => 'Fin';
 
   @override
-  String get billing => 'Facturación';
+  String get billing => 'Vendido';
 
   @override
   String get composition => 'Composición';
 
   @override
-  String get customersReceived => 'Clientes - Recibido';
+  String get customersReceived => 'Clientes que ya pagaron';
 
   @override
-  String get customersToReceive => 'Clientes - Por Recibir';
+  String get customersToReceive => 'Clientes con saldo';
 
   @override
   String get customerWithoutName => 'Cliente sin nombre';
@@ -1324,7 +1324,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get financialReport => 'Informe financiero';
 
   @override
-  String get totalBilling => 'Facturación Total';
+  String get totalBilling => 'Vendido';
 
   @override
   String get financialSummary => 'Resumen Financiero';
@@ -1345,7 +1345,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paidOrders => 'Órdenes Pagadas';
 
   @override
-  String get ordersToReceive => 'Órdenes por Cobrar';
+  String get ordersToReceive => 'OS con saldo';
 
   @override
   String get vehicle => 'Vehículo';
@@ -1411,12 +1411,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String receivedWithPercent(String percent) {
-    return 'Recibido ($percent%)';
+    return 'Ya pagado ($percent%)';
   }
 
   @override
   String toReceiveWithPercent(String percent) {
-    return 'Por Recibir ($percent%)';
+    return 'Falta pagar ($percent%)';
   }
 
   @override
@@ -2819,16 +2819,79 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get financialAlreadyPaid => 'Ya pagado';
+
+  @override
+  String financialEmptyReceived(String month) {
+    return 'Ningún pago en $month.';
+  }
+
+  @override
+  String get financialReceivable => 'Por cobrar';
+
+  @override
+  String get financialInProgress => 'En curso';
+
+  @override
+  String get financialSold => 'Vendido';
+
+  @override
+  String get financialToday => 'Hoy';
+
+  @override
+  String get financialNextCharge => 'Próximo cobro';
+
+  @override
+  String financialNextChargeMessage(String name, String amount, String date) {
+    return '$name debe $amount desde $date';
+  }
+
+  @override
+  String get financialSendCharge => 'Enviar cobro';
+
+  @override
+  String financialReceivableSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clientes',
+      one: '1 cliente',
+    );
+    return '$amount de $_temp0';
+  }
+
+  @override
+  String financialInProgressSummary(String amount, int count) {
+    return '$amount en $count OS';
+  }
+
+  @override
+  String financialMonthAmount(String month, String amount) {
+    return '$month · $amount';
+  }
+
+  @override
+  String financialSince(String date) {
+    return 'desde $date';
+  }
+
+  @override
+  String financialOrderDate(int number, String date) {
+    return 'OS $number · $date';
+  }
+
+  @override
+  String get financialEmptyReceivable => 'Nadie tiene saldo por cobrar.';
+
+  @override
+  String get financialEmptyInProgress => 'Ninguna OS en curso con saldo.';
+
+  @override
   String get financialToReceive => 'Falta cobrar';
 
   @override
   String financialOrderSince(int number, String date) {
     return 'Orden $number · desde $date';
-  }
-
-  @override
-  String financialOrdersSince(int count, String date) {
-    return '$count órdenes · desde $date';
   }
 
   @override
@@ -2839,27 +2902,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get financialNextMonth => 'Mes siguiente';
-
-  @override
-  String financialNextStep(String amount, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count clientes',
-      one: '1 cliente',
-    );
-    return 'Falta cobrar $amount de $_temp0';
-  }
-
-  @override
-  String financialOldestDebt(String name, String amount, String date) {
-    return '$name debe desde hace más tiempo: $amount desde $date.';
-  }
-
-  @override
-  String financialSendChargeTo(String name) {
-    return 'Enviar cobro a $name';
-  }
 
   @override
   String financialPickOrderTitle(String name) {
@@ -3680,16 +3722,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get financialReportShort => 'Informe';
-
-  @override
-  String financialReceivedIn(String month) {
-    return 'Recibido en $month';
-  }
-
-  @override
-  String financialReceivedSub(int count) {
-    return '$count OS · ver todas';
-  }
 
   @override
   String get financialSendReportPdf => 'Enviar informe en PDF';

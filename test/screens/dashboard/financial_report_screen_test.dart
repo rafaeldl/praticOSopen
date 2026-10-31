@@ -116,6 +116,7 @@ void main() {
     Brightness brightness = Brightness.light,
     double width = 800,
     bool empty = false,
+    int initialMonthOffset = 0,
   }) async {
     tester.view.physicalSize = Size(width, 3000);
     tester.view.devicePixelRatio = 2;
@@ -135,7 +136,10 @@ void main() {
           theme: CupertinoThemeData(brightness: brightness),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FinancialReportScreen(openCustomPeriod: openCustomPeriod),
+          home: FinancialReportScreen(
+            openCustomPeriod: openCustomPeriod,
+            initialMonthOffset: initialMonthOffset,
+          ),
         ),
       ),
     );
@@ -164,7 +168,13 @@ void main() {
     await pumpReport(tester);
 
     expect(find.text('Relatório financeiro'), findsWidgets);
-    expect(find.text('Falta receber'), findsWidgets);
+    // Same words as the tab mean the same number: this screen splits Vendido.
+    expect(find.text('Vendido'), findsOneWidget);
+    expect(find.text('Já pago'), findsOneWidget);
+    expect(find.text('Falta pagar'), findsOneWidget);
+    expect(find.text('Recebido'), findsNothing);
+    expect(find.text('Falta receber'), findsNothing);
+    expect(find.text('Faturamento'), findsNothing);
     expect(find.textContaining('Média por OS'), findsOneWidget);
     expect(find.textContaining('Ticket'), findsNothing);
     expect(find.textContaining(RegExp(r'\bordem\b')), findsNothing);
@@ -289,11 +299,23 @@ void main() {
   ) async {
     await pumpReport(tester);
 
-    await tester.tap(find.text(l10n.received).first);
+    await tester.tap(find.text(l10n.financialAlreadyPaid).first);
     await tester.pump();
 
     expect(find.text(l10n.customersReceived), findsOneWidget);
     expect(find.byIcon(CupertinoIcons.checkmark_alt), findsOneWidget);
+  });
+
+  testWidgets('opens in the month chosen in the tab', (tester) async {
+    await pumpReport(tester, initialMonthOffset: -1);
+
+    final now = DateTime.now();
+    expect(
+      find.text(FormatService().formatMonthYearTitle(
+        DateTime(now.year, now.month - 1, 1),
+      )),
+      findsOneWidget,
+    );
   });
 
   testWidgets('empty period shows a single sentence and no sections', (

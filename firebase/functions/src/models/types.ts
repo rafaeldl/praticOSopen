@@ -277,6 +277,8 @@ export interface Order {
   createdBy: UserAggr;
   updatedAt?: DateValue;
   updatedBy?: UserAggr;
+  /** UTC ISO. Kept by the order triggers (order-completion.service); absent on orders done before this field. */
+  completedAt?: string;
 }
 
 // ============================================================================
