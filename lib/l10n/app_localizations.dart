@@ -5284,6 +5284,126 @@ abstract class AppLocalizations {
   /// **'Quando'**
   String get receiveWhen;
 
+  /// No description provided for @receiveMarkReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como recebido'**
+  String get receiveMarkReceived;
+
+  /// No description provided for @receiveReceivedFrom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido de {customer}'**
+  String receiveReceivedFrom(String customer);
+
+  /// No description provided for @receiveReceivedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido'**
+  String get receiveReceivedTitle;
+
+  /// No description provided for @receiveSummaryCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{A receber · 1 OS} other{A receber · {count} OS}}'**
+  String receiveSummaryCount(int count);
+
+  /// No description provided for @receiveSummarySome.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber · {checked} de {total} OS'**
+  String receiveSummarySome(int checked, int total);
+
+  /// No description provided for @receiveSummaryOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber · {order}'**
+  String receiveSummaryOrder(String order);
+
+  /// No description provided for @receiveSummaryPlain.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber'**
+  String get receiveSummaryPlain;
+
+  /// No description provided for @receiveOrdersIncluded.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS incluídas'**
+  String get receiveOrdersIncluded;
+
+  /// No description provided for @receivePreviewAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Quita a OS.} other{Quita as {count} OS.}}'**
+  String receivePreviewAll(int count);
+
+  /// No description provided for @receivePreviewSettles.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quita OS {numbers}.'**
+  String receivePreviewSettles(String numbers);
+
+  /// No description provided for @receivePreviewPart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga {amount} da OS {number}.'**
+  String receivePreviewPart(String amount, String number);
+
+  /// No description provided for @receivePreviewLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ficam {amount}.'**
+  String receivePreviewLeft(String amount);
+
+  /// No description provided for @receiveChargeAdjusts.
+  ///
+  /// In pt, this message translates to:
+  /// **'A cobrança aberta se ajusta sozinha, sem avisar {customer}.'**
+  String receiveChargeAdjusts(String customer);
+
+  /// No description provided for @receiveChargeAdjustsNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'A cobrança aberta se ajusta sozinha, sem avisar o cliente.'**
+  String get receiveChargeAdjustsNoName;
+
+  /// No description provided for @chargeSend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar cobrança'**
+  String get chargeSend;
+
+  /// No description provided for @chargeSendAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar de novo'**
+  String get chargeSendAgain;
+
+  /// No description provided for @chargeSendOrderLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandar link da OS'**
+  String get chargeSendOrderLink;
+
+  /// No description provided for @chargeDetailUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança de {value} · vale até {date}'**
+  String chargeDetailUntil(String value, String date);
+
+  /// No description provided for @chargeDetailOverdue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança de {value} · ainda dá para pagar'**
+  String chargeDetailOverdue(String value);
+
+  /// No description provided for @chargeDetailValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança de {value}'**
+  String chargeDetailValue(String value);
+
   /// No description provided for @receiveConfirmButton.
   ///
   /// In pt, this message translates to:
@@ -7793,7 +7913,7 @@ abstract class AppLocalizations {
   /// No description provided for @chargeCopyLink.
   ///
   /// In pt, this message translates to:
-  /// **'Copiar o link'**
+  /// **'Copiar link'**
   String get chargeCopyLink;
 
   /// No description provided for @chargeLinkCopied.
@@ -7805,13 +7925,13 @@ abstract class AppLocalizations {
   /// No description provided for @chargeCancelLink.
   ///
   /// In pt, this message translates to:
-  /// **'Cancelar o link'**
+  /// **'Cancelar cobrança'**
   String get chargeCancelLink;
 
   /// No description provided for @chargeLinkTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Link para pagar'**
+  /// **'Mandar cobrança'**
   String get chargeLinkTitle;
 
   /// No description provided for @chargeLinkIntro.

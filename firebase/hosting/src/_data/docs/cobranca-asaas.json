@@ -65,8 +65,8 @@
             "title": "Mandar o link para pagar",
             "steps": [
               "Na OS, toque em <strong>Falta receber</strong> (ou no botão azul <strong>Receber</strong>, quando a OS está pronta).",
-              "Toque em <strong>Mandar link para (cliente) pagar</strong>.",
-              "Em <strong>Link para pagar</strong>, confira o <strong>Valor</strong>. Ele vem com o que falta na OS e pode ser menor (para cobrar uma entrada), mas nunca maior.",
+              "Toque em <strong>Mandar cobrança</strong>.",
+              "Na tela seguinte, confira o <strong>Valor</strong>. Ele vem com o que falta na OS e pode ser menor (para cobrar uma entrada), mas nunca maior.",
               "Se precisar, mude o <strong>Vencimento</strong> e escolha <strong>Parcelar no cartão</strong> (de 2x a 12x). Sem parcelar, o cliente escolhe Pix, boleto ou cartão.",
               "Se o cliente não tem CPF ou CNPJ no cadastro, informe agora. O Asaas exige o documento, e ele fica salvo no cadastro do cliente.",
               "Toque no <strong>✓</strong> e mande o link ao cliente."
@@ -74,7 +74,7 @@
           },
           {
             "title": "Pelo Financeiro e pelo cliente",
-            "content": "Na aba <strong>Financeiro</strong>, <strong>Mandar cobrança para (cliente)</strong> cria o link (ou reaproveita o que está aberto) e já abre o envio. Em <strong>Receber de (cliente)</strong>, aberto pelo Financeiro ou pela tela do cliente, <strong>Mandar link para pagar…</strong> junta várias OS do mesmo cliente num link só."
+            "content": "Na aba <strong>Financeiro</strong>, a <strong>Próxima cobrança</strong> leva ao mesmo lugar. Com várias OS do mesmo cliente, marque as que quer cobrar e toque em <strong>Mandar cobrança</strong>: elas vão num link só."
           },
           {
             "title": "Entrada e restante",
@@ -100,7 +100,7 @@
         ],
         "infoCard": {
           "title": "Um link aberto por vez",
-          "content": "Um link novo cancela o anterior que ainda não foi pago. No <strong>…</strong> da tela Receber ficam <strong>Copiar o link</strong>, <strong>Mandar de novo pelo WhatsApp</strong> e <strong>Cancelar o link</strong>. Se a OS mudar de valor, o app avisa e oferece <strong>Gerar link novo</strong> com o valor certo. Cancelar a OS cancela o link aberto."
+          "content": "Um link novo cancela o anterior que ainda não foi pago. No <strong>…</strong> da tela Receber ficam <strong>Copiar link</strong> e <strong>Cancelar cobrança</strong>. Se a OS mudar de valor, o app avisa e oferece <strong>Gerar link novo</strong> com o valor certo. Cancelar a OS cancela o link aberto."
         }
       },
       {
@@ -119,7 +119,7 @@
           }
         ],
         "paragraphs": [
-          "Enquanto o cliente não paga, a tela Receber mostra quando o link foi mandado e até quando vale. Toque em <strong>Lembrar pelo WhatsApp também</strong> para mandar de novo.",
+          "Enquanto o cliente não paga, a tela Receber mostra <strong>Esperando (cliente) pagar</strong> e até quando a cobrança vale. Toque em <strong>Mandar de novo</strong> para lembrar.",
           "Se o link vencer, a página da OS mostra que a cobrança venceu e orienta o cliente a falar com você. Mande um link novo pela OS."
         ]
       },
@@ -145,7 +145,7 @@
               },
               {
                 "label": "Recebeu de outro jeito",
-                "text": "Se o cliente pagou em dinheiro, toque em <strong>Recebi de outro jeito</strong> e registre. O link é ajustado ou cancelado, para ninguém pagar duas vezes."
+                "text": "Se o cliente pagou em dinheiro, toque em <strong>Marcar como recebido</strong> e registre. O link é ajustado ou cancelado, para ninguém pagar duas vezes."
               },
               {
                 "label": "Estorno",
@@ -323,8 +323,8 @@
             "title": "Send the payment link",
             "steps": [
               "On the order, tap <strong>Left to receive</strong> (or the blue <strong>Receive</strong> button, once the order is ready).",
-              "Tap <strong>Send (customer) a link to pay</strong>.",
-              "In <strong>Payment link</strong>, check the <strong>Amount</strong>. It starts with what’s left on the order and can be lower (to charge a down payment), but never higher.",
+              "Tap <strong>Send charge</strong>.",
+              "On the next screen, check the <strong>Amount</strong>. It starts with what’s left on the order and can be lower (to charge a down payment), but never higher.",
               "If needed, change the <strong>Due date</strong> and pick <strong>Split on the card</strong> (2x to 12x). Without splitting, the customer picks Pix, boleto or card.",
               "If the customer has no CPF or CNPJ on file, enter it now. Asaas requires it, and it’s saved on the customer’s record.",
               "Tap the <strong>✓</strong> and send the link to the customer."
@@ -332,7 +332,7 @@
           },
           {
             "title": "From Financial and from the customer",
-            "content": "On the <strong>Financial</strong> tab, <strong>Send payment request to (customer)</strong> creates the link (or reuses the open one) and opens sending right away. In <strong>Receive from (customer)</strong>, opened from Financial or the customer screen, <strong>Send payment link…</strong> puts several orders from the same customer into one link."
+            "content": "On the <strong>Financial</strong> tab, the <strong>Next charge</strong> goes to the same place. With several orders from the same customer, check the ones to charge and tap <strong>Send charge</strong>: they go into one link."
           },
           {
             "title": "Down payment and the rest",
@@ -358,7 +358,7 @@
         ],
         "infoCard": {
           "title": "One open link at a time",
-          "content": "A new link cancels the previous unpaid one. The <strong>…</strong> on the Receive screen has <strong>Copy the link</strong>, <strong>Send again on WhatsApp</strong> and <strong>Cancel the link</strong>. If the order total changes, the app tells you and offers <strong>Create a new link</strong> with the right amount. Canceling the order cancels the open link."
+          "content": "A new link cancels the previous unpaid one. The <strong>…</strong> on the Receive screen has <strong>Copy link</strong> and <strong>Cancel charge</strong>. If the order total changes, the app tells you and offers <strong>Create a new link</strong> with the right amount. Canceling the order cancels the open link."
         }
       },
       {
@@ -403,7 +403,7 @@
               },
               {
                 "label": "Got paid another way",
-                "text": "If the customer paid in cash, tap <strong>I got paid another way</strong> and record it. The link is adjusted or canceled, so nobody pays twice."
+                "text": "If the customer paid in cash, tap <strong>Mark as received</strong> and record it. The link is adjusted or canceled, so nobody pays twice."
               },
               {
                 "label": "Refund",
@@ -581,8 +581,8 @@
             "title": "Enviar el enlace de pago",
             "steps": [
               "En la OS, toca <strong>Falta cobrar</strong> (o el botón azul <strong>Cobrar</strong>, cuando la OS está lista).",
-              "Toca <strong>Enviar a (cliente) un enlace para pagar</strong>.",
-              "En <strong>Enlace de pago</strong>, revisa el <strong>Monto</strong>. Viene con lo que falta en la OS y puede ser menor (para cobrar un anticipo), pero nunca mayor.",
+              "Toca <strong>Enviar cobro</strong>.",
+              "En la pantalla siguiente, revisa el <strong>Monto</strong>. Viene con lo que falta en la OS y puede ser menor (para cobrar un anticipo), pero nunca mayor.",
               "Si hace falta, cambia el <strong>Vencimiento</strong> y elige <strong>En cuotas con tarjeta</strong> (de 2x a 12x). Sin cuotas, el cliente elige Pix, boleto o tarjeta.",
               "Si el cliente no tiene CPF o CNPJ registrado, ingrésalo ahora. Asaas lo exige, y queda guardado en el registro del cliente.",
               "Toca el <strong>✓</strong> y envía el enlace al cliente."
@@ -590,7 +590,7 @@
           },
           {
             "title": "Desde Financiero y desde el cliente",
-            "content": "En la pestaña <strong>Financiero</strong>, <strong>Enviar cobro a (cliente)</strong> crea el enlace (o reutiliza el que está abierto) y abre el envío al momento. En <strong>Recibir de (cliente)</strong>, abierto desde Financiero o desde la pantalla del cliente, <strong>Enviar enlace de pago…</strong> junta varias OS del mismo cliente en un solo enlace."
+            "content": "En la pestaña <strong>Financiero</strong>, el <strong>Próximo cobro</strong> lleva al mismo lugar. Con varias OS del mismo cliente, marca las que quieres cobrar y toca <strong>Enviar cobro</strong>: van en un solo enlace."
           },
           {
             "title": "Anticipo y resto",
@@ -616,7 +616,7 @@
         ],
         "infoCard": {
           "title": "Un enlace abierto a la vez",
-          "content": "Un enlace nuevo cancela el anterior que todavía no se pagó. En el <strong>…</strong> de la pantalla Cobrar están <strong>Copiar el enlace</strong>, <strong>Enviar de nuevo por WhatsApp</strong> y <strong>Cancelar el enlace</strong>. Si la OS cambia de valor, la app avisa y ofrece <strong>Generar un enlace nuevo</strong> con el monto correcto. Cancelar la OS cancela el enlace abierto."
+          "content": "Un enlace nuevo cancela el anterior que todavía no se pagó. En el <strong>…</strong> de la pantalla Cobrar están <strong>Copiar enlace</strong> y <strong>Cancelar cobro</strong>. Si la OS cambia de valor, la app avisa y ofrece <strong>Generar un enlace nuevo</strong> con el monto correcto. Cancelar la OS cancela el enlace abierto."
         }
       },
       {
@@ -635,7 +635,7 @@
           }
         ],
         "paragraphs": [
-          "Mientras el cliente no paga, la pantalla Cobrar muestra cuándo se envió el enlace y hasta cuándo vale. Toca <strong>Recordar también por WhatsApp</strong> para enviarlo de nuevo.",
+          "Mientras el cliente no paga, la pantalla Cobrar muestra <strong>Esperando el pago de (cliente)</strong> y hasta cuándo vale el cobro. Toca <strong>Enviar de nuevo</strong> para recordar.",
           "Si el enlace vence, la página de la OS muestra que el cobro venció y le indica al cliente que hable contigo. Envía un enlace nuevo desde la OS."
         ]
       },
@@ -661,7 +661,7 @@
               },
               {
                 "label": "Cobraste de otra forma",
-                "text": "Si el cliente pagó en efectivo, toca <strong>Cobré de otra forma</strong> y regístralo. El enlace se ajusta o se cancela, para que nadie pague dos veces."
+                "text": "Si el cliente pagó en efectivo, toca <strong>Marcar como cobrado</strong> y regístralo. El enlace se ajusta o se cancela, para que nadie pague dos veces."
               },
               {
                 "label": "Reembolso",

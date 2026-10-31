@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/material.dart' show Material, MaterialType;
@@ -9,23 +8,31 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/customer_charge.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/repositories/tenant/customer_charge_repository.dart';
+import 'package:praticos/repositories/tenant/order_charge_repository.dart';
 import 'package:praticos/repositories/tenant/payment_settings_repository.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/screens/integrations/asaas_connection_screen.dart'
     show safePaymentSettings;
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/payments/create_customer_charge_screen.dart';
-import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
+import 'package:praticos/screens/payments/widgets/order_charge_card.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
-import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
+import 'package:praticos/screens/payments/widgets/receive_date_row.dart'
+    show paidAtFor;
+import 'package:praticos/screens/payments/widgets/receive_payment_sheet.dart';
+import 'package:praticos/screens/payments/widgets/receive_summary.dart';
+import 'package:praticos/screens/widgets/app_list_row.dart'
+    show kAppListRowStackScale;
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/pull_down_menu.dart';
+import 'package:praticos/screens/widgets/secondary_button.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
@@ -35,12 +42,11 @@ import 'package:praticos/services/pdf/receipt_pdf.dart'
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
-import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/utils/payment_allocation.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Whether "Mandar link para pagar" goes through Asaas: the user may charge
+/// Whether "Mandar cobrança" goes through Asaas: the user may charge
 /// (`chargeOrder`), the company is in the pilot and connected, and there is
 /// a customer to charge.
 bool customerChargeReady({
@@ -50,21 +56,21 @@ bool customerChargeReady({
   required String? customerId,
 }) => canCharge && asaasEnabled && asaasConnected && customerId != null;
 
-/// "Receber de João": one payment from a customer who owes on several
-/// orders, split oldest order first ([allocatePayment]) over the orders
-/// checked in "Está pagando".
+/// What a customer owes on several orders and the two ways out: "Marcar
+/// como recebido" (the money already came in) and "Mandar cobrança" (it did
+/// not, with Asaas connected).
 ///
-/// An inset-grouped form: the amount (the only place it shows, starting at
-/// the sum of the checked orders, never more), "Quando" and "Comprovante"
-/// rows, the blue "Confirmar recebimento" and the "Está pagando" list. Each
-/// order row toggles a check when tapped and says what this payment does to
-/// it ("Quita", "Recebe R$ 300 · fica R$ 199,99"); its ⓘ opens the order.
-/// On success it shows a toast and pops with `true`. Pushed (not a sheet):
-/// it acts on existing orders.
+/// On top the customer, what is "A receber" on the orders checked and the
+/// two buttons; below, the orders. Tapping a row toggles its check; its ⓘ
+/// opens the order. How much, when and the receipt are in
+/// [ReceivePaymentSheet], which goes only after the person says it was paid;
+/// the payment is split oldest order first ([allocatePayment]). On success
+/// it shows a toast and pops with `true`. Pushed (not a sheet): it acts on
+/// existing orders.
 ///
-/// With Asaas connected, the "…" has "Mandar link para pagar…" (one link for
-/// the checked orders); an open link shows as a row on top and the "…" then
-/// shares, copies or cancels it. A consultant also sees "Outras OS de João"
+/// With a charge open, its status shows under the amount, the blue button
+/// goes away (the customer is the one who acts) until it is overdue, and the
+/// "…" copies or cancels it. A consultant also sees "Outras OS de João"
 /// (orders someone else created, only number and open amount, read from the
 /// server), unchecked and not openable; checking one makes the save go
 /// through the server, which needs connection.
@@ -85,20 +91,29 @@ class ReceiveCustomerScreen extends StatefulWidget {
     this.api,
     this.otherOrdersLoader,
     this.reloadOrder,
+    this.orderCharges,
+    this.startCharge = false,
   });
+
+  /// Open single-order links by order id (tests). Defaults to Firestore.
+  final Stream<Map<String, OrderCharge>>? orderCharges;
+
+  /// Opens "Mandar cobrança" as soon as the screen knows there is no open
+  /// charge ("Próxima cobrança" of the Financeiro).
+  final bool startCharge;
 
   /// Reads an order again after it was opened from its ⓘ (tests). Defaults
   /// to Firestore.
   final Future<Order?> Function(String orderId)? reloadOrder;
 
-  /// Whether "Mandar link para pagar" is available (tests). Defaults to the
+  /// Whether "Mandar cobrança" is available (tests). Defaults to the
   /// `chargeOrder` permission plus the company's `settings/payments`.
   final Future<bool> Function()? chargeReady;
 
   /// The customer's open multi-order charge (tests). Defaults to Firestore.
   final Stream<CustomerCharge?>? openCharge;
 
-  /// Opens the "Link para pagar" sheet (tests). Completes with the created
+  /// Opens the "Mandar cobrança" sheet (tests). Completes with the created
   /// charge or null.
   final Future<CustomerCharge?> Function(
     BuildContext context,
@@ -152,6 +167,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
     String? customerName,
     bool? canAttachReceipt,
     bool? canReceive,
+    bool startCharge = false,
   }) async {
     final done = await Navigator.of(context, rootNavigator: true).push<bool>(
       CupertinoPageRoute<bool>(
@@ -163,6 +179,7 @@ class ReceiveCustomerScreen extends StatefulWidget {
             customer: customer,
             customerName: customerName,
             canAttachReceipt: canAttachReceipt,
+            startCharge: startCharge,
           );
           final allowed =
               canReceive ??
@@ -177,6 +194,25 @@ class ReceiveCustomerScreen extends StatefulWidget {
       ),
     );
     return done ?? false;
+  }
+
+  /// Whether the logged-in person can send this customer an Asaas charge.
+  static Future<bool> chargeAvailable(String? customerId) async {
+    final companyId = Global.companyAggr?.id;
+    if (companyId == null || Global.currentUser == null) return false;
+    final canCharge = AuthorizationService.instance.hasPermission(
+      PermissionType.chargeOrder,
+    );
+    if (!canCharge) return false;
+    final settings = await safePaymentSettings(
+      PaymentSettingsRepository().watch(companyId),
+    ).first.timeout(const Duration(seconds: 8));
+    return customerChargeReady(
+      canCharge: canCharge,
+      asaasEnabled: settings.asaasEnabled,
+      asaasConnected: settings.asaasConnected,
+      customerId: customerId,
+    );
   }
 
   @override
@@ -199,13 +235,8 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       if (widget.checkedOrderIds?.contains(b.orderId) ?? true) b.orderId,
   };
 
-  late final TextEditingController _amount = TextEditingController(
-    text: ReceiveAmountField.textFor(_max),
-  );
-  final FocusNode _amountFocus = FocusNode();
-
-  /// The person typed an amount: checking orders no longer rewrites it.
-  bool _typed = false;
+  /// What was filled in the sheet: kept when saving fails.
+  ReceiveDraft? _draft;
 
   /// "Outras OS de João": open orders someone else created (consultant).
   List<CustomerOpenOrder> _others = const [];
@@ -213,6 +244,12 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   bool _chargeReady = false;
   CustomerCharge? _openCharge;
   StreamSubscription<CustomerCharge?>? _chargeSub;
+
+  /// Open single-order links, by order id.
+  Map<String, OrderCharge> _orderCharges = const {};
+  final List<StreamSubscription<dynamic>> _orderChargeSubs = [];
+  final Map<String, OrderCharge> _orderChargesSeen = {};
+  bool _startedCharge = false;
 
   /// Every order that can be checked, oldest first: the screen's and the
   /// others (as light [Order]s with only id, number, open and date).
@@ -257,8 +294,6 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   /// With one open order there is nothing to choose: no check, no toggle.
   bool get _selectable => _openCount > 1;
 
-  DateTime _paidDay = DateTime.now();
-  PickedReceiptFile? _receipt;
   bool _busy = false;
 
   bool get _canAttach =>
@@ -275,7 +310,6 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   @override
   void initState() {
     super.initState();
-    _amountFocus.addListener(_onFocus);
     _loadCharge();
     _loadOthers();
   }
@@ -283,14 +317,10 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   @override
   void dispose() {
     _chargeSub?.cancel();
-    _amountFocus.removeListener(_onFocus);
-    _amountFocus.dispose();
-    _amount.dispose();
+    for (final sub in _orderChargeSubs) {
+      sub.cancel();
+    }
     super.dispose();
-  }
-
-  void _onFocus() {
-    if (mounted) setState(() {});
   }
 
   Future<void> _loadCharge() async {
@@ -310,27 +340,53 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
             ? null
             : CustomerChargeRepository().watchOpen(companyId, customerId));
     _chargeSub = stream?.listen((charge) {
-      if (mounted) setState(() => _openCharge = charge);
+      if (!mounted) return;
+      setState(() => _openCharge = charge);
+      if (widget.startCharge && !_startedCharge) {
+        _startedCharge = true;
+        if (charge == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _sendCharge();
+          });
+        }
+      }
     }, onError: (Object _) {});
+    _watchOrderCharges();
   }
 
-  Future<bool> _defaultChargeReady() async {
+  /// The single-order links of these orders: they show on the rows, and a
+  /// new charge replaces them. Read only with `chargeOrder`, as the rules ask.
+  void _watchOrderCharges() {
+    final source = widget.orderCharges;
+    if (source != null) {
+      _orderChargeSubs.add(
+        source.listen((charges) {
+          if (mounted) setState(() => _orderCharges = charges);
+        }, onError: (Object _) {}),
+      );
+      return;
+    }
     final companyId = Global.companyAggr?.id;
-    if (companyId == null || Global.currentUser == null) return false;
-    final canCharge = AuthorizationService.instance.hasPermission(
-      PermissionType.chargeOrder,
-    );
-    if (!canCharge) return false;
-    final settings = await safePaymentSettings(
-      PaymentSettingsRepository().watch(companyId),
-    ).first.timeout(const Duration(seconds: 8));
-    return customerChargeReady(
-      canCharge: canCharge,
-      asaasEnabled: settings.asaasEnabled,
-      asaasConnected: settings.asaasConnected,
-      customerId: widget.customer?.id,
-    );
+    if (companyId == null) return;
+    for (final balance in _balances) {
+      final orderId = balance.orderId;
+      _orderChargeSubs.add(
+        OrderChargeRepository().watch(companyId, orderId).listen((charges) {
+          if (!mounted) return;
+          final current = OrderCharge.current(charges);
+          if (current != null && current.isOpen) {
+            _orderChargesSeen[orderId] = current;
+          } else {
+            _orderChargesSeen.remove(orderId);
+          }
+          setState(() => _orderCharges = Map.of(_orderChargesSeen));
+        }, onError: (Object _) {}),
+      );
+    }
   }
+
+  Future<bool> _defaultChargeReady() =>
+      ReceiveCustomerScreen.chargeAvailable(widget.customer?.id);
 
   Future<void> _loadOthers() async {
     List<CustomerOpenOrder> listed;
@@ -371,20 +427,20 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     await SharePlus.instance.share(ShareParams(text: url));
   }
 
-  /// "Mandar link para pagar…": shares the open link, or creates one for the
-  /// checked own orders (the typed amount, never more than they owe) and
-  /// shares it.
+  /// "Mandar cobrança": one link for the checked own orders, then the share
+  /// sheet. A single-order link of those orders is replaced by this one, so
+  /// the person confirms first.
   Future<void> _sendCharge() async {
-    final open = _openCharge;
-    if (open?.invoiceUrl != null) {
-      await _share(open!.invoiceUrl!);
+    final customer = widget.customer;
+    final balances = _active
+        .where((b) => !_others.any((o) => o.id == b.orderId))
+        .toList();
+    if (customer == null || balances.isEmpty) return;
+    if (balances.any((b) => _orderCharges.containsKey(b.orderId)) &&
+        !await _confirmReplace()) {
       return;
     }
-    final customer = widget.customer;
-    final active = _active.where((b) => !_others.any((o) => o.id == b.orderId));
-    final balances = active.toList();
-    if (customer == null || balances.isEmpty) return;
-    final typed = parseCurrencyInput(_amount.text);
+    if (!mounted) return;
     final created =
         await (widget.createCharge ??
             (context, balances, value) => FormSheet.show<CustomerCharge>(
@@ -395,59 +451,68 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
                 initialValue: value,
                 service: widget.api,
               ),
-            ))(context, balances, typed);
+            ))(context, balances, totalOpen(balances));
     if (created == null || !mounted) return;
     setState(() => _openCharge = created);
     if (created.invoiceUrl != null) await _share(created.invoiceUrl!);
   }
 
-  /// The "…" of the top bar: the payment link, the rare path here.
+  Future<bool> _confirmReplace() async {
+    final replace = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(dialogContext.l10n.chargeReplaceTitle),
+        content: Text(dialogContext.l10n.chargeReplaceConfirm),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            key: const Key('receiveCustomerChargeReplace'),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(dialogContext.l10n.chargeReplace),
+          ),
+        ],
+      ),
+    );
+    return replace == true;
+  }
+
+  /// "Mandar de novo": the same link, no new charge.
+  Future<void> _resendCharge() async {
+    final url = _openCharge?.invoiceUrl;
+    if (url != null) await _share(url);
+  }
+
+  /// The "…" of the top bar, only with a charge open.
   Future<void> _showMenu() async {
     final l10n = context.l10n;
     final charge = _openCharge;
+    if (charge == null) return;
     final choice = await showPullDownMenu(
       context,
       groups: [
-        if (charge == null)
-          PullDownGroup([
-            PullDownItem(
-              value: 'send',
-              label: l10n.receiveCustomerSendLink,
-              icon: CupertinoIcons.link,
-            ),
-          ])
-        else ...[
-          PullDownGroup([
-            PullDownItem(
-              value: 'share',
-              label: l10n.receiveCustomerShareCharge,
-              icon: CupertinoIcons.share,
-            ),
-            PullDownItem(
-              value: 'copy',
-              label: l10n.chargeCopyLink,
-              icon: CupertinoIcons.doc_on_doc,
-            ),
-          ]),
-          PullDownGroup([
-            PullDownItem(
-              value: 'cancel',
-              label: l10n.chargeCancelLink,
-              icon: CupertinoIcons.xmark_circle,
-              destructive: true,
-            ),
-          ]),
-        ],
+        PullDownGroup([
+          PullDownItem(
+            value: 'copy',
+            label: l10n.chargeCopyLink,
+            icon: CupertinoIcons.doc_on_doc,
+          ),
+        ]),
+        PullDownGroup([
+          PullDownItem(
+            value: 'cancel',
+            label: l10n.chargeCancelLink,
+            icon: CupertinoIcons.xmark_circle,
+            destructive: true,
+          ),
+        ]),
       ],
     );
-    if (!mounted || choice == null) return;
-    if (choice == 'send') {
-      await _sendCharge();
-      return;
-    }
-    if (charge == null) return;
+    if (!mounted) return;
     final url = charge.invoiceUrl;
-    if (choice == 'share' && url != null) await _share(url);
     if (choice == 'copy' && url != null) {
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
@@ -525,34 +590,20 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
 
   int _cents(double value) => (value * 100).round();
 
-  Future<void> _pickDay() async {
-    _amountFocus.unfocus();
-    final day = await pickPaymentDay(context, _paidDay);
-    if (day != null && mounted) setState(() => _paidDay = day);
-  }
-
-  Future<void> _attach() async {
-    _amountFocus.unfocus();
-    final picked = await (widget.pickReceipt ?? pickReceiptFile)(context);
-    if (picked != null && mounted) setState(() => _receipt = picked);
-  }
-
-  /// Checks or unchecks an order. Until the person types an amount, the
-  /// field follows the sum of the checked orders.
+  /// Checks or unchecks an order; the amount at the top follows.
   void _toggle(String id) {
     setState(() {
       if (!_checked.remove(id)) _checked.add(id);
-      if (!_typed) _amount.text = ReceiveAmountField.textFor(_max);
+      _draft = null;
     });
   }
 
   /// Opens one of the customer's own orders (its ⓘ; "Outras OS" cannot be
-  /// read). Coming back keeps what was typed and reads the order again, so a
-  /// change made there (a payment, a new total) shows in the rows.
+  /// read). Coming back reads the order again, so a change made there (a
+  /// payment, a new total) shows in the rows.
   Future<void> _openOrder(Order order) async {
     final id = order.id;
     if (id == null) return;
-    _amountFocus.unfocus();
     await Navigator.of(
       context,
     ).pushNamed('/order', arguments: {'order': order});
@@ -569,7 +620,6 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     if (index < 0) return;
     setState(() {
       _orders[index] = fresh!;
-      if (!_typed) _amount.text = ReceiveAmountField.textFor(_max);
     });
   }
 
@@ -609,20 +659,61 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     }
     if (!changed) return false;
     _orders.removeWhere((o) => ids.contains(o.id) && fresh[o.id] == null);
-    setState(() {
-      _typed = false;
-      _amount.text = ReceiveAmountField.textFor(_max);
-    });
+    setState(() => _draft = null);
     return true;
   }
 
-  Future<void> _confirm() async {
-    final value = parseCurrencyInput(_amount.text);
+  /// What the amount does, in one sentence: oldest orders first.
+  String? _preview(double amount) {
+    final l10n = context.l10n;
+    final active = _active;
+    final previews = previewAllocation(active, allocatePayment(active, amount));
+    if (active.length < 2) return null;
+    if (previews.every((p) => p.settles)) {
+      return l10n.receivePreviewAll(active.length);
+    }
+    final format = FormatService();
+    final settled = [
+      for (final p in previews)
+        if (p.settles) '${p.balance.orderNumber ?? '?'}',
+    ];
+    return [
+      if (settled.isNotEmpty) l10n.receivePreviewSettles(settled.join(', ')),
+      for (final p in previews)
+        if (!p.settles && !p.untouched)
+          l10n.receivePreviewPart(
+            format.formatCurrency(p.received),
+            '${p.balance.orderNumber ?? '?'}',
+          ),
+      l10n.receivePreviewLeft(format.formatCurrency(_max - amount)),
+    ].join(' ');
+  }
+
+  /// "Marcar como recebido": the sheet, then saving what came back.
+  Future<void> _openReceive() async {
+    if (_busy || _active.isEmpty) return;
+    final l10n = context.l10n;
+    final draft = await ReceivePaymentSheet.show(
+      context,
+      title: l10n.receiveReceivedFrom(_name),
+      max: _max,
+      preview: _preview,
+      initial: _draft,
+      canAttach: _canAttach,
+      pickReceipt: widget.pickReceipt,
+      note: _openCharge == null ? null : l10n.receiveChargeAdjusts(_name),
+    );
+    if (draft == null || !mounted) return;
+    _draft = draft;
+    await _confirm(draft);
+  }
+
+  Future<void> _confirm(ReceiveDraft draft) async {
+    final value = draft.amount;
     final active = _active;
     if (_busy || active.isEmpty || value <= 0 || _cents(value) > _cents(_max)) {
       return;
     }
-    _amountFocus.unfocus();
     final l10n = context.l10n;
     setState(() => _busy = true);
     final service = widget.service ?? CustomerReceiptService();
@@ -642,8 +733,8 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       customer: widget.customer,
       orders: _orders,
       allocations: allocations,
-      paidAt: paidAtFor(_paidDay),
-      file: _receipt,
+      paidAt: paidAtFor(draft.paidDay),
+      file: draft.receipt,
     );
     try {
       // Someone else's order: only the server may write it (online).
@@ -671,19 +762,25 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     Navigator.of(context).pop(true);
   }
 
+  String _summaryLabel() {
+    final l10n = context.l10n;
+    final checked = _active.length;
+    return checked == _openCount
+        ? l10n.receiveSummaryCount(_openCount)
+        : l10n.receiveSummarySome(checked, _openCount);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final text = AppColors.text.resolveFrom(context);
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    final showMenu = !_busy && (_openCharge != null || _canSendLink);
+    final charge = _openCharge;
 
     return CupertinoPageScaffold(
       backgroundColor: AppColors.groupedBackground.resolveFrom(context),
       navigationBar: CupertinoNavigationBar(
         backgroundColor: AppNavBar.barBackground(context),
         border: null,
-        trailing: showMenu
+        trailing: !_busy && charge != null
             ? GlassBarButton(
                 key: const Key('receiveCustomerMenu'),
                 label: l10n.receiveMoreOptions,
@@ -696,122 +793,111 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
         type: MaterialType.transparency,
         child: SafeArea(
           bottom: false,
-          child: Stack(
+          child: ListView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xl,
+            ),
             children: [
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _amount,
-                builder: (context, value, _) {
-                  final amount = parseCurrencyInput(value.text);
-                  final active = _active;
-                  final tooMuch = _cents(amount) > _cents(_max);
-                  final canSave =
-                      !_busy && active.isNotEmpty && amount > 0 && !tooMuch;
-                  final previews = {
-                    for (final p in previewAllocation(
-                      active,
-                      canSave || _busy ? allocatePayment(active, amount) : [],
-                    ))
-                      p.balance.orderId: p,
-                  };
-                  final showLines = amount > 0 && !tooMuch;
-                  return ListView(
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.paddingOf(context).bottom + 80,
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.pageMargin,
-                          AppSpacing.sm,
-                          AppSpacing.pageMargin,
-                          AppSpacing.xs,
-                        ),
-                        child: Semantics(
-                          header: true,
-                          child: Text(
-                            l10n.receiveCustomerTitle(_name),
-                            key: const Key('receiveCustomerTitle'),
-                            style: AppTypography.title.copyWith(color: text),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.pageMargin,
-                          0,
-                          AppSpacing.pageMargin,
-                          AppSpacing.sm,
-                        ),
-                        child: Text(
-                          l10n.receiveCustomerOpenCount(_openCount),
-                          key: const Key('receiveCustomerSentence'),
-                          style: AppTypography.callout.copyWith(
-                            color: secondary,
-                          ),
-                        ),
-                      ),
-                      if (_openCharge != null) _buildOpenCharge(_openCharge!),
-                      _buildAmountSection(amount, tooMuch, active.isEmpty),
-                      _buildDetailsSection(),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.blockMargin,
-                          AppSpacing.sm,
-                          AppSpacing.blockMargin,
-                          AppSpacing.md,
-                        ),
-                        child: _busy
-                            ? const SizedBox(
-                                height: AppSizes.primaryButtonHeight,
-                                child: Center(
-                                  child: CupertinoActivityIndicator(),
-                                ),
-                              )
-                            : PrimaryButton(
-                                key: const Key('receiveCustomerConfirm'),
-                                label: l10n.receiveConfirmButton,
-                                onPressed: canSave ? _confirm : null,
-                              ),
-                      ),
-                      _buildOrdersSection(
-                        header: l10n.receiveCustomerPaying,
-                        footer: l10n.receiveCustomerOldestFirst,
-                        footerKey: const Key('receiveCustomerSplitNote'),
-                        orders: [
-                          for (final b in _balances)
-                            for (final o in _orders)
-                              if (o.id == b.orderId) o,
-                        ],
-                        own: true,
-                        previews: previews,
-                        showLines: showLines,
-                      ),
-                      if (_others.isNotEmpty)
-                        _buildOrdersSection(
-                          header: l10n.receiveCustomerOthersTitle(_name),
-                          footer: l10n.receiveCustomerOthersNote,
-                          footerKey: const Key('receiveCustomerOthersNote'),
-                          orders: [for (final o in _others) _otherAsOrder(o)],
-                          own: false,
-                          previews: previews,
-                          showLines: showLines,
-                        ),
-                    ],
-                  );
-                },
+              ReceiveSummary(
+                titleKey: const Key('receiveCustomerTitle'),
+                title: _name,
+                label: _summaryLabel(),
+                amount: FormatService().formatCurrency(_max),
               ),
-              if (_amountFocus.hasFocus)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _KeyboardDoneBar(onDone: _amountFocus.unfocus),
+              if (charge != null) _buildChargeStatus(charge),
+              _buildActions(),
+              _buildOrdersSection(
+                header: l10n.receiveOrdersIncluded,
+                orders: [
+                  for (final b in _balances)
+                    for (final o in _orders)
+                      if (o.id == b.orderId) o,
+                ],
+                own: true,
+              ),
+              if (_others.isNotEmpty)
+                _buildOrdersSection(
+                  header: l10n.receiveCustomerOthersTitle(_name),
+                  footer: l10n.receiveCustomerOthersNote,
+                  footerKey: const Key('receiveCustomerOthersNote'),
+                  orders: [for (final o in _others) _otherAsOrder(o)],
+                  own: false,
                 ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// The one or two buttons under the amount. With a charge open nothing is
+  /// blue while the customer has time to pay; overdue, the next step is ours.
+  Widget _buildActions() {
+    final l10n = context.l10n;
+    final charge = _openCharge;
+    final canAct = !_busy && _active.isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.blockMargin,
+        0,
+        AppSpacing.blockMargin,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_busy)
+            const SizedBox(
+              height: AppSizes.primaryButtonHeight,
+              child: Center(child: CupertinoActivityIndicator()),
+            )
+          else if (charge == null) ...[
+            PrimaryButton(
+              key: const Key('receiveCustomerConfirm'),
+              label: l10n.receiveMarkReceived,
+              onPressed: canAct ? _openReceive : null,
+            ),
+            if (_canSendLink) ...[
+              const SizedBox(height: AppSpacing.sm),
+              SecondaryButton(
+                key: const Key('receiveCustomerSendCharge'),
+                label: l10n.chargeSend,
+                onPressed: canAct ? _sendCharge : null,
+              ),
+            ],
+          ] else ...[
+            if (charge.status == 'overdue')
+              PrimaryButton(
+                key: const Key('receiveCustomerResend'),
+                label: l10n.chargeSendAgain,
+                onPressed: _resendCharge,
+              )
+            else
+              SecondaryButton(
+                key: const Key('receiveCustomerResend'),
+                label: l10n.chargeSendAgain,
+                onPressed: _resendCharge,
+              ),
+            const SizedBox(height: AppSpacing.xs),
+            Center(
+              child: TextLink(
+                key: const Key('receiveCustomerConfirm'),
+                label: l10n.receiveMarkReceived,
+                onPressed: canAct ? _openReceive : null,
+              ),
+            ),
+          ],
+          if (_active.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: _sectionText(
+                l10n.receiveCustomerNoneChecked,
+                key: const Key('receiveCustomerHint'),
+                color: AppColors.danger.resolveFrom(context),
+                bold: true,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -860,185 +946,47 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
     );
   }
 
-  /// "Quanto recebeu": the only place the amount shows. Standard field with
-  /// ⓧ to clear; the footer gives the hint or why the button is off.
-  Widget _buildAmountSection(double amount, bool tooMuch, bool noneChecked) {
-    final l10n = context.l10n;
-    final String hint;
-    var error = false;
-    if (noneChecked) {
-      hint = l10n.receiveCustomerNoneChecked;
-      error = true;
-    } else if (tooMuch) {
-      hint = l10n.receiveCustomerTooMuchChosen(
-        FormatService().formatCurrency(_max),
-      );
-      error = true;
-    } else if (amount <= 0) {
-      hint = l10n.receiveCustomerZero;
-    } else {
-      hint = l10n.receiveCustomerPartHint;
-    }
-    final format = FormatService().currencyFormat;
-    return _section(
-      header: _sectionText(l10n.receiveCustomerAmountLabel),
-      footer: _sectionText(
-        hint,
-        key: const Key('receiveCustomerHint'),
-        color: error ? AppColors.danger.resolveFrom(context) : null,
-        bold: error,
-      ),
-      children: [
-        Semantics(
-          label: l10n.receiveCustomerAmountLabel,
-          child: CupertinoTextField(
-            key: const Key('receiveAmountField'),
-            controller: _amount,
-            focusNode: _amountFocus,
-            enabled: !_busy,
-            onChanged: (_) => _typed = true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              CurrencyTextInputFormatter.currency(
-                locale: format.locale,
-                symbol: format.currencySymbol,
-                decimalDigits: 2,
-              ),
-            ],
-            placeholder: ReceiveAmountField.textFor(0),
-            placeholderStyle: AppTypography.title.copyWith(
-              color: AppColors.textSecondary.resolveFrom(context),
-              fontFeatures: AppTypography.tabular,
-            ),
-            clearButtonMode: OverlayVisibilityMode.editing,
-            clearButtonSemanticLabel: l10n.clear,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            decoration: null,
-            style: AppTypography.title.copyWith(
-              color: AppColors.text.resolveFrom(context),
-              fontFeatures: AppTypography.tabular,
-            ),
-            cursorColor: AppColors.accent.resolveFrom(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// "Quando ›" and "Comprovante ›" as plain form rows.
-  Widget _buildDetailsSection() {
-    final l10n = context.l10n;
-    final accentText = AppColors.accentText.resolveFrom(context);
-    return _section(
-      children: [
-        _FormRow(
-          key: const Key('receiveDateRow'),
-          label: l10n.receiveWhen,
-          value: paymentDayLabel(l10n, _paidDay),
-          valueKey: const Key('receiveDateValue'),
-          onTap: _busy ? null : _pickDay,
-        ),
-        if (_receipt != null)
-          _FormRow(
-            key: const Key('receiveReceiptChip'),
-            label: l10n.receipt,
-            value: _receipt!.name,
-            trailing: CupertinoButton(
-              key: const Key('receiveRemoveReceipt'),
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(
-                AppSizes.minTouchTarget,
-                AppSizes.minTouchTarget,
-              ),
-              onPressed: _busy ? null : () => setState(() => _receipt = null),
-              child: Semantics(
-                label: l10n.receiveRemoveReceipt,
-                child: Icon(
-                  CupertinoIcons.xmark_circle_fill,
-                  size: 22,
-                  color: AppColors.textSecondary.resolveFrom(context),
-                ),
-              ),
-            ),
-          )
-        else if (_canAttach)
-          _FormRow(
-            key: const Key('receiveCustomerAttach'),
-            label: l10n.receipt,
-            value: l10n.receiveAttach,
-            valueColor: accentText,
-            onTap: _busy ? null : _attach,
-          ),
-      ],
-    );
-  }
-
-  /// The open multi-order link: amount, orders and due date. Its actions
-  /// (share again, copy, cancel) are in the "…".
-  Widget _buildOpenCharge(CustomerCharge charge) {
+  /// The open multi-order charge: who the app is waiting for and what was
+  /// charged. Its actions are the buttons under it and the "…".
+  Widget _buildChargeStatus(CustomerCharge charge) {
     final l10n = context.l10n;
     final format = FormatService();
-    final due = charge.dueDay;
-    return _section(
-      hasLeading: true,
-      children: [
-        AppListRow(
-          key: const Key('receiveCustomerOpenCharge'),
-          leading: Icon(
-            CupertinoIcons.link,
-            color: AppColors.accentText.resolveFrom(context),
-          ),
-          title: l10n.receiveCustomerOpenCharge(
-            format.formatCurrency(charge.value ?? 0),
-          ),
-          subtitle: l10n.receiveCustomerOpenChargeDetail(
-            charge.orderNumbers.join(', '),
-            due == null ? '-' : format.formatDate(due),
-          ),
-        ),
-      ],
+    final value = format.formatCurrency(charge.value ?? 0);
+    final due = charge.dueDay == null ? '-' : format.formatDate(charge.dueDay);
+    final overdue = charge.status == 'overdue';
+    return ChargeStatusCard(
+      key: const Key('receiveCustomerOpenCharge'),
+      overdue: overdue,
+      status: overdue
+          ? l10n.chargeExpiredOn(due)
+          : l10n.chargeWaitingFor(_name),
+      detail: overdue
+          ? l10n.chargeDetailOverdue(value)
+          : l10n.chargeDetailUntil(value, due),
     );
   }
 
-  /// "Está pagando" (the customer's own orders, openable by their ⓘ) or
-  /// "Outras OS de João" (someone else's, not openable).
+  /// The customer's own orders, openable by their ⓘ, or "Outras OS de João"
+  /// (someone else's, not openable).
   Widget _buildOrdersSection({
     required String header,
-    required String footer,
-    required Key footerKey,
+    String? footer,
+    Key? footerKey,
     required List<Order> orders,
     required bool own,
-    required Map<String, AllocationPreview> previews,
-    required bool showLines,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: _section(
         hasLeading: _selectable,
         header: _sectionText(header),
-        footer: _sectionText(footer, key: footerKey),
-        children: [
-          for (final order in orders)
-            _buildOrderRow(
-              order,
-              own: own,
-              preview: previews[order.id],
-              showLine: showLines,
-            ),
-        ],
+        footer: footer == null ? null : _sectionText(footer, key: footerKey),
+        children: [for (final order in orders) _buildOrderRow(order, own: own)],
       ),
     );
   }
 
-  Widget _buildOrderRow(
-    Order order, {
-    required bool own,
-    required AllocationPreview? preview,
-    required bool showLine,
-  }) {
+  Widget _buildOrderRow(Order order, {required bool own}) {
     final l10n = context.l10n;
     final format = FormatService();
     final id = order.id ?? '';
@@ -1049,19 +997,13 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
         ? l10n.receiveCustomerPickRow(number)
         : l10n.receiveCustomerOrderRow(number, description);
     final open = format.formatCurrency(OpenBalance.ofOrder(order).open);
-    String? line;
-    if (checked && showLine && preview != null) {
-      if (preview.settles) {
-        line = l10n.receiveCustomerRowSettles;
-      } else if (preview.untouched) {
-        line = l10n.receiveCustomerRowLater;
-      } else {
-        line = l10n.receiveCustomerRowPartial(
-          format.formatCurrency(preview.received),
-          format.formatCurrency(preview.remaining),
-        );
-      }
-    }
+    // A single-order link is the one thing a row says beyond its amount.
+    final charge = _orderCharges[id];
+    final String? line = charge == null
+        ? null
+        : charge.status == ChargeStatus.overdue
+        ? l10n.chargeExpiredOn(format.formatDayMonthOrDate(charge.dueDateValue))
+        : l10n.chargeWaitingPayment;
     return _OrderCheckRow(
       key: Key(own ? 'receiveCustomerRow_$id' : 'receiveCustomerOther_$id'),
       id: id,
@@ -1077,9 +1019,8 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
   }
 }
 
-/// One order of "Está pagando": check circle, "OS 15 · Fiat Uno", what is
-/// open on it and, under, what this payment does to it. Tapping the row
-/// toggles the check; the ⓘ (own orders only) opens the order.
+/// One order: check circle, "OS 15 · Fiat Uno", what is open on it and,
+/// under, its open link if there is one. Tapping the row toggles the check; the ⓘ (own orders only) opens the order.
 class _OrderCheckRow extends StatelessWidget {
   const _OrderCheckRow({
     super.key,
@@ -1213,116 +1154,6 @@ class _OrderCheckRow extends StatelessWidget {
         else
           const SizedBox(width: AppSpacing.lg),
       ],
-    );
-  }
-}
-
-/// Plain form row: label on the left, value (or [trailing]) on the right,
-/// chevron when it opens something. Wraps, never ellipsized.
-class _FormRow extends StatelessWidget {
-  const _FormRow({
-    super.key,
-    required this.label,
-    required this.value,
-    this.valueKey,
-    this.valueColor,
-    this.onTap,
-    this.trailing,
-  });
-
-  final String label;
-  final String value;
-  final Key? valueKey;
-  final Color? valueColor;
-  final VoidCallback? onTap;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppColors.text.resolveFrom(context);
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    final row = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          AppSpacing.lg,
-          trailing == null ? AppSpacing.md : 0,
-          trailing == null ? AppSpacing.lg : AppSpacing.xs,
-          trailing == null ? AppSpacing.md : 0,
-        ),
-        child: Row(
-          children: [
-            Text(label, style: AppTypography.body.copyWith(color: text)),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                value,
-                key: valueKey,
-                textAlign: TextAlign.end,
-                style: AppTypography.body.copyWith(
-                  color: valueColor ?? secondary,
-                  fontFeatures: AppTypography.tabular,
-                ),
-              ),
-            ),
-            if (trailing != null)
-              trailing!
-            else if (onTap != null) ...[
-              const SizedBox(width: AppSpacing.xs),
-              Icon(CupertinoIcons.chevron_forward, size: 18, color: secondary),
-            ],
-          ],
-        ),
-      ),
-    );
-    if (trailing != null) {
-      return Semantics(label: '$label: $value', child: row);
-    }
-    return Semantics(
-      button: true,
-      label: '$label: $value',
-      excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: row,
-      ),
-    );
-  }
-}
-
-/// "OK" bar over the numeric keyboard (it has no return key).
-class _KeyboardDoneBar extends StatelessWidget {
-  const _KeyboardDoneBar({required this.onDone});
-
-  final VoidCallback onDone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const Key('receiveKeyboardDone'),
-      decoration: BoxDecoration(
-        color: AppColors.surface.resolveFrom(context),
-        border: Border(
-          top: BorderSide(color: AppColors.separator.resolveFrom(context)),
-        ),
-      ),
-      alignment: AlignmentDirectional.centerEnd,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        minimumSize: const Size(
-          AppSizes.minTouchTarget,
-          AppSizes.minTouchTarget,
-        ),
-        onPressed: onDone,
-        child: Text(
-          context.l10n.ok,
-          style: AppTypography.bodyStrong.copyWith(
-            color: AppColors.accentText.resolveFrom(context),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/order_charge.dart';
-import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/format_service.dart';
@@ -72,100 +71,133 @@ int _paidCount(OrderCharge? charge) => charge?.paidAsaasPaymentIds?.length ?? 0;
 bool chargeHasPaidInstallments(OrderCharge charge) =>
     charge.isOpen && (charge.paidAsaasPaymentIds ?? const []).isNotEmpty;
 
-/// Top block of the Receber screen while a payment link is open: when it was
-/// sent, what is still missing and until when the link is valid, plus a
-/// WhatsApp reminder. No filled button: the customer is the one who acts.
-class ChargeLinkBlock extends StatelessWidget {
-  const ChargeLinkBlock({
+/// Status of an open charge: dot and sentence ("Esperando Elias pagar", or
+/// "Venceu em 28/10" in red) and what was charged. Shared by the Receber
+/// screens; the actions live on the screen, under it.
+class ChargeStatusCard extends StatelessWidget {
+  const ChargeStatusCard({
+    super.key,
+    required this.status,
+    required this.detail,
+    this.overdue = false,
+    this.note,
+  });
+
+  final String status;
+  final String detail;
+  final bool overdue;
+
+  /// Extra line ("Falta mais R$ 900 fora do link.").
+  final String? note;
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary = AppColors.textSecondary.resolveFrom(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.blockMargin,
+        0,
+        AppSpacing.blockMargin,
+        AppSpacing.md,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface.resolveFrom(context),
+        borderRadius: BorderRadius.circular(AppRadii.field),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _DotLine(
+            color: overdue ? AppColors.danger : AppColors.warning,
+            text: status,
+            style: AppTypography.body.copyWith(
+              color: overdue
+                  ? AppColors.danger.resolveFrom(context)
+                  : AppColors.text.resolveFrom(context),
+              fontWeight: overdue ? FontWeight.w600 : null,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            detail,
+            key: const Key('chargeLinkDetail'),
+            style: AppTypography.callout.copyWith(
+              color: secondary,
+              fontFeatures: AppTypography.tabular,
+            ),
+          ),
+          if (note != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              note!,
+              key: const Key('chargeMissingOutsideLink'),
+              style: AppTypography.callout.copyWith(color: secondary),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// [ChargeStatusCard] of an order's open charge. [remaining] is what the
+/// order still owes: above the charge value, it says how much is outside.
+class OrderChargeStatus extends StatelessWidget {
+  const OrderChargeStatus({
     super.key,
     required this.charge,
     required this.customerName,
-    required this.onRemind,
     this.remaining = 0,
   });
 
   final OrderCharge charge;
   final String? customerName;
-  final VoidCallback onRemind;
-
-  /// What the order still owes; above the link value, the block says how
-  /// much is missing outside the link.
   final double remaining;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final format = FormatService();
-    final onSoft = AppColors.onAccentSoft.resolveFrom(context);
     final value = format.formatCurrency(charge.value ?? 0);
     final due = format.formatDayMonthOrDate(charge.dueDateValue);
     final overdue = charge.status == ChargeStatus.overdue;
-
-    final String label;
-    if (overdue && due.isNotEmpty) {
-      label = l10n.chargeLinkExpiredOn(due);
-    } else if (charge.createdAt != null) {
-      label = l10n.chargeLinkSentOn(
-        format.formatDayMonthOrDate(charge.createdAt),
-      );
-    } else {
-      label = l10n.chargeLinkSent;
-    }
-
     final name = customerName;
-    var sentence = name == null || name.isEmpty
-        ? l10n.chargeNotPaidYetNoCustomer(value)
-        : l10n.chargeNotPaidYet(name, value);
-    if (!overdue && due.isNotEmpty) {
-      sentence = '$sentence ${l10n.chargeLinkValidUntil(due)}';
-    }
-    final outside = remaining - (charge.value ?? 0);
+    final installments = charge.mode == ChargeMode.cardInstallments;
 
-    return _BlockCard(
+    final String detail;
+    if (chargeHasPaidInstallments(charge)) {
+      final paid = _paidCount(charge);
+      detail = l10n.chargeInstallmentsPaid(
+        paid,
+        charge.installmentCount ?? paid,
+      );
+    } else if (installments && charge.installmentCount != null && !overdue) {
+      detail = l10n.chargeInstallmentsUntil(charge.installmentCount!, due);
+    } else if (overdue) {
+      detail = installments
+          ? l10n.chargeDetailValue(value)
+          : l10n.chargeDetailOverdue(value);
+    } else {
+      detail = l10n.chargeDetailUntil(value, due);
+    }
+
+    final outside = remaining - (charge.value ?? 0);
+    return ChargeStatusCard(
       key: const Key('chargeLinkBlock'),
-      background: AppColors.accentSoft.resolveFrom(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: AppTypography.label.copyWith(color: onSoft)),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            sentence,
-            key: const Key('chargeLinkSentence'),
-            style: AppTypography.highlight.copyWith(
-              color: onSoft,
-              fontFeatures: AppTypography.tabular,
-            ),
-          ),
-          if (outside > OrderPaymentMath.centTolerance) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              l10n.chargeMissingOutsideLink(format.formatCurrency(outside)),
-              key: const Key('chargeMissingOutsideLink'),
-              style: AppTypography.callout.copyWith(color: onSoft),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          CupertinoButton(
-            key: const Key('chargeRemindWhatsApp'),
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(
-              AppSizes.minTouchTarget,
-              AppSizes.minTouchTarget,
-            ),
-            onPressed: onRemind,
-            child: Text(
-              l10n.chargeRemindWhatsApp,
-              style: AppTypography.callout.copyWith(
-                color: onSoft,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-                decorationColor: onSoft,
-              ),
-            ),
-          ),
-        ],
-      ),
+      overdue: overdue,
+      status: overdue
+          ? l10n.chargeExpiredOn(due)
+          : name == null || name.isEmpty
+          ? l10n.chargeWaitingPayment
+          : l10n.chargeWaitingFor(name),
+      detail: detail,
+      note: outside > OrderPaymentMath.centTolerance
+          ? l10n.chargeMissingOutsideLink(format.formatCurrency(outside))
+          : null,
     );
   }
 }
@@ -271,88 +303,6 @@ class ChargeCanceledBlock extends StatelessWidget {
             key: const Key('chargeSendNewLinkButton'),
             label: l10n.chargeGenerateNew(remainingText),
             onPressed: busy ? null : onSend,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "Link de pagamento" row under "Link para pagar". Informational only (no
-/// chevron, not tappable): its actions live in the screen's "…" menu.
-class ChargeLinkRow extends StatelessWidget {
-  const ChargeLinkRow({
-    super.key,
-    required this.charge,
-    required this.customerName,
-    this.replacing = false,
-  });
-
-  final OrderCharge charge;
-  final String? customerName;
-
-  /// The "new link" block is showing: say that it cancels this one.
-  final bool replacing;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final format = FormatService();
-    final secondary = AppColors.textSecondary.resolveFrom(context);
-    final due = format.formatDayMonthOrDate(charge.dueDateValue);
-    final overdue = charge.status == ChargeStatus.overdue;
-    final name = customerName;
-
-    final Widget status;
-    if (overdue) {
-      final danger = AppColors.danger.resolveFrom(context);
-      status = _DotLine(
-        color: AppColors.danger,
-        text: l10n.chargeExpiredOn(due),
-        style: AppTypography.callout.copyWith(
-          color: danger,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-    } else {
-      status = _DotLine(
-        color: AppColors.warning,
-        text: name == null || name.isEmpty
-            ? l10n.chargeWaitingPayment
-            : l10n.chargeWaitingFor(name),
-        style: AppTypography.callout.copyWith(color: secondary),
-      );
-    }
-
-    final String detail;
-    if (chargeHasPaidInstallments(charge)) {
-      final paid = _paidCount(charge);
-      detail = l10n.chargeInstallmentsPaid(
-        paid,
-        charge.installmentCount ?? paid,
-      );
-    } else if (replacing) {
-      detail = l10n.chargeUntilReplaced(due);
-    } else if (charge.mode == ChargeMode.cardInstallments &&
-        charge.installmentCount != null) {
-      detail = l10n.chargeInstallmentsUntil(charge.installmentCount!, due);
-    } else {
-      detail = l10n.chargeMethodsUntil(due);
-    }
-
-    return AppListRow(
-      key: const Key('chargeLinkRow'),
-      title: l10n.chargePaymentLink,
-      trailing: format.formatCurrency(charge.value ?? 0),
-      subtitleWidget: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          status,
-          const SizedBox(height: 2),
-          Text(
-            detail,
-            key: const Key('chargeLinkDetail'),
-            style: AppTypography.label.copyWith(color: secondary),
           ),
         ],
       ),

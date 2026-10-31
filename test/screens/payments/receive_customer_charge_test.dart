@@ -9,8 +9,11 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/customer_charge.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_charge.dart';
 import 'package:praticos/models/receipt.dart';
 import 'package:praticos/screens/payments/receive_customer_screen.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/secondary_button.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/customer_receipt_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -52,12 +55,12 @@ List<Order> _orders() => [
   _order('b', 190, 500, DateTime(2026, 9, 10)),
 ];
 
-CustomerCharge _charge() => CustomerCharge.fromJson({
+CustomerCharge _charge({String status = 'pending'}) => CustomerCharge.fromJson({
   'id': 'cc1',
   'customer': {'id': 'c1', 'name': 'João'},
   'value': 950,
   'dueDate': '2026-10-20',
-  'status': 'pending',
+  'status': status,
   'invoiceUrl': 'https://asaas.test/i/cc1',
   'allocations': [
     {'orderId': 'a', 'orderNumber': 182, 'amount': 450},
@@ -80,6 +83,8 @@ void main() {
     AsaasApiService? api,
     Future<List<CustomerOpenOrder>> Function()? others,
     double textScale = 1,
+    Stream<Map<String, OrderCharge>>? orderCharges,
+    bool startCharge = false,
   }) async {
     tester.view.physicalSize = const Size(430, 1600);
     tester.view.devicePixelRatio = 1;
@@ -101,6 +106,8 @@ void main() {
             canAttachReceipt: false,
             chargeReady: () async => chargeReady,
             openCharge: openCharge ?? Stream.value(null),
+            orderCharges: orderCharges ?? Stream.value(const {}),
+            startCharge: startCharge,
             createCharge: createCharge,
             shareLink: (_, url) async => shared?.add(url),
             api: api,
@@ -112,14 +119,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('Mandar link para pagar', () {
+  Future<void> receive(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('new_order_save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+
+  group('Mandar cobrança', () {
     testWidgets('hidden without Asaas', (tester) async {
       await pump(tester);
       expect(find.byKey(const Key('receiveCustomerMenu')), findsNothing);
       expect(find.text('Mandar cobrança'), findsNothing);
     });
 
-    testWidgets('creates one link for the orders and shares it', (
+    testWidgets('creates one charge for the orders and shares it', (
       tester,
     ) async {
       final calls = <(List<String>, double)>[];
@@ -134,21 +149,37 @@ void main() {
         },
       );
 
-      // Not in the content: it lives in the "…" of the top bar.
-      expect(find.text('Mandar link para pagar…'), findsNothing);
-      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
-      await tester.pumpAndSettle();
-      expect(find.text('Mandar link para pagar…'), findsOneWidget);
-      await tester.tap(find.text('Mandar link para pagar…'));
+      // On the screen, beside the blue button; no "…" until a charge exists.
+      expect(find.byKey(const Key('receiveCustomerMenu')), findsNothing);
+      expect(find.byType(SecondaryButton), findsOneWidget);
+      await tester.tap(find.text('Mandar cobrança'));
       await tester.pumpAndSettle();
 
       expect(calls.single.$1, ['a', 'b']);
       expect(calls.single.$2, 950);
       expect(shared, ['https://asaas.test/i/cc1']);
-      expect(find.text('Link aberto de ${brl(950)}'), findsOneWidget);
+      expect(find.text('Esperando João pagar'), findsOneWidget);
     });
 
-    testWidgets('an open link is shown and shared again, not duplicated', (
+    testWidgets('only the orders checked go in the charge', (tester) async {
+      final calls = <(List<String>, double)>[];
+      await pump(
+        tester,
+        chargeReady: true,
+        createCharge: (_, balances, value) async {
+          calls.add(([for (final b in balances) b.orderId], value));
+          return null;
+        },
+      );
+      await tester.tap(find.byKey(const Key('receiveCustomerToggle_a')));
+      await tester.pump();
+      await tester.tap(find.text('Mandar cobrança'));
+      await tester.pumpAndSettle();
+      expect(calls.single.$1, ['b']);
+      expect(calls.single.$2, 500);
+    });
+
+    testWidgets('an open charge is shown and sent again, not duplicated', (
       tester,
     ) async {
       var created = 0;
@@ -164,19 +195,133 @@ void main() {
         },
       );
 
-      expect(find.text('Link aberto de ${brl(950)}'), findsOneWidget);
-      expect(find.text('OS 182, 190 · vence 20/10/2026'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
-      await tester.pumpAndSettle();
-      // With a link open, the "…" shares it again instead of a new one.
-      expect(find.text('Mandar link para pagar…'), findsNothing);
-      await tester.tap(find.text('Mandar o link de novo'));
+      expect(find.text('Esperando João pagar'), findsOneWidget);
+      expect(
+        find.text('Cobrança de ${brl(950)} · vale até 20/10/2026'),
+        findsOneWidget,
+      );
+      // The customer is the one who acts: nothing blue.
+      expect(find.byType(PrimaryButton), findsNothing);
+      expect(find.text('Mandar cobrança'), findsNothing);
+      await tester.tap(find.text('Mandar de novo'));
       await tester.pumpAndSettle();
       expect(created, 0);
       expect(shared, ['https://asaas.test/i/cc1']);
     });
 
-    testWidgets('"…" cancels the link through the API', (tester) async {
+    testWidgets('overdue: red, and "Mandar de novo" turns blue', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        chargeReady: true,
+        openCharge: Stream.value(_charge(status: 'overdue')),
+      );
+      expect(find.text('Venceu em 20/10/2026'), findsOneWidget);
+      expect(
+        find.text('Cobrança de ${brl(950)} · ainda dá para pagar'),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<PrimaryButton>(
+              find.byKey(const Key('receiveCustomerResend')),
+            )
+            .label,
+        'Mandar de novo',
+      );
+    });
+
+    testWidgets('received another way: the sheet says the charge adjusts', (
+      tester,
+    ) async {
+      final service = _FakeService();
+      await pump(
+        tester,
+        service: service,
+        chargeReady: true,
+        openCharge: Stream.value(_charge()),
+      );
+      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('A cobrança aberta se ajusta sozinha, sem avisar João.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('new_order_save')));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(service.local.single.allocations.map((a) => a.amount), [450, 500]);
+    });
+
+    testWidgets('a single-order link shows on its row and asks to replace', (
+      tester,
+    ) async {
+      final calls = <double>[];
+      await pump(
+        tester,
+        chargeReady: true,
+        orderCharges: Stream.value({
+          'a': OrderCharge(
+            id: 'ch1',
+            status: ChargeStatus.pending,
+            value: 450,
+            dueDate: '2026-10-20',
+          ),
+        }),
+        createCharge: (_, _, value) async {
+          calls.add(value);
+          return null;
+        },
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('receiveCustomerLine_a')))
+            .data,
+        'Esperando o pagamento',
+      );
+
+      await tester.tap(find.text('Mandar cobrança'));
+      await tester.pumpAndSettle();
+      expect(find.text('Já existe uma cobrança em aberto'), findsOneWidget);
+      expect(calls, isEmpty);
+      await tester.tap(find.byKey(const Key('receiveCustomerChargeReplace')));
+      await tester.pumpAndSettle();
+      expect(calls, [950]);
+    });
+
+    testWidgets('startCharge opens the charge sheet right away', (
+      tester,
+    ) async {
+      final calls = <double>[];
+      await pump(
+        tester,
+        chargeReady: true,
+        startCharge: true,
+        createCharge: (_, _, value) async {
+          calls.add(value);
+          return null;
+        },
+      );
+      expect(calls, [950]);
+    });
+
+    testWidgets('startCharge with a charge open only shows it', (tester) async {
+      final calls = <double>[];
+      await pump(
+        tester,
+        chargeReady: true,
+        startCharge: true,
+        openCharge: Stream.value(_charge()),
+        createCharge: (_, _, value) async {
+          calls.add(value);
+          return null;
+        },
+      );
+      expect(calls, isEmpty);
+      expect(find.text('Esperando João pagar'), findsOneWidget);
+    });
+
+    testWidgets('"…" cancels the charge through the API', (tester) async {
       final requests = <http.Request>[];
       final api = AsaasApiService.withClient(
         MockClient((request) async {
@@ -200,7 +345,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('receiveCustomerMenu')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Cancelar o link').last);
+      await tester.tap(find.text('Cancelar cobrança').last);
       await tester.pumpAndSettle();
       await tester.tap(
         find.byKey(const Key('receiveCustomerChargeCancelConfirm')),
@@ -212,7 +357,7 @@ void main() {
         requests.single.url.path,
         endsWith('/v1/app/customers/c1/charges/cc1'),
       );
-      expect(find.text('Link aberto de ${brl(950)}'), findsNothing);
+      expect(find.text('Esperando João pagar'), findsNothing);
       await tester.pumpAndSettle(const Duration(seconds: 5));
     });
   });
@@ -240,9 +385,8 @@ void main() {
       expect(find.byKey(const Key('receiveCustomerOther_a')), findsNothing);
       // Unchecked and not openable (no ⓘ).
       expect(find.byKey(const Key('receiveCustomerInfo_x')), findsNothing);
-      expect(find.byKey(const Key('receiveCustomerLine_x')), findsNothing);
 
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await receive(tester);
       await tester.pumpAndSettle(const Duration(seconds: 5));
       expect(service.local.single.allocations.map((a) => a.orderId), [
         'a',
@@ -262,16 +406,13 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
       await tester.pump();
-      // The amount followed the checked orders: 200 + 450.
-      expect(find.textContaining('650,00'), findsOneWidget);
+      // The total followed the checked orders: 200 + 450.
       expect(
-        tester
-            .widget<Text>(find.byKey(const Key('receiveCustomerLine_x')))
-            .data,
-        'Quita',
+        tester.widget<Text>(find.byKey(const Key('receiveSummaryAmount'))).data,
+        brl(650),
       );
 
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
+      await receive(tester);
       await tester.pumpAndSettle(const Duration(seconds: 5));
       expect(service.local, isEmpty);
       final request = service.online.single;
@@ -286,8 +427,7 @@ void main() {
       await tester.tap(find.byKey(const Key('receiveCustomerToggle_b')));
       await tester.tap(find.byKey(const Key('receiveCustomerToggle_x')));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('receiveCustomerConfirm')));
-      await tester.pump();
+      await receive(tester);
 
       expect(
         find.text(
@@ -297,7 +437,6 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('receiveCustomerConfirm')), findsOneWidget);
-      expect(find.textContaining('200,00'), findsWidgets);
       await tester.pumpAndSettle(const Duration(seconds: 5));
     });
 

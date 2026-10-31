@@ -58,13 +58,20 @@ A tela unificada permite:
 - Valor já pago
 - Saldo restante
 
-#### Registrar Pagamento ("Receber")
-- Campo de valor pré-preenchido com o que falta receber (não passa disso)
-- **Quando**: dia em que o dinheiro entrou, "Hoje" por padrão; abre um seletor de data
-  sem datas futuras. Grava `paidAt` na transação (hoje = agora; outro dia = meio-dia do dia)
-- "Anexar comprovante" (câmera, galeria ou arquivo), se tiver `attachPhotos`
-- Botão azul "Confirmar recebimento" (o valor fica só no campo). Sem forma de pagamento (Pix/dinheiro/cartão)
+#### Marcar como recebido
+- Topo: cliente, "A receber · OS 18 · C180" e o valor (`ReceiveSummary`), com "total R$ X" embaixo quando ele difere do que falta ou há desconto
+- Botão azul "Marcar como recebido". Abre `ReceivePaymentSheet` (sheet com X e ✓): "Quanto recebeu" já com o que falta (não passa disso)
+- **Quando**: dia em que o dinheiro entrou, "Hoje" por padrão; seletor de data sem datas futuras. Grava `paidAt` na transação (hoje = agora; outro dia = meio-dia do dia)
+- "Comprovante › Anexar" (câmera, galeria ou arquivo), se tiver `attachPhotos`
+- Sem forma de pagamento (Pix/dinheiro/cartão). Se salvar falhar, o que foi preenchido volta na próxima abertura da sheet
 - Desconto e "Desfazer" ficam no menu "…"
+- Comprovante compartilhado de outro app: a sheet abre sozinha com o arquivo anexado
+
+#### Mandar cobrança
+- Com Asaas: botão branco "Mandar cobrança" (`SecondaryButton`), que abre a sheet de cobrança (`CreateChargeScreen`). Sem Asaas: "Mandar link da OS"
+- Boleto não tem botão próprio: o link deixa o cliente escolher Pix, boleto ou cartão
+- Cobrança aberta: `OrderChargeStatus` ("Esperando Ana pagar", "Cobrança de R$ X · vale até dd/mm"), "Mandar de novo" em cinza e o link "Marcar como recebido". Nada azul enquanto o cliente tem prazo. Vencida: texto em vermelho e "Mandar de novo" azul
+- O "…" tem "Copiar link" e "Cancelar cobrança"
 
 #### Histórico de Transações
 - Lista de todas as transações (pagamentos e descontos)
@@ -73,30 +80,13 @@ A tela unificada permite:
 
 ### Receber de um cliente (várias OS)
 
-Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart`), empurrada:
+Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart`), empurrada. Responde "o que falta receber deste cliente?" e tem duas saídas, com a mesma estrutura do Receber de uma OS:
 
-- Título "Receber de João" (quebra linha, sem reticências) e a frase "3 OS em aberto. Marque as
-  OS que foram pagas." (com 1 OS só "1 OS em aberto.").
-- **Formulário em cartões brancos** (`CupertinoListSection.insetGrouped`):
-  - "Quanto recebeu": campo padrão (sem borda azul nem lápis), com ⓧ para limpar, teclado numérico
-    com vírgula e uma barra "OK" em cima do teclado. Não abre o teclado sozinho. Começa com a soma
-    das OS marcadas e é o **único lugar** onde o valor aparece. Rodapé: "Se recebeu só uma parte,
-    digite quanto." ou o motivo do botão desligado ("Digite quanto recebeu.", "Passa do que falta
-    nessas OS (R$ X).", "Marque pelo menos uma OS.").
-  - "Quando › Hoje" (como acima) e "Comprovante › Anexar" (depois, o nome do arquivo com ⓧ para
-    tirar), linhas normais do formulário.
-- Botão azul "Confirmar recebimento" (58 de altura, o único azul da tela). Sucesso: aviso
-  (`showAppToast`) e volta; o Financeiro recarrega.
-- **Está pagando**: uma linha por OS em aberto, mais antiga primeiro. Tocar na linha marca ou
-  desmarca (✓ no círculo, padrão de seleção do iPhone; com 1 OS não há o que marcar). A linha mostra
-  "OS 15 · Fiat Uno" (veículo/aparelho, ou o primeiro serviço, como no recibo em PDF), quanto falta à
-  direita e, embaixo, o que este pagamento faz nela: "Quita", "Recebe R$ 300 · fica R$ 199,99" ou
-  "Fica para depois". O ⓘ (44 pt) abre a OS (`/order`); ao voltar, o valor digitado fica e a OS é
-  lida de novo. Rodapé: "Se o valor não der para tudo, as mais antigas são pagas primeiro."
-- Enquanto a pessoa não digita, o valor segue a soma das OS marcadas; depois de digitar, marcar e
-  desmarcar não muda o valor. O máximo é o que falta nas marcadas.
-- O valor vai **primeiro para as OS mais antigas** entre as marcadas (`allocatePayment` em
-  `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
+- **Topo** (`ReceiveSummary`): nome do cliente (quebra linha, sem reticências), "A receber · 6 OS" (ou "· 2 de 6 OS") e o valor das OS marcadas. É o único número grande.
+- **Botões**: azul "Marcar como recebido" e cinza "Mandar cobrança" (só com Asaas conectado e `chargeOrder`), do mesmo tamanho. Sem OS marcada, os dois desligam e aparece "Marque pelo menos uma OS.".
+- **OS incluídas**: uma linha por OS em aberto, mais antiga primeiro. Tocar marca ou desmarca (com 1 OS não há o que marcar). A linha mostra "OS 15 · Fiat Uno" (veículo/aparelho, ou o primeiro serviço, como no recibo em PDF), quanto falta e, se houver, o link aberto só daquela OS. O ⓘ (44 pt) abre a OS (`/order`); ao voltar, a OS é lida de novo.
+- **Sheet "Recebido de João"** (`ReceivePaymentSheet`, `lib/screens/payments/widgets/receive_payment_sheet.dart`): "Quanto recebeu" com a soma das marcadas (ⓧ para limpar, teclado numérico com "OK" no campo, sem foco automático), uma frase do que o valor faz ("Quita OS 182. Paga R$ 300,00 da OS 190. Ficam R$ 500,00."), "Quando" e "Comprovante". O ✓ fica cinza com o motivo ("Digite quanto recebeu.", "Passa do que falta nessas OS (R$ X)."). A sheet só devolve o preenchido; quem grava é a tela. Sucesso: aviso (`showAppToast`) e volta; o Financeiro recarrega. Falha: aviso, e o preenchido volta na próxima abertura.
+- O valor vai **primeiro para as OS mais antigas** entre as marcadas (`allocatePayment` em `lib/utils/payment_allocation.dart`, centavos inteiros, cada OS limitada ao que falta nela).
 
 **Entradas:**
 - Aba Financeiro: na lista de A receber, cliente com 2+ OS em aberto.
@@ -128,16 +118,10 @@ Tela `ReceiveCustomerScreen` (`lib/screens/payments/receive_customer_screen.dart
 
 ### Mandar cobrança de várias OS (Asaas)
 
-Em "Receber de João", com a conta Asaas conectada (piloto) e permissão `chargeOrder`, o "…" do
-topo tem "Mandar link para pagar…", que abre `CreateCustomerChargeScreen`
-(`lib/screens/payments/create_customer_charge_screen.dart`, sheet grande): valor (até o que falta
-nas OS marcadas, mais antiga primeiro), vencimento e CPF/CNPJ se faltar. O servidor cria **um**
-link do Asaas para as OS (`POST /v1/app/customers/{id}/charges`) e o app abre o compartilhar.
+Com a conta Asaas conectada (piloto) e permissão `chargeOrder`, "Mandar cobrança" abre `CreateCustomerChargeScreen` (`lib/screens/payments/create_customer_charge_screen.dart`, sheet grande) com o total das OS marcadas: valor (pode ser menor, mais antiga primeiro), vencimento e CPF/CNPJ se faltar. O servidor cria **um** link do Asaas para as OS (`POST /v1/app/customers/{id}/charges`) e o app abre o compartilhar. "Próxima cobrança" da aba Financeiro leva ao mesmo lugar: cliente com várias OS abre esta tela com a sheet já aberta (`startCharge`), com as OS de A receber marcadas. Sem Asaas continua perguntando "Qual OS?", porque só dá para mandar o link de uma OS.
 
-- A cobrança aberta aparece na tela ("Link aberto de R$ X", "OS 182, 190 · vence 18/10"), lida de
-  `companies/{cid}/customerCharges` (`CustomerChargeRepository.watchOpen`, um filtro só), como uma
-  linha acima do valor. Com link aberto, o "…" troca "Mandar link para pagar…" por mandar o link de
-  novo, copiar e cancelar (vermelho, com confirmação).
+- A cobrança aberta aparece abaixo do valor (`ChargeStatusCard`, lida de `companies/{cid}/customerCharges` por `CustomerChargeRepository.watchOpen`, um filtro só). "Mandar de novo" reenvia o mesmo link, "Marcar como recebido" vira link e a sheet avisa que a cobrança se ajusta sozinha. O "…" copia ou cancela (vermelho, com confirmação). Vencida: vermelho e "Mandar de novo" azul.
+- Link aberto só de uma OS aparece na linha dela (`OrderChargeRepository.watch`). Se essa OS entra numa cobrança nova, o app confirma antes, porque o servidor cancela o link anterior.
 - Criar o link cancela os links abertos de uma OS só dessas OS e o link anterior de várias OS do
   cliente. Enquanto a OS está nesse link, "Mandar cobrança" da OS sozinha explica que é preciso
   cancelar o de várias OS primeiro.

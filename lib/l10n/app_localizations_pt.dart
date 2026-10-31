@@ -2975,6 +2975,103 @@ class AppLocalizationsPt extends AppLocalizations {
   String get receiveWhen => 'Quando';
 
   @override
+  String get receiveMarkReceived => 'Marcar como recebido';
+
+  @override
+  String receiveReceivedFrom(String customer) {
+    return 'Recebido de $customer';
+  }
+
+  @override
+  String get receiveReceivedTitle => 'Recebido';
+
+  @override
+  String receiveSummaryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'A receber · $count OS',
+      one: 'A receber · 1 OS',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receiveSummarySome(int checked, int total) {
+    return 'A receber · $checked de $total OS';
+  }
+
+  @override
+  String receiveSummaryOrder(String order) {
+    return 'A receber · $order';
+  }
+
+  @override
+  String get receiveSummaryPlain => 'A receber';
+
+  @override
+  String get receiveOrdersIncluded => 'OS incluídas';
+
+  @override
+  String receivePreviewAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Quita as $count OS.',
+      one: 'Quita a OS.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivePreviewSettles(String numbers) {
+    return 'Quita OS $numbers.';
+  }
+
+  @override
+  String receivePreviewPart(String amount, String number) {
+    return 'Paga $amount da OS $number.';
+  }
+
+  @override
+  String receivePreviewLeft(String amount) {
+    return 'Ficam $amount.';
+  }
+
+  @override
+  String receiveChargeAdjusts(String customer) {
+    return 'A cobrança aberta se ajusta sozinha, sem avisar $customer.';
+  }
+
+  @override
+  String get receiveChargeAdjustsNoName =>
+      'A cobrança aberta se ajusta sozinha, sem avisar o cliente.';
+
+  @override
+  String get chargeSend => 'Mandar cobrança';
+
+  @override
+  String get chargeSendAgain => 'Mandar de novo';
+
+  @override
+  String get chargeSendOrderLink => 'Mandar link da OS';
+
+  @override
+  String chargeDetailUntil(String value, String date) {
+    return 'Cobrança de $value · vale até $date';
+  }
+
+  @override
+  String chargeDetailOverdue(String value) {
+    return 'Cobrança de $value · ainda dá para pagar';
+  }
+
+  @override
+  String chargeDetailValue(String value) {
+    return 'Cobrança de $value';
+  }
+
+  @override
   String get receiveConfirmButton => 'Confirmar recebimento';
 
   @override
@@ -4679,16 +4776,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chargeSendAgainWhatsApp => 'Mandar de novo pelo WhatsApp';
 
   @override
-  String get chargeCopyLink => 'Copiar o link';
+  String get chargeCopyLink => 'Copiar link';
 
   @override
   String get chargeLinkCopied => 'Link copiado';
 
   @override
-  String get chargeCancelLink => 'Cancelar o link';
+  String get chargeCancelLink => 'Cancelar cobrança';
 
   @override
-  String get chargeLinkTitle => 'Link para pagar';
+  String get chargeLinkTitle => 'Mandar cobrança';
 
   @override
   String chargeLinkIntro(String name) {

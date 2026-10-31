@@ -10,6 +10,9 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/screens/widgets/secondary_button.dart';
+import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -144,7 +147,12 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('manual receive: amount filled, no payment method asked', (
+  Future<void> openSheet(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('receiveConfirm')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('summary and one blue button; the form stays in the sheet', (
     tester,
   ) async {
     await pumpScreen(
@@ -162,58 +170,63 @@ void main() {
       ),
     );
 
-    expect(find.text('Receber'), findsWidgets);
-    expect(find.text('Falta receber'), findsOneWidget);
-    expect(find.text('Confirmar recebimento'), findsOneWidget);
-    expect(find.textContaining('Recebi '), findsNothing);
-    expect(find.textContaining('950,00'), findsWidgets);
-    expect(find.text('Anexar comprovante'), findsOneWidget);
+    expect(find.text('Ana Ribeiro'), findsOneWidget);
+    expect(find.text('A receber · OS 42'), findsOneWidget);
+    expect(find.text(FormatService().formatCurrency(950)), findsOneWidget);
+    expect(find.text('Marcar como recebido'), findsOneWidget);
+    expect(find.byType(PrimaryButton), findsOneWidget);
+    expect(find.byType(CupertinoTextField), findsNothing);
+    expect(find.text('Quando'), findsNothing);
     expect(find.textContaining('Como pagou'), findsNothing);
     // Manual payment: no payment method, receipt state visible.
     expect(find.textContaining('pelo link'), findsNothing);
     expect(find.textContaining('sem comprovante'), findsOneWidget);
-    // Old segmented control and shortcut are gone.
-    expect(find.byType(CupertinoSlidingSegmentedControl<int>), findsNothing);
-    expect(find.textContaining('Pagar valor total'), findsNothing);
   });
 
-  testWidgets(
-    'the suggested amount follows a new balance (a link paid meanwhile)',
-    (tester) async {
-      final store = storeWith(total: 1200);
-      await pumpScreen(tester, store);
-      expect(find.textContaining('1.200,00'), findsWidgets);
-
-      // reloadPayments after the webhook booked R$ 300 by the link.
-      runInAction(() => store.paidAmount = 300);
-      await tester.pump();
-
-      // Only the subtitle ("total R$ 1.200,00") still says 1.200,00.
-      expect(find.textContaining('900,00'), findsWidgets);
-      expect(find.textContaining('1.200,00'), findsOneWidget);
-    },
-  );
-
-  testWidgets('an amount the person typed is kept when the balance changes', (
+  testWidgets('the amount follows a new balance (a link paid meanwhile)', (
     tester,
   ) async {
     final store = storeWith(total: 1200);
     await pumpScreen(tester, store);
-    await tester.enterText(find.byType(CupertinoTextField).first, '10000');
-    await tester.pump();
-    expect(find.textContaining('100,00'), findsWidgets);
+    expect(find.text(FormatService().formatCurrency(1200)), findsOneWidget);
 
+    // reloadPayments after the webhook booked R$ 300 by the link.
     runInAction(() => store.paidAmount = 300);
     await tester.pump();
-
-    expect(find.textContaining('900,00'), findsNothing);
-    expect(find.textContaining('100,00'), findsWidgets);
+    expect(find.text(FormatService().formatCurrency(900)), findsOneWidget);
   });
 
-  testWidgets('manual receive asks when the money came in ("Hoje")', (
-    tester,
-  ) async {
+  testWidgets('the sheet says what the amount leaves open', (tester) async {
+    await pumpScreen(tester, storeWith(total: 1000));
+    await openSheet(tester);
+
+    expect(find.text('Recebido de Ana Ribeiro'), findsOneWidget);
+    expect(find.text('Quita a OS.'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('receiveAmountField')),
+      '30000',
+    );
+    await tester.pump();
+    expect(
+      find.text('Ficam ${FormatService().formatCurrency(700)}.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the sheet takes no more than what is missing', (tester) async {
+    await pumpScreen(tester, storeWith(total: 100));
+    await openSheet(tester);
+    await tester.enterText(
+      find.byKey(const Key('receiveAmountField')),
+      '20000',
+    );
+    await tester.pump();
+    expect(find.textContaining('Passa do que falta'), findsOneWidget);
+  });
+
+  testWidgets('the sheet asks when the money came in ("Hoje")', (tester) async {
     await pumpScreen(tester, storeWith(total: 500));
+    await openSheet(tester);
 
     expect(find.text('Quando'), findsOneWidget);
     expect(find.text('Hoje'), findsOneWidget);
@@ -441,16 +454,19 @@ void main() {
     expect(find.byKey(const Key('receiveMoreButton')), findsNothing);
   });
 
-  testWidgets('shows customer and total under the title, and the amount hint', (
+  testWidgets('the total shows only when it differs from the amount', (
     tester,
   ) async {
     await pumpScreen(tester, storeWith(total: 1250));
+    expect(find.byKey(const Key('receiveSubtitle')), findsNothing);
+  });
+
+  testWidgets('with something received, the total shows under the amount', (
+    tester,
+  ) async {
+    await pumpScreen(tester, storeWith(total: 1250, paid: 250));
     expect(
-      find.text('Ana Ribeiro · total ${FormatService().formatCurrency(1250)}'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Recebeu só uma parte? Toque no valor e digite quanto.'),
+      find.text('total ${FormatService().formatCurrency(1250)}'),
       findsOneWidget,
     );
   });
@@ -571,7 +587,7 @@ void main() {
     final format = FormatService();
     expect(
       find.text(
-        'Ana Ribeiro · total ${format.formatCurrency(700)}'
+        'total ${format.formatCurrency(700)}'
         ' · desconto ${format.formatCurrency(50)}',
       ),
       findsOneWidget,
@@ -647,14 +663,23 @@ void main() {
     }
 
     group('no open link', () {
-      testWidgets('offers "Mandar link para Ana Ribeiro pagar"', (
+      testWidgets('offers "Mandar cobrança" beside the blue button', (
         tester,
       ) async {
         await pumpScreen(tester, countingStore([]), canCharge: true);
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
-        expect(find.text('Mandar link para Ana Ribeiro pagar'), findsOneWidget);
-        expect(find.text('Link para pagar'), findsNothing);
+        expect(find.text('Mandar cobrança'), findsOneWidget);
+        expect(find.byType(SecondaryButton), findsOneWidget);
+      });
+
+      testWidgets('outside Asaas it shares the order link instead', (
+        tester,
+      ) async {
+        await pumpScreen(tester, countingStore([]));
+        await tester.pumpAndSettle();
+        expect(find.text('Mandar link da OS'), findsOneWidget);
+        expect(find.text('Mandar cobrança'), findsNothing);
       });
 
       testWidgets('opens the create-link sheet once (double tap)', (
@@ -682,9 +707,7 @@ void main() {
           tester,
           countingStore([]),
           canCharge: true,
-          charges: [
-            charge(status: ChargeStatus.canceled)..autoCanceled = true,
-          ],
+          charges: [charge(status: ChargeStatus.canceled)..autoCanceled = true],
         );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('chargeCanceledBlock')), findsOneWidget);
@@ -757,7 +780,7 @@ void main() {
           charges: [charge(status: ChargeStatus.canceled)],
         );
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('chargeLinkRow')), findsNothing);
+        expect(find.byKey(const Key('chargeLinkBlock')), findsNothing);
         expect(find.byKey(const Key('chargeSendLink')), findsOneWidget);
       });
 
@@ -777,7 +800,9 @@ void main() {
     });
 
     group('open link', () {
-      testWidgets('block says it was sent; no blue button', (tester) async {
+      testWidgets('status replaces the blue button; nothing is filled', (
+        tester,
+      ) async {
         await pumpScreen(
           tester,
           countingStore([]),
@@ -786,14 +811,14 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('chargeLinkBlock')), findsOneWidget);
-        expect(find.byKey(const Key('receiveConfirm')), findsNothing);
-        expect(find.text('Lembrar pelo WhatsApp também'), findsOneWidget);
-        expect(find.text('Link para pagar'), findsOneWidget);
         expect(find.text('Esperando Ana Ribeiro pagar'), findsOneWidget);
+        expect(find.byType(PrimaryButton), findsNothing);
+        expect(find.byType(TextLink), findsOneWidget);
+        expect(find.text('Mandar de novo'), findsOneWidget);
         expect(find.byKey(const Key('chargeSendLink')), findsNothing);
       });
 
-      testWidgets('"Recebi de outro jeito" brings back the manual block', (
+      testWidgets('"Marcar como recebido" opens the sheet and warns', (
         tester,
       ) async {
         await pumpScreen(
@@ -803,15 +828,17 @@ void main() {
           charges: [charge()],
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Recebi de outro jeito'));
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('chargeLinkBlock')), findsNothing);
-        expect(find.byKey(const Key('receiveConfirm')), findsOneWidget);
-        // The link row stays.
-        expect(find.byKey(const Key('chargeLinkRow')), findsOneWidget);
+        await openSheet(tester);
+        expect(find.byKey(const Key('receivePaymentSheet')), findsOneWidget);
+        expect(
+          find.text(
+            'A cobrança aberta se ajusta sozinha, sem avisar Ana Ribeiro.',
+          ),
+          findsOneWidget,
+        );
       });
 
-      testWidgets('the row is not tappable; "…" has the link actions', (
+      testWidgets('"…" has the link actions, not the ones on screen', (
         tester,
       ) async {
         await pumpScreen(
@@ -821,18 +848,14 @@ void main() {
           charges: [charge()],
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('chargeLinkRow')));
-        await tester.pumpAndSettle();
-        expect(find.byType(CupertinoActionSheet), findsNothing);
-
         await openMenu(tester);
-        expect(find.text('Copiar o link'), findsOneWidget);
-        expect(find.text('Mandar de novo pelo WhatsApp'), findsOneWidget);
+        expect(find.text('Copiar link'), findsOneWidget);
+        expect(find.text('Mandar de novo'), findsOneWidget); // On screen only.
         expect(find.text('Dar desconto'), findsOneWidget);
-        expect(find.text('Cancelar o link'), findsOneWidget);
+        expect(find.text('Cancelar cobrança'), findsOneWidget);
       });
 
-      testWidgets('paid installments: no "Cancelar o link"', (tester) async {
+      testWidgets('paid installments: no "Cancelar cobrança"', (tester) async {
         await pumpScreen(
           tester,
           countingStore([], paid: 333.33),
@@ -852,8 +875,8 @@ void main() {
         expect(find.byKey(const Key('chargeLinkBlock')), findsOneWidget);
 
         await openMenu(tester);
-        expect(find.text('Copiar o link'), findsOneWidget);
-        expect(find.text('Cancelar o link'), findsNothing);
+        expect(find.text('Copiar link'), findsOneWidget);
+        expect(find.text('Cancelar cobrança'), findsNothing);
       });
 
       testWidgets('overdue: says when it expired', (tester) async {
@@ -865,8 +888,9 @@ void main() {
         );
         await tester.pumpAndSettle();
         final due = format.formatDayMonthOrDate(DateTime(2026, 10, 20));
-        expect(find.text('O link venceu em $due'), findsOneWidget);
         expect(find.text('Venceu em $due'), findsOneWidget);
+        expect(find.byKey(const Key('chargeSendAgain')), findsOneWidget);
+        expect(find.byType(PrimaryButton), findsOneWidget);
       });
 
       testWidgets('copies the link from the "…" menu', (tester) async {
@@ -894,7 +918,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         await openMenu(tester);
-        await tester.tap(find.text('Copiar o link'));
+        await tester.tap(find.text('Copiar link'));
         await tester.pumpAndSettle();
         expect(copied, ['https://sandbox.asaas.com/i/abc']);
         // Quick notice, not an alert to dismiss.
@@ -927,7 +951,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         await openMenu(tester);
-        await tester.tap(find.text('Cancelar o link'));
+        await tester.tap(find.text('Cancelar cobrança'));
         await tester.pumpAndSettle();
         expect(
           find.text('O cliente não vai mais conseguir pagar por esse link.'),
@@ -956,7 +980,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         await openMenu(tester);
-        await tester.tap(find.text('Cancelar o link'));
+        await tester.tap(find.text('Cancelar cobrança'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('confirmCancelChargeAction')));
         await tester.pumpAndSettle();
@@ -975,9 +999,9 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('receiveAllDone')), findsOneWidget);
-        expect(find.byKey(const Key('chargeLinkRow')), findsOneWidget);
+        expect(find.byKey(const Key('chargeLinkBlock')), findsOneWidget);
         await openMenu(tester);
-        expect(find.text('Cancelar o link'), findsOneWidget);
+        expect(find.text('Cancelar cobrança'), findsOneWidget);
       });
     });
 
@@ -1001,12 +1025,8 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('Gerar link novo de $remaining'), findsOneWidget);
-        expect(find.byKey(const Key('receiveConfirm')), findsNothing);
-        final due = format.formatDayMonthOrDate(DateTime(2026, 10, 20));
-        expect(
-          find.text('até $due · o link novo cancela este'),
-          findsOneWidget,
-        );
+        // The only blue button is the new link's.
+        expect(find.byType(PrimaryButton), findsOneWidget);
 
         await tester.tap(find.text('Manter o link de $value'));
         await tester.pumpAndSettle();

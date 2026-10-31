@@ -2983,6 +2983,103 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiveWhen => 'When';
 
   @override
+  String get receiveMarkReceived => 'Mark as received';
+
+  @override
+  String receiveReceivedFrom(String customer) {
+    return 'Received from $customer';
+  }
+
+  @override
+  String get receiveReceivedTitle => 'Received';
+
+  @override
+  String receiveSummaryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'To receive · $count orders',
+      one: 'To receive · 1 order',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receiveSummarySome(int checked, int total) {
+    return 'To receive · $checked of $total orders';
+  }
+
+  @override
+  String receiveSummaryOrder(String order) {
+    return 'To receive · $order';
+  }
+
+  @override
+  String get receiveSummaryPlain => 'To receive';
+
+  @override
+  String get receiveOrdersIncluded => 'Orders included';
+
+  @override
+  String receivePreviewAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Settles the $count orders.',
+      one: 'Settles the order.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivePreviewSettles(String numbers) {
+    return 'Settles orders $numbers.';
+  }
+
+  @override
+  String receivePreviewPart(String amount, String number) {
+    return 'Pays $amount of order $number.';
+  }
+
+  @override
+  String receivePreviewLeft(String amount) {
+    return '$amount left.';
+  }
+
+  @override
+  String receiveChargeAdjusts(String customer) {
+    return 'The open charge adjusts itself, without notifying $customer.';
+  }
+
+  @override
+  String get receiveChargeAdjustsNoName =>
+      'The open charge adjusts itself, without notifying the customer.';
+
+  @override
+  String get chargeSend => 'Send charge';
+
+  @override
+  String get chargeSendAgain => 'Send again';
+
+  @override
+  String get chargeSendOrderLink => 'Send order link';
+
+  @override
+  String chargeDetailUntil(String value, String date) {
+    return 'Charge of $value · valid until $date';
+  }
+
+  @override
+  String chargeDetailOverdue(String value) {
+    return 'Charge of $value · can still be paid';
+  }
+
+  @override
+  String chargeDetailValue(String value) {
+    return 'Charge of $value';
+  }
+
+  @override
   String get receiveConfirmButton => 'Confirm payment';
 
   @override
@@ -4686,16 +4783,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chargeSendAgainWhatsApp => 'Send again on WhatsApp';
 
   @override
-  String get chargeCopyLink => 'Copy the link';
+  String get chargeCopyLink => 'Copy link';
 
   @override
   String get chargeLinkCopied => 'Link copied';
 
   @override
-  String get chargeCancelLink => 'Cancel the link';
+  String get chargeCancelLink => 'Cancel charge';
 
   @override
-  String get chargeLinkTitle => 'Payment link';
+  String get chargeLinkTitle => 'Send charge';
 
   @override
   String chargeLinkIntro(String name) {

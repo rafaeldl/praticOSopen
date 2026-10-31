@@ -60,9 +60,9 @@
             "steps": [
               "Abra a OS. Ela precisa estar Aprovada, Em andamento ou Concluída.",
               "Toque em <strong>Falta receber</strong>, abaixo do Total. Com a OS concluída, o botão azul do topo já é <strong>Receber R$ …</strong>.",
-              "O valor já vem com o que falta. Se recebeu só uma parte, toque no valor e digite quanto.",
-              "Se quiser, mude o dia em <strong>Quando</strong> e toque em <strong>Anexar comprovante</strong>.",
-              "Toque em <strong>Confirmar recebimento</strong>. O valor vai para <strong>Já recebido</strong> e o que falta diminui."
+              "Toque em <strong>Marcar como recebido</strong>. O valor já vem com o que falta. Se recebeu só uma parte, digite quanto.",
+              "Se quiser, mude o dia em <strong>Quando</strong> e anexe o <strong>Comprovante</strong>.",
+              "Toque no <strong>✓</strong>. O valor vai para <strong>Já recebido</strong> e o que falta diminui."
             ]
           },
           {
@@ -77,8 +77,8 @@
             "title": "Cliente com várias OS em aberto",
             "steps": [
               "Abra o cliente (em Clientes ou na lista da aba Financeiro) e toque em <strong>Receber</strong>.",
-              "Marque as OS que ele está pagando e digite quanto recebeu.",
-              "Toque em <strong>Confirmar recebimento</strong>. Se o valor não der para tudo, as OS mais antigas são pagas primeiro. Depois, dá para mandar o recibo para o cliente."
+              "Marque as OS que ele está pagando e toque em <strong>Marcar como recebido</strong>.",
+              "Confira o valor e toque no <strong>✓</strong>. Se o valor não der para tudo, as OS mais antigas são pagas primeiro. Depois, dá para mandar o recibo para o cliente."
             ]
           },
           {
@@ -108,7 +108,7 @@
               },
               {
                 "label": "Valor zero",
-                "text": "O botão Confirmar recebimento só acende com um valor maior que zero."
+                "text": "O <strong>✓</strong> só acende com um valor maior que zero."
               },
               {
                 "label": "Acima do que falta",
@@ -343,9 +343,9 @@
             "steps": [
               "Open the order. It must be Approved, In progress or Completed.",
               "Tap <strong>Left to receive</strong>, below the Total. On a completed order, the blue button at the top is already <strong>Receive $…</strong>.",
-              "The amount comes filled with what is left. If you got only part of it, tap the amount and type how much.",
-              "If you want, change the day under <strong>When</strong> and tap <strong>Attach receipt</strong>.",
-              "Tap <strong>Confirm payment</strong>. The amount goes to <strong>Already received</strong> and what is left goes down."
+              "Tap <strong>Mark as received</strong>. The amount comes filled with what is left. If you got only part of it, type how much.",
+              "If you want, change the day under <strong>When</strong> and attach the <strong>Receipt</strong>.",
+              "Tap the <strong>✓</strong>. The amount goes to <strong>Already received</strong> and what is left goes down."
             ]
           },
           {
@@ -360,8 +360,8 @@
             "title": "Customer with several open orders",
             "steps": [
               "Open the customer (in Customers or in the Financial tab list) and tap <strong>Receive</strong>.",
-              "Check the orders they are paying and type how much you got.",
-              "Tap <strong>Confirm payment</strong>. If the amount doesn't cover everything, the oldest orders are paid first. Then you can send the receipt to the customer."
+              "Check the orders they are paying and tap <strong>Mark as received</strong>.",
+              "Check the amount and tap the <strong>✓</strong>. If the amount doesn't cover everything, the oldest orders are paid first. Then you can send the receipt to the customer."
             ]
           },
           {
@@ -391,7 +391,7 @@
               },
               {
                 "label": "Zero amount",
-                "text": "The Confirm payment button only lights up with an amount above zero."
+                "text": "The <strong>✓</strong> only lights up with an amount above zero."
               },
               {
                 "label": "More than what's left",
@@ -627,8 +627,8 @@
               "Abre la OS. Tiene que estar Aprobada, En curso o Completada.",
               "Toca <strong>Falta cobrar</strong>, debajo del Total. Con la OS completada, el botón azul de arriba ya es <strong>Cobrar $…</strong>.",
               "El valor ya viene con lo que falta. Si recibiste solo una parte, toca el valor y escribe cuánto.",
-              "Si quieres, cambia el día en <strong>Cuándo</strong> y toca <strong>Adjuntar comprobante</strong>.",
-              "Toca <strong>Confirmar cobro</strong>. El valor pasa a <strong>Ya cobrado</strong> y lo que falta baja."
+              "Si quieres, cambia el día en <strong>Cuándo</strong> y adjunta el <strong>Comprobante</strong>.",
+              "Toca el <strong>✓</strong>. El valor pasa a <strong>Ya cobrado</strong> y lo que falta baja."
             ]
           },
           {
@@ -644,7 +644,7 @@
             "steps": [
               "Abre el cliente (en Clientes o en la lista de la pestaña Financiero) y toca <strong>Cobrar</strong>.",
               "Marca las OS que está pagando y escribe cuánto recibiste.",
-              "Toca <strong>Confirmar cobro</strong>. Si el valor no alcanza para todo, se pagan primero las OS más antiguas. Después puedes enviar el recibo al cliente."
+              "Revisa el valor y toca el <strong>✓</strong>. Si el valor no alcanza para todo, se pagan primero las OS más antiguas. Después puedes enviar el recibo al cliente."
             ]
           },
           {
@@ -674,7 +674,7 @@
               },
               {
                 "label": "Valor cero",
-                "text": "El botón Confirmar cobro solo se activa con un valor mayor que cero."
+                "text": "El <strong>✓</strong> solo se activa con un valor mayor que cero."
               },
               {
                 "label": "Más de lo que falta",
