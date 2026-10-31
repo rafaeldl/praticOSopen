@@ -31,6 +31,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:praticos/global.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/utils/financial_summary.dart';
 part 'order_store.g.dart';
 
 /// "Em aberto" loads every open order at once: the next-step block, the
@@ -1923,10 +1924,8 @@ abstract class _OrderStore with Store {
         end,
       );
 
-      // Filtrar ordens que não são orçamentos
-      var filteredOrders = orders
-          .where((order) => order?.status != 'quote')
-          .toList();
+      // Sem orçamentos nem canceladas: mesma regra do Vendido
+      var filteredOrders = orders.where(FinancialSummary.isSold).toList();
 
       // Aplicar filtro por cliente selecionado no ranking
       if (selectedCustomerInRanking != null) {
@@ -2081,10 +2080,8 @@ abstract class _OrderStore with Store {
         periodOffset,
       );
 
-      // Filtrar ordens que não são orçamentos
-      var filteredOrders = orders
-          .where((order) => order?.status != 'quote')
-          .toList();
+      // Sem orçamentos nem canceladas: mesma regra do Vendido
+      var filteredOrders = orders.where(FinancialSummary.isSold).toList();
 
       // Aplicar filtro por cliente selecionado no ranking
       if (selectedCustomerInRanking != null) {

@@ -30,6 +30,12 @@ class Order extends BaseAuditCompany {
   String? status;
   int? number;
 
+  /// When the order became `done`. Written only by the server (order
+  /// triggers): never sent on save, or a stale copy would overwrite it.
+  /// Null on orders done before this field.
+  @JsonKey(includeToJson: false)
+  DateTime? completedAt;
+
   /// Valor total pago (soma dos pagamentos parciais)
   double? paidAmount;
 

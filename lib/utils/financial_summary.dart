@@ -1,7 +1,7 @@
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_transaction.dart';
 
-/// A customer who owes money, with the open orders that add up to the debt.
+/// A customer with money to receive on completed orders (A receber).
 class Debtor {
   Debtor({
     required this.key,
@@ -9,7 +9,8 @@ class Debtor {
     required this.name,
     required this.amount,
     required this.orders,
-  });
+    List<Order>? openOrders,
+  }) : openOrders = openOrders ?? orders;
 
   /// Grouping key: the customer id, or [noCustomerKey] for orders without one.
   final String key;
@@ -19,8 +20,12 @@ class Debtor {
   /// Sum of what is still open on [orders].
   final double amount;
 
-  /// Open orders of this customer, oldest first.
+  /// Completed orders with a balance, oldest first.
   final List<Order> orders;
+
+  /// Every open order of this customer, completed or not, oldest first:
+  /// receiving is not limited to what A receber shows.
+  final List<Order> openOrders;
 
   static const noCustomerKey = '_none';
 
@@ -29,44 +34,50 @@ class Debtor {
   bool get hasSingleOrder => orders.length == 1;
 }
 
-/// Numbers behind the Financeiro tab ("Quem me deve").
+/// Numbers behind the Financeiro tab.
 ///
-/// - [entered]: money received in the chosen month, by payment date, on
-///   orders of any month.
-/// - [owed]: everything still open, in any month ("Falta receber").
-/// - [debtors]: customers who owe, longest-overdue first.
-/// - [receivedOrders]: paid orders with money received in the month, latest
-///   first.
+/// Change with the month:
+/// - [entered] (Recebido): money received in the chosen month, by payment
+///   date, on orders of any month and status.
+/// - [sold] (Vendido): total of the orders opened in the chosen month.
+///
+/// Are about today, whatever the month:
+/// - [owed] (A receber): balance of the completed orders, in [debtors],
+///   grouped by customer, longest-overdue first.
+/// - [inProgress] (Em andamento): balance of [inProgressOrders], the approved
+///   and running orders; it moves to [owed] when the order is completed.
 class FinancialSummary {
   FinancialSummary({
     required this.entered,
+    required this.sold,
+    required this.soldOrders,
     required this.owed,
     required this.debtors,
-    required this.receivedOrders,
-    required this.monthOrderCount,
+    required this.inProgress,
+    required this.inProgressOrders,
   });
 
   final double entered;
+  final double sold;
+
+  /// Orders opened in the chosen month, newest first.
+  final List<Order> soldOrders;
   final double owed;
   final List<Debtor> debtors;
-  final List<Order> receivedOrders;
+  final double inProgress;
 
-  /// Orders (without quotes) created in the chosen month.
-  final int monthOrderCount;
+  /// Approved and running orders with a balance, oldest first.
+  final List<Order> inProgressOrders;
 
   static final empty = FinancialSummary(
     entered: 0,
+    sold: 0,
+    soldOrders: const [],
     owed: 0,
     debtors: const [],
-    receivedOrders: const [],
-    monthOrderCount: 0,
+    inProgress: 0,
+    inProgressOrders: const [],
   );
-
-  bool get hasDebt => debtors.isNotEmpty;
-  bool get isEmpty => monthOrderCount == 0 && debtors.isEmpty && entered == 0;
-
-  /// The debtor to charge first (the one owing for the longest).
-  Debtor? get oldestDebtor => debtors.isEmpty ? null : debtors.first;
 
   /// Builds the summary of [month] from the orders created in it, the orders
   /// that may have been paid in it ([paidOrders], any month) and every order
@@ -94,42 +105,57 @@ class FinancialSummary {
       (sum, o) => sum + receivedIn(o, month),
     );
 
-    final received =
-        candidates
-            .where((o) => o.payment == 'paid' && receivedIn(o, month) > 0)
-            .toList()
-          ..sort((a, b) => paidDate(b).compareTo(paidDate(a)));
+    final sold = created.where(isSold).toList()
+      ..sort((a, b) => _oldestFirst(b, a));
+
+    final open = openOrders.whereType<Order>().where(isOpen).toList()
+      ..sort(_oldestFirst);
 
     final byCustomer = <String, List<Order>>{};
     final names = <String, String?>{};
-    for (final order in openOrders.whereType<Order>()) {
-      if (!isOpen(order)) continue;
-      final id = order.customer?.id;
-      final key = id ?? Debtor.noCustomerKey;
+    for (final order in open) {
+      final key = order.customer?.id ?? Debtor.noCustomerKey;
       byCustomer.putIfAbsent(key, () => []).add(order);
       names[key] ??= order.customer?.name;
     }
 
-    final debtors = byCustomer.entries.map((e) {
-      final orders = [...e.value]..sort(_oldestFirst);
-      return Debtor(
-        key: e.key,
-        customerId: e.key == Debtor.noCustomerKey ? null : e.key,
-        name: names[e.key],
-        amount: orders.fold<double>(0, (sum, o) => sum + openAmount(o)),
-        orders: orders,
+    final debtors = <Debtor>[];
+    byCustomer.forEach((key, customerOrders) {
+      final orders = customerOrders.where(isReceivable).toList();
+      if (orders.isEmpty) return;
+      debtors.add(
+        Debtor(
+          key: key,
+          customerId: key == Debtor.noCustomerKey ? null : key,
+          name: names[key],
+          amount: _openSum(orders),
+          orders: orders,
+          openOrders: customerOrders,
+        ),
       );
-    }).toList()
-      ..sort((a, b) => _oldestFirst(a.oldestOrder, b.oldestOrder));
+    });
+    debtors.sort((a, b) => _oldestFirst(a.oldestOrder, b.oldestOrder));
+
+    final running = open.where(isInProgress).toList();
 
     return FinancialSummary(
       entered: entered,
+      sold: sold.fold<double>(0, (sum, o) => sum + (o.total ?? 0)),
+      soldOrders: sold,
       owed: debtors.fold<double>(0, (sum, d) => sum + d.amount),
       debtors: debtors,
-      receivedOrders: received,
-      monthOrderCount: created.length,
+      inProgress: _openSum(running),
+      inProgressOrders: running,
     );
   }
+
+  static double _openSum(Iterable<Order> orders) =>
+      orders.fold<double>(0, (sum, o) => sum + openAmount(o));
+
+  /// Counts as sold (Vendido, and every total of the Relatório): anything but
+  /// quotes and canceled orders.
+  static bool isSold(Order? order) =>
+      order?.status != 'quote' && order?.status != 'canceled';
 
   /// Money received on [order] in [month], by the date of each payment. Old
   /// orders have no transactions (and old paid ones may have no paidAmount,
@@ -181,6 +207,15 @@ class FinancialSummary {
       order.status != 'canceled' &&
       order.payment != 'paid' &&
       openAmount(order) > 0;
+
+  /// Open and completed: shows in A receber.
+  static bool isReceivable(Order order) =>
+      isOpen(order) && order.status == 'done';
+
+  /// Open and not completed yet: shows in Em andamento.
+  static bool isInProgress(Order order) =>
+      isOpen(order) &&
+      (order.status == 'approved' || order.status == 'progress');
 
   /// The open orders among [orders], oldest first: the same list and order
   /// as `Debtor.orders` (the order a customer payment is split in).

@@ -11,6 +11,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/dashboard/financial_tab.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FirebaseCoreMockWithBucket extends MockFirebaseApp {
   @override
@@ -36,6 +37,7 @@ void main() {
     TestFirebaseCoreHostApi.setUp(_FirebaseCoreMockWithBucket());
     await Firebase.initializeApp();
     await initializeDateFormatting('pt_BR');
+    SharedPreferences.setMockInitialValues({});
   });
 
   testWidgets('tapping a debtor opens "Receber" of the order, not the order '
@@ -46,7 +48,7 @@ void main() {
       ..total = 1250
       ..paidAmount = 0
       ..payment = 'unpaid'
-      ..status = 'approved'
+      ..status = 'done'
       ..createdAt = DateTime(2026, 10, 2)
       ..customer = (CustomerAggr()
         ..id = 'Ana'
@@ -56,6 +58,7 @@ void main() {
       monthLoader: (_) async => [],
       paidLoader: (_) async => [],
       openLoader: () async => [order],
+      openChargeChecker: (_) async => false,
     );
     Object? args;
     String? route;
@@ -76,6 +79,8 @@ void main() {
     await tester.pump();
     await tester.pump();
 
+    await tester.tap(find.byKey(const ValueKey('financialReceivable')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('debtor-Ana')));
     await tester.pump();
 

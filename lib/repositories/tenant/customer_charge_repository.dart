@@ -30,6 +30,19 @@ class CustomerChargeRepository {
         );
   }
 
+  /// Whether the customer has an open charge of several orders.
+  Future<bool> hasOpen(String companyId, String customerId) async {
+    final snap = await _db
+        .collection('companies')
+        .doc(companyId)
+        .collection('customerCharges')
+        .where('customer.id', isEqualTo: customerId)
+        .get();
+    return snap.docs.any(
+      (doc) => CustomerCharge.fromJson(doc.data(), id: doc.id).isOpen,
+    );
+  }
+
   /// The server keeps at most one open charge per customer; if two show up
   /// (a race), the later due date wins.
   static CustomerCharge? openOf(List<CustomerCharge> charges) {

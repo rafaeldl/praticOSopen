@@ -2812,16 +2812,78 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get financialReceivable => 'To receive';
+
+  @override
+  String get financialInProgress => 'In progress';
+
+  @override
+  String get financialSold => 'Sold';
+
+  @override
+  String get financialToday => 'Today';
+
+  @override
+  String get financialNextCharge => 'Next charge';
+
+  @override
+  String financialNextChargeMessage(String name, String amount, String date) {
+    return '$name owes $amount since $date';
+  }
+
+  @override
+  String get financialSendCharge => 'Send charge';
+
+  @override
+  String financialReceivableSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count customers',
+      one: '1 customer',
+    );
+    return '$amount from $_temp0';
+  }
+
+  @override
+  String financialInProgressSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders',
+      one: '1 order',
+    );
+    return '$amount in $_temp0';
+  }
+
+  @override
+  String financialMonthAmount(String month, String amount) {
+    return '$month · $amount';
+  }
+
+  @override
+  String financialSince(String date) {
+    return 'since $date';
+  }
+
+  @override
+  String financialOrderDate(int number, String date) {
+    return 'Order $number · $date';
+  }
+
+  @override
+  String get financialEmptyReceivable => 'Nobody owes you anything.';
+
+  @override
+  String get financialEmptyInProgress =>
+      'No orders in progress with a balance.';
+
+  @override
   String get financialToReceive => 'To collect';
 
   @override
   String financialOrderSince(int number, String date) {
     return 'Order $number · since $date';
-  }
-
-  @override
-  String financialOrdersSince(int count, String date) {
-    return '$count orders · since $date';
   }
 
   @override
@@ -2832,27 +2894,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financialNextMonth => 'Next month';
-
-  @override
-  String financialNextStep(String amount, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count customers',
-      one: '1 customer',
-    );
-    return '$amount to collect from $_temp0';
-  }
-
-  @override
-  String financialOldestDebt(String name, String amount, String date) {
-    return '$name has owed the longest: $amount since $date.';
-  }
-
-  @override
-  String financialSendChargeTo(String name) {
-    return 'Send payment request to $name';
-  }
 
   @override
   String financialPickOrderTitle(String name) {
@@ -3672,16 +3713,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financialReportShort => 'Report';
-
-  @override
-  String financialReceivedIn(String month) {
-    return 'Received in $month';
-  }
-
-  @override
-  String financialReceivedSub(int count) {
-    return '$count orders · see all';
-  }
 
   @override
   String get financialSendReportPdf => 'Send report as PDF';

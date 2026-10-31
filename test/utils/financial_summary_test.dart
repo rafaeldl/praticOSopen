@@ -36,22 +36,56 @@ Order order(
 
 void main() {
   group('FinancialSummary.compute', () {
-    test('owed counts every open order, even from other months', () {
+    test('A receber counts only completed orders, even from other months', () {
       final summary = FinancialSummary.compute(
         month: DateTime(2026, 10),
-        monthOrders: [
-          order('1', customerId: 'a', customerName: 'Ana', total: 300, paid: 100),
-        ],
+        monthOrders: const [],
         openOrders: [
+          order('1', customerId: 'a', customerName: 'Ana', total: 300, paid: 100, status: 'done'),
           // Open order from August, not in the month list.
-          order('2', customerId: 'b', customerName: 'Bia', total: 500,
+          order('2', customerId: 'b', customerName: 'Bia', total: 500, status: 'done',
               createdAt: DateTime(2026, 8, 3)),
-          order('1', customerId: 'a', customerName: 'Ana', total: 300, paid: 100),
+          order('3', customerId: 'c', customerName: 'Caio', total: 900),
+          order('4', customerId: 'd', customerName: 'Dora', total: 800, status: 'progress'),
         ],
       );
 
-      expect(summary.owed, 700); // 200 (Ana) + 500 (Bia)
+      expect(summary.owed, 700); // 200 (Ana) + 500 (Bia): shows only the balance
       expect(summary.debtors.map((d) => d.name), ['Bia', 'Ana']);
+    });
+
+    test('Em andamento counts approved and running orders, oldest first', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [
+          order('1', customerId: 'a', total: 300, paid: 100, createdAt: DateTime(2026, 10, 5)),
+          order('2', customerId: 'b', total: 500, status: 'progress', createdAt: DateTime(2026, 10, 2)),
+          order('3', customerId: 'c', total: 900, status: 'done'),
+          order('4', customerId: 'd', total: 700, status: 'quote'),
+          order('5', customerId: 'e', total: 600, status: 'canceled'),
+          order('6', customerId: 'f', payment: 'paid', paid: 100),
+        ],
+      );
+
+      expect(summary.inProgress, 700);
+      expect(summary.inProgressOrders.map((o) => o.id), ['2', '1']);
+    });
+
+    test('completing an order moves its balance from Em andamento to A receber', () {
+      final running = order('1', customerId: 'a', total: 300, paid: 100, status: 'progress');
+      FinancialSummary compute() => FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [running],
+      );
+
+      expect(compute().inProgress, 200);
+      expect(compute().owed, 0);
+
+      running.status = 'done';
+      expect(compute().inProgress, 0);
+      expect(compute().owed, 200);
     });
 
     test('sums customers with many orders and orders them by oldest debt', () {
@@ -59,11 +93,11 @@ void main() {
         month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: [
-          order('1', customerId: 'a', customerName: 'Ana', total: 100,
+          order('1', customerId: 'a', customerName: 'Ana', total: 100, status: 'done',
               createdAt: DateTime(2026, 10, 8)),
-          order('2', customerId: 'a', customerName: 'Ana', total: 250,
+          order('2', customerId: 'a', customerName: 'Ana', total: 250, status: 'done',
               createdAt: DateTime(2026, 10, 2)),
-          order('3', customerId: 'b', customerName: 'Bia', total: 900,
+          order('3', customerId: 'b', customerName: 'Bia', total: 900, status: 'done',
               createdAt: DateTime(2026, 10, 5)),
         ],
       );
@@ -74,7 +108,33 @@ void main() {
       expect(ana.hasSingleOrder, isFalse);
       expect(ana.oldestOrder.id, '2');
       expect(ana.since, DateTime(2026, 10, 2));
-      expect(summary.oldestDebtor, same(ana));
+    });
+
+    test('"desde" is the oldest completed order; receiving keeps every open order', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [
+          order('1', customerId: 'a', total: 400, createdAt: DateTime(2026, 9, 1)),
+          order('2', customerId: 'a', total: 100, status: 'done', createdAt: DateTime(2026, 10, 2)),
+        ],
+      );
+
+      final ana = summary.debtors.single;
+      expect(ana.amount, 100);
+      expect(ana.since, DateTime(2026, 10, 2));
+      expect(ana.orders.map((o) => o.id), ['2']);
+      expect(ana.openOrders.map((o) => o.id), ['1', '2']);
+    });
+
+    test('a customer with only running orders is not in A receber', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [order('1', customerId: 'a')],
+      );
+
+      expect(summary.debtors, isEmpty);
     });
 
     test('ignores quotes, canceled, paid and zero balance orders', () {
@@ -84,9 +144,9 @@ void main() {
         openOrders: [
           order('1', customerId: 'a', status: 'quote'),
           order('2', customerId: 'a', status: 'canceled'),
-          order('3', customerId: 'a', payment: 'paid', paid: 100),
-          order('4', customerId: 'a', total: 100, paid: 100),
-          order('5', customerId: 'a', total: 40),
+          order('3', customerId: 'a', payment: 'paid', paid: 100, status: 'done'),
+          order('4', customerId: 'a', total: 100, paid: 100, status: 'done'),
+          order('5', customerId: 'a', total: 40, status: 'done'),
         ],
       );
 
@@ -98,13 +158,44 @@ void main() {
       final summary = FinancialSummary.compute(
         month: DateTime(2026, 10),
         monthOrders: const [],
-        openOrders: [order('1'), order('2')],
+        openOrders: [order('1', status: 'done'), order('2', status: 'done')],
       );
 
       final debtor = summary.debtors.single;
       expect(debtor.customerId, isNull);
       expect(debtor.name, isNull);
       expect(debtor.amount, 200);
+    });
+
+    test('Vendido sums the orders opened in the month, no quotes or canceled', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: [
+          order('1', total: 500, createdAt: DateTime(2026, 10, 2)),
+          order('2', total: 300, status: 'done', createdAt: DateTime(2026, 10, 9)),
+          order('3', total: 200, status: 'progress', payment: 'paid', paid: 200, createdAt: DateTime(2026, 10, 5)),
+          order('4', total: 999, status: 'quote'),
+          order('5', total: 888, status: 'canceled'),
+        ],
+        openOrders: const [],
+      );
+
+      expect(summary.sold, 1000);
+      expect(summary.soldOrders.map((o) => o.id), ['2', '3', '1']);
+    });
+
+    test('Vendido and Recebido follow the month; A receber does not', () {
+      FinancialSummary compute(DateTime month, List<Order> created) =>
+          FinancialSummary.compute(
+            month: month,
+            monthOrders: created,
+            openOrders: [order('9', customerId: 'a', total: 70, status: 'done')],
+          );
+
+      expect(compute(DateTime(2026, 10), [order('1', total: 500)]).sold, 500);
+      expect(compute(DateTime(2026, 9), const []).sold, 0);
+      expect(compute(DateTime(2026, 10), const []).owed, 70);
+      expect(compute(DateTime(2026, 9), const []).owed, 70);
     });
 
     test('entered sums payments of the month, legacy paid orders use total',
@@ -125,34 +216,6 @@ void main() {
       );
 
       expect(summary.entered, 950);
-      expect(summary.monthOrderCount, 3);
-      expect(summary.receivedOrders.map((o) => o.id).toSet(), {'1', '2'});
-    });
-
-    test('received orders come latest paid first', () {
-      final summary = FinancialSummary.compute(
-        month: DateTime(2026, 10),
-        monthOrders: [
-          order('1', payment: 'paid', paid: 100, updatedAt: DateTime(2026, 10, 3)),
-          order('2', payment: 'paid', paid: 100, updatedAt: DateTime(2026, 10, 9)),
-          order(
-            '3',
-            payment: 'paid',
-            paid: 100,
-            updatedAt: DateTime(2026, 10, 1),
-            transactions: [
-              PaymentTransaction(
-                type: PaymentTransactionType.payment,
-                amount: 100,
-                createdAt: DateTime(2026, 10, 12),
-              ),
-            ],
-          ),
-        ],
-        openOrders: const [],
-      );
-
-      expect(summary.receivedOrders.map((o) => o.id), ['3', '2', '1']);
     });
 
     test('counts the money by payment date, on orders of any month', () {
@@ -198,8 +261,6 @@ void main() {
       );
 
       expect(summary.entered, 700);
-      expect(summary.receivedOrders.map((o) => o.id).toSet(), {'1', '2'});
-      expect(summary.monthOrderCount, 1);
     });
 
     test('old orders without transactions count in the month they were '
@@ -209,39 +270,22 @@ void main() {
       expect(FinancialSummary.receivedIn(old, DateTime(2026, 11)), 0);
     });
 
-    test('a month with only money from older orders is not empty', () {
-      final summary = FinancialSummary.compute(
-        month: DateTime(2026, 10),
-        monthOrders: const [],
-        paidOrders: [
-          order(
-            '2',
-            total: 500,
-            paid: 500,
-            payment: 'paid',
-            createdAt: DateTime(2026, 8, 1),
-            transactions: [
-              PaymentTransaction.payment(
-                amount: 500,
-                paidAt: DateTime(2026, 10, 20),
-              ),
-            ],
-          ),
-        ],
-        openOrders: const [],
-      );
-      expect(summary.isEmpty, isFalse);
+    test('isSold leaves out quotes and canceled orders (Vendido and Relatório)', () {
+      expect(FinancialSummary.isSold(order('1')), isTrue);
+      expect(FinancialSummary.isSold(order('2', status: 'done')), isTrue);
+      expect(FinancialSummary.isSold(order('3', status: 'quote')), isFalse);
+      expect(FinancialSummary.isSold(order('4', status: 'canceled')), isFalse);
     });
 
-    test('empty when there are no orders and no debt', () {
-      final summary = FinancialSummary.compute(
-        month: DateTime(2026, 10),
-        monthOrders: const [],
-        openOrders: const [],
-      );
-      expect(summary.isEmpty, isTrue);
-      expect(summary.hasDebt, isFalse);
-      expect(summary.oldestDebtor, isNull);
+    test('isOpen still covers running orders: receiving does not change', () {
+      final orders = [
+        order('1', customerId: 'a', status: 'done', createdAt: DateTime(2026, 10, 2)),
+        order('2', customerId: 'a', createdAt: DateTime(2026, 10, 1)),
+        order('3', customerId: 'a', status: 'progress', createdAt: DateTime(2026, 10, 3)),
+        order('4', customerId: 'a', status: 'quote'),
+      ];
+
+      expect(FinancialSummary.openOrdersOldestFirst(orders).map((o) => o.id), ['2', '1', '3']);
     });
   });
 }

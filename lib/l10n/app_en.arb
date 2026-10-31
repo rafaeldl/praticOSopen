@@ -1399,6 +1399,20 @@
       }
     }
   },
+  "financialReceivable": "To receive",
+  "financialInProgress": "In progress",
+  "financialSold": "Sold",
+  "financialToday": "Today",
+  "financialNextCharge": "Next charge",
+  "financialNextChargeMessage": "{name} owes {amount} since {date}",
+  "financialSendCharge": "Send charge",
+  "financialReceivableSummary": "{amount} from {count, plural, =1{1 customer} other{{count} customers}}",
+  "financialInProgressSummary": "{amount} in {count, plural, =1{1 order} other{{count} orders}}",
+  "financialMonthAmount": "{month} · {amount}",
+  "financialSince": "since {date}",
+  "financialOrderDate": "Order {number} · {date}",
+  "financialEmptyReceivable": "Nobody owes you anything.",
+  "financialEmptyInProgress": "No orders in progress with a balance.",
   "financialToReceive": "To collect",
   "financialOrderSince": "Order {number} · since {date}",
   "@financialOrderSince": {
@@ -1411,53 +1425,9 @@
       }
     }
   },
-  "financialOrdersSince": "{count} orders · since {date}",
-  "@financialOrdersSince": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "financialOtherPeriod": "Other period",
   "financialPreviousMonth": "Previous month",
   "financialNextMonth": "Next month",
-  "financialNextStep": "{amount} to collect from {count, plural, =1{1 customer} other{{count} customers}}",
-  "@financialNextStep": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "financialOldestDebt": "{name} has owed the longest: {amount} since {date}.",
-  "@financialOldestDebt": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "financialSendChargeTo": "Send payment request to {name}",
-  "@financialSendChargeTo": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "financialPickOrderTitle": "Open orders of {name}",
   "@financialPickOrderTitle": {
     "placeholders": {
@@ -1833,10 +1803,6 @@
   "orderCountShort": "{count, plural, =1{1 WO} other{{count} WO}}",
   "deviceOwnerPrefix": "owner: ",
   "financialReportShort": "Report",
-  "financialReceivedIn": "Received in {month}",
-  "@financialReceivedIn": {"placeholders": {"month": {"type": "String"}}},
-  "financialReceivedSub": "{count} orders · see all",
-  "@financialReceivedSub": {"placeholders": {"count": {"type": "int"}}},
   "financialSendReportPdf": "Send report as PDF",
   "receiveSubtitle": "{customer} · total {total}",
   "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},

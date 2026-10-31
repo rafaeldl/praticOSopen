@@ -1399,6 +1399,20 @@
       }
     }
   },
+  "financialReceivable": "Por cobrar",
+  "financialInProgress": "En curso",
+  "financialSold": "Vendido",
+  "financialToday": "Hoy",
+  "financialNextCharge": "Próximo cobro",
+  "financialNextChargeMessage": "{name} debe {amount} desde {date}",
+  "financialSendCharge": "Enviar cobro",
+  "financialReceivableSummary": "{amount} de {count, plural, =1{1 cliente} other{{count} clientes}}",
+  "financialInProgressSummary": "{amount} en {count} OS",
+  "financialMonthAmount": "{month} · {amount}",
+  "financialSince": "desde {date}",
+  "financialOrderDate": "OS {number} · {date}",
+  "financialEmptyReceivable": "Nadie tiene saldo por cobrar.",
+  "financialEmptyInProgress": "Ninguna OS en curso con saldo.",
   "financialToReceive": "Falta cobrar",
   "financialOrderSince": "Orden {number} · desde {date}",
   "@financialOrderSince": {
@@ -1411,53 +1425,9 @@
       }
     }
   },
-  "financialOrdersSince": "{count} órdenes · desde {date}",
-  "@financialOrdersSince": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "financialOtherPeriod": "Otro período",
   "financialPreviousMonth": "Mes anterior",
   "financialNextMonth": "Mes siguiente",
-  "financialNextStep": "Falta cobrar {amount} de {count, plural, =1{1 cliente} other{{count} clientes}}",
-  "@financialNextStep": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "financialOldestDebt": "{name} debe desde hace más tiempo: {amount} desde {date}.",
-  "@financialOldestDebt": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "amount": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "financialSendChargeTo": "Enviar cobro a {name}",
-  "@financialSendChargeTo": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "financialPickOrderTitle": "Órdenes abiertas de {name}",
   "@financialPickOrderTitle": {
     "placeholders": {
@@ -1833,10 +1803,6 @@
   "orderCountShort": "{count, plural, =1{1 OS} other{{count} OS}}",
   "deviceOwnerPrefix": "de ",
   "financialReportShort": "Informe",
-  "financialReceivedIn": "Recibido en {month}",
-  "@financialReceivedIn": {"placeholders": {"month": {"type": "String"}}},
-  "financialReceivedSub": "{count} OS · ver todas",
-  "@financialReceivedSub": {"placeholders": {"count": {"type": "int"}}},
   "financialSendReportPdf": "Enviar informe en PDF",
   "receiveSubtitle": "{customer} · total {total}",
   "@receiveSubtitle": {"placeholders": {"customer": {"type": "String"}, "total": {"type": "String"}}},
