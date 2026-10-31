@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/mobx/customer_store.dart';
+import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
@@ -14,6 +16,7 @@ import 'package:praticos/models/receipt.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/screens/device_form_screen.dart';
 import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -27,6 +30,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeDirectory implements CustomerDirectory {
   FakeDirectory({
@@ -89,6 +93,34 @@ class SlowVehiclesDirectory extends FakeDirectory {
 
   @override
   Future<List<DeviceAggr>> vehiclesOf(String customerId) => vehicles();
+}
+
+class FakeCustomerRepository implements CustomerRepositoryV2 {
+  final saved = <String, Customer>{};
+
+  @override
+  Stream<List<Customer?>> streamCustomers(String companyId) => Stream.value([]);
+
+  @override
+  Future<void> createItem(
+    String companyId,
+    Customer? item, {
+    String? id,
+  }) async {
+    item!.id = 'new-id';
+    saved[companyId] = item;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeUserStore implements UserStore {
+  @override
+  Future<User?> getSingleUserById() async => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 Customer customer(String id, String name, {String? phone}) => Customer()
@@ -455,6 +487,88 @@ void main() {
       expect(find.byType(FormSheet), findsNothing);
       expect(find.text('Qual cliente?'), findsOneWidget);
       expect(h.result, 'unset');
+    });
+
+    group('new customer from the picker', () {
+      late FakeCustomerRepository repository;
+
+      // Like the form: the store is created at save time, so its company is
+      // still being read when the save starts.
+      Widget picker({bool many = false}) => CustomerListScreen(
+        canAdd: true,
+        directory: directory(many: many),
+        onSaveCustomer: (c) => CustomerStore(
+          repository: repository,
+          userStore: FakeUserStore(),
+          onCreated: (_) {},
+        ).saveCustomer(c),
+      );
+
+      Future<void> tapSave(WidgetTester tester) async {
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('new_order_save')));
+        await tester.pumpAndSettle();
+      }
+
+      setUp(() {
+        SharedPreferences.setMockInitialValues({'companyId': 'co1'});
+        repository = FakeCustomerRepository();
+      });
+
+      testWidgets('"Novo cliente" saves and chooses the customer', (
+        tester,
+      ) async {
+        final h = Harness();
+        await h.pump(tester, picker());
+        await tester.tap(find.byKey(const ValueKey('picker-add')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byType(CupertinoTextField).first,
+          'Carla Dias',
+        );
+        await tapSave(tester);
+
+        expect(repository.saved['co1']?.name, 'Carla Dias');
+        final pick = h.result as CustomerPick;
+        expect(pick.customer, same(repository.saved['co1']));
+        expect(pick.customer.id, 'new-id');
+        expect(find.text('Qual cliente?'), findsNothing);
+      });
+
+      testWidgets('"Cadastrar “x”" saves the typed name and chooses it', (
+        tester,
+      ) async {
+        final h = Harness();
+        await h.pump(tester, picker(many: true));
+        await tester.enterText(find.byType(CupertinoTextField), 'Carla Dias');
+        await tester.pump();
+        await tester.tap(find.text('Cadastrar “Carla Dias”'));
+        await tester.pumpAndSettle();
+        await tapSave(tester);
+
+        expect(repository.saved['co1']?.name, 'Carla Dias');
+        expect((h.result as CustomerPick).customer.id, 'new-id');
+      });
+
+      testWidgets('a failed save keeps the sheet and chooses no one', (
+        tester,
+      ) async {
+        SharedPreferences.setMockInitialValues({});
+        final h = Harness();
+        await h.pump(tester, picker());
+        await tester.tap(find.byKey(const ValueKey('picker-add')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byType(CupertinoTextField).first,
+          'Carla Dias',
+        );
+        await tapSave(tester);
+
+        expect(repository.saved, isEmpty);
+        expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+        expect(find.byType(FormSheet), findsOneWidget);
+        expect(h.result, 'unset');
+      });
     });
   });
 

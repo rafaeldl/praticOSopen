@@ -39,7 +39,12 @@ class CustomerPick {
 /// - "Recentes" first, then "Todos". The order's customer has the ✓.
 /// - No swipe actions: this is a choice, not a management list.
 class CustomerListScreen extends StatefulWidget {
-  const CustomerListScreen({super.key, this.directory, this.canAdd});
+  const CustomerListScreen({
+    super.key,
+    this.directory,
+    this.canAdd,
+    this.onSaveCustomer,
+  });
 
   /// Injected in tests; defaults to [FirestoreCustomerDirectory].
   final CustomerDirectory? directory;
@@ -48,6 +53,9 @@ class CustomerListScreen extends StatefulWidget {
   /// `manageCustomers` permission (the Firestore rules deny the write
   /// otherwise). Test seam.
   final bool? canAdd;
+
+  /// Saves a new customer. Defaults to [CustomerFormScreen]'s. Test seam.
+  final Future<void> Function(Customer customer)? onSaveCustomer;
 
   @override
   State<CustomerListScreen> createState() => _CustomerListScreenState();
@@ -156,7 +164,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     }
     final created = await FormSheet.show<Customer>(
       context,
-      (_) => CustomerFormScreen(asSheet: true, customer: draft),
+      (_) => CustomerFormScreen(
+        asSheet: true,
+        customer: draft,
+        onSave: widget.onSaveCustomer,
+      ),
     );
     if (created != null && mounted) {
       Navigator.pop(context, CustomerPick(created));
