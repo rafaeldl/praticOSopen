@@ -63,12 +63,18 @@ export function parseArgs(argv: string[]): Args {
     }
   }
   if (apply && dryRun) throw new Error('--apply and --dry-run are mutually exclusive');
+  if (until && argv.some((arg) => arg.startsWith('--days='))) {
+    throw new Error('--days and --until are mutually exclusive');
+  }
   return { apply, days, project, until };
 }
 
 function parseUntil(value: string): Date {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00.000Z`) : new Date(NaN);
-  if (Number.isNaN(date.getTime())) throw new Error('--until must be a date like 2026-12-28');
+  // A rollover like 2026-02-31 comes back as another day.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    throw new Error('--until must be a date like 2026-12-28');
+  }
   return new Date(date.getTime() + DAY_MS + 3 * 60 * 60 * 1000);
 }
 

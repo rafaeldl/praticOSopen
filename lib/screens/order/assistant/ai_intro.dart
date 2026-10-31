@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/menu_navigation/home.dart' show ordersChanged;
 import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
@@ -16,16 +17,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String kAiIntroSeenKey = 'ai_intro_seen_v1';
 
 /// Shows [AiIntroSheet] once per device, where the assistant is on. The app
-/// never asks again, whatever the answer.
-Future<void> showAiIntroOnce(
+/// never asks again, whatever the answer. [isSettled] says the user is still
+/// on Início: the answer from the server can take seconds, and the sheet must
+/// not land on an order opened meanwhile. Returns false in that case, with
+/// nothing saved, so the caller tries again later.
+Future<bool> showAiIntroOnce(
   BuildContext context, {
+  required bool Function() isSettled,
   AiOrderAssistClient? assistant,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-  if (prefs.getBool(kAiIntroSeenKey) == true) return;
+  if (prefs.getBool(kAiIntroSeenKey) == true) return true;
   final on = await (assistant ?? AiOrderAssistService()).isEnabled();
-  if (!on || !context.mounted) return;
+  if (!on) return true;
+  if (!context.mounted || !isSettled()) return false;
   await prefs.setBool(kAiIntroSeenKey, true);
+  if (!context.mounted) return true;
   AnalyticsService.logAiEvent('ai_intro_shown');
 
   final accepted = await showCupertinoModalPopup<bool>(
@@ -40,8 +47,12 @@ Future<void> showAiIntroOnce(
     accepted == true ? 'ai_intro_accepted' : 'ai_intro_dismissed',
   );
   if (accepted == true && context.mounted) {
-    openNewOrder(context, startTalking: true);
+    openNewOrder(
+      context,
+      startTalking: true,
+    ).then((_) => ordersChanged.value++);
   }
+  return true;
 }
 
 /// First use of the assistant: one sentence and one action, which opens the

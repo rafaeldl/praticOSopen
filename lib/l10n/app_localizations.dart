@@ -9569,7 +9569,7 @@ abstract class AppLocalizations {
   /// No description provided for @courtesyBannerAiUse.
   ///
   /// In pt, this message translates to:
-  /// **'Neste mês você usou o assistente {used} vezes; no Free são {free}.'**
+  /// **'{used, plural, =1{Neste mês você usou o assistente 1 vez; no Free são {free}.} other{Neste mês você usou o assistente {used} vezes; no Free são {free}.}}'**
   String courtesyBannerAiUse(int used, int free);
 
   /// No description provided for @courtesyBannerToFree.

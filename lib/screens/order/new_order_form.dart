@@ -966,11 +966,15 @@ class AssistantNote extends StatelessWidget {
     required this.onAction,
     this.filled = false,
     this.icon,
+    this.onClose,
   });
 
   final String message;
   final String actionLabel;
   final VoidCallback onAction;
+
+  /// Shows an "X" beside the action, when the action does not close the note.
+  final VoidCallback? onClose;
 
   /// The assistant filled the order: blue sparkle; otherwise a warning.
   final bool filled;
@@ -1030,6 +1034,19 @@ class AssistantNote extends StatelessWidget {
                 ),
               ),
             ),
+            if (onClose != null)
+              CupertinoButton(
+                key: const ValueKey('assistant_note_close'),
+                padding: EdgeInsets.zero,
+                minimumSize: const Size.square(AppSizes.minTouchTarget),
+                onPressed: onClose,
+                child: Icon(
+                  CupertinoIcons.xmark,
+                  size: 18,
+                  semanticLabel: context.l10n.close,
+                  color: AppColors.textSecondary.resolveFrom(context),
+                ),
+              ),
           ],
         ),
       ),

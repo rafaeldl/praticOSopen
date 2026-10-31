@@ -148,22 +148,28 @@ export interface CourtesyNoticeRecord {
   days: number;
 }
 
+/** A notice owed: its step (15 or 3) and the days really left. */
+export interface DueCourtesyNotice {
+  step: number;
+  daysLeft: number;
+}
+
 /**
- * The end-of-courtesy notice owed at `now` (15 or 3), or null. A notice already
+ * The end-of-courtesy notice owed at `now`, or null. A notice already
  * sent for this `expiresAt` (`last`) is not repeated; moving the date starts over.
  */
 export function dueCourtesyNotice(
   subscription: Subscription | undefined,
   now: Date,
   last?: CourtesyNoticeRecord,
-): number | null {
+): DueCourtesyNotice | null {
   if (!isGraceActive(subscription, now)) return null;
   const expiresAt = subscription!.expiresAt as string;
   const daysLeft = Math.ceil((Date.parse(expiresAt) - now.getTime()) / DAY_MS);
-  const due = [...COURTESY_NOTICE_DAYS].sort((a, b) => a - b).find((days) => daysLeft <= days);
-  if (due === undefined) return null;
-  if (last?.expiresAt === expiresAt && last.days <= due) return null;
-  return due;
+  const step = [...COURTESY_NOTICE_DAYS].sort((a, b) => a - b).find((days) => daysLeft <= days);
+  if (step === undefined) return null;
+  if (last?.expiresAt === expiresAt && last.days <= step) return null;
+  return { step, daysLeft };
 }
 
 function defaultUsage(): SubscriptionUsage {

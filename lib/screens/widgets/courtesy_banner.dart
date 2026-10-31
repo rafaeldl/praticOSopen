@@ -18,11 +18,15 @@ class CourtesyBanner extends StatefulWidget {
   const CourtesyBanner({
     super.key,
     required this.subscription,
+    required this.companyId,
     this.loadAiStatus,
     this.onViewPlans,
   });
 
   final Subscription subscription;
+
+  /// Kept with "Agora não": a device can hold several companies.
+  final String? companyId;
 
   /// Assistant use of the month; defaults to the server (tests inject).
   final Future<AiStatus> Function()? loadAiStatus;
@@ -41,27 +45,70 @@ class CourtesyBanner extends StatefulWidget {
 }
 
 class _CourtesyBannerState extends State<CourtesyBanner> {
-  late final CourtesyNotice? _notice =
-      CourtesyNotice.of(widget.subscription, DateTime.now());
+  CourtesyNotice? _notice;
 
   /// Stays hidden until the saved "Agora não" has been read.
   bool _hidden = true;
   int _aiUsed = 0;
 
+  /// The app can stay open for days: the count follows when it comes back.
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onResume: _refresh,
+  );
+
+  String _dismissKey(CourtesyNotice notice) =>
+      '${notice.dismissKey}_${widget.companyId}';
+
   @override
   void initState() {
     super.initState();
+    _lifecycle;
+    _notice = CourtesyNotice.of(widget.subscription, DateTime.now());
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(CourtesyBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _refresh();
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  /// A new date or the last days are a new warning, even after "Agora não".
+  void _refresh() {
+    final notice = CourtesyNotice.of(widget.subscription, DateTime.now());
+    final previous = _notice;
+    final same = notice != null &&
+        previous != null &&
+        notice.dismissKey == previous.dismissKey;
+    if (same) {
+      setState(() => _notice = notice);
+      return;
+    }
+    _notice = notice;
+    _hidden = true;
     _load();
   }
 
   Future<void> _load() async {
     final notice = _notice;
-    if (notice == null) return;
+    if (notice == null) {
+      if (mounted) setState(() {});
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(notice.dismissKey) == true) return;
+    if (prefs.getBool(_dismissKey(notice)) == true) {
+      if (mounted) setState(() {});
+      return;
+    }
     final ai = await (widget.loadAiStatus ??
         () => AiOrderAssistService().status())();
-    if (!mounted) return;
+    if (!mounted || !identical(notice, _notice)) return;
     setState(() {
       _hidden = false;
       _aiUsed = ai.used ?? 0;
@@ -72,9 +119,10 @@ class _CourtesyBannerState extends State<CourtesyBanner> {
   }
 
   Future<void> _dismiss() async {
+    final key = _dismissKey(_notice!);
     setState(() => _hidden = true);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_notice!.dismissKey, true);
+    await prefs.setBool(key, true);
   }
 
   String _text(BuildContext context, CourtesyNotice notice) {

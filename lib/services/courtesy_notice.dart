@@ -26,9 +26,9 @@ class CourtesyNotice {
       return null;
     }
     if (!endsAt.isAfter(now)) return null;
-    final daysLeft = (endsAt.difference(now).inHours / 24).ceil();
+    final daysLeft = (endsAt.difference(now).inMinutes / (24 * 60)).ceil();
     if (daysLeft > kCourtesyNoticeDays) return null;
-    return CourtesyNotice(daysLeft, endsAt);
+    return CourtesyNotice(daysLeft < 1 ? 1 : daysLeft, endsAt);
   }
 }
 

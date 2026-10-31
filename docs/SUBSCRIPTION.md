@@ -86,7 +86,7 @@ GitHub secrets `REVENUECAT_IOS_API_KEY` and `REVENUECAT_ANDROID_API_KEY` are wir
 `GET /v1/app/ai/status` returns the month's use, and `PlanScreen` shows it as the first usage
 row when the assistant is on (`PlanResource.ai`). At the limit, the screen shows the usual block
 with "Ver planos". In the order, from 80% of the month's requests on the note says how many are
-left, and when they run out its action opens the paywall.
+left. When a request is refused for the limit, the note offers "Ver planos" and an "X".
 
 ## Firestore Data Model (server-owned)
 
@@ -291,7 +291,7 @@ npm run subscriptions:grace -- --project=praticos --until=2026-12-28          # 
 npm run subscriptions:grace -- --project=praticos --until=2026-12-28 --apply  # write
 ```
 
-`--until` changes only `subscription.expiresAt` of companies in a running grace period,
+`--until` changes only `subscription.expiresAt` (and its `updatedAt`) of companies in a running grace period,
 to the end of that day in Brazil. The app and the notices read that field, so both follow it.
 
 ### End-of-courtesy notices
@@ -302,11 +302,13 @@ Two warnings, 15 and 3 days before `expiresAt`, both for owner/admin:
   America/Sao_Paulo. Quotes the assistant use of the month against Free, in the language of
   `company.country` (pt by default). `companies/{id}/settings/courtesyNotice { expiresAt, days }`
   records the last one sent, outside `subscription` so old app versions can still save the
-  company: a notice is never repeated, and a new `expiresAt` starts over. A company that fails
-  is retried on the next run.
+  company: a notice is never repeated, and a new `expiresAt` starts over. The text says the days
+  really left. If FCM fails or the in-app copy cannot be saved, nothing is recorded and the
+  next run tries again; a recipient with no token still gets the in-app copy.
 - **Início:** `CourtesyBanner` (`lib/screens/widgets/courtesy_banner.dart`), from 15 days on,
   with the days left, the use of the month, the plan that covers it (`recommendedPlan`) and
-  "Ver planos". "Agora não" hides it until the last 3 days or a new date (saved on the device).
+  "Ver planos". "Agora não" hides it until the last 3 days or a new date (saved on the device,
+  per company). The count refreshes when the app returns to the foreground.
   Only for owner/admin, and only with paid plans on.
 
 The RevenueCat paywall cannot open on a chosen plan, so the banner names the plan in the text.

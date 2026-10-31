@@ -2469,7 +2469,7 @@
       "days": { "type": "int" }
     }
   },
-  "courtesyBannerAiUse": "You used the assistant {used} times this month; Free includes {free}.",
+  "courtesyBannerAiUse": "{used, plural, =1{You used the assistant once this month; Free includes {free}.} other{You used the assistant {used} times this month; Free includes {free}.}}",
   "@courtesyBannerAiUse": {
     "placeholders": {
       "used": { "type": "int" },

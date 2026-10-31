@@ -32,11 +32,11 @@ describe('dueCourtesyNotice', () => {
   });
 
   it('owes the 15-day notice, then nothing until 3 days', () => {
-    expect(dueCourtesyNotice(grace(), daysBefore(15))).toBe(15);
+    expect(dueCourtesyNotice(grace(), daysBefore(15))).toEqual({ step: 15, daysLeft: 15 });
     const last = { expiresAt: END, days: 15 };
     expect(dueCourtesyNotice(grace(), daysBefore(14), last)).toBeNull();
     expect(dueCourtesyNotice(grace(), daysBefore(4), last)).toBeNull();
-    expect(dueCourtesyNotice(grace(), daysBefore(3), last)).toBe(3);
+    expect(dueCourtesyNotice(grace(), daysBefore(3), last)).toEqual({ step: 3, daysLeft: 3 });
   });
 
   it('never repeats the 3-day notice', () => {
@@ -46,7 +46,11 @@ describe('dueCourtesyNotice', () => {
   it('starts over when the date moves', () => {
     const moved = grace({ expiresAt: '2026-12-28T12:00:00.000Z' });
     const last = { expiresAt: END, days: 3 };
-    expect(dueCourtesyNotice(moved, new Date('2026-12-13T12:00:00.000Z'), last)).toBe(15);
+    expect(dueCourtesyNotice(moved, new Date('2026-12-13T12:00:00.000Z'), last)).toEqual({ step: 15, daysLeft: 15 });
+  });
+
+  it('tells the days really left when a notice goes out late', () => {
+    expect(dueCourtesyNotice(grace(), daysBefore(13))).toEqual({ step: 15, daysLeft: 13 });
   });
 
   it('owes nothing outside a running courtesy', () => {
@@ -66,7 +70,16 @@ describe('courtesyMessage', () => {
     expect(courtesyMessage(3, 0, 'BR').body).not.toContain('assistente');
   });
 
+  it('speaks in the singular', () => {
+    expect(courtesyMessage(1, 1, 'BR').title).toBe('Sua cortesia do Pro acaba em 1 dia');
+    expect(courtesyMessage(1, 1, 'BR').body).toContain('1 vez ');
+    expect(courtesyMessage(1, 1, 'US').body).toContain('once');
+    expect(courtesyMessage(1, 1, 'MX').title).toBe('Tu cortesía Pro termina en 1 día');
+  });
+
   it('follows the company country, with pt as default', () => {
+    expect(courtesyMessage(3, 0, 'PT').title).toBe('Sua cortesia do Pro acaba em 3 dias');
+    expect(courtesyMessage(3, 0, 'DE').title).toBe('Your Pro courtesy ends in 3 days');
     expect(courtesyMessage(3, 0, undefined).title).toBe('Sua cortesia do Pro acaba em 3 dias');
     expect(courtesyMessage(3, 0, 'US').title).toBe('Your Pro courtesy ends in 3 days');
     expect(courtesyMessage(3, 0, 'MX').title).toBe('Tu cortesía Pro termina en 3 días');
@@ -95,6 +108,19 @@ describe('sendCourtesyNotices', () => {
 
     await expect(sendCourtesyNotices(daysBefore(15), deps)).resolves.toEqual({ sent: 0, errors: 0 });
     expect(notify).toHaveBeenCalledTimes(1);
+  });
+
+  it('quotes the days really left and records the step', async () => {
+    fake.seed('companies/c1', { subscription: grace() });
+    const notify = jest.fn().mockResolvedValue(undefined);
+
+    await sendCourtesyNotices(daysBefore(13), { aiUsed: async () => 0, notify });
+
+    expect(notify.mock.calls[0][1].title).toBe('Sua cortesia do Pro acaba em 13 dias');
+    await expect(sendCourtesyNotices(daysBefore(12), { aiUsed: async () => 0, notify })).resolves.toEqual({
+      sent: 0,
+      errors: 0,
+    });
   });
 
   it('retries a company that failed on the next run', async () => {

@@ -23,6 +23,11 @@ void main() {
       expect(CourtesyNotice.of(grace(), now)?.daysLeft, 2);
     });
 
+    test('never says zero days before the end', () {
+      final now = end.subtract(const Duration(minutes: 30));
+      expect(CourtesyNotice.of(grace(), now)?.daysLeft, 1);
+    });
+
     test('stays quiet after the end and for a store subscription', () {
       expect(CourtesyNotice.of(grace(), end), isNull);
       expect(

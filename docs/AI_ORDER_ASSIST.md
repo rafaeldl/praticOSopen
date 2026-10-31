@@ -15,7 +15,7 @@ O app pergunta ao servidor (`GET /v1/app/ai/status`) ao abrir a OS e só mostra 
 
 ## Primeiro uso
 
-`showAiIntroOnce` (`lib/screens/order/assistant/ai_intro.dart`) abre uma folha em Início, uma vez por aparelho, depois que a lista carrega e só com o assistente ligado. "Experimentar agora" abre a Nova OS já ouvindo (`openNewOrder(startTalking: true)`). Com qualquer resposta, não volta a aparecer (`ai_intro_seen_v1` em `SharedPreferences`).
+`showAiIntroOnce` (`lib/screens/order/assistant/ai_intro.dart`) abre uma folha em Início, uma vez por aparelho, depois que a lista carrega, só com o assistente ligado e só para quem tem o "+" (técnico não). Se o usuário saiu de Início enquanto o servidor respondia, nada é gravado e a folha espera a próxima carga. "Experimentar agora" abre a Nova OS já ouvindo (`openNewOrder(startTalking: true)`). Com qualquer resposta, não volta a aparecer (`ai_intro_seen_v1` em `SharedPreferences`).
 
 ## Ligar e desligar
 

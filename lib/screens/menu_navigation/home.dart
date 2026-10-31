@@ -5,6 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/config/feature_flags.dart';
+import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
@@ -49,6 +50,7 @@ class _HomeState extends State<Home> {
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
   bool _whatsappStatusLoaded = false;
   bool _aiIntroChecked = false;
+  bool _aiIntroRunning = false;
 
   @override
   void initState() {
@@ -90,11 +92,30 @@ class _HomeState extends State<Home> {
     _showAiIntroOnce();
   }
 
-  /// After the first load, so the sheet opens over a settled Início.
-  void _showAiIntroOnce() {
-    if (_aiIntroChecked || !mounted || Global.companyAggr?.id == null) return;
-    _aiIntroChecked = true;
-    showAiIntroOnce(context);
+  /// After a load, so the sheet opens over a settled Início. Only for who has
+  /// the "+": the sheet leads to a new order.
+  Future<void> _showAiIntroOnce() async {
+    if (_aiIntroChecked || _aiIntroRunning || !mounted) return;
+    if (Global.companyAggr?.id == null) return;
+    if (!_authService.canCreateOrder) {
+      _aiIntroChecked = true;
+      return;
+    }
+    _aiIntroRunning = true;
+    final done = await showAiIntroOnce(context, isSettled: _isSettledOnHome);
+    _aiIntroRunning = false;
+    _aiIntroChecked = done;
+  }
+
+  /// Início is what the user sees: its tab, with nothing pushed over the app.
+  bool _isSettledOnHome() {
+    if (!mounted || ModalRoute.of(context)?.isCurrent == false) return false;
+    if (Navigator.of(context, rootNavigator: true).canPop()) return false;
+    return Provider.of<BottomNavigationBarStore>(
+          context,
+          listen: false,
+        ).currentIndex ==
+        0;
   }
 
   /// Tells "no open orders" apart from "company never created an order".
@@ -252,7 +273,12 @@ class _HomeState extends State<Home> {
   Widget? _buildCourtesyBanner() {
     final subscription = context.read<SubscriptionStore>().subscription;
     if (!CourtesyBanner.applies(subscription, DateTime.now())) return null;
-    return CourtesyBanner(subscription: subscription!);
+    final companyId = Global.companyAggr?.id;
+    return CourtesyBanner(
+      key: ValueKey('courtesy_$companyId'),
+      subscription: subscription!,
+      companyId: companyId,
+    );
   }
 
   Widget? _buildWhatsAppBanner() {

@@ -20,33 +20,36 @@ export interface CourtesyMessage {
   days: number;
 }
 
-/** Text of the push, in the company's language (Brazil and default: pt). */
+const PORTUGUESE = ['BR', 'PT', 'AO', 'MZ'];
+const SPANISH = ['ES', 'MX', 'AR', 'CL', 'CO', 'PE', 'UY', 'PY', 'BO', 'EC', 'VE', 'CR', 'PA', 'DO', 'GT', 'HN', 'SV', 'NI'];
+
+/** Text of the push, in the company's language (no country: pt; unknown: en). */
 export function courtesyMessage(days: number, aiUsed: number, country: string | undefined): CourtesyMessage {
   const free = AI_REQUESTS_PER_MONTH.free;
-  if (country === 'US') {
+  if (!country || PORTUGUESE.includes(country)) {
     return {
       days,
-      title: `Your Pro courtesy ends in ${days} days`,
+      title: `Sua cortesia do Pro acaba em ${days === 1 ? '1 dia' : `${days} dias`}`,
       body: aiUsed > 0
-        ? `You used the assistant ${aiUsed} times this month. Free includes ${free}. Choose a plan in the app.`
-        : 'After that the app goes back to Free. Choose a plan in the app.',
+        ? `Você usou o assistente ${aiUsed === 1 ? '1 vez' : `${aiUsed} vezes`} neste mês. No Free são ${free}. Escolha seu plano no app.`
+        : 'Depois disso, o app volta para o plano Free. Escolha seu plano no app.',
     };
   }
-  if (country && country !== 'BR') {
+  if (SPANISH.includes(country)) {
     return {
       days,
-      title: `Tu cortesía Pro termina en ${days} días`,
+      title: `Tu cortesía Pro termina en ${days === 1 ? '1 día' : `${days} días`}`,
       body: aiUsed > 0
-        ? `Usaste el asistente ${aiUsed} veces este mes. El plan Free incluye ${free}. Elige un plan en la app.`
+        ? `Usaste el asistente ${aiUsed === 1 ? '1 vez' : `${aiUsed} veces`} este mes. El plan Free incluye ${free}. Elige un plan en la app.`
         : 'Después, la app vuelve al plan Free. Elige un plan en la app.',
     };
   }
   return {
     days,
-    title: `Sua cortesia do Pro acaba em ${days} dias`,
+    title: `Your Pro courtesy ends in ${days === 1 ? '1 day' : `${days} days`}`,
     body: aiUsed > 0
-      ? `Você usou o assistente ${aiUsed} vezes neste mês. No Free são ${free}. Escolha seu plano no app.`
-      : 'Depois disso, o app volta para o plano Free. Escolha seu plano no app.',
+      ? `You used the assistant ${aiUsed === 1 ? 'once' : `${aiUsed} times`} this month. Free includes ${free}. Choose a plan in the app.`
+      : 'After that the app goes back to Free. Choose a plan in the app.',
   };
 }
 
@@ -82,11 +85,11 @@ export async function sendCourtesyNotices(
       try {
         const record = doc.ref.collection('settings').doc('courtesyNotice');
         const last = (await record.get()).data() as CourtesyNoticeRecord | undefined;
-        const days = dueCourtesyNotice(subscription, now, last);
-        if (days === null) continue;
+        const notice = dueCourtesyNotice(subscription, now, last);
+        if (notice === null) continue;
         const aiUsed = await deps.aiUsed(doc.id);
-        await deps.notify(doc.id, courtesyMessage(days, aiUsed, doc.get('country') as string | undefined));
-        await record.set({ expiresAt: subscription!.expiresAt as string, days });
+        await deps.notify(doc.id, courtesyMessage(notice.daysLeft, aiUsed, doc.get('country') as string | undefined));
+        await record.set({ expiresAt: subscription!.expiresAt as string, days: notice.step });
         sent++;
       } catch (error) {
         errors++;

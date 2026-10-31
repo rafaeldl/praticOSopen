@@ -1298,6 +1298,9 @@ void main() {
 
       expect(find.text('Ver planos'), findsOneWidget);
       expect(find.text('Fechar'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('assistant_note_close')));
+      await tester.pumpAndSettle();
+      expect(find.text('Ver planos'), findsNothing);
       expect(events['ai_assist_requested'], {'input': 'text'});
       expect(events['ai_assist_result'], {'result': 'quota'});
       expect(events['upgrade_modal_shown'], {'trigger': 'ai_limit_100'});

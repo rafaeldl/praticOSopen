@@ -6,7 +6,7 @@ jest.mock('firebase-admin/messaging', () => ({
 jest.mock('../firestore.service', () => jest.requireActual('../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 
 import { fakeDb, list, resetFakeDb, seed } from '../../__tests__/helpers/fake-firestore';
-import { notifyAsaasPaymentReceived } from '../notification.service';
+import { notifyAsaasPaymentReceived, notifyCourtesyEnding } from '../notification.service';
 
 describe('notification.service - notifyAsaasPaymentReceived', () => {
   beforeEach(() => {
@@ -57,5 +57,42 @@ describe('notification.service - notifyAsaasPaymentReceived', () => {
     fakeDb.reset();
     await expect(notifyAsaasPaymentReceived('c1', 'o1', 10)).resolves.toBeUndefined();
     expect(mockSendEachForMulticast).not.toHaveBeenCalled();
+  });
+});
+
+describe('notification.service - notifyCourtesyEnding', () => {
+  const message = { title: 'Título', body: 'Texto', days: 15 };
+
+  beforeEach(() => {
+    resetFakeDb();
+    jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockSendEachForMulticast.mockResolvedValue({ successCount: 1, failureCount: 0, responses: [] });
+    seed('companies/c1', {
+      owner: { id: 'owner1', name: 'Dono' },
+      users: [
+        { user: { id: 'adm1', name: 'Admin' }, role: 'admin' },
+        { user: { id: 'tec1', name: 'Técnico' }, role: 'technician' },
+      ],
+    });
+    seed('users/owner1', { fcmTokens: [{ token: 't1' }] });
+  });
+
+  it('saves the in-app copy with no order fields, only for who can buy', async () => {
+    await notifyCourtesyEnding('c1', message);
+    const rows = list('companies/c1/notifications');
+    expect(rows.map((row) => (row as { recipientId: string }).recipientId).sort()).toEqual(['adm1', 'owner1']);
+    expect(rows[0]).not.toHaveProperty('orderId');
+  });
+
+  it('throws when the push fails, so the job retries', async () => {
+    mockSendEachForMulticast.mockRejectedValue(new Error('fcm down'));
+    await expect(notifyCourtesyEnding('c1', message)).rejects.toThrow('not delivered');
+  });
+
+  it('counts as delivered without tokens: the in-app copy reached them', async () => {
+    seed('users/owner1', {});
+    await expect(notifyCourtesyEnding('c1', message)).resolves.toBeUndefined();
   });
 });

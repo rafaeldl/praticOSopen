@@ -346,8 +346,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// [_note] when the month's requests ran out: its action opens the plans.
   String? _quotaNote;
 
-  /// A draft filled this order, for the adoption funnel.
-  bool _assistantFilled = false;
+  /// Drafts that filled this order and were not undone, for the funnel.
+  int _draftsKept = 0;
 
   /// Opened from the first-use sheet: starts listening once the assistant is
   /// known to be on.
@@ -1460,7 +1460,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final filled = error == null && await _applyDraft(draft!, sent!);
     if (!mounted) return;
     if (error == null) result = filled ? 'filled' : 'nothing';
-    _assistantFilled = _assistantFilled || filled;
+    if (filled) _draftsKept++;
     AnalyticsService.logAiEvent('ai_assist_result', {'result': result});
     setState(() {
       _barMode = AssistantBarMode.idle;
@@ -1496,6 +1496,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return ' ${context.l10n.orderAssistantUsesLeft(left)}';
   }
 
+  /// The note has done its job once the paywall closes.
+  Future<void> _openPlansFromNote() async {
+    await PaywallLauncher.showPaywall(context);
+    if (mounted) _dismissNote();
+  }
+
   void _dismissNote() => setState(() {
     _note = null;
     _undo = null;
@@ -1505,7 +1511,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   void _undoDraft() {
     final undo = _undo;
     if (undo != null) {
-      _assistantFilled = false;
+      _draftsKept--;
       AnalyticsService.logAiEvent('ai_assist_undone');
       if (undo.customer) {
         runInAction(() {
@@ -2509,7 +2515,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     _registerNew();
     _store.createItem(
       onCreated: (orderId) {
-        if (_assistantFilled) AnalyticsService.logAiEvent('ai_order_saved');
+        if (_draftsKept > 0) AnalyticsService.logAiEvent('ai_order_saved');
         if (request.isNotEmpty && companyId != null) {
           addOrderComment(
             companyId: companyId,
@@ -2672,10 +2678,11 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                           ? l10n.orderAssistantUndo
                           : l10n.close,
                       onAction: showPlans
-                          ? () => PaywallLauncher.showPaywall(context)
+                          ? _openPlansFromNote
                           : canUndo
                           ? _undoDraft
                           : _dismissNote,
+                      onClose: showPlans ? _dismissNote : null,
                     ),
                   )
                 else if (_notifyStatus != null)

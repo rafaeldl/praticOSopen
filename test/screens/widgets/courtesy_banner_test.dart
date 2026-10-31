@@ -21,6 +21,7 @@ Future<void> _pump(
   Subscription subscription, {
   int aiUsed = 0,
   VoidCallback? onViewPlans,
+  String companyId = 'c1',
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
@@ -31,6 +32,7 @@ Future<void> _pump(
         child: Center(
           child: CourtesyBanner(
             subscription: subscription,
+            companyId: companyId,
             loadAiStatus: () async =>
                 AiStatus(enabled: true, used: aiUsed, limit: 400),
             onViewPlans: onViewPlans,
@@ -103,6 +105,31 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await _pump(tester, _grace(days: 3));
     expect(find.byKey(const ValueKey('courtesy_banner')), findsOneWidget);
+  });
+
+  testWidgets('"Agora não" belongs to the company', (tester) async {
+    final subscription = _grace();
+    await _pump(tester, subscription);
+    await tester.tap(find.text('Agora não'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox());
+    await _pump(tester, subscription, companyId: 'c2');
+    expect(find.byKey(const ValueKey('courtesy_banner')), findsOneWidget);
+  });
+
+  testWidgets('follows a new date while on screen', (tester) async {
+    await _pump(tester, _grace());
+    await _pump(tester, _grace(days: 5));
+    expect(find.textContaining('Acaba em 5 dias.'), findsOneWidget);
+  });
+
+  testWidgets('one use reads in the singular', (tester) async {
+    await _pump(tester, _grace(), aiUsed: 1);
+    expect(
+      find.textContaining('Neste mês você usou o assistente 1 vez;'),
+      findsOneWidget,
+    );
   });
 
   test('applies only to whoever can buy, inside the window', () {

@@ -25,6 +25,8 @@ describe('grant-grace-period', () => {
   it('parses --until as the end of that day in Brazil', () => {
     expect(parseArgs(['--until=2026-12-28']).until?.toISOString()).toBe('2026-12-29T03:00:00.000Z');
     expect(() => parseArgs(['--until=amanha'])).toThrow('--until');
+    expect(() => parseArgs(['--until=2026-02-31'])).toThrow('--until');
+    expect(() => parseArgs(['--until=2026-12-28', '--days=30'])).toThrow('mutually exclusive');
   });
 
   it('moves only a running courtesy, and only its date', () => {
