@@ -1,17 +1,17 @@
 # App web: relatório de descoberta
 
-Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados. Nada foi publicado, e nenhuma regra, API ou dado de produção mudou.
+Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados. Nada foi publicado, e nenhuma regra, API ou dado de produção mudou. Revisado no mesmo dia com a análise independente de uso, com dados até 30/10.
 
 ## Resposta curta
 
-**O app web é viável e a arquitetura está clara, mas paridade total não se paga hoje.** Recomendo validar a demanda antes de escrever a primeira tela e corrigir já as falhas de permissão dentro da empresa, que existem com ou sem web.
+**O app web é viável e a arquitetura está clara, mas paridade total não se paga hoje.** Recomendo validar a demanda antes de escrever a primeira tela e corrigir as falhas de permissão dentro da empresa antes de ampliar cobrança, nota fiscal ou equipes. Elas existem com ou sem web.
 
 | Pergunta | Resposta |
 |---|---|
 | Dá para construir? | Sim. Vue + Vite no Hosting cumpre INP, busca e acessibilidade no protótipo. Ver [ADR](ADR-001-web-architecture.md) |
-| Vale paridade total agora? | Não. Das 118 empresas ativas, 12 têm 2 ou mais usuários e só 3 têm 2 ou mais agindo. Nenhum pedido registrado |
-| O que vem primeiro? | Testar interesse, sem código web |
-| Qual o risco mais urgente? | Papéis dentro da mesma empresa gravam o que a tela proíbe. Independe do web |
+| Vale paridade total agora? | Não. Só 20 empresas usam de verdade (faixa de 16 a 20), e há 1 assinatura de loja ativa. Nenhum pedido registrado |
+| O que vem primeiro? | A primeira OS completa e a oferta para as 20 antes de 07/12. O teste de interesse vai junto, em conversa direta e sem código web |
+| Qual o maior risco? | Papéis dentro da mesma empresa gravam o que a tela proíbe. Independe do web. A exposição hoje é pequena: 11 membros reais têm papel restrito, e Asaas e nota fiscal não têm uso real |
 
 ## Decisões para o Rafael
 
@@ -20,17 +20,36 @@ Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados
 3. **Segurança:** autorizar a correção das falhas dentro da empresa, com plano para não quebrar versões antigas do app.
 4. **Meta de 50%:** manter só para sequência e lote, ou tirar decisões do fluxo.
 5. **Recepção:** não existe esse papel. Consultor só vê as próprias OS, e supervisor não vê preço. Definir se vira papel novo.
+6. **Idiomas:** aceitar só pt-BR nas Fases 1 e 2, com os textos já em chaves. As 20 empresas são pt-BR, e os 29 cadastros em outros idiomas têm zero empresas ativas. Inglês e espanhol entrariam antes da abertura pública.
 
 ## O que os dados mostram
 
 Detalhes em [`usage-findings.md`](usage-findings.md).
 
-- **`/order` é a tela nº 1 e o uso é concentrado.** 10 telas, 19% dos arquivos, têm 93% das visitas com nome (78% contando rotas sem nome). Todas são o fluxo da OS.
+- **`/order` é a tela nº 1 e o uso é concentrado.** 10 telas, 19% dos arquivos, têm 93% das visitas com nome (78% contando rotas sem nome). Todas são o fluxo da OS. As visitas pesam para a maior empresa, então a prioridade agora se apoia no que as 20 fazem.
 - **A premissa de paridade antes do diferencial não se sustenta como ordem de entrega.** A cauda soma 0,9% das visitas, com a ressalva de que abas só são medidas desde 13/10.
-- **A base é de uma pessoa, no celular.** 118 empresas com OS em 90 dias e mediana de 2 OS. Em 81 de 82 empresas com autor conhecido, uma pessoa cria tudo.
-- **Só uma empresa passa de 10 mil OS, e ela parece trabalhar de mesa.** Tem 38% das OS do período. É o melhor argumento a favor do web e também um risco de concentração.
+- **A base real é de 20 empresas.** Há 75 empresas com OS com conteúdo em 90 dias, e 20 usam de verdade. Em 81 de 82 empresas com autor conhecido, uma pessoa cria tudo. Das 20, 7 têm 2 ou mais membros.
+- **Só uma empresa passa de 10 mil OS, e ela parece trabalhar de mesa.** Tem 42% das OS e 67% do valor digitado em 90 dias. É o melhor argumento a favor do web e também um risco de concentração.
 - **O celular continua no jogo.** 16% das OS têm foto, e 74% das fotos entram na primeira hora. O web complementa o app.
 - **Quem preferiria o computador segue como hipótese.** O GA4 só vê celular e tablet.
+
+## Revisão com a análise de uso
+
+**A recomendação não muda e fica mais forte.** Com 20 empresas reais e 1 assinatura, as 3 telas pedem cerca de 22% da base no plano Pro para empatar, e a paridade pede 60%. Mudam o desenho do teste, a ordem e os dados de apoio.
+
+| O que mudou | Antes | Agora | Por quê |
+|---|---|---|---|
+| Teste de demanda | Lista de interesse no app, base de 21 empresas, início ao chegar em 70% de instalação | Conversa direta com as 12 empresas com mais perfil de mesa, junto com a oferta de 07/12. Sem PR e sem esperar versão | A base de 21 era de 04/10. Cerca de metade dos pares usuário e versão logados ainda está antes da 1.63 |
+| Portão 0 | 8 de 21 | 6 de 12, mais 1 das 5 maiores e 5 pagantes | Base real, e 5 cobre o empate das 3 telas |
+| Prioridade do web | Nada antes do teste | Primeira OS completa e oferta de 07/12 vêm antes | 74% das contas não chegam à primeira OS com conteúdo, e 7 das 20 passam do limite Free quando a cortesia acabar |
+| Fase 2 | Sem data da OS | Com data da OS e comentário interno | 14 das 20 agendam, e 8 das 20 comentam |
+| Fase 4 | Financeiro e contratos na fila | Só depois de uso real no app | Financeiro tem zero empresas reais, e contratos tem 1 |
+| Quadro de OS | Candidato | Fora por enquanto | A maior empresa mantém toda OS como aprovada |
+| Permissões | Corrigir já | Corrigir antes de ampliar cobrança, nota ou equipes, e antes da Fase 1 | Só 11 membros reais têm papel restrito. Asaas e nota não têm uso real |
+
+Dados do GA4 que deixam de valer: os 488 usuários de Android, porque 414 parecem robôs, e a suspeita de subcontagem no iOS, porque 86 logados no GA4 batem com 90 no Auth. Em trabalho real são 19 usuários no Android e 17 no iOS. Os 111 pares de empresas possivelmente duplicadas não afetam as 20, mas inflam cadastros em cerca de 15%, então nenhum portão usa cadastro como base.
+
+O que continua igual: arquitetura, metas técnicas, matriz, 12.439 OS da maior empresa (contadas sem as cópias legadas) e a falha da meta de 50%.
 
 ## Metas
 
@@ -73,11 +92,13 @@ Cada fase só começa com a anterior aprovada. A matriz é o placar de todas.
 
 | Fase | Entrega | Portão de saída |
 |---|---|---|
-| **0. Sem código web** | Lista de interesse no app, conversa com as 5 maiores, correções de permissão e do total, investigar as leituras altas | **Portão 0:** 8 ou mais das 21 empresas com 5+ OS/mês pedem, 1 ou mais das 5 maiores pede, 5 ou mais pagantes depois de 07/12. Prazo: 15/01/2027 |
-| **1. Fatia** | Tokens unificados no `firebase/web`, login, escolha de empresa, lista e detalhe só leitura, atrás de flag | Piloto com a maior empresa. Metas de performance e axe no CI |
-| **2. Núcleo** | Nova OS, itens, cliente, veículo, receber e enviar ao cliente. Depende dos itens 1 a 4 do ADR | **Portão 1, 60 dias:** 6 empresas por semana (mínimo 3), 40% das OS delas no web |
+| **0. Sem código web** | Conversa com as 12 empresas-alvo junto com a oferta de 07/12, correções de permissão e do total, investigar as leituras altas | **Portão 0:** 6 ou mais das 12 dizem por escrito que usariam no computador, 1 ou mais das 5 maiores está entre elas, 5 ou mais pagantes depois de 07/12. Prazo: 15/01/2027. Critério em [`business-red-team.md`](business-red-team.md) |
+| **1. Fatia** | Só pt-BR, se aprovado. Tokens unificados no `firebase/web`, login, escolha de empresa, lista e detalhe só leitura, atrás de flag | Piloto com a maior empresa. Metas de performance e axe no CI |
+| **2. Núcleo** | Nova OS, itens, cliente, veículo, data da OS, comentário interno, receber e enviar ao cliente. Depende dos itens 1 a 4 do ADR | **Portão 1, 60 dias:** 6 empresas por semana (mínimo 3), 40% das OS delas no web |
 | **3. Velocidade** | Ações em lote, receber vários, paleta, busca global, importação, repetir OS | 10 tarefas com cronômetro contra o app |
-| **4. Cauda** | Agenda da equipe, Financeiro, checklists, contratos, nota, o resto da matriz, por demanda | **Portão 2:** 20 ou mais pagantes, 30% usando web toda semana por 8 semanas |
+| **4. Cauda** | Agenda da equipe, checklists, nota e o resto da matriz, por demanda. Financeiro, contratos e cobrança Asaas só depois de uso real no app | **Portão 2:** 20 ou mais pagantes, 30% usando web toda semana por 8 semanas |
+
+O Portão 2 pede tantos pagantes quanto as empresas que usam hoje, então paridade total depende de a base crescer.
 
 Parada imediata: dado de uma empresa visto por outra, rejeição de loja citando o web ou manutenção acima de 8 h/mês por 2 meses.
 

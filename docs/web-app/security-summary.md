@@ -69,3 +69,7 @@ anônimo só acessa OS por magic link válido.
 Contagens e reprodução ficam no registro privado. Há achados de severidade alta dentro da mesma empresa, fora do teste entre empresas, e o relatório de descoberta os trata como pré-requisito do web.
 
 _Rodar:_ `cd firebase/functions && npm run test:rules` (requer Java 21+).
+
+## Exposição real (revisão de 31/10)
+
+A severidade dos achados dentro da empresa não muda, mas a exposição hoje é pequena: 738 de 753 membros reais são `admin`, 11 têm papel restrito, e cobrança Asaas e nota fiscal não têm uso real. A correção precisa vir antes de ampliar esses recursos, de abrir papéis no web ou de incentivar equipes.

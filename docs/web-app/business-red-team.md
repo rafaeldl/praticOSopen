@@ -7,7 +7,8 @@ Data: 2026-10-31. Objetivo: tentar provar que o web não compensa. Não é acons
 **Vale só em parte, e não agora.** Paridade total não vale com a base de hoje. O custo de infraestrutura não é o problema. O problema é falta de demanda medida, tempo do Rafael e risco na revisão do iOS.
 
 - Não começar antes do corte da cortesia (07/12) e da aprovação do iOS novo.
-- Primeiro, testar interesse sem construir o web (Portão 0).
+- Primeiro, testar interesse sem construir o web (Portão 0), em conversa direta junto com a oferta de 07/12.
+- Revisão de 31/10: 20 empresas usam de verdade, com 1 assinatura de loja ativa. O veredito fica mais forte. As 3 telas pedem 4,5 assinaturas Pro para empatar, ou 22% da base real. A paridade em Nuxt pede 12, ou 60%.
 - Se passar, fazer só 3 telas. Paridade só com o Portão 2.
 
 A melhor defesa do web é uma só: a maior empresa trabalha como escritório e pode valer sozinha um plano alto. Isso justifica perguntar a ela, não construir paridade.
@@ -20,9 +21,9 @@ A melhor defesa do web é uma só: a maior empresa trabalha como escritório e p
 | Mediana de OS em 90 dias entre elas | 2 | Firestore, 31/10 |
 | Parte da maior empresa nas OS de 90 dias | 38% (top 5: 58%) | Firestore, 31/10 |
 | Empresas ativas com 2 ou mais usuários agindo | 3 de 118 (12 têm 2 ou mais cadastrados) | Firestore, 31/10 |
-| Empresas com 5 ou mais OS em 30 dias | 21; com 20 ou mais: 1 | snapshot de 04/10 |
+| Empresas com 5 ou mais OS em 30 dias | 21; com 20 ou mais: 1 | snapshot de 04/10, **superado:** das 20 que usam de verdade, 13 têm 5 ou mais e 5 têm 20 ou mais |
 | Fotos anexadas na primeira hora após a OS | 74% | Firestore, 31/10 |
-| Usuários de celular e tablet | 610 (computador: 17, no site) | GA4 |
+| Usuários de celular e tablet | 610 (computador: 17, no site). **Inválido como base:** 414 dos 488 usuários de Android parecem robôs | GA4 |
 | Pedidos de versão para computador | nenhum achado | discovery, issues e `business/` |
 
 Leitura: a "recepção" do objetivo quase não existe na base, pois a base é de uma pessoa, no celular e em campo. Limite da busca: não olhei e-mail de suporte nem avaliações das lojas, então "nenhum" significa "não registrado", não "não existe".
@@ -151,23 +152,29 @@ O web muda o risco principal: o celular é pessoal, o computador da oficina é c
 
 | Alternativa | Esforço | Resolve | Veredito |
 |---|---|---|---|
-| Portão 0: lista de interesse no app e pergunta à maior empresa | 1 PR | Mede a demanda | **Fazer primeiro** |
+| Portão 0: conversa com as 12 empresas-alvo, junto com a oferta de 07/12 | Sem PR, cerca de 2 h do Rafael | Mede a demanda | **Fazer primeiro** |
 | Exportar para planilha | 1 a 2 PRs | Contador, relatórios | **Fazer se pedirem** |
 | Reduzir leituras no app | 1 a 3 PRs | Custo e velocidade em empresas grandes | **Investigar** |
 | 3 telas no Nuxt que já existe (`firebase/web`, 6,6 mil linhas): lista de OS, nova OS, clientes | 25 PRs | Trabalho de mesa | **Se passar no Portão 0** |
 | Link "Continuar no computador" | Parte das 3 telas | Digitar OS longa | Junto com as 3 telas |
-| Layout de iPad | Médio | Quase nada: 13 usuários em tablet, contra 610 em celular e tablet | Não |
+| Layout de iPad | Médio | Quase nada: 13 usuários em tablet, dos quais 10 parecem robôs | Não |
 | PWA do Flutter | 50 PRs | Rápido de lançar, mas sem layout de mesa, e a arquitetura deve medir | Não como produto; pode ser prova técnica |
 
 ## 8. Critério de morte
 
-**T0:** versão nova instalada em 70% das empresas ativas.
+**Portão 0 (leitura em 15/01/2027, no máximo). Sem código web.** A versão anterior usava lista no app e esperava 70% de instalação. Saiu porque depende de loja e de atualização: cerca de metade dos pares usuário e versão logados ainda está antes da 1.63.
 
-**Portão 0 (até T0 + 14 dias, no máximo 15/01/2027). Sem código web.** Seguir só com **as três** condições:
+**Quem:** as 12 das 20 empresas com perfil de mesa. São as que têm até 15% das OS com foto e 50% ou mais com pagamento, ou 2 ou mais membros. Lista por ID só no diretório privado.
 
-- 8 ou mais das 21 empresas com 5+ OS/mês pedem acesso, por escrito.
-- Pelo menos 1 das 5 maiores empresas pede.
-- 5 ou mais pagantes após o corte de 07/12.
+**Como:** o Rafael fala com elas na mesma conversa da oferta de 07/12, sem mostrar tela e sem prometer data. Perguntas: quem lança a OS, em que aparelho, se há computador no balcão, e o que faria no computador se pudesse. Só no fim: "Usaria toda semana?".
+
+Seguir só com **as três** condições:
+
+- 6 ou mais das 12 dizem por escrito que usariam toda semana e citam uma tarefa concreta.
+- Pelo menos 1 das 5 maiores empresas está entre elas.
+- 5 ou mais pagantes entre as 20 que usam de verdade, após o corte de 07/12.
+
+Interesse declarado é sinal fraco, por isso a terceira condição pede pagamento. Empresa duplicada conta uma vez.
 
 Falhou em qualquer uma: **parar** e reavaliar em 6 meses.
 
@@ -177,7 +184,7 @@ Falhou em qualquer uma: **parar** e reavaliar em 6 meses.
 - Menos de 40% das OS dessas empresas feitas no web.
 - Nenhuma assinatura nova ou mantida que cite o web.
 
-**Portão 2 (paridade).** Só com 20 ou mais pagantes e 30% deles usando o web toda semana, por 8 semanas seguidas.
+**Portão 2 (paridade).** Só com 20 ou mais pagantes e 30% deles usando o web toda semana, por 8 semanas seguidas. Hoje isso equivale a todas as empresas que usam de verdade, então depende de a base crescer.
 
 **Parada imediata, a qualquer momento:**
 

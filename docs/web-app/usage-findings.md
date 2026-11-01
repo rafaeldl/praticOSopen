@@ -2,6 +2,24 @@
 
 Janela: 02/08 a 31/10/2026 (90 dias), salvo indicação. Fontes: Firestore de produção e GA4 (iOS e Android), só leitura. Sem 11 empresas internas ou de demonstração. Só agregados.
 
+**Revisão de 31/10.** A análise independente de uso, com dados até 30/10, usa critérios mais rígidos. Prevalece nos pontos abaixo. O restante do documento mantém os cortes originais.
+
+| Tema | Aqui | Análise de uso | Efeito |
+|---|---|---|---|
+| Empresas reais | 766, sem 11 internas | 737, sem 40 internas | Exclusão por dono, ID e nome pega mais testes |
+| Ativas em 90 dias | 118 com qualquer OS | 103 com trabalho, 75 com OS com conteúdo | 118 inclui OS vazias e de exemplo |
+| Usam de verdade | 17 com 4+ semanas | 20 (faixa de 16 a 20), com 5 recorrentes, 11 regulares e 4 novas | É a base certa para portões |
+| OS em 90 dias | 1.232 | 1.116 | Sem OS internas e de exemplo |
+| Maior empresa | 38% das OS | 42% das OS, 67% do valor digitado | Concentração maior |
+| Equipe | 3 de 118 com 2+ agindo | 7 das 20 com 2+ membros, e 1 de 15 membros fora de `admin` criou OS em 28 dias | Consistentes: equipe cadastrada, mas quase sem papel próprio |
+| Android no GA4 | Sem filtro | 414 de 488 parecem robôs, 48 logados | Totais de usuários do GA4 não servem de base |
+| iOS e ATT | Suspeita de subcontagem | Não há: `analytics_storage` ligado, 86 logados no GA4 e 90 no Auth | Lacuna encerrada |
+| Peso nas visitas | Visitas por tela | Um modelo de iPhone tem 12.545 de 25.929 eventos do iOS, em 3 usuários, provavelmente a maior empresa [I] | A ordem das telas reflete muito essa empresa |
+
+**O que as 20 usam, em 90 dias:** OS com conteúdo 20, cliente novo 20, link 18, pagamento 16, link aberto pelo cliente 16, OS com data 14, foto 8, comentário interno 8, aprovação pelo link 6, formulário 6. Financeiro 0, Asaas 0, bot 0, contratos 1, IA 1. O dado de IA ainda não prova rejeição, porque ela está ligada há 14 dias e parte dos usuários segue em versões sem IA.
+
+**Perfil de mesa nas 20 [I]:** 8 têm até 15% das OS com foto e 50% ou mais com pagamento. 7 têm 2 ou mais membros. A união dá 12 empresas, das quais 9 têm 5 ou mais OS em 30 dias. É inferência a partir do padrão de uso, não prova de computador no balcão. Só 4 das 20 fotografam em 50% ou mais das OS.
+
 Legenda: **[M]** medido, **[E]** estimativa com a conta explicada, **[I]** inferência, **HIPÓTESE** ainda sem dado.
 
 ## Conclusões
@@ -96,7 +114,7 @@ Como validar:
 - **Envio da OS:** o evento `share` só cobre o link (267). As 1.208 aberturas da tela de compartilhar no iOS provavelmente incluem PDF [I]. Android não mostra isso.
 - **Tempo de execução:** não há histórico de situação e `completedAt` é novo (2 OS na janela). `updatedAt` existe em 30% das OS. Não dá para medir duração da OS nem quanto tempo cada tarefa leva hoje.
 - **Leitura:** consulta não deixa rastro no Firestore. Para leitura só há GA4, sem corte por empresa.
-- **iOS e ATT:** os eventos próprios batem com o Firestore em totais, incluindo empresas de teste: OS 1.337 × 1.260, pagamentos 866 × 950, fotos 565 × 528, clientes 661 × 613. A subcontagem esperada não aparece nesses totais.
+- **iOS e ATT (encerrada, ver a revisão no topo):** os eventos próprios batem com o Firestore em totais, incluindo empresas de teste: OS 1.337 × 1.260, pagamentos 866 × 950, fotos 565 × 528, clientes 661 × 613. A subcontagem esperada não aparece nesses totais.
 - **Equipe:** `memberships` mostra 4 empresas com 2 ou mais usuários, `users.companies` mostra 15. Este documento usa `users.companies`.
 - **Autor:** 79 OS sem `createdBy` (6%), em 59 empresas.
 - **Horas:** `createdAt` da OS, fotos e pagamentos usam a hora do aparelho, sem fuso gravado. `completedAt` é UTC.
