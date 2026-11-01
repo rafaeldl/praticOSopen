@@ -121,7 +121,7 @@ describeEmulator('firestore.rules web tenant isolation', () => {
       });
       set('companies/c1/private/membership', { members: { owner1: 'owner' } });
 
-      // Share token of c1 (read is gated by membership of its company).
+      // Share token of c1 (only Cloud Functions read it, not even c1 members).
       set('links/share/tokens/ST_c1', { companyId: 'c1', orderId: 'o1_other' });
 
       await batch.commit();
@@ -183,8 +183,8 @@ describeEmulator('firestore.rules web tenant isolation', () => {
       deny(fs.getDoc(fs.doc(dbFor('c2admin'), 'companies/c1/customers/anything'))));
     it('c2 admin cannot read the c1 share token', () =>
       deny(fs.getDoc(fs.doc(dbFor('c2admin'), 'links/share/tokens/ST_c1'))));
-    it('c1 admin CAN read the c1 share token (control)', () =>
-      allow(fs.getDoc(fs.doc(dbFor('c1admin'), 'links/share/tokens/ST_c1'))));
+    it('c1 admin cannot read the c1 share token either', () =>
+      deny(fs.getDoc(fs.doc(dbFor('c1admin'), 'links/share/tokens/ST_c1'))));
   });
 
   // ── Web client cannot self-escalate role via direct writes ──────────────
