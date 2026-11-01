@@ -179,6 +179,32 @@ String whatsappNumber(String phone, {String? country}) {
   return digits;
 }
 
+/// Key to compare two phones: [whatsappNumber], and in Brazil without the
+/// ninth digit, because WhatsApp still brings old mobiles with 8 digits.
+String phoneMatchKey(String phone, {String? country}) {
+  final number = whatsappNumber(phone, country: country);
+  if (number.length == 13 && number.startsWith('55') && number[4] == '9') {
+    return number.replaceRange(4, 5, '');
+  }
+  return number;
+}
+
+/// First of [customers] with the same [phone], in any format, or null.
+Customer? findCustomerByPhone(
+  List<Customer> customers,
+  String phone, {
+  String? country,
+}) {
+  final key = phoneMatchKey(phone, country: country);
+  if (key.isEmpty) return null;
+  for (final c in customers) {
+    final other = c.phone ?? '';
+    if (other.trim().isEmpty) continue;
+    if (phoneMatchKey(other, country: country) == key) return c;
+  }
+  return null;
+}
+
 /// How many of [orders] include the device [deviceId] (in `devices` or the
 /// legacy single `device`).
 int orderCountForDevice(List<Order> orders, String? deviceId) {

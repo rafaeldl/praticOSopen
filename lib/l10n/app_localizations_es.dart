@@ -4538,6 +4538,38 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customerSaveNeedsName => 'Escribe el nombre para guardar.';
 
   @override
+  String get pickFromContacts => 'Elegir de contactos';
+
+  @override
+  String get contactWhichNumber => '¿Qué número?';
+
+  @override
+  String get customerDuplicateTitle => 'Ya registrado';
+
+  @override
+  String customerDuplicateMessage(String name) {
+    return '$name ya tiene este teléfono.';
+  }
+
+  @override
+  String get customerDuplicateOpen => 'Abrir cliente';
+
+  @override
+  String get customerDuplicateSaveAnyway => 'Guardar de todos modos';
+
+  @override
+  String get contactReadFailed => 'No se pudo leer este contacto.';
+
+  @override
+  String contactFirstOfMany(int count) {
+    return 'Este archivo tiene $count contactos. Abrimos el primero.';
+  }
+
+  @override
+  String get contactCannotAddCustomer =>
+      'Tu perfil no puede registrar clientes.';
+
+  @override
   String get customerMoreDataHint => 'Correo, documento fiscal, dirección';
 
   @override

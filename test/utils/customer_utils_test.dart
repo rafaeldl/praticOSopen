@@ -181,6 +181,51 @@ void main() {
     });
   });
 
+  group('findCustomerByPhone', () {
+    final list = [
+      customer('c1', 'Sem telefone'),
+      customer('c2', 'Vazio', phone: '  '),
+      customer('c3', 'Ana', phone: '(48) 98408-7801'),
+      customer('c4', 'Bia', phone: '+55 48 3222-3344'),
+    ];
+
+    test('the same number in another format is a match', () {
+      expect(findCustomerByPhone(list, '48984087801')?.id, 'c3');
+      expect(findCustomerByPhone(list, '+55 48 98408-7801')?.id, 'c3');
+      expect(findCustomerByPhone(list, '(48) 3222-3344')?.id, 'c4');
+    });
+
+    test('in Brazil the ninth digit is ignored', () {
+      expect(findCustomerByPhone(list, '+55 48 8408-7801')?.id, 'c3');
+      expect(findCustomerByPhone(list, '(48) 8408-7801')?.id, 'c3');
+      expect(
+        findCustomerByPhone([customer('c', 'Old', phone: '554884087801')],
+                '(48) 98408-7801')
+            ?.id,
+        'c',
+      );
+    });
+
+    test('another number or area code is no match', () {
+      expect(findCustomerByPhone(list, '(48) 98408-7802'), isNull);
+      expect(findCustomerByPhone(list, '(47) 98408-7801'), isNull);
+    });
+
+    test('outside Brazil the ninth digit is not touched', () {
+      final us = [customer('c', 'Al', phone: '+1 202 555 0123')];
+      expect(
+        findCustomerByPhone(us, '(202) 555-0123', country: 'US')?.id,
+        'c',
+      );
+      expect(phoneMatchKey('+351 912 345 678'), '351912345678');
+      expect(phoneMatchKey('+55 48 3222-3344'), '554832223344');
+    });
+
+    test('a phone without digits matches nothing', () {
+      expect(findCustomerByPhone(list, 'abc'), isNull);
+    });
+  });
+
   group('currentCustomerId', () {
     CustomerAggr aggr({String? id, String? name, String? phone}) =>
         CustomerAggr()

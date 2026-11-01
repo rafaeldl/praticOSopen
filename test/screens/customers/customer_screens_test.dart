@@ -23,6 +23,7 @@ import 'package:praticos/screens/nfse/nfse_access.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_detail_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
+import 'package:praticos/utils/vcard.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
@@ -677,6 +678,228 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(FormSheet), findsNothing);
       expect(h.result, isNull);
+    });
+
+    group('contacts', () {
+      Finder link() => find.byKey(const Key('customerPickContact'));
+
+      Finder field(String text) => find.widgetWithText(
+            CupertinoTextField,
+            text,
+            skipOffstage: false,
+          );
+
+      testWidgets('new customer fills name, phone and e-mail, without saving', (
+        tester,
+      ) async {
+        var saves = 0;
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async => saves++,
+            pickContact: () async => const ContactCard(
+              name: 'Ana Ribeiro',
+              phones: ['+55 48 98408-7801'],
+              email: 'ana@example.com',
+            ),
+          ),
+        );
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+
+        expect(field('Ana Ribeiro'), findsOneWidget);
+        expect(field('(48) 98408-7801'), findsOneWidget);
+        expect(field('ana@example.com'), findsOneWidget);
+        expect(find.text('E-mail'), findsOneWidget);
+        expect(saves, 0);
+        expect(find.byType(FormSheet), findsOneWidget);
+      });
+
+      testWidgets('several numbers ask which one', (tester) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async {},
+            pickContact: () async => const ContactCard(
+              name: 'Bia',
+              phones: ['(48) 98408-7801', '(48) 3222-3344'],
+            ),
+          ),
+        );
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+        expect(find.text('Qual número?'), findsWidgets);
+        await tester.tap(find.text('(48) 3222-3344'));
+        await tester.pumpAndSettle();
+
+        expect(field('Bia'), findsOneWidget);
+        expect(field('(48) 3222-3344'), findsOneWidget);
+      });
+
+      testWidgets('without a number fills only the name', (tester) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async {},
+            pickContact: () async => const ContactCard(name: 'Carla'),
+          ),
+        );
+        await tester.enterText(find.byType(CupertinoTextField).at(1), '48');
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+
+        expect(field('Carla'), findsOneWidget);
+        expect(field('48'), findsOneWidget);
+      });
+
+      testWidgets('closing the picker changes nothing', (tester) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async {},
+            pickContact: () async => null,
+          ),
+        );
+        await tester.enterText(find.byType(CupertinoTextField).first, 'Dani');
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+
+        expect(field('Dani'), findsOneWidget);
+      });
+
+      testWidgets('editing a customer has no link', (tester) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            customer: customer('c1', 'Ana'),
+            onSave: (_) async {},
+            pickContact: () async => null,
+          ),
+        );
+        expect(link(), findsNothing);
+      });
+    });
+
+    group('repeated phone', () {
+      final existing = customer('c1', 'Ana', phone: '(48) 98408-7801');
+
+      Future<Harness> pumpNew(
+        WidgetTester tester, {
+        Customer? draft,
+        required Future<void> Function(Customer) onSave,
+        Future<List<Customer>> Function()? load,
+      }) => pumpForm(
+        tester,
+        CustomerFormScreen(
+          asSheet: true,
+          customer: draft ?? (Customer()..name = 'Ana R.'),
+          onSave: onSave,
+          loadCustomers: load ?? () async => [existing],
+        ),
+      );
+
+      testWidgets('warns, and "Abrir cliente" pops the existing one', (
+        tester,
+      ) async {
+        var saves = 0;
+        final h = await pumpNew(
+          tester,
+          draft: Customer()
+            ..name = 'Ana R.'
+            ..phone = '+55 48 8408-7801',
+          onSave: (_) async => saves++,
+        );
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(find.text('Já cadastrado'), findsOneWidget);
+        expect(find.text('Ana já está com este telefone.'), findsOneWidget);
+        expect(saves, 0);
+
+        await tester.tap(find.text('Abrir cliente'));
+        await tester.pumpAndSettle();
+        expect(saves, 0);
+        expect(h.result, same(existing));
+      });
+
+      testWidgets('"Salvar mesmo assim" saves the new customer', (
+        tester,
+      ) async {
+        Customer? saved;
+        final h = await pumpNew(
+          tester,
+          draft: Customer()
+            ..name = 'Ana R.'
+            ..phone = '48984087801',
+          onSave: (c) async => saved = c,
+        );
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Salvar mesmo assim'));
+        await tester.pumpAndSettle();
+        expect(saved?.name, 'Ana R.');
+        expect((h.result as Customer).name, 'Ana R.');
+      });
+
+      testWidgets('no warning without a phone or with another number', (
+        tester,
+      ) async {
+        var saves = 0;
+        await pumpNew(tester, onSave: (_) async => saves++);
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(find.text('Já cadastrado'), findsNothing);
+        expect(saves, 1);
+
+        await pumpNew(
+          tester,
+          draft: Customer()
+            ..name = 'Outra'
+            ..phone = '48999990000',
+          onSave: (_) async => saves++,
+        );
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(find.text('Já cadastrado'), findsNothing);
+        expect(saves, 2);
+      });
+
+      testWidgets('editing a customer does not warn', (tester) async {
+        var saves = 0;
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            customer: customer('c2', 'Ana', phone: '(48) 98408-7801'),
+            onSave: (_) async => saves++,
+            loadCustomers: () async => [existing],
+          ),
+        );
+        await tester.tap(find.text('Salvar'));
+        await tester.pumpAndSettle();
+        expect(find.text('Já cadastrado'), findsNothing);
+        expect(saves, 1);
+      });
+
+      testWidgets('a list that fails to load does not stop the save', (
+        tester,
+      ) async {
+        var saves = 0;
+        await pumpNew(
+          tester,
+          draft: Customer()
+            ..name = 'Ana R.'
+            ..phone = '48984087801',
+          onSave: (_) async => saves++,
+          load: () async => throw StateError('offline'),
+        );
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+        expect(find.text('Já cadastrado'), findsNothing);
+        expect(saves, 1);
+      });
     });
 
     testWidgets('✓ saves and pops the new customer', (tester) async {
