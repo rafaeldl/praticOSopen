@@ -69,6 +69,7 @@ export function callRoute(
     const res: any = {
       statusCode: 200,
       headersSent: false,
+      locals: {},
       status(code: number) {
         this.statusCode = code;
         return this;

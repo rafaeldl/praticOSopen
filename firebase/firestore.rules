@@ -92,6 +92,18 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] in ['owner', 'admin', 'supervisor', 'consultant', 'technician'];
     }
 
+    // Criação de OS: número vem do servidor, a empresa é a do caminho, e quem
+    // só vê as próprias OS cria em nome próprio. Admin e supervisor podem gerar
+    // OS de contrato, que mantém o autor do modelo.
+    function isValidOrderCreate(companyId) {
+      let data = request.resource.data;
+      return data.get('number', null) == null
+        && data.get(['company', 'id'], companyId) == companyId
+        && (isCompanyAdmin(companyId)
+          || hasRole(companyId, 'supervisor')
+          || data.get(['createdBy', 'id'], '') == request.auth.uid);
+    }
+
     // Verifica se o usuário pode executar OS (todos os perfis)
     function canExecuteOrders(companyId) {
       return belongsToCompany(companyId);
@@ -232,16 +244,10 @@ service cloud.firestore {
     // Share Tokens - magic links para clientes acompanharem OS
     // Path: /links/share/tokens/{tokenId}
     // Acesso principal é via Cloud Functions (Admin SDK)
-    // Usuários autenticados podem ler tokens das suas empresas
+    // O app e o web não leem esta coleção direto
     match /links/share/tokens/{tokenId} {
-      // Leitura: membro da empresa pode ver tokens da empresa
-      allow read: if request.auth != null
-        && resource.data.companyId != null
-        && belongsToCompany(resource.data.companyId);
-
-      // Escrita: apenas via Cloud Functions (Admin SDK)
-      // Usuários não podem criar/editar tokens diretamente
-      allow write: if false;
+      // Leitura e escrita: apenas via Cloud Functions (Admin SDK)
+      allow read, write: if false;
     }
 
     // Invite Tokens - convites unificados para colaboradores
@@ -413,7 +419,7 @@ service cloud.firestore {
         );
 
         // Criação: admin, supervisor, consultant
-        allow create: if canManageOrders(companyId);
+        allow create: if canManageOrders(companyId) && isValidOrderCreate(companyId);
 
         // Atualização: depende do perfil e do tipo de alteração
         allow update: if belongsToCompany(companyId) && (

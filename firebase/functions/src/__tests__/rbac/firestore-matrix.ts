@@ -476,7 +476,7 @@ export const CASES: RulesCase[] = [
   {
     id: 'shareTokens.read', area: 'Link do cliente', title: 'ler token de link da empresa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'links/share/tokens/ST_c1')),
-    allow: MEMBERS,
+    allow: [],
   },
   {
     id: 'shareTokens.write', area: 'Link do cliente', title: 'criar link de cliente direto',

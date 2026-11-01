@@ -678,6 +678,47 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('links/share/tokens/{token}', () => {
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.setDoc(fs.doc(ctx.firestore(), 'links/share/tokens/ST_1'), { companyId: 'c1', orderId: 'o1' });
+      });
+    });
+
+    it('stays server-only, even for the company admin', async () => {
+      await rut.assertFails(fs.getDoc(fs.doc(asUser('tech1', { c1: 'technician' }), 'links/share/tokens/ST_1')));
+      await rut.assertFails(fs.getDoc(fs.doc(asUser('admin1', { c1: 'admin' }), 'links/share/tokens/ST_1')));
+    });
+  });
+
+  describe('companies/{cid}/orders create', () => {
+    const create = (uid: string, role: string, data: Record<string, unknown>) =>
+      fs.setDoc(fs.doc(asUser(uid, { c1: role }), 'companies/c1/orders/new1'), data);
+
+    it('accepts the order the app creates, with number still null', async () => {
+      await rut.assertSucceeds(create('tech1', 'technician', {
+        number: null, company: { id: 'c1' }, createdBy: { id: 'tech1' },
+      }));
+    });
+
+    it('leaves the number to the server', async () => {
+      await rut.assertFails(create('admin1', 'admin', { number: 1, createdBy: { id: 'admin1' } }));
+    });
+
+    it('keeps the order in the company of its path', async () => {
+      await rut.assertFails(create('admin1', 'admin', { company: { id: 'c2' }, createdBy: { id: 'admin1' } }));
+    });
+
+    it.each(['technician', 'consultant'])('%s creates only in their own name', async (role) => {
+      await rut.assertFails(create('tech1', role, { createdBy: { id: 'admin1' } }));
+      await rut.assertFails(create('tech1', role, {}));
+    });
+
+    it.each(['admin', 'supervisor'])('%s can keep the author of a contract order', async (role) => {
+      await rut.assertSucceeds(create('user9', role, { createdBy: { id: 'admin1' } }));
+    });
+  });
+
   describe('links/invites/tokens/{token}', () => {
     const invite = (token: string) => ({
       token,
