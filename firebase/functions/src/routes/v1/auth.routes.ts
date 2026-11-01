@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../../services/firestore.service';
 import { ApiKeyData, toDate } from '../../models/types';
+import { sameSecret } from '../../middleware/auth.middleware';
 import { v4 as uuidv4 } from 'uuid';
 
 const router: Router = Router();
@@ -51,7 +52,7 @@ router.post('/token', async (req: Request, res: Response) => {
     const keyData = keySnapshot.docs[0].data() as ApiKeyData;
 
     // Verify secret
-    if (keyData.secret !== apiSecret) {
+    if (!keyData.secret || !sameSecret(String(apiSecret), keyData.secret)) {
       res.status(401).json({
         success: false,
         error: {

@@ -173,6 +173,12 @@ export async function removeTeamMember(
   await afterCommit('removeTeamMember', companyId, targetUserId, async () => {
     if (result.hasUser) await refreshRolesClaim(targetUserId, result.companies);
   });
+  // The old ID token keeps the claim for up to 1h. Revoking signs the user out
+  // everywhere, so it only happens when no other company needs that session.
+  if (result.hasUser && result.companies.length === 0) {
+    await afterCommit('removeTeamMember', companyId, targetUserId, () =>
+      auth.revokeRefreshTokens(targetUserId));
+  }
   await afterCommit('removeTeamMember', companyId, targetUserId, () =>
     unlinkUserChannels(targetUserId, companyId));
 }

@@ -10,12 +10,14 @@ import request from 'supertest';
 import express, { Express } from 'express';
 
 const mockSetClaims = jest.fn(async (_uid: string, _claims: unknown) => undefined);
+const mockRevokeTokens = jest.fn(async (_uid: string) => undefined);
 
 jest.mock('../services/firestore.service', () => ({
   ...jest.requireActual('./helpers/fake-firestore').firestoreServiceMock,
   auth: {
     verifyIdToken: async (token: string) => ({ uid: token }),
     setCustomUserClaims: (uid: string, claims: unknown) => mockSetClaims(uid, claims),
+    revokeRefreshTokens: (uid: string) => mockRevokeTokens(uid),
   },
 }));
 
@@ -95,6 +97,7 @@ afterAll(() => logSpies.forEach((s) => s.mockRestore()));
 beforeEach(() => {
   seedTenants();
   mockSetClaims.mockClear();
+  mockRevokeTokens.mockClear();
 });
 
 describe('team API: role × action', () => {
@@ -239,6 +242,18 @@ describe('team API: other companies', () => {
     expect((await patch(app, 'admin2', TARGET, 'manager', 'c2')).status).toBe(200);
     expect(roleIn('companies/c1/private/membership', TARGET)).toBe('technician');
     expect(mockSetClaims).toHaveBeenCalledWith(TARGET, { roles: { c1: 'technician', c2: 'manager' } });
+  });
+
+  it('signs out a member left without any company', async () => {
+    const res = await del(app, UID.admin, UID.technician);
+    expect(res.status).toBe(200);
+    expect(mockRevokeTokens).toHaveBeenCalledWith(UID.technician);
+  });
+
+  it('keeps the session of a member who still has another company', async () => {
+    const res = await del(app, UID.admin, TARGET);
+    expect(res.status).toBe(200);
+    expect(mockRevokeTokens).not.toHaveBeenCalled();
   });
 
   it('unknown member → 404', async () => {

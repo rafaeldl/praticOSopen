@@ -278,6 +278,16 @@ describeEmulator('firestore.rules', () => {
       }
     });
 
+    it('nobody replaces the owner, but the owner name can change', async () => {
+      for (const db of [admin(), ownerClaim(), ownerWithoutClaims()]) {
+        await rut.assertFails(fs.updateDoc(company(db), { owner: { id: 'attacker', name: 'Attacker' } }));
+        await rut.assertFails(fs.updateDoc(company(db), { owner: 'attacker' }));
+        await rut.assertFails(fs.updateDoc(company(db), { owner: fs.deleteField() }));
+      }
+      await rut.assertSucceeds(fs.updateDoc(company(admin()), { owner: { id: 'admin1', name: 'Renamed' } }));
+      await rut.assertSucceeds(fs.updateDoc(company(admin()), { owner: 'admin1' }));
+    });
+
     it('owner/admin cannot replace or remove the subscription', async () => {
       const db = admin();
       await rut.assertFails(fs.setDoc(company(db), { subscription: { plan: 'business', status: 'active' } }, { merge: true }));

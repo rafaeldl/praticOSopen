@@ -3,6 +3,7 @@
  * Handles login tokens for WhatsApp users who want to access the app
  */
 
+import { randomInt } from 'crypto';
 import { db } from './firestore.service';
 
 // Token expiration time (15 minutes for security)
@@ -35,13 +36,13 @@ export interface ValidateTokenResult {
 
 /**
  * Generate a unique login token
- * Format: LT_ + 8 uppercase alphanumeric characters
+ * Format: LT_ + 26 uppercase alphanumeric characters (over 128 bits)
  */
 export function generateToken(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = 'LT_';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < 26; i++) {
+    result += chars.charAt(randomInt(chars.length));
   }
   return result;
 }
