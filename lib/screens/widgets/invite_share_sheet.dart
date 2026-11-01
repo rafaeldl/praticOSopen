@@ -9,6 +9,7 @@ import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -191,8 +192,8 @@ class InviteShareSheet extends StatelessWidget {
 
     final String whatsappUrl;
     if (whatsappPhone != null && whatsappPhone!.isNotEmpty) {
-      final cleanNumber = whatsappPhone!.replaceAll(RegExp(r'\D'), '');
-      whatsappUrl = 'https://wa.me/$cleanNumber?text=$message';
+      whatsappUrl =
+          'https://wa.me/${whatsappNumber(whatsappPhone!)}?text=$message';
     } else {
       whatsappUrl = 'https://wa.me/?text=$message';
     }

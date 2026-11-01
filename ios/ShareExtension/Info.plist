@@ -35,6 +35,7 @@
         $attachment,
         ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.image"
         || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "com.adobe.pdf"
+        || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.vcard"
     ).@count &gt; 0
 ).@count &gt; 0</string>
 			<key>PHSupportedMediaTypes</key>

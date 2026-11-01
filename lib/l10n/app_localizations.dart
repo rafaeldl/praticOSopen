@@ -7510,6 +7510,60 @@ abstract class AppLocalizations {
   /// **'Escreva o nome para salvar.'**
   String get customerSaveNeedsName;
 
+  /// No description provided for @pickFromContacts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher dos contatos'**
+  String get pickFromContacts;
+
+  /// No description provided for @contactWhichNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual número?'**
+  String get contactWhichNumber;
+
+  /// No description provided for @customerDuplicateTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já cadastrado'**
+  String get customerDuplicateTitle;
+
+  /// No description provided for @customerDuplicateMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} já está com este telefone.'**
+  String customerDuplicateMessage(String name);
+
+  /// No description provided for @customerDuplicateOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir cliente'**
+  String get customerDuplicateOpen;
+
+  /// No description provided for @customerDuplicateSaveAnyway.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar mesmo assim'**
+  String get customerDuplicateSaveAnyway;
+
+  /// No description provided for @contactReadFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para ler este contato.'**
+  String get contactReadFailed;
+
+  /// No description provided for @contactFirstOfMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este arquivo tem {count} contatos. Abrimos o primeiro.'**
+  String contactFirstOfMany(int count);
+
+  /// No description provided for @contactCannotAddCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu perfil não pode cadastrar clientes.'**
+  String get contactCannotAddCustomer;
+
   /// No description provided for @customerMoreDataHint.
   ///
   /// In pt, this message translates to:
