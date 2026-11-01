@@ -753,7 +753,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/WEB_APP_DESIGN.md` - Padrão do app web (proposta): tokens, mestre-detalhe, teclado
-- `docs/web-app/discovery-report.md` - Descoberta do app web: uso real, arquitetura proposta, matriz de paridade e roteiro
+- `docs/web-app/discovery-report.md` - Descoberta do app web: uso real, arquitetura aprovada, matriz de paridade e roteiro
 - `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
 - `docs/formularios_dinamicos.md` - Especificação de checklists/vistorias

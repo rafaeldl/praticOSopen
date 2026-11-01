@@ -7,7 +7,7 @@ Data: 2026-10-31. Objetivo: tentar provar que o web não compensa. Não é acons
 **Vale só em parte, e não agora.** Paridade total não vale com a base de hoje. O custo de infraestrutura não é o problema. O problema é falta de demanda medida, tempo do Rafael e risco na revisão do iOS.
 
 - Não começar antes do corte da cortesia (07/12) e da aprovação do iOS novo.
-- Primeiro, testar interesse sem construir o web (Portão 0), em conversa direta junto com a oferta de 07/12.
+- Primeiro, testar interesse sem construir o web (Portão 0), em contato direto e antes da oferta de 07/12.
 - Revisão de 31/10: 20 empresas usam de verdade, com 1 assinatura de loja ativa. O veredito fica mais forte. As 3 telas pedem 4,5 assinaturas Pro para empatar, ou 22% da base real. A paridade em Nuxt pede 12, ou 60%.
 - Se passar, fazer só 3 telas. Paridade só com o Portão 2.
 
@@ -152,7 +152,7 @@ O web muda o risco principal: o celular é pessoal, o computador da oficina é c
 
 | Alternativa | Esforço | Resolve | Veredito |
 |---|---|---|---|
-| Portão 0: conversa com as 12 empresas-alvo, junto com a oferta de 07/12 | Sem PR, cerca de 2 h do Rafael | Mede a demanda | **Fazer primeiro** |
+| Portão 0: pergunta às 12 empresas-alvo, antes da oferta de 07/12 | Sem PR, cerca de 1h05 do Rafael, ou 5h30 em conversas | Mede a demanda | **Fazer primeiro** |
 | Exportar para planilha | 1 a 2 PRs | Contador, relatórios | **Fazer se pedirem** |
 | Reduzir leituras no app | 1 a 3 PRs | Custo e velocidade em empresas grandes | **Investigar** |
 | 3 telas no Nuxt que já existe (`firebase/web`, 6,6 mil linhas): lista de OS, nova OS, clientes | 25 PRs | Trabalho de mesa | **Se passar no Portão 0** |
@@ -166,7 +166,7 @@ O web muda o risco principal: o celular é pessoal, o computador da oficina é c
 
 **Quem:** as 12 das 20 empresas com perfil de mesa. São as que têm até 15% das OS com foto e 50% ou mais com pagamento, ou 2 ou mais membros. Lista por ID só no diretório privado.
 
-**Como:** o Rafael fala com elas na mesma conversa da oferta de 07/12, sem mostrar tela e sem prometer data. Perguntas: quem lança a OS, em que aparelho, se há computador no balcão, e o que faria no computador se pudesse. Só no fim: "Usaria toda semana?".
+**Como:** proposta em [`demand-test.md`](demand-test.md): uma mensagem curta com uma pergunta, antes da oferta de 07/12, sem mostrar tela e sem prometer data. Silêncio conta como não.
 
 Seguir só com **as três** condições:
 

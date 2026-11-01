@@ -1,10 +1,10 @@
 # ADR-001: Arquitetura do app web
 
-**Status:** proposta, aguardando aprovação do Rafael.
+**Status:** aprovado pelo Rafael em 2026-10-31. A construção segue bloqueada até passar o Portão 0.
 **Data:** 2026-10-31
 **Evidência:** [`architecture-benchmarks.md`](architecture-benchmarks.md), [`business-rules-map.md`](business-rules-map.md), [`security-summary.md`](security-summary.md), [`business-red-team.md`](business-red-team.md).
 
-## Decisão proposta
+## Decisão
 
 Quando o web for construído, usar **Vue 3 + Vite, como SPA estática em `/app` no Firebase Hosting**, em pasta própria (`firebase/webapp/`). Nuxt continua servindo `/q`, `/pro` e `/admin`.
 

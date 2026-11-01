@@ -10,13 +10,18 @@ Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados
 |---|---|
 | Dá para construir? | Sim. Vue + Vite no Hosting cumpre INP, busca e acessibilidade no protótipo. Ver [ADR](ADR-001-web-architecture.md) |
 | Vale paridade total agora? | Não. Só 20 empresas usam de verdade (faixa de 16 a 20), e há 1 assinatura de loja ativa. Nenhum pedido registrado |
-| O que vem primeiro? | A primeira OS completa e a oferta para as 20 antes de 07/12. O teste de interesse vai junto, em conversa direta e sem código web |
+| O que vem primeiro? | A primeira OS completa e a oferta para as 20 antes de 07/12. O teste de interesse vem antes da oferta, separado e sem código web. Ver [`demand-test.md`](demand-test.md) |
 | Qual o maior risco? | Papéis dentro da mesma empresa gravam o que a tela proíbe. Independe do web. A exposição hoje é pequena: 11 membros reais têm papel restrito, e Asaas e nota fiscal não têm uso real |
 
 ## Decisões para o Rafael
 
-1. **Arquitetura:** aprovar o [ADR-001](ADR-001-web-architecture.md).
-2. **Ordem:** seguir o Portão 0 antes de construir, ou ir direto à primeira fatia.
+Aprovadas em 2026-10-31:
+
+- **Arquitetura:** [ADR-001](ADR-001-web-architecture.md).
+- **Ordem e Portão 0:** validar a demanda antes de construir. A forma leve, com uma pergunta por mensagem, é proposta em [`demand-test.md`](demand-test.md).
+
+Pendentes:
+
 3. **Segurança:** autorizar a correção das falhas dentro da empresa, com plano para não quebrar versões antigas do app.
 4. **Meta de 50%:** manter só para sequência e lote, ou tirar decisões do fluxo.
 5. **Recepção:** não existe esse papel. Consultor só vê as próprias OS, e supervisor não vê preço. Definir se vira papel novo.
@@ -39,7 +44,7 @@ Detalhes em [`usage-findings.md`](usage-findings.md).
 
 | O que mudou | Antes | Agora | Por quê |
 |---|---|---|---|
-| Teste de demanda | Lista de interesse no app, base de 21 empresas, início ao chegar em 70% de instalação | Conversa direta com as 12 empresas com mais perfil de mesa, junto com a oferta de 07/12. Sem PR e sem esperar versão | A base de 21 era de 04/10. Cerca de metade dos pares usuário e versão logados ainda está antes da 1.63 |
+| Teste de demanda | Lista de interesse no app, base de 21 empresas, início ao chegar em 70% de instalação | Contato direto com as 12 empresas com mais perfil de mesa, antes da oferta de 07/12. Sem PR e sem esperar versão. Forma em [`demand-test.md`](demand-test.md) | A base de 21 era de 04/10. Cerca de metade dos pares usuário e versão logados ainda está antes da 1.63 |
 | Portão 0 | 8 de 21 | 6 de 12, mais 1 das 5 maiores e 5 pagantes | Base real, e 5 cobre o empate das 3 telas |
 | Prioridade do web | Nada antes do teste | Primeira OS completa e oferta de 07/12 vêm antes | 74% das contas não chegam à primeira OS com conteúdo, e 7 das 20 passam do limite Free quando a cortesia acabar |
 | Fase 2 | Sem data da OS | Com data da OS e comentário interno | 14 das 20 agendam, e 8 das 20 comentam |
@@ -92,7 +97,7 @@ Cada fase só começa com a anterior aprovada. A matriz é o placar de todas.
 
 | Fase | Entrega | Portão de saída |
 |---|---|---|
-| **0. Sem código web** | Conversa com as 12 empresas-alvo junto com a oferta de 07/12, correções de permissão e do total, investigar as leituras altas | **Portão 0:** 6 ou mais das 12 dizem por escrito que usariam no computador, 1 ou mais das 5 maiores está entre elas, 5 ou mais pagantes depois de 07/12. Prazo: 15/01/2027. Critério em [`business-red-team.md`](business-red-team.md) |
+| **0. Sem código web** | Pergunta às 12 empresas-alvo antes da oferta de 07/12 ([`demand-test.md`](demand-test.md)), correções de permissão e do total, investigar as leituras altas | **Portão 0:** 6 ou mais das 12 dizem por escrito que usariam no computador, 1 ou mais das 5 maiores está entre elas, 5 ou mais pagantes depois de 07/12. Prazo: 15/01/2027. Critério em [`business-red-team.md`](business-red-team.md) |
 | **1. Fatia** | Só pt-BR, se aprovado. Tokens unificados no `firebase/web`, login, escolha de empresa, lista e detalhe só leitura, atrás de flag | Piloto com a maior empresa. Metas de performance e axe no CI |
 | **2. Núcleo** | Nova OS, itens, cliente, veículo, data da OS, comentário interno, receber e enviar ao cliente. Depende dos itens 1 a 4 do ADR | **Portão 1, 60 dias:** 6 empresas por semana (mínimo 3), 40% das OS delas no web |
 | **3. Velocidade** | Ações em lote, receber vários, paleta, busca global, importação, repetir OS | 10 tarefas com cronômetro contra o app |
@@ -117,7 +122,8 @@ Junto com a Fase 1 entram os processos que ainda são `risk:high`: casos de cont
 
 | Arquivo | Conteúdo |
 |---|---|
-| [`ADR-001-web-architecture.md`](ADR-001-web-architecture.md) | Decisão proposta |
+| [`ADR-001-web-architecture.md`](ADR-001-web-architecture.md) | Decisão aprovada |
+| [`demand-test.md`](demand-test.md) | Teste de demanda: critério, mensagem e contagem |
 | [`../WEB_APP_DESIGN.md`](../WEB_APP_DESIGN.md) | Padrão do app web |
 | [`usage-findings.md`](usage-findings.md) | Uso real, agregado |
 | [`parity-matrix.yaml`](parity-matrix.yaml), [`parity-summary.md`](parity-summary.md) | Matriz de paridade |
