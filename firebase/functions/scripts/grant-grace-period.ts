@@ -1,7 +1,9 @@
 /**
  * Launch grace period: 60 days of Pro (source 'grace') for every company that
  * does not have an active paid store subscription. Keeps `usage`; companies
- * already in grace are skipped, so re-running never extends it.
+ * already in grace are skipped, so re-running never extends it. --until moves
+ * the end of the courtesy instead: only companies in a running grace period
+ * change, and nothing else is written (the end-of-courtesy notices start over).
  * Spec: docs/superpowers/specs/2026-10-07-paid-plans-iap-design.md §5.3.
  * Prints aggregate counts only (no company names or ids: the repo is public).
  *
@@ -13,19 +15,23 @@
  * --project is required:
  *   npm run subscriptions:grace -- --project=praticos
  *   npm run subscriptions:grace -- --project=praticos --apply [--days=60]
+ *   npm run subscriptions:grace -- --project=praticos --apply --until=2026-12-28
  */
 
 import * as admin from 'firebase-admin';
-import { buildGraceSubscription } from '../src/services/subscription-plans';
+import { buildGraceSubscription, isGraceActive } from '../src/services/subscription-plans';
 import type { Subscription } from '../src/models/types';
 
 export interface Args {
   apply: boolean;
   days: number;
   project?: string;
+  /** New end of the courtesy (end of this day in Brazil, 03:00 UTC the next day). */
+  until?: Date;
 }
 
-export const USAGE = 'Usage: grant-grace-period.ts [--dry-run | --apply] [--days=60] [--project=<projectId>]';
+export const USAGE =
+  'Usage: grant-grace-period.ts [--dry-run | --apply] [--days=60 | --until=YYYY-MM-DD] [--project=<projectId>]';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const BATCH_LIMIT = 400;
@@ -35,6 +41,7 @@ export function parseArgs(argv: string[]): Args {
   let dryRun = false;
   let days = 60;
   let project: string | undefined;
+  let until: Date | undefined;
   for (const arg of argv) {
     if (arg === '--apply') {
       apply = true;
@@ -46,6 +53,8 @@ export function parseArgs(argv: string[]): Args {
         throw new Error('--days must be an integer between 1 and 365');
       }
       days = value;
+    } else if (arg.startsWith('--until=')) {
+      until = parseUntil(arg.slice('--until='.length));
     } else if (arg.startsWith('--project=')) {
       project = arg.slice('--project='.length);
       if (!project) throw new Error('--project requires a value');
@@ -54,7 +63,19 @@ export function parseArgs(argv: string[]): Args {
     }
   }
   if (apply && dryRun) throw new Error('--apply and --dry-run are mutually exclusive');
-  return { apply, days, project };
+  if (until && argv.some((arg) => arg.startsWith('--days='))) {
+    throw new Error('--days and --until are mutually exclusive');
+  }
+  return { apply, days, project, until };
+}
+
+function parseUntil(value: string): Date {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00.000Z`) : new Date(NaN);
+  // A rollover like 2026-02-31 comes back as another day.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    throw new Error('--until must be a date like 2026-12-28');
+  }
+  return new Date(date.getTime() + DAY_MS + 3 * 60 * 60 * 1000);
 }
 
 export interface Target {
@@ -117,6 +138,17 @@ export function planGrace(existing: unknown, expiresAt: Date, now: Date): GraceP
   };
 }
 
+/** `--until`: moves a running courtesy; never touches anything else. */
+export function planExtension(existing: unknown, until: Date, now: Date): GracePlan {
+  const current = isPlainObject(existing) ? (existing as unknown as Subscription) : undefined;
+  if (!isGraceActive(current, now)) return { action: 'skip_paid' };
+  const nowIso = now.toISOString();
+  return {
+    action: 'grant',
+    update: { 'subscription.expiresAt': until.toISOString(), 'subscription.updatedAt': nowIso, updatedAt: nowIso },
+  };
+}
+
 export interface GraceSummary {
   total: number;
   grant: number;
@@ -145,10 +177,14 @@ async function main(): Promise<void> {
   }
 
   const now = new Date();
-  const expiresAt = graceExpiry(now, args.days);
+  const expiresAt = args.until ?? graceExpiry(now, args.days);
+  if (expiresAt.getTime() <= now.getTime()) {
+    console.error('--until must be in the future');
+    process.exit(1);
+  }
   console.log(`Target: ${target.projectId} (${target.emulator ? 'EMULATOR' : 'PRODUCTION'})`);
   console.log(
-    `Grace:  Pro until ${expiresAt.toISOString()} (${args.days} days)` +
+    `Grace:  Pro until ${expiresAt.toISOString()}${args.until ? ' (moving running courtesies)' : ` (${args.days} days)`}` +
       (target.write ? '' : ' [dry-run, nothing will be written]'),
   );
 
@@ -157,13 +193,15 @@ async function main(): Promise<void> {
   const snapshot = await db.collection('companies').get();
   const plans = snapshot.docs.map((doc) => ({
     ref: doc.ref,
-    plan: planGrace(doc.get('subscription'), expiresAt, now),
+    plan: args.until
+      ? planExtension(doc.get('subscription'), args.until, now)
+      : planGrace(doc.get('subscription'), expiresAt, now),
   }));
 
   const summary = summarize(plans.map((p) => p.plan));
   console.log(`Companies:                 ${summary.total}`);
-  console.log(`Grant grace:               ${summary.grant}`);
-  console.log(`Skip (paid subscription):  ${summary.skipPaid}`);
+  console.log(`${args.until ? 'Move courtesy:           ' : 'Grant grace:             '}  ${summary.grant}`);
+  console.log(`${args.until ? 'Skip (not in courtesy):  ' : 'Skip (paid subscription):'}  ${summary.skipPaid}`);
   console.log(`Skip (already in grace):   ${summary.skipGrace}`);
 
   if (!target.write) {

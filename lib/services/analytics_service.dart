@@ -1,6 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 /// Centralized analytics service for Firebase Analytics.
 ///
@@ -297,5 +299,29 @@ class AnalyticsService {
         'trigger': trigger,
       },
     ));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // P5 — AI assistant adoption
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Receives the assistant events in tests instead of Firebase. Reset to
+  /// null afterwards.
+  @visibleForTesting
+  static void Function(String name, Map<String, Object> parameters)?
+      debugAiEventSink;
+
+  /// Logs one step of the assistant funnel (docs/FIREBASE_ANALYTICS.md).
+  /// Does nothing before Firebase starts.
+  static void logAiEvent(
+    String name, [
+    Map<String, Object> parameters = const {},
+  ]) {
+    final sink = debugAiEventSink;
+    if (sink != null) return sink(name, parameters);
+    if (Firebase.apps.isEmpty) return;
+    _instance._safe(
+      () => _instance._analytics.logEvent(name: name, parameters: parameters),
+    );
   }
 }

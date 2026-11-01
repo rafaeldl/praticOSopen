@@ -122,6 +122,11 @@ class AuthorizationService {
   /// Verifica se o usuário atual é técnico.
   bool get isTechnician => normalizedRole == RolesType.technician;
 
+  /// Creates orders: the "+" beside the tabs. Technicians work on the orders
+  /// they are given (prototype "Início · técnico": no "+").
+  bool get canCreateOrder =>
+      !isTechnician && hasPermission(PermissionType.createOrder);
+
   // ═══════════════════════════════════════════════════════════════════
   // PERMISSION CHECKS
   // ═══════════════════════════════════════════════════════════════════

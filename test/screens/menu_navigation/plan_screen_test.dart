@@ -4,6 +4,7 @@ import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/screens/menu_navigation/more/plan_screen.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ Future<void> _pump(
   Subscription subscription, {
   VoidCallback? onOpenTeam,
   VoidCallback? onOpenChecklists,
+  AiStatus ai = AiStatus.off,
 }) async {
   final store = SubscriptionStore()..latest = subscription;
   await tester.pumpWidget(
@@ -37,6 +39,7 @@ Future<void> _pump(
         home: PlanScreen(
           onOpenTeam: onOpenTeam,
           onOpenChecklists: onOpenChecklists,
+          loadAiStatus: () async => ai,
         ),
       ),
     ),
@@ -168,5 +171,39 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text('Oficina do Zé'), findsOneWidget);
+  });
+
+  group('assistant', () {
+    testWidgets('shows the month use first when it is on', (tester) async {
+      await _pump(
+        tester,
+        _starter(),
+        ai: const AiStatus(enabled: true, used: 87, limit: 150),
+      );
+      expect(find.byKey(const ValueKey('plan_usage_ai')), findsOneWidget);
+      expect(find.text('Assistente este mês'), findsOneWidget);
+      expect(find.text('87 de 150'), findsOneWidget);
+    });
+
+    testWidgets('hides the row when it is off', (tester) async {
+      await _pump(tester, _starter());
+      expect(find.byKey(const ValueKey('plan_usage_ai')), findsNothing);
+    });
+
+    testWidgets('at the limit it says so and offers the plans', (tester) async {
+      await _pump(
+        tester,
+        _starter(),
+        ai: const AiStatus(enabled: true, used: 150, limit: 150),
+      );
+      expect(find.byKey(const ValueKey('plan_limit_block')), findsOneWidget);
+      expect(
+        find.text(
+          'Você usou 150 de 150 pedidos do assistente neste mês. '
+          'Para continuar agora, veja os planos.',
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

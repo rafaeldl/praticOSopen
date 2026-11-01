@@ -20,6 +20,12 @@ interface NotificationRecipient {
   fcmTokens?: string[];
 }
 
+/** What reached the recipients: in-app rows saved, and whether FCM itself failed. */
+interface NotificationDelivery {
+  saved: number;
+  pushFailed: boolean;
+}
+
 interface NotificationPayload {
   title: string;
   body: string;
@@ -104,7 +110,8 @@ async function sendNotification(
   recipients: NotificationRecipient[],
   payload: NotificationPayload,
   companyId: string
-): Promise<void> {
+): Promise<NotificationDelivery> {
+  const delivery: NotificationDelivery = { saved: 0, pushFailed: false };
   // Log notification for debugging
   console.log(`[NOTIFICATION] ${payload.title}`);
   console.log(`[NOTIFICATION] ${payload.body}`);
@@ -121,8 +128,9 @@ async function sendNotification(
         title: payload.title,
         body: payload.body,
         type: payload.data?.type,
-        orderId: payload.data?.orderId,
-        orderNumber: payload.data?.orderNumber,
+        // Absent, not undefined: Firestore refuses undefined values.
+        ...(payload.data?.orderId ? { orderId: payload.data.orderId } : {}),
+        ...(payload.data?.orderNumber ? { orderNumber: payload.data.orderNumber } : {}),
         recipientId: recipient.userId,
         read: false,
         readAt: null,
@@ -130,6 +138,7 @@ async function sendNotification(
         createdAt: FieldValue.serverTimestamp(),
         company: { id: companyId },
       });
+      delivery.saved++;
     } catch (error) {
       console.error(`[NOTIFICATION] Error saving notification for ${recipient.name}:`, error);
     }
@@ -193,11 +202,13 @@ async function sendNotification(
         }
       });
     } catch (error) {
+      delivery.pushFailed = true;
       console.error('[NOTIFICATION] Error sending FCM:', error);
     }
   } else {
     console.log('[NOTIFICATION] No FCM tokens available for recipients');
   }
+  return delivery;
 }
 
 // Roles that receive Asaas payment notifications (financial roles only)
@@ -209,7 +220,10 @@ const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
  * Owner + users with a financial role. Unlike getNotificationRecipients, the
  * assigned technician and the order creator are not included.
  */
-async function getPaymentNotificationRecipients(companyId: string): Promise<NotificationRecipient[]> {
+async function getPaymentNotificationRecipients(
+  companyId: string,
+  roles: RoleType[] = PAYMENT_NOTIFICATION_ROLES,
+): Promise<NotificationRecipient[]> {
   const recipients: NotificationRecipient[] = [];
   const added = new Set<string>();
   const companyDoc = await db.collection('companies').doc(companyId).get();
@@ -221,12 +235,36 @@ async function getPaymentNotificationRecipients(companyId: string): Promise<Noti
     added.add(company.owner.id);
   }
   for (const userRole of company.users ?? []) {
-    if (userRole.user?.id && PAYMENT_NOTIFICATION_ROLES.includes(userRole.role) && !added.has(userRole.user.id)) {
+    if (userRole.user?.id && roles.includes(userRole.role) && !added.has(userRole.user.id)) {
       recipients.push({ userId: userRole.user.id, name: userRole.user.name });
       added.add(userRole.user.id);
     }
   }
   return recipients;
+}
+
+/**
+ * Notify whoever can buy a plan (owner/admin) that the courtesy is ending.
+ * Throws when it could not reach them, so the daily job retries the company.
+ */
+export async function notifyCourtesyEnding(
+  companyId: string,
+  message: { title: string; body: string; days: number },
+): Promise<void> {
+  const recipients = await getPaymentNotificationRecipients(companyId, ['owner', 'admin']);
+  if (recipients.length === 0) return;
+  const delivery = await sendNotification(
+    recipients,
+    {
+      title: message.title,
+      body: message.body,
+      data: { type: 'courtesy_ending', days: String(message.days), companyId },
+    },
+    companyId,
+  );
+  if (delivery.pushFailed || delivery.saved === 0) {
+    throw new Error('courtesy notice not delivered');
+  }
 }
 
 /**

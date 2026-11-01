@@ -4,12 +4,14 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess } from '../../middleware/app-permission.middleware';
 import { AuthenticatedRequest, ShareTokenPermission, Order } from '../../models/types';
 import * as shareTokenService from '../../services/share-token.service';
 import * as orderService from '../../services/order.service';
 import { getUserAggr } from '../../middleware/company.middleware';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 /**
  * POST /bot/orders/:number/share

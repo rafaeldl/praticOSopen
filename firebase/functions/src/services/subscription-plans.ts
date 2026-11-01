@@ -137,6 +137,41 @@ export function isGraceActive(subscription: Subscription | undefined, now: Date)
   );
 }
 
+/** Days before the end of the courtesy on which the owner is told, latest last. */
+export const COURTESY_NOTICE_DAYS = [15, 3];
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Last end-of-courtesy push sent to a company. */
+export interface CourtesyNoticeRecord {
+  expiresAt: string;
+  days: number;
+}
+
+/** A notice owed: its step (15 or 3) and the days really left. */
+export interface DueCourtesyNotice {
+  step: number;
+  daysLeft: number;
+}
+
+/**
+ * The end-of-courtesy notice owed at `now`, or null. A notice already
+ * sent for this `expiresAt` (`last`) is not repeated; moving the date starts over.
+ */
+export function dueCourtesyNotice(
+  subscription: Subscription | undefined,
+  now: Date,
+  last?: CourtesyNoticeRecord,
+): DueCourtesyNotice | null {
+  if (!isGraceActive(subscription, now)) return null;
+  const expiresAt = subscription!.expiresAt as string;
+  const daysLeft = Math.ceil((Date.parse(expiresAt) - now.getTime()) / DAY_MS);
+  const step = [...COURTESY_NOTICE_DAYS].sort((a, b) => a - b).find((days) => daysLeft <= days);
+  if (step === undefined) return null;
+  if (last?.expiresAt === expiresAt && last.days <= step) return null;
+  return { step, daysLeft };
+}
+
 function defaultUsage(): SubscriptionUsage {
   return { photosThisMonth: 0, formTemplatesActive: 0, usersActive: 1, usageResetAt: getNextMonthReset() };
 }

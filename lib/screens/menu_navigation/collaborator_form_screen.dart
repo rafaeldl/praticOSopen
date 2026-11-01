@@ -10,6 +10,7 @@ import 'package:praticos/screens/menu_navigation/invite_form.dart';
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 /// "Convidar pessoa" as a `FormSheet` (open it with `FormSheet.show`).
@@ -150,8 +151,9 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
               final message = Uri.encodeComponent(
                 context.l10n.inviteWhatsAppBotMessage(companyName),
               );
-              final cleanNumber = phone.replaceAll(RegExp(r'\D'), '');
-              final url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+              final url = Uri.parse(
+                'https://wa.me/${whatsappNumber(phone)}?text=$message',
+              );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }

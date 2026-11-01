@@ -4,12 +4,14 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess, requireAppPermission } from '../../middleware/app-permission.middleware';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
 import { getUserAggr } from '../../middleware/company.middleware';
 import { buildOrderDetail } from '../../utils/bot-response.utils';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 // Valid status transitions
 const validTransitions: Record<string, string[]> = {
@@ -43,7 +45,7 @@ function parseBoundedInt(value: unknown, fallback: number, min: number, max: num
  * List orders for the bot with formatted output.
  * limit: 1-50 (default 10); offset: 0-1000 (default 0). Invalid values use the default.
  */
-router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/list', requireAppPermission('viewAllOrders'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
 

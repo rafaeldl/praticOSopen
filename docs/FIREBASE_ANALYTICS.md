@@ -105,6 +105,23 @@ adb shell setprop debug.firebase.analytics.app .none.
 # iOS: remove -FIRDebugEnabled from scheme
 ```
 
+## AI assistant adoption
+
+Logged with `AnalyticsService.logAiEvent`. The counter in `companies/{id}/aiUsage/{YYYY-MM}` says how
+much was used; these events say whether it worked.
+
+| Event | Parameters | When |
+|---|---|---|
+| `ai_intro_shown` | | First-use sheet opened |
+| `ai_intro_accepted` / `ai_intro_dismissed` | | "Experimentar agora" / "Agora não" or tap outside |
+| `ai_assist_requested` | `input`: `text`, `photo`, `photo_text` | Request sent |
+| `ai_assist_result` | `result`: `filled`, `nothing`, `quota`, `error` | Answer applied or refused |
+| `ai_assist_undone` | | "Desfazer" |
+| `ai_order_saved` | | New order saved with something the assistant filled |
+| `upgrade_modal_shown` | `trigger`: `ai_limit_100`, `courtesy_first`, `courtesy_last` | Limit note or courtesy banner shown |
+
+Adoption per company = `ai_order_saved` over `ai_assist_requested`, by `company_id`.
+
 ## Files Modified
 
 - **NEW**: `lib/services/analytics_service.dart`

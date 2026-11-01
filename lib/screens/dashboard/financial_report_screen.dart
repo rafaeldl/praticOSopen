@@ -862,33 +862,25 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
 
   Future<void> _proceedWithShare(OrderStore orderStore) async {
     final currentContext = context;
+    // The alert lives on the root navigator; the report may be on a tab's.
+    final rootNavigator = Navigator.of(currentContext, rootNavigator: true);
+    var alertOpen = true;
+    void closeAlert() {
+      if (!alertOpen) return;
+      alertOpen = false;
+      rootNavigator.pop();
+    }
 
     showCupertinoDialog(
       context: currentContext,
       barrierDismissible: false,
-      builder: (context) => CupertinoAlertDialog(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(),
-            const SizedBox(width: 16),
-            Text(
-              currentContext.l10n.preparingReport,
-              style: AppTypography.body.copyWith(
-                color: AppColors.text.resolveFrom(context),
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => const ReportLoadingAlert(),
     );
 
     try {
       final pdf = await _buildPdf(orderStore);
 
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pop();
-      }
+      closeAlert();
 
       if (currentContext.mounted) {
         final reportName = _latinCharactersOnly(currentContext.l10n.financialReport).replaceAll(' ', '_');
@@ -898,9 +890,9 @@ class _FinancialReportScreenState extends State<FinancialReportScreen> {
         );
       }
     } catch (e) {
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pop();
+      closeAlert();
 
+      if (currentContext.mounted) {
         showCupertinoDialog(
           context: currentContext,
           builder: (context) => CupertinoAlertDialog(
@@ -2338,6 +2330,33 @@ class _CustomPeriodSheetState extends State<_CustomPeriodSheet> {
 }
 
 /// "Mandar relatório em PDF": the single filled button, fixed at the bottom.
+/// "Preparando relatório": the blocking alert while the PDF is built. The
+/// text wraps because the alert is narrow and the text scales.
+class ReportLoadingAlert extends StatelessWidget {
+  const ReportLoadingAlert({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoAlertDialog(
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CupertinoActivityIndicator(),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              context.l10n.preparingReport,
+              style: AppTypography.body.copyWith(
+                color: AppColors.text.resolveFrom(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SendPdfBar extends StatelessWidget {
   const _SendPdfBar({required this.onPressed});
 

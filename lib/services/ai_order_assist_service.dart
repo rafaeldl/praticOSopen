@@ -381,6 +381,21 @@ abstract class AiOrderAssistClient {
   Future<bool> isEnabled();
 }
 
+/// `GET /v1/app/ai/status`: is the assistant on, and this month's use.
+class AiStatus {
+  const AiStatus({required this.enabled, this.used, this.limit});
+
+  static const off = AiStatus(enabled: false);
+
+  final bool enabled;
+
+  /// Requests used this month, when the server sent them.
+  final int? used;
+
+  /// Requests allowed per month (-1 = unlimited), when the server sent them.
+  final int? limit;
+}
+
 /// How long one company's answer to `GET /status` is reused.
 const Duration kAiStatusCacheDuration = Duration(minutes: 5);
 
@@ -398,6 +413,17 @@ bool parseAiStatusResponse(int status, String body) {
   }
 }
 
+/// Reads the use of the month out of `GET /v1/app/ai/status`.
+AiStatus parseAiStatus(int status, String body) {
+  if (!parseAiStatusResponse(status, body)) return AiStatus.off;
+  final usage = (jsonDecode(body) as Map)['data']['usage'];
+  return AiStatus(
+    enabled: true,
+    used: usage is Map ? (usage['used'] as num?)?.toInt() : null,
+    limit: usage is Map ? (usage['limit'] as num?)?.toInt() : null,
+  );
+}
+
 class AiOrderAssistService implements AiOrderAssistClient {
   AiOrderAssistService({http.Client? client})
     : _client = client ?? http.Client();
@@ -406,29 +432,33 @@ class AiOrderAssistService implements AiOrderAssistClient {
 
   /// Last answer per company, shared by every screen (see
   /// [kAiStatusCacheDuration]).
-  static final Map<String, ({bool enabled, DateTime at})> _statusCache = {};
+  static final Map<String, ({AiStatus status, DateTime at})> _statusCache = {};
 
   /// Clears the cached answers (tests, company switch).
   static void clearStatusCache() => _statusCache.clear();
 
   @override
-  Future<bool> isEnabled({DateTime Function() now = DateTime.now}) async {
+  Future<bool> isEnabled({DateTime Function() now = DateTime.now}) async =>
+      (await status(now: now)).enabled;
+
+  /// On or off and this month's use. Any failure means off.
+  Future<AiStatus> status({DateTime Function() now = DateTime.now}) async {
     try {
       final headers = await appApiHeaders();
       final companyId = headers['X-Company-Id'] ?? '';
       final cached = _statusCache[companyId];
       if (cached != null &&
           now().difference(cached.at) < kAiStatusCacheDuration) {
-        return cached.enabled;
+        return cached.status;
       }
       final response = await _client
           .get(Uri.parse('$appApiBaseUrl/v1/app/ai/status'), headers: headers)
           .timeout(const Duration(seconds: 10));
-      final enabled = parseAiStatusResponse(response.statusCode, response.body);
-      _statusCache[companyId] = (enabled: enabled, at: now());
-      return enabled;
+      final status = parseAiStatus(response.statusCode, response.body);
+      _statusCache[companyId] = (status: status, at: now());
+      return status;
     } catch (_) {
-      return false;
+      return AiStatus.off;
     }
   }
 
@@ -464,7 +494,10 @@ class AiOrderAssistService implements AiOrderAssistClient {
     } catch (_) {
       throw const AiOrderAssistException(AiAssistError.unavailable);
     }
-    return parseAiOrderAssistResponse(response.statusCode, response.body);
+    final draft = parseAiOrderAssistResponse(response.statusCode, response.body);
+    // The use of the month changed: "Plano" reads it again.
+    clearStatusCache();
+    return draft;
   }
 }
 

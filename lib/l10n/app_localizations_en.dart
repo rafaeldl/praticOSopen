@@ -4539,6 +4539,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerSaveNeedsName => 'Type the name to save.';
 
   @override
+  String get pickFromContacts => 'Choose from contacts';
+
+  @override
+  String get contactWhichNumber => 'Which number?';
+
+  @override
+  String get customerDuplicateTitle => 'Already registered';
+
+  @override
+  String customerDuplicateMessage(String name) {
+    return '$name already has this phone number.';
+  }
+
+  @override
+  String get customerDuplicateOpen => 'Open customer';
+
+  @override
+  String get customerDuplicateSaveAnyway => 'Save anyway';
+
+  @override
+  String get contactReadFailed => 'Couldn\'t read this contact.';
+
+  @override
+  String contactFirstOfMany(int count) {
+    return 'This file has $count contacts. We opened the first one.';
+  }
+
+  @override
+  String get contactCannotAddCustomer => 'Your profile can\'t add customers.';
+
+  @override
   String get customerMoreDataHint => 'E-mail, tax ID, address';
 
   @override
@@ -5924,4 +5955,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String chargeSendNewLink(String value) {
     return 'Send a new link for $value.';
   }
+
+  @override
+  String orderAssistantUsesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count assistant uses left this month.',
+      one: '1 assistant use left this month.',
+      zero: 'No assistant uses left this month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planUsageAi => 'Assistant this month';
+
+  @override
+  String planLimitAi(String used, String limit) {
+    return 'You used $used of $limit assistant requests this month. To keep going now, see the plans.';
+  }
+
+  @override
+  String aiIntroTitle(String order) {
+    return 'Create your next $order by talking';
+  }
+
+  @override
+  String get aiIntroBody =>
+      'Say the customer and the service, or take a photo. The app fills it in and you just check it before saving.';
+
+  @override
+  String get aiIntroTry => 'Try it now';
+
+  @override
+  String get aiIntroLater => 'Not now';
+
+  @override
+  String get courtesyBannerLabel => 'Pro plan courtesy';
+
+  @override
+  String courtesyBannerEnds(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Ends in $days days.',
+      one: 'Ends in 1 day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String courtesyBannerAiUse(int used, int free) {
+    String _temp0 = intl.Intl.pluralLogic(
+      used,
+      locale: localeName,
+      other:
+          'You used the assistant $used times this month; Free includes $free.',
+      one: 'You used the assistant once this month; Free includes $free.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courtesyBannerToFree =>
+      'After that, the app goes back to the Free plan.';
+
+  @override
+  String courtesyBannerPlan(String plan) {
+    return 'The $plan plan covers your use.';
+  }
+
+  @override
+  String get courtesyBannerLater => 'Not now';
 }

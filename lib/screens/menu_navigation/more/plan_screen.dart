@@ -10,6 +10,7 @@ import 'package:praticos/screens/widgets/primary_button.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/ai_order_assist_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/paywall_launcher.dart';
 import 'package:praticos/services/subscription_service.dart';
@@ -18,7 +19,7 @@ import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
 /// Resource counted against the plan limits.
-enum PlanResource { team, photos, checklists }
+enum PlanResource { ai, team, photos, checklists }
 
 /// How close one resource is to its limit.
 enum PlanUsageLevel { unlimited, ok, near, atLimit }
@@ -39,11 +40,20 @@ class PlanUsage {
     return PlanUsageLevel.ok;
   }
 
-  /// Usage of the three resources, in the prototype order.
-  static List<PlanUsage> of(Subscription subscription, DateTime now) {
+  /// Usage of the resources, in the prototype order. The assistant comes
+  /// first, when [ai] says it is on: it is what the month's limit is about.
+  static List<PlanUsage> of(
+    Subscription subscription,
+    DateTime now, {
+    AiStatus? ai,
+  }) {
     final limits = subscription.effectiveLimits(now);
     final usage = subscription.usage;
+    final aiUsed = ai?.used;
+    final aiLimit = ai?.limit;
     return [
+      if (ai?.enabled == true && aiUsed != null && aiLimit != null)
+        PlanUsage(PlanResource.ai, aiUsed, aiLimit),
       PlanUsage(PlanResource.team, usage.usersActive, limits.users),
       PlanUsage(PlanResource.photos, usage.photosThisMonth, limits.photosPerMonth),
       PlanUsage(
@@ -56,12 +66,35 @@ class PlanUsage {
 /// the limits, and the paywall, Customer Center and restore purchases
 /// (owner/admin only, and only when the build has paid plans). When a limit
 /// is reached, a block says so and holds the only blue button ("Ver planos").
-class PlanScreen extends StatelessWidget {
-  const PlanScreen({super.key, this.onOpenTeam, this.onOpenChecklists});
+class PlanScreen extends StatefulWidget {
+  const PlanScreen({
+    super.key,
+    this.onOpenTeam,
+    this.onOpenChecklists,
+    this.loadAiStatus,
+  });
 
   /// Destinations of the usage rows (defaults: Equipe and Checklists routes).
   final VoidCallback? onOpenTeam;
   final VoidCallback? onOpenChecklists;
+
+  /// Assistant use of the month; defaults to the server (tests inject).
+  final Future<AiStatus> Function()? loadAiStatus;
+
+  @override
+  State<PlanScreen> createState() => _PlanScreenState();
+}
+
+class _PlanScreenState extends State<PlanScreen> {
+  AiStatus? _ai;
+
+  @override
+  void initState() {
+    super.initState();
+    (widget.loadAiStatus ?? () => AiOrderAssistService().status())().then((ai) {
+      if (mounted) setState(() => _ai = ai);
+    });
+  }
 
   /// "Starter · renova em 10/11/2026"; just the plan name on Free.
   String _header(BuildContext context, Subscription subscription,
@@ -94,6 +127,7 @@ class PlanScreen extends StatelessWidget {
     final used = _count(usage.used);
     final limit = _count(usage.limit);
     return switch (usage.resource) {
+      PlanResource.ai => l10n.planLimitAi(used, limit),
       PlanResource.team => l10n.planLimitTeam(used, limit),
       PlanResource.photos => l10n.planLimitPhotos(used, limit),
       PlanResource.checklists => l10n.planLimitChecklists(used, limit),
@@ -111,7 +145,7 @@ class PlanScreen extends StatelessWidget {
     final canPurchase = paid && PaywallLauncher.currentUserCanPurchase;
     final issue =
         subscription.periodState(now) == SubscriptionPeriodState.paymentIssue;
-    final usages = PlanUsage.of(subscription, now);
+    final usages = PlanUsage.of(subscription, now, ai: _ai);
     final reached = paid
         ? usages.where((u) => u.level == PlanUsageLevel.atLimit).firstOrNull
         : null;
@@ -157,6 +191,7 @@ class PlanScreen extends StatelessWidget {
                 key: ValueKey('plan_usage_${usage.resource.name}'),
                 usage: usage,
                 title: switch (usage.resource) {
+                  PlanResource.ai => l10n.planUsageAi,
                   PlanResource.team => l10n.planUsageTeam,
                   PlanResource.photos => l10n.planUsagePhotos,
                   PlanResource.checklists => l10n.planUsageChecklists,
@@ -165,10 +200,11 @@ class PlanScreen extends StatelessWidget {
                     ? _count(usage.used)
                     : l10n.planUsageOf(_count(usage.used), _count(usage.limit)),
                 onTap: switch (usage.resource) {
-                  PlanResource.team => onOpenTeam ??
+                  PlanResource.ai => null,
+                  PlanResource.team => widget.onOpenTeam ??
                       () => Navigator.pushNamed(context, '/collaborator_list'),
                   PlanResource.photos => null,
-                  PlanResource.checklists => onOpenChecklists ??
+                  PlanResource.checklists => widget.onOpenChecklists ??
                       () => Navigator.pushNamed(context, '/form_template_list'),
                 },
               ),

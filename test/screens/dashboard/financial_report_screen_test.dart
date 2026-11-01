@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:praticos/l10n/app_localizations.dart';
@@ -354,5 +355,147 @@ void main() {
     await pumpReport(tester, width: 1200);
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('"Preparando relatório" alert', () {
+    const printing = MethodChannel('net.nfet.printing');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+    tearDown(() => messenger.setMockMethodCallHandler(printing, null));
+
+    /// The report as the Financeiro tab opens it: pushed on the tab's own
+    /// navigator, while dialogs go to the root one.
+    Future<void> pumpReportInTab(
+      WidgetTester tester, {
+      Locale locale = const Locale('pt'),
+      Future<Object?> Function(MethodCall)? onPrinting,
+    }) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      messenger.setMockMethodCallHandler(
+        printing,
+        onPrinting ?? (_) async => 1,
+      );
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<OrderStore>.value(value: _FakeOrderStore()),
+            ChangeNotifierProvider<SegmentConfigProvider>(
+              create: (_) => SegmentConfigProvider(),
+            ),
+          ],
+          child: CupertinoApp(
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: CupertinoTabView(
+              builder: (context) => CupertinoPageScaffold(
+                child: Center(
+                  child: CupertinoButton(
+                    onPressed: () => Navigator.of(context).push(
+                      CupertinoPageRoute<void>(
+                        builder: (_) => const FinancialReportScreen(),
+                      ),
+                    ),
+                    child: const Text('open'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+    }
+
+    /// Lets the PDF build, which needs real async, reach the share sheet.
+    Future<void> finishSharing(WidgetTester tester) async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(seconds: 1)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapSend(WidgetTester tester) async {
+      final send = find.byKey(const Key('financialSendReportPdf'));
+      await tester.ensureVisible(send);
+      await tester.tap(send);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    for (final locale in const [Locale('pt'), Locale('en'), Locale('es')]) {
+      for (final scale in const [1.0, 1.3, 2.0, 3.0]) {
+        testWidgets(
+          'wraps instead of overflowing (${locale.languageCode}, x$scale)',
+          (tester) async {
+            tester.platformDispatcher.textScaleFactorTestValue = scale;
+            addTearDown(tester.platformDispatcher.clearAllTestValues);
+            addTearDown(tester.view.reset);
+            tester.view.physicalSize = const Size(1170, 2532);
+            tester.view.devicePixelRatio = 3;
+
+            await tester.pumpWidget(
+              CupertinoApp(
+                locale: locale,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: const ReportLoadingAlert(),
+              ),
+            );
+
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+
+    testWidgets('the text has its accent', (tester) async {
+      expect(l10n.preparingReport, 'Preparando relatório...');
+    });
+
+    testWidgets('closes before the share sheet and keeps the report open', (
+      tester,
+    ) async {
+      var alertOpenOnShare = true;
+      await pumpReportInTab(
+        tester,
+        onPrinting: (call) async {
+          if (call.method == 'sharePdf') {
+            alertOpenOnShare = tester
+                .state<NavigatorState>(find.byType(Navigator).first)
+                .canPop();
+          }
+          return 1;
+        },
+      );
+
+      await tapSend(tester);
+      await finishSharing(tester);
+
+      expect(alertOpenOnShare, isFalse);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.byType(FinancialReportScreen), findsOneWidget);
+    });
+
+    testWidgets('an error closes the alert and shows the error dialog', (
+      tester,
+    ) async {
+      await pumpReportInTab(
+        tester,
+        onPrinting: (call) async => throw PlatformException(code: 'failed'),
+      );
+
+      await tapSend(tester);
+      await finishSharing(tester);
+
+      expect(find.text(l10n.preparingReport), findsNothing);
+      expect(find.text(l10n.errorGeneratingReport), findsOneWidget);
+      expect(find.byType(FinancialReportScreen), findsOneWidget);
+    });
   });
 }

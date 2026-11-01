@@ -47,19 +47,22 @@ let uploads = 0;
 const uniqueName = () => `new_${Date.now()}_${uploads++}`;
 
 const ADMINS: Actor[] = ['owner', 'admin'];
+const RECEIVERS: Actor[] = ['owner', 'admin', 'manager', 'consultant'];
 
 export const STORAGE_CASES: StorageCase[] = [
   { id: 'orderPhoto.read', title: 'ver foto de OS', run: read(`${T}/orders/o1/photos/p1.png`), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'orderPhoto.upload', title: 'enviar foto para OS', run: upload(`${T}/orders/o1/photos/new.png`), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'orderPhoto.delete', title: 'apagar foto de OS', run: remove(`${T}/orders/o1/photos/p1.png`), allow: MEMBERS, shouldAllow: MEMBERS },
-  { id: 'orderPhotos.list', title: 'listar fotos de OS', run: list(`${T}/orders/o1/photos`), allow: MEMBERS, shouldAllow: MEMBERS },
-  { id: 'tenant.list', title: 'listar todos os arquivos da empresa', run: list(T), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'orderPhotos.list', title: 'listar fotos de OS', run: list(`${T}/orders/o1/photos`), allow: ADMINS, shouldAllow: ADMINS },
+  { id: 'tenant.list', title: 'listar todos os arquivos da empresa', run: list(T), allow: ADMINS, shouldAllow: ADMINS },
   { id: 'tenant.delete', title: 'apagar arquivo qualquer da empresa (exclusão de conta antiga)', run: remove(`${T}/orders/o1/documents/d1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'tenant.deleteOther', title: 'apagar arquivo fora dos caminhos conhecidos', run: remove(`${T}/legacy/x.png`), allow: ADMINS, shouldAllow: ADMINS },
   { id: 'orderDocument.read', title: 'baixar documento da OS', run: read(`${T}/orders/o1/documents/d1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'orderDocument.upload', title: 'anexar documento na OS', run: upload(`${T}/orders/o1/documents/new.pdf`, PDF), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'paymentProof.read', title: 'ver comprovante de pagamento da OS', run: read(`${T}/orders/o1/payments/t1/f1.pdf`), allow: MEMBERS, shouldAllow: MEMBERS },
-  { id: 'paymentProof.upload', title: 'enviar comprovante de pagamento da OS', run: upload(`${T}/orders/o1/payments/t1/new.pdf`, PDF), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'paymentProof.upload', title: 'enviar comprovante de pagamento da OS', run: (s) => upload(`${T}/orders/o1/payments/t1/${uniqueName()}.pdf`, PDF)(s), allow: MEMBERS, shouldAllow: MEMBERS },
+  { id: 'paymentProof.replace', title: 'trocar comprovante de pagamento da OS', run: upload(`${T}/orders/o1/payments/t1/f1.pdf`, PDF), allow: RECEIVERS, shouldAllow: RECEIVERS },
+  { id: 'paymentProof.delete', title: 'apagar comprovante de pagamento da OS', run: remove(`${T}/orders/o1/payments/t1/f1.pdf`), allow: RECEIVERS, shouldAllow: RECEIVERS },
   { id: 'formPhoto.upload', title: 'enviar foto de checklist', run: upload(`${T}/orders/o1/forms/f1/new.png`), allow: MEMBERS, shouldAllow: MEMBERS },
   { id: 'productPhoto.upload', title: 'trocar foto de produto', run: upload(`${T}/products/prod1/new.png`), allow: ADMINS, shouldAllow: ADMINS },
   { id: 'servicePhoto.upload', title: 'trocar foto de serviço', run: upload(`${T}/services/serv1/new.png`), allow: ADMINS, shouldAllow: ADMINS },

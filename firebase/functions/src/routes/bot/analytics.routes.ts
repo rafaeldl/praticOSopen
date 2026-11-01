@@ -5,6 +5,7 @@
 
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import * as analyticsService from '../../services/analytics.service';
 import { PeriodType, startOfMonth, endOfDay, startOfDay, parseLocalDate } from '../../utils/date.utils';
 import {
@@ -26,7 +27,7 @@ const router: Router = Router();
  *
  * If no params provided, defaults to current month
  */
-router.get('/financial', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/financial', requireAppPermission('viewFinancialReports'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
 

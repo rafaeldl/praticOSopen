@@ -88,8 +88,7 @@ class AccountDeletionFlow {
   }
 
   Future<void> _delete(BuildContext context) async {
-    final navigator = Navigator.of(context);
-    _showLoading(context);
+    final navigator = _showLoading(context);
     try {
       await deleteAccount();
       _closeLoading(navigator);
@@ -135,8 +134,7 @@ class AccountDeletionFlow {
   }
 
   Future<void> _reauthenticate(BuildContext context) async {
-    final navigator = Navigator.of(context);
-    _showLoading(context);
+    final navigator = _showLoading(context);
     try {
       await reauthenticate();
       _closeLoading(navigator);
@@ -153,12 +151,16 @@ class AccountDeletionFlow {
     }
   }
 
-  void _showLoading(BuildContext context) {
+  /// Returns the navigator holding the spinner, the one to close it on: the
+  /// dialog goes on the root navigator, and this screen sits on a tab's.
+  NavigatorState _showLoading(BuildContext context) {
+    final navigator = Navigator.of(context, rootNavigator: true);
     showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CupertinoActivityIndicator(radius: 20)),
     );
+    return navigator;
   }
 
   void _closeLoading(NavigatorState navigator) {

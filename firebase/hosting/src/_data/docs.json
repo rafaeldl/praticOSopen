@@ -31,6 +31,11 @@
               "href": "compartilhar.html"
             },
             {
+              "title": "Contatos do cliente",
+              "description": "Puxe o cliente dos contatos do celular, receba um contato de outro app e evite cadastro repetido.",
+              "href": "contatos.html"
+            },
+            {
               "title": "Checklists",
               "description": "Modelos de checklist que você responde na OS, com fotos, durante o serviço.",
               "href": "procedimentos.html"
@@ -134,6 +139,11 @@
               "href": "compartilhar-en.html"
             },
             {
+              "title": "Customer contacts",
+              "description": "Pull customers from your phone contacts, receive a contact from another app and avoid repeated records.",
+              "href": "contatos-en.html"
+            },
+            {
               "title": "Checklists",
               "description": "Checklist templates you fill in on the order, with photos, during the job.",
               "href": "procedimentos-en.html"
@@ -235,6 +245,11 @@
               "title": "Compartir OS",
               "description": "Envía al cliente un enlace para ver la OS, aprobar el presupuesto, comentar y calificar, sin crear cuenta.",
               "href": "compartilhar-es.html"
+            },
+            {
+              "title": "Contactos del cliente",
+              "description": "Trae clientes de los contactos del celular, recibe un contacto de otra app y evita registros repetidos.",
+              "href": "contatos-es.html"
             },
             {
               "title": "Checklists",
