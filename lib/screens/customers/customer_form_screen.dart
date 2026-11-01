@@ -158,7 +158,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     final contact = await pick();
     if (contact == null || !mounted) return;
     final phone = await askContactPhone(context, contact);
-    if (!mounted) return;
+    if (!mounted || (phone == null && contact.phones.isNotEmpty)) return;
     final name = contact.name;
     final email = contact.email;
     if (name != null) _name.text = name;

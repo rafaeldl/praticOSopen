@@ -771,6 +771,32 @@ void main() {
         expect(field('Dani'), findsOneWidget);
       });
 
+      testWidgets('going back from "Qual número?" changes nothing', (
+        tester,
+      ) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async {},
+            pickContact: () async => const ContactCard(
+              name: 'Bruno',
+              phones: ['48 98408-7801', '48 3333-1111'],
+              email: 'bruno@example.com',
+            ),
+          ),
+        );
+        await tester.enterText(find.byType(CupertinoTextField).first, 'Dani');
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Voltar'));
+        await tester.pumpAndSettle();
+
+        expect(field('Dani'), findsOneWidget);
+        expect(field('Bruno'), findsNothing);
+        expect(field('bruno@example.com'), findsNothing);
+      });
+
       testWidgets('takes the focus off the fields before the picker opens', (
         tester,
       ) async {
