@@ -4,7 +4,7 @@ Data: 2026-10-31. Pronto para enviar, mas **nada foi enviado**. Cada envio depen
 
 ## Resposta curta
 
-Proposta: trocar as 12 conversas por **uma mensagem curta com uma pergunta**. Custa cerca de 1h10, contra cerca de 5 h. O Portão 0 aprovado não muda.
+Decidido pelo Rafael em 2026-11-01: **uma mensagem curta com uma pergunta**, no lugar das 12 conversas. Custa cerca de 1h05, contra cerca de 5h30. O Portão 0 aprovado não muda.
 
 ## Custo em horas
 

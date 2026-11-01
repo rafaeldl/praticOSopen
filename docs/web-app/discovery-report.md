@@ -18,7 +18,7 @@ Data: 2026-10-31. Dados de produção lidos em 02/08 a 31/10/2026, só agregados
 Aprovadas em 2026-10-31:
 
 - **Arquitetura:** [ADR-001](ADR-001-web-architecture.md).
-- **Ordem e Portão 0:** validar a demanda antes de construir. A forma leve, com uma pergunta por mensagem, é proposta em [`demand-test.md`](demand-test.md).
+- **Ordem e Portão 0:** validar a demanda antes de construir. A forma leve, com uma pergunta por mensagem, foi escolhida em 2026-11-01. Ver [`demand-test.md`](demand-test.md).
 
 Pendentes:
 

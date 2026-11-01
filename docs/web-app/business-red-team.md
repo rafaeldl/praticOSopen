@@ -166,7 +166,7 @@ O web muda o risco principal: o celular é pessoal, o computador da oficina é c
 
 **Quem:** as 12 das 20 empresas com perfil de mesa. São as que têm até 15% das OS com foto e 50% ou mais com pagamento, ou 2 ou mais membros. Lista por ID só no diretório privado.
 
-**Como:** proposta em [`demand-test.md`](demand-test.md): uma mensagem curta com uma pergunta, antes da oferta de 07/12, sem mostrar tela e sem prometer data. Silêncio conta como não.
+**Como:** decidido em [`demand-test.md`](demand-test.md): uma mensagem curta com uma pergunta, antes da oferta de 07/12, sem mostrar tela e sem prometer data. Silêncio conta como não.
 
 Seguir só com **as três** condições:
 
