@@ -7,7 +7,7 @@ void main() {
   test('builds the card from the iOS map', () {
     final card = contactFromPicker({
       'name': ' Ana Ribeiro ',
-      'phones': ['+55 48 98408-7801', '(48) 3222-3344', '48 98408 7801', ''],
+      'phones': ['+55 48 98408-7801', '(48) 3222-3344', '55 (48) 98408 7801', ''],
       'email': 'ana@example.com',
     });
     expect(card.name, 'Ana Ribeiro');

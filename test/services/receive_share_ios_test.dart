@@ -74,15 +74,35 @@ void main() {
     expect(batch.pdfs.map((f) => f.path), ['$group/Orçamento.pdf']);
   });
 
+  test('Android types a contact card as text, and it is kept', () {
+    const path = '/data/user/0/br.com.rafsoft.praticos/cache/Ana.vcf';
+    final files = ReceiveShareService.filesFromShared([
+      SharedMediaFile(
+          path: path, mimeType: 'text/x-vcard', type: SharedMediaType.text),
+      SharedMediaFile(
+          path: 'Olha isso', mimeType: 'text/plain', type: SharedMediaType.text),
+    ]);
+    expect(files.map((f) => f.path), [path]);
+    expect(ReceivedBatch(files).isOnlyContacts, isTrue);
+  });
+
+  test('Android receives contact cards', () {
+    final manifest =
+        File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+    expect(manifest, contains('text/x-vcard'));
+    expect(manifest, contains('text/vcard'));
+  });
+
   group('iOS project config', () {
     const groupId = 'group.br.com.rafsoft.praticos';
     String read(String path) => File(path).readAsStringSync();
 
-    test('extension accepts images and PDFs', () {
+    test('extension accepts images, PDFs and contacts', () {
       final plist = read('ios/ShareExtension/Info.plist');
       expect(plist, contains('com.apple.share-services'));
       expect(plist, contains('"public.image"'));
       expect(plist, contains('"com.adobe.pdf"'));
+      expect(plist, contains('"public.vcard"'));
       expect(plist, contains('<key>AppGroupId</key>'));
       expect(plist, contains(r'$(FLUTTER_BUILD_NUMBER)'));
     });
