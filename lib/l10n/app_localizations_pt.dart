@@ -3327,10 +3327,40 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get loginTitle => 'Entre para começar';
+  String get loginTitle => 'Do orçamento\nao pagamento,\nnuma OS só.';
 
   @override
-  String get loginSubtitle => 'Suas OS ficam salvas e a equipe vê as mesmas.';
+  String get loginSampleTitle => 'Ordem de serviço';
+
+  @override
+  String get loginSampleNumber => 'Nº 0142';
+
+  @override
+  String get loginSampleCustomerLabel => 'Cliente';
+
+  @override
+  String get loginSampleCustomer => 'Marcos Andrade';
+
+  @override
+  String get loginSampleServiceLabel => 'Serviço';
+
+  @override
+  String get loginSampleService => 'Limpeza + carga de gás';
+
+  @override
+  String get loginSampleDeliveryLabel => 'Entrega';
+
+  @override
+  String get loginSampleDelivery => 'Hoje, 16:00';
+
+  @override
+  String get loginSampleTotalLabel => 'Total';
+
+  @override
+  String get loginSampleTotal => 'R\$ 480,00';
+
+  @override
+  String get loginSampleStamp => 'Aprovado pelo cliente';
 
   @override
   String get loginWithEmailLink => 'Entrar com e-mail e senha';

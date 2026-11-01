@@ -56,6 +56,18 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 13. **Sem botão "Editar".** Cada linha abre o seu editor: o que já existe abre empurrado ou em sheet pequena; item novo abre em sheet grande (regra 9).
 14. **Menu "…" para o raro.** Fica no topo, em vidro (`showPullDownMenu`), com grupos separados e ícone em cada ação. Ordem: mudar a situação › · "Adicionar à OS" (só o que o registro ainda não tem) · arquivo (Ver PDF, Copiar link) · destrutivas em vermelho no fim (Cancelar, Apagar), sempre com confirmação. O que é frequente sai do menu e ganha lugar próprio (link na seção, botão do topo ou Foto na barra).
 
+## Login
+
+Quem chega aqui ainda não conhece o app, então a tela explica o que ele faz antes de pedir a entrada (`lib/screens/login.dart`):
+
+- **Fundo:** azul da marca (`accent`; no escuro, `accentSoft`) com as réguas de formulário (`FormRulerPainter`).
+- **Topo:** ícone e a frase do site, "Do orçamento ao pagamento, numa OS só." (`loginTitle`), com as quebras de linha definidas no `.arb`.
+- **Imagem:** uma OS de exemplo (`LoginSampleOrder`, `lib/screens/widgets/login_sample_order.dart`), desenhada em Flutter e não uma foto: vale para todos os ramos e acompanha idioma e modo escuro. Os dados de exemplo ficam nas chaves `loginSample*` e não passam pelo `FormatService`, porque antes do login não há empresa nem moeda.
+- **Movimento:** a folha sobe de trás do painel e o carimbo aparece no fim. Com "Reduzir movimento", tudo já abre no lugar.
+- **Espaço:** a folha nunca aumenta a altura da tela. Em tela pequena ela encolhe, e com texto grande o painel a corta; sem espaço, ela sai e os botões ficam.
+- **Carimbo:** "Aprovado pelo cliente" é parte da ilustração, igual ao do site. A regra de nunca usar selo colorido continua valendo para status de verdade.
+- **VoiceOver:** a folha é imagem e fica escondida do leitor de tela.
+
 ## Cores
 
 Cada cor tem um papel só. Componentes usam o papel, nunca o hex.

@@ -3335,11 +3335,40 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get loginTitle => 'Entra para empezar';
+  String get loginTitle => 'Del presupuesto\nal cobro,\nen una sola orden.';
 
   @override
-  String get loginSubtitle =>
-      'Tus órdenes quedan guardadas y tu equipo ve las mismas.';
+  String get loginSampleTitle => 'Orden de servicio';
+
+  @override
+  String get loginSampleNumber => 'Nº 0142';
+
+  @override
+  String get loginSampleCustomerLabel => 'Cliente';
+
+  @override
+  String get loginSampleCustomer => 'Marcos Andrade';
+
+  @override
+  String get loginSampleServiceLabel => 'Servicio';
+
+  @override
+  String get loginSampleService => 'Limpieza + recarga de gas';
+
+  @override
+  String get loginSampleDeliveryLabel => 'Entrega';
+
+  @override
+  String get loginSampleDelivery => 'Hoy, 16:00';
+
+  @override
+  String get loginSampleTotalLabel => 'Total';
+
+  @override
+  String get loginSampleTotal => '480,00 €';
+
+  @override
+  String get loginSampleStamp => 'Aprobado por el cliente';
 
   @override
   String get loginWithEmailLink => 'Entrar con correo y contraseña';

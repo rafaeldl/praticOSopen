@@ -5755,14 +5755,74 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Entre para começar'**
+  /// **'Do orçamento\nao pagamento,\nnuma OS só.'**
   String get loginTitle;
 
-  /// No description provided for @loginSubtitle.
+  /// No description provided for @loginSampleTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Suas OS ficam salvas e a equipe vê as mesmas.'**
-  String get loginSubtitle;
+  /// **'Ordem de serviço'**
+  String get loginSampleTitle;
+
+  /// No description provided for @loginSampleNumber.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nº 0142'**
+  String get loginSampleNumber;
+
+  /// No description provided for @loginSampleCustomerLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get loginSampleCustomerLabel;
+
+  /// No description provided for @loginSampleCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcos Andrade'**
+  String get loginSampleCustomer;
+
+  /// No description provided for @loginSampleServiceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço'**
+  String get loginSampleServiceLabel;
+
+  /// No description provided for @loginSampleService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpeza + carga de gás'**
+  String get loginSampleService;
+
+  /// No description provided for @loginSampleDeliveryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega'**
+  String get loginSampleDeliveryLabel;
+
+  /// No description provided for @loginSampleDelivery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje, 16:00'**
+  String get loginSampleDelivery;
+
+  /// No description provided for @loginSampleTotalLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total'**
+  String get loginSampleTotalLabel;
+
+  /// No description provided for @loginSampleTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'R\$ 480,00'**
+  String get loginSampleTotal;
+
+  /// No description provided for @loginSampleStamp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovado pelo cliente'**
+  String get loginSampleStamp;
 
   /// No description provided for @loginWithEmailLink.
   ///

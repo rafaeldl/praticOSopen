@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/login.dart';
+import 'package:praticos/screens/widgets/login_sample_order.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -27,11 +28,15 @@ class _FakeAuthStore implements AuthStore {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Widget _app(_FakeAuthStore auth, {Brightness brightness = Brightness.light}) {
+Widget _app(
+  _FakeAuthStore auth, {
+  Brightness brightness = Brightness.light,
+  Locale locale = const Locale('pt'),
+}) {
   return Provider<AuthStore>.value(
     value: auth,
     child: CupertinoApp(
-      locale: const Locale('pt'),
+      locale: locale,
       theme: CupertinoThemeData(brightness: brightness),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -58,7 +63,10 @@ void main() {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
 
-    expect(find.text('Entre para começar'), findsOneWidget);
+    expect(
+      find.text('Do orçamento\nao pagamento,\nnuma OS só.'),
+      findsOneWidget,
+    );
     expect(find.byType(SignInWithAppleButton), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.text('Entrar com e-mail e senha'), findsOneWidget);
@@ -70,9 +78,75 @@ void main() {
     );
     expect(
       (bg.backgroundColor! as CupertinoDynamicColor).color,
-      const Color(0xFFE0F1FF),
+      const Color(0xFF116BB5),
     );
   });
+
+  testWidgets('shows the sample order, stamped, once it settles', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginSampleOrder), findsOneWidget);
+    expect(find.text('Ordem de serviço'), findsOneWidget);
+    expect(find.text('R\$ 480,00'), findsOneWidget);
+    expect(find.text('APROVADO PELO CLIENTE'), findsOneWidget);
+  });
+
+  testWidgets('the sample order is a picture: hidden from VoiceOver', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Marcos Andrade'), findsNothing);
+    semantics.dispose();
+  });
+
+  testWidgets('with Reduce Motion the order is already in place', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: _app(_FakeAuthStore()),
+      ),
+    );
+
+    expect(tester.hasRunningAnimations, isFalse);
+    final stamp = tester.widget<FadeTransition>(
+      find
+          .ancestor(
+            of: find.text('APROVADO PELO CLIENTE'),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
+    );
+    expect(stamp.opacity.value, 1);
+  });
+
+  for (final locale in const ['pt', 'en', 'es']) {
+    testWidgets('small screen with large text does not overflow ($locale)', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320 * 2, 568 * 2);
+      tester.view.devicePixelRatio = 2;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+      await tester.pumpWidget(_app(_FakeAuthStore(), locale: Locale(locale)));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SignInWithAppleButton), findsOneWidget);
+    });
+  }
 
   testWidgets('dark: dark blue background and dark panel', (tester) async {
     useTallScreen(tester);

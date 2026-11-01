@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/email_login_screen.dart';
+import 'package:praticos/screens/widgets/login_sample_order.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -11,9 +12,10 @@ import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Login screen: `accentSoft` "order form" background with ruler lines, the app
-/// icon and a short phrase on top, and a rounded panel at the bottom with the
-/// native Apple button, the Google button and the e-mail link.
+/// Login screen: brand-blue "order form" background with ruler lines, the app
+/// icon, a phrase saying what the app does and a sample service order on top,
+/// and a rounded panel at the bottom with the native Apple button, the Google
+/// button and the e-mail link.
 ///
 /// UI only: authentication goes through [AuthStore] untouched.
 class LoginPage extends StatefulWidget {
@@ -30,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
   static const _buttonHeight = 58.0;
   static const _buttonRadius = BorderRadius.all(Radius.circular(14));
+  static const _heroMaxWidth = 480.0;
 
   @override
   void didChangeDependencies() {
@@ -40,10 +43,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final background = AppColors.accentSoft.resolveFrom(context);
+    final background = (isDark ? AppColors.accentSoft : AppColors.accent)
+        .resolveFrom(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: SystemUiOverlayStyle.light,
       child: CupertinoPageScaffold(
         backgroundColor: background,
         child: DefaultTextStyle(
@@ -53,9 +57,9 @@ class _LoginPageState extends State<LoginPage> {
               Positioned.fill(
                 child: CustomPaint(
                   painter: FormRulerPainter(
-                    color: AppColors.accent
+                    color: (isDark ? AppColors.accentText : AppColors.onAccent)
                         .resolveFrom(context)
-                        .withValues(alpha: isDark ? 0.22 : 0.12),
+                        .withValues(alpha: isDark ? 0.12 : 0.08),
                   ),
                 ),
               ),
@@ -67,7 +71,23 @@ class _LoginPageState extends State<LoginPage> {
                       hasScrollBody: false,
                       child: Column(
                         children: [
-                          Expanded(child: _buildHeader(context)),
+                          Expanded(
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: _heroMaxWidth,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _buildHeader(context),
+                                    const Expanded(child: _SampleOrderArea()),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                           _buildPanel(context),
                         ],
                       ),
@@ -83,45 +103,38 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final textColor = AppColors.text.resolveFrom(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Semantics(
-              label: 'PraticOS',
-              image: true,
-              child: ExcludeSemantics(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: Image.asset(
-                    'assets/images/icon.png',
-                    width: 88,
-                    height: 88,
-                    cacheWidth: 264,
-                    fit: BoxFit.cover,
-                  ),
+      padding: const EdgeInsets.fromLTRB(28, 16, 28, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            label: 'PraticOS',
+            image: true,
+            child: ExcludeSemantics(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(13),
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 54,
+                  height: 54,
+                  cacheWidth: 162,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(height: 28),
-            Text(
-              context.l10n.loginTitle,
-              textAlign: TextAlign.center,
-              style: AppTypography.title.copyWith(color: textColor),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            context.l10n.loginTitle,
+            style: AppTypography.title.copyWith(
+              color: AppColors.onAccent.resolveFrom(context),
+              height: 1.14,
+              letterSpacing: 0,
             ),
-            const SizedBox(height: 10),
-            Text(
-              context.l10n.loginSubtitle,
-              textAlign: TextAlign.center,
-              style: AppTypography.callout.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -305,6 +318,26 @@ class _LoginPageState extends State<LoginPage> {
         () async => _auth.signInWithGoogle(),
         context.l10n.errorSignInGoogleFriendly,
       );
+}
+
+/// Takes what is left between the header and the panel.
+///
+/// The order goes in a [Positioned] so it never adds to the scroll height: on
+/// short screens or with large text the buttons push it away instead.
+class _SampleOrderArea extends StatelessWidget {
+  const _SampleOrderArea();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ClipRect(
+      child: Stack(
+        children: [
+          SizedBox.expand(),
+          Positioned.fill(child: LoginSampleOrder()),
+        ],
+      ),
+    );
+  }
 }
 
 /// Draws subtle horizontal rules, like the lines of a service-order form.
