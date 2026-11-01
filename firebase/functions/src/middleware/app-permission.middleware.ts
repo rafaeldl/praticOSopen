@@ -12,7 +12,7 @@
  */
 
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest, Order } from '../models/types';
+import { AuthenticatedRequest, Order, OrderStatus } from '../models/types';
 import { db } from '../services/firestore.service';
 import * as orderService from '../services/order.service';
 
@@ -109,6 +109,48 @@ export function canSeeOrder(req: AuthenticatedRequest, order: Pick<Order, 'creat
   return !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
 }
 
+/**
+ * Same flow as AuthorizationService.canChangeOrderStatus and firestore.rules.
+ * Keeping the status is not a change, so it is always allowed.
+ */
+export function canChangeOrderStatus(
+  req: AuthenticatedRequest,
+  order: Pick<Order, 'status' | 'createdBy'>,
+  newStatus: OrderStatus,
+): boolean {
+  const from = order.status;
+  if (!canSeeOrder(req, order)) return false;
+  if (from === newStatus) return true;
+
+  const role = appRoleOf(req.userContext?.role);
+  if (role === 'admin' || role === 'manager') return true;
+  if (role === 'consultant') return from === 'quote' && (newStatus === 'approved' || newStatus === 'canceled');
+  if (role !== 'supervisor' && role !== 'technician') return false;
+
+  const isCreator = !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
+  if (from === 'quote') return isCreator && (newStatus === 'approved' || newStatus === 'progress');
+  if (from === 'approved') return newStatus === 'progress' || newStatus === 'done';
+  return from === 'progress' && newStatus === 'done';
+}
+
+/** Status a new order can start in, same as orderCreateFieldsAllowed in firestore.rules. */
+export function canCreateOrderWithStatus(req: AuthenticatedRequest, status: OrderStatus): boolean {
+  const role = appRoleOf(req.userContext?.role);
+  if (role === 'admin') return true;
+  if (role === 'consultant') return status === 'quote' || status === 'approved' || status === 'canceled';
+  if (role === 'supervisor' || role === 'technician') {
+    return status === 'quote' || status === 'approved' || status === 'progress';
+  }
+  return false;
+}
+
+/** Supervisor and technician edit items only on quotes (AuthorizationService.canEditOrderMainFields). */
+export function canEditOrderMainFields(req: AuthenticatedRequest, order: Pick<Order, 'status' | 'createdBy'>): boolean {
+  const role = appRoleOf(req.userContext?.role);
+  if (!role || !canSeeOrder(req, order)) return false;
+  return (role !== 'supervisor' && role !== 'technician') || order.status === 'quote';
+}
+
 /** Same body as requirePermission in auth.middleware (older apps read it). */
 export function forbidden(res: Response, message = 'Not allowed'): void {
   res.status(403).json({ success: false, error: { code: 'INSUFFICIENT_PERMISSIONS', message } });
@@ -126,6 +168,20 @@ export function requireAppPermission(...permissions: AppPermission[]) {
       for (const permission of permissions) {
         if (!(await can(req, res, permission))) return forbidden(res, `Permission '${permission}' is required`);
       }
+      next();
+    } catch (error) {
+      internalError(res, error);
+    }
+  };
+}
+
+/** Middleware: the order in `req.params[param]` must accept item changes from the user. */
+export function requireOrderItemsEditable(param = 'id') {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const companyId = req.userContext?.companyId;
+      const order = companyId ? await orderService.getOrder(companyId, String(req.params[param])) : null;
+      if (order && !canEditOrderMainFields(req, order)) return forbidden(res, 'Not allowed on this order');
       next();
     } catch (error) {
       internalError(res, error);

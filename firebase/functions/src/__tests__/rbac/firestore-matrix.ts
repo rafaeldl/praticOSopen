@@ -50,6 +50,8 @@ const ADMINS: Actor[] = ['owner', 'admin'];
 const FINANCIAL: Actor[] = ['owner', 'admin', 'manager'];
 const SEE_ALL_ORDERS: Actor[] = ['owner', 'admin', 'manager', 'supervisor'];
 const SIGNED_IN: Actor[] = [...ROLE_ACTORS, 'otherCompany', 'noCompany'];
+const OPERATORS: Actor[] = ['supervisor', 'technician'];
+const RECEIVE_OWN: Actor[] = [...FINANCIAL, 'consultant'];
 
 const C = 'companies/c1';
 
@@ -74,7 +76,12 @@ export interface RulesCase {
 
 const own = (uid: string) => `${C}/orders/own_${uid}`;
 const ownApproved = (uid: string) => `${C}/orders/appr_${uid}`;
+const ownOldApproved = (uid: string) => `${C}/orders/old_${uid}`;
+const ownDone = (uid: string) => `${C}/orders/done_${uid}`;
+const ownPaidQuote = (uid: string) => `${C}/orders/paidq_${uid}`;
+const ownPaidDone = (uid: string) => `${C}/orders/paidd_${uid}`;
 const GHOST_ORDER = `${C}/orders/ghost_quote`;
+const GHOST_APPROVED = `${C}/orders/ghost_approved`;
 
 export const CASES: RulesCase[] = [
   // ─── Company ────────────────────────────────────────────────────────────
@@ -181,8 +188,133 @@ export const CASES: RulesCase[] = [
   },
   {
     id: 'orders.update.others', area: 'OS', title: 'editar OS de outra pessoa',
-    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_ORDER), { status: 'approved' }),
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_ORDER), { dueDate: '2026-12-01T00:00:00.000' }),
     allow: SEE_ALL_ORDERS,
+  },
+  // ─── Orders: field rules (mirrors AuthorizationService) ─────────────────
+  {
+    id: 'orders.status.approveOthersQuote', area: 'OS', title: 'aprovar orçamento de outra pessoa',
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_ORDER), { status: 'approved' }),
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.status.startOwnQuote', area: 'OS', title: 'levar o próprio orçamento direto para em andamento',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, own(uid)), { status: 'progress' }),
+    allow: [...FINANCIAL, ...OPERATORS],
+  },
+  {
+    id: 'orders.status.executeOthers', area: 'OS', title: 'iniciar OS aprovada de outra pessoa',
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_APPROVED), { status: 'progress' }),
+    allow: SEE_ALL_ORDERS,
+  },
+  {
+    id: 'orders.status.finishOwn', area: 'OS', title: 'concluir OS aprovada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { status: 'done' }),
+    allow: [...FINANCIAL, ...OPERATORS],
+  },
+  {
+    id: 'orders.status.cancelApproved', area: 'OS', title: 'cancelar OS aprovada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { status: 'canceled' }),
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.status.reopenDone', area: 'OS', title: 'reabrir OS concluída',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownDone(uid)), { status: 'approved' }),
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.status.backToQuote', area: 'OS', title: 'voltar OS aprovada para orçamento',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { status: 'quote' }),
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.money.receiveOthers', area: 'OS', title: 'lançar recebimento em OS de outra pessoa',
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_APPROVED), {
+      paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10 }],
+    }),
+    allow: FINANCIAL, permission: 'chargeOrder',
+  },
+  {
+    id: 'orders.money.receiveOwn', area: 'OS', title: 'lançar recebimento na OS que criou',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), {
+      paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10 }],
+    }),
+    allow: RECEIVE_OWN,
+  },
+  {
+    id: 'orders.money.markPaid', area: 'OS', title: 'marcar OS como paga sem recebimento',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { payment: 'paid', paid: true }),
+    allow: RECEIVE_OWN,
+  },
+  {
+    // Second write of OrderStore.setStatus: follows status, total and paidAmount.
+    id: 'orders.money.paymentFollowsStatus', area: 'OS', title: 'ajustar situação de pagamento depois de mudar o status',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { payment: 'unpaid', paid: false }),
+    allow: MEMBERS,
+  },
+  {
+    id: 'orders.money.discount', area: 'OS', title: 'dar desconto na OS que criou',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { discount: 10, total: 90 }),
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.total.quote', area: 'OS', title: 'mudar valor do orçamento que criou',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, own(uid)), { total: 50 }),
+    allow: MEMBERS,
+  },
+  {
+    id: 'orders.total.approved', area: 'OS', title: 'mudar valor de OS aprovada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { total: 50 }),
+    allow: RECEIVE_OWN,
+  },
+  {
+    id: 'orders.createdBy.change', area: 'OS', title: 'trocar o autor da OS',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, own(uid)), { createdBy: { id: 'ghost', name: 'Ghost' } }),
+    allow: ADMINS,
+  },
+  {
+    // App up to 1.52: full save with the payment fields, same values.
+    id: 'orders.save.fullLegacy', area: 'OS', title: 'salvar OS aprovada com o documento inteiro (app até 1.52)',
+    run: ({ db, fs, uid }) => fs.setDoc(fs.doc(db, ownApproved(uid)), {
+      status: 'approved', total: 100, discount: 0, paid: false, payment: 'unpaid', paidAmount: 0, transactions: [],
+      createdBy: { id: uid, name: uid }, updatedAt: '2026-11-01T10:00:00.000',
+    }, { merge: true }),
+    allow: MEMBERS,
+  },
+  {
+    // App 1.53+: full save without transactions/paidAmount/paid/payment.
+    id: 'orders.save.fullStripped', area: 'OS', title: 'salvar OS aprovada sem campos de pagamento (app 1.53+)',
+    run: ({ db, fs, uid }) => fs.setDoc(fs.doc(db, ownApproved(uid)), {
+      status: 'approved', total: 100, discount: 0, services: [{ description: 'obs', value: 100 }],
+      createdBy: { id: uid, name: uid }, updatedAt: '2026-11-01T10:00:00.000',
+    }, { merge: true }),
+    allow: MEMBERS,
+  },
+  {
+    // Orders older than the payment fields: the app sends null for keys the document lacks.
+    id: 'orders.save.nullOnOldOrder', area: 'OS', title: 'salvar OS antiga, sem campos de pagamento no documento',
+    run: ({ db, fs, uid }) => fs.setDoc(fs.doc(db, ownOldApproved(uid)), {
+      status: 'approved', total: 100, discount: null, paid: false, payment: 'unpaid', paidAmount: null, transactions: null,
+      createdBy: { id: uid, name: uid }, updatedAt: '2026-11-01T10:00:00.000',
+    }, { merge: true }),
+    allow: MEMBERS,
+  },
+  {
+    id: 'orders.create.withMoney', area: 'OS', title: 'criar OS já com recebimento',
+    run: ({ db, fs, uid }) =>
+      fs.setDoc(fs.doc(db, `${C}/orders/new_${uid}`), {
+        status: 'approved', paidAmount: 100, paid: true, payment: 'paid',
+        createdBy: { id: uid, name: uid }, company: { id: 'c1' },
+      }),
+    allow: ['owner', 'admin', 'consultant'],
+  },
+  {
+    id: 'orders.create.done', area: 'OS', title: 'criar OS já concluída',
+    run: ({ db, fs, uid }) =>
+      fs.setDoc(fs.doc(db, `${C}/orders/new_${uid}`), {
+        status: 'done', createdBy: { id: uid, name: uid }, company: { id: 'c1' },
+      }),
+    allow: ADMINS,
   },
   {
     id: 'orders.delete.ownQuote', area: 'OS', title: 'apagar orçamento que criou',
@@ -197,6 +329,19 @@ export const CASES: RulesCase[] = [
   {
     id: 'orders.delete.approved', area: 'OS', title: 'apagar OS aprovada (não orçamento)',
     run: ({ db, fs, uid }) => fs.deleteDoc(fs.doc(db, ownApproved(uid))),
+    allow: ADMINS,
+  },
+  {
+    id: 'orders.delete.quoteWithMoney', area: 'OS', title: 'apagar orçamento com recebimento',
+    run: ({ db, fs, uid }) => fs.deleteDoc(fs.doc(db, ownPaidQuote(uid))),
+    allow: ADMINS,
+  },
+  {
+    id: 'orders.delete.doneViaQuote', area: 'OS', title: 'voltar OS concluída com recebimento para orçamento e apagar',
+    run: async ({ db, fs, uid }) => {
+      await fs.updateDoc(fs.doc(db, ownPaidDone(uid)), { status: 'quote', payment: null, paid: false });
+      await fs.deleteDoc(fs.doc(db, ownPaidDone(uid)));
+    },
     allow: ADMINS,
   },
   {
@@ -496,12 +641,24 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
   for (const actor of ACTORS) {
     const uid = ACTOR_INFO[actor].uid ?? 'anon';
     set(`${C}/orders/own_${uid}`, { status: 'quote', createdBy: { id: uid, name: uid } });
-    set(`${C}/orders/appr_${uid}`, { status: 'approved', createdBy: { id: uid, name: uid } });
+    const by = { id: uid, name: uid };
+    const money = {
+      total: 100, discount: 0, paidAmount: 100, paid: true, payment: 'paid',
+      transactions: [{ id: 't0', type: 'payment', amount: 100 }],
+    };
+    set(`${C}/orders/appr_${uid}`, {
+      status: 'approved', total: 100, discount: 0, paidAmount: 0, paid: false, payment: 'unpaid', transactions: [], createdBy: by,
+    });
+    set(`${C}/orders/old_${uid}`, { status: 'approved', total: 100, paid: false, payment: 'unpaid', createdBy: by });
+    set(`${C}/orders/done_${uid}`, { status: 'done', total: 100, createdBy: by });
+    set(`${C}/orders/paidq_${uid}`, { ...money, status: 'quote', paid: false, payment: null, createdBy: by });
+    set(`${C}/orders/paidd_${uid}`, { ...money, status: 'done', createdBy: by });
     set(`${C}/notifications/n_${uid}`, { recipientId: uid, read: false });
     const role = ACTOR_INFO[actor].roles.c1;
     if (role) set(`${C}/memberships/${uid}`, { user: { id: uid, name: uid }, role });
   }
   set(GHOST_ORDER, { status: 'quote', createdBy: { id: 'ghost', name: 'Ghost' } });
+  set(GHOST_APPROVED, { status: 'approved', total: 100, createdBy: { id: 'ghost', name: 'Ghost' } });
   set(`${GHOST_ORDER}/photos/p1`, { url: 'x' });
   set(`${GHOST_ORDER}/comments/cm1`, { text: 'oi', author: { userId: 'ghost' } });
   set(`${GHOST_ORDER}/charges/ch1`, { value: 100 });
