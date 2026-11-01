@@ -133,9 +133,52 @@ void main() {
     expect(orderCountForDevice(orders, null), 0);
   });
 
-  test('whatsappNumber adds Brazil code to local numbers', () {
-    expect(whatsappNumber('(11) 90000-0001'), '5511900000001');
-    expect(whatsappNumber('+55 11 90000-0001'), '5511900000001');
+  group('whatsappNumber', () {
+    test('adds Brazil code to local numbers', () {
+      expect(whatsappNumber('(11) 90000-0001'), '5511900000001');
+      expect(whatsappNumber('+55 11 90000-0001'), '5511900000001');
+    });
+
+    test('area code 55 is not mistaken for the country code', () {
+      expect(whatsappNumber('55999990000'), '5555999990000');
+      expect(whatsappNumber('(55) 99999-0000'), '5555999990000');
+      expect(whatsappNumber('5532223344'), '555532223344');
+      expect(whatsappNumber('5599990000'), '555599990000');
+    });
+
+    test('keeps the country code that is already there', () {
+      expect(whatsappNumber('5555999990000'), '5555999990000');
+      expect(whatsappNumber('5548984087801'), '5548984087801');
+      expect(whatsappNumber('+1 (202) 555-0123'), '12025550123');
+      expect(whatsappNumber('+351 912 345 678'), '351912345678');
+      expect(whatsappNumber('+351 912 345 678', country: 'US'), '351912345678');
+    });
+
+    test('drops the leading zero of a national number', () {
+      expect(whatsappNumber('048 98408-7801'), '5548984087801');
+    });
+
+    test('old Brazilian mobile with 8 digits gets the 55', () {
+      expect(whatsappNumber('(48) 8408-7801'), '554884087801');
+      expect(whatsappNumber('+55 48 8408-7801'), '554884087801');
+    });
+
+    test('a company in the US does not get the 55', () {
+      expect(whatsappNumber('(202) 555-0123', country: 'US'), '12025550123');
+      expect(whatsappNumber('5599990000', country: 'US'), '15599990000');
+    });
+
+    test('an unknown or empty country falls back to Brazil', () {
+      expect(whatsappNumber('48984087801', country: ''), '5548984087801');
+      expect(whatsappNumber('48984087801', country: 'XX'), '5548984087801');
+    });
+
+    test('an invalid number goes back as digits only', () {
+      expect(whatsappNumber('123'), '123');
+      expect(whatsappNumber('abc'), '');
+      expect(whatsappNumber(''), '');
+      expect(whatsappNumber('ramal 12', country: 'US'), '12');
+    });
   });
 
   group('currentCustomerId', () {

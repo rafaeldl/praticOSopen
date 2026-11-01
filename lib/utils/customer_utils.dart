@@ -1,3 +1,5 @@
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -146,12 +148,34 @@ int _newestFirst(Order a, Order b) {
   return db.compareTo(da);
 }
 
-/// Number for a `wa.me` link: digits only; Brazilian numbers typed without
-/// the country code (10 or 11 digits) get the 55 prefix.
-String whatsappNumber(String phone) {
-  var digits = phone.replaceAll(RegExp(r'\D'), '');
-  if (digits.startsWith('0')) digits = digits.substring(1);
-  if (digits.length == 10 || digits.length == 11) digits = '55$digits';
+/// Number for a `wa.me` link, the one rule for the whole app.
+///
+/// A number typed with `+` keeps its own country; any other gets the country
+/// code of the company (or [country], an ISO 3166-1 alpha-2 code), Brazil by
+/// default. Numbers that are not valid go back as digits only, except old
+/// Brazilian mobiles (8 digits after the area code, still common on WhatsApp),
+/// which get the 55 too.
+String whatsappNumber(String phone, {String? country}) {
+  final digits = phone.replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) return '';
+  try {
+    final code = (country ?? Global.companyAggr?.country ?? 'BR').toUpperCase();
+    final iso = IsoCode.values.where((c) => c.name == code).firstOrNull ??
+        IsoCode.BR;
+    final typed = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    final international = typed.startsWith('+');
+    final parsed = international
+        ? PhoneNumber.parse(typed)
+        : PhoneNumber.parse(typed, destinationCountry: iso);
+    if (parsed.isValid()) return '${parsed.countryCode}${parsed.nsn}';
+    if (!international &&
+        iso == IsoCode.BR &&
+        (parsed.nsn.length == 10 || parsed.nsn.length == 11)) {
+      return '55${parsed.nsn}';
+    }
+  } catch (_) {
+    // Not a phone number: fall through to the digits.
+  }
   return digits;
 }
 
