@@ -337,6 +337,120 @@ void main() {
       expect(find.textContaining(pt.accountDeletionTakingLong), findsOneWidget);
     });
 
+    group('inside a tab navigator, like the real app', () {
+      Future<void> pumpAccountInTab(
+        WidgetTester tester, {
+        required Future<void> Function() onDelete,
+        Future<void> Function()? onReauth,
+      }) async {
+        await tester.pumpWidget(
+          app(
+            CupertinoTabScaffold(
+              tabBar: CupertinoTabBar(
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(CupertinoIcons.home),
+                    label: 'Aba A',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(CupertinoIcons.money_dollar),
+                    label: 'Aba B',
+                  ),
+                ],
+              ),
+              tabBuilder: (_, __) => CupertinoTabView(
+                builder: (context) => CupertinoPageScaffold(
+                  child: Center(
+                    child: CupertinoButton(
+                      child: const Text('abrir conta'),
+                      onPressed: () => Navigator.push(
+                        context,
+                        CupertinoPageRoute<void>(
+                          builder: (_) => AccountView(
+                            name: 'Maria',
+                            onSignOut: () async {},
+                            deletion: AccountDeletionFlow(
+                              paidPlansEnabled: false,
+                              deleteAccount: onDelete,
+                              reauthenticate: onReauth ?? () async {},
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('abrir conta'));
+        await tester.pumpAndSettle();
+      }
+
+      // The spinner never settles, so pumpAndSettle would hide what is left.
+      Future<void> pumpDialogs(WidgetTester tester) =>
+          tester.pump(const Duration(seconds: 1));
+
+      Future<void> confirmDeletion(WidgetTester tester) async {
+        await tester.tap(find.text('Apagar minha conta'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(pt.continue_));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(pt.permanentlyDelete));
+        await tester.pump();
+        await pumpDialogs(tester);
+        await pumpDialogs(tester);
+      }
+
+      testWidgets('a failed deletion closes the spinner and keeps the screen', (
+        tester,
+      ) async {
+        await pumpAccountInTab(
+          tester,
+          onDelete: () async => throw Exception('network'),
+        );
+        await confirmDeletion(tester);
+
+        expect(find.byType(CupertinoActivityIndicator), findsNothing);
+        expect(find.text(pt.errorDeletingAccount), findsOneWidget);
+
+        await tester.tap(find.text(pt.ok));
+        await tester.pumpAndSettle();
+        expect(find.byType(AccountView), findsOneWidget);
+      });
+
+      testWidgets('a successful deletion closes the spinner', (tester) async {
+        await pumpAccountInTab(tester, onDelete: () async {});
+        await confirmDeletion(tester);
+
+        expect(find.byType(CupertinoActivityIndicator), findsNothing);
+      });
+
+      testWidgets('failed re-authentication closes the spinner and explains', (
+        tester,
+      ) async {
+        await pumpAccountInTab(
+          tester,
+          onDelete: () async => throw Exception('REQUIRES_RECENT_LOGIN'),
+          onReauth: () async => throw Exception('network'),
+        );
+        await confirmDeletion(tester);
+
+        expect(find.byType(CupertinoActivityIndicator), findsNothing);
+        await tester.tap(find.text(pt.signInAgain));
+        await tester.pump();
+        await pumpDialogs(tester);
+        await pumpDialogs(tester);
+
+        expect(find.byType(CupertinoActivityIndicator), findsNothing);
+        expect(find.text(pt.reauthenticationFailed), findsOneWidget);
+        await tester.tap(find.text(pt.ok));
+        await tester.pumpAndSettle();
+        expect(find.byType(AccountView), findsOneWidget);
+      });
+    });
+
     testWidgets('sign out confirms first', (tester) async {
       final calls = await pumpAccount(tester);
       await tester.tap(find.text('Sair'));
