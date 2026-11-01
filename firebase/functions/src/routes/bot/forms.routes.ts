@@ -4,6 +4,7 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess } from '../../middleware/app-permission.middleware';
 import Busboy from 'busboy';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
@@ -16,6 +17,7 @@ import {
   updateFormStatusSchema,
 } from '../../utils/validation.utils';
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 // ============================================================================
 // Form Templates

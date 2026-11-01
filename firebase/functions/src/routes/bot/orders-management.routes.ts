@@ -15,6 +15,7 @@
  */
 
 import { Router, Response } from 'express';
+import { canSeeOrder, checkOrderNumberAccess, forbidden } from '../../middleware/app-permission.middleware';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
@@ -37,6 +38,7 @@ import {
 import { DeviceAggr } from '../../models/types';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 /**
  * POST /api/bot/orders/full
@@ -224,6 +226,10 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
           success: false,
           error: { code: 'NOT_FOUND', message: 'Order not found for update', orderId: data.id },
         });
+        return;
+      }
+      if (!canSeeOrder(req, existingOrder)) {
+        forbidden(res, 'Not allowed on this order');
         return;
       }
 

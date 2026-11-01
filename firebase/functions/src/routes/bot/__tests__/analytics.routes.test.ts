@@ -4,6 +4,9 @@ import { buildApp } from './helpers';
 // ---- Mocks ----------------------------------------------------------------
 
 jest.mock('../../../services/analytics.service');
+jest.mock('../../../services/firestore.service', () => ({
+  db: { collection: () => ({ doc: () => ({ get: async () => ({ data: () => ({}) }) }) }) },
+}));
 jest.mock('../../../middleware/auth.middleware', () => ({
   requireLinked: (_req: any, _res: any, next: any) => next(),
 }));

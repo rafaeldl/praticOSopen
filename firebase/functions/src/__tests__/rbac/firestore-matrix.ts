@@ -223,6 +223,12 @@ export const CASES: RulesCase[] = [
     allow: MEMBERS,
   },
   {
+    id: 'orders.comments.createAsOther', area: 'OS', title: 'comentar em nome de outra pessoa',
+    run: ({ db, fs, uid }) =>
+      fs.setDoc(fs.doc(db, `${own(uid)}/comments/forged_${uid}`), { text: 'oi', author: { userId: 'someone-else' } }),
+    allow: [],
+  },
+  {
     id: 'orders.comments.readOthers', area: 'OS', title: 'ler comentários de OS de outra pessoa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, `${GHOST_ORDER}/comments/cm1`)),
     allow: MEMBERS, permission: 'viewAllOrders',
@@ -470,7 +476,7 @@ export const CASES: RulesCase[] = [
   {
     id: 'shareTokens.read', area: 'Link do cliente', title: 'ler token de link da empresa',
     run: ({ db, fs }) => fs.getDoc(fs.doc(db, 'links/share/tokens/ST_c1')),
-    allow: MEMBERS,
+    allow: [],
   },
   {
     id: 'shareTokens.write', area: 'Link do cliente', title: 'criar link de cliente direto',
