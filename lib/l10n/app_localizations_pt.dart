@@ -1399,7 +1399,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get preparingReport => 'Preparando relatorio...';
+  String get preparingReport => 'Preparando relatório...';
 
   @override
   String get appTagline => 'Sistema de Gestao de Ordens de Servico';
