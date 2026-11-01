@@ -80,6 +80,36 @@ describe('normalizePhone', () => {
   test('supports custom country code', () => {
     expect(normalizePhone('5551234567', '1')).toBe('+15551234567');
   });
+
+  test('keeps number that already has a custom country code', () => {
+    expect(normalizePhone('15551234567', '1')).toBe('+15551234567');
+  });
+
+  test('adds country code to 11-digit number in area code 55', () => {
+    expect(normalizePhone('55999990000')).toBe('+5555999990000');
+  });
+
+  test('adds country code to 10-digit number in area code 55', () => {
+    expect(normalizePhone('5532210000')).toBe('+555532210000');
+  });
+
+  test('adds country code to formatted number in area code 55', () => {
+    expect(normalizePhone('(55) 99999-0000')).toBe('+5555999990000');
+  });
+
+  test('keeps 13-digit number in area code 55 with country code', () => {
+    expect(normalizePhone('5555999990000')).toBe('+5555999990000');
+    expect(normalizePhone('+55 55 99999-0000')).toBe('+5555999990000');
+  });
+
+  test('keeps 12-digit number in area code 55 with country code', () => {
+    expect(normalizePhone('555532210000')).toBe('+555532210000');
+  });
+
+  test('is idempotent for numbers in area code 55', () => {
+    expect(normalizePhone(normalizePhone('55999990000'))).toBe('+5555999990000');
+    expect(normalizePhone(normalizePhone('5532210000'))).toBe('+555532210000');
+  });
 });
 
 // ============================================================================
