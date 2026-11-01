@@ -8,6 +8,7 @@ import { checkOrderNumberAccess, requireAppPermission } from '../../middleware/a
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
 import { getUserAggr } from '../../middleware/company.middleware';
+import { canChangeOrderStatus, forbidden } from '../../middleware/app-permission.middleware';
 import { buildOrderDetail } from '../../utils/bot-response.utils';
 
 const router: Router = Router();
@@ -196,6 +197,11 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
         success: false,
         error: { code: 'NOT_FOUND', message: `OS #${orderNumber} não encontrada.` },
       });
+      return;
+    }
+
+    if (!canChangeOrderStatus(req, order, newStatus)) {
+      forbidden(res, 'Status change not allowed');
       return;
     }
 

@@ -438,6 +438,7 @@ export async function updateOrder(
   if (input.status !== undefined) {
     updateData.status = input.status;
     updateData.done = input.status === 'done';
+    Object.assign(updateData, paymentStatusFields(input.status, existing.total ?? 0, existing.paidAmount ?? 0));
   }
 
   if (input.dueDate !== undefined) {
