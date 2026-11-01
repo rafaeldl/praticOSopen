@@ -151,6 +151,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   Future<void> _pickContact() async {
     final pick = widget.pickContact ?? ContactPickerService().pick;
+    // A field focused behind the native picker brings the keyboard back on top
+    // of every screen that follows.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.delayed(Duration.zero);
     final contact = await pick();
     if (contact == null || !mounted) return;
     final phone = await askContactPhone(context, contact);

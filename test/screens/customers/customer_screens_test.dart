@@ -771,6 +771,29 @@ void main() {
         expect(field('Dani'), findsOneWidget);
       });
 
+      testWidgets('takes the focus off the fields before the picker opens', (
+        tester,
+      ) async {
+        await pumpForm(
+          tester,
+          CustomerFormScreen(
+            asSheet: true,
+            onSave: (_) async {},
+            pickContact: () async {
+              expect(
+                FocusManager.instance.primaryFocus?.context
+                    ?.findAncestorWidgetOfExactType<EditableText>(),
+                isNull,
+              );
+              return null;
+            },
+          ),
+        );
+        await tester.showKeyboard(find.byType(CupertinoTextField).first);
+        await tester.tap(link());
+        await tester.pumpAndSettle();
+      });
+
       testWidgets('editing a customer has no link', (tester) async {
         await pumpForm(
           tester,
