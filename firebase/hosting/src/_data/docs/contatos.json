@@ -1,0 +1,230 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "escolher",
+        "title": "Escolher dos contatos",
+        "intro": "Em vez de digitar, puxe o nome e o telefone do cliente do próprio celular.",
+        "steps": [
+          "Toque em <strong>Novo cliente</strong>, ou no <strong>+</strong> da tela <strong>Qual cliente?</strong> dentro da OS.",
+          "Toque em <strong>Escolher dos contatos</strong>, logo abaixo do telefone.",
+          "Escolha a pessoa na lista do celular.",
+          "Confira os dados e toque no <strong>✓</strong> para salvar."
+        ],
+        "infoCard": {
+          "title": "iPhone e Android",
+          "content": "No iPhone vêm o nome, o telefone e o e-mail. Se a pessoa tem mais de um número, o app pergunta <strong>Qual número?</strong>, e quem não tem número preenche só o nome. No Android, você escolhe o número na própria lista do celular e vêm o nome e esse número; o e-mail você digita, e contatos sem número não aparecem na lista."
+        }
+      },
+      {
+        "id": "receber",
+        "title": "Receber um contato",
+        "intro": "Recebeu ou abriu um contato em outro app? Mande para o PraticOS e ele vira um cliente.",
+        "steps": [
+          "No app Contatos, abra a pessoa e toque em <strong>Compartilhar contato</strong>. Em outros apps, use o compartilhar do cartão de contato, se existir.",
+          "Escolha o <strong>PraticOS</strong> na lista.",
+          "O app abre o <strong>Novo cliente</strong> preenchido. Confira e toque no <strong>✓</strong>."
+        ],
+        "infoCard": {
+          "title": "Nada é salvo sozinho",
+          "content": "O cliente só é criado quando você toca no <strong>✓</strong>. Se o arquivo tiver vários contatos, o app usa o primeiro e avisa. Para isso funcionar você precisa estar logado e seu perfil precisa poder cadastrar clientes."
+        }
+      },
+      {
+        "id": "repetido",
+        "title": "Telefone já cadastrado",
+        "intro": "Ao salvar um cliente novo, o app compara o telefone com os clientes da empresa, mesmo que esteja escrito de outro jeito. No Brasil, tanto faz ter ou não o nono dígito.",
+        "features": [
+          {
+            "title": "Abrir cliente",
+            "description": "Fecha o cadastro e usa o cliente que já existe. Dentro da OS, ele vira o cliente da OS."
+          },
+          {
+            "title": "Salvar mesmo assim",
+            "description": "Cria o cliente novo. Serve para números compartilhados, como o de uma família ou de uma empresa."
+          }
+        ]
+      },
+      {
+        "id": "whatsapp",
+        "title": "Conversa certa no WhatsApp",
+        "intro": "O link da OS, a cobrança e os avisos abrem a conversa pelo telefone do cliente. O app completa o número com o código do país da sua empresa, e um número digitado com <strong>+</strong> mantém o próprio país. Um cliente de outro país deve ser cadastrado com <strong>+</strong>."
+      },
+      {
+        "id": "privacidade",
+        "title": "Sua agenda",
+        "intro": "O PraticOS não lê a sua agenda e não pede permissão de contatos. A lista que aparece é a do próprio celular, e o app só recebe o contato que você escolher ou compartilhar. O arquivo recebido é apagado depois de usado."
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas frequentes",
+        "faq": [
+          {
+            "q": "Se eu mudar o contato no celular, o cliente muda?",
+            "a": "Não. Depois de salvo, o cliente é independente do contato."
+          },
+          {
+            "q": "Dá para importar vários clientes de uma vez?",
+            "a": "Ainda não. Um contato por vez."
+          },
+          {
+            "q": "Dá para mandar um contato pelo WhatsApp para o PraticOS?",
+            "a": "Depende do WhatsApp entregar o cartão de contato a outros apps. Pelo app Contatos e pelo botão <strong>Escolher dos contatos</strong> sempre funciona."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "escolher",
+        "title": "Choose from contacts",
+        "intro": "Instead of typing, pull the customer’s name and phone from your own phone.",
+        "steps": [
+          "Tap <strong>New customer</strong>, or the <strong>+</strong> on the <strong>Which customer?</strong> screen inside an order.",
+          "Tap <strong>Choose from contacts</strong>, right below the phone.",
+          "Choose the person from your phone’s list.",
+          "Check the details and tap <strong>✓</strong> to save."
+        ],
+        "infoCard": {
+          "title": "iPhone and Android",
+          "content": "On iPhone you get the name, phone and e-mail. If the person has more than one number, the app asks <strong>Which number?</strong>, and someone with no number fills in only the name. On Android you choose the number in the phone’s own list and get the name and that number; you type the e-mail, and contacts with no number are not listed."
+        }
+      },
+      {
+        "id": "receber",
+        "title": "Receive a contact",
+        "intro": "Got or opened a contact in another app? Send it to PraticOS and it becomes a customer.",
+        "steps": [
+          "In the Contacts app, open the person and tap <strong>Share contact</strong>. In other apps, use the contact card’s share option, if there is one.",
+          "Choose <strong>PraticOS</strong> from the list.",
+          "The app opens <strong>New customer</strong> filled in. Check it and tap <strong>✓</strong>."
+        ],
+        "infoCard": {
+          "title": "Nothing is saved on its own",
+          "content": "The customer is only created when you tap <strong>✓</strong>. If the file has several contacts, the app uses the first one and tells you. You need to be signed in, and your profile must be able to add customers."
+        }
+      },
+      {
+        "id": "repetido",
+        "title": "Phone already registered",
+        "intro": "When you save a new customer, the app compares the phone with the company’s customers, even if it is written another way. In Brazil, it does not matter whether the ninth digit is there.",
+        "features": [
+          {
+            "title": "Open customer",
+            "description": "Closes the form and uses the existing customer. Inside an order, they become the order’s customer."
+          },
+          {
+            "title": "Save anyway",
+            "description": "Creates the new customer. Useful for shared numbers, such as a family’s or a company’s."
+          }
+        ]
+      },
+      {
+        "id": "whatsapp",
+        "title": "The right WhatsApp chat",
+        "intro": "The order link, the charge and the notices open the chat through the customer’s phone. The app completes the number with your company’s country code, and a number typed with <strong>+</strong> keeps its own country. A customer from another country should be added with <strong>+</strong>."
+      },
+      {
+        "id": "privacidade",
+        "title": "Your address book",
+        "intro": "PraticOS does not read your address book and does not ask for contacts permission. The list you see belongs to the phone, and the app only receives the contact you choose or share. The received file is deleted after use."
+      },
+      {
+        "id": "faq",
+        "title": "Questions",
+        "faq": [
+          {
+            "q": "If I change the contact on my phone, does the customer change?",
+            "a": "No. Once saved, the customer is independent from the contact."
+          },
+          {
+            "q": "Can I import several customers at once?",
+            "a": "Not yet. One contact at a time."
+          },
+          {
+            "q": "Can I send a contact from WhatsApp to PraticOS?",
+            "a": "It depends on WhatsApp handing the contact card to other apps. The Contacts app and the <strong>Choose from contacts</strong> button always work."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "escolher",
+        "title": "Elegir de contactos",
+        "intro": "En lugar de escribir, trae el nombre y el teléfono del cliente desde tu celular.",
+        "steps": [
+          "Toca <strong>Nuevo cliente</strong>, o el <strong>+</strong> de la pantalla <strong>¿Qué cliente?</strong> dentro de la OS.",
+          "Toca <strong>Elegir de contactos</strong>, justo debajo del teléfono.",
+          "Elige a la persona en la lista del celular.",
+          "Revisa los datos y toca <strong>✓</strong> para guardar."
+        ],
+        "infoCard": {
+          "title": "iPhone y Android",
+          "content": "En iPhone llegan el nombre, el teléfono y el correo. Si la persona tiene más de un número, la app pregunta <strong>¿Qué número?</strong>, y quien no tiene número completa solo el nombre. En Android eliges el número en la propia lista del celular y llegan el nombre y ese número; el correo lo escribes tú, y los contactos sin número no aparecen en la lista."
+        }
+      },
+      {
+        "id": "receber",
+        "title": "Recibir un contacto",
+        "intro": "¿Recibiste o abriste un contacto en otra app? Envíalo a PraticOS y se convierte en cliente.",
+        "steps": [
+          "En la app Contactos, abre a la persona y toca <strong>Compartir contacto</strong>. En otras apps, usa la opción de compartir de la tarjeta de contacto, si existe.",
+          "Elige <strong>PraticOS</strong> en la lista.",
+          "La app abre <strong>Nuevo cliente</strong> completado. Revisa y toca <strong>✓</strong>."
+        ],
+        "infoCard": {
+          "title": "Nada se guarda solo",
+          "content": "El cliente solo se crea cuando tocas <strong>✓</strong>. Si el archivo tiene varios contactos, la app usa el primero y avisa. Necesitas tener la sesión iniciada y tu perfil debe poder registrar clientes."
+        }
+      },
+      {
+        "id": "repetido",
+        "title": "Teléfono ya registrado",
+        "intro": "Al guardar un cliente nuevo, la app compara el teléfono con los clientes de la empresa, aunque esté escrito de otra forma. En Brasil, da igual si tiene o no el noveno dígito.",
+        "features": [
+          {
+            "title": "Abrir cliente",
+            "description": "Cierra el registro y usa el cliente que ya existe. Dentro de la OS, pasa a ser el cliente de la OS."
+          },
+          {
+            "title": "Guardar de todos modos",
+            "description": "Crea el cliente nuevo. Sirve para números compartidos, como el de una familia o una empresa."
+          }
+        ]
+      },
+      {
+        "id": "whatsapp",
+        "title": "El chat correcto en WhatsApp",
+        "intro": "El enlace de la OS, el cobro y los avisos abren el chat por el teléfono del cliente. La app completa el número con el código del país de tu empresa, y un número escrito con <strong>+</strong> mantiene su propio país. Un cliente de otro país debe registrarse con <strong>+</strong>."
+      },
+      {
+        "id": "privacidade",
+        "title": "Tu agenda",
+        "intro": "PraticOS no lee tu agenda y no pide permiso de contactos. La lista que ves es la del celular, y la app solo recibe el contacto que elijas o compartas. El archivo recibido se borra después de usarlo."
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas frecuentes",
+        "faq": [
+          {
+            "q": "Si cambio el contacto en el celular, ¿cambia el cliente?",
+            "a": "No. Una vez guardado, el cliente es independiente del contacto."
+          },
+          {
+            "q": "¿Puedo importar varios clientes a la vez?",
+            "a": "Todavía no. Un contacto por vez."
+          },
+          {
+            "q": "¿Puedo enviar un contacto desde WhatsApp a PraticOS?",
+            "a": "Depende de que WhatsApp entregue la tarjeta de contacto a otras apps. La app Contactos y el botón <strong>Elegir de contactos</strong> siempre funcionan."
+          }
+        ]
+      }
+    ]
+  }
+}
