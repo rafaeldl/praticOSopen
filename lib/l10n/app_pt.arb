@@ -569,7 +569,7 @@
       }
     }
   },
-  "preparingReport": "Preparando relatorio...",
+  "preparingReport": "Preparando relatório...",
   "appTagline": "Sistema de Gestao de Ordens de Servico",
   "receivedWithPercent": "Já pago ({percent}%)",
   "@receivedWithPercent": {

@@ -2725,7 +2725,7 @@ abstract class AppLocalizations {
   /// No description provided for @preparingReport.
   ///
   /// In pt, this message translates to:
-  /// **'Preparando relatorio...'**
+  /// **'Preparando relatório...'**
   String get preparingReport;
 
   /// No description provided for @appTagline.
