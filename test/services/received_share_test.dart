@@ -91,7 +91,7 @@ void main() {
         file('a.vcf', utf8.encode('''
 BEGIN:VCARD
 FN:João
-TEL:48984087801
+TEL:48981234567
 END:VCARD
 BEGIN:VCARD
 FN:Bia

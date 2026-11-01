@@ -8,13 +8,13 @@ void main() {
       'VERSION:3.0\r\n'
       'N:Conceição;João;;;\r\n'
       'FN:João Conceição\r\n'
-      'TEL;type=CELL;type=VOICE;type=pref:+55 48 98408-7801\r\n'
+      'TEL;type=CELL;type=VOICE;type=pref:+55 48 98123-4567\r\n'
       'EMAIL;type=INTERNET:joao@example.com\r\n'
       'END:VCARD\r\n',
     );
     expect(cards, hasLength(1));
     expect(cards.first.name, 'João Conceição');
-    expect(cards.first.phones, ['+55 48 98408-7801']);
+    expect(cards.first.phones, ['+55 48 98123-4567']);
     expect(cards.first.email, 'joao@example.com');
   });
 
@@ -25,7 +25,7 @@ void main() {
       'N;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:Concei=C3=A7=C3=A3o;Jo=C3=A3o;;;\n'
       'FN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:Jo=C3=A3o Con=\n'
       'cei=C3=A7=C3=A3o\n'
-      'TEL;CELL:48984087801\n'
+      'TEL;CELL:48981234567\n'
       'END:VCARD\n',
     );
     expect(cards.single.name, 'João Conceição');
@@ -35,15 +35,15 @@ void main() {
     final cards = parseVCards(
       'BEGIN:VCARD\n'
       'FN:Bia\n'
-      'item1.TEL;type=pref:(48) 98408-7801\n'
+      'item1.TEL;type=pref:(48) 98123-4567\n'
       'item1.X-ABLabel:Trabalho\n'
       'TEL;type=HOME:(48) 3222-3344\n'
-      'TEL;type=CELL:48 98408 7801\n'
+      'TEL;type=CELL:48 98123 4567\n'
       'TEL;VALUE=uri:tel:+1-202-555-0123\n'
       'END:VCARD\n',
     );
     expect(cards.single.phones, [
-      '(48) 98408-7801',
+      '(48) 98123-4567',
       '(48) 3222-3344',
       '+1-202-555-0123',
     ]);
@@ -55,7 +55,7 @@ void main() {
       'Dra. Maria Clara Silva',
     );
     expect(
-      parseVCards('BEGIN:VCARD\nORG:Oficina\\, Ltda;Vendas\nTEL:48984087801\nEND:VCARD')
+      parseVCards('BEGIN:VCARD\nORG:Oficina\\, Ltda;Vendas\nTEL:48981234567\nEND:VCARD')
           .single
           .name,
       'Oficina, Ltda',
@@ -63,9 +63,9 @@ void main() {
   });
 
   test('a phone without a name is still a contact', () {
-    final card = parseVCards('BEGIN:VCARD\nTEL:48984087801\nEND:VCARD').single;
+    final card = parseVCards('BEGIN:VCARD\nTEL:48981234567\nEND:VCARD').single;
     expect(card.name, isNull);
-    expect(card.phones, ['48984087801']);
+    expect(card.phones, ['48981234567']);
   });
 
   test('joins folded lines and ignores the photo', () {

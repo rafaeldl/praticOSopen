@@ -700,7 +700,7 @@ void main() {
             onSave: (_) async => saves++,
             pickContact: () async => const ContactCard(
               name: 'Ana Ribeiro',
-              phones: ['+55 48 98408-7801'],
+              phones: ['+55 48 98123-4567'],
               email: 'ana@example.com',
             ),
           ),
@@ -709,7 +709,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(field('Ana Ribeiro'), findsOneWidget);
-        expect(field('(48) 98408-7801'), findsOneWidget);
+        expect(field('(48) 98123-4567'), findsOneWidget);
         expect(field('ana@example.com'), findsOneWidget);
         expect(find.text('E-mail'), findsOneWidget);
         expect(saves, 0);
@@ -724,7 +724,7 @@ void main() {
             onSave: (_) async {},
             pickContact: () async => const ContactCard(
               name: 'Bia',
-              phones: ['(48) 98408-7801', '(48) 3222-3344'],
+              phones: ['(48) 98123-4567', '(48) 3222-3344'],
             ),
           ),
         );
@@ -781,7 +781,7 @@ void main() {
             onSave: (_) async {},
             pickContact: () async => const ContactCard(
               name: 'Bruno',
-              phones: ['48 98408-7801', '48 3333-1111'],
+              phones: ['48 98123-4567', '48 3333-1111'],
               email: 'bruno@example.com',
             ),
           ),
@@ -834,7 +834,7 @@ void main() {
     });
 
     group('repeated phone', () {
-      final existing = customer('c1', 'Ana', phone: '(48) 98408-7801');
+      final existing = customer('c1', 'Ana', phone: '(48) 98123-4567');
 
       Future<Harness> pumpNew(
         WidgetTester tester, {
@@ -859,7 +859,7 @@ void main() {
           tester,
           draft: Customer()
             ..name = 'Ana R.'
-            ..phone = '+55 48 8408-7801',
+            ..phone = '+55 48 8123-4567',
           onSave: (_) async => saves++,
         );
         await tester.tap(save);
@@ -882,7 +882,7 @@ void main() {
           tester,
           draft: Customer()
             ..name = 'Ana R.'
-            ..phone = '48984087801',
+            ..phone = '48981234567',
           onSave: (c) async => saved = c,
         );
         await tester.tap(save);
@@ -921,7 +921,7 @@ void main() {
         await pumpForm(
           tester,
           CustomerFormScreen(
-            customer: customer('c2', 'Ana', phone: '(48) 98408-7801'),
+            customer: customer('c2', 'Ana', phone: '(48) 98123-4567'),
             onSave: (_) async => saves++,
             loadCustomers: () async => [existing],
           ),
@@ -940,7 +940,7 @@ void main() {
           tester,
           draft: Customer()
             ..name = 'Ana R.'
-            ..phone = '48984087801',
+            ..phone = '48981234567',
           onSave: (_) async => saves++,
           load: () async => throw StateError('offline'),
         );
@@ -1544,13 +1544,13 @@ void main() {
         HomeCustomerList(
           canAdd: true,
           directory: FakeDirectory(
-            customers: [customer('c9', 'Carla', phone: '+5548984087801')],
+            customers: [customer('c9', 'Carla', phone: '+5548981234567')],
           ),
         ),
         direct: true,
       );
-      expect(find.text('(48) 98408-7801'), findsOneWidget);
-      expect(find.text('+5548984087801'), findsNothing);
+      expect(find.text('(48) 98123-4567'), findsOneWidget);
+      expect(find.text('+5548981234567'), findsNothing);
     });
 
     testWidgets('searching by plate lists the owner', (tester) async {

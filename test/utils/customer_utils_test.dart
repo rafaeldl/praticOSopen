@@ -148,19 +148,19 @@ void main() {
 
     test('keeps the country code that is already there', () {
       expect(whatsappNumber('5555999990000'), '5555999990000');
-      expect(whatsappNumber('5548984087801'), '5548984087801');
+      expect(whatsappNumber('5548981234567'), '5548981234567');
       expect(whatsappNumber('+1 (202) 555-0123'), '12025550123');
       expect(whatsappNumber('+351 912 345 678'), '351912345678');
       expect(whatsappNumber('+351 912 345 678', country: 'US'), '351912345678');
     });
 
     test('drops the leading zero of a national number', () {
-      expect(whatsappNumber('048 98408-7801'), '5548984087801');
+      expect(whatsappNumber('048 98123-4567'), '5548981234567');
     });
 
     test('old Brazilian mobile with 8 digits gets the 55', () {
-      expect(whatsappNumber('(48) 8408-7801'), '554884087801');
-      expect(whatsappNumber('+55 48 8408-7801'), '554884087801');
+      expect(whatsappNumber('(48) 8123-4567'), '554881234567');
+      expect(whatsappNumber('+55 48 8123-4567'), '554881234567');
     });
 
     test('a company in the US does not get the 55', () {
@@ -169,8 +169,8 @@ void main() {
     });
 
     test('an unknown or empty country falls back to Brazil', () {
-      expect(whatsappNumber('48984087801', country: ''), '5548984087801');
-      expect(whatsappNumber('48984087801', country: 'XX'), '5548984087801');
+      expect(whatsappNumber('48981234567', country: ''), '5548981234567');
+      expect(whatsappNumber('48981234567', country: 'XX'), '5548981234567');
     });
 
     test('an invalid number goes back as digits only', () {
@@ -185,22 +185,22 @@ void main() {
     final list = [
       customer('c1', 'Sem telefone'),
       customer('c2', 'Vazio', phone: '  '),
-      customer('c3', 'Ana', phone: '(48) 98408-7801'),
+      customer('c3', 'Ana', phone: '(48) 98123-4567'),
       customer('c4', 'Bia', phone: '+55 48 3222-3344'),
     ];
 
     test('the same number in another format is a match', () {
-      expect(findCustomerByPhone(list, '48984087801')?.id, 'c3');
-      expect(findCustomerByPhone(list, '+55 48 98408-7801')?.id, 'c3');
+      expect(findCustomerByPhone(list, '48981234567')?.id, 'c3');
+      expect(findCustomerByPhone(list, '+55 48 98123-4567')?.id, 'c3');
       expect(findCustomerByPhone(list, '(48) 3222-3344')?.id, 'c4');
     });
 
     test('in Brazil the ninth digit is ignored', () {
-      expect(findCustomerByPhone(list, '+55 48 8408-7801')?.id, 'c3');
-      expect(findCustomerByPhone(list, '(48) 8408-7801')?.id, 'c3');
+      expect(findCustomerByPhone(list, '+55 48 8123-4567')?.id, 'c3');
+      expect(findCustomerByPhone(list, '(48) 8123-4567')?.id, 'c3');
       expect(
-        findCustomerByPhone([customer('c', 'Old', phone: '554884087801')],
-                '(48) 98408-7801')
+        findCustomerByPhone([customer('c', 'Old', phone: '554881234567')],
+                '(48) 98123-4567')
             ?.id,
         'c',
       );
@@ -208,7 +208,7 @@ void main() {
 
     test('another number or area code is no match', () {
       expect(findCustomerByPhone(list, '(48) 98408-7802'), isNull);
-      expect(findCustomerByPhone(list, '(47) 98408-7801'), isNull);
+      expect(findCustomerByPhone(list, '(47) 98123-4567'), isNull);
     });
 
     test('outside Brazil the ninth digit is not touched', () {

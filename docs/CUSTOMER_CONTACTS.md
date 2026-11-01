@@ -45,7 +45,7 @@ Usam a função: `share_link_service`, `collaborator_form_screen`, `invite_share
 
 ### Telefone repetido
 - Só ao salvar cliente novo com telefone. Editar não avisa.
-- Compara `phoneMatchKey` com os clientes da empresa. No Brasil, tira o nono dígito do celular (`5548984087801` e `554884087801` são o mesmo).
+- Compara `phoneMatchKey` com os clientes da empresa. No Brasil, tira o nono dígito do celular (`5548981234567` e `554881234567` são o mesmo).
 - "Abrir cliente" fecha o formulário devolvendo o cliente que já existe: a lista abre o detalhe, e "Qual cliente?" o escolhe para a OS.
 - "Salvar mesmo assim" cria o novo, porque há números compartilhados.
 - Falha ou demora de mais de 5 segundos ao carregar a lista não impede salvar.
@@ -64,7 +64,7 @@ whatsappNumber('55999990000');                  // 5555999990000
 whatsappNumber('(202) 555-0123', country: 'US'); // 12025550123
 whatsappNumber('+351 912 345 678');              // 351912345678
 
-final duplicate = findCustomerByPhone(customers, '(48) 8408-7801');
+final duplicate = findCustomerByPhone(customers, '(48) 8123-4567');
 ```
 
 ## Para testar em aparelho real
