@@ -1,5 +1,6 @@
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/utils/order_items.dart';
 
 /// Thrown when someone tries to remove a payment created by the Asaas
 /// integration. Those can only be undone by refunding the charge in Asaas.
@@ -98,7 +99,7 @@ class OrderPaymentMath {
       sum += service.value ?? 0.0;
     }
     for (final product in order.products ?? const <OrderProduct>[]) {
-      sum += product.total ?? 0.0;
+      sum += productLineTotal(product) ?? 0.0;
     }
     return sum;
   }

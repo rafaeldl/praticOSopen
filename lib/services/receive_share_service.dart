@@ -6,21 +6,28 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_document.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/order/order_route.dart';
 import 'package:praticos/screens/share/receipt_question.dart';
 import 'package:praticos/screens/share/which_order_sheet.dart';
+import 'package:praticos/screens/widgets/app_toast.dart';
+import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/services/order_saved_elsewhere.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/received_share.dart';
 import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/phone_format.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Receives photos and PDFs shared from other apps and asks "Em qual OS?".
+/// A shared contact opens the new customer form instead.
 ///
 /// Android (intent filters) and iOS (Share Extension in `ios/ShareExtension`).
 /// On iOS the extension copies the files to the App Group container and opens
@@ -49,12 +56,15 @@ class ReceiveShareService {
   }
 
   /// Files from the plugin payload (Android intent or iOS Share Extension).
-  /// Only images and files are kept; text and URLs are ignored.
+  /// Only images and files are kept, plus contact cards, which Android types
+  /// as text; other text and URLs are ignored.
   @visibleForTesting
   static List<ReceivedFile> filesFromShared(List<SharedMediaFile> media) =>
       media
           .where((m) =>
-              m.type == SharedMediaType.image || m.type == SharedMediaType.file)
+              m.type == SharedMediaType.image ||
+              m.type == SharedMediaType.file ||
+              (m.type == SharedMediaType.text && isContactMime(m.mimeType)))
           .map((m) => ReceivedFile(
               path: normalizeSharedPath(m.path), mimeType: m.mimeType))
           .toList();
@@ -80,6 +90,10 @@ class ReceiveShareService {
       final companyId = Global.companyAggr?.id;
       final context = NotificationTapHandler.navigatorKey.currentContext;
       if (companyId == null || context == null) return;
+      if (batch.isOnlyContacts) {
+        await _openContact(context, batch);
+        return;
+      }
       final choice = await WhichOrderSheet.show(context, batch: batch);
       if (choice == null || !context.mounted) return;
       String? orderId = choice.order?.id;
@@ -105,11 +119,71 @@ class ReceiveShareService {
     }
   }
 
+  /// Opens the new customer form filled from the shared contact. The person
+  /// reviews it and saves with the "✓"; a file with several contacts uses the
+  /// first one and says so.
+  Future<void> _openContact(BuildContext context, ReceivedBatch batch) async {
+    final l10n = context.l10n;
+    if (!AuthorizationService.instance
+        .hasPermission(PermissionType.manageCustomers)) {
+      await _alert(context, l10n.contactCannotAddCustomer);
+      return;
+    }
+    final cards = await readContactCards(batch.contacts);
+    if (!context.mounted) return;
+    if (cards.isEmpty) {
+      await _alert(context, l10n.contactReadFailed);
+      return;
+    }
+    final card = cards.first;
+    if (cards.length > 1) {
+      showAppToast(
+        context,
+        l10n.contactFirstOfMany(cards.length),
+        duration: const Duration(seconds: 4),
+      );
+    }
+    final phone = await askContactPhone(context, card);
+    if (!context.mounted || (phone == null && card.phones.isNotEmpty)) return;
+    final draft = Customer()
+      ..name = card.name
+      ..phone = phone == null ? null : formatPhone(phone)
+      ..email = card.email;
+    final customer = await FormSheet.show<Customer>(
+      context,
+      (_) => CustomerFormScreen(asSheet: true, customer: draft),
+    );
+    if (customer == null) return;
+    await NotificationTapHandler.navigatorKey.currentState?.pushNamed(
+      '/customer_detail',
+      arguments: {'customer': customer},
+    );
+  }
+
+  Future<void> _alert(BuildContext context, String message) {
+    return showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Deletes the iOS Share Extension copies (saved, canceled or ignored), so
-  /// the App Group container does not grow with every share.
+  /// the App Group container does not grow with every share. Contact cards
+  /// hold personal data, so their Android copy goes too.
   void _deleteExtensionCopies(List<ReceivedFile> files) {
     for (final f in files) {
-      if (!isShareExtensionCopy(f.path)) continue;
+      final contactCopy =
+          f.kind == ReceivedKind.contact && isAndroidCacheCopy(f.path);
+      if (!isShareExtensionCopy(f.path) && !contactCopy) continue;
       try {
         File(f.path).deleteSync();
       } catch (_) {}

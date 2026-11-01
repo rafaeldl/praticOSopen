@@ -2,9 +2,10 @@
 //  ShareViewController.swift
 //  ShareExtension
 //
-//  "Compartilhar -> PraticOS": receives photos and PDFs from other apps.
-//  receive_sharing_intent copies the files to the App Group container and
-//  opens the app, which asks "Em qual OS?" (see lib/services/receive_share_service.dart).
+//  "Compartilhar -> PraticOS": receives photos, PDFs and contacts from other
+//  apps. receive_sharing_intent copies the files to the App Group container and
+//  opens the app, which asks "Em qual OS?" or, for a contact, opens the new
+//  customer form (see lib/services/receive_share_service.dart).
 //
 
 import UIKit
@@ -12,6 +13,7 @@ import receive_sharing_intent
 
 class ShareViewController: RSIShareViewController {
     private static let pdfType = "com.adobe.pdf"
+    private static let vcardType = "public.vcard"
     private static let fileUrlType = "public.file-url"
 
     private var attachmentsPrepared = false
@@ -21,13 +23,17 @@ class ShareViewController: RSIShareViewController {
     // "public.file-url", so those PDFs would be dropped. Before handing the
     // attachments to the plugin, write such PDFs to a temporary file and
     // expose them as a file URL.
+    //
+    // Contacts (.vcf) always go through the same path, even with a file URL:
+    // "public.vcard" conforms to "public.text", so the plugin would load the
+    // card as text and drop it.
     override func viewDidAppear(_ animated: Bool) {
         if attachmentsPrepared {
             super.viewDidAppear(animated)
             return
         }
         attachmentsPrepared = true
-        preparePdfAttachments { [weak self] in
+        prepareDataAttachments { [weak self] in
             self?.continueWithPlugin(animated)
         }
     }
@@ -36,7 +42,7 @@ class ShareViewController: RSIShareViewController {
         super.viewDidAppear(animated)
     }
 
-    private func preparePdfAttachments(completion: @escaping () -> Void) {
+    private func prepareDataAttachments(completion: @escaping () -> Void) {
         guard let item = extensionContext?.inputItems.first as? NSExtensionItem,
               let providers = item.attachments, !providers.isEmpty else {
             completion()
@@ -48,15 +54,23 @@ class ShareViewController: RSIShareViewController {
         let group = DispatchGroup()
 
         for (index, provider) in providers.enumerated() {
-            guard provider.hasItemConformingToTypeIdentifier(Self.pdfType),
-                  !provider.hasItemConformingToTypeIdentifier(Self.fileUrlType) else {
+            let isContact = provider.hasItemConformingToTypeIdentifier(Self.vcardType)
+            let isPdfData = provider.hasItemConformingToTypeIdentifier(Self.pdfType)
+                && !provider.hasItemConformingToTypeIdentifier(Self.fileUrlType)
+            guard isContact || isPdfData else {
                 continue
             }
             group.enter()
             let suggestedName = provider.suggestedName
-            provider.loadItem(forTypeIdentifier: Self.pdfType, options: nil) { data, _ in
+            let type = isContact ? Self.vcardType : Self.pdfType
+            provider.loadItem(forTypeIdentifier: type, options: nil) { data, _ in
                 defer { group.leave() }
-                guard let url = Self.writeTemporaryPdf(data, suggestedName: suggestedName) else {
+                guard let url = Self.writeTemporaryFile(
+                    data,
+                    suggestedName: suggestedName,
+                    fallbackName: isContact ? "Contato" : "Documento",
+                    fileExtension: isContact ? "vcf" : "pdf"
+                ) else {
                     return
                 }
                 lock.lock()
@@ -71,10 +85,15 @@ class ShareViewController: RSIShareViewController {
         }
     }
 
-    private static func writeTemporaryPdf(_ data: NSSecureCoding?, suggestedName: String?) -> URL? {
+    private static func writeTemporaryFile(
+        _ data: NSSecureCoding?,
+        suggestedName: String?,
+        fallbackName: String,
+        fileExtension: String
+    ) -> URL? {
         var name = (suggestedName ?? "").replacingOccurrences(of: "/", with: "-")
-        if name.isEmpty { name = "Documento" }
-        if !name.lowercased().hasSuffix(".pdf") { name += ".pdf" }
+        if name.isEmpty { name = fallbackName }
+        if !name.lowercased().hasSuffix(".\(fileExtension)") { name += ".\(fileExtension)" }
 
         let fileManager = FileManager.default
         let directory = fileManager.temporaryDirectory
@@ -86,6 +105,8 @@ class ShareViewController: RSIShareViewController {
                 try fileManager.copyItem(at: url, to: destination)
             } else if let bytes = data as? Data {
                 try bytes.write(to: destination)
+            } else if let text = data as? String {
+                try text.write(to: destination, atomically: true, encoding: .utf8)
             } else {
                 return nil
             }

@@ -4539,6 +4539,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerSaveNeedsName => 'Type the name to save.';
 
   @override
+  String get pickFromContacts => 'Choose from contacts';
+
+  @override
+  String get contactWhichNumber => 'Which number?';
+
+  @override
+  String get customerDuplicateTitle => 'Already registered';
+
+  @override
+  String customerDuplicateMessage(String name) {
+    return '$name already has this phone number.';
+  }
+
+  @override
+  String get customerDuplicateOpen => 'Open customer';
+
+  @override
+  String get customerDuplicateSaveAnyway => 'Save anyway';
+
+  @override
+  String get contactReadFailed => 'Couldn\'t read this contact.';
+
+  @override
+  String contactFirstOfMany(int count) {
+    return 'This file has $count contacts. We opened the first one.';
+  }
+
+  @override
+  String get contactCannotAddCustomer => 'Your profile can\'t add customers.';
+
+  @override
   String get customerMoreDataHint => 'E-mail, tax ID, address';
 
   @override

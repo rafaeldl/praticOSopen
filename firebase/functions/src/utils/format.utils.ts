@@ -9,8 +9,14 @@
 export function normalizePhone(phone: string, defaultCountryCode = '55'): string {
   let cleaned = phone.replace(/\D/g, '');
 
+  // A Brazilian number with country code has 12 or 13 digits, so a shorter
+  // one starting with 55 is in area code (DDD) 55, not country code 55
+  const isBrazil = defaultCountryCode === '55';
+  const hasCountryCode = cleaned.startsWith(defaultCountryCode) &&
+    (!isBrazil || cleaned.length >= 12);
+
   // Add country code if not present
-  if (!cleaned.startsWith(defaultCountryCode) && cleaned.length <= 11) {
+  if (!hasCountryCode && cleaned.length <= 11) {
     cleaned = defaultCountryCode + cleaned;
   }
 

@@ -241,6 +241,13 @@ class _FormMoreCardState extends State<FormMoreCard> {
   late bool _open = widget.initiallyOpen;
 
   @override
+  void didUpdateWidget(FormMoreCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Something filled in from outside must not stay hidden.
+    if (widget.initiallyOpen && !oldWidget.initiallyOpen) _open = true;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final secondary = AppColors.textSecondary.resolveFrom(context);
     return Padding(

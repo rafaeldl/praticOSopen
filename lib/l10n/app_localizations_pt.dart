@@ -1399,7 +1399,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get preparingReport => 'Preparando relatorio...';
+  String get preparingReport => 'Preparando relatório...';
 
   @override
   String get appTagline => 'Sistema de Gestao de Ordens de Servico';
@@ -4526,6 +4526,38 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get customerSaveNeedsName => 'Escreva o nome para salvar.';
+
+  @override
+  String get pickFromContacts => 'Escolher dos contatos';
+
+  @override
+  String get contactWhichNumber => 'Qual número?';
+
+  @override
+  String get customerDuplicateTitle => 'Já cadastrado';
+
+  @override
+  String customerDuplicateMessage(String name) {
+    return '$name já está com este telefone.';
+  }
+
+  @override
+  String get customerDuplicateOpen => 'Abrir cliente';
+
+  @override
+  String get customerDuplicateSaveAnyway => 'Salvar mesmo assim';
+
+  @override
+  String get contactReadFailed => 'Não deu para ler este contato.';
+
+  @override
+  String contactFirstOfMany(int count) {
+    return 'Este arquivo tem $count contatos. Abrimos o primeiro.';
+  }
+
+  @override
+  String get contactCannotAddCustomer =>
+      'Seu perfil não pode cadastrar clientes.';
 
   @override
   String get customerMoreDataHint => 'E-mail, CPF ou CNPJ, endereço';

@@ -17,6 +17,9 @@ jest.mock('../../services/catalog.service');
 jest.mock('../../services/order.service');
 jest.mock('../../services/analytics.service');
 jest.mock('../../services/share-token.service');
+jest.mock('../../services/firestore.service', () => ({
+  db: { collection: () => ({ doc: () => ({ get: async () => ({ data: () => ({}) }) }) }) },
+}));
 
 import { registerReadTools } from '../tools/read';
 import {

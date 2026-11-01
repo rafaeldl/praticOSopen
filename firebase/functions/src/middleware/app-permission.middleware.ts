@@ -103,7 +103,7 @@ export async function can(
 }
 
 /** Every order, or only the ones the user created (same as firestore.rules). */
-export function canSeeOrder(req: AuthenticatedRequest, order: Pick<Order, 'createdBy'>): boolean {
+export function canSeeOrder(req: AuthenticatedRequest, order: Partial<Pick<Order, 'createdBy'>>): boolean {
   const role = req.userContext?.role;
   if (role === 'owner' || role === 'admin' || role === 'manager' || role === 'supervisor') return true;
   return !!req.userContext?.userId && order.createdBy?.id === req.userContext.userId;
@@ -159,6 +159,28 @@ export function forbidden(res: Response, message = 'Not allowed'): void {
 function internalError(res: Response, error: unknown): void {
   console.error('Permission check error:', (error as Error).name);
   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal error' } });
+}
+
+/**
+ * router.param callback for `:number`: the order must be one the user can see.
+ * No user context or a missing order goes on to the route, which answers them.
+ */
+export async function checkOrderNumberAccess(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+  value: string,
+): Promise<void> {
+  try {
+    const companyId = req.userContext?.companyId;
+    const orderNumber = parseInt(value, 10);
+    if (!companyId || isNaN(orderNumber) || canSeeOrder(req, {})) return next();
+    const order = await orderService.getOrderByNumber(companyId, orderNumber);
+    if (order && !canSeeOrder(req, order)) return forbidden(res, 'Not allowed on this order');
+    next();
+  } catch (error) {
+    internalError(res, error);
+  }
 }
 
 /** Middleware: 403 unless the user has every one of [permissions]. */
