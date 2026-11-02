@@ -1,5 +1,5 @@
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/customer.dart';
@@ -11,6 +11,7 @@ import 'package:praticos/screens/payments/create_charge_screen.dart'
     show ChargeFormError, chargeFormErrorText, validateChargeInput;
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -59,10 +60,8 @@ class _CreateCustomerChargeScreenState
   final _format = FormatService();
 
   /// Asaas only charges in BRL, whatever the app locale.
-  final _brl = CurrencyTextInputFormatter.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
+  final _brl = MoneyInputFormatter(
+    NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$', decimalDigits: 2),
   );
 
   late final TextEditingController _value;
@@ -92,7 +91,7 @@ class _CreateCustomerChargeScreenState
     final initial = widget.initialValue > 0 && widget.initialValue <= _owed
         ? widget.initialValue
         : _owed;
-    _value = TextEditingController(text: _brl.formatDouble(initial))
+    _value = TextEditingController(text: _brl.textFor(initial))
       ..addListener(_changed);
     _loadTaxId();
   }
@@ -246,7 +245,7 @@ class _CreateCustomerChargeScreenState
               key: const Key('customerChargeValueField'),
               label: l10n.chargeValue,
               controller: _value,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [_brl],
               hint: l10n.receiveCustomerChargeOwedHint(
                 _format.formatBrl(_owed),

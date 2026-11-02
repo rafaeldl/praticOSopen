@@ -165,7 +165,7 @@ void main() {
         'orderServiceIndex': 0,
       });
 
-      await tester.enterText(_key('order_item_value'), '15000');
+      await tester.enterText(_key('order_item_value'), '150');
       await tester.enterText(_key('order_item_notes'), 'Óleo 0W20');
       await tester.tap(_key('order_item_save'));
       await tester.pumpAndSettle();
@@ -339,7 +339,7 @@ void main() {
         contains('106,50'),
       );
 
-      await tester.enterText(_key('order_item_value'), '4000');
+      await tester.enterText(_key('order_item_value'), '40');
       await tester.tap(_key('order_item_save'));
       await tester.pumpAndSettle();
 

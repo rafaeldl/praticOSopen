@@ -155,7 +155,9 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
                   label: l10n.value,
                   controller: _valueController,
                   placeholder: formatter.textFor(0),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [formatter],
                   validator: (text) => text.trim().isEmpty
                       ? config.label(LabelKeys.required)

@@ -278,7 +278,7 @@ void main() {
 
       await tester.enterText(
         find.byKey(const Key('chargeValueField')),
-        '150000',
+        '1500',
       );
       await tester.pumpAndSettle();
 

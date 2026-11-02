@@ -1,5 +1,5 @@
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
@@ -10,6 +10,7 @@ import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/payments/asaas_error_text.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/asaas_api_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -98,10 +99,8 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
   final _formatService = FormatService();
 
   /// Asaas only charges in BRL, whatever the app locale.
-  final _brlFormatter = CurrencyTextInputFormatter.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
+  final _brlFormatter = MoneyInputFormatter(
+    NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$', decimalDigits: 2),
   );
 
   late final TextEditingController _valueController;
@@ -134,7 +133,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
     _dueDate = DateTime(today.year, today.month, today.day + 3);
     _valueController = TextEditingController(
       text: widget.remainingBalance > 0
-          ? _brlFormatter.formatDouble(widget.remainingBalance)
+          ? _brlFormatter.textFor(widget.remainingBalance)
           : '',
     );
     _valueController.addListener(_onValueChanged);
@@ -363,7 +362,7 @@ class _CreateChargeScreenState extends State<CreateChargeScreen> {
               key: const Key('chargeValueField'),
               label: l10n.chargeValue,
               controller: _valueController,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [_brlFormatter],
               hint: l10n.chargeBalanceHint(
                 _formatService.formatBrl(widget.remainingBalance),
