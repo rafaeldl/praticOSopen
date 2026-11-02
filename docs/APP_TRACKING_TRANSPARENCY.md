@@ -35,6 +35,16 @@ que possa rastrear o usuario.
    `ad_user_data` e `ad_personalization` somente com `authorized`. `analytics_storage`
    fica sempre ligado.
 
+## Por que o pedido continua no inicio do app
+
+O teste de usuario de 01/11/2026 pediu para adiar o alerta (issue #491). Ficou como esta, de proposito:
+
+- O Analytics comeca a coletar ao abrir o app, e o `setConsent` so roda depois da resposta. Adiar para depois do login deixaria uma janela de coleta antes do alerta, contra a HIG de privacidade ("before collecting any tracking data") e o que esta documentado abaixo para o reenvio.
+- O `first_open` sairia sem IDFA para quem aceitasse, e a atribuicao de campanhas e o motivo de o app declarar rastreamento.
+- A ultima rejeicao foi justamente por este alerta, e mudar o momento pede um video novo em aparelho fisico.
+
+Para adiar, seria preciso primeiro negar o consentimento de anuncios por padrao ate a resposta, aceitar a perda de atribuicao e gravar o video. A alternativa mais simples e a secao "nao declarar rastreamento" abaixo.
+
 ## Historico de App Review
 
 **12/09/2026 — Guideline 2.1 (Information Needed), 1.49.3 (147), iPad Air M3 / iPadOS 27:**
