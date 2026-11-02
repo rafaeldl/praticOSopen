@@ -3335,40 +3335,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get loginTitle => 'From quote\nto payment,\nin one work order.';
+  String get loginTitle => 'You talk.\nPraticOS';
 
   @override
-  String get loginSampleTitle => 'Work order';
+  String get loginTitleHighlight => 'writes the order.';
 
   @override
-  String get loginSampleNumber => 'No. 0142';
+  String get loginTradeAuto => 'Auto repair';
 
   @override
-  String get loginSampleCustomerLabel => 'Customer';
+  String get loginTradeHvac => 'HVAC';
 
   @override
-  String get loginSampleCustomer => 'Mark Anderson';
+  String get loginSampleSaid => 'You say';
 
   @override
-  String get loginSampleServiceLabel => 'Service';
+  String get loginSampleLine => '“Julia\'s Civic, oil change and alignment”';
 
   @override
-  String get loginSampleService => 'AC cleaning + recharge';
+  String get loginSampleTotal => '\$200.00';
 
   @override
-  String get loginSampleDeliveryLabel => 'Due';
-
-  @override
-  String get loginSampleDelivery => 'Today, 4:00 PM';
-
-  @override
-  String get loginSampleTotalLabel => 'Total';
-
-  @override
-  String get loginSampleTotal => '\$480.00';
-
-  @override
-  String get loginSampleStamp => 'Approved by customer';
+  String get loginSampleDone => 'Order ready to send';
 
   @override
   String get loginWithEmailLink => 'Sign in with email and password';

@@ -58,15 +58,14 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 
 ## Login
 
-Quem chega aqui ainda não conhece o app, então a tela explica o que ele faz antes de pedir a entrada (`lib/screens/login.dart`):
+Quem chega aqui ainda não conhece o app, então a tela explica o que ele faz antes de pedir a entrada, com a mesma linguagem da home do site (`firebase/hosting/design.md`). Se o site mudar de frase, foto ou cor, esta tela muda junto (`lib/screens/login.dart`):
 
-- **Fundo:** azul da marca (`accent`; no escuro, `accentSoft`) com as réguas de formulário (`FormRulerPainter`).
-- **Topo:** ícone e a frase do site, "Do orçamento ao pagamento, numa OS só." (`loginTitle`), com as quebras de linha definidas no `.arb`.
-- **Imagem:** uma OS de exemplo (`LoginSampleOrder`, `lib/screens/widgets/login_sample_order.dart`), desenhada em Flutter e não uma foto: vale para todos os ramos e acompanha idioma e modo escuro. Os dados de exemplo ficam nas chaves `loginSample*` e não passam pelo `FormatService`, porque antes do login não há empresa nem moeda.
-- **Movimento:** a folha sobe de trás do painel e o carimbo aparece no fim. Com "Reduzir movimento", tudo já abre no lugar.
-- **Espaço:** a folha nunca aumenta a altura da tela. Em tela pequena ela encolhe, e com texto grande o painel a corta; sem espaço, ela sai e os botões ficam.
-- **Carimbo:** "Aprovado pelo cliente" é parte da ilustração, igual ao do site. A regra de nunca usar selo colorido continua valendo para status de verdade.
-- **VoiceOver:** a folha é imagem e fica escondida do leitor de tela.
+- **Fundo:** azul-marinho do site (`brandNavy`), igual no claro e no escuro, como as faixas do site.
+- **Topo:** ícone e a frase do site, "Você fala. O PraticOS faz a OS." (`loginTitle` e `loginTitleHighlight`), com a última parte em amarelo (`brandYellow`). A fonte continua a do sistema, porque o app não carrega a Outfit do site.
+- **Imagem:** duas fotos do site com a etiqueta do ramo e, por cima, o cartão da fala que vira OS (`LoginHero`, `lib/screens/widgets/login_hero.dart`). O cartão fica abaixo das pessoas nas fotos: nada de mais linhas nele. Os dados de exemplo são os do site, nas chaves `loginSample*`, e não passam pelo `FormatService`, porque antes do login não há empresa nem moeda.
+- **Movimento:** uma passada só: o cartão aparece e o aviso de OS pronta fecha. Com "Reduzir movimento", tudo já abre pronto.
+- **Espaço:** a imagem nunca aumenta a altura da tela. Em tela pequena as fotos saem primeiro e o cartão encolhe; sem espaço, ele sai também e os botões ficam.
+- **VoiceOver:** a imagem fica escondida do leitor de tela.
 
 ## Cores
 

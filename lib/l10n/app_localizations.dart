@@ -5755,74 +5755,50 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Do orçamento\nao pagamento,\nnuma OS só.'**
+  /// **'Você fala.\nO PraticOS'**
   String get loginTitle;
 
-  /// No description provided for @loginSampleTitle.
+  /// No description provided for @loginTitleHighlight.
   ///
   /// In pt, this message translates to:
-  /// **'Ordem de serviço'**
-  String get loginSampleTitle;
+  /// **'faz a OS.'**
+  String get loginTitleHighlight;
 
-  /// No description provided for @loginSampleNumber.
+  /// No description provided for @loginTradeAuto.
   ///
   /// In pt, this message translates to:
-  /// **'Nº 0142'**
-  String get loginSampleNumber;
+  /// **'Oficina mecânica'**
+  String get loginTradeAuto;
 
-  /// No description provided for @loginSampleCustomerLabel.
+  /// No description provided for @loginTradeHvac.
   ///
   /// In pt, this message translates to:
-  /// **'Cliente'**
-  String get loginSampleCustomerLabel;
+  /// **'Refrigeração'**
+  String get loginTradeHvac;
 
-  /// No description provided for @loginSampleCustomer.
+  /// No description provided for @loginSampleSaid.
   ///
   /// In pt, this message translates to:
-  /// **'Marcos Andrade'**
-  String get loginSampleCustomer;
+  /// **'Você diz'**
+  String get loginSampleSaid;
 
-  /// No description provided for @loginSampleServiceLabel.
+  /// No description provided for @loginSampleLine.
   ///
   /// In pt, this message translates to:
-  /// **'Serviço'**
-  String get loginSampleServiceLabel;
-
-  /// No description provided for @loginSampleService.
-  ///
-  /// In pt, this message translates to:
-  /// **'Limpeza + carga de gás'**
-  String get loginSampleService;
-
-  /// No description provided for @loginSampleDeliveryLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entrega'**
-  String get loginSampleDeliveryLabel;
-
-  /// No description provided for @loginSampleDelivery.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje, 16:00'**
-  String get loginSampleDelivery;
-
-  /// No description provided for @loginSampleTotalLabel.
-  ///
-  /// In pt, this message translates to:
-  /// **'Total'**
-  String get loginSampleTotalLabel;
+  /// **'“Onix da Juliana, troca de óleo e alinhamento”'**
+  String get loginSampleLine;
 
   /// No description provided for @loginSampleTotal.
   ///
   /// In pt, this message translates to:
-  /// **'R\$ 480,00'**
+  /// **'R\$ 200,00'**
   String get loginSampleTotal;
 
-  /// No description provided for @loginSampleStamp.
+  /// No description provided for @loginSampleDone.
   ///
   /// In pt, this message translates to:
-  /// **'Aprovado pelo cliente'**
-  String get loginSampleStamp;
+  /// **'OS pronta para enviar'**
+  String get loginSampleDone;
 
   /// No description provided for @loginWithEmailLink.
   ///

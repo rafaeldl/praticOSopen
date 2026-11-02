@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/login.dart';
-import 'package:praticos/screens/widgets/login_sample_order.dart';
+import 'package:praticos/screens/widgets/login_hero.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -64,35 +65,33 @@ void main() {
     await tester.pumpWidget(_app(_FakeAuthStore()));
 
     expect(
-      find.text('Do orçamento\nao pagamento,\nnuma OS só.'),
+      find.text('Você fala.\nO PraticOS\nfaz a OS.', findRichText: true),
       findsOneWidget,
     );
     expect(find.byType(SignInWithAppleButton), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.text('Entrar com e-mail e senha'), findsOneWidget);
     expect(find.textContaining('Política de Privacidade'), findsOneWidget);
-    expect(find.byType(CustomPaint), findsWidgets);
 
     final bg = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
     );
-    expect(
-      (bg.backgroundColor! as CupertinoDynamicColor).color,
-      const Color(0xFF116BB5),
-    );
+    expect(bg.backgroundColor, AppColors.brandNavy);
   });
 
-  testWidgets('shows the sample order, stamped, once it settles', (
+  testWidgets('shows the photos and the complete order once it settles', (
     tester,
   ) async {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
     await tester.pumpAndSettle();
 
-    expect(find.byType(LoginSampleOrder), findsOneWidget);
-    expect(find.text('Ordem de serviço'), findsOneWidget);
-    expect(find.text('R\$ 480,00'), findsOneWidget);
-    expect(find.text('APROVADO PELO CLIENTE'), findsOneWidget);
+    expect(find.byType(LoginHero), findsOneWidget);
+    expect(find.text('Oficina mecânica'), findsOneWidget);
+    expect(find.text('Refrigeração'), findsOneWidget);
+    expect(find.text('Você diz'), findsOneWidget);
+    expect(find.text('R\$ 200,00'), findsOneWidget);
+    expect(find.text('OS pronta para enviar'), findsOneWidget);
   });
 
   testWidgets('the sample order is a picture: hidden from VoiceOver', (
@@ -103,7 +102,7 @@ void main() {
     await tester.pumpWidget(_app(_FakeAuthStore()));
     await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Marcos Andrade'), findsNothing);
+    expect(find.bySemanticsLabel('OS pronta para enviar'), findsNothing);
     semantics.dispose();
   });
 
@@ -119,15 +118,15 @@ void main() {
     );
 
     expect(tester.hasRunningAnimations, isFalse);
-    final stamp = tester.widget<FadeTransition>(
+    final done = tester.widget<FadeTransition>(
       find
           .ancestor(
-            of: find.text('APROVADO PELO CLIENTE'),
+            of: find.text('OS pronta para enviar'),
             matching: find.byType(FadeTransition),
           )
           .first,
     );
-    expect(stamp.opacity.value, 1);
+    expect(done.opacity.value, 1);
   });
 
   for (final locale in const ['pt', 'en', 'es']) {
@@ -148,7 +147,7 @@ void main() {
     });
   }
 
-  testWidgets('dark: dark blue background and dark panel', (tester) async {
+  testWidgets('dark: same navy background and dark panel', (tester) async {
     useTallScreen(tester);
     await tester.pumpWidget(
       _app(_FakeAuthStore(), brightness: Brightness.dark),
@@ -157,8 +156,7 @@ void main() {
     final scaffold = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
     );
-    final bg = scaffold.backgroundColor! as CupertinoDynamicColor;
-    expect(bg.darkColor, const Color(0xFF142F4B));
+    expect(scaffold.backgroundColor, AppColors.brandNavy);
 
     final panel = tester.widget<Container>(
       find.byKey(const Key('login_panel')),
