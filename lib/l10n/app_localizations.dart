@@ -5896,17 +5896,125 @@ abstract class AppLocalizations {
   /// **'Você diz'**
   String get loginSampleSaid;
 
-  /// No description provided for @loginSampleLine.
+  /// No description provided for @loginSampleAutomotivo.
   ///
   /// In pt, this message translates to:
   /// **'“Onix da Juliana, troca de óleo e alinhamento”'**
-  String get loginSampleLine;
+  String get loginSampleAutomotivo;
 
-  /// No description provided for @loginSampleTotal.
+  /// No description provided for @loginSampleRefrigeracao.
   ///
   /// In pt, this message translates to:
-  /// **'R\$ 200,00'**
-  String get loginSampleTotal;
+  /// **'“Split da Dona Marta, limpeza e recarga de gás”'**
+  String get loginSampleRefrigeracao;
+
+  /// No description provided for @loginSampleEletrica.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Casa do Paulo, troca de disjuntores no quadro”'**
+  String get loginSampleEletrica;
+
+  /// No description provided for @loginSampleAssistenciaCelular.
+  ///
+  /// In pt, this message translates to:
+  /// **'“iPhone do Lucas, troca de tela e bateria”'**
+  String get loginSampleAssistenciaCelular;
+
+  /// No description provided for @loginSampleHidraulica.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Apê da Ana, vazamento no sifão da pia”'**
+  String get loginSampleHidraulica;
+
+  /// No description provided for @loginSampleEnergiaSolar.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Telhado do Carlos, instalar mais duas placas”'**
+  String get loginSampleEnergiaSolar;
+
+  /// No description provided for @loginSampleInformatica.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Notebook da Bia, formatação e troca do SSD”'**
+  String get loginSampleInformatica;
+
+  /// No description provided for @loginSampleLimpeza.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Escritório da Clara, limpeza dos vidros”'**
+  String get loginSampleLimpeza;
+
+  /// No description provided for @loginSampleEletronica.
+  ///
+  /// In pt, this message translates to:
+  /// **'“TV do Seu José, troca da placa principal”'**
+  String get loginSampleEletronica;
+
+  /// No description provided for @loginSampleSegurancaCftv.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Loja do Marcos, instalar quatro câmeras”'**
+  String get loginSampleSegurancaCftv;
+
+  /// No description provided for @loginSampleBicicletaria.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Bike do Pedro, revisão geral e pneu novo”'**
+  String get loginSampleBicicletaria;
+
+  /// No description provided for @loginSampleEletrodomesticos.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Lavadora da Sônia, troca da bomba de água”'**
+  String get loginSampleEletrodomesticos;
+
+  /// No description provided for @loginSampleImpressoras.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Impressora do escritório, troca do fusor”'**
+  String get loginSampleImpressoras;
+
+  /// No description provided for @loginSampleAutomacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Casa da Renata, instalar o painel da sala”'**
+  String get loginSampleAutomacao;
+
+  /// No description provided for @loginSampleDedetizacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Cozinha do Tião, dedetização com laudo”'**
+  String get loginSampleDedetizacao;
+
+  /// No description provided for @loginSampleElevadores.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Prédio Aurora, manutenção mensal do elevador”'**
+  String get loginSampleElevadores;
+
+  /// No description provided for @loginSampleManutencaoPredial.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Condomínio Jardim, vistoria do corredor e do hall”'**
+  String get loginSampleManutencaoPredial;
+
+  /// No description provided for @loginSampleMoveis.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Guarda-roupa da Luciana, montagem e ajustes”'**
+  String get loginSampleMoveis;
+
+  /// No description provided for @loginSampleManutencaoAtivos.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Motor da linha 2, troca de rolamentos”'**
+  String get loginSampleManutencaoAtivos;
+
+  /// No description provided for @loginSampleObrasPublicas.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Rua das Flores, recapeamento do trecho 3”'**
+  String get loginSampleObrasPublicas;
 
   /// No description provided for @loginSampleDone.
   ///

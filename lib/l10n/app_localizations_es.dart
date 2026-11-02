@@ -3439,11 +3439,82 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginSampleSaid => 'Tú dices';
 
   @override
-  String get loginSampleLine =>
+  String get loginSampleAutomotivo =>
       '“El Corolla de Julia, cambio de aceite y alineación”';
 
   @override
-  String get loginSampleTotal => '\$ 200,00';
+  String get loginSampleRefrigeracao =>
+      '“El aire de doña Marta, limpieza y recarga de gas”';
+
+  @override
+  String get loginSampleEletrica =>
+      '“Casa de Pablo, cambio de disyuntores en el tablero”';
+
+  @override
+  String get loginSampleAssistenciaCelular =>
+      '“iPhone de Lucas, cambio de pantalla y batería”';
+
+  @override
+  String get loginSampleHidraulica =>
+      '“Apartamento de Ana, fuga en el sifón del fregadero”';
+
+  @override
+  String get loginSampleEnergiaSolar =>
+      '“Techo de Carlos, instalar dos paneles más”';
+
+  @override
+  String get loginSampleInformatica =>
+      '“Portátil de Bea, formateo y cambio de SSD”';
+
+  @override
+  String get loginSampleLimpeza => '“Oficina de Clara, limpieza de vidrios”';
+
+  @override
+  String get loginSampleEletronica =>
+      '“Tele de don José, cambio de placa principal”';
+
+  @override
+  String get loginSampleSegurancaCftv =>
+      '“Tienda de Marcos, instalar cuatro cámaras”';
+
+  @override
+  String get loginSampleBicicletaria =>
+      '“Bici de Pedro, revisión general y neumático nuevo”';
+
+  @override
+  String get loginSampleEletrodomesticos =>
+      '“Lavadora de Sonia, cambio de la bomba de agua”';
+
+  @override
+  String get loginSampleImpressoras =>
+      '“Impresora de la oficina, cambio del fusor”';
+
+  @override
+  String get loginSampleAutomacao =>
+      '“Casa de Renata, instalar el panel de la sala”';
+
+  @override
+  String get loginSampleDedetizacao =>
+      '“Cocina de Tito, fumigación con informe”';
+
+  @override
+  String get loginSampleElevadores =>
+      '“Edificio Aurora, mantenimiento mensual del ascensor”';
+
+  @override
+  String get loginSampleManutencaoPredial =>
+      '“Condominio Jardín, inspección de pasillo y vestíbulo”';
+
+  @override
+  String get loginSampleMoveis => '“Armario de Lucía, montaje y ajustes”';
+
+  @override
+  String get loginSampleManutencaoAtivos =>
+      '“Motor de la línea 2, cambio de rodamientos”';
+
+  @override
+  String get loginSampleObrasPublicas =>
+      '“Calle de las Flores, repavimentación del tramo 3”';
 
   @override
   String get loginSampleDone => 'Orden lista para enviar';
