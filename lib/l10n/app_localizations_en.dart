@@ -3370,11 +3370,82 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get loginTitle => 'Sign in to get started';
+  String get loginTitle => 'You talk.\nPraticOS';
 
   @override
-  String get loginSubtitle =>
-      'Your orders stay saved and your team sees the same ones.';
+  String get loginTitleHighlight => 'writes the order.';
+
+  @override
+  String get loginTradeAutomotivo => 'Auto Repair Shop';
+
+  @override
+  String get loginTradeRefrigeracao => 'HVAC Technician';
+
+  @override
+  String get loginTradeEletrica => 'Electrician';
+
+  @override
+  String get loginTradeAssistenciaCelular => 'Phone Repair Shop';
+
+  @override
+  String get loginTradeHidraulica => 'Plumbing';
+
+  @override
+  String get loginTradeEnergiaSolar => 'Solar Installer';
+
+  @override
+  String get loginTradeInformatica => 'IT Services';
+
+  @override
+  String get loginTradeLimpeza => 'Cleaning Services';
+
+  @override
+  String get loginTradeEletronica => 'Electronics Repair';
+
+  @override
+  String get loginTradeSegurancaCftv => 'CCTV & Security';
+
+  @override
+  String get loginTradeBicicletaria => 'Bike Shop';
+
+  @override
+  String get loginTradeEletrodomesticos => 'Appliance Repair';
+
+  @override
+  String get loginTradeImpressoras => 'Printers';
+
+  @override
+  String get loginTradeAutomacao => 'Home Automation';
+
+  @override
+  String get loginTradeDedetizacao => 'Pest Control';
+
+  @override
+  String get loginTradeElevadores => 'Elevator Maintenance';
+
+  @override
+  String get loginTradeManutencaoPredial => 'Building Maintenance';
+
+  @override
+  String get loginTradeMoveis => 'Furniture Assembly';
+
+  @override
+  String get loginTradeManutencaoAtivos => 'Asset Maintenance';
+
+  @override
+  String get loginTradeObrasPublicas => 'Public Works';
+
+  @override
+  String get loginSampleSaid => 'You say';
+
+  @override
+  String get loginSampleLine => '“Julia\'s Civic, oil change and alignment”';
+
+  @override
+  String get loginSampleTotal => '\$200.00';
+
+  @override
+  String get loginSampleDone => 'Order ready to send';
 
   @override
   String get loginWithEmailLink => 'Sign in with email and password';

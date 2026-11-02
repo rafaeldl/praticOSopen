@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/email_login_screen.dart';
+import 'package:praticos/screens/widgets/login_hero.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -11,9 +12,10 @@ import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Login screen: `accentSoft` "order form" background with ruler lines, the app
-/// icon and a short phrase on top, and a rounded panel at the bottom with the
-/// native Apple button, the Google button and the e-mail link.
+/// Login screen, in the language of the site: navy background, the app icon and
+/// the site's phrase on top, photos of people at work with the spoken order over
+/// them, and a rounded panel at the bottom with the native Apple button, the
+/// Google button and the e-mail link.
 ///
 /// UI only: authentication goes through [AuthStore] untouched.
 class LoginPage extends StatefulWidget {
@@ -30,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
   static const _buttonHeight = 58.0;
   static const _buttonRadius = BorderRadius.all(Radius.circular(14));
+  static const _heroMaxWidth = 480.0;
 
   @override
   void didChangeDependencies() {
@@ -39,43 +42,42 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final background = AppColors.accentSoft.resolveFrom(context);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: SystemUiOverlayStyle.light,
       child: CupertinoPageScaffold(
-        backgroundColor: background,
+        backgroundColor: AppColors.brandNavy,
         child: DefaultTextStyle(
           style: CupertinoTheme.of(context).textTheme.textStyle,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: FormRulerPainter(
-                    color: AppColors.accent
-                        .resolveFrom(context)
-                        .withValues(alpha: isDark ? 0.22 : 0.12),
+          child: SafeArea(
+            bottom: false,
+            child: CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: _heroMaxWidth,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildHeader(context),
+                                const Expanded(child: _HeroArea()),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      _buildPanel(context),
+                    ],
                   ),
                 ),
-              ),
-              SafeArea(
-                bottom: false,
-                child: CustomScrollView(
-                  slivers: [
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Column(
-                        children: [
-                          Expanded(child: _buildHeader(context)),
-                          _buildPanel(context),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -83,45 +85,48 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final textColor = AppColors.text.resolveFrom(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Semantics(
-              label: 'PraticOS',
-              image: true,
-              child: ExcludeSemantics(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: Image.asset(
-                    'assets/images/icon.png',
-                    width: 88,
-                    height: 88,
-                    cacheWidth: 264,
-                    fit: BoxFit.cover,
-                  ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            label: 'PraticOS',
+            image: true,
+            child: ExcludeSemantics(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 44,
+                  height: 44,
+                  cacheWidth: 132,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            const SizedBox(height: 28),
-            Text(
-              context.l10n.loginTitle,
-              textAlign: TextAlign.center,
-              style: AppTypography.title.copyWith(color: textColor),
+          ),
+          const SizedBox(height: 12),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: '${context.l10n.loginTitle}\n'),
+                TextSpan(
+                  text: context.l10n.loginTitleHighlight,
+                  style: const TextStyle(color: AppColors.brandYellow),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              context.l10n.loginSubtitle,
-              textAlign: TextAlign.center,
-              style: AppTypography.callout.copyWith(
-                color: AppColors.textSecondary.resolveFrom(context),
-              ),
+            style: AppTypography.title.copyWith(
+              color: CupertinoColors.white,
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+              letterSpacing: 0,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -307,24 +312,20 @@ class _LoginPageState extends State<LoginPage> {
       );
 }
 
-/// Draws subtle horizontal rules, like the lines of a service-order form.
-class FormRulerPainter extends CustomPainter {
-  const FormRulerPainter({required this.color, this.spacing = 36});
-
-  final Color color;
-  final double spacing;
+/// Takes what is left between the header and the panel.
+///
+/// The hero goes in a [Positioned] so it never adds to the scroll height: on
+/// short screens or with large text the buttons push it away instead.
+class _HeroArea extends StatelessWidget {
+  const _HeroArea();
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    for (double y = spacing; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+  Widget build(BuildContext context) {
+    return const Stack(
+      children: [
+        SizedBox.expand(),
+        Positioned.fill(child: LoginHero()),
+      ],
+    );
   }
-
-  @override
-  bool shouldRepaint(FormRulerPainter old) =>
-      old.color != color || old.spacing != spacing;
 }

@@ -5761,14 +5761,158 @@ abstract class AppLocalizations {
   /// No description provided for @loginTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Entre para começar'**
+  /// **'Você fala.\nO PraticOS'**
   String get loginTitle;
 
-  /// No description provided for @loginSubtitle.
+  /// No description provided for @loginTitleHighlight.
   ///
   /// In pt, this message translates to:
-  /// **'Suas OS ficam salvas e a equipe vê as mesmas.'**
-  String get loginSubtitle;
+  /// **'faz a OS.'**
+  String get loginTitleHighlight;
+
+  /// No description provided for @loginTradeAutomotivo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Oficina Mecânica'**
+  String get loginTradeAutomotivo;
+
+  /// No description provided for @loginTradeRefrigeracao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Refrigeração'**
+  String get loginTradeRefrigeracao;
+
+  /// No description provided for @loginTradeEletrica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Elétrica'**
+  String get loginTradeEletrica;
+
+  /// No description provided for @loginTradeAssistenciaCelular.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistência de Celular'**
+  String get loginTradeAssistenciaCelular;
+
+  /// No description provided for @loginTradeHidraulica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hidráulica'**
+  String get loginTradeHidraulica;
+
+  /// No description provided for @loginTradeEnergiaSolar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Energia Solar'**
+  String get loginTradeEnergiaSolar;
+
+  /// No description provided for @loginTradeInformatica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informática'**
+  String get loginTradeInformatica;
+
+  /// No description provided for @loginTradeLimpeza.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpeza'**
+  String get loginTradeLimpeza;
+
+  /// No description provided for @loginTradeEletronica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Eletrônica'**
+  String get loginTradeEletronica;
+
+  /// No description provided for @loginTradeSegurancaCftv.
+  ///
+  /// In pt, this message translates to:
+  /// **'Segurança CFTV'**
+  String get loginTradeSegurancaCftv;
+
+  /// No description provided for @loginTradeBicicletaria.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bicicletaria'**
+  String get loginTradeBicicletaria;
+
+  /// No description provided for @loginTradeEletrodomesticos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Eletrodomésticos'**
+  String get loginTradeEletrodomesticos;
+
+  /// No description provided for @loginTradeImpressoras.
+  ///
+  /// In pt, this message translates to:
+  /// **'Impressoras'**
+  String get loginTradeImpressoras;
+
+  /// No description provided for @loginTradeAutomacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Automação Residencial'**
+  String get loginTradeAutomacao;
+
+  /// No description provided for @loginTradeDedetizacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dedetização'**
+  String get loginTradeDedetizacao;
+
+  /// No description provided for @loginTradeElevadores.
+  ///
+  /// In pt, this message translates to:
+  /// **'Elevadores'**
+  String get loginTradeElevadores;
+
+  /// No description provided for @loginTradeManutencaoPredial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenção Predial'**
+  String get loginTradeManutencaoPredial;
+
+  /// No description provided for @loginTradeMoveis.
+  ///
+  /// In pt, this message translates to:
+  /// **'Móveis'**
+  String get loginTradeMoveis;
+
+  /// No description provided for @loginTradeManutencaoAtivos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenção de Ativos'**
+  String get loginTradeManutencaoAtivos;
+
+  /// No description provided for @loginTradeObrasPublicas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obras Públicas'**
+  String get loginTradeObrasPublicas;
+
+  /// No description provided for @loginSampleSaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você diz'**
+  String get loginSampleSaid;
+
+  /// No description provided for @loginSampleLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'“Onix da Juliana, troca de óleo e alinhamento”'**
+  String get loginSampleLine;
+
+  /// No description provided for @loginSampleTotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'R\$ 200,00'**
+  String get loginSampleTotal;
+
+  /// No description provided for @loginSampleDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS pronta para enviar'**
+  String get loginSampleDone;
 
   /// No description provided for @loginWithEmailLink.
   ///

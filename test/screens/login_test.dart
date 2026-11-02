@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/login.dart';
+import 'package:praticos/screens/widgets/login_hero.dart';
+import 'package:praticos/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -27,11 +29,15 @@ class _FakeAuthStore implements AuthStore {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Widget _app(_FakeAuthStore auth, {Brightness brightness = Brightness.light}) {
+Widget _app(
+  _FakeAuthStore auth, {
+  Brightness brightness = Brightness.light,
+  Locale locale = const Locale('pt'),
+}) {
   return Provider<AuthStore>.value(
     value: auth,
     child: CupertinoApp(
-      locale: const Locale('pt'),
+      locale: locale,
       theme: CupertinoThemeData(brightness: brightness),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -58,23 +64,124 @@ void main() {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
 
-    expect(find.text('Entre para começar'), findsOneWidget);
+    expect(
+      find.text('Você fala.\nO PraticOS\nfaz a OS.', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.byType(SignInWithAppleButton), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);
     expect(find.text('Entrar com e-mail e senha'), findsOneWidget);
     expect(find.textContaining('Política de Privacidade'), findsOneWidget);
-    expect(find.byType(CustomPaint), findsWidgets);
 
     final bg = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
     );
-    expect(
-      (bg.backgroundColor! as CupertinoDynamicColor).color,
-      const Color(0xFFE0F1FF),
-    );
+    expect(bg.backgroundColor, AppColors.brandNavy);
   });
 
-  testWidgets('dark: dark blue background and dark panel', (tester) async {
+  testWidgets('shows the photos and the complete order once it settles', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.byType(LoginHero), findsOneWidget);
+    expect(find.text('Oficina Mecânica'), findsOneWidget);
+    expect(find.text('Refrigeração'), findsOneWidget);
+    expect(find.text('Você diz'), findsOneWidget);
+    expect(find.text('R\$ 200,00'), findsOneWidget);
+    expect(find.text('OS pronta para enviar'), findsOneWidget);
+  });
+
+  testWidgets('the sample order is a picture: hidden from VoiceOver', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.bySemanticsLabel('OS pronta para enviar'), findsNothing);
+    semantics.dispose();
+  });
+
+  testWidgets('with Reduce Motion the order is already in place', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: _app(_FakeAuthStore()),
+      ),
+    );
+
+    expect(tester.hasRunningAnimations, isFalse);
+    final done = tester.widget<FadeTransition>(
+      find
+          .ancestor(
+            of: find.text('OS pronta para enviar'),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
+    );
+    expect(done.opacity.value, 1);
+  });
+
+  double reelOffset(WidgetTester tester) => tester
+      .state<ScrollableState>(find.byType(Scrollable).last)
+      .position
+      .pixels;
+
+  testWidgets('the reel passes to the side and a tap pauses it', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final moved = reelOffset(tester);
+    expect(moved, greaterThan(0));
+
+    await tester.tap(find.text('Oficina Mecânica'));
+    await tester.pump();
+    final paused = reelOffset(tester);
+    await tester.pump(const Duration(seconds: 1));
+    expect(reelOffset(tester), paused);
+  });
+
+  testWidgets('with Reduce Motion the reel stands still', (tester) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: _app(_FakeAuthStore()),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(reelOffset(tester), 0);
+  });
+
+  for (final locale in const ['pt', 'en', 'es']) {
+    testWidgets('small screen with large text does not overflow ($locale)', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320 * 2, 568 * 2);
+      tester.view.devicePixelRatio = 2;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+      await tester.pumpWidget(_app(_FakeAuthStore(), locale: Locale(locale)));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SignInWithAppleButton), findsOneWidget);
+    });
+  }
+
+  testWidgets('dark: same navy background and dark panel', (tester) async {
     useTallScreen(tester);
     await tester.pumpWidget(
       _app(_FakeAuthStore(), brightness: Brightness.dark),
@@ -83,8 +190,7 @@ void main() {
     final scaffold = tester.widget<CupertinoPageScaffold>(
       find.byType(CupertinoPageScaffold),
     );
-    final bg = scaffold.backgroundColor! as CupertinoDynamicColor;
-    expect(bg.darkColor, const Color(0xFF142F4B));
+    expect(scaffold.backgroundColor, AppColors.brandNavy);
 
     final panel = tester.widget<Container>(
       find.byKey(const Key('login_panel')),
@@ -105,7 +211,7 @@ void main() {
     final auth = _FakeAuthStore();
     await tester.pumpWidget(_app(auth));
     await tester.tap(find.text('Continuar com Google'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(auth.googleCalls, 1);
   });
 
@@ -117,7 +223,7 @@ void main() {
       ..appleError = Exception('[firebase_auth/network-request-failed] x');
     await tester.pumpWidget(_app(auth));
     await tester.tap(find.byType(SignInWithAppleButton));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(
       find.text('Não deu para entrar com a Apple. Tente de novo.'),
       findsOneWidget,
@@ -129,7 +235,7 @@ void main() {
       message: 'canceled',
     );
     await tester.tap(find.byType(SignInWithAppleButton));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(find.byKey(const Key('login_error')), findsNothing);
   });
 }

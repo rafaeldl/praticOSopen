@@ -120,6 +120,11 @@ class AppColors {
         darkHighContrastColor: Color(0xFF000000),
       );
 
+  /// Site navy and logo yellow, for the screens that speak the site's language
+  /// (login). The same in both modes, like the site's navy bands.
+  static const brandNavy = Color(0xFF07294F);
+  static const brandYellow = Color(0xFFFFC921);
+
   /// Highlighter (logo yellow): marks what the AI is about to change. Only that.
   /// Text on it is always [onMarker], in both modes.
   static const marker = CupertinoDynamicColor.withBrightnessAndContrast(

@@ -3362,10 +3362,83 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get loginTitle => 'Entre para começar';
+  String get loginTitle => 'Você fala.\nO PraticOS';
 
   @override
-  String get loginSubtitle => 'Suas OS ficam salvas e a equipe vê as mesmas.';
+  String get loginTitleHighlight => 'faz a OS.';
+
+  @override
+  String get loginTradeAutomotivo => 'Oficina Mecânica';
+
+  @override
+  String get loginTradeRefrigeracao => 'Refrigeração';
+
+  @override
+  String get loginTradeEletrica => 'Elétrica';
+
+  @override
+  String get loginTradeAssistenciaCelular => 'Assistência de Celular';
+
+  @override
+  String get loginTradeHidraulica => 'Hidráulica';
+
+  @override
+  String get loginTradeEnergiaSolar => 'Energia Solar';
+
+  @override
+  String get loginTradeInformatica => 'Informática';
+
+  @override
+  String get loginTradeLimpeza => 'Limpeza';
+
+  @override
+  String get loginTradeEletronica => 'Eletrônica';
+
+  @override
+  String get loginTradeSegurancaCftv => 'Segurança CFTV';
+
+  @override
+  String get loginTradeBicicletaria => 'Bicicletaria';
+
+  @override
+  String get loginTradeEletrodomesticos => 'Eletrodomésticos';
+
+  @override
+  String get loginTradeImpressoras => 'Impressoras';
+
+  @override
+  String get loginTradeAutomacao => 'Automação Residencial';
+
+  @override
+  String get loginTradeDedetizacao => 'Dedetização';
+
+  @override
+  String get loginTradeElevadores => 'Elevadores';
+
+  @override
+  String get loginTradeManutencaoPredial => 'Manutenção Predial';
+
+  @override
+  String get loginTradeMoveis => 'Móveis';
+
+  @override
+  String get loginTradeManutencaoAtivos => 'Manutenção de Ativos';
+
+  @override
+  String get loginTradeObrasPublicas => 'Obras Públicas';
+
+  @override
+  String get loginSampleSaid => 'Você diz';
+
+  @override
+  String get loginSampleLine =>
+      '“Onix da Juliana, troca de óleo e alinhamento”';
+
+  @override
+  String get loginSampleTotal => 'R\$ 200,00';
+
+  @override
+  String get loginSampleDone => 'OS pronta para enviar';
 
   @override
   String get loginWithEmailLink => 'Entrar com e-mail e senha';

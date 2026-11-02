@@ -56,6 +56,17 @@ Protótipos de referência (canvas): https://claude.ai/artifact/NfHsv1Ge52LXGdpd
 13. **Sem botão "Editar".** Cada linha abre o seu editor: o que já existe abre empurrado ou em sheet pequena; item novo abre em sheet grande (regra 9).
 14. **Menu "…" para o raro.** Fica no topo, em vidro (`showPullDownMenu`), com grupos separados e ícone em cada ação. Ordem: mudar a situação › · "Adicionar à OS" (só o que o registro ainda não tem) · arquivo (Ver PDF, Copiar link) · destrutivas em vermelho no fim (Cancelar, Apagar), sempre com confirmação. O que é frequente sai do menu e ganha lugar próprio (link na seção, botão do topo ou Foto na barra).
 
+## Login
+
+Quem chega aqui ainda não conhece o app, então a tela explica o que ele faz antes de pedir a entrada, com a mesma linguagem da home do site (`firebase/hosting/design.md`). Se o site mudar de frase, foto ou cor, esta tela muda junto (`lib/screens/login.dart`):
+
+- **Fundo:** azul-marinho do site (`brandNavy`), igual no claro e no escuro, como as faixas do site.
+- **Topo:** ícone e a frase do site, "Você fala. O PraticOS faz a OS." (`loginTitle` e `loginTitleHighlight`), com a última parte em amarelo (`brandYellow`). A fonte continua a do sistema, porque o app não carrega a Outfit do site.
+- **Imagem:** faixa com as fotos dos 20 ramos do site (`assets/images/trades/`), cada uma com a etiqueta do ramo, e o cartão da fala que vira OS (`LoginHero`, `lib/screens/widgets/login_hero.dart`). O cartão fica abaixo das pessoas nas fotos: nada de mais linhas nele. Os dados de exemplo são os do site, nas chaves `loginSample*`, e não passam pelo `FormatService`, porque antes do login não há empresa nem moeda.
+- **Movimento:** a faixa passa devagar para o lado, sem parar, como a do site; um toque pausa e o dedo arrasta. O cartão faz uma passada só e termina no aviso de OS pronta. Com "Reduzir movimento", tudo já abre pronto e a faixa só anda com o dedo.
+- **Espaço:** a imagem nunca aumenta a altura da tela. Em tela pequena as fotos saem primeiro e o cartão encolhe; sem espaço, ele sai também e os botões ficam.
+- **VoiceOver:** a imagem fica escondida do leitor de tela.
+
 ## Cores
 
 Cada cor tem um papel só. Componentes usam o papel, nunca o hex.
