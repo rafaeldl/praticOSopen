@@ -69,7 +69,7 @@ class _HostState extends State<_Host> {
 
   /// What the store would load for each view.
   List<Order> get _orders => switch (view) {
-    HomeView.open || HomeView.mine =>
+    HomeView.open || HomeView.mine || HomeView.quotes =>
       widget.orders.where((o) => !HomeRules.isFinished(o)).toList(),
     HomeView.done => widget.orders.where((o) => o.status == 'done').toList(),
     HomeView.all => widget.orders,
@@ -211,14 +211,8 @@ void main() {
     expect(find.text('Elis'), findsOneWidget);
   });
 
-  testWidgets('search shows up only when the list is pulled down', (
-    tester,
-  ) async {
+  testWidgets('search is on screen from the start', (tester) async {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
-    expect(find.byType(CupertinoSearchTextField), findsNothing);
-
-    await tester.drag(find.text('Bruno'), const Offset(0, 300));
-    await tester.pumpAndSettle();
     expect(find.byType(CupertinoSearchTextField), findsOneWidget);
     expect(find.text('Buscar OS, cliente ou veículo'), findsOneWidget);
 
@@ -230,6 +224,82 @@ void main() {
     await tester.tap(find.text('Cancelar'));
     await tester.pumpAndSettle();
     expect(find.text('Bruno'), findsOneWidget);
+  });
+
+  testWidgets('search finds orders by status, without the accent', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            Order()
+              ..id = 'q'
+              ..status = 'quote'
+              ..customer = (CustomerAggr()..name = 'Quitéria'),
+            Order()
+              ..id = 'a'
+              ..status = 'approved'
+              ..customer = (CustomerAggr()..name = 'Aprígio'),
+          ],
+        ),
+      ),
+    );
+    await tester.enterText(find.byType(CupertinoSearchTextField), 'orcamento');
+    await tester.pumpAndSettle();
+    expect(find.text('Quitéria'), findsOneWidget);
+    expect(find.text('Aprígio'), findsNothing);
+  });
+
+  testWidgets('Orçamentos shows only quotes, the oldest first', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            Order()
+              ..id = 'new'
+              ..status = 'quote'
+              ..createdAt = DateTime(2026, 10, 20)
+              ..customer = (CustomerAggr()..name = 'Nova'),
+            Order()
+              ..id = 'old'
+              ..status = 'quote'
+              ..createdAt = DateTime(2026, 9, 1)
+              ..customer = (CustomerAggr()..name = 'Antiga'),
+            Order()
+              ..id = 'a'
+              ..status = 'approved'
+              ..customer = (CustomerAggr()..name = 'Aprovada'),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Orçamentos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aprovada'), findsNothing);
+    expect(find.text('2 orçamentos sem resposta'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Antiga')).dy,
+      lessThan(tester.getTopLeft(find.text('Nova')).dy),
+    );
+  });
+
+  testWidgets('Orçamentos without quotes says so', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        _Host(
+          orders: [
+            Order()
+              ..id = 'a'
+              ..status = 'approved'
+              ..customer = (CustomerAggr()..name = 'Aprovada'),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Orçamentos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhum orçamento sem resposta.'), findsOneWidget);
   });
 
   testWidgets('top bar: bell with unread count and the company button', (

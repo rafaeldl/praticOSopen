@@ -6,6 +6,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/models/app_notification.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/menu_navigation/more/reminders_screen.dart';
 import 'package:praticos/screens/notifications/notification_list_tile.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
@@ -50,6 +51,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
           openNotificationOrder(context, notification);
         },
         onMarkAllRead: store.markAllAsRead,
+        onOpenReminders: () => Navigator.of(context).push(
+          CupertinoPageRoute<void>(builder: (_) => const RemindersScreen()),
+        ),
       ),
     );
   }
@@ -84,6 +88,7 @@ class NotificationListView extends StatelessWidget {
     this.isLoading = false,
     this.hasError = false,
     this.onRetry,
+    this.onOpenReminders,
     this.now,
   });
 
@@ -93,6 +98,9 @@ class NotificationListView extends StatelessWidget {
   final VoidCallback? onRetry;
   final ValueChanged<AppNotification> onOpen;
   final VoidCallback onMarkAllRead;
+
+  /// "Ajustar lembretes": the reminders settings.
+  final VoidCallback? onOpenReminders;
 
   /// Clock, injected in tests.
   final DateTime Function()? now;
@@ -126,7 +134,14 @@ class NotificationListView extends StatelessWidget {
           else if (notifications.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: EmptyState(title: l10n.noticesEmpty),
+              child: EmptyState(
+                title: l10n.noticesEmpty,
+                message: l10n.noticesEmptyHint(l10n.orderShort),
+                actionLabel: onOpenReminders == null
+                    ? null
+                    : l10n.noticesRemindersLink,
+                onAction: onOpenReminders,
+              ),
             )
           else ...[
             SliverToBoxAdapter(child: _header(context, unread.length)),

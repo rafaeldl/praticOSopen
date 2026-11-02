@@ -2517,5 +2517,26 @@
       "plan": { "type": "String" }
     }
   },
-  "courtesyBannerLater": "Ahora no"
+  "courtesyBannerLater": "Ahora no",
+  "filterQuotes": "Presupuestos",
+  "homeQuotesWaiting": "{count, plural, =1{1 presupuesto sin respuesta} other{{count} presupuestos sin respuesta}}",
+  "noQuotesWaiting": "Ningún presupuesto sin respuesta.",
+  "ratingsEmptyHint": "La evaluación llega cuando el cliente pone la nota por el enlace de la {order}, una vez terminada. Para pedir una, abre una {order} concluida y manda el enlace al cliente.",
+  "noticesEmptyHint": "Aquí aparece lo que pasa en tus {order}: aprobaciones del cliente, comentarios, evaluaciones y pagos. Los recordatorios de horas agendadas llegan directo al celular.",
+  "noticesRemindersLink": "Ajustar recordatorios",
+  "reminderWillNotify": "La app avisa {time} antes.",
+  "reminderIsOff": "Recordatorio desactivado.",
+  "reminderPhoneBlocked": "Los avisos están desactivados en los Ajustes del celular.",
+  "reminderAdjust": "Ajustar",
+  "reminderNotificationTitle": "Agendado a las {time}",
+  "notificationPromptTitle": "Avisos de PraticOS",
+  "notificationPromptMessage": "La app te recuerda antes de cada hora agendada y avisa cuando el cliente aprueba un presupuesto. El celular preguntará si puede enviar estos avisos.",
+  "continueAction": "Continuar",
+  "checklistOfferTitle": "¿Hacer el checklist de entrada?",
+  "checklistOfferMessage": "Registra cómo llegó {device}, antes de empezar el servicio.",
+  "checklistOfferAction": "Hacer checklist",
+  "moreContractsSubtitle": "Mantenimiento que se repite solo",
+  "contractsOffQuestion": "¿Tienes clientes fijos o mantenimiento que se repite?",
+  "contractsOffMessage": "Con contratos lo acuerdas una vez, por ejemplo cada 6 meses, y la app se encarga de la próxima {order} en la fecha correcta.",
+  "contractsOffAction": "Usar contratos"
 }

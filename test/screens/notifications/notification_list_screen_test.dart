@@ -163,6 +163,7 @@ void main() {
   testWidgets('empty, loading and error states', (tester) async {
     await tester.pumpWidget(_app(_view(const [])));
     expect(find.text('Nenhum aviso por enquanto.'), findsOneWidget);
+    expect(find.textContaining('aprovação do cliente'), findsOneWidget);
 
     await tester.pumpWidget(_app(_view(const [], isLoading: true)));
     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);

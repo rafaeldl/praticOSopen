@@ -9,6 +9,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/subscription.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/contracts/contracts_off_screen.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/more/account_screen.dart';
 import 'package:praticos/screens/menu_navigation/more/advanced_screen.dart';
@@ -57,7 +58,9 @@ class _SettingsState extends State<Settings> {
           _authService.hasPermission(PermissionType.viewProducts);
       final visibility = MoreVisibility(
         customers: _authService.hasPermission(PermissionType.viewCustomers),
-        contracts: config.useContracts,
+        // With the switch off, who can turn it on still finds the row.
+        contracts: config.useContracts ||
+            _authService.hasPermission(PermissionType.manageCompany),
         company: _authService.hasPermission(PermissionType.manageCompany),
         team: _authService.hasPermission(PermissionType.manageUsers),
         catalog: canViewServices || canViewProducts,
@@ -109,7 +112,19 @@ class _SettingsState extends State<Settings> {
       case MoreDestination.customers:
         _push(context, HomeCustomerList());
       case MoreDestination.contracts:
-        Navigator.of(context, rootNavigator: true).pushNamed('/contract_list');
+        if (config.useContracts) {
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).pushNamed('/contract_list');
+        } else {
+          Navigator.of(context, rootNavigator: true).push(
+            CupertinoPageRoute<void>(
+              builder: (_) =>
+                  ContractsOffScreen(companyId: Global.companyAggr?.id),
+            ),
+          );
+        }
       case MoreDestination.company:
         _push(
           context,

@@ -6022,4 +6022,90 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get courtesyBannerLater => 'Agora não';
+
+  @override
+  String get filterQuotes => 'Orçamentos';
+
+  @override
+  String homeQuotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orçamentos sem resposta',
+      one: '1 orçamento sem resposta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noQuotesWaiting => 'Nenhum orçamento sem resposta.';
+
+  @override
+  String ratingsEmptyHint(String order) {
+    return 'A avaliação chega quando o cliente dá a nota pelo link da $order, depois que ela fica pronta. Para pedir uma, abra uma $order concluída e mande o link para o cliente.';
+  }
+
+  @override
+  String noticesEmptyHint(String order) {
+    return 'Aqui aparece o que acontece nas suas $order: aprovação do cliente, comentários, avaliações e pagamentos. Os lembretes de horário marcado chegam direto no celular.';
+  }
+
+  @override
+  String get noticesRemindersLink => 'Ajustar lembretes';
+
+  @override
+  String reminderWillNotify(String time) {
+    return 'O app avisa $time antes.';
+  }
+
+  @override
+  String get reminderIsOff => 'Lembrete desligado.';
+
+  @override
+  String get reminderPhoneBlocked =>
+      'Os avisos estão desligados nos Ajustes do celular.';
+
+  @override
+  String get reminderAdjust => 'Ajustar';
+
+  @override
+  String reminderNotificationTitle(String time) {
+    return 'Agendamento às $time';
+  }
+
+  @override
+  String get notificationPromptTitle => 'Avisos do PraticOS';
+
+  @override
+  String get notificationPromptMessage =>
+      'O app lembra você antes de cada horário marcado e avisa quando o cliente aprova um orçamento. O celular vai perguntar se pode mandar esses avisos.';
+
+  @override
+  String get continueAction => 'Continuar';
+
+  @override
+  String get checklistOfferTitle => 'Fazer o checklist de entrada?';
+
+  @override
+  String checklistOfferMessage(String device) {
+    return 'Registre como $device chegou, antes de começar o serviço.';
+  }
+
+  @override
+  String get checklistOfferAction => 'Fazer checklist';
+
+  @override
+  String get moreContractsSubtitle => 'Manutenção que se repete sozinha';
+
+  @override
+  String get contractsOffQuestion =>
+      'Tem cliente fixo ou manutenção que se repete?';
+
+  @override
+  String contractsOffMessage(String order) {
+    return 'Com contratos, você combina uma vez, por exemplo a cada 6 meses, e o app cuida da próxima $order na data certa.';
+  }
+
+  @override
+  String get contractsOffAction => 'Usar contratos';
 }
