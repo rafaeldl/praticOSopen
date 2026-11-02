@@ -29,6 +29,22 @@ void main() {
   List<PaymentAllocation> split(double amount) =>
       allocatePayment(orders.map(OpenBalance.ofOrder).toList(), amount);
 
+  test('the payment method goes to every payment and to the receipt', () {
+    final plan = buildReceiptPlan(
+      receiptId: 'r1',
+      customer: customer,
+      orders: orders,
+      allocations: split(750),
+      paidAt: paidAt,
+      paymentMethod: PaymentMethod.cash,
+      now: now,
+    );
+
+    expect(plan.transactions['a']!.paymentMethod, PaymentMethod.cash);
+    expect(plan.transactions['b']!.paymentMethod, PaymentMethod.cash);
+    expect(plan.receipt.paymentMethod, PaymentMethod.cash);
+  });
+
   test('one payment per order with its share, date and receipt id', () {
     final plan = buildReceiptPlan(
       receiptId: 'r1',

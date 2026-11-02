@@ -2,8 +2,8 @@
 
 ## Visão Geral
 
-Geração do PDF da Ordem de Serviço, usado pelo "Compartilhar PDF / Imprimir" da tela de OS
-e pela tela de preview (`PdfPreviewScreen`).
+Geração do PDF da Ordem de Serviço. "Ver PDF", no menu "…" da OS, gera o documento e o mostra
+em `PdfViewerScreen`; compartilhar é um segundo passo, no botão do topo dessa tela.
 
 O PDF é composto por:
 
@@ -23,7 +23,7 @@ Planos Free recebem marca d'água (ver `FeatureGateService.shouldShowPdfWatermar
 | `lib/services/pdf/pdf_forms_builder.dart` | Widgets das páginas de formulários |
 | `lib/services/pdf/pdf_photo_grid.dart` | Grid de fotos compartilhado entre os dois builders |
 | `lib/services/pdf/pdf_image_loader.dart` | Download + cache das imagens (logo, badges, fotos) |
-| `lib/services/pdf/pdf_localizations.dart` | Strings do PDF (sem acentos, para as fontes Helvetica) |
+| `lib/services/pdf/pdf_localizations.dart` | Strings do PDF, iguais às do `.arb` |
 | `lib/services/pdf/pdf_styles.dart` | Cores, espaçamentos e formato de página |
 
 ## Fluxo de Dados
@@ -40,6 +40,14 @@ PdfFormsBuilder.buildFormContent(...)         →  uma página por formulário
         ↓
 doc.save() → Uint8List
 ```
+
+## Fontes
+
+A página usa a Helvetica embutida no PDF, que só desenha Latin-1 (cobre os acentos do português
+e do espanhol). O que a pessoa digita fora disso (o "μ" grego de "35μF", "€", aspas curvas do
+iPhone) sai pela fonte reserva `assets/fonts/Roboto-Regular.ttf` (`pdfFallbackTheme`, licença
+Apache 2.0 em `assets/fonts/Roboto_LICENSE.txt`). Ela só entra no arquivo quando algum caractere
+precisa dela, sem mudar o layout do resto, e se não carregar o PDF sai do mesmo jeito.
 
 ## Fotos no PDF
 

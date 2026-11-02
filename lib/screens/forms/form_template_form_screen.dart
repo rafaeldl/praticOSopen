@@ -21,6 +21,7 @@ import 'package:praticos/screens/widgets/pull_down_menu.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
 import 'package:praticos/screens/widgets/status_dot.dart';
 import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -810,7 +811,9 @@ class _QuestionEditorState extends State<_QuestionEditor> {
           AppFormField(
             label: l10n.checklistQuestion,
             controller: _label,
-            placeholder: l10n.checklistQuestionPlaceholder,
+            placeholder: l10n.checklistQuestionPlaceholder(
+              SegmentConfigService().exampleSegment,
+            ),
             textCapitalization: TextCapitalization.sentences,
             autofocus: widget.existing == null,
           ),

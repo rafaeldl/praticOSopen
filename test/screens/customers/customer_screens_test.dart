@@ -1073,7 +1073,7 @@ void main() {
       );
       expect(find.text('Ligar'), findsOneWidget);
       expect(find.text('WhatsApp'), findsOneWidget);
-      expect(find.text('Placa ABC1D23 · 2 OS'), findsOneWidget);
+      expect(find.textContaining('ABC1D23 · 2 OS'), findsOneWidget);
       expect(find.textContaining('Cadastrar outro'), findsOneWidget);
       expect(find.text('Últimas OS'), findsOneWidget);
       expect(find.text('OS 3 · Revisão'), findsOneWidget);

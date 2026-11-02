@@ -558,7 +558,7 @@
       }
     }
   },
-  "pageOf": "Pagina {current} de {total}",
+  "pageOf": "Página {current} de {total}",
   "@pageOf": {
     "placeholders": {
       "current": {
@@ -570,7 +570,7 @@
     }
   },
   "preparingReport": "Preparando relatório...",
-  "appTagline": "Sistema de Gestao de Ordens de Servico",
+  "appTagline": "Sistema de Gestão de Ordens de Serviço",
   "receivedWithPercent": "Já pago ({percent}%)",
   "@receivedWithPercent": {
     "placeholders": {
@@ -588,13 +588,13 @@
     }
   },
   "generatedByPraticos": "Gerado por PraticOS",
-  "serviceDescriptionColumn": "DESCRICAO DO SERVICO",
-  "descriptionColumn": "DESCRICAO",
+  "serviceDescriptionColumn": "DESCRIÇÃO DO SERVIÇO",
+  "descriptionColumn": "DESCRIÇÃO",
   "unitShort": "UNIT.",
-  "alreadyPaid": "Ja pago",
+  "alreadyPaid": "Já pago",
   "remainingBalance": "SALDO RESTANTE",
   "totalToPay": "TOTAL A PAGAR",
-  "photosAvailableDigitally": "Fotos disponiveis no sistema digital",
+  "photosAvailableDigitally": "Fotos disponíveis no sistema digital",
   "attachedPhotosCount": "Fotos Anexadas ({count})",
   "@attachedPhotosCount": {
     "placeholders": {
@@ -603,8 +603,8 @@
       }
     }
   },
-  "photoRecord": "REGISTRO FOTOGRAFICO",
-  "partsAndProducts": "PECAS E PRODUTOS",
+  "photoRecord": "REGISTRO FOTOGRÁFICO",
+  "partsAndProducts": "PEÇAS E PRODUTOS",
   "nPhotosCount": "{count} {count, plural, =1{foto} other{fotos}}",
   "@nPhotosCount": {
     "placeholders": {
@@ -613,8 +613,8 @@
       }
     }
   },
-  "notSelected": "Nao selecionado",
-  "formLabelWithTitle": "Formulario: {title}",
+  "notSelected": "Não selecionado",
+  "formLabelWithTitle": "Formulário: {title}",
   "@formLabelWithTitle": {
     "placeholders": {
       "title": {
@@ -793,24 +793,24 @@
   "termsOfService": "Termos e Condições",
   "termsOfServicePlaceholder": "Ex: Equipamentos não retirados em 90 dias poderão ser descartados...",
   "useDefaultTerms": "Usar texto padrão do segmento",
-  "pdfTermsAndConditions": "Termos e Condicoes",
-  "pdfCompanySignature": "Responsavel",
+  "pdfTermsAndConditions": "Termos e Condições",
+  "pdfCompanySignature": "Responsável",
   "pdfClientSignature": "Cliente",
-  "pdfTechnician": "Tecnico",
+  "pdfTechnician": "Técnico",
   "pdfCreatedDate": "Criada",
-  "pdfCompletedDate": "Concluida",
+  "pdfCompletedDate": "Concluída",
   "pdfIssuedDate": "Emitida",
-  "pdfServicesSubtotal": "Subtotal Servicos",
-  "pdfPartsSubtotal": "Subtotal Pecas",
+  "pdfServicesSubtotal": "Subtotal Serviços",
+  "pdfPartsSubtotal": "Subtotal Peças",
   "pdfPaid": "Pago",
   "pdfUnitValue": "Valor Unit.",
-  "pdfServiceType": "Servico",
-  "pdfProductType": "Peca",
+  "pdfServiceType": "Serviço",
+  "pdfProductType": "Peça",
   "pdfItemType": "Tipo",
   "pdfSummary": "Resumo",
   "pdfGeneral": "Geral",
   "pdfTrackOnline": "Acompanhe online",
-  "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
+  "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de serviço",
   "pdfEquipment": "Equipamento",
   "upgrade": "Fazer upgrade",
   "formTemplates": "formulários",
@@ -960,15 +960,8 @@
   "asaasErrorUnavailable": "O Asaas está indisponível no momento. Tente novamente em instantes.",
   "listLoadError": "Não deu para carregar. Verifique a internet e tente de novo.",
   "pickCustomerTitle": "Quem é o cliente?",
-  "searchCustomerPlaceholder": "Buscar por nome, telefone ou placa",
-  "plateValue": "Placa {plate}",
-  "@plateValue": {
-    "placeholders": {
-      "plate": {
-        "type": "String"
-      }
-    }
-  },
+  "searchCustomerPlaceholder": "Buscar por nome, telefone ou {serial}",
+  "@searchCustomerPlaceholder": {"placeholders": {"serial": {"type": "String"}}},
   "customerNamePlaceholder": "Ex.: Ana Ribeiro",
   "customerNameRequired": "Digite o nome do cliente",
   "customerPhoneLabel": "Telefone ou WhatsApp",
@@ -1047,8 +1040,10 @@
   "catalogNewProduct": "Novo produto",
   "saveServiceButton": "Salvar serviço",
   "saveProductButton": "Salvar produto",
-  "serviceNameHint": "Ex.: Troca de óleo",
-  "productNameHint": "Ex.: Filtro de óleo",
+  "serviceNameHint": "Ex.: {segment, select, automotive{Troca de óleo} hvac{Limpeza do split} smartphones{Troca de tela} computers{Formatação} appliances{Conserto de geladeira} electrical{Troca de disjuntor} plumbing{Conserto de vazamento} security{Instalação de câmera} solar{Limpeza das placas} printers{Troca de toner} bicycles{Revisão completa} other{Manutenção}}",
+  "@serviceNameHint": {"placeholders": {"segment": {"type": "String"}}},
+  "productNameHint": "Ex.: {segment, select, automotive{Filtro de óleo} hvac{Capacitor} smartphones{Tela} computers{Memória RAM} appliances{Resistência} electrical{Disjuntor} plumbing{Registro} security{Câmera} solar{Inversor} printers{Toner} bicycles{Câmara de ar} other{Peça de reposição}}",
+  "@productNameHint": {"placeholders": {"segment": {"type": "String"}}},
   "serviceNameRequired": "Digite o nome do serviço",
   "productNameRequired": "Digite o nome do produto",
   "catalogPriceLabel": "Preço",
@@ -2226,7 +2221,8 @@
   "orderAssistantPhoto": "Foto",
   "orderAssistantTalkShort": "Falar",
   "orderCustomerRequestTitle": "O que o cliente pediu",
-  "orderCustomerRequestPlaceholder": "Ex.: barulho ao frear",
+  "orderCustomerRequestPlaceholder": "Ex.: {segment, select, automotive{barulho ao frear} hvac{não está gelando} smartphones{tela quebrada} computers{não liga} appliances{parou de funcionar} electrical{tomada sem energia} plumbing{vazamento na pia} security{câmera sem imagem} solar{geração baixa} printers{papel enroscando} bicycles{corrente pulando} other{não está funcionando}}",
+  "@orderCustomerRequestPlaceholder": {"placeholders": {"segment": {"type": "String"}}},
   "orderDeliverySection": "Entrega",
   "orderDueLabel": "Fica pronto",
   "orderDueNone": "Sem data",
@@ -2235,7 +2231,8 @@
   "orderStatusLabel": "Situação",
   "orderScheduleLabel": "Visita",
   "orderAddressLabel": "Local",
-  "speechHint": "Fale o cliente, o veículo e o que vai ser feito.",
+  "speechHint": "Fale o cliente, o {device} e o que vai ser feito.",
+  "@speechHint": {"placeholders": {"device": {"type": "String"}}},
   "speechListening": "Ouvindo…",
   "speechFill": "Preencher a OS",
   "speechUnavailable": "O microfone não está liberado. Libere em Ajustes ou digite o serviço.",
@@ -2253,7 +2250,8 @@
   "orderAssistantMarked": "Preenchido pela IA",
   "speechCancel": "Cancelar fala",
   "speechStopAndFill": "Parar e preencher a OS",
-  "speechTypeHint": "Escreva o cliente, o veículo e o que vai ser feito",
+  "speechTypeHint": "Escreva o cliente, o {device} e o que vai ser feito",
+  "@speechTypeHint": {"placeholders": {"device": {"type": "String"}}},
   "speechNothingHeard": "Não ouvi nada. Toque em Falar e tente de novo.",
   "orderServicesAndParts": "Serviços e peças",
   "orderItemKindPart": "peça",
@@ -2378,8 +2376,6 @@
   "@contactFirstOfMany": {"placeholders": {"count": {"type": "int"}}},
   "contactCannotAddCustomer": "Seu perfil não pode cadastrar clientes.",
   "customerMoreDataHint": "E-mail, CPF ou CNPJ, endereço",
-  "deviceSaveNeedsField": "Preencha o campo {field} para salvar.",
-  "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},
   "deviceMoreDataHint": "Foto, {brand} e {category}",
   "@deviceMoreDataHint": {"placeholders": {"brand": {"type": "String"}, "category": {"type": "String"}}},
   "catalogMoreDataHintFields": "Foto e outros campos",
@@ -2400,7 +2396,8 @@
   "@checklistDeleteMessage": {"placeholders": {"name": {"type": "String"}}},
   "checklistQuestionNew": "Nova pergunta",
   "checklistQuestion": "Pergunta",
-  "checklistQuestionPlaceholder": "Ex.: Os pneus estão bons?",
+  "checklistQuestionPlaceholder": "Ex.: {segment, select, automotive{Os pneus estão bons?} hvac{O dreno está livre?} smartphones{A tela liga?} computers{O ventilador gira?} appliances{O aparelho liga?} electrical{O quadro está identificado?} plumbing{Há sinal de vazamento?} security{As câmeras estão gravando?} solar{As placas estão limpas?} printers{A impressão sai nítida?} bicycles{Os freios estão bons?} other{Está funcionando?}}",
+  "@checklistQuestionPlaceholder": {"placeholders": {"segment": {"type": "String"}}},
   "checklistAnswerType": "Tipo de resposta",
   "checklistOptions": "Opções",
   "checklistOptionsPlaceholder": "Ex.: Bom\nRegular\nRuim",
@@ -2885,5 +2882,20 @@
       "plan": { "type": "String" }
     }
   },
-  "courtesyBannerLater": "Agora não"
+  "courtesyBannerLater": "Agora não",
+  "deviceSaveNeedsAny": "Preencha {first} ou {second} para salvar.",
+  "@deviceSaveNeedsAny": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
+  "orderStatusVisit": "{status} · visita {date}",
+  "@orderStatusVisit": {"placeholders": {"status": {"type": "String"}, "date": {"type": "String"}}},
+  "orderOpenChecklist": "Abrir checklist",
+  "orderPdfTitle": "{order} {number}",
+  "@orderPdfTitle": {"placeholders": {"order": {"type": "String"}, "number": {"type": "String"}}},
+  "receivePaymentMethod": "Forma de pagamento",
+  "receivePaymentMethodOptional": "Opcional",
+  "receivePaymentMethodQuestion": "Como foi pago?",
+  "receivePaymentMethodNone": "Não informar",
+  "paymentMethodPix": "Pix",
+  "paymentMethodCash": "Dinheiro",
+  "paymentMethodCard": "Cartão",
+  "paymentMethodOther": "Outro"
 }

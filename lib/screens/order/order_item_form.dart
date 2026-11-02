@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/money_field.dart';
@@ -491,7 +492,7 @@ class OrderItemDeviceRow extends StatelessWidget {
           ].where((s) => s.isNotEmpty).join(' · ');
     return FormRow(
       key: const ValueKey('order_item_device'),
-      icon: CupertinoIcons.car_detailed,
+      icon: SegmentConfigProvider.instance.deviceIcon,
       title: label,
       value: name,
       showChevron: enabled,

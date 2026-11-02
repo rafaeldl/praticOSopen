@@ -642,7 +642,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   Widget _vehicleRow(DeviceAggr vehicle, List<Order> orders) {
     final l10n = context.l10n;
     final parts = [
-      if (vehicle.serial?.isNotEmpty ?? false) l10n.plateValue(vehicle.serial!),
+      if (vehicle.serial?.isNotEmpty ?? false)
+        SegmentConfigProvider.instance.serialValue(vehicle.serial),
       l10n.orderCountShort(orderCountForDevice(orders, vehicle.id)),
     ];
     return AppListRow(

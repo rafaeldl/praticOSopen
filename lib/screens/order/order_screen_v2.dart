@@ -42,6 +42,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/utils/phone_format.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/screens/widgets/order_custom_fields.dart';
@@ -702,15 +703,44 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       final forms = _store.formsStream?.value ?? const <of_model.OrderForm>[];
       final pending = forms
           .where((f) => f.status != of_model.FormStatus.completed)
-          .length;
-      if (pending > 0) {
-        await _alert(l10n.orderPendingChecklists(pending));
+          .toList();
+      if (pending.isNotEmpty) {
+        await _offerPendingChecklist(pending);
         return;
       }
     }
     if (status == 'canceled' && !await _confirmCancel()) return;
     _store.setStatus(status);
     await _offerNotifyCustomer(status);
+  }
+
+  /// "Falta terminar 1 checklist": blocks "pronta" and opens the first one
+  /// still pending.
+  Future<void> _offerPendingChecklist(
+    List<of_model.OrderForm> pending,
+  ) async {
+    final l10n = context.l10n;
+    final open = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(l10n.orderPendingChecklists(pending.length)),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notNow),
+          ),
+          CupertinoDialogAction(
+            key: const ValueKey('order_open_pending_checklist'),
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.orderOpenChecklist),
+          ),
+        ],
+      ),
+    );
+    if (open == true && mounted) {
+      await _actions.openChecklist(context, _store, pending.first);
+    }
   }
 
   /// "Avisar o cliente?" after approved / in progress / done: a note above
@@ -948,7 +978,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       case 'device':
         await _addDevice();
       case 'pdf':
-        await _actions.sharePdf(context, order, config);
+        await _actions.viewPdf(context, order, config);
       case 'link':
         final copied = await _actions.copyLink(order);
         if (mounted) {
@@ -2263,7 +2293,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ),
         for (final device in _store.devices)
           FormRow(
-            icon: CupertinoIcons.car_detailed,
+            icon: config.deviceIcon,
             title: device.name ?? '',
             subtitle: _newDevices.any((d) => d.id == device.id)
                 ? [
@@ -2278,7 +2308,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
           ),
         if (_deviceAsk != null)
           FormRow(
-            icon: CupertinoIcons.car_detailed,
+            icon: config.deviceIcon,
             title: l10n.orderAssistantDeviceGuess(_deviceAsk!.label),
             marked: true,
             onTap: _resolveDeviceAsk,
@@ -2398,7 +2428,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 : null,
             suffixMode: OverlayVisibilityMode.always,
             controller: _requestController,
-            placeholder: l10n.orderCustomerRequestPlaceholder,
+            placeholder: l10n.orderCustomerRequestPlaceholder(
+              SegmentConfigService().exampleSegment,
+            ),
             minLines: 2,
             maxLines: null,
             textCapitalization: TextCapitalization.sentences,

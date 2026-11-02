@@ -31,7 +31,8 @@ import 'package:provider/provider.dart';
 /// taken from the company's own devices, which also fill brand and category)
 /// and the plate/serial in a white card, and photo, brand, category and the
 /// segment fields in a "Mais dados" card that opens in place. The "✓" turns
-/// blue once the plate/serial is filled. Editing stays a pushed screen, with
+/// blue once the model or the plate/serial is filled: a call often comes in
+/// before anyone has seen the device. Editing stays a pushed screen, with
 /// those fields (and the status, with device management) behind a
 /// [MoreFieldsLink].
 ///
@@ -115,8 +116,9 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         _device?.photo ?? '',
       ].join('\u0000');
 
-  /// The sheet can be saved once the plate/serial (required) is filled.
-  bool get _canSave => _serial.text.trim().isNotEmpty;
+  /// The sheet can be saved once the model or the plate/serial is filled.
+  bool get _canSave =>
+      _model.text.trim().isNotEmpty || _serial.text.trim().isNotEmpty;
 
   /// Something was typed since the sheet opened: closing asks first.
   bool get _dirty => _customTouched || _snapshot != _initialSnapshot;
@@ -268,8 +270,9 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         child: FormSheet(
           title: title,
           canSave: _canSave,
-          missingHint: l10n.deviceSaveNeedsField(
-            config.label(LabelKeys.deviceSerialNumber),
+          missingHint: l10n.deviceSaveNeedsAny(
+            config.label(LabelKeys.deviceModel).toLowerCase(),
+            config.serialLabelInSentence,
           ),
           dirty: _dirty,
           busy: _isLoading,
@@ -375,10 +378,16 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       inputFormatters: masks.isEmpty
           ? null
           : [TextInputMask(mask: masks.length == 1 ? masks.first : masks)],
-      onSaved: (v) => _device!.serial = v.trim().toUpperCase(),
+      onSaved: (v) {
+        final value = v.trim().toUpperCase();
+        _device!.serial = value.isEmpty ? null : value;
+      },
       validator: (v) {
         final value = v.trim();
-        if (value.isEmpty) return l10n.fieldRequiredHint(serialLabel);
+        if (value.isEmpty) {
+          // Optional, but a saved device needs a name or a serial.
+          return _canSave ? null : l10n.fieldRequiredHint(serialLabel);
+        }
         final pattern = serialField?.pattern;
         if (pattern != null && !RegExp(pattern).hasMatch(value)) {
           return l10n.invalidFormat;

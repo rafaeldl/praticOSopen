@@ -703,10 +703,16 @@ class _HomeContentState extends State<HomeContent> {
       };
     } else {
       final label = widget.statusLabel(order.status);
-      final showDue = order.dueDate != null && !HomeRules.isFinished(order);
-      statusText = showDue
+      final active = !HomeRules.isFinished(order);
+      final withDue = order.dueDate != null && active
           ? l10n.orderStatusDue(label, format.formatDayMonth(order.dueDate))
           : label;
+      statusText = order.scheduledDate != null && active
+          ? l10n.orderStatusVisit(
+              withDue,
+              format.formatDayMonth(order.scheduledDate),
+            )
+          : withDue;
     }
 
     // Money on the list only once the work is done: what is left to receive.

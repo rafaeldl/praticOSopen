@@ -30,6 +30,7 @@ class CustomerReceiptRequest {
     required this.orders,
     required this.allocations,
     required this.paidAt,
+    this.paymentMethod,
     this.file,
   });
 
@@ -37,6 +38,9 @@ class CustomerReceiptRequest {
   final List<Order> orders;
   final List<PaymentAllocation> allocations;
   final DateTime paidAt;
+
+  /// `PaymentMethod`; null when not informed.
+  final String? paymentMethod;
   final PickedReceiptFile? file;
 }
 
@@ -104,6 +108,7 @@ class CustomerReceiptService {
       orders: request.orders,
       allocations: request.allocations,
       paidAt: request.paidAt,
+      paymentMethod: request.paymentMethod,
       now: DateTime.now(),
       actor: actor,
       company: Global.companyAggr,
@@ -196,6 +201,7 @@ class CustomerReceiptService {
         customerId,
         receiptId: receiptId,
         paidAt: request.paidAt,
+        paymentMethod: request.paymentMethod,
         allocations: [
           for (final a in request.allocations)
             (orderId: a.orderId, amount: a.amount),

@@ -37,6 +37,8 @@ export interface CustomerReceiptInput {
   /** Oldest first, as the screen split it. */
   allocations: Array<{ orderId: string; amount: number }>;
   receiptFile?: ReceiptFileInput;
+  /** How the money came in (pix | cash | card | other); absent when not informed. */
+  paymentMethod?: string;
 }
 
 export interface OpenOrderSummary {
@@ -186,6 +188,7 @@ export async function registerCustomerReceipt(
         createdBy: actor,
         paidAt,
         receiptGroupId: input.receiptId,
+        ...(input.paymentMethod ? { paymentMethod: input.paymentMethod } : {}),
       };
       const update: Record<string, unknown> = {};
       if (file) {
@@ -225,6 +228,7 @@ export async function registerCustomerReceipt(
       customer: orders[0].customer ? { id: customerId, name: orders[0].customer.name ?? null } : { id: customerId },
       amount,
       paidAt,
+      ...(input.paymentMethod ? { paymentMethod: input.paymentMethod } : {}),
       ...(file ? { receiptFile: { ...file, fileName: file.fileName ?? null } } : {}),
       allocations: receiptAllocations,
       status: 'active',

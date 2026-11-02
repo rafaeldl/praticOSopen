@@ -1400,14 +1400,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String pageOf(int current, int total) {
-    return 'Pagina $current de $total';
+    return 'Página $current de $total';
   }
 
   @override
   String get preparingReport => 'Preparando informe...';
 
   @override
-  String get appTagline => 'Sistema de Gestion de Ordenes de Servicio';
+  String get appTagline => 'Sistema de Gestión de Órdenes de Servicio';
 
   @override
   String receivedWithPercent(String percent) {
@@ -1423,10 +1423,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generatedByPraticos => 'Generado por PraticOS';
 
   @override
-  String get serviceDescriptionColumn => 'DESCRIPCION DEL SERVICIO';
+  String get serviceDescriptionColumn => 'DESCRIPCIÓN DEL SERVICIO';
 
   @override
-  String get descriptionColumn => 'DESCRIPCION';
+  String get descriptionColumn => 'DESCRIPCIÓN';
 
   @override
   String get unitShort => 'UNIT.';
@@ -1450,7 +1450,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get photoRecord => 'REGISTRO FOTOGRAFICO';
+  String get photoRecord => 'REGISTRO FOTOGRÁFICO';
 
   @override
   String get partsAndProducts => 'PIEZAS Y PRODUCTOS';
@@ -1821,7 +1821,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get useDefaultTerms => 'Usar texto predeterminado del segmento';
 
   @override
-  String get pdfTermsAndConditions => 'Terminos y Condiciones';
+  String get pdfTermsAndConditions => 'Términos y Condiciones';
 
   @override
   String get pdfCompanySignature => 'Responsable';
@@ -1830,7 +1830,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pdfClientSignature => 'Cliente';
 
   @override
-  String get pdfTechnician => 'Tecnico';
+  String get pdfTechnician => 'Técnico';
 
   @override
   String get pdfCreatedDate => 'Creada';
@@ -1873,7 +1873,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pdfTrackOnlineDescription =>
-      'Escanee el codigo QR para rastrear esta orden de servicio';
+      'Escanee el código QR para rastrear esta orden de servicio';
 
   @override
   String get pdfEquipment => 'Equipo';
@@ -2172,11 +2172,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pickCustomerTitle => '¿Quién es el cliente?';
 
   @override
-  String get searchCustomerPlaceholder => 'Buscar por nombre, teléfono o placa';
-
-  @override
-  String plateValue(String plate) {
-    return 'Placa $plate';
+  String searchCustomerPlaceholder(String serial) {
+    return 'Buscar por nombre, teléfono o $serial';
   }
 
   @override
@@ -2292,10 +2289,42 @@ class AppLocalizationsEs extends AppLocalizations {
   String get saveProductButton => 'Guardar producto';
 
   @override
-  String get serviceNameHint => 'Ej.: Cambio de aceite';
+  String serviceNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Cambio de aceite',
+      'hvac': 'Limpieza del split',
+      'smartphones': 'Cambio de pantalla',
+      'computers': 'Formateo',
+      'appliances': 'Reparación de nevera',
+      'electrical': 'Cambio de disyuntor',
+      'plumbing': 'Reparación de fuga',
+      'security': 'Instalación de cámara',
+      'solar': 'Limpieza de paneles',
+      'printers': 'Cambio de tóner',
+      'bicycles': 'Revisión completa',
+      'other': 'Mantenimiento',
+    });
+    return 'Ej.: $_temp0';
+  }
 
   @override
-  String get productNameHint => 'Ej.: Filtro de aceite';
+  String productNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Filtro de aceite',
+      'hvac': 'Capacitor',
+      'smartphones': 'Pantalla',
+      'computers': 'Memoria RAM',
+      'appliances': 'Resistencia',
+      'electrical': 'Disyuntor',
+      'plumbing': 'Llave de paso',
+      'security': 'Cámara',
+      'solar': 'Inversor',
+      'printers': 'Tóner',
+      'bicycles': 'Cámara de aire',
+      'other': 'Repuesto',
+    });
+    return 'Ej.: $_temp0';
+  }
 
   @override
   String get serviceNameRequired => 'Escribe el nombre del servicio';
@@ -4269,7 +4298,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderCustomerRequestTitle => 'Lo que pidió el cliente';
 
   @override
-  String get orderCustomerRequestPlaceholder => 'Ej.: ruido al frenar';
+  String orderCustomerRequestPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'ruido al frenar',
+      'hvac': 'no enfría',
+      'smartphones': 'pantalla rota',
+      'computers': 'no enciende',
+      'appliances': 'dejó de funcionar',
+      'electrical': 'enchufe sin corriente',
+      'plumbing': 'fuga en el lavabo',
+      'security': 'cámara sin imagen',
+      'solar': 'generación baja',
+      'printers': 'atasco de papel',
+      'bicycles': 'cadena saltando',
+      'other': 'no funciona',
+    });
+    return 'Ej.: $_temp0';
+  }
 
   @override
   String get orderDeliverySection => 'Entrega';
@@ -4296,7 +4341,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderAddressLabel => 'Lugar';
 
   @override
-  String get speechHint => 'Di el cliente, el vehículo y lo que se va a hacer.';
+  String speechHint(String device) {
+    return 'Di el cliente, el $device y lo que se va a hacer.';
+  }
 
   @override
   String get speechListening => 'Escuchando…';
@@ -4350,8 +4397,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get speechStopAndFill => 'Detener y completar la OS';
 
   @override
-  String get speechTypeHint =>
-      'Escribe el cliente, el vehículo y lo que se hará';
+  String speechTypeHint(String device) {
+    return 'Escribe el cliente, el $device y lo que se hará';
+  }
 
   @override
   String get speechNothingHeard =>
@@ -4573,11 +4621,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get customerMoreDataHint => 'Correo, documento fiscal, dirección';
 
   @override
-  String deviceSaveNeedsField(String field) {
-    return 'Completa el campo $field para guardar.';
-  }
-
-  @override
   String deviceMoreDataHint(String brand, String category) {
     return 'Foto, $brand y $category';
   }
@@ -4639,7 +4682,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checklistQuestion => 'Pregunta';
 
   @override
-  String get checklistQuestionPlaceholder => 'Ej.: ¿Los neumáticos están bien?';
+  String checklistQuestionPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': '¿Los neumáticos están bien?',
+      'hvac': '¿El drenaje está libre?',
+      'smartphones': '¿La pantalla enciende?',
+      'computers': '¿El ventilador gira?',
+      'appliances': '¿Enciende?',
+      'electrical': '¿El tablero está identificado?',
+      'plumbing': '¿Hay señales de fuga?',
+      'security': '¿Las cámaras están grabando?',
+      'solar': '¿Los paneles están limpios?',
+      'printers': '¿La impresión sale nítida?',
+      'bicycles': '¿Los frenos están bien?',
+      'other': '¿Funciona?',
+    });
+    return 'Ej.: $_temp0';
+  }
 
   @override
   String get checklistAnswerType => 'Tipo de respuesta';
@@ -6039,4 +6098,46 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get courtesyBannerLater => 'Ahora no';
+
+  @override
+  String deviceSaveNeedsAny(String first, String second) {
+    return 'Completa $first o $second para guardar.';
+  }
+
+  @override
+  String orderStatusVisit(String status, String date) {
+    return '$status · visita $date';
+  }
+
+  @override
+  String get orderOpenChecklist => 'Abrir checklist';
+
+  @override
+  String orderPdfTitle(String order, String number) {
+    return '$order $number';
+  }
+
+  @override
+  String get receivePaymentMethod => 'Forma de pago';
+
+  @override
+  String get receivePaymentMethodOptional => 'Opcional';
+
+  @override
+  String get receivePaymentMethodQuestion => '¿Cómo se pagó?';
+
+  @override
+  String get receivePaymentMethodNone => 'No indicar';
+
+  @override
+  String get paymentMethodPix => 'Pix';
+
+  @override
+  String get paymentMethodCash => 'Efectivo';
+
+  @override
+  String get paymentMethodCard => 'Tarjeta';
+
+  @override
+  String get paymentMethodOther => 'Otro';
 }

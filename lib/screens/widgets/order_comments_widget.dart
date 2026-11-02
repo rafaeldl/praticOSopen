@@ -48,7 +48,9 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
   final FormatService _formatService = FormatService();
   final Map<String, GlobalKey> _commentKeys = {};
   late final Stream<List<OrderComment>> _stream = _watch();
-  bool _isInternal = false;
+  // Starts internal: showing a comment to the customer is a choice. Without
+  // the switch there is no way to choose, so it stays visible.
+  late bool _isInternal = widget.showInternalToggle;
   bool _isSending = false;
   bool _hasScrolledToComment = false;
 

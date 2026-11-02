@@ -5,6 +5,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
@@ -188,7 +189,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     return PickerScaffold<CustomerPick>(
       title: l10n.pickerCustomerTitle,
       itemCount: customers.length,
-      searchPlaceholder: l10n.searchCustomerPlaceholder,
+      searchPlaceholder: l10n.searchCustomerPlaceholder(
+        SegmentConfigProvider.instance.serialLabelInSentence,
+      ),
       autofocusSearch: true,
       onQueryChanged: _plates.search,
       loading: _customers == null && !_hasError,
@@ -227,7 +230,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       title: c.name ?? '',
       subtitle: device == null
           ? (c.phone?.isNotEmpty ?? false ? formatPhone(c.phone) : null)
-          : '${l10n.plateValue(device.serial ?? '')} · ${device.name ?? ''}',
+          : '${SegmentConfigProvider.instance.serialValue(device.serial)} · ${device.name ?? ''}',
       selected: selectedId != null && c.id == selectedId,
     );
 

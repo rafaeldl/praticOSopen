@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
@@ -158,6 +159,26 @@ void main() {
     // Mail-style rows: value on the right, no photo.
     expect(find.byType(OrderListRow), findsNWidgets(3));
     expect(find.textContaining('100,00'), findsNWidgets(3));
+  });
+
+  testWidgets('the row shows the visit date of an open order', (tester) async {
+    final visit = _order('Ana', 'approved')
+      ..scheduledDate = DateTime(2030, 5, 12, 14);
+    final both = _order('Bruno', 'approved', number: 2, due: DateTime(2030, 5, 20))
+      ..scheduledDate = DateTime(2030, 5, 12, 14);
+    final finished = _order('Caio', 'done', number: 3)
+      ..scheduledDate = DateTime(2030, 5, 12, 14);
+    await tester.pumpWidget(_app(_Host(orders: [visit, both, finished])));
+
+    final day = FormatService().formatDayMonth(DateTime(2030, 5, 12));
+    final due = FormatService().formatDayMonth(DateTime(2030, 5, 20));
+    expect(find.textContaining('· visita $day'), findsNWidgets(2));
+    expect(find.textContaining('entrega $due · visita $day'), findsOneWidget);
+
+    await tester.tap(find.text('Concluídas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Caio'), findsOneWidget);
+    expect(find.textContaining('visita'), findsNothing);
   });
 
   testWidgets('filter buttons: Em aberto, Concluídas, Todas', (tester) async {

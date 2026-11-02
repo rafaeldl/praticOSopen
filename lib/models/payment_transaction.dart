@@ -14,6 +14,17 @@ enum PaymentTransactionType {
   discount,
 }
 
+/// How a manual payment came in, chosen by the user (optional). Kept as text
+/// so a value from a newer version never breaks reading a payment.
+class PaymentMethod {
+  static const pix = 'pix';
+  static const cash = 'cash';
+  static const card = 'card';
+  static const other = 'other';
+
+  static const all = [pix, cash, card, other];
+}
+
 /// Modelo para rastrear transações de pagamento e desconto
 /// Cada transação representa um pagamento parcial ou um desconto concedido
 @JsonSerializable(explicitToJson: true)
@@ -50,6 +61,11 @@ class PaymentTransaction {
   @JsonKey(includeIfNull: false)
   String? billingType;
 
+  /// [PaymentMethod] chosen when registering a manual payment. Absent on
+  /// payments booked without it and on Asaas payments (see [billingType]).
+  @JsonKey(includeIfNull: false)
+  String? paymentMethod;
+
   /// When the money came in, chosen by the user ("Quando"). Absent on
   /// payments booked before this field existed: use [paidOn].
   @JsonKey(includeIfNull: false)
@@ -70,6 +86,7 @@ class PaymentTransaction {
     this.receiptDocumentId,
     this.receiptUrl,
     this.billingType,
+    this.paymentMethod,
     this.paidAt,
     this.receiptGroupId,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -94,6 +111,7 @@ class PaymentTransaction {
     UserAggr? createdBy,
     DateTime? paidAt,
     String? receiptGroupId,
+    String? paymentMethod,
   }) {
     return PaymentTransaction(
       type: PaymentTransactionType.payment,
@@ -102,6 +120,7 @@ class PaymentTransaction {
       createdBy: createdBy,
       paidAt: paidAt,
       receiptGroupId: receiptGroupId,
+      paymentMethod: paymentMethod,
     );
   }
 

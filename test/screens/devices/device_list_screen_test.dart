@@ -163,11 +163,17 @@ void main() {
     },
   );
 
-  testWidgets('without vehicles of the customer there is no extra section', (
+  testWidgets('customer without vehicles: the list is "Outros", not hers', (
     tester,
   ) async {
     await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno, gol]);
     expect(find.textContaining(RegExp(r' de Ana$')), findsNothing);
+    expect(find.textContaining('Outros'), findsOneWidget);
+    expect(find.byType(AppListRow), findsNWidgets(2));
+  });
+
+  testWidgets('without a customer the list has no section', (tester) async {
+    await pumpList(tester, args: {'order': orderOf(null)}, devices: [uno, gol]);
     expect(find.textContaining('Outros'), findsNothing);
     expect(find.byType(AppListRow), findsNWidgets(2));
   });

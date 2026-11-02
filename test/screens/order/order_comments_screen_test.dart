@@ -94,7 +94,7 @@ void main() {
     expect(find.text(l10n.commentsEmpty), findsOneWidget);
   });
 
-  testWidgets('envia para o cliente por padrão e só para a equipe com o '
+  testWidgets('começa só para a equipe e mostra ao cliente com o '
       'interruptor', (tester) async {
     final sent = <(String, bool)>[];
     await pump(
@@ -105,13 +105,13 @@ void main() {
       },
     );
 
-    expect(find.text(l10n.commentsCustomerSees), findsOneWidget);
+    expect(find.text(l10n.commentsCustomerHidden), findsOneWidget);
     final send = find.byKey(const ValueKey('order_comments_send'));
     expect(tester.widget<CupertinoButton>(send).onPressed, isNull);
 
     await tester.enterText(
       find.byKey(const ValueKey('order_comments_field')),
-      '  Olá  ',
+      '  Interno  ',
     );
     await tester.pump();
     await tester.tap(send);
@@ -119,16 +119,16 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('order_comments_internal')));
     await tester.pumpAndSettle();
-    expect(find.text(l10n.commentsCustomerHidden), findsOneWidget);
+    expect(find.text(l10n.commentsCustomerSees), findsOneWidget);
     await tester.enterText(
       find.byKey(const ValueKey('order_comments_field')),
-      'Interno',
+      'Para o cliente',
     );
     await tester.pump();
     await tester.tap(send);
     await tester.pumpAndSettle();
 
-    expect(sent, [('Olá', false), ('Interno', true)]);
+    expect(sent, [('Interno', true), ('Para o cliente', false)]);
   });
 
   testWidgets('erro ao enviar aparece no aviso e mantém o texto', (

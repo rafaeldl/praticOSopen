@@ -516,7 +516,8 @@ void main() {
     ) async {
       await openSheet(tester, FakeSource(), kind: CatalogKind.product);
       expect(find.text('Novo produto'), findsOneWidget);
-      expect(find.text('Ex.: Filtro de óleo'), findsOneWidget);
+      // No segment loaded: the neutral example, never one from a workshop.
+      expect(find.text('Ex.: Peça de reposição'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('form_more')));
       await tester.pumpAndSettle();
       expect(find.text('+ Foto do produto'), findsOneWidget);

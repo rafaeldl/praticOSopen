@@ -30,6 +30,7 @@ Receipt _$ReceiptFromJson(Map<String, dynamic> json) => Receipt()
   ..paidAt = json['paidAt'] == null
       ? null
       : DateTime.parse(json['paidAt'] as String)
+  ..paymentMethod = json['paymentMethod'] as String?
   ..receiptFile = json['receiptFile'] == null
       ? null
       : ReceiptFile.fromJson(json['receiptFile'] as Map<String, dynamic>)
@@ -48,6 +49,7 @@ Map<String, dynamic> _$ReceiptToJson(Receipt instance) => <String, dynamic>{
   'customer': instance.customer?.toJson(),
   'amount': instance.amount,
   'paidAt': instance.paidAt?.toIso8601String(),
+  'paymentMethod': ?instance.paymentMethod,
   'receiptFile': instance.receiptFile?.toJson(),
   'allocations': instance.allocations?.map((e) => e.toJson()).toList(),
   'status': instance.status,

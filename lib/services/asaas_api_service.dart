@@ -323,6 +323,7 @@ class AsaasApiService {
     required DateTime paidAt,
     required List<({String orderId, double amount})> allocations,
     Map<String, dynamic>? receiptFile,
+    String? paymentMethod,
   }) async {
     final headers = await _headers();
     final response = await _send(
@@ -337,6 +338,7 @@ class AsaasApiService {
               {'orderId': a.orderId, 'amount': (a.amount * 100).round() / 100},
           ],
           if (receiptFile != null) 'receiptFile': receiptFile,
+          if (paymentMethod != null) 'paymentMethod': paymentMethod,
         }),
       ),
     );

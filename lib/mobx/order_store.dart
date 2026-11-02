@@ -1607,6 +1607,7 @@ abstract class _OrderStore with Store {
     double amount, {
     String? description,
     DateTime? paidAt,
+    String? paymentMethod,
   }) async {
     lastPaymentFailure = null;
     if (order == null || companyId == null || amount <= 0) return null;
@@ -1617,6 +1618,7 @@ abstract class _OrderStore with Store {
       description: description,
       createdBy: actor,
       paidAt: paidAt,
+      paymentMethod: paymentMethod,
     );
     transaction.id = _newTransactionId();
 

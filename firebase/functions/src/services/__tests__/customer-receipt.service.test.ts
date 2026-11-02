@@ -84,6 +84,26 @@ describe('customer-receipt.service', () => {
     ]);
   });
 
+  it('guarda a forma de pagamento no pagamento e no recebimento; sem ela, nada é gravado', async () => {
+    await registerCustomerReceipt(
+      'c1',
+      'cust1',
+      { receiptId: 'r1', paidAt: PAID_AT, allocations: [{ orderId: 'o2', amount: 10 }], paymentMethod: 'pix' },
+      CONSULTANT,
+    );
+    expect(read('companies/c1/orders/o2').transactions[0].paymentMethod).toBe('pix');
+    expect(read('companies/c1/receipts/r1').paymentMethod).toBe('pix');
+
+    await registerCustomerReceipt(
+      'c1',
+      'cust1',
+      { receiptId: 'r3', paidAt: PAID_AT, allocations: [{ orderId: 'o2', amount: 10 }] },
+      CONSULTANT,
+    );
+    expect(read('companies/c1/orders/o2').transactions[1]).not.toHaveProperty('paymentMethod');
+    expect(read('companies/c1/receipts/r3')).not.toHaveProperty('paymentMethod');
+  });
+
   it('com comprovante: documento na OS ligado ao pagamento', async () => {
     await registerCustomerReceipt(
       'c1',
