@@ -19,6 +19,18 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/utils/startup_company.dart';
 
+/// After accepting an invite the store still holds "no company", so it must
+/// reload before restarting at '/', or the user lands on onboarding.
+Future<void> enterCompanyAfterInvite(
+  BuildContext context,
+  AuthStore authStore,
+) async {
+  await authStore.reloadUserAndCompany();
+  if (context.mounted) {
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
+}
+
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
 /// Se não tem empresa → Verifica convites pendentes
@@ -184,10 +196,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 ),
               );
             },
-            onInviteAccepted: () {
-              // Força rebuild para verificar novamente
-              setState(() => _pendingInvitesFuture = null);
-            },
+            onInviteAccepted: () =>
+                enterCompanyAfterInvite(context, widget.authStore),
           );
         }
 
