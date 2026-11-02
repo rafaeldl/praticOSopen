@@ -21,49 +21,162 @@
     });
   });
 
-  // Rows scroll by hand without JS; clones make the loop seamless and stay out of the tab order.
+  // Rows are plain scrollers, so touch swipes work natively. The script adds the slow
+  // advance and mouse dragging; clones make the loop seamless and stay out of the tab order.
   var reels = document.querySelector('[data-reels]');
   var toggle = document.querySelector('[data-reels-toggle]');
-  if (reels && toggle && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var rowsOf = [].slice.call(reels.querySelectorAll('[data-reel]'));
+  if (reels && toggle) {
+    var LOOP_SECONDS = 90;
+    var DRAG_THRESHOLD = 6;
+    var TOUCH_RESUME_MS = 1500;
+    var moving = false;
+    var paused = false;
+    var hovering = false;
+    var drag = null;
+    var skipClick = false;
+    var lastFrame = 0;
+    var rowsOf = [].slice.call(reels.querySelectorAll('[data-reel]')).map(function (el) {
+      return { el: el, back: el.classList.contains('reel--back'), pos: 0, held: false, resumeAt: 0 };
+    });
 
-    var setPaused = function (paused) {
-      reels.classList.toggle('is-paused', paused);
-      toggle.textContent = toggle.getAttribute(paused ? 'data-resume' : 'data-pause');
+    var advancing = function (row) {
+      return moving && !paused && !hovering && !row.held && Date.now() >= row.resumeAt;
+    };
+
+    // Half the width is one full pass, so jumping by it is invisible.
+    var wrap = function (row) {
+      if (!moving) return;
+      var half = row.el.scrollWidth / 2;
+      if (row.el.scrollLeft >= half) row.el.scrollLeft -= half;
+      else if (row.el.scrollLeft <= 0) row.el.scrollLeft += half;
+    };
+
+    var tick = function (now) {
+      if (!moving) return;
+      var seconds = Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+      rowsOf.forEach(function (row) {
+        if (!advancing(row)) return;
+        var half = row.el.scrollWidth / 2;
+        row.pos += (row.back ? -1 : 1) * (half / LOOP_SECONDS) * seconds;
+        if (row.pos >= half) row.pos -= half;
+        if (row.pos <= 0) row.pos += half;
+        row.el.scrollLeft = row.pos;
+      });
+      requestAnimationFrame(tick);
+    };
+
+    var setPaused = function (value) {
+      paused = value;
+      toggle.textContent = toggle.getAttribute(value ? 'data-resume' : 'data-pause');
     };
 
     var startReels = function () {
       rowsOf.forEach(function (row) {
-        [].slice.call(row.children).forEach(function (item) {
+        [].slice.call(row.el.children).forEach(function (item) {
           var copy = item.cloneNode(true);
           copy.setAttribute('aria-hidden', 'true');
           copy.setAttribute('data-copy', '');
           copy.querySelector('a').tabIndex = -1;
-          row.appendChild(copy);
+          row.el.appendChild(copy);
         });
       });
       reels.classList.add('is-moving');
+      moving = true;
+      rowsOf.forEach(function (row) {
+        if (row.back && !row.el.scrollLeft) row.el.scrollLeft = row.el.scrollWidth / 2;
+        row.pos = row.el.scrollLeft;
+      });
       setPaused(false);
+      lastFrame = performance.now();
+      requestAnimationFrame(tick);
     };
 
     // A focused link must stay reachable, so keyboard users get the hand-scrolled rows.
     var stopReels = function () {
+      moving = false;
       reels.classList.remove('is-moving');
       [].slice.call(reels.querySelectorAll('[data-copy]')).forEach(function (c) { c.remove(); });
       setPaused(true);
     };
 
-    reels.addEventListener('focusin', function (e) {
-      if (reels.classList.contains('is-moving') && e.target.matches(':focus-visible')) stopReels();
+    rowsOf.forEach(function (row) {
+      row.el.addEventListener('scroll', function () {
+        if (advancing(row)) return;
+        wrap(row);
+        row.pos = row.el.scrollLeft;
+      }, { passive: true });
+
+      row.el.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        row.held = true;
+        drag = { row: row, startX: e.clientX, startLeft: row.el.scrollLeft, moved: false };
+      });
+
+      row.el.addEventListener('touchstart', function () { row.held = true; }, { passive: true });
+      ['touchend', 'touchcancel'].forEach(function (type) {
+        row.el.addEventListener(type, function () {
+          row.held = false;
+          row.resumeAt = Date.now() + TOUCH_RESUME_MS;
+        }, { passive: true });
+      });
+
+      // Images and links would otherwise start the browser's own drag.
+      row.el.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+      // A drag ends with a click on whatever is under the mouse; that one must not navigate.
+      row.el.addEventListener('click', function (e) {
+        if (!skipClick) return;
+        skipClick = false;
+        e.preventDefault();
+      }, true);
     });
 
-    toggle.addEventListener('click', function () {
-      if (!reels.classList.contains('is-moving')) startReels();
-      else setPaused(!reels.classList.contains('is-paused'));
+    window.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.startX;
+      if (!drag.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+      if (!drag.moved) {
+        drag.moved = true;
+        drag.row.el.classList.add('is-dragging');
+      }
+      var el = drag.row.el;
+      var target = drag.startLeft - dx;
+      el.scrollLeft = target;
+      wrap(drag.row);
+      // After a loop jump, keep following the mouse from the new position.
+      drag.startLeft += el.scrollLeft - target;
+      drag.row.pos = el.scrollLeft;
     });
 
-    toggle.hidden = false;
-    startReels();
+    var endDrag = function () {
+      if (!drag) return;
+      drag.row.held = false;
+      drag.row.el.classList.remove('is-dragging');
+      skipClick = drag.moved;
+      // Keep the flag only for the click of this release; a drag released off the row has none.
+      setTimeout(function () { skipClick = false; }, 0);
+      drag = null;
+    };
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    reels.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hovering = true; });
+    reels.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hovering = false; });
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      reels.addEventListener('focusin', function (e) {
+        if (moving && e.target.matches(':focus-visible')) stopReels();
+      });
+
+      toggle.addEventListener('click', function () {
+        if (!moving) startReels();
+        else setPaused(!paused);
+      });
+
+      toggle.hidden = false;
+      startReels();
+    }
   }
 
   // The card stays complete at rest; one pass plays on load, replays are manual.
