@@ -1405,6 +1405,8 @@
   "financialInProgress": "In progress",
   "financialSold": "Sold",
   "financialToday": "Today",
+  "financialReceivableCompleted": "Completed jobs",
+  "financialReceivableOpen": "Open jobs",
   "financialNextCharge": "Next charge",
   "financialNextChargeMessage": "{name} owes {amount} since {date}",
   "financialSendCharge": "Send charge",

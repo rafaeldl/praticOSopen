@@ -1447,6 +1447,8 @@
   "financialInProgress": "Em andamento",
   "financialSold": "Vendido",
   "financialToday": "Hoje",
+  "financialReceivableCompleted": "Serviços concluídos",
+  "financialReceivableOpen": "Serviços em aberto",
   "financialNextCharge": "Próxima cobrança",
   "financialNextChargeMessage": "{name} deve {amount} desde {date}",
   "@financialNextChargeMessage": {
