@@ -13,6 +13,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart' show runInAction;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
@@ -32,12 +33,15 @@ import 'package:praticos/screens/nfse/nfse_issue_sheet.dart';
 import 'package:praticos/screens/customers/customer_list_screen.dart'
     show CustomerPick;
 import 'package:praticos/screens/order/assistant/speech_listener.dart';
+import 'package:praticos/screens/menu_navigation/more/reminders_screen.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
+import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_extras.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
+import 'package:praticos/screens/order/reminder_hint.dart';
 import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/screens/widgets/contract_config_sheet.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
@@ -269,6 +273,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   bool _scrollToComments = false;
   String? _highlightCommentId;
 
+  /// Accepted the checklist offer after saving: opens "Qual checklist?".
+  bool _addChecklistOnOpen = false;
+
+  /// "Novo contrato": opened from Contratos.
+  bool _opensAsContract = false;
+
   /// Comments of a saved order (the last two show on the screen).
   Stream<List<OrderComment>>? _commentsStream;
 
@@ -294,6 +304,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   /// Nova OS opened to hold files shared from another app: called with the
   /// new order id once it is saved (after its own photos are uploaded).
   void Function(String orderId)? _onCreated;
+
+  /// New order saved, with its id (see `openNewOrder`).
+  void Function(Order order)? _onSaved;
 
   @override
   void dispose() {
@@ -392,6 +405,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final order = args?['order'] as Order?;
     _scrollToComments = args?['scrollToComments'] == true;
+    _addChecklistOnOpen = args?['addChecklist'] == true;
     _highlightCommentId = args?['commentId'] as String?;
     _previousTitle = args?['previousTitle'] as String?;
     if (order != null && (order.id != null || order.number != null)) {
@@ -404,6 +418,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       );
     } else {
       _onCreated = args?['onCreated'] as void Function(String)?;
+      _onSaved = args?['onSaved'] as void Function(Order)?;
+      _opensAsContract = args?['repeat'] == true;
       _startTalking = args?['startTalking'] == true;
       if (widget.showAssistant != null) _talkIfAsked();
       _startNew(order);
@@ -477,6 +493,12 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
         _commentsStream = _actions.watchComments(loaded).asBroadcastStream();
       }
     });
+    if (_addChecklistOnOpen) {
+      _addChecklistOnOpen = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _actions.addChecklist(context, _store);
+      });
+    }
     if (_scrollToComments) {
       _scrollToComments = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1175,24 +1197,63 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     }
   }
 
+  /// Null when this tree has no reminder settings: no local reminder.
+  ReminderStore? get _reminders {
+    try {
+      return Provider.of<ReminderStore>(context, listen: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// "O app avisa 30 min antes.", or why it will not.
+  String? _reminderHint() {
+    final store = _reminders;
+    if (store == null) return null;
+    NotificationStore? notifications;
+    try {
+      notifications = Provider.of<NotificationStore>(context, listen: false);
+    } catch (_) {
+      // Same as above: tests without the store.
+    }
+    return reminderHintText(
+      context.l10n,
+      minutes: store.reminderMinutes,
+      blocked: notifications?.permissionBlocked ?? false,
+    );
+  }
+
   Future<void> _pickSchedule() async {
     final current = _store.order?.scheduledDate;
+    final reminders = _reminders;
     final pick = await OrderDateSheet.show(
       context,
       initial: current ?? DateTime.now(),
       removeLabel: current == null ? null : context.l10n.orderScheduleRemove,
+      footer: reminders == null
+          ? null
+          : Observer(
+              builder: (popupContext) {
+                reminders.reminderMinutes;
+                return ReminderHintRow(
+                  text: _reminderHint() ?? '',
+                  onAdjust: () => Navigator.of(popupContext).push(
+                    CupertinoPageRoute<void>(
+                      builder: (_) => const RemindersScreen(),
+                    ),
+                  ),
+                );
+              },
+            ),
     );
     if (pick == null || !mounted) return;
     if (pick.remove) {
       _store.clearScheduledDate();
     } else {
-      ReminderStore? reminders;
-      try {
-        reminders = Provider.of<ReminderStore>(context, listen: false);
-      } catch (_) {
-        // No reminder settings in this tree: no local reminder.
-      }
       _store.setScheduledDate(pick.date!, reminderStore: reminders);
+      // A new order asks after "✓" (see `openNewOrder`).
+      if (!_isNew) await askNotificationsOnce(context);
+      if (!mounted) return;
     }
     setState(() {});
   }
@@ -2222,7 +2283,9 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
             Column(
               children: [
                 NewOrderTopBar(
-                  title: l10n.orderNewTitle(_shortOrderLabel(config)),
+                  title: _opensAsContract
+                      ? l10n.contractNew
+                      : l10n.orderNewTitle(_shortOrderLabel(config)),
                   onClose: _close,
                   onSave: canSave ? _saveAndClose : null,
                 ),
@@ -2605,12 +2668,17 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final companyId = _store.companyId;
     final photos = List<AiPhoto>.of(_photos);
     final onCreated = _onCreated;
+    final onSaved = _onSaved;
+    final reminders = _reminders;
     _store.deferSave = false;
     _store.updateTotal();
     _registerNew();
     _store.createItem(
       onCreated: (orderId) {
         if (_draftsKept > 0) AnalyticsService.logAiEvent('ai_order_saved');
+        _store.scheduleReminder(reminders);
+        final saved = _store.order;
+        if (saved != null) onSaved?.call(saved);
         if (request.isNotEmpty && companyId != null) {
           addOrderComment(
             companyId: companyId,
@@ -3685,6 +3753,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
       if (scheduled != null)
         AppListRow(
           title: l10n.scheduledDate,
+          subtitle: scheduled.isAfter(DateTime.now()) ? _reminderHint() : null,
           trailing: _format.formatDateTime(scheduled),
           onTap: canEdit ? _pickSchedule : null,
         ),

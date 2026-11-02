@@ -120,6 +120,14 @@ class NotificationService {
     return granted;
   }
 
+  /// Whether the iPhone has not asked about notifications yet. Without
+  /// asking, because reading the settings shows no alert.
+  Future<bool> isPermissionUndecided() async {
+    if (!Platform.isIOS) return false;
+    final settings = await _messaging.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.notDetermined;
+  }
+
   /// Register FCM token for the current user
   Future<void> registerToken(String userId) async {
     try {

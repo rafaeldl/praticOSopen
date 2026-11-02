@@ -32,23 +32,34 @@
     var moving = false;
     var paused = false;
     var hovering = false;
+    var touching = false;
+    var resumeAt = 0;
     var drag = null;
     var skipClick = false;
     var lastFrame = 0;
     var rowsOf = [].slice.call(reels.querySelectorAll('[data-reel]')).map(function (el) {
-      return { el: el, back: el.classList.contains('reel--back'), pos: 0, held: false, resumeAt: 0 };
+      return { el: el, back: el.classList.contains('reel--back'), pos: 0 };
     });
 
-    var advancing = function (row) {
-      return moving && !paused && !hovering && !row.held && Date.now() >= row.resumeAt;
+    // Writing scrollLeft on any row cancels a touch swipe in Android Chrome, so every row
+    // waits for the finger and for the fling after it.
+    var settled = function () {
+      return !touching && !drag && Date.now() >= resumeAt;
     };
 
-    // Half the width is one full pass, so jumping by it is invisible.
+    var advancing = function () {
+      return moving && !paused && !hovering && settled();
+    };
+
+    // Half the width is one full pass, so jumping by it is invisible. Rows rest in the
+    // middle of that range to leave room for a swipe in either direction.
     var wrap = function (row) {
       if (!moving) return;
       var half = row.el.scrollWidth / 2;
-      if (row.el.scrollLeft >= half) row.el.scrollLeft -= half;
-      else if (row.el.scrollLeft <= 0) row.el.scrollLeft += half;
+      var jump = row.el.scrollLeft >= half * 1.5 ? -half : row.el.scrollLeft < half / 2 ? half : 0;
+      if (!jump) return;
+      row.el.scrollLeft += jump;
+      row.pos += jump;
     };
 
     var tick = function (now) {
@@ -56,11 +67,10 @@
       var seconds = Math.min((now - lastFrame) / 1000, 0.1);
       lastFrame = now;
       rowsOf.forEach(function (row) {
-        if (!advancing(row)) return;
+        if (settled()) wrap(row);
+        if (!advancing()) return;
         var half = row.el.scrollWidth / 2;
         row.pos += (row.back ? -1 : 1) * (half / LOOP_SECONDS) * seconds;
-        if (row.pos >= half) row.pos -= half;
-        if (row.pos <= 0) row.pos += half;
         row.el.scrollLeft = row.pos;
       });
       requestAnimationFrame(tick);
@@ -84,7 +94,7 @@
       reels.classList.add('is-moving');
       moving = true;
       rowsOf.forEach(function (row) {
-        if (row.back && !row.el.scrollLeft) row.el.scrollLeft = row.el.scrollWidth / 2;
+        row.el.scrollLeft = row.el.scrollWidth / 2;
         row.pos = row.el.scrollLeft;
       });
       setPaused(false);
@@ -102,23 +112,14 @@
 
     rowsOf.forEach(function (row) {
       row.el.addEventListener('scroll', function () {
-        if (advancing(row)) return;
-        wrap(row);
+        if (advancing()) return;
         row.pos = row.el.scrollLeft;
+        if (!drag) resumeAt = Date.now() + TOUCH_RESUME_MS;
       }, { passive: true });
 
       row.el.addEventListener('pointerdown', function (e) {
         if (e.pointerType !== 'mouse' || e.button !== 0) return;
-        row.held = true;
         drag = { row: row, startX: e.clientX, startLeft: row.el.scrollLeft, moved: false };
-      });
-
-      row.el.addEventListener('touchstart', function () { row.held = true; }, { passive: true });
-      ['touchend', 'touchcancel'].forEach(function (type) {
-        row.el.addEventListener(type, function () {
-          row.held = false;
-          row.resumeAt = Date.now() + TOUCH_RESUME_MS;
-        }, { passive: true });
       });
 
       // Images and links would otherwise start the browser's own drag.
@@ -151,7 +152,6 @@
 
     var endDrag = function () {
       if (!drag) return;
-      drag.row.held = false;
       drag.row.el.classList.remove('is-dragging');
       skipClick = drag.moved;
       // Keep the flag only for the click of this release; a drag released off the row has none.
@@ -160,6 +160,14 @@
     };
     window.addEventListener('pointerup', endDrag);
     window.addEventListener('pointercancel', endDrag);
+
+    reels.addEventListener('touchstart', function () { touching = true; }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (type) {
+      reels.addEventListener(type, function (e) {
+        touching = e.touches.length > 0;
+        resumeAt = Date.now() + TOUCH_RESUME_MS;
+      }, { passive: true });
+    });
 
     reels.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hovering = true; });
     reels.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hovering = false; });

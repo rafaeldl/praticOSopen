@@ -28,6 +28,14 @@ abstract class _NotificationStore with Store {
   @observable
   bool isInitialized = false;
 
+  /// iPhone that was not asked yet: the alert waits for a moment that
+  /// explains it (see `askNotificationsOnce`).
+  bool permissionUndecided = false;
+
+  /// Asked and refused: reminders will not show.
+  bool get permissionBlocked =>
+      isInitialized && !permissionUndecided && !hasPermission;
+
   String? get companyId => Global.companyAggr?.id;
   String? get userId => Global.currentUser?.uid;
 
@@ -51,8 +59,11 @@ abstract class _NotificationStore with Store {
       // Initialize notification service
       await notificationService.initialize();
 
-      // Request permission
-      hasPermission = await notificationService.requestPermission();
+      // Request permission, unless it still needs its explanation
+      permissionUndecided = await notificationService.isPermissionUndecided();
+      if (!permissionUndecided) {
+        hasPermission = await notificationService.requestPermission();
+      }
 
       // Register token if permission granted and user is logged in
       if (hasPermission && userId != null) {
@@ -129,11 +140,13 @@ abstract class _NotificationStore with Store {
     unreadCount = null;
     isInitialized = false;
     hasPermission = false;
+    permissionUndecided = false;
   }
 
   /// Request permission again (e.g., from settings)
   @action
   Future<bool> requestPermissionAgain() async {
+    permissionUndecided = false;
     hasPermission = await notificationService.requestPermission();
 
     if (hasPermission && userId != null) {

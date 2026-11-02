@@ -31,6 +31,7 @@ class OrderDateSheet extends StatefulWidget {
     this.removeLabel,
     this.dateOnly = false,
     this.minimum,
+    this.footer,
   });
 
   final DateTime initial;
@@ -42,6 +43,9 @@ class OrderDateSheet extends StatefulWidget {
   /// Earliest day that can be picked.
   final DateTime? minimum;
 
+  /// Under the picker (when the app will remind about a visit).
+  final Widget? footer;
+
   /// Resolves with what was picked, or null when dismissed.
   static Future<OrderDatePick?> show(
     BuildContext context, {
@@ -49,6 +53,7 @@ class OrderDateSheet extends StatefulWidget {
     String? removeLabel,
     bool dateOnly = false,
     DateTime? minimum,
+    Widget? footer,
   }) {
     return showCupertinoModalPopup<OrderDatePick>(
       context: context,
@@ -57,6 +62,7 @@ class OrderDateSheet extends StatefulWidget {
         removeLabel: removeLabel,
         dateOnly: dateOnly,
         minimum: minimum,
+        footer: footer,
       ),
     );
   }
@@ -73,11 +79,11 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
     final l10n = context.l10n;
     final accent = AppColors.accentText.resolveFrom(context);
     return Container(
-      height: 320,
       color: AppColors.surface.resolveFrom(context),
       child: SafeArea(
         top: false,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -106,7 +112,8 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
                 ),
               ],
             ),
-            Expanded(
+            SizedBox(
+              height: 216,
               child: CupertinoDatePicker(
                 initialDateTime: widget.initial,
                 minimumDate: widget.minimum,
@@ -117,6 +124,7 @@ class _OrderDateSheetState extends State<OrderDateSheet> {
                 onDateTimeChanged: (d) => _picked = d,
               ),
             ),
+            ?widget.footer,
           ],
         ),
       ),

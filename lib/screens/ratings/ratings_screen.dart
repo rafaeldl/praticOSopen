@@ -130,7 +130,10 @@ class _RatingsScreenState extends State<RatingsScreen> {
           else if (_ratedOrders.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: EmptyState(title: l10n.noRatingsYet),
+              child: EmptyState(
+                title: l10n.noRatingsYet,
+                message: l10n.ratingsEmptyHint(l10n.orderShort),
+              ),
             )
           else ...[
             SliverToBoxAdapter(child: _buildSummary(context)),

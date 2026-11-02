@@ -6,6 +6,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/global.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/services/order_reminder_text.dart';
 import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 
@@ -176,13 +177,12 @@ abstract class _AgendaStore with Store {
       }
       if (order.scheduledDate!.isBefore(now)) continue;
 
-      final orderNumber = order.number?.toString() ?? '';
-      final customerName = order.customer?.name ?? '';
+      final text = OrderReminderText.of(order);
 
       NotificationService.instance.scheduleOrderReminder(
         orderId: order.id!,
-        title: 'Agendamento em breve',
-        body: 'OS #$orderNumber - $customerName',
+        title: text.title,
+        body: text.body,
         scheduledDate: order.scheduledDate!,
         minutesBefore: minutes,
         companyId: companyId,

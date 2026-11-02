@@ -5050,6 +5050,18 @@ abstract class AppLocalizations {
   /// **'Hoje'**
   String get financialToday;
 
+  /// No description provided for @financialReceivableCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços concluídos'**
+  String get financialReceivableCompleted;
+
+  /// No description provided for @financialReceivableOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços em aberto'**
+  String get financialReceivableOpen;
+
   /// No description provided for @financialNextCharge.
   ///
   /// In pt, this message translates to:
@@ -9991,6 +10003,132 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Outro'**
   String get paymentMethodOther;
+
+  /// No description provided for @filterQuotes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamentos'**
+  String get filterQuotes;
+
+  /// No description provided for @homeQuotesWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 orçamento sem resposta} other{{count} orçamentos sem resposta}}'**
+  String homeQuotesWaiting(int count);
+
+  /// No description provided for @noQuotesWaiting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum orçamento sem resposta.'**
+  String get noQuotesWaiting;
+
+  /// No description provided for @ratingsEmptyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A avaliação chega quando o cliente dá a nota pelo link da {order}, depois que ela fica pronta. Para pedir uma, abra uma {order} concluída e mande o link para o cliente.'**
+  String ratingsEmptyHint(String order);
+
+  /// No description provided for @noticesEmptyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aqui aparece o que acontece nas suas {order}: aprovação do cliente, comentários, avaliações e pagamentos. Os lembretes de horário marcado chegam direto no celular.'**
+  String noticesEmptyHint(String order);
+
+  /// No description provided for @noticesRemindersLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustar lembretes'**
+  String get noticesRemindersLink;
+
+  /// No description provided for @reminderWillNotify.
+  ///
+  /// In pt, this message translates to:
+  /// **'O app avisa {time} antes.'**
+  String reminderWillNotify(String time);
+
+  /// No description provided for @reminderIsOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete desligado.'**
+  String get reminderIsOff;
+
+  /// No description provided for @reminderPhoneBlocked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os avisos estão desligados nos Ajustes do celular.'**
+  String get reminderPhoneBlocked;
+
+  /// No description provided for @reminderAdjust.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustar'**
+  String get reminderAdjust;
+
+  /// No description provided for @reminderNotificationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendamento às {time}'**
+  String reminderNotificationTitle(String time);
+
+  /// No description provided for @notificationPromptTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos do PraticOS'**
+  String get notificationPromptTitle;
+
+  /// No description provided for @notificationPromptMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O app lembra você antes de cada horário marcado e avisa quando o cliente aprova um orçamento. O celular vai perguntar se pode mandar esses avisos.'**
+  String get notificationPromptMessage;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar'**
+  String get continueAction;
+
+  /// No description provided for @checklistOfferTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer o checklist de entrada?'**
+  String get checklistOfferTitle;
+
+  /// No description provided for @checklistOfferMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registre como {device} chegou, antes de começar o serviço.'**
+  String checklistOfferMessage(String device);
+
+  /// No description provided for @checklistOfferAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer checklist'**
+  String get checklistOfferAction;
+
+  /// No description provided for @moreContractsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenção que se repete sozinha'**
+  String get moreContractsSubtitle;
+
+  /// No description provided for @contractsOffQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem cliente fixo ou manutenção que se repete?'**
+  String get contractsOffQuestion;
+
+  /// No description provided for @contractsOffMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com contratos, você combina uma vez, por exemplo a cada 6 meses, e o app cuida da próxima {order} na data certa.'**
+  String contractsOffMessage(String order);
+
+  /// No description provided for @contractsOffAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar contratos'**
+  String get contractsOffAction;
 }
 
 class _AppLocalizationsDelegate
