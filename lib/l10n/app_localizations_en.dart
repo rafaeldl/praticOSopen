@@ -3341,10 +3341,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitleHighlight => 'writes the order.';
 
   @override
-  String get loginTradeAuto => 'Auto repair';
+  String get loginTradeAutomotivo => 'Auto Repair Shop';
 
   @override
-  String get loginTradeHvac => 'HVAC';
+  String get loginTradeRefrigeracao => 'HVAC Technician';
+
+  @override
+  String get loginTradeEletrica => 'Electrician';
+
+  @override
+  String get loginTradeAssistenciaCelular => 'Phone Repair Shop';
+
+  @override
+  String get loginTradeHidraulica => 'Plumbing';
+
+  @override
+  String get loginTradeEnergiaSolar => 'Solar Installer';
+
+  @override
+  String get loginTradeInformatica => 'IT Services';
+
+  @override
+  String get loginTradeLimpeza => 'Cleaning Services';
+
+  @override
+  String get loginTradeEletronica => 'Electronics Repair';
+
+  @override
+  String get loginTradeSegurancaCftv => 'CCTV & Security';
+
+  @override
+  String get loginTradeBicicletaria => 'Bike Shop';
+
+  @override
+  String get loginTradeEletrodomesticos => 'Appliance Repair';
+
+  @override
+  String get loginTradeImpressoras => 'Printers';
+
+  @override
+  String get loginTradeAutomacao => 'Home Automation';
+
+  @override
+  String get loginTradeDedetizacao => 'Pest Control';
+
+  @override
+  String get loginTradeElevadores => 'Elevator Maintenance';
+
+  @override
+  String get loginTradeManutencaoPredial => 'Building Maintenance';
+
+  @override
+  String get loginTradeMoveis => 'Furniture Assembly';
+
+  @override
+  String get loginTradeManutencaoAtivos => 'Asset Maintenance';
+
+  @override
+  String get loginTradeObrasPublicas => 'Public Works';
 
   @override
   String get loginSampleSaid => 'You say';

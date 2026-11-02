@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// Illustration of the login screen, from the home of the site: photos of two
-/// trades with the spoken order under the people. What was said turns into a
-/// ready order, once. With Reduce Motion it is already complete.
+/// Illustration of the login screen, from the home of the site: a reel with the
+/// photos of every trade and the spoken order below the people. What was said
+/// turns into a ready order, once. With Reduce Motion it is already complete.
 ///
 /// Being a picture, it is hidden from VoiceOver. The card shrinks to fit, and
 /// the photos leave first when the space above the panel gets short.
@@ -25,8 +27,7 @@ class _LoginHeroState extends State<LoginHero>
   static const _cardBottom = 14.0;
   static const _cardOverlap = 24.0;
   static const _minPhotoHeight = 72.0;
-  static const _margin = 20.0;
-  static const _gap = 10.0;
+  static const _margin = 30.0;
   static const _cardMaxWidth = 340.0;
   static const _radius = BorderRadius.all(Radius.circular(10));
 
@@ -75,20 +76,20 @@ class _LoginHeroState extends State<LoginHero>
           final showPhotos = top - photosBottom >= _minPhotoHeight;
 
           return Padding(
-            padding: const EdgeInsets.fromLTRB(_margin, 16, _margin, 0),
+            padding: const EdgeInsets.only(top: 16),
             child: Stack(
               fit: StackFit.expand,
               children: [
                 if (showPhotos)
                   Padding(
                     padding: EdgeInsets.only(bottom: photosBottom),
-                    child: _buildPhotos(context),
+                    child: const _TradeReel(),
                   ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    10,
+                    _margin,
                     0,
-                    10,
+                    _margin,
                     _cardBottom,
                   ),
                   child: Align(
@@ -108,74 +109,6 @@ class _LoginHeroState extends State<LoginHero>
           );
         },
       ),
-    );
-  }
-
-  Widget _buildPhotos(BuildContext context) {
-    final l10n = context.l10n;
-    return ClipRRect(
-      borderRadius: _radius,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 3,
-            child: _buildPhoto(
-              'assets/images/login_mechanic.webp',
-              l10n.loginTradeAuto,
-              const Alignment(0, 0.45),
-            ),
-          ),
-          const SizedBox(width: _gap),
-          Expanded(
-            flex: 2,
-            child: _buildPhoto(
-              'assets/images/login_hvac.webp',
-              l10n.loginTradeHvac,
-              const Alignment(0, 0.1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPhoto(String asset, String label, Alignment alignment) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          asset,
-          fit: BoxFit.cover,
-          alignment: alignment,
-          cacheWidth: 640,
-        ),
-        Positioned(
-          top: 8,
-          left: 8,
-          right: 8,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.brandYellow,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.label.copyWith(
-                  color: AppColors.brandNavy,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -316,6 +249,166 @@ class _LoginHeroState extends State<LoginHero>
             color: color,
           ),
       ],
+    );
+  }
+}
+
+/// Photos of the trades passing slowly to the side, endlessly, like the reels
+/// of the site. A tap pauses them and a drag moves them by hand. With Reduce
+/// Motion they stand still and only the drag is left.
+class _TradeReel extends StatefulWidget {
+  const _TradeReel();
+
+  @override
+  State<_TradeReel> createState() => _TradeReelState();
+}
+
+class _TradeReelState extends State<_TradeReel>
+    with SingleTickerProviderStateMixin {
+  /// Points per second: the pace of the site's reels.
+  static const _speed = 20.0;
+  static const _gap = 10.0;
+  static const _photoRatio = 800 / 993;
+
+  final _scroll = ScrollController();
+  late final Ticker _ticker;
+  Duration _lastTick = Duration.zero;
+  bool _paused = false;
+  bool _reduceMotion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker(_onTick);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
+    _syncTicker();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _syncTicker() {
+    final shouldRun = !_paused && !_reduceMotion;
+    if (shouldRun && !_ticker.isActive) {
+      _lastTick = Duration.zero;
+      _ticker.start();
+    } else if (!shouldRun && _ticker.isActive) {
+      _ticker.stop();
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    final seconds = (elapsed - _lastTick).inMicroseconds / 1000000;
+    _lastTick = elapsed;
+    if (!_scroll.hasClients) return;
+    // The finger wins while it drags or flings the reel.
+    if (_scroll.position.isScrollingNotifier.value) return;
+    _scroll.jumpTo(_scroll.offset + _speed * seconds);
+  }
+
+  void _togglePause() {
+    _paused = !_paused;
+    _syncTicker();
+  }
+
+  List<(String, String)> _trades(AppLocalizations l10n) => [
+    ('automotivo', l10n.loginTradeAutomotivo),
+    ('refrigeracao', l10n.loginTradeRefrigeracao),
+    ('eletrica', l10n.loginTradeEletrica),
+    ('assistencia-celular', l10n.loginTradeAssistenciaCelular),
+    ('hidraulica', l10n.loginTradeHidraulica),
+    ('energia-solar', l10n.loginTradeEnergiaSolar),
+    ('informatica', l10n.loginTradeInformatica),
+    ('limpeza', l10n.loginTradeLimpeza),
+    ('eletronica', l10n.loginTradeEletronica),
+    ('seguranca-cftv', l10n.loginTradeSegurancaCftv),
+    ('bicicletaria', l10n.loginTradeBicicletaria),
+    ('eletrodomesticos', l10n.loginTradeEletrodomesticos),
+    ('impressoras', l10n.loginTradeImpressoras),
+    ('automacao', l10n.loginTradeAutomacao),
+    ('dedetizacao', l10n.loginTradeDedetizacao),
+    ('elevadores', l10n.loginTradeElevadores),
+    ('manutencao-predial', l10n.loginTradeManutencaoPredial),
+    ('moveis', l10n.loginTradeMoveis),
+    ('manutencao-ativos', l10n.loginTradeManutencaoAtivos),
+    ('obras-publicas', l10n.loginTradeObrasPublicas),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final trades = _trades(context.l10n);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _togglePause,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxHeight * _photoRatio;
+          return ListView.builder(
+            controller: _scroll,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: 20),
+            itemExtent: width + _gap,
+            itemBuilder: (context, index) {
+              final (slug, label) = trades[index % trades.length];
+              return Padding(
+                padding: const EdgeInsets.only(right: _gap),
+                child: _buildPhoto(slug, label),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPhoto(String slug, String label) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/trades/$slug.webp',
+            fit: BoxFit.cover,
+            cacheWidth: 560,
+            gaplessPlayback: true,
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            right: 8,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.brandYellow,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.label.copyWith(
+                    color: AppColors.brandNavy,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

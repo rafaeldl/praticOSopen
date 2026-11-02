@@ -3333,10 +3333,64 @@ class AppLocalizationsPt extends AppLocalizations {
   String get loginTitleHighlight => 'faz a OS.';
 
   @override
-  String get loginTradeAuto => 'Oficina mecânica';
+  String get loginTradeAutomotivo => 'Oficina Mecânica';
 
   @override
-  String get loginTradeHvac => 'Refrigeração';
+  String get loginTradeRefrigeracao => 'Refrigeração';
+
+  @override
+  String get loginTradeEletrica => 'Elétrica';
+
+  @override
+  String get loginTradeAssistenciaCelular => 'Assistência de Celular';
+
+  @override
+  String get loginTradeHidraulica => 'Hidráulica';
+
+  @override
+  String get loginTradeEnergiaSolar => 'Energia Solar';
+
+  @override
+  String get loginTradeInformatica => 'Informática';
+
+  @override
+  String get loginTradeLimpeza => 'Limpeza';
+
+  @override
+  String get loginTradeEletronica => 'Eletrônica';
+
+  @override
+  String get loginTradeSegurancaCftv => 'Segurança CFTV';
+
+  @override
+  String get loginTradeBicicletaria => 'Bicicletaria';
+
+  @override
+  String get loginTradeEletrodomesticos => 'Eletrodomésticos';
+
+  @override
+  String get loginTradeImpressoras => 'Impressoras';
+
+  @override
+  String get loginTradeAutomacao => 'Automação Residencial';
+
+  @override
+  String get loginTradeDedetizacao => 'Dedetização';
+
+  @override
+  String get loginTradeElevadores => 'Elevadores';
+
+  @override
+  String get loginTradeManutencaoPredial => 'Manutenção Predial';
+
+  @override
+  String get loginTradeMoveis => 'Móveis';
+
+  @override
+  String get loginTradeManutencaoAtivos => 'Manutenção de Ativos';
+
+  @override
+  String get loginTradeObrasPublicas => 'Obras Públicas';
 
   @override
   String get loginSampleSaid => 'Você diz';

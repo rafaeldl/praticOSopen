@@ -84,10 +84,10 @@ void main() {
   ) async {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     expect(find.byType(LoginHero), findsOneWidget);
-    expect(find.text('Oficina mecânica'), findsOneWidget);
+    expect(find.text('Oficina Mecânica'), findsOneWidget);
     expect(find.text('Refrigeração'), findsOneWidget);
     expect(find.text('Você diz'), findsOneWidget);
     expect(find.text('R\$ 200,00'), findsOneWidget);
@@ -100,7 +100,7 @@ void main() {
     useTallScreen(tester);
     final semantics = tester.ensureSemantics();
     await tester.pumpWidget(_app(_FakeAuthStore()));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     expect(find.bySemanticsLabel('OS pronta para enviar'), findsNothing);
     semantics.dispose();
@@ -129,6 +129,40 @@ void main() {
     expect(done.opacity.value, 1);
   });
 
+  double reelOffset(WidgetTester tester) => tester
+      .state<ScrollableState>(find.byType(Scrollable).last)
+      .position
+      .pixels;
+
+  testWidgets('the reel passes to the side and a tap pauses it', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(_app(_FakeAuthStore()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final moved = reelOffset(tester);
+    expect(moved, greaterThan(0));
+
+    await tester.tap(find.text('Oficina Mecânica'));
+    await tester.pump();
+    final paused = reelOffset(tester);
+    await tester.pump(const Duration(seconds: 1));
+    expect(reelOffset(tester), paused);
+  });
+
+  testWidgets('with Reduce Motion the reel stands still', (tester) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: _app(_FakeAuthStore()),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(reelOffset(tester), 0);
+  });
+
   for (final locale in const ['pt', 'en', 'es']) {
     testWidgets('small screen with large text does not overflow ($locale)', (
       tester,
@@ -140,7 +174,7 @@ void main() {
       addTearDown(tester.platformDispatcher.clearAllTestValues);
 
       await tester.pumpWidget(_app(_FakeAuthStore(), locale: Locale(locale)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
 
       expect(tester.takeException(), isNull);
       expect(find.byType(SignInWithAppleButton), findsOneWidget);
@@ -177,7 +211,7 @@ void main() {
     final auth = _FakeAuthStore();
     await tester.pumpWidget(_app(auth));
     await tester.tap(find.text('Continuar com Google'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(auth.googleCalls, 1);
   });
 
@@ -189,7 +223,7 @@ void main() {
       ..appleError = Exception('[firebase_auth/network-request-failed] x');
     await tester.pumpWidget(_app(auth));
     await tester.tap(find.byType(SignInWithAppleButton));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(
       find.text('Não deu para entrar com a Apple. Tente de novo.'),
       findsOneWidget,
@@ -201,7 +235,7 @@ void main() {
       message: 'canceled',
     );
     await tester.tap(find.byType(SignInWithAppleButton));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
     expect(find.byKey(const Key('login_error')), findsNothing);
   });
 }
