@@ -88,7 +88,8 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
   pagamento), no "poderoso", "intuitivo", "eficiente", "solução completa".
 - No invented numbers (users, ratings, conversion). No fake testimonials: a quote
   goes live only after the named customer approves the exact text, and it never
-  sits beside an AI-generated photo.
+  sits beside an AI-generated photo. The only exception is the customer's own
+  portrait, retouched from a real photo, if they approve the final image.
 - Claim only what the app does. Segment fields marked "para evolução futura" in `firebase/scripts/seed_segments.js` are not claims.
 - Feature flags in `site.json`: `flags.whatsappBot` (assistant pages/sections,
   currently **off** — bot is shut down), `flags.whatsappContact` (float button).
