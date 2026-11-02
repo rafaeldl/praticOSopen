@@ -213,7 +213,7 @@
       {
         "id": "ver",
         "title": "Ver lo que está en espera",
-        "intro": "En Inicio, toca el filtro <strong>En espera</strong>. Las OS más antiguas aparecen primero, con una línea como \"En espera hace 3 días · Esperando repuesto\". La misma línea aparece en los otros filtros, con un punto naranja al lado. Si la OS también está atrasada, el punto es rojo."
+        "intro": "En Inicio, toca el filtro <strong>En espera</strong>. Las OS más antiguas aparecen primero, con una línea como \"En espera desde hace 3 días · Esperando repuesto\". La misma línea aparece en los otros filtros, con un punto naranja al lado. Si la OS también está atrasada, el punto es rojo."
       },
       {
         "id": "reanudar",

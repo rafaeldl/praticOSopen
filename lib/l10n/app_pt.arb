@@ -2934,6 +2934,7 @@
   "noOrdersOnHold": "Nenhum serviço parado.",
   "orderHoldMark": "Marcar como parada",
   "orderHoldResume": "Retomar serviço",
+  "orderHoldSaveError": "Não deu para salvar. Tente de novo.",
   "orderHoldSheetTitle": "Por que parou?",
   "orderHoldNoteHint": "Observação (opcional)",
   "orderHoldReasonPart": "Esperando peça",

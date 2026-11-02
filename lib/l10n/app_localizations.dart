@@ -10160,6 +10160,12 @@ abstract class AppLocalizations {
   /// **'Retomar serviço'**
   String get orderHoldResume;
 
+  /// No description provided for @orderHoldSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para salvar. Tente de novo.'**
+  String get orderHoldSaveError;
+
   /// No description provided for @orderHoldSheetTitle.
   ///
   /// In pt, this message translates to:

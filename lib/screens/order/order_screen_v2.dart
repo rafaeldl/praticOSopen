@@ -854,14 +854,16 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final picked = await showOrderHoldSheet(context);
     if (picked == null || !mounted) return;
     final l10n = context.l10n;
-    _store.markOnHold(reason: picked.reason, note: picked.note);
     final reason = OrderHoldStyle.reasonLabel(l10n, picked.reason);
     final note = picked.note;
-    unawaited(
-      _actions.logOrderEvent(
-        order,
-        l10n.orderHoldLogMarked(note == null ? reason : '$reason. $note'),
-      ),
+    final log = l10n.orderHoldLogMarked(
+      note == null ? reason : '$reason. $note',
+    );
+    _store.markOnHold(
+      reason: picked.reason,
+      note: note,
+      onSaved: () => unawaited(_actions.logOrderEvent(order, log)),
+      onFailed: _warnHoldNotSaved,
     );
   }
 
@@ -869,11 +871,21 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final order = _store.order;
     final hold = _store.hold;
     if (order == null || hold == null || !_canResume(order)) return;
-    final days = hold.daysSince(DateTime.now());
-    _store.resumeHold();
-    unawaited(
-      _actions.logOrderEvent(order, context.l10n.orderHoldLogResumed(days)),
+    // "Retomar" gives way to the next step in the same spot: without this, a
+    // double tap would complete the order.
+    if (_statusCooldown?.isActive ?? false) return;
+    _statusCooldown = Timer(kStatusTapCooldown, () {});
+    final log = context.l10n.orderHoldLogResumed(
+      hold.daysSince(DateTime.now()),
     );
+    _store.resumeHold(
+      onSaved: () => unawaited(_actions.logOrderEvent(order, log)),
+      onFailed: _warnHoldNotSaved,
+    );
+  }
+
+  void _warnHoldNotSaved() {
+    if (mounted) showAppToast(context, context.l10n.orderHoldSaveError);
   }
 
   /// "OS" for the default label; a segment that renames the order keeps it.

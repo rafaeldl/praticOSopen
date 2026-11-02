@@ -2558,6 +2558,7 @@
   "noOrdersOnHold": "Nothing on hold.",
   "orderHoldMark": "Put on hold",
   "orderHoldResume": "Resume work",
+  "orderHoldSaveError": "Could not save. Try again.",
   "orderHoldSheetTitle": "Why did it stop?",
   "orderHoldNoteHint": "Note (optional)",
   "orderHoldReasonPart": "Waiting for a part",

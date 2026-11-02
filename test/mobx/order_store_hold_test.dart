@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -158,13 +160,100 @@ void main() {
     expect(store.hold, isNull);
   });
 
-  test('a failed write does not throw to the screen', () async {
-    store
-      ..order = order('approved')
-      ..writeHold = (companyId, orderId, hold) async =>
-          throw StateError('denied');
-    store.markOnHold(reason: OrderHoldReason.customer);
-    await pumpEventQueue();
-    expect(store.hold?.reason, OrderHoldReason.customer);
+  group('when the server answers', () {
+    late List<String> events;
+
+    Future<void> refuse(Object error) async => throw error;
+
+    setUp(() => events = []);
+
+    test('an accepted mark tells the screen', () async {
+      store.order = order('approved');
+      store.markOnHold(
+        reason: OrderHoldReason.customer,
+        onSaved: () => events.add('saved'),
+        onFailed: () => events.add('failed'),
+      );
+      await pumpEventQueue();
+      expect(events, ['saved']);
+      expect(store.hold?.reason, OrderHoldReason.customer);
+    });
+
+    test('a refused mark is undone and only "failed" runs', () async {
+      store
+        ..order = order('approved')
+        ..writeHold = (_, _, _) => refuse(StateError('denied'));
+      store.markOnHold(
+        reason: OrderHoldReason.customer,
+        onSaved: () => events.add('saved'),
+        onFailed: () => events.add('failed'),
+      );
+      expect(store.hold?.reason, OrderHoldReason.customer);
+
+      await pumpEventQueue();
+
+      expect(events, ['failed']);
+      expect(store.hold, isNull);
+      expect(store.order!.onHold, isNull);
+    });
+
+    test('a refused "Retomar" brings the mark back', () async {
+      final previous = stopped();
+      store
+        ..order = order('progress', hold: previous)
+        ..hold = previous
+        ..writeHold = (_, _, _) => refuse(StateError('denied'));
+      store.resumeHold(
+        onSaved: () => events.add('saved'),
+        onFailed: () => events.add('failed'),
+      );
+      expect(store.hold, isNull);
+
+      await pumpEventQueue();
+
+      expect(events, ['failed']);
+      expect(store.hold, same(previous));
+      expect(store.order!.onHold, same(previous));
+    });
+
+    test('a write that throws at once is handled the same way', () async {
+      store
+        ..order = order('approved')
+        ..writeHold = (_, _, _) => throw StateError('no app');
+      store.markOnHold(
+        reason: OrderHoldReason.other,
+        onFailed: () => events.add('failed'),
+      );
+      await pumpEventQueue();
+      expect(events, ['failed']);
+      expect(store.hold, isNull);
+    });
+
+    test('a late refusal does not undo a newer mark', () async {
+      final first = Completer<void>();
+      store
+        ..order = order('approved')
+        ..writeHold = (_, _, _) => first.future;
+      store.markOnHold(reason: OrderHoldReason.part);
+
+      store.writeHold = (_, _, _) async {};
+      store.resumeHold();
+      store.markOnHold(reason: OrderHoldReason.customer);
+      first.completeError(StateError('denied'));
+      await pumpEventQueue();
+
+      expect(store.hold?.reason, OrderHoldReason.customer);
+    });
+
+    test('a refused removal on finishing keeps the mark gone', () async {
+      store
+        ..order = (order('progress', hold: stopped())..payment = 'unpaid')
+        ..hold = store.order?.onHold
+        ..writeHold = (_, _, _) => refuse(StateError('denied'));
+      store.setStatus('done');
+      await pumpEventQueue();
+      expect(store.hold, isNull);
+      expect(store.order!.onHold, isNull);
+    });
   });
 }

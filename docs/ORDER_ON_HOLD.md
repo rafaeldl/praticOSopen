@@ -72,8 +72,10 @@ Mudar a situação por API, bot, MCP ou app antigo:
 5. Concluir e cancelar continuam disponíveis pela situação da OS e tiram a marca. Voltar para orçamento também.
 6. Ir de `approved` para `progress` (ou o contrário) não tira a marca, porque a OS continua onde ela vale. Só o "Retomar serviço" a remove nesse caso.
 7. Uma marca que sobrou em OS fora de `approved` e `progress` é ignorada na tela (`isOnHold`) até o trigger apagá-la.
-8. Financeiro não muda: a OS parada continua contando onde contava.
-9. O Início ganha o filtro "Paradas", com as mais antigas primeiro. Em todos os filtros, a OS parada mostra motivo e dias parados. Atrasada e parada ao mesmo tempo, fica com o ponto vermelho e mantém a linha da parada.
+8. Se o servidor recusar a gravação, a tela desfaz a marca (ou a traz de volta, ao retomar), mostra um aviso e não grava comentário. Se a recusa vier ao tirar a marca por mudança de situação, nada é desfeito: a marca fica oculta e o trigger a remove.
+9. "Retomar serviço" usa o mesmo intervalo de 800 ms do botão azul: um toque duplo não conclui a OS.
+10. Financeiro não muda: a OS parada continua contando onde contava.
+11. O Início ganha o filtro "Paradas", com as mais antigas primeiro. Em todos os filtros, a OS parada mostra motivo e dias parados. Atrasada e parada ao mesmo tempo, fica com o ponto vermelho e mantém a linha da parada.
 
 ### Permissão
 
@@ -90,7 +92,7 @@ O consultor vê a marca, mas não a muda. A regra e o app ficam alinhados em `or
 
 ### Histórico
 
-O app não tem uma linha do tempo da OS. O padrão existente para registrar acontecimentos é o comentário interno (`addOrderComment`), que aparece na OS e não aparece para o cliente no link. Marcar e retomar deixam um comentário interno com o motivo, ou com os dias parados. A tela grava esse comentário por `OrderScreenActions.logOrderEvent`. Concluir ou cancelar uma OS parada não gera comentário.
+O app não tem uma linha do tempo da OS. O padrão existente para registrar acontecimentos é o comentário interno (`addOrderComment`), que aparece na OS e não aparece para o cliente no link. Marcar e retomar deixam um comentário interno com o motivo, ou com os dias parados. A tela grava esse comentário por `OrderScreenActions.logOrderEvent`, depois que o servidor aceita a marca. Sem internet, o comentário espera a conexão voltar com o app aberto. Concluir ou cancelar uma OS parada não gera comentário.
 
 ## Exemplos de Uso
 

@@ -6239,6 +6239,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderHoldResume => 'Resume work';
 
   @override
+  String get orderHoldSaveError => 'Could not save. Try again.';
+
+  @override
   String get orderHoldSheetTitle => 'Why did it stop?';
 
   @override

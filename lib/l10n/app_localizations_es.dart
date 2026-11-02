@@ -6251,6 +6251,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderHoldResume => 'Reanudar servicio';
 
   @override
+  String get orderHoldSaveError => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
   String get orderHoldSheetTitle => '¿Por qué se detuvo?';
 
   @override
@@ -6273,8 +6276,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'En espera hace $count días',
-      one: 'En espera hace 1 día',
+      other: 'En espera desde hace $count días',
+      one: 'En espera desde hace 1 día',
       zero: 'En espera desde hoy',
     );
     return '$_temp0';

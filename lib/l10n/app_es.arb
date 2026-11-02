@@ -2558,13 +2558,14 @@
   "noOrdersOnHold": "Ningún servicio en espera.",
   "orderHoldMark": "Poner en espera",
   "orderHoldResume": "Reanudar servicio",
+  "orderHoldSaveError": "No se pudo guardar. Inténtalo de nuevo.",
   "orderHoldSheetTitle": "¿Por qué se detuvo?",
   "orderHoldNoteHint": "Observación (opcional)",
   "orderHoldReasonPart": "Esperando repuesto",
   "orderHoldReasonCustomer": "Esperando al cliente",
   "orderHoldReasonAuthorization": "Esperando autorización",
   "orderHoldReasonOther": "Otro motivo",
-  "orderHoldSince": "{count, plural, =0{En espera desde hoy} =1{En espera hace 1 día} other{En espera hace {count} días}}",
+  "orderHoldSince": "{count, plural, =0{En espera desde hoy} =1{En espera desde hace 1 día} other{En espera desde hace {count} días}}",
   "orderHoldLogMarked": "Puesta en espera: {reason}",
   "orderHoldLogResumed": "{count, plural, =0{Reanudada el mismo día} =1{Reanudada tras 1 día en espera} other{Reanudada tras {count} días en espera}}"
 }

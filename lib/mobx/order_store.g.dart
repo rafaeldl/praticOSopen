@@ -1461,24 +1461,34 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  void markOnHold({required String reason, String? note}) {
+  void markOnHold({
+    required String reason,
+    String? note,
+    VoidCallback? onSaved,
+    VoidCallback? onFailed,
+  }) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.markOnHold',
     );
     try {
-      return super.markOnHold(reason: reason, note: note);
+      return super.markOnHold(
+        reason: reason,
+        note: note,
+        onSaved: onSaved,
+        onFailed: onFailed,
+      );
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void resumeHold() {
+  void resumeHold({VoidCallback? onSaved, VoidCallback? onFailed}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.resumeHold',
     );
     try {
-      return super.resumeHold();
+      return super.resumeHold(onSaved: onSaved, onFailed: onFailed);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

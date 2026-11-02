@@ -6240,6 +6240,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderHoldResume => 'Retomar serviço';
 
   @override
+  String get orderHoldSaveError => 'Não deu para salvar. Tente de novo.';
+
+  @override
   String get orderHoldSheetTitle => 'Por que parou?';
 
   @override

@@ -10,6 +10,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -1715,6 +1716,88 @@ void main() {
       expect(mark, findsOneWidget);
       expect(find.text('Marcar como pronta'), findsOneWidget);
       expect(actions.calls, ['log: Retomada depois de 3 dias parada']);
+    });
+
+    testWidgets('a double tap on "Retomar" does not complete the order', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': stopped('progress')},
+      );
+
+      await tester.tap(primary);
+      await tester.pump(const Duration(milliseconds: 150));
+      // The same spot now holds "Marcar como pronta".
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.order!.status, 'progress');
+      expect(store.hold, isNull);
+      expect(actions.calls, ['log: Retomada depois de 3 dias parada']);
+
+      // After the cooldown the next step works again.
+      await tester.pump(kStatusTapCooldown);
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+      expect(store.order!.status, 'done');
+    });
+
+    testWidgets('a refused mark goes away, warns and leaves no comment', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': order('progress')},
+      );
+      // Only now: with a company at load time the store would open Firestore.
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      addTearDown(() => Global.companyAggr = null);
+      store.writeHold = (_, _, _) async => throw StateError('denied');
+
+      await tester.tap(mark);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('order_hold_reason_part')));
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNull);
+      expect(find.byKey(const ValueKey('order_hold')), findsNothing);
+      expect(mark, findsOneWidget);
+      expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+      expect(actions.calls, isEmpty);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a refused "Retomar" keeps the mark and leaves no comment', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': stopped('progress')},
+      );
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      addTearDown(() => Global.companyAggr = null);
+      store.writeHold = (_, _, _) async => throw StateError('denied');
+
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNotNull);
+      expect(find.byKey(const ValueKey('order_hold')), findsOneWidget);
+      expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+      expect(actions.calls, isEmpty);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('who cannot resume keeps the normal next step', (tester) async {
