@@ -3439,10 +3439,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSampleSaid => 'You say';
 
   @override
-  String get loginSampleLine => '“Julia\'s Civic, oil change and alignment”';
+  String get loginSampleAutomotivo =>
+      '“Julia\'s Civic, oil change and alignment”';
 
   @override
-  String get loginSampleTotal => '\$200.00';
+  String get loginSampleRefrigeracao =>
+      '“Martha\'s AC, cleaning and refrigerant recharge”';
+
+  @override
+  String get loginSampleEletrica =>
+      '“Paul\'s house, new breakers in the panel”';
+
+  @override
+  String get loginSampleAssistenciaCelular =>
+      '“Luke\'s iPhone, new screen and battery”';
+
+  @override
+  String get loginSampleHidraulica =>
+      '“Anna\'s apartment, leak at the sink trap”';
+
+  @override
+  String get loginSampleEnergiaSolar => '“Charles\'s roof, two more panels”';
+
+  @override
+  String get loginSampleInformatica =>
+      '“Bea\'s laptop, clean install and new SSD”';
+
+  @override
+  String get loginSampleLimpeza => '“Clara\'s office, window cleaning”';
+
+  @override
+  String get loginSampleEletronica => '“Joe\'s TV, new main board”';
+
+  @override
+  String get loginSampleSegurancaCftv =>
+      '“Mark\'s store, four cameras installed”';
+
+  @override
+  String get loginSampleBicicletaria =>
+      '“Peter\'s bike, full tune-up and new tire”';
+
+  @override
+  String get loginSampleEletrodomesticos => '“Sonia\'s washer, new water pump”';
+
+  @override
+  String get loginSampleImpressoras => '“Office printer, new fuser”';
+
+  @override
+  String get loginSampleAutomacao =>
+      '“Renata\'s house, living room panel install”';
+
+  @override
+  String get loginSampleDedetizacao =>
+      '“Tom\'s kitchen, pest control and report”';
+
+  @override
+  String get loginSampleElevadores =>
+      '“Aurora Building, monthly elevator service”';
+
+  @override
+  String get loginSampleManutencaoPredial =>
+      '“Garden Condo, hallway and lobby inspection”';
+
+  @override
+  String get loginSampleMoveis =>
+      '“Lucy\'s wardrobe, assembly and adjustments”';
+
+  @override
+  String get loginSampleManutencaoAtivos => '“Line 2 motor, new bearings”';
+
+  @override
+  String get loginSampleObrasPublicas =>
+      '“Flower Street, resurfacing of section 3”';
 
   @override
   String get loginSampleDone => 'Order ready to send';

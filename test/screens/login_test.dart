@@ -89,8 +89,12 @@ void main() {
     expect(find.byType(LoginHero), findsOneWidget);
     expect(find.text('Oficina Mecânica'), findsOneWidget);
     expect(find.text('Refrigeração'), findsOneWidget);
-    expect(find.text('Você diz'), findsOneWidget);
-    expect(find.text('R\$ 200,00'), findsOneWidget);
+    expect(find.text('Você diz · Oficina Mecânica'), findsOneWidget);
+    expect(
+      find.text('“Onix da Juliana, troca de óleo e alinhamento”'),
+      findsOneWidget,
+    );
+    expect(find.text('R\$\u00A0200,00'), findsOneWidget);
     expect(find.text('OS pronta para enviar'), findsOneWidget);
   });
 
@@ -140,9 +144,9 @@ void main() {
     useTallScreen(tester);
     await tester.pumpWidget(_app(_FakeAuthStore()));
     await tester.pump();
+    final start = reelOffset(tester);
     await tester.pump(const Duration(seconds: 1));
-    final moved = reelOffset(tester);
-    expect(moved, greaterThan(0));
+    expect(reelOffset(tester), greaterThan(start));
 
     await tester.tap(find.text('Oficina Mecânica'));
     await tester.pump();
@@ -159,8 +163,50 @@ void main() {
         child: _app(_FakeAuthStore()),
       ),
     );
+    final start = reelOffset(tester);
     await tester.pump(const Duration(seconds: 1));
-    expect(reelOffset(tester), 0);
+    expect(reelOffset(tester), start);
+  });
+
+  testWidgets('the card follows the photo at the center of the reel', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: _app(_FakeAuthStore()),
+      ),
+    );
+    await tester.pump();
+
+    final extent = tester
+        .widget<ListView>(find.byType(ListView).last)
+        .itemExtent!;
+    final position = tester
+        .state<ScrollableState>(find.byType(Scrollable).last)
+        .position;
+    final start = position.pixels;
+
+    position.jumpTo(start + extent * 3);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Você diz · Assistência de Celular'), findsOneWidget);
+    expect(
+      find.text('“iPhone do Lucas, troca de tela e bateria”'),
+      findsOneWidget,
+    );
+    expect(find.text('R\$\u00A0650,00'), findsOneWidget);
+    expect(
+      find.text('“Onix da Juliana, troca de óleo e alinhamento”'),
+      findsNothing,
+    );
+
+    // The reel never ends: past the last trade comes the first again.
+    position.jumpTo(start + extent * 20);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Você diz · Oficina Mecânica'), findsOneWidget);
   });
 
   for (final locale in const ['pt', 'en', 'es']) {
