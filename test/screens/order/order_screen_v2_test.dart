@@ -10,6 +10,7 @@ import 'package:praticos/screens/widgets/app_list_row.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -97,6 +98,10 @@ class FakeActions extends OrderScreenActions {
   @override
   Future<void> shareWithCustomer(BuildContext context, Order order) async =>
       calls.add('send');
+
+  @override
+  Future<void> logOrderEvent(Order order, String text) async =>
+      calls.add('log: $text');
 }
 
 /// Registration without Firebase: ids in order, writes kept in lists.
@@ -174,11 +179,14 @@ OrderPermissions _permissions({
   bool prices = true,
   bool receive = true,
   bool Function(Order? order)? receiveOn,
+  bool hold = true,
+  List<String> statuses = const ['approved', 'progress', 'canceled'],
 }) => OrderPermissions(
+  canChangeHold: (_) => hold,
   canViewPrices: () => prices,
   canReceivePayments: receiveOn ?? (_) => receive,
   canGiveDiscount: () => receive,
-  availableStatuses: (_) => const ['approved', 'progress', 'canceled'],
+  availableStatuses: (_) => statuses,
   canChangeStatus: (_, _) => true,
   canDelete: (_) => true,
 );
@@ -1550,6 +1558,300 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('Cadastrar “'), findsNothing);
       expect(find.text('Alinhamento'), findsOneWidget);
+    });
+  });
+
+  group('stopped order', () {
+    final mark = find.byKey(const ValueKey('order_mark_on_hold'));
+    final primary = find.byKey(const ValueKey('order_primary_button'));
+
+    Order order(String status) => Order()
+      ..id = 'o1'
+      ..number = 186
+      ..status = status
+      ..customer = (CustomerAggr()
+        ..id = 'c1'
+        ..name = 'Ana Souza')
+      ..services = []
+      ..products = []
+      ..paidAmount = 0
+      ..transactions = [];
+
+    Order stopped(String status) => order(status)
+      ..onHold = (OrderHold()
+        ..reason = OrderHoldReason.part
+        ..note = 'Bomba chega sexta'
+        ..since = DateTime.now().subtract(const Duration(days: 3)));
+
+    OrderScreenV2 buildScreen(
+      OrderStore store,
+      FakeActions actions, {
+      bool hold = true,
+    }) => OrderScreenV2(
+      showAssistant: false,
+      store: store,
+      catalogSource: FakeSource(),
+      catalogPermissions: _allCatalog,
+      permissions: _permissions(hold: hold, statuses: const ['done']),
+      actions: actions,
+      mostUsed: () async => const [],
+    );
+
+    testWidgets('marks in two taps: the link, then the reason', (tester) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': order('progress')},
+      );
+
+      await tester.tap(mark);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('order_hold_reason_part')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(store.hold?.reason, OrderHoldReason.part);
+      expect(store.order!.status, 'progress');
+      expect(find.text('Parada desde hoje · Esperando peça'), findsOneWidget);
+      expect(mark, findsNothing);
+      expect(actions.calls, [
+        'log: Marcada como parada: Esperando peça',
+      ]);
+    });
+
+    testWidgets('the note is optional and goes with the reason', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': order('approved')},
+      );
+
+      await tester.tap(mark);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('order_hold_note')),
+        'Sem retorno',
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('order_hold_reason_customer')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(store.hold?.note, 'Sem retorno');
+      expect(find.text('Sem retorno'), findsOneWidget);
+      expect(actions.calls, [
+        'log: Marcada como parada: Esperando cliente. Sem retorno',
+      ]);
+    });
+
+    testWidgets('cancelling the sheet marks nothing', (tester) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': order('approved')},
+      );
+
+      await tester.tap(mark);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNull);
+      expect(actions.calls, isEmpty);
+    });
+
+    testWidgets('only on approved and in progress orders', (tester) async {
+      for (final status in ['quote', 'done', 'canceled']) {
+        await _pump(
+          tester,
+          buildScreen(OrderStore(), FakeActions()),
+          args: {'order': order(status)},
+        );
+        expect(mark, findsNothing, reason: status);
+      }
+    });
+
+    testWidgets('who cannot change the status does not see it', (tester) async {
+      await _pump(
+        tester,
+        buildScreen(OrderStore(), FakeActions(), hold: false),
+        args: {'order': order('approved')},
+      );
+      expect(mark, findsNothing);
+    });
+
+    testWidgets('a stopped order shows why, for how long and "Retomar"', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': stopped('progress')},
+      );
+
+      expect(find.text('Parada há 3 dias · Esperando peça'), findsOneWidget);
+      expect(find.text('Bomba chega sexta'), findsOneWidget);
+      expect(
+        find.descendant(of: primary, matching: find.text('Retomar serviço')),
+        findsOneWidget,
+      );
+
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNull);
+      expect(store.order!.status, 'progress');
+      expect(find.text('Parada há 3 dias · Esperando peça'), findsNothing);
+      expect(mark, findsOneWidget);
+      expect(find.text('Marcar como pronta'), findsOneWidget);
+      expect(actions.calls, ['log: Retomada depois de 3 dias parada']);
+    });
+
+    testWidgets('a double tap on "Retomar" does not complete the order', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': stopped('progress')},
+      );
+
+      await tester.tap(primary);
+      await tester.pump(const Duration(milliseconds: 150));
+      // The same spot now holds "Marcar como pronta".
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.order!.status, 'progress');
+      expect(store.hold, isNull);
+      expect(actions.calls, ['log: Retomada depois de 3 dias parada']);
+
+      // After the cooldown the next step works again.
+      await tester.pump(kStatusTapCooldown);
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+      expect(store.order!.status, 'done');
+    });
+
+    testWidgets('a refused mark goes away, warns and leaves no comment', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': order('progress')},
+      );
+      // Only now: with a company at load time the store would open Firestore.
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      addTearDown(() => Global.companyAggr = null);
+      store.writeHold = (_, _, _) async => throw StateError('denied');
+
+      await tester.tap(mark);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('order_hold_reason_part')));
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNull);
+      expect(find.byKey(const ValueKey('order_hold')), findsNothing);
+      expect(mark, findsOneWidget);
+      expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+      expect(actions.calls, isEmpty);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a refused "Retomar" keeps the mark and leaves no comment', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      final actions = FakeActions();
+      await _pump(
+        tester,
+        buildScreen(store, actions),
+        args: {'order': stopped('progress')},
+      );
+      Global.companyAggr = CompanyAggr()..id = 'c1';
+      addTearDown(() => Global.companyAggr = null);
+      store.writeHold = (_, _, _) async => throw StateError('denied');
+
+      await tester.tap(primary);
+      await tester.pumpAndSettle();
+
+      expect(store.hold, isNotNull);
+      expect(find.byKey(const ValueKey('order_hold')), findsOneWidget);
+      expect(find.text('Não deu para salvar. Tente de novo.'), findsOneWidget);
+      expect(actions.calls, isEmpty);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('who cannot resume keeps the normal next step', (tester) async {
+      await _pump(
+        tester,
+        buildScreen(OrderStore(), FakeActions(), hold: false),
+        args: {'order': stopped('approved')},
+      );
+      expect(find.text('Parada há 3 dias · Esperando peça'), findsOneWidget);
+      expect(find.text('Retomar serviço'), findsNothing);
+    });
+
+    testWidgets('concluding through the status removes the mark', (
+      tester,
+    ) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        buildScreen(store, FakeActions()),
+        args: {'order': stopped('progress')},
+      );
+
+      await tester.tap(find.byKey(const ValueKey('order_header_status')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Concluído').last);
+      await tester.pumpAndSettle();
+
+      expect(store.order!.status, 'done');
+      expect(store.hold, isNull);
+      expect(store.order!.onHold, isNull);
+      expect(find.byKey(const ValueKey('order_hold')), findsNothing);
+      expect(mark, findsNothing);
+    });
+
+    testWidgets('the "…" menu also marks and resumes', (tester) async {
+      final store = OrderStore();
+      await _pump(
+        tester,
+        buildScreen(store, FakeActions()),
+        args: {'order': order('approved')},
+      );
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      expect(_menuLabels(tester), contains('Marcar como parada'));
+      await tester.tap(find.text('Marcar como parada').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('order_hold_reason_other')));
+      await tester.pumpAndSettle();
+      expect(store.hold?.reason, OrderHoldReason.other);
+
+      await tester.tap(find.byIcon(CupertinoIcons.ellipsis));
+      await tester.pumpAndSettle();
+      expect(_menuLabels(tester), contains('Retomar serviço'));
+      expect(_menuLabels(tester), isNot(contains('Marcar como parada')));
     });
   });
 

@@ -433,6 +433,28 @@ class AuthorizationService {
     }
   }
 
+  /// Marca de OS parada: quem muda a situação de uma OS aprovada ou em
+  /// andamento pode marcar e retomar. O consultor só decide orçamentos, então
+  /// não pode. Espelha `orderHoldChangeAllowed` em firestore.rules.
+  bool canChangeOrderHold(Order order) => canChangeOrderHoldFor(
+    role: normalizedRole,
+    userId: Global.currentUser?.uid,
+    order: order,
+  );
+
+  /// Pure version of [canChangeOrderHold].
+  static bool canChangeOrderHoldFor({
+    required RolesType? role,
+    required String? userId,
+    required Order order,
+  }) {
+    if (role == null || role == RolesType.consultant) return false;
+    if (!canAccessOrderFor(role: role, userId: userId, order: order)) {
+      return false;
+    }
+    return order.canBeOnHold;
+  }
+
   /// Retorna a lista de status disponíveis que o usuário pode selecionar
   /// para uma determinada OS, baseado no status atual e no perfil do usuário.
   ///

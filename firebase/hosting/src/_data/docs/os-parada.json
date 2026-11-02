@@ -1,0 +1,266 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Para que serve",
+        "intro": "Às vezes o serviço está aprovado ou em andamento, mas ninguém está mexendo nele: falta peça, o cliente não respondeu ou a autorização não chegou. A marca de OS parada mostra isso na lista, com o motivo e há quantos dias está assim.",
+        "infoCard": {
+          "title": "A situação da OS não muda",
+          "content": "A marca fica ao lado da situação. Uma OS Em Andamento continua Em Andamento, e o Financeiro continua igual."
+        }
+      },
+      {
+        "id": "marcar",
+        "title": "Marcar como parada",
+        "intro": "Vale para OS Aprovada ou Em Andamento.",
+        "subsections": [
+          {
+            "title": "Em dois toques",
+            "validationList": [
+              {
+                "label": "1. Abra a OS",
+                "text": "Toque em <strong>Marcar como parada</strong>, abaixo do botão azul. O mesmo item está no menu <strong>…</strong>."
+              },
+              {
+                "label": "2. Escolha o motivo",
+                "text": "Esperando peça, Esperando cliente, Esperando autorização ou Outro motivo. Ao tocar, a marca já fica salva."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Quer deixar um recado?",
+          "content": "Escreva a observação antes de escolher o motivo. Ela é opcional e aparece na OS, por exemplo \"A bomba chega sexta\"."
+        }
+      },
+      {
+        "id": "ver",
+        "title": "Ver o que está parado",
+        "intro": "No Início, toque no filtro <strong>Paradas</strong>. As OS mais antigas aparecem primeiro, com uma linha como \"Parada há 3 dias · Esperando peça\". A mesma linha aparece nos outros filtros, com um ponto laranja ao lado. Se a OS também estiver atrasada, o ponto fica vermelho."
+      },
+      {
+        "id": "retomar",
+        "title": "Retomar, concluir ou cancelar",
+        "intro": "Enquanto a OS está parada, o botão azul é <strong>Retomar serviço</strong>. Ao tocar, a marca sai e a OS continua na mesma situação.",
+        "features": [
+          {
+            "title": "Concluir",
+            "description": "Mudar a situação para concluída tira a marca."
+          },
+          {
+            "title": "Cancelar",
+            "description": "Cancelar a OS também tira a marca."
+          },
+          {
+            "title": "Registro",
+            "description": "Marcar e retomar deixam um comentário interno na OS, com o motivo ou com os dias parados. O cliente não vê esse comentário."
+          }
+        ]
+      },
+      {
+        "id": "quem-pode",
+        "title": "Quem pode marcar",
+        "intro": "Pode marcar e retomar quem muda a situação de uma OS aprovada ou em andamento: dono, administrador, gerente, supervisor e técnico. O técnico faz isso nas OS que ele acessa. O consultor vê a marca, mas não a muda. Veja os <a href=\"perfis.html\">perfis</a>."
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas frequentes",
+        "faq": [
+          {
+            "question": "O cliente vê que a OS está parada?",
+            "answer": "Não. A marca, o motivo e o comentário ficam só para a sua equipe. Eles não aparecem no link da OS nem no PDF."
+          },
+          {
+            "question": "A OS parada muda o que tenho a receber?",
+            "answer": "Não. O Financeiro não olha a marca: a OS parada continua contando como antes."
+          },
+          {
+            "question": "Posso marcar um orçamento?",
+            "answer": "Não. A marca vale só para OS Aprovada ou Em Andamento."
+          },
+          {
+            "question": "É o mesmo que o aviso de OS paradas nos Lembretes?",
+            "answer": "Não. Aquele aviso conta OS abertas há mais de 7 dias, marcadas ou não. Veja <a href=\"lembretes.html\">Lembretes</a>."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "What it is for",
+        "intro": "Sometimes a job is approved or in progress, but nobody is working on it: a part is missing, the customer has not answered or the authorization has not arrived. The on-hold mark shows this in the list, with the reason and how many days it has been that way.",
+        "infoCard": {
+          "title": "The order status does not change",
+          "content": "The mark sits beside the status. An order In Progress stays In Progress, and the Financial tab stays the same."
+        }
+      },
+      {
+        "id": "mark",
+        "title": "Put an order on hold",
+        "intro": "It works on Approved and In Progress orders.",
+        "subsections": [
+          {
+            "title": "In two taps",
+            "validationList": [
+              {
+                "label": "1. Open the order",
+                "text": "Tap <strong>Put on hold</strong>, below the blue button. The same item is in the <strong>…</strong> menu."
+              },
+              {
+                "label": "2. Pick the reason",
+                "text": "Waiting for a part, Waiting for the customer, Waiting for authorization or Other reason. The tap saves the mark."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Want to leave a note?",
+          "content": "Write the note before picking the reason. It is optional and shows on the order, for example \"The pump arrives on Friday\"."
+        }
+      },
+      {
+        "id": "see",
+        "title": "See what is on hold",
+        "intro": "On Home, tap the <strong>On hold</strong> filter. The oldest orders come first, with a line such as \"On hold for 3 days · Waiting for a part\". The same line shows in the other filters, with an orange dot beside it. If the order is also overdue, the dot is red."
+      },
+      {
+        "id": "resume",
+        "title": "Resume, complete or cancel",
+        "intro": "While an order is on hold, the blue button is <strong>Resume work</strong>. The tap removes the mark and the order keeps its status.",
+        "features": [
+          {
+            "title": "Complete",
+            "description": "Changing the status to completed removes the mark."
+          },
+          {
+            "title": "Cancel",
+            "description": "Canceling the order also removes the mark."
+          },
+          {
+            "title": "Record",
+            "description": "Putting on hold and resuming leave an internal comment on the order, with the reason or the days on hold. The customer does not see this comment."
+          }
+        ]
+      },
+      {
+        "id": "who-can",
+        "title": "Who can use it",
+        "intro": "Whoever changes the status of an approved or running order can put it on hold and resume it: owner, admin, manager, supervisor and technician. Technicians do it on the orders they can open. Consultants see the mark but cannot change it. See <a href=\"perfis-en.html\">roles</a>."
+      },
+      {
+        "id": "faq",
+        "title": "FAQ",
+        "faq": [
+          {
+            "question": "Does the customer see that the order is on hold?",
+            "answer": "No. The mark, the reason and the comment stay with your team. They do not show on the order link or on the PDF."
+          },
+          {
+            "question": "Does it change what I have to receive?",
+            "answer": "No. The Financial tab does not read the mark: an order on hold counts as it did before."
+          },
+          {
+            "question": "Can I put a quote on hold?",
+            "answer": "No. The mark works only on Approved and In Progress orders."
+          },
+          {
+            "question": "Is it the same as the stalled orders alert in Reminders?",
+            "answer": "No. That alert counts orders open for more than 7 days, marked or not. See <a href=\"lembretes-en.html\">Reminders</a>."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "resumen",
+        "title": "Para qué sirve",
+        "intro": "A veces el servicio está aprobado o en progreso, pero nadie está trabajando en él: falta un repuesto, el cliente no respondió o la autorización no llegó. La marca de OS en espera lo muestra en la lista, con el motivo y cuántos días lleva así.",
+        "infoCard": {
+          "title": "El estado de la OS no cambia",
+          "content": "La marca queda junto al estado. Una OS En Progreso sigue En Progreso, y la pestaña Financiero sigue igual."
+        }
+      },
+      {
+        "id": "marcar",
+        "title": "Poner en espera",
+        "intro": "Funciona en OS Aprobada o En Progreso.",
+        "subsections": [
+          {
+            "title": "En dos toques",
+            "validationList": [
+              {
+                "label": "1. Abre la OS",
+                "text": "Toca <strong>Poner en espera</strong>, debajo del botón azul. La misma opción está en el menú <strong>…</strong>."
+              },
+              {
+                "label": "2. Elige el motivo",
+                "text": "Esperando repuesto, Esperando al cliente, Esperando autorización u Otro motivo. Al tocar, la marca queda guardada."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "¿Quieres dejar una nota?",
+          "content": "Escribe la observación antes de elegir el motivo. Es opcional y aparece en la OS, por ejemplo \"La bomba llega el viernes\"."
+        }
+      },
+      {
+        "id": "ver",
+        "title": "Ver lo que está en espera",
+        "intro": "En Inicio, toca el filtro <strong>En espera</strong>. Las OS más antiguas aparecen primero, con una línea como \"En espera desde hace 3 días · Esperando repuesto\". La misma línea aparece en los otros filtros, con un punto naranja al lado. Si la OS también está atrasada, el punto es rojo."
+      },
+      {
+        "id": "reanudar",
+        "title": "Reanudar, concluir o cancelar",
+        "intro": "Mientras la OS está en espera, el botón azul es <strong>Reanudar servicio</strong>. Al tocarlo, la marca sale y la OS sigue en el mismo estado.",
+        "features": [
+          {
+            "title": "Concluir",
+            "description": "Cambiar el estado a concluida quita la marca."
+          },
+          {
+            "title": "Cancelar",
+            "description": "Cancelar la OS también quita la marca."
+          },
+          {
+            "title": "Registro",
+            "description": "Poner en espera y reanudar dejan un comentario interno en la OS, con el motivo o con los días en espera. El cliente no ve este comentario."
+          }
+        ]
+      },
+      {
+        "id": "quien-puede",
+        "title": "Quién puede usarla",
+        "intro": "Puede poner en espera y reanudar quien cambia el estado de una OS aprobada o en progreso: dueño, administrador, gerente, supervisor y técnico. El técnico lo hace en las OS a las que tiene acceso. El consultor ve la marca, pero no puede cambiarla. Consulta los <a href=\"perfis-es.html\">perfiles</a>."
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas frecuentes",
+        "faq": [
+          {
+            "question": "¿El cliente ve que la OS está en espera?",
+            "answer": "No. La marca, el motivo y el comentario quedan solo para tu equipo. No aparecen en el enlace de la OS ni en el PDF."
+          },
+          {
+            "question": "¿Cambia lo que tengo por cobrar?",
+            "answer": "No. La pestaña Financiero no mira la marca: la OS en espera sigue contando como antes."
+          },
+          {
+            "question": "¿Puedo poner un presupuesto en espera?",
+            "answer": "No. La marca funciona solo en OS Aprobada o En Progreso."
+          },
+          {
+            "question": "¿Es lo mismo que el aviso de OS detenidas en Recordatorios?",
+            "answer": "No. Ese aviso cuenta OS abiertas hace más de 7 días, marcadas o no. Consulta <a href=\"lembretes-es.html\">Recordatorios</a>."
+          }
+        ]
+      }
+    ]
+  }
+}

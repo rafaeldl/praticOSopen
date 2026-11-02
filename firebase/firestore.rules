@@ -196,6 +196,25 @@ service cloud.firestore {
           ));
     }
 
+    // Marca de OS parada: mesmo público que muda a situação de OS aprovada ou
+    // em andamento (o consultor só decide orçamentos). Tirar a marca (null)
+    // vale em qualquer situação, porque concluir ou cancelar também a remove.
+    // No app: AuthorizationService.canChangeOrderHold.
+    function orderHoldValid(hold) {
+      return hold.keys().hasOnly(['reason', 'note', 'since'])
+        && hold.keys().hasAll(['reason', 'since'])
+        && hold.reason in ['part', 'customer', 'authorization', 'other']
+        && hold.since is string
+        && (!hold.keys().hasAny(['note']) || (hold.note is string && hold.note.size() <= 500));
+    }
+
+    function orderHoldChangeAllowed(companyId) {
+      let hold = request.resource.data.get('onHold', null);
+      return (canViewFinancial(companyId) || isOperator(companyId))
+        && (hold == null
+          || (request.resource.data.get('status', null) in ['approved', 'progress'] && orderHoldValid(hold)));
+    }
+
     function numberOrZero(value) {
       return value is number ? value : 0;
     }
@@ -233,7 +252,8 @@ service cloud.firestore {
         && (canReceiveOnOrder(companyId) || !keys.hasAny(['payment', 'paid']) || orderPaymentMatchesState())
         && (canViewFinancial(companyId) || sameNumber('discount'))
         && (!isOperator(companyId) || resource.data.get('status', null) == 'quote' || sameNumber('total'))
-        && (!keys.hasAny(['status']) || orderStatusChangeAllowed(companyId));
+        && (!keys.hasAny(['status']) || orderStatusChangeAllowed(companyId))
+        && (!keys.hasAny(['onHold']) || orderHoldChangeAllowed(companyId));
     }
 
     function orderHasNoMoney() {
@@ -244,14 +264,15 @@ service cloud.firestore {
     // Operador cria sem dinheiro e só no começo do fluxo (mesmo fluxo do status)
     function orderCreateFieldsAllowed(companyId) {
       let d = request.resource.data;
-      return isCompanyAdmin(companyId)
-        || (hasRole(companyId, 'consultant') && d.get('status', null) in [null, 'quote', 'approved', 'canceled'])
-        || (isOperator(companyId)
+      return d.get('onHold', null) == null
+        && (isCompanyAdmin(companyId)
+          || (hasRole(companyId, 'consultant') && d.get('status', null) in [null, 'quote', 'approved', 'canceled'])
+          || (isOperator(companyId)
             && d.get('status', null) in [null, 'quote', 'approved', 'progress']
             && numberOrZero(d.get('paidAmount', 0)) == 0
             && listOrEmpty(d.get('transactions', [])).size() == 0
             && d.get('paid', false) != true
-            && d.get('payment', null) in [null, 'unpaid']);
+            && d.get('payment', null) in [null, 'unpaid']));
     }
 
     // Dono da empresa: só o servidor troca. Compara o id porque `owner` pode

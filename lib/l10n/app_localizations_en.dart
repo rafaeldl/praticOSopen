@@ -6220,4 +6220,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contractsOffAction => 'Use contracts';
+
+  @override
+  String get filterOnHold => 'On hold';
+
+  @override
+  String homeOnHoldCount(int count) {
+    return '$count on hold';
+  }
+
+  @override
+  String get noOrdersOnHold => 'Nothing on hold.';
+
+  @override
+  String get orderHoldMark => 'Put on hold';
+
+  @override
+  String get orderHoldResume => 'Resume work';
+
+  @override
+  String get orderHoldSaveError => 'Could not save. Try again.';
+
+  @override
+  String get orderHoldSheetTitle => 'Why did it stop?';
+
+  @override
+  String get orderHoldNoteHint => 'Note (optional)';
+
+  @override
+  String get orderHoldReasonPart => 'Waiting for a part';
+
+  @override
+  String get orderHoldReasonCustomer => 'Waiting for the customer';
+
+  @override
+  String get orderHoldReasonAuthorization => 'Waiting for authorization';
+
+  @override
+  String get orderHoldReasonOther => 'Other reason';
+
+  @override
+  String orderHoldSince(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'On hold for $count days',
+      one: 'On hold for 1 day',
+      zero: 'On hold since today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderHoldLogMarked(String reason) {
+    return 'Put on hold: $reason';
+  }
+
+  @override
+  String orderHoldLogResumed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Resumed after $count days on hold',
+      one: 'Resumed after 1 day on hold',
+      zero: 'Resumed the same day',
+    );
+    return '$_temp0';
+  }
 }

@@ -2,13 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/theme/status_style.dart';
 
 /// Row of an order in a list, in the style of Mail: customer and value on
 /// the first line, what is being done ("Fiat Uno · troca de embreagem") on
 /// the second, the status in grey on the third. Color is spent only on what
 /// needs attention: an overdue order gets a red dot on the left (where Mail
-/// puts "unread") and its status in danger, bold. No photo, no status dot on
-/// the other rows.
+/// puts "unread") and its status in danger, bold. A stopped order gets an
+/// orange dot there and one more line with the reason and the days. No photo,
+/// no status dot on the other rows.
 class OrderListRow extends StatelessWidget {
   const OrderListRow({
     super.key,
@@ -18,6 +20,7 @@ class OrderListRow extends StatelessWidget {
     this.detailText,
     this.statusExtra,
     this.overdue = false,
+    this.holdText,
     this.onTap,
   });
 
@@ -35,6 +38,9 @@ class OrderListRow extends StatelessWidget {
 
   /// Overdue: red dot on the left, status in danger and bold.
   final bool overdue;
+
+  /// Stopped: "Parada há 3 dias · Esperando peça", under the status.
+  final String? holdText;
   final VoidCallback? onTap;
 
   /// Room on the left for the overdue dot; dividers start here too.
@@ -64,16 +70,20 @@ class OrderListRow extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            if (overdue)
+            if (overdue || holdText != null)
               Positioned(
                 left: -23,
                 top: 9,
                 child: Container(
-                  key: const Key('order_row_overdue_dot'),
+                  key: Key(
+                    overdue ? 'order_row_overdue_dot' : 'order_row_hold_dot',
+                  ),
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: danger,
+                    color: overdue
+                        ? danger
+                        : OrderHoldStyle.color.resolveFrom(context),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -143,6 +153,18 @@ class OrderListRow extends StatelessWidget {
                     fontFeatures: AppTypography.tabular,
                   ),
                 ),
+                if (holdText != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    holdText!,
+                    key: const Key('order_row_hold'),
+                    style: AppTypography.callout.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: text,
+                      fontFeatures: AppTypography.tabular,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

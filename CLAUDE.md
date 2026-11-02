@@ -744,6 +744,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/REMINDERS_AND_NOTICES.md` - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
 - `docs/AI_ORDER_ASSIST.md` - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
 - `docs/ONBOARDING.md` - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)
+- `docs/ORDER_ON_HOLD.md` - Marca de OS parada (motivo, dias parados, filtro Paradas)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/VALUES_AND_BILLING_TOGGLE.md` - Opção "Valores e cobrança" por empresa (`Company.useFinancial`)
 - `docs/CUSTOMER_CONTACTS.md` - Contatos do cliente: número único do WhatsApp, seletor do sistema, aviso de telefone repetido e receber contato

@@ -15,6 +15,25 @@ void main() {
   final now = DateTime(2026, 10, 12, 15);
 
   group('HomeRules', () {
+    test('stopped: only marked open orders, the oldest first', () {
+      OrderHold since(DateTime date) => OrderHold()
+        ..reason = OrderHoldReason.part
+        ..since = date;
+      final recent = order('progress')..onHold = since(DateTime(2026, 10, 11));
+      final old = order('approved')..onHold = since(DateTime(2026, 10, 2));
+      final leftover = order('done')..onHold = since(DateTime(2026, 10, 1));
+
+      expect(HomeRules.stopped([recent, order('progress'), old, leftover]), [
+        old,
+        recent,
+      ]);
+    });
+
+    test('Paradas loads the open orders', () {
+      expect(HomeView.onHold.queryField, 'open');
+      expect(HomeView.onHold.isOpenList, isTrue);
+    });
+
     test('overdue only for unfinished orders past due date', () {
       expect(
         HomeRules.isOverdue(

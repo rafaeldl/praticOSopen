@@ -36,6 +36,13 @@ class Order extends BaseAuditCompany {
   @JsonKey(includeToJson: false)
   DateTime? completedAt;
 
+  /// "Parada" mark: why the work stopped and since when. Separate from
+  /// [status] (finance, filters and metrics never read it). Written only by
+  /// `OrderStore.markOnHold` / `resumeHold` and the order trigger: never sent
+  /// on a full save, or a stale copy would bring a removed mark back.
+  @JsonKey(includeToJson: false)
+  OrderHold? onHold;
+
   /// Valor total pago (soma dos pagamentos parciais)
   double? paidAmount;
 
@@ -80,6 +87,16 @@ class Order extends BaseAuditCompany {
     final paid = paidAmount ?? 0.0;
     return totalValue - paid;
   }
+
+  /// Statuses in which an order can be marked "parada".
+  static const holdStatuses = ['approved', 'progress'];
+
+  /// Whether [status] accepts the "parada" mark.
+  bool get canBeOnHold => holdStatuses.contains(status);
+
+  /// Marked "parada" and still in a status where the mark applies (a leftover
+  /// mark on a finished order is ignored until the trigger removes it).
+  bool get isOnHold => onHold != null && canBeOnHold;
 
   /// Verifica se está totalmente pago
   bool get isFullyPaid => remainingBalance <= 0;
@@ -225,6 +242,42 @@ class OrderService {
   factory OrderService.fromJson(Map<String, dynamic> json) =>
       _$OrderServiceFromJson(json);
   Map<String, dynamic> toJson() => _$OrderServiceToJson(this);
+}
+
+/// Why an order is "parada". Stored in Firestore as `onHold.reason`.
+class OrderHoldReason {
+  OrderHoldReason._();
+
+  static const part = 'part';
+  static const customer = 'customer';
+  static const authorization = 'authorization';
+  static const other = 'other';
+
+  static const values = [part, customer, authorization, other];
+}
+
+/// "Parada" mark of an order: reason, optional note and when it stopped.
+@JsonSerializable(includeIfNull: false)
+class OrderHold {
+  String? reason; // OrderHoldReason
+  String? note;
+  DateTime? since;
+
+  OrderHold();
+
+  /// Whole calendar days stopped (0 on the day it was marked).
+  int daysSince(DateTime now) {
+    final start = since?.toLocal();
+    if (start == null) return 0;
+    final today = DateTime(now.year, now.month, now.day);
+    final first = DateTime(start.year, start.month, start.day);
+    final days = (today.difference(first).inHours / 24).round();
+    return days < 0 ? 0 : days;
+  }
+
+  factory OrderHold.fromJson(Map<String, dynamic> json) =>
+      _$OrderHoldFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderHoldToJson(this);
 }
 
 /// Link de compartilhamento da OS

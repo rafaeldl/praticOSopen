@@ -6232,4 +6232,71 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get contractsOffAction => 'Usar contratos';
+
+  @override
+  String get filterOnHold => 'En espera';
+
+  @override
+  String homeOnHoldCount(int count) {
+    return '$count en espera';
+  }
+
+  @override
+  String get noOrdersOnHold => 'Ningún servicio en espera.';
+
+  @override
+  String get orderHoldMark => 'Poner en espera';
+
+  @override
+  String get orderHoldResume => 'Reanudar servicio';
+
+  @override
+  String get orderHoldSaveError => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get orderHoldSheetTitle => '¿Por qué se detuvo?';
+
+  @override
+  String get orderHoldNoteHint => 'Observación (opcional)';
+
+  @override
+  String get orderHoldReasonPart => 'Esperando repuesto';
+
+  @override
+  String get orderHoldReasonCustomer => 'Esperando al cliente';
+
+  @override
+  String get orderHoldReasonAuthorization => 'Esperando autorización';
+
+  @override
+  String get orderHoldReasonOther => 'Otro motivo';
+
+  @override
+  String orderHoldSince(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'En espera desde hace $count días',
+      one: 'En espera desde hace 1 día',
+      zero: 'En espera desde hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderHoldLogMarked(String reason) {
+    return 'Puesta en espera: $reason';
+  }
+
+  @override
+  String orderHoldLogResumed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Reanudada tras $count días en espera',
+      one: 'Reanudada tras 1 día en espera',
+      zero: 'Reanudada el mismo día',
+    );
+    return '$_temp0';
+  }
 }

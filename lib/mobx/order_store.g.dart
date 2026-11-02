@@ -127,6 +127,21 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$holdAtom = Atom(name: '_OrderStore.hold', context: context);
+
+  @override
+  OrderHold? get hold {
+    _$holdAtom.reportRead();
+    return super.hold;
+  }
+
+  @override
+  set hold(OrderHold? value) {
+    _$holdAtom.reportWrite(value, super.hold, () {
+      super.hold = value;
+    });
+  }
+
   late final _$formsStreamAtom = Atom(
     name: '_OrderStore.formsStream',
     context: context,
@@ -1446,6 +1461,40 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void markOnHold({
+    required String reason,
+    String? note,
+    VoidCallback? onSaved,
+    VoidCallback? onFailed,
+  }) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.markOnHold',
+    );
+    try {
+      return super.markOnHold(
+        reason: reason,
+        note: note,
+        onSaved: onSaved,
+        onFailed: onFailed,
+      );
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void resumeHold({VoidCallback? onSaved, VoidCallback? onFailed}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.resumeHold',
+    );
+    try {
+      return super.resumeHold(onSaved: onSaved, onFailed: onFailed);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic updateOrder() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.updateOrder',
@@ -1690,6 +1739,7 @@ mixin _$OrderStore on _OrderStore, Store {
     return '''
 orderList: ${orderList},
 orderStream: ${orderStream},
+hold: ${hold},
 formsStream: ${formsStream},
 dueDate: ${dueDate},
 scheduledDate: ${scheduledDate},

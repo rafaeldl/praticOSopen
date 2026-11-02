@@ -39,6 +39,7 @@ import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/order_item_search_screen.dart';
 import 'package:praticos/screens/order/order_extras.dart';
+import 'package:praticos/screens/order/order_hold_sheet.dart';
 import 'package:praticos/screens/order/order_item_sheet.dart';
 import 'package:praticos/screens/order/order_screen_services.dart';
 import 'package:praticos/screens/order/reminder_hint.dart';
@@ -835,6 +836,58 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     return ok ?? false;
   }
 
+  // ─── "Parada" mark ───────────────────────────────────────────────────────
+
+  bool _canMarkOnHold(Order order) =>
+      order.id != null &&
+      order.canBeOnHold &&
+      _store.hold == null &&
+      _permissions.canChangeHold(order);
+
+  bool _canResume(Order order) =>
+      _store.hold != null && _permissions.canChangeHold(order);
+
+  /// One tap opens the reasons and the reason saves it: two taps in all.
+  Future<void> _markOnHold() async {
+    final order = _store.order;
+    if (order == null || !_canMarkOnHold(order)) return;
+    final picked = await showOrderHoldSheet(context);
+    if (picked == null || !mounted) return;
+    final l10n = context.l10n;
+    final reason = OrderHoldStyle.reasonLabel(l10n, picked.reason);
+    final note = picked.note;
+    final log = l10n.orderHoldLogMarked(
+      note == null ? reason : '$reason. $note',
+    );
+    _store.markOnHold(
+      reason: picked.reason,
+      note: note,
+      onSaved: () => unawaited(_actions.logOrderEvent(order, log)),
+      onFailed: _warnHoldNotSaved,
+    );
+  }
+
+  void _resume() {
+    final order = _store.order;
+    final hold = _store.hold;
+    if (order == null || hold == null || !_canResume(order)) return;
+    // "Retomar" gives way to the next step in the same spot: without this, a
+    // double tap would complete the order.
+    if (_statusCooldown?.isActive ?? false) return;
+    _statusCooldown = Timer(kStatusTapCooldown, () {});
+    final log = context.l10n.orderHoldLogResumed(
+      hold.daysSince(DateTime.now()),
+    );
+    _store.resumeHold(
+      onSaved: () => unawaited(_actions.logOrderEvent(order, log)),
+      onFailed: _warnHoldNotSaved,
+    );
+  }
+
+  void _warnHoldNotSaved() {
+    if (mounted) showAppToast(context, context.l10n.orderHoldSaveError);
+  }
+
   /// "OS" for the default label; a segment that renames the order keeps it.
   String _shortOrderLabel(SegmentConfigProvider config) {
     final l10n = context.l10n;
@@ -869,6 +922,18 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               label: l10n.orderMenuChangeStatus,
               icon: CupertinoIcons.arrow_right_arrow_left,
               submenu: true,
+            ),
+          if (_canMarkOnHold(order))
+            PullDownItem(
+              value: 'hold',
+              label: l10n.orderHoldMark,
+              icon: CupertinoIcons.pause_circle,
+            ),
+          if (_canResume(order))
+            PullDownItem(
+              value: 'resume',
+              label: l10n.orderHoldResume,
+              icon: CupertinoIcons.play_circle,
             ),
         ]),
         PullDownGroup(title: l10n.orderMenuAddTo(orderLabel), [
@@ -978,6 +1043,10 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     switch (choice) {
       case 'status':
         await _selectStatus();
+      case 'hold':
+        await _markOnHold();
+      case 'resume':
+        _resume();
       case 'comment':
         await _actions.openComments(context, order);
       case 'checklist':
@@ -3038,6 +3107,8 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final order = _store.order;
     if (order == null) return null;
     final l10n = context.l10n;
+    // Stopped: the next step is getting it going again.
+    if (_canResume(order)) return (l10n.orderHoldResume, _resume);
     (String, VoidCallback)? to(String label, String target) =>
         _permissions.canChangeStatus(order, target)
         ? (
@@ -3081,6 +3152,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
     final due = order.dueDate;
     final overdue = _isOverdue(status, due);
     final remaining = _store.remainingBalance;
+    final hold = _store.hold;
 
     String? phrase;
     VoidCallback? onPhrase;
@@ -3215,6 +3287,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
                 key: const ValueKey('order_header_phrase'),
               ),
             ),
+          if (hold != null) _buildHold(hold),
           if (action != null) ...[
             const SizedBox(height: AppSpacing.lg),
             _primaryButton(
@@ -3223,7 +3296,79 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
               key: const ValueKey('order_primary_button'),
             ),
           ],
+          if (_canMarkOnHold(order)) _buildMarkOnHold(),
         ],
+      ),
+    );
+  }
+
+  /// Why the order is stopped, since when, and the note.
+  Widget _buildHold(OrderHold hold) {
+    final note = hold.note;
+    return Padding(
+      key: const ValueKey('order_hold'),
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              CupertinoIcons.pause_circle_fill,
+              size: 20,
+              color: OrderHoldStyle.color.resolveFrom(context),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  OrderHoldStyle.line(context.l10n, hold, DateTime.now()),
+                  style: AppTypography.bodyStrong.copyWith(
+                    color: AppColors.text.resolveFrom(context),
+                  ),
+                ),
+                if (note != null)
+                  Text(
+                    note,
+                    style: AppTypography.callout.copyWith(
+                      color: AppColors.textSecondary.resolveFrom(context),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "Marcar como parada", quiet, under the one blue button.
+  Widget _buildMarkOnHold() {
+    final color = AppColors.textSecondary.resolveFrom(context);
+    return Semantics(
+      identifier: 'order_mark_on_hold',
+      button: true,
+      child: _tappable(
+        key: const ValueKey('order_mark_on_hold'),
+        onTap: _markOnHold,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
+          child: Row(
+            children: [
+              Icon(CupertinoIcons.pause_circle, size: 20, color: color),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  context.l10n.orderHoldMark,
+                  style: AppTypography.callout.copyWith(color: color),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

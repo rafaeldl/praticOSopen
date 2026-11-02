@@ -18,6 +18,9 @@
  *   or a discount closed it: no money came in) or done (`status` → 'done') → `autoIssueInvoice`, which
  *   issues the nota when the company chose that moment (settings/nfse.autoIssue);
  * - `status` entered or left `done` (every company) → `syncCompletedAt`;
+ * - order marked "parada" in a status that no longer allows it (every company:
+ *   bot, API, MCP and old app versions change the status without knowing the
+ *   mark) → `clearOrderHold`;
  * - anything else returns without reading Firestore.
  *
  * Both branches run independently; if one fails the other still runs and the
@@ -36,6 +39,7 @@ import {
 import { reconcileOutsidePayments } from './outside-payment.service';
 import { autoIssueInvoice } from './invoice.service';
 import { syncCompletedAt } from '../order-completion.service';
+import { clearOrderHold, holdNoLongerApplies } from '../order-hold.service';
 
 export type OrderUpdateSnapshot = OrderPaymentState & {
   status?: string;
@@ -44,6 +48,7 @@ export type OrderUpdateSnapshot = OrderPaymentState & {
   paymentSyncedAt?: string;
   lastPaymentAt?: string;
   completedAt?: string;
+  onHold?: unknown;
 };
 
 /** Repair first (it can change paidAmount), then bring open links in line. */
@@ -94,6 +99,9 @@ export async function handleOrderUpdatedAsaas(
   }
   if ((after.status === 'done') !== (before?.status === 'done')) {
     tasks.push(syncCompletedAt(companyId, orderId, before, after, eventTime));
+  }
+  if (holdNoLongerApplies(after)) {
+    tasks.push(clearOrderHold(companyId, orderId));
   }
   if (tasks.length === 0) return;
 

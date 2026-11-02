@@ -24,7 +24,8 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart'
+    show VoidCallback, debugPrint, visibleForTesting;
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
@@ -65,6 +66,20 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableStream<Order?>? orderStream;
+
+  /// "Parada" mark of the open order (null when it is not stopped).
+  @observable
+  OrderHold? hold;
+
+  /// Clock of the "parada" mark, replaceable in tests.
+  @visibleForTesting
+  DateTime Function() holdClock = DateTime.now;
+
+  /// Writes (or, with null, removes) the mark. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(String companyId, String orderId, OrderHold? hold)
+  writeHold = (companyId, orderId, hold) =>
+      repository.setHold(companyId, orderId, hold, actor: Global.userAggr);
 
   @observable
   ObservableStream<List<of_model.OrderForm>>? formsStream;
@@ -396,6 +411,7 @@ abstract class _OrderStore with Store {
         ? FormatService().formatDateTime(order.scheduledDate!)
         : null;
     status = order.status;
+    hold = order.isOnHold ? order.onHold : null;
     address = order.address;
     latitude = order.latitude;
     longitude = order.longitude;
@@ -764,6 +780,12 @@ abstract class _OrderStore with Store {
     this.status = status;
     updatePayment();
     createItem();
+    // Done, canceled or back to quote: the "parada" mark no longer applies.
+    // If this write fails the mark stays hidden and the order trigger removes
+    // it, so there is nothing to undo.
+    if (order!.onHold != null && !order!.canBeOnHold) {
+      _saveHold(null, undoOnFailure: false);
+    }
     // createItem no longer writes `payment`: persist the status-driven change.
     if (order!.id != null && order!.payment != previousPayment) {
       final clear = OrderPaymentMath.orderStatusPaymentUpdate(status);
@@ -782,6 +804,75 @@ abstract class _OrderStore with Store {
         _queuePaymentFieldUpdate(order!.id!, update, Global.userAggr);
       }
     }
+  }
+
+  /// Marks the saved order "parada" from now on. The status stays the same.
+  /// [onSaved] runs once the server accepted it; when it refuses, the mark is
+  /// undone and [onFailed] runs.
+  @action
+  void markOnHold({
+    required String reason,
+    String? note,
+    VoidCallback? onSaved,
+    VoidCallback? onFailed,
+  }) {
+    final current = order;
+    if (current == null || current.id == null || !current.canBeOnHold) return;
+    final text = note?.trim() ?? '';
+    _saveHold(
+      OrderHold()
+        ..reason = reason
+        ..note = text.isEmpty ? null : text
+        ..since = holdClock().toUtc(),
+      onSaved: onSaved,
+      onFailed: onFailed,
+    );
+  }
+
+  /// "Retomar": removes the mark, the status stays the same. [onSaved] and
+  /// [onFailed] work as in [markOnHold].
+  @action
+  void resumeHold({VoidCallback? onSaved, VoidCallback? onFailed}) {
+    if (order?.id == null || order?.onHold == null) return;
+    _saveHold(null, onSaved: onSaved, onFailed: onFailed);
+  }
+
+  /// Updates the screen at once and queues the write without waiting for it:
+  /// offline it only resolves when the connection is back, so the mark shows
+  /// right away. A refused write brings the previous state back, unless the
+  /// mark changed again in the meantime.
+  void _saveHold(
+    OrderHold? next, {
+    VoidCallback? onSaved,
+    VoidCallback? onFailed,
+    bool undoOnFailure = true,
+  }) {
+    final target = order;
+    final orderId = target?.id;
+    final previous = target?.onHold;
+    target?.onHold = next;
+    hold = next;
+    final company = companyId;
+    if (orderId == null || company == null) {
+      onSaved?.call();
+      return;
+    }
+    Future.sync(() => writeHold(company, orderId, next)).then(
+      (_) => onSaved?.call(),
+      onError: (Object e) {
+        debugPrint('Could not save the order hold mark: $e');
+        if (!undoOnFailure) return;
+        if (identical(target?.onHold, next)) {
+          runInAction(() {
+            target?.onHold = previous;
+            if (identical(order, target)) {
+              hold = target!.isOnHold ? previous : null;
+            }
+          });
+        }
+        onFailed?.call();
+      },
+    );
   }
 
   String dateToString(DateTime? date) {

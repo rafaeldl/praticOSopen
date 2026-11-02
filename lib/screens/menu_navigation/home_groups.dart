@@ -15,7 +15,10 @@ enum HomeView {
   mine,
 
   /// Quotes still waiting for an answer, the ones waiting longest first.
-  quotes;
+  quotes,
+
+  /// Open orders marked "parada", the ones stopped longest first.
+  onHold;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
@@ -24,11 +27,15 @@ enum HomeView {
     HomeView.all => null,
     HomeView.mine => 'open',
     HomeView.quotes => 'open',
+    HomeView.onHold => 'open',
   };
 
   /// Views that load every open order (so counts are exact).
   bool get isOpenList =>
-      this == HomeView.open || this == HomeView.mine || this == HomeView.quotes;
+      this == HomeView.open ||
+      this == HomeView.mine ||
+      this == HomeView.quotes ||
+      this == HomeView.onHold;
 }
 
 /// Urgency of an open order, in list order.
@@ -147,6 +154,17 @@ class HomeRules {
       ..sort(
         (a, b) => (a.createdAt ?? DateTime(0)).compareTo(
           b.createdAt ?? DateTime(0),
+        ),
+      );
+  }
+
+  /// Orders marked "parada", the ones stopped longest first.
+  static List<Order> stopped(List<Order> orders) {
+    final items = orders.where((o) => o.isOnHold).toList();
+    return items
+      ..sort(
+        (a, b) => (a.onHold!.since ?? DateTime(0)).compareTo(
+          b.onHold!.since ?? DateTime(0),
         ),
       );
   }

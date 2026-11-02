@@ -57,6 +57,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..completedAt = json['completedAt'] == null
       ? null
       : DateTime.parse(json['completedAt'] as String)
+  ..onHold = json['onHold'] == null
+      ? null
+      : OrderHold.fromJson(json['onHold'] as Map<String, dynamic>)
   ..paidAmount = (json['paidAmount'] as num?)?.toDouble()
   ..transactions = (json['transactions'] as List<dynamic>?)
       ?.map((e) => PaymentTransaction.fromJson(e as Map<String, dynamic>))
@@ -180,6 +183,19 @@ Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
       'photo': instance.photo,
       'deviceId': instance.deviceId,
     };
+
+OrderHold _$OrderHoldFromJson(Map<String, dynamic> json) => OrderHold()
+  ..reason = json['reason'] as String?
+  ..note = json['note'] as String?
+  ..since = json['since'] == null
+      ? null
+      : DateTime.parse(json['since'] as String);
+
+Map<String, dynamic> _$OrderHoldToJson(OrderHold instance) => <String, dynamic>{
+  'reason': ?instance.reason,
+  'note': ?instance.note,
+  'since': ?instance.since?.toIso8601String(),
+};
 
 OrderShareLink _$OrderShareLinkFromJson(Map<String, dynamic> json) =>
     OrderShareLink()
