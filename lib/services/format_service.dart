@@ -35,6 +35,9 @@ class FormatService {
   }
 
   /// Obtém locale no formato usado pelo intl (pt_BR, en_US, es_ES)
+  /// Current locale ('pt-BR').
+  String get locale => _locale;
+
   String get _intlLocale => _locale.replaceAll('-', '_');
 
   // ══════════════════════════════════════════════════════════

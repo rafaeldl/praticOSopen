@@ -2519,5 +2519,26 @@
       "plan": { "type": "String" }
     }
   },
-  "courtesyBannerLater": "Not now"
+  "courtesyBannerLater": "Not now",
+  "filterQuotes": "Quotes",
+  "homeQuotesWaiting": "{count, plural, =1{1 quote waiting for an answer} other{{count} quotes waiting for an answer}}",
+  "noQuotesWaiting": "No quotes waiting for an answer.",
+  "ratingsEmptyHint": "A rating arrives when the customer scores the {order} through its link, once it is done. To ask for one, open a completed {order} and send the customer the link.",
+  "noticesEmptyHint": "This is where you see what happens in your {order}: customer approvals, comments, ratings and payments. Reminders of scheduled times go straight to your phone.",
+  "noticesRemindersLink": "Adjust reminders",
+  "reminderWillNotify": "The app reminds you {time} before.",
+  "reminderIsOff": "Reminder turned off.",
+  "reminderPhoneBlocked": "Notifications are off in your phone's Settings.",
+  "reminderAdjust": "Adjust",
+  "reminderNotificationTitle": "Scheduled at {time}",
+  "notificationPromptTitle": "PraticOS notifications",
+  "notificationPromptMessage": "The app reminds you before each scheduled time and tells you when a customer approves a quote. Your phone will ask if it can send these notifications.",
+  "continueAction": "Continue",
+  "checklistOfferTitle": "Fill in the check-in checklist?",
+  "checklistOfferMessage": "Record how {device} arrived, before you start the work.",
+  "checklistOfferAction": "Fill in checklist",
+  "moreContractsSubtitle": "Maintenance that repeats on its own",
+  "contractsOffQuestion": "Do you have regular customers or repeat maintenance?",
+  "contractsOffMessage": "With contracts you set it up once, say every 6 months, and the app takes care of the next {order} on the right date.",
+  "contractsOffAction": "Use contracts"
 }

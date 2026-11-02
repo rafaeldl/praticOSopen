@@ -89,6 +89,7 @@ void main() {
   testWidgets('empty state', (tester) async {
     await pump(tester, () async => []);
     expect(find.text('Nenhuma avaliação ainda'), findsOneWidget);
+    expect(find.textContaining('abra uma OS concluída'), findsOneWidget);
   });
 
   testWidgets('error state offers retry', (tester) async {

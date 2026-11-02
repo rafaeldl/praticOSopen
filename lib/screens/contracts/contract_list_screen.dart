@@ -69,6 +69,15 @@ class _ContractListScreenState extends State<ContractListScreen> {
     super.dispose();
   }
 
+  void _new() {
+    final onNew = widget.onNew;
+    if (onNew != null) {
+      onNew();
+    } else {
+      openNewOrder(context, repeat: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -84,8 +93,7 @@ class _ContractListScreenState extends State<ContractListScreen> {
               key: const ValueKey('contract_new'),
               label: l10n.contractNew,
               icon: CupertinoIcons.add,
-              onPressed:
-                  widget.onNew ?? () => openNewOrder(context, repeat: true),
+              onPressed: _new,
             ),
           ),
           SliverToBoxAdapter(
@@ -169,6 +177,8 @@ class _ContractListScreenState extends State<ContractListScreen> {
             message: showActive
                 ? l10n.contractsEmptyAdd(l10n.orderShort)
                 : null,
+            actionLabel: showActive ? l10n.contractNew : null,
+            onAction: showActive ? _new : null,
           ),
         )
       else ...[
