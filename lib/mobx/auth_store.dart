@@ -204,8 +204,8 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  signInWithGoogle() {
-    _auth.signInWithGoogle();
+  Future<dynamic> signInWithGoogle() {
+    return _auth.signInWithGoogle();
   }
 
   @action
@@ -247,6 +247,14 @@ abstract class _AuthStore with Store {
   @action
   Future<void> reauthenticate() async {
     await _auth.reauthenticate();
+  }
+
+  /// True when only the password can re-authenticate the current user.
+  bool get reauthNeedsPassword => _auth.reauthNeedsPassword;
+
+  @action
+  Future<void> reauthenticateWithPassword(String password) {
+    return _auth.reauthenticateWithPassword(password);
   }
 
   @action

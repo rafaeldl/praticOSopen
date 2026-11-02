@@ -162,6 +162,7 @@ void main() {
       WidgetTester tester, {
       Future<void> Function()? onDelete,
       Future<void> Function()? onReauth,
+      Future<void> Function(String password)? onPasswordReauth,
     }) async {
       final calls = <String>[];
       await tester.pumpWidget(
@@ -182,6 +183,8 @@ void main() {
                 calls.add('reauth');
                 await onReauth?.call();
               },
+              needsPassword: () => onPasswordReauth != null,
+              reauthenticateWithPassword: onPasswordReauth,
             ),
           ),
         ),
@@ -315,6 +318,91 @@ void main() {
       // after re-authenticating the final confirmation comes back
       expect(calls, ['delete', 'reauth']);
       expect(find.text(pt.finalConfirmation), findsOneWidget);
+    });
+
+    Future<void> reachPasswordDialog(WidgetTester tester) async {
+      await tester.tap(find.text('Apagar minha conta'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.continue_));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.permanentlyDelete));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(pt.signInAgain));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('e-mail account re-authenticates with the password', (
+      tester,
+    ) async {
+      var attempts = 0;
+      final passwords = <String>[];
+      final calls = await pumpAccount(
+        tester,
+        onDelete: () async {
+          attempts++;
+          if (attempts == 1) throw Exception('REQUIRES_RECENT_LOGIN');
+        },
+        onPasswordReauth: (password) async => passwords.add(password),
+      );
+      await reachPasswordDialog(tester);
+
+      // Empty password does nothing
+      await tester.tap(find.text(pt.signInAgain));
+      await tester.pumpAndSettle();
+      expect(passwords, isEmpty);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('account_deletion_password')),
+        'segredo',
+      );
+      await tester.tap(find.text(pt.signInAgain));
+      await tester.pumpAndSettle();
+
+      expect(passwords, ['segredo']);
+      expect(calls, ['delete']);
+      expect(find.text(pt.finalConfirmation), findsOneWidget);
+    });
+
+    testWidgets('canceling the password stops without an error', (
+      tester,
+    ) async {
+      final passwords = <String>[];
+      await pumpAccount(
+        tester,
+        onDelete: () async => throw Exception('REQUIRES_RECENT_LOGIN'),
+        onPasswordReauth: (password) async => passwords.add(password),
+      );
+      await reachPasswordDialog(tester);
+
+      await tester.tap(find.text(pt.cancel));
+      await tester.pumpAndSettle();
+
+      expect(passwords, isEmpty);
+      expect(find.text(pt.reauthenticationFailed), findsNothing);
+    });
+
+    testWidgets('wrong password shows the plain sentence', (tester) async {
+      await pumpAccount(
+        tester,
+        onDelete: () async => throw Exception('REQUIRES_RECENT_LOGIN'),
+        onPasswordReauth: (_) async =>
+            throw Exception('[firebase_auth/invalid-credential] x'),
+      );
+      await reachPasswordDialog(tester);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('account_deletion_password')),
+        'errada',
+      );
+      await tester.tap(find.text(pt.signInAgain));
+      await tester.pumpAndSettle();
+
+      expect(find.text(pt.reauthenticationFailed), findsOneWidget);
+      expect(
+        find.textContaining(pt.emailLoginWrongCredentials),
+        findsOneWidget,
+      );
+      expect(find.textContaining('firebase_auth'), findsNothing);
     });
 
     testWidgets('client timeout shows the "can take a few minutes" message', (

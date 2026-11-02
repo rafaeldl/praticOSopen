@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
@@ -34,6 +35,7 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   Future<_CompanyCheckResult>? _companyCheckFuture;
+  Future<bool>? _pendingInvitesFuture;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     widget.authStore.reloadUserAndCompany();
     setState(() {
       _companyCheckFuture = _checkUserCompany();
+      _pendingInvitesFuture = null;
     });
   }
 
@@ -162,7 +165,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   /// Decide se mostra tela de convites ou de criação de empresa
   Widget _buildOnboardingDecision(_CompanyCheckResult result) {
     return FutureBuilder<bool>(
-      future: _checkPendingInvites(),
+      future: _pendingInvitesFuture ??= _checkPendingInvites(),
       builder: (context, inviteSnapshot) {
         if (inviteSnapshot.connectionState == ConnectionState.waiting) {
           return const LoadingScreen();
@@ -183,7 +186,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
             },
             onInviteAccepted: () {
               // Força rebuild para verificar novamente
-              setState(() {});
+              setState(() => _pendingInvitesFuture = null);
             },
           );
         }
@@ -196,21 +199,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   /// Verifica se o usuário tem convites pendentes
   Future<bool> _checkPendingInvites() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user?.email == null) return false;
-
-      final invites = await FirebaseFirestore.instance
-          .collection('invites')
-          .where('email', isEqualTo: user!.email!.toLowerCase())
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
-
-      return invites.docs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
+    final store = InviteStore.instance;
+    await store.loadPendingInvites();
+    return store.errorMessage == null && store.pendingInvites.isNotEmpty;
   }
 
   /// Verifica se o usuário tem empresa associada e se ela tem segmento definido

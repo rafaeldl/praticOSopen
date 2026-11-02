@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/screens/email_login_screen.dart';
 import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/widgets/login_hero.dart';
 import 'package:praticos/theme/app_colors.dart';
@@ -13,6 +14,7 @@ class _FakeAuthStore implements AuthStore {
   int appleCalls = 0;
   int googleCalls = 0;
   Object? appleError;
+  Object? googleError;
 
   @override
   Future<dynamic> signInWithApple() async {
@@ -21,8 +23,9 @@ class _FakeAuthStore implements AuthStore {
   }
 
   @override
-  dynamic signInWithGoogle() {
+  Future<dynamic> signInWithGoogle() async {
     googleCalls++;
+    if (googleError != null) throw googleError!;
   }
 
   @override
@@ -33,6 +36,7 @@ Widget _app(
   _FakeAuthStore auth, {
   Brightness brightness = Brightness.light,
   Locale locale = const Locale('pt'),
+  VoidCallback? logEmailLoginOpened,
 }) {
   return Provider<AuthStore>.value(
     value: auth,
@@ -46,7 +50,7 @@ Widget _app(
         GlobalWidgetsLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
       ],
-      home: const LoginPage(),
+      home: LoginPage(logEmailLoginOpened: logEmailLoginOpened),
     ),
   );
 }
@@ -70,7 +74,7 @@ void main() {
     );
     expect(find.byType(SignInWithAppleButton), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);
-    expect(find.text('Entrar com e-mail e senha'), findsOneWidget);
+    expect(find.text('Já tenho conta com e-mail'), findsOneWidget);
     expect(find.textContaining('Política de Privacidade'), findsOneWidget);
 
     final bg = tester.widget<CupertinoPageScaffold>(
@@ -213,6 +217,36 @@ void main() {
     await tester.tap(find.text('Continuar com Google'));
     await tester.pump(const Duration(seconds: 2));
     expect(auth.googleCalls, 1);
+  });
+
+  testWidgets('the e-mail link opens the e-mail sign-in', (tester) async {
+    useTallScreen(tester);
+    var opened = 0;
+    await tester.pumpWidget(
+      _app(_FakeAuthStore(), logEmailLoginOpened: () => opened++),
+    );
+    await tester.tap(find.byKey(const Key('login_email_link')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(EmailLoginScreen), findsOneWidget);
+    expect(opened, 1);
+  });
+
+  testWidgets('Google error shows a fixed phrase, cancel shows nothing', (
+    tester,
+  ) async {
+    useTallScreen(tester);
+    final auth = _FakeAuthStore()
+      ..googleError = Exception('[firebase_auth/network-request-failed] x');
+    await tester.pumpWidget(_app(auth));
+    await tester.tap(find.text('Continuar com Google'));
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byKey(const Key('login_error')), findsOneWidget);
+    expect(find.textContaining('firebase_auth'), findsNothing);
+
+    auth.googleError = Exception('Login cancelado pelo usuário');
+    await tester.tap(find.text('Continuar com Google'));
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byKey(const Key('login_error')), findsNothing);
   });
 
   testWidgets('Apple error shows a fixed phrase, cancel shows nothing', (

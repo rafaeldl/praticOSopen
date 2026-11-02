@@ -3441,7 +3441,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get loginSampleDone => 'OS pronta para enviar';
 
   @override
-  String get loginWithEmailLink => 'Entrar com e-mail e senha';
+  String get loginWithEmailLink => 'Já tenho conta com e-mail';
 
   @override
   String get errorSignInAppleFriendly =>
@@ -5151,6 +5151,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get emailLoginTitle => 'Entrar com e-mail';
+
+  @override
+  String get emailLoginNewAccountHint =>
+      'Ainda não tem conta? Volte e continue com Apple ou Google.';
 
   @override
   String get emailLoginEmailRequired => 'Escreva o seu e-mail.';

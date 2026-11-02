@@ -3449,7 +3449,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginSampleDone => 'Orden lista para enviar';
 
   @override
-  String get loginWithEmailLink => 'Entrar con correo y contraseña';
+  String get loginWithEmailLink => 'Ya tengo cuenta con correo';
 
   @override
   String get errorSignInAppleFriendly =>
@@ -5159,6 +5159,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emailLoginTitle => 'Entrar con correo';
+
+  @override
+  String get emailLoginNewAccountHint =>
+      '¿Aún no tienes cuenta? Vuelve y continúa con Apple o Google.';
 
   @override
   String get emailLoginEmailRequired => 'Escribe tu correo.';

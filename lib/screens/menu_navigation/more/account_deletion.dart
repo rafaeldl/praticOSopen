@@ -14,6 +14,8 @@ class AccountDeletionFlow {
   AccountDeletionFlow({
     required this.deleteAccount,
     required this.reauthenticate,
+    this.needsPassword,
+    this.reauthenticateWithPassword,
     bool? paidPlansEnabled,
     Future<void> Function()? openStoreSettings,
   })  : paidPlansEnabled =
@@ -22,6 +24,11 @@ class AccountDeletionFlow {
 
   final Future<void> Function() deleteAccount;
   final Future<void> Function() reauthenticate;
+
+  /// True for e-mail accounts: the flow asks for the password and calls
+  /// [reauthenticateWithPassword] instead of [reauthenticate].
+  final bool Function()? needsPassword;
+  final Future<void> Function(String password)? reauthenticateWithPassword;
   final bool paidPlansEnabled;
   final Future<void> Function() openStoreSettings;
 
@@ -134,9 +141,22 @@ class AccountDeletionFlow {
   }
 
   Future<void> _reauthenticate(BuildContext context) async {
+    String? password;
+    if (needsPassword?.call() ?? false) {
+      password = await showCupertinoDialog<String>(
+        context: context,
+        builder: (_) => const _PasswordDialog(),
+      );
+      if (password == null || !context.mounted) return;
+    }
+
     final navigator = _showLoading(context);
     try {
-      await reauthenticate();
+      if (password == null) {
+        await reauthenticate();
+      } else {
+        await reauthenticateWithPassword!(password);
+      }
       _closeLoading(navigator);
       if (context.mounted) _confirmFinal(context);
     } catch (e) {
@@ -207,9 +227,77 @@ class AccountDeletionFlow {
     if (error.contains('permission-denied')) {
       return context.l10n.noPermissionDelete;
     }
+    if (error.contains('invalid-credential') ||
+        error.contains('wrong-password')) {
+      return context.l10n.emailLoginWrongCredentials;
+    }
+    if (error.contains('too-many-requests')) {
+      return context.l10n.emailLoginTooManyAttempts;
+    }
     if (error.contains('network')) {
       return context.l10n.networkError;
     }
     return '${context.l10n.error}: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
+  }
+}
+
+/// Asks the password of an e-mail account; pops with it, or null on cancel.
+class _PasswordDialog extends StatefulWidget {
+  const _PasswordDialog();
+
+  @override
+  State<_PasswordDialog> createState() => _PasswordDialogState();
+}
+
+class _PasswordDialogState extends State<_PasswordDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_controller.text.isEmpty) return;
+    Navigator.pop(context, _controller.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return CupertinoAlertDialog(
+      title: Text(l10n.reauthenticationRequired),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.emailLoginPasswordRequired),
+          const SizedBox(height: 12),
+          CupertinoTextField(
+            key: const ValueKey('account_deletion_password'),
+            controller: _controller,
+            placeholder: l10n.password,
+            obscureText: true,
+            autofocus: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            autofillHints: const [AutofillHints.password],
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+          ),
+        ],
+      ),
+      actions: [
+        CupertinoDialogAction(
+          child: Text(l10n.cancel),
+          onPressed: () => Navigator.pop(context),
+        ),
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: _submit,
+          child: Text(l10n.signInAgain),
+        ),
+      ],
+    );
   }
 }

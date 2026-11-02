@@ -6,6 +6,7 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/email_login_screen.dart';
 import 'package:praticos/screens/widgets/login_hero.dart';
 import 'package:praticos/screens/widgets/text_link.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,10 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// UI only: authentication goes through [AuthStore] untouched.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.logEmailLoginOpened});
+
+  /// Replaces the analytics event in tests (no Firebase there).
+  final VoidCallback? logEmailLoginOpened;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -259,6 +263,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _navigateToEmailLogin() {
+    (widget.logEmailLoginOpened ??
+        AnalyticsService.instance.logEmailLoginOpened)();
     Navigator.of(context).push(
       CupertinoPageRoute(builder: (context) => const EmailLoginScreen()),
     );
@@ -306,10 +312,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleAppleSignIn() =>
       _signIn(_auth.signInWithApple, context.l10n.errorSignInAppleFriendly);
 
-  Future<void> _handleGoogleSignIn() async => _signIn(
-        () async => _auth.signInWithGoogle(),
-        context.l10n.errorSignInGoogleFriendly,
-      );
+  Future<void> _handleGoogleSignIn() =>
+      _signIn(_auth.signInWithGoogle, context.l10n.errorSignInGoogleFriendly);
 }
 
 /// Takes what is left between the header and the panel.

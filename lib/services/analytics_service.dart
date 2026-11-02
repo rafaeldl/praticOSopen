@@ -99,6 +99,12 @@ class AnalyticsService {
   // P1 — Install → Activation Funnel
   // ═══════════════════════════════════════════════════════════════════
 
+  /// Logs a tap on the e-mail link of the login screen: the app has no e-mail
+  /// sign-up, so opens without an `email` login show who looked for one.
+  void logEmailLoginOpened() {
+    _safe(() => _analytics.logEvent(name: 'email_login_opened'));
+  }
+
   /// Logs a login event (Firebase built-in).
   void logLogin({required String method, bool hasCompany = true}) {
     _safe(() => _analytics.logLogin(loginMethod: method, parameters: {

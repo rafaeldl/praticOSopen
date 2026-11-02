@@ -21,7 +21,7 @@ The payment features in work orders let the professional record and charge their
 
 Signing in with the demo account:
 
-1. On the sign-in screen, tap "Entrar com e-mail e senha" (Sign in with email and password) below the Apple and Google buttons.
+1. On the sign-in screen, tap "Já tenho conta com e-mail" (I already have an account with email) below the Apple and Google buttons.
 2. Enter the demo email and password.
 3. Tap "Entrar" (Sign in).
 

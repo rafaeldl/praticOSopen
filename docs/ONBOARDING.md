@@ -18,7 +18,7 @@ e `2026-10-11-financeiro-opcional-design.md`.
 | Seu negócio | `lib/screens/onboarding/your_business_screen.dart` |
 | Criação da empresa (`OnboardingSetup`, `FirebaseOnboardingSetup`) | `lib/services/onboarding_service.dart` |
 | Decisão de rota | `lib/screens/auth_wrapper.dart` |
-| Login (Apple, Google, link para e-mail) | `lib/screens/login.dart` |
+| Login (Apple, Google, link "Já tenho conta com e-mail") | `lib/screens/login.dart` |
 | Entrar com e-mail | `lib/screens/email_login_screen.dart` |
 | Convites recebidos / código de convite | `lib/screens/onboarding/pending_invites_screen.dart`, `accept_invite_screen.dart` |
 | Carregando | `lib/screens/loading_screen.dart` |
@@ -51,7 +51,12 @@ AuthWrapper (sem empresa e sem convite pendente, ou empresa sem ramo)
   → saveCompany → seedCompany → finish (recarrega AuthStore) → '/' (Início)
 ```
 
-Convite pendente pelo e-mail continua com prioridade (`PendingInvitesScreen`); "Criar minha
+Conta nova entra só por Apple ou Google. O e-mail e senha não tem cadastro: serve à conta demo
+da revisão e a contas antigas, e a tela diz a quem é novo para voltar. O evento
+`email_login_opened` mede quem procurou esse caminho.
+
+Convite pendente continua com prioridade (`PendingInvitesScreen`, lido pelo `InviteStore` em
+`links/invites/tokens`; pelas regras só e-mail verificado lê o convite, senão vale o código); "Criar minha
 empresa" de lá abre o `OnboardingFlow`. "Recebi um código de convite" na tela do ramo abre
 `AcceptInviteScreen` e, aceito, recarrega o `AuthStore` e volta para `/`.
 

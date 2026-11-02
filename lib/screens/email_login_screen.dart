@@ -10,9 +10,10 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 
-/// "Entrar com e-mail": rare path (App Review, old accounts). Glass back,
-/// e-mail and password fields, one blue "Entrar" and the "Esqueceu a senha?"
-/// link. A failed sign-in shows a fixed sentence above the button (never the
+/// "Entrar com e-mail": rare path (App Review, old accounts). There is no
+/// sign-up by e-mail, so a line sends new users back to Apple or Google.
+/// Glass back, e-mail and password fields, one blue "Entrar" and the
+/// "Esqueceu a senha?" link. A failed sign-in shows a fixed sentence above the button (never the
 /// exception) and keeps the form, so the user can fix it or reset the
 /// password.
 ///
@@ -153,6 +154,19 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         label: l10n.forgotPasswordQuestion,
                         onPressed:
                             _isLoading ? null : _showForgotPasswordDialog,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.pageMargin,
+                      ),
+                      child: Text(
+                        l10n.emailLoginNewAccountHint,
+                        textAlign: TextAlign.center,
+                        style: AppTypography.label.copyWith(
+                          color: AppColors.textSecondary.resolveFrom(context),
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxl),

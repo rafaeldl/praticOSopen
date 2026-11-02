@@ -5917,7 +5917,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginWithEmailLink.
   ///
   /// In pt, this message translates to:
-  /// **'Entrar com e-mail e senha'**
+  /// **'Já tenho conta com e-mail'**
   String get loginWithEmailLink;
 
   /// No description provided for @errorSignInAppleFriendly.
@@ -8437,6 +8437,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Entrar com e-mail'**
   String get emailLoginTitle;
+
+  /// No description provided for @emailLoginNewAccountHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não tem conta? Volte e continue com Apple ou Google.'**
+  String get emailLoginNewAccountHint;
 
   /// No description provided for @emailLoginEmailRequired.
   ///

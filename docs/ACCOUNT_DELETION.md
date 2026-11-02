@@ -48,7 +48,7 @@ Cada passo pode ser repetido. Empresa que já não existe é pulada; Storage é 
 `AuthStore.deleteAccount()` → `AccountDeletionApiService.deleteAccount()` (timeout de 120 s). Depois do 200: limpa preferências/estado e aguarda `signOutGoogle()`, que faz o sign-out do Firebase mesmo se o do Google falhar (`AuthRepository.signOutAll`).
 
 Erros mapeados pelo serviço:
-- 401 `REQUIRES_RECENT_LOGIN` → `Exception('REQUIRES_RECENT_LOGIN')` (a tela reautentica e tenta de novo);
+- 401 `REQUIRES_RECENT_LOGIN` → `Exception('REQUIRES_RECENT_LOGIN')` (a tela reautentica e tenta de novo: Google e Apple pelo provedor, conta de e-mail pedindo a senha num diálogo; o provedor é o primeiro suportado da conta, pulando telefone vinculado);
 - 409 → `Exception(<mensagem em pt do servidor>)`, mostrada por `AccountDeletionFlow.formatError`;
 - timeout do cliente → `ACCOUNT_DELETION_TIMEOUT` → `l10n.accountDeletionTakingLong` ("A exclusão pode levar alguns minutos. Tente de novo em instantes."). O servidor continua; a nova tentativa termina ou responde 200.
 
@@ -58,5 +58,4 @@ Fora do escopo desta versão:
 - **Cobranças abertas no Asaas** não são canceladas; a conexão some com a empresa, mas a conta e as cobranças continuam no Asaas.
 - **Assinatura no RevenueCat/lojas** não é cancelada (o app avisa antes de excluir); o registro no RevenueCat fica.
 - **`apiKeys`** da empresa (coleção raiz) e outros **links órfãos** fora de `links/whatsapp/numbers` não são apagados.
-- **Reautenticação por e-mail/senha**: o fluxo de reautenticação do app cobre Google e Apple; quem usa e-mail/senha precisa sair e entrar de novo para ter login recente.
 - Uma empresa só com o dono, mas com o mapa privado contradizendo o campo `owner`, fica bloqueada até o suporte corrigir os dados.
