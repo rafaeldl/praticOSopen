@@ -96,7 +96,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a OS se preenche",
+          "title": "Fale o serviço e a IA preenche a OS",
           "text": "Na Nova OS, toque em Falar e diga “Caloi da Marina, revisão completa e troca de corrente”, ou tire uma foto do pedido anotado. A IA preenche cliente, bike, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -267,7 +267,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the work order fills itself in",
+          "title": "Say the job and AI fills in the work order",
           "text": "On New order, tap Speak and say “Marina's Caloi, full tune-up and new chain”, or take a photo of the written order. The AI fills in the customer, bike, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -438,7 +438,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la orden se completa",
+          "title": "Di el servicio y la IA completa la orden",
           "text": "En Nueva OS, toca Hablar y di “Caloi de Marina, service completo y cambio de cadena”, o saca una foto del pedido anotado. La IA completa cliente, bici, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",

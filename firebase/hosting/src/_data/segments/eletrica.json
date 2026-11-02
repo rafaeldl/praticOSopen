@@ -96,7 +96,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e o orçamento se preenche",
+          "title": "Fale o serviço e a IA preenche o orçamento",
           "text": "Na visita, toque em Falar na Nova OS e diga “casa do Rogério, troca do quadro e três tomadas novas”, ou tire uma foto do que você anotou. A IA preenche cliente, serviços e materiais com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -267,7 +267,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the quote fills itself in",
+          "title": "Say the job and AI fills in the quote",
           "text": "At the visit, tap Speak on New order and say “Rogério's house, panel replacement and three new outlets”, or take a photo of your notes. The AI fills in the customer, services and materials with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -438,7 +438,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di el trabajo y el presupuesto se completa",
+          "title": "Di el trabajo y la IA completa el presupuesto",
           "text": "En la visita, toca Hablar en Nueva OS y di “casa de Rogério, cambio del tablero y tres tomas nuevas”, o saca una foto de lo que anotaste. La IA completa cliente, servicios y materiales con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",

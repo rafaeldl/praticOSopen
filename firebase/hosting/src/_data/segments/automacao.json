@@ -96,7 +96,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale a obra e a proposta se preenche",
+          "title": "Fale a obra e a IA preenche a proposta",
           "text": "Na Nova OS, toque em Falar e diga “apartamento do Ricardo, seis interruptores inteligentes e programação”, ou tire uma foto do que você anotou. A IA preenche cliente, equipamentos e serviços com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -279,7 +279,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the proposal fills itself in",
+          "title": "Say the job and AI fills in the proposal",
           "text": "On New order, tap Speak and say “Ricardo's apartment, six smart switches and programming”, or take a photo of your notes. The AI fills in the customer, equipment and services with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -462,7 +462,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di la obra y la propuesta se completa",
+          "title": "Di la obra y la IA completa la propuesta",
           "text": "En Nueva OS, toca Hablar y di “departamento de Ricardo, seis interruptores inteligentes y programación”, o saca una foto de lo que anotaste. La IA completa cliente, equipos y servicios con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",

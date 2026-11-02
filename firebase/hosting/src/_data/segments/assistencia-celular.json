@@ -96,7 +96,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale o conserto e a OS se preenche",
+          "title": "Fale o conserto e a IA preenche a OS",
           "text": "Na Nova OS, toque em Falar e diga “iPhone 13 da Carla, troca de tela e bateria”, ou tire uma foto do pedido anotado. A IA preenche cliente, aparelho, serviços e peças com os preços do seu catálogo. Você confere, completa o IMEI e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -267,7 +267,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the repair and the work order fills itself in",
+          "title": "Say the repair and AI fills in the work order",
           "text": "On New order, tap Speak and say “Carla's iPhone 13, screen and battery replacement”, or take a photo of the written order. The AI fills in the customer, device, services and parts with your catalog prices. You check it, add the IMEI and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -438,7 +438,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di la reparación y la orden se completa",
+          "title": "Di la reparación y la IA completa la orden",
           "text": "En Nueva OS, toca Hablar y di “iPhone 13 de Carla, cambio de pantalla y batería”, o saca una foto del pedido anotado. La IA completa cliente, equipo, servicios y repuestos con los precios de tu catálogo. Tú revisas, agregas el IMEI y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",

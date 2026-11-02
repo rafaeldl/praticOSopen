@@ -96,7 +96,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a OS se preenche",
+          "title": "Fale o serviço e a IA preenche a OS",
           "text": "Na Nova OS, toque em Falar e diga “Onix da Juliana, troca de óleo e alinhamento”, ou tire uma foto da placa. A IA preenche cliente, veículo, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -267,7 +267,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the work order fills itself in",
+          "title": "Say the job and AI fills in the work order",
           "text": "On New order, tap Speak and say “Juliana's Onix, oil change and alignment”, or take a photo of the license plate. The AI fills in the customer, vehicle, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -438,7 +438,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la orden se completa",
+          "title": "Di el servicio y la IA completa la orden",
           "text": "En Nueva OS, toca Hablar y di “Onix de Juliana, cambio de aceite y alineación”, o saca una foto de la placa. La IA completa cliente, vehículo, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",

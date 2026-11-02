@@ -91,7 +91,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a OS se preenche",
+          "title": "Fale o serviço e a IA preenche a OS",
           "text": "Na Nova OS, toque em Falar e diga “Banheiro da Célia, caça vazamento e troca de válvula”, ou tire uma foto do pedido anotado. A IA preenche cliente, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -257,7 +257,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the work order fills itself in",
+          "title": "Say the job and AI fills in the work order",
           "text": "On New order, tap Speak and say “Celia's bathroom, leak detection and flush valve replacement”, or take a photo of the written request. The AI fills in the customer, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -423,7 +423,7 @@
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la orden se completa",
+          "title": "Di el servicio y la IA completa la orden",
           "text": "En Nueva OS, toca Hablar y di “Baño de Celia, detección de fugas y cambio de válvula”, o saca una foto del pedido anotado. La IA completa cliente, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
