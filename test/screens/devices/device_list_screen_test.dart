@@ -168,6 +168,7 @@ void main() {
   ) async {
     await pumpList(tester, args: {'order': orderOf('c1')}, devices: [uno, gol]);
     expect(find.textContaining(RegExp(r' de Ana$')), findsNothing);
+    expect(find.text('de Ana Ribeiro'), findsNothing);
     expect(find.textContaining('Outros'), findsOneWidget);
     expect(find.byType(AppListRow), findsNWidgets(2));
   });

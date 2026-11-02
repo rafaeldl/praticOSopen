@@ -245,7 +245,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           PickerItem<Device> item(Device d) => _pickerItem(d, selectedIds);
           return PickerScaffold<Device>(
             title: l10n.pickerDeviceTitle(device),
-            subtitle: customerName.isEmpty
+            subtitle: customerName.isEmpty || mineIds.isEmpty
                 ? null
                 : l10n.pickerDeviceSubtitle(customerName),
             itemCount: all.length,

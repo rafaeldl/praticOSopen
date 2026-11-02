@@ -7111,7 +7111,7 @@ abstract class AppLocalizations {
   /// No description provided for @speechHint.
   ///
   /// In pt, this message translates to:
-  /// **'Fale o cliente, o {device} e o que vai ser feito.'**
+  /// **'Fale quem é o cliente, qual {device} e o que vai ser feito.'**
   String speechHint(String device);
 
   /// No description provided for @speechListening.
@@ -7213,7 +7213,7 @@ abstract class AppLocalizations {
   /// No description provided for @speechTypeHint.
   ///
   /// In pt, this message translates to:
-  /// **'Escreva o cliente, o {device} e o que vai ser feito'**
+  /// **'Escreva quem é o cliente, qual {device} e o que vai ser feito'**
   String speechTypeHint(String device);
 
   /// No description provided for @speechNothingHeard.

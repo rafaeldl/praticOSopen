@@ -4331,7 +4331,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String speechHint(String device) {
-    return 'Fale o cliente, o $device e o que vai ser feito.';
+    return 'Fale quem é o cliente, qual $device e o que vai ser feito.';
   }
 
   @override
@@ -4388,7 +4388,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String speechTypeHint(String device) {
-    return 'Escreva o cliente, o $device e o que vai ser feito';
+    return 'Escreva quem é o cliente, qual $device e o que vai ser feito';
   }
 
   @override
