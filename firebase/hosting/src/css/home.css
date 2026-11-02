@@ -61,7 +61,7 @@
 .tabs button:hover { background: var(--color-paper-3); }
 .tabs button:active { transform: translateY(1px); }
 .tabs button[aria-selected="true"] { background: var(--color-navy); color: var(--color-on-navy); }
-.panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-xl); align-items: end; background: var(--color-paper-2); border-radius: var(--radius-card); margin-top: var(--space-md); padding-inline: clamp(24px, 5vw, 64px); overflow: hidden; }
+.panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-xl); align-items: center; background: var(--color-paper-2); border-radius: var(--radius-card); margin-top: var(--space-md); padding-inline: clamp(24px, 5vw, 64px); overflow: hidden; }
 .panel[hidden] { display: none; }
 .panel__copy { padding-block: var(--space-xl); align-self: center; }
 .panel h3 { font-size: clamp(1.6rem, 1.35rem + 1vw, 2.2rem); line-height: 1.12; letter-spacing: -0.01em; }
@@ -69,7 +69,8 @@
 .panel ul { margin-top: var(--space-sm); display: grid; gap: var(--space-2xs); max-width: 46ch; }
 .panel li { position: relative; padding-left: 26px; color: var(--color-ink); font-weight: 500; }
 .panel li::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
-.panel__shot { justify-self: center; width: min(100%, 20rem); height: 27rem; margin: var(--space-xl) 0 0; border: var(--rule); border-bottom: 0; border-radius: var(--radius-card) var(--radius-card) 0 0; overflow: hidden; background: var(--color-card); box-shadow: var(--shadow-card); }
+.panel__shot { justify-self: center; width: min(100%, 20rem); margin-block: var(--space-xl); border: var(--rule); border-radius: 20px; overflow: hidden; background: var(--color-card); box-shadow: var(--shadow-card); }
+.panel__shot img { width: 100%; height: auto; }
 
 /* ---------- AI ---------- */
 .ai { padding-block: var(--space-2xl) var(--space-3xl); }
@@ -118,7 +119,7 @@
   .work { padding-block: var(--space-2xl); }
   .panel { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .panel__copy { padding-block: var(--space-lg) 0; }
-  .panel__shot { margin-top: var(--space-lg); height: 23rem; width: min(100%, 17.5rem); }
+  .panel__shot { margin-block: var(--space-lg); width: min(100%, 17.5rem); }
   .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--page-gutter) * -1); padding-inline: var(--page-gutter); padding-block: var(--space-3xs); scrollbar-width: none; }
   .tabs button { flex: none; }
   .ai { padding-block: var(--space-lg) var(--space-2xl); }
