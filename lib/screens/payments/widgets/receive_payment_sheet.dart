@@ -1,4 +1,3 @@
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
@@ -6,6 +5,7 @@ import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
+import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/services/customer_receipt_service.dart'
     show PickedReceiptFile;
 import 'package:praticos/services/format_service.dart';
@@ -196,13 +196,7 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                inputFormatters: [
-                  CurrencyTextInputFormatter.currency(
-                    locale: format.locale,
-                    symbol: format.currencySymbol,
-                    decimalDigits: 2,
-                  ),
-                ],
+                inputFormatters: [MoneyInputFormatter(format)],
                 placeholder: ReceiveAmountField.textFor(0),
                 placeholderStyle: AppTypography.title.copyWith(
                   color: secondary,

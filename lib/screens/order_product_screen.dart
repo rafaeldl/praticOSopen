@@ -197,7 +197,9 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
                   label: config.label(LabelKeys.unitValue),
                   controller: _valueController,
                   placeholder: formatter.textFor(0),
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [formatter],
                   validator: (text) => text.trim().isEmpty
                       ? config.label(LabelKeys.required)

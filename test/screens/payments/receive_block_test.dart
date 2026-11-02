@@ -161,7 +161,7 @@ void main() {
           of: find.byKey(const Key('receiveDiscountField')),
           matching: find.byType(CupertinoTextField),
         ),
-        '5000',
+        '50',
       );
       await tester.pump();
       expect(find.textContaining('1.200,00'), findsOneWidget);
@@ -194,7 +194,7 @@ void main() {
           of: find.byKey(const Key('receiveDiscountField')),
           matching: find.byType(CupertinoTextField),
         ),
-        '20000',
+        '200',
       );
       await tester.pump();
       expect(

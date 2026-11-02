@@ -477,7 +477,7 @@ void main() {
       );
       await tester.tap(find.text('Novo serviço'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(CupertinoTextField).at(1), '15000');
+      await tester.enterText(find.byType(CupertinoTextField).at(1), '150');
       await tester.pumpAndSettle();
 
       await tester.tap(close);
@@ -504,7 +504,7 @@ void main() {
       final src2 = FakeSource();
       await openSheet(tester, src2);
       await tester.enterText(find.byType(CupertinoTextField).first, 'Revisão');
-      await tester.enterText(find.byType(CupertinoTextField).at(1), '15000');
+      await tester.enterText(find.byType(CupertinoTextField).at(1), '150');
       await tester.pump();
       await tester.tap(save);
       await tester.pumpAndSettle();

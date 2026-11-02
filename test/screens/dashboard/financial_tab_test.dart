@@ -767,4 +767,26 @@ void main() {
       expect(calls, ['create:a1:1250.0', 'share:a1']);
     },
   );
+
+  testWidgets('reloads when the tab comes back on screen', (tester) async {
+    final calls = <int>[];
+    final store = storeWith(monthCalls: calls);
+    Widget tab(bool onScreen) => CupertinoApp(
+      locale: const Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: TickerMode(enabled: onScreen, child: FinancialTab(store: store)),
+    );
+    await tester.pumpWidget(tab(true));
+    await tester.pumpAndSettle();
+    final loaded = calls.length;
+
+    await tester.pumpWidget(tab(false));
+    await tester.pumpAndSettle();
+    expect(calls.length, loaded);
+
+    await tester.pumpWidget(tab(true));
+    await tester.pumpAndSettle();
+    expect(calls.length, greaterThan(loaded));
+  });
 }
