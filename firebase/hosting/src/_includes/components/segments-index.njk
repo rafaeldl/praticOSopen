@@ -1,12 +1,12 @@
-{# Photo mural of every trade — doubles as internal linking for SEO #}
+{# Moving reels of every trade — doubles as internal linking for SEO #}
 {% set seg = segments[langCode] | default(segments.pt) %}
 {% set sg = (homepage[langCode] | default(homepage.pt)).segments %}
 {% set wideSlugs = ['automotivo', 'refrigeracao', 'assistencia-celular', 'eletrica'] %}
 {% macro tradeCard(segment, slug, wide, relPath) %}
-<li class="trade{% if wide %} trade--wide{% endif %}">
+<li class="trade">
     <a href="{{ relPath }}{{ segment.href | prettyUrl }}">
         <img src="{{ relPath }}assets/images/site/segments/{{ slug }}.webp" alt="" loading="lazy" decoding="async" width="{{ 800 if wide else 560 }}" height="{{ 993 if wide else 695 }}">
-        <span>{{ segment.label }}</span>
+        <span class="tag">{{ segment.label }}</span>
     </a>
 </li>
 {% endmacro %}
@@ -14,15 +14,21 @@
     <div class="wrap">
         <h2>{{ sg.title }}</h2>
         <p class="trades__lede">{{ sg.lede }}</p>
-        <ul class="mural" role="list">
-            {% for pass in ['wide', 'rest'] %}
+    </div>
+    <div class="reels" data-reels>
+        {% for side in [1, 0] %}
+        <ul class="reel{% if side == 0 %} reel--back{% endif %}" role="list" data-reel>
             {% for segment in seg.links %}
+            {% if loop.index % 2 == side %}
             {% set slug = segment.href | replace('segmentos/', '') | replace('-en.html', '') | replace('-es.html', '') | replace('.html', '') %}
-            {% set wide = slug in wideSlugs %}
-            {% if (pass == 'wide' and wide) or (pass == 'rest' and not wide) %}{{ tradeCard(segment, slug, wide, relPath) }}{% endif %}
-            {% endfor %}
+            {{ tradeCard(segment, slug, slug in wideSlugs, relPath) }}
+            {% endif %}
             {% endfor %}
         </ul>
+        {% endfor %}
+    </div>
+    <div class="wrap trades__foot">
         <p class="trades__note">{{ sg.imageNote }}</p>
+        <button class="trades__toggle" type="button" data-reels-toggle data-pause="{{ sg.pause }}" data-resume="{{ sg.resume }}" hidden>{{ sg.pause }}</button>
     </div>
 </section>

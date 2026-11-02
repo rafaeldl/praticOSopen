@@ -19,8 +19,8 @@ modern-minimal (custom theme "Campo")
 
 ## Macrostructure family
 - **Home**: Photographic — headline beside trade photos with the spoken-order
-  card over them, then feature tabs with real screens, the AI list, the trades
-  photo mural and the closing band.
+  card over them, then feature tabs with real screens, the AI list, the moving
+  trades reels and the closing band.
 - **Segments and feature pages**: Narrative Workflow — the life of a work order
   in numbered stages. Segments may swap stage content for their trade and add a
   problem → solution split (Split Studio rows).
@@ -70,6 +70,7 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 ## Motion
 - Easings `--ease-out` / `--ease-in` / `--ease-in-out`; 160–240 ms.
 - No scroll reveals. Hover/focus/press, plus one pass of the home demo card with a manual replay. The card rests complete, and reduced motion skips the pass.
+- The home trades reels move slowly and continuously. They pause on hover and through a visible toggle, keyboard focus stops them, and reduced motion leaves plain hand-scrolled rows. Nothing else loops.
 
 ## Microinteractions stance
 - Silent success; no toasts, no confetti.
@@ -97,7 +98,7 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 - The current photos in `src/assets/images/site/` are AI-generated: keep the
   "Imagens ilustrativas" note beside them, never attach a name, company or
   testimonial, and replace them with authorized customer photos as they arrive.
-- Every trade in the app's seed has a page and a mural photo.
+- Every trade in the app's seed has a page and a reel photo.
 - Content pages: typography only; tables and callouts use rules, not cards.
 
 ## What pages MUST share

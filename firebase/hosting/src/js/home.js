@@ -21,6 +21,51 @@
     });
   });
 
+  // Rows scroll by hand without JS; clones make the loop seamless and stay out of the tab order.
+  var reels = document.querySelector('[data-reels]');
+  var toggle = document.querySelector('[data-reels-toggle]');
+  if (reels && toggle && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var rowsOf = [].slice.call(reels.querySelectorAll('[data-reel]'));
+
+    var setPaused = function (paused) {
+      reels.classList.toggle('is-paused', paused);
+      toggle.textContent = toggle.getAttribute(paused ? 'data-resume' : 'data-pause');
+    };
+
+    var startReels = function () {
+      rowsOf.forEach(function (row) {
+        [].slice.call(row.children).forEach(function (item) {
+          var copy = item.cloneNode(true);
+          copy.setAttribute('aria-hidden', 'true');
+          copy.setAttribute('data-copy', '');
+          copy.querySelector('a').tabIndex = -1;
+          row.appendChild(copy);
+        });
+      });
+      reels.classList.add('is-moving');
+      setPaused(false);
+    };
+
+    // A focused link must stay reachable, so keyboard users get the hand-scrolled rows.
+    var stopReels = function () {
+      reels.classList.remove('is-moving');
+      [].slice.call(reels.querySelectorAll('[data-copy]')).forEach(function (c) { c.remove(); });
+      setPaused(true);
+    };
+
+    reels.addEventListener('focusin', function (e) {
+      if (reels.classList.contains('is-moving') && e.target.matches(':focus-visible')) stopReels();
+    });
+
+    toggle.addEventListener('click', function () {
+      if (!reels.classList.contains('is-moving')) startReels();
+      else setPaused(!reels.classList.contains('is-paused'));
+    });
+
+    toggle.hidden = false;
+    startReels();
+  }
+
   // The card stays complete at rest; one pass plays on load, replays are manual.
   var demo = document.querySelector('[data-demo]');
   if (!demo || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;

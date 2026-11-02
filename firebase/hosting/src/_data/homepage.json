@@ -132,7 +132,9 @@
     "segments": {
       "title": "Feito para quem conserta, instala e faz manutenção",
       "lede": "O PraticOS se ajusta ao seu ramo. Na oficina o campo se chama veículo, na assistência técnica é aparelho, na refrigeração é equipamento. Veja o seu:",
-      "imageNote": "Imagens ilustrativas."
+      "imageNote": "Imagens ilustrativas.",
+      "pause": "Pausar fotos",
+      "resume": "Continuar fotos"
     },
     "whatsappAssistant": {
       "title": "Sem tempo de abrir o app? Mande uma mensagem.",
@@ -319,7 +321,9 @@
     "segments": {
       "title": "Built for people who repair, install and maintain",
       "lede": "PraticOS adapts to your trade. In an auto shop the field is called vehicle, in a phone repair shop it is device, in HVAC it is equipment. Find yours:",
-      "imageNote": "Illustrative images."
+      "imageNote": "Illustrative images.",
+      "pause": "Pause photos",
+      "resume": "Resume photos"
     },
     "whatsappAssistant": {
       "title": "No time to open the app? Send a message.",
@@ -506,7 +510,9 @@
     "segments": {
       "title": "Hecho para quien repara, instala y mantiene",
       "lede": "PraticOS se adapta a tu rubro. En el taller el campo se llama vehículo, en el servicio técnico es aparato, en refrigeración es equipo. Encuentra el tuyo:",
-      "imageNote": "Imágenes ilustrativas."
+      "imageNote": "Imágenes ilustrativas.",
+      "pause": "Pausar fotos",
+      "resume": "Reanudar fotos"
     },
     "whatsappAssistant": {
       "title": "¿Sin tiempo para abrir la app? Manda un mensaje.",
