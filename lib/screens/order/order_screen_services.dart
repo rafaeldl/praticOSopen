@@ -32,6 +32,7 @@ import 'package:praticos/services/ai_order_assist_service.dart' show AiPhoto;
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/location_service.dart';
+import 'package:praticos/screens/order/pdf_viewer_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -136,8 +137,9 @@ class OrderScreenActions {
     return ShareLinkSheet.show(context, order);
   }
 
-  /// Generates the order PDF and opens the share sheet.
-  Future<void> sharePdf(
+  /// Generates the order PDF and shows it; sharing is a second step, on the
+  /// top bar of the viewer.
+  Future<void> viewPdf(
     BuildContext context,
     Order order,
     SegmentConfigProvider config,
@@ -177,17 +179,29 @@ class OrderScreenActions {
       if (order.id != null) {
         forms = await FormsService().getOrderForms(companyId, order.id!).first;
       }
-      await PdfService().shareOsPdf(
-        OsPdfData(
-          order: order,
-          customer: customer,
-          company: company,
-          forms: forms,
-          config: config,
-          localizations: pdfLocalizations,
+      final data = OsPdfData(
+        order: order,
+        customer: customer,
+        company: company,
+        forms: forms,
+        config: config,
+        localizations: pdfLocalizations,
+      );
+      final bytes = await PdfService().generateOsPdf(data);
+      navigator.pop();
+      await navigator.push(
+        CupertinoPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => PdfViewerScreen(
+            title: l10n.orderPdfTitle(
+              config.serviceOrder,
+              '${order.number ?? ''}',
+            ),
+            bytes: bytes,
+            filename: PdfService.osPdfFilename(data),
+          ),
         ),
       );
-      navigator.pop();
     } catch (_) {
       navigator.pop();
       if (!context.mounted) return;

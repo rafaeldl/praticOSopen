@@ -51,6 +51,7 @@ export const customerReceiptSchema = z.object({
       contentType: z.string().max(100),
     })
     .optional(),
+  paymentMethod: z.enum(['pix', 'cash', 'card', 'other']).optional(),
 });
 
 export const customerChargeSchema = z.object({

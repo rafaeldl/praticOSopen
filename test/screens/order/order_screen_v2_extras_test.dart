@@ -978,6 +978,31 @@ void main() {
       expect(store.status, 'done');
     });
 
+    testWidgets('pending checklist blocks "pronta" and offers to open it', (
+      tester,
+    ) async {
+      final actions = FakeActions();
+      final store = OrderStore()
+        ..formsStream = ObservableStream(Stream.value([_form('f1')]));
+      await _pump(
+        tester,
+        screen(store, actions: actions),
+        args: {'order': _order(status: 'progress')},
+      );
+
+      await tester.tap(find.text('Marcar como pronta'));
+      await tester.pumpAndSettle();
+      expect(find.text('Falta terminar 1 checklist'), findsOneWidget);
+      expect(find.text('Agora não'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const ValueKey('order_open_pending_checklist')),
+      );
+      await tester.pumpAndSettle();
+      expect(actions.calls, ['checklist:f1']);
+      expect(store.status, 'progress');
+    });
+
     testWidgets('no prompt when the customer has no phone', (tester) async {
       final store = OrderStore();
       await _pump(tester, screen(store), args: {'order': approved()});

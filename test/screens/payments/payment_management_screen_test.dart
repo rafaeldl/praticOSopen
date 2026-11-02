@@ -245,6 +245,58 @@ void main() {
     expect(find.text('Hoje'), findsOneWidget);
   });
 
+  testWidgets('the payment method is optional and shows on the payment', (
+    tester,
+  ) async {
+    final store = storeWith(total: 500);
+    await pumpScreen(tester, store);
+    await openSheet(tester);
+
+    expect(find.text('Forma de pagamento'), findsOneWidget);
+    expect(find.text('Opcional'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('receiveMethodRow')));
+    await tester.pumpAndSettle();
+    expect(find.text('Como foi pago?'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('receiveMethod_pix')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pix'), findsOneWidget);
+
+    // Back to "not informed".
+    await tester.tap(find.byKey(const Key('receiveMethodRow')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('receiveMethod_none')));
+    await tester.pumpAndSettle();
+    expect(find.text('Opcional'), findsOneWidget);
+  });
+
+  testWidgets('a manual payment shows its method; an old one stays as it was', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      storeWith(
+        total: 500,
+        paid: 300,
+        transactions: [
+          PaymentTransaction(
+            id: 'old',
+            type: PaymentTransactionType.payment,
+            amount: 100,
+          ),
+          PaymentTransaction(
+            id: 'new',
+            type: PaymentTransactionType.payment,
+            amount: 200,
+            paymentMethod: PaymentMethod.cash,
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('Dinheiro'), findsOneWidget);
+    expect(find.text('Pagamento'), findsOneWidget);
+  });
+
   testWidgets('Asaas paid: shows billing type and "Tudo recebido"', (
     tester,
   ) async {

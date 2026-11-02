@@ -1395,14 +1395,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String pageOf(int current, int total) {
-    return 'Pagina $current de $total';
+    return 'Página $current de $total';
   }
 
   @override
   String get preparingReport => 'Preparando relatório...';
 
   @override
-  String get appTagline => 'Sistema de Gestao de Ordens de Servico';
+  String get appTagline => 'Sistema de Gestão de Ordens de Serviço';
 
   @override
   String receivedWithPercent(String percent) {
@@ -1418,16 +1418,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get generatedByPraticos => 'Gerado por PraticOS';
 
   @override
-  String get serviceDescriptionColumn => 'DESCRICAO DO SERVICO';
+  String get serviceDescriptionColumn => 'DESCRIÇÃO DO SERVIÇO';
 
   @override
-  String get descriptionColumn => 'DESCRICAO';
+  String get descriptionColumn => 'DESCRIÇÃO';
 
   @override
   String get unitShort => 'UNIT.';
 
   @override
-  String get alreadyPaid => 'Ja pago';
+  String get alreadyPaid => 'Já pago';
 
   @override
   String get remainingBalance => 'SALDO RESTANTE';
@@ -1436,7 +1436,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get totalToPay => 'TOTAL A PAGAR';
 
   @override
-  String get photosAvailableDigitally => 'Fotos disponiveis no sistema digital';
+  String get photosAvailableDigitally => 'Fotos disponíveis no sistema digital';
 
   @override
   String attachedPhotosCount(int count) {
@@ -1444,10 +1444,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get photoRecord => 'REGISTRO FOTOGRAFICO';
+  String get photoRecord => 'REGISTRO FOTOGRÁFICO';
 
   @override
-  String get partsAndProducts => 'PECAS E PRODUTOS';
+  String get partsAndProducts => 'PEÇAS E PRODUTOS';
 
   @override
   String nPhotosCount(int count) {
@@ -1461,11 +1461,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get notSelected => 'Nao selecionado';
+  String get notSelected => 'Não selecionado';
 
   @override
   String formLabelWithTitle(String title) {
-    return 'Formulario: $title';
+    return 'Formulário: $title';
   }
 
   @override
@@ -1813,31 +1813,31 @@ class AppLocalizationsPt extends AppLocalizations {
   String get useDefaultTerms => 'Usar texto padrão do segmento';
 
   @override
-  String get pdfTermsAndConditions => 'Termos e Condicoes';
+  String get pdfTermsAndConditions => 'Termos e Condições';
 
   @override
-  String get pdfCompanySignature => 'Responsavel';
+  String get pdfCompanySignature => 'Responsável';
 
   @override
   String get pdfClientSignature => 'Cliente';
 
   @override
-  String get pdfTechnician => 'Tecnico';
+  String get pdfTechnician => 'Técnico';
 
   @override
   String get pdfCreatedDate => 'Criada';
 
   @override
-  String get pdfCompletedDate => 'Concluida';
+  String get pdfCompletedDate => 'Concluída';
 
   @override
   String get pdfIssuedDate => 'Emitida';
 
   @override
-  String get pdfServicesSubtotal => 'Subtotal Servicos';
+  String get pdfServicesSubtotal => 'Subtotal Serviços';
 
   @override
-  String get pdfPartsSubtotal => 'Subtotal Pecas';
+  String get pdfPartsSubtotal => 'Subtotal Peças';
 
   @override
   String get pdfPaid => 'Pago';
@@ -1846,10 +1846,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pdfUnitValue => 'Valor Unit.';
 
   @override
-  String get pdfServiceType => 'Servico';
+  String get pdfServiceType => 'Serviço';
 
   @override
-  String get pdfProductType => 'Peca';
+  String get pdfProductType => 'Peça';
 
   @override
   String get pdfItemType => 'Tipo';
@@ -1865,7 +1865,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get pdfTrackOnlineDescription =>
-      'Escaneie o QR Code para acompanhar esta ordem de servico';
+      'Escaneie o QR Code para acompanhar esta ordem de serviço';
 
   @override
   String get pdfEquipment => 'Equipamento';
@@ -2164,11 +2164,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pickCustomerTitle => 'Quem é o cliente?';
 
   @override
-  String get searchCustomerPlaceholder => 'Buscar por nome, telefone ou placa';
-
-  @override
-  String plateValue(String plate) {
-    return 'Placa $plate';
+  String searchCustomerPlaceholder(String serial) {
+    return 'Buscar por nome, telefone ou $serial';
   }
 
   @override
@@ -2284,10 +2281,42 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveProductButton => 'Salvar produto';
 
   @override
-  String get serviceNameHint => 'Ex.: Troca de óleo';
+  String serviceNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Troca de óleo',
+      'hvac': 'Limpeza do split',
+      'smartphones': 'Troca de tela',
+      'computers': 'Formatação',
+      'appliances': 'Conserto de geladeira',
+      'electrical': 'Troca de disjuntor',
+      'plumbing': 'Conserto de vazamento',
+      'security': 'Instalação de câmera',
+      'solar': 'Limpeza das placas',
+      'printers': 'Troca de toner',
+      'bicycles': 'Revisão completa',
+      'other': 'Manutenção',
+    });
+    return 'Ex.: $_temp0';
+  }
 
   @override
-  String get productNameHint => 'Ex.: Filtro de óleo';
+  String productNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Filtro de óleo',
+      'hvac': 'Capacitor',
+      'smartphones': 'Tela',
+      'computers': 'Memória RAM',
+      'appliances': 'Resistência',
+      'electrical': 'Disjuntor',
+      'plumbing': 'Registro',
+      'security': 'Câmera',
+      'solar': 'Inversor',
+      'printers': 'Toner',
+      'bicycles': 'Câmara de ar',
+      'other': 'Peça de reposição',
+    });
+    return 'Ex.: $_temp0';
+  }
 
   @override
   String get serviceNameRequired => 'Digite o nome do serviço';
@@ -4264,7 +4293,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderCustomerRequestTitle => 'O que o cliente pediu';
 
   @override
-  String get orderCustomerRequestPlaceholder => 'Ex.: barulho ao frear';
+  String orderCustomerRequestPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'barulho ao frear',
+      'hvac': 'não está gelando',
+      'smartphones': 'tela quebrada',
+      'computers': 'não liga',
+      'appliances': 'parou de funcionar',
+      'electrical': 'tomada sem energia',
+      'plumbing': 'vazamento na pia',
+      'security': 'câmera sem imagem',
+      'solar': 'geração baixa',
+      'printers': 'papel enroscando',
+      'bicycles': 'corrente pulando',
+      'other': 'não está funcionando',
+    });
+    return 'Ex.: $_temp0';
+  }
 
   @override
   String get orderDeliverySection => 'Entrega';
@@ -4291,7 +4336,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderAddressLabel => 'Local';
 
   @override
-  String get speechHint => 'Fale o cliente, o veículo e o que vai ser feito.';
+  String speechHint(String device) {
+    return 'Fale quem é o cliente, qual $device e o que vai ser feito.';
+  }
 
   @override
   String get speechListening => 'Ouvindo…';
@@ -4346,8 +4393,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get speechStopAndFill => 'Parar e preencher a OS';
 
   @override
-  String get speechTypeHint =>
-      'Escreva o cliente, o veículo e o que vai ser feito';
+  String speechTypeHint(String device) {
+    return 'Escreva quem é o cliente, qual $device e o que vai ser feito';
+  }
 
   @override
   String get speechNothingHeard =>
@@ -4569,11 +4617,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get customerMoreDataHint => 'E-mail, CPF ou CNPJ, endereço';
 
   @override
-  String deviceSaveNeedsField(String field) {
-    return 'Preencha o campo $field para salvar.';
-  }
-
-  @override
   String deviceMoreDataHint(String brand, String category) {
     return 'Foto, $brand e $category';
   }
@@ -4635,7 +4678,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get checklistQuestion => 'Pergunta';
 
   @override
-  String get checklistQuestionPlaceholder => 'Ex.: Os pneus estão bons?';
+  String checklistQuestionPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Os pneus estão bons?',
+      'hvac': 'O dreno está livre?',
+      'smartphones': 'A tela liga?',
+      'computers': 'O ventilador gira?',
+      'appliances': 'O aparelho liga?',
+      'electrical': 'O quadro está identificado?',
+      'plumbing': 'Há sinal de vazamento?',
+      'security': 'As câmeras estão gravando?',
+      'solar': 'As placas estão limpas?',
+      'printers': 'A impressão sai nítida?',
+      'bicycles': 'Os freios estão bons?',
+      'other': 'Está funcionando?',
+    });
+    return 'Ex.: $_temp0';
+  }
 
   @override
   String get checklistAnswerType => 'Tipo de resposta';
@@ -6028,6 +6087,48 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get courtesyBannerLater => 'Agora não';
+
+  @override
+  String deviceSaveNeedsAny(String first, String second) {
+    return 'Preencha $first ou $second para salvar.';
+  }
+
+  @override
+  String orderStatusVisit(String status, String date) {
+    return '$status · visita $date';
+  }
+
+  @override
+  String get orderOpenChecklist => 'Abrir checklist';
+
+  @override
+  String orderPdfTitle(String order, String number) {
+    return '$order $number';
+  }
+
+  @override
+  String get receivePaymentMethod => 'Forma de pagamento';
+
+  @override
+  String get receivePaymentMethodOptional => 'Opcional';
+
+  @override
+  String get receivePaymentMethodQuestion => 'Como foi pago?';
+
+  @override
+  String get receivePaymentMethodNone => 'Não informar';
+
+  @override
+  String get paymentMethodPix => 'Pix';
+
+  @override
+  String get paymentMethodCash => 'Dinheiro';
+
+  @override
+  String get paymentMethodCard => 'Cartão';
+
+  @override
+  String get paymentMethodOther => 'Outro';
 
   @override
   String get filterQuotes => 'Orçamentos';

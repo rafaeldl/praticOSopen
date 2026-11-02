@@ -245,7 +245,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           PickerItem<Device> item(Device d) => _pickerItem(d, selectedIds);
           return PickerScaffold<Device>(
             title: l10n.pickerDeviceTitle(device),
-            subtitle: customerName.isEmpty
+            subtitle: customerName.isEmpty || mineIds.isEmpty
                 ? null
                 : l10n.pickerDeviceSubtitle(customerName),
             itemCount: all.length,
@@ -275,14 +275,16 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             sections: (query) {
               final filtered = all.where((d) => _matchesQuery(d, query));
               final mine = filtered.where((d) => mineIds.contains(d.id));
-              if (mine.isEmpty) {
+              // Vehicles of other customers never go under this one's name.
+              if (mine.isEmpty && customerName.isEmpty) {
                 return [PickerSection(items: filtered.map(item).toList())];
               }
               return [
-                PickerSection(
-                  label: l10n.devicesOfCustomer(config.devicePlural, first),
-                  items: mine.map(item).toList(),
-                ),
+                if (mine.isNotEmpty)
+                  PickerSection(
+                    label: l10n.devicesOfCustomer(config.devicePlural, first),
+                    items: mine.map(item).toList(),
+                  ),
                 PickerSection(
                   label: l10n.otherDevicesSection(
                     config.devicePlural.toLowerCase(),
@@ -306,9 +308,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       pickerMatches(d.manufacturer, query);
 
   PickerItem<Device> _pickerItem(Device device, Set<String> selectedIds) {
-    final l10n = context.l10n;
+    final config = context.read<SegmentConfigProvider>();
     final parts = [
-      if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
+      if (device.serial?.isNotEmpty ?? false) config.serialValue(device.serial),
       if (device.manufacturer?.isNotEmpty ?? false) device.manufacturer!,
     ];
     return PickerItem(
@@ -380,7 +382,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     final l10n = context.l10n;
     final management = config.useDeviceManagement;
     final subtitleParts = [
-      if (device.serial?.isNotEmpty ?? false) l10n.plateValue(device.serial!),
+      if (device.serial?.isNotEmpty ?? false) config.serialValue(device.serial),
       if (device.manufacturer?.isNotEmpty ?? false) device.manufacturer!,
       if (management) DeviceStatusStyle.label(l10n, device.status),
     ];

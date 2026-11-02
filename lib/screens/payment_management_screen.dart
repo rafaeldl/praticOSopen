@@ -794,6 +794,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final transaction = await store.addPayment(
       draft.amount,
       paidAt: paidAtFor(draft.paidDay),
+      paymentMethod: draft.paymentMethod,
     );
     var receiptOk = true;
     final receipt = draft.receipt;

@@ -45,7 +45,7 @@
           },
           {
             "title": "Pelo menu da OS",
-            "content": "No <strong>…</strong> do topo da OS, <strong>Copiar link</strong> copia o mesmo link, e <strong>Ver PDF</strong> abre o PDF da OS para mandar ou imprimir."
+            "content": "No <strong>…</strong> do topo da OS, <strong>Copiar link</strong> copia o mesmo link, e <strong>Ver PDF</strong> mostra o PDF da OS. Para mandar ou imprimir, toque no botão de compartilhar no topo."
           }
         ],
         "infoCard": {
@@ -132,7 +132,7 @@
           },
           {
             "title": "Responder ao cliente",
-            "content": "Na OS, abra <strong>Comentários</strong> e escreva. Com a chave <strong>Só a equipe vê</strong> desligada, o cliente também vê a resposta, pelo link da OS. Ligue a chave quando o recado for só para a equipe."
+            "content": "Na OS, abra <strong>Comentários</strong> e escreva. A chave <strong>Só a equipe vê</strong> começa ligada, então o comentário fica só com a equipe. Desligue a chave quando quiser que o cliente veja a resposta, pelo link da OS."
           }
         ],
         "warningCard": {
@@ -283,7 +283,7 @@
           },
           {
             "title": "From the order menu",
-            "content": "In the <strong>…</strong> at the top of the order, <strong>Copy link</strong> copies the same link, and <strong>View PDF</strong> opens the order’s PDF to send or print."
+            "content": "In the <strong>…</strong> at the top of the order, <strong>Copy link</strong> copies the same link, and <strong>View PDF</strong> shows the order’s PDF. To send or print it, tap the share button at the top."
           }
         ],
         "infoCard": {
@@ -370,7 +370,7 @@
           },
           {
             "title": "Reply to the customer",
-            "content": "On the order, open <strong>Comments</strong> and write. With the <strong>Team only</strong> switch off, the customer also sees the reply, on the order link. Turn the switch on when the note is just for the team."
+            "content": "On the order, open <strong>Comments</strong> and write. The <strong>Team only</strong> switch starts on, so the comment stays with the team. Turn it off when you want the customer to see the reply, on the order link."
           }
         ],
         "warningCard": {
@@ -521,7 +521,7 @@
           },
           {
             "title": "Desde el menú de la OS",
-            "content": "En el <strong>…</strong> de arriba de la OS, <strong>Copiar enlace</strong> copia el mismo enlace y <strong>Ver PDF</strong> abre el PDF de la OS para enviar o imprimir."
+            "content": "En el <strong>…</strong> de arriba de la OS, <strong>Copiar enlace</strong> copia el mismo enlace y <strong>Ver PDF</strong> muestra el PDF de la OS. Para enviarlo o imprimirlo, toca el botón de compartir arriba."
           }
         ],
         "infoCard": {
@@ -608,7 +608,7 @@
           },
           {
             "title": "Responder al cliente",
-            "content": "En la OS, abre <strong>Comentarios</strong> y escribe. Con el interruptor <strong>Solo el equipo lo ve</strong> apagado, el cliente también ve la respuesta, en el enlace de la OS. Enciéndelo cuando el mensaje sea solo para el equipo."
+            "content": "En la OS, abre <strong>Comentarios</strong> y escribe. El interruptor <strong>Solo el equipo lo ve</strong> empieza encendido, así que el comentario queda solo para el equipo. Apágalo cuando quieras que el cliente vea la respuesta, en el enlace de la OS."
           }
         ],
         "warningCard": {

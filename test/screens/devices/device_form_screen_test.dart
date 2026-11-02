@@ -96,7 +96,21 @@ void main() {
     expect(h.saved, isEmpty);
   });
 
-  testWidgets('✓ is gray with the hint until the plate is filled', (
+  testWidgets('saves with only the model: no serial is stored', (tester) async {
+    final h = _Harness();
+    await h.open(tester);
+
+    await tester.enterText(find.byType(EditableText).first, 'Split LG 12000');
+    await tester.pump();
+    expect(_saveEnabled(tester), isTrue);
+    await tester.tap(_save);
+    await tester.pumpAndSettle();
+
+    expect(h.saved.single.name, 'Split LG 12000');
+    expect(h.saved.single.serial, isNull);
+  });
+
+  testWidgets('✓ is gray with the hint until the model or plate is filled', (
     tester,
   ) async {
     final h = _Harness();

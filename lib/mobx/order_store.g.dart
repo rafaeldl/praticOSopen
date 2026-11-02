@@ -1118,9 +1118,15 @@ mixin _$OrderStore on _OrderStore, Store {
     double amount, {
     String? description,
     DateTime? paidAt,
+    String? paymentMethod,
   }) {
     return _$addPaymentAsyncAction.run(
-      () => super.addPayment(amount, description: description, paidAt: paidAt),
+      () => super.addPayment(
+        amount,
+        description: description,
+        paidAt: paidAt,
+        paymentMethod: paymentMethod,
+      ),
     );
   }
 

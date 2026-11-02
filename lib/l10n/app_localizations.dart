@@ -2719,7 +2719,7 @@ abstract class AppLocalizations {
   /// No description provided for @pageOf.
   ///
   /// In pt, this message translates to:
-  /// **'Pagina {current} de {total}'**
+  /// **'Página {current} de {total}'**
   String pageOf(int current, int total);
 
   /// No description provided for @preparingReport.
@@ -2731,7 +2731,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In pt, this message translates to:
-  /// **'Sistema de Gestao de Ordens de Servico'**
+  /// **'Sistema de Gestão de Ordens de Serviço'**
   String get appTagline;
 
   /// No description provided for @receivedWithPercent.
@@ -2755,13 +2755,13 @@ abstract class AppLocalizations {
   /// No description provided for @serviceDescriptionColumn.
   ///
   /// In pt, this message translates to:
-  /// **'DESCRICAO DO SERVICO'**
+  /// **'DESCRIÇÃO DO SERVIÇO'**
   String get serviceDescriptionColumn;
 
   /// No description provided for @descriptionColumn.
   ///
   /// In pt, this message translates to:
-  /// **'DESCRICAO'**
+  /// **'DESCRIÇÃO'**
   String get descriptionColumn;
 
   /// No description provided for @unitShort.
@@ -2773,7 +2773,7 @@ abstract class AppLocalizations {
   /// No description provided for @alreadyPaid.
   ///
   /// In pt, this message translates to:
-  /// **'Ja pago'**
+  /// **'Já pago'**
   String get alreadyPaid;
 
   /// No description provided for @remainingBalance.
@@ -2791,7 +2791,7 @@ abstract class AppLocalizations {
   /// No description provided for @photosAvailableDigitally.
   ///
   /// In pt, this message translates to:
-  /// **'Fotos disponiveis no sistema digital'**
+  /// **'Fotos disponíveis no sistema digital'**
   String get photosAvailableDigitally;
 
   /// No description provided for @attachedPhotosCount.
@@ -2803,13 +2803,13 @@ abstract class AppLocalizations {
   /// No description provided for @photoRecord.
   ///
   /// In pt, this message translates to:
-  /// **'REGISTRO FOTOGRAFICO'**
+  /// **'REGISTRO FOTOGRÁFICO'**
   String get photoRecord;
 
   /// No description provided for @partsAndProducts.
   ///
   /// In pt, this message translates to:
-  /// **'PECAS E PRODUTOS'**
+  /// **'PEÇAS E PRODUTOS'**
   String get partsAndProducts;
 
   /// No description provided for @nPhotosCount.
@@ -2821,13 +2821,13 @@ abstract class AppLocalizations {
   /// No description provided for @notSelected.
   ///
   /// In pt, this message translates to:
-  /// **'Nao selecionado'**
+  /// **'Não selecionado'**
   String get notSelected;
 
   /// No description provided for @formLabelWithTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Formulario: {title}'**
+  /// **'Formulário: {title}'**
   String formLabelWithTitle(String title);
 
   /// No description provided for @linked.
@@ -3439,13 +3439,13 @@ abstract class AppLocalizations {
   /// No description provided for @pdfTermsAndConditions.
   ///
   /// In pt, this message translates to:
-  /// **'Termos e Condicoes'**
+  /// **'Termos e Condições'**
   String get pdfTermsAndConditions;
 
   /// No description provided for @pdfCompanySignature.
   ///
   /// In pt, this message translates to:
-  /// **'Responsavel'**
+  /// **'Responsável'**
   String get pdfCompanySignature;
 
   /// No description provided for @pdfClientSignature.
@@ -3457,7 +3457,7 @@ abstract class AppLocalizations {
   /// No description provided for @pdfTechnician.
   ///
   /// In pt, this message translates to:
-  /// **'Tecnico'**
+  /// **'Técnico'**
   String get pdfTechnician;
 
   /// No description provided for @pdfCreatedDate.
@@ -3469,7 +3469,7 @@ abstract class AppLocalizations {
   /// No description provided for @pdfCompletedDate.
   ///
   /// In pt, this message translates to:
-  /// **'Concluida'**
+  /// **'Concluída'**
   String get pdfCompletedDate;
 
   /// No description provided for @pdfIssuedDate.
@@ -3481,13 +3481,13 @@ abstract class AppLocalizations {
   /// No description provided for @pdfServicesSubtotal.
   ///
   /// In pt, this message translates to:
-  /// **'Subtotal Servicos'**
+  /// **'Subtotal Serviços'**
   String get pdfServicesSubtotal;
 
   /// No description provided for @pdfPartsSubtotal.
   ///
   /// In pt, this message translates to:
-  /// **'Subtotal Pecas'**
+  /// **'Subtotal Peças'**
   String get pdfPartsSubtotal;
 
   /// No description provided for @pdfPaid.
@@ -3505,13 +3505,13 @@ abstract class AppLocalizations {
   /// No description provided for @pdfServiceType.
   ///
   /// In pt, this message translates to:
-  /// **'Servico'**
+  /// **'Serviço'**
   String get pdfServiceType;
 
   /// No description provided for @pdfProductType.
   ///
   /// In pt, this message translates to:
-  /// **'Peca'**
+  /// **'Peça'**
   String get pdfProductType;
 
   /// No description provided for @pdfItemType.
@@ -3541,7 +3541,7 @@ abstract class AppLocalizations {
   /// No description provided for @pdfTrackOnlineDescription.
   ///
   /// In pt, this message translates to:
-  /// **'Escaneie o QR Code para acompanhar esta ordem de servico'**
+  /// **'Escaneie o QR Code para acompanhar esta ordem de serviço'**
   String get pdfTrackOnlineDescription;
 
   /// No description provided for @pdfEquipment.
@@ -4051,14 +4051,8 @@ abstract class AppLocalizations {
   /// No description provided for @searchCustomerPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Buscar por nome, telefone ou placa'**
-  String get searchCustomerPlaceholder;
-
-  /// No description provided for @plateValue.
-  ///
-  /// In pt, this message translates to:
-  /// **'Placa {plate}'**
-  String plateValue(String plate);
+  /// **'Buscar por nome, telefone ou {serial}'**
+  String searchCustomerPlaceholder(String serial);
 
   /// No description provided for @customerNamePlaceholder.
   ///
@@ -4219,14 +4213,14 @@ abstract class AppLocalizations {
   /// No description provided for @serviceNameHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: Troca de óleo'**
-  String get serviceNameHint;
+  /// **'Ex.: {segment, select, automotive{Troca de óleo} hvac{Limpeza do split} smartphones{Troca de tela} computers{Formatação} appliances{Conserto de geladeira} electrical{Troca de disjuntor} plumbing{Conserto de vazamento} security{Instalação de câmera} solar{Limpeza das placas} printers{Troca de toner} bicycles{Revisão completa} other{Manutenção}}'**
+  String serviceNameHint(String segment);
 
   /// No description provided for @productNameHint.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: Filtro de óleo'**
-  String get productNameHint;
+  /// **'Ex.: {segment, select, automotive{Filtro de óleo} hvac{Capacitor} smartphones{Tela} computers{Memória RAM} appliances{Resistência} electrical{Disjuntor} plumbing{Registro} security{Câmera} solar{Inversor} printers{Toner} bicycles{Câmara de ar} other{Peça de reposição}}'**
+  String productNameHint(String segment);
 
   /// No description provided for @serviceNameRequired.
   ///
@@ -7075,8 +7069,8 @@ abstract class AppLocalizations {
   /// No description provided for @orderCustomerRequestPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: barulho ao frear'**
-  String get orderCustomerRequestPlaceholder;
+  /// **'Ex.: {segment, select, automotive{barulho ao frear} hvac{não está gelando} smartphones{tela quebrada} computers{não liga} appliances{parou de funcionar} electrical{tomada sem energia} plumbing{vazamento na pia} security{câmera sem imagem} solar{geração baixa} printers{papel enroscando} bicycles{corrente pulando} other{não está funcionando}}'**
+  String orderCustomerRequestPlaceholder(String segment);
 
   /// No description provided for @orderDeliverySection.
   ///
@@ -7129,8 +7123,8 @@ abstract class AppLocalizations {
   /// No description provided for @speechHint.
   ///
   /// In pt, this message translates to:
-  /// **'Fale o cliente, o veículo e o que vai ser feito.'**
-  String get speechHint;
+  /// **'Fale quem é o cliente, qual {device} e o que vai ser feito.'**
+  String speechHint(String device);
 
   /// No description provided for @speechListening.
   ///
@@ -7231,8 +7225,8 @@ abstract class AppLocalizations {
   /// No description provided for @speechTypeHint.
   ///
   /// In pt, this message translates to:
-  /// **'Escreva o cliente, o veículo e o que vai ser feito'**
-  String get speechTypeHint;
+  /// **'Escreva quem é o cliente, qual {device} e o que vai ser feito'**
+  String speechTypeHint(String device);
 
   /// No description provided for @speechNothingHeard.
   ///
@@ -7582,12 +7576,6 @@ abstract class AppLocalizations {
   /// **'E-mail, CPF ou CNPJ, endereço'**
   String get customerMoreDataHint;
 
-  /// No description provided for @deviceSaveNeedsField.
-  ///
-  /// In pt, this message translates to:
-  /// **'Preencha o campo {field} para salvar.'**
-  String deviceSaveNeedsField(String field);
-
   /// No description provided for @deviceMoreDataHint.
   ///
   /// In pt, this message translates to:
@@ -7699,8 +7687,8 @@ abstract class AppLocalizations {
   /// No description provided for @checklistQuestionPlaceholder.
   ///
   /// In pt, this message translates to:
-  /// **'Ex.: Os pneus estão bons?'**
-  String get checklistQuestionPlaceholder;
+  /// **'Ex.: {segment, select, automotive{Os pneus estão bons?} hvac{O dreno está livre?} smartphones{A tela liga?} computers{O ventilador gira?} appliances{O aparelho liga?} electrical{O quadro está identificado?} plumbing{Há sinal de vazamento?} security{As câmeras estão gravando?} solar{As placas estão limpas?} printers{A impressão sai nítida?} bicycles{Os freios estão bons?} other{Está funcionando?}}'**
+  String checklistQuestionPlaceholder(String segment);
 
   /// No description provided for @checklistAnswerType.
   ///
@@ -9943,6 +9931,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Agora não'**
   String get courtesyBannerLater;
+
+  /// No description provided for @deviceSaveNeedsAny.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha {first} ou {second} para salvar.'**
+  String deviceSaveNeedsAny(String first, String second);
+
+  /// No description provided for @orderStatusVisit.
+  ///
+  /// In pt, this message translates to:
+  /// **'{status} · visita {date}'**
+  String orderStatusVisit(String status, String date);
+
+  /// No description provided for @orderOpenChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir checklist'**
+  String get orderOpenChecklist;
+
+  /// No description provided for @orderPdfTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{order} {number}'**
+  String orderPdfTitle(String order, String number);
+
+  /// No description provided for @receivePaymentMethod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Forma de pagamento'**
+  String get receivePaymentMethod;
+
+  /// No description provided for @receivePaymentMethodOptional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional'**
+  String get receivePaymentMethodOptional;
+
+  /// No description provided for @receivePaymentMethodQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi pago?'**
+  String get receivePaymentMethodQuestion;
+
+  /// No description provided for @receivePaymentMethodNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não informar'**
+  String get receivePaymentMethodNone;
+
+  /// No description provided for @paymentMethodPix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pix'**
+  String get paymentMethodPix;
+
+  /// No description provided for @paymentMethodCash.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dinheiro'**
+  String get paymentMethodCash;
+
+  /// No description provided for @paymentMethodCard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cartão'**
+  String get paymentMethodCard;
+
+  /// No description provided for @paymentMethodOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro'**
+  String get paymentMethodOther;
 
   /// No description provided for @filterQuotes.
   ///

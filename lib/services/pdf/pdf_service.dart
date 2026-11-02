@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
@@ -37,6 +37,24 @@ bool canShareOrderPdf({
   required bool useFinancial,
 }) {
   return canViewPrices || !useFinancial;
+}
+
+const _fallbackFontAsset = 'assets/fonts/Roboto-Regular.ttf';
+
+/// Theme with a Unicode font behind the built-in Helvetica, which only draws
+/// Latin-1: what people type outside it (the Greek "μ" of "35μF", "€", curly
+/// quotes, the iPhone's "—") would come out as a box. Only the characters
+/// that need it use the font, so the layout stays the same. Without the font
+/// the PDF is still generated.
+Future<pw.ThemeData?> pdfFallbackTheme({AssetBundle? bundle}) async {
+  try {
+    final data = await (bundle ?? rootBundle).load(_fallbackFontAsset);
+    return pw.ThemeData(
+      defaultTextStyle: pw.TextStyle(fontFallback: [pw.Font.ttf(data)]),
+    );
+  } catch (_) {
+    return null;
+  }
 }
 
 /// Dados necessarios para gerar o PDF da OS
@@ -120,6 +138,7 @@ class PdfService {
 
     // 1. Carregar fontes
     final (baseFont, boldFont) = await _loadFonts();
+    final theme = await pdfFallbackTheme();
 
     // 2. Carregar imagens
     final images = await _loadImages(data, options);
@@ -151,6 +170,7 @@ class PdfService {
       doc.addPage(
         pw.MultiPage(
           pageTheme: pw.PageTheme(
+            theme: theme,
             pageFormat: PdfStyles.pageFormat,
             margin: PdfStyles.pageMargin,
             buildForeground: showWatermark
@@ -183,6 +203,7 @@ class PdfService {
         doc.addPage(
           pw.MultiPage(
             pageTheme: pw.PageTheme(
+              theme: theme,
               pageFormat: PdfStyles.pageFormat,
               margin: PdfStyles.pageMargin,
               buildForeground: showWatermark
@@ -215,15 +236,9 @@ class PdfService {
     return doc.save();
   }
 
-  /// Gera o PDF e compartilha via sistema
-  Future<void> shareOsPdf(
-    OsPdfData data, [
-    OsPdfOptions options = const OsPdfOptions(),
-  ]) async {
-    final bytes = await generateOsPdf(data, options);
-    final filename = '${data.config.serviceOrder}-${data.order.number ?? "NOVA"}.pdf';
-    await Printing.sharePdf(bytes: bytes, filename: filename);
-  }
+  /// Nome do arquivo ao compartilhar o PDF.
+  static String osPdfFilename(OsPdfData data) =>
+      '${data.config.serviceOrder}-${data.order.number ?? "NOVA"}.pdf';
 
   /// Carrega as fontes (usando Helvetica nativa)
   Future<(pw.Font, pw.Font)> _loadFonts() async {

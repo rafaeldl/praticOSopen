@@ -128,6 +128,17 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
+  /// Name of the serial field for a sentence: "placa", "número de série",
+  /// but "IMEI" keeps its capitals.
+  String get serialLabelInSentence {
+    final label = this.label('device.serial');
+    return label == label.toUpperCase() ? label : label.toLowerCase();
+  }
+
+  /// "Placa ABC-1234", "Número de série 123", "IMEI 123".
+  String serialValue(String? serial) =>
+      '${label('device.serial')} ${serial ?? ''}'.trim();
+
   /// Inicializa com um segmento específico
   ///
   /// NOTE: Não controla locale aqui - isso é feito automaticamente pelo

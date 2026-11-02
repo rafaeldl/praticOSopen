@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_glass.dart';
 import 'package:praticos/theme/app_spacing.dart';
@@ -782,7 +783,9 @@ class AssistantBar extends StatelessWidget {
               maxLines: 4,
               maxLength: 2000,
               textCapitalization: TextCapitalization.sentences,
-              placeholder: l10n.speechTypeHint,
+              placeholder: l10n.speechTypeHint(
+                SegmentConfigService().device.toLowerCase(),
+              ),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               style: AppTypography.body.copyWith(
                 color: AppColors.text.resolveFrom(context),
@@ -930,7 +933,7 @@ class AssistantTranscript extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l10n.speechHint,
+              l10n.speechHint(SegmentConfigService().device.toLowerCase()),
               style: AppTypography.label.copyWith(color: secondary),
             ),
             if (heard.isNotEmpty) ...[

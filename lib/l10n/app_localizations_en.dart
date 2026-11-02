@@ -2167,11 +2167,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickCustomerTitle => 'Who is the customer?';
 
   @override
-  String get searchCustomerPlaceholder => 'Search by name, phone or plate';
-
-  @override
-  String plateValue(String plate) {
-    return 'Plate $plate';
+  String searchCustomerPlaceholder(String serial) {
+    return 'Search by name, phone or $serial';
   }
 
   @override
@@ -2286,10 +2283,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveProductButton => 'Save product';
 
   @override
-  String get serviceNameHint => 'E.g.: Oil change';
+  String serviceNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Oil change',
+      'hvac': 'Split AC cleaning',
+      'smartphones': 'Screen replacement',
+      'computers': 'OS reinstall',
+      'appliances': 'Refrigerator repair',
+      'electrical': 'Breaker replacement',
+      'plumbing': 'Leak repair',
+      'security': 'Camera installation',
+      'solar': 'Panel cleaning',
+      'printers': 'Toner replacement',
+      'bicycles': 'Full tune-up',
+      'other': 'Maintenance',
+    });
+    return 'E.g.: $_temp0';
+  }
 
   @override
-  String get productNameHint => 'E.g.: Oil filter';
+  String productNameHint(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Oil filter',
+      'hvac': 'Capacitor',
+      'smartphones': 'Screen',
+      'computers': 'RAM memory',
+      'appliances': 'Heating element',
+      'electrical': 'Circuit breaker',
+      'plumbing': 'Shutoff valve',
+      'security': 'Camera',
+      'solar': 'Inverter',
+      'printers': 'Toner',
+      'bicycles': 'Inner tube',
+      'other': 'Spare part',
+    });
+    return 'E.g.: $_temp0';
+  }
 
   @override
   String get serviceNameRequired => 'Enter the service name';
@@ -4273,7 +4302,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderCustomerRequestTitle => 'What the customer asked';
 
   @override
-  String get orderCustomerRequestPlaceholder => 'E.g.: noise when braking';
+  String orderCustomerRequestPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'noise when braking',
+      'hvac': 'not cooling',
+      'smartphones': 'cracked screen',
+      'computers': 'won\'t turn on',
+      'appliances': 'stopped working',
+      'electrical': 'outlet with no power',
+      'plumbing': 'leak under the sink',
+      'security': 'camera with no image',
+      'solar': 'low generation',
+      'printers': 'paper jam',
+      'bicycles': 'chain skipping',
+      'other': 'not working',
+    });
+    return 'E.g.: $_temp0';
+  }
 
   @override
   String get orderDeliverySection => 'Delivery';
@@ -4300,8 +4345,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderAddressLabel => 'Location';
 
   @override
-  String get speechHint =>
-      'Say the customer, the vehicle and what will be done.';
+  String speechHint(String device) {
+    return 'Say the customer, the $device and what will be done.';
+  }
 
   @override
   String get speechListening => 'Listening…';
@@ -4356,8 +4402,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechStopAndFill => 'Stop and fill in the order';
 
   @override
-  String get speechTypeHint =>
-      'Type the customer, the vehicle and what will be done';
+  String speechTypeHint(String device) {
+    return 'Type the customer, the $device and what will be done';
+  }
 
   @override
   String get speechNothingHeard =>
@@ -4579,11 +4626,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerMoreDataHint => 'E-mail, tax ID, address';
 
   @override
-  String deviceSaveNeedsField(String field) {
-    return 'Fill in $field to save.';
-  }
-
-  @override
   String deviceMoreDataHint(String brand, String category) {
     return 'Photo, $brand and $category';
   }
@@ -4643,7 +4685,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistQuestion => 'Question';
 
   @override
-  String get checklistQuestionPlaceholder => 'E.g.: Are the tires OK?';
+  String checklistQuestionPlaceholder(String segment) {
+    String _temp0 = intl.Intl.selectLogic(segment, {
+      'automotive': 'Are the tires OK?',
+      'hvac': 'Is the drain clear?',
+      'smartphones': 'Does the screen turn on?',
+      'computers': 'Is the fan spinning?',
+      'appliances': 'Does it turn on?',
+      'electrical': 'Is the panel labeled?',
+      'plumbing': 'Any sign of a leak?',
+      'security': 'Are the cameras recording?',
+      'solar': 'Are the panels clean?',
+      'printers': 'Is the print sharp?',
+      'bicycles': 'Are the brakes OK?',
+      'other': 'Is it working?',
+    });
+    return 'E.g.: $_temp0';
+  }
 
   @override
   String get checklistAnswerType => 'Type of answer';
@@ -6034,6 +6092,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courtesyBannerLater => 'Not now';
+
+  @override
+  String deviceSaveNeedsAny(String first, String second) {
+    return 'Fill in $first or $second to save.';
+  }
+
+  @override
+  String orderStatusVisit(String status, String date) {
+    return '$status · visit $date';
+  }
+
+  @override
+  String get orderOpenChecklist => 'Open checklist';
+
+  @override
+  String orderPdfTitle(String order, String number) {
+    return '$order $number';
+  }
+
+  @override
+  String get receivePaymentMethod => 'Payment method';
+
+  @override
+  String get receivePaymentMethodOptional => 'Optional';
+
+  @override
+  String get receivePaymentMethodQuestion => 'How was it paid?';
+
+  @override
+  String get receivePaymentMethodNone => 'Don\'t specify';
+
+  @override
+  String get paymentMethodPix => 'Pix';
+
+  @override
+  String get paymentMethodCash => 'Cash';
+
+  @override
+  String get paymentMethodCard => 'Card';
+
+  @override
+  String get paymentMethodOther => 'Other';
 
   @override
   String get filterQuotes => 'Quotes';

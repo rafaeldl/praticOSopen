@@ -42,6 +42,7 @@ ReceiptPlan buildReceiptPlan({
   required List<PaymentAllocation> allocations,
   required DateTime paidAt,
   required DateTime now,
+  String? paymentMethod,
   UserAggr? actor,
   CompanyAggr? company,
   ReceiptFile? file,
@@ -67,6 +68,7 @@ ReceiptPlan buildReceiptPlan({
       createdAt: now,
       createdBy: actor,
       paidAt: paidAt,
+      paymentMethod: paymentMethod,
       receiptGroupId: receiptId,
     );
 
@@ -111,6 +113,7 @@ ReceiptPlan buildReceiptPlan({
     ..customer = customer
     ..amount = totalCents / 100
     ..paidAt = paidAt
+    ..paymentMethod = paymentMethod
     ..receiptFile = file
     ..allocations = receiptAllocations
     ..status = ReceiptStatus.active

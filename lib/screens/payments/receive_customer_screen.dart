@@ -734,6 +734,7 @@ class _ReceiveCustomerScreenState extends State<ReceiveCustomerScreen> {
       orders: _orders,
       allocations: allocations,
       paidAt: paidAtFor(draft.paidDay),
+      paymentMethod: draft.paymentMethod,
       file: draft.receipt,
     );
     try {

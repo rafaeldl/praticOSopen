@@ -597,6 +597,12 @@ class SegmentConfigService {
       ..addAll(fields);
   }
 
+  /// Sets the segment without reading Firestore (widget tests only).
+  @visibleForTesting
+  void debugSetSegment(String? segmentId) {
+    _segmentId = segmentId;
+  }
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;
@@ -611,6 +617,10 @@ class SegmentConfigService {
     _useContracts = false;
     _useFinancial = true;
   }
+
+  /// Segment for the "Ex.: …" texts of the `.arb` files (select); an unknown
+  /// or missing segment takes their neutral `other`.
+  String get exampleSegment => _segmentId ?? 'other';
 
   /// Getters de estado
   bool get isLoaded => _segmentId != null;

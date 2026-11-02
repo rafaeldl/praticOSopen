@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/screens/order/new_order_form.dart';
 import 'package:praticos/screens/payments/widgets/receipt_file_picker.dart';
 import 'package:praticos/screens/payments/widgets/receive_amount_field.dart';
 import 'package:praticos/screens/payments/widgets/receive_date_row.dart';
+import 'package:praticos/screens/payments/widgets/receive_payment_row.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/money_field.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/services/customer_receipt_service.dart'
     show PickedReceiptFile;
 import 'package:praticos/services/format_service.dart';
@@ -21,11 +24,15 @@ class ReceiveDraft {
     required this.amount,
     required this.paidDay,
     this.receipt,
+    this.paymentMethod,
   });
 
   final double amount;
   final DateTime paidDay;
   final PickedReceiptFile? receipt;
+
+  /// `PaymentMethod`; null when not informed.
+  final String? paymentMethod;
 }
 
 /// "Recebido de João": how much, when and the receipt of a payment that
@@ -100,6 +107,7 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
   final FocusNode _focus = FocusNode();
   late DateTime _paidDay = widget.initial?.paidDay ?? DateTime.now();
   late PickedReceiptFile? _receipt = widget.initial?.receipt;
+  late String? _paymentMethod = widget.initial?.paymentMethod;
 
   /// The saved amount no longer fits (the balance went down): back to [max].
   static double _startAmount(ReceivePaymentSheet sheet) {
@@ -133,6 +141,33 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
     if (day != null && mounted) setState(() => _paidDay = day);
   }
 
+  Future<void> _pickMethod() async {
+    _focus.unfocus();
+    final l10n = context.l10n;
+    const none = '';
+    final picked = await pickOne<String>(
+      context,
+      title: l10n.receivePaymentMethodQuestion,
+      selected: _paymentMethod ?? none,
+      options: [
+        for (final method in PaymentMethod.all)
+          PickerItem(
+            key: ValueKey('receiveMethod_$method'),
+            value: method,
+            title: paymentMethodLabel(l10n, method)!,
+          ),
+        PickerItem(
+          key: const ValueKey('receiveMethod_none'),
+          value: none,
+          title: l10n.receivePaymentMethodNone,
+        ),
+      ],
+    );
+    if (picked != null && mounted) {
+      setState(() => _paymentMethod = picked == none ? null : picked);
+    }
+  }
+
   Future<void> _attach() async {
     _focus.unfocus();
     final picked = await (widget.pickReceipt ?? pickReceiptFile)(context);
@@ -145,6 +180,7 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
         amount: parseCurrencyInput(_amount.text),
         paidDay: _paidDay,
         receipt: _receipt,
+        paymentMethod: _paymentMethod,
       ),
     );
   }
@@ -170,7 +206,10 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
               FormatService().formatCurrency(widget.max),
             )
           : l10n.receiveCustomerZero,
-      dirty: _amount.text != _initialText || _receipt != null,
+      dirty:
+          _amount.text != _initialText ||
+          _receipt != null ||
+          _paymentMethod != null,
       onSave: _save,
       children: [
         FormFieldsCard(
@@ -261,6 +300,15 @@ class _ReceivePaymentSheetState extends State<ReceivePaymentSheet> {
               title: l10n.receiveWhen,
               value: paymentDayLabel(l10n, _paidDay),
               onTap: _pickDay,
+            ),
+            FormRow(
+              key: const Key('receiveMethodRow'),
+              icon: CupertinoIcons.creditcard,
+              title: l10n.receivePaymentMethod,
+              value:
+                  paymentMethodLabel(l10n, _paymentMethod) ??
+                  l10n.receivePaymentMethodOptional,
+              onTap: _pickMethod,
             ),
             if (_receipt != null)
               FormRow(

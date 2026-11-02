@@ -140,7 +140,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               ),
               child: CupertinoSearchTextField(
                 controller: _searchController,
-                placeholder: l10n.searchCustomerPlaceholder,
+                placeholder: l10n.searchCustomerPlaceholder(
+                  config.serialLabelInSentence,
+                ),
                 backgroundColor: AppColors.secondaryFill.resolveFrom(context),
                 style: AppTypography.body.copyWith(
                   color: AppColors.text.resolveFrom(context),
@@ -229,7 +231,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         _row(
           hit.customer,
           plate:
-              '${l10n.plateValue(hit.device.serial ?? '')} · ${hit.device.name ?? ''}',
+              '${SegmentConfigProvider.instance.serialValue(hit.device.serial)} · ${hit.device.name ?? ''}',
         ),
     ];
     for (final entry in groupByInitial(matches).entries) {

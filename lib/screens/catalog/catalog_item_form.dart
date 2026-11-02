@@ -6,6 +6,7 @@ import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/money_field.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
@@ -296,7 +297,9 @@ class _CatalogItemFormState extends State<CatalogItemForm> {
       AppFormField(
         label: l10n.name,
         initialValue: _item.name,
-        placeholder: _isService ? l10n.serviceNameHint : l10n.productNameHint,
+        placeholder: _isService
+            ? l10n.serviceNameHint(SegmentConfigService().exampleSegment)
+            : l10n.productNameHint(SegmentConfigService().exampleSegment),
         textCapitalization: TextCapitalization.sentences,
         textInputAction: TextInputAction.next,
         autofocus: !_isEditing,

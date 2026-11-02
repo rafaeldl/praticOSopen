@@ -1,37 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
-/// Helper function to remove accents for PDF fonts
-String _latinCharactersOnly(String text) {
-  if (text.isEmpty) return '';
-
-  final Map<String, String> accentMap = {
-    'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
-    'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
-    'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
-    'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
-    'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
-    'ç': 'c', 'ñ': 'n',
-    'Á': 'A', 'À': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
-    'É': 'E', 'È': 'E', 'Ê': 'E', 'Ë': 'E',
-    'Í': 'I', 'Ì': 'I', 'Î': 'I', 'Ï': 'I',
-    'Ó': 'O', 'Ò': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O',
-    'Ú': 'U', 'Ù': 'U', 'Û': 'U', 'Ü': 'U',
-    'Ç': 'C', 'Ñ': 'N',
-  };
-
-  try {
-    String result = text;
-    accentMap.forEach((key, value) {
-      result = result.replaceAll(key, value);
-    });
-    result = result.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
-    return result;
-  } catch (e) {
-    return 'texto';
-  }
-}
-
 /// Localized strings for PDF generation
 class PdfLocalizations {
   final String newOrder;
@@ -153,57 +122,57 @@ class PdfLocalizations {
     final l10n = context.l10n;
 
     return PdfLocalizations(
-      newOrder: _latinCharactersOnly(l10n.newOrder),
-      notInformed: _latinCharactersOnly(l10n.notInformed),
-      generatedByPraticos: _latinCharactersOnly(l10n.generatedByPraticos),
-      serviceDescriptionColumn: _latinCharactersOnly(l10n.serviceDescriptionColumn),
-      descriptionColumn: _latinCharactersOnly(l10n.descriptionColumn),
-      value: _latinCharactersOnly(l10n.valueColumn),
-      quantityShort: _latinCharactersOnly(l10n.quantityShort),
-      unitShort: _latinCharactersOnly(l10n.unitShort),
-      total: _latinCharactersOnly(l10n.total),
-      services: _latinCharactersOnly(l10n.services),
-      products: _latinCharactersOnly(l10n.products),
-      subtotal: _latinCharactersOnly(l10n.subtotal),
-      discount: _latinCharactersOnly(l10n.discount),
-      alreadyPaid: _latinCharactersOnly(l10n.alreadyPaid),
-      totalPaid: _latinCharactersOnly(l10n.totalPaid),
-      remainingBalance: _latinCharactersOnly(l10n.remainingBalance),
-      totalToPay: _latinCharactersOnly(l10n.totalToPay),
-      customerSignature: _latinCharactersOnly(l10n.customerSignature),
-      photosAvailableDigitally: _latinCharactersOnly(l10n.photosAvailableDigitally),
-      photoRecord: _latinCharactersOnly(l10n.photoRecord),
-      partsAndProducts: _latinCharactersOnly(l10n.partsAndProducts),
-      serviceLocation: _latinCharactersOnly(l10n.serviceLocation),
-      summary: _latinCharactersOnly(l10n.pdfSummary),
-      general: _latinCharactersOnly(l10n.pdfGeneral),
-      termsAndConditions: _latinCharactersOnly(l10n.pdfTermsAndConditions),
-      companySignature: _latinCharactersOnly(l10n.pdfCompanySignature),
-      clientSignature: _latinCharactersOnly(l10n.pdfClientSignature),
-      technician: _latinCharactersOnly(l10n.pdfTechnician),
-      createdDate: _latinCharactersOnly(l10n.pdfCreatedDate),
-      completedDate: _latinCharactersOnly(l10n.pdfCompletedDate),
-      issuedDate: _latinCharactersOnly(l10n.pdfIssuedDate),
-      servicesSubtotal: _latinCharactersOnly(l10n.pdfServicesSubtotal),
-      partsSubtotal: _latinCharactersOnly(l10n.pdfPartsSubtotal),
-      paid: _latinCharactersOnly(l10n.pdfPaid),
-      unitValue: _latinCharactersOnly(l10n.pdfUnitValue),
-      serviceType: _latinCharactersOnly(l10n.pdfServiceType),
-      productType: _latinCharactersOnly(l10n.pdfProductType),
-      itemType: _latinCharactersOnly(l10n.pdfItemType),
-      trackOnline: _latinCharactersOnly(l10n.pdfTrackOnline),
-      trackOnlineDescription: _latinCharactersOnly(l10n.pdfTrackOnlineDescription),
-      equipment: _latinCharactersOnly(l10n.pdfEquipment),
-      statusCompleted: _latinCharactersOnly(l10n.statusCompleted),
-      statusInProgress: _latinCharactersOnly(l10n.statusInProgress),
-      statusPending: _latinCharactersOnly(l10n.statusPending),
-      notAnswered: _latinCharactersOnly(l10n.notAnswered),
-      notSelected: _latinCharactersOnly(l10n.notSelected),
-      formatPageOf: (current, total) => _latinCharactersOnly(l10n.pageOf(current, total)),
-      formatItemsCount: (count) => _latinCharactersOnly(l10n.nItemsCount(count)),
-      formatPhotosCount: (count) => _latinCharactersOnly(l10n.nPhotosCount(count)),
-      formatAttachedPhotosCount: (count) => _latinCharactersOnly(l10n.attachedPhotosCount(count)),
-      formatFormLabel: (title) => _latinCharactersOnly(l10n.formLabelWithTitle(title)),
+      newOrder: l10n.newOrder,
+      notInformed: l10n.notInformed,
+      generatedByPraticos: l10n.generatedByPraticos,
+      serviceDescriptionColumn: l10n.serviceDescriptionColumn,
+      descriptionColumn: l10n.descriptionColumn,
+      value: l10n.valueColumn,
+      quantityShort: l10n.quantityShort,
+      unitShort: l10n.unitShort,
+      total: l10n.total,
+      services: l10n.services,
+      products: l10n.products,
+      subtotal: l10n.subtotal,
+      discount: l10n.discount,
+      alreadyPaid: l10n.alreadyPaid,
+      totalPaid: l10n.totalPaid,
+      remainingBalance: l10n.remainingBalance,
+      totalToPay: l10n.totalToPay,
+      customerSignature: l10n.customerSignature,
+      photosAvailableDigitally: l10n.photosAvailableDigitally,
+      photoRecord: l10n.photoRecord,
+      partsAndProducts: l10n.partsAndProducts,
+      serviceLocation: l10n.serviceLocation,
+      summary: l10n.pdfSummary,
+      general: l10n.pdfGeneral,
+      termsAndConditions: l10n.pdfTermsAndConditions,
+      companySignature: l10n.pdfCompanySignature,
+      clientSignature: l10n.pdfClientSignature,
+      technician: l10n.pdfTechnician,
+      createdDate: l10n.pdfCreatedDate,
+      completedDate: l10n.pdfCompletedDate,
+      issuedDate: l10n.pdfIssuedDate,
+      servicesSubtotal: l10n.pdfServicesSubtotal,
+      partsSubtotal: l10n.pdfPartsSubtotal,
+      paid: l10n.pdfPaid,
+      unitValue: l10n.pdfUnitValue,
+      serviceType: l10n.pdfServiceType,
+      productType: l10n.pdfProductType,
+      itemType: l10n.pdfItemType,
+      trackOnline: l10n.pdfTrackOnline,
+      trackOnlineDescription: l10n.pdfTrackOnlineDescription,
+      equipment: l10n.pdfEquipment,
+      statusCompleted: l10n.statusCompleted,
+      statusInProgress: l10n.statusInProgress,
+      statusPending: l10n.statusPending,
+      notAnswered: l10n.notAnswered,
+      notSelected: l10n.notSelected,
+      formatPageOf: (current, total) => l10n.pageOf(current, total),
+      formatItemsCount: (count) => l10n.nItemsCount(count),
+      formatPhotosCount: (count) => l10n.nPhotosCount(count),
+      formatAttachedPhotosCount: (count) => l10n.attachedPhotosCount(count),
+      formatFormLabel: (title) => l10n.formLabelWithTitle(title),
     );
   }
 }

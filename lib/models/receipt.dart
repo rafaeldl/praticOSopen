@@ -31,6 +31,10 @@ class Receipt extends BaseAuditCompany {
   /// When the money came in (chosen by the user; defaults to now).
   DateTime? paidAt;
 
+  /// `PaymentMethod` chosen by the user; absent when not informed.
+  @JsonKey(includeIfNull: false)
+  String? paymentMethod;
+
   /// Optional file attached (photo or PDF), stored once for every order.
   ReceiptFile? receiptFile;
 

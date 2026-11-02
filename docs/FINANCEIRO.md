@@ -63,7 +63,8 @@ A tela unificada permite:
 - Botão azul "Marcar como recebido". Abre `ReceivePaymentSheet` (sheet com X e ✓): "Quanto recebeu" já com o que falta (não passa disso)
 - **Quando**: dia em que o dinheiro entrou, "Hoje" por padrão; seletor de data sem datas futuras. Grava `paidAt` na transação (hoje = agora; outro dia = meio-dia do dia)
 - "Comprovante › Anexar" (câmera, galeria ou arquivo), se tiver `attachPhotos`
-- Sem forma de pagamento (Pix/dinheiro/cartão). Se salvar falhar, o que foi preenchido volta na próxima abertura da sheet
+- **Forma de pagamento** (opcional): Pix, dinheiro, cartão ou outro. Grava `paymentMethod` na transação (`PaymentMethod`, texto em inglês) e, em "Receber de …", também no `Receipt`. Sem escolha o campo não é gravado; pagamentos antigos seguem sem ele e a linha continua "Pagamento". A escolhida aparece no título da linha e no sheet do pagamento. O Asaas continua usando `billingType`
+- Se salvar falhar, o que foi preenchido volta na próxima abertura da sheet
 - Desconto e "Desfazer" ficam no menu "…"
 - Comprovante compartilhado de outro app: a sheet abre sozinha com o arquivo anexado
 
