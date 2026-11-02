@@ -17,6 +17,8 @@ const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
 // 09:00 in Brazil on 2026-11-02.
 const NOW = new Date('2026-11-02T12:00:00.000Z');
 
+const NEXT_DAY = new Date('2026-11-03T12:00:00.000Z');
+
 const device = (day: string, extra: Record<string, unknown> = {}) => ({
   name: 'Split 12000',
   nextMaintenanceDate: day,
@@ -85,7 +87,7 @@ describe('sendMaintenanceNotices', () => {
     expect(fake.docs.get('companies/c1/devices/far')?.nextMaintenanceNoticeFor).toBeUndefined();
   });
 
-  it('tells each date once, and again when the date changes', async () => {
+  it('tells each date once, and again the next day when the date changes', async () => {
     fake.seed('companies/c1/devices/d1', device('2026-11-05'));
 
     await sendMaintenanceNotices(NOW, { notify });
@@ -93,8 +95,21 @@ describe('sendMaintenanceNotices', () => {
     expect(notify).toHaveBeenCalledTimes(1);
 
     fake.seed('companies/c1/devices/d1', device('2026-11-07', { nextMaintenanceNoticeFor: '2026-11-05' }));
-    await sendMaintenanceNotices(NOW, { notify });
+    await sendMaintenanceNotices(NEXT_DAY, { notify });
     expect(notify).toHaveBeenCalledTimes(2);
+  });
+
+  it('two runs at the same time send one notice', async () => {
+    fake.seed('companies/c1/devices/d1', device('2026-11-05'));
+
+    const runs = await Promise.all([
+      sendMaintenanceNotices(NOW, { notify }),
+      sendMaintenanceNotices(NOW, { notify }),
+    ]);
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(runs.map((run) => run.sent).sort()).toEqual([0, 1]);
+    expect(runs.map((run) => run.errors)).toEqual([0, 0]);
   });
 
   it('leaves out a device under an active contract, not an ended one', async () => {

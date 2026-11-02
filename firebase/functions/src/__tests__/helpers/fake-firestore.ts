@@ -91,6 +91,13 @@ export class FakeDoc {
   async update(data: Data) {
     this.store.write(this.path, data, 'update');
   }
+  /** Like Firestore: fails with ALREADY_EXISTS (6) when the document exists. */
+  async create(data: Data) {
+    if (this.store.docs.has(this.path)) {
+      throw Object.assign(new Error(`ALREADY_EXISTS: ${this.path}`), { code: 6 });
+    }
+    this.store.write(this.path, data, 'set');
+  }
   async delete() {
     this.store.docs.delete(this.path);
   }

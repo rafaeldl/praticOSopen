@@ -6,9 +6,13 @@
  *
  * `nextMaintenanceDate` is a day (`YYYY-MM-DD`), compared as text.
  * `nextMaintenanceNoticeFor` records the day already told, so each date is
- * told once, a run that failed tries again the next day, and a new date is
- * told again. A device under an active contract is left out: the contract
- * already handles it.
+ * told once and a new date is told again. A device under an active contract is
+ * left out: the contract already handles it.
+ *
+ * companies/{cid}/settings/maintenanceNotice_{day} is the lock of the day:
+ * created before sending, so two runs at the same time send one notice, and
+ * released only when nothing reached the company, so that run can be repeated.
+ * A date set after the notice of the day is told on the next day.
  */
 
 import { db } from './firestore.service';
@@ -114,6 +118,22 @@ async function lastTechnician(companyId: string, deviceId: string): Promise<User
   return (last?.assignedTo as UserAggr | undefined) ?? null;
 }
 
+const ALREADY_EXISTS = 6;
+
+/** False when another run already took the notice of this day. */
+async function claimDay(
+  lock: FirebaseFirestore.DocumentReference,
+  now: Date,
+): Promise<boolean> {
+  try {
+    await lock.create({ claimedAt: now.toISOString() });
+    return true;
+  } catch (error) {
+    if ((error as { code?: number }).code === ALREADY_EXISTS) return false;
+    throw error;
+  }
+}
+
 export interface MaintenanceNoticeDeps {
   notify: (companyId: string, message: MaintenanceMessage, technicians: UserAggr[]) => Promise<void>;
 }
@@ -167,9 +187,17 @@ export async function sendMaintenanceNotices(
 
         const assigned = await Promise.all(due.map((d) => lastTechnician(companyId, d.deviceId)));
         const technicians = assigned.filter((user): user is UserAggr => user !== null);
-        await deps.notify(companyId, maintenanceMessage(due, company.get('country') as string | undefined), technicians);
+        const companyRef = db.collection('companies').doc(companyId);
+        const lock = companyRef.collection('settings').doc(`maintenanceNotice_${today}`);
+        if (!(await claimDay(lock, now))) continue;
+        try {
+          await deps.notify(companyId, maintenanceMessage(due, company.get('country') as string | undefined), technicians);
+        } catch (error) {
+          await lock.delete();
+          throw error;
+        }
 
-        const devices = db.collection('companies').doc(companyId).collection('devices');
+        const devices = companyRef.collection('devices');
         await Promise.all(due.map((d) => devices.doc(d.deviceId).update({ nextMaintenanceNoticeFor: d.day })));
         sent++;
       } catch (error) {

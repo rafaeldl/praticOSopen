@@ -270,7 +270,9 @@ export async function notifyCourtesyEnding(
 /**
  * Tell the company about the maintenances coming up: who manages devices, and
  * the [technicians] of their last orders while they are still on the team.
- * Throws when it could not reach them, so the daily job retries the company.
+ * The bell counts as delivered: a failure of the push alone is not repeated,
+ * or the bell would get a copy every day. Throws only when the bell failed for
+ * everyone, so the daily job retries the company.
  */
 export async function notifyMaintenanceDue(
   companyId: string,
@@ -296,7 +298,7 @@ export async function notifyMaintenanceDue(
     },
     companyId,
   );
-  if (delivery.pushFailed || delivery.saved === 0) {
+  if (delivery.saved === 0) {
     throw new Error('maintenance notice not delivered');
   }
 }
