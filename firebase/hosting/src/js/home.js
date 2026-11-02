@@ -27,6 +27,8 @@
   var toggle = document.querySelector('[data-reels-toggle]');
   if (reels && toggle) {
     var LOOP_SECONDS = 90;
+    // One fling on an iPhone travels more than a full pass, so the rows need several in reserve.
+    var PASSES = 6;
     var DRAG_THRESHOLD = 6;
     var TOUCH_RESUME_MS = 1500;
     var moving = false;
@@ -51,12 +53,12 @@
       return moving && !paused && !hovering && settled();
     };
 
-    // Half the width is one full pass, so jumping by it is invisible. Rows rest in the
-    // middle of that range to leave room for a swipe in either direction.
+    // Jumping by whole passes is invisible, so rows drift back to the middle of the track
+    // and keep room for a swipe in either direction.
     var wrap = function (row) {
       if (!moving) return;
-      var half = row.el.scrollWidth / 2;
-      var jump = row.el.scrollLeft >= half * 1.5 ? -half : row.el.scrollLeft < half / 2 ? half : 0;
+      var pass = row.el.scrollWidth / PASSES;
+      var jump = Math.round((row.el.scrollWidth / 2 - row.el.scrollLeft) / pass) * pass;
       if (!jump) return;
       row.el.scrollLeft += jump;
       row.pos += jump;
@@ -69,8 +71,8 @@
       rowsOf.forEach(function (row) {
         if (settled()) wrap(row);
         if (!advancing()) return;
-        var half = row.el.scrollWidth / 2;
-        row.pos += (row.back ? -1 : 1) * (half / LOOP_SECONDS) * seconds;
+        var pass = row.el.scrollWidth / PASSES;
+        row.pos += (row.back ? -1 : 1) * (pass / LOOP_SECONDS) * seconds;
         row.el.scrollLeft = row.pos;
       });
       requestAnimationFrame(tick);
@@ -83,13 +85,16 @@
 
     var startReels = function () {
       rowsOf.forEach(function (row) {
-        [].slice.call(row.el.children).forEach(function (item) {
-          var copy = item.cloneNode(true);
-          copy.setAttribute('aria-hidden', 'true');
-          copy.setAttribute('data-copy', '');
-          copy.querySelector('a').tabIndex = -1;
-          row.el.appendChild(copy);
-        });
+        var items = [].slice.call(row.el.children);
+        for (var n = 1; n < PASSES; n++) {
+          items.forEach(function (item) {
+            var copy = item.cloneNode(true);
+            copy.setAttribute('aria-hidden', 'true');
+            copy.setAttribute('data-copy', '');
+            copy.querySelector('a').tabIndex = -1;
+            row.el.appendChild(copy);
+          });
+        }
       });
       reels.classList.add('is-moving');
       moving = true;
