@@ -741,6 +741,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
+- `docs/DEVICE_NEXT_MAINTENANCE.md` - Próxima manutenção por aparelho: pergunta ao concluir, Início, aviso diário
 - `docs/REMINDERS_AND_NOTICES.md` - Dica ao marcar a visita, texto do lembrete, sino, pedido de notificação e oferta do checklist depois de salvar a OS
 - `docs/AI_ORDER_ASSIST.md` - Assistente de IA na OS (`aiOrderAssist`, Gemini/Claude, ligar e desligar com `npm run ai`, cota mensal)
 - `docs/ONBOARDING.md` - Primeiro acesso: Ramo → Seu negócio → Início (criação da empresa)

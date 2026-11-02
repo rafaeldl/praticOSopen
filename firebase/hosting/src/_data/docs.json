@@ -31,6 +31,11 @@
               "href": "os-parada.html"
             },
             {
+              "title": "Próxima manutenção",
+              "description": "Guarde a data no aparelho, receba o aviso uma semana antes e chame o cliente em um toque.",
+              "href": "manutencao.html"
+            },
+            {
               "title": "Compartilhar OS",
               "description": "Mande ao cliente um link para ver a OS, aprovar o orçamento, comentar e avaliar, sem criar conta.",
               "href": "compartilhar.html"
@@ -144,6 +149,11 @@
               "href": "os-parada-en.html"
             },
             {
+              "title": "Next maintenance",
+              "description": "Keep the date on the device, get told a week before and contact the customer in one tap.",
+              "href": "manutencao-en.html"
+            },
+            {
               "title": "Share a work order",
               "description": "Send the customer a link to view the order, approve the quote, comment and rate the job, no account needed.",
               "href": "compartilhar-en.html"
@@ -255,6 +265,11 @@
               "title": "OS en espera",
               "description": "Marca el servicio que espera repuesto, cliente o autorización, y ve el motivo y los días en la lista.",
               "href": "os-parada-es.html"
+            },
+            {
+              "title": "Próximo mantenimiento",
+              "description": "Guarda la fecha en el equipo, recibe el aviso una semana antes y contacta al cliente con un toque.",
+              "href": "manutencao-es.html"
             },
             {
               "title": "Compartir OS",

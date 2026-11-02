@@ -1,0 +1,332 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Para que serve",
+        "intro": "Quem faz manutenção preventiva combina a próxima visita e depois precisa lembrar dela. A próxima manutenção fica guardada no aparelho: o app avisa uma semana antes e deixa a mensagem para o cliente pronta.",
+        "infoCard": {
+          "title": "É só um lembrete",
+          "content": "A data não cria OS sozinha, não entra nas OS em aberto e não aparece no Financeiro."
+        }
+      },
+      {
+        "id": "definir",
+        "title": "Definir a data",
+        "intro": "Você escolhe a data ao concluir a OS ou na ficha do aparelho.",
+        "subsections": [
+          {
+            "title": "Ao concluir a OS",
+            "validationList": [
+              {
+                "label": "1. Conclua a OS",
+                "text": "Se a OS tem aparelho, o app pergunta <strong>Quando é a próxima manutenção?</strong>"
+              },
+              {
+                "label": "2. Escolha o prazo",
+                "text": "3 meses, 6 meses, 1 ano ou Não repetir. Com mais de um aparelho na OS, a data vale para todos."
+              }
+            ]
+          },
+          {
+            "title": "Na ficha do aparelho",
+            "validationList": [
+              {
+                "label": "1. Abra o aparelho",
+                "text": "No topo aparece <strong>Próxima manutenção: maio de 2027</strong>, ou <strong>Definir próxima manutenção</strong> quando ainda não há data."
+              },
+              {
+                "label": "2. Toque para mudar ou tirar",
+                "text": "Escolha o dia e toque em Salvar, ou toque em Tirar para apagar a data."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Não quer a pergunta?",
+          "content": "Depois de 3 recusas seguidas, o app para de perguntar. Se você definir uma data na ficha do aparelho, a pergunta volta."
+        }
+      },
+      {
+        "id": "chegando",
+        "title": "Manutenções chegando",
+        "intro": "Sete dias antes da data, a manutenção aparece no Início, com cliente, aparelho e data, e fica lá até a data mudar. Nesse dia chega também um aviso no celular, mesmo sem abrir o app.",
+        "features": [
+          {
+            "title": "Chamar cliente",
+            "description": "Abre o WhatsApp com a mensagem pronta. Você revisa e envia."
+          },
+          {
+            "title": "Abrir OS",
+            "description": "Abre uma Nova OS com o cliente, o aparelho e os serviços da última OS. Nada é salvo até você tocar em ✓."
+          },
+          {
+            "title": "Ver aparelho",
+            "description": "Leva à ficha, para mudar ou tirar a data."
+          }
+        ]
+      },
+      {
+        "id": "ciclo",
+        "title": "O ciclo continua",
+        "intro": "Ao concluir a nova OS, a pergunta volta e a próxima data substitui a anterior. Se você tocar em Não repetir, a data que acabou de ser cumprida sai. Uma data ainda distante continua lá."
+      },
+      {
+        "id": "contrato",
+        "title": "Aparelho com contrato",
+        "intro": "Com contrato ativo, a ficha mostra a data do contrato, com a indicação <strong>Pelo contrato</strong>. O app não pede outra data, e o aparelho não entra em Manutenções chegando."
+      },
+      {
+        "id": "quem-pode",
+        "title": "Quem pode usar",
+        "intro": "Quem pode editar aparelhos define, muda e tira a data: dono, administrador e supervisor. Quem não pode vê a data, mas não recebe a pergunta ao concluir a OS.",
+        "infoCard": {
+          "title": "Quem recebe o aviso",
+          "content": "Dono, administradores, supervisores e o técnico da última OS do aparelho."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas frequentes",
+        "faq": [
+          {
+            "question": "O app manda mensagem para o cliente sozinho?",
+            "answer": "Não. Ele só abre o WhatsApp com o texto pronto. Quem envia é você."
+          },
+          {
+            "question": "A data vira OS em aberto?",
+            "answer": "Não. Ela é um lembrete e não muda a contagem de OS nem o Financeiro."
+          },
+          {
+            "question": "Atrasei a manutenção. O que acontece?",
+            "answer": "Ela continua em Manutenções chegando, com a data em vermelho, até você concluir uma nova OS ou mudar a data."
+          },
+          {
+            "question": "Dá para marcar uma data por serviço?",
+            "answer": "Ainda não. A data fica no aparelho."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "What it is for",
+        "intro": "Preventive maintenance means agreeing on the next visit and then remembering it. The next maintenance is stored on the device: the app tells you a week before and has the message to the customer ready.",
+        "infoCard": {
+          "title": "It is only a reminder",
+          "content": "The date does not create an order, does not count as an open order and does not show up in Financial."
+        }
+      },
+      {
+        "id": "set",
+        "title": "Set the date",
+        "intro": "Pick the date when you finish an order or on the device page.",
+        "subsections": [
+          {
+            "title": "When finishing an order",
+            "validationList": [
+              {
+                "label": "1. Finish the order",
+                "text": "If the order has a device, the app asks <strong>When is the next maintenance?</strong>"
+              },
+              {
+                "label": "2. Pick the period",
+                "text": "3 months, 6 months, 1 year or Don't repeat. With more than one device on the order, the date applies to all of them."
+              }
+            ]
+          },
+          {
+            "title": "On the device page",
+            "validationList": [
+              {
+                "label": "1. Open the device",
+                "text": "At the top you see <strong>Next maintenance: May 2027</strong>, or <strong>Set next maintenance</strong> when there is no date yet."
+              },
+              {
+                "label": "2. Tap to change or remove",
+                "text": "Pick the day and tap Save, or tap Remove to clear the date."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Don't want the question?",
+          "content": "After 3 refusals in a row, the app stops asking. If you set a date on the device page, the question comes back."
+        }
+      },
+      {
+        "id": "coming",
+        "title": "Maintenance coming up",
+        "intro": "Seven days before the date, the maintenance shows on Home with the customer, device and date, and stays there until the date changes. That day a phone notification arrives too, even if the app stays closed.",
+        "features": [
+          {
+            "title": "Contact customer",
+            "description": "Opens WhatsApp with the message ready. You review it and send it."
+          },
+          {
+            "title": "Open order",
+            "description": "Opens a New order with the customer, the device and the services of the last order. Nothing is saved until you tap ✓."
+          },
+          {
+            "title": "View device",
+            "description": "Goes to the device page, to change or remove the date."
+          }
+        ]
+      },
+      {
+        "id": "cycle",
+        "title": "The cycle goes on",
+        "intro": "When you finish the new order, the question comes back and the next date replaces the previous one. If you tap Don't repeat, the date just fulfilled goes away. A date still far off stays."
+      },
+      {
+        "id": "contract",
+        "title": "Device under contract",
+        "intro": "With an active contract, the device page shows the contract date, marked <strong>From the contract</strong>. The app does not ask for another date, and the device stays out of Maintenance coming up."
+      },
+      {
+        "id": "who-can",
+        "title": "Who can use it",
+        "intro": "Whoever can edit devices sets, changes and removes the date: owner, admin and supervisor. Others see the date but are not asked when finishing an order.",
+        "infoCard": {
+          "title": "Who gets the notification",
+          "content": "Owner, admins, supervisors and the technician of the device's last order."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "FAQ",
+        "faq": [
+          {
+            "question": "Does the app message the customer on its own?",
+            "answer": "No. It only opens WhatsApp with the text ready. You send it."
+          },
+          {
+            "question": "Does the date become an open order?",
+            "answer": "No. It is a reminder and changes neither the order count nor Financial."
+          },
+          {
+            "question": "I am late on a maintenance. What happens?",
+            "answer": "It stays in Maintenance coming up, with the date in red, until you finish a new order or change the date."
+          },
+          {
+            "question": "Can I set a date per service?",
+            "answer": "Not yet. The date belongs to the device."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "descripcion",
+        "title": "Para qué sirve",
+        "intro": "Quien hace mantenimiento preventivo acuerda la próxima visita y después tiene que acordarse. El próximo mantenimiento queda guardado en el equipo: la app avisa una semana antes y deja listo el mensaje para el cliente.",
+        "infoCard": {
+          "title": "Es solo un recordatorio",
+          "content": "La fecha no crea una OS, no cuenta como OS abierta y no aparece en Financiero."
+        }
+      },
+      {
+        "id": "definir",
+        "title": "Definir la fecha",
+        "intro": "Elige la fecha al concluir la OS o en la ficha del equipo.",
+        "subsections": [
+          {
+            "title": "Al concluir la OS",
+            "validationList": [
+              {
+                "label": "1. Concluye la OS",
+                "text": "Si la OS tiene equipo, la app pregunta <strong>¿Cuándo es el próximo mantenimiento?</strong>"
+              },
+              {
+                "label": "2. Elige el plazo",
+                "text": "3 meses, 6 meses, 1 año o No repetir. Con más de un equipo en la OS, la fecha vale para todos."
+              }
+            ]
+          },
+          {
+            "title": "En la ficha del equipo",
+            "validationList": [
+              {
+                "label": "1. Abre el equipo",
+                "text": "Arriba aparece <strong>Próximo mantenimiento: mayo de 2027</strong>, o <strong>Definir próximo mantenimiento</strong> si aún no hay fecha."
+              },
+              {
+                "label": "2. Toca para cambiar o quitar",
+                "text": "Elige el día y toca Guardar, o toca Quitar para borrar la fecha."
+              }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "¿No quieres la pregunta?",
+          "content": "Después de 3 rechazos seguidos, la app deja de preguntar. Si defines una fecha en la ficha del equipo, la pregunta vuelve."
+        }
+      },
+      {
+        "id": "proximos",
+        "title": "Mantenimientos próximos",
+        "intro": "Siete días antes de la fecha, el mantenimiento aparece en Inicio con cliente, equipo y fecha, y sigue ahí hasta que la fecha cambie. Ese día también llega un aviso al celular, aunque no abras la app.",
+        "features": [
+          {
+            "title": "Contactar al cliente",
+            "description": "Abre WhatsApp con el mensaje listo. Tú lo revisas y lo envías."
+          },
+          {
+            "title": "Abrir OS",
+            "description": "Abre una Nueva OS con el cliente, el equipo y los servicios de la última OS. Nada se guarda hasta que tocas ✓."
+          },
+          {
+            "title": "Ver equipo",
+            "description": "Lleva a la ficha, para cambiar o quitar la fecha."
+          }
+        ]
+      },
+      {
+        "id": "ciclo",
+        "title": "El ciclo continúa",
+        "intro": "Al concluir la nueva OS, la pregunta vuelve y la próxima fecha reemplaza a la anterior. Si tocas No repetir, la fecha recién cumplida se quita. Una fecha aún lejana se queda."
+      },
+      {
+        "id": "contrato",
+        "title": "Equipo con contrato",
+        "intro": "Con un contrato activo, la ficha muestra la fecha del contrato, con la indicación <strong>Por el contrato</strong>. La app no pide otra fecha y el equipo no entra en Mantenimientos próximos."
+      },
+      {
+        "id": "quien-puede",
+        "title": "Quién puede usarlo",
+        "intro": "Quien puede editar equipos define, cambia y quita la fecha: dueño, administrador y supervisor. Los demás ven la fecha, pero no reciben la pregunta al concluir la OS.",
+        "infoCard": {
+          "title": "Quién recibe el aviso",
+          "content": "Dueño, administradores, supervisores y el técnico de la última OS del equipo."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas frecuentes",
+        "faq": [
+          {
+            "question": "¿La app le escribe al cliente sola?",
+            "answer": "No. Solo abre WhatsApp con el texto listo. Lo envías tú."
+          },
+          {
+            "question": "¿La fecha se vuelve OS abierta?",
+            "answer": "No. Es un recordatorio y no cambia el conteo de OS ni Financiero."
+          },
+          {
+            "question": "Me atrasé con un mantenimiento. ¿Qué pasa?",
+            "answer": "Sigue en Mantenimientos próximos, con la fecha en rojo, hasta que concluyas una nueva OS o cambies la fecha."
+          },
+          {
+            "question": "¿Puedo definir una fecha por servicio?",
+            "answer": "Todavía no. La fecha queda en el equipo."
+          }
+        ]
+      }
+    ]
+  }
+}
