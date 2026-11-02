@@ -228,6 +228,23 @@ class TenantOrderRepository extends TenantRepository<Order?> {
         .update(toFirestoreUpdate(update, actor: actor ?? Global.userAggr));
   }
 
+  /// Saves the "parada" mark on its own, or removes it when [hold] is null:
+  /// `Order.toJson` leaves it out, so a full save never touches it. No
+  /// transaction: works offline.
+  Future<void> setHold(
+    String companyId,
+    String orderId,
+    OrderHold? hold, {
+    UserAggr? actor,
+  }) {
+    final user = actor ?? Global.userAggr;
+    return collectionFor(companyId).doc(orderId).update({
+      'onHold': hold == null ? FieldValue.delete() : hold.toJson(),
+      'updatedAt': DateTime.now().toIso8601String(),
+      if (user != null) 'updatedBy': user.toJson(),
+    });
+  }
+
   /// Reads the order inside a Firestore transaction, applies [mutate] to the
   /// fresh copy and writes only payment fields, discount, total and audit
   /// (`updatedBy` is the acting user, not the previous one).

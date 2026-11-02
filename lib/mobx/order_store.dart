@@ -24,7 +24,7 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
@@ -65,6 +65,20 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableStream<Order?>? orderStream;
+
+  /// "Parada" mark of the open order (null when it is not stopped).
+  @observable
+  OrderHold? hold;
+
+  /// Clock of the "parada" mark, replaceable in tests.
+  @visibleForTesting
+  DateTime Function() holdClock = DateTime.now;
+
+  /// Writes (or, with null, removes) the mark. Replaceable in tests.
+  @visibleForTesting
+  late Future<void> Function(String companyId, String orderId, OrderHold? hold)
+  writeHold = (companyId, orderId, hold) =>
+      repository.setHold(companyId, orderId, hold, actor: Global.userAggr);
 
   @observable
   ObservableStream<List<of_model.OrderForm>>? formsStream;
@@ -396,6 +410,7 @@ abstract class _OrderStore with Store {
         ? FormatService().formatDateTime(order.scheduledDate!)
         : null;
     status = order.status;
+    hold = order.isOnHold ? order.onHold : null;
     address = order.address;
     latitude = order.latitude;
     longitude = order.longitude;
@@ -764,6 +779,8 @@ abstract class _OrderStore with Store {
     this.status = status;
     updatePayment();
     createItem();
+    // Done, canceled or back to quote: the "parada" mark no longer applies.
+    if (order!.onHold != null && !order!.canBeOnHold) _saveHold(null);
     // createItem no longer writes `payment`: persist the status-driven change.
     if (order!.id != null && order!.payment != previousPayment) {
       final clear = OrderPaymentMath.orderStatusPaymentUpdate(status);
@@ -782,6 +799,40 @@ abstract class _OrderStore with Store {
         _queuePaymentFieldUpdate(order!.id!, update, Global.userAggr);
       }
     }
+  }
+
+  /// Marks the saved order "parada" from now on. The status stays the same.
+  @action
+  void markOnHold({required String reason, String? note}) {
+    final current = order;
+    if (current == null || current.id == null || !current.canBeOnHold) return;
+    final text = note?.trim() ?? '';
+    _saveHold(
+      OrderHold()
+        ..reason = reason
+        ..note = text.isEmpty ? null : text
+        ..since = holdClock().toUtc(),
+    );
+  }
+
+  /// "Retomar": removes the mark, the status stays the same.
+  @action
+  void resumeHold() {
+    if (order?.id == null || order?.onHold == null) return;
+    _saveHold(null);
+  }
+
+  /// Updates the screen at once and queues the write (offline-safe, like the
+  /// payment fields: awaiting it would hang without a connection).
+  void _saveHold(OrderHold? next) {
+    final orderId = order?.id;
+    order?.onHold = next;
+    hold = next;
+    final company = companyId;
+    if (orderId == null || company == null) return;
+    writeHold(company, orderId, next).catchError((Object e, StackTrace stack) {
+      debugPrint('Could not save the order hold mark: $e');
+    });
   }
 
   String dateToString(DateTime? date) {

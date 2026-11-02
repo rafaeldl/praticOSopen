@@ -10129,6 +10129,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Usar contratos'**
   String get contractsOffAction;
+
+  /// No description provided for @filterOnHold.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paradas'**
+  String get filterOnHold;
+
+  /// No description provided for @homeOnHoldCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 parada} other{{count} paradas}}'**
+  String homeOnHoldCount(int count);
+
+  /// No description provided for @noOrdersOnHold.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum serviço parado.'**
+  String get noOrdersOnHold;
+
+  /// No description provided for @orderHoldMark.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como parada'**
+  String get orderHoldMark;
+
+  /// No description provided for @orderHoldResume.
+  ///
+  /// In pt, this message translates to:
+  /// **'Retomar serviço'**
+  String get orderHoldResume;
+
+  /// No description provided for @orderHoldSheetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por que parou?'**
+  String get orderHoldSheetTitle;
+
+  /// No description provided for @orderHoldNoteHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Observação (opcional)'**
+  String get orderHoldNoteHint;
+
+  /// No description provided for @orderHoldReasonPart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando peça'**
+  String get orderHoldReasonPart;
+
+  /// No description provided for @orderHoldReasonCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando cliente'**
+  String get orderHoldReasonCustomer;
+
+  /// No description provided for @orderHoldReasonAuthorization.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperando autorização'**
+  String get orderHoldReasonAuthorization;
+
+  /// No description provided for @orderHoldReasonOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro motivo'**
+  String get orderHoldReasonOther;
+
+  /// No description provided for @orderHoldSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Parada desde hoje} =1{Parada há 1 dia} other{Parada há {count} dias}}'**
+  String orderHoldSince(int count);
+
+  /// No description provided for @orderHoldLogMarked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcada como parada: {reason}'**
+  String orderHoldLogMarked(String reason);
+
+  /// No description provided for @orderHoldLogResumed.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Retomada no mesmo dia} =1{Retomada depois de 1 dia parada} other{Retomada depois de {count} dias parada}}'**
+  String orderHoldLogResumed(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/l10n/app_localizations.dart';
+import 'package:praticos/models/order.dart';
 import 'package:praticos/theme/app_colors.dart';
 
 /// Status of an order -> dot color + localized label.
@@ -63,6 +64,33 @@ class OrderStatusStyle {
         fontWeight: FontWeight.w700,
         color: overdueColor.resolveFrom(context),
       );
+}
+
+/// "Parada" mark of an order -> color + localized text.
+class OrderHoldStyle {
+  OrderHoldStyle._();
+
+  /// Dot and icon of a stopped order. Resolve with `.resolveFrom(context)`.
+  static const CupertinoDynamicColor color = AppColors.warning;
+
+  /// Localized reason ("Esperando peça").
+  static String reasonLabel(AppLocalizations l10n, String? reason) {
+    switch (reason) {
+      case OrderHoldReason.part:
+        return l10n.orderHoldReasonPart;
+      case OrderHoldReason.customer:
+        return l10n.orderHoldReasonCustomer;
+      case OrderHoldReason.authorization:
+        return l10n.orderHoldReasonAuthorization;
+      default:
+        return l10n.orderHoldReasonOther;
+    }
+  }
+
+  /// "Parada há 3 dias · Esperando peça".
+  static String line(AppLocalizations l10n, OrderHold hold, DateTime now) =>
+      '${l10n.orderHoldSince(hold.daysSince(now))} · '
+      '${reasonLabel(l10n, hold.reason)}';
 }
 
 /// Status of a device -> dot color + localized label.

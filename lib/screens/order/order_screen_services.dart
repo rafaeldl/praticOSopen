@@ -32,6 +32,7 @@ import 'package:praticos/services/ai_order_assist_service.dart' show AiPhoto;
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/location_service.dart';
+import 'package:praticos/services/order_comment_service.dart';
 import 'package:praticos/screens/order/pdf_viewer_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
@@ -51,6 +52,7 @@ class OrderPermissions {
     this.canGiveDiscount = _always,
     this.canRegisterCustomers = _always,
     this.canRegisterDevices = _always,
+    this.canChangeHold = _anyOrder,
   });
 
   static bool _anyOrder(Order order) => true;
@@ -74,6 +76,7 @@ class OrderPermissions {
           auth.hasPermission(PermissionType.manageCustomers),
       canRegisterDevices: () =>
           auth.hasPermission(PermissionType.manageDevices),
+      canChangeHold: auth.canChangeOrderHold,
     );
   }
 
@@ -106,6 +109,10 @@ class OrderPermissions {
 
   /// The assistant may register a vehicle it heard (`manageDevices`).
   final bool Function() canRegisterDevices;
+
+  /// Mark the order "parada" and resume it: the same people who can change
+  /// the status of an approved or running order.
+  final bool Function(Order order) canChangeHold;
 }
 
 /// Side effects of the order screen that leave it (other screens, sharing,
@@ -354,6 +361,18 @@ class OrderScreenActions {
               OrderComment.fromJson(doc.data())..id = doc.id,
           ].where((c) => c.deleted != true).toList(),
         );
+  }
+
+  /// Records what happened to the order as an internal comment (the order's
+  /// history; the customer never sees it).
+  Future<void> logOrderEvent(Order order, String text) {
+    final companyId = order.company?.id;
+    if (order.id == null || companyId == null) return Future.value();
+    return addOrderComment(
+      companyId: companyId,
+      orderId: order.id!,
+      text: text,
+    );
   }
 
   /// All the comments, with the box to write one (internal or for the

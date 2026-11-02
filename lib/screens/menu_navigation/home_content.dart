@@ -14,14 +14,15 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/theme/status_style.dart';
 
 /// Visual layer of the Início tab. It receives plain data and callbacks (no
 /// store, no Firebase), so every state can be tested in isolation. `Home`
 /// wires it to the order store.
 ///
 /// Zones: top bar (bell, profile), large title with a one-line summary,
-/// the search field, filter buttons ("Em aberto | Orçamentos | Concluídas |
-/// Todas"), and the list in the style of Mail. "Nova OS" is the blue "+"
+/// the search field, filter buttons ("Em aberto | Orçamentos | Paradas |
+/// Concluídas | Todas"), and the list in the style of Mail. "Nova OS" is the blue "+"
 /// beside the tabs ([NewOrderTabButton]), not on this screen.
 class HomeContent extends StatefulWidget {
   const HomeContent({
@@ -150,13 +151,16 @@ class _HomeContentState extends State<HomeContent> {
       !widget.loadFailed &&
       widget.customerFilterName == null &&
       widget.view != HomeView.done &&
-      widget.view != HomeView.quotes;
+      widget.view != HomeView.quotes &&
+      widget.view != HomeView.onHold;
 
   /// Orders of the current view before search ("Minhas" keeps only the ones
-  /// assigned to the user, "Orçamentos" only the quotes).
+  /// assigned to the user, "Orçamentos" only the quotes, "Paradas" only the
+  /// stopped ones).
   List<Order> get _baseOrders => switch (widget.view) {
     HomeView.mine => HomeRules.assignedTo(widget.orders, widget.currentUserId),
     HomeView.quotes => HomeRules.waitingQuotes(widget.orders),
+    HomeView.onHold => HomeRules.stopped(widget.orders),
     _ => widget.orders,
   };
 
@@ -287,6 +291,8 @@ class _HomeContentState extends State<HomeContent> {
       final String text;
       if (widget.view == HomeView.quotes) {
         text = l10n.homeQuotesWaiting(base.length);
+      } else if (widget.view == HomeView.onHold) {
+        text = l10n.homeOnHoldCount(base.length);
       } else if (widget.view == HomeView.mine) {
         final today = HomeRules.scheduledToday(base, _now).length;
         text = today > 0
@@ -357,6 +363,8 @@ class _HomeContentState extends State<HomeContent> {
                 ? l10n.noOpenOrders
                 : widget.view == HomeView.quotes
                 ? l10n.noQuotesWaiting
+                : widget.view == HomeView.onHold
+                ? l10n.noOrdersOnHold
                 : l10n.noOrdersInView,
             actionLabel: mainView ? l10n.seeAllOrders : null,
             onAction: mainView
@@ -531,10 +539,15 @@ class _HomeContentState extends State<HomeContent> {
   Widget _buildFilters(BuildContext context) {
     final l10n = context.l10n;
     final filters = widget.technician
-        ? [(HomeView.mine, l10n.filterMine), (HomeView.all, l10n.filterAll)]
+        ? [
+            (HomeView.mine, l10n.filterMine),
+            (HomeView.onHold, l10n.filterOnHold),
+            (HomeView.all, l10n.filterAll),
+          ]
         : [
             (HomeView.open, l10n.filterOpen),
             (HomeView.quotes, l10n.filterQuotes),
+            (HomeView.onHold, l10n.filterOnHold),
             (HomeView.done, l10n.filterDone),
             (HomeView.all, l10n.filterAll),
           ];
@@ -630,6 +643,7 @@ class _HomeContentState extends State<HomeContent> {
       case HomeView.open:
         _addRows(context, items, HomeRules.sortOpen(visible, now), now);
       case HomeView.quotes:
+      case HomeView.onHold:
       case HomeView.done:
         _addRows(context, items, visible, now);
       case HomeView.all:
@@ -715,6 +729,9 @@ class _HomeContentState extends State<HomeContent> {
         statusText: statusText,
         statusExtra: remaining,
         overdue: overdue,
+        holdText: order.isOnHold
+            ? OrderHoldStyle.line(l10n, order.onHold!, now)
+            : null,
         onTap: () => widget.onOpenOrder(order),
       ),
     );

@@ -6215,4 +6215,74 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get contractsOffAction => 'Usar contratos';
+
+  @override
+  String get filterOnHold => 'Paradas';
+
+  @override
+  String homeOnHoldCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paradas',
+      one: '1 parada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noOrdersOnHold => 'Nenhum serviço parado.';
+
+  @override
+  String get orderHoldMark => 'Marcar como parada';
+
+  @override
+  String get orderHoldResume => 'Retomar serviço';
+
+  @override
+  String get orderHoldSheetTitle => 'Por que parou?';
+
+  @override
+  String get orderHoldNoteHint => 'Observação (opcional)';
+
+  @override
+  String get orderHoldReasonPart => 'Esperando peça';
+
+  @override
+  String get orderHoldReasonCustomer => 'Esperando cliente';
+
+  @override
+  String get orderHoldReasonAuthorization => 'Esperando autorização';
+
+  @override
+  String get orderHoldReasonOther => 'Outro motivo';
+
+  @override
+  String orderHoldSince(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Parada há $count dias',
+      one: 'Parada há 1 dia',
+      zero: 'Parada desde hoje',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String orderHoldLogMarked(String reason) {
+    return 'Marcada como parada: $reason';
+  }
+
+  @override
+  String orderHoldLogResumed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Retomada depois de $count dias parada',
+      one: 'Retomada depois de 1 dia parada',
+      zero: 'Retomada no mesmo dia',
+    );
+    return '$_temp0';
+  }
 }

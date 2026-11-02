@@ -26,6 +26,11 @@
               "href": "lembretes.html"
             },
             {
+              "title": "OS parada",
+              "description": "Marque o serviço que está esperando peça, cliente ou autorização e veja o motivo e os dias parados na lista.",
+              "href": "os-parada.html"
+            },
+            {
               "title": "Compartilhar OS",
               "description": "Mande ao cliente um link para ver a OS, aprovar o orçamento, comentar e avaliar, sem criar conta.",
               "href": "compartilhar.html"
@@ -134,6 +139,11 @@
               "href": "lembretes-en.html"
             },
             {
+              "title": "Orders on hold",
+              "description": "Mark the job that is waiting for a part, the customer or an authorization, and see the reason and the days in the list.",
+              "href": "os-parada-en.html"
+            },
+            {
               "title": "Share a work order",
               "description": "Send the customer a link to view the order, approve the quote, comment and rate the job, no account needed.",
               "href": "compartilhar-en.html"
@@ -240,6 +250,11 @@
               "title": "Recordatorios",
               "description": "Avisos en el celular antes de cada cita, un recordatorio diario a las 9 h y alertas de OS detenidas.",
               "href": "lembretes-es.html"
+            },
+            {
+              "title": "OS en espera",
+              "description": "Marca el servicio que espera repuesto, cliente o autorización, y ve el motivo y los días en la lista.",
+              "href": "os-parada-es.html"
             },
             {
               "title": "Compartir OS",

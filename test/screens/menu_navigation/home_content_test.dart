@@ -70,7 +70,7 @@ class _HostState extends State<_Host> {
 
   /// What the store would load for each view.
   List<Order> get _orders => switch (view) {
-    HomeView.open || HomeView.mine || HomeView.quotes =>
+    HomeView.open || HomeView.mine || HomeView.quotes || HomeView.onHold =>
       widget.orders.where((o) => !HomeRules.isFinished(o)).toList(),
     HomeView.done => widget.orders.where((o) => o.status == 'done').toList(),
     HomeView.all => widget.orders,
@@ -189,11 +189,11 @@ void main() {
     expect(find.text('Em aberto'), findsOneWidget);
     expect(find.text('Concluídas'), findsOneWidget);
     expect(find.text('Todas'), findsOneWidget);
-    // Side by side on one line, like Mail's categories.
+    // Side by side, like Mail's categories (five of them wrap at the end).
     final open = tester.getRect(find.text('Em aberto'));
-    final all = tester.getRect(find.text('Todas'));
-    expect(all.center.dy, open.center.dy);
-    expect(all.left, greaterThan(open.right));
+    final quotes = tester.getRect(find.text('Orçamentos'));
+    expect(quotes.center.dy, open.center.dy);
+    expect(quotes.left, greaterThan(open.right));
 
     await tester.tap(find.text('Concluídas'));
     await tester.pumpAndSettle();
@@ -303,6 +303,149 @@ void main() {
       tester.getTopLeft(find.text('Antiga')).dy,
       lessThan(tester.getTopLeft(find.text('Nova')).dy),
     );
+  });
+
+  group('Paradas', () {
+    Order stopped(
+      String customer,
+      String reason,
+      DateTime since, {
+      int number = 1,
+      String status = 'progress',
+    }) => _order(customer, status, number: number)
+      ..onHold = (OrderHold()
+        ..reason = reason
+        ..since = since);
+
+    testWidgets('shows only stopped orders with reason and days, the oldest '
+        'first', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: [
+              _order('Sem parada', 'progress', number: 1),
+              stopped(
+                'Parada recente',
+                OrderHoldReason.customer,
+                DateTime(2026, 10, 11, 18),
+                number: 2,
+              ),
+              stopped(
+                'Parada antiga',
+                OrderHoldReason.part,
+                DateTime(2026, 10, 9),
+                number: 3,
+                status: 'approved',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Paradas'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('2 paradas'), findsOneWidget);
+      expect(find.text('Sem parada'), findsNothing);
+      expect(find.text('Parada há 3 dias · Esperando peça'), findsOneWidget);
+      expect(find.text('Parada há 1 dia · Esperando cliente'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Parada antiga')).dy,
+        lessThan(tester.getTopLeft(find.text('Parada recente')).dy),
+      );
+    });
+
+    testWidgets('the mark shows in the other filters too, beside the dot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: [
+              stopped(
+                'Carlos',
+                OrderHoldReason.authorization,
+                DateTime(2026, 10, 12, 8),
+              )..dueDate = DateTime(2026, 10, 10),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Em aberto, and overdue on top: the red dot wins, the line stays.
+      expect(
+        find.text('Parada desde hoje · Esperando autorização'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('order_row_overdue_dot')), findsOneWidget);
+
+      await tester.tap(find.text('Todas'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Parada desde hoje · Esperando autorização'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a stopped order that is not overdue gets the orange dot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: [
+              stopped('Carlos', OrderHoldReason.other, DateTime(2026, 10, 10)),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('order_row_hold_dot')), findsOneWidget);
+      expect(find.byKey(const Key('order_row_overdue_dot')), findsNothing);
+    });
+
+    testWidgets('a leftover mark on a finished order is not shown', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: [
+              stopped(
+                'Carlos',
+                OrderHoldReason.part,
+                DateTime(2026, 10, 10),
+                status: 'done',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Concluídas'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('order_row_hold')), findsNothing);
+    });
+
+    testWidgets('nothing stopped says so', (tester) async {
+      await tester.pumpWidget(
+        _app(_Host(orders: [_order('Ana', 'progress')])),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Paradas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nenhum serviço parado.'), findsOneWidget);
+    });
+
+    testWidgets('technicians have the filter too', (tester) async {
+      await tester.pumpWidget(
+        _app(_Host(orders: const [], technician: true)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Paradas'), findsOneWidget);
+    });
   });
 
   testWidgets('Orçamentos without quotes says so', (tester) async {

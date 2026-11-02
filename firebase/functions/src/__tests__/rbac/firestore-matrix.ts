@@ -78,10 +78,13 @@ const own = (uid: string) => `${C}/orders/own_${uid}`;
 const ownApproved = (uid: string) => `${C}/orders/appr_${uid}`;
 const ownOldApproved = (uid: string) => `${C}/orders/old_${uid}`;
 const ownDone = (uid: string) => `${C}/orders/done_${uid}`;
+const ownOnHold = (uid: string) => `${C}/orders/hold_${uid}`;
 const ownPaidQuote = (uid: string) => `${C}/orders/paidq_${uid}`;
 const ownPaidDone = (uid: string) => `${C}/orders/paidd_${uid}`;
 const GHOST_ORDER = `${C}/orders/ghost_quote`;
 const GHOST_APPROVED = `${C}/orders/ghost_approved`;
+const GHOST_ON_HOLD = `${C}/orders/ghost_hold`;
+const HOLD = { reason: 'part', since: '2026-11-02T12:00:00.000Z' };
 
 export const CASES: RulesCase[] = [
   // ─── Company ────────────────────────────────────────────────────────────
@@ -240,6 +243,74 @@ export const CASES: RulesCase[] = [
       paidAmount: 10, transactions: [{ id: 't1', type: 'payment', amount: 10 }],
     }),
     allow: RECEIVE_OWN,
+  },
+  {
+    // Same people as orders.status.finishOwn, except who only decides quotes.
+    id: 'orders.hold.markOwn', area: 'OS', title: 'marcar como parada a OS que criou',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { onHold: { ...HOLD, note: 'Bomba chega sexta' } }),
+    allow: [...FINANCIAL, ...OPERATORS],
+  },
+  {
+    id: 'orders.hold.markOthers', area: 'OS', title: 'marcar como parada OS de outra pessoa',
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_APPROVED), { onHold: HOLD }),
+    allow: [...FINANCIAL, 'supervisor'],
+  },
+  {
+    id: 'orders.hold.markQuote', area: 'OS', title: 'marcar orçamento como parado',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, own(uid)), { onHold: HOLD }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.markDone', area: 'OS', title: 'marcar OS concluída como parada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownDone(uid)), { onHold: HOLD }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.withoutReason', area: 'OS', title: 'marcar como parada sem motivo',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { onHold: { since: HOLD.since } }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.unknownReason', area: 'OS', title: 'marcar como parada com motivo que não existe',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { onHold: { ...HOLD, reason: 'peca' } }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.extraField', area: 'OS', title: 'gravar outro campo dentro da marca de parada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { onHold: { ...HOLD, paid: true } }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.longNote', area: 'OS', title: 'gravar observação longa demais na marca de parada',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownApproved(uid)), { onHold: { ...HOLD, note: 'x'.repeat(501) } }),
+    allow: [],
+  },
+  {
+    id: 'orders.hold.resumeOwn', area: 'OS', title: 'retomar OS parada que criou',
+    run: ({ db, fs, uid }) => fs.updateDoc(fs.doc(db, ownOnHold(uid)), { onHold: fs.deleteField() }),
+    allow: [...FINANCIAL, ...OPERATORS],
+  },
+  {
+    id: 'orders.hold.resumeOthers', area: 'OS', title: 'retomar OS parada de outra pessoa',
+    run: ({ db, fs }) => fs.updateDoc(fs.doc(db, GHOST_ON_HOLD), { onHold: fs.deleteField() }),
+    allow: [...FINANCIAL, 'supervisor'],
+  },
+  {
+    // Second write of OrderStore.setStatus: the status went first.
+    id: 'orders.hold.finishOwn', area: 'OS', title: 'concluir OS parada e tirar a marca',
+    run: async ({ db, fs, uid }) => {
+      await fs.updateDoc(fs.doc(db, ownOnHold(uid)), { status: 'done' });
+      await fs.updateDoc(fs.doc(db, ownOnHold(uid)), { onHold: fs.deleteField() });
+    },
+    allow: [...FINANCIAL, ...OPERATORS],
+  },
+  {
+    id: 'orders.hold.create', area: 'OS', title: 'criar OS já marcada como parada',
+    run: ({ db, fs, uid }) =>
+      fs.setDoc(fs.doc(db, `${C}/orders/new_${uid}`), {
+        status: 'approved', onHold: HOLD, createdBy: { id: uid, name: uid }, company: { id: 'c1' },
+      }),
+    allow: [],
   },
   {
     id: 'orders.money.markPaid', area: 'OS', title: 'marcar OS como paga sem recebimento',
@@ -656,6 +727,9 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
       status: 'approved', total: 100, discount: 0, paidAmount: 0, paid: false, payment: 'unpaid', transactions: [], createdBy: by,
     });
     set(`${C}/orders/old_${uid}`, { status: 'approved', total: 100, paid: false, payment: 'unpaid', createdBy: by });
+    set(`${C}/orders/hold_${uid}`, {
+      status: 'progress', total: 100, paid: false, payment: 'unpaid', onHold: HOLD, createdBy: by,
+    });
     set(`${C}/orders/done_${uid}`, { status: 'done', total: 100, createdBy: by });
     set(`${C}/orders/paidq_${uid}`, { ...money, status: 'quote', paid: false, payment: null, createdBy: by });
     set(`${C}/orders/paidd_${uid}`, { ...money, status: 'done', createdBy: by });
@@ -665,6 +739,7 @@ export async function seed(db: Firestore, fs: Fs): Promise<void> {
   }
   set(GHOST_ORDER, { status: 'quote', createdBy: { id: 'ghost', name: 'Ghost' } });
   set(GHOST_APPROVED, { status: 'approved', total: 100, createdBy: { id: 'ghost', name: 'Ghost' } });
+  set(GHOST_ON_HOLD, { status: 'progress', total: 100, onHold: HOLD, createdBy: { id: 'ghost', name: 'Ghost' } });
   set(`${GHOST_ORDER}/photos/p1`, { url: 'x' });
   set(`${GHOST_ORDER}/comments/cm1`, { text: 'oi', author: { userId: 'ghost' } });
   set(`${GHOST_ORDER}/charges/ch1`, { value: 100 });

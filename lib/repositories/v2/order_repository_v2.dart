@@ -100,6 +100,15 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   }) =>
       _tenant.applyPaymentFieldUpdate(companyId, orderId, update, actor: actor);
 
+  /// Grava ou remove a marca de OS parada. Ver [TenantOrderRepository.setHold].
+  Future<void> setHold(
+    String companyId,
+    String orderId,
+    OrderHold? hold, {
+    UserAggr? actor,
+  }) =>
+      _tenant.setHold(companyId, orderId, hold, actor: actor);
+
   // ═══════════════════════════════════════════════════════════════════
   // Ratings Support
   // ═══════════════════════════════════════════════════════════════════

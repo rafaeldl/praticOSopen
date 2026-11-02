@@ -281,6 +281,15 @@ export interface Order {
   updatedBy?: UserAggr;
   /** UTC ISO. Kept by the order triggers (order-completion.service); absent on orders done before this field. */
   completedAt?: string;
+  /** "Parada" mark, separate from `status`. Removed by order-hold.service when the status no longer allows it. */
+  onHold?: OrderHold;
+}
+
+/** Why an order stopped and since when (UTC ISO). Only on `approved` or `progress` orders. */
+export interface OrderHold {
+  reason: 'part' | 'customer' | 'authorization' | 'other';
+  note?: string;
+  since: string;
 }
 
 // ============================================================================
