@@ -42,10 +42,14 @@ class Debtor {
 /// - [sold] (Vendido): total of the orders opened in the chosen month.
 ///
 /// Are about today, whatever the month:
-/// - [owed] (A receber): balance of the completed orders, in [debtors],
-///   grouped by customer, longest-overdue first.
+/// - [receivable] (A receber): what customers owe now, in two parts.
+///   [owed] is the balance of the completed orders, in [debtors], grouped by
+///   customer, longest-overdue first. [depositOwed] is the balance of
+///   [depositOrders], running orders that already got a partial payment.
 /// - [inProgress] (Em andamento): balance of [inProgressOrders], the approved
-///   and running orders; it moves to [owed] when the order is completed.
+///   and running orders with nothing received yet. Each order counts in one
+///   place: it moves to [depositOrders] on the first payment and to [owed]
+///   when completed.
 class FinancialSummary {
   FinancialSummary({
     required this.entered,
@@ -54,6 +58,8 @@ class FinancialSummary {
     required this.soldOrders,
     required this.owed,
     required this.debtors,
+    required this.depositOwed,
+    required this.depositOrders,
     required this.inProgress,
     required this.inProgressOrders,
   });
@@ -69,10 +75,24 @@ class FinancialSummary {
   final List<Order> soldOrders;
   final double owed;
   final List<Debtor> debtors;
+  final double depositOwed;
+
+  /// Approved and running orders with a partial payment, oldest first.
+  final List<Order> depositOrders;
   final double inProgress;
 
-  /// Approved and running orders with a balance, oldest first.
+  /// Approved and running orders with nothing received, oldest first.
   final List<Order> inProgressOrders;
+
+  /// The value of A receber.
+  double get receivable => owed + depositOwed;
+
+  /// How many customers A receber lists: one with completed and running
+  /// orders counts once.
+  int get receivableCustomers => {
+    ...debtors.map((d) => d.key),
+    ...depositOrders.map(_customerKey),
+  }.length;
 
   static final empty = FinancialSummary(
     entered: 0,
@@ -81,6 +101,8 @@ class FinancialSummary {
     soldOrders: const [],
     owed: 0,
     debtors: const [],
+    depositOwed: 0,
+    depositOrders: const [],
     inProgress: 0,
     inProgressOrders: const [],
   );
@@ -123,7 +145,7 @@ class FinancialSummary {
     final byCustomer = <String, List<Order>>{};
     final names = <String, String?>{};
     for (final order in open) {
-      final key = order.customer?.id ?? Debtor.noCustomerKey;
+      final key = _customerKey(order);
       byCustomer.putIfAbsent(key, () => []).add(order);
       names[key] ??= order.customer?.name;
     }
@@ -146,6 +168,8 @@ class FinancialSummary {
     debtors.sort((a, b) => _oldestFirst(a.oldestOrder, b.oldestOrder));
 
     final running = open.where(isInProgress).toList();
+    final deposits = running.where(hasPartialPayment).toList();
+    final notPaid = running.where((o) => !hasPartialPayment(o)).toList();
 
     return FinancialSummary(
       entered: entered,
@@ -154,10 +178,15 @@ class FinancialSummary {
       soldOrders: sold,
       owed: debtors.fold<double>(0, (sum, d) => sum + d.amount),
       debtors: debtors,
-      inProgress: _openSum(running),
-      inProgressOrders: running,
+      depositOwed: _openSum(deposits),
+      depositOrders: deposits,
+      inProgress: _openSum(notPaid),
+      inProgressOrders: notPaid,
     );
   }
+
+  static String _customerKey(Order order) =>
+      order.customer?.id ?? Debtor.noCustomerKey;
 
   static double _openSum(Iterable<Order> orders) =>
       orders.fold<double>(0, (sum, o) => sum + openAmount(o));
@@ -237,10 +266,14 @@ class FinancialSummary {
   static bool isReceivable(Order order) =>
       isOpen(order) && order.status == 'done';
 
-  /// Open and not completed yet: shows in Em andamento.
+  /// Open and not completed yet: in Em andamento, or in A receber once it
+  /// has a partial payment.
   static bool isInProgress(Order order) =>
       isOpen(order) &&
       (order.status == 'approved' || order.status == 'progress');
+
+  /// Part of [order] was already received.
+  static bool hasPartialPayment(Order order) => (order.paidAmount ?? 0) > 0;
 
   /// The open orders among [orders], oldest first: the same list and order
   /// as `Debtor.orders` (the order a customer payment is split in).

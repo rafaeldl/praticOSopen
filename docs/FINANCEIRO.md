@@ -256,14 +256,20 @@ fica como está.
 
 **Hoje** (lista agrupada, não muda com o mês):
 
-- **A receber**: saldo (`total - paidAmount`) das OS com `status == 'done'`, `payment != 'paid'` e
-  saldo > 0 (`FinancialSummary.isReceivable`), sem limite de antiguidade. Abre a lista por cliente,
-  mais antigo primeiro: título "A receber", subtítulo "{valor} de {n} clientes", linhas com cliente,
-  valor e "desde {data}" (abertura da OS concluída mais antiga). OS sem cliente entram juntas como
-  "Cliente sem nome".
-- **Em andamento**: saldo das OS `approved` ou `progress` (`FinancialSummary.isInProgress`). Abre a
-  lista das OS, mais antiga primeiro; tocar abre a OS. Quando a OS é concluída, o saldo passa para A
-  receber.
+- **A receber** (`FinancialSummary.receivable`): o que os clientes devem agora, em duas partes.
+  - **Serviços concluídos** (`owed`, `debtors`): saldo (`total - paidAmount`) das OS com
+    `status == 'done'`, `payment != 'paid'` e saldo > 0 (`FinancialSummary.isReceivable`), sem limite
+    de antiguidade. Lista por cliente, mais antigo primeiro, com cliente, valor e "desde {data}"
+    (abertura da OS concluída mais antiga). OS sem cliente entram juntas como "Cliente sem nome".
+  - **Serviços em aberto** (`depositOwed`, `depositOrders`): saldo das OS `approved` ou `progress`
+    que já têm recebimento parcial (`FinancialSummary.hasPartialPayment`). Lista por OS; tocar abre
+    a OS. Estas OS não entram em Próxima cobrança, que continua só com serviços concluídos.
+
+  Subtítulo "{valor} de {n} clientes"; o cliente com as duas partes conta uma vez. Os títulos das
+  partes só aparecem quando há as duas.
+- **Em andamento**: saldo das OS `approved` ou `progress` sem nenhum recebimento. Abre a lista das
+  OS, mais antiga primeiro; tocar abre a OS. Cada OS conta em um lugar só: passa para A receber no
+  primeiro pagamento ou ao ser concluída.
 
 **Receber não é filtrado:** o filtro por concluída vale só para o que aparece. `FinancialSummary.isOpen`
 e `openOrdersOldestFirst` continuam cobrindo toda OS ativa com saldo. Tocar num cliente de A receber

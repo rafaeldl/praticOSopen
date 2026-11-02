@@ -68,24 +68,63 @@ void main() {
         ],
       );
 
-      expect(summary.inProgress, 700);
-      expect(summary.inProgressOrders.map((o) => o.id), ['2', '1']);
+      expect(summary.inProgress, 500);
+      expect(summary.inProgressOrders.map((o) => o.id), ['2']);
+      expect(summary.depositOwed, 200);
+      expect(summary.depositOrders.map((o) => o.id), ['1']);
+    });
+
+    test('a running order with a deposit counts once, in A receber', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [
+          order('1', customerId: 'a', total: 250, paid: 100),
+          order('2', customerId: 'a', total: 300, status: 'done'),
+          order('3', customerId: 'b', total: 80, status: 'progress'),
+        ],
+      );
+
+      expect(summary.owed, 300);
+      expect(summary.depositOwed, 150);
+      expect(summary.receivable, 450);
+      expect(summary.inProgress, 80);
+      expect(summary.receivableCustomers, 1);
+      // Próxima cobrança works from debtors: running orders stay out of it.
+      expect(summary.debtors.single.orders.map((o) => o.id), ['2']);
+    });
+
+    test('a deposit without a customer still counts in A receber', () {
+      final summary = FinancialSummary.compute(
+        month: DateTime(2026, 10),
+        monthOrders: const [],
+        openOrders: [order('1', total: 250, paid: 100)],
+      );
+
+      expect(summary.receivable, 150);
+      expect(summary.receivableCustomers, 1);
     });
 
     test('completing an order moves its balance from Em andamento to A receber', () {
-      final running = order('1', customerId: 'a', total: 300, paid: 100, status: 'progress');
+      final running = order('1', customerId: 'a', total: 300, status: 'progress');
       FinancialSummary compute() => FinancialSummary.compute(
         month: DateTime(2026, 10),
         monthOrders: const [],
         openOrders: [running],
       );
 
-      expect(compute().inProgress, 200);
-      expect(compute().owed, 0);
+      expect(compute().inProgress, 300);
+      expect(compute().receivable, 0);
+
+      running.paidAmount = 100;
+      expect(compute().inProgress, 0);
+      expect(compute().depositOwed, 200);
+      expect(compute().receivable, 200);
 
       running.status = 'done';
-      expect(compute().inProgress, 0);
+      expect(compute().depositOwed, 0);
       expect(compute().owed, 200);
+      expect(compute().receivable, 200);
     });
 
     test('sums customers with many orders and orders them by oldest debt', () {

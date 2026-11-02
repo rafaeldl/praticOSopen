@@ -2830,6 +2830,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialToday => 'Hoje';
 
   @override
+  String get financialReceivableCompleted => 'Serviços concluídos';
+
+  @override
+  String get financialReceivableOpen => 'Serviços em aberto';
+
+  @override
   String get financialNextCharge => 'Próxima cobrança';
 
   @override

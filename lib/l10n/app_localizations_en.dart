@@ -2832,6 +2832,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialToday => 'Today';
 
   @override
+  String get financialReceivableCompleted => 'Completed jobs';
+
+  @override
+  String get financialReceivableOpen => 'Open jobs';
+
+  @override
   String get financialNextCharge => 'Next charge';
 
   @override

@@ -5056,6 +5056,18 @@ abstract class AppLocalizations {
   /// **'Hoje'**
   String get financialToday;
 
+  /// No description provided for @financialReceivableCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços concluídos'**
+  String get financialReceivableCompleted;
+
+  /// No description provided for @financialReceivableOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços em aberto'**
+  String get financialReceivableOpen;
+
   /// No description provided for @financialNextCharge.
   ///
   /// In pt, this message translates to:

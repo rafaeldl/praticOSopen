@@ -1405,6 +1405,8 @@
   "financialInProgress": "En curso",
   "financialSold": "Vendido",
   "financialToday": "Hoy",
+  "financialReceivableCompleted": "Servicios terminados",
+  "financialReceivableOpen": "Servicios en curso",
   "financialNextCharge": "Próximo cobro",
   "financialNextChargeMessage": "{name} debe {amount} desde {date}",
   "financialSendCharge": "Enviar cobro",
