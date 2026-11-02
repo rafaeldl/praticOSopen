@@ -5,6 +5,22 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
 
+/// Runs every write and waits for all. [isMissing] failures (a device deleted
+/// meanwhile) are skipped; any other one is thrown after all have finished.
+Future<void> writeEachExisting(
+  Iterable<Future<void> Function()> writes, {
+  required bool Function(Object error) isMissing,
+}) async {
+  final errors = await Future.wait(
+    writes.map(
+      (write) => write().then<Object?>((_) => null, onError: (Object e) => e),
+    ),
+  );
+  for (final error in errors) {
+    if (error != null && !isMissing(error)) throw error;
+  }
+}
+
 /// Repository para Devices usando subcollections por tenant.
 ///
 /// Path: `/companies/{companyId}/devices/{deviceId}`
@@ -82,7 +98,9 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
   }
 
   /// Sets ([day], `YYYY-MM-DD`) or removes (null) the next maintenance of
-  /// [deviceIds], all or none. Touches only these fields, so it never undoes
+  /// [deviceIds]. One write per device, not a batch: a device deleted meanwhile
+  /// must not take the others with it, and only the server can tell (offline,
+  /// a failed read says nothing). Touches only these fields, so it never undoes
   /// an edit made elsewhere, and clears the daily job's "already told" mark.
   /// [customer] stays as it was when null. Offline it resolves only when the
   /// connection is back: do not wait for it on screen.
@@ -93,7 +111,6 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
     CustomerAggr? customer,
     UserAggr? actor,
   }) {
-    final batch = firestore.batch();
     final fields = <String, dynamic>{
       'nextMaintenanceDate': day ?? FieldValue.delete(),
       'nextMaintenanceNoticeFor': FieldValue.delete(),
@@ -104,9 +121,11 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
       'updatedAt': DateTime.now().toIso8601String(),
       if (actor != null) 'updatedBy': actor.toJson(),
     };
-    for (final id in deviceIds) {
-      batch.update(collectionFor(companyId).doc(id), fields);
-    }
-    return batch.commit();
+    return writeEachExisting(
+      deviceIds.map(
+        (id) => () => collectionFor(companyId).doc(id).update(fields),
+      ),
+      isMissing: (e) => e is FirebaseException && e.code == 'not-found',
+    );
   }
 }

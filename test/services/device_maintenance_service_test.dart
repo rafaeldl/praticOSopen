@@ -3,6 +3,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/services/device_maintenance_service.dart';
 
 void main() {
@@ -44,13 +45,52 @@ void main() {
     test('carries the number and the message, encoded', () {
       final uri = whatsappMessageUri('(47) 99999-1234', 'Olá, Ana & cia!');
       expect(uri?.host, 'wa.me');
-      expect(uri?.path, '/5547999991234');
-      expect(uri?.queryParameters['text'], 'Olá, Ana & cia!');
+      expect(
+        uri.toString(),
+        'https://wa.me/5547999991234?text=Ol%C3%A1%2C%20Ana%20%26%20cia!',
+      );
+    });
+
+    test('a space is never a "+", and a "+" of the text survives', () {
+      final url = whatsappMessageUri('47999991234', 'a b+c').toString();
+      expect(url, endsWith('?text=a%20b%2Bc'));
     });
 
     test('is null without a phone', () {
       expect(whatsappMessageUri(null, 'x'), isNull);
       expect(whatsappMessageUri('  ', 'x'), isNull);
+    });
+  });
+
+  group('writeEachExisting', () {
+    bool missing(Object e) => e == 'not-found';
+
+    test('a deleted device does not stop the others', () async {
+      final done = <String>[];
+      await writeEachExisting([
+        () async => done.add('a'),
+        () async => throw 'not-found',
+        () async => done.add('c'),
+      ], isMissing: missing);
+      expect(done, ['a', 'c']);
+    });
+
+    test('any other failure reaches the caller, after all were tried', () async {
+      final done = <String>[];
+      await expectLater(
+        writeEachExisting([
+          () async => throw 'permission-denied',
+          () async => done.add('b'),
+        ], isMissing: missing),
+        throwsA('permission-denied'),
+      );
+      expect(done, ['b']);
+    });
+
+    test('every device deleted is not a failure', () async {
+      await writeEachExisting([
+        () async => throw 'not-found',
+      ], isMissing: missing);
     });
   });
 

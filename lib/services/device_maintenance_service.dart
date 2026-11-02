@@ -46,7 +46,9 @@ bool maintenanceIsNear(String? day, DateTime now) =>
 Uri? whatsappMessageUri(String? phone, String message) {
   final number = (phone ?? '').trim().isEmpty ? '' : whatsappNumber(phone!);
   if (number.isEmpty) return null;
-  return Uri.https('wa.me', '/$number', {'text': message});
+  // encodeComponent, not Uri.https: its "+" for spaces is not read by every
+  // WhatsApp, which would show them in the message.
+  return Uri.parse('https://wa.me/$number?text=${Uri.encodeComponent(message)}');
 }
 
 /// The order a maintenance starts from: its customer, the device, and the

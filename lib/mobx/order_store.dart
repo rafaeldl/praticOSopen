@@ -778,6 +778,7 @@ abstract class _OrderStore with Store {
   Future<void>? setStatus(String? status) {
     if (status == null) return null;
     final previousPayment = order!.payment;
+    _holdBeforeStatus = order!.onHold;
     order!.status = status;
     this.status = status;
     updatePayment();
@@ -809,13 +810,22 @@ abstract class _OrderStore with Store {
     return saved;
   }
 
-  /// Puts the status back on screen after the server refused [setStatus]. It
-  /// writes nothing: the server never took the new one.
+  /// "Parada" mark before the last [setStatus], for [restoreStatus].
+  OrderHold? _holdBeforeStatus;
+
+  /// Puts the status back on screen after the server refused [setStatus]: the
+  /// server never took the new one. The "parada" mark [setStatus] took away
+  /// comes back too, and is written again, because that separate write may
+  /// have gone through.
   @action
   void restoreStatus(String? status) {
     order?.status = status;
     this.status = status;
     updatePayment();
+    final mark = _holdBeforeStatus;
+    if (mark != null && order?.onHold == null) {
+      _saveHold(mark, undoOnFailure: false);
+    }
   }
 
   /// Marks the saved order "parada" from now on. The status stays the same.
