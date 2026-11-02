@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Integrador de Automação | PraticOS",
     "ogDescription": "Cada obra de automação numa OS: proposta com seu catálogo, aprovação por link, checklist da instalação com fotos e pagamentos em etapas.",
     "hero": {
-      "title": "Proposta, instalação e pós-venda",
-      "titleMark": "na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para integradores de automação residencial. Monte a proposta com o seu catálogo, mande por link para o cliente aprovar, registre a instalação com fotos e acompanhe o que falta receber — tudo pelo celular.",
+      "title": "A programação entra na conta.",
+      "titleMark": "O cliente aprova pelo link.",
+      "lede": "O app para integradores de automação residencial que acaba com a proposta feita do zero. Equipamentos e programação aparecem separados, o cliente aprova pelo link e você sabe o que falta receber.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,97 +54,94 @@
       }
     },
     "problems": {
-      "title": "Onde o integrador perde dinheiro",
-      "lede": "Quase nunca é na instalação. É a proposta refeita do zero, a hora de programação que não foi cobrada e o chamado de pós-venda sem nenhum registro do que foi feito.",
+      "title": "O dinheiro que o integrador deixa na mesa",
+      "lede": "Quase nunca é na instalação. É a proposta refeita do zero, a programação que não foi cobrada e o pós-venda sem nenhuma lembrança do que foi feito.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Proposta montada do zero toda vez",
-          "detail": "Cada orçamento vira uma planilha nova, com preço de módulo, cabo e mão de obra digitados à mão.",
-          "answer": "Cadastre produtos e serviços com preço uma vez. Na OS você escolhe os itens, ajusta quantidades e o total é somado na hora."
+          "detail": "Cada orçamento vira uma planilha nova, com preço de equipamento, cabo e mão de obra digitados à mão.",
+          "answer": "Seus produtos e serviços já com preço. Escolha os itens, ajuste as quantidades e a proposta sai em menos tempo."
         },
         {
           "problem": "Programação que ninguém vê",
-          "detail": "O cliente compara o preço do módulo na internet e não enxerga as horas de configuração e de cenas.",
-          "answer": "Mão de obra de programação entra como item da OS, separada dos equipamentos. O cliente vê tudo discriminado pelo link e no PDF."
+          "detail": "O cliente compara o preço do equipamento na internet e não enxerga as horas de programação e de cenas.",
+          "answer": "A programação aparece como item próprio, separada dos equipamentos. O cliente entende pelo que está pagando."
         },
         {
           "problem": "Obra espalhada em grupos de conversa",
           "detail": "Planta, fotos do rack e combinados ficam perdidos entre mensagens de três pessoas diferentes.",
-          "answer": "A OS reúne cliente, endereço, itens, fotos e os comentários que o cliente deixa pelo link, num lugar só."
+          "answer": "Cliente, endereço, itens, fotos e comentários num lugar só. Nada se perde entre mensagens."
         },
         {
-          "problem": "Pós-venda sem registro",
+          "problem": "Pós-venda sem memória",
           "detail": "Dois anos depois o cliente chama e ninguém lembra qual equipamento foi instalado em qual ambiente.",
-          "answer": "Crie um checklist de registro da instalação com os campos que você usa — ambiente, equipamento, observações e fotos — e ele fica na OS do cliente."
+          "answer": "Monte seu checklist com ambiente, equipamento, observações e fotos. Anos depois, você sabe o que instalou e onde."
         },
         {
           "problem": "Entrada paga, saldo esquecido",
           "detail": "O cliente paga uma parte para comprar o material e o restante fica para depois. Depois, ninguém lembra quanto falta.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Entrada, parcelas e saldo sob controle. Você vê quanto falta receber e de quem, e quanto entrou no mês."
         },
         {
           "problem": "Várias obras na mesma semana",
           "detail": "Dois técnicos marcados no mesmo dia, um cliente esperando e ninguém avisado.",
-          "answer": "A data da OS coloca a instalação na Agenda, com a semana no topo e o horário de cada atendimento. O celular avisa antes de cada visita."
+          "answer": "Cada instalação entra na Agenda, com dia e horário, e o celular avisa antes de cada visita."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma obra de automação passa pelo PraticOS",
-      "lede": "Da visita técnica à entrega, cada etapa fica registrada na OS do cliente.",
+      "title": "Da visita técnica à obra paga",
+      "lede": "Proposta aprovada, instalação na agenda, entrega com fotos e saldo recebido.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale a obra e a proposta se preenche",
+          "title": "Fale a obra, a IA monta a proposta",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “apartamento do Ricardo, seis interruptores inteligentes e programação”, ou tire uma foto do que você anotou. A IA preenche cliente, equipamentos e serviços com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a programação é 800”",
             "Equipamentos e programação em itens separados"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Faça a visita técnica",
+          "title": "Faça a visita técnica sem esquecer nada",
+          "tab": "Vistoriar",
           "text": "Monte um checklist de vistoria com o que você confere em toda obra — infraestrutura de rede, pontos de energia, quadro, ambientes — e use em todas as visitas.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Do seu jeito, com o que você sempre confere",
             "Fotos em cada item do checklist",
-            "O mesmo modelo para todas as obras"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+            "Toda obra com o mesmo padrão"
+          ]
         },
         {
           "number": "03",
-          "title": "Mande a proposta por link",
+          "title": "Cliente aprova pelo link",
+          "tab": "Aprovar",
           "text": "Equipamentos e serviços saem do seu catálogo, já com preço. O cliente abre a OS no navegador, vê os itens e as fotos, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "Equipamentos e programação discriminados",
             "PDF da OS para enviar ou imprimir"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
-          "title": "Agende a instalação",
+          "title": "Instalação marcada, lembrete no celular",
+          "tab": "Agendar",
           "text": "A data da OS coloca a obra na Agenda. Você vê a semana no topo e o que está marcado em cada dia, com horário.",
           "facts": [
             "Semana no topo e os atendimentos de cada dia, com horário",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+          ]
         },
         {
           "number": "05",
           "title": "Entregue a obra e receba",
+          "tab": "Receber",
           "text": "Registre o que foi instalado com fotos e receba em etapas: entrada, parcelas e saldo, com desconto se precisar.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -157,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem trabalha com automação",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que o integrador quer saber antes de começar",
+      "lede": "Não achou a sua? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -192,9 +189,9 @@
     "ogTitle": "Home Automation Installer Software | PraticOS",
     "ogDescription": "Each smart home job on one work order: proposal from your catalog, approval by link, install checklist with photos and staged payments.",
     "hero": {
-      "title": "Proposal, install and follow-up",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for home automation installers. Build the proposal from your catalog, send it as a link for the customer to approve, record the install with photos and track what's still owed — all from your phone.",
+      "title": "Programming goes on the bill.",
+      "titleMark": "Your customer approves by link.",
+      "lede": "The home automation installer app that ends the proposal built from scratch. Equipment and programming show up separately, the customer approves by link and you know what's still owed.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -237,97 +234,94 @@
       }
     },
     "problems": {
-      "title": "Where an installer loses money",
-      "lede": "It's rarely the install itself. It's the proposal rebuilt from scratch, the programming hours nobody billed and the service call with no record of what was done.",
+      "title": "The money installers leave on the table",
+      "lede": "It's rarely the install itself. It's the proposal rebuilt from scratch, the programming hours nobody billed and the service call with no memory of what was done.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Every proposal starts from zero",
-          "detail": "Each quote becomes a new spreadsheet, with module, cable and labor prices typed by hand.",
-          "answer": "Add products and services with prices once. On the work order you pick items, set quantities and the total adds up as you go."
+          "detail": "Each quote becomes a new spreadsheet, with device, cable and labor prices typed by hand.",
+          "answer": "Your products and services, already priced. Pick the items, set quantities and the proposal takes less time."
         },
         {
           "problem": "Programming nobody sees",
-          "detail": "The customer compares module prices online and doesn't see the hours spent on setup and scenes.",
-          "answer": "Programming labor is its own line on the work order, separate from equipment. The customer sees it itemized in the link and the PDF."
+          "detail": "The customer compares device prices online and doesn't see the hours spent on programming and scenes.",
+          "answer": "Programming gets its own line, separate from equipment. The customer understands what they're paying for."
         },
         {
           "problem": "The job scattered across group chats",
           "detail": "Floor plans, rack photos and agreements get lost between messages from three different people.",
-          "answer": "The work order keeps the customer, address, items, photos and the comments the customer leaves on the link in one place."
+          "answer": "Customer, address, items, photos and comments in one place. Nothing gets lost between messages."
         },
         {
-          "problem": "Service calls with no record",
+          "problem": "Service calls with no memory",
           "detail": "Two years later the customer calls and nobody remembers which device went into which room.",
-          "answer": "Build an install record checklist with the fields you use — room, device, notes and photos — and it stays on the customer's work order."
+          "answer": "Build your checklist with room, device, notes and photos. Years later, you know what you installed and where."
         },
         {
           "problem": "Deposit paid, balance forgotten",
           "detail": "The customer pays part up front for materials and the rest comes later. Later, nobody knows how much is left.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "Deposit, installments and balance under control. See what's still owed, by whom, and what came in this month."
         },
         {
           "problem": "Several jobs in the same week",
           "detail": "Two techs booked on the same day, a customer waiting and nobody told.",
-          "answer": "The work order date puts the install on the Schedule, with the week on top and the time of each visit. The phone sends a reminder before each one."
+          "answer": "Every install goes on the Schedule with its day and time, and your phone reminds you before each visit."
         }
       ]
     },
     "workflow": {
-      "title": "How a smart home job moves through PraticOS",
-      "lede": "From site survey to handover, every step is recorded on the customer's work order.",
+      "title": "From site survey to a paid job",
+      "lede": "Proposal approved, install on the schedule, handover with photos and balance collected.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the proposal fills itself in",
+          "title": "Say the job, AI builds the proposal",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Ricardo's apartment, six smart switches and programming”, or take a photo of your notes. The AI fills in the customer, equipment and services with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “programming is 800”",
             "Equipment and programming as separate items"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Do the site survey",
+          "title": "Survey the site with nothing forgotten",
+          "tab": "Survey",
           "text": "Build a survey checklist with what you check on every job — network, power outlets, electrical panel, rooms — and reuse it on every visit.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Your way, with what you always check",
             "Photos on every checklist item",
-            "One template for every job"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+            "One standard for every job"
+          ]
         },
         {
           "number": "03",
-          "title": "Send the proposal as a link",
+          "title": "Customer approves by link",
+          "tab": "Approve",
           "text": "Equipment and services come from your catalog, already priced. The customer opens the work order in a browser, sees items and photos, approves it and leaves comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes stays on file",
             "Equipment and programming itemized",
             "Work order PDF to send or print"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
-          "title": "Schedule the install",
+          "title": "Install booked, reminder on your phone",
+          "tab": "Schedule",
           "text": "The work order date puts the job on the Schedule. You see the week on top and what is booked each day, with times.",
           "facts": [
             "The week on top and each day's appointments, with times",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the day's appointments"
+          ]
         },
         {
           "number": "05",
           "title": "Hand over the job and get paid",
+          "tab": "Get paid",
           "text": "Record what was installed with photos and get paid in stages: deposit, installments and balance, with a discount if needed.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -340,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from automation installers",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What automation installers want to know first",
+      "lede": "Don't see yours? Send us an email. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -375,9 +369,9 @@
     "ogTitle": "Sistema para Automatización Residencial | PraticOS",
     "ogDescription": "Cada obra de domótica en una orden: propuesta con tu catálogo, aprobación por link, checklist de instalación con fotos y pagos por etapas.",
     "hero": {
-      "title": "Propuesta, instalación y posventa",
-      "titleMark": "en una orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para integradores de automatización residencial. Arma la propuesta con tu catálogo, envíala por link para que el cliente la apruebe, registra la instalación con fotos y controla lo que falta cobrar — todo desde el celular.",
+      "title": "La programación entra en la cuenta.",
+      "titleMark": "El cliente aprueba por link.",
+      "lede": "La app para integradores de automatización residencial que termina con la propuesta hecha desde cero. Equipos y programación aparecen separados, el cliente aprueba por link y sabes lo que falta cobrar.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -420,97 +414,94 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el integrador",
-      "lede": "Casi nunca es en la instalación. Es la propuesta rehecha desde cero, las horas de programación que no se cobraron y la visita de posventa sin ningún registro de lo que se hizo.",
+      "title": "El dinero que el integrador deja sobre la mesa",
+      "lede": "Casi nunca es en la instalación. Es la propuesta rehecha desde cero, las horas de programación sin cobrar y la posventa sin ningún recuerdo de lo que se hizo.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Cada propuesta desde cero",
-          "detail": "Cada presupuesto es una planilla nueva, con precios de módulos, cable y mano de obra escritos a mano.",
-          "answer": "Carga productos y servicios con precio una vez. En la orden eliges los ítems, ajustas cantidades y el total se suma al momento."
+          "detail": "Cada presupuesto es una planilla nueva, con precios de equipos, cable y mano de obra escritos a mano.",
+          "answer": "Tus productos y servicios, ya con precio. Eliges los ítems, ajustas cantidades y la propuesta sale en menos tiempo."
         },
         {
           "problem": "Programación que nadie ve",
-          "detail": "El cliente compara el precio del módulo en internet y no ve las horas de configuración y escenas.",
-          "answer": "La mano de obra de programación entra como ítem de la orden, separada de los equipos. El cliente la ve detallada en el link y en el PDF."
+          "detail": "El cliente compara el precio del equipo en internet y no ve las horas de programación y escenas.",
+          "answer": "La programación aparece como ítem propio, separada de los equipos. El cliente entiende qué está pagando."
         },
         {
           "problem": "La obra repartida en grupos de chat",
           "detail": "Planos, fotos del rack y acuerdos se pierden entre mensajes de tres personas distintas.",
-          "answer": "La orden reúne cliente, dirección, ítems, fotos y los comentarios que el cliente deja en el link, en un solo lugar."
+          "answer": "Cliente, dirección, ítems, fotos y comentarios en un solo lugar. Nada se pierde entre mensajes."
         },
         {
-          "problem": "Posventa sin registro",
+          "problem": "Posventa sin memoria",
           "detail": "Dos años después el cliente llama y nadie recuerda qué equipo se instaló en qué ambiente.",
-          "answer": "Crea un checklist de registro de instalación con los campos que usas — ambiente, equipo, observaciones y fotos — y queda en la orden del cliente."
+          "answer": "Arma tu checklist con ambiente, equipo, observaciones y fotos. Años después, sabes qué instalaste y dónde."
         },
         {
           "problem": "Anticipo cobrado, saldo olvidado",
           "detail": "El cliente paga una parte para comprar el material y el resto queda para después. Después, nadie sabe cuánto falta.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Anticipo, cuotas y saldo bajo control. Ves cuánto falta cobrar, a quién y cuánto entró en el mes."
         },
         {
           "problem": "Varias obras en la misma semana",
           "detail": "Dos técnicos agendados el mismo día, un cliente esperando y nadie avisado.",
-          "answer": "La fecha de la orden pone la instalación en la Agenda, con la semana arriba y el horario de cada visita. El celular avisa antes de cada una."
+          "answer": "Cada instalación entra en la Agenda, con día y horario, y el celular avisa antes de cada visita."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una obra de domótica por PraticOS",
-      "lede": "De la visita técnica a la entrega, cada paso queda registrado en la orden del cliente.",
+      "title": "De la visita técnica a la obra cobrada",
+      "lede": "Propuesta aprobada, instalación en la agenda, entrega con fotos y saldo cobrado.",
       "stages": [
         {
           "number": "01",
-          "title": "Di la obra y la propuesta se completa",
+          "title": "Di la obra, la IA arma la propuesta",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “departamento de Ricardo, seis interruptores inteligentes y programación”, o saca una foto de lo que anotaste. La IA completa cliente, equipos y servicios con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la programación es 800”",
             "Equipos y programación en ítems separados"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Haz la visita técnica",
+          "title": "Haz la visita técnica sin olvidar nada",
+          "tab": "Visitar",
           "text": "Arma un checklist de relevamiento con lo que revisas en toda obra — red, tomas de energía, tablero, ambientes — y úsalo en todas las visitas.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "A tu manera, con lo que siempre revisas",
             "Fotos en cada ítem del checklist",
-            "La misma plantilla para todas las obras"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+            "El mismo estándar en cada obra"
+          ]
         },
         {
           "number": "03",
-          "title": "Envía la propuesta por link",
+          "title": "El cliente aprueba por link",
+          "tab": "Aprobar",
           "text": "Equipos y servicios salen de tu catálogo, con precio. El cliente abre la orden en el navegador, ve los ítems y las fotos, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El sí del cliente queda guardado",
             "Equipos y programación detallados",
             "PDF de la orden para enviar o imprimir"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
-          "title": "Agenda la instalación",
+          "title": "Instalación marcada, aviso en el celular",
+          "tab": "Agendar",
           "text": "La fecha de la orden pone la obra en la Agenda. Ves la semana arriba y lo que está marcado cada día, con horario.",
           "facts": [
             "La semana arriba y las visitas de cada día, con horario",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y las visitas marcadas en el día"
+          ]
         },
         {
           "number": "05",
           "title": "Entrega la obra y cobra",
+          "tab": "Cobrar",
           "text": "Registra lo instalado con fotos y cobra por etapas: anticipo, cuotas y saldo, con descuento si hace falta.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -523,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien trabaja con domótica",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que el integrador quiere saber antes de empezar",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

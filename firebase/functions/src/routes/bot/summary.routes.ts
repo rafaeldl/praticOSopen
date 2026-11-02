@@ -6,6 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
+import { requireAppPermission } from '../../middleware/app-permission.middleware';
 import * as analyticsService from '../../services/analytics.service';
 
 const router: Router = Router();
@@ -14,7 +15,7 @@ const router: Router = Router();
  * GET /api/bot/summary/today
  * Get today's summary formatted for WhatsApp
  */
-router.get('/today', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/today', requireLinked, requireAppPermission('viewDashboard'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.userContext?.companyId;
     if (!companyId) {
@@ -46,7 +47,7 @@ router.get('/today', requireLinked, async (req: AuthenticatedRequest, res: Respo
  * GET /api/bot/summary/pending
  * Get pending items formatted for WhatsApp
  */
-router.get('/pending', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/pending', requireLinked, requireAppPermission('viewDashboard'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.userContext?.companyId;
     if (!companyId) {

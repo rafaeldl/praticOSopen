@@ -151,4 +151,11 @@ describe('maskPhone', () => {
   test('masks 10-digit phone (DDD + 8 digits)', () => {
     expect(maskPhone('4832214694')).toBe('(48) *****-4694');
   });
+
+  test('keeps area code 55 with and without country code', () => {
+    expect(maskPhone('55988264694')).toBe('(55) *****-4694');
+    expect(maskPhone('5532214694')).toBe('(55) *****-4694');
+    expect(maskPhone('+5555988264694')).toBe('(55) *****-4694');
+    expect(maskPhone('555532214694')).toBe('(55) *****-4694');
+  });
 });

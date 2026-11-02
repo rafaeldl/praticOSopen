@@ -37,6 +37,11 @@ service firebase.storage {
       return hasAnyRole(companyId, ['owner', 'admin']);
     }
 
+    // Mesmos papéis de quem recebe pagamento no app
+    function canReceivePayment(companyId) {
+      return hasAnyRole(companyId, ['owner', 'admin', 'manager', 'consultant']);
+    }
+
     // Imagem ou PDF até 10MB (comprovante)
     function isValidReceipt() {
       return request.resource.contentType != null
@@ -45,12 +50,12 @@ service firebase.storage {
         && request.resource.size < 10 * 1024 * 1024;
     }
 
-    // Tudo da empresa: leitura e listagem só para membros. Apagar a pasta
-    // inteira (exclusão de conta feita pelo app até a versão de out/2026)
+    // Tudo da empresa: abrir um arquivo só para membros. Listar e apagar a
+    // pasta inteira (exclusão de conta feita pelo app até a versão de out/2026)
     // só para dono/admin. Os caminhos abaixo liberam o resto.
     match /tenants/{companyId}/{allPaths=**} {
-      allow read: if belongsToCompany(companyId);
-      allow delete: if isCompanyAdmin(companyId);
+      allow get: if belongsToCompany(companyId);
+      allow list, delete: if isCompanyAdmin(companyId);
     }
 
     // Logo pelo caminho antigo do cadastro (app até out/2026)
@@ -67,8 +72,12 @@ service firebase.storage {
     }
 
     match /tenants/{companyId}/orders/{orderId}/payments/{txnId}/{fileId} {
-      allow create, update: if belongsToCompany(companyId) && isValidDocument();
-      allow delete: if belongsToCompany(companyId);
+      // Arquivo novo: qualquer membro. Trocar ou apagar: só quem pode receber
+      // pagamento. Reenviar por cima também chega aqui como create.
+      allow create: if isValidDocument()
+        && (canReceivePayment(companyId) || (belongsToCompany(companyId) && resource == null));
+      allow update: if canReceivePayment(companyId) && isValidDocument();
+      allow delete: if canReceivePayment(companyId);
     }
 
     match /tenants/{companyId}/orders/{orderId}/documents/{docId} {

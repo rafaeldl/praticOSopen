@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/share_token.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -173,15 +174,11 @@ class ShareLinkService {
     required String phone,
     String? message,
   }) async {
-    // Normalize phone number (remove non-digits, ensure country code)
-    String normalizedPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
-    if (!normalizedPhone.startsWith('55') && normalizedPhone.length <= 11) {
-      normalizedPhone = '55$normalizedPhone';
-    }
-
     final text = message != null ? '$message\n\n$url' : url;
     final encodedText = Uri.encodeComponent(text);
-    final whatsappUrl = Uri.parse('https://wa.me/$normalizedPhone?text=$encodedText');
+    final whatsappUrl = Uri.parse(
+      'https://wa.me/${whatsappNumber(phone)}?text=$encodedText',
+    );
 
     if (await canLaunchUrl(whatsappUrl)) {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);

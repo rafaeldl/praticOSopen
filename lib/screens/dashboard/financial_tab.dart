@@ -95,10 +95,23 @@ class _FinancialTabState extends State<FinancialTab> {
   /// share sheet): a second tap is ignored so no duplicate charge is made.
   bool _sendingCharge = false;
 
+  /// Whether the tab was on screen; tabs stay alive while hidden.
+  bool? _onScreen;
+
   @override
   void initState() {
     super.initState();
     _store.load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Orders change on other tabs (completed, paid): coming back must not
+    // show the old numbers.
+    final onScreen = TickerMode.of(context);
+    if (_onScreen == false && onScreen) _store.refresh();
+    _onScreen = onScreen;
   }
 
   // ── Navigation ──────────────────────────────────────────────────

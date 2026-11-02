@@ -4,6 +4,7 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess } from '../../middleware/app-permission.middleware';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
@@ -12,6 +13,7 @@ import * as commentService from '../../services/comment.service';
 import { timestampToDate } from '../../utils/date.utils';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 /**
  * POST /bot/orders/:number/comments

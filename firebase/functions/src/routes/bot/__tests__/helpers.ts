@@ -18,6 +18,7 @@ export function buildApp(
     companyCountry?: string;
     companyId?: string;
     userId?: string;
+    role?: string;
   } = {},
 ) {
   const app = express();
@@ -37,7 +38,7 @@ export function buildApp(
       userName: 'Test User',
       companyId: overrides.companyId ?? 'comp1',
       companyName: 'Test Co',
-      role: 'admin',
+      role: overrides.role ?? 'admin',
       permissions: ['read:all', 'write:all', 'delete:all'],
     };
     next();

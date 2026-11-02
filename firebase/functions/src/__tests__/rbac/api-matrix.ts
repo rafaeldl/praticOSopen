@@ -74,6 +74,36 @@ export const API_CASES: ApiCase[] = [
     allow: SEE_ALL_ORDERS,
   },
   {
+    id: 'orders.create.done', area: 'OS', title: 'criar OS já concluída',
+    method: 'post', path: O, body: { customerId: 'cust1', status: 'done' },
+    allow: ADMINS,
+  },
+  {
+    id: 'orders.status.approveOthersQuote', area: 'OS', title: 'aprovar orçamento de outra pessoa',
+    method: 'patch', path: `${O}/quote_1`, body: { status: 'approved' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.status.cancelApproved', area: 'OS', title: 'cancelar OS aprovada',
+    method: 'patch', path: `${O}/o1`, body: { status: 'canceled' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.status.reopenDone', area: 'OS', title: 'reabrir OS concluída',
+    method: 'patch', path: `${O}/done_1`, body: { status: 'progress' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.services.approved', area: 'OS', title: 'pôr serviço em OS aprovada',
+    method: 'post', path: `${O}/o1/services`, body: { serviceId: 's1' },
+    allow: FINANCIAL,
+  },
+  {
+    id: 'orders.products.approved', area: 'OS', title: 'pôr produto em OS aprovada',
+    method: 'post', path: `${O}/o1/products`, body: { productId: 'p1', quantity: 1 },
+    allow: FINANCIAL,
+  },
+  {
     id: 'orders.services.price', area: 'OS', title: 'pôr serviço com valor na OS',
     method: 'post', path: `${O}/o1/services`, body: { serviceId: 's1', value: 999 },
     allow: FINANCIAL, permission: 'editPrices',

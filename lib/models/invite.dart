@@ -1,6 +1,7 @@
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/utils/customer_utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'invite.g.dart';
@@ -84,9 +85,8 @@ class Invite {
 
   /// Gera o link de convite para WhatsApp.
   String getWhatsAppLink(String botNumber) {
-    final cleanNumber = botNumber.replaceAll(RegExp(r'\D'), '');
     final message = Uri.encodeComponent(token ?? '');
-    return 'https://wa.me/$cleanNumber?text=$message';
+    return 'https://wa.me/${whatsappNumber(botNumber)}?text=$message';
   }
 
   factory Invite.fromJson(Map<String, dynamic> json) => _$InviteFromJson(json);

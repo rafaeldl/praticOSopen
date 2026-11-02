@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Manutenção Predial | PraticOS",
     "ogDescription": "Chamados de manutenção organizados por unidade: empreendimento, bloco, andar e sistema afetado na OS, fotos do reparo e acompanhamento por link.",
     "hero": {
-      "title": "Cada chamado na",
-      "titleMark": "unidade certa.",
-      "lede": "PraticOS é o app de ordem de serviço para manutenção predial. Registre o chamado na unidade — empreendimento, bloco, andar e sistema afetado —, fotografe antes e depois, mande o orçamento por link e veja o histórico de cada apartamento.",
+      "title": "Controle cada chamado,",
+      "titleMark": "unidade por unidade.",
+      "lede": "O PraticOS é o app de manutenção predial para quem precisa responder por cada chamado. Saiba o que está parado, mostre fotos de antes e depois e tenha o histórico de cada unidade à mão.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -55,99 +55,95 @@
       }
     },
     "problems": {
-      "title": "Onde a manutenção predial perde tempo e dinheiro",
-      "lede": "O problema raramente é o reparo. É o chamado que chega pelo grupo do condomínio, a unidade que ninguém anotou direito e a infiltração que volta sem histórico.",
+      "title": "O que tira o controle da manutenção predial",
+      "lede": "O problema raramente é o reparo. É o chamado que se perde no grupo, a unidade mal identificada e a infiltração que volta sem histórico.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Chamado perdido no grupo",
           "detail": "O morador manda foto no WhatsApp, o síndico repassa, e uma semana depois ninguém sabe se alguém foi lá.",
-          "answer": "Cada chamado vira uma OS com status: orçamento, aprovado, em reparo, resolvido. A lista mostra o que está parado."
+          "answer": "Cada chamado tem situação clara, do orçamento ao resolvido, e você vê o que está parado."
         },
         {
           "problem": "Unidade anotada pela metade",
           "detail": "“Apto 302” — de qual torre? Em qual empreendimento? A equipe vai ao lugar errado.",
-          "answer": "A unidade é cadastrada com empreendimento ou condomínio, bloco ou torre, número, andar e tipo: apartamento, garagem, depósito, sala ou área comum."
+          "answer": "A equipe vai à unidade certa: empreendimento, bloco, número, andar e tipo."
         },
         {
           "problem": "O mesmo vazamento, pela terceira vez",
           "detail": "A infiltração volta e ninguém sabe o que já foi feito naquele apartamento.",
-          "answer": "Busque pela unidade na lista de OS e veja todos os chamados anteriores, com fotos e materiais usados."
+          "answer": "Consulte a unidade e veja os chamados anteriores, com fotos e materiais usados."
         },
         {
           "problem": "Garantia discutida sem dados",
           "detail": "Na assistência técnica de construtora, o morador pede um reparo e ninguém confere quando a unidade foi entregue nem qual sistema falhou.",
-          "answer": "A data de entrega da unidade e o sistema afetado — hidráulica, elétrica, estrutura, impermeabilização, esquadrias — ficam na OS."
+          "answer": "Decida com a data de entrega da unidade e o sistema afetado em mãos."
         },
         {
           "problem": "Reparo feito, morador insatisfeito",
           "detail": "Sem foto do antes, o morador diz que o problema era outro ou que o serviço ficou pior.",
-          "answer": "Fotos do antes e do depois ficam anexadas à OS. O morador ou síndico abre o link e vê o andamento, sem ligar."
+          "answer": "Apresente as fotos de antes e depois. Morador e síndico acompanham pelo link, sem ligar."
         },
         {
           "problem": "Agenda na cabeça",
           "detail": "Dois empreendimentos, chamados de urgência no meio e visitas marcadas por mensagem. Alguém fica esperando.",
-          "answer": "Cada OS com dia e hora entra na Agenda e o celular avisa antes do atendimento. Se alguém trabalha com você, a visita aparece para ele também."
+          "answer": "Cada visita na Agenda, com aviso no celular antes do atendimento."
         }
       ]
     },
     "workflow": {
-      "title": "Como um chamado passa pelo PraticOS",
-      "lede": "Da solicitação do morador ao reparo resolvido, tudo fica na OS da unidade.",
+      "title": "Da solicitação ao reparo comprovado",
+      "lede": "Cada chamado fica com a unidade, as fotos e a aprovação, prontos para mostrar ao síndico ou à construtora.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o chamado e a IA abre a OS",
+          "title": "Fale o chamado, a IA monta a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga, por exemplo: “Condomínio Jardim das Flores, torre B, apto 1204, infiltração no teto do banheiro”. Ou fotografe o pedido anotado. A IA preenche cliente, unidade e serviços com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
-            "Empreendimento, bloco ou torre, número e andar",
+            "A unidade certa: empreendimento, bloco ou torre, número e andar",
             "Sistema afetado e data de entrega da unidade",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Agende a visita",
+          "title": "Programe o atendimento",
+          "tab": "Agendar",
           "text": "Marque dia e hora na OS. Ela aparece na Agenda, no dia escolhido, e o celular avisa antes do atendimento.",
           "facts": [
-            "Semana no topo e os atendimentos do dia",
+            "A semana inteira à vista, com os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
             "Aviso antes do atendimento, mesmo com o app fechado"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
+          ]
         },
         {
           "number": "03",
-          "title": "Documente com fotos e checklist",
+          "title": "Comprove com fotos e checklist",
+          "tab": "Registrar",
           "text": "Monte checklists com os itens da sua vistoria — hidráulica, elétrica, impermeabilização — e preencha no local, com fotos em cada item.",
           "facts": [
-            "Itens de sim, não ou não se aplica, texto e foto",
+            "Sim, não, não se aplica, anotação e foto em cada item",
             "Fotos do antes e do depois na mesma OS",
             "PDF da OS para enviar ao síndico ou à construtora"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "04",
           "title": "Aprove, resolva e cobre",
+          "tab": "Aprovar",
           "text": "Mande o orçamento por link para aprovação. Concluído o reparo, registre o pagamento inteiro ou em parcelas.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "Aprovação guardada junto ao chamado",
             "Pagamento parcial e desconto na mesma OS",
             "Quanto falta receber de cada cliente no Financeiro"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Perguntas de quem cuida de manutenção predial",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que perguntam os responsáveis pela manutenção predial",
+      "lede": "Se a sua dúvida não estiver aqui, escreva para nós. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -181,9 +177,9 @@
     "ogTitle": "Building Maintenance Software | PraticOS",
     "ogDescription": "Maintenance requests organized by unit: development, building, floor and affected system on the work order, repair photos and progress by link.",
     "hero": {
-      "title": "Every request on",
-      "titleMark": "the right unit.",
-      "lede": "PraticOS is the work order app for building maintenance. Log the request on the unit — development, building, floor and affected system —, take before and after photos, send the quote as a link and see the history of every apartment.",
+      "title": "Stay on top of every request,",
+      "titleMark": "unit by unit.",
+      "lede": "PraticOS is the building maintenance app for people who have to answer for every request. See what's stuck, show before and after photos and keep each unit's history at hand.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -227,99 +223,95 @@
       }
     },
     "problems": {
-      "title": "Where building maintenance loses time and money",
-      "lede": "The repair is rarely the problem. It's the request that comes through the residents' group chat, the unit nobody wrote down properly and the leak that comes back with no history.",
+      "title": "Where building maintenance loses control",
+      "lede": "The repair is rarely the problem. It's the request lost in the group chat, the poorly identified unit and the leak that comes back with no history.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Requests lost in the group chat",
           "detail": "A resident sends a photo, the manager forwards it, and a week later nobody knows if anyone went.",
-          "answer": "Every request becomes a work order with a status: quote, approved, under repair, resolved. The list shows what's stuck."
+          "answer": "Every request has a clear status, from quote to resolved, and you see what's stuck."
         },
         {
           "problem": "Half a unit address",
           "detail": "“Apt 302” — which building? Which development? The crew goes to the wrong door.",
-          "answer": "The unit is on file with development or property, building or tower, number, floor and type: apartment, garage, storage, office or common area."
+          "answer": "The crew goes to the right door: development, building, number, floor and type."
         },
         {
           "problem": "The same leak, for the third time",
           "detail": "The water comes back and nobody knows what was already done in that apartment.",
-          "answer": "Search for the unit in the work order list and see every past request, with photos and materials used."
+          "answer": "Look up the unit and see past requests, with photos and materials used."
         },
         {
           "problem": "Warranty claims argued without data",
           "detail": "On builder warranty service, a resident asks for a repair and nobody checks when the unit was handed over or which system failed.",
-          "answer": "The unit's handover date and the affected system — plumbing, electrical, structure, waterproofing, windows — are on the work order."
+          "answer": "Decide with the unit's handover date and the affected system in hand."
         },
         {
           "problem": "Repair done, resident unhappy",
           "detail": "With no before photo, the resident says the problem was something else or the fix made it worse.",
-          "answer": "Before and after photos are attached to the work order. The resident or manager opens the link and follows progress without calling."
+          "answer": "Show the before and after photos. Residents and managers follow progress by link, without calling."
         },
         {
           "problem": "A schedule kept in your head",
           "detail": "Two developments, urgent calls in between and visits booked by text. Someone ends up waiting.",
-          "answer": "Every order with a date and time goes on the Schedule and your phone reminds you before the visit. If someone works with you, they see the visit too."
+          "answer": "Every visit on the Schedule, with a phone reminder before it."
         }
       ]
     },
     "workflow": {
-      "title": "How a request moves through PraticOS",
-      "lede": "From the resident's request to a resolved repair, everything stays on the unit's work order.",
+      "title": "From resident request to documented repair",
+      "lede": "Each request keeps its unit, photos and approval, ready to show the manager or the builder.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the request and the AI opens the order",
+          "title": "Say the request and AI builds the order",
+          "tab": "Speak",
           "text": "Tap Speak and say something like: “Jardim das Flores condo, tower B, unit 1204, leak in the bathroom ceiling”. Or photograph the written request. The AI fills in customer, unit and services with your catalog prices and marks what it filled with ✦.",
           "facts": [
-            "Development, building or tower, number and floor",
+            "The right unit: development, building or tower, number and floor",
             "Affected system and unit handover date",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Schedule the visit",
+          "title": "Plan the visit",
+          "tab": "Schedule",
           "text": "Set the day and time on the order. It shows up on the Schedule on that day and your phone reminds you before the visit.",
           "facts": [
-            "The week on top and the day's visits",
+            "The whole week in view, with each day's visits",
             "Daily summary at 9am, if you want it",
             "Reminder before the visit, even with the app closed"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the visit booked for the day"
+          ]
         },
         {
           "number": "03",
           "title": "Document with photos and a checklist",
+          "tab": "Record",
           "text": "Build checklists with your inspection items — plumbing, electrical, waterproofing — and fill them in on site, with photos on each item.",
           "facts": [
-            "Yes, no or N/A items, text and photo",
+            "Yes, no, N/A, notes and a photo on each item",
             "Before and after photos on the same work order",
             "Work order PDF to send to the manager or builder"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "04",
           "title": "Approve, resolve and bill",
+          "tab": "Approve",
           "text": "Send the quote as a link for approval. Once the repair is done, record the payment in full or in parts.",
           "facts": [
-            "Approval recorded on the work order",
+            "Approval kept with the request",
             "Partial payment and discount on the same work order",
             "What each customer still owes, in Financial"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Questions from building maintenance teams",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What building maintenance teams ask us",
+      "lede": "If your question isn't here, write to us. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -353,9 +345,9 @@
     "ogTitle": "Sistema de Mantenimiento de Edificios | PraticOS",
     "ogDescription": "Solicitudes de mantenimiento ordenadas por unidad: proyecto, torre, piso y sistema afectado en la orden, fotos del arreglo y seguimiento por link.",
     "hero": {
-      "title": "Cada solicitud en",
-      "titleMark": "la unidad correcta.",
-      "lede": "PraticOS es la app de órdenes de servicio para mantenimiento de edificios. Registra la solicitud en la unidad — proyecto, torre, piso y sistema afectado —, saca fotos del antes y el después, envía el presupuesto por link y ve el historial de cada departamento.",
+      "title": "Controla cada solicitud,",
+      "titleMark": "unidad por unidad.",
+      "lede": "PraticOS es la app de mantenimiento de edificios para quien debe responder por cada solicitud. Ve lo que está parado, muestra fotos del antes y el después y ten a mano el historial de cada unidad.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -399,99 +391,95 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde tiempo y plata el mantenimiento de edificios",
-      "lede": "El problema casi nunca es el arreglo. Es la solicitud que llega por el grupo del condominio, la unidad que nadie anotó bien y la filtración que vuelve sin historial.",
+      "title": "Dónde se pierde el control del mantenimiento de edificios",
+      "lede": "El problema casi nunca es el arreglo. Es la solicitud perdida en el grupo, la unidad mal identificada y la filtración que vuelve sin historial.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Solicitudes perdidas en el grupo",
           "detail": "El vecino manda una foto por WhatsApp, el administrador la reenvía y una semana después nadie sabe si alguien fue.",
-          "answer": "Cada solicitud se vuelve una orden con estado: presupuesto, aprobado, en reparación, resuelto. La lista muestra lo que está parado."
+          "answer": "Cada solicitud tiene un estado claro, del presupuesto a resuelto, y ves lo que está parado."
         },
         {
           "problem": "Unidad anotada a medias",
           "detail": "“Depto 302” — ¿de qué torre? ¿En qué proyecto? El equipo va a la puerta equivocada.",
-          "answer": "La unidad se registra con proyecto o condominio, bloque o torre, número, piso y tipo: departamento, cochera, bodega, oficina o área común."
+          "answer": "El equipo llega a la unidad correcta: proyecto, bloque, número, piso y tipo."
         },
         {
           "problem": "La misma filtración, por tercera vez",
           "detail": "El agua vuelve y nadie sabe qué se hizo antes en ese departamento.",
-          "answer": "Busca la unidad en la lista de órdenes y ve todas las solicitudes anteriores, con fotos y materiales usados."
+          "answer": "Consulta la unidad y ve las solicitudes anteriores, con fotos y materiales usados."
         },
         {
           "problem": "Garantía discutida sin datos",
           "detail": "En la posventa de la constructora, el propietario pide un arreglo y nadie revisa cuándo se entregó la unidad ni qué sistema falló.",
-          "answer": "La fecha de entrega de la unidad y el sistema afectado — plomería, electricidad, estructura, impermeabilización, aberturas — quedan en la orden."
+          "answer": "Decide con la fecha de entrega de la unidad y el sistema afectado a mano."
         },
         {
           "problem": "Arreglo hecho, vecino insatisfecho",
           "detail": "Sin foto del antes, el vecino dice que el problema era otro o que quedó peor.",
-          "answer": "Las fotos del antes y el después quedan en la orden. El vecino o el administrador abre el link y sigue el avance sin llamar."
+          "answer": "Muestra las fotos del antes y el después. Vecino y administrador siguen el avance por link, sin llamar."
         },
         {
           "problem": "La agenda en la cabeza",
           "detail": "Dos proyectos, urgencias en el medio y visitas marcadas por mensaje. Alguien se queda esperando.",
-          "answer": "Cada orden con día y hora entra en la Agenda y el celular avisa antes de la visita. Si alguien trabaja contigo, también ve la visita."
+          "answer": "Cada visita en la Agenda, con aviso en el celular antes de la cita."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una solicitud por PraticOS",
-      "lede": "De la solicitud del vecino al arreglo resuelto, todo queda en la orden de la unidad.",
+      "title": "De la solicitud del vecino al arreglo comprobado",
+      "lede": "Cada solicitud conserva su unidad, sus fotos y su aprobación, listas para mostrar al administrador o a la constructora.",
       "stages": [
         {
           "number": "01",
-          "title": "Di la solicitud y la IA abre la orden",
+          "title": "Di la solicitud y la IA arma la orden",
+          "tab": "Hablar",
           "text": "Toca Hablar y di, por ejemplo: “Condominio Jardim das Flores, torre B, depto 1204, filtración en el techo del baño”. O fotografía el pedido anotado. La IA completa cliente, unidad y servicios con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
-            "Proyecto, bloque o torre, número y piso",
+            "La unidad correcta: proyecto, bloque o torre, número y piso",
             "Sistema afectado y fecha de entrega de la unidad",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Agenda la visita",
+          "title": "Programa la visita",
+          "tab": "Agendar",
           "text": "Marca día y hora en la orden. Aparece en la Agenda, en el día elegido, y el celular avisa antes de la visita.",
           "facts": [
-            "La semana arriba y las visitas del día",
+            "Toda la semana a la vista, con las visitas del día",
             "Resumen del día a las 9, si lo quieres",
             "Aviso antes de la visita, incluso con la app cerrada"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y la visita marcada del día"
+          ]
         },
         {
           "number": "03",
           "title": "Documenta con fotos y checklist",
+          "tab": "Registrar",
           "text": "Arma checklists con los ítems de tu inspección — plomería, electricidad, impermeabilización — y complétalos en el lugar, con fotos en cada ítem.",
           "facts": [
-            "Ítems de sí, no o no aplica, texto y foto",
+            "Sí, no, no aplica, nota y foto en cada ítem",
             "Fotos del antes y el después en la misma orden",
             "PDF de la orden para enviar al administrador o a la constructora"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "04",
           "title": "Aprueba, resuelve y cobra",
+          "tab": "Aprobar",
           "text": "Envía el presupuesto por link para su aprobación. Terminado el arreglo, registra el pago total o en partes.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "Aprobación guardada junto a la solicitud",
             "Pago parcial y descuento en la misma orden",
             "Cuánto falta cobrar a cada cliente en Financiero"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Preguntas de quien hace mantenimiento de edificios",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que preguntan los equipos de mantenimiento de edificios",
+      "lede": "Si tu pregunta no está aquí, escríbenos. Responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

@@ -4,12 +4,15 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess, requireAppPermission } from '../../middleware/app-permission.middleware';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
 import { getUserAggr } from '../../middleware/company.middleware';
+import { canChangeOrderStatus, forbidden } from '../../middleware/app-permission.middleware';
 import { buildOrderDetail } from '../../utils/bot-response.utils';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 // Valid status transitions
 const validTransitions: Record<string, string[]> = {
@@ -43,7 +46,7 @@ function parseBoundedInt(value: unknown, fallback: number, min: number, max: num
  * List orders for the bot with formatted output.
  * limit: 1-50 (default 10); offset: 0-1000 (default 0). Invalid values use the default.
  */
-router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
+router.get('/list', requireAppPermission('viewAllOrders'), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
 
@@ -194,6 +197,11 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
         success: false,
         error: { code: 'NOT_FOUND', message: `OS #${orderNumber} não encontrada.` },
       });
+      return;
+    }
+
+    if (!canChangeOrderStatus(req, order, newStatus)) {
+      forbidden(res, 'Status change not allowed');
       return;
     }
 

@@ -37,6 +37,36 @@ PaymentTransaction _discount(String id, double amount) => PaymentTransaction(
     );
 
 void main() {
+  group('computeTotal', () {
+    test('uses value x quantity on a product line without a stored total', () {
+      final order = Order()
+        ..services = [OrderService()..value = 100]
+        ..products = [
+          OrderProduct()
+            ..value = 25
+            ..quantity = 3
+        ]
+        ..discount = 10;
+
+      expect(OrderPaymentMath.computeTotal(order), 165);
+    });
+
+    test('keeps a stored line total and leaves unpriced items out', () {
+      final order = Order()
+        ..services = [OrderService()]
+        ..products = [
+          OrderProduct()
+            ..value = 25
+            ..quantity = 3
+            ..total = 70,
+          OrderProduct()..quantity = 2,
+        ]
+        ..discount = 0;
+
+      expect(OrderPaymentMath.computeTotal(order), 70);
+    });
+  });
+
   group('stripPaymentFields', () {
     test('remove os campos de pagamento e mantém o resto', () {
       final json = _order(paid: 10, transactions: [_payment('p1', 10)]).toJson();

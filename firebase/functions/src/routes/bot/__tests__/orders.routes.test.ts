@@ -241,6 +241,18 @@ describe('Bot Orders Routes', () => {
       expect(res.body.data.formatContext).toBeDefined();
     });
 
+    it('follows the status flow of the role', async () => {
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+
+      const app = buildApp(router, { role: 'technician' });
+      const res = await request(app)
+        .patch('/1/status')
+        .send({ status: 'canceled' });
+
+      expect(res.status).toBe(403);
+      expect(mockOrderService.updateOrder).not.toHaveBeenCalled();
+    });
+
     it('returns allowedTransitions on invalid transition', async () => {
       const doneOrder = { ...fakeOrder, status: 'done' };
       mockOrderService.getOrderByNumber.mockResolvedValue(doneOrder as any);

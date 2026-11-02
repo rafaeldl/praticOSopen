@@ -18,6 +18,13 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
+import {
+  canChangeOrderStatus,
+  canCreateOrderWithStatus,
+  canSeeOrder,
+  checkOrderNumberAccess,
+  forbidden,
+} from '../../middleware/app-permission.middleware';
 import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
@@ -37,6 +44,7 @@ import {
 import { DeviceAggr } from '../../models/types';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 /**
  * POST /api/bot/orders/full
@@ -226,6 +234,10 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         });
         return;
       }
+      if (!canSeeOrder(req, existingOrder)) {
+        forbidden(res, 'Not allowed on this order');
+        return;
+      }
 
       // Build update payload with resolved entities
       const updatePayload: Record<string, unknown> = {
@@ -290,7 +302,13 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         updatePayload.total = svcTotal + productsTotal;
       }
 
-      if (data.status) updatePayload.status = data.status;
+      if (data.status) {
+        if (!canChangeOrderStatus(req, existingOrder, data.status as OrderStatus)) {
+          forbidden(res, 'Status change not allowed');
+          return;
+        }
+        updatePayload.status = data.status;
+      }
       if (data.dueDate) updatePayload.dueDate = new Date(data.dueDate).toISOString();
       if (data.scheduledDate) updatePayload.scheduledDate = new Date(data.scheduledDate).toISOString();
 
@@ -304,6 +322,11 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       res.status(200).json({ success: true, data: { ...upsertDetail, updated: true } });
     } else {
       // Create new order
+      if (!canCreateOrderWithStatus(req, (data.status ?? 'quote') as OrderStatus)) {
+        forbidden(res, 'Status not allowed on a new order');
+        return;
+      }
+
       const orderResult = await orderService.createOrder(
         companyId,
         {
@@ -714,6 +737,11 @@ router.patch('/:number', requireLinked, async (req: AuthenticatedRequest, res: R
         success: false,
         error: { code: 'NOT_FOUND', message: `OS #${orderNumber} não encontrada` },
       });
+      return;
+    }
+
+    if (data.status !== undefined && !canChangeOrderStatus(req, order, data.status as OrderStatus)) {
+      forbidden(res, 'Status change not allowed');
       return;
     }
 

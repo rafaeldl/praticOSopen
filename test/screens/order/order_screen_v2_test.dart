@@ -1481,7 +1481,7 @@ void main() {
 
       await tester.tap(find.text('Alinhamento'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(CupertinoTextField).last, '8000');
+      await tester.enterText(find.byType(CupertinoTextField).last, '80');
       await tester.tap(find.text('Salvar'));
       await tester.pumpAndSettle();
 

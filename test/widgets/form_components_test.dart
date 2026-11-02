@@ -5,6 +5,7 @@ import 'package:praticos/screens/widgets/add_row.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/app_sheet.dart';
 import 'package:praticos/screens/widgets/money_field.dart';
+import 'package:praticos/utils/currency_input.dart';
 import 'package:praticos/screens/widgets/more_fields_link.dart';
 
 Widget app(Widget home, {String locale = 'pt', Brightness? brightness}) {
@@ -196,18 +197,63 @@ void main() {
     String text(WidgetTester tester) =>
         tester.widget<CupertinoTextField>(find.byType(CupertinoTextField)).controller!.text;
 
-    testWidgets('formats typed digits as BRL in pt', (tester) async {
+    String plain(String value) => value.replaceAll(' ', ' ');
+
+    testWidgets('reads typed digits as whole BRL in pt', (tester) async {
       final changes = await pump(tester, 'pt');
-      await tester.enterText(find.byType(CupertinoTextField), '123456');
-      expect(text(tester).replaceAll(' ', ' '), 'R\$ 1.234,56');
+      await tester.enterText(find.byType(CupertinoTextField), '250');
+      expect(plain(text(tester)), 'R\$ 250');
+      expect(changes.last, 250);
+    });
+
+    testWidgets('reads USD with the decimal point in en', (tester) async {
+      final changes = await pump(tester, 'en');
+      await tester.enterText(find.byType(CupertinoTextField), '1234.5');
+      expect(text(tester), '\$1,234.5');
+      expect(changes.last, 1234.5);
+    });
+
+    testWidgets('the comma opens the cents in pt', (tester) async {
+      final changes = await pump(tester, 'pt');
+      await tester.enterText(find.byType(CupertinoTextField), '1234,56');
+      expect(plain(text(tester)), 'R\$ 1.234,56');
       expect(changes.last, 1234.56);
     });
 
-    testWidgets('formats typed digits as USD in en', (tester) async {
-      final changes = await pump(tester, 'en');
-      await tester.enterText(find.byType(CupertinoTextField), '123456');
-      expect(text(tester), '\$1,234.56');
-      expect(changes.last, 1234.56);
+    testWidgets('a dot from the device keyboard opens the cents in pt', (
+      tester,
+    ) async {
+      final changes = await pump(tester, 'pt');
+      final field = find.byType(CupertinoTextField);
+      await tester.enterText(field, '12.');
+      await tester.enterText(field, '${text(tester)}5');
+      expect(changes.last, 12.5);
+    });
+
+    testWidgets('deletes one character at a time', (tester) async {
+      final changes = await pump(tester, 'pt', initial: 250);
+      final field = find.byType(CupertinoTextField);
+      for (final expected in [250.0, 250.0, 250.0, 25.0, 2.0]) {
+        final current = text(tester);
+        await tester.enterText(field, current.substring(0, current.length - 1));
+        expect(changes.last, expected);
+      }
+    });
+
+    testWidgets('the amount reads while the cents are being typed', (
+      tester,
+    ) async {
+      await pump(tester, 'pt');
+      await tester.enterText(find.byType(CupertinoTextField), '250,');
+      expect(parseCurrencyInput(text(tester)), 250);
+      await tester.enterText(find.byType(CupertinoTextField), '250,5');
+      expect(parseCurrencyInput(text(tester)), 250.5);
+    });
+
+    testWidgets('keeps at most two decimals', (tester) async {
+      final changes = await pump(tester, 'pt');
+      await tester.enterText(find.byType(CupertinoTextField), '10,999');
+      expect(changes.last, 10.99);
     });
 
     testWidgets('shows the initial amount formatted', (tester) async {
@@ -228,7 +274,7 @@ void main() {
       )));
       await tester.enterText(find.byType(CupertinoTextField), '1990');
       key.currentState!.save();
-      expect(saved, 19.9);
+      expect(saved, 1990);
     });
   });
 

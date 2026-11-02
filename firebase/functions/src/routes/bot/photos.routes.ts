@@ -4,6 +4,7 @@
  */
 
 import { Router, Response } from 'express';
+import { checkOrderNumberAccess } from '../../middleware/app-permission.middleware';
 import Busboy from 'busboy';
 import { AuthenticatedRequest, OrderPhoto } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
@@ -13,6 +14,7 @@ import * as photoService from '../../services/photo-upload.service';
 import { validateInput, uploadPhotoSchema } from '../../utils/validation.utils';
 
 const router: Router = Router();
+router.param('number', checkOrderNumberAccess);
 
 /**
  * POST /bot/orders/:number/photos

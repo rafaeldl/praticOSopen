@@ -269,6 +269,24 @@
         fetchOrder();
     }
 
+    // API text goes into innerHTML templates. `&` stays as is so URLs keep working.
+    const HTML_ESCAPES = { '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+    function escapeHtml(value) {
+        return String(value).replace(/[<>"']/g, (char) => HTML_ESCAPES[char]);
+    }
+
+    function escapeData(value) {
+        if (typeof value === 'string') return escapeHtml(value);
+        if (Array.isArray(value)) return value.map(escapeData);
+        if (value && typeof value === 'object') {
+            return Object.fromEntries(
+                Object.entries(value).map(([key, item]) => [key, escapeData(item)])
+            );
+        }
+        return value;
+    }
+
     // Fetch order data
     async function fetchOrder() {
         try {
@@ -279,7 +297,7 @@
                 throw new Error(result.error?.message || 'Failed to load order');
             }
 
-            orderData = result.data;
+            orderData = escapeData(result.data);
             renderOrder();
         } catch (error) {
             console.error('Error fetching order:', error);
@@ -720,8 +738,9 @@
         const photo = lightboxPhotos[lightboxIndex];
         overlay.querySelector('.lightbox-counter').textContent = `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
         overlay.querySelector('.lightbox-image').src = photo.url;
-        overlay.querySelector('.lightbox-image').alt = photo.description || text.photo;
-        overlay.querySelector('.lightbox-description').textContent = photo.description || '';
+        const description = overlay.querySelector('.lightbox-description');
+        description.innerHTML = photo.description || '';
+        overlay.querySelector('.lightbox-image').alt = description.textContent || text.photo;
         overlay.querySelector('.lightbox-prev').disabled = lightboxIndex === 0;
         overlay.querySelector('.lightbox-next').disabled = lightboxIndex === lightboxPhotos.length - 1;
     }
@@ -1240,7 +1259,7 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
                         ${orderData.customer?.name || text.you}
                     </div>
-                    <div class="comment-text">${commentText}</div>
+                    <div class="comment-text">${escapeHtml(commentText)}</div>
                     <div class="comment-time">${formatDate(new Date().toISOString())}</div>
                 `;
                 commentsContainer.appendChild(newComment);

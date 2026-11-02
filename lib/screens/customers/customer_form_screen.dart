@@ -8,11 +8,17 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/screens/widgets/form_sheet.dart';
 import 'package:praticos/screens/widgets/more_fields_link.dart';
+import 'package:praticos/screens/widgets/picker_screen.dart';
 import 'package:praticos/screens/widgets/section_label.dart';
+import 'package:praticos/services/contact_picker_service.dart';
+import 'package:praticos/services/customer_directory.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
+import 'package:praticos/utils/customer_utils.dart';
+import 'package:praticos/utils/phone_format.dart';
+import 'package:praticos/utils/vcard.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:praticos/widgets/tax_id_form_field.dart';
 
@@ -25,13 +31,19 @@ import 'package:praticos/widgets/tax_id_form_field.dart';
 /// Editing stays a pushed screen, with those fields behind a
 /// [MoreFieldsLink] (open right away when the customer already has any).
 ///
-/// Pops with the saved [Customer].
+/// A new customer can be filled from the phone's contacts, and saving one
+/// with a phone that is already registered asks first (a number can be
+/// shared, so it never blocks). Nothing is saved without the "✓".
+///
+/// Pops with the saved [Customer], or the existing one from "Abrir cliente".
 class CustomerFormScreen extends StatefulWidget {
   const CustomerFormScreen({
     super.key,
     this.customer,
     this.asSheet = false,
     this.onSave,
+    this.pickContact,
+    this.loadCustomers,
   });
 
   /// Customer to edit. Falls back to the `customer` route argument; a new one
@@ -43,6 +55,14 @@ class CustomerFormScreen extends StatefulWidget {
 
   /// Saves the customer. Defaults to [CustomerStore.saveCustomer].
   final Future<void> Function(Customer customer)? onSave;
+
+  /// Opens the system contact picker. Defaults to [ContactPickerService],
+  /// and the link stays hidden where that is not supported.
+  final Future<ContactCard?> Function()? pickContact;
+
+  /// Customers of the company, to warn about a repeated phone. Defaults to
+  /// [FirestoreCustomerDirectory].
+  final Future<List<Customer>> Function()? loadCustomers;
 
   @override
   State<CustomerFormScreen> createState() => _CustomerFormScreenState();
@@ -124,9 +144,82 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
         (c.customData?.isNotEmpty ?? false);
   }
 
+  /// The contacts link: only for a new customer, where there is a picker.
+  bool get _canPickContact =>
+      !_isEditing &&
+      (widget.pickContact != null || ContactPickerService.isSupported);
+
+  Future<void> _pickContact() async {
+    final pick = widget.pickContact ?? ContactPickerService().pick;
+    // A field focused behind the native picker brings the keyboard back on top
+    // of every screen that follows.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.delayed(Duration.zero);
+    final contact = await pick();
+    if (contact == null || !mounted) return;
+    final phone = await askContactPhone(context, contact);
+    if (!mounted || (phone == null && contact.phones.isNotEmpty)) return;
+    final name = contact.name;
+    final email = contact.email;
+    if (name != null) _name.text = name;
+    if (phone != null) _phone.text = formatPhone(phone);
+    if (email != null) _email.text = email;
+  }
+
+  /// The customer that already has the phone being saved, if any. Failing to
+  /// load the list (no internet, say) must not stop the save.
+  Future<Customer?> _findDuplicate() async {
+    final phone = _phone.text.trim();
+    if (_isEditing || phone.isEmpty) return null;
+    try {
+      final load = widget.loadCustomers ??
+          () => FirestoreCustomerDirectory()
+              .watchCustomers()
+              .first
+              .timeout(const Duration(seconds: 5));
+      return findCustomerByPhone(await load(), phone);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// True to save anyway; false after "Abrir cliente", which closes the form
+  /// with the existing customer.
+  Future<bool> _confirmDuplicate(Customer duplicate) async {
+    final l10n = context.l10n;
+    final open = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(l10n.customerDuplicateTitle),
+        content: Text(l10n.customerDuplicateMessage(duplicate.name ?? '')),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.customerDuplicateOpen),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.customerDuplicateSaveAnyway),
+          ),
+        ],
+      ),
+    );
+    if (open != true || !mounted) return true;
+    Navigator.pop(context, duplicate);
+    return false;
+  }
+
   Future<void> _saveCustomer() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+    final duplicate = await _findDuplicate();
+    if (!mounted) return;
+    if (duplicate != null) {
+      setState(() => _isLoading = false);
+      if (!await _confirmDuplicate(duplicate) || !mounted) return;
+      setState(() => _isLoading = true);
+    }
     _formKey.currentState!.save();
     // Avoid storing an empty map in Firestore.
     if (_customer!.customData != null && _customer!.customData!.isEmpty) {
@@ -238,11 +331,17 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   List<Widget> _buildSheetCards(SegmentConfigProvider config) {
     final l10n = context.l10n;
     return [
-      FormFieldsCard(children: [_nameField(), _phoneField(config)]),
+      FormFieldsCard(
+        children: [
+          _nameField(),
+          _phoneField(config),
+          if (_canPickContact) _pickContactLink(),
+        ],
+      ),
       FormMoreCard(
         title: l10n.formMoreData,
         hint: l10n.customerMoreDataHint,
-        initiallyOpen: _hasMoreData,
+        initiallyOpen: _hasMoreData || _email.text.isNotEmpty,
         children: _moreFields(config, inCard: true),
       ),
     ];
@@ -278,6 +377,25 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
               ),
             ],
       onSaved: (v) => _customer!.phone = v.isEmpty ? null : v,
+    );
+  }
+
+  Widget _pickContactLink() {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: CupertinoButton(
+        key: const Key('customerPickContact'),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        minimumSize: const Size(44, 44),
+        onPressed: _pickContact,
+        child: Text(
+          context.l10n.pickFromContacts,
+          style: AppTypography.callout.copyWith(
+            color: AppColors.accentText.resolveFrom(context),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 
@@ -406,4 +524,21 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
     return sections;
   }
+}
+
+/// The phone to use from [contact]: the only one, or the one chosen in
+/// "Qual número?" when there are several. Null without a phone, or when the
+/// question is closed.
+Future<String?> askContactPhone(BuildContext context, ContactCard contact) {
+  final phones = contact.phones;
+  if (phones.length <= 1) return Future.value(phones.firstOrNull);
+  return pickOne<String>(
+    context,
+    title: context.l10n.contactWhichNumber,
+    subtitle: contact.name,
+    options: [
+      for (final phone in phones)
+        PickerItem<String>(value: phone, title: formatPhone(phone)),
+    ],
+  );
 }

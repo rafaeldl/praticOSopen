@@ -569,7 +569,7 @@
       }
     }
   },
-  "preparingReport": "Preparando relatorio...",
+  "preparingReport": "Preparando relatório...",
   "appTagline": "Sistema de Gestao de Ordens de Servico",
   "receivedWithPercent": "Já pago ({percent}%)",
   "@receivedWithPercent": {
@@ -2376,6 +2376,17 @@
   "@pickerNoDevice": {"placeholders": {"device": {"type": "String"}}},
   "formMoreData": "Mais dados",
   "customerSaveNeedsName": "Escreva o nome para salvar.",
+  "pickFromContacts": "Escolher dos contatos",
+  "contactWhichNumber": "Qual número?",
+  "customerDuplicateTitle": "Já cadastrado",
+  "customerDuplicateMessage": "{name} já está com este telefone.",
+  "@customerDuplicateMessage": {"placeholders": {"name": {"type": "String"}}},
+  "customerDuplicateOpen": "Abrir cliente",
+  "customerDuplicateSaveAnyway": "Salvar mesmo assim",
+  "contactReadFailed": "Não deu para ler este contato.",
+  "contactFirstOfMany": "Este arquivo tem {count} contatos. Abrimos o primeiro.",
+  "@contactFirstOfMany": {"placeholders": {"count": {"type": "int"}}},
+  "contactCannotAddCustomer": "Seu perfil não pode cadastrar clientes.",
   "customerMoreDataHint": "E-mail, CPF ou CNPJ, endereço",
   "deviceSaveNeedsField": "Preencha o campo {field} para salvar.",
   "@deviceSaveNeedsField": {"placeholders": {"field": {"type": "String"}}},

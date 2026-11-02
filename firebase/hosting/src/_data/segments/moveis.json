@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Montador de Móveis | PraticOS",
     "ogDescription": "Montagens no celular: agenda do dia, OS para loja ou cliente particular, fotos do móvel montado e controle do que cada cliente ainda deve.",
     "hero": {
-      "title": "Cada montagem com",
-      "titleMark": "foto e valor na OS.",
-      "lede": "PraticOS é o app de ordem de serviço para montador de móveis. Marque as montagens na agenda, registre o serviço de cada loja ou cliente particular, fotografe o móvel montado e saiba o que falta receber — pelo celular.",
+      "title": "Menos reclamação sem prova.",
+      "titleMark": "Mais montagem paga.",
+      "lede": "PraticOS é o app de ordem de serviço para montador de móveis. Cada montagem fica na agenda, com foto do móvel pronto, e você sabe o que cada loja ou cliente ainda deve.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -55,80 +55,78 @@
       }
     },
     "problems": {
-      "title": "Onde o montador perde dinheiro",
+      "title": "Onde o montador deixa dinheiro na mesa",
       "lede": "Montagem não falta. O que escapa é o endereço anotado errado, a peça que chegou faltando sem foto e a loja que paga no fim do mês sem conferir o que você fez.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Montagem esquecida ou marcada duas vezes",
           "detail": "A loja manda o pedido por mensagem, o cliente particular liga, e a agenda fica num caderno que ninguém mais lê.",
-          "answer": "Cada montagem é uma OS com dia e hora. A agenda mostra o mês e o celular avisa antes de cada atendimento."
+          "answer": "Cada montagem tem dia e hora na agenda, e o celular avisa antes de cada atendimento. Nada esquecido."
         },
         {
           "problem": "Peça faltando ou avariada sem prova",
           "detail": "A caixa chega com a porta riscada e, depois da montagem, o cliente diz que foi você.",
-          "answer": "Fotografe as caixas e as avarias na chegada. As fotos ficam na OS, com data, antes de você abrir a primeira embalagem."
+          "answer": "Fotografe as caixas e as avarias antes de abrir a primeira embalagem. As fotos ficam com data, e você tem como provar."
         },
         {
           "problem": "Cliente reclama depois da entrega",
           "detail": "Uma semana depois aparece a reclamação de porta desalinhada ou móvel não fixado.",
-          "answer": "O checklist de entrega registra o móvel conferido com o cliente, as orientações passadas, o prazo de garantia e a foto do móvel montado."
+          "answer": "Móvel conferido com o cliente, orientações passadas, garantia e foto do móvel montado, tudo por escrito. Você responde com confiança."
         },
         {
           "problem": "Loja que paga sem conferir",
           "detail": "Você atende três lojas e particulares. No fim do mês, ninguém sabe quais montagens já foram pagas.",
-          "answer": "Cada OS mostra o total e o que falta receber. O Financeiro junta quem ainda deve, de quem há mais tempo, e tem o botão para mandar a cobrança."
+          "answer": "Veja o que cada OS ainda tem a receber e quem deve há mais tempo, e mande a cobrança com um botão."
         },
         {
           "problem": "Valor combinado de boca",
           "detail": "Montagem de cozinha, desmontagem, fixação na parede. O valor muda e o cliente lembra de outro.",
-          "answer": "O orçamento fica na OS com os serviços do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+          "answer": "O cliente aprova o orçamento pelo link. O valor fica combinado por escrito."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma montagem passa pelo PraticOS",
-      "lede": "Do pedido à entrega, cada etapa fica registrada na OS.",
+      "title": "Do pedido da loja ao dinheiro recebido",
+      "lede": "Menos tempo com papel, mais tempo montando. Do pedido à entrega, nada fica esquecido.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale a montagem e a IA abre a OS",
+          "title": "Fale a montagem e a IA faz a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga, por exemplo: “Loja Casa Bela, guarda-roupa de 6 portas na casa da Ana, amanhã às 9”. Ou fotografe o pedido da loja. A IA preenche cliente, móvel e serviços com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "Com dia e hora, a montagem entra na Agenda",
             "Corrija falando: “a montagem é 250”",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registre a chegada no local",
+          "title": "Proteja-se antes de abrir as caixas",
+          "tab": "Registrar",
           "text": "Antes de abrir as caixas, fotografe as embalagens e qualquer avaria. Use o checklist de entrada e ajuste os itens ao seu jeito.",
           "facts": [
             "Fotos das caixas e das avarias",
             "Descrição do móvel e defeitos visíveis",
             "Observações sobre o local de montagem"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
-          "title": "Entregue com conferência",
+          "title": "Entregue com o cliente de acordo",
+          "tab": "Entregar",
           "text": "Ao terminar, preencha o checklist de entrega com o cliente e fotografe o móvel montado. Ele pode acompanhar tudo pelo link da OS.",
           "facts": [
             "Móvel conferido e funcionamento demonstrado",
-            "Prazo de garantia registrado na OS",
+            "Prazo de garantia por escrito",
             "PDF da OS para enviar à loja ou ao cliente"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         },
         {
           "number": "04",
-          "title": "Receba e confira",
+          "title": "Receba e saiba quem ainda deve",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em partes. O Financeiro mostra quanto falta receber, de quais clientes, e o que entrou no mês.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -141,8 +139,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem monta móveis",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Dúvidas de quem monta móveis",
+      "lede": "Não achou a sua? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -176,9 +174,9 @@
     "ogTitle": "Furniture Assembly Software | PraticOS",
     "ogDescription": "Assembly jobs on your phone: the day's calendar, work orders for stores or homeowners, photos of the finished piece and who still owes you.",
     "hero": {
-      "title": "Every assembly job with",
-      "titleMark": "photos and price.",
-      "lede": "PraticOS is the work order app for furniture assemblers. Put jobs on the calendar, record the work for each store or homeowner, photograph the finished piece and know what's still owed — from your phone.",
+      "title": "Fewer complaints without proof.",
+      "titleMark": "More assembly jobs paid.",
+      "lede": "PraticOS is the work order app for furniture assemblers. Every job is on your calendar with a photo of the finished piece, and you know what each store or customer still owes.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -222,80 +220,78 @@
       }
     },
     "problems": {
-      "title": "Where an assembler loses money",
+      "title": "Where an assembler's money slips away",
       "lede": "There's no shortage of jobs. What slips away is the wrong address, the missing part with no photo and the store that pays at month's end without checking what you did.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Jobs forgotten or double-booked",
           "detail": "The store sends the order by text, a homeowner calls, and the schedule lives in a notebook nobody reads.",
-          "answer": "Every job is a work order with a day and time. The calendar shows the month and your phone reminds you before each visit."
+          "answer": "Every job has a day and time on the calendar, and your phone reminds you before each visit. Nothing forgotten."
         },
         {
           "problem": "Missing or damaged parts with no proof",
           "detail": "The box arrives with a scratched door and, after the job, the customer says you did it.",
-          "answer": "Photograph the boxes and any damage on arrival. The photos stay on the work order, dated, before you open the first package."
+          "answer": "Photograph the boxes and any damage before you open the first package. The photos are dated, so you have proof."
         },
         {
           "problem": "Complaints after you leave",
           "detail": "A week later comes a complaint about a crooked door or a piece that wasn't anchored.",
-          "answer": "The handover checklist records the piece checked with the customer, the instructions given, the warranty period and a photo of the finished piece."
+          "answer": "Piece checked with the customer, instructions given, warranty period and a photo of the finished piece, all in writing. You answer with confidence."
         },
         {
           "problem": "Stores that pay without checking",
           "detail": "You work for three stores plus homeowners. At month's end, nobody knows which jobs were paid.",
-          "answer": "Each order shows the total and what is still due. Financial lists everyone who still owes you, oldest first, with a button to send them a payment reminder."
+          "answer": "See what each order still has due and who has owed you the longest, and send a payment reminder with one button."
         },
         {
           "problem": "Prices agreed by word of mouth",
           "detail": "Kitchen install, disassembly, wall anchoring. The price changes and the customer remembers another one.",
-          "answer": "The quote lives on the work order with services from your catalog. The customer approves it by link and the approval is recorded."
+          "answer": "The customer approves the quote by link. The price is agreed in writing."
         }
       ]
     },
     "workflow": {
-      "title": "How an assembly job moves through PraticOS",
-      "lede": "From the order to the handover, every step is recorded on the work order.",
+      "title": "From the store's order to money in hand",
+      "lede": "Less time on paperwork, more time assembling. From the order to the handover, nothing gets forgotten.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the AI opens the order",
+          "title": "Say the job and AI writes the order",
+          "tab": "Speak",
           "text": "Tap Speak and say something like: “Casa Bela store, 6-door wardrobe at Ana's place, tomorrow at 9”. Or photograph the store's order. The AI fills in customer, piece and services with your catalog prices and marks what it filled with ✦.",
           "facts": [
             "With a date and time, the job goes on the Schedule",
             "Fix it by voice: “assembly is 250”",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Record what you find on arrival",
+          "title": "Protect yourself before opening the boxes",
+          "tab": "Record",
           "text": "Before opening the boxes, photograph the packaging and any damage. Use the intake checklist and adjust the items to the way you work.",
           "facts": [
             "Photos of the boxes and any damage",
             "Description of the piece and visible defects",
             "Notes about the installation spot"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
-          "title": "Hand over with a walkthrough",
+          "title": "Hand over with the customer on board",
+          "tab": "Deliver",
           "text": "When you're done, go through the handover checklist with the customer and photograph the finished piece. They can follow it all through the work order link.",
           "facts": [
             "Piece checked and operation demonstrated",
-            "Warranty period recorded on the work order",
+            "Warranty period in writing",
             "Work order PDF to send to the store or customer"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         },
         {
           "number": "04",
-          "title": "Get paid and keep track",
+          "title": "Get paid and know who still owes",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts. Financial shows how much is still due, from which customers, and what came in this month.",
           "facts": [
             "Partial payment and discount on the same order",
@@ -309,7 +305,7 @@
     },
     "faq": {
       "title": "Questions from furniture assemblers",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "lede": "Can't find yours? Send us an email and the PraticOS team will answer.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -343,9 +339,9 @@
     "ogTitle": "Sistema para Armadores de Muebles | PraticOS",
     "ogDescription": "Armados en el celular: agenda del día, órdenes para tienda o cliente particular, fotos del mueble armado y control de lo que cada cliente todavía debe.",
     "hero": {
-      "title": "Cada armado con",
-      "titleMark": "fotos y precio en la orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para armadores de muebles. Marca los armados en la agenda, registra el trabajo de cada tienda o cliente particular, fotografía el mueble terminado y sabe lo que falta cobrar — desde el celular.",
+      "title": "Menos reclamos sin prueba.",
+      "titleMark": "Más armados cobrados.",
+      "lede": "PraticOS es la app de órdenes de servicio para armadores de muebles. Cada armado queda en tu agenda, con foto del mueble terminado, y sabes lo que cada tienda o cliente todavía debe.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -389,80 +385,78 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el armador",
+      "title": "Dónde se le escapa la plata al armador",
       "lede": "Trabajo no falta. Lo que se escapa es la dirección mal anotada, la pieza que llegó faltando sin foto y la tienda que paga a fin de mes sin revisar lo que hiciste.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Armados olvidados o agendados dos veces",
           "detail": "La tienda manda el pedido por mensaje, el particular llama, y la agenda queda en un cuaderno que nadie lee.",
-          "answer": "Cada armado es una orden con día y hora. La agenda muestra el mes y el celular te avisa antes de cada visita."
+          "answer": "Cada armado tiene día y hora en la agenda, y el celular te avisa antes de cada visita. Nada se olvida."
         },
         {
           "problem": "Piezas faltantes o dañadas sin prueba",
           "detail": "La caja llega con la puerta rayada y, después del armado, el cliente dice que fuiste tú.",
-          "answer": "Fotografía las cajas y los daños al llegar. Las fotos quedan en la orden, con fecha, antes de abrir el primer paquete."
+          "answer": "Fotografía las cajas y los daños antes de abrir el primer paquete. Las fotos quedan con fecha y tienes cómo demostrarlo."
         },
         {
           "problem": "Reclamos después de la entrega",
           "detail": "Una semana después aparece el reclamo de una puerta desalineada o un mueble sin fijar.",
-          "answer": "El checklist de entrega registra el mueble revisado con el cliente, las indicaciones dadas, el plazo de garantía y la foto del mueble armado."
+          "answer": "Mueble revisado con el cliente, indicaciones dadas, garantía y foto del mueble armado, todo por escrito. Respondes con confianza."
         },
         {
           "problem": "Tiendas que pagan sin revisar",
           "detail": "Trabajas para tres tiendas y para particulares. A fin de mes nadie sabe qué armados ya se pagaron.",
-          "answer": "Cada orden muestra el total y lo que falta cobrar. Financiero junta a quien todavía debe, el más atrasado primero, con el botón para mandar el cobro."
+          "answer": "Ve lo que cada orden tiene por cobrar y quién debe hace más tiempo, y envía el cobro con un botón."
         },
         {
           "problem": "Precio acordado de palabra",
           "detail": "Armado de cocina, desarmado, fijación a la pared. El precio cambia y el cliente recuerda otro.",
-          "answer": "El presupuesto queda en la orden con los servicios de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+          "answer": "El cliente aprueba el presupuesto por link. El precio queda acordado por escrito."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un armado por PraticOS",
-      "lede": "Del pedido a la entrega, cada paso queda registrado en la orden.",
+      "title": "Del pedido de la tienda a la plata cobrada",
+      "lede": "Menos tiempo con papeles, más tiempo armando. Del pedido a la entrega, nada se olvida.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el armado y la IA abre la orden",
+          "title": "Di el armado y la IA hace la orden",
+          "tab": "Hablar",
           "text": "Toca Hablar y di, por ejemplo: “Tienda Casa Bela, ropero de 6 puertas en la casa de Ana, mañana a las 9”. O fotografía el pedido de la tienda. La IA completa cliente, mueble y servicios con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "Con día y hora, el armado entra en la Agenda",
             "Corrige hablando: “el armado es 250”",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registra la llegada",
+          "title": "Protégete antes de abrir las cajas",
+          "tab": "Registrar",
           "text": "Antes de abrir las cajas, fotografía los embalajes y cualquier daño. Usa el checklist de ingreso y ajusta los ítems a tu forma de trabajar.",
           "facts": [
             "Fotos de las cajas y de los daños",
             "Descripción del mueble y defectos visibles",
             "Notas sobre el lugar de armado"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
-          "title": "Entrega con revisión",
+          "title": "Entrega con el cliente conforme",
+          "tab": "Entregar",
           "text": "Al terminar, completa el checklist de entrega con el cliente y fotografía el mueble armado. El cliente puede seguir todo por el link de la orden.",
           "facts": [
             "Mueble revisado y funcionamiento mostrado",
-            "Plazo de garantía registrado en la orden",
+            "Plazo de garantía por escrito",
             "PDF de la orden para enviar a la tienda o al cliente"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
-          "title": "Cobra y lleva la cuenta",
+          "title": "Cobra y sabe quién todavía debe",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes. Financiero muestra cuánto falta cobrar, de qué clientes, y lo que entró en el mes.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -475,8 +469,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien arma muebles",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Dudas de quien arma muebles",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo y te responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
