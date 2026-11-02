@@ -70,7 +70,7 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 ## Motion
 - Easings `--ease-out` / `--ease-in` / `--ease-in-out`; 160–240 ms.
 - No scroll reveals. Hover/focus/press, plus one pass of the home demo card with a manual replay. The card rests complete, and reduced motion skips the pass.
-- The home trades reels move slowly and continuously. They pause on hover and through a visible toggle, keyboard focus stops them, and reduced motion leaves plain hand-scrolled rows. Nothing else loops.
+- The home trades reels move slowly and continuously. Rows can be dragged with the mouse or swiped, and a click or tap opens the trade's page. They pause on hover and through a visible toggle, keyboard focus stops them, and reduced motion leaves still rows that can be dragged and swiped. Nothing else loops.
 
 ## Microinteractions stance
 - Silent success; no toasts, no confetti.
