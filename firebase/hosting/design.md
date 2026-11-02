@@ -102,6 +102,8 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
   "Imagens ilustrativas" note beside them, never attach a name, company or
   testimonial, and replace them with authorized customer photos as they arrive.
 - Every trade in the app's seed has a page and a reel photo.
+- App screens appear whole, 820 x 1240, with all four corners rounded: no bleed
+  off the panel, no clipped navigation, no row cut through.
 - Content pages: typography only; tables and callouts use rules, not cards.
 
 ## What pages MUST share

@@ -14,7 +14,6 @@
 .fx-hero .lede { margin-top: var(--space-md); }
 .fx-hero .btn-row { margin-top: var(--space-lg); }
 .fx-hero__shot { width: min(100%, 17rem); justify-self: start; }
-.fx-hero__shot:not(.fx-hero__shot--demo) img { aspect-ratio: 9 / 14; object-fit: cover; object-position: top; }
 @media (min-width: 60rem) {
   .fx-hero { padding-top: var(--space-3xl); }
   .fx-hero__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-xl); }
