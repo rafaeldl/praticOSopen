@@ -190,8 +190,9 @@
     "testimonial": {
       "title": "Quem usa, recomenda",
       "quote": "Cada carro que entra na oficina fica registrado no PraticOS: cliente, serviço e o que falta receber. Ficou bem mais fácil saber o que fazer e o que cobrar.",
-      "name": "Manuel",
-      "role": "Oficina mecânica"
+      "name": "Manoel Vergilino dos Santos",
+      "role": "Oficina mecânica",
+      "photo": "assets/images/site/manoel-vergilino.jpg"
     }
   },
   "en": {
@@ -385,8 +386,9 @@
     "testimonial": {
       "title": "Trusted in the shop",
       "quote": "Every car that comes into the shop is logged in PraticOS: customer, service and what's still owed. It got much easier to know what to do and what to charge.",
-      "name": "Manuel",
-      "role": "Auto repair shop"
+      "name": "Manoel Vergilino dos Santos",
+      "role": "Auto repair shop",
+      "photo": "assets/images/site/manoel-vergilino.jpg"
     }
   },
   "es": {
@@ -580,8 +582,9 @@
     "testimonial": {
       "title": "Quien lo usa, lo recomienda",
       "quote": "Cada auto que entra al taller queda registrado en PraticOS: cliente, servicio y lo que falta cobrar. Ahora es mucho más fácil saber qué hacer y qué cobrar.",
-      "name": "Manuel",
-      "role": "Taller mecánico"
+      "name": "Manoel Vergilino dos Santos",
+      "role": "Taller mecánico",
+      "photo": "assets/images/site/manoel-vergilino.jpg"
     }
   }
 }
