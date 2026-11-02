@@ -103,9 +103,7 @@
             "BTUs, voltagem, tipo de gás e data de instalação",
             "Com dia e hora, a OS entra na Agenda e o celular avisa antes",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -115,9 +113,7 @@
             "Instalação: evaporadora, condensadora, dreno, vácuo, pressão",
             "Preventiva, diagnóstico e recarga de gás",
             "Segurança do técnico (NR10/NR35) e comissionamento com tensão, corrente e ΔT"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
@@ -127,9 +123,7 @@
             "Aprovação registrada na própria OS",
             "Você recebe uma notificação quando o cliente aprova",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -275,9 +269,7 @@
             "BTUs, voltage, refrigerant type and install date",
             "With a date and time, the order goes on the Schedule and your phone reminds you",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -287,9 +279,7 @@
             "Install: indoor unit, outdoor unit, drain, vacuum, pressure",
             "Preventive maintenance, diagnosis and refrigerant recharge",
             "Technician safety and commissioning with voltage, amperage and ΔT"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
@@ -299,9 +289,7 @@
             "Approval recorded on the work order",
             "You get a notification when the customer approves",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         },
         {
           "number": "04",
@@ -447,9 +435,7 @@
             "BTU, voltaje, tipo de gas y fecha de instalación",
             "Con día y hora, la orden entra en la Agenda y el celular avisa antes",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -459,9 +445,7 @@
             "Instalación: evaporadora, condensadora, drenaje, vacío, presión",
             "Mantenimiento preventivo, diagnóstico y recarga de gas",
             "Seguridad del técnico y puesta en marcha con voltaje, corriente y ΔT"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
@@ -471,9 +455,7 @@
             "Aprobación registrada en la propia orden",
             "Recibes una notificación cuando el cliente aprueba",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",

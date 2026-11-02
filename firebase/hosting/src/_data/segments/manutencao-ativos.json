@@ -103,9 +103,7 @@
             "Ativo com tag, fabricante, número de série, localização e categoria",
             "Corrija falando: “o filtro é 180”",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -115,9 +113,7 @@
             "Preventiva e corretiva na mesma agenda",
             "Resumo do dia às 9h, se você quiser",
             "Aviso de orçamento parado há 7 dias"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
+          ]
         },
         {
           "number": "03",
@@ -125,11 +121,9 @@
           "text": "Monte um checklist para cada tipo de equipamento e use em todas as visitas. Marque os itens, anote leituras e fotografe antes e depois.",
           "facts": [
             "Itens com verificação, texto ou foto",
-            "Leituras e observações em campo de texto",
+            "Leituras e observações guardadas na OS",
             "Modelos em Checklists, pelo botão do perfil no Início"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "04",
@@ -139,9 +133,7 @@
             "Aprovação registrada na própria OS",
             "PDF com uma página por checklist",
             "Total e o que falta receber na tela da OS"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         }
       ]
     },
@@ -275,9 +267,7 @@
             "Asset with tag, manufacturer, serial number, location and category",
             "Fix it by voice: “the filter is 180”",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -287,9 +277,7 @@
             "Preventive and corrective on one schedule",
             "Daily summary at 9am, if you want it",
             "Reminder for quotes with no answer for 7 days"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the visit booked for the day"
+          ]
         },
         {
           "number": "03",
@@ -297,11 +285,9 @@
           "text": "Build a checklist for each type of equipment and use it on every visit. Check off items, note readings and take before and after photos.",
           "facts": [
             "Items with check, text or photo",
-            "Readings and notes in text fields",
+            "Readings and notes saved on the order",
             "Templates in Checklists, from the profile button on Home"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "04",
@@ -311,9 +297,7 @@
             "Approval recorded on the order",
             "PDF with a page per checklist",
             "Total and amount still due on the order screen"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         }
       ]
     },
@@ -447,9 +431,7 @@
             "Activo con etiqueta, fabricante, número de serie, ubicación y categoría",
             "Corrige hablando: “el filtro es 180”",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -459,9 +441,7 @@
             "Preventivo y correctivo en la misma agenda",
             "Resumen del día a las 9, si lo quieres",
             "Aviso de presupuesto sin respuesta hace 7 días"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y la visita marcada del día"
+          ]
         },
         {
           "number": "03",
@@ -469,11 +449,9 @@
           "text": "Arma un checklist para cada tipo de equipo y úsalo en todas las visitas. Marca los ítems, anota lecturas y toma fotos de antes y después.",
           "facts": [
             "Ítems con verificación, texto o foto",
-            "Lecturas y observaciones en campos de texto",
+            "Lecturas y observaciones guardadas en la orden",
             "Modelos en Checklists, desde el botón del perfil en Inicio"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "04",
@@ -483,9 +461,7 @@
             "Aprobación registrada en la propia orden",
             "PDF con una página por checklist",
             "Total y lo que falta cobrar en la pantalla de la OS"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         }
       ]
     },

@@ -102,9 +102,7 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a bateria é 250”",
             "Aparelho com fabricante, modelo, cor e IMEI, e a busca pelo IMEI traz as OS anteriores"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,9 +112,7 @@
             "Fotos de frente, verso e avarias visíveis",
             "Display, touch, câmeras, áudio, Wi-Fi, Bluetooth e carregamento",
             "Senha de desbloqueio e acessórios deixados"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Aprovação registrada na própria OS",
             "Cliente acompanha o reparo sem ligar",
             "PDF da OS com checklists e fotos"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -273,9 +267,7 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the battery is 250”",
             "Device with manufacturer, model, color and IMEI; searching by IMEI brings up its past work orders"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -285,9 +277,7 @@
             "Front, back and visible damage photos",
             "Display, touch, cameras, audio, Wi-Fi, Bluetooth and charging",
             "Unlock passcode and accessories left"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "03",
@@ -297,9 +287,7 @@
             "Approval recorded on the work order",
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
@@ -444,9 +432,7 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la batería es 250”",
             "Equipo con fabricante, modelo, color e IMEI; buscar por IMEI trae sus órdenes anteriores"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -456,9 +442,7 @@
             "Fotos de frente, dorso y daños visibles",
             "Pantalla, touch, cámaras, audio, Wi-Fi, Bluetooth y carga",
             "Contraseña de desbloqueo y accesorios que quedaron"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "03",
@@ -468,9 +452,7 @@
             "Aprobación registrada en la propia orden",
             "El cliente sigue la reparación sin llamar",
             "PDF de la orden con checklists y fotos"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",

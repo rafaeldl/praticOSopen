@@ -107,3 +107,11 @@ Wordmark, tokens, fonts, CTA voice, section-head rule, nav, footer.
 ## What pages MAY differ on
 Macrostructure within their family, ordering of sections, whether a page shows
 the ticket.
+
+## Segment page screens
+
+The app screenshots in `assets/screenshots/` come from a car-repair demo account
+(Onix, oil change, vehicle check-in). Only the `automotivo` page may show them,
+plus the neutral `financial.png`, which is the one screen other trades share.
+Stages without `image` render as text. Add a screen to another trade only when
+it was captured with that trade's data.

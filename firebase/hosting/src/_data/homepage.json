@@ -63,11 +63,11 @@
       }
     },
     "workflow": {
-      "title": "Do pedido à cobrança, tudo na mesma OS",
-      "lede": "Cinco passos, do primeiro contato ao dinheiro na conta. Sem planilha, sem caderno e sem orçamento perdido no meio da conversa.",
+      "title": "Menos papelada. Mais serviço e dinheiro no bolso.",
+      "lede": "Do primeiro contato ao pagamento, o PraticOS cuida da parte chata para você cuidar do cliente.",
       "stages": [
         {
-          "title": "Fale e a IA preenche a OS",
+          "title": "Abra a OS sem digitar",
           "text": "Toque no + e em Falar: “Onix da Juliana, troca de óleo e alinhamento”. A IA preenche cliente, veículo, serviços e peças com os preços do seu catálogo.",
           "facts": [
             "Também dá para tirar foto da placa ou do pedido anotado",
@@ -79,7 +79,7 @@
           "tab": "Falar"
         },
         {
-          "title": "Registre com foto e checklist",
+          "title": "Prove o serviço com fotos",
           "text": "Fotografe o antes e o depois direto na OS. O checklist de entrada mostra como o equipamento chegou, antes de alguém mexer.",
           "facts": [
             "Fotos ficam na OS, não perdidas na galeria",
@@ -91,7 +91,7 @@
           "tab": "Registrar"
         },
         {
-          "title": "Mande o link para o cliente",
+          "title": "Orçamento aprovado pelo celular do cliente",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê fotos e valores, aprova o orçamento e deixa comentários.",
           "facts": [
             "Aprovação registrada na própria OS",
@@ -103,7 +103,7 @@
           "tab": "Aprovar"
         },
         {
-          "title": "Marque o dia e a hora",
+          "title": "Nenhum atendimento esquecido",
           "text": "A Agenda mostra a semana e os atendimentos de cada dia. O app lembra você antes de cada horário.",
           "facts": [
             "Lembrete no celular antes do horário",
@@ -115,7 +115,7 @@
           "tab": "Agendar"
         },
         {
-          "title": "Veja quanto falta receber",
+          "title": "Receba o que é seu",
           "text": "A aba Financeiro mostra quanto falta receber e de quem. Registre o que o cliente pagou, de uma vez ou em partes.",
           "facts": [
             "Quem deve há mais tempo aparece primeiro",
@@ -130,8 +130,8 @@
       "tabsLabel": "Recursos do app"
     },
     "segments": {
-      "title": "Feito para quem conserta, instala e faz manutenção",
-      "lede": "O PraticOS se ajusta ao seu ramo. Na oficina o campo se chama veículo, na assistência técnica é aparelho, na refrigeração é equipamento. Veja o seu:",
+      "title": "O PraticOS fala a língua do seu serviço",
+      "lede": "Escolha o seu ramo e o app já chega do seu jeito: veículo na oficina, aparelho na assistência técnica, equipamento na refrigeração. Encontre o seu:",
       "imageNote": "Imagens ilustrativas.",
       "pause": "Pausar fotos",
       "resume": "Continuar fotos"
@@ -252,11 +252,11 @@
       }
     },
     "workflow": {
-      "title": "From request to payment, all in one order",
-      "lede": "Five steps, from first contact to money in the bank. No spreadsheet, no notebook, no quote lost in a chat.",
+      "title": "Less paperwork. More jobs done and money in your pocket.",
+      "lede": "From first call to payment, PraticOS handles the boring part so you can take care of the customer.",
       "stages": [
         {
-          "title": "Say it and AI fills in the order",
+          "title": "Open the order without typing",
           "text": "Tap + and Speak: “Julia's Civic, oil change and alignment.” AI fills in the customer, vehicle, services and parts with the prices from your catalog.",
           "facts": [
             "You can also take a photo of the plate or a handwritten request",
@@ -268,7 +268,7 @@
           "tab": "Talk"
         },
         {
-          "title": "Record it with photos and a checklist",
+          "title": "Show your work with photos",
           "text": "Shoot the before and after right in the work order. The check-in checklist shows how the item arrived, before anyone touches it.",
           "facts": [
             "Photos stay in the order, not lost in your gallery",
@@ -280,7 +280,7 @@
           "tab": "Record"
         },
         {
-          "title": "Send the link to the customer",
+          "title": "Get quotes approved from the customer's phone",
           "text": "The customer opens the work order in the browser, nothing to install. They see photos and prices, approve the quote and leave comments.",
           "facts": [
             "Approval is recorded on the order itself",
@@ -292,7 +292,7 @@
           "tab": "Approve"
         },
         {
-          "title": "Set the day and time",
+          "title": "Never miss a job",
           "text": "The Schedule shows the week and each day's appointments. The app reminds you before each one.",
           "facts": [
             "Phone reminder before the appointment",
@@ -304,7 +304,7 @@
           "tab": "Schedule"
         },
         {
-          "title": "See what's left to collect",
+          "title": "Get paid what you're owed",
           "text": "The Financial tab shows what's left to collect and from whom. Record what the customer paid, all at once or in parts.",
           "facts": [
             "Whoever has owed the longest shows first",
@@ -319,8 +319,8 @@
       "tabsLabel": "App features"
     },
     "segments": {
-      "title": "Built for people who repair, install and maintain",
-      "lede": "PraticOS adapts to your trade. In an auto shop the field is called vehicle, in a phone repair shop it is device, in HVAC it is equipment. Find yours:",
+      "title": "PraticOS speaks your trade's language",
+      "lede": "Pick your trade and the app is ready your way: vehicle at the auto shop, device at the phone repair shop, equipment in HVAC. Find yours:",
       "imageNote": "Illustrative images.",
       "pause": "Pause photos",
       "resume": "Resume photos"
@@ -441,11 +441,11 @@
       }
     },
     "workflow": {
-      "title": "Del pedido al cobro, todo en la misma orden",
-      "lede": "Cinco pasos, del primer contacto al dinero en la cuenta. Sin planilla, sin cuaderno y sin presupuestos perdidos en la conversación.",
+      "title": "Menos papeleo. Más trabajos y dinero en el bolsillo.",
+      "lede": "Del primer contacto al pago, PraticOS se ocupa de la parte aburrida para que tú cuides al cliente.",
       "stages": [
         {
-          "title": "Dilo y la IA rellena la orden",
+          "title": "Abre la orden sin escribir",
           "text": "Toca + y Hablar: “El Corolla de Julia, cambio de aceite y alineación”. La IA rellena cliente, vehículo, servicios y piezas con los precios de tu catálogo.",
           "facts": [
             "También puedes sacar foto de la matrícula o del pedido anotado",
@@ -457,7 +457,7 @@
           "tab": "Hablar"
         },
         {
-          "title": "Registra con foto y checklist",
+          "title": "Demuestra tu trabajo con fotos",
           "text": "Fotografía el antes y el después directo en la orden. El checklist de entrada muestra cómo llegó el equipo, antes de que alguien lo toque.",
           "facts": [
             "Las fotos quedan en la orden, no perdidas en la galería",
@@ -469,7 +469,7 @@
           "tab": "Registrar"
         },
         {
-          "title": "Manda el enlace al cliente",
+          "title": "Presupuesto aprobado desde el celular del cliente",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve fotos y valores, aprueba el presupuesto y deja comentarios.",
           "facts": [
             "La aprobación queda registrada en la orden",
@@ -481,7 +481,7 @@
           "tab": "Aprobar"
         },
         {
-          "title": "Marca el día y la hora",
+          "title": "Ningún trabajo olvidado",
           "text": "La Agenda muestra la semana y las visitas de cada día. La app te avisa antes de cada horario.",
           "facts": [
             "Aviso en el celular antes del horario",
@@ -493,7 +493,7 @@
           "tab": "Agendar"
         },
         {
-          "title": "Mira cuánto falta cobrar",
+          "title": "Cobra lo que es tuyo",
           "text": "La pestaña Financiero muestra cuánto falta cobrar y a quién. Registra lo que pagó el cliente, de una vez o en partes.",
           "facts": [
             "Quien debe hace más tiempo aparece primero",
@@ -508,8 +508,8 @@
       "tabsLabel": "Funciones de la app"
     },
     "segments": {
-      "title": "Hecho para quien repara, instala y mantiene",
-      "lede": "PraticOS se adapta a tu rubro. En el taller el campo se llama vehículo, en el servicio técnico es aparato, en refrigeración es equipo. Encuentra el tuyo:",
+      "title": "PraticOS habla el idioma de tu oficio",
+      "lede": "Elige tu rubro y la app llega a tu manera: vehículo en el taller, aparato en el servicio técnico, equipo en refrigeración. Encuentra el tuyo:",
       "imageNote": "Imágenes ilustrativas.",
       "pause": "Pausar fotos",
       "resume": "Reanudar fotos"

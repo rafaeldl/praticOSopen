@@ -103,9 +103,7 @@
             "Empreendimento, bloco ou torre, número e andar",
             "Sistema afetado e data de entrega da unidade",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -115,9 +113,7 @@
             "Semana no topo e os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
             "Aviso antes do atendimento, mesmo com o app fechado"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
+          ]
         },
         {
           "number": "03",
@@ -127,9 +123,7 @@
             "Itens de sim, não ou não se aplica, texto e foto",
             "Fotos do antes e do depois na mesma OS",
             "PDF da OS para enviar ao síndico ou à construtora"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "04",
@@ -139,9 +133,7 @@
             "Aprovação registrada na própria OS",
             "Pagamento parcial e desconto na mesma OS",
             "Quanto falta receber de cada cliente no Financeiro"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         }
       ]
     },
@@ -275,9 +267,7 @@
             "Development, building or tower, number and floor",
             "Affected system and unit handover date",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -287,9 +277,7 @@
             "The week on top and the day's visits",
             "Daily summary at 9am, if you want it",
             "Reminder before the visit, even with the app closed"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the visit booked for the day"
+          ]
         },
         {
           "number": "03",
@@ -299,9 +287,7 @@
             "Yes, no or N/A items, text and photo",
             "Before and after photos on the same work order",
             "Work order PDF to send to the manager or builder"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "04",
@@ -311,9 +297,7 @@
             "Approval recorded on the work order",
             "Partial payment and discount on the same work order",
             "What each customer still owes, in Financial"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         }
       ]
     },
@@ -447,9 +431,7 @@
             "Proyecto, bloque o torre, número y piso",
             "Sistema afectado y fecha de entrega de la unidad",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -459,9 +441,7 @@
             "La semana arriba y las visitas del día",
             "Resumen del día a las 9, si lo quieres",
             "Aviso antes de la visita, incluso con la app cerrada"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y la visita marcada del día"
+          ]
         },
         {
           "number": "03",
@@ -471,9 +451,7 @@
             "Ítems de sí, no o no aplica, texto y foto",
             "Fotos del antes y el después en la misma orden",
             "PDF de la orden para enviar al administrador o a la constructora"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "04",
@@ -483,9 +461,7 @@
             "Aprobación registrada en la propia orden",
             "Pago parcial y descuento en la misma orden",
             "Cuánto falta cobrar a cada cliente en Financiero"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         }
       ]
     },

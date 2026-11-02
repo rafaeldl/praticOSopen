@@ -76,7 +76,7 @@
         {
           "problem": "Pós-venda sem registro",
           "detail": "Dois anos depois o cliente chama e ninguém lembra qual equipamento foi instalado em qual ambiente.",
-          "answer": "Crie um checklist de registro da instalação com os campos que você usa — ambiente, equipamento, observações e fotos — e ele fica na OS do cliente."
+          "answer": "Crie um checklist de registro da instalação com o que você precisa anotar — ambiente, equipamento, observações e fotos — e ele fica na OS do cliente."
         },
         {
           "problem": "Entrada paga, saldo esquecido",
@@ -102,21 +102,17 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a programação é 800”",
             "Equipamentos e programação em itens separados"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
           "title": "Faça a visita técnica",
           "text": "Monte um checklist de vistoria com o que você confere em toda obra — infraestrutura de rede, pontos de energia, quadro, ambientes — e use em todas as visitas.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as obras"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Aprovação registrada na própria OS",
             "Equipamentos e programação discriminados",
             "PDF da OS para enviar ou imprimir"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -138,9 +132,7 @@
             "Semana no topo e os atendimentos de cada dia, com horário",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+          ]
         },
         {
           "number": "05",
@@ -259,7 +251,7 @@
         {
           "problem": "Service calls with no record",
           "detail": "Two years later the customer calls and nobody remembers which device went into which room.",
-          "answer": "Build an install record checklist with the fields you use — room, device, notes and photos — and it stays on the customer's work order."
+          "answer": "Build an install record checklist with what you need to note — room, device, notes and photos — and it stays on the customer's work order."
         },
         {
           "problem": "Deposit paid, balance forgotten",
@@ -285,21 +277,17 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “programming is 800”",
             "Equipment and programming as separate items"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
           "title": "Do the site survey",
           "text": "Build a survey checklist with what you check on every job — network, power outlets, electrical panel, rooms — and reuse it on every visit.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Build it your way with text, numbers, yes/no, lists and photos",
             "Photos on every checklist item",
             "One template for every job"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "03",
@@ -309,9 +297,7 @@
             "Approval recorded on the work order",
             "Equipment and programming itemized",
             "Work order PDF to send or print"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
@@ -321,9 +307,7 @@
             "The week on top and each day's appointments, with times",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the day's appointments"
+          ]
         },
         {
           "number": "05",
@@ -442,7 +426,7 @@
         {
           "problem": "Posventa sin registro",
           "detail": "Dos años después el cliente llama y nadie recuerda qué equipo se instaló en qué ambiente.",
-          "answer": "Crea un checklist de registro de instalación con los campos que usas — ambiente, equipo, observaciones y fotos — y queda en la orden del cliente."
+          "answer": "Crea un checklist de registro de instalación con lo que necesitas anotar — ambiente, equipo, observaciones y fotos — y queda en la orden del cliente."
         },
         {
           "problem": "Anticipo cobrado, saldo olvidado",
@@ -468,21 +452,17 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la programación es 800”",
             "Equipos y programación en ítems separados"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
           "title": "Haz la visita técnica",
           "text": "Arma un checklist de relevamiento con lo que revisas en toda obra — red, tomas de energía, tablero, ambientes — y úsalo en todas las visitas.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las obras"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "03",
@@ -492,9 +472,7 @@
             "Aprobación registrada en la propia orden",
             "Equipos y programación detallados",
             "PDF de la orden para enviar o imprimir"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
@@ -504,9 +482,7 @@
             "La semana arriba y las visitas de cada día, con horario",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y las visitas marcadas en el día"
+          ]
         },
         {
           "number": "05",

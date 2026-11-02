@@ -102,9 +102,7 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “os vidros são 180”",
             "Ou tire foto do pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,9 +112,7 @@
             "Semana no topo, serviços do dia embaixo",
             "Lembrete no celular antes do horário",
             "Com equipe, agenda filtrada por pessoa"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Itens com verificação, texto ou foto",
             "Um modelo por tipo de limpeza",
             "Checklist concluído só reabre com Administrador, Gerente ou Supervisor"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido com fotos dentro de uma OS"
+          ]
         },
         {
           "number": "04",
@@ -138,9 +132,7 @@
             "Aprovação registrada na própria OS",
             "Avaliação do cliente depois de concluída",
             "PDF da OS com checklist e fotos"
-          ],
-          "image": "order.png",
-          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+          ]
         },
         {
           "number": "05",
@@ -285,9 +277,7 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the windows are 180”",
             "Or take a photo of the written request"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -297,9 +287,7 @@
             "The week on top, the day’s jobs below",
             "Phone reminder before the job",
             "With a crew, schedule filtered by person"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the appointments booked for the day"
+          ]
         },
         {
           "number": "03",
@@ -309,9 +297,7 @@
             "Items with a check, text or photo",
             "One template per type of cleaning",
             "Completed checklists reopen only for Admin, Manager or Supervisor"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in with photos inside a work order"
+          ]
         },
         {
           "number": "04",
@@ -321,9 +307,7 @@
             "Approval recorded on the work order",
             "Customer rating after completion",
             "Work order PDF with checklist and photos"
-          ],
-          "image": "order.png",
-          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+          ]
         },
         {
           "number": "05",
@@ -468,9 +452,7 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “los vidrios son 180”",
             "O saca una foto del pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -480,9 +462,7 @@
             "La semana arriba, los servicios del día abajo",
             "Aviso en el celular antes del horario",
             "Con equipo, agenda filtrada por persona"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y las citas marcadas del día"
+          ]
         },
         {
           "number": "03",
@@ -492,9 +472,7 @@
             "Ítems con verificación, texto o foto",
             "Un modelo por tipo de limpieza",
             "El checklist completado solo se reabre con Administrador, Gerente o Supervisor"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado con fotos dentro de una OS"
+          ]
         },
         {
           "number": "04",
@@ -504,9 +482,7 @@
             "Aprobación registrada en la propia OS",
             "Calificación del cliente al completar",
             "PDF de la OS con checklist y fotos"
-          ],
-          "image": "order.png",
-          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+          ]
         },
         {
           "number": "05",

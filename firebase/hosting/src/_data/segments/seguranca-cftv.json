@@ -102,9 +102,7 @@
             "Sistema com tipo e número de canais",
             "Corrija falando: “a mão de obra é 900”",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,9 +112,7 @@
             "Tipo de sistema: CFTV, alarme, controle de acesso, interfonia",
             "Internet e pontos de energia no local",
             "Fotos dos pontos de instalação"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Aprovação registrada na própria OS",
             "Notificação quando o cliente aprova ou comenta",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -138,9 +132,7 @@
             "Semana no topo e os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
             "Situações do ramo: em instalação, operacional"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e o atendimento marcado no dia"
+          ]
         },
         {
           "number": "05",
@@ -285,9 +277,7 @@
             "System with type and number of channels",
             "Fix it by voice: “labor is 900”",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -297,9 +287,7 @@
             "System type: CCTV, alarm, access control, intercom",
             "Internet and power available on site",
             "Photos of each mounting point"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
@@ -309,9 +297,7 @@
             "Approval recorded on the work order",
             "Notification when the customer approves or comments",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         },
         {
           "number": "04",
@@ -321,9 +307,7 @@
             "The week on top and the day's visits",
             "Daily summary at 9am, if you want it",
             "Statuses in your trade's words: installing, operational"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the visit booked for the day"
+          ]
         },
         {
           "number": "05",
@@ -468,9 +452,7 @@
             "Sistema con tipo y número de canales",
             "Corrige hablando: “la mano de obra es 900”",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -480,9 +462,7 @@
             "Tipo de sistema: CCTV, alarma, control de acceso, intercomunicador",
             "Internet y puntos de energía en el lugar",
             "Fotos de los puntos de instalación"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
@@ -492,9 +472,7 @@
             "Aprobación registrada en la propia orden",
             "Notificación cuando el cliente aprueba o comenta",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
@@ -504,9 +482,7 @@
             "La semana arriba y las visitas del día",
             "Resumen del día a las 9, si lo quieres",
             "Estados del rubro: en instalación, operativo"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y la visita marcada del día"
+          ]
         },
         {
           "number": "05",

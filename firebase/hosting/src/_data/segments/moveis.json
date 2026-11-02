@@ -98,9 +98,7 @@
             "Com dia e hora, a montagem entra na Agenda",
             "Corrija falando: “a montagem é 250”",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -110,9 +108,7 @@
             "Fotos das caixas e das avarias",
             "Descrição do móvel e defeitos visíveis",
             "Observações sobre o local de montagem"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
@@ -122,9 +118,7 @@
             "Móvel conferido e funcionamento demonstrado",
             "Prazo de garantia registrado na OS",
             "PDF da OS para enviar à loja ou ao cliente"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com a situação, o botão do próximo passo, serviços, total e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -265,9 +259,7 @@
             "With a date and time, the job goes on the Schedule",
             "Fix it by voice: “assembly is 250”",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -277,9 +269,7 @@
             "Photos of the boxes and any damage",
             "Description of the piece and visible defects",
             "Notes about the installation spot"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
@@ -289,9 +279,7 @@
             "Piece checked and operation demonstrated",
             "Warranty period recorded on the work order",
             "Work order PDF to send to the store or customer"
-          ],
-          "image": "order.png",
-          "alt": "Order screen with the status, the next-step button, services, total and the amount still due"
+          ]
         },
         {
           "number": "04",
@@ -432,9 +420,7 @@
             "Con día y hora, el armado entra en la Agenda",
             "Corrige hablando: “el armado es 250”",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -444,9 +430,7 @@
             "Fotos de las cajas y de los daños",
             "Descripción del mueble y defectos visibles",
             "Notas sobre el lugar de armado"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
@@ -456,9 +440,7 @@
             "Mueble revisado y funcionamiento mostrado",
             "Plazo de garantía registrado en la orden",
             "PDF de la orden para enviar a la tienda o al cliente"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la OS con la situación, el botón del próximo paso, servicios, total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",

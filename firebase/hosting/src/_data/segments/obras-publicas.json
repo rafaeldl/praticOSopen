@@ -101,9 +101,7 @@
             "Modalidade e nº da licitação, nº do contrato, prazo e base legal",
             "Secretaria responsável, localização e objeto da obra",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -113,9 +111,7 @@
             "Trabalhadores e equipamentos no local",
             "Cronograma no prazo, atrasado ou adiantado",
             "Seguro, certidões negativas e licença ambiental"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
@@ -137,9 +133,7 @@
             "Recebimento provisório ou definitivo",
             "PDF do contrato com o histórico de medições",
             "Relatório do mês no Financeiro"
-          ],
-          "image": "home.png",
-          "alt": "Início com as ordens de serviço em aberto e os filtros"
+          ]
         }
       ]
     },
@@ -271,9 +265,7 @@
             "Bid type and number, contract number, deadline and legal basis",
             "Responsible department, location and project scope",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -283,9 +275,7 @@
             "Workers and equipment on site",
             "Schedule on time, late or ahead",
             "Insurance, tax clearance certificates and environmental permit"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
@@ -307,9 +297,7 @@
             "Provisional or final acceptance",
             "Contract PDF with the measurement history",
             "Monthly report in Financial"
-          ],
-          "image": "home.png",
-          "alt": "Home with the open work orders and the filters"
+          ]
         }
       ]
     },
@@ -441,9 +429,7 @@
             "Modalidad y n.º de licitación, n.º de contrato, plazo y base legal",
             "Secretaría responsable, ubicación y objeto de la obra",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -453,9 +439,7 @@
             "Trabajadores y equipos en el lugar",
             "Cronograma en plazo, atrasado o adelantado",
             "Seguro, certificados de deuda y licencia ambiental"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
@@ -477,9 +461,7 @@
             "Recepción provisoria o definitiva",
             "PDF del contrato con el historial de mediciones",
             "Informe del mes en Financiero"
-          ],
-          "image": "home.png",
-          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
+          ]
         }
       ]
     },

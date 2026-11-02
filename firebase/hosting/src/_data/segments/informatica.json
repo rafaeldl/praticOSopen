@@ -102,9 +102,7 @@
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “a limpeza é 150”",
             "Ou tire foto da etiqueta ou do pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,9 +112,7 @@
             "Liga? Tela funciona? Avarias e acessórios",
             "Senha de acesso registrada na OS",
             "Processador, memória e armazenamento no equipamento"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido com fotos dentro de uma OS"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Aprovação registrada na própria OS",
             "Seus termos de garantia e retirada antes da aprovação",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -138,9 +132,7 @@
             "Backup, sistema, drivers e dados restaurados",
             "Temperatura antes e depois da limpeza",
             "Busca pelo número de série no Início"
-          ],
-          "image": "home.png",
-          "alt": "Início com as ordens de serviço em aberto e os filtros"
+          ]
         },
         {
           "number": "05",
@@ -285,9 +277,7 @@
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the cleaning is 150”",
             "Or take a photo of the label or the written request"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -297,9 +287,7 @@
             "Powers on? Screen works? Damage and accessories",
             "Login password recorded on the order",
             "Processor, memory and storage on the machine"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in with photos inside a work order"
+          ]
         },
         {
           "number": "03",
@@ -309,9 +297,7 @@
             "Approval recorded on the work order",
             "Your warranty and pickup terms before approval",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+          ]
         },
         {
           "number": "04",
@@ -321,9 +307,7 @@
             "Backup, OS, drivers and data restored",
             "Temperature before and after cleaning",
             "Search by serial number on Home"
-          ],
-          "image": "home.png",
-          "alt": "Home with the open work orders and the filters"
+          ]
         },
         {
           "number": "05",
@@ -468,9 +452,7 @@
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “la limpieza es 150”",
             "O saca una foto de la etiqueta o del pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -480,9 +462,7 @@
             "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
             "Contraseña de acceso registrada en la OS",
             "Procesador, memoria y almacenamiento en el equipo"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado con fotos dentro de una OS"
+          ]
         },
         {
           "number": "03",
@@ -492,9 +472,7 @@
             "Aprobación registrada en la propia OS",
             "Tus términos de garantía y retiro antes de aprobar",
             "PDF de la OS para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
@@ -504,9 +482,7 @@
             "Backup, sistema, drivers y datos restaurados",
             "Temperatura antes y después de la limpieza",
             "Búsqueda por número de serie en Inicio"
-          ],
-          "image": "home.png",
-          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
+          ]
         },
         {
           "number": "05",

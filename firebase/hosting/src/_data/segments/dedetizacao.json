@@ -102,9 +102,7 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o depósito é 200”",
             "Cliente, endereço e serviço numa OS só"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,21 +112,17 @@
             "Semana no topo e os atendimentos de cada dia, com horário",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+          ]
         },
         {
           "number": "03",
           "title": "Registre a aplicação",
           "text": "Crie o checklist do jeito que você trabalha — praga alvo, produto, lote, diluição, áreas tratadas, recomendações — e preencha no local.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as visitas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "04",
@@ -138,9 +132,7 @@
             "Aprovação registrada na própria OS",
             "PDF com o checklist preenchido e as fotos",
             "Cliente acompanha o andamento sem ligar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "05",
@@ -285,9 +277,7 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the storeroom is 200”",
             "Client, address and service on one work order"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -297,21 +287,17 @@
             "The week on top and each day's appointments, with times",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the day's appointments"
+          ]
         },
         {
           "number": "03",
           "title": "Record the treatment",
           "text": "Build the checklist the way you work — target pest, product, lot, dilution, treated areas, recommendations — and fill it in on site.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Build it your way with text, numbers, yes/no, lists and photos",
             "Photos on every checklist item",
             "One template for every visit"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "04",
@@ -321,9 +307,7 @@
             "Approval recorded on the work order",
             "PDF with the completed checklist and photos",
             "Clients follow progress without calling"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "05",
@@ -468,9 +452,7 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “el depósito es 200”",
             "Cliente, dirección y servicio en una sola orden"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -480,21 +462,17 @@
             "La semana arriba y las visitas de cada día, con horario",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y las visitas marcadas en el día"
+          ]
         },
         {
           "number": "03",
           "title": "Registra la aplicación",
           "text": "Crea el checklist como trabajas tú — plaga, producto, lote, dilución, áreas tratadas, recomendaciones — y complétalo en el lugar.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las visitas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "04",
@@ -504,9 +482,7 @@
             "Aprobación registrada en la propia orden",
             "PDF con el checklist completado y las fotos",
             "El cliente sigue el avance sin llamar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "05",

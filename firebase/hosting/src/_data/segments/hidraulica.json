@@ -96,22 +96,18 @@
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a válvula é 120”",
-            "No app, o campo do atendimento se chama Instalação"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+            "O app já fala Instalação, como você"
+          ]
         },
         {
           "number": "02",
           "title": "Registre como encontrou",
           "text": "Fotografe o local na OS antes de abrir a parede. Para padronizar, crie o seu checklist com o que você confere em todo atendimento.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todos os atendimentos"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "03",
@@ -121,9 +117,7 @@
             "Aprovação registrada na própria OS",
             "Cliente acompanha sem precisar ligar",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -262,22 +256,18 @@
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the valve is 120”",
-            "In the app, the job field is called Installation"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+            "The app says Installation, just like you do"
+          ]
         },
         {
           "number": "02",
           "title": "Record what you found",
           "text": "Photograph the spot on the order before opening the wall. To standardize, build your own checklist with what you check on every visit.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Build it your way with text, numbers, yes/no, lists and photos",
             "Photos on every checklist item",
             "One template for every visit"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "03",
@@ -287,9 +277,7 @@
             "Approval recorded on the work order",
             "Customers follow along without calling",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
@@ -428,22 +416,18 @@
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la válvula es 120”",
-            "En la app, el campo del trabajo se llama Instalación"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+            "La app dice Instalación, igual que tú"
+          ]
         },
         {
           "number": "02",
           "title": "Registra lo que encontraste",
           "text": "Fotografía el lugar en la orden antes de abrir la pared. Para estandarizar, crea tu checklist con lo que revisas en cada visita.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las visitas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "03",
@@ -453,9 +437,7 @@
             "Aprobación registrada en la propia orden",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",

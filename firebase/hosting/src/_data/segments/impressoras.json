@@ -97,21 +97,17 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o fusor é 250”",
             "Impressora registrada com número de série"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
           "title": "Registre como ela chegou",
           "text": "Fotografe a impressora na OS. Para padronizar a entrada, crie o seu checklist com os itens que você confere em toda máquina.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as máquinas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "03",
@@ -121,9 +117,7 @@
             "Aprovação registrada na própria OS",
             "Cliente vê quando a impressora fica pronta",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
@@ -149,7 +143,7 @@
         },
         {
           "question": "Serve para impressoras e copiadoras?",
-          "answer": "Sim. Ao escolher o segmento Impressoras / Copiadoras, o campo do aparelho vira Impressora, com número de série, e o app traz exemplos de serviços como troca de toner e reparo de fusor."
+          "answer": "Sim. Ao escolher o segmento Impressoras / Copiadoras, o app passa a falar Impressora, com número de série, e o app traz exemplos de serviços como troca de toner e reparo de fusor."
         },
         {
           "question": "Consigo ver o que já foi feito em uma máquina?",
@@ -263,21 +257,17 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the fuser is 250”",
             "Printer recorded with its serial number"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
           "title": "Record how it came in",
           "text": "Photograph the printer on the order. To standardize check-in, build your own checklist with what you check on every machine.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Build it your way with text, numbers, yes/no, lists and photos",
             "Photos on every checklist item",
             "One template for every machine"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "03",
@@ -287,9 +277,7 @@
             "Approval recorded on the work order",
             "Customers see when the printer is ready",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
@@ -315,7 +303,7 @@
         },
         {
           "question": "Does it work for printers and copiers?",
-          "answer": "Yes. When you pick the Printers / Copiers segment, the item field becomes Printer, with a serial number, and the app comes with sample services such as toner replacement and fuser repair."
+          "answer": "Yes. When you pick the Printers / Copiers segment, the app says Printer, with a serial number, and the app comes with sample services such as toner replacement and fuser repair."
         },
         {
           "question": "Can I see what was already done on a machine?",
@@ -429,21 +417,17 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “el fusor es 250”",
             "Impresora registrada con número de serie"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
           "title": "Registra cómo llegó",
           "text": "Fotografía la impresora en la orden. Para estandarizar el ingreso, crea tu checklist con lo que revisas en cada máquina.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las máquinas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "03",
@@ -453,9 +437,7 @@
             "Aprobación registrada en la propia orden",
             "El cliente ve cuándo la impresora está lista",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
@@ -481,7 +463,7 @@
         },
         {
           "question": "¿Sirve para impresoras y fotocopiadoras?",
-          "answer": "Sí. Al elegir el segmento Impresoras / Fotocopiadoras, el campo del aparato pasa a ser Impresora, con número de serie, y la app trae ejemplos de servicios como cambio de tóner y reparación de fusor."
+          "answer": "Sí. Al elegir el segmento Impresoras / Fotocopiadoras, la app pasa a decir Impresora, con número de serie, y la app trae ejemplos de servicios como cambio de tóner y reparación de fusor."
         },
         {
           "question": "¿Puedo ver lo que ya se hizo en una máquina?",

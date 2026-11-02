@@ -102,9 +102,7 @@
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “cada tomada é 60”",
             "Tensão do local (110V, 220V, bivolt ou trifásico) e disjuntor geral em amperes"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
@@ -114,9 +112,7 @@
             "Aprovação registrada na própria OS",
             "Cliente acompanha o andamento sem ligar",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "03",
@@ -126,9 +122,7 @@
             "Foto do quadro antes e depois",
             "Tensão e corrente medidas, DR e aterramento",
             "Circuitos identificados e teste dos pontos"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "04",
@@ -273,9 +267,7 @@
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “each outlet is 60”",
             "Site voltage (110V, 220V, dual or three-phase) and main breaker in amps"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
@@ -285,9 +277,7 @@
             "Approval recorded on the work order",
             "Customers follow progress without calling",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "03",
@@ -297,9 +287,7 @@
             "Panel photo before and after",
             "Measured voltage and current, GFCI and grounding",
             "Circuits labeled and outlets tested"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "04",
@@ -444,9 +432,7 @@
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “cada toma es 60”",
             "Voltaje del lugar (110V, 220V, doble voltaje o trifásico) e interruptor general en amperes"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
@@ -456,9 +442,7 @@
             "Aprobación registrada en la propia orden",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "03",
@@ -468,9 +452,7 @@
             "Foto del tablero antes y después",
             "Tensión y corriente medidas, diferencial y puesta a tierra",
             "Circuitos identificados y prueba de los puntos"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "04",
