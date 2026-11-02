@@ -86,7 +86,9 @@ tokens, never raw values. Page width `--page-max` 74rem, gutter `--page-gutter`.
 ## Copy rules
 - Speak to the technician/shop owner: concrete jobs (orçamento, foto, link,
   pagamento), no "poderoso", "intuitivo", "eficiente", "solução completa".
-- No invented numbers (users, ratings, conversion). No fake testimonials.
+- No invented numbers (users, ratings, conversion). No fake testimonials: a quote
+  goes live only after the named customer approves the exact text, and it never
+  sits beside an AI-generated photo.
 - Claim only what the app does. Segment fields marked "para evolução futura" in `firebase/scripts/seed_segments.js` are not claims.
 - Feature flags in `site.json`: `flags.whatsappBot` (assistant pages/sections,
   currently **off** — bot is shut down), `flags.whatsappContact` (float button).

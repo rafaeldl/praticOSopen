@@ -1,0 +1,10 @@
+{% set t = data.testimonial %}
+<section class="quote" aria-labelledby="quote-title">
+  <div class="wrap">
+    <h2 class="quote__title" id="quote-title">{{ t.title }}</h2>
+    <figure class="quote__body">
+      <blockquote>{{ t.quote }}</blockquote>
+      <figcaption><strong>{{ t.name }}</strong> <span>{{ t.role }}</span></figcaption>
+    </figure>
+  </div>
+</section>

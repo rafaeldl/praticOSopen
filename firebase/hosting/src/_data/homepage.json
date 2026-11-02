@@ -186,6 +186,12 @@
           "text": "O que a IA preencheu fica marcado. Dá para desfazer antes de mandar para o cliente."
         }
       ]
+    },
+    "testimonial": {
+      "title": "Quem usa, recomenda",
+      "quote": "Cada carro que entra na oficina fica registrado no PraticOS: cliente, serviço e o que falta receber. Ficou bem mais fácil saber o que fazer e o que cobrar.",
+      "name": "Manuel",
+      "role": "Oficina mecânica"
     }
   },
   "en": {
@@ -375,6 +381,12 @@
           "text": "Anything AI filled in is marked. You can undo it before it goes to the customer."
         }
       ]
+    },
+    "testimonial": {
+      "title": "Trusted in the shop",
+      "quote": "Every car that comes into the shop is logged in PraticOS: customer, service and what's still owed. It got much easier to know what to do and what to charge.",
+      "name": "Manuel",
+      "role": "Auto repair shop"
     }
   },
   "es": {
@@ -564,6 +576,12 @@
           "text": "Lo que la IA rellenó queda marcado. Puedes deshacerlo antes de enviarlo al cliente."
         }
       ]
+    },
+    "testimonial": {
+      "title": "Quien lo usa, lo recomienda",
+      "quote": "Cada auto que entra al taller queda registrado en PraticOS: cliente, servicio y lo que falta cobrar. Ahora es mucho más fácil saber qué hacer y qué cobrar.",
+      "name": "Manuel",
+      "role": "Taller mecánico"
     }
   }
 }
