@@ -347,7 +347,13 @@ class _HomeContentState extends State<HomeContent> {
       );
     }
 
-    slivers.add(SliverToBoxAdapter(child: _buildFilters(context)));
+    // The key keeps the filters' scroll when the sections above come and go.
+    slivers.add(
+      SliverToBoxAdapter(
+        key: const ValueKey('home_filters_sliver'),
+        child: _buildFilters(context),
+      ),
+    );
 
     // States.
     if (widget.loadFailed && widget.orders.isEmpty) {
@@ -606,8 +612,8 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  /// Filter buttons, like the categories in Mail. They wrap to a second
-  /// line with large text instead of shrinking.
+  /// Filter buttons, like the categories in Mail: one line that scrolls
+  /// sideways.
   Widget _buildFilters(BuildContext context) {
     final l10n = context.l10n;
     final filters = widget.technician
@@ -624,28 +630,17 @@ class _HomeContentState extends State<HomeContent> {
             (HomeView.all, l10n.filterAll),
           ];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.pageMargin,
-        AppSpacing.md,
-        AppSpacing.pageMargin,
-        AppSpacing.xs,
+      padding: const EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.xs,
       ),
       child: Semantics(
         container: true,
         identifier: 'home_filters',
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            for (final (view, label) in filters)
-              _FilterButton(
-                label: label,
-                selected: widget.view == view,
-                onPressed: () {
-                  if (view != widget.view) widget.onViewChanged(view);
-                },
-              ),
-          ],
+        child: _HomeFilters(
+          filters: filters,
+          selected: widget.view,
+          onChanged: widget.onViewChanged,
         ),
       ),
     );
@@ -829,17 +824,199 @@ class _HomeContentState extends State<HomeContent> {
   }
 }
 
+/// How much of the first filter that does not fit must stay on screen, to
+/// show there is more to the side.
+const double kFilterPeek = 28;
+
+/// Tightest side padding of a filter button.
+const double kFilterMinPadding = 10;
+
+/// Side padding of the filter buttons for a [viewport] width, given the width
+/// of each label. It starts at [AppSpacing.lg] and tightens, down to
+/// [kFilterMinPadding], until a filter is cut with at least [kFilterPeek]
+/// showing. Without this, some iPhones end exactly between two filters and
+/// nothing says the line goes on.
+double filterButtonPadding(List<double> labelWidths, double viewport) {
+  bool shows(double padding) {
+    var left = AppSpacing.pageMargin;
+    for (final width in labelWidths) {
+      final right = left + width + 2 * padding;
+      if (right > viewport) return viewport - left >= kFilterPeek;
+      left = right + AppSpacing.sm;
+    }
+    return true;
+  }
+
+  for (var padding = AppSpacing.lg; padding > kFilterMinPadding; padding -= 1) {
+    if (shows(padding)) return padding;
+  }
+  return kFilterMinPadding;
+}
+
+/// Scroll offset that brings a filter ([left] to [right], in the line) fully
+/// into view with the page margin, moving only what is needed.
+double filterScrollTarget({
+  required double left,
+  required double right,
+  required double offset,
+  required double viewport,
+  required double maxExtent,
+}) {
+  var target = offset;
+  final end = right + AppSpacing.pageMargin;
+  if (end > offset + viewport) target = end - viewport;
+  final start = left - AppSpacing.pageMargin;
+  if (start < target) target = start;
+  return target.clamp(0.0, maxExtent);
+}
+
+/// The filters in one line that scrolls sideways up to the screen edge. The
+/// selected one slides fully into view, on opening and when it changes.
+class _HomeFilters extends StatefulWidget {
+  const _HomeFilters({
+    required this.filters,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final List<(HomeView, String)> filters;
+  final HomeView selected;
+  final ValueChanged<HomeView> onChanged;
+
+  @override
+  State<_HomeFilters> createState() => _HomeFiltersState();
+}
+
+class _HomeFiltersState extends State<_HomeFilters> {
+  final ScrollController _scroll = ScrollController();
+  final GlobalKey _viewport = GlobalKey();
+  final Map<HomeView, GlobalKey> _keys = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _revealSelected();
+  }
+
+  @override
+  void didUpdateWidget(_HomeFilters oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selected != widget.selected) _revealSelected();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _revealSelected() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      final button = _keys[widget.selected]?.currentContext?.findRenderObject();
+      final viewport = _viewport.currentContext?.findRenderObject();
+      if (button is! RenderBox || viewport is! RenderBox) return;
+      final position = _scroll.position;
+      final left =
+          button.localToGlobal(Offset.zero, ancestor: viewport).dx +
+          position.pixels;
+      final target = filterScrollTarget(
+        left: left,
+        right: left + button.size.width,
+        offset: position.pixels,
+        viewport: position.viewportDimension,
+        maxExtent: position.maxScrollExtent,
+      );
+      if (target == position.pixels) return;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _scroll.jumpTo(target);
+      } else {
+        _scroll.animateTo(
+          target,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /// Width of [label] as [_FilterButton] draws it.
+  double _labelWidth(BuildContext context, String label, bool selected) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: DefaultTextStyle.of(
+          context,
+        ).style.merge(_FilterButton.labelStyle(selected)),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final padding = filterButtonPadding([
+          for (final (view, label) in widget.filters)
+            _labelWidth(context, label, view == widget.selected),
+        ], constraints.maxWidth);
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(
+            context,
+          ).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            key: _viewport,
+            controller: _scroll,
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
+            child: Row(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final (view, label) in widget.filters)
+                  _FilterButton(
+                    key: _keys.putIfAbsent(view, GlobalKey.new),
+                    label: label,
+                    selected: widget.selected == view,
+                    horizontalPadding: padding,
+                    onPressed: () {
+                      if (view != widget.selected) widget.onChanged(view);
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// One filter button: filled accent when selected, grey otherwise.
 class _FilterButton extends StatelessWidget {
   const _FilterButton({
+    super.key,
     required this.label,
     required this.selected,
+    required this.horizontalPadding,
     required this.onPressed,
   });
 
   final String label;
   final bool selected;
+  final double horizontalPadding;
   final VoidCallback onPressed;
+
+  static TextStyle labelStyle(bool selected) => AppTypography.callout.copyWith(
+    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -857,8 +1034,8 @@ class _FilterButton extends StatelessWidget {
         onTap: onPressed,
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSizes.minTouchTarget),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
             vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
@@ -866,15 +1043,12 @@ class _FilterButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(22),
           ),
           // widthFactor 1: the button hugs its label instead of filling the
-          // row, so the three filters sit side by side.
+          // row, so the filters sit side by side.
           child: Align(
             widthFactor: 1,
             child: Text(
               label,
-              style: AppTypography.callout.copyWith(
-                color: foreground,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              ),
+              style: labelStyle(selected).copyWith(color: foreground),
             ),
           ),
         ),

@@ -12,6 +12,7 @@ import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/order_list_row.dart';
 import 'package:praticos/screens/widgets/primary_button.dart';
+import 'package:praticos/theme/app_spacing.dart';
 
 final _now = DateTime(2026, 10, 12, 10);
 
@@ -51,8 +52,10 @@ class _Host extends StatefulWidget {
     this.onOpenOrder,
     this.maintenances = const [],
     this.onOpenMaintenance,
+    this.initialView,
   });
 
+  final HomeView? initialView;
   final List<Device> maintenances;
   final ValueChanged<Device>? onOpenMaintenance;
   final bool technician;
@@ -71,7 +74,9 @@ class _Host extends StatefulWidget {
 }
 
 class _HostState extends State<_Host> {
-  late HomeView view = widget.technician ? HomeView.mine : HomeView.open;
+  late HomeView view =
+      widget.initialView ??
+      (widget.technician ? HomeView.mine : HomeView.open);
 
   /// What the store would load for each view.
   List<Order> get _orders => switch (view) {
@@ -310,7 +315,7 @@ void main() {
     expect(find.text('Em aberto'), findsOneWidget);
     expect(find.text('Concluídas'), findsOneWidget);
     expect(find.text('Todas'), findsOneWidget);
-    // Side by side, like Mail's categories (five of them wrap at the end).
+    // Side by side, like Mail's categories.
     final open = tester.getRect(find.text('Em aberto'));
     final quotes = tester.getRect(find.text('Orçamentos'));
     expect(quotes.center.dy, open.center.dy);
@@ -347,6 +352,8 @@ void main() {
 
   testWidgets('Todas shows month sections', (tester) async {
     await tester.pumpWidget(_app(_Host(orders: mixed)));
+    await tester.ensureVisible(find.text('Todas'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Todas'));
     await tester.pumpAndSettle();
     expect(find.text('Outubro de 2026'), findsOneWidget);
@@ -647,18 +654,275 @@ void main() {
     expect(retried, 1);
   });
 
-  testWidgets('large text: filters wrap instead of overflowing', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: _app(_Host(orders: mixed)),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-    expect(find.text('Concluídas'), findsOneWidget);
+  group('filters in one line', () {
+    const labels = ['Em aberto', 'Orçamentos', 'Paradas', 'Concluídas', 'Todas'];
+
+    Future<double> phone(WidgetTester tester, double width) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = Size(width, 800);
+      addTearDown(tester.view.reset);
+      return width;
+    }
+
+    ScrollPosition position(WidgetTester tester) => tester
+        .state<ScrollableState>(
+          find.ancestor(
+            of: find.text('Em aberto'),
+            matching: find.byType(Scrollable),
+          ).first,
+        )
+        .position;
+
+    void expectInside(WidgetTester tester, String label, double width) {
+      final rect = tester.getRect(find.text(label));
+      expect(rect.left, greaterThanOrEqualTo(0), reason: label);
+      expect(rect.right, lessThanOrEqualTo(width), reason: label);
+    }
+
+    Finder button(String label) => find
+        .ancestor(of: find.text(label), matching: find.byType(GestureDetector))
+        .first;
+
+    for (final width in [375.0, 390.0, 402.0, 440.0]) {
+      testWidgets('at $width: one line, from the margin, cut at the edge', (
+        tester,
+      ) async {
+        await phone(tester, width);
+        await tester.pumpWidget(_app(_Host(orders: mixed)));
+        await tester.pumpAndSettle();
+
+        final tops = {
+          for (final label in labels) tester.getCenter(find.text(label)).dy,
+        };
+        expect(tops, hasLength(1));
+        expect(tester.getRect(button(labels.first)).left, AppSpacing.pageMargin);
+
+        final rects = labels.map((label) => tester.getRect(button(label)));
+        expect(rects.where((r) => r.left < width && r.right > width), hasLength(1));
+      });
+    }
+
+    testWidgets('scrolls to the screen edge, with the margin at the end', (
+      tester,
+    ) async {
+      final width = await phone(tester, 375);
+      await tester.pumpWidget(_app(_Host(orders: mixed)));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('Em aberto'), const Offset(-3000, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(button('Todas')).right, width - AppSpacing.pageMargin);
+      // Still the filters: the list did not move.
+      expect(find.text('Ana'), findsOneWidget);
+    });
+
+    testWidgets('choosing a filter cut at the edge slides it into view, only '
+        'as much as needed', (tester) async {
+      final width = await phone(tester, 375);
+      await tester.pumpWidget(_app(_Host(orders: mixed)));
+      await tester.pumpAndSettle();
+
+      final cut = labels.firstWhere(
+        (label) => tester.getRect(button(label)).right > width,
+      );
+      await tester.tapAt(Offset(width - 8, tester.getCenter(button(cut)).dy));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(button(cut)).right, width - AppSpacing.pageMargin);
+    });
+
+    testWidgets('choosing one cut on the left slides it back', (tester) async {
+      await phone(tester, 375);
+      await tester.pumpWidget(
+        _app(_Host(orders: mixed, initialView: HomeView.all)),
+      );
+      await tester.pumpAndSettle();
+
+      final cut = button(
+        labels.lastWhere((label) => tester.getRect(button(label)).left < 0),
+      );
+      await tester.tapAt(Offset(8, tester.getCenter(cut).dy));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(cut).left, AppSpacing.pageMargin);
+    });
+
+    testWidgets('opens with a hidden filter selected in view', (tester) async {
+      final width = await phone(tester, 375);
+      await tester.pumpWidget(
+        _app(_Host(orders: mixed, initialView: HomeView.all)),
+      );
+      await tester.pumpAndSettle();
+
+      expectInside(tester, 'Todas', width);
+      expect(position(tester).pixels, greaterThan(0));
+    });
+
+    testWidgets('a filter already in view does not move the line', (
+      tester,
+    ) async {
+      await phone(tester, 600);
+      await tester.pumpWidget(_app(_Host(orders: mixed)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Orçamentos'));
+      await tester.pumpAndSettle();
+
+      expect(position(tester).pixels, 0);
+    });
+
+    testWidgets('keeps its place when the sections above change', (
+      tester,
+    ) async {
+      final width = await phone(tester, 375);
+      final maintenance = Device()
+        ..id = 'd1'
+        ..name = 'Split'
+        ..nextMaintenanceDate = '2026-10-15';
+      await tester.pumpWidget(
+        _app(_Host(orders: mixed, maintenances: [maintenance])),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('Em aberto'), const Offset(-3000, 0));
+      await tester.pumpAndSettle();
+      final offset = position(tester).pixels;
+      expect(find.text('Manutenções chegando'), findsOneWidget);
+
+      // "Concluídas" takes the section away; the line stays where it was.
+      await tester.tap(find.text('Concluídas'));
+      await tester.pump();
+      expect(find.text('Manutenções chegando'), findsNothing);
+      expect(position(tester).pixels, offset);
+      await tester.pumpAndSettle();
+      expectInside(tester, 'Concluídas', width);
+    });
+
+    testWidgets('large text stays in one line, without overflowing', (
+      tester,
+    ) async {
+      await phone(tester, 800);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: _app(_Host(orders: mixed)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getCenter(find.text('Orçamentos')).dy,
+        tester.getCenter(find.text('Em aberto')).dy,
+      );
+      expect(find.text('Concluídas'), findsOneWidget);
+    });
+
+    testWidgets('a filter keeps the touch target and its button role', (
+      tester,
+    ) async {
+      await phone(tester, 375);
+      await tester.pumpWidget(_app(_Host(orders: mixed)));
+      await tester.pumpAndSettle();
+
+      final semantics = tester.ensureSemantics();
+      expect(
+        tester.getSize(button('Paradas')).height,
+        greaterThanOrEqualTo(AppSizes.minTouchTarget),
+      );
+      expect(
+        tester.getSemantics(find.text('Em aberto')),
+        containsSemantics(
+          label: 'Em aberto',
+          isButton: true,
+          isSelected: true,
+          hasTapAction: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
+    testWidgets('a technician has few filters and nothing to scroll', (
+      tester,
+    ) async {
+      await phone(tester, 500);
+      await tester.pumpWidget(_app(_Host(orders: mixed, technician: true)));
+      await tester.pumpAndSettle();
+
+      final line = find
+          .ancestor(of: find.text('Todas'), matching: find.byType(Scrollable))
+          .first;
+      expect(tester.state<ScrollableState>(line).position.maxScrollExtent, 0);
+    });
+
+    group('filterButtonPadding', () {
+      test('keeps the padding when a filter is already well cut', () {
+        expect(filterButtonPadding([200, 200, 200], 300), AppSpacing.lg);
+      });
+
+      test('keeps the padding when everything fits', () {
+        expect(filterButtonPadding([50, 50], 400), AppSpacing.lg);
+      });
+
+      // Width of the labels in pt-BR on the iPhone.
+      const labelWidths = [82.0, 94.0, 62.0, 85.0, 46.0];
+
+      for (final width in [320.0, 375.0, 390.0, 393.0, 402.0, 430.0, 440.0]) {
+        test('at $width a filter is cut with enough showing', () {
+          final padding = filterButtonPadding(labelWidths, width);
+          var left = AppSpacing.pageMargin;
+          for (final label in labelWidths) {
+            final right = left + label + 2 * padding;
+            if (right > width) {
+              expect(width - left, greaterThanOrEqualTo(kFilterPeek));
+              return;
+            }
+            left = right + AppSpacing.sm;
+          }
+          fail('nothing was cut');
+        });
+      }
+
+      test('tightens only where the line would end between two filters', () {
+        expect(filterButtonPadding(labelWidths, 375), lessThan(AppSpacing.lg));
+        expect(filterButtonPadding(labelWidths, 320), AppSpacing.lg);
+      });
+
+      test('never below the minimum', () {
+        expect(filterButtonPadding([300, 200], 370), kFilterMinPadding);
+      });
+    });
+
+    group('filterScrollTarget', () {
+      double target(double left, double right, {double offset = 0}) =>
+          filterScrollTarget(
+            left: left,
+            right: right,
+            offset: offset,
+            viewport: 375,
+            maxExtent: 300,
+          );
+
+      test('stays put when the filter is in view', () {
+        expect(target(100, 200), 0);
+      });
+
+      test('moves just enough to the right, leaving the margin', () {
+        expect(
+          target(340, 450),
+          450 + AppSpacing.pageMargin - 375,
+        );
+      });
+
+      test('moves just enough to the left, leaving the margin', () {
+        expect(target(100, 200, offset: 150), 100 - AppSpacing.pageMargin);
+      });
+
+      test('stops at the ends', () {
+        expect(target(24, 100, offset: 10), 0);
+        expect(target(600, 660, offset: 280), 300);
+      });
+    });
   });
 
   testWidgets('renders in dark mode', (tester) async {
