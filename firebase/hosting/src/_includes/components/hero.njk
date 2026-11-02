@@ -1,38 +1,48 @@
-{# H2 · split diptych — headline left, a sample work order (Tier-A HTML/CSS) right #}
+{# Photographic hero — headline left, trade photos right, the spoken order building over them #}
 {% set hero = data.hero %}
-{% set t = hero.ticket %}
+{% set demo = hero.demo %}
 <section class="hero" id="hero">
     <div class="wrap hero__grid">
         <div class="hero__copy">
-            <h1>{{ hero.titleBefore }} <span class="mark">{{ hero.titleMark }}</span></h1>
-            <p class="lede">{{ hero.lede }}</p>
-            <div class="btn-row">
-                <a href="#baixar" class="btn btn--primary" data-ga="cta_click" data-ga-detail="hero_download">{{ hero.ctaPrimary }}</a>
-                <a href="#como-funciona" class="btn btn--secondary" data-ga="select_content" data-ga-detail="hero_how_it_works">{{ hero.ctaSecondary }}</a>
+            <h1>{{ hero.titleBefore }}
+<span class="hero__mark">{{ hero.titleMark }}</span></h1>
+            <p class="hero__lede">{{ hero.lede }}</p>
+            <div class="hero__stores">
+                <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="btn btn--primary" data-ga="cta_click" data-ga-detail="hero_app_store">{{ hero.ctaAppStore }}</a>
+                <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="btn hero__btn-line" data-ga="cta_click" data-ga-detail="hero_play_store">{{ hero.ctaPlayStore }}</a>
             </div>
-            <p class="hero__note mono">{{ hero.note }}</p>
         </div>
 
-        <figure class="ticket" aria-label="{{ t.caption }}">
-            <figcaption class="ticket__caption label">{{ t.caption }}</figcaption>
-            <div class="ticket__sheet">
-                <header class="ticket__head">
-                    <span class="ticket__title">{{ t.title }}</span>
-                    <span class="ticket__number mono">{{ t.number }}</span>
-                </header>
-                <dl class="ticket__rows">
-                    {% for row in t.rows %}
-                    <div class="ticket__row"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+        <div class="media">
+            {% for tile in hero.tiles %}
+            <figure class="tile">
+                <img src="{{ relPath }}assets/images/site/{{ tile.image }}" alt="{{ tile.alt }}" width="{{ tile.width }}" height="{{ tile.height }}" decoding="async"{% if loop.first %} fetchpriority="high"{% endif %}>
+                <figcaption class="tag">{{ tile.label }}</figcaption>
+            </figure>
+            {% endfor %}
+
+            <div class="demo" data-demo aria-label="{{ demo.label }}">
+                <div class="demo__said">
+                    <div class="demo__top">
+                        <span>{{ demo.said }}</span>
+                        <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </div>
+                    <p class="demo__line" data-demo-line>{{ demo.line }}</p>
+                </div>
+                <div class="demo__order">
+                    {% for row in demo.rows %}
+                    <div class="demo__row" data-demo-row><span>{{ row.label }}</span><span>{{ row.value }}</span></div>
                     {% endfor %}
-                    <div class="ticket__row ticket__row--total"><dt>{{ t.totalLabel }}</dt><dd class="mono">{{ t.total }}</dd></div>
-                </dl>
-                <p class="ticket__stamp" aria-hidden="true">{{ t.stamp }}</p>
-                <ol class="ticket__steps" role="list">
-                    {% for step in t.steps %}
-                    <li class="{% if loop.index0 < t.current %}is-done{% elif loop.index0 == t.current %}is-current{% endif %}"{% if loop.index0 == t.current %} aria-current="step"{% endif %}>{{ step }}</li>
-                    {% endfor %}
-                </ol>
+                    <div class="demo__row demo__row--total" data-demo-row><span>{{ demo.totalLabel }}</span><span>{{ demo.total }}</span></div>
+                </div>
+                <div class="demo__done" data-demo-done>{{ demo.done }}<button class="demo__again" type="button" data-demo-again hidden>{{ demo.again }}</button></div>
             </div>
-        </figure>
+        </div>
     </div>
 </section>
+
+<div class="strip">
+    <ul class="wrap" role="list">
+        {% for item in hero.strip %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+</div>

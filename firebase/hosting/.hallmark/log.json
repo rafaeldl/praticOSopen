@@ -1,3 +1,25 @@
 [
-  { "date": "2026-10-04", "scope": "app", "macrostructure": "Narrative Workflow (marketing) · Long Document (content)", "theme": "custom", "theme_axes": "light / grotesk-sans / cool", "vibe": "work-order paper, graphite ink, highlighter", "enrichment": "Tier-A HTML/CSS work-order ticket", "nav": "N1b", "footer": "Ft4", "brief": "PraticOS institutional site redesign" }
+  {
+    "date": "2026-10-04",
+    "scope": "app",
+    "macrostructure": "Narrative Workflow (marketing) · Long Document (content)",
+    "theme": "custom",
+    "theme_axes": "light / grotesk-sans / cool",
+    "vibe": "work-order paper, graphite ink, highlighter",
+    "enrichment": "Tier-A HTML/CSS work-order ticket",
+    "nav": "N1b",
+    "footer": "Ft4",
+    "brief": "PraticOS institutional site redesign"
+  },
+  {
+    "date": "2026-11-01",
+    "scope": "home and site tokens",
+    "macrostructure": "Photographic (home) · Narrative Workflow (segments) · Long Document (content)",
+    "theme": "custom",
+    "theme_axes": "light / geometric-sans / warm",
+    "vibe": "warm paper, navy bands, yellow actions, people at work",
+    "enrichment": "spoken request building a work order over trade photos",
+    "nav": "N1b",
+    "footer": "Ft4"
+  }
 ]

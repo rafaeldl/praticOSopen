@@ -1,16 +1,28 @@
-{# Index list of every trade — doubles as internal linking for SEO #}
+{# Photo mural of every trade — doubles as internal linking for SEO #}
 {% set seg = segments[langCode] | default(segments.pt) %}
 {% set sg = (homepage[langCode] | default(homepage.pt)).segments %}
-<section class="section section--alt segments-index" id="segmentos">
+{% set wideSlugs = ['automotivo', 'refrigeracao', 'assistencia-celular', 'eletrica'] %}
+{% macro tradeCard(segment, slug, wide, relPath) %}
+<li class="trade{% if wide %} trade--wide{% endif %}">
+    <a href="{{ relPath }}{{ segment.href | prettyUrl }}">
+        <img src="{{ relPath }}assets/images/site/segments/{{ slug }}.webp" alt="" loading="lazy" decoding="async" width="{{ 800 if wide else 560 }}" height="{{ 993 if wide else 695 }}">
+        <span>{{ segment.label }}</span>
+    </a>
+</li>
+{% endmacro %}
+<section class="trades" id="segmentos">
     <div class="wrap">
-        <div class="section-head">
-            <h2>{{ sg.title }}</h2>
-            <p>{{ sg.lede }}</p>
-        </div>
-        <ul class="seg-list" role="list">
+        <h2>{{ sg.title }}</h2>
+        <p class="trades__lede">{{ sg.lede }}</p>
+        <ul class="mural" role="list">
+            {% for pass in ['wide', 'rest'] %}
             {% for segment in seg.links %}
-            <li><a href="{{ relPath }}{{ segment.href | prettyUrl }}"><span>{{ segment.label }}</span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+            {% set slug = segment.href | replace('segmentos/', '') | replace('-en.html', '') | replace('-es.html', '') | replace('.html', '') %}
+            {% set wide = slug in wideSlugs %}
+            {% if (pass == 'wide' and wide) or (pass == 'rest' and not wide) %}{{ tradeCard(segment, slug, wide, relPath) }}{% endif %}
+            {% endfor %}
             {% endfor %}
         </ul>
+        <p class="trades__note">{{ sg.imageNote }}</p>
     </div>
 </section>

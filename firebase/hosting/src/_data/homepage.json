@@ -1,57 +1,72 @@
 {
   "pt": {
     "hero": {
-      "titleBefore": "Do orçamento ao pagamento,",
-      "titleMark": "numa OS só.",
-      "lede": "PraticOS é o app de ordem de serviço para quem trabalha na oficina, na bancada ou na casa do cliente. Fale o serviço e a IA preenche a OS. Depois tire as fotos, mande o link para o cliente aprovar e veja quanto falta receber — tudo pelo celular.",
-      "ctaPrimary": "Baixar grátis",
-      "ctaSecondary": "Ver como funciona",
-      "note": "Comece grátis · iOS e Android · planos pagos no app",
-      "ticket": {
-        "caption": "Exemplo de OS",
-        "title": "Ordem de serviço",
-        "number": "Nº 0142",
+      "titleBefore": "Você fala.\nO PraticOS",
+      "titleMark": "faz a OS.",
+      "lede": "Diga o serviço e a IA preenche cliente, veículo, peças e preços. Depois é só mandar para o cliente aprovar.",
+      "ctaAppStore": "Baixar na App Store",
+      "ctaPlayStore": "Baixar no Google Play",
+      "strip": [
+        "Comece grátis",
+        "iPhone e Android",
+        "Cliente aprova sem instalar nada"
+      ],
+      "tiles": [
+        {
+          "label": "Oficina mecânica",
+          "alt": "Mecânico de uniforme azul falando no celular em uma oficina organizada",
+          "image": "hero-mechanic.webp",
+          "width": 928,
+          "height": 1152
+        },
+        {
+          "label": "Refrigeração",
+          "alt": "Técnica ligando as mangueiras na unidade externa do ar-condicionado",
+          "image": "hero-hvac.webp",
+          "width": 640,
+          "height": 794
+        },
+        {
+          "label": "Eletrônica",
+          "alt": "Técnico soldando uma placa na bancada",
+          "image": "hero-electronics.webp",
+          "width": 640,
+          "height": 794
+        }
+      ],
+      "demo": {
+        "label": "Exemplo: a fala vira uma ordem de serviço",
+        "said": "Você diz",
+        "line": "“Onix da Juliana, troca de óleo e alinhamento”",
         "rows": [
           {
             "label": "Cliente",
-            "value": "Marcos Andrade"
+            "value": "Juliana Costa"
           },
           {
-            "label": "Equipamento",
-            "value": "Split 12.000 BTUs · sala"
+            "label": "Veículo",
+            "value": "Onix"
           },
           {
-            "label": "Serviço",
-            "value": "Limpeza completa + carga de gás"
+            "label": "Troca de óleo",
+            "value": "R$ 80,00"
           },
           {
-            "label": "Entrega",
-            "value": "Hoje, 16:00"
-          },
-          {
-            "label": "Fotos",
-            "value": "4 anexadas"
+            "label": "Alinhamento",
+            "value": "R$ 120,00"
           }
         ],
         "totalLabel": "Total",
-        "total": "R$ 480,00",
-        "stamp": "Aprovado pelo cliente",
-        "steps": [
-          "Orçamento",
-          "Aprovada",
-          "Em andamento",
-          "Concluída",
-          "Paga"
-        ],
-        "current": 2
+        "total": "R$ 200,00",
+        "done": "OS pronta para enviar",
+        "again": "Ver de novo"
       }
     },
     "workflow": {
-      "title": "Como uma OS anda no PraticOS",
+      "title": "Do pedido à cobrança, tudo na mesma OS",
       "lede": "Cinco passos, do primeiro contato ao dinheiro na conta. Sem planilha, sem caderno e sem orçamento perdido no meio da conversa.",
       "stages": [
         {
-          "number": "01",
           "title": "Fale e a IA preenche a OS",
           "text": "Toque no + e em Falar: “Onix da Juliana, troca de óleo e alinhamento”. A IA preenche cliente, veículo, serviços e peças com os preços do seu catálogo.",
           "facts": [
@@ -60,10 +75,10 @@
             "Corrija falando: “o alinhamento é 100”"
           ],
           "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com cliente, veículo e serviços marcados"
+          "alt": "Nova OS preenchida pelo assistente de IA, com cliente, veículo e serviços marcados",
+          "tab": "Falar"
         },
         {
-          "number": "02",
           "title": "Registre com foto e checklist",
           "text": "Fotografe o antes e o depois direto na OS. O checklist de entrada mostra como o equipamento chegou, antes de alguém mexer.",
           "facts": [
@@ -72,10 +87,10 @@
             "PDF da OS com as fotos, pronto para enviar ou imprimir"
           ],
           "image": "checklist.png",
-          "alt": "Checklist de entrada preenchido com fotos das avarias"
+          "alt": "Checklist de entrada preenchido com fotos das avarias",
+          "tab": "Registrar"
         },
         {
-          "number": "03",
           "title": "Mande o link para o cliente",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê fotos e valores, aprova o orçamento e deixa comentários.",
           "facts": [
@@ -84,10 +99,10 @@
             "No fim, ele avalia o serviço pelo mesmo link"
           ],
           "image": "order.png",
-          "alt": "Tela de uma OS com o cliente, a situação, o botão do próximo passo, serviços e total"
+          "alt": "Tela de uma OS com o cliente, a situação, o botão do próximo passo, serviços e total",
+          "tab": "Aprovar"
         },
         {
-          "number": "04",
           "title": "Marque o dia e a hora",
           "text": "A Agenda mostra a semana e os atendimentos de cada dia. O app lembra você antes de cada horário.",
           "facts": [
@@ -96,10 +111,10 @@
             "Aviso de orçamento parado sem resposta"
           ],
           "image": "agenda.png",
-          "alt": "Agenda da semana com um atendimento marcado"
+          "alt": "Agenda da semana com um atendimento marcado",
+          "tab": "Agendar"
         },
         {
-          "number": "05",
           "title": "Veja quanto falta receber",
           "text": "A aba Financeiro mostra quanto falta receber e de quem. Registre o que o cliente pagou, de uma vez ou em partes.",
           "facts": [
@@ -108,13 +123,16 @@
             "O que entrou no mês, numa tela só"
           ],
           "image": "financial.png",
-          "alt": "Aba Financeiro com o total que falta receber e a lista de clientes"
+          "alt": "Aba Financeiro com o total que falta receber e a lista de clientes",
+          "tab": "Receber"
         }
-      ]
+      ],
+      "tabsLabel": "Recursos do app"
     },
     "segments": {
       "title": "Feito para quem conserta, instala e faz manutenção",
-      "lede": "O PraticOS se ajusta ao seu ramo. Na oficina o campo se chama veículo, na assistência técnica é aparelho, na refrigeração é equipamento. Veja o seu:"
+      "lede": "O PraticOS se ajusta ao seu ramo. Na oficina o campo se chama veículo, na assistência técnica é aparelho, na refrigeração é equipamento. Veja o seu:",
+      "imageNote": "Imagens ilustrativas."
     },
     "whatsappAssistant": {
       "title": "Sem tempo de abrir o app? Mande uma mensagem.",
@@ -146,61 +164,96 @@
       "contactLead": "Ficou com dúvida?",
       "contactWhatsapp": "Fale com a gente no WhatsApp",
       "contactFaq": "Perguntas frequentes"
+    },
+    "ai": {
+      "title": "IA para quem está com a mão na massa",
+      "photoLabel": "Elétrica",
+      "photoAlt": "Eletricista testando um quadro de luz em uma casa",
+      "items": [
+        {
+          "title": "Entende como você fala",
+          "text": "Fale do seu jeito, entre um serviço e outro. A IA separa cliente, equipamento e serviço.",
+          "quote": "Geladeira da dona Marta não gela, visita amanhã"
+        },
+        {
+          "title": "Lê a foto para você",
+          "text": "Fotografe a placa ou o pedido anotado no papel. O que estiver ali entra na OS."
+        },
+        {
+          "title": "Você sempre confere",
+          "text": "O que a IA preencheu fica marcado. Dá para desfazer antes de mandar para o cliente."
+        }
+      ]
     }
   },
   "en": {
     "hero": {
-      "titleBefore": "From quote to payment,",
-      "titleMark": "in one work order.",
-      "lede": "PraticOS is the work order app for people who work in a shop, at a bench or at the customer's door. Say the job and AI fills in the work order. Then take the photos, send the link for the customer to approve and see what's left to collect — all from your phone.",
-      "ctaPrimary": "Download free",
-      "ctaSecondary": "See how it works",
-      "note": "Start free · iOS and Android · paid plans in the app",
-      "ticket": {
-        "caption": "Sample work order",
-        "title": "Work order",
-        "number": "No. 0142",
+      "titleBefore": "You talk.\nPraticOS",
+      "titleMark": "writes the order.",
+      "lede": "Say the job and AI fills in the customer, vehicle, parts and prices. Then just send it for the customer to approve.",
+      "ctaAppStore": "Download on the App Store",
+      "ctaPlayStore": "Get it on Google Play",
+      "strip": [
+        "Start free",
+        "iPhone and Android",
+        "Customers approve with nothing to install"
+      ],
+      "tiles": [
+        {
+          "label": "Auto repair",
+          "alt": "Mechanic in a blue uniform speaking into a phone in a tidy workshop",
+          "image": "hero-mechanic.webp",
+          "width": 928,
+          "height": 1152
+        },
+        {
+          "label": "HVAC",
+          "alt": "Technician connecting hoses to an outdoor air conditioning unit",
+          "image": "hero-hvac.webp",
+          "width": 640,
+          "height": 794
+        },
+        {
+          "label": "Electronics",
+          "alt": "Technician soldering a circuit board at the bench",
+          "image": "hero-electronics.webp",
+          "width": 640,
+          "height": 794
+        }
+      ],
+      "demo": {
+        "label": "Example: speech turns into a work order",
+        "said": "You say",
+        "line": "“Julia's Civic, oil change and alignment”",
         "rows": [
           {
             "label": "Customer",
-            "value": "Mark Anderson"
+            "value": "Julia Carter"
           },
           {
-            "label": "Equipment",
-            "value": "Split AC 12,000 BTU · living room"
+            "label": "Vehicle",
+            "value": "Civic"
           },
           {
-            "label": "Service",
-            "value": "Full cleaning + refrigerant recharge"
+            "label": "Oil change",
+            "value": "$80.00"
           },
           {
-            "label": "Ready",
-            "value": "Today, 4:00 PM"
-          },
-          {
-            "label": "Photos",
-            "value": "4 attached"
+            "label": "Alignment",
+            "value": "$120.00"
           }
         ],
         "totalLabel": "Total",
-        "total": "$480.00",
-        "stamp": "Approved by customer",
-        "steps": [
-          "Quote",
-          "Approved",
-          "In progress",
-          "Completed",
-          "Paid"
-        ],
-        "current": 2
+        "total": "$200.00",
+        "done": "Order ready to send",
+        "again": "Play again"
       }
     },
     "workflow": {
-      "title": "How a work order moves through PraticOS",
+      "title": "From request to payment, all in one order",
       "lede": "Five steps, from first contact to money in the bank. No spreadsheet, no notebook, no quote lost in a chat.",
       "stages": [
         {
-          "number": "01",
           "title": "Say it and AI fills in the order",
           "text": "Tap + and Speak: “Julia's Civic, oil change and alignment.” AI fills in the customer, vehicle, services and parts with the prices from your catalog.",
           "facts": [
@@ -209,10 +262,10 @@
             "Fix it by speaking: “alignment is 100”"
           ],
           "image": "ai-order.png",
-          "alt": "New work order filled in by the AI assistant, with customer, vehicle and services marked"
+          "alt": "New work order filled in by the AI assistant, with customer, vehicle and services marked",
+          "tab": "Talk"
         },
         {
-          "number": "02",
           "title": "Record it with photos and a checklist",
           "text": "Shoot the before and after right in the work order. The check-in checklist shows how the item arrived, before anyone touches it.",
           "facts": [
@@ -221,10 +274,10 @@
             "Work order PDF with photos, ready to send or print"
           ],
           "image": "checklist.png",
-          "alt": "Check-in checklist filled in with photos of the damage"
+          "alt": "Check-in checklist filled in with photos of the damage",
+          "tab": "Record"
         },
         {
-          "number": "03",
           "title": "Send the link to the customer",
           "text": "The customer opens the work order in the browser, nothing to install. They see photos and prices, approve the quote and leave comments.",
           "facts": [
@@ -233,10 +286,10 @@
             "At the end, they rate the job through the same link"
           ],
           "image": "order.png",
-          "alt": "A work order screen with the customer, status, next-step button, services and total"
+          "alt": "A work order screen with the customer, status, next-step button, services and total",
+          "tab": "Approve"
         },
         {
-          "number": "04",
           "title": "Set the day and time",
           "text": "The Schedule shows the week and each day's appointments. The app reminds you before each one.",
           "facts": [
@@ -245,10 +298,10 @@
             "A nudge when a quote has gone unanswered"
           ],
           "image": "agenda.png",
-          "alt": "Weekly schedule with one appointment booked"
+          "alt": "Weekly schedule with one appointment booked",
+          "tab": "Schedule"
         },
         {
-          "number": "05",
           "title": "See what's left to collect",
           "text": "The Financial tab shows what's left to collect and from whom. Record what the customer paid, all at once or in parts.",
           "facts": [
@@ -257,13 +310,16 @@
             "What came in this month, on one screen"
           ],
           "image": "financial.png",
-          "alt": "Financial tab with the total left to collect and the list of customers"
+          "alt": "Financial tab with the total left to collect and the list of customers",
+          "tab": "Collect"
         }
-      ]
+      ],
+      "tabsLabel": "App features"
     },
     "segments": {
       "title": "Built for people who repair, install and maintain",
-      "lede": "PraticOS adapts to your trade. In an auto shop the field is called vehicle, in a phone repair shop it is device, in HVAC it is equipment. Find yours:"
+      "lede": "PraticOS adapts to your trade. In an auto shop the field is called vehicle, in a phone repair shop it is device, in HVAC it is equipment. Find yours:",
+      "imageNote": "Illustrative images."
     },
     "whatsappAssistant": {
       "title": "No time to open the app? Send a message.",
@@ -295,61 +351,96 @@
       "contactLead": "Questions?",
       "contactWhatsapp": "Talk to us on WhatsApp",
       "contactFaq": "FAQ"
+    },
+    "ai": {
+      "title": "AI for people with their hands full",
+      "photoLabel": "Electrician",
+      "photoAlt": "Electrician testing a breaker panel in a house",
+      "items": [
+        {
+          "title": "Understands how you talk",
+          "text": "Speak your way, between jobs. AI sorts out the customer, equipment and service.",
+          "quote": "Mrs. Martin's fridge isn't cooling, visit tomorrow"
+        },
+        {
+          "title": "Reads the photo for you",
+          "text": "Take a photo of the plate or a handwritten request. What's there goes into the order."
+        },
+        {
+          "title": "You always check",
+          "text": "Anything AI filled in is marked. You can undo it before it goes to the customer."
+        }
+      ]
     }
   },
   "es": {
     "hero": {
-      "titleBefore": "Del presupuesto al cobro,",
-      "titleMark": "en una sola orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para quien trabaja en el taller, en el banco de trabajo o en casa del cliente. Di el servicio y la IA rellena la orden. Después saca las fotos, manda el enlace para que el cliente apruebe y mira cuánto falta cobrar — todo desde el celular.",
-      "ctaPrimary": "Descargar gratis",
-      "ctaSecondary": "Ver cómo funciona",
-      "note": "Empieza gratis · iOS y Android · planes pagos en la app",
-      "ticket": {
-        "caption": "Ejemplo de orden",
-        "title": "Orden de servicio",
-        "number": "N.º 0142",
+      "titleBefore": "Tú hablas.\nPraticOS",
+      "titleMark": "hace la orden.",
+      "lede": "Di el servicio y la IA rellena cliente, vehículo, repuestos y precios. Después solo mándala para que el cliente la apruebe.",
+      "ctaAppStore": "Descargar en App Store",
+      "ctaPlayStore": "Descargar en Google Play",
+      "strip": [
+        "Empieza gratis",
+        "iPhone y Android",
+        "El cliente aprueba sin instalar nada"
+      ],
+      "tiles": [
+        {
+          "label": "Taller mecánico",
+          "alt": "Mecánico de uniforme azul hablando al celular en un taller ordenado",
+          "image": "hero-mechanic.webp",
+          "width": 928,
+          "height": 1152
+        },
+        {
+          "label": "Refrigeración",
+          "alt": "Técnica conectando mangueras a la unidad exterior del aire acondicionado",
+          "image": "hero-hvac.webp",
+          "width": 640,
+          "height": 794
+        },
+        {
+          "label": "Electrónica",
+          "alt": "Técnico soldando una placa en la mesa de trabajo",
+          "image": "hero-electronics.webp",
+          "width": 640,
+          "height": 794
+        }
+      ],
+      "demo": {
+        "label": "Ejemplo: lo que dices se convierte en una orden de servicio",
+        "said": "Tú dices",
+        "line": "“El Corolla de Julia, cambio de aceite y alineación”",
         "rows": [
           {
             "label": "Cliente",
-            "value": "Marcos Andrade"
+            "value": "Julia Gómez"
           },
           {
-            "label": "Equipo",
-            "value": "Split 12.000 BTU · sala"
+            "label": "Vehículo",
+            "value": "Corolla"
           },
           {
-            "label": "Servicio",
-            "value": "Limpieza completa + carga de gas"
+            "label": "Cambio de aceite",
+            "value": "$ 80,00"
           },
           {
-            "label": "Entrega",
-            "value": "Hoy, 16:00"
-          },
-          {
-            "label": "Fotos",
-            "value": "4 adjuntas"
+            "label": "Alineación",
+            "value": "$ 120,00"
           }
         ],
         "totalLabel": "Total",
-        "total": "$ 480,00",
-        "stamp": "Aprobado por el cliente",
-        "steps": [
-          "Presupuesto",
-          "Aprobada",
-          "En curso",
-          "Completada",
-          "Pagada"
-        ],
-        "current": 2
+        "total": "$ 200,00",
+        "done": "Orden lista para enviar",
+        "again": "Ver de nuevo"
       }
     },
     "workflow": {
-      "title": "Cómo avanza una orden en PraticOS",
+      "title": "Del pedido al cobro, todo en la misma orden",
       "lede": "Cinco pasos, del primer contacto al dinero en la cuenta. Sin planilla, sin cuaderno y sin presupuestos perdidos en la conversación.",
       "stages": [
         {
-          "number": "01",
           "title": "Dilo y la IA rellena la orden",
           "text": "Toca + y Hablar: “El Corolla de Julia, cambio de aceite y alineación”. La IA rellena cliente, vehículo, servicios y piezas con los precios de tu catálogo.",
           "facts": [
@@ -358,10 +449,10 @@
             "Corrige hablando: “la alineación es 100”"
           ],
           "image": "ai-order.png",
-          "alt": "Nueva orden rellenada por el asistente de IA, con cliente, vehículo y servicios marcados"
+          "alt": "Nueva orden rellenada por el asistente de IA, con cliente, vehículo y servicios marcados",
+          "tab": "Hablar"
         },
         {
-          "number": "02",
           "title": "Registra con foto y checklist",
           "text": "Fotografía el antes y el después directo en la orden. El checklist de entrada muestra cómo llegó el equipo, antes de que alguien lo toque.",
           "facts": [
@@ -370,10 +461,10 @@
             "PDF de la orden con fotos, listo para enviar o imprimir"
           ],
           "image": "checklist.png",
-          "alt": "Checklist de entrada rellenado con fotos de los daños"
+          "alt": "Checklist de entrada rellenado con fotos de los daños",
+          "tab": "Registrar"
         },
         {
-          "number": "03",
           "title": "Manda el enlace al cliente",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve fotos y valores, aprueba el presupuesto y deja comentarios.",
           "facts": [
@@ -382,10 +473,10 @@
             "Al final, califica el servicio con el mismo enlace"
           ],
           "image": "order.png",
-          "alt": "Pantalla de una orden con el cliente, el estado, el botón del siguiente paso, servicios y total"
+          "alt": "Pantalla de una orden con el cliente, el estado, el botón del siguiente paso, servicios y total",
+          "tab": "Aprobar"
         },
         {
-          "number": "04",
           "title": "Marca el día y la hora",
           "text": "La Agenda muestra la semana y las visitas de cada día. La app te avisa antes de cada horario.",
           "facts": [
@@ -394,10 +485,10 @@
             "Aviso de presupuesto parado sin respuesta"
           ],
           "image": "agenda.png",
-          "alt": "Agenda de la semana con una visita marcada"
+          "alt": "Agenda de la semana con una visita marcada",
+          "tab": "Agendar"
         },
         {
-          "number": "05",
           "title": "Mira cuánto falta cobrar",
           "text": "La pestaña Financiero muestra cuánto falta cobrar y a quién. Registra lo que pagó el cliente, de una vez o en partes.",
           "facts": [
@@ -406,13 +497,16 @@
             "Lo que entró en el mes, en una sola pantalla"
           ],
           "image": "financial.png",
-          "alt": "Pestaña Financiero con el total que falta cobrar y la lista de clientes"
+          "alt": "Pestaña Financiero con el total que falta cobrar y la lista de clientes",
+          "tab": "Cobrar"
         }
-      ]
+      ],
+      "tabsLabel": "Funciones de la app"
     },
     "segments": {
       "title": "Hecho para quien repara, instala y mantiene",
-      "lede": "PraticOS se adapta a tu rubro. En el taller el campo se llama vehículo, en el servicio técnico es aparato, en refrigeración es equipo. Encuentra el tuyo:"
+      "lede": "PraticOS se adapta a tu rubro. En el taller el campo se llama vehículo, en el servicio técnico es aparato, en refrigeración es equipo. Encuentra el tuyo:",
+      "imageNote": "Imágenes ilustrativas."
     },
     "whatsappAssistant": {
       "title": "¿Sin tiempo para abrir la app? Manda un mensaje.",
@@ -444,6 +538,26 @@
       "contactLead": "¿Dudas?",
       "contactWhatsapp": "Escríbenos por WhatsApp",
       "contactFaq": "Preguntas frecuentes"
+    },
+    "ai": {
+      "title": "IA para quien tiene las manos ocupadas",
+      "photoLabel": "Electricista",
+      "photoAlt": "Electricista probando un tablero eléctrico en una casa",
+      "items": [
+        {
+          "title": "Entiende cómo hablas",
+          "text": "Habla a tu manera, entre un servicio y otro. La IA separa cliente, equipo y servicio.",
+          "quote": "El refrigerador de doña Marta no enfría, visita mañana"
+        },
+        {
+          "title": "Lee la foto por ti",
+          "text": "Fotografía la placa o el pedido anotado en papel. Lo que esté ahí entra en la orden."
+        },
+        {
+          "title": "Tú siempre revisas",
+          "text": "Lo que la IA rellenó queda marcado. Puedes deshacerlo antes de enviarlo al cliente."
+        }
+      ]
     }
   }
 }
