@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Refrigeração e Ar-Condicionado | PraticOS",
     "ogDescription": "OS de refrigeração no celular: histórico de cada equipamento, checklist de instalação e preventiva com fotos, orçamento aprovado por link.",
     "hero": {
-      "title": "Cada equipamento com",
-      "titleMark": "seu histórico.",
-      "lede": "PraticOS é o app de ordem de serviço para técnico de refrigeração e ar-condicionado. Cadastre o equipamento com BTUs, voltagem e tipo de gás, preencha o checklist com fotos no local, mande o orçamento por link e registre o pagamento — pelo celular.",
+      "title": "Chegue sabendo o histórico.",
+      "titleMark": "Saia com o serviço aprovado.",
+      "lede": "PraticOS é o app de ordem de serviço para técnico de refrigeração e ar-condicionado que deixa mais tempo para o serviço e menos para a papelada. Cada equipamento guarda o histórico, o checklist sai com fotos no local e o cliente aprova o orçamento por link.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -55,49 +55,50 @@
       }
     },
     "problems": {
-      "title": "Onde o técnico de refrigeração perde dinheiro",
+      "title": "O dinheiro que o técnico de refrigeração perde sem perceber",
       "lede": "O serviço aparece. O que escapa é o histórico do aparelho, a carga de gás que ninguém anotou e a visita que vira discussão de preço.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Não lembrar o que foi feito no aparelho",
           "detail": "O cliente liga dizendo que o ar parou de novo. Você não sabe se foi recarga, capacitor ou só limpeza da última vez.",
-          "answer": "Cada equipamento fica cadastrado com BTUs, voltagem, gás e data de instalação. Busque pelo nome ou número de série e veja todas as OS dele."
+          "answer": "Busque o equipamento pelo nome ou número de série e veja todas as OS dele, com BTUs, voltagem, gás e data de instalação. Você chega sabendo."
         },
         {
-          "problem": "Recarga de gás sem registro",
+          "problem": "Recarga de gás que você não consegue provar",
           "detail": "Quantos gramas entraram, qual era a pressão antes e depois? Se o aparelho voltar com vazamento, você não tem como mostrar.",
-          "answer": "O checklist de recarga registra tipo de gás, quantidade em gramas, pressão antes e depois, temperatura de saída e teste de vazamento."
+          "answer": "Tipo de gás, gramas, pressão antes e depois, temperatura de saída e teste de vazamento ficam guardados. Se o equipamento voltar, você tem como mostrar."
         },
         {
           "problem": "Preventiva feita, mas sem prova",
           "detail": "O condomínio ou a empresa pergunta o que foi limpo e trocado. A resposta está na memória do técnico.",
-          "answer": "O checklist de manutenção preventiva marca filtros, evaporadora, condensadora, dreno e parte elétrica, com fotos em cada item."
+          "answer": "Filtros, evaporadora, condensadora, dreno e parte elétrica, com fotos em cada item. Você tem o que mostrar ao condomínio."
         },
         {
           "problem": "Orçamento combinado por áudio",
           "detail": "Você passou o valor por mensagem, o cliente diz que entendeu outro. A peça já foi comprada.",
-          "answer": "O orçamento fica na OS com serviços e peças do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+          "answer": "O cliente aprova pelo link, com serviços e peças na tela. Combinado é combinado, e fica guardado."
         },
         {
           "problem": "Agenda espalhada",
           "detail": "Instalação de manhã, visita técnica à tarde, preventiva no outro bairro. Um atendimento esquecido é um cliente perdido.",
-          "answer": "A OS entra na agenda pela data marcada e o celular avisa antes de cada atendimento, mesmo com o app fechado."
+          "answer": "Com data marcada, a OS entra na agenda e o celular avisa antes de cada atendimento, mesmo com o app fechado. Nenhum cliente esquecido."
         },
         {
           "problem": "Fim do mês sem saber quem pagou",
           "detail": "Contrato de manutenção, serviço avulso e fiado misturados. Ninguém sabe o que falta receber.",
-          "answer": "Registre pagamentos inteiros ou em partes na OS. O Financeiro mostra quanto falta receber, de quais clientes, e tem o botão para mandar a cobrança."
+          "answer": "Você vê quanto falta receber e de quais clientes, mesmo com pagamento em partes, e manda a cobrança ali mesmo."
         }
       ]
     },
     "workflow": {
-      "title": "Como um atendimento de ar-condicionado passa pelo PraticOS",
-      "lede": "Da visita ao pagamento, tudo fica na OS do equipamento.",
+      "title": "Da visita ao pagamento, sem nada esquecido",
+      "lede": "Você chega preparado, o cliente aprova e você recebe, tudo pelo celular.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA abre a OS",
+          "title": "Fale o serviço. A IA abre a OS.",
+          "tab": "Falar",
           "text": "Toque em Falar e diga, por exemplo: “Split 12 mil da Juliana, limpeza completa e recarga de gás, amanhã às 14h”. Ou fotografe a etiqueta do aparelho. A IA preenche cliente, equipamento, serviços e peças com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "BTUs, voltagem, tipo de gás e data de instalação",
@@ -107,7 +108,8 @@
         },
         {
           "number": "02",
-          "title": "Preencha o checklist no local",
+          "title": "Comprove o serviço no local",
+          "tab": "Registrar",
           "text": "Os checklists de refrigeração vêm prontos e você ajusta os itens. Cada item aceita fotos.",
           "facts": [
             "Instalação: evaporadora, condensadora, dreno, vácuo, pressão",
@@ -117,10 +119,11 @@
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Deixe o cliente aprovar pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Vê as fotos, as peças e os serviços, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "Aprovação do cliente guardada para qualquer dúvida",
             "Você recebe uma notificação quando o cliente aprova",
             "PDF da OS para imprimir ou enviar"
           ]
@@ -128,7 +131,8 @@
         {
           "number": "04",
           "title": "Conclua e receba",
-          "text": "Registre o pagamento inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quais clientes.",
+          "tab": "Receber",
+          "text": "Receba inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quais clientes.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
             "Relatório do mês com o que entrou",
@@ -140,8 +144,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem trabalha com refrigeração",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Antes de usar no seu dia a dia",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -149,7 +153,7 @@
         },
         {
           "question": "Serve para residencial, comercial e ar automotivo?",
-          "answer": "Sim. O segmento de refrigeração cobre split e janela residencial, sistemas comerciais como VRF, chiller e câmara fria, e ar-condicionado automotivo. O app usa os termos do ramo: equipamento, BTUs, gás."
+          "answer": "Sim. Funciona para split e janela residencial, sistemas comerciais como VRF, chiller e câmara fria, e ar-condicionado automotivo. O app fala a sua língua: equipamento, BTUs, gás."
         },
         {
           "question": "O PraticOS gera o PMOC?",
@@ -175,9 +179,9 @@
     "ogTitle": "HVAC Work Order Software | PraticOS",
     "ogDescription": "HVAC work orders on your phone: a history for every unit, install and maintenance checklists with photos, quotes approved by link.",
     "hero": {
-      "title": "Every unit with",
-      "titleMark": "its own history.",
-      "lede": "PraticOS is the work order app for HVAC and refrigeration technicians. Add the unit with BTUs, voltage and refrigerant, fill in the checklist with photos on site, send the quote as a link and record the payment — from your phone.",
+      "title": "Arrive knowing the history.",
+      "titleMark": "Leave with the job approved.",
+      "lede": "PraticOS is the work order app for HVAC and refrigeration technicians that leaves more time for the job and less for paperwork. Every unit keeps its history, checklists get done on site with photos and the customer approves the quote by link.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -221,49 +225,50 @@
       }
     },
     "problems": {
-      "title": "Where an HVAC tech loses money",
+      "title": "The money an HVAC tech loses without noticing",
       "lede": "The calls come in. What slips away is the unit's history, the refrigerant charge nobody wrote down and the visit that turns into an argument about price.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Not knowing what was done on the unit",
           "detail": "The customer calls because the AC stopped again. You can't tell whether it was a recharge, a capacitor or just a cleaning last time.",
-          "answer": "Each unit is on file with BTUs, voltage, refrigerant and install date. Search by name or serial number and see every work order for it."
+          "answer": "Search the unit by name or serial number and see every work order, with BTUs, voltage, refrigerant and install date. You show up knowing."
         },
         {
-          "problem": "Refrigerant charges with no record",
+          "problem": "Refrigerant charges you can't prove",
           "detail": "How much went in, what were the pressures before and after? If the unit comes back with a leak, you have nothing to show.",
-          "answer": "The recharge checklist records refrigerant type, amount in grams, pressure before and after, supply air temperature and the leak test."
+          "answer": "Refrigerant type, grams, pressure before and after, supply air temperature and the leak test are all saved. If the unit comes back, you have something to show."
         },
         {
           "problem": "Maintenance done, but no proof",
           "detail": "The property manager asks what was cleaned and replaced. The answer lives in the tech's memory.",
-          "answer": "The preventive maintenance checklist covers filters, indoor unit, outdoor unit, drain and electrical, with photos on every item."
+          "answer": "Filters, indoor unit, outdoor unit, drain and electrical, with photos on every item. You have something to show the property manager."
         },
         {
           "problem": "Quotes agreed by voice message",
           "detail": "You sent the price in a message, the customer remembers a different number. The part is already bought.",
-          "answer": "The quote lives on the work order with services and parts from your catalog. The customer approves it by link and the approval is recorded."
+          "answer": "The customer approves by link, with services and parts right there. What was agreed stays on hand."
         },
         {
           "problem": "A schedule in five places",
           "detail": "An install in the morning, a service call in the afternoon, maintenance across town. A forgotten visit is a lost customer.",
-          "answer": "The work order goes on the calendar by its scheduled date, and your phone reminds you before each visit, even with the app closed."
+          "answer": "Once it's scheduled, the job lands on your calendar and your phone reminds you before each visit, even with the app closed. No customer forgotten."
         },
         {
           "problem": "Closing the month without knowing who paid",
           "detail": "Maintenance contracts, one-off jobs and IOUs all mixed together. Nobody knows what's still outstanding.",
-          "answer": "Record full or partial payments on the order. Financial shows how much is still due, from which customers, with a button to send a payment reminder."
+          "answer": "See what's still due and from which customers, even with partial payments, and send the payment reminder right there."
         }
       ]
     },
     "workflow": {
-      "title": "How an HVAC job moves through PraticOS",
-      "lede": "From the visit to the payment, everything stays on the unit's work order.",
+      "title": "From the visit to the payment, nothing forgotten",
+      "lede": "You show up prepared, the customer approves and you get paid, all from your phone.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the AI opens the order",
+          "title": "Say the job. AI opens the work order.",
+          "tab": "Speak",
           "text": "Tap Speak and say something like: “Juliana's 12,000 BTU split, full cleaning and refrigerant recharge, tomorrow at 2pm”. Or photograph the unit's label. The AI fills in customer, unit, services and parts with your catalog prices and marks what it filled with ✦.",
           "facts": [
             "BTUs, voltage, refrigerant type and install date",
@@ -273,7 +278,8 @@
         },
         {
           "number": "02",
-          "title": "Fill in the checklist on site",
+          "title": "Prove the work on site",
+          "tab": "Record",
           "text": "The HVAC checklists come ready to use and you can adjust the items. Every item takes photos.",
           "facts": [
             "Install: indoor unit, outdoor unit, drain, vacuum, pressure",
@@ -283,10 +289,11 @@
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Let the customer approve by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in a browser, nothing to install. They see photos, parts and services, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "Customer approval kept on hand in case of any doubt",
             "You get a notification when the customer approves",
             "Work order PDF to print or send"
           ]
@@ -294,7 +301,8 @@
         {
           "number": "04",
           "title": "Finish the job and get paid",
-          "text": "Record the payment in full or in parts, with a discount if needed. Financial shows how much is still due and from which customers.",
+          "tab": "Get paid",
+          "text": "Get paid in full or in parts, with a discount if needed. Financial shows how much is still due and from which customers.",
           "facts": [
             "Partial payment and discount on the same order",
             "Monthly report of what came in",
@@ -306,8 +314,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from HVAC techs",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Before you try it on the job",
+      "lede": "Still have a question? Send us an email: the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -315,7 +323,7 @@
         },
         {
           "question": "Does it work for residential, commercial and automotive AC?",
-          "answer": "Yes. The HVAC segment covers residential split and window units, commercial systems like VRF, chillers and cold rooms, and vehicle AC. The app uses your trade's words: equipment, BTUs, refrigerant."
+          "answer": "Yes. It works for residential split and window units, commercial systems like VRF, chillers and cold rooms, and vehicle AC. The app speaks your trade: equipment, BTUs, refrigerant."
         },
         {
           "question": "Can I keep a maintenance record for each unit?",
@@ -341,9 +349,9 @@
     "ogTitle": "Sistema para Técnicos de Aire Acondicionado | PraticOS",
     "ogDescription": "Las órdenes de refrigeración en el celular: historial de cada equipo, checklist de instalación y mantenimiento con fotos, presupuesto aprobado por link.",
     "hero": {
-      "title": "Cada equipo con",
-      "titleMark": "su historial.",
-      "lede": "PraticOS es la app de órdenes de servicio para técnicos de refrigeración y aire acondicionado. Registra el equipo con BTU, voltaje y tipo de gas, completa el checklist con fotos en el lugar, envía el presupuesto por link y registra el pago — desde el celular.",
+      "title": "Llega conociendo el historial.",
+      "titleMark": "Sal con el trabajo aprobado.",
+      "lede": "PraticOS es la app de órdenes de servicio para técnicos de refrigeración y aire acondicionado que te deja más tiempo para trabajar y menos papeleo. Cada equipo guarda su historial, el checklist se hace en el lugar con fotos y el cliente aprueba el presupuesto por link.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -387,49 +395,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el técnico de refrigeración",
+      "title": "El dinero que el técnico de refrigeración pierde sin darse cuenta",
       "lede": "El trabajo llega. Lo que se escapa es el historial del equipo, la carga de gas que nadie anotó y la visita que termina en discusión por el precio.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "No recordar qué se le hizo al equipo",
           "detail": "El cliente llama porque el aire dejó de enfriar otra vez. No sabes si la última vez fue recarga, capacitor o solo limpieza.",
-          "answer": "Cada equipo queda registrado con BTU, voltaje, gas y fecha de instalación. Búscalo por nombre o número de serie y ve todas sus órdenes."
+          "answer": "Busca el equipo por nombre o número de serie y ve todas sus órdenes, con BTU, voltaje, gas y fecha de instalación. Llegas sabiendo."
         },
         {
-          "problem": "Recargas de gas sin registro",
+          "problem": "Recargas de gas que no puedes demostrar",
           "detail": "¿Cuántos gramos entraron, cuál era la presión antes y después? Si el equipo vuelve con una fuga, no tienes cómo demostrarlo.",
-          "answer": "El checklist de recarga registra tipo de gas, cantidad en gramos, presión antes y después, temperatura de salida y prueba de fugas."
+          "answer": "Tipo de gas, gramos, presión antes y después, temperatura de salida y prueba de fugas quedan guardados. Si el equipo vuelve, tienes cómo demostrarlo."
         },
         {
           "problem": "Mantenimiento hecho, pero sin prueba",
           "detail": "El administrador del edificio pregunta qué se limpió y qué se cambió. La respuesta está en la memoria del técnico.",
-          "answer": "El checklist de mantenimiento preventivo marca filtros, evaporadora, condensadora, drenaje y parte eléctrica, con fotos en cada ítem."
+          "answer": "Filtros, evaporadora, condensadora, drenaje y parte eléctrica, con fotos en cada ítem. Tienes qué mostrarle al administrador."
         },
         {
           "problem": "Presupuesto acordado por audio",
           "detail": "Pasaste el precio por mensaje y el cliente entendió otro. El repuesto ya está comprado.",
-          "answer": "El presupuesto queda en la orden con servicios y repuestos de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+          "answer": "El cliente aprueba por link, con servicios y repuestos a la vista. Lo acordado queda guardado."
         },
         {
           "problem": "Agenda desparramada",
           "detail": "Instalación en la mañana, visita técnica en la tarde, mantenimiento en otro barrio. Una visita olvidada es un cliente perdido.",
-          "answer": "La orden entra en la agenda por la fecha programada y el celular te avisa antes de cada visita, incluso con la app cerrada."
+          "answer": "Con fecha programada, la orden entra en la agenda y el celular te avisa antes de cada visita, incluso con la app cerrada. Ningún cliente olvidado."
         },
         {
           "problem": "Cerrar el mes sin saber quién pagó",
           "detail": "Contratos de mantenimiento, trabajos sueltos y fiado mezclados. Nadie sabe cuánto falta cobrar.",
-          "answer": "Registra pagos totales o en partes en la orden. Financiero muestra cuánto falta cobrar, de qué clientes, y tiene el botón para mandar el cobro."
+          "answer": "Ves cuánto falta cobrar y de qué clientes, incluso con pagos en partes, y envías el cobro ahí mismo."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un servicio de aire acondicionado por PraticOS",
-      "lede": "De la visita al pago, todo queda en la orden del equipo.",
+      "title": "De la visita al pago, sin olvidar nada",
+      "lede": "Llegas preparado, el cliente aprueba y tú cobras, todo desde el celular.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el trabajo y la IA abre la orden",
+          "title": "Di el trabajo. La IA abre la orden.",
+          "tab": "Hablar",
           "text": "Toca Hablar y di, por ejemplo: “Split de 12 mil de Juliana, limpieza completa y recarga de gas, mañana a las 14”. O fotografía la etiqueta del equipo. La IA completa cliente, equipo, servicios y repuestos con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "BTU, voltaje, tipo de gas y fecha de instalación",
@@ -439,7 +448,8 @@
         },
         {
           "number": "02",
-          "title": "Completa el checklist en el lugar",
+          "title": "Demuestra el trabajo en el lugar",
+          "tab": "Registrar",
           "text": "Los checklists de refrigeración vienen listos y tú ajustas los ítems. Cada ítem acepta fotos.",
           "facts": [
             "Instalación: evaporadora, condensadora, drenaje, vacío, presión",
@@ -449,10 +459,11 @@
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "Deja que el cliente apruebe por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos, los repuestos y los servicios, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "Aprobación del cliente guardada ante cualquier duda",
             "Recibes una notificación cuando el cliente aprueba",
             "PDF de la orden para imprimir o enviar"
           ]
@@ -460,7 +471,8 @@
         {
           "number": "04",
           "title": "Termina y cobra",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y de qué clientes.",
+          "tab": "Cobrar",
+          "text": "Cobra el total o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y de qué clientes.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
             "Informe del mes con lo que entró",
@@ -472,8 +484,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien trabaja en refrigeración",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Antes de usarlo en tu día a día",
+      "lede": "¿Te queda alguna duda? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -481,7 +493,7 @@
         },
         {
           "question": "¿Sirve para residencial, comercial y aire automotriz?",
-          "answer": "Sí. El segmento de refrigeración cubre split y ventana residencial, sistemas comerciales como VRF, chiller y cámaras frigoríficas, y aire acondicionado vehicular. La app usa los términos del rubro: equipo, BTU, gas."
+          "answer": "Sí. Funciona para split y ventana residencial, sistemas comerciales como VRF, chiller y cámaras frigoríficas, y aire acondicionado vehicular. La app habla tu idioma: equipo, BTU, gas."
         },
         {
           "question": "¿Puedo llevar el registro de mantenimiento de cada equipo?",

@@ -1,104 +1,52 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow (trade) · theme: custom "Ordem de Serviço"
+/* Hallmark · genre: modern-minimal · macrostructure: Photographic · theme: "Campo" (design.md)
  * Segment landing pages (src/segmentos/*.njk, layout layouts/segment.njk).
- * enrichment: Tier-A HTML/CSS sample work order for the trade · design-system: design.md
- * Hallmark · pre-emit critique: P5 H4 E4 S5 R4 V4
+ * Builds on home.css (hero, tag, demo card, strip, tabs, panel); only trade-specific parts live here.
+ * enrichment: the trade's sample order over its photo · design-system: design.md
  */
 
-/* ---------- Hero (H2 split diptych) ---------- */
-.seg-hero { padding-block: var(--space-2xl) var(--space-3xl); }
-.seg-hero__grid { display: grid; gap: var(--space-2xl); grid-template-columns: minmax(0, 1fr); align-items: center; }
-.seg-hero h1 { max-width: 15ch; }
-.seg-hero .lede { margin-top: var(--space-md); }
-.seg-hero .btn-row { margin-top: var(--space-lg); }
-.seg-hero__note { margin-top: var(--space-md); font-size: var(--text-xs); color: var(--color-neutral); }
-.seg-hero__shot { width: min(100%, 18rem); justify-self: center; aspect-ratio: 9 / 14; }
-.seg-hero__shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-@media (min-width: 60rem) {
-  .seg-hero { padding-top: var(--space-3xl); }
-  .seg-hero__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-xl); }
-}
+/* ---------- Hero ---------- */
+.seg-top h1 { font-size: clamp(2.5rem, 1.5rem + 3.2vw, 3.8rem); }
+.seg-top__grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6.2fr); }
+.seg-top__note { margin-top: var(--space-sm); font-size: var(--text-xs); opacity: 0.75; }
+.seg-photo { position: relative; min-width: 0; height: 560px; }
+.seg-photo__tile { position: absolute; inset: 0; }
+.seg-photo__tile img { transform: none !important; object-position: 50% 30%; }
+.seg-order { left: calc(var(--space-2xl) * -1); bottom: var(--space-sm); width: 18.5rem; font-size: 0.9rem; }
+.seg-order__head { padding: var(--space-xs) var(--space-sm) var(--space-3xs); font-size: 0.86rem; color: var(--color-muted); }
+.seg-order .demo__row dt { color: var(--color-muted); flex: none; }
+.seg-order .demo__row { font-size: 0.88rem; }
+.seg-order .demo__row dd { margin: 0; font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+.seg-order .demo__row--total dt, .seg-order .demo__row--total dd { font-weight: 700; color: var(--color-ink); }
+.seg-order .demo__done { margin: 0; }
 
-/* Sample work order for the trade — a printed form, not a device mockup */
-.seg-ticket { margin: 0; position: relative; width: 100%; max-width: 30rem; justify-self: center; }
-.seg-ticket__caption { display: block; margin-bottom: var(--space-2xs); }
-.seg-ticket__sheet {
-  position: relative;
-  background: var(--color-card);
-  border: var(--rule);
-  border-top: 6px solid var(--color-rule-strong);
-  border-radius: 0 0 var(--radius-card) var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-md) var(--space-md) var(--space-sm);
-}
-.seg-ticket__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-sm); padding-bottom: var(--space-sm); border-bottom: var(--rule-strong); }
-.seg-ticket__title { font-family: var(--font-display); font-weight: 800; font-size: var(--text-md); letter-spacing: -0.01em; text-transform: uppercase; }
-.seg-ticket__number { font-size: var(--text-sm); color: var(--color-accent); font-weight: 500; white-space: nowrap; }
-.seg-ticket__rows { margin: 0; }
-.seg-ticket__row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--space-xs); padding: 0.6rem 0; border-bottom: 1px dashed var(--color-rule); align-items: baseline; }
-.seg-ticket__row dt { font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-neutral); }
-.seg-ticket__row dd { margin: 0; font-size: var(--text-sm); font-weight: 500; overflow-wrap: anywhere; }
-.seg-ticket__row--total { border-bottom: 0; padding-top: var(--space-sm); }
-.seg-ticket__row--total dd { font-size: var(--text-lg); font-weight: 500; letter-spacing: -0.02em; }
-.seg-ticket__stamp {
-  display: table; margin: var(--space-2xs) var(--space-2xs) 0 auto;
-  font-family: var(--font-display); font-weight: 900; font-size: var(--text-xs);
-  letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.15;
-  color: var(--color-success);
-  border: 2px solid currentColor; border-radius: var(--radius-input);
-  padding: 0.35rem 0.55rem; max-width: 9.5rem; text-align: center;
-  transform: rotate(-7deg);
-  opacity: 0.9;
-}
-ol.seg-ticket__steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: var(--rule); }
-.seg-ticket__steps li { font-size: 0.6875rem; line-height: 1.25; color: var(--color-neutral); padding-top: 0.5rem; border-top: 4px solid var(--color-paper-3); -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
-.seg-ticket__steps li.is-done { border-top-color: var(--color-rule-strong); color: var(--color-muted); }
-.seg-ticket__steps li.is-current { border-top-color: var(--color-accent); color: var(--color-ink); font-weight: 600; }
-@media (max-width: 26rem) {
-  .seg-ticket__row { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
-}
+/* ---------- What the trade gains ---------- */
+.seg-gains { background: var(--color-paper-2); padding-block: var(--space-3xl); }
+.seg-gains h2, .seg-faq h2 { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.08; letter-spacing: -0.014em; max-width: 22ch; }
+.seg-gains__list { margin-top: var(--space-lg); }
+.seg-gains__list li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-xl); padding-block: var(--space-md); border-top: var(--rule); }
+.seg-gains__list h3 { font-size: 1.3rem; line-height: 1.2; }
+.seg-gains__list li p { margin-top: var(--space-3xs); color: var(--color-muted); max-width: 46ch; }
+.seg-gains__list .seg-gains__answer { position: relative; margin-top: 0; padding-left: 28px; color: var(--color-ink); font-weight: 500; }
+.seg-gains__answer::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
 
-/* ---------- Problem → answer rows (Split Studio) ---------- */
-.seg-split { border-top: var(--rule); }
-.seg-split__row {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm);
-  padding-block: var(--space-lg);
-  border-bottom: var(--rule);
-}
-.seg-split__problem { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: var(--space-xs); align-items: baseline; }
-.seg-split__num { font-size: var(--text-sm); color: var(--color-neutral); }
-.seg-split__problem h3 { font-size: var(--text-md); }
-.seg-split__problem p { margin-top: var(--space-2xs); color: var(--color-muted); max-width: 46ch; }
-.seg-split__answer { padding-left: calc(2.5rem + var(--space-xs)); max-width: 52ch; }
-.seg-split__answer .label { display: block; color: var(--color-accent); margin-bottom: var(--space-3xs); }
-@media (min-width: 52rem) {
-  .seg-split__row { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--space-xl); }
-  .seg-split__answer { padding-left: var(--space-lg); border-left: var(--rule); }
-}
+/* ---------- Tabs without a screen ---------- */
+.panel--text { align-items: center; }
+.panel--text .panel__copy { padding-block: var(--space-xl); }
+ul.panel__facts { margin: var(--space-lg) 0; max-width: none; padding: var(--space-md) var(--space-lg); background: var(--color-card); border-radius: var(--radius-card); }
 
-/* ---------- Workflow stages ---------- */
-.seg-stages { display: grid; }
-.seg-stage {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-lg);
-  padding-block: var(--space-xl);
-  border-top: var(--rule);
-}
-.seg-stage:first-child { border-top: 0; padding-top: 0; }
-.seg-stage__num { display: block; font-size: var(--text-lg); font-weight: 500; color: var(--color-accent); margin-bottom: var(--space-xs); letter-spacing: -0.02em; }
-.seg-stage h3 { font-size: var(--text-xl); max-width: 22ch; }
-.seg-stage__copy p { margin-top: var(--space-sm); color: var(--color-muted); max-width: 48ch; }
-ul.seg-stage__facts { margin-top: var(--space-md); display: grid; gap: var(--space-2xs); max-width: 48ch; }
-.seg-stage__facts li { position: relative; padding-left: 1.25rem; font-size: var(--text-sm); }
-.seg-stage__facts li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.5rem; height: 0.5rem; background: var(--color-rule-strong); }
-.seg-stage__shot { width: min(100%, 17rem); justify-self: start; aspect-ratio: 9 / 14; }
-.seg-stage__shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.seg-stage--text { padding-block: var(--space-lg); }
-.seg-stage--text h3 { font-size: var(--text-md); }
-@media (min-width: 52rem) {
-  .seg-stage:not(.seg-stage--text) { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-2xl); align-items: center; }
-  .seg-stage:not(.seg-stage--text) .seg-stage__shot { justify-self: end; }
-  .seg-stage:not(.seg-stage--text):nth-child(even) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
-  .seg-stage:not(.seg-stage--text):nth-child(even) .seg-stage__copy { order: 2; }
-  .seg-stage:not(.seg-stage--text):nth-child(even) .seg-stage__shot { order: 1; justify-self: start; }
+/* ---------- FAQ ---------- */
+.seg-faq { padding-block: var(--space-3xl); }
+.seg-faq__list { margin-top: var(--space-lg); }
+
+@media (max-width: 60rem) {
+  .seg-top__grid { grid-template-columns: minmax(0, 1fr); }
+  .seg-photo { height: auto; display: grid; }
+  .seg-photo__tile { position: relative; inset: auto; height: 320px; }
+  .seg-order { position: relative; left: auto; bottom: auto; width: 100%; max-width: 25rem; margin: -84px auto 0; }
+  .seg-gains, .seg-faq { padding-block: var(--space-2xl); }
+  .seg-gains__list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
+  .panel--text .panel__copy { padding-block: var(--space-lg) 0; }
+  ul.panel__facts { margin-block: var(--space-md) var(--space-lg); padding: var(--space-sm); }
 }
 
 /* ---------- FAQ (details accordion) ---------- */

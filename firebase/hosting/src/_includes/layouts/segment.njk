@@ -2,22 +2,23 @@
 layout: layouts/base.njk
 pageType: segment
 ---
-{# Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow (trade) · design-system: design.md
- # Segment landing: hero (H2 split diptych) → problem/answer rows (Split Studio) → workflow stages
- # → FAQ → final CTA. Data: _data/segments/<slug>.json, one object per language.
- # Optional blocks (hero.ticket, problems, workflow, faq) are skipped when missing. #}
+{# Hallmark · genre: modern-minimal · macrostructure: Photographic · theme: "Campo" (design.md)
+ # Segment landing, same language as the home: navy photo hero with the trade's order card →
+ # what the trade loses vs. gains → feature tabs → FAQ → final CTA.
+ # Data: _data/segments/<slug>.json, one object per language. #}
 {% set segmentData = segments[segmentSlug] %}
 {% set data = segmentData[langCode] | default(segmentData.pt) %}
 {% set homeHref = relPath ~ (indexPage | default('index.html') | prettyUrl) %}
 {% set ui = {
-    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', note: 'Comece grátis · iOS e Android · planos pagos no app', answerLabel: 'No PraticOS', faqTitle: 'Perguntas frequentes', shotAlt: 'Lista de ordens de serviço no app PraticOS' },
-    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', note: 'Start free · iOS and Android · paid plans in the app', answerLabel: 'In PraticOS', faqTitle: 'Frequently asked questions', shotAlt: 'Work order list in the PraticOS app' },
-    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', note: 'Empieza gratis · iOS y Android · planes pagos en la app', answerLabel: 'En PraticOS', faqTitle: 'Preguntas frecuentes', shotAlt: 'Lista de órdenes de servicio en la app PraticOS' }
+    pt: { ctaPrimary: 'Baixar grátis', ctaSecondary: 'Ver como funciona', strip: ['Comece grátis', 'iPhone e Android', 'Cliente aprova sem instalar nada'], tabsLabel: 'Recursos do app', imageNote: 'Imagem ilustrativa.' },
+    en: { ctaPrimary: 'Download free', ctaSecondary: 'See how it works', strip: ['Start free', 'iPhone and Android', 'Customers approve without installing anything'], tabsLabel: 'App features', imageNote: 'Illustrative image.' },
+    es: { ctaPrimary: 'Descargar gratis', ctaSecondary: 'Ver cómo funciona', strip: ['Empieza gratis', 'iPhone y Android', 'El cliente aprueba sin instalar nada'], tabsLabel: 'Funciones de la app', imageNote: 'Imagen ilustrativa.' }
 }[langCode] | default({}) %}
 
 {% include "components/segment/hero.njk" %}
-{% if data.problems %}{% include "components/segment/problems.njk" %}{% endif %}
+{% include "components/segment/problems.njk" %}
 {% include "components/segment/workflow.njk" %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
-{% if data.faq and data.faq.items %}{% include "components/segment/faq.njk" %}{% endif %}
+{% include "components/segment/faq.njk" %}
 {% include "components/download.njk" %}
+<script src="{{ relPath }}js/home.js" defer></script>

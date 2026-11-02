@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Eletricista | PraticOS",
     "ogDescription": "OS do eletricista no celular: orçamento aprovado por link, checklist de segurança, medições e fotos do quadro, agenda e controle do que entrou.",
     "hero": {
-      "title": "Orçamento, medições e fotos do quadro",
-      "titleMark": "na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para eletricistas. Monte o orçamento com o seu catálogo, mande por link para o cliente aprovar, registre tensão, DR e aterramento com fotos do quadro e receba — tudo pelo celular.",
+      "title": "Cobre o preço certo.",
+      "titleMark": "E prove o serviço feito.",
+      "lede": "O app para eletricista que transforma a visita em orçamento aprovado pelo cliente. Tensão, DR, aterramento e fotos do quadro ficam guardados, e você recebe pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde o eletricista perde dinheiro",
-      "lede": "Quase nunca é falta de chamado. É o orçamento passado de cabeça, o material que ficou fora da conta e o “depois que você mexeu, o disjuntor cai” sem nada registrado.",
+      "title": "O dinheiro que o eletricista deixa na mesa",
+      "lede": "O problema quase nunca é falta de chamado. É o preço passado de cabeça, o material fora da conta e o “depois que você mexeu, o disjuntor cai” sem nenhuma prova do seu lado.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Preço passado de cabeça",
           "detail": "Cabo, disjuntor, DR e mão de obra somados no olho. No fim, o serviço saiu mais barato do que custou.",
-          "answer": "Cadastre materiais e serviços com preço uma vez. Na OS você escolhe os itens, ajusta quantidades e o total é somado na hora."
+          "answer": "Seus materiais e serviços já com preço. Escolha os itens e o total sai certo, na hora."
         },
         {
           "problem": "Orçamento por áudio que o cliente esquece",
           "detail": "O valor foi falado no telefone e, na hora de cobrar, o cliente lembra de outro número.",
-          "answer": "O cliente aprova o orçamento pelo link, e a aprovação fica registrada na própria OS."
+          "answer": "O cliente aprova pelo link, e o valor combinado fica guardado para a hora de cobrar."
         },
         {
           "problem": "“Depois que você mexeu, o disjuntor cai”",
           "detail": "O cliente liga semanas depois culpando o seu serviço, e você não tem como mostrar como deixou a instalação.",
-          "answer": "O checklist de registro do serviço elétrico guarda tensão e corrente medidas, teste do DR, aterramento e foto do quadro depois do serviço."
+          "answer": "Tensão, corrente, teste do DR, aterramento e foto do quadro guardados. Você mostra como deixou a instalação."
         },
         {
-          "problem": "Segurança sem registro",
+          "problem": "Segurança feita, mas sem prova",
           "detail": "O circuito foi desligado e testado, mas nada ficou escrito. Se algo der errado, não há como mostrar.",
-          "answer": "O checklist de segurança NR10 registra circuito desenergizado e bloqueado, teste de ausência de tensão, EPI usado, área sinalizada e foto do quadro antes."
+          "answer": "Circuito desenergizado, teste de ausência de tensão, EPI e foto do quadro no checklist NR10. Se precisar, você mostra o que fez."
         },
         {
           "problem": "Serviço marcado em cima de outro",
           "detail": "Duas visitas no mesmo horário e um cliente esperando em casa sem notícia.",
-          "answer": "A data da OS coloca o serviço na agenda, e o celular avisa antes de cada atendimento."
+          "answer": "Sua agenda organizada pela data de cada OS, e o celular avisa antes de cada atendimento."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Sinal para comprar material, saldo no fim da obra e cliente que pede para pagar depois.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Veja quanto falta receber e de quem, e quanto entrou no mês. Pagamento em partes também."
         }
       ]
     },
     "workflow": {
-      "title": "Como um serviço elétrico passa pelo PraticOS",
-      "lede": "Da visita à liberação, cada etapa fica registrada na OS da instalação.",
+      "title": "Da visita ao pagamento, sem papelada",
+      "lede": "Você fala, o cliente aprova, o serviço fica provado e você recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA preenche o orçamento",
+          "title": "Fale o serviço, a IA monta o orçamento",
+          "tab": "Falar",
           "text": "Na visita, toque em Falar na Nova OS e diga “casa do Rogério, troca do quadro e três tomadas novas”, ou tire uma foto do que você anotou. A IA preenche cliente, serviços e materiais com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -106,17 +107,19 @@
         },
         {
           "number": "02",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê materiais e mão de obra, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "Cliente acompanha o andamento sem ligar",
             "PDF da OS para imprimir ou enviar"
           ]
         },
         {
           "number": "03",
-          "title": "Execute com checklist",
+          "title": "Faça o serviço sem esquecer nada",
+          "tab": "Executar",
           "text": "Os checklists de elétrica vêm prontos e você ajusta os itens: segurança antes de começar, registro do serviço e qualidade na entrega.",
           "facts": [
             "Foto do quadro antes e depois",
@@ -127,6 +130,7 @@
         {
           "number": "04",
           "title": "Libere e receba",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -139,8 +143,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de eletricistas",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que o eletricista quer saber antes de começar",
+      "lede": "Não achou a sua? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -174,9 +178,9 @@
     "ogTitle": "Electrician Software | PraticOS",
     "ogDescription": "Electrician work orders on your phone: quotes approved by link, safety checklist, readings and panel photos, a schedule and a clear view of what came in.",
     "hero": {
-      "title": "Quote, readings and panel photos",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for electricians. Build the quote from your catalog, send it as a link for the customer to approve, record voltage, GFCI and grounding with panel photos and get paid — all from your phone.",
+      "title": "Charge the right price.",
+      "titleMark": "Prove the work you did.",
+      "lede": "The electrician app that turns a site visit into a quote your customer approves. Voltage, GFCI, grounding and panel photos stay on file, and you get paid from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -219,49 +223,50 @@
       }
     },
     "problems": {
-      "title": "Where an electrician loses money",
-      "lede": "It's rarely a lack of calls. It's the quote given off the top of your head, the materials left off the bill and the “ever since you worked on it, the breaker trips” with nothing on record.",
+      "title": "The money electricians leave on the table",
+      "lede": "It's rarely a lack of calls. It's the price given off the top of your head, the materials left off the bill and the “ever since you worked on it, the breaker trips” with no proof on your side.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Prices off the top of your head",
           "detail": "Wire, breakers, GFCIs and labor added up by eye. In the end, the job paid less than it cost.",
-          "answer": "Add materials and services with prices once. On the work order you pick items, set quantities and the total adds up as you go."
+          "answer": "Your materials and services, already priced. Pick the items and the total comes out right, instantly."
         },
         {
           "problem": "Quotes given over the phone",
           "detail": "The price was said on a call and, when it's time to bill, the customer remembers a different number.",
-          "answer": "The customer approves the quote by link, and the approval is recorded on the work order."
+          "answer": "The customer approves by link, and the agreed price is saved for when it's time to bill."
         },
         {
           "problem": "“Ever since you worked on it, the breaker trips”",
           "detail": "The customer calls weeks later blaming your work, and you can't show how you left the installation.",
-          "answer": "The electrical service record checklist keeps measured voltage and current, GFCI test, grounding and a photo of the panel after the job."
+          "answer": "Voltage, current, GFCI test, grounding and a panel photo on file. You can show how you left the installation."
         },
         {
-          "problem": "Safety steps with no record",
+          "problem": "Safety done, but no proof",
           "detail": "The circuit was shut off and tested, but nothing was written down. If something goes wrong, there's nothing to show.",
-          "answer": "The safety checklist records circuit de-energized and locked out, absence-of-voltage test, PPE used, area marked off and a photo of the panel before."
+          "answer": "Circuit de-energized, absence-of-voltage test, PPE and a panel photo on the safety checklist. If you ever need to, you can show what you did."
         },
         {
           "problem": "Jobs booked on top of each other",
           "detail": "Two visits at the same time and a customer waiting at home with no word.",
-          "answer": "The work order date puts the job on the Schedule, and the phone sends a reminder before each visit."
+          "answer": "Your schedule stays organized by each work order's date, and your phone reminds you before every visit."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "A deposit to buy materials, the balance at the end and a customer who asks to pay later.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "See what's still owed, by whom, and what came in this month. Partial payments too."
         }
       ]
     },
     "workflow": {
-      "title": "How an electrical job moves through PraticOS",
-      "lede": "From the site visit to sign-off, every step is recorded on the installation's work order.",
+      "title": "From site visit to getting paid, with less paperwork",
+      "lede": "You speak, the customer approves, the work is on record and you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and AI fills in the quote",
+          "title": "Say the job, AI builds the quote",
+          "tab": "Speak",
           "text": "At the visit, tap Speak on New order and say “Rogério's house, panel replacement and three new outlets”, or take a photo of your notes. The AI fills in the customer, services and materials with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -271,17 +276,19 @@
         },
         {
           "number": "02",
-          "title": "Send the quote as a link",
+          "title": "Customer approves by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in a browser, nothing to install. They see materials and labor, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes stays on file",
             "Customers follow progress without calling",
             "Work order PDF to print or send"
           ]
         },
         {
           "number": "03",
-          "title": "Do the work with a checklist",
+          "title": "Do the job with nothing forgotten",
+          "tab": "Work",
           "text": "Electrical checklists come ready to use and you can adjust the items: safety before you start, service record and handover quality.",
           "facts": [
             "Panel photo before and after",
@@ -292,6 +299,7 @@
         {
           "number": "04",
           "title": "Sign off and get paid",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -304,8 +312,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from electricians",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What electricians want to know first",
+      "lede": "Don't see yours? Send us an email. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -339,9 +347,9 @@
     "ogTitle": "Sistema para Electricista | PraticOS",
     "ogDescription": "Las órdenes del electricista en el celular: presupuesto aprobado por link, checklist de seguridad, mediciones y fotos del tablero, y agenda.",
     "hero": {
-      "title": "Presupuesto, mediciones y tablero",
-      "titleMark": "en una orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para electricistas. Arma el presupuesto con tu catálogo, envíalo por link para que el cliente lo apruebe, registra tensión, diferencial y puesta a tierra con fotos del tablero y cobra — todo desde el celular.",
+      "title": "Cobra el precio justo.",
+      "titleMark": "Y demuestra tu trabajo.",
+      "lede": "La app para electricistas que convierte la visita en un presupuesto aprobado por el cliente. Tensión, diferencial, puesta a tierra y fotos del tablero quedan guardados, y cobras desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -384,49 +392,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el electricista",
-      "lede": "Casi nunca es falta de trabajo. Es el presupuesto dado de memoria, el material que quedó fuera de la cuenta y el “desde que tocaste, salta la térmica” sin nada registrado.",
+      "title": "El dinero que el electricista deja sobre la mesa",
+      "lede": "Casi nunca es falta de trabajo. Es el precio dado de memoria, el material fuera de la cuenta y el “desde que tocaste, salta la térmica” sin ninguna prueba de tu lado.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Precio dado de memoria",
           "detail": "Cable, térmicas, diferencial y mano de obra sumados a ojo. Al final, el trabajo salió más barato de lo que costó.",
-          "answer": "Carga materiales y servicios con precio una vez. En la orden eliges los ítems, ajustas cantidades y el total se suma al momento."
+          "answer": "Tus materiales y servicios, ya con precio. Eliges los ítems y el total sale bien, al momento."
         },
         {
           "problem": "Presupuesto por audio que el cliente olvida",
           "detail": "El precio se dijo por teléfono y, al cobrar, el cliente recuerda otro número.",
-          "answer": "El cliente aprueba el presupuesto por link, y la aprobación queda registrada en la propia orden."
+          "answer": "El cliente aprueba por link, y el valor acordado queda guardado para la hora de cobrar."
         },
         {
           "problem": "“Desde que tocaste, salta la térmica”",
           "detail": "El cliente llama semanas después culpando tu trabajo, y no tienes cómo mostrar cómo dejaste la instalación.",
-          "answer": "El checklist de registro del servicio eléctrico guarda tensión y corriente medidas, prueba del diferencial, puesta a tierra y foto del tablero después."
+          "answer": "Tensión, corriente, prueba del diferencial, puesta a tierra y foto del tablero guardados. Puedes mostrar cómo dejaste la instalación."
         },
         {
-          "problem": "Seguridad sin registro",
+          "problem": "Seguridad hecha, pero sin prueba",
           "detail": "El circuito se cortó y se probó, pero nada quedó escrito. Si algo sale mal, no hay cómo mostrarlo.",
-          "answer": "El checklist de seguridad registra circuito desenergizado y bloqueado, prueba de ausencia de tensión, EPP usado, área señalizada y foto del tablero antes."
+          "answer": "Circuito desenergizado, prueba de ausencia de tensión, EPP y foto del tablero en el checklist de seguridad. Si hace falta, muestras lo que hiciste."
         },
         {
           "problem": "Trabajos agendados uno encima del otro",
           "detail": "Dos visitas a la misma hora y un cliente esperando en casa sin noticias.",
-          "answer": "La fecha de la orden pone el trabajo en la agenda, y el celular avisa antes de cada visita."
+          "answer": "Tu agenda ordenada por la fecha de cada orden, y el celular te avisa antes de cada visita."
         },
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Un anticipo para comprar material, el saldo al final y un cliente que pide pagar después.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Ve cuánto falta cobrar, a quién y cuánto entró en el mes. También con pagos en partes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un trabajo eléctrico por PraticOS",
-      "lede": "De la visita a la liberación, cada paso queda registrado en la orden de la instalación.",
+      "title": "De la visita al cobro, con menos papeleo",
+      "lede": "Tú hablas, el cliente aprueba, el trabajo queda demostrado y cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el trabajo y la IA completa el presupuesto",
+          "title": "Di el trabajo, la IA arma el presupuesto",
+          "tab": "Hablar",
           "text": "En la visita, toca Hablar en Nueva OS y di “casa de Rogério, cambio del tablero y tres tomas nuevas”, o saca una foto de lo que anotaste. La IA completa cliente, servicios y materiales con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
@@ -436,17 +445,19 @@
         },
         {
           "number": "02",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve materiales y mano de obra, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El sí del cliente queda guardado",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
           ]
         },
         {
           "number": "03",
-          "title": "Ejecuta con checklist",
+          "title": "Haz el trabajo sin olvidar nada",
+          "tab": "Ejecutar",
           "text": "Los checklists de electricidad vienen listos y tú ajustas los ítems: seguridad antes de empezar, registro del servicio y calidad en la entrega.",
           "facts": [
             "Foto del tablero antes y después",
@@ -457,6 +468,7 @@
         {
           "number": "04",
           "title": "Libera y cobra",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -469,8 +481,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de electricistas",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que el electricista quiere saber antes de empezar",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

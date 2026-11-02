@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Assistência de Eletrodomésticos | PraticOS",
     "ogDescription": "OS da linha branca no celular: a IA abre a OS pelo que você fala, a visita entra na agenda, o diagnóstico vai no checklist e o cliente aprova o orçamento por link.",
     "hero": {
-      "title": "Visita, diagnóstico e garantia",
-      "titleMark": "na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrodomésticos. Agende a visita, faça o diagnóstico com checklist e fotos, mande o orçamento por link para o cliente aprovar e registre a garantia e o pagamento — tudo pelo celular.",
+      "title": "Menos visita perdida.",
+      "titleMark": "Mais conserto aprovado e pago.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrodomésticos. Você chega sabendo o defeito, o cliente aprova o orçamento pelo celular e a garantia fica por escrito.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde a assistência de linha branca perde dinheiro",
-      "lede": "Quase nunca é falta de chamado. É a visita marcada sem saber o defeito, a peça trocada que não entrou na conta e a garantia discutida sem nada escrito.",
+      "title": "Onde a assistência de linha branca deixa dinheiro na mesa",
+      "lede": "Quase nunca falta chamado. O que custa caro é a visita sem saber o defeito, a peça trocada que ficou fora da conta e a garantia discutida sem nada escrito.",
       "answerLabel": "No PraticOS",
       "items": [
         {
-          "problem": "Visita sem saber o que levar",
+          "problem": "Voltar porque não sabia o que levar",
           "detail": "O técnico chega na casa do cliente sem saber o modelo, a voltagem nem o defeito, e precisa voltar outro dia.",
-          "answer": "Fale o que o cliente contou no telefone e a IA abre a OS com o cliente, o endereço, o eletrodoméstico, a voltagem e o defeito relatado."
+          "answer": "Fale o que o cliente contou e a IA abre a OS com endereço, aparelho, voltagem e defeito. Você sai sabendo o que levar."
         },
         {
-          "problem": "Diagnóstico de cabeça",
+          "problem": "Cada técnico testa de um jeito",
           "detail": "Cada técnico confere uma coisa diferente, e o que foi testado não fica em lugar nenhum.",
-          "answer": "Checklists prontos de diagnóstico de geladeira e freezer, máquina de lavar e micro-ondas, com fotos, preenchidos na casa do cliente."
+          "answer": "Checklists prontos para geladeira, freezer, lavadora e micro-ondas, com fotos. Nenhum teste esquecido."
         },
         {
           "problem": "“O defeito voltou”",
           "detail": "O cliente liga dois meses depois e ninguém sabe que peça foi trocada nem qual garantia foi dada.",
-          "answer": "O checklist de entrega registra serviço executado, peças trocadas, teste final, orientações e prazo de garantia: 30, 60 ou 90 dias."
+          "answer": "Peças trocadas, teste final e garantia de 30, 60 ou 90 dias por escrito. Você responde com confiança."
         },
         {
-          "problem": "Visita marcada de cabeça",
+          "problem": "Agenda que só existe na cabeça",
           "detail": "Dois clientes no mesmo horário, um bairro de distância entre eles e alguém esperando a manhã inteira.",
-          "answer": "A data da OS coloca a visita na Agenda, e o celular avisa antes de cada atendimento. Se alguém trabalha com você, dá para ver a agenda de cada pessoa."
+          "answer": "A visita entra na Agenda e o celular avisa antes de cada atendimento. Com equipe, você vê a agenda de cada pessoa."
         },
         {
           "problem": "Técnico volta sem receber",
           "detail": "O cliente pede para pagar depois e, no fim do mês, ninguém lembra quem ficou devendo.",
-          "answer": "Receba o valor inteiro ou em partes na OS. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança."
+          "answer": "Receba inteiro ou em partes. Você vê quem ainda deve e manda a cobrança com um botão."
         },
         {
           "problem": "“O técnico já saiu?”",
           "detail": "O cliente liga para saber do orçamento e do conserto, e a ligação cai no balcão.",
-          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+          "answer": "O cliente abre o link e vê status, fotos e valores. Menos ligação para você atender."
         }
       ]
     },
     "workflow": {
-      "title": "Como um chamado passa pela assistência no PraticOS",
-      "lede": "Da ligação do cliente à garantia, cada etapa fica registrada na OS do eletrodoméstico.",
+      "title": "Da ligação do cliente ao dinheiro recebido",
+      "lede": "Menos tempo com papel, mais tempo consertando. Do chamado à garantia, nada fica esquecido.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o chamado e a IA abre a OS",
+          "title": "Fale e a IA abre a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga o chamado: “Geladeira da dona Sandra, não está gelando, visita amanhã às 9”. A IA preenche cliente, aparelho, serviço e preço do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦",
@@ -106,7 +107,8 @@
         },
         {
           "number": "02",
-          "title": "Visita na agenda",
+          "title": "Cada visita no horário certo",
+          "tab": "Agendar",
           "text": "Com dia e hora na OS, a visita entra na Agenda. Você vê a semana, o dia e o que tem em cada horário, sem marcar dois clientes juntos.",
           "facts": [
             "Semana no topo, atendimentos do dia embaixo",
@@ -116,7 +118,8 @@
         },
         {
           "number": "03",
-          "title": "Diagnostique no local",
+          "title": "Diagnostique sem esquecer nada",
+          "tab": "Testar",
           "text": "Os checklists de eletrodomésticos vêm prontos e você ajusta os itens: entrada do aparelho, diagnóstico por tipo, segurança e teste final, com fotos.",
           "facts": [
             "Geladeira: compressor, gás, termostato, borracha, degelo",
@@ -126,10 +129,11 @@
         },
         {
           "number": "04",
-          "title": "Mande o orçamento por link",
-          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários. Na OS, o botão azul mostra o próximo passo.",
+          "title": "Cliente aprova pelo celular",
+          "tab": "Aprovar",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários. E você sabe sempre o próximo passo.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O “sim” do cliente fica guardado",
             "Cliente acompanha o conserto sem ligar",
             "PDF da OS com checklists e fotos"
           ]
@@ -137,9 +141,10 @@
         {
           "number": "05",
           "title": "Entregue com garantia e receba",
+          "tab": "Receber",
           "text": "Registre peças trocadas, teste final e prazo de garantia no checklist de entrega. Depois receba, inteiro ou em partes. O Financeiro mostra quem ainda deve.",
           "facts": [
-            "Garantia de 30, 60 ou 90 dias na OS",
+            "Garantia de 30, 60 ou 90 dias por escrito",
             "Pagamento em partes e desconto na mesma OS",
             "Quem deve há mais tempo aparece primeiro"
           ],
@@ -149,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem conserta eletrodomésticos",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Dúvidas de quem conserta eletrodomésticos",
+      "lede": "Não achou a sua? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -184,9 +189,9 @@
     "ogTitle": "Appliance Repair Software | PraticOS",
     "ogDescription": "Appliance repair on your phone: AI opens the work order from what you say, the visit goes on the schedule, the diagnosis goes on a checklist and the customer approves the quote by link.",
     "hero": {
-      "title": "Visit, diagnosis and warranty",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for appliance repair. Schedule the visit, run the diagnosis with a checklist and photos, send the quote as a link for the customer to approve and record the warranty and payment — all from your phone.",
+      "title": "Fewer wasted trips.",
+      "titleMark": "More repairs approved and paid.",
+      "lede": "PraticOS is the work order app for appliance repair. You show up knowing the problem, the customer approves the quote from their phone and the warranty is in writing.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -229,49 +234,50 @@
       }
     },
     "problems": {
-      "title": "Where an appliance repair business loses money",
-      "lede": "It's rarely a lack of calls. It's the visit booked without knowing the problem, the part swapped but never billed and the warranty argued over with nothing in writing.",
+      "title": "Where appliance repair money slips away",
+      "lede": "It's rarely a lack of calls. What costs you is the visit booked without knowing the problem, the part swapped but never billed and the warranty argued over with nothing in writing.",
       "answerLabel": "In PraticOS",
       "items": [
         {
-          "problem": "Visits without knowing what to bring",
+          "problem": "Coming back for the right part",
           "detail": "The tech shows up without knowing the model, voltage or problem, and has to come back another day.",
-          "answer": "Say what the customer told you on the phone and AI opens the work order with the customer, address, appliance, voltage and reported fault."
+          "answer": "Say what the customer told you and AI opens the work order with the address, appliance, voltage and fault. You leave knowing what to bring."
         },
         {
-          "problem": "Diagnosis from memory",
+          "problem": "Every tech tests differently",
           "detail": "Each tech checks something different, and what was tested isn't written anywhere.",
-          "answer": "Ready-made diagnostic checklists for fridge and freezer, washer and microwave, with photos, filled in at the customer's home."
+          "answer": "Ready-made checklists for fridges, freezers, washers and microwaves, with photos. No test forgotten."
         },
         {
           "problem": "“It's broken again”",
           "detail": "The customer calls two months later and nobody knows which part was replaced or what warranty was given.",
-          "answer": "The handover checklist records work done, parts replaced, final test, instructions and warranty period: 30, 60 or 90 days."
+          "answer": "Parts replaced, final test and a 30, 60 or 90-day warranty in writing. You answer with confidence."
         },
         {
-          "problem": "Visits booked from memory",
+          "problem": "A schedule that lives in your head",
           "detail": "Two customers at the same time, a neighborhood apart, and someone waiting all morning.",
-          "answer": "The date on the work order puts the visit on the Schedule, and your phone reminds you before each appointment. If someone works with you, you can see each person’s schedule."
+          "answer": "The visit goes on the Schedule and your phone reminds you before each appointment. With a team, you see everyone's schedule."
         },
         {
           "problem": "Techs coming back unpaid",
           "detail": "The customer asks to pay later and, by month-end, nobody remembers who still owes.",
-          "answer": "Receive the full amount or in parts on the work order. Financial shows how much is left to collect and from whom, with a button to send the payment request."
+          "answer": "Get paid in full or in parts. See who still owes you and send the payment request with one button."
         },
         {
           "problem": "“Is the tech on the way?”",
           "detail": "The customer calls to ask about the quote and the repair, and the call lands at the front desk.",
-          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+          "answer": "The customer opens the link and sees the status, photos and prices. Fewer calls for you to take."
         }
       ]
     },
     "workflow": {
-      "title": "How a service call moves through PraticOS",
-      "lede": "From the customer's call to the warranty, every step is recorded on the appliance's work order.",
+      "title": "From the customer's call to money in hand",
+      "lede": "Less time on paperwork, more time on repairs. From the call to the warranty, nothing gets forgotten.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the call and AI opens the order",
+          "title": "Talk, and AI opens the order",
+          "tab": "Speak",
           "text": "Tap Speak and say the call: “Sandra’s fridge, not cooling, visit tomorrow at 9.” AI fills in the customer, appliance, service and the price from your catalog. You check it and save.",
           "facts": [
             "What AI filled in is marked with ✦",
@@ -281,7 +287,8 @@
         },
         {
           "number": "02",
-          "title": "The visit on the schedule",
+          "title": "Every visit at the right time",
+          "tab": "Schedule",
           "text": "With a date and time on the work order, the visit goes on the Schedule. You see the week, the day and what is booked at each hour, so two customers never land on the same slot.",
           "facts": [
             "The week on top, the day’s appointments below",
@@ -291,7 +298,8 @@
         },
         {
           "number": "03",
-          "title": "Diagnose on site",
+          "title": "Diagnose without missing a thing",
+          "tab": "Test",
           "text": "Appliance checklists come ready and you adjust the items: check-in, diagnosis by appliance type, safety and final test, with photos.",
           "facts": [
             "Fridge: compressor, gas, thermostat, door seal, defrost",
@@ -301,10 +309,11 @@
         },
         {
           "number": "04",
-          "title": "Send the quote by link",
-          "text": "The customer opens the work order in the browser, with nothing to install. They see the photos, parts and labor, approve and leave comments. On the order, the blue button shows the next step.",
+          "title": "Customers approve from their phone",
+          "tab": "Approve",
+          "text": "The customer opens the work order in the browser, with nothing to install. They see the photos, parts and labor, approve and leave comments. And you always know the next step.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes is on file",
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
           ]
@@ -312,9 +321,10 @@
         {
           "number": "05",
           "title": "Deliver with warranty and get paid",
+          "tab": "Get paid",
           "text": "Record replaced parts, final test and warranty period on the delivery checklist. Then receive the payment, in full or in parts. Financial shows who still owes.",
           "facts": [
-            "30, 60 or 90-day warranty on the order",
+            "30, 60 or 90-day warranty in writing",
             "Partial payments and discounts in the same order",
             "Whoever has owed the longest shows up first"
           ],
@@ -324,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from appliance repair businesses",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Questions from appliance repair pros",
+      "lede": "Can't find yours? Send us an email and the PraticOS team will answer.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -359,9 +369,9 @@
     "ogTitle": "Sistema para Técnico de Electrodomésticos | PraticOS",
     "ogDescription": "Línea blanca en el celular: la IA abre la OS con lo que dices, la visita entra en la agenda, el diagnóstico va en el checklist y el cliente aprueba el presupuesto por link.",
     "hero": {
-      "title": "Visita, diagnóstico y garantía",
-      "titleMark": "en una orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para técnicos de electrodomésticos. Agenda la visita, haz el diagnóstico con checklist y fotos, envía el presupuesto por link para que el cliente lo apruebe y registra la garantía y el pago — todo desde el celular.",
+      "title": "Menos visitas perdidas.",
+      "titleMark": "Más reparaciones aprobadas y cobradas.",
+      "lede": "PraticOS es la app de órdenes de servicio para técnicos de electrodomésticos. Llegas sabiendo la falla, el cliente aprueba el presupuesto desde el celular y la garantía queda por escrito.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -404,49 +414,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el servicio técnico de línea blanca",
-      "lede": "Casi nunca es falta de llamados. Es la visita agendada sin saber la falla, el repuesto cambiado que no entró en la cuenta y la garantía discutida sin nada escrito.",
+      "title": "Dónde se le escapa la plata al servicio técnico de línea blanca",
+      "lede": "Casi nunca faltan llamados. Lo que sale caro es la visita sin saber la falla, el repuesto cambiado que no entró en la cuenta y la garantía discutida sin nada escrito.",
       "answerLabel": "En PraticOS",
       "items": [
         {
-          "problem": "Visitas sin saber qué llevar",
+          "problem": "Volver porque no sabías qué llevar",
           "detail": "El técnico llega a la casa del cliente sin saber el modelo, el voltaje ni la falla, y tiene que volver otro día.",
-          "answer": "Di lo que el cliente contó por teléfono y la IA abre la OS con el cliente, la dirección, el electrodoméstico, el voltaje y la falla reportada."
+          "answer": "Di lo que contó el cliente y la IA abre la OS con dirección, aparato, voltaje y falla. Sales sabiendo qué llevar."
         },
         {
-          "problem": "Diagnóstico de memoria",
+          "problem": "Cada técnico prueba a su manera",
           "detail": "Cada técnico revisa algo distinto, y lo que se probó no queda en ningún lado.",
-          "answer": "Checklists listos de diagnóstico de refrigerador y freezer, lavadora y microondas, con fotos, completados en la casa del cliente."
+          "answer": "Checklists listos para refrigerador, freezer, lavadora y microondas, con fotos. Ninguna prueba olvidada."
         },
         {
           "problem": "“Volvió a fallar”",
           "detail": "El cliente llama dos meses después y nadie sabe qué repuesto se cambió ni qué garantía se dio.",
-          "answer": "El checklist de entrega registra el servicio hecho, repuestos cambiados, prueba final, indicaciones y plazo de garantía: 30, 60 o 90 días."
+          "answer": "Repuestos cambiados, prueba final y garantía de 30, 60 o 90 días por escrito. Respondes con confianza."
         },
         {
-          "problem": "Visitas agendadas de memoria",
+          "problem": "Una agenda que solo existe en tu cabeza",
           "detail": "Dos clientes a la misma hora, a un barrio de distancia, y alguien esperando toda la mañana.",
-          "answer": "La fecha de la OS pone la visita en la Agenda, y el celular avisa antes de cada cita. Si alguien trabaja contigo, puedes ver la agenda de cada persona."
+          "answer": "La visita entra en la Agenda y el celular avisa antes de cada cita. Con equipo, ves la agenda de cada persona."
         },
         {
           "problem": "El técnico vuelve sin cobrar",
           "detail": "El cliente pide pagar después y, a fin de mes, nadie recuerda quién quedó debiendo.",
-          "answer": "Cobra el valor completo o en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro."
+          "answer": "Cobra completo o en partes. Ves quién todavía debe y envías el cobro con un botón."
         },
         {
           "problem": "“¿Ya salió el técnico?”",
           "detail": "El cliente llama para preguntar por el presupuesto y la reparación, y la llamada cae en el mostrador.",
-          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+          "answer": "El cliente abre el link y ve estado, fotos y valores. Menos llamadas que atender."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un llamado por el servicio técnico en PraticOS",
-      "lede": "Del llamado del cliente a la garantía, cada paso queda registrado en la orden del electrodoméstico.",
+      "title": "Del llamado del cliente a la plata cobrada",
+      "lede": "Menos tiempo con papeles, más tiempo reparando. Del llamado a la garantía, nada se olvida.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el llamado y la IA abre la OS",
+          "title": "Habla y la IA abre la OS",
+          "tab": "Hablar",
           "text": "Toca Hablar y di el llamado: “Refrigerador de la señora Sandra, no enfría, visita mañana a las 9”. La IA completa cliente, aparato, servicio y precio de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que la IA completó queda marcado con ✦",
@@ -456,7 +467,8 @@
         },
         {
           "number": "02",
-          "title": "La visita en la agenda",
+          "title": "Cada visita a la hora justa",
+          "tab": "Agendar",
           "text": "Con día y hora en la OS, la visita entra en la Agenda. Ves la semana, el día y lo que hay en cada horario, sin poner dos clientes juntos.",
           "facts": [
             "La semana arriba, las citas del día abajo",
@@ -466,7 +478,8 @@
         },
         {
           "number": "03",
-          "title": "Diagnostica en el lugar",
+          "title": "Diagnostica sin olvidar nada",
+          "tab": "Probar",
           "text": "Los checklists de electrodomésticos vienen listos y tú ajustas los ítems: ingreso del aparato, diagnóstico por tipo, seguridad y prueba final, con fotos.",
           "facts": [
             "Refrigerador: compresor, gas, termostato, burlete, descongelamiento",
@@ -476,10 +489,11 @@
         },
         {
           "number": "04",
-          "title": "Envía el presupuesto por link",
-          "text": "El cliente abre la OS en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios. En la OS, el botón azul muestra el próximo paso.",
+          "title": "El cliente aprueba desde el celular",
+          "tab": "Aprobar",
+          "text": "El cliente abre la OS en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios. Y tú siempre sabes el próximo paso.",
           "facts": [
-            "Aprobación registrada en la propia OS",
+            "El “sí” del cliente queda guardado",
             "El cliente sigue la reparación sin llamar",
             "PDF de la OS con checklists y fotos"
           ]
@@ -487,9 +501,10 @@
         {
           "number": "05",
           "title": "Entrega con garantía y cobra",
+          "tab": "Cobrar",
           "text": "Registra repuestos cambiados, prueba final y plazo de garantía en el checklist de entrega. Después cobra, completo o en partes. Financiero muestra quién todavía debe.",
           "facts": [
-            "Garantía de 30, 60 o 90 días en la OS",
+            "Garantía de 30, 60 o 90 días por escrito",
             "Pago en partes y descuento en la misma OS",
             "Quien debe hace más tiempo aparece primero"
           ],
@@ -499,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de técnicos de electrodomésticos",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Dudas de técnicos de electrodomésticos",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo y te responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

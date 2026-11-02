@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Instalador de CFTV e Segurança | PraticOS",
     "ogDescription": "OS de segurança eletrônica no celular: vistoria antes da instalação, checklist de comissionamento com fotos, histórico por sistema e aprovação por link.",
     "hero": {
-      "title": "Da vistoria à entrega",
-      "titleMark": "com cada câmera registrada.",
-      "lede": "PraticOS é o app de ordem de serviço para quem instala CFTV, alarme, controle de acesso e cerca elétrica. Fale o serviço e a IA abre a OS. Faça a vistoria do local, mande o orçamento por link, registre o comissionamento com fotos e receba — pelo celular.",
+      "title": "Vistoria que vira orçamento.",
+      "titleMark": "Entrega que fica provada.",
+      "lede": "O app para instalação de câmeras, CFTV, alarme, controle de acesso e cerca elétrica. Fale o serviço e a IA abre a OS, o cliente aprova pelo link, os testes ficam guardados e você recebe pelo celular.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde o instalador de segurança perde dinheiro",
-      "lede": "Não é falta de instalação. É a visita técnica que não virou orçamento, a senha que ninguém anotou e o chamado de “câmera parada” sem histórico.",
+      "title": "O dinheiro que o instalador de segurança deixa na mesa",
+      "lede": "Não é falta de instalação. É a vistoria que não virou orçamento, a senha que ninguém anotou e o chamado de “câmera parada” sem histórico.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Vistoria anotada no papel",
           "detail": "O técnico vê os pontos, a internet e a energia do local, mas o orçamento sai dias depois, com metade da informação.",
-          "answer": "O checklist de vistoria pré-instalação registra tipo de sistema, internet disponível, pontos de energia e fotos de cada ponto, já dentro da OS."
+          "answer": "Tipo de sistema, internet, pontos de energia e fotos já na OS. Você orça com a informação inteira."
         },
         {
           "problem": "Orçamento que o cliente “não viu”",
           "detail": "A proposta foi por mensagem e o cliente some. Quando volta, o valor das câmeras já mudou.",
-          "answer": "O orçamento fica na OS com equipamentos e mão de obra do seu catálogo. O cliente aprova pelo link e você recebe uma notificação."
+          "answer": "Equipamentos e mão de obra do seu catálogo, num link. O cliente aprova e você recebe o aviso."
         },
         {
-          "problem": "Instalação entregue sem teste documentado",
+          "problem": "Entrega sem teste para mostrar",
           "detail": "Um mês depois o cliente diz que a gravação nunca funcionou. Não há como provar o contrário.",
-          "answer": "O checklist de comissionamento marca gravação, acesso remoto, senhas padrão alteradas e testes feitos, com foto da configuração como evidência."
+          "answer": "Gravação, acesso remoto, senhas padrão alteradas e testes no checklist, com foto. Se o cliente questionar, você mostra."
         },
         {
           "problem": "Chamado sem histórico do sistema",
           "detail": "O técnico chega para manutenção sem saber quantos canais tem o gravador nem o que foi trocado da última vez.",
-          "answer": "Cada sistema fica cadastrado com tipo e número de canais. Busque pelo nome ou identificador e veja todas as OS daquele cliente."
+          "answer": "Cada sistema guardado com tipo e número de canais. Busque pelo nome ou identificador e chegue sabendo o que já foi feito."
         },
         {
           "problem": "Responsabilidade sobre senhas e gravação",
           "detail": "O cliente perde a senha do NVR ou questiona o uso das imagens, e a culpa cai em você.",
-          "answer": "O termo de autorização e privacidade registra o responsável do cliente e a ciência sobre guarda de senhas e uso da gravação."
+          "answer": "No termo de autorização e privacidade, o responsável do cliente fica ciente sobre senhas e gravação. E você tem como mostrar."
         },
         {
           "problem": "Mensalidades e serviços sem controle",
           "detail": "Instalação parcelada, manutenção avulsa e cliente que paga atrasado no mesmo caderno.",
-          "answer": "Registre pagamentos inteiros ou em partes na OS. O Financeiro mostra quanto falta receber, de quais clientes, e o relatório do mês com o que entrou."
+          "answer": "Pagamento inteiro ou em partes. Você vê quanto falta receber, de quem, e quanto entrou no mês."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma instalação passa pelo PraticOS",
-      "lede": "Da vistoria ao sistema operacional, cada etapa fica registrada na OS.",
+      "title": "Da vistoria ao sistema operacional e pago",
+      "lede": "Vistoria que vira orçamento, cliente aprovando, testes provados e pagamento recebido.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA abre a OS",
+          "title": "Fale o serviço, a IA abre a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga, por exemplo: “Mercado Bom Preço, instalação de 8 câmeras e um NVR de 8 canais, vistoria na quinta”. Ou fotografe o pedido anotado. A IA preenche cliente, sistema, equipamentos e mão de obra com os preços do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
             "Sistema com tipo e número de canais",
@@ -106,7 +107,8 @@
         },
         {
           "number": "02",
-          "title": "Faça a vistoria do local",
+          "title": "Vistorie o local sem esquecer nada",
+          "tab": "Vistoriar",
           "text": "Na OS, abra o checklist de vistoria: ele vem pronto e você ajusta os itens.",
           "facts": [
             "Tipo de sistema: CFTV, alarme, controle de acesso, interfonia",
@@ -116,31 +118,34 @@
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Vê as fotos da vistoria, os equipamentos e a mão de obra, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "Notificação quando o cliente aprova ou comenta",
             "PDF da OS para imprimir ou enviar"
           ]
         },
         {
           "number": "04",
-          "title": "Agende a instalação",
+          "title": "Instalação marcada, lembrete no celular",
+          "tab": "Agendar",
           "text": "Marque dia e hora na OS. Ela aparece na Agenda, no dia escolhido, e o celular avisa antes do atendimento.",
           "facts": [
             "Semana no topo e os atendimentos do dia",
             "Resumo do dia às 9h, se você quiser",
-            "Situações do ramo: em instalação, operacional"
+            "Nas palavras do ramo: em instalação, operacional"
           ]
         },
         {
           "number": "05",
           "title": "Comissione, entregue e receba",
+          "tab": "Receber",
           "text": "Registre os testes do sistema e o termo do cliente. Depois lance o pagamento inteiro ou em parcelas.",
           "facts": [
             "Gravação, playback, notificações e sensores testados",
-            "Senhas padrão alteradas e acesso remoto configurado",
+            "Senhas padrão alteradas e acesso remoto pronto",
             "Pagamento parcial e desconto na mesma OS"
           ],
           "image": "financial.png",
@@ -149,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem trabalha com segurança eletrônica",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que o instalador de segurança quer saber antes de começar",
+      "lede": "Não achou a sua? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -184,9 +189,9 @@
     "ogTitle": "CCTV and Security Installer Software | PraticOS",
     "ogDescription": "Security work orders on your phone: pre-install site survey, commissioning checklist with photos, history by system and approval by link.",
     "hero": {
-      "title": "From survey to handover,",
-      "titleMark": "every camera on file.",
-      "lede": "PraticOS is the work order app for people who install CCTV, alarms, access control and electric fences. Say the job and the AI opens the order. Survey the site, send the quote as a link, record commissioning with photos and get paid — from your phone.",
+      "title": "Site surveys that become quotes.",
+      "titleMark": "Handovers you can prove.",
+      "lede": "The camera installation app for CCTV, alarm, access control and electric fence installers. Say the job and the AI opens the order, the customer approves by link, your tests stay on file and you get paid from your phone.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -229,49 +234,50 @@
       }
     },
     "problems": {
-      "title": "Where a security installer loses money",
+      "title": "The money security installers leave on the table",
       "lede": "It's not a lack of installs. It's the site visit that never became a quote, the password nobody wrote down and the “camera's down” call with no history.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Site surveys on paper",
           "detail": "The tech checks the mounting points, internet and power, but the quote goes out days later with half the details.",
-          "answer": "The pre-install survey checklist records system type, available internet, power points and photos of each spot, right on the work order."
+          "answer": "System type, internet, power points and photos already on the work order. You quote with the full picture."
         },
         {
           "problem": "Quotes the customer “never saw”",
           "detail": "The proposal went out by text and the customer goes quiet. When they come back, camera prices have changed.",
-          "answer": "The quote lives on the work order with equipment and labor from your catalog. The customer approves it by link and you get notified."
+          "answer": "Equipment and labor from your catalog, in one link. The customer approves and you get notified."
         },
         {
-          "problem": "Installs handed over with no documented test",
+          "problem": "Handovers with no test to show",
           "detail": "A month later the customer says recording never worked. You can't prove otherwise.",
-          "answer": "The commissioning checklist covers recording, remote access, default passwords changed and tests run, with a photo of the setup as evidence."
+          "answer": "Recording, remote access, default passwords changed and tests on the checklist, with a photo. If the customer questions it, you can show them."
         },
         {
           "problem": "Service calls with no system history",
           "detail": "The tech shows up without knowing how many channels the recorder has or what was replaced last time.",
-          "answer": "Each system is on file with type and channel count. Search by name or identifier and see every work order for that customer."
+          "answer": "Every system on file with type and channel count. Search by name or identifier and arrive knowing what's been done."
         },
         {
           "problem": "Who's responsible for passwords and footage",
           "detail": "The customer loses the NVR password or questions how footage is used, and the blame lands on you.",
-          "answer": "The authorization and privacy form records the customer's contact person and their acknowledgment about keeping passwords and using recordings."
+          "answer": "On the authorization and privacy form, the customer's contact person acknowledges how passwords and recordings are handled. And you can show it."
         },
         {
           "problem": "Installments and service calls untracked",
           "detail": "Install paid in parts, one-off maintenance and late payers all in the same notebook.",
-          "answer": "Record full or partial payments on the order. Financial shows how much is still due, from which customers, and the monthly report of what came in."
+          "answer": "Full or partial payments. See what's still due, from whom, and what came in this month."
         }
       ]
     },
     "workflow": {
-      "title": "How an install moves through PraticOS",
-      "lede": "From site survey to an operational system, every step is recorded on the work order.",
+      "title": "From site survey to an operational, paid system",
+      "lede": "Surveys that become quotes, customers approving, tests on record and payment collected.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the AI opens the order",
+          "title": "Say the job, AI opens the order",
+          "tab": "Speak",
           "text": "Tap Speak and say something like: “Good Price Market, install 8 cameras and an 8-channel NVR, site survey on Thursday”. Or photograph the written request. The AI fills in customer, system, equipment and labor with your catalog prices and marks what it filled with ✦.",
           "facts": [
             "System with type and number of channels",
@@ -281,7 +287,8 @@
         },
         {
           "number": "02",
-          "title": "Survey the site",
+          "title": "Survey the site with nothing forgotten",
+          "tab": "Survey",
           "text": "On the order, open the site survey checklist: it comes ready to use and you can adjust the items.",
           "facts": [
             "System type: CCTV, alarm, access control, intercom",
@@ -291,17 +298,19 @@
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Customer approves by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in a browser, nothing to install. They see the survey photos, equipment and labor, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes stays on file",
             "Notification when the customer approves or comments",
             "Work order PDF to print or send"
           ]
         },
         {
           "number": "04",
-          "title": "Schedule the install",
+          "title": "Install booked, reminder on your phone",
+          "tab": "Schedule",
           "text": "Set the day and time on the order. It shows up on the Schedule on that day and your phone reminds you before the visit.",
           "facts": [
             "The week on top and the day's visits",
@@ -312,6 +321,7 @@
         {
           "number": "05",
           "title": "Commission, hand over and get paid",
+          "tab": "Get paid",
           "text": "Record the system tests and the customer's sign-off form. Then log the payment in full or in parts.",
           "facts": [
             "Recording, playback, notifications and sensors tested",
@@ -324,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from security installers",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What security installers want to know first",
+      "lede": "Don't see yours? Send us an email. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -359,9 +369,9 @@
     "ogTitle": "Sistema para Instaladores de CCTV y Seguridad | PraticOS",
     "ogDescription": "Órdenes de seguridad electrónica en el celular: relevamiento antes de instalar, puesta en marcha con fotos, historial por sistema y aprobación por link.",
     "hero": {
-      "title": "De la visita a la entrega,",
-      "titleMark": "cada cámara registrada.",
-      "lede": "PraticOS es la app de órdenes de servicio para quien instala CCTV, alarmas, control de acceso y cerco eléctrico. Di el trabajo y la IA abre la orden. Haz el relevamiento del lugar, envía el presupuesto por link, registra la puesta en marcha con fotos y cobra — desde el celular.",
+      "title": "Visitas que se vuelven presupuesto.",
+      "titleMark": "Entregas que puedes demostrar.",
+      "lede": "La app de instalación de cámaras para quien trabaja con CCTV, alarmas, control de acceso y cerco eléctrico. Di el trabajo y la IA abre la orden, el cliente aprueba por link, las pruebas quedan guardadas y cobras desde el celular.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -404,49 +414,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el instalador de seguridad",
+      "title": "El dinero que el instalador de seguridad deja sobre la mesa",
       "lede": "No es falta de instalaciones. Es la visita técnica que nunca se volvió presupuesto, la contraseña que nadie anotó y el llamado de “la cámara no graba” sin historial.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Relevamiento anotado en papel",
           "detail": "El técnico ve los puntos, la internet y la energía del lugar, pero el presupuesto sale días después y con la mitad de los datos.",
-          "answer": "El checklist de relevamiento previo registra tipo de sistema, internet disponible, puntos de energía y fotos de cada punto, dentro de la orden."
+          "answer": "Tipo de sistema, internet, puntos de energía y fotos ya en la orden. Presupuestas con toda la información."
         },
         {
           "problem": "Presupuesto que el cliente “no vio”",
           "detail": "La propuesta se fue por mensaje y el cliente desaparece. Cuando vuelve, el precio de las cámaras ya cambió.",
-          "answer": "El presupuesto queda en la orden con equipos y mano de obra de tu catálogo. El cliente lo aprueba por link y recibes una notificación."
+          "answer": "Equipos y mano de obra de tu catálogo, en un link. El cliente aprueba y recibes el aviso."
         },
         {
-          "problem": "Instalación entregada sin prueba documentada",
+          "problem": "Entrega sin prueba para mostrar",
           "detail": "Un mes después el cliente dice que la grabación nunca funcionó. No tienes cómo demostrar lo contrario.",
-          "answer": "El checklist de puesta en marcha marca grabación, acceso remoto, contraseñas de fábrica cambiadas y pruebas hechas, con foto de la configuración."
+          "answer": "Grabación, acceso remoto, contraseñas de fábrica cambiadas y pruebas en el checklist, con foto. Si el cliente lo cuestiona, se lo muestras."
         },
         {
           "problem": "Llamado técnico sin historial del sistema",
           "detail": "El técnico llega al mantenimiento sin saber cuántos canales tiene el grabador ni qué se cambió la última vez.",
-          "answer": "Cada sistema queda registrado con tipo y cantidad de canales. Búscalo por nombre o identificador y ve todas las órdenes de ese cliente."
+          "answer": "Cada sistema guardado con tipo y cantidad de canales. Búscalo por nombre o identificador y llega sabiendo lo que ya se hizo."
         },
         {
           "problem": "Responsabilidad sobre contraseñas y grabaciones",
           "detail": "El cliente pierde la contraseña del NVR o cuestiona el uso de las imágenes, y la culpa recae en ti.",
-          "answer": "El formulario de autorización y privacidad registra al responsable del cliente y su conformidad sobre la guarda de contraseñas y el uso de la grabación."
+          "answer": "En el formulario de autorización y privacidad, el responsable del cliente da su conformidad sobre contraseñas y grabación. Y tienes cómo mostrarlo."
         },
         {
           "problem": "Cuotas y servicios sin control",
           "detail": "Instalación en cuotas, mantenimiento suelto y clientes que pagan tarde en el mismo cuaderno.",
-          "answer": "Registra pagos totales o en partes en la orden. Financiero muestra cuánto falta cobrar, de qué clientes, y el informe del mes con lo que entró."
+          "answer": "Pagos totales o en partes. Ves cuánto falta cobrar, a quién y cuánto entró en el mes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una instalación por PraticOS",
-      "lede": "Del relevamiento al sistema operativo, cada paso queda registrado en la orden.",
+      "title": "Del relevamiento al sistema operativo y cobrado",
+      "lede": "Visitas que se vuelven presupuesto, cliente aprobando, pruebas demostradas y pago cobrado.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el trabajo y la IA abre la orden",
+          "title": "Di el trabajo, la IA abre la orden",
+          "tab": "Hablar",
           "text": "Toca Hablar y di, por ejemplo: “Mercado Buen Precio, instalación de 8 cámaras y un NVR de 8 canales, relevamiento el jueves”. O fotografía el pedido anotado. La IA completa cliente, sistema, equipos y mano de obra con los precios de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
             "Sistema con tipo y número de canales",
@@ -456,7 +467,8 @@
         },
         {
           "number": "02",
-          "title": "Haz el relevamiento del lugar",
+          "title": "Revisa el lugar sin olvidar nada",
+          "tab": "Visitar",
           "text": "En la orden, abre el checklist de relevamiento: viene listo y tú ajustas los ítems.",
           "facts": [
             "Tipo de sistema: CCTV, alarma, control de acceso, intercomunicador",
@@ -466,31 +478,34 @@
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos del relevamiento, los equipos y la mano de obra, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El sí del cliente queda guardado",
             "Notificación cuando el cliente aprueba o comenta",
             "PDF de la orden para imprimir o enviar"
           ]
         },
         {
           "number": "04",
-          "title": "Agenda la instalación",
+          "title": "Instalación marcada, aviso en el celular",
+          "tab": "Agendar",
           "text": "Marca día y hora en la orden. Aparece en la Agenda, en el día elegido, y el celular avisa antes de la visita.",
           "facts": [
             "La semana arriba y las visitas del día",
             "Resumen del día a las 9, si lo quieres",
-            "Estados del rubro: en instalación, operativo"
+            "En las palabras del rubro: en instalación, operativo"
           ]
         },
         {
           "number": "05",
           "title": "Pon en marcha, entrega y cobra",
+          "tab": "Cobrar",
           "text": "Registra las pruebas del sistema y la conformidad del cliente. Después carga el pago total o en partes.",
           "facts": [
             "Grabación, reproducción, notificaciones y sensores probados",
-            "Contraseñas de fábrica cambiadas y acceso remoto configurado",
+            "Contraseñas de fábrica cambiadas y acceso remoto listo",
             "Pago parcial y descuento en la misma orden"
           ],
           "image": "financial.png",
@@ -499,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien trabaja con seguridad electrónica",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que el instalador de seguridad quiere saber antes de empezar",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

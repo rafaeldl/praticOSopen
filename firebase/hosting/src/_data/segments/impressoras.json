@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Assistência de Impressoras | PraticOS",
     "ogDescription": "OS de impressoras no celular: número de série, fotos na entrada, orçamento aprovado por link e histórico de cada máquina.",
     "hero": {
-      "title": "A impressora, o orçamento",
-      "titleMark": "e o histórico juntos.",
-      "lede": "PraticOS é o app de ordem de serviço para assistência de impressoras e copiadoras. Registre a máquina com número de série, fotografe a entrada, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "title": "Toda impressora com histórico.",
+      "titleMark": "Toda peça na conta.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência de impressoras e copiadoras. Você vê o que já foi feito em cada máquina, o cliente aprova o orçamento pelo celular e nenhuma peça fica fora da conta.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,67 +54,70 @@
       }
     },
     "problems": {
-      "title": "Onde a assistência de impressoras perde dinheiro",
-      "lede": "Não é falta de máquina no balcão. É o toner que não entrou na conta, o reparo feito sem saber o histórico e a impressora pronta que ninguém avisou.",
+      "title": "Onde a assistência de impressoras deixa dinheiro na mesa",
+      "lede": "Máquina no balcão não falta. O que custa caro é o toner fora da conta, o reparo sem conhecer o histórico e a impressora pronta que ninguém avisou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Qual é essa impressora mesmo?",
           "detail": "A mesma máquina volta, e ninguém sabe o que foi trocado da última vez.",
-          "answer": "Busque pelo número de série ou pelo cliente e veja todas as OS daquela impressora, com serviços, peças e fotos."
+          "answer": "Busque pelo número de série ou pelo cliente e veja tudo que já foi feito, com serviços, peças e fotos. Você começa o reparo sabendo toda a história."
         },
         {
           "problem": "Peça usada que não foi cobrada",
           "detail": "Rolete, cilindro, cartucho. Itens que somem da conta na correria.",
-          "answer": "Serviços e peças entram na OS com o preço do seu catálogo, e o total é somado na hora."
+          "answer": "Serviços e peças entram com o preço do seu catálogo e o total sai na hora. Nada fica fora da conta."
         },
         {
           "problem": "“Essa tampa já estava quebrada?”",
           "detail": "O cliente aponta um dano e você não tem como mostrar como a máquina chegou.",
-          "answer": "Fotografe a impressora na entrada, direto na OS. Se quiser padronizar, monte um checklist de entrada."
+          "answer": "Fotografe a impressora na entrada. Você mostra como ela chegou e evita discussão."
         },
         {
           "problem": "Orçamento parado sem resposta",
           "detail": "A máquina fica na bancada esperando o cliente decidir, e ninguém cobra a resposta.",
-          "answer": "Mande o orçamento por link. O cliente aprova pelo navegador, e o app avisa quando um orçamento fica parado."
+          "answer": "Mande o orçamento por link. O cliente aprova pelo celular, e o app avisa quando um orçamento fica parado."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Conserto e venda de suprimentos anotados no mesmo caderno. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem."
+          "answer": "Receba inteiro ou em partes e veja quanto falta entrar e de quem."
         }
       ]
     },
     "workflow": {
-      "title": "Como a impressora passa pela bancada no PraticOS",
-      "lede": "Do balcão à retirada, cada etapa fica registrada na OS da máquina.",
+      "title": "Do balcão à retirada, sem nada esquecido",
+      "lede": "Menos tempo anotando, mais tempo na bancada. A máquina entra, o cliente aprova e você recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA preenche a OS",
+          "title": "Fale o serviço e a IA faz a OS",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “Impressora da Patrícia, reparo de fusor e limpeza de trilhos”, ou tire uma foto do pedido anotado. A IA preenche cliente, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o fusor é 250”",
-            "Impressora registrada com número de série"
+            "Cada impressora com o seu número de série"
           ]
         },
         {
           "number": "02",
-          "title": "Registre como ela chegou",
-          "text": "Fotografe a impressora na OS. Para padronizar a entrada, crie o seu checklist com os itens que você confere em toda máquina.",
+          "title": "Mostre como ela chegou",
+          "tab": "Registrar",
+          "text": "Fotografe a impressora na OS. Quer padronizar a entrada? Crie o seu checklist com o que você confere em toda máquina.",
           "facts": [
-            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
+            "Do seu jeito, com sim/não, anotações e fotos",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as máquinas"
           ]
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo celular",
+          "tab": "Aprovar",
           "text": "Manutenção, troca de toner e peças saem do seu catálogo, já com preço. O cliente abre a OS no navegador, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O “sim” do cliente fica guardado",
             "Cliente vê quando a impressora fica pronta",
             "PDF da OS para imprimir ou enviar"
           ]
@@ -122,6 +125,7 @@
         {
           "number": "04",
           "title": "Entregue a máquina e receba",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -134,8 +138,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem conserta impressoras",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Dúvidas de quem conserta impressoras",
+      "lede": "Não achou a sua? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -143,7 +147,7 @@
         },
         {
           "question": "Serve para impressoras e copiadoras?",
-          "answer": "Sim. Ao escolher o segmento Impressoras / Copiadoras, o app passa a falar Impressora, com número de série, e o app traz exemplos de serviços como troca de toner e reparo de fusor."
+          "answer": "Sim. Escolha Impressoras / Copiadoras e o app já fala a sua língua: Impressora, número de série e exemplos de serviços como troca de toner e reparo de fusor."
         },
         {
           "question": "Consigo ver o que já foi feito em uma máquina?",
@@ -169,9 +173,9 @@
     "ogTitle": "Printer Repair Software | PraticOS",
     "ogDescription": "Printer repair work orders on your phone: serial number, check-in photos, quotes approved by link and the history of every machine.",
     "hero": {
-      "title": "The printer, the quote",
-      "titleMark": "and the history together.",
-      "lede": "PraticOS is the work order app for printer and copier repair. Record the machine with its serial number, photograph it at check-in, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "title": "Every printer with its history.",
+      "titleMark": "Every part on the bill.",
+      "lede": "PraticOS is the work order app for printer and copier repair. See what was done on each machine, get quotes approved from the customer's phone and keep every part on the bill.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -214,67 +218,70 @@
       }
     },
     "problems": {
-      "title": "Where a printer repair shop loses money",
-      "lede": "It isn't a lack of machines on the counter. It's the toner left off the bill, the repair done without the history and the finished printer nobody called about.",
+      "title": "Where a printer repair shop's money slips away",
+      "lede": "There's no shortage of machines on the counter. What costs you is the toner left off the bill, the repair done without the history and the finished printer nobody called about.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Which printer is this again?",
           "detail": "The same machine comes back and nobody knows what was replaced last time.",
-          "answer": "Search by serial number or customer and see every order for that printer, with services, parts and photos."
+          "answer": "Search by serial number or customer and see everything done on that printer, with services, parts and photos. You start the repair knowing the whole story."
         },
         {
           "problem": "Parts used but not billed",
           "detail": "Rollers, drums, cartridges. Items that vanish from the bill in the rush.",
-          "answer": "Services and parts go on the order with your catalog prices, and the total adds up instantly."
+          "answer": "Services and parts go on with your catalog prices and the total adds up instantly. Nothing left off the bill."
         },
         {
           "problem": "“Was that cover already broken?”",
           "detail": "The customer points at damage and you can't show how the machine came in.",
-          "answer": "Photograph the printer at check-in, right on the order. To standardize, build a check-in checklist."
+          "answer": "Photograph the printer at check-in. You can show how it came in and avoid the argument."
         },
         {
           "problem": "Quote sitting without an answer",
           "detail": "The machine waits on the bench for the customer to decide, and nobody follows up.",
-          "answer": "Send the quote as a link. The customer approves in a browser, and the app nudges you when a quote goes unanswered."
+          "answer": "Send the quote as a link. The customer approves from their phone, and the app nudges you when a quote goes unanswered."
         },
         {
           "problem": "Month closed with no idea what came in",
           "detail": "Repairs and supply sales in the same notebook. Nobody knows who still owes.",
-          "answer": "Record payments in full or in parts. The Financial tab shows what's still owed and by whom."
+          "answer": "Get paid in full or in parts and see what's still owed and by whom."
         }
       ]
     },
     "workflow": {
-      "title": "How a printer moves across the bench in PraticOS",
-      "lede": "From the counter to pickup, every step is recorded on the machine's order.",
+      "title": "From the counter to pickup, nothing forgotten",
+      "lede": "Less time writing things down, more time at the bench. The machine comes in, the customer approves and you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and AI fills in the work order",
+          "title": "Say the job and AI writes the order",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Patricia's printer, fuser repair and rail cleaning”, or take a photo of the written request. The AI fills in the customer, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the fuser is 250”",
-            "Printer recorded with its serial number"
+            "Every printer identified by its serial number"
           ]
         },
         {
           "number": "02",
-          "title": "Record how it came in",
-          "text": "Photograph the printer on the order. To standardize check-in, build your own checklist with what you check on every machine.",
+          "title": "Show how it came in",
+          "tab": "Record",
+          "text": "Photograph the printer on the order. Want a standard check-in? Build your own checklist with what you check on every machine.",
           "facts": [
-            "Build it your way with text, numbers, yes/no, lists and photos",
+            "Your way, with yes/no, notes and photos",
             "Photos on every checklist item",
             "One template for every machine"
           ]
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Customers approve from their phone",
+          "tab": "Approve",
           "text": "Maintenance, toner replacement and parts come from your catalog, already priced. The customer opens the order in a browser, approves it and leaves comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes is on file",
             "Customers see when the printer is ready",
             "Work order PDF to print or send"
           ]
@@ -282,6 +289,7 @@
         {
           "number": "04",
           "title": "Hand over the machine and get paid",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -294,8 +302,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from printer technicians",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Questions from printer repair pros",
+      "lede": "Can't find yours? Send us an email and the PraticOS team will answer.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -303,7 +311,7 @@
         },
         {
           "question": "Does it work for printers and copiers?",
-          "answer": "Yes. When you pick the Printers / Copiers segment, the app says Printer, with a serial number, and the app comes with sample services such as toner replacement and fuser repair."
+          "answer": "Yes. Pick Printers / Copiers and the app speaks your language: Printer, serial number and sample services such as toner replacement and fuser repair."
         },
         {
           "question": "Can I see what was already done on a machine?",
@@ -329,9 +337,9 @@
     "ogTitle": "Sistema para Servicio Técnico de Impresoras | PraticOS",
     "ogDescription": "Órdenes de impresoras en el celular: número de serie, fotos al ingreso, presupuestos aprobados por link e historial de cada máquina.",
     "hero": {
-      "title": "La impresora, el presupuesto",
-      "titleMark": "y el historial juntos.",
-      "lede": "PraticOS es la app de órdenes de servicio para técnicos de impresoras y fotocopiadoras. Registra la máquina con número de serie, fotografía el ingreso, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
+      "title": "Cada impresora con su historial.",
+      "titleMark": "Cada repuesto en la cuenta.",
+      "lede": "PraticOS es la app de órdenes de servicio para técnicos de impresoras y fotocopiadoras. Ves lo que ya se hizo en cada máquina, el cliente aprueba el presupuesto desde el celular y ningún repuesto queda fuera de la cuenta.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -374,67 +382,70 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el servicio técnico de impresoras",
-      "lede": "No es falta de máquinas en el mostrador. Es el tóner que no entró en la cuenta, la reparación hecha sin conocer el historial y la impresora lista que nadie avisó.",
+      "title": "Dónde se le escapa la plata al servicio técnico de impresoras",
+      "lede": "Máquinas en el mostrador no faltan. Lo que sale caro es el tóner fuera de la cuenta, la reparación sin conocer el historial y la impresora lista que nadie avisó.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "¿Cuál era esta impresora?",
           "detail": "La misma máquina vuelve y nadie sabe qué se cambió la última vez.",
-          "answer": "Busca por número de serie o por cliente y ve todas las órdenes de esa impresora, con servicios, repuestos y fotos."
+          "answer": "Busca por número de serie o por cliente y ve todo lo que se hizo, con servicios, repuestos y fotos. Empiezas la reparación sabiendo toda la historia."
         },
         {
           "problem": "Repuesto usado que no se cobró",
           "detail": "Rodillo, cilindro, cartucho. Piezas que desaparecen de la cuenta con el apuro.",
-          "answer": "Servicios y repuestos entran en la orden con el precio de tu catálogo, y el total se suma al instante."
+          "answer": "Servicios y repuestos entran con el precio de tu catálogo y el total sale al instante. Nada queda fuera de la cuenta."
         },
         {
           "problem": "“¿Esa tapa ya estaba rota?”",
           "detail": "El cliente señala un daño y no tienes cómo mostrar cómo llegó la máquina.",
-          "answer": "Fotografía la impresora al ingreso, directo en la orden. Para estandarizar, arma un checklist de ingreso."
+          "answer": "Fotografía la impresora al ingreso. Muestras cómo llegó y evitas la discusión."
         },
         {
           "problem": "Presupuesto parado sin respuesta",
           "detail": "La máquina espera en la mesa a que el cliente decida, y nadie hace seguimiento.",
-          "answer": "Envía el presupuesto por link. El cliente aprueba en el navegador, y la app avisa cuando un presupuesto queda sin respuesta."
+          "answer": "Envía el presupuesto por link. El cliente aprueba desde el celular, y la app te avisa cuando un presupuesto queda sin respuesta."
         },
         {
           "problem": "Mes cerrado sin saber cuánto entró",
           "detail": "Reparaciones y venta de insumos en el mismo cuaderno. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y a quién."
+          "answer": "Cobra completo o en partes y ve cuánto falta cobrar y a quién."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa la impresora por la mesa en PraticOS",
-      "lede": "Del mostrador a la entrega, cada etapa queda registrada en la orden de la máquina.",
+      "title": "Del mostrador a la entrega, sin olvidar nada",
+      "lede": "Menos tiempo anotando, más tiempo en la mesa de trabajo. Entra la máquina, el cliente aprueba y tú cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la IA completa la orden",
+          "title": "Di el servicio y la IA arma la orden",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “Impresora de Patricia, reparación de fusor y limpieza de rieles”, o saca una foto del pedido anotado. La IA completa cliente, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “el fusor es 250”",
-            "Impresora registrada con número de serie"
+            "Cada impresora con su número de serie"
           ]
         },
         {
           "number": "02",
-          "title": "Registra cómo llegó",
-          "text": "Fotografía la impresora en la orden. Para estandarizar el ingreso, crea tu checklist con lo que revisas en cada máquina.",
+          "title": "Muestra cómo llegó",
+          "tab": "Registrar",
+          "text": "Fotografía la impresora en la orden. ¿Quieres un ingreso estándar? Crea tu checklist con lo que revisas en cada máquina.",
           "facts": [
-            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
+            "A tu manera, con sí/no, notas y fotos",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las máquinas"
           ]
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba desde el celular",
+          "tab": "Aprobar",
           "text": "Mantenimiento, cambio de tóner y repuestos salen de tu catálogo, con precio. El cliente abre la orden en el navegador, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El “sí” del cliente queda guardado",
             "El cliente ve cuándo la impresora está lista",
             "PDF de la orden para imprimir o enviar"
           ]
@@ -442,6 +453,7 @@
         {
           "number": "04",
           "title": "Entrega la máquina y cobra",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -454,8 +466,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien repara impresoras",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Dudas de quien repara impresoras",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo y te responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -463,7 +475,7 @@
         },
         {
           "question": "¿Sirve para impresoras y fotocopiadoras?",
-          "answer": "Sí. Al elegir el segmento Impresoras / Fotocopiadoras, la app pasa a decir Impresora, con número de serie, y la app trae ejemplos de servicios como cambio de tóner y reparación de fusor."
+          "answer": "Sí. Elige Impresoras / Fotocopiadoras y la app habla tu idioma: Impresora, número de serie y ejemplos de servicios como cambio de tóner y reparación de fusor."
         },
         {
           "question": "¿Puedo ver lo que ya se hizo en una máquina?",

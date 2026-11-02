@@ -9,9 +9,9 @@
     "ogTitle": "App para Encanador | PraticOS",
     "ogDescription": "OS de hidráulica no celular: fotos do serviço, orçamento aprovado por link e histórico de cada instalação.",
     "hero": {
-      "title": "O vazamento, o orçamento",
-      "titleMark": "e o histórico juntos.",
-      "lede": "PraticOS é o app de ordem de serviço para encanador. Abra a OS falando, fotografe o serviço, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular, na casa do cliente.",
+      "title": "Cada peça na conta.",
+      "titleMark": "Cada serviço cobrado.",
+      "lede": "O app para encanador que abre a OS pela sua voz, ainda na casa do cliente. Ele aprova o orçamento por link, as fotos provam o serviço e você sabe quem ainda deve.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,44 +54,45 @@
       }
     },
     "problems": {
-      "title": "Onde o encanador perde dinheiro",
-      "lede": "Não é falta de chamado. É o orçamento esquecido na conversa, a peça que não entrou na conta e o serviço feito que ninguém cobrou.",
+      "title": "O dinheiro que o encanador deixa na mesa",
+      "lede": "O problema não é falta de chamado. É o orçamento perdido na conversa, a peça fora da conta e o serviço feito que ninguém cobrou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Orçamento perdido na conversa",
           "detail": "Você passa o valor por mensagem, o cliente some, e depois ninguém lembra o que foi combinado.",
-          "answer": "O orçamento vai por link, com serviços, peças e valores. O cliente aprova ali mesmo, e a aprovação fica registrada na OS."
+          "answer": "Mande o orçamento por link, com serviços, peças e valores. O cliente aprova ali mesmo e o combinado não se perde."
         },
         {
           "problem": "Peça usada que não foi cobrada",
           "detail": "Sifão, joelho, fita veda rosca. Peças pequenas que somem da conta.",
-          "answer": "Serviços e peças entram na OS com o preço do seu catálogo, e o total é somado na hora."
+          "answer": "Cada peça entra na conta com o preço do seu catálogo. O total sai certo, na hora."
         },
         {
           "problem": "“O vazamento voltou”",
           "detail": "O cliente liga meses depois e você não lembra o que foi feito naquele banheiro.",
-          "answer": "Busque pelo nome do cliente e veja todas as OS dele, com serviços, peças e fotos."
+          "answer": "Busque o nome do cliente e veja tudo o que você já fez lá, com peças e fotos."
         },
         {
           "problem": "Parede fechada, serviço sem prova",
           "detail": "Depois do acabamento, ninguém consegue ver o que foi feito por dentro.",
-          "answer": "Fotografe o antes e o depois direto na OS. As fotos ficam guardadas e seguem no PDF."
+          "answer": "Foto do antes e do depois guardada e no PDF. A prova do seu serviço continua com você."
         },
         {
           "problem": "Serviço feito e sem receber",
           "detail": "Você termina o atendimento, o cliente paga depois, e a conta fica só na memória.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem."
+          "answer": "Pagamento inteiro ou em partes, sem depender da memória. Você vê quanto falta receber e de quem."
         }
       ]
     },
     "workflow": {
-      "title": "Como um chamado anda no PraticOS",
-      "lede": "Do pedido do cliente ao pagamento, cada etapa fica registrada na OS.",
+      "title": "Do chamado ao pagamento, sem papelada",
+      "lede": "Você abre a OS falando, mostra o serviço com foto, o cliente aprova e você recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA preenche a OS",
+          "title": "Fale o serviço, a IA abre a OS",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “Banheiro da Célia, caça vazamento e troca de válvula”, ou tire uma foto do pedido anotado. A IA preenche cliente, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -101,20 +102,22 @@
         },
         {
           "number": "02",
-          "title": "Registre como encontrou",
+          "title": "Fotografe como encontrou",
+          "tab": "Registrar",
           "text": "Fotografe o local na OS antes de abrir a parede. Para padronizar, crie o seu checklist com o que você confere em todo atendimento.",
           "facts": [
-            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
+            "Do seu jeito, com o que você sempre confere",
             "Fotos em cada item do checklist",
-            "O mesmo modelo para todos os atendimentos"
+            "Todo atendimento com o mesmo padrão"
           ]
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo link",
+          "tab": "Aprovar",
           "text": "Desentupimento, reparo de vazamento e peças saem do seu catálogo, já com preço. O cliente abre a OS no navegador, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "Cliente acompanha sem precisar ligar",
             "PDF da OS para imprimir ou enviar"
           ]
@@ -122,6 +125,7 @@
         {
           "number": "04",
           "title": "Termine o serviço e receba",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -134,8 +138,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem trabalha com hidráulica",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que o encanador quer saber antes de começar",
+      "lede": "Não achou a sua? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -169,9 +173,9 @@
     "ogTitle": "Plumber App | PraticOS",
     "ogDescription": "Plumbing work orders on your phone: job photos, quotes approved by link and the history of every installation.",
     "hero": {
-      "title": "The leak, the quote",
-      "titleMark": "and the history together.",
-      "lede": "PraticOS is the work order app for plumbers. Open the order by speaking, photograph the job, send the quote as a link for the customer to approve and record the payment — all from your phone, at the customer's door.",
+      "title": "Every part on the bill.",
+      "titleMark": "Every job charged.",
+      "lede": "The plumber app that opens the work order by voice, right at the customer's door. They approve the quote by link, your photos prove the work and you know who still owes you.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -214,44 +218,45 @@
       }
     },
     "problems": {
-      "title": "Where a plumber loses money",
-      "lede": "It isn't a lack of calls. It's the quote forgotten in a chat, the part left off the bill and the finished job nobody charged for.",
+      "title": "The money plumbers leave on the table",
+      "lede": "It isn't a lack of calls. It's the quote lost in a chat, the part left off the bill and the finished job nobody charged for.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Quote lost in a chat",
           "detail": "You send the price by message, the customer goes quiet, and later nobody remembers what was agreed.",
-          "answer": "The quote goes out as a link with services, parts and prices. The customer approves it right there, and the approval is recorded on the order."
+          "answer": "Send the quote as a link with services, parts and prices. The customer approves it right there and the deal stays clear."
         },
         {
           "problem": "Parts used but not billed",
           "detail": "Traps, elbows, thread seal tape. Small parts that vanish from the bill.",
-          "answer": "Services and parts go on the order with your catalog prices, and the total adds up instantly."
+          "answer": "Every part goes on the bill at your catalog price. The total comes out right, instantly."
         },
         {
           "problem": "“The leak is back”",
           "detail": "The customer calls months later and you can't remember what was done in that bathroom.",
-          "answer": "Search the customer's name and see all their orders, with services, parts and photos."
+          "answer": "Search the customer's name and see everything you've done there, with parts and photos."
         },
         {
           "problem": "Wall closed, no proof of the work",
           "detail": "Once the finish is on, nobody can see what was done behind it.",
-          "answer": "Photograph the before and after right on the order. The photos stay saved and go into the PDF."
+          "answer": "Before and after photos saved and in the PDF. The proof of your work stays with you."
         },
         {
           "problem": "Job done, money still out",
           "detail": "You finish the visit, the customer pays later and the balance lives only in your head.",
-          "answer": "Record payments in full or in parts. The Financial tab shows what's still owed and by whom."
+          "answer": "Full or partial payments, no relying on memory. See what's still owed and by whom."
         }
       ]
     },
     "workflow": {
-      "title": "How a call moves through PraticOS",
-      "lede": "From the customer's request to payment, every step is recorded on the order.",
+      "title": "From call to payment, with less paperwork",
+      "lede": "Open the order by speaking, show the work in photos, get the customer's approval and get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and AI fills in the work order",
+          "title": "Say the job, AI opens the order",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Celia's bathroom, leak detection and flush valve replacement”, or take a photo of the written request. The AI fills in the customer, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -261,20 +266,22 @@
         },
         {
           "number": "02",
-          "title": "Record what you found",
+          "title": "Photograph what you found",
+          "tab": "Record",
           "text": "Photograph the spot on the order before opening the wall. To standardize, build your own checklist with what you check on every visit.",
           "facts": [
-            "Build it your way with text, numbers, yes/no, lists and photos",
+            "Your way, with what you always check",
             "Photos on every checklist item",
-            "One template for every visit"
+            "One standard for every visit"
           ]
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Customer approves by link",
+          "tab": "Approve",
           "text": "Unclogging, leak repair and parts come from your catalog, already priced. The customer opens the order in a browser, approves it and leaves comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes stays on file",
             "Customers follow along without calling",
             "Work order PDF to print or send"
           ]
@@ -282,6 +289,7 @@
         {
           "number": "04",
           "title": "Finish the job and get paid",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -294,8 +302,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from plumbers",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What plumbers want to know first",
+      "lede": "Don't see yours? Send us an email. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -329,9 +337,9 @@
     "ogTitle": "App para Fontaneros | PraticOS",
     "ogDescription": "Órdenes de fontanería en el celular: fotos del trabajo, presupuestos aprobados por link e historial de cada instalación.",
     "hero": {
-      "title": "La fuga, el presupuesto",
-      "titleMark": "y el historial juntos.",
-      "lede": "PraticOS es la app de órdenes de servicio para fontaneros. Abre la orden hablando, fotografía el trabajo, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular, en casa del cliente.",
+      "title": "Cada repuesto en la cuenta.",
+      "titleMark": "Cada trabajo cobrado.",
+      "lede": "La app para fontaneros que abre la orden con tu voz, en casa del cliente. El cliente aprueba el presupuesto por link, las fotos demuestran el trabajo y sabes quién todavía debe.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -374,44 +382,45 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el fontanero",
-      "lede": "No es falta de llamadas. Es el presupuesto olvidado en la conversación, el repuesto que no entró en la cuenta y el trabajo hecho que nadie cobró.",
+      "title": "El dinero que el fontanero deja sobre la mesa",
+      "lede": "No es falta de llamadas. Es el presupuesto perdido en la conversación, el repuesto fuera de la cuenta y el trabajo hecho que nadie cobró.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Presupuesto perdido en la conversación",
           "detail": "Pasas el valor por mensaje, el cliente desaparece y después nadie recuerda lo acordado.",
-          "answer": "El presupuesto va por link, con servicios, repuestos y valores. El cliente aprueba ahí mismo y la aprobación queda registrada en la orden."
+          "answer": "Envía el presupuesto por link, con servicios, repuestos y valores. El cliente aprueba ahí mismo y lo acordado no se pierde."
         },
         {
           "problem": "Repuesto usado que no se cobró",
           "detail": "Sifón, codo, cinta de teflón. Piezas pequeñas que desaparecen de la cuenta.",
-          "answer": "Servicios y repuestos entran en la orden con el precio de tu catálogo, y el total se suma al instante."
+          "answer": "Cada repuesto entra en la cuenta con el precio de tu catálogo. El total sale bien, al instante."
         },
         {
           "problem": "“La fuga volvió”",
           "detail": "El cliente llama meses después y no recuerdas qué se hizo en ese baño.",
-          "answer": "Busca por el nombre del cliente y ve todas sus órdenes, con servicios, repuestos y fotos."
+          "answer": "Busca el nombre del cliente y ve todo lo que ya hiciste ahí, con repuestos y fotos."
         },
         {
           "problem": "Pared cerrada, trabajo sin prueba",
           "detail": "Después del acabado, nadie puede ver lo que se hizo por dentro.",
-          "answer": "Fotografía el antes y el después directo en la orden. Las fotos quedan guardadas y van en el PDF."
+          "answer": "Fotos del antes y el después guardadas y en el PDF. La prueba de tu trabajo se queda contigo."
         },
         {
           "problem": "Trabajo hecho y sin cobrar",
           "detail": "Terminas la visita, el cliente paga después y la cuenta queda solo en tu memoria.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y a quién."
+          "answer": "Pagos totales o en partes, sin depender de la memoria. Ves cuánto falta cobrar y a quién."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo avanza una llamada en PraticOS",
-      "lede": "Del pedido del cliente al cobro, cada etapa queda registrada en la orden.",
+      "title": "De la llamada al cobro, con menos papeleo",
+      "lede": "Abres la orden hablando, muestras el trabajo con fotos, el cliente aprueba y cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la IA completa la orden",
+          "title": "Di el servicio, la IA abre la orden",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “Baño de Celia, detección de fugas y cambio de válvula”, o saca una foto del pedido anotado. La IA completa cliente, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
@@ -421,20 +430,22 @@
         },
         {
           "number": "02",
-          "title": "Registra lo que encontraste",
+          "title": "Fotografía lo que encontraste",
+          "tab": "Registrar",
           "text": "Fotografía el lugar en la orden antes de abrir la pared. Para estandarizar, crea tu checklist con lo que revisas en cada visita.",
           "facts": [
-            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
+            "A tu manera, con lo que siempre revisas",
             "Fotos en cada ítem del checklist",
-            "La misma plantilla para todas las visitas"
+            "El mismo estándar en cada visita"
           ]
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba por link",
+          "tab": "Aprobar",
           "text": "Desatascos, reparación de fugas y repuestos salen de tu catálogo, con precio. El cliente abre la orden en el navegador, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El sí del cliente queda guardado",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
           ]
@@ -442,6 +453,7 @@
         {
           "number": "04",
           "title": "Termina el trabajo y cobra",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -454,8 +466,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien trabaja en fontanería",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que el fontanero quiere saber antes de empezar",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

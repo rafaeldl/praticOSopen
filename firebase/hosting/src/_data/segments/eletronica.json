@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Assistência Técnica de Eletrônicos | PraticOS",
     "ogDescription": "OS da bancada no celular: a IA abre a OS pelo que você fala, o aparelho fica com número de série e fotos da entrada, e o cliente aprova o orçamento e as regras de retirada por link.",
     "hero": {
-      "title": "Toda TV na bancada",
-      "titleMark": "com foto, dono e prazo.",
-      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrônicos. Registre o aparelho com modelo e número de série, fotografe como ele chegou, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "title": "Menos aparelho parado.",
+      "titleMark": "Mais conserto aprovado e pago.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de eletrônicos que mantém sua bancada andando. O aparelho entra com fotos, o cliente aprova o orçamento por link e você sabe quem ainda falta pagar.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde a assistência de eletrônicos perde dinheiro",
+      "title": "O dinheiro que a assistência de eletrônicos perde sem perceber",
       "lede": "Não é falta de aparelho na bancada. É o orçamento que ninguém respondeu, a TV que o dono nunca buscou e o risco na tela que ninguém fotografou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Aparelho esquecido na prateleira",
           "detail": "A TV ficou pronta há meses, o cliente não aparece e você não sabe o que pode fazer com ela.",
-          "answer": "Escreva suas regras de retirada em Termos para o cliente (no botão do perfil, no topo do Início). O cliente lê o texto antes de aprovar o orçamento, a aprovação fica registrada e os termos saem no PDF da OS."
+          "answer": "Escreva suas regras de retirada em Termos para o cliente. Ele lê antes de aprovar e as regras saem no PDF da OS. Você tem o que mostrar."
         },
         {
           "problem": "Orçamento sem resposta",
           "detail": "Você abriu o aparelho, passou o valor por mensagem e o cliente sumiu.",
-          "answer": "O orçamento vai por link, com fotos e valores. Você vê se o cliente abriu, e o app avisa quando uma OS fica parada em orçamento por mais de 7 dias."
+          "answer": "O orçamento vai por link, com fotos e valores. Você vê se o cliente abriu e o app avisa quando ficar parado mais de 7 dias."
         },
         {
           "problem": "O risco que já estava lá",
           "detail": "O cliente diz que a carcaça ou a tela saiu arranhada da assistência.",
-          "answer": "Fotografe o aparelho na entrada e registre avarias, acessórios deixados e o defeito relatado num checklist dentro da OS."
+          "answer": "Fotografe o aparelho na entrada e anote avarias, acessórios e o defeito relatado. Você mostra como ele chegou."
         },
         {
           "problem": "Duas TVs iguais na bancada",
           "detail": "Mesmo modelo, mesma cor, e a etiqueta de papel caiu.",
-          "answer": "Cada OS tem o aparelho com marca, modelo e número de série. Busque pelo número de série ou pelo nome do cliente na lista de OS."
+          "answer": "Cada OS guarda marca, modelo e número de série. Busque pela série ou pelo cliente e entregue o aparelho certo."
         },
         {
           "problem": "Preço diferente para o mesmo conserto",
           "detail": "Cada vez que alguém orça a mesma troca de fonte, sai um valor.",
-          "answer": "Monte o catálogo de serviços e peças com preço. No orçamento, é só escolher os itens, e o total soma sozinho."
+          "answer": "Com o catálogo de serviços e peças, você escolhe os itens e o total sai sozinho. Mesmo conserto, mesmo preço."
         },
         {
           "problem": "Garantia discutida de memória",
           "detail": "O aparelho volta com defeito e ninguém lembra o que foi trocado.",
-          "answer": "A OS guarda serviços, peças, fotos e datas. Abra o cliente, veja os aparelhos dele e as últimas OS, e confira o que foi feito e quando."
+          "answer": "Serviços, peças, fotos e datas ficam guardados. Abra o cliente e veja o que foi feito e quando."
         }
       ]
     },
     "workflow": {
-      "title": "Como o aparelho passa pela bancada no PraticOS",
-      "lede": "Da entrada à retirada, cada etapa fica registrada na OS do aparelho.",
+      "title": "Da entrada à retirada, sem nada esquecido",
+      "lede": "O aparelho entra com fotos, o cliente aprova e a bancada anda até você receber.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o aparelho e a IA abre a OS",
+          "title": "Fale o aparelho. A IA abre a OS.",
+          "tab": "Falar",
           "text": "No balcão, toque em Falar: “TV Samsung 50 do Carlos, liga e apaga, orçamento de diagnóstico”. A IA preenche cliente, aparelho, serviço e preço do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦",
@@ -106,37 +107,41 @@
         },
         {
           "number": "02",
-          "title": "Registre a entrada",
+          "title": "Mostre como o aparelho chegou",
+          "tab": "Registrar",
           "text": "Antes de abrir o aparelho, fotografe e anote como ele chegou no checklist de entrada: marca, modelo, número de série, avarias e acessórios deixados.",
           "facts": [
-            "Fotos e avarias registradas na OS",
+            "Fotos e avarias guardadas para qualquer dúvida",
             "Defeito relatado e acessórios deixados",
             "Checklists que você ajusta aos seus aparelhos"
           ]
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Deixe o cliente aprovar pelo link",
+          "tab": "Aprovar",
           "text": "Depois do diagnóstico, monte o orçamento com serviços e peças do catálogo. O cliente abre no navegador, vê as fotos, lê seus termos e aprova.",
           "facts": [
-            "Aprovação ou recusa registrada na OS",
+            "Aprovação ou recusa guardada, sem disse me disse",
             "O cliente comenta direto na OS, sem ligar",
             "PDF da OS para imprimir ou enviar"
           ]
         },
         {
           "number": "04",
-          "title": "Acompanhe a bancada",
-          "text": "O Início mostra as OS em aberto, com cliente, aparelho, situação e entrega. O cliente consulta a situação pelo mesmo link, sem ligar.",
+          "title": "Saiba como está cada conserto",
+          "tab": "Acompanhar",
+          "text": "Abra o app e veja o que está na bancada, de quem é e quando entrega. O cliente consulta a situação pelo mesmo link, sem ligar.",
           "facts": [
-            "Filtros: Em aberto, Concluídas, Todas",
+            "Veja o que está em aberto e o que já foi concluído",
             "Aviso de orçamento sem resposta há 7 dias",
-            "Busca pelo número de série ou pelo cliente"
+            "Ache qualquer aparelho pelo número de série ou pelo cliente"
           ]
         },
         {
           "number": "05",
           "title": "Entregue e receba",
+          "tab": "Receber",
           "text": "Receba o valor inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -149,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem conserta eletrônicos",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Antes de usar na sua assistência",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -158,7 +163,7 @@
         },
         {
           "question": "Serve para TV, som, monitor e videogame?",
-          "answer": "Sim. A OS aceita qualquer aparelho: você cadastra marca, modelo e número de série e monta os checklists com os itens que confere na entrada e na entrega."
+          "answer": "Sim. A OS aceita qualquer aparelho: você coloca marca, modelo e número de série e monta os checklists com os itens que confere na entrada e na entrega."
         },
         {
           "question": "Consigo definir prazo de retirada para o cliente?",
@@ -184,9 +189,9 @@
     "ogTitle": "Electronics Repair Shop Software | PraticOS",
     "ogDescription": "Your repair bench on your phone: AI opens the work order from what you say, the device gets its serial number and check-in photos, and the customer approves the quote and pickup terms by link.",
     "hero": {
-      "title": "Every TV on the bench",
-      "titleMark": "with photos and a deadline.",
-      "lede": "PraticOS is the work order app for electronics repair shops. Log the device with model and serial number, photograph how it arrived, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "title": "Fewer devices gathering dust.",
+      "titleMark": "More repairs approved and paid.",
+      "lede": "PraticOS is the work order app for electronics repair shops that keeps your bench moving. Devices check in with photos, customers approve quotes by link and you always know who still owes you.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -229,49 +234,50 @@
       }
     },
     "problems": {
-      "title": "Where an electronics repair shop loses money",
+      "title": "The money an electronics repair shop loses without noticing",
       "lede": "It's rarely a lack of devices on the bench. It's the quote nobody answered, the TV the owner never picked up and the scratch nobody photographed.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Devices left on the shelf",
           "detail": "The TV was ready months ago, the customer never shows up and you're not sure what you can do with it.",
-          "answer": "Write your pickup rules in Terms for the customer (from the profile button at the top of Home). The customer reads them before approving the quote, the approval is recorded and the terms print on the work order PDF."
+          "answer": "Write your pickup rules in Terms for the customer. They read them before approving, and they print on the work order PDF. You have something to show."
         },
         {
           "problem": "Quotes with no reply",
           "detail": "You opened the device, texted the price and the customer went quiet.",
-          "answer": "The quote goes out as a link with photos and prices. You can see whether the customer opened it, and the app reminds you when a quote has sat for more than 7 days."
+          "answer": "The quote goes out as a link with photos and prices. You see if the customer opened it, and the app reminds you when it sits for more than 7 days."
         },
         {
           "problem": "The scratch that was already there",
           "detail": "The customer says the case or screen left your shop scratched.",
-          "answer": "Photograph the device at check-in and record damage, accessories left and the reported issue in a checklist on the work order."
+          "answer": "Photograph the device at check-in and note damage, accessories and the reported issue. You can show how it came in."
         },
         {
           "problem": "Two identical TVs on the bench",
           "detail": "Same model, same color, and the paper tag fell off.",
-          "answer": "Each work order holds the device with brand, model and serial number. Search the work order list by serial number or customer name."
+          "answer": "Each work order holds brand, model and serial number. Search by serial or customer and hand back the right device."
         },
         {
           "problem": "Different prices for the same repair",
           "detail": "Every time someone quotes the same power board swap, the number changes.",
-          "answer": "Build a catalog of services and parts with prices. On the quote, pick the items and the total adds up on its own."
+          "answer": "Build a catalog of services and parts and the total adds up on its own. Same repair, same price."
         },
         {
           "problem": "Warranty claims argued from memory",
           "detail": "The device comes back with a fault and nobody remembers what was replaced.",
-          "answer": "The work order keeps services, parts, photos and dates. Open the customer, see their devices and recent orders, and check what was done and when."
+          "answer": "Services, parts, photos and dates are all saved. Open the customer and see what was done and when."
         }
       ]
     },
     "workflow": {
-      "title": "How a device moves across the bench in PraticOS",
-      "lede": "From check-in to pickup, every step is recorded on the device's work order.",
+      "title": "From check-in to pickup, nothing forgotten",
+      "lede": "The device comes in with photos, the customer approves and the bench keeps moving until you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the device and AI opens the order",
+          "title": "Say the device. AI opens the order.",
+          "tab": "Speak",
           "text": "At the counter, tap Speak: “Carlos’s Samsung 50-inch TV, turns on and off, diagnostic quote.” AI fills in the customer, device, service and the price from your catalog. You check it and save.",
           "facts": [
             "What AI filled in is marked with ✦",
@@ -281,38 +287,42 @@
         },
         {
           "number": "02",
-          "title": "Log the check-in",
+          "title": "Show how the device arrived",
+          "tab": "Record",
           "text": "Before opening the device, photograph and note how it arrived on the check-in checklist: brand, model, serial number, damage and accessories left with you.",
           "facts": [
-            "Photos and damage recorded on the order",
+            "Photos and damage kept on hand in case of any doubt",
             "Reported fault and accessories left",
             "Checklists you adjust to your devices"
           ]
         },
         {
           "number": "03",
-          "title": "Send the quote by link",
+          "title": "Let the customer approve by link",
+          "tab": "Approve",
           "text": "After the diagnosis, build the quote with services and parts from your catalog. The customer opens it in the browser, sees the photos, reads your terms and approves.",
           "facts": [
-            "Approval or rejection recorded on the order",
+            "Approval or rejection kept on hand, no he-said-she-said",
             "The customer comments right on the order, no call needed",
             "Work order PDF to print or send"
           ]
         },
         {
           "number": "04",
-          "title": "Keep track of the bench",
-          "text": "Home shows your open work orders, with customer, device, status and due date. The customer checks the status on the same link, without calling.",
+          "title": "Know where every repair stands",
+          "tab": "Track",
+          "text": "Open the app and see what's on the bench, whose it is and when it's due. The customer checks the status on the same link, without calling.",
           "facts": [
-            "Filters: Open, Completed, All",
+            "See what's open and what's done",
             "Alert for quotes with no reply after 7 days",
-            "Search by serial number or customer"
+            "Find any device by serial number or customer"
           ]
         },
         {
           "number": "05",
           "title": "Deliver and get paid",
-          "text": "Receive the full amount or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
+          "tab": "Get paid",
+          "text": "Get paid in full or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
           "facts": [
             "Partial payments and discounts in the same order",
             "Whoever has owed the longest shows up first",
@@ -324,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from electronics repair shops",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Before you try it in your shop",
+      "lede": "Still have a question? Send us an email: the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -359,9 +369,9 @@
     "ogTitle": "Sistema para Servicio Técnico de Electrónica | PraticOS",
     "ogDescription": "El taller en el celular: la IA abre la OS con lo que dices, el equipo queda con número de serie y fotos al ingreso, y el cliente aprueba el presupuesto y las reglas de retiro por link.",
     "hero": {
-      "title": "Cada TV en el banco",
-      "titleMark": "con foto, dueño y plazo.",
-      "lede": "PraticOS es la app de órdenes de servicio para talleres de electrónica. Registra el equipo con modelo y número de serie, fotografía cómo llegó, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
+      "title": "Menos equipos parados.",
+      "titleMark": "Más reparaciones aprobadas y cobradas.",
+      "lede": "PraticOS es la app de órdenes de servicio para talleres de electrónica que mantiene tu banco en movimiento. El equipo entra con fotos, el cliente aprueba el presupuesto por link y sabes quién todavía te debe.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -404,49 +414,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el taller de electrónica",
+      "title": "El dinero que el taller de electrónica pierde sin darse cuenta",
       "lede": "Casi nunca falta trabajo en el banco. Es el presupuesto que nadie contestó, la TV que el dueño nunca retiró y el rayón en la pantalla que nadie fotografió.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Equipos olvidados en el estante",
           "detail": "La TV quedó lista hace meses, el cliente no aparece y no sabes qué puedes hacer con ella.",
-          "answer": "Escribe tus reglas de retiro en Términos para el cliente (en el botón del perfil, arriba en Inicio). El cliente lee el texto antes de aprobar el presupuesto, la aprobación queda registrada y los términos salen en el PDF de la OS."
+          "answer": "Escribe tus reglas de retiro en Términos para el cliente. Las lee antes de aprobar y salen en el PDF de la OS. Tienes qué mostrar."
         },
         {
           "problem": "Presupuestos sin respuesta",
           "detail": "Abriste el equipo, mandaste el precio por mensaje y el cliente desapareció.",
-          "answer": "El presupuesto va por link, con fotos y valores. Ves si el cliente lo abrió, y la app te avisa cuando una orden lleva más de 7 días en presupuesto."
+          "answer": "El presupuesto va por link, con fotos y valores. Ves si el cliente lo abrió y la app te avisa cuando lleva más de 7 días detenido."
         },
         {
           "problem": "El rayón que ya estaba",
           "detail": "El cliente dice que la carcasa o la pantalla salió rayada del taller.",
-          "answer": "Fotografía el equipo al ingreso y registra daños, accesorios entregados y la falla reportada en un checklist dentro de la orden."
+          "answer": "Fotografía el equipo al ingreso y anota daños, accesorios y la falla reportada. Puedes mostrar cómo llegó."
         },
         {
           "problem": "Dos TV iguales en el banco",
           "detail": "Mismo modelo, mismo color, y la etiqueta de papel se cayó.",
-          "answer": "Cada orden tiene el equipo con marca, modelo y número de serie. Busca por número de serie o por nombre del cliente en la lista de órdenes."
+          "answer": "Cada orden guarda marca, modelo y número de serie. Busca por serie o por cliente y entrega el equipo correcto."
         },
         {
           "problem": "Precios distintos para la misma reparación",
           "detail": "Cada vez que alguien cotiza el mismo cambio de fuente, sale otro valor.",
-          "answer": "Arma el catálogo de servicios y repuestos con precio. En el presupuesto eliges los ítems y el total se suma solo."
+          "answer": "Arma el catálogo de servicios y repuestos y el total se suma solo. Misma reparación, mismo precio."
         },
         {
           "problem": "Garantía discutida de memoria",
           "detail": "El equipo vuelve con falla y nadie recuerda qué se cambió.",
-          "answer": "La OS guarda servicios, repuestos, fotos y fechas. Abre el cliente, mira sus equipos y las últimas OS, y revisa qué se hizo y cuándo."
+          "answer": "Servicios, repuestos, fotos y fechas quedan guardados. Abre el cliente y ve qué se hizo y cuándo."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un equipo por el banco en PraticOS",
-      "lede": "Del ingreso al retiro, cada paso queda registrado en la orden del equipo.",
+      "title": "Del ingreso al retiro, sin olvidar nada",
+      "lede": "El equipo entra con fotos, el cliente aprueba y el banco sigue andando hasta que cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el equipo y la IA abre la OS",
+          "title": "Di el equipo. La IA abre la OS.",
+          "tab": "Hablar",
           "text": "En el mostrador, toca Hablar: “TV Samsung 50 de Carlos, enciende y se apaga, presupuesto de diagnóstico”. La IA completa cliente, equipo, servicio y precio de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que la IA completó queda marcado con ✦",
@@ -456,37 +467,41 @@
         },
         {
           "number": "02",
-          "title": "Registra el ingreso",
+          "title": "Muestra cómo llegó el equipo",
+          "tab": "Registrar",
           "text": "Antes de abrir el equipo, fotografía y anota cómo llegó en el checklist de ingreso: marca, modelo, número de serie, daños y accesorios que dejó.",
           "facts": [
-            "Fotos y daños registrados en la OS",
+            "Fotos y daños guardados ante cualquier duda",
             "Falla reportada y accesorios dejados",
             "Checklists que ajustas a tus equipos"
           ]
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "Deja que el cliente apruebe por link",
+          "tab": "Aprobar",
           "text": "Después del diagnóstico, arma el presupuesto con servicios y repuestos del catálogo. El cliente lo abre en el navegador, ve las fotos, lee tus términos y aprueba.",
           "facts": [
-            "Aprobación o rechazo registrado en la OS",
+            "Aprobación o rechazo guardados, sin discusiones",
             "El cliente comenta en la orden, sin llamar",
             "PDF de la OS para imprimir o enviar"
           ]
         },
         {
           "number": "04",
-          "title": "Sigue el banco",
-          "text": "Inicio muestra las OS abiertas, con cliente, equipo, situación y entrega. El cliente consulta la situación en el mismo link, sin llamar.",
+          "title": "Mira cómo va cada reparación",
+          "tab": "Seguir",
+          "text": "Abre la app y ve qué hay en el banco, de quién es y cuándo se entrega. El cliente consulta la situación en el mismo link, sin llamar.",
           "facts": [
-            "Filtros: Abiertas, Completadas, Todas",
+            "Ve lo que está abierto y lo que ya terminó",
             "Aviso de presupuesto sin respuesta hace 7 días",
-            "Búsqueda por número de serie o por cliente"
+            "Encuentra cualquier equipo por número de serie o cliente"
           ]
         },
         {
           "number": "05",
           "title": "Entrega y cobra",
+          "tab": "Cobrar",
           "text": "Cobra el valor completo o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro.",
           "facts": [
             "Pago en partes y descuento en la misma OS",
@@ -499,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien repara electrónica",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Antes de usarlo en tu taller",
+      "lede": "¿Te queda alguna duda? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

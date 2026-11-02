@@ -54,7 +54,7 @@
 <!-- Stylesheets -->
 <link rel="stylesheet" href="{{ relPath }}css/tokens.css">
 <link rel="stylesheet" href="{{ relPath }}css/site.css">
-{% if pageType == 'homepage' %}
+{% if pageType == 'homepage' or pageType == 'segment' %}
 <link rel="stylesheet" href="{{ relPath }}css/home.css">
 {% endif %}
 {% if segmentStyles %}

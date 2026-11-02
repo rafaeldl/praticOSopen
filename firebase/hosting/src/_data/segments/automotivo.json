@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Oficina Mecânica | PraticOS",
     "ogDescription": "OS da oficina no celular: checklist de entrada com fotos, histórico pela placa, orçamento aprovado por link e controle do que entrou.",
     "hero": {
-      "title": "Placa, fotos e orçamento",
-      "titleMark": "na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para oficina mecânica. Cadastre o carro pela placa, faça o checklist de entrada com fotos, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "title": "Menos discussão no balcão.",
+      "titleMark": "Mais carro entregue e pago.",
+      "lede": "PraticOS é o app de ordem de serviço para oficina mecânica que tira a papelada do seu dia. O carro entra com fotos, o cliente aprova o orçamento por link e você sabe quem ainda falta pagar.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,61 +54,63 @@
       }
     },
     "problems": {
-      "title": "Onde a oficina perde dinheiro",
+      "title": "O dinheiro que a oficina perde sem perceber",
       "lede": "Quase nunca é falta de serviço. É o orçamento que ficou num áudio, a peça que não entrou na conta e o arranhão que ninguém fotografou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Orçamento perdido na conversa",
           "detail": "O valor ficou num papel ou no meio do WhatsApp. O cliente volta e ninguém lembra o que foi combinado.",
-          "answer": "O orçamento fica na OS, com serviços e peças do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+          "answer": "O cliente aprova pelo link, com serviços e peças na tela. Combinado é combinado, e fica guardado."
         },
         {
           "problem": "Peça usada que não foi cobrada",
           "detail": "A peça foi para o carro, mas não foi para a conta. No fim do mês, a diferença aparece no caixa.",
-          "answer": "Peças e mão de obra entram na OS com preço, e o total é somado na hora. O que foi usado está escrito na OS."
+          "answer": "Peças e mão de obra entram com preço e o total sai na hora. Você cobra tudo o que usou."
         },
         {
           "problem": "O arranhão que já estava lá",
           "detail": "O cliente reclama de uma avaria que o carro já tinha quando chegou, e você não tem como mostrar.",
-          "answer": "O checklist de entrada registra lataria com fotos, quilometragem, combustível e luzes do painel antes de alguém mexer no carro."
+          "answer": "Fotos da lataria, quilometragem, combustível e luzes do painel antes de mexer no carro. Você mostra como ele chegou."
         },
         {
           "problem": "Diagnóstico refeito do zero",
           "detail": "O carro volta e ninguém sabe o que foi trocado da última vez.",
-          "answer": "Busque pela placa na lista de OS e veja todos os serviços já feitos naquele veículo."
+          "answer": "Digite a placa e veja tudo o que já foi feito no carro. Menos tempo refazendo diagnóstico."
         },
         {
           "problem": "Telefone tocando o dia todo",
           "detail": "“Já ficou pronto?” Cada ligação tira o mecânico de baixo do carro.",
-          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+          "answer": "O cliente abre o link e vê o status, as fotos e os valores, sem ligar. Você continua no serviço."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Dinheiro, cartão e fiado misturados no mesmo caderno. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Você vê quem ainda deve e quanto entrou no mês, mesmo com pagamento em partes."
         }
       ]
     },
     "workflow": {
-      "title": "Como o carro passa pela oficina no PraticOS",
-      "lede": "Da recepção à entrega, cada etapa fica registrada na OS do veículo.",
+      "title": "Da recepção à entrega, sem nada esquecido",
+      "lede": "O carro entra com fotos, o cliente aprova e você recebe, sem correr atrás de papel.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA preenche a OS",
+          "title": "Fale o serviço. A IA monta a OS.",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “Onix da Juliana, troca de óleo e alinhamento”, ou tire uma foto da placa. A IA preenche cliente, veículo, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “o alinhamento é 100”",
-            "Placa no formato antigo ou Mercosul, e a busca pela placa traz as OS anteriores do carro"
+            "Pela placa, antiga ou Mercosul, você puxa as OS anteriores do carro"
           ],
           "image": "ai-order.png",
           "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
         },
         {
           "number": "02",
-          "title": "Faça o checklist de entrada",
+          "title": "Mostre como o carro chegou",
+          "tab": "Registrar",
           "text": "Antes de mexer no carro, registre como ele chegou. O checklist de entrada do veículo vem pronto e você ajusta os itens.",
           "facts": [
             "Fotos da lataria e das avarias",
@@ -120,10 +122,11 @@
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Deixe o cliente aprovar pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "Aprovação do cliente guardada para qualquer dúvida",
             "Cliente acompanha o andamento sem ligar",
             "PDF da OS para imprimir ou enviar"
           ],
@@ -133,7 +136,8 @@
         {
           "number": "04",
           "title": "Entregue o carro e receba",
-          "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
+          "tab": "Receber",
+          "text": "Receba inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
             "Relatório do mês com o que entrou",
@@ -145,8 +149,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem oficina",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Antes de usar na sua oficina",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -154,7 +158,7 @@
         },
         {
           "question": "Serve para funilaria, lanternagem e lava-car?",
-          "answer": "Sim. O segmento automotivo cobre oficina mecânica, funilaria e pintura, lanternagem e lava-car. O app usa os termos do ramo: veículo, placa, montadora."
+          "answer": "Sim. Funciona para oficina mecânica, funilaria e pintura, lanternagem e lava-car. O app fala a sua língua: veículo, placa, montadora."
         },
         {
           "question": "Consigo ver o que já foi feito num carro?",
@@ -180,9 +184,9 @@
     "ogTitle": "Auto Repair Shop Software | PraticOS",
     "ogDescription": "Shop work orders on your phone: intake checklist with photos, history by license plate, quotes approved by link and a clear view of what came in.",
     "hero": {
-      "title": "Plate, photos and quote",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for auto repair shops. Add the car by license plate, run the intake checklist with photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "title": "Fewer arguments at the counter.",
+      "titleMark": "More cars out and paid for.",
+      "lede": "PraticOS is the work order app for auto repair shops that takes paperwork off your day. Cars check in with photos, customers approve quotes by link and you always know who still owes you.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -225,49 +229,50 @@
       }
     },
     "problems": {
-      "title": "Where a repair shop loses money",
+      "title": "The money your shop loses without noticing",
       "lede": "It's rarely a lack of work. It's the quote buried in a text thread, the part that never made it onto the bill and the scratch nobody photographed.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Quotes lost in the chat",
           "detail": "The price was on a sticky note or somewhere in a message thread. The customer comes back and nobody remembers what was agreed.",
-          "answer": "The quote lives on the work order, with services and parts from your catalog. The customer approves it by link and the approval is recorded."
+          "answer": "The customer approves by link, with services and parts right there. What was agreed stays on hand."
         },
         {
           "problem": "Parts used but never billed",
           "detail": "The part went into the car but not onto the bill. At the end of the month the gap shows up in the cash count.",
-          "answer": "Parts and labor go on the work order with prices, and the total adds up as you go. What was used is written down."
+          "answer": "Parts and labor go in with prices and the total adds up on the spot. You bill everything you used."
         },
         {
           "problem": "The scratch that was already there",
           "detail": "A customer complains about damage the car already had when it arrived, and you have nothing to show.",
-          "answer": "The intake checklist records the body with photos, mileage, fuel level and dashboard lights before anyone touches the car."
+          "answer": "Body photos, mileage, fuel and dashboard lights, before anyone touches the car. You can show how it came in."
         },
         {
           "problem": "Diagnosing from scratch, again",
           "detail": "The car comes back and nobody knows what was replaced last time.",
-          "answer": "Search the work order list by license plate and see every job done on that vehicle."
+          "answer": "Type the plate and see every job done on that car. Less time diagnosing twice."
         },
         {
           "problem": "The phone ringing all day",
           "detail": "“Is it ready yet?” Every call pulls a mechanic out from under a car.",
-          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+          "answer": "The customer opens the link and sees the status, photos and prices without calling. You stay on the job."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Cash, card and IOUs in the same notebook. Nobody knows who still owes you.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "See who still owes you and what came in this month, even with partial payments."
         }
       ]
     },
     "workflow": {
-      "title": "How a car moves through the shop in PraticOS",
-      "lede": "From drop-off to pickup, every step is recorded on the vehicle's work order.",
+      "title": "From drop-off to pickup, nothing forgotten",
+      "lede": "The car comes in with photos, the customer approves and you get paid, with no chasing paper.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and AI fills in the work order",
+          "title": "Say the job. AI builds the work order.",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Juliana's Onix, oil change and alignment”, or take a photo of the license plate. The AI fills in the customer, vehicle, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -279,7 +284,8 @@
         },
         {
           "number": "02",
-          "title": "Run the intake checklist",
+          "title": "Show how the car arrived",
+          "tab": "Record",
           "text": "Before anyone works on the car, record how it arrived. The vehicle intake checklist comes ready to use and you can adjust the items.",
           "facts": [
             "Photos of the body and any damage",
@@ -291,10 +297,11 @@
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Let the customer approve by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in a browser, nothing to install. They see photos, parts and labor, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "Customer approval kept on hand in case of any doubt",
             "Customers follow progress without calling",
             "Work order PDF to print or send"
           ],
@@ -304,7 +311,8 @@
         {
           "number": "04",
           "title": "Hand over the car and get paid",
-          "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
+          "tab": "Get paid",
+          "text": "Get paid in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
             "Monthly report of what came in",
@@ -316,8 +324,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from shop owners",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Before you try it in your shop",
+      "lede": "Still have a question? Send us an email: the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -325,7 +333,7 @@
         },
         {
           "question": "Does it work for body shops, dent repair and car washes?",
-          "answer": "Yes. The automotive segment covers auto repair, body and paint, dent repair and car washes. The app uses your trade's words: vehicle, license plate, make."
+          "answer": "Yes. It works for auto repair, body and paint, dent repair and car washes. The app speaks your trade: vehicle, license plate, make."
         },
         {
           "question": "Can I see what was already done on a car?",
@@ -351,9 +359,9 @@
     "ogTitle": "Sistema para Taller Mecánico | PraticOS",
     "ogDescription": "Las órdenes del taller en el celular: checklist de ingreso con fotos, historial por placa, presupuesto aprobado por link y control de lo cobrado.",
     "hero": {
-      "title": "Placa, fotos y presupuesto",
-      "titleMark": "en la misma orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para talleres mecánicos. Registra el auto por la placa, haz el checklist de ingreso con fotos, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
+      "title": "Menos discusiones en el mostrador.",
+      "titleMark": "Más autos entregados y cobrados.",
+      "lede": "PraticOS es la app de órdenes de servicio para talleres mecánicos que te saca el papeleo de encima. El auto entra con fotos, el cliente aprueba el presupuesto por link y sabes quién todavía te debe.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -396,49 +404,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el taller",
+      "title": "El dinero que tu taller pierde sin darse cuenta",
       "lede": "Casi nunca es falta de trabajo. Es el presupuesto que quedó en un audio, el repuesto que no entró en la cuenta y el rayón que nadie fotografió.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Presupuestos perdidos en el chat",
           "detail": "El precio quedó en un papel o en medio del WhatsApp. El cliente vuelve y nadie recuerda lo que se acordó.",
-          "answer": "El presupuesto queda en la orden, con servicios y repuestos de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+          "answer": "El cliente aprueba por link, con servicios y repuestos a la vista. Lo acordado queda guardado."
         },
         {
           "problem": "Repuestos usados que no se cobraron",
           "detail": "El repuesto fue al auto, pero no a la cuenta. A fin de mes, la diferencia aparece en la caja.",
-          "answer": "Repuestos y mano de obra entran en la orden con precio, y el total se suma al momento. Lo que se usó queda escrito."
+          "answer": "Repuestos y mano de obra entran con precio y el total sale al momento. Cobras todo lo que usaste."
         },
         {
           "problem": "El rayón que ya estaba",
           "detail": "El cliente reclama un daño que el auto ya tenía cuando llegó, y no tienes cómo mostrarlo.",
-          "answer": "El checklist de ingreso registra la carrocería con fotos, kilometraje, combustible y luces del tablero antes de que alguien toque el auto."
+          "answer": "Fotos de la carrocería, kilometraje, combustible y luces del tablero antes de tocar el auto. Puedes mostrar cómo llegó."
         },
         {
           "problem": "Diagnóstico desde cero, otra vez",
           "detail": "El auto vuelve y nadie sabe qué se cambió la última vez.",
-          "answer": "Busca por la placa en la lista de órdenes y ve todos los trabajos hechos en ese vehículo."
+          "answer": "Escribe la placa y ve todo lo que se hizo en ese auto. Menos tiempo repitiendo diagnósticos."
         },
         {
           "problem": "El teléfono sonando todo el día",
           "detail": "“¿Ya está listo?” Cada llamada saca al mecánico de abajo del auto.",
-          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+          "answer": "El cliente abre el link y ve el estado, las fotos y los valores sin llamar. Tú sigues trabajando."
         },
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Efectivo, tarjeta y fiado en el mismo cuaderno. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Ves quién todavía debe y cuánto entró en el mes, incluso con pagos en partes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un auto por el taller en PraticOS",
-      "lede": "De la recepción a la entrega, cada paso queda registrado en la orden del vehículo.",
+      "title": "De la recepción a la entrega, sin olvidar nada",
+      "lede": "El auto entra con fotos, el cliente aprueba y tú cobras, sin correr detrás de papeles.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la IA completa la orden",
+          "title": "Di el trabajo. La IA arma la orden.",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “Onix de Juliana, cambio de aceite y alineación”, o saca una foto de la placa. La IA completa cliente, vehículo, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
@@ -450,7 +459,8 @@
         },
         {
           "number": "02",
-          "title": "Haz el checklist de ingreso",
+          "title": "Muestra cómo llegó el auto",
+          "tab": "Registrar",
           "text": "Antes de tocar el auto, registra cómo llegó. El checklist de ingreso del vehículo viene listo y tú ajustas los ítems.",
           "facts": [
             "Fotos de la carrocería y de los daños",
@@ -462,10 +472,11 @@
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "Deja que el cliente apruebe por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "Aprobación del cliente guardada ante cualquier duda",
             "El cliente sigue el avance sin llamar",
             "PDF de la orden para imprimir o enviar"
           ],
@@ -475,7 +486,8 @@
         {
           "number": "04",
           "title": "Entrega el auto y cobra",
-          "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
+          "tab": "Cobrar",
+          "text": "Cobra el total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
             "Informe del mes con lo que entró",
@@ -487,8 +499,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene taller",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Antes de usarlo en tu taller",
+      "lede": "¿Te queda alguna duda? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -496,7 +508,7 @@
         },
         {
           "question": "¿Sirve para chapa y pintura, desabollado y lavado de autos?",
-          "answer": "Sí. El segmento automotriz cubre taller mecánico, carrocería y pintura, desabollado y lavado de autos. La app usa los términos del rubro: vehículo, placa, marca."
+          "answer": "Sí. Funciona para taller mecánico, carrocería y pintura, desabollado y lavado de autos. La app habla tu idioma: vehículo, placa, marca."
         },
         {
           "question": "¿Puedo ver lo que ya se hizo en un auto?",

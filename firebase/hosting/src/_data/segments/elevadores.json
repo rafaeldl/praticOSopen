@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Manutenção de Elevadores | PraticOS",
     "ogDescription": "Preventivas e chamados no celular: a IA abre a OS pelo que você fala, a visita entra na agenda, o checklist vai com fotos e o síndico aprova o reparo extra por link.",
     "hero": {
-      "title": "Cada visita ao elevador",
-      "titleMark": "registrada na OS.",
-      "lede": "PraticOS é o app de ordem de serviço para quem faz manutenção de elevadores. Agende a visita, faça o checklist de preventiva com fotos no celular, registre as peças trocadas e mande ao síndico o link da OS para ele ver o serviço e aprovar o reparo extra.",
+      "title": "Prove cada preventiva.",
+      "titleMark": "Cobre cada reparo extra.",
+      "lede": "O PraticOS é o app para manutenção de elevadores que mostra ao síndico o que foi feito. Faça o checklist com fotos no celular e mande o link para ele ver o serviço e aprovar o reparo extra.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde a empresa de elevadores perde dinheiro",
-      "lede": "O contrato está assinado. O que escapa é a visita sem registro, o reparo extra que não virou cobrança e o histórico que só existe na cabeça de um técnico.",
+      "title": "Onde o contrato de elevador vaza dinheiro",
+      "lede": "O contrato está assinado. O que escapa é a visita sem prova, o reparo extra sem cobrança e o histórico que só um técnico conhece.",
       "answerLabel": "No PraticOS",
       "items": [
         {
-          "problem": "Preventiva sem comprovação",
+          "problem": "Síndico duvida da preventiva",
           "detail": "O síndico pergunta se a visita do mês foi feita, e a única resposta é a palavra do técnico.",
-          "answer": "O técnico preenche o checklist na OS, com fotos da casa de máquinas, da cabina e do poço. Você manda o link ao síndico e ele vê o que foi verificado."
+          "answer": "Mande o link: o síndico vê o checklist e as fotos da casa de máquinas, da cabina e do poço."
         },
         {
           "problem": "Reparo extra que não vira cobrança",
           "detail": "Trocou um rolete no meio da preventiva, mas a peça não entrou em nenhuma conta.",
-          "answer": "Peças e serviços fora do contrato entram na OS com preço. O síndico aprova o orçamento pelo link e a aprovação fica registrada."
+          "answer": "Coloque a peça na OS com preço. O síndico aprova pelo link e você cobra."
         },
         {
           "problem": "Histórico na cabeça do técnico",
           "detail": "Outro técnico atende o chamado e não sabe o que já foi trocado naquele elevador.",
-          "answer": "Cadastre cada elevador com fabricante, modelo e número de série. Na tela do cliente você vê os equipamentos do condomínio e as últimas OS de cada um."
+          "answer": "Abra o condomínio e veja os elevadores e as últimas OS de cada um."
         },
         {
           "problem": "Agenda espalhada",
           "detail": "Preventivas e chamados anotados em planilha, papel e grupo de mensagens.",
-          "answer": "Cada visita é uma OS com dia e hora. A Agenda mostra a semana e o dia, o celular avisa antes do atendimento e, com equipe, dá para ver a agenda de cada técnico."
+          "answer": "Preventivas e chamados na mesma Agenda, com aviso no celular antes de cada visita."
         },
         {
           "problem": "Prédio com vários elevadores",
           "detail": "Social, serviço e monta-carga no mesmo condomínio, cada um com seu problema.",
-          "answer": "Uma OS pode reunir mais de um equipamento do mesmo cliente, e cada elevador continua com o próprio cadastro."
+          "answer": "Atenda vários elevadores na mesma OS, sem misturar o histórico de cada um."
         },
         {
           "problem": "Relatório digitado à noite",
           "detail": "Depois do expediente, alguém passa a limpo o que os técnicos contaram durante o dia.",
-          "answer": "O PDF da OS sai com os serviços, uma página por checklist e as fotos, pronto para enviar ao síndico ou arquivar."
+          "answer": "O PDF sai pronto para o síndico: serviços, checklist e fotos."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma visita passa pelo PraticOS",
-      "lede": "Do agendamento ao relatório, cada visita fica registrada na OS do condomínio.",
+      "title": "Da visita marcada ao reparo pago",
+      "lede": "Você faz o serviço, o síndico vê a prova e aprova o extra, e você recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale a visita e a IA abre a OS",
+          "title": "Fale a visita, a IA monta a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga: “Condomínio Solar, elevador 2, preventiva mensal na quinta às 8”. A IA preenche cliente, equipamento, serviço e preço do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦",
@@ -106,37 +107,41 @@
         },
         {
           "number": "02",
-          "title": "A visita na agenda",
+          "title": "Preventivas e chamados na mesma agenda",
+          "tab": "Agendar",
           "text": "Com dia e hora na OS, a visita entra na Agenda. Preventiva e chamado ficam no mesmo lugar, e o celular avisa antes do horário.",
           "facts": [
             "Semana no topo, visitas do dia embaixo",
             "Lembrete de 15 minutos a 2 horas antes",
-            "Com equipe, agenda filtrada por técnico"
+            "Com equipe, a agenda de cada técnico"
           ]
         },
         {
           "number": "03",
-          "title": "Faça o checklist no local",
+          "title": "Comprove no local",
+          "tab": "Registrar",
           "text": "Monte uma vez o seu checklist de preventiva e use em todas as visitas. Marque sim, não ou não se aplica e fotografe o que encontrou na casa de máquinas, na cabina e no poço.",
           "facts": [
-            "Itens com verificação, texto ou foto",
+            "Marque, anote e fotografe cada item",
             "Os mesmos itens em todas as visitas",
-            "Checklist concluído só reabre com Administrador, Gerente ou Supervisor"
+            "Checklist concluído fica protegido: só Administrador, Gerente ou Supervisor reabre"
           ]
         },
         {
           "number": "04",
-          "title": "Mande o link ao síndico",
+          "title": "Mostre ao síndico",
+          "tab": "Aprovar",
           "text": "O síndico abre a OS no navegador, sem instalar nada. Ele vê fotos e checklist, aprova o reparo extra quando houver e deixa comentários.",
           "facts": [
-            "Aprovação registrada na OS",
+            "O sim do síndico fica guardado",
             "PDF da OS para o arquivo do condomínio",
-            "Comentários do síndico no histórico da OS"
+            "Comentários do síndico guardados com o serviço"
           ]
         },
         {
           "number": "05",
           "title": "Receba pelo que foi feito",
+          "tab": "Receber",
           "text": "Receba reparos e peças, inteiro ou em partes. O Financeiro mostra quanto falta receber e de quais condomínios, com o botão para mandar a cobrança.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -149,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem mantém elevadores",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que as empresas de elevadores perguntam",
+      "lede": "Ficou alguma dúvida? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -184,9 +189,9 @@
     "ogTitle": "Elevator Maintenance Software | PraticOS",
     "ogDescription": "Maintenance visits and service calls on your phone: AI opens the work order from what you say, the visit goes on the schedule, the checklist gets photos and the property manager approves extra repairs by link.",
     "hero": {
-      "title": "Every elevator visit",
-      "titleMark": "on a work order.",
-      "lede": "PraticOS is the work order app for elevator maintenance technicians. Schedule the visit, run the maintenance checklist with photos on your phone, log replaced parts and send the property manager a link to review the job and approve extra repairs.",
+      "title": "Prove every maintenance visit.",
+      "titleMark": "Bill every extra repair.",
+      "lede": "PraticOS is the elevator maintenance app that shows the property manager what was done. Run the checklist with photos on your phone and send a link so they can review the job and approve extra repairs.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -229,49 +234,50 @@
       }
     },
     "problems": {
-      "title": "Where an elevator company loses money",
-      "lede": "The contract is signed. What slips is the visit with no record, the extra repair that never got billed and the history that lives only in one technician's head.",
+      "title": "Where elevator contracts leak money",
+      "lede": "The contract is signed. What slips is the visit with no proof, the extra repair nobody billed and the history only one technician knows.",
       "answerLabel": "In PraticOS",
       "items": [
         {
-          "problem": "Maintenance with no proof",
+          "problem": "The manager doubts the visit happened",
           "detail": "The property manager asks whether this month's visit happened, and all you have is the technician's word.",
-          "answer": "The technician fills in the checklist on the work order, with photos of the machine room, car and hoistway. You send the manager a link and they see what was checked."
+          "answer": "Send a link and the manager sees the checklist and photos of the machine room, car and hoistway."
         },
         {
           "problem": "Extra repairs that never get billed",
           "detail": "A roller was replaced during the routine visit, but the part never made it onto an invoice.",
-          "answer": "Out-of-contract parts and services go on the work order with prices. The manager approves the quote by link and the approval is recorded."
+          "answer": "Add the part to the work order with a price. The manager approves by link and you bill it."
         },
         {
           "problem": "History in one technician's head",
           "detail": "Another technician takes the callback and has no idea what was already replaced on that elevator.",
-          "answer": "Register each elevator with manufacturer, model and serial number. On the customer screen you see the building’s equipment and the recent work orders for each one."
+          "answer": "Open the building and see every elevator and its recent work orders."
         },
         {
           "problem": "A scattered schedule",
           "detail": "Routine visits and callbacks noted in spreadsheets, on paper and in group chats.",
-          "answer": "Each visit is a work order with a date and time. The Schedule shows the week and the day, your phone reminds you before the visit and, with a team, you can see each technician’s schedule."
+          "answer": "Routine visits and callbacks on one Schedule, with a phone reminder before each."
         },
         {
           "problem": "Buildings with several elevators",
           "detail": "Passenger, service and freight elevators in one building, each with its own issues.",
-          "answer": "One work order can hold more than one unit for the same customer, and each elevator keeps its own record."
+          "answer": "Handle several elevators on one work order without mixing up their histories."
         },
         {
           "problem": "Reports typed up at night",
           "detail": "After hours, someone writes up what the technicians reported during the day.",
-          "answer": "The work order PDF comes out with services, a page per checklist and the photos, ready to send to the manager or file."
+          "answer": "The PDF comes out ready for the manager: services, checklist and photos."
         }
       ]
     },
     "workflow": {
-      "title": "How a visit moves through PraticOS",
-      "lede": "From scheduling to the report, every visit is recorded on the building's work order.",
+      "title": "From booked visit to paid repair",
+      "lede": "You do the work, the manager sees the proof and approves the extras, and you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the visit and AI opens the order",
+          "title": "Say the visit and AI builds the order",
+          "tab": "Speak",
           "text": "Tap Speak and say: “Solar Building, elevator 2, monthly maintenance on Thursday at 8.” AI fills in the customer, equipment, service and the price from your catalog. You check it and save.",
           "facts": [
             "What AI filled in is marked with ✦",
@@ -281,38 +287,42 @@
         },
         {
           "number": "02",
-          "title": "The visit on the schedule",
+          "title": "Routine visits and callbacks on one schedule",
+          "tab": "Schedule",
           "text": "With a date and time on the work order, the visit goes on the Schedule. Maintenance and service calls sit in the same place, and your phone reminds you before the appointment.",
           "facts": [
             "The week on top, the day’s visits below",
             "Reminder 15 minutes to 2 hours before",
-            "With a team, schedule filtered by technician"
+            "With a team, each technician's schedule"
           ]
         },
         {
           "number": "03",
-          "title": "Run the checklist on site",
+          "title": "Prove it on site",
+          "tab": "Record",
           "text": "Build your maintenance checklist once and use it on every visit. Mark yes, no or not applicable and photograph what you found in the machine room, the car and the shaft.",
           "facts": [
-            "Items with a check, text or photo",
+            "Check, note and photograph every item",
             "The same items on every visit",
-            "Completed checklists reopen only for Admin, Manager or Supervisor"
+            "Completed checklists are protected: only Admin, Manager or Supervisor can reopen them"
           ]
         },
         {
           "number": "04",
-          "title": "Send the link to the property manager",
+          "title": "Show the property manager",
+          "tab": "Approve",
           "text": "The property manager opens the work order in the browser, with nothing to install. They see photos and the checklist, approve extra repairs when needed and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The manager's yes is kept on file",
             "Work order PDF for the building’s records",
-            "Manager comments in the order history"
+            "Manager comments kept with the job"
           ]
         },
         {
           "number": "05",
           "title": "Get paid for the work",
-          "text": "Receive repairs and parts in full or in parts. Financial shows how much is left to collect and from which buildings, with a button to send the payment request.",
+          "tab": "Get paid",
+          "text": "Get paid for repairs and parts, in full or in installments. Financial shows how much is left to collect and from which buildings, with a button to send the payment request.",
           "facts": [
             "Partial payments and discounts in the same order",
             "Whoever has owed the longest shows up first",
@@ -324,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from elevator companies",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What elevator companies ask us",
+      "lede": "Still have a question? Email us. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -359,9 +369,9 @@
     "ogTitle": "Sistema para Mantenimiento de Ascensores | PraticOS",
     "ogDescription": "Mantenimientos y llamados en el celular: la IA abre la OS con lo que dices, la visita entra en la agenda, el checklist va con fotos y el administrador aprueba la reparación extra por link.",
     "hero": {
-      "title": "Cada visita al ascensor",
-      "titleMark": "registrada en la orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para quien hace mantenimiento de ascensores. Agenda la visita, haz el checklist de mantenimiento con fotos en el celular, registra los repuestos cambiados y envía al administrador el link de la orden para que vea el trabajo y apruebe las reparaciones extra.",
+      "title": "Demuestra cada visita.",
+      "titleMark": "Cobra cada reparación extra.",
+      "lede": "PraticOS es la app para mantenimiento de ascensores que le muestra al administrador lo que se hizo. Haz el checklist con fotos en el celular y envía el link para que vea el trabajo y apruebe las reparaciones extra.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -404,49 +414,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata la empresa de ascensores",
-      "lede": "El contrato está firmado. Lo que se escapa es la visita sin registro, la reparación extra que no se cobró y el historial que solo existe en la cabeza de un técnico.",
+      "title": "Dónde se escapa el dinero en el contrato de ascensores",
+      "lede": "El contrato está firmado. Lo que se escapa es la visita sin prueba, la reparación extra sin cobrar y el historial que solo conoce un técnico.",
       "answerLabel": "En PraticOS",
       "items": [
         {
-          "problem": "Mantenimiento sin comprobante",
+          "problem": "El administrador duda de la visita",
           "detail": "El administrador pregunta si se hizo la visita del mes, y la única respuesta es la palabra del técnico.",
-          "answer": "El técnico completa el checklist en la orden, con fotos de la sala de máquinas, la cabina y el pozo. Le envías el link al administrador y ve lo que se revisó."
+          "answer": "Envía el link y el administrador ve el checklist y las fotos de la sala de máquinas, la cabina y el pozo."
         },
         {
           "problem": "Reparaciones extra que no se cobran",
           "detail": "Se cambió un rodillo en plena visita preventiva, pero el repuesto no entró en ninguna cuenta.",
-          "answer": "Repuestos y servicios fuera del contrato entran en la orden con precio. El administrador aprueba el presupuesto por link y la aprobación queda registrada."
+          "answer": "Pon el repuesto en la orden con su precio. El administrador aprueba por link y tú cobras."
         },
         {
           "problem": "Historial en la cabeza del técnico",
           "detail": "Otro técnico atiende el llamado y no sabe qué ya se cambió en ese ascensor.",
-          "answer": "Registra cada ascensor con fabricante, modelo y número de serie. En la pantalla del cliente ves los equipos del edificio y las últimas OS de cada uno."
+          "answer": "Abre el edificio y mira cada ascensor con sus últimas órdenes."
         },
         {
-          "problem": "Agenda desparramada",
+          "problem": "Agenda desordenada",
           "detail": "Preventivas y llamados anotados en planillas, papel y grupos de mensajes.",
-          "answer": "Cada visita es una OS con día y hora. La Agenda muestra la semana y el día, el celular avisa antes de la cita y, con equipo, puedes ver la agenda de cada técnico."
+          "answer": "Preventivos y llamados en la misma Agenda, con aviso en el celular antes de cada visita."
         },
         {
           "problem": "Edificios con varios ascensores",
           "detail": "Principal, de servicio y montacargas en el mismo edificio, cada uno con su problema.",
-          "answer": "Una orden puede reunir más de un equipo del mismo cliente, y cada ascensor mantiene su propio registro."
+          "answer": "Atiende varios ascensores en una orden sin mezclar el historial de cada uno."
         },
         {
           "problem": "Informes escritos de noche",
           "detail": "Después de la jornada, alguien pasa en limpio lo que los técnicos contaron durante el día.",
-          "answer": "El PDF de la orden sale con los servicios, una página por checklist y las fotos, listo para enviar al administrador o archivar."
+          "answer": "El PDF sale listo para el administrador: servicios, checklist y fotos."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una visita por PraticOS",
-      "lede": "De la agenda al informe, cada visita queda registrada en la orden del edificio.",
+      "title": "De la visita agendada a la reparación cobrada",
+      "lede": "Haces el trabajo, el administrador ve la prueba y aprueba lo extra, y tú cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di la visita y la IA abre la OS",
+          "title": "Di la visita y la IA arma la orden",
+          "tab": "Hablar",
           "text": "Toca Hablar y di: “Edificio Solar, ascensor 2, mantenimiento mensual el jueves a las 8”. La IA completa cliente, equipo, servicio y precio de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que la IA completó queda marcado con ✦",
@@ -456,37 +467,41 @@
         },
         {
           "number": "02",
-          "title": "La visita en la agenda",
+          "title": "Preventivos y llamados en la misma agenda",
+          "tab": "Agendar",
           "text": "Con día y hora en la OS, la visita entra en la Agenda. Mantenimiento y llamados quedan en el mismo lugar, y el celular avisa antes del horario.",
           "facts": [
             "La semana arriba, las visitas del día abajo",
             "Aviso de 15 minutos a 2 horas antes",
-            "Con equipo, agenda filtrada por técnico"
+            "Con equipo, la agenda de cada técnico"
           ]
         },
         {
           "number": "03",
-          "title": "Haz el checklist en el lugar",
+          "title": "Compruébalo en el lugar",
+          "tab": "Registrar",
           "text": "Arma una vez tu checklist de mantenimiento y úsalo en todas las visitas. Marca sí, no o no aplica y fotografía lo que encontraste en la sala de máquinas, la cabina y el pozo.",
           "facts": [
-            "Ítems con verificación, texto o foto",
+            "Marca, anota y fotografía cada ítem",
             "Los mismos ítems en todas las visitas",
-            "El checklist completado solo se reabre con Administrador, Gerente o Supervisor"
+            "Checklist completado protegido: solo Administrador, Gerente o Supervisor lo reabre"
           ]
         },
         {
           "number": "04",
-          "title": "Envía el link al administrador",
+          "title": "Muéstraselo al administrador",
+          "tab": "Aprobar",
           "text": "El administrador abre la OS en el navegador, sin instalar nada. Ve fotos y checklist, aprueba la reparación extra cuando la hay y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la OS",
+            "El sí del administrador queda guardado",
             "PDF de la OS para el archivo del edificio",
-            "Comentarios del administrador en el historial de la OS"
+            "Comentarios del administrador guardados junto al trabajo"
           ]
         },
         {
           "number": "05",
           "title": "Cobra por lo que hiciste",
+          "tab": "Cobrar",
           "text": "Cobra reparaciones y repuestos, completo o en partes. Financiero muestra cuánto falta cobrar y de qué edificios, con el botón para enviar el cobro.",
           "facts": [
             "Pago en partes y descuento en la misma OS",
@@ -499,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien mantiene ascensores",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que preguntan las empresas de ascensores",
+      "lede": "¿Te quedó alguna duda? Escríbenos. Responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

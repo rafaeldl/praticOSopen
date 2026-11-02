@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Dedetizadora | PraticOS",
     "ogDescription": "Cada visita numa OS: agenda com lembrete, checklist da aplicação com fotos, orçamento aprovado por link e PDF do serviço para o cliente.",
     "hero": {
-      "title": "Cada aplicação registrada,",
-      "titleMark": "com foto e produto.",
-      "lede": "PraticOS é o app de ordem de serviço para dedetizadoras. Agende a visita, registre no checklist o que foi aplicado e onde, com fotos, mande o orçamento por link para o cliente aprovar e entregue o PDF do serviço — tudo pelo celular.",
+      "title": "Você aplica.",
+      "titleMark": "O cliente vê a prova no celular.",
+      "lede": "O PraticOS é o app para dedetizadora que troca a ficha de papel pelo celular. Agende a visita, mostre com foto o que foi aplicado e onde, e receba a aprovação do orçamento por link.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,49 +54,50 @@
       }
     },
     "problems": {
-      "title": "Onde a dedetizadora perde dinheiro",
-      "lede": "Quase nunca é falta de chamado. É a ficha de papel que não volta, o técnico que chega sem saber o histórico e o cliente que pede comprovante do que foi aplicado.",
+      "title": "O que custa caro na rotina da dedetizadora",
+      "lede": "Chamado não falta. O dinheiro escapa na ficha que não volta, no técnico que chega às cegas e no cliente que cobra comprovante.",
       "answerLabel": "No PraticOS",
       "items": [
         {
-          "problem": "Ficha de papel que não volta",
+          "problem": "A ficha de papel sumiu",
           "detail": "A ficha molha, rasga ou fica no carro, e o que foi feito só é passado a limpo dias depois.",
-          "answer": "Você preenche a OS no celular, no local, com fotos, e ela fica salva na hora. Se alguém trabalha com você, vê a mesma OS assim que ela é salva."
+          "answer": "Feche a OS no celular, ainda no local, com fotos. Nada para passar a limpo depois."
         },
         {
-          "problem": "Cliente pede comprovante da aplicação",
+          "problem": "O cliente cobra comprovante",
           "detail": "Restaurante, condomínio ou escola quer saber qual produto foi usado, em que áreas e em que dia.",
-          "answer": "Monte um checklist com produto, lote, diluição, áreas tratadas e fotos. O PDF da OS sai com o checklist preenchido e as fotos."
+          "answer": "Entregue um PDF com produto, lote, diluição, áreas tratadas e fotos."
         },
         {
-          "problem": "Técnico chega sem o histórico",
+          "problem": "Técnico chega às cegas",
           "detail": "Na volta ao cliente, ninguém sabe onde estavam os focos nem o que foi aplicado da última vez.",
-          "answer": "Busque pelo nome do cliente e veja todas as OS anteriores, com checklists, fotos e observações."
+          "answer": "Busque o cliente e saiba o que foi feito antes, com fotos e observações."
         },
         {
-          "problem": "Agenda no caderno",
+          "problem": "Agenda que não fecha",
           "detail": "Duas visitas no mesmo horário, técnico atravessando a cidade e cliente esperando.",
-          "answer": "A data da OS coloca a visita na Agenda, com a semana no topo e o horário de cada atendimento. O celular avisa antes de cada visita."
+          "answer": "Veja a semana inteira e receba um aviso no celular antes de cada visita."
         },
         {
-          "problem": "Orçamento combinado por telefone",
+          "problem": "Preço combinado que vira discussão",
           "detail": "O valor foi falado numa ligação e, na hora de cobrar, o cliente lembra de outro número.",
-          "answer": "O cliente aprova o orçamento pelo link, e a aprovação fica registrada na própria OS."
+          "answer": "O cliente aprova o orçamento pelo link e o valor fica combinado por escrito."
         },
         {
-          "problem": "Mês fechado sem saber quanto entrou",
+          "problem": "Mês fechado no escuro",
           "detail": "Pagamento na hora, condomínio que paga no fim do mês e cliente que paga no mês seguinte, tudo no mesmo caderno.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Saiba quanto entrou, quanto falta receber e de quem."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma visita passa pelo PraticOS",
-      "lede": "Do agendamento ao recebimento, cada etapa fica registrada na OS do cliente.",
+      "title": "Da primeira ligação ao pagamento, sem ficha de papel",
+      "lede": "Você agenda, aplica, mostra ao cliente o que fez e recebe, tudo pelo celular.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a IA preenche a OS",
+          "title": "Fale o serviço, a IA monta a OS",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “restaurante do Paulo, dedetização da cozinha e do depósito”, ou tire uma foto do pedido anotado. A IA preenche cliente, serviços e valores com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
@@ -106,37 +107,41 @@
         },
         {
           "number": "02",
-          "title": "Agende a visita",
+          "title": "Organize a semana",
+          "tab": "Agendar",
           "text": "A data e a hora da OS colocam a visita na Agenda. Você vê a semana no topo e o que está marcado em cada dia.",
           "facts": [
-            "Semana no topo e os atendimentos de cada dia, com horário",
+            "A semana inteira à vista, com o horário de cada visita",
             "Resumo do dia às 9h, se você ligar",
             "Lembrete no celular antes do atendimento"
           ]
         },
         {
           "number": "03",
-          "title": "Registre a aplicação",
+          "title": "Prove o que aplicou",
+          "tab": "Registrar",
           "text": "Crie o checklist do jeito que você trabalha — praga alvo, produto, lote, diluição, áreas tratadas, recomendações — e preencha no local.",
           "facts": [
-            "Monte do seu jeito, com texto, número, sim/não, lista e foto",
+            "Monte do seu jeito, com os itens que você precisa",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as visitas"
           ]
         },
         {
           "number": "04",
-          "title": "Envie a OS para o cliente",
+          "title": "Deixe o cliente aprovar",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê os serviços, as fotos e os valores, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "PDF com o checklist preenchido e as fotos",
             "Cliente acompanha o andamento sem ligar"
           ]
         },
         {
           "number": "05",
-          "title": "Receba",
+          "title": "Receba pelo serviço",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -150,7 +155,7 @@
     },
     "faq": {
       "title": "Perguntas de quem tem dedetizadora",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "lede": "Ficou alguma dúvida? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -162,7 +167,7 @@
         },
         {
           "question": "O PDF serve como certificado de execução?",
-          "answer": "O PDF da OS traz os dados do serviço, o checklist preenchido e as fotos. Ele não é um certificado oficial: confira com a vigilância sanitária da sua cidade o que o certificado precisa ter e inclua esses campos no seu checklist."
+          "answer": "O PDF da OS traz os dados do serviço, o checklist preenchido e as fotos. Ele não é um certificado oficial: confira com a vigilância sanitária da sua cidade o que o certificado precisa ter e inclua esses itens no seu checklist."
         },
         {
           "question": "Os técnicos podem usar no próprio celular?",
@@ -184,9 +189,9 @@
     "ogTitle": "Pest Control Software | PraticOS",
     "ogDescription": "Every visit on one work order: schedule with reminders, treatment checklist with photos, quotes approved by link and a service PDF for the client.",
     "hero": {
-      "title": "Every treatment on record,",
-      "titleMark": "with photos and product.",
-      "lede": "PraticOS is the work order app for pest control companies. Schedule the visit, record what was applied and where in a checklist with photos, send the quote as a link for the client to approve and hand over the service PDF — all from your phone.",
+      "title": "Finish the job.",
+      "titleMark": "Hand over the proof from your phone.",
+      "lede": "PraticOS is the pest control app that replaces paper tickets with your phone. Schedule the visit, show what was applied and where with photos, and get quotes approved by link.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -229,49 +234,50 @@
       }
     },
     "problems": {
-      "title": "Where a pest control company loses money",
-      "lede": "It's rarely a lack of calls. It's the paper ticket that never comes back, the tech who arrives without the history and the client asking for proof of what was applied.",
+      "title": "What's costing your pest control business",
+      "lede": "Calls aren't the issue. Money slips away in the paper ticket that never comes back, the tech who shows up blind and the client demanding proof.",
       "answerLabel": "In PraticOS",
       "items": [
         {
-          "problem": "Paper tickets that never come back",
+          "problem": "The paper ticket went missing",
           "detail": "The ticket gets wet, torn or left in the truck, and what was done only gets written up days later.",
-          "answer": "You fill in the work order on your phone, on site, with photos, and it's saved right away. If someone works with you, they see the same work order as soon as it's saved."
+          "answer": "Close the job on your phone, on site, with photos. Nothing to write up later."
         },
         {
-          "problem": "Clients asking for proof of treatment",
+          "problem": "Clients demanding proof",
           "detail": "A restaurant, building or school wants to know which product was used, in which areas and on what day.",
-          "answer": "Build a checklist with product, lot, dilution, treated areas and photos. The work order PDF includes the completed checklist and the photos."
+          "answer": "Hand over a PDF with product, lot, dilution, treated areas and photos."
         },
         {
-          "problem": "Techs arriving without the history",
+          "problem": "Techs showing up blind",
           "detail": "On a return visit, nobody knows where the activity was or what was applied last time.",
-          "answer": "Search by client name and see every past work order, with checklists, photos and notes."
+          "answer": "Look up the client and see what was done before, with photos and notes."
         },
         {
-          "problem": "A schedule in a notebook",
+          "problem": "A schedule that doesn't add up",
           "detail": "Two visits at the same time, a tech crossing town and a client waiting.",
-          "answer": "The work order date puts the visit on the Schedule, with the week on top and the time of each visit. The phone sends a reminder before each one."
+          "answer": "See the whole week and get a phone reminder before every visit."
         },
         {
-          "problem": "Quotes agreed over the phone",
+          "problem": "Prices that turn into arguments",
           "detail": "The price was said on a call and, when it's time to bill, the client remembers a different number.",
-          "answer": "The client approves the quote by link, and the approval is recorded on the work order."
+          "answer": "The client approves the quote by link, so the price is agreed in writing."
         },
         {
-          "problem": "Closing the month without knowing what came in",
+          "problem": "Closing the month in the dark",
           "detail": "Paid on the spot, buildings that pay at month-end and clients who pay next month, all in the same notebook.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "Know what came in, what's still owed and by whom."
         }
       ]
     },
     "workflow": {
-      "title": "How a visit moves through PraticOS",
-      "lede": "From scheduling to payment, every step is recorded on the client's work order.",
+      "title": "From the first call to getting paid, no paper tickets",
+      "lede": "You schedule, treat, show the client what you did and get paid, all from your phone.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and AI fills in the work order",
+          "title": "Say the job and AI builds the work order",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Paulo's restaurant, kitchen and storeroom treatment”, or take a photo of the written order. The AI fills in the client, services and prices from your catalog. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
@@ -281,37 +287,41 @@
         },
         {
           "number": "02",
-          "title": "Schedule the visit",
+          "title": "Plan your week",
+          "tab": "Schedule",
           "text": "The work order date and time put the visit on the Schedule. You see the week on top and what is booked each day.",
           "facts": [
-            "The week on top and each day's appointments, with times",
+            "The whole week in view, with every visit's time",
             "Daily summary at 9 a.m., if you turn it on",
             "Phone reminder before each visit"
           ]
         },
         {
           "number": "03",
-          "title": "Record the treatment",
+          "title": "Prove what you applied",
+          "tab": "Record",
           "text": "Build the checklist the way you work — target pest, product, lot, dilution, treated areas, recommendations — and fill it in on site.",
           "facts": [
-            "Build it your way with text, numbers, yes/no, lists and photos",
+            "Build it your way, with the items you need",
             "Photos on every checklist item",
             "One template for every visit"
           ]
         },
         {
           "number": "04",
-          "title": "Send the work order to the client",
+          "title": "Let the client approve",
+          "tab": "Approve",
           "text": "The client opens the work order in a browser, nothing to install. They see services, photos and prices, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The client's yes is kept on file",
             "PDF with the completed checklist and photos",
             "Clients follow progress without calling"
           ]
         },
         {
           "number": "05",
-          "title": "Get paid",
+          "title": "Get paid for the job",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -324,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from pest control companies",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Questions pest control pros ask",
+      "lede": "Still have a question? Email us. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -337,7 +347,7 @@
         },
         {
           "question": "Can the PDF be used as a service certificate?",
-          "answer": "The work order PDF includes the service details, the completed checklist and the photos. It is not an official certificate: check with your local health or licensing authority what a certificate must include and add those fields to your checklist."
+          "answer": "The work order PDF includes the service details, the completed checklist and the photos. It is not an official certificate: check with your local health or licensing authority what a certificate must include and add those items to your checklist."
         },
         {
           "question": "Can my techs use it on their own phones?",
@@ -359,9 +369,9 @@
     "ogTitle": "Sistema para Control de Plagas | PraticOS",
     "ogDescription": "Cada visita en una orden: agenda con aviso, checklist de aplicación con fotos, presupuesto aprobado por link y PDF del servicio para el cliente.",
     "hero": {
-      "title": "Cada aplicación registrada,",
-      "titleMark": "con foto y producto.",
-      "lede": "PraticOS es la app de órdenes de servicio para empresas de control de plagas. Agenda la visita, registra en el checklist qué se aplicó y dónde, con fotos, envía el presupuesto por link para que el cliente lo apruebe y entrega el PDF del servicio — todo desde el celular.",
+      "title": "Terminas la aplicación.",
+      "titleMark": "El cliente ve la prueba en el celular.",
+      "lede": "PraticOS es la app para control de plagas que cambia la planilla de papel por el celular. Agenda la visita, muestra con fotos qué se aplicó y dónde, y recibe la aprobación del presupuesto por link.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -404,49 +414,50 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata la empresa de control de plagas",
-      "lede": "Casi nunca es falta de pedidos. Es la planilla de papel que no vuelve, el técnico que llega sin el historial y el cliente que pide constancia de lo que se aplicó.",
+      "title": "Lo que le cuesta dinero a tu empresa de control de plagas",
+      "lede": "Pedidos no faltan. El dinero se escapa en la planilla que no vuelve, en el técnico que llega a ciegas y en el cliente que exige constancia.",
       "answerLabel": "En PraticOS",
       "items": [
         {
-          "problem": "Planillas de papel que no vuelven",
+          "problem": "La planilla de papel se perdió",
           "detail": "La planilla se moja, se rompe o queda en la camioneta, y lo que se hizo se pasa en limpio días después.",
-          "answer": "Completas la orden en el celular, en el lugar, con fotos, y queda guardada al instante. Si alguien trabaja contigo, ve la misma orden apenas se guarda."
+          "answer": "Cierra el trabajo en el celular, en el lugar, con fotos. Nada que pasar en limpio después."
         },
         {
-          "problem": "El cliente pide constancia de la aplicación",
+          "problem": "El cliente exige constancia",
           "detail": "Un restaurante, un edificio o una escuela quiere saber qué producto se usó, en qué áreas y qué día.",
-          "answer": "Arma un checklist con producto, lote, dilución, áreas tratadas y fotos. El PDF de la orden sale con el checklist completado y las fotos."
+          "answer": "Entrega un PDF con producto, lote, dilución, áreas tratadas y fotos."
         },
         {
-          "problem": "Técnico sin el historial",
+          "problem": "Técnico que llega a ciegas",
           "detail": "En la visita de repaso, nadie sabe dónde estaban los focos ni qué se aplicó la última vez.",
-          "answer": "Busca por el nombre del cliente y ve todas las órdenes anteriores, con checklists, fotos y observaciones."
+          "answer": "Busca al cliente y mira qué se hizo antes, con fotos y observaciones."
         },
         {
-          "problem": "Agenda en un cuaderno",
+          "problem": "Una agenda que no cierra",
           "detail": "Dos visitas a la misma hora, un técnico cruzando la ciudad y un cliente esperando.",
-          "answer": "La fecha de la orden pone la visita en la Agenda, con la semana arriba y el horario de cada visita. El celular avisa antes de cada una."
+          "answer": "Mira toda la semana y recibe un aviso en el celular antes de cada visita."
         },
         {
-          "problem": "Presupuesto acordado por teléfono",
+          "problem": "Precios que terminan en discusión",
           "detail": "El precio se dijo en una llamada y, al cobrar, el cliente recuerda otro número.",
-          "answer": "El cliente aprueba el presupuesto por link, y la aprobación queda registrada en la propia orden."
+          "answer": "El cliente aprueba el presupuesto por link y el precio queda acordado por escrito."
         },
         {
-          "problem": "Cerrar el mes sin saber cuánto entró",
+          "problem": "Cerrar el mes a oscuras",
           "detail": "Cobros en el momento, edificios que pagan a fin de mes y clientes que pagan el mes siguiente, todo en el mismo cuaderno.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Sabe cuánto entró, cuánto falta cobrar y de quién."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una visita por PraticOS",
-      "lede": "De la agenda al cobro, cada paso queda registrado en la orden del cliente.",
+      "title": "De la primera llamada al cobro, sin planillas de papel",
+      "lede": "Agendas, aplicas, le muestras al cliente lo que hiciste y cobras, todo desde el celular.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la IA completa la orden",
+          "title": "Di el servicio y la IA arma la orden",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “restaurante de Paulo, fumigación de la cocina y el depósito”, o saca una foto del pedido anotado. La IA completa cliente, servicios y valores con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
@@ -456,37 +467,41 @@
         },
         {
           "number": "02",
-          "title": "Agenda la visita",
+          "title": "Organiza tu semana",
+          "tab": "Agendar",
           "text": "La fecha y la hora de la orden ponen la visita en la Agenda. Ves la semana arriba y lo que está marcado cada día.",
           "facts": [
-            "La semana arriba y las visitas de cada día, con horario",
+            "Toda la semana a la vista, con el horario de cada visita",
             "Resumen del día a las 9 h, si lo activas",
             "Aviso en el celular antes de la visita"
           ]
         },
         {
           "number": "03",
-          "title": "Registra la aplicación",
+          "title": "Demuestra lo que aplicaste",
+          "tab": "Registrar",
           "text": "Crea el checklist como trabajas tú — plaga, producto, lote, dilución, áreas tratadas, recomendaciones — y complétalo en el lugar.",
           "facts": [
-            "Ármalo a tu manera con texto, número, sí/no, lista y foto",
+            "Ármalo a tu manera, con los ítems que necesitas",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todas las visitas"
           ]
         },
         {
           "number": "04",
-          "title": "Envía la orden al cliente",
+          "title": "Deja que el cliente apruebe",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve los servicios, las fotos y los valores, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El sí del cliente queda guardado",
             "PDF con el checklist completado y las fotos",
             "El cliente sigue el avance sin llamar"
           ]
         },
         {
           "number": "05",
-          "title": "Cobra",
+          "title": "Cobra tu trabajo",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -499,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de empresas de control de plagas",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Preguntas de quienes trabajan en control de plagas",
+      "lede": "¿Te quedó alguna duda? Escríbenos. Responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -512,7 +527,7 @@
         },
         {
           "question": "¿El PDF sirve como certificado del servicio?",
-          "answer": "El PDF de la orden trae los datos del servicio, el checklist completado y las fotos. No es un certificado oficial: consulta con la autoridad sanitaria de tu ciudad qué debe incluir el certificado y agrega esos campos a tu checklist."
+          "answer": "El PDF de la orden trae los datos del servicio, el checklist completado y las fotos. No es un certificado oficial: consulta con la autoridad sanitaria de tu ciudad qué debe incluir el certificado y agrega esos puntos a tu checklist."
         },
         {
           "question": "¿Los técnicos pueden usarlo en su propio celular?",

@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Assistência Técnica de Celular | PraticOS",
     "ogDescription": "OS da assistência no celular: aparelho com IMEI, checklist de entrada com fotos, orçamento aprovado por link e controle do que entrou.",
     "hero": {
-      "title": "Cada aparelho com IMEI,",
-      "titleMark": "fotos e orçamento.",
-      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de celular. Registre o aparelho com IMEI, faça o checklist de entrada com fotos, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "title": "Cada aparelho com seu dono.",
+      "titleMark": "Cada peça cobrada.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de celular que evita discussão no balcão. O aparelho entra com IMEI e fotos, o cliente aprova o orçamento por link e cada peça entra na conta.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,59 +54,61 @@
       }
     },
     "problems": {
-      "title": "Onde a assistência perde dinheiro",
+      "title": "O dinheiro que a assistência perde sem perceber",
       "lede": "Não é falta de aparelho na bancada. É o celular trocado na entrega, a tela que “já estava trincada” e a bateria que não entrou na conta.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Aparelho trocado na bancada",
           "detail": "Três celulares iguais esperando peça. Na hora de entregar, ninguém tem certeza de qual é de quem.",
-          "answer": "Cada OS tem o aparelho com fabricante, modelo, cor e IMEI. A busca encontra a OS pelo IMEI, pelo nome do cliente ou pelo número."
+          "answer": "Cada OS guarda fabricante, modelo, cor e IMEI. Busque pelo IMEI, pelo cliente ou pelo número da OS e entregue o aparelho certo."
         },
         {
           "problem": "“Esse risco não estava aqui”",
           "detail": "O cliente volta dizendo que a carcaça arranhou ou o Face ID parou na loja, e você não tem como mostrar como o aparelho chegou.",
-          "answer": "O checklist de entrada do celular registra fotos de frente e verso, tela trincada, se liga, touch, Face ID ou Touch ID, avarias e acessórios deixados."
+          "answer": "Fotos de frente e verso, tela, touch, Face ID ou Touch ID, avarias e acessórios. Você mostra como o aparelho chegou."
         },
         {
           "problem": "Dados perdidos, cliente bravo",
           "detail": "O reparo apaga as fotos do cliente e a discussão vira sobre quem avisou o quê.",
-          "answer": "O checklist de autorização registra se houve backup, se a senha foi fornecida, se o cliente sabe do risco de perda de dados e a preferência de peças."
+          "answer": "Backup, senha, risco de perda de dados e preferência de peças ficam combinados antes do reparo. Você avisou, e está guardado."
         },
         {
           "problem": "Peça trocada que não foi cobrada",
           "detail": "Conector, bateria, película. A peça foi para o aparelho, mas não foi para a conta.",
-          "answer": "Peças e mão de obra entram na OS com preço do seu catálogo, e o total é somado na hora."
+          "answer": "Peças e mão de obra entram com o preço do seu catálogo e o total sai na hora. Você cobra tudo o que trocou."
         },
         {
           "problem": "“Já ficou pronto?”",
           "detail": "Cada ligação tira o técnico do microscópio no meio da solda.",
-          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+          "answer": "O cliente abre o link e vê o status, as fotos e os valores, sem ligar. Você continua na solda."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Pix, cartão e dinheiro anotados em lugares diferentes. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Você vê quem ainda deve e quanto entrou no mês, mesmo com pagamento em partes."
         }
       ]
     },
     "workflow": {
-      "title": "Como o celular passa pela assistência no PraticOS",
-      "lede": "Do balcão à entrega, cada etapa fica registrada na OS do aparelho.",
+      "title": "Do balcão à entrega, sem nada esquecido",
+      "lede": "O aparelho entra com fotos, o cliente aprova e você entrega testado e recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o conserto e a IA preenche a OS",
+          "title": "Fale o conserto. A IA monta a OS.",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “iPhone 13 da Carla, troca de tela e bateria”, ou tire uma foto do pedido anotado. A IA preenche cliente, aparelho, serviços e peças com os preços do seu catálogo. Você confere, completa o IMEI e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a bateria é 250”",
-            "Aparelho com fabricante, modelo, cor e IMEI, e a busca pelo IMEI traz as OS anteriores"
+            "Aparelho com modelo, cor e IMEI, e pelo IMEI você puxa as OS anteriores"
           ]
         },
         {
           "number": "02",
-          "title": "Faça a entrada e o diagnóstico",
+          "title": "Confira tudo na entrada",
+          "tab": "Registrar",
           "text": "Os checklists de celular vêm prontos e você ajusta os itens: entrada do aparelho, diagnóstico completo, troca de tela, troca de bateria e teste final.",
           "facts": [
             "Fotos de frente, verso e avarias visíveis",
@@ -116,10 +118,11 @@
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Deixe o cliente aprovar pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê as fotos, as peças e a mão de obra, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "Aprovação do cliente guardada para qualquer dúvida",
             "Cliente acompanha o reparo sem ligar",
             "PDF da OS com checklists e fotos"
           ]
@@ -127,7 +130,8 @@
         {
           "number": "04",
           "title": "Teste, entregue e receba",
-          "text": "Antes de devolver, o teste final confere se o aparelho liga, carrega e se câmeras, áudio e sensores funcionam. Depois, registre o pagamento.",
+          "tab": "Receber",
+          "text": "Antes de devolver, o teste final confere se o aparelho liga, carrega e se câmeras, áudio e sensores funcionam. Depois, é só receber.",
           "facts": [
             "Foto do aparelho pronto na OS",
             "Pagamento em partes e desconto na mesma OS",
@@ -139,8 +143,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem assistência técnica",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Antes de usar na sua assistência",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -148,7 +152,7 @@
         },
         {
           "question": "Os checklists de celular já vêm prontos?",
-          "answer": "Sim. Ao escolher o segmento de celulares, você encontra modelos de entrada do aparelho, diagnóstico completo, troca de tela, troca de bateria, autorização e privacidade e teste final. Dá para editar os itens ou criar os seus."
+          "answer": "Sim. Ao escolher o ramo de celulares, você encontra modelos de entrada do aparelho, diagnóstico completo, troca de tela, troca de bateria, autorização e privacidade e teste final. Dá para editar os itens ou criar os seus."
         },
         {
           "question": "Consigo achar um aparelho pelo IMEI?",
@@ -174,9 +178,9 @@
     "ogTitle": "Phone Repair Shop Software | PraticOS",
     "ogDescription": "Repair tickets on your phone: device with IMEI, intake checklist with photos, quotes approved by link and a clear view of what came in.",
     "hero": {
-      "title": "Every device with IMEI,",
-      "titleMark": "photos and a quote.",
-      "lede": "PraticOS is the work order app for phone repair shops. Log the device with its IMEI, run the intake checklist with photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "title": "Every device back to its owner.",
+      "titleMark": "Every part billed.",
+      "lede": "PraticOS is the work order app for phone repair shops that heads off arguments at the counter. Devices check in with IMEI and photos, customers approve quotes by link and every part goes on the bill.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -219,59 +223,61 @@
       }
     },
     "problems": {
-      "title": "Where a repair shop loses money",
+      "title": "The money your repair shop loses without noticing",
       "lede": "It's not a lack of phones on the bench. It's the device handed to the wrong person, the screen that “was already cracked” and the battery that never made it onto the bill.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Devices mixed up on the bench",
           "detail": "Three identical phones waiting on parts. At pickup, nobody is sure which one belongs to whom.",
-          "answer": "Each work order holds the device with manufacturer, model, color and IMEI. Search finds it by IMEI, customer name or order number."
+          "answer": "Each work order holds manufacturer, model, color and IMEI. Search by IMEI, customer or order number and hand back the right device."
         },
         {
           "problem": "“That scratch wasn't there”",
           "detail": "A customer says the case got scratched or Face ID stopped working at your shop, and you can't show how the phone came in.",
-          "answer": "The phone intake checklist records front and back photos, cracked screen, power, touch, Face ID or Touch ID, visible damage and accessories left."
+          "answer": "Front and back photos, screen, touch, Face ID or Touch ID, damage and accessories. You can show how the phone came in."
         },
         {
           "problem": "Lost data, angry customer",
           "detail": "The repair wipes the customer's photos and the argument turns into who warned whom.",
-          "answer": "The authorization checklist records whether there was a backup, whether a passcode was given, that the customer knows the data-loss risk and their parts preference."
+          "answer": "Backup, passcode, data-loss risk and parts preference are agreed before the repair. You warned them, and it's saved."
         },
         {
           "problem": "Parts swapped but never billed",
           "detail": "Charging port, battery, screen protector. The part went into the phone but not onto the bill.",
-          "answer": "Parts and labor go on the work order with prices from your catalog, and the total adds up as you go."
+          "answer": "Parts and labor go in with prices from your catalog and the total adds up on the spot. You bill everything you swapped."
         },
         {
           "problem": "“Is it ready yet?”",
           "detail": "Every call pulls the tech away from the microscope mid-solder.",
-          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+          "answer": "The customer opens the link and sees the status, photos and prices without calling. You stay at the bench."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Cash, card and transfers written down in different places. Nobody knows who still owes you.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "See who still owes you and what came in this month, even with partial payments."
         }
       ]
     },
     "workflow": {
-      "title": "How a phone moves through the shop in PraticOS",
-      "lede": "From the counter to pickup, every step is recorded on the device's work order.",
+      "title": "From the counter to pickup, nothing forgotten",
+      "lede": "The phone comes in with photos, the customer approves and you hand it back tested and get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the repair and AI fills in the work order",
+          "title": "Say the repair. AI builds the work order.",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Carla's iPhone 13, screen and battery replacement”, or take a photo of the written order. The AI fills in the customer, device, services and parts with your catalog prices. You check it, add the IMEI and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the battery is 250”",
-            "Device with manufacturer, model, color and IMEI; searching by IMEI brings up its past work orders"
+            "Device with model, color and IMEI; the IMEI brings up its past work orders"
           ]
         },
         {
           "number": "02",
-          "title": "Run intake and diagnostics",
+          "title": "Check everything at intake",
+          "tab": "Record",
           "text": "Phone checklists come ready to use and you can adjust the items: device intake, full diagnostics, screen replacement, battery replacement and final test.",
           "facts": [
             "Front, back and visible damage photos",
@@ -281,10 +287,11 @@
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Let the customer approve by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in a browser, nothing to install. They see photos, parts and labor, approve it and leave comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "Customer approval kept on hand in case of any doubt",
             "Customers follow the repair without calling",
             "Work order PDF with checklists and photos"
           ]
@@ -292,7 +299,8 @@
         {
           "number": "04",
           "title": "Test, hand over and get paid",
-          "text": "Before pickup, the final test checks that the phone powers on, charges and that cameras, audio and sensors work. Then record the payment.",
+          "tab": "Get paid",
+          "text": "Before pickup, the final test checks that the phone powers on, charges and that cameras, audio and sensors work. Then you get paid.",
           "facts": [
             "Photo of the finished device on the work order",
             "Payment in parts and discount on the same work order",
@@ -304,8 +312,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from repair shop owners",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Before you try it in your shop",
+      "lede": "Still have a question? Send us an email: the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -313,7 +321,7 @@
         },
         {
           "question": "Do the phone checklists come ready to use?",
-          "answer": "Yes. When you pick the phone repair segment you get templates for device intake, full diagnostics, screen replacement, battery replacement, authorization and privacy, and final test. You can edit the items or build your own."
+          "answer": "Yes. When you choose phone repair you get templates for device intake, full diagnostics, screen replacement, battery replacement, authorization and privacy, and final test. You can edit the items or build your own."
         },
         {
           "question": "Can I find a device by its IMEI?",
@@ -339,9 +347,9 @@
     "ogTitle": "Sistema para Asistencia Técnica de Celular | PraticOS",
     "ogDescription": "Las órdenes del servicio técnico en el celular: equipo con IMEI, checklist de ingreso con fotos, presupuesto aprobado por link y control de lo cobrado.",
     "hero": {
-      "title": "Cada equipo con su IMEI,",
-      "titleMark": "fotos y presupuesto.",
-      "lede": "PraticOS es la app de órdenes de servicio para técnicos de celular. Registra el equipo con su IMEI, haz el checklist de ingreso con fotos, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
+      "title": "Cada equipo con su dueño.",
+      "titleMark": "Cada repuesto cobrado.",
+      "lede": "PraticOS es la app de órdenes de servicio para técnicos de celular que evita discusiones en el mostrador. El equipo entra con IMEI y fotos, el cliente aprueba el presupuesto por link y cada repuesto entra en la cuenta.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -384,59 +392,61 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el servicio técnico",
+      "title": "El dinero que tu servicio técnico pierde sin darse cuenta",
       "lede": "No es falta de equipos en la mesa. Es el celular entregado a otra persona, la pantalla que “ya estaba rota” y la batería que no entró en la cuenta.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Equipos mezclados en la mesa",
           "detail": "Tres celulares iguales esperando repuesto. Al entregar, nadie está seguro de cuál es de quién.",
-          "answer": "Cada orden tiene el equipo con fabricante, modelo, color e IMEI. La búsqueda la encuentra por IMEI, nombre del cliente o número de orden."
+          "answer": "Cada orden guarda fabricante, modelo, color e IMEI. Busca por IMEI, por cliente o por número de orden y entrega el equipo correcto."
         },
         {
           "problem": "“Ese rayón no estaba”",
           "detail": "El cliente dice que la carcasa se rayó o que el Face ID dejó de andar en tu local, y no tienes cómo mostrar cómo llegó el equipo.",
-          "answer": "El checklist de ingreso del celular registra fotos de frente y dorso, pantalla rota, si enciende, touch, Face ID o Touch ID, daños y accesorios que quedaron."
+          "answer": "Fotos de frente y dorso, pantalla, touch, Face ID o Touch ID, daños y accesorios. Puedes mostrar cómo llegó el equipo."
         },
         {
           "problem": "Datos perdidos, cliente enojado",
           "detail": "La reparación borra las fotos del cliente y la discusión pasa a ser quién avisó qué.",
-          "answer": "El checklist de autorización registra si hubo respaldo, si dejó la contraseña, que el cliente conoce el riesgo de perder datos y su preferencia de repuestos."
+          "answer": "Respaldo, contraseña, riesgo de perder datos y preferencia de repuestos quedan acordados antes de reparar. Avisaste, y queda guardado."
         },
         {
           "problem": "Repuestos que no se cobraron",
           "detail": "Pin de carga, batería, mica. El repuesto fue al equipo, pero no a la cuenta.",
-          "answer": "Repuestos y mano de obra entran en la orden con el precio de tu catálogo, y el total se suma al momento."
+          "answer": "Repuestos y mano de obra entran con el precio de tu catálogo y el total sale al momento. Cobras todo lo que cambiaste."
         },
         {
           "problem": "“¿Ya está listo?”",
           "detail": "Cada llamada saca al técnico del microscopio en plena soldadura.",
-          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+          "answer": "El cliente abre el link y ve el estado, las fotos y los valores sin llamar. Tú sigues en la mesa."
         },
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Efectivo, tarjeta y transferencias anotados en lugares distintos. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Ves quién todavía debe y cuánto entró en el mes, incluso con pagos en partes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un celular por el servicio técnico en PraticOS",
-      "lede": "Del mostrador a la entrega, cada paso queda registrado en la orden del equipo.",
+      "title": "Del mostrador a la entrega, sin olvidar nada",
+      "lede": "El celular entra con fotos, el cliente aprueba y tú lo entregas probado y cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di la reparación y la IA completa la orden",
+          "title": "Di la reparación. La IA arma la orden.",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “iPhone 13 de Carla, cambio de pantalla y batería”, o saca una foto del pedido anotado. La IA completa cliente, equipo, servicios y repuestos con los precios de tu catálogo. Tú revisas, agregas el IMEI y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la batería es 250”",
-            "Equipo con fabricante, modelo, color e IMEI; buscar por IMEI trae sus órdenes anteriores"
+            "Equipo con modelo, color e IMEI; con el IMEI ves sus órdenes anteriores"
           ]
         },
         {
           "number": "02",
-          "title": "Haz el ingreso y el diagnóstico",
+          "title": "Revisa todo al ingreso",
+          "tab": "Registrar",
           "text": "Los checklists de celular vienen listos y tú ajustas los ítems: ingreso del equipo, diagnóstico completo, cambio de pantalla, cambio de batería y prueba final.",
           "facts": [
             "Fotos de frente, dorso y daños visibles",
@@ -446,10 +456,11 @@
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "Deja que el cliente apruebe por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve las fotos, los repuestos y la mano de obra, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "Aprobación del cliente guardada ante cualquier duda",
             "El cliente sigue la reparación sin llamar",
             "PDF de la orden con checklists y fotos"
           ]
@@ -457,7 +468,8 @@
         {
           "number": "04",
           "title": "Prueba, entrega y cobra",
-          "text": "Antes de devolverlo, la prueba final confirma que el equipo enciende, carga y que cámaras, audio y sensores funcionan. Después, registra el pago.",
+          "tab": "Cobrar",
+          "text": "Antes de devolverlo, la prueba final confirma que el equipo enciende, carga y que cámaras, audio y sensores funcionan. Después, solo queda cobrar.",
           "facts": [
             "Foto del equipo listo en la orden",
             "Pago en partes y descuento en la misma orden",
@@ -469,8 +481,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene servicio técnico",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Antes de usarlo en tu servicio técnico",
+      "lede": "¿Te queda alguna duda? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -478,7 +490,7 @@
         },
         {
           "question": "¿Los checklists de celular vienen listos?",
-          "answer": "Sí. Al elegir el segmento de celulares encuentras plantillas de ingreso del equipo, diagnóstico completo, cambio de pantalla, cambio de batería, autorización y privacidad, y prueba final. Puedes editar los ítems o crear los tuyos."
+          "answer": "Sí. Al elegir el rubro de celulares encuentras plantillas de ingreso del equipo, diagnóstico completo, cambio de pantalla, cambio de batería, autorización y privacidad, y prueba final. Puedes editar los ítems o crear los tuyos."
         },
         {
           "question": "¿Puedo encontrar un equipo por el IMEI?",

@@ -108,6 +108,14 @@ Wordmark, tokens, fonts, CTA voice, section-head rule, nav, footer.
 Macrostructure within their family, ordering of sections, whether a page shows
 the ticket.
 
+## Segment pages
+
+Segment pages use the same language as the home: navy photo hero, yellow words in
+the headline, the trade's order card over its photo, tabs and rows. Do not bring
+back the printed ticket, highlighter headline, mono labels or numbered stages.
+Write copy as sales, not as a system description: what the professional gains.
+Avoid "campo", "cadastro" and "configurar".
+
 ## Segment page screens
 
 The app screenshots in `assets/screenshots/` come from a car-repair demo account
