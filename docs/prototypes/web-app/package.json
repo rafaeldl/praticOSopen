@@ -1,0 +1,25 @@
+{
+  "name": "praticos-web-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5199 --strictPort",
+    "build": "vite build && node scripts-artifact.mjs",
+    "test": "node tests/run.mjs"
+  },
+  "dependencies": {
+    "lucide-vue-next": "0.460.0",
+    "vue": "3.5.13"
+  },
+  "devDependencies": {
+    "@fontsource-variable/dm-sans": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/outfit": "5.3.0",
+    "@vitejs/plugin-vue": "5.2.1",
+    "axe-core": "4.10.2",
+    "playwright": "1.56.1",
+    "vite": "6.0.7",
+    "vite-plugin-singlefile": "2.1.0"
+  }
+}
