@@ -33,7 +33,13 @@ Device _$DeviceFromJson(Map<String, dynamic> json) => Device()
   ..keywords = (json['keywords'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList()
-  ..customData = json['customData'] as Map<String, dynamic>?;
+  ..customData = json['customData'] as Map<String, dynamic>?
+  ..nextMaintenanceDate = json['nextMaintenanceDate'] as String?
+  ..nextMaintenanceCustomer = json['nextMaintenanceCustomer'] == null
+      ? null
+      : CustomerAggr.fromJson(
+          json['nextMaintenanceCustomer'] as Map<String, dynamic>,
+        );
 
 Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'id': instance.id,

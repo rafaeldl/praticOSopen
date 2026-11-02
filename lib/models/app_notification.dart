@@ -14,6 +14,7 @@ class NotificationType {
   static const statusChanged = 'status_changed';
   static const orderRated = 'order_rated';
   static const paymentReceived = 'payment_received';
+  static const maintenanceDue = 'maintenance_due';
 }
 
 /// In-app notification stored in Firestore

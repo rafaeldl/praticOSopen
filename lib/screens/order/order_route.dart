@@ -30,13 +30,15 @@ class OrderRoute extends StatelessWidget {
 /// [repeat] starts the order with "Repetir" turned on (from Contratos).
 /// [onCreated] gets the new order id once it is saved (files shared from
 /// another app are attached then). [startTalking] opens it already listening,
-/// from the assistant's first-use sheet. Resolves with `true` on "✓"; the
+/// from the assistant's first-use sheet. [prefill] starts it with a customer,
+/// devices and services (next maintenance). Resolves with `true` on "✓"; the
 /// offers that follow a save ([runNewOrderOffers]) do not hold it up.
 Future<Object?> openNewOrder(
   BuildContext context, {
   bool repeat = false,
   bool startTalking = false,
   void Function(String orderId)? onCreated,
+  Order? prefill,
 }) async {
   final saved = Completer<Order>();
   final arguments = {
@@ -45,6 +47,7 @@ Future<Object?> openNewOrder(
       startTalking: startTalking,
       onCreated: onCreated,
     ),
+    'order': ?prefill,
     'onSaved': saved.complete,
   };
   final result = await Navigator.of(context, rootNavigator: true).push<Object?>(

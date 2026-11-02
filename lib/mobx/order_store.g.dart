@@ -1449,12 +1449,24 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  dynamic setStatus(String? status) {
+  Future<void>? setStatus(String? status) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setStatus',
     );
     try {
       return super.setStatus(status);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void restoreStatus(String? status) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.restoreStatus',
+    );
+    try {
+      return super.restoreStatus(status);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

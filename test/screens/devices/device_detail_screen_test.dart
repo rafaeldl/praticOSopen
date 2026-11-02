@@ -12,6 +12,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/screens/devices/device_detail_screen.dart';
@@ -19,9 +20,10 @@ import 'package:provider/provider.dart';
 
 /// Serves a fixed order history instead of querying Firestore.
 class _FakeOrderRepository extends TenantOrderRepository {
-  _FakeOrderRepository(this.orders);
+  _FakeOrderRepository(this.orders, {this.contracts = const []});
 
   final List<Order?> orders;
+  final List<Order?> contracts;
 
   @override
   Stream<List<Order?>> streamOrdersByDevice(
@@ -33,7 +35,19 @@ class _FakeOrderRepository extends TenantOrderRepository {
   Stream<List<Order?>> streamContractsByDevice(
     String companyId,
     String deviceId,
-  ) => Stream.value(const []);
+  ) => Stream.value(contracts);
+}
+
+/// Serves the device as it is saved, which may differ from what the screen
+/// received.
+class _FakeDeviceRepository extends TenantDeviceRepository {
+  _FakeDeviceRepository(this.device);
+
+  final Device device;
+
+  @override
+  Stream<Device?> streamSingle(String companyId, String? id) =>
+      Stream.value(device);
 }
 
 void main() {
@@ -103,6 +117,150 @@ void main() {
     expect(pushed.single.name, '/order');
     expect(appRoutes.containsKey(pushed.single.name), isTrue);
     expect((pushed.single.arguments as Map)['order'], same(order));
+  });
+
+  group('next maintenance', () {
+    Device aggregate() => Device()
+      ..id = 'd1'
+      ..name = 'Split';
+
+    Device withDate(String day) => aggregate()..nextMaintenanceDate = day;
+
+    final saves = <(DateTime?, String?)>[];
+
+    Future<void> pump(
+      WidgetTester tester,
+      Device saved, {
+      bool canManage = true,
+      List<Order?> contracts = const [],
+      List<Order?> orders = const [],
+    }) async {
+      saves.clear();
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SegmentConfigProvider>(
+          create: (_) => SegmentConfigProvider(),
+          child: CupertinoApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('pt'),
+            home: DeviceDetailScreen(
+              // What came from an order: no date, as an aggregate.
+              device: aggregate(),
+              orderRepository: _FakeOrderRepository(
+                orders,
+                contracts: contracts,
+              ),
+              deviceRepository: _FakeDeviceRepository(saved),
+              canManageDevices: canManage,
+              saveMaintenance: (id, date, customer, onFailed) =>
+                  saves.add((date, customer?.name)),
+              showPrices: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('reads the saved date, not the device that came in', (
+      tester,
+    ) async {
+      await pump(tester, withDate('2027-05-12'));
+
+      expect(find.text('Próxima manutenção: maio de 2027'), findsOneWidget);
+      expect(find.text('Toque para mudar ou tirar'), findsOneWidget);
+    });
+
+    testWidgets('without a date it offers to set one', (tester) async {
+      await pump(tester, aggregate());
+      expect(find.text('Definir próxima manutenção'), findsOneWidget);
+    });
+
+    testWidgets('who cannot edit devices is not offered a date', (
+      tester,
+    ) async {
+      await pump(tester, aggregate(), canManage: false);
+      expect(find.text('Definir próxima manutenção'), findsNothing);
+    });
+
+    testWidgets('who cannot edit devices only reads it', (tester) async {
+      await pump(tester, withDate('2027-05-12'), canManage: false);
+      expect(find.text('Próxima manutenção: maio de 2027'), findsOneWidget);
+      expect(find.text('Toque para mudar ou tirar'), findsNothing);
+    });
+
+    testWidgets('setting saves the date, with the owner from the orders', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        aggregate(),
+        orders: [
+          Order()
+            ..id = 'o1'
+            ..customer = (CustomerAggr()..name = 'Padaria'),
+        ],
+      );
+
+      await tester.tap(find.text('Definir próxima manutenção'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar'));
+      await tester.pumpAndSettle();
+
+      expect(saves, hasLength(1));
+      expect(saves.single.$1, isNotNull);
+      expect(saves.single.$2, 'Padaria');
+    });
+
+    testWidgets('a double tap on "Salvar" stays on the screen', (tester) async {
+      await pump(tester, aggregate());
+
+      await tester.tap(find.text('Definir próxima manutenção'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar'));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.text('Salvar'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(saves, hasLength(1));
+      expect(find.byType(DeviceDetailScreen), findsOneWidget);
+    });
+
+    testWidgets('"Tirar" removes the date', (tester) async {
+      await pump(tester, withDate('2027-05-12'));
+
+      await tester.tap(find.text('Próxima manutenção: maio de 2027'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tirar'));
+      await tester.pumpAndSettle();
+
+      expect(saves.single.$1, isNull);
+    });
+
+    testWidgets('an active contract shows its date and asks for no other', (
+      tester,
+    ) async {
+      final contract = Order()
+        ..id = 'c1'
+        ..contract = (OrderContract()
+          ..active = true
+          ..nextDueDate = DateTime(2027, 3, 1));
+      await pump(tester, withDate('2027-05-12'), contracts: [contract]);
+
+      expect(find.text('Próxima manutenção: março de 2027'), findsOneWidget);
+      expect(find.text('Pelo contrato'), findsOneWidget);
+      expect(find.text('Definir próxima manutenção'), findsNothing);
+      expect(find.text('Próxima manutenção: maio de 2027'), findsNothing);
+    });
+
+    testWidgets('an ended contract gives the row back', (tester) async {
+      final ended = Order()
+        ..id = 'c1'
+        ..contract = (OrderContract()..active = false);
+      await pump(tester, aggregate(), contracts: [ended]);
+
+      expect(find.text('Definir próxima manutenção'), findsOneWidget);
+    });
   });
 
   Future<List<RouteSettings>> pumpDetail(

@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/menu_navigation/home_content.dart';
@@ -48,8 +49,12 @@ class _Host extends StatefulWidget {
     this.onOpenProfile,
     this.technician = false,
     this.onOpenOrder,
+    this.maintenances = const [],
+    this.onOpenMaintenance,
   });
 
+  final List<Device> maintenances;
+  final ValueChanged<Device>? onOpenMaintenance;
   final bool technician;
   final ValueChanged<Order>? onOpenOrder;
   final List<Order> orders;
@@ -109,6 +114,8 @@ class _HostState extends State<_Host> {
       onLoadMore: () {},
       onOpenNotifications: () {},
       onOpenProfile: widget.onOpenProfile ?? () {},
+      maintenances: widget.maintenances,
+      onOpenMaintenance: widget.onOpenMaintenance,
       now: () => _now,
     );
   }
@@ -141,6 +148,87 @@ void main() {
     _order('Duda', 'done', number: 4, total: 380, paid: 200),
     _order('Elis', 'done', number: 5, total: 640, paid: 640),
   ];
+
+  group('Manutenções chegando', () {
+    Device device(String name, String customer, String day) => Device()
+      ..id = name
+      ..name = name
+      ..nextMaintenanceDate = day
+      ..nextMaintenanceCustomer = (CustomerAggr()..name = customer);
+
+    testWidgets('shows customer, device and date, and opens the item', (
+      tester,
+    ) async {
+      final tapped = <Device>[];
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [device('Split 12000', 'Padaria', '2026-10-15')],
+            onOpenMaintenance: tapped.add,
+          ),
+        ),
+      );
+
+      expect(find.text('Manutenções chegando'), findsOneWidget);
+      expect(find.text('Padaria'), findsOneWidget);
+      expect(find.text('15/10/2026'), findsOneWidget);
+
+      await tester.tap(find.text('Split 12000'));
+      expect(tapped.single.name, 'Split 12000');
+    });
+
+    testWidgets('does not exist without maintenances', (tester) async {
+      await tester.pumpWidget(_app(_Host(orders: mixed)));
+      expect(find.text('Manutenções chegando'), findsNothing);
+    });
+
+    testWidgets('does not change the order count', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [device('A', 'X', '2026-10-15')],
+          ),
+        ),
+      );
+      expect(find.text('3 em aberto · 1 atrasada'), findsOneWidget);
+    });
+
+    testWidgets('three rows, then "Ver mais"', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [
+              for (final name in ['A', 'B', 'C', 'D', 'E'])
+                device(name, 'Cliente', '2026-10-15'),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('D'), findsNothing);
+      await tester.tap(find.text('Ver mais 2'));
+      await tester.pump();
+      expect(find.text('E'), findsOneWidget);
+      expect(find.text('Ver mais 2'), findsNothing);
+    });
+
+    testWidgets('stays out of the finished orders', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [device('A', 'X', '2026-10-15')],
+          ),
+        ),
+      );
+      await tester.tap(find.text('Concluídas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Manutenções chegando'), findsNothing);
+    });
+  });
 
   testWidgets('Em aberto: summary, overdue first with a red dot, no groups', (
     tester,

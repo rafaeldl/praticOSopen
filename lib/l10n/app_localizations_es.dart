@@ -6442,4 +6442,88 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get nextMaintenanceQuestion => '¿Cuándo es el próximo mantenimiento?';
+
+  @override
+  String get nextMaintenanceThreeMonths => '3 meses';
+
+  @override
+  String get nextMaintenanceSixMonths => '6 meses';
+
+  @override
+  String get nextMaintenanceOneYear => '1 año';
+
+  @override
+  String get nextMaintenanceNoRepeat => 'No repetir';
+
+  @override
+  String nextMaintenanceCurrent(String date) {
+    return 'Previsto para $date';
+  }
+
+  @override
+  String nextMaintenanceOn(String date) {
+    return 'Próximo mantenimiento: $date';
+  }
+
+  @override
+  String get nextMaintenanceSet => 'Definir próximo mantenimiento';
+
+  @override
+  String get nextMaintenanceChangeHint => 'Toca para cambiar o quitar';
+
+  @override
+  String get nextMaintenanceRemove => 'Quitar';
+
+  @override
+  String get nextMaintenanceByContract => 'Por el contrato';
+
+  @override
+  String get nextMaintenanceSaveError =>
+      'No se pudo guardar la fecha del mantenimiento';
+
+  @override
+  String get orderStatusSaveError => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get maintenanceComing => 'Mantenimientos próximos';
+
+  @override
+  String maintenanceShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ver $count más',
+      one: 'Ver 1 más',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get maintenanceCallCustomer => 'Contactar al cliente';
+
+  @override
+  String get maintenanceOpenOrder => 'Abrir OS';
+
+  @override
+  String maintenanceViewDevice(String device) {
+    return 'Ver $device';
+  }
+
+  @override
+  String get maintenanceNoPhone => 'Cliente sin teléfono';
+
+  @override
+  String get maintenanceWhatsappError => 'No se pudo abrir WhatsApp';
+
+  @override
+  String maintenanceWhatsappMessage(
+    String customer,
+    String device,
+    String date,
+  ) {
+    return '¡Hola, $customer! Se acerca el mantenimiento de $device, previsto para $date. ¿Coordinamos un día?';
+  }
 }

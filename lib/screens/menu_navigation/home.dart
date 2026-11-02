@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/mobx/whatsapp_setup_banner_store.dart';
+import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/mobx/subscription_store.dart';
@@ -18,10 +21,12 @@ import 'package:praticos/screens/menu_navigation/home_content.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
+import 'package:praticos/screens/devices/maintenance_actions.dart';
 import 'package:praticos/screens/order/assistant/ai_intro.dart';
 import 'package:praticos/screens/widgets/courtesy_banner.dart';
 import 'package:praticos/screens/widgets/whatsapp_setup_banner.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/device_maintenance_service.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -51,6 +56,11 @@ class _HomeState extends State<Home> {
   bool _whatsappStatusLoaded = false;
   bool _aiIntroChecked = false;
   bool _aiIntroRunning = false;
+  final DeviceMaintenanceService _maintenance = DeviceMaintenanceService();
+  StreamSubscription<List<Device>>? _maintenanceSub;
+  String? _maintenanceKey;
+  List<Device> _maintenances = const [];
+  bool _maintenanceBusy = false;
 
   @override
   void initState() {
@@ -61,6 +71,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     ordersChanged.removeListener(_loadOrders);
+    _maintenanceSub?.cancel();
     super.dispose();
   }
 
@@ -143,6 +154,66 @@ class _HomeState extends State<Home> {
     }
   }
 
+  /// Listens to the maintenances within a week, again when the company or
+  /// the day changes. A failure only hides the section.
+  void _watchMaintenances() {
+    final companyId = Global.companyAggr?.id;
+    final until = maintenanceWindowEnd(DateTime.now());
+    final key = '$companyId|$until';
+    if (companyId == null || key == _maintenanceKey) return;
+    _maintenanceKey = key;
+    _maintenanceSub?.cancel();
+    _maintenanceSub = _maintenance.devices
+        .streamMaintenanceUntil(companyId, until)
+        .asyncMap(
+          (list) => _maintenance.withoutContract(
+            list.whereType<Device>().toList(),
+          ),
+        )
+        .listen((list) {
+          if (mounted) setState(() => _maintenances = list);
+        }, onError: (Object e) => debugPrint('Maintenances: $e'));
+  }
+
+  /// One sheet at a time: reading the phone or the last order takes a moment,
+  /// and the row is still there to be tapped.
+  Future<void> _openMaintenance(Device device) async {
+    if (_maintenanceBusy) return;
+    _maintenanceBusy = true;
+    try {
+      final action = await askMaintenanceAction(
+        context,
+        device,
+        canCreateOrder: _authService.canCreateOrder,
+        deviceLabel: context.read<SegmentConfigProvider>().device.toLowerCase(),
+      );
+      if (!mounted) return;
+      switch (action) {
+        case MaintenanceAction.callCustomer:
+          await callMaintenanceCustomer(context, device, service: _maintenance);
+        case MaintenanceAction.openOrder:
+          final saved = await openMaintenanceOrder(
+            context,
+            device,
+            service: _maintenance,
+          );
+          if (saved == true) ordersChanged.value++;
+        case MaintenanceAction.viewDevice:
+          await Navigator.of(context, rootNavigator: true).pushNamed(
+            '/device_detail',
+            arguments: {
+              'device': device,
+              'previousTitle': context.l10n.home,
+            },
+          );
+        case null:
+          break;
+      }
+    } finally {
+      _maintenanceBusy = false;
+    }
+  }
+
   void _changeView(HomeView view) {
     if (view == _view) return;
     HapticFeedback.selectionClick();
@@ -173,6 +244,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
     final notificationStore = Provider.of<NotificationStore>(context);
+    _watchMaintenances();
     FirebaseCrashlytics.instance.log("Abrindo home (Cupertino)");
 
     return Observer(
@@ -208,6 +280,8 @@ class _HomeState extends State<Home> {
             .pushNamed('/notifications'),
         leading: _buildWhatsAppNavButton(context),
         banner: _buildCourtesyBanner() ?? _buildWhatsAppBanner(),
+        maintenances: _maintenances,
+        onOpenMaintenance: _openMaintenance,
       ),
     );
   }

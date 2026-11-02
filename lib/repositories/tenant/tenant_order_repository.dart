@@ -560,6 +560,25 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     );
   }
 
+  /// The device's orders once, from both the current and the legacy field.
+  Future<List<Order>> getOrdersByDevice(
+    String companyId,
+    String deviceId,
+  ) async {
+    final lists = await Future.wait([
+      getQueryList(
+        companyId,
+        args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
+      ),
+      getQueryList(companyId, args: [QueryArgs('device.id', deviceId)]),
+    ]);
+    final byId = <String?, Order>{};
+    for (final order in lists.expand((list) => list).whereType<Order>()) {
+      byId[order.id] = order;
+    }
+    return byId.values.toList();
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // Child orders (generated from contract templates)
   // ═══════════════════════════════════════════════════════════════════

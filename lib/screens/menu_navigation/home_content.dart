@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/screens/widgets/glass_bar_button.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/menu_navigation/home_groups.dart';
 import 'package:praticos/screens/widgets/list_states.dart';
@@ -15,6 +16,9 @@ import 'package:praticos/theme/app_colors.dart';
 import 'package:praticos/theme/app_spacing.dart';
 import 'package:praticos/theme/app_typography.dart';
 import 'package:praticos/theme/status_style.dart';
+
+/// Rows of "Manutenções chegando" before "Ver mais".
+const _maintenancesShown = 3;
 
 /// Visual layer of the Início tab. It receives plain data and callbacks (no
 /// store, no Firebase), so every state can be tested in isolation. `Home`
@@ -52,6 +56,8 @@ class HomeContent extends StatefulWidget {
     this.onClearCustomerFilter,
     this.leading,
     this.banner,
+    this.maintenances = const [],
+    this.onOpenMaintenance,
     this.now,
   });
 
@@ -101,6 +107,10 @@ class HomeContent extends StatefulWidget {
   final Widget? leading;
   final Widget? banner;
 
+  /// "Manutenções chegando": devices due within a week or late, soonest first.
+  final List<Device> maintenances;
+  final ValueChanged<Device>? onOpenMaintenance;
+
   /// Clock, for tests.
   final DateTime Function()? now;
 
@@ -113,6 +123,7 @@ class _HomeContentState extends State<HomeContent> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   String _query = '';
+  bool _allMaintenances = false;
 
   DateTime get _now => (widget.now ?? DateTime.now)();
 
@@ -317,6 +328,13 @@ class _HomeContentState extends State<HomeContent> {
       slivers.add(SliverToBoxAdapter(child: _buildCustomerFilter(context)));
     }
 
+    if (widget.maintenances.isNotEmpty &&
+        widget.view.isOpenList &&
+        _query.isEmpty &&
+        widget.customerFilterName == null) {
+      slivers.add(SliverToBoxAdapter(child: _buildMaintenances(context)));
+    }
+
     final visit = _nextVisit;
     if (visit != null) {
       slivers.add(
@@ -412,6 +430,49 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
     return slivers;
+  }
+
+  /// "Manutenções chegando": a reminder, outside the order list. It shows the
+  /// first few so a busy month does not push the orders off the screen.
+  Widget _buildMaintenances(BuildContext context) {
+    final l10n = context.l10n;
+    final format = FormatService()..setLocale(l10n.localeName);
+    final all = widget.maintenances;
+    final shown = _allMaintenances ? all : all.take(_maintenancesShown);
+    final hidden = all.length - shown.length;
+    final today = DateTime(_now.year, _now.month, _now.day);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(l10n.maintenanceComing),
+        for (final device in shown)
+          AppListRow(
+            key: ValueKey('home_maintenance_${device.id}'),
+            title: device.name ?? '',
+            subtitle: device.nextMaintenanceCustomer?.name,
+            trailing: format.formatDate(device.nextMaintenance),
+            trailingStyle:
+                device.nextMaintenance?.isBefore(today) ?? false
+                ? AppTypography.body.copyWith(
+                    color: OrderStatusStyle.overdueColor.resolveFrom(context),
+                  )
+                : null,
+            onTap: widget.onOpenMaintenance == null
+                ? null
+                : () => widget.onOpenMaintenance!(device),
+          ),
+        if (hidden > 0)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageMargin,
+            ),
+            child: TextLink(
+              label: l10n.maintenanceShowMore(hidden),
+              onPressed: () => setState(() => _allMaintenances = true),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildSubtitle(BuildContext context, String text) {
