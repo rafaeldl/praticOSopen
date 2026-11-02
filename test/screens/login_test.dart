@@ -226,6 +226,8 @@ void main() {
       _app(_FakeAuthStore(), logEmailLoginOpened: () => opened++),
     );
     await tester.tap(find.byKey(const Key('login_email_link')));
+    // Two frames: a new route is offstage in the first one.
+    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(EmailLoginScreen), findsOneWidget);
     expect(opened, 1);
