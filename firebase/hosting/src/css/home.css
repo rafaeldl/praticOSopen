@@ -88,13 +88,12 @@
 .reels { margin-top: var(--space-xl); display: grid; gap: var(--space-xs); overflow-x: clip; }
 .reel { display: flex; width: 100%; overflow-x: auto; padding-inline: var(--page-gutter); scrollbar-width: none; }
 .reel::-webkit-scrollbar { display: none; }
-.reels.is-moving .reel { width: max-content; overflow: visible; padding-inline: 0; animation: reel 90s linear infinite; }
-.reels.is-moving .reel--back { animation-direction: reverse; }
-.reels.is-paused .reel { animation-play-state: paused; }
+.reels.is-moving .reel { padding-inline: 0; }
+.reel.is-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.reel.is-dragging a { cursor: grabbing; }
 @media (hover: hover) {
-  .reels:hover .reel { animation-play-state: paused; }
+  .reel { cursor: grab; }
 }
-@keyframes reel { to { transform: translateX(-50%); } }
 .trade { flex: none; padding-right: var(--space-xs); }
 .trade a { position: relative; display: block; text-decoration: none; }
 .trade img { width: 13rem; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-card); background: var(--color-paper-3); }
@@ -136,5 +135,4 @@
   .tabs button:active { transform: none; }
   .demo__row { transition: none; }
   .wave i { animation: none !important; }
-  .reels.is-moving .reel { animation: none; }
 }
