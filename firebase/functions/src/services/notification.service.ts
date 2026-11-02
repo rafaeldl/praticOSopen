@@ -268,6 +268,40 @@ export async function notifyCourtesyEnding(
 }
 
 /**
+ * Tell the company about the maintenances coming up: who manages devices, and
+ * the [technicians] of their last orders while they are still on the team.
+ * Throws when it could not reach them, so the daily job retries the company.
+ */
+export async function notifyMaintenanceDue(
+  companyId: string,
+  message: { title: string; body: string; count: number },
+  technicians: UserAggr[],
+): Promise<void> {
+  const recipients = await getPaymentNotificationRecipients(companyId, ['owner', 'admin', 'supervisor']);
+  if (recipients.length === 0) return;
+  const companyDoc = await db.collection('companies').doc(companyId).get();
+  const team = (companyDoc.data() as Company).users ?? [];
+  for (const technician of technicians) {
+    const known = recipients.some((r) => r.userId === technician.id);
+    if (!known && team.some((member) => member.user?.id === technician.id)) {
+      recipients.push({ userId: technician.id, name: technician.name });
+    }
+  }
+  const delivery = await sendNotification(
+    recipients,
+    {
+      title: message.title,
+      body: message.body,
+      data: { type: 'maintenance_due', count: String(message.count), companyId },
+    },
+    companyId,
+  );
+  if (delivery.pushFailed || delivery.saved === 0) {
+    throw new Error('maintenance notice not delivered');
+  }
+}
+
+/**
  * Notify owner/admin/manager that an Asaas payment was booked on an order.
  * Never throws: a failed push must not fail the webhook.
  */

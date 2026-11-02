@@ -23,10 +23,17 @@ export interface CourtesyMessage {
 const PORTUGUESE = ['BR', 'PT', 'AO', 'MZ'];
 const SPANISH = ['ES', 'MX', 'AR', 'CL', 'CO', 'PE', 'UY', 'PY', 'BO', 'EC', 'VE', 'CR', 'PA', 'DO', 'GT', 'HN', 'SV', 'NI'];
 
-/** Text of the push, in the company's language (no country: pt; unknown: en). */
+/** Language of a company's pushes (no country: pt; unknown: en). */
+export function companyLanguage(country: string | undefined): 'pt' | 'es' | 'en' {
+  if (!country || PORTUGUESE.includes(country)) return 'pt';
+  return SPANISH.includes(country) ? 'es' : 'en';
+}
+
+/** Text of the push, in the company's language. */
 export function courtesyMessage(days: number, aiUsed: number, country: string | undefined): CourtesyMessage {
   const free = AI_REQUESTS_PER_MONTH.free;
-  if (!country || PORTUGUESE.includes(country)) {
+  const language = companyLanguage(country);
+  if (language === 'pt') {
     return {
       days,
       title: `Sua cortesia do Pro acaba em ${days === 1 ? '1 dia' : `${days} dias`}`,
@@ -35,7 +42,7 @@ export function courtesyMessage(days: number, aiUsed: number, country: string | 
         : 'Depois disso, o app volta para o plano Free. Escolha seu plano no app.',
     };
   }
-  if (SPANISH.includes(country)) {
+  if (language === 'es') {
     return {
       days,
       title: `Tu cortesía Pro termina en ${days === 1 ? '1 día' : `${days} días`}`,

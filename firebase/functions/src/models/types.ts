@@ -147,6 +147,12 @@ export interface Device extends DeviceAggr {
   manufacturer?: string;
   category?: string;
   description?: string;
+  /** Day of the next maintenance, `YYYY-MM-DD`. A reminder only. */
+  nextMaintenanceDate?: string;
+  /** Who the maintenance is for: the order's customer when it was set. */
+  nextMaintenanceCustomer?: { id: string; name: string };
+  /** Day the daily job already told the company about. */
+  nextMaintenanceNoticeFor?: string;
   company: CompanyAggr;
   createdAt: DateValue;
   createdBy: UserAggr;

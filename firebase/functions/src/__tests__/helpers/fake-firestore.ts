@@ -41,12 +41,14 @@ function getField(data: Data | undefined, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, key) => (isPlainObject(acc) ? acc[key] : undefined), data);
 }
 
-/** Firestore filter semantics used by the tests: ==, in, array-contains and numeric > (numbers only). */
+/** Firestore filter semantics used by the tests: ==, in, array-contains, numeric > and text >= / <=. */
 function matches(actual: unknown, op: string, value: unknown): boolean {
   if (op === '==') return actual === value;
   if (op === 'array-contains') return Array.isArray(actual) && actual.includes(value);
   if (op === 'in') return Array.isArray(value) && value.includes(actual);
   if (op === '>') return typeof actual === 'number' && typeof value === 'number' && actual > value;
+  if (op === '>=') return typeof actual === 'string' && typeof value === 'string' && actual >= value;
+  if (op === '<=') return typeof actual === 'string' && typeof value === 'string' && actual <= value;
   throw new Error(`FakeQuery: unsupported operator ${op}`);
 }
 
