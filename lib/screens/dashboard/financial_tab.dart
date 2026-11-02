@@ -95,10 +95,23 @@ class _FinancialTabState extends State<FinancialTab> {
   /// share sheet): a second tap is ignored so no duplicate charge is made.
   bool _sendingCharge = false;
 
+  /// Whether the tab was on screen; tabs stay alive while hidden.
+  bool? _onScreen;
+
   @override
   void initState() {
     super.initState();
     _store.load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Orders change on other tabs (completed, paid): coming back must not
+    // show the old numbers.
+    final onScreen = TickerMode.of(context);
+    if (_onScreen == false && onScreen) _store.refresh();
+    _onScreen = onScreen;
   }
 
   // ── Navigation ──────────────────────────────────────────────────
@@ -333,10 +346,12 @@ class _FinancialTabState extends State<FinancialTab> {
     _openList(
       title: l10n.financialReceivable,
       subtitle: (summary) => l10n.financialReceivableSummary(
-        format.formatCurrency(summary.owed),
-        summary.debtors.length,
+        format.formatCurrency(summary.receivable),
+        summary.receivableCustomers,
       ),
       rows: (summary) => [
+        if (summary.depositOrders.isNotEmpty && summary.debtors.isNotEmpty)
+          SectionLabel(l10n.financialReceivableCompleted),
         for (final debtor in summary.debtors)
           AppListRow(
             key: ValueKey('debtor-${debtor.key}'),
@@ -348,6 +363,17 @@ class _FinancialTabState extends State<FinancialTab> {
               format.formatDayMonthOrDate(debtor.since),
             ),
             onTap: () => _openDebtor(debtor),
+          ),
+        if (summary.depositOrders.isNotEmpty)
+          SectionLabel(l10n.financialReceivableOpen),
+        for (final order in summary.depositOrders)
+          _orderRow(
+            order,
+            amount: FinancialSummary.openAmount(order),
+            subtitle: l10n.financialOrderSince(
+              order.number ?? 0,
+              format.formatDayMonthOrDate(order.createdAt),
+            ),
           ),
       ],
       emptyMessage: l10n.financialEmptyReceivable,
@@ -574,7 +600,7 @@ class _FinancialTabState extends State<FinancialTab> {
                   title: l10n.financialReceivable,
                   valueBesideTitle: true,
                   horizontalPadding: AppSpacing.lg,
-                  trailing: format.formatCurrency(summary.owed),
+                  trailing: format.formatCurrency(summary.receivable),
                   onTap: _openReceivable,
                 ),
                 AppListRow(

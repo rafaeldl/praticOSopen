@@ -7,23 +7,58 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/widgets/app_form_field.dart';
 import 'package:praticos/services/format_service.dart';
 
-/// Input formatter that treats typed digits as the smallest currency unit
-/// (typing 1 2 3 4 5 gives 123,45) and formats with the locale currency.
+/// Input formatter that reads what is typed as a plain amount: 250 is 250
+/// and 250,5 is 250,50, as anyone writes a price. The decimal separator of
+/// [format] opens the cents; the digits are formatted with the locale
+/// currency as they come in.
 class MoneyInputFormatter extends TextInputFormatter {
   MoneyInputFormatter(this.format);
 
   final NumberFormat format;
 
+  /// Longest whole part accepted, so the amount stays a safe number.
+  static const _maxWholeDigits = 12;
+
   int get _digits => format.decimalDigits ?? 2;
+  String get _separator => format.symbols.DECIMAL_SEP;
 
   /// Text shown for [value] in the field.
   String textFor(double value) => format.format(value);
 
-  /// Amount represented by [text] (any text that holds the typed digits).
+  /// Amount represented by [text] (the field text or just the typed digits).
   double valueOf(String text) {
-    final digits = text.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return 0;
-    return int.parse(digits) / math.pow(10, _digits);
+    final (whole, cents) = _parts(text);
+    if (whole.isEmpty && cents == null) return 0;
+    final number = '${whole.isEmpty ? '0' : whole}.${cents ?? ''}0';
+    return double.parse(number);
+  }
+
+  /// Whole digits and typed cents of [text]; cents are null until the
+  /// separator shows up.
+  (String, String?) _parts(String text) {
+    final clean = text.replaceAll(format.currencySymbol, '');
+    final at = _digits == 0 ? -1 : clean.lastIndexOf(_separator);
+    String digits(String value) => value.replaceAll(RegExp(r'\D'), '');
+    if (at < 0) return (digits(clean), null);
+    final cents = digits(clean.substring(at + 1));
+    return (
+      digits(clean.substring(0, at)),
+      cents.substring(0, math.min(cents.length, _digits)),
+    );
+  }
+
+  /// [whole] and [cents] in the locale currency, with only the cents typed.
+  String _render(String whole, String? cents) {
+    final amount = whole.isEmpty ? 0 : int.parse(whole);
+    final full = format.format(amount);
+    if (_digits == 0) return full;
+    final zeros = '$_separator${'0' * _digits}';
+    final at = full.lastIndexOf(zeros);
+    return full.replaceRange(
+      at,
+      at + zeros.length,
+      cents == null ? '' : '$_separator$cents',
+    );
   }
 
   @override
@@ -31,14 +66,37 @@ class MoneyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) {
-      return const TextEditingValue();
+    var text = newValue.text.replaceAll(format.currencySymbol, '').trim();
+    if (text.isEmpty) return const TextEditingValue();
+    // The keyboard follows the device, not the app: a final dot or comma is
+    // always the separator, never a thousands mark.
+    if (text.endsWith('.') || text.endsWith(',')) {
+      text = '${text.substring(0, text.length - 1)}$_separator';
     }
-    final text = textFor(valueOf(digits));
+    var (whole, cents) = _parts(text);
+    // Deleted only the symbol or a space: delete the last typed character.
+    if (newValue.text.length < oldValue.text.length &&
+        (whole, cents) == _parts(oldValue.text)) {
+      if (cents == null) {
+        whole = whole.substring(0, math.max(whole.length - 1, 0));
+      } else if (cents.isEmpty) {
+        cents = null;
+      } else {
+        cents = cents.substring(0, cents.length - 1);
+      }
+    }
+    if (whole.isEmpty && cents == null) return const TextEditingValue();
+    whole = whole.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+    if (whole.length > _maxWholeDigits) return oldValue;
+    final rendered = _render(whole, cents);
+    // Keeps the caret before a trailing symbol (1.250 €).
+    final symbol = rendered.lastIndexOf(format.currencySymbol);
+    final caret = symbol > 0 && rendered.trim().endsWith(format.currencySymbol)
+        ? rendered.substring(0, symbol).trimRight().length
+        : rendered.length;
     return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
+      text: rendered,
+      selection: TextSelection.collapsed(offset: caret),
     );
   }
 }
@@ -113,7 +171,7 @@ class _MoneyFieldState extends State<MoneyField> {
       placeholder: widget.placeholder ?? formatter.textFor(0),
       hint: widget.hint,
       autofocus: widget.autofocus,
-      keyboardType: TextInputType.number,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [formatter],
       validator: widget.validator == null
           ? null

@@ -133,11 +133,11 @@
           },
           {
             "title": "A receber",
-            "description": "O que falta receber das OS concluídas, por cliente, de qualquer mês. Toque no nome para receber."
+            "description": "O que falta receber, de qualquer mês: serviços concluídos, por cliente, e serviços em aberto que já têm sinal. Toque na linha para receber ou abrir a OS."
           },
           {
             "title": "Em andamento",
-            "description": "O saldo das OS aprovadas e em andamento. Quando a OS é concluída, o valor passa para A receber."
+            "description": "O saldo das OS aprovadas e em andamento sem nenhum pagamento. Com o primeiro pagamento ou ao concluir a OS, o valor passa para A receber."
           },
           {
             "title": "Próxima cobrança",
@@ -416,11 +416,11 @@
           },
           {
             "title": "To receive",
-            "description": "What is left to receive on completed orders, by customer, from any month. Tap a name to receive."
+            "description": "What is left to receive, from any month: completed jobs, by customer, and open jobs that already have a deposit. Tap a row to receive or open the order."
           },
           {
             "title": "In progress",
-            "description": "The balance of approved and running orders. When an order is completed, it moves to To receive."
+            "description": "The balance of approved and running orders with no payment yet. With the first payment or when the order is completed, it moves to To receive."
           },
           {
             "title": "Next charge",
@@ -699,11 +699,11 @@
           },
           {
             "title": "Por cobrar",
-            "description": "Lo que falta cobrar de las OS concluidas, por cliente, de cualquier mes. Toca el nombre para cobrar."
+            "description": "Lo que falta cobrar, de cualquier mes: servicios terminados, por cliente, y servicios en curso que ya tienen anticipo. Toca la fila para cobrar o abrir la OS."
           },
           {
             "title": "En curso",
-            "description": "El saldo de las OS aprobadas y en curso. Cuando la OS se concluye, el valor pasa a Por cobrar."
+            "description": "El saldo de las OS aprobadas y en curso sin ningún pago. Con el primer pago o al concluir la OS, el valor pasa a Por cobrar."
           },
           {
             "title": "Próximo cobro",

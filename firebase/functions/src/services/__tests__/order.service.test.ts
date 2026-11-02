@@ -2,10 +2,14 @@ jest.mock('uuid', () => ({ v4: () => 'txn-1' }));
 
 const mockTxGet = jest.fn();
 const mockTxUpdate = jest.fn();
+const mockGetDocument = jest.fn();
+const mockUpdateDocument = jest.fn();
 const mockOrderRef = { id: 'order1' };
 
 jest.mock('../firestore.service', () => ({
   getTenantCollection: jest.fn(() => ({ doc: jest.fn(() => mockOrderRef) })),
+  getDocument: (...args: unknown[]) => mockGetDocument(...args),
+  updateDocument: (...args: unknown[]) => mockUpdateDocument(...args),
   runTransaction: jest.fn((fn: (tx: unknown) => Promise<unknown>) =>
     fn({ get: mockTxGet, update: mockTxUpdate })
   ),
@@ -16,6 +20,7 @@ import {
   PaymentValidationError,
   applyPaymentTransaction,
   calculateRemainingBalance,
+  updateOrder,
 } from '../order.service';
 import { Order, PaymentTransaction, UserAggr } from '../../models/types';
 
@@ -129,6 +134,42 @@ describe('applyPaymentTransaction', () => {
     );
     expect(result.paidAmount).toBe(0.3);
     expect(result.payment).toBe('paid');
+  });
+});
+
+describe('updateOrder', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('mudar a situação recalcula payment e paid', async () => {
+    mockGetDocument.mockResolvedValue({ status: 'quote', total: 100, paidAmount: 100 });
+
+    await updateOrder('comp1', 'order1', { status: 'approved' }, user);
+
+    expect(mockUpdateDocument).toHaveBeenCalledWith(
+      expect.anything(),
+      'order1',
+      expect.objectContaining({ status: 'approved', done: false, paid: true, payment: 'paid' }),
+    );
+  });
+
+  it('cancelar tira a situação de pagamento', async () => {
+    mockGetDocument.mockResolvedValue({ status: 'approved', total: 100, paidAmount: 0 });
+
+    await updateOrder('comp1', 'order1', { status: 'canceled' }, user);
+
+    expect(mockUpdateDocument).toHaveBeenCalledWith(
+      expect.anything(),
+      'order1',
+      expect.objectContaining({ paid: false, payment: null }),
+    );
+  });
+
+  it('sem mudar a situação, não mexe em pagamento', async () => {
+    mockGetDocument.mockResolvedValue({ status: 'approved', total: 100, paidAmount: 100 });
+
+    await updateOrder('comp1', 'order1', { scheduledDate: null }, user);
+
+    expect(mockUpdateDocument.mock.calls[0][2]).not.toHaveProperty('payment');
   });
 });
 

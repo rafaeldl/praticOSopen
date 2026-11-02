@@ -2832,6 +2832,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialToday => 'Today';
 
   @override
+  String get financialReceivableCompleted => 'Completed jobs';
+
+  @override
+  String get financialReceivableOpen => 'Open jobs';
+
+  @override
   String get financialNextCharge => 'Next charge';
 
   @override
@@ -6028,4 +6034,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courtesyBannerLater => 'Not now';
+
+  @override
+  String get filterQuotes => 'Quotes';
+
+  @override
+  String homeQuotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count quotes waiting for an answer',
+      one: '1 quote waiting for an answer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noQuotesWaiting => 'No quotes waiting for an answer.';
+
+  @override
+  String ratingsEmptyHint(String order) {
+    return 'A rating arrives when the customer scores the $order through its link, once it is done. To ask for one, open a completed $order and send the customer the link.';
+  }
+
+  @override
+  String noticesEmptyHint(String order) {
+    return 'This is where you see what happens in your $order: customer approvals, comments, ratings and payments. Reminders of scheduled times go straight to your phone.';
+  }
+
+  @override
+  String get noticesRemindersLink => 'Adjust reminders';
+
+  @override
+  String reminderWillNotify(String time) {
+    return 'The app reminds you $time before.';
+  }
+
+  @override
+  String get reminderIsOff => 'Reminder turned off.';
+
+  @override
+  String get reminderPhoneBlocked =>
+      'Notifications are off in your phone\'s Settings.';
+
+  @override
+  String get reminderAdjust => 'Adjust';
+
+  @override
+  String reminderNotificationTitle(String time) {
+    return 'Scheduled at $time';
+  }
+
+  @override
+  String get notificationPromptTitle => 'PraticOS notifications';
+
+  @override
+  String get notificationPromptMessage =>
+      'The app reminds you before each scheduled time and tells you when a customer approves a quote. Your phone will ask if it can send these notifications.';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get checklistOfferTitle => 'Fill in the check-in checklist?';
+
+  @override
+  String checklistOfferMessage(String device) {
+    return 'Record how $device arrived, before you start the work.';
+  }
+
+  @override
+  String get checklistOfferAction => 'Fill in checklist';
+
+  @override
+  String get moreContractsSubtitle => 'Maintenance that repeats on its own';
+
+  @override
+  String get contractsOffQuestion =>
+      'Do you have regular customers or repeat maintenance?';
+
+  @override
+  String contractsOffMessage(String order) {
+    return 'With contracts you set it up once, say every 6 months, and the app takes care of the next $order on the right date.';
+  }
+
+  @override
+  String get contractsOffAction => 'Use contracts';
 }

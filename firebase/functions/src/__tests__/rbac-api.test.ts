@@ -24,11 +24,13 @@ jest.mock('../services/order.service', () => ({
   ...jest.requireActual('../services/order.service'),
   listOrders: jest.fn(async () => ({ data: [], total: 0, hasMore: false })),
   getOrder: jest.fn(async (_c: string, id: string) => ({
-    id, number: 1, status: 'approved', total: 100, discount: 0, paidAmount: 0,
+    // `quote_`, `done_` and `ownquote_` set the status; every other order is approved.
+    id, number: 1, status: /^(own)?quote_/.test(id) ? 'quote' : id.startsWith('done_') ? 'done' : 'approved',
+    total: 100, discount: 0, paidAmount: 0,
     customer: { id: 'cust1', name: 'Ana', phone: '+5511999990000' },
     services: [{ service: { id: 's1', name: 'Polimento', value: 80 }, value: 100 }],
     // `own_<uid>` is an order created by that user; any other id, by someone else.
-    createdBy: id.startsWith('own_') ? { id: id.slice(4), name: 'Own' } : { id: 'ghost', name: 'Ghost' },
+    createdBy: /^own(quote)?_/.test(id) ? { id: id.replace(/^own(quote)?_/, ''), name: 'Own' } : { id: 'ghost', name: 'Ghost' },
   })),
   createOrder: jest.fn(async () => ({ id: 'new1', number: 2, status: 'quote' })),
   updateOrder: jest.fn(async () => true),
@@ -273,8 +275,8 @@ describe('Consultant and technician on the orders they created', () => {
     it(`${role}: opens, edits and shares their own order`, async () => {
       const results = {
         get: (await call('get', `/v1/app/orders/${id}`)).status,
-        patch: (await call('patch', `/v1/app/orders/${id}`, { status: 'progress' })).status,
-        service: (await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1' })).status,
+        patch: (await call('patch', `/v1/app/orders/${id}`, { scheduledDate: '2026-11-02T10:00:00Z' })).status,
+        service: (await call('post', `/v1/app/orders/ownquote_${UID[role]}/services`, { serviceId: 's1' })).status,
         shareCreate: (await call('post', `/v1/app/orders/${id}/share`, { permissions: ['view'] })).status,
         shareList: (await call('get', `/v1/app/orders/${id}/share`)).status,
         shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/t1`)).status,
@@ -285,6 +287,18 @@ describe('Consultant and technician on the orders they created', () => {
     it(`${role}: cannot set their own price (no editPrices)`, async () => {
       const res = await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1', value: 1 });
       expect(res.status).toBe(403);
+    });
+
+    it(`${role}: follows the app on the status of their own order`, async () => {
+      const finish = await call('patch', `/v1/app/orders/${id}`, { status: 'done' });
+      const approve = await call('patch', `/v1/app/orders/ownquote_${UID[role]}`, { status: 'approved' });
+      const cancel = await call('patch', `/v1/app/orders/${id}`, { status: 'canceled' });
+      expect([finish.status, approve.status, cancel.status]).toEqual([role === 'technician' ? 200 : 403, 200, 403]);
+    });
+
+    it(`${role}: edits items on approved orders only if consultant`, async () => {
+      const res = await call('post', `/v1/app/orders/${id}/services`, { serviceId: 's1' });
+      expect(res.status).toBe(role === 'consultant' ? 200 : 403);
     });
   }
 

@@ -204,7 +204,7 @@ void main() {
     expect(find.text('Quita a OS.'), findsOneWidget);
     await tester.enterText(
       find.byKey(const Key('receiveAmountField')),
-      '30000',
+      '300',
     );
     await tester.pump();
     expect(
@@ -218,7 +218,7 @@ void main() {
     await openSheet(tester);
     await tester.enterText(
       find.byKey(const Key('receiveAmountField')),
-      '20000',
+      '200',
     );
     await tester.pump();
     expect(find.textContaining('Passa do que falta'), findsOneWidget);

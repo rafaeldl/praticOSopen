@@ -30,6 +30,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
 import 'package:praticos/global.dart';
 import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/services/order_reminder_text.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/utils/financial_summary.dart';
 part 'order_store.g.dart';
@@ -514,7 +515,7 @@ abstract class _OrderStore with Store {
     order!.scheduledDate = date;
     scheduledDate = FormatService().formatDateTime(date);
     createItem();
-    _scheduleReminder(reminderStore);
+    scheduleReminder(reminderStore);
   }
 
   @action
@@ -734,21 +735,21 @@ abstract class _OrderStore with Store {
     }
   }
 
-  /// Schedule a local reminder for the current order
-  void _scheduleReminder(ReminderStore? reminderStore) {
+  /// Schedule a local reminder for the current order. A new order only has
+  /// an id after "✓", so the new order screen calls this once it is saved.
+  void scheduleReminder(ReminderStore? reminderStore) {
     final orderId = order?.id;
     final date = order?.scheduledDate;
     final minutes = reminderStore?.reminderMinutes ?? 0;
     if (orderId == null || date == null || minutes <= 0) return;
 
-    final orderNumber = order?.number?.toString() ?? '';
-    final customerName = order?.customer?.name ?? '';
+    final text = OrderReminderText.of(order!);
     final companyId = Global.companyAggr?.id;
 
     NotificationService.instance.scheduleOrderReminder(
       orderId: orderId,
-      title: 'Agendamento em breve',
-      body: 'OS #$orderNumber - $customerName',
+      title: text.title,
+      body: text.body,
       scheduledDate: date,
       minutesBefore: minutes,
       companyId: companyId,

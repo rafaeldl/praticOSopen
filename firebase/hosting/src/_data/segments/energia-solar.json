@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Integrador Solar | PraticOS",
     "ogDescription": "Instalações solares no celular: a IA abre a OS pelo que você fala, o sistema fica com kWp e nº do inversor, e os checklists de segurança e comissionamento vão com fotos.",
     "hero": {
-      "title": "Do telhado ao inversor,",
-      "titleMark": "tudo na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para integradores e instaladores de energia solar. Registre o sistema com potência e nº do inversor, faça os checklists de segurança e de comissionamento com fotos, mande o orçamento por link e registre o pagamento — pelo celular.",
+      "title": "Menos volta ao telhado.",
+      "titleMark": "Mais dinheiro recebido.",
+      "lede": "O app de energia solar para integradores e instaladores que deixa cada sistema, com potência e número do inversor, sempre à mão. O cliente aprova pelo link, e entrada e saldo não ficam esquecidos.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,97 +54,94 @@
       }
     },
     "problems": {
-      "title": "Onde o integrador solar perde dinheiro",
+      "title": "O dinheiro que o integrador solar deixa na mesa",
       "lede": "A venda fechou. O prejuízo aparece depois: a visita que volta porque faltou foto, a medição que ninguém anotou e a parcela que ninguém cobrou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
-          "problem": "Orçamento em PDF solto",
+          "problem": "Qual proposta o cliente aprovou?",
           "detail": "Houve três versões da proposta, e ninguém sabe qual o cliente aprovou.",
-          "answer": "O orçamento fica na OS, com equipamentos e mão de obra do seu catálogo. O cliente aprova pelo link e a aprovação fica registrada."
+          "answer": "Uma OS só, com equipamentos e mão de obra do seu catálogo. O cliente aprova pelo link e acaba a dúvida."
         },
         {
-          "problem": "Comissionamento sem registro",
+          "problem": "Sistema entregue sem prova",
           "detail": "Meses depois, o cliente diz que o sistema gera pouco e não há anotação de como ele foi entregue.",
-          "answer": "O checklist de comissionamento registra a potência em kWp, a tensão e a corrente CC da string principal e fotos do inversor e dos quadros."
+          "answer": "Potência em kWp, tensão e corrente CC da string principal e fotos do inversor guardadas. Você mostra como entregou o sistema."
         },
         {
           "problem": "Equipe no telhado sem conferência",
           "detail": "Ninguém sabe se o EPI e a linha de vida foram checados antes de subir.",
-          "answer": "O checklist de segurança NR10/NR35 pede EPI, ancoragem, desligamento CC/CA e foto da área antes do serviço."
+          "answer": "EPI, ancoragem, desligamento CC/CA e foto da área conferidos no checklist NR10/NR35 antes de começar."
         },
         {
           "problem": "Cliente ligando para saber da obra",
           "detail": "“Quando vocês instalam?” “Já está gerando?”",
-          "answer": "O cliente abre a OS pelo link e vê o status — em instalação ou gerando — com as fotos do serviço."
+          "answer": "O cliente abre o link e vê o andamento, em instalação ou gerando, com as fotos do serviço. Menos ligação para você."
         },
         {
           "problem": "Pós-venda sem histórico",
           "detail": "O cliente chama para manutenção e ninguém acha o número do inversor.",
-          "answer": "Cada sistema guarda potência, quantidade de placas, data de instalação e nº do inversor. Busque pelo número ou pelo cliente na lista de OS."
+          "answer": "Potência, placas, data de instalação e número do inversor sempre à mão. Busque pelo número ou pelo cliente."
         },
         {
           "problem": "Parcela esquecida",
           "detail": "Entrada paga, saldo na conclusão — e no fim do mês ninguém sabe quem ainda deve.",
-          "answer": "Receba a entrada e o saldo como pagamentos em partes na OS. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança."
+          "answer": "Entrada e saldo sob controle. Você vê quanto falta receber e de quem, e manda a cobrança dali mesmo."
         }
       ]
     },
     "workflow": {
-      "title": "Como uma instalação passa pelo PraticOS",
-      "lede": "Do orçamento ao sistema gerando, cada etapa fica registrada na OS do cliente.",
+      "title": "Do orçamento ao sistema gerando, sem ponta solta",
+      "lede": "Agenda em dia, cliente aprovando, entrega com prova e saldo recebido.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale a instalação e a IA abre a OS",
+          "title": "Fale a instalação, a IA abre a OS",
+          "tab": "Falar",
           "text": "Toque em Falar: “Sistema do Paulo, 12 placas de 550, inversor de 6 kW, instalação dia 20”. A IA preenche cliente, equipamentos e mão de obra com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “a mão de obra é 2.500”",
             "Ou tire foto do pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "A instalação na agenda",
+          "title": "Instalação marcada, lembrete no celular",
+          "tab": "Agendar",
           "text": "Com a data na OS, a instalação entra na Agenda, e o celular avisa antes do horário. Manutenção e limpeza de placas entram do mesmo jeito.",
           "facts": [
             "Semana no topo, atendimentos do dia embaixo",
             "Lembrete no celular antes do horário",
             "Resumo do dia às 9h, se você quiser"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda com a semana no topo e os atendimentos marcados no dia"
+          ]
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo link",
+          "tab": "Aprovar",
           "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê os itens e valores, aprova e deixa comentários. Depois, acompanha a situação: em instalação, gerando.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O sim do cliente fica guardado",
             "O cliente comenta direto na OS, sem ligar",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+          ]
         },
         {
           "number": "04",
-          "title": "Instale com checklist",
+          "title": "Instale sem esquecer nada",
+          "tab": "Instalar",
           "text": "Segurança NR10/NR35 antes de subir, comissionamento ao ligar, entrega e orientações no final. Os modelos vêm prontos e você ajusta os itens.",
           "facts": [
             "Tensão e corrente CC da string principal",
             "Fotos do inversor e dos quadros",
-            "Monitoramento configurado e orientações repassadas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido com fotos dentro de uma OS"
+            "Monitoramento pronto e orientações repassadas"
+          ]
         },
         {
           "number": "05",
           "title": "Entregue e receba",
+          "tab": "Receber",
           "text": "Registre a entrada e o saldo como pagamentos em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -157,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem instala energia solar",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que o instalador solar quer saber antes de começar",
+      "lede": "Não achou a sua? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -192,9 +189,9 @@
     "ogTitle": "Solar Installer Software | PraticOS",
     "ogDescription": "Solar installs on your phone: AI opens the work order from what you say, the system gets its kWp and inverter serial, and the safety and commissioning checklists get photos.",
     "hero": {
-      "title": "From roof to inverter,",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for solar installers. Log the system with its size and inverter serial, run the safety and commissioning checklists with photos, send the quote as a link and record the payment — all from your phone.",
+      "title": "Fewer trips back to the roof.",
+      "titleMark": "More money collected.",
+      "lede": "The solar installation app that keeps every system, with its size and inverter serial, close at hand. Customers approve by link, and deposits and balances don't get forgotten.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -237,97 +234,94 @@
       }
     },
     "problems": {
-      "title": "Where a solar installer loses money",
+      "title": "The money solar installers leave on the table",
       "lede": "The sale closed. The losses show up later: the return trip because a photo was missing, the reading nobody wrote down and the balance nobody collected.",
       "answerLabel": "In PraticOS",
       "items": [
         {
-          "problem": "Quotes as loose PDFs",
+          "problem": "Which proposal did they approve?",
           "detail": "There were three versions of the proposal and nobody knows which one the customer approved.",
-          "answer": "The quote lives on the work order, with equipment and labor from your catalog. The customer approves it by link and the approval is recorded."
+          "answer": "One work order, with equipment and labor from your catalog. The customer approves by link and the doubt is gone."
         },
         {
-          "problem": "Commissioning with no record",
+          "problem": "System handed over with no proof",
           "detail": "Months later the customer says the system underperforms, and there's no note of how it was handed over.",
-          "answer": "The commissioning checklist records system size in kWp, DC voltage and current on the main string and photos of the inverter and panels."
+          "answer": "System size in kWp, DC voltage and current on the main string and inverter photos on file. You can show how you handed the system over."
         },
         {
           "problem": "Crew on the roof with no check",
           "detail": "Nobody knows whether PPE and the lifeline were checked before going up.",
-          "answer": "The safety checklist asks for PPE, anchorage, DC/AC shutdown and a photo of the work area before the job starts."
+          "answer": "PPE, anchorage, DC/AC shutdown and a work area photo checked on the safety checklist before you start."
         },
         {
           "problem": "Customers calling about the job",
           "detail": "“When are you installing?” “Is it generating yet?”",
-          "answer": "The customer opens the work order from a link and sees the status — installing or generating — with the job photos."
+          "answer": "The customer opens the link and sees where things stand, installing or generating, with the job photos. Fewer calls for you."
         },
         {
           "problem": "After-sales with no history",
           "detail": "The customer calls for service and nobody can find the inverter serial.",
-          "answer": "Each system keeps its size, panel count, install date and inverter serial. Search the work order list by serial or customer."
+          "answer": "Size, panel count, install date and inverter serial close at hand. Search by serial or customer."
         },
         {
           "problem": "The forgotten balance",
           "detail": "Deposit paid, balance due on completion — and at month end nobody knows who still owes you.",
-          "answer": "Record the deposit and the balance as partial payments on the work order. Financial shows how much is left to collect and from whom, with a button to send the payment request."
+          "answer": "Deposit and balance under control. See what's left to collect and from whom, and send the payment request right there."
         }
       ]
     },
     "workflow": {
-      "title": "How an install moves through PraticOS",
-      "lede": "From quote to generating, every step is recorded on the customer's work order.",
+      "title": "From quote to generating, no loose ends",
+      "lede": "Schedule under control, customer approving, handover on record and balance collected.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the install and AI opens the order",
+          "title": "Say the install, AI opens the order",
+          "tab": "Speak",
           "text": "Tap Speak: “Paulo’s system, 12 panels of 550 W, 6 kW inverter, install on the 20th.” AI fills in the customer, equipment and labor with the prices from your catalog. You check it and save.",
           "facts": [
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “labor is 2,500”",
             "Or take a photo of the written request"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "The install on the schedule",
+          "title": "Install booked, reminder on your phone",
+          "tab": "Schedule",
           "text": "With a date on the work order, the install goes on the Schedule, and your phone reminds you before the appointment. Maintenance and panel cleaning go in the same way.",
           "facts": [
             "The week on top, the day’s appointments below",
             "Phone reminder before the appointment",
             "Daily summary at 9 a.m., if you want it"
-          ],
-          "image": "agenda.png",
-          "alt": "Schedule with the week on top and the appointments booked for the day"
+          ]
         },
         {
           "number": "03",
-          "title": "Send the quote by link",
+          "title": "Customer approves by link",
+          "tab": "Approve",
           "text": "The customer opens the work order in the browser, with nothing to install. They see items and prices, approve and leave comments. Then they follow the status: installing, generating.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes stays on file",
             "The customer comments right on the order, no call needed",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+          ]
         },
         {
           "number": "04",
-          "title": "Install with a checklist",
+          "title": "Install with nothing forgotten",
+          "tab": "Install",
           "text": "Safety before going up, commissioning at power-on, handover and guidance at the end. The templates come ready and you adjust the items.",
           "facts": [
             "DC voltage and current of the main string",
             "Photos of the inverter and panels",
             "Monitoring set up and guidance given"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in with photos inside a work order"
+          ]
         },
         {
           "number": "05",
           "title": "Deliver and get paid",
+          "tab": "Get paid",
           "text": "Record the deposit and the balance as partial payments, with a discount if needed. Financial shows how much is left to collect and from whom.",
           "facts": [
             "Partial payments and discounts in the same order",
@@ -340,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from solar installers",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What solar installers want to know first",
+      "lede": "Don't see yours? Send us an email. The PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -375,9 +369,9 @@
     "ogTitle": "Sistema para Instalador Solar | PraticOS",
     "ogDescription": "Instalaciones solares en el celular: la IA abre la OS con lo que dices, el sistema queda con kWp y n.º del inversor, y los checklists de seguridad y puesta en marcha van con fotos.",
     "hero": {
-      "title": "Del techo al inversor,",
-      "titleMark": "todo en la misma orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para integradores e instaladores de energía solar. Registra el sistema con potencia y n.º del inversor, haz los checklists de seguridad y puesta en marcha con fotos, envía el presupuesto por link y registra el pago — desde el celular.",
+      "title": "Menos vueltas al techo.",
+      "titleMark": "Más dinero cobrado.",
+      "lede": "La app de energía solar para integradores e instaladores que deja cada sistema, con potencia y número del inversor, siempre a mano. El cliente aprueba por link, y anticipo y saldo no se olvidan.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -420,97 +414,94 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el instalador solar",
+      "title": "El dinero que el instalador solar deja sobre la mesa",
       "lede": "La venta se cerró. La pérdida aparece después: la visita que se repite porque faltó una foto, la medición que nadie anotó y la cuota que nadie cobró.",
       "answerLabel": "En PraticOS",
       "items": [
         {
-          "problem": "Presupuestos en PDF sueltos",
+          "problem": "¿Qué propuesta aprobó el cliente?",
           "detail": "Hubo tres versiones de la propuesta y nadie sabe cuál aprobó el cliente.",
-          "answer": "El presupuesto queda en la orden, con equipos y mano de obra de tu catálogo. El cliente lo aprueba por link y la aprobación queda registrada."
+          "answer": "Una sola orden, con equipos y mano de obra de tu catálogo. El cliente aprueba por link y se acaba la duda."
         },
         {
-          "problem": "Puesta en marcha sin registro",
+          "problem": "Sistema entregado sin prueba",
           "detail": "Meses después, el cliente dice que el sistema genera poco y no hay anotación de cómo se entregó.",
-          "answer": "El checklist de puesta en marcha registra la potencia en kWp, la tensión y la corriente CC del string principal y fotos del inversor y los tableros."
+          "answer": "Potencia en kWp, tensión y corriente CC del string principal y fotos del inversor guardadas. Puedes mostrar cómo entregaste el sistema."
         },
         {
           "problem": "Equipo en el techo sin control",
           "detail": "Nadie sabe si se revisaron el EPP y la línea de vida antes de subir.",
-          "answer": "El checklist de seguridad pide EPP, anclaje, corte CC/CA y foto del área antes del trabajo."
+          "answer": "EPP, anclaje, corte CC/CA y foto del área revisados en el checklist de seguridad antes de empezar."
         },
         {
           "problem": "Clientes llamando por la obra",
           "detail": "“¿Cuándo instalan?” “¿Ya está generando?”",
-          "answer": "El cliente abre la orden desde un link y ve el estado — en instalación o generando — con las fotos del trabajo."
+          "answer": "El cliente abre el link y ve cómo va todo, en instalación o generando, con las fotos del trabajo. Menos llamadas para ti."
         },
         {
           "problem": "Posventa sin historial",
           "detail": "El cliente llama por mantenimiento y nadie encuentra el número del inversor.",
-          "answer": "Cada sistema guarda potencia, cantidad de paneles, fecha de instalación y n.º del inversor. Busca por número o por cliente en la lista de órdenes."
+          "answer": "Potencia, paneles, fecha de instalación y número del inversor siempre a mano. Busca por número o por cliente."
         },
         {
           "problem": "La cuota olvidada",
           "detail": "Anticipo pagado, saldo al terminar — y a fin de mes nadie sabe quién todavía debe.",
-          "answer": "Registra el anticipo y el saldo como pagos en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro."
+          "answer": "Anticipo y saldo bajo control. Ves cuánto falta cobrar y a quién, y envías el cobro desde ahí mismo."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una instalación por PraticOS",
-      "lede": "Del presupuesto al sistema generando, cada paso queda registrado en la orden del cliente.",
+      "title": "Del presupuesto al sistema generando, sin cabos sueltos",
+      "lede": "Agenda al día, cliente aprobando, entrega demostrada y saldo cobrado.",
       "stages": [
         {
           "number": "01",
-          "title": "Di la instalación y la IA abre la OS",
+          "title": "Di la instalación, la IA abre la OS",
+          "tab": "Hablar",
           "text": "Toca Hablar: “Sistema de Paulo, 12 paneles de 550, inversor de 6 kW, instalación el día 20”. La IA completa cliente, equipos y mano de obra con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “la mano de obra es 2.500”",
             "O saca una foto del pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "La instalación en la agenda",
+          "title": "Instalación marcada, aviso en el celular",
+          "tab": "Agendar",
           "text": "Con la fecha en la OS, la instalación entra en la Agenda, y el celular avisa antes del horario. Mantenimiento y limpieza de paneles entran igual.",
           "facts": [
             "La semana arriba, las citas del día abajo",
             "Aviso en el celular antes del horario",
             "Resumen del día a las 9 h, si lo quieres"
-          ],
-          "image": "agenda.png",
-          "alt": "Agenda con la semana arriba y las citas marcadas del día"
+          ]
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba por link",
+          "tab": "Aprobar",
           "text": "El cliente abre la OS en el navegador, sin instalar nada. Ve los ítems y valores, aprueba y deja comentarios. Después sigue la situación: en instalación, generando.",
           "facts": [
-            "Aprobación registrada en la propia OS",
+            "El sí del cliente queda guardado",
             "El cliente comenta en la orden, sin llamar",
             "PDF de la OS para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
-          "title": "Instala con checklist",
+          "title": "Instala sin olvidar nada",
+          "tab": "Instalar",
           "text": "Seguridad antes de subir, puesta en marcha al encender, entrega y orientaciones al final. Los modelos vienen listos y tú ajustas los ítems.",
           "facts": [
             "Tensión y corriente CC del string principal",
             "Fotos del inversor y de los tableros",
-            "Monitoreo configurado y orientaciones dadas"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado con fotos dentro de una OS"
+            "Monitoreo listo y orientaciones dadas"
+          ]
         },
         {
           "number": "05",
           "title": "Entrega y cobra",
+          "tab": "Cobrar",
           "text": "Registra el anticipo y el saldo como pagos en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién.",
           "facts": [
             "Pago en partes y descuento en la misma OS",
@@ -523,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien instala energía solar",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que el instalador solar quiere saber antes de empezar",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",

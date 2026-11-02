@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Obras Públicas e Prefeituras | PraticOS",
     "ogDescription": "Contratos de obra no celular: medição por etapa, vistoria de andamento com fotos, termo de recebimento e valor contratado, liberado e a liberar.",
     "hero": {
-      "title": "Contrato, medição e vistoria",
-      "titleMark": "na mesma tela.",
-      "lede": "PraticOS ajuda a secretaria de obras, e quem executa a obra, a acompanhar cada contrato. Cada contrato tem a obra, a empresa contratada e o fiscal; as medições e vistorias são feitas no celular, com fotos, e o saldo a liberar fica sempre à vista.",
+      "title": "Cada medição comprovada,",
+      "titleMark": "cada contrato sob controle.",
+      "lede": "O PraticOS é o sistema para obras públicas que dá à secretaria de obras, e a quem executa, controle sobre cada contrato. Medições e vistorias com fotos no celular, saldo a liberar sempre à vista e informação em ordem para a prestação de contas.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -53,73 +53,72 @@
       }
     },
     "problems": {
-      "title": "Onde o acompanhamento de obras se perde",
-      "lede": "A obra anda, mas a informação fica para trás: a medição numa planilha, a foto no celular do fiscal e o saldo do contrato calculado na véspera da prestação de contas.",
+      "title": "Onde se perde o controle da obra pública",
+      "lede": "A obra anda, mas a informação fica para trás: medição em planilha, foto no celular do fiscal e saldo calculado na véspera da prestação de contas.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Medição em planilha solta",
           "detail": "Cada fiscal usa um modelo. O percentual previsto e o executado não batem com o que foi pago.",
-          "answer": "O formulário de medição registra etapa, % previsto, % executado, qualidade, materiais e fotos. A medição financeira atualiza o total liberado e o saldo a liberar do contrato."
+          "answer": "Medição padronizada por etapa, com fotos, e saldo do contrato sempre atualizado."
         },
         {
           "problem": "Vistoria sem registro",
           "detail": "O fiscal foi à obra, mas não ficou escrito quantos trabalhadores havia, quais máquinas nem se o cronograma estava em dia.",
-          "answer": "A vistoria de andamento registra acesso ao local, trabalhadores, equipamentos, cumprimento do cronograma, justificativa de atraso e fotos."
+          "answer": "Comprove a visita: trabalhadores, equipamentos, cronograma, justificativa de atraso e fotos."
         },
         {
           "problem": "Fotos espalhadas em celulares",
           "detail": "As fotos da obra estão no aparelho do fiscal. Quando ele sai de férias, ninguém encontra.",
-          "answer": "As fotos ficam dentro do contrato, em cada item da medição ou vistoria, e não dependem do celular de ninguém."
+          "answer": "As fotos ficam no contrato, não no celular de ninguém."
         },
         {
           "problem": "Dados do contrato em pastas diferentes",
           "detail": "Número da licitação num processo, prazo contratual noutro, fiscal designado num e-mail.",
-          "answer": "O contrato guarda modalidade e número da licitação, número do contrato, prazo, base legal, fiscal designado e etapa atual."
+          "answer": "Licitação, prazo, base legal, fiscal designado e etapa atual num só lugar."
         },
         {
           "problem": "Contratada sem saber o que foi medido",
           "detail": "A empresa contratada liga para saber o que foi aprovado na medição, e a resposta depende de quem atende.",
-          "answer": "Mande o link do contrato: a contratada acompanha o andamento, vê as fotos e comenta pelo navegador, sem instalar nada e sem ver os outros contratos."
+          "answer": "Envie o link: a contratada acompanha o andamento e as fotos, sem instalar nada e sem ver outros contratos."
         },
         {
           "problem": "Recebimento sem termo",
           "detail": "A obra foi entregue, mas não ficou registrado se o escopo foi cumprido nem quais correções ficaram pendentes.",
-          "answer": "O termo de recebimento registra se é provisório ou definitivo, escopo e especificações atendidos, correções pendentes e avaliação final."
+          "answer": "Encerre com termo de recebimento: provisório ou definitivo, escopo atendido e correções pendentes."
         }
       ]
     },
     "workflow": {
-      "title": "Como um contrato de obra passa pelo PraticOS",
-      "lede": "Da assinatura ao recebimento, cada medição e vistoria fica no contrato.",
+      "title": "Da assinatura ao recebimento, tudo comprovado",
+      "lede": "Cada medição e vistoria fica no contrato, com fotos, pronta para a prestação de contas.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o contrato e a IA abre a OS",
+          "title": "Fale o contrato, a IA monta a OS",
+          "tab": "Falar",
           "text": "Toque em Falar e diga, por exemplo: “Construtora Vale Verde, recapeamento da Rua das Acácias, medição da etapa de drenagem”. Ou fotografe a ordem de serviço em papel. A IA preenche contratada, obra e itens do seu catálogo e marca com ✦ o que preencheu.",
           "facts": [
-            "Modalidade e nº da licitação, nº do contrato, prazo e base legal",
+            "Modalidade e número da licitação, número do contrato, prazo e base legal",
             "Secretaria responsável, localização e objeto da obra",
             "Nada é salvo sem você conferir"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pela IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Faça as vistorias em campo",
+          "title": "Fiscalize na obra",
+          "tab": "Vistoriar",
           "text": "O fiscal preenche a vistoria de andamento no celular, na obra. O checklist de conformidade legal confere a documentação da empresa.",
           "facts": [
             "Trabalhadores e equipamentos no local",
             "Cronograma no prazo, atrasado ou adiantado",
             "Seguro, certidões negativas e licença ambiental"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido dentro da OS, com fotos e itens marcados"
+          ]
         },
         {
           "number": "03",
-          "title": "Registre as medições",
+          "title": "Comprove cada medição",
+          "tab": "Medir",
           "text": "A medição física vai no formulário, com fotos. A medição financeira é lançada no contrato e atualiza o saldo.",
           "facts": [
             "% previsto e % executado por etapa",
@@ -131,21 +130,20 @@
         },
         {
           "number": "04",
-          "title": "Receba a obra e acompanhe o todo",
-          "text": "Feche o contrato com o termo de recebimento. No Início, os filtros Em aberto e Concluídas mostram em que pé está cada contrato.",
+          "title": "Receba a obra com termo",
+          "tab": "Receber",
+          "text": "Feche o contrato com o termo de recebimento. No Início, você vê em que pé está cada contrato, em aberto ou concluído.",
           "facts": [
             "Recebimento provisório ou definitivo",
             "PDF do contrato com o histórico de medições",
             "Relatório do mês no Financeiro"
-          ],
-          "image": "home.png",
-          "alt": "Início com as ordens de serviço em aberto e os filtros"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Perguntas de quem acompanha obras públicas",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "O que perguntam as equipes de obras públicas",
+      "lede": "Se a sua dúvida não estiver aqui, escreva para nós. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "O PraticOS substitui o sistema de licitação?",
@@ -153,7 +151,7 @@
         },
         {
           "question": "Posso cadastrar contratos que já estão em execução?",
-          "answer": "Sim. Cadastre o contrato com o valor contratado e o percentual já executado. O acompanhamento começa a partir daí."
+          "answer": "Sim. Inclua o contrato com o valor contratado e o percentual já executado. O acompanhamento começa a partir daí."
         },
         {
           "question": "O fiscal de obra vê os valores do contrato?",
@@ -179,9 +177,9 @@
     "ogTitle": "Public Works Contract Management Software | PraticOS",
     "ogDescription": "Public works contracts on your phone: progress measurements by milestone, site inspections with photos, acceptance forms and the balance on each contract.",
     "hero": {
-      "title": "Contract, measurement, inspection",
-      "titleMark": "on one screen.",
-      "lede": "PraticOS helps public works departments, and the people who build the work, keep track of each contract. Each contract has the project, the contractor and the inspector; measurements and inspections are done on a phone, with photos, and the balance left to release is always in view.",
+      "title": "Every measurement documented,",
+      "titleMark": "every contract under control.",
+      "lede": "PraticOS is the public works software that gives departments and contractors control over every contract. Measurements and inspections with photos from a phone, the balance to release always in view, and records in order for the audit.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -223,73 +221,72 @@
       }
     },
     "problems": {
-      "title": "Where public works tracking falls apart",
-      "lede": "The work moves forward, but the information lags behind: measurements in a spreadsheet, photos on the inspector's phone and the contract balance worked out the night before the audit.",
+      "title": "Where public works lose control",
+      "lede": "The work moves forward, but the information lags behind: measurements in a spreadsheet, photos on the inspector's phone and a balance worked out the night before the audit.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Measurements in loose spreadsheets",
           "detail": "Each inspector uses a different template. Planned and actual percentages don't match what was paid.",
-          "answer": "The measurement form records milestone, % planned, % complete, quality, materials and photos. The financial measurement updates the amount released and the balance on the contract."
+          "answer": "Standard measurements by milestone, with photos, and a contract balance that stays up to date."
         },
         {
           "problem": "Inspections with no record",
           "detail": "The inspector went to the site, but nobody wrote down how many workers were there, which machines or whether the schedule was on track.",
-          "answer": "The progress inspection records site access, workers, equipment, schedule compliance, reasons for delay and photos."
+          "answer": "Document the visit: workers, equipment, schedule, reasons for delay and photos."
         },
         {
           "problem": "Photos scattered across phones",
           "detail": "The site photos are on the inspector's phone. When they go on leave, nobody can find them.",
-          "answer": "Photos live inside the contract, on each item of the measurement or inspection, and don't depend on anyone's phone."
+          "answer": "Photos stay with the contract, not on anyone's phone."
         },
         {
           "problem": "Contract details in different folders",
           "detail": "The bid number in one file, the contract deadline in another, the assigned inspector in an email.",
-          "answer": "The contract holds bid type and number, contract number, deadline, legal basis, assigned inspector and current milestone."
+          "answer": "Bid, deadline, legal basis, assigned inspector and current milestone in one place."
         },
         {
           "problem": "Contractors who don't know what was measured",
           "detail": "The contractor calls to ask what was approved in the measurement, and the answer depends on who picks up.",
-          "answer": "Send the contract link: the contractor follows progress, sees the photos and comments from a browser, with nothing to install and without seeing other contracts."
+          "answer": "Send the link: the contractor follows progress and photos, with nothing to install and no access to other contracts."
         },
         {
           "problem": "Handover with no acceptance form",
           "detail": "The project was delivered, but nobody recorded whether the scope was met or which fixes were still pending.",
-          "answer": "The acceptance form records whether it's provisional or final, scope and specifications met, pending fixes and final assessment."
+          "answer": "Close with an acceptance form: provisional or final, scope met and pending fixes."
         }
       ]
     },
     "workflow": {
-      "title": "How a public works contract moves through PraticOS",
-      "lede": "From signing to acceptance, every measurement and inspection stays on the contract.",
+      "title": "From signing to acceptance, all of it documented",
+      "lede": "Every measurement and inspection stays on the contract, with photos, ready for the audit.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the contract and the AI opens the order",
+          "title": "Say the contract and AI builds the order",
+          "tab": "Speak",
           "text": "Tap Speak and say something like: “Greenvale Construction, repaving of Acacia Street, drainage milestone measurement”. Or photograph the paper work order. The AI fills in contractor, project and catalog items and marks what it filled with ✦.",
           "facts": [
             "Bid type and number, contract number, deadline and legal basis",
             "Responsible department, location and project scope",
             "Nothing is saved until you check it"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI, with the filled-in fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Run site inspections",
+          "title": "Inspect on site",
+          "tab": "Inspect",
           "text": "The inspector fills in the progress inspection on a phone, on site. The legal compliance checklist checks the contractor's paperwork.",
           "facts": [
             "Workers and equipment on site",
             "Schedule on time, late or ahead",
             "Insurance, tax clearance certificates and environmental permit"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in on the order, with photos and checked items"
+          ]
         },
         {
           "number": "03",
-          "title": "Record measurements",
+          "title": "Document every measurement",
+          "tab": "Measure",
           "text": "The physical measurement goes on the form, with photos. The financial measurement is entered on the contract and updates the balance.",
           "facts": [
             "% planned and % complete per milestone",
@@ -301,21 +298,20 @@
         },
         {
           "number": "04",
-          "title": "Accept the work and see the big picture",
-          "text": "Close the contract with the acceptance form. On Home, the Open and Completed filters show where each contract stands.",
+          "title": "Accept the work on record",
+          "tab": "Accept",
+          "text": "Close the contract with the acceptance form. On Home, you see where each contract stands, open or completed.",
           "facts": [
             "Provisional or final acceptance",
             "Contract PDF with the measurement history",
             "Monthly report in Financial"
-          ],
-          "image": "home.png",
-          "alt": "Home with the open work orders and the filters"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Questions from people who track public works",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "What public works teams ask us",
+      "lede": "If your question isn't here, write to us. The PraticOS team answers it.",
       "items": [
         {
           "question": "Does PraticOS replace our procurement system?",
@@ -349,9 +345,9 @@
     "ogTitle": "Sistema para Obras Públicas y Municipios | PraticOS",
     "ogDescription": "Contratos de obra en el celular: medición por etapa, inspección de avance con fotos, acta de recepción y monto contratado, liberado y por liberar.",
     "hero": {
-      "title": "Medición e inspección",
-      "titleMark": "en el mismo contrato.",
-      "lede": "PraticOS ayuda a la secretaría de obras, y a quien ejecuta la obra, a seguir cada contrato. Cada contrato tiene la obra, la empresa contratada y el fiscal; las mediciones e inspecciones se hacen en el celular, con fotos, y el saldo por liberar siempre está a la vista.",
+      "title": "Cada medición comprobada,",
+      "titleMark": "cada contrato bajo control.",
+      "lede": "PraticOS es el sistema para obras públicas que da control sobre cada contrato a la secretaría de obras y a quien ejecuta. Mediciones e inspecciones con fotos desde el celular, saldo por liberar siempre a la vista e información en orden para la rendición de cuentas.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -393,73 +389,72 @@
       }
     },
     "problems": {
-      "title": "Dónde se pierde el seguimiento de obras",
-      "lede": "La obra avanza, pero la información queda atrás: la medición en una planilla, la foto en el celular del fiscal y el saldo del contrato calculado la noche antes de la rendición de cuentas.",
+      "title": "Dónde se pierde el control de la obra pública",
+      "lede": "La obra avanza, pero la información queda atrás: la medición en una planilla, la foto en el celular del fiscal y el saldo calculado la noche antes de la rendición de cuentas.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Mediciones en planillas sueltas",
           "detail": "Cada fiscal usa un modelo distinto. El porcentaje previsto y el ejecutado no coinciden con lo pagado.",
-          "answer": "El formulario de medición registra etapa, % previsto, % ejecutado, calidad, materiales y fotos. La medición financiera actualiza el total liberado y el saldo por liberar."
+          "answer": "Mediciones estandarizadas por etapa, con fotos, y el saldo del contrato siempre al día."
         },
         {
           "problem": "Inspecciones sin registro",
           "detail": "El fiscal fue a la obra, pero no quedó escrito cuántos trabajadores había, qué máquinas ni si el cronograma estaba al día.",
-          "answer": "La inspección de avance registra acceso al lugar, trabajadores, equipos, cumplimiento del cronograma, justificación de atraso y fotos."
+          "answer": "Comprueba la visita: trabajadores, equipos, cronograma, justificación de atraso y fotos."
         },
         {
           "problem": "Fotos repartidas en celulares",
           "detail": "Las fotos de la obra están en el teléfono del fiscal. Cuando se va de vacaciones, nadie las encuentra.",
-          "answer": "Las fotos quedan dentro del contrato, en cada ítem de la medición o inspección, y no dependen del celular de nadie."
+          "answer": "Las fotos quedan en el contrato, no en el celular de nadie."
         },
         {
           "problem": "Datos del contrato en carpetas distintas",
           "detail": "El número de licitación en un expediente, el plazo contractual en otro y el fiscal designado en un correo.",
-          "answer": "El contrato guarda modalidad y número de licitación, número de contrato, plazo, base legal, fiscal designado y etapa actual."
+          "answer": "Licitación, plazo, base legal, fiscal designado y etapa actual en un solo lugar."
         },
         {
           "problem": "Contratada sin saber qué se midió",
           "detail": "La empresa contratada llama para saber qué se aprobó en la medición, y la respuesta depende de quién atiende.",
-          "answer": "Envía el link del contrato: la contratada sigue el avance, ve las fotos y comenta desde el navegador, sin instalar nada y sin ver los otros contratos."
+          "answer": "Envía el link: la contratada sigue el avance y las fotos, sin instalar nada y sin ver otros contratos."
         },
         {
           "problem": "Recepción sin acta",
           "detail": "La obra se entregó, pero no quedó registrado si se cumplió el alcance ni qué correcciones quedaron pendientes.",
-          "answer": "El acta de recepción registra si es provisoria o definitiva, alcance y especificaciones cumplidos, correcciones pendientes y evaluación final."
+          "answer": "Cierra con acta de recepción: provisoria o definitiva, alcance cumplido y correcciones pendientes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa un contrato de obra por PraticOS",
-      "lede": "De la firma a la recepción, cada medición e inspección queda en el contrato.",
+      "title": "De la firma a la recepción, todo comprobado",
+      "lede": "Cada medición e inspección queda en el contrato, con fotos, lista para la rendición de cuentas.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el contrato y la IA abre la orden",
+          "title": "Di el contrato y la IA arma la orden",
+          "tab": "Hablar",
           "text": "Toca Hablar y di, por ejemplo: “Constructora Valle Verde, pavimentación de la calle Las Acacias, medición de la etapa de drenaje”. O fotografía la orden de servicio en papel. La IA completa contratada, obra e ítems de tu catálogo y marca con ✦ lo que completó.",
           "facts": [
-            "Modalidad y n.º de licitación, n.º de contrato, plazo y base legal",
+            "Modalidad y número de licitación, número de contrato, plazo y base legal",
             "Secretaría responsable, ubicación y objeto de la obra",
             "Nada se guarda sin que lo revises"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por la IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Haz las inspecciones en campo",
+          "title": "Inspecciona en la obra",
+          "tab": "Inspeccionar",
           "text": "El fiscal completa la inspección de avance en el celular, en la obra. El checklist de cumplimiento legal revisa la documentación de la empresa.",
           "facts": [
             "Trabajadores y equipos en el lugar",
             "Cronograma en plazo, atrasado o adelantado",
             "Seguro, certificados de deuda y licencia ambiental"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado dentro de la OS, con fotos e ítems marcados"
+          ]
         },
         {
           "number": "03",
-          "title": "Registra las mediciones",
+          "title": "Comprueba cada medición",
+          "tab": "Medir",
           "text": "La medición física va en el formulario, con fotos. La medición financiera se carga en el contrato y actualiza el saldo.",
           "facts": [
             "% previsto y % ejecutado por etapa",
@@ -471,21 +466,20 @@
         },
         {
           "number": "04",
-          "title": "Recibe la obra y mira el conjunto",
-          "text": "Cierra el contrato con el acta de recepción. En Inicio, los filtros Abiertas y Terminadas muestran en qué está cada contrato.",
+          "title": "Recibe la obra con acta",
+          "tab": "Recibir",
+          "text": "Cierra el contrato con el acta de recepción. En Inicio ves en qué está cada contrato, abierto o terminado.",
           "facts": [
             "Recepción provisoria o definitiva",
             "PDF del contrato con el historial de mediciones",
             "Informe del mes en Financiero"
-          ],
-          "image": "home.png",
-          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
+          ]
         }
       ]
     },
     "faq": {
-      "title": "Preguntas de quien sigue obras públicas",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Lo que preguntan los equipos de obras públicas",
+      "lede": "Si tu pregunta no está aquí, escríbenos. Responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿PraticOS reemplaza el sistema de licitaciones?",

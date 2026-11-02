@@ -12,7 +12,10 @@ enum HomeView {
   all,
 
   /// Technician: the open orders assigned to them ("Minhas").
-  mine;
+  mine,
+
+  /// Quotes still waiting for an answer, the ones waiting longest first.
+  quotes;
 
   /// Status field understood by `OrderStore.loadOrdersInfinite`.
   String? get queryField => switch (this) {
@@ -20,10 +23,12 @@ enum HomeView {
     HomeView.done => 'done',
     HomeView.all => null,
     HomeView.mine => 'open',
+    HomeView.quotes => 'open',
   };
 
   /// Views that load every open order (so counts are exact).
-  bool get isOpenList => this == HomeView.open || this == HomeView.mine;
+  bool get isOpenList =>
+      this == HomeView.open || this == HomeView.mine || this == HomeView.quotes;
 }
 
 /// Urgency of an open order, in list order.
@@ -133,6 +138,45 @@ class HomeRules {
   static List<Order> assignedTo(List<Order> orders, String? userId) {
     if (userId == null) return const [];
     return orders.where((o) => o.assignedTo?.id == userId).toList();
+  }
+
+  /// Quotes without an answer, the ones waiting longest first.
+  static List<Order> waitingQuotes(List<Order> orders) {
+    final quotes = orders.where((o) => o.status == 'quote').toList();
+    return quotes
+      ..sort(
+        (a, b) => (a.createdAt ?? DateTime(0)).compareTo(
+          b.createdAt ?? DateTime(0),
+        ),
+      );
+  }
+
+  static const _accents = {
+    'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
+    'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+    'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
+    'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+    'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
+    'ç': 'c', 'ñ': 'n',
+  };
+
+  /// Lower case without accents: "orcamento" finds "Orçamento".
+  static String searchKey(String text) => text
+      .toLowerCase()
+      .split('')
+      .map((c) => _accents[c] ?? c)
+      .join();
+
+  /// Whether [query] (already a [searchKey]) is in the order's number,
+  /// customer, status, or any device name or serial.
+  static bool matchesSearch(Order o, String query, String statusLabel) {
+    final fields = [
+      o.number?.toString() ?? '',
+      o.customer?.name ?? '',
+      statusLabel,
+      for (final d in o.effectiveDevices) ...[d.name ?? '', d.serial ?? ''],
+    ];
+    return fields.any((field) => searchKey(field).contains(query));
   }
 
   static bool isScheduledToday(Order o, DateTime now) {

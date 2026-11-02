@@ -155,6 +155,8 @@ class MoreView extends StatelessWidget {
         if (name == null || name.isEmpty) return companyName;
         return [context.l10n.yourAccount, if (companyName != null) companyName]
             .join(' · ');
+      case MoreDestination.contracts:
+        return context.l10n.moreContractsSubtitle;
       case MoreDestination.company:
         return context.l10n.moreCompanySubtitle;
       case MoreDestination.catalog:

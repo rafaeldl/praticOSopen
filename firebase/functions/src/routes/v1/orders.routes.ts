@@ -8,9 +8,12 @@ import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import {
   can,
+  canChangeOrderStatus,
+  canCreateOrderWithStatus,
   forbidden,
   requireAppPermission,
   requireOrderAccess,
+  requireOrderItemsEditable,
 } from '../../middleware/app-permission.middleware';
 import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
@@ -183,6 +186,11 @@ router.post('/', requireAppPermission('createOrder'), async (req: AuthenticatedR
       return;
     }
 
+    if (!canCreateOrderWithStatus(req, validation.data.status ?? 'quote')) {
+      forbidden(res, 'Status not allowed on a new order');
+      return;
+    }
+
     const { customerId, deviceId, ...orderData } = validation.data;
 
     // Get customer
@@ -269,6 +277,14 @@ router.patch('/:id', requireAppPermission('editOrder'), requireOrderAccess(), as
       return;
     }
 
+    if (validation.data.status !== undefined) {
+      const order = await orderService.getOrder(companyId, String(req.params.id));
+      if (order && !canChangeOrderStatus(req, order, validation.data.status)) {
+        forbidden(res, 'Status change not allowed');
+        return;
+      }
+    }
+
     const updatedBy = getUserAggr(req);
 
     // Transform assignedTo string to UserAggr if provided
@@ -321,7 +337,7 @@ router.patch('/:id', requireAppPermission('editOrder'), requireOrderAccess(), as
  * POST /api/v1/orders/:id/services
  * Add a service to an order
  */
-router.post('/:id/services', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/services', requireAppPermission('editOrder'), requireOrderAccess(), requireOrderItemsEditable(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {
@@ -390,7 +406,7 @@ router.post('/:id/services', requireAppPermission('editOrder'), requireOrderAcce
  * POST /api/v1/orders/:id/products
  * Add a product to an order
  */
-router.post('/:id/products', requireAppPermission('editOrder'), requireOrderAccess(), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/:id/products', requireAppPermission('editOrder'), requireOrderAccess(), requireOrderItemsEditable(), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const companyId = req.auth?.companyId;
     if (!companyId) {

@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Assistência Técnica de Informática | PraticOS",
     "ogDescription": "OS da bancada no celular: a IA abre a OS pelo que você fala, entrada com fotos, diagnóstico de hardware, backup confirmado e orçamento aprovado por link.",
     "hero": {
-      "title": "Notebook, senha e diagnóstico",
-      "titleMark": "na mesma OS.",
-      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de informática. Registre o computador com processador, memória e armazenamento, faça a entrada com fotos e o diagnóstico de hardware, mande o orçamento por link e registre o pagamento — pelo celular.",
+      "title": "Menos retrabalho na bancada.",
+      "titleMark": "Mais confiança do cliente.",
+      "lede": "PraticOS é o app de ordem de serviço para assistência técnica de informática que passa confiança do balcão à entrega. O computador entra com fotos, o backup fica combinado, o diagnóstico fica guardado e o cliente aprova o orçamento por link.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,97 +54,94 @@
       }
     },
     "problems": {
-      "title": "Onde a assistência de informática perde dinheiro",
+      "title": "O dinheiro que a assistência de informática perde sem perceber",
       "lede": "Não falta computador na bancada. Falta saber de quem é cada um, o que já foi testado e se o backup foi feito antes de formatar.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Backup que ninguém confirmou",
           "detail": "O cliente diz que tinha fotos no HD e que a assistência apagou tudo.",
-          "answer": "O checklist de privacidade e backup registra se o backup foi feito e se o cliente está ciente, antes de qualquer formatação."
+          "answer": "Antes de formatar, o checklist confirma o backup e que o cliente está ciente. Você tem como mostrar."
         },
         {
           "problem": "Senha num post-it",
           "detail": "A senha do sistema ficou colada na tampa do notebook, à vista de todos.",
-          "answer": "A senha de acesso fica no checklist de entrada, dentro da OS, junto com fotos, avarias e acessórios deixados."
+          "answer": "A senha fica dentro da OS, com fotos, avarias e acessórios. Longe da tampa do notebook."
         },
         {
           "problem": "Diagnóstico refeito do zero",
           "detail": "O notebook volta e ninguém sabe o que já foi testado.",
-          "answer": "O diagnóstico de hardware guarda memória, HD/SSD com saúde em %, fonte, placa-mãe e temperatura da CPU. Busque pelo número de série e veja as OS anteriores."
+          "answer": "Memória, HD/SSD com saúde em %, fonte, placa-mãe e temperatura da CPU ficam guardados. Busque pelo número de série e continue de onde parou."
         },
         {
-          "problem": "Upgrade sem conferência",
+          "problem": "Upgrade que o cliente não entende",
           "detail": "Trocou a memória ou o SSD, e o cliente não sabe o que mudou nem o que pagou.",
-          "answer": "O checklist de upgrade registra o componente trocado, a especificação anterior e a nova, e se o sistema reconheceu o hardware."
+          "answer": "Componente trocado, especificação antiga e nova, e se o sistema reconheceu. O cliente vê o que pagou."
         },
         {
           "problem": "Telefone tocando o dia todo",
           "detail": "“Já ficou pronto?” Cada ligação interrompe quem está na bancada.",
-          "answer": "O cliente abre a OS pelo link e vê o status, as fotos e os valores, sem precisar ligar."
+          "answer": "O cliente abre o link e vê o status, as fotos e os valores, sem ligar. Você continua no serviço."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Pix, cartão e dinheiro anotados em lugares diferentes. Ninguém sabe quem ainda deve.",
-          "answer": "Receba o valor inteiro ou em partes na OS. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Receba inteiro ou em partes e veja quem ainda deve e quanto entrou no mês."
         }
       ]
     },
     "workflow": {
-      "title": "Como o computador passa pela bancada no PraticOS",
-      "lede": "Da entrada à retirada, cada etapa fica registrada na OS do equipamento.",
+      "title": "Da entrada à retirada, sem nada esquecido",
+      "lede": "O computador entra com fotos, o cliente aprova e o serviço anda até você receber.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o equipamento e a IA abre a OS",
+          "title": "Fale o equipamento. A IA abre a OS.",
+          "tab": "Falar",
           "text": "No balcão, toque em Falar: “Notebook Dell do Ricardo, lento e esquentando, limpeza interna e troca de pasta térmica”. A IA preenche cliente, equipamento, serviços e preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦",
             "Corrija falando: “a limpeza é 150”",
             "Ou tire foto da etiqueta ou do pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registre a entrada",
+          "title": "Mostre como o equipamento chegou",
+          "tab": "Registrar",
           "text": "O checklist de entrada vem pronto e você ajusta os itens: liga, tela, avarias, acessórios deixados e a senha de acesso, com fotos.",
           "facts": [
             "Liga? Tela funciona? Avarias e acessórios",
-            "Senha de acesso registrada na OS",
-            "Processador, memória e armazenamento no equipamento"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist preenchido com fotos dentro de uma OS"
+            "Senha de acesso dentro da OS, longe do post-it",
+            "Processador, memória e armazenamento anotados"
+          ]
         },
         {
           "number": "03",
-          "title": "Diagnostique e orce por link",
+          "title": "Diagnostique e deixe o cliente aprovar",
+          "tab": "Aprovar",
           "text": "Faça o diagnóstico de hardware e monte o orçamento com serviços e peças do catálogo. O cliente abre a OS no navegador, vê tudo, lê seus termos e aprova.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "Aprovação do cliente guardada para qualquer dúvida",
             "Seus termos de garantia e retirada antes da aprovação",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS aberta com a situação, o botão do próximo passo, os itens, o total e o que falta receber"
+          ]
         },
         {
           "number": "04",
-          "title": "Execute com checklist",
-          "text": "Formatação, limpeza interna e upgrade têm checklists prontos. O Início mostra o que está em orçamento, aprovado, em andamento ou concluído.",
+          "title": "Execute sem esquecer nada",
+          "tab": "Consertar",
+          "text": "Formatação, limpeza interna e upgrade têm checklists prontos. Abra o app e veja o que está em orçamento, aprovado, em andamento ou concluído.",
           "facts": [
             "Backup, sistema, drivers e dados restaurados",
             "Temperatura antes e depois da limpeza",
-            "Busca pelo número de série no Início"
-          ],
-          "image": "home.png",
-          "alt": "Início com as ordens de serviço em aberto e os filtros"
+            "Ache qualquer equipamento pelo número de série"
+          ]
         },
         {
           "number": "05",
           "title": "Entregue e receba",
+          "tab": "Receber",
           "text": "Receba o valor inteiro ou em partes, com desconto se precisar. O Financeiro mostra quanto falta receber e de quem, com o botão para mandar a cobrança.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -157,8 +154,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem assistência de informática",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Antes de usar na sua assistência",
+      "lede": "Ficou alguma dúvida? Mande um e-mail: quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -166,7 +163,7 @@
         },
         {
           "question": "Serve para redes e servidores?",
-          "answer": "Sim. O ramo de informática cobre desktops, notebooks, redes e servidores. Para atender no local do cliente, marque dia e hora na OS e o atendimento entra na Agenda."
+          "answer": "Sim. Funciona para desktops, notebooks, redes e servidores. Para atender no local do cliente, marque dia e hora na OS e o atendimento entra na Agenda."
         },
         {
           "question": "Posso colocar minhas regras de garantia e retirada?",
@@ -192,9 +189,9 @@
     "ogTitle": "Computer Repair Shop Software | PraticOS",
     "ogDescription": "Your repair bench on your phone: AI opens the work order from what you say, check-in with photos, hardware diagnosis, confirmed backup and quotes approved by link.",
     "hero": {
-      "title": "Laptop, password and diagnosis",
-      "titleMark": "on one work order.",
-      "lede": "PraticOS is the work order app for computer repair shops. Log the computer with processor, memory and storage, run the check-in with photos and the hardware diagnosis, send the quote as a link and record the payment — all from your phone.",
+      "title": "Less rework on the bench.",
+      "titleMark": "More customers who trust you.",
+      "lede": "PraticOS is the work order app for computer repair shops that builds trust from check-in to pickup. The computer comes in with photos, the backup is agreed up front, the diagnosis is saved and the customer approves the quote by link.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -237,98 +234,95 @@
       }
     },
     "problems": {
-      "title": "Where a computer repair shop loses money",
+      "title": "The money a computer repair shop loses without noticing",
       "lede": "There's no shortage of computers on the bench. What's missing is knowing whose each one is, what's been tested and whether the backup happened before the wipe.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "A backup nobody confirmed",
           "detail": "The customer says there were photos on the drive and your shop erased them.",
-          "answer": "The privacy and backup checklist records whether the backup was done and that the customer was informed, before any reinstall."
+          "answer": "Before any reinstall, the checklist confirms the backup and that the customer was told. You have something to show."
         },
         {
           "problem": "Passwords on sticky notes",
           "detail": "The login password is taped to the laptop lid for anyone to see.",
-          "answer": "The password goes on the check-in checklist inside the work order, along with photos, damage and accessories left."
+          "answer": "The password stays inside the work order, with photos, damage and accessories. Not on the laptop lid."
         },
         {
           "problem": "Diagnosing from scratch, again",
           "detail": "The laptop comes back and nobody knows what was already tested.",
-          "answer": "The hardware diagnosis keeps RAM, drive health in %, power supply, motherboard and CPU temperature. Search by serial number and see past work orders."
+          "answer": "RAM, drive health in %, power supply, motherboard and CPU temperature are all saved. Search by serial number and pick up where you left off."
         },
         {
-          "problem": "Upgrades with no record",
+          "problem": "Upgrades the customer can't follow",
           "detail": "You swapped the RAM or SSD, and the customer doesn't know what changed or what they paid for.",
-          "answer": "The upgrade checklist records the part replaced, the old and new specs, and whether the system recognized the hardware."
+          "answer": "Part replaced, old and new specs, and whether the system recognized it. The customer sees what they paid for."
         },
         {
           "problem": "The phone ringing all day",
           "detail": "“Is it ready yet?” Every call pulls someone off the bench.",
-          "answer": "The customer opens the work order from a link and sees the status, photos and prices without calling."
+          "answer": "The customer opens the link and sees the status, photos and prices without calling. You stay on the job."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Card, cash and transfers noted in different places. Nobody knows who still owes you.",
-          "answer": "Receive the full amount or in parts on the work order. Financial shows how much is left to collect and from whom, and the monthly report shows what came in."
+          "answer": "Get paid in full or in parts and see who still owes you and what came in this month."
         }
       ]
     },
     "workflow": {
-      "title": "How a computer moves across the bench in PraticOS",
-      "lede": "From check-in to pickup, every step is recorded on the computer's work order.",
+      "title": "From check-in to pickup, nothing forgotten",
+      "lede": "The computer comes in with photos, the customer approves and the job keeps moving until you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the machine and AI opens the order",
+          "title": "Say the machine. AI opens the order.",
+          "tab": "Speak",
           "text": "At the counter, tap Speak: “Ricardo’s Dell laptop, slow and overheating, internal cleaning and thermal paste.” AI fills in the customer, machine, services and prices from your catalog. You check it and save.",
           "facts": [
             "What AI filled in is marked with ✦",
             "Fix it by speaking: “the cleaning is 150”",
             "Or take a photo of the label or the written request"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Log the check-in",
+          "title": "Show how the machine arrived",
+          "tab": "Record",
           "text": "The check-in checklist comes ready and you adjust the items: powers on, screen, damage, accessories left and the login password, with photos.",
           "facts": [
             "Powers on? Screen works? Damage and accessories",
-            "Login password recorded on the order",
-            "Processor, memory and storage on the machine"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist filled in with photos inside a work order"
+            "Login password inside the order, not on a sticky note",
+            "Processor, memory and storage noted down"
+          ]
         },
         {
           "number": "03",
-          "title": "Diagnose and quote by link",
+          "title": "Diagnose and get the customer's approval",
+          "tab": "Approve",
           "text": "Run the hardware diagnosis and build the quote with services and parts from your catalog. The customer opens the work order in the browser, sees everything, reads your terms and approves.",
           "facts": [
-            "Approval recorded on the work order",
+            "Customer approval kept on hand in case of any doubt",
             "Your warranty and pickup terms before approval",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order with its status, the next-step button, the items, the total and what is left to receive"
+          ]
         },
         {
           "number": "04",
-          "title": "Do the job with a checklist",
-          "text": "Reinstalls, internal cleaning and upgrades have ready-made checklists. Home shows what is in quote, approved, in progress or completed.",
+          "title": "Get the job done, nothing skipped",
+          "tab": "Repair",
+          "text": "Reinstalls, internal cleaning and upgrades have ready-made checklists. Open the app and see what's quoted, approved, in progress or completed.",
           "facts": [
             "Backup, OS, drivers and data restored",
             "Temperature before and after cleaning",
-            "Search by serial number on Home"
-          ],
-          "image": "home.png",
-          "alt": "Home with the open work orders and the filters"
+            "Find any machine by serial number"
+          ]
         },
         {
           "number": "05",
           "title": "Deliver and get paid",
-          "text": "Receive the full amount or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
+          "tab": "Get paid",
+          "text": "Get paid in full or in parts, with a discount if needed. Financial shows how much is left to collect and from whom, with a button to send the payment request.",
           "facts": [
             "Partial payments and discounts in the same order",
             "Whoever has owed the longest shows up first",
@@ -340,8 +334,8 @@
       ]
     },
     "faq": {
-      "title": "Questions from computer repair shops",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "title": "Before you try it in your shop",
+      "lede": "Still have a question? Send us an email: the PraticOS team answers it.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -349,7 +343,7 @@
         },
         {
           "question": "Does it work for networks and servers?",
-          "answer": "Yes. The computer trade covers desktops, laptops, networks and servers. To work at the customer’s site, set a date and time on the work order and the appointment goes on the Schedule."
+          "answer": "Yes. It works for desktops, laptops, networks and servers. To work at the customer’s site, set a date and time on the work order and the appointment goes on the Schedule."
         },
         {
           "question": "Can I add my own warranty and pickup rules?",
@@ -375,9 +369,9 @@
     "ogTitle": "Sistema para Servicio Técnico de Computadoras | PraticOS",
     "ogDescription": "El banco de trabajo en el celular: la IA abre la OS con lo que dices, ingreso con fotos, diagnóstico de hardware, backup confirmado y presupuesto aprobado por link.",
     "hero": {
-      "title": "Notebook, clave y diagnóstico",
-      "titleMark": "en una sola orden.",
-      "lede": "PraticOS es la app de órdenes de servicio para servicio técnico de computadoras. Registra la computadora con procesador, memoria y almacenamiento, haz el ingreso con fotos y el diagnóstico de hardware, envía el presupuesto por link y registra el pago — desde el celular.",
+      "title": "Menos retrabajo en el banco.",
+      "titleMark": "Más clientes que confían en ti.",
+      "lede": "PraticOS es la app de órdenes de servicio para servicio técnico de computadoras que genera confianza del ingreso a la entrega. La computadora entra con fotos, el backup queda acordado, el diagnóstico queda guardado y el cliente aprueba el presupuesto por link.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -420,97 +414,94 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata el servicio técnico de computadoras",
+      "title": "El dinero que el servicio técnico de computadoras pierde sin darse cuenta",
       "lede": "No faltan computadoras en el banco. Falta saber de quién es cada una, qué ya se probó y si se hizo el backup antes de formatear.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Un backup que nadie confirmó",
           "detail": "El cliente dice que tenía fotos en el disco y que el servicio técnico las borró.",
-          "answer": "El checklist de privacidad y backup registra si se hizo el backup y si el cliente está al tanto, antes de cualquier formateo."
+          "answer": "Antes de formatear, el checklist confirma el backup y que el cliente está al tanto. Tienes qué mostrar."
         },
         {
           "problem": "Contraseñas en un papelito",
           "detail": "La contraseña del sistema quedó pegada en la tapa de la notebook, a la vista de todos.",
-          "answer": "La contraseña va en el checklist de ingreso, dentro de la orden, junto con fotos, daños y accesorios entregados."
+          "answer": "La contraseña queda dentro de la orden, con fotos, daños y accesorios. No en la tapa de la notebook."
         },
         {
           "problem": "Diagnóstico desde cero, otra vez",
           "detail": "La notebook vuelve y nadie sabe qué ya se probó.",
-          "answer": "El diagnóstico de hardware guarda RAM, salud del disco en %, fuente, placa madre y temperatura del CPU. Busca por número de serie y ve las órdenes anteriores."
+          "answer": "RAM, salud del disco en %, fuente, placa madre y temperatura del CPU quedan guardados. Busca por número de serie y sigue donde quedaste."
         },
         {
-          "problem": "Upgrades sin registro",
+          "problem": "Upgrades que el cliente no entiende",
           "detail": "Cambiaste la memoria o el SSD, y el cliente no sabe qué cambió ni qué pagó.",
-          "answer": "El checklist de upgrade registra el componente cambiado, la especificación anterior y la nueva, y si el sistema reconoció el hardware."
+          "answer": "Componente cambiado, especificación anterior y nueva, y si el sistema lo reconoció. El cliente ve lo que pagó."
         },
         {
           "problem": "El teléfono sonando todo el día",
           "detail": "“¿Ya está lista?” Cada llamada saca a alguien del banco.",
-          "answer": "El cliente abre la orden desde un link y ve el estado, las fotos y los valores, sin llamar."
+          "answer": "El cliente abre el link y ve el estado, las fotos y los valores sin llamar. Tú sigues trabajando."
         },
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Tarjeta, efectivo y transferencias anotados en lugares distintos. Nadie sabe quién todavía debe.",
-          "answer": "Cobra el valor completo o en partes en la OS. Financiero muestra cuánto falta cobrar y a quién, y el informe del mes muestra lo que entró."
+          "answer": "Cobra el total o en partes y ve quién todavía debe y cuánto entró en el mes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una computadora por el banco en PraticOS",
-      "lede": "Del ingreso al retiro, cada paso queda registrado en la orden del equipo.",
+      "title": "Del ingreso al retiro, sin olvidar nada",
+      "lede": "La computadora entra con fotos, el cliente aprueba y el trabajo avanza hasta que cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el equipo y la IA abre la OS",
+          "title": "Di el equipo. La IA abre la OS.",
+          "tab": "Hablar",
           "text": "En el mostrador, toca Hablar: “Notebook Dell de Ricardo, lenta y calentando, limpieza interna y cambio de pasta térmica”. La IA completa cliente, equipo, servicios y precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que la IA completó queda marcado con ✦",
             "Corrige hablando: “la limpieza es 150”",
             "O saca una foto de la etiqueta o del pedido anotado"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registra el ingreso",
+          "title": "Muestra cómo llegó el equipo",
+          "tab": "Registrar",
           "text": "El checklist de ingreso viene listo y tú ajustas los ítems: enciende, pantalla, daños, accesorios dejados y la contraseña de acceso, con fotos.",
           "facts": [
             "¿Enciende? ¿Funciona la pantalla? Daños y accesorios",
-            "Contraseña de acceso registrada en la OS",
-            "Procesador, memoria y almacenamiento en el equipo"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist completado con fotos dentro de una OS"
+            "Contraseña dentro de la orden, no en un papelito",
+            "Procesador, memoria y almacenamiento anotados"
+          ]
         },
         {
           "number": "03",
-          "title": "Diagnostica y presupuesta por link",
+          "title": "Diagnostica y deja que el cliente apruebe",
+          "tab": "Aprobar",
           "text": "Haz el diagnóstico de hardware y arma el presupuesto con servicios y repuestos del catálogo. El cliente abre la OS en el navegador, ve todo, lee tus términos y aprueba.",
           "facts": [
-            "Aprobación registrada en la propia OS",
+            "Aprobación del cliente guardada ante cualquier duda",
             "Tus términos de garantía y retiro antes de aprobar",
             "PDF de la OS para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "OS abierta con la situación, el botón del próximo paso, los ítems, el total y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
-          "title": "Ejecuta con checklist",
-          "text": "Formateo, limpieza interna y upgrade tienen checklists listos. Inicio muestra lo que está en presupuesto, aprobado, en curso o completado.",
+          "title": "Ejecuta sin olvidar nada",
+          "tab": "Reparar",
+          "text": "Formateo, limpieza interna y upgrade tienen checklists listos. Abre la app y ve lo que está en presupuesto, aprobado, en curso o completado.",
           "facts": [
             "Backup, sistema, drivers y datos restaurados",
             "Temperatura antes y después de la limpieza",
-            "Búsqueda por número de serie en Inicio"
-          ],
-          "image": "home.png",
-          "alt": "Inicio con las órdenes de servicio abiertas y los filtros"
+            "Encuentra cualquier equipo por número de serie"
+          ]
         },
         {
           "number": "05",
           "title": "Entrega y cobra",
+          "tab": "Cobrar",
           "text": "Cobra el valor completo o en partes, con descuento si hace falta. Financiero muestra cuánto falta cobrar y a quién, con el botón para enviar el cobro.",
           "facts": [
             "Pago en partes y descuento en la misma OS",
@@ -523,8 +514,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene servicio técnico de computadoras",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Antes de usarlo en tu servicio técnico",
+      "lede": "¿Te queda alguna duda? Escríbenos un correo: responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -532,7 +523,7 @@
         },
         {
           "question": "¿Sirve para redes y servidores?",
-          "answer": "Sí. El rubro de informática cubre computadoras de escritorio, notebooks, redes y servidores. Para atender en el lugar del cliente, marca día y hora en la OS y la cita entra en la Agenda."
+          "answer": "Sí. Funciona para computadoras de escritorio, notebooks, redes y servidores. Para atender en el lugar del cliente, marca día y hora en la OS y la cita entra en la Agenda."
         },
         {
           "question": "¿Puedo poner mis reglas de garantía y retiro?",

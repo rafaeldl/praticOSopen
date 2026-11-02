@@ -177,6 +177,14 @@ void main() {
       status: 'progress',
       createdAt: DateTime(2026, 10, 3),
     );
+    final notPaid = _order(
+      'r2',
+      202,
+      customer: 'Flora',
+      total: 600,
+      status: 'approved',
+      createdAt: DateTime(2026, 10, 3),
+    );
     final canceled = _order(
       'c1',
       201,
@@ -189,7 +197,7 @@ void main() {
       tester,
       storeWith(
         month: [paid, ana, running, canceled],
-        open: [ana, bia1, bia2, running],
+        open: [ana, bia1, bia2, running, notPaid],
       ),
     );
 
@@ -201,7 +209,7 @@ void main() {
     expect(find.text(money(10250)), findsOneWidget);
     expect(find.text('Hoje'), findsOneWidget);
     expect(find.text('A receber'), findsOneWidget);
-    expect(find.text(money(1730)), findsOneWidget);
+    expect(find.text(money(2330)), findsOneWidget); // 1.730 + saldo de 600
     expect(find.text('Em andamento'), findsOneWidget);
     expect(find.text(money(600)), findsOneWidget);
     expect(find.text('Próxima cobrança'), findsOneWidget);
@@ -287,6 +295,37 @@ void main() {
     final ya = tester.getTopLeft(find.byKey(const ValueKey('debtor-Ana'))).dy;
     final yb = tester.getTopLeft(find.byKey(const ValueKey('debtor-Bia'))).dy;
     expect(ya, lessThan(yb));
+  });
+
+  testWidgets('A receber separates completed and open jobs', (tester) async {
+    final deposit = _order(
+      'd1',
+      5,
+      customer: 'Dora',
+      total: 250,
+      paid: 100,
+      status: 'progress',
+      createdAt: DateTime(2026, 10, 3),
+    );
+    await pumpTab(tester, storeWith(open: [ana, deposit]));
+
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('financialReceivable')),
+        matching: find.text(money(ana.total! - (ana.paidAmount ?? 0) + 150)),
+      ),
+      findsOneWidget,
+    );
+
+    await openReceivable(tester);
+
+    expect(find.text('Serviços concluídos'), findsOneWidget);
+    expect(find.text('Serviços em aberto'), findsOneWidget);
+    expect(find.text('Dora'), findsOneWidget);
+    expect(find.text(money(150)), findsOneWidget);
+    final done = tester.getTopLeft(find.text('Serviços concluídos')).dy;
+    final open = tester.getTopLeft(find.text('Serviços em aberto')).dy;
+    expect(done, lessThan(open));
   });
 
   testWidgets('A receber with nobody shows the empty state', (tester) async {
@@ -403,8 +442,7 @@ void main() {
       'r1',
       200,
       customer: 'Dora',
-      total: 700,
-      paid: 100,
+      total: 600,
       status: 'approved',
       createdAt: DateTime(2026, 10, 3),
     );
@@ -427,7 +465,7 @@ void main() {
 
     expect(find.text('${money(900)} em 2 OS'), findsOneWidget);
     expect(find.text('OS 200 · desde 03/10'), findsOneWidget);
-    expect(find.text(money(600)), findsOneWidget); // balance, not the total
+    expect(find.text(money(600)), findsOneWidget);
     expect(find.text('Ana'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('order-r1')));
@@ -767,4 +805,26 @@ void main() {
       expect(calls, ['create:a1:1250.0', 'share:a1']);
     },
   );
+
+  testWidgets('reloads when the tab comes back on screen', (tester) async {
+    final calls = <int>[];
+    final store = storeWith(monthCalls: calls);
+    Widget tab(bool onScreen) => CupertinoApp(
+      locale: const Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: TickerMode(enabled: onScreen, child: FinancialTab(store: store)),
+    );
+    await tester.pumpWidget(tab(true));
+    await tester.pumpAndSettle();
+    final loaded = calls.length;
+
+    await tester.pumpWidget(tab(false));
+    await tester.pumpAndSettle();
+    expect(calls.length, loaded);
+
+    await tester.pumpWidget(tab(true));
+    await tester.pumpAndSettle();
+    expect(calls.length, greaterThan(loaded));
+  });
 }

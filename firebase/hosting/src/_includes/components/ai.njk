@@ -1,0 +1,22 @@
+{# AI section — one photo beside a ruled list #}
+{% set ai = data.ai %}
+<section class="ai" id="ia">
+    <div class="wrap ai__grid">
+        <figure class="ai__photo">
+            <img src="{{ relPath }}assets/images/site/ai-electrician.webp" alt="{{ ai.photoAlt }}" loading="lazy" decoding="async" width="800" height="993">
+            <figcaption class="tag">{{ ai.photoLabel }}</figcaption>
+        </figure>
+        <div>
+            <h2>{{ ai.title }}</h2>
+            <ul class="ai__list" role="list">
+                {% for item in ai.items %}
+                <li>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.text }}</p>
+                    {% if item.quote %}<q>{{ item.quote }}</q>{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>

@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:praticos/models/order.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/screens/order/new_order_offers.dart';
 import 'package:praticos/screens/order/order_screen_v2.dart';
+import 'package:praticos/services/notification_tap_handler.dart';
 
 /// `/order`: the order screen ([OrderScreenV2]). It reads the route
 /// arguments (`order`, and `scrollToComments` / `commentId` from a
@@ -25,19 +30,24 @@ class OrderRoute extends StatelessWidget {
 /// [repeat] starts the order with "Repetir" turned on (from Contratos).
 /// [onCreated] gets the new order id once it is saved (files shared from
 /// another app are attached then). [startTalking] opens it already listening,
-/// from the assistant's first-use sheet. Resolves with `true` on "✓".
+/// from the assistant's first-use sheet. Resolves with `true` on "✓"; the
+/// offers that follow a save ([runNewOrderOffers]) do not hold it up.
 Future<Object?> openNewOrder(
   BuildContext context, {
   bool repeat = false,
   bool startTalking = false,
   void Function(String orderId)? onCreated,
-}) {
-  final arguments = newOrderArguments(
-    repeat: repeat,
-    startTalking: startTalking,
-    onCreated: onCreated,
-  );
-  return Navigator.of(context, rootNavigator: true).push<Object?>(
+}) async {
+  final saved = Completer<Order>();
+  final arguments = {
+    ...?newOrderArguments(
+      repeat: repeat,
+      startTalking: startTalking,
+      onCreated: onCreated,
+    ),
+    'onSaved': saved.complete,
+  };
+  final result = await Navigator.of(context, rootNavigator: true).push<Object?>(
     CupertinoSheetRoute<Object?>(
       enableDrag: false,
       builder: (_) => Navigator(
@@ -61,7 +71,23 @@ Future<Object?> openNewOrder(
       ),
     ),
   );
+  if (result == true) unawaited(_offersAfterSave(saved.future));
+  return result;
 }
+
+/// Saving offline never gives the order an id: then only what does not need
+/// it is offered. The sheet's own context is gone by now.
+Future<void> _offersAfterSave(Future<Order> saved) async {
+  final order = await saved
+      .then<Order?>((order) => order)
+      .timeout(_savedWait, onTimeout: () => null);
+  final context = NotificationTapHandler.navigatorKey.currentContext;
+  if (context != null && context.mounted) {
+    await runNewOrderOffers(context, order);
+  }
+}
+
+const _savedWait = Duration(seconds: 3);
 
 /// Route arguments of the "Nova OS" ([OrderScreenV2] reads them).
 Map<String, dynamic>? newOrderArguments({

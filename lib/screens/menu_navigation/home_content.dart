@@ -20,9 +20,9 @@ import 'package:praticos/theme/app_typography.dart';
 /// wires it to the order store.
 ///
 /// Zones: top bar (bell, profile), large title with a one-line summary,
-/// filter buttons ("Em aberto | Concluídas | Todas"), and the list in the
-/// style of Mail. Search is hidden until the list is pulled down. "Nova OS"
-/// is the blue "+" beside the tabs ([NewOrderTabButton]), not on this screen.
+/// the search field, filter buttons ("Em aberto | Orçamentos | Concluídas |
+/// Todas"), and the list in the style of Mail. "Nova OS" is the blue "+"
+/// beside the tabs ([NewOrderTabButton]), not on this screen.
 class HomeContent extends StatefulWidget {
   const HomeContent({
     super.key,
@@ -103,9 +103,6 @@ class HomeContent extends StatefulWidget {
   /// Clock, for tests.
   final DateTime Function()? now;
 
-  /// How far the list must be pulled down to show the search field.
-  static const double pullToSearch = 48;
-
   @override
   State<HomeContent> createState() => _HomeContentState();
 }
@@ -114,12 +111,7 @@ class _HomeContentState extends State<HomeContent> {
   final ScrollController _scroll = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
-  final GlobalKey _searchKey = GlobalKey();
   String _query = '';
-
-  /// Search shows up when the list is pulled down (like Mail and Notes) and
-  /// stays until the list is scrolled away with an empty field.
-  bool _searchVisible = false;
 
   DateTime get _now => (widget.now ?? DateTime.now)();
 
@@ -127,14 +119,6 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-  }
-
-  @override
-  void didUpdateWidget(HomeContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.view != widget.view && _query.isEmpty) {
-      _searchVisible = false;
-    }
   }
 
   @override
@@ -151,19 +135,6 @@ class _HomeContentState extends State<HomeContent> {
     if (position.extentAfter < 200 && widget.hasMore && !widget.isLoading) {
       widget.onLoadMore();
     }
-    if (!_searchVisible && position.pixels < -HomeContent.pullToSearch) {
-      setState(() => _searchVisible = true);
-    } else if (_searchVisible &&
-        _query.isEmpty &&
-        !_searchFocus.hasFocus &&
-        position.pixels > 300) {
-      // Hide it without moving the rows under the finger.
-      final height = _searchKey.currentContext?.size?.height ?? 0;
-      setState(() => _searchVisible = false);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scroll.hasClients) _scroll.jumpTo(_scroll.offset - height);
-      });
-    }
   }
 
   void _clearSearch() {
@@ -178,13 +149,16 @@ class _HomeContentState extends State<HomeContent> {
       !widget.isLoading &&
       !widget.loadFailed &&
       widget.customerFilterName == null &&
-      widget.view != HomeView.done;
+      widget.view != HomeView.done &&
+      widget.view != HomeView.quotes;
 
   /// Orders of the current view before search ("Minhas" keeps only the ones
-  /// assigned to the user).
-  List<Order> get _baseOrders => widget.view == HomeView.mine
-      ? HomeRules.assignedTo(widget.orders, widget.currentUserId)
-      : widget.orders;
+  /// assigned to the user, "Orçamentos" only the quotes).
+  List<Order> get _baseOrders => switch (widget.view) {
+    HomeView.mine => HomeRules.assignedTo(widget.orders, widget.currentUserId),
+    HomeView.quotes => HomeRules.waitingQuotes(widget.orders),
+    _ => widget.orders,
+  };
 
   /// Technician's next visit today, shown in the "Agora" block.
   Order? get _nextVisit => widget.view == HomeView.mine && _query.isEmpty
@@ -193,18 +167,15 @@ class _HomeContentState extends State<HomeContent> {
 
   List<Order> get _visibleOrders {
     if (_query.isEmpty) return _baseOrders;
-    return _baseOrders.where((order) {
-      final number = order.number?.toString().toLowerCase() ?? '';
-      final customer = order.customer?.name?.toLowerCase() ?? '';
-      final devices = order.effectiveDevices;
-      return number.contains(_query) ||
-          customer.contains(_query) ||
-          devices.any(
-            (d) =>
-                (d.name?.toLowerCase() ?? '').contains(_query) ||
-                (d.serial?.toLowerCase() ?? '').contains(_query),
-          );
-    }).toList();
+    return _baseOrders
+        .where(
+          (order) => HomeRules.matchesSearch(
+            order,
+            _query,
+            widget.statusLabel(order.status),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -217,7 +188,6 @@ class _HomeContentState extends State<HomeContent> {
       backgroundColor: AppColors.background.resolveFrom(context),
       child: CustomScrollView(
         controller: _scroll,
-        // Bouncing everywhere: pulling past the top is what shows search.
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
@@ -315,7 +285,9 @@ class _HomeContentState extends State<HomeContent> {
         base.isNotEmpty &&
         widget.customerFilterName == null) {
       final String text;
-      if (widget.view == HomeView.mine) {
+      if (widget.view == HomeView.quotes) {
+        text = l10n.homeQuotesWaiting(base.length);
+      } else if (widget.view == HomeView.mine) {
         final today = HomeRules.scheduledToday(base, _now).length;
         text = today > 0
             ? l10n.homeWithYouToday(today)
@@ -329,9 +301,7 @@ class _HomeContentState extends State<HomeContent> {
       slivers.add(_buildSubtitle(context, text));
     }
 
-    if (_searchVisible) {
-      slivers.add(SliverToBoxAdapter(child: _buildSearch(context)));
-    }
+    slivers.add(SliverToBoxAdapter(child: _buildSearch(context)));
 
     if (widget.banner != null) {
       slivers.add(SliverToBoxAdapter(child: widget.banner));
@@ -385,6 +355,8 @@ class _HomeContentState extends State<HomeContent> {
                 ? l10n.noOrdersWithYou
                 : widget.view == HomeView.open
                 ? l10n.noOpenOrders
+                : widget.view == HomeView.quotes
+                ? l10n.noQuotesWaiting
                 : l10n.noOrdersInView,
             actionLabel: mainView ? l10n.seeAllOrders : null,
             onAction: mainView
@@ -457,7 +429,6 @@ class _HomeContentState extends State<HomeContent> {
     final l10n = context.l10n;
     final device = widget.deviceLabel;
     return Padding(
-      key: _searchKey,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.pageMargin,
         AppSpacing.sm,
@@ -475,8 +446,9 @@ class _HomeContentState extends State<HomeContent> {
                 placeholder: device == null
                     ? l10n.homeSearchHint
                     : l10n.homeSearchHintDevice(device.toLowerCase()),
-                onChanged: (value) =>
-                    setState(() => _query = value.trim().toLowerCase()),
+                onChanged: (value) => setState(
+                  () => _query = HomeRules.searchKey(value.trim()),
+                ),
               ),
             ),
           ),
@@ -562,6 +534,7 @@ class _HomeContentState extends State<HomeContent> {
         ? [(HomeView.mine, l10n.filterMine), (HomeView.all, l10n.filterAll)]
         : [
             (HomeView.open, l10n.filterOpen),
+            (HomeView.quotes, l10n.filterQuotes),
             (HomeView.done, l10n.filterDone),
             (HomeView.all, l10n.filterAll),
           ];
@@ -656,6 +629,7 @@ class _HomeContentState extends State<HomeContent> {
         }
       case HomeView.open:
         _addRows(context, items, HomeRules.sortOpen(visible, now), now);
+      case HomeView.quotes:
       case HomeView.done:
         _addRows(context, items, visible, now);
       case HomeView.all:
