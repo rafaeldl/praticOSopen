@@ -4,7 +4,7 @@ pageType: segment
 ---
 {# Hallmark · genre: modern-minimal · macrostructure: Photographic · theme: "Campo" (design.md)
  # Segment landing, same language as the home: navy photo hero with the trade's order card →
- # what the trade loses vs. gains → feature tabs → FAQ → final CTA.
+ # feature tabs → what the trade loses vs. gains → moving trades → FAQ → final CTA.
  # Data: _data/segments/<slug>.json, one object per language. #}
 {% set segmentData = segments[segmentSlug] %}
 {% set data = segmentData[langCode] | default(segmentData.pt) %}
@@ -16,9 +16,10 @@ pageType: segment
 }[langCode] | default({}) %}
 
 {% include "components/segment/hero.njk" %}
-{% include "components/segment/problems.njk" %}
 {% include "components/segment/workflow.njk" %}
+{% include "components/segment/problems.njk" %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
+{% include "components/segments-index.njk" %}
 {% include "components/segment/faq.njk" %}
 {% include "components/download.njk" %}
 <script src="{{ relPath }}js/home.js" defer></script>

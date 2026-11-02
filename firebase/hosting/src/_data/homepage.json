@@ -160,7 +160,7 @@
         "name": "App Store"
       },
       "playStore": {
-        "label": "Disponível no",
+        "label": "Baixar no",
         "name": "Google Play"
       },
       "contactLead": "Ficou com dúvida?",
@@ -538,7 +538,7 @@
         "name": "App Store"
       },
       "playStore": {
-        "label": "Disponible en",
+        "label": "Descargar en",
         "name": "Google Play"
       },
       "contactLead": "¿Dudas?",

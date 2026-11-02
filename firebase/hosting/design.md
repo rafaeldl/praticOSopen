@@ -108,6 +108,12 @@ Wordmark, tokens, fonts, CTA voice, section-head rule, nav, footer.
 Macrostructure within their family, ordering of sections, whether a page shows
 the ticket.
 
+## Shared chrome
+
+The header, final band and footer are navy in both themes, as in the prototype.
+The bar keeps links, language and theme controls. The final band uses two plain
+buttons, not store cards. The WhatsApp float is icon only, so it never covers text.
+
 ## Segment pages
 
 Segment pages use the same language as the home: navy photo hero, yellow words in

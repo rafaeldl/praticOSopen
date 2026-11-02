@@ -20,11 +20,11 @@
 .seg-order .demo__done { margin: 0; }
 
 /* ---------- What the trade gains ---------- */
-.seg-gains { background: var(--color-paper-2); padding-block: var(--space-3xl); }
+.seg-gains { padding-block: var(--space-2xl) var(--space-3xl); }
 .seg-gains h2, .seg-faq h2 { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.08; letter-spacing: -0.014em; max-width: 22ch; }
 .seg-gains__list { margin-top: var(--space-lg); }
 .seg-gains__list li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-xl); padding-block: var(--space-md); border-top: var(--rule); }
-.seg-gains__list h3 { font-size: 1.3rem; line-height: 1.2; }
+.seg-gains__list h3 { font-size: 1.45rem; line-height: 1.2; }
 .seg-gains__list li p { margin-top: var(--space-3xs); color: var(--color-muted); max-width: 46ch; }
 .seg-gains__list .seg-gains__answer { position: relative; margin-top: 0; padding-left: 28px; color: var(--color-ink); font-weight: 500; }
 .seg-gains__answer::before { content: ""; position: absolute; left: 2px; top: 0.34em; width: 13px; height: 7px; border-left: 3px solid var(--color-success); border-bottom: 3px solid var(--color-success); transform: rotate(-45deg); }
