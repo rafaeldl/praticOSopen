@@ -1,11 +1,9 @@
 {# Conversational FAQ — native <details> accordion + FAQPage structured data #}
 {% set fq = data.faq %}
-<section class="section seg-faq" id="perguntas">
+<section class="seg-faq" id="perguntas">
     <div class="wrap">
-        <div class="section-head">
-            <h2>{{ fq.title | default(ui.faqTitle) }}{% if fq.titleHighlight %} {{ fq.titleHighlight }}{% endif %}</h2>
-            {% if fq.lede or fq.subtitle %}<p>{{ fq.lede | default(fq.subtitle) }}</p>{% endif %}
-        </div>
+        <h2>{{ fq.title }}</h2>
+        {% if fq.lede %}<p class="work__lede">{{ fq.lede }}</p>{% endif %}
         <div class="seg-faq__list">
             {% for item in fq.items %}
             <details class="seg-faq__item">

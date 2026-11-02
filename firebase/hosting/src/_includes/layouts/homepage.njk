@@ -2,11 +2,13 @@
 layout: layouts/base.njk
 pageType: homepage
 ---
-{# Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow · design-system: design.md · designed-as-app #}
+{# Hallmark · genre: modern-minimal · macrostructure: Photographic · design-system: design.md · designed-as-app #}
 {% set data = homepage[langCode] | default(homepage.pt) %}
 
 {% include "components/hero.njk" %}
 {% include "components/workflow.njk" %}
+{% include "components/ai.njk" %}
 {% if site.flags.whatsappBot %}{% include "components/whatsapp-section.njk" %}{% endif %}
 {% include "components/segments-index.njk" %}
 {% include "components/download.njk" %}
+<script src="{{ relPath }}js/home.js" defer></script>

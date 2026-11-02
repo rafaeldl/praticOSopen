@@ -9,9 +9,9 @@
     "ogTitle": "Sistema para Bicicletaria | PraticOS",
     "ogDescription": "OS da bicicletaria no celular: ficha completa da bike, fotos na entrada, orçamento aprovado por link e histórico de cada revisão.",
     "hero": {
-      "title": "A ficha da bike, o orçamento",
-      "titleMark": "e o histórico juntos.",
-      "lede": "PraticOS é o app de ordem de serviço para bicicletaria. Cadastre a bike com aro, grupo, freio e número de série, registre a entrada com fotos, mande o orçamento por link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "title": "Cada bike com o dono certo.",
+      "titleMark": "Cada peça na conta.",
+      "lede": "PraticOS é o app de ordem de serviço para bicicletaria. Você sabe o que já foi trocado em cada bike, o cliente aprova o orçamento pelo celular e nenhuma peça fica fora da conta.",
       "ctaPrimary": "Baixar grátis",
       "ctaSecondary": "Ver como funciona",
       "note": "Comece grátis · iOS e Android · planos pagos no app",
@@ -54,85 +54,83 @@
       }
     },
     "problems": {
-      "title": "Onde a bicicletaria perde dinheiro",
-      "lede": "Não é falta de bike na oficina. É a câmara que não entrou na conta, a revisão feita sem saber o que já foi trocado e a bike pronta que ninguém avisou.",
+      "title": "Onde a bicicletaria deixa dinheiro na mesa",
+      "lede": "Bike na oficina não falta. O que custa caro é a câmara fora da conta, a revisão sem saber o que já foi trocado e a bike pronta que ninguém avisou.",
       "answerLabel": "No PraticOS",
       "items": [
         {
           "problem": "Bike parecida, dono errado",
           "detail": "Duas MTBs pretas aro 29 penduradas lado a lado. Na entrega, alguém sai com a bicicleta do outro.",
-          "answer": "Cada OS tem a ficha da bike: marca, modelo, cor, aro, tamanho do quadro e número de série. A busca encontra a OS pelo número de série ou pelo nome do cliente."
+          "answer": "Cada OS traz marca, modelo, cor, aro, tamanho do quadro e número de série. Você entrega a bike certa para o dono certo."
         },
         {
           "problem": "Revisão feita no escuro",
           "detail": "A bike volta e ninguém lembra se a corrente ou as pastilhas foram trocadas na última revisão.",
-          "answer": "Busque pelo número de série ou pelo cliente e veja todas as OS daquela bike, com serviços, peças e fotos."
+          "answer": "Busque pelo número de série ou pelo cliente e veja tudo que já foi feito, com serviços, peças e fotos. Você começa a revisão sabendo toda a história."
         },
         {
           "problem": "Peça usada que não foi cobrada",
           "detail": "Câmara, cabo, pastilha, fita de guidão. Peças pequenas que somem da conta.",
-          "answer": "Serviços e peças entram na OS com preço do seu catálogo, e o total é somado na hora."
+          "answer": "Serviços e peças entram com o preço do seu catálogo e o total sai na hora. Nada fica fora da conta."
         },
         {
           "problem": "“O quadro já estava riscado?”",
           "detail": "O cliente aponta um risco na pintura e você não tem como mostrar como a bike chegou.",
-          "answer": "Fotografe a bike na entrada, direto na OS. Se quiser padronizar, monte um checklist de entrada com quadro, rodas, freios e transmissão."
+          "answer": "Fotografe a bike na entrada. Você mostra como ela chegou e evita discussão."
         },
         {
           "problem": "Bike pronta ocupando espaço",
           "detail": "A oficina lota de bicicletas prontas e o cliente nem sabe que já pode buscar.",
-          "answer": "Marque a OS como concluída e a lista do Início mostra quais bikes já podem sair. O cliente vê a mesma situação pelo link."
+          "answer": "Conclua a OS e veja quais bikes já podem sair. O cliente acompanha tudo pelo link."
         },
         {
           "problem": "Mês fechado sem saber quanto entrou",
           "detail": "Serviço de oficina e venda de peça anotados no mesmo caderno. Ninguém sabe quem ainda deve.",
-          "answer": "Registre pagamentos inteiros ou em partes. O Financeiro mostra quanto falta receber e de quem, e o relatório do mês mostra o que entrou."
+          "answer": "Receba inteiro ou em partes. Você vê quem ainda deve e o que entrou no mês."
         }
       ]
     },
     "workflow": {
-      "title": "Como a bike passa pela oficina no PraticOS",
-      "lede": "Do balcão à retirada, cada etapa fica registrada na OS da bicicleta.",
+      "title": "Do balcão à retirada, sem nada esquecido",
+      "lede": "Menos tempo anotando, mais tempo na oficina. A bike entra, o cliente aprova e você recebe.",
       "stages": [
         {
           "number": "01",
-          "title": "Fale o serviço e a OS se preenche",
+          "title": "Fale o serviço e a IA faz a OS",
+          "tab": "Falar",
           "text": "Na Nova OS, toque em Falar e diga “Caloi da Marina, revisão completa e troca de corrente”, ou tire uma foto do pedido anotado. A IA preenche cliente, bike, serviços e peças com os preços do seu catálogo. Você confere e salva.",
           "facts": [
             "O que a IA preencheu fica marcado com ✦, e dá para desfazer",
             "Corrija falando: “a corrente é 120”",
             "Ficha da bike com tipo, aro, quadro, grupo, freio e número de série"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nova OS preenchida pelo assistente de IA, com os campos marcados e a barra Foto e Falar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registre como ela chegou",
-          "text": "Fotografe a bike na OS. Para padronizar a entrada, crie o seu checklist com os itens que a oficina confere em toda bicicleta.",
+          "title": "Mostre como ela chegou",
+          "tab": "Registrar",
+          "text": "Fotografe a bike na OS. Quer padronizar a entrada? Crie o seu checklist com o que a oficina confere em toda bicicleta.",
           "facts": [
-            "Campos de texto, número, sim/não, lista e foto",
+            "Do seu jeito, com sim/não, anotações e fotos",
             "Fotos em cada item do checklist",
             "O mesmo modelo para todas as revisões"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de entrada com fotos de avarias e os itens conferidos"
+          ]
         },
         {
           "number": "03",
-          "title": "Mande o orçamento por link",
+          "title": "Cliente aprova pelo celular",
+          "tab": "Aprovar",
           "text": "Revisão, regulagem, sangria e peças saem do seu catálogo, já com preço. O cliente abre a OS no navegador, aprova e deixa comentários.",
           "facts": [
-            "Aprovação registrada na própria OS",
+            "O “sim” do cliente fica guardado",
             "Cliente vê quando a bike fica pronta",
             "PDF da OS para imprimir ou enviar"
-          ],
-          "image": "order.png",
-          "alt": "Tela da OS com o cliente, a situação, o botão do próximo passo, serviços, peças e o que falta receber"
+          ]
         },
         {
           "number": "04",
           "title": "Entregue a bike e receba",
+          "tab": "Receber",
           "text": "Registre o pagamento inteiro ou em parcelas, com desconto se precisar. Na aba Financeiro você vê quem ainda deve e manda a cobrança para o cliente.",
           "facts": [
             "Pagamento em partes e desconto na mesma OS",
@@ -145,8 +143,8 @@
       ]
     },
     "faq": {
-      "title": "Perguntas de quem tem bicicletaria",
-      "lede": "Se a sua não estiver aqui, mande um e-mail — quem responde é a equipe do PraticOS.",
+      "title": "Dúvidas de quem tem bicicletaria",
+      "lede": "Não achou a sua? Mande um e-mail. Quem responde é a equipe do PraticOS.",
       "items": [
         {
           "question": "Preciso pagar para usar?",
@@ -154,7 +152,7 @@
         },
         {
           "question": "Serve para oficina de MTB, speed e e-bike?",
-          "answer": "Sim. Ao escolher o segmento de bicicletaria, você indica a especialidade — oficina geral, MTB, speed ou e-bike — e a ficha da bike traz tipo, aro, quadro, marchas, freio e suspensão."
+          "answer": "Sim. Escolha bicicletaria, diga a sua especialidade (oficina geral, MTB, speed ou e-bike) e a ficha da bike já vem com tipo, aro, quadro, marchas, freio e suspensão."
         },
         {
           "question": "Consigo ver o que já foi feito numa bike?",
@@ -180,9 +178,9 @@
     "ogTitle": "Bike Shop Software | PraticOS",
     "ogDescription": "Bike shop work orders on your phone: full bike profile, check-in photos, quotes approved by link and the history of every tune-up.",
     "hero": {
-      "title": "The bike's specs, the quote",
-      "titleMark": "and history together.",
-      "lede": "PraticOS is the work order app for bike shops. Add the bike with wheel size, groupset, brakes and serial number, record its condition with photos, send the quote as a link for the customer to approve and record the payment — all from your phone.",
+      "title": "Every bike with the right owner.",
+      "titleMark": "Every part on the bill.",
+      "lede": "PraticOS is the work order app for bike shops. Know what was replaced on every bike, get quotes approved from the customer's phone and keep every part on the bill.",
       "ctaPrimary": "Download free",
       "ctaSecondary": "See how it works",
       "note": "Start free · iOS and Android · paid plans in the app",
@@ -225,85 +223,83 @@
       }
     },
     "problems": {
-      "title": "Where a bike shop loses money",
-      "lede": "It's not a lack of bikes in the stand. It's the tube that never made it onto the bill, the tune-up done without knowing what was replaced and the finished bike nobody was told about.",
+      "title": "Where a bike shop's money slips away",
+      "lede": "There's no shortage of bikes in the stand. What costs you is the tube left off the bill, the tune-up done without knowing what was replaced and the finished bike nobody was told about.",
       "answerLabel": "In PraticOS",
       "items": [
         {
           "problem": "Similar bike, wrong owner",
           "detail": "Two black 29″ mountain bikes hanging side by side. At pickup, someone leaves on the other person's bike.",
-          "answer": "Each work order holds the bike profile: brand, model, color, wheel size, frame size and serial number. Search finds it by serial number or customer name."
+          "answer": "Every work order holds the brand, model, color, wheel size, frame size and serial number. The right bike goes back to the right owner."
         },
         {
           "problem": "Tune-ups done blind",
           "detail": "The bike comes back and nobody remembers whether the chain or pads were replaced last time.",
-          "answer": "Search by serial number or customer and see every work order for that bike, with services, parts and photos."
+          "answer": "Search by serial number or customer and see everything done on that bike, with services, parts and photos. You start the tune-up knowing the whole story."
         },
         {
           "problem": "Parts used but never billed",
           "detail": "Tubes, cables, pads, bar tape. Small parts that slip off the bill.",
-          "answer": "Services and parts go on the work order with prices from your catalog, and the total adds up as you go."
+          "answer": "Services and parts go on with your catalog prices and the total adds up as you go. Nothing left off the bill."
         },
         {
           "problem": "“Was that scratch already there?”",
           "detail": "The customer points to a scratch on the frame and you can't show how the bike came in.",
-          "answer": "Photograph the bike at check-in, right on the work order. To standardize it, build a check-in checklist with frame, wheels, brakes and drivetrain."
+          "answer": "Photograph the bike at check-in. You can show how it came in and avoid the argument."
         },
         {
           "problem": "Finished bikes taking up space",
           "detail": "The shop fills up with finished bikes and the customers don't know they can pick them up.",
-          "answer": "Mark the work order as completed and the Home list shows which bikes can go. The customer sees the same status on the link."
+          "answer": "Complete the work order and see which bikes can go. The customer follows it all on the link."
         },
         {
           "problem": "Closing the month without knowing what came in",
           "detail": "Service work and parts sales in the same notebook. Nobody knows who still owes you.",
-          "answer": "Record full or partial payments. Financial shows what is still owed and by whom, and the monthly report shows what came in."
+          "answer": "Get paid in full or in parts. See who still owes you and what came in this month."
         }
       ]
     },
     "workflow": {
-      "title": "How a bike moves through the shop in PraticOS",
-      "lede": "From the counter to pickup, every step is recorded on the bike's work order.",
+      "title": "From the counter to pickup, nothing forgotten",
+      "lede": "Less time writing things down, more time in the shop. The bike comes in, the customer approves and you get paid.",
       "stages": [
         {
           "number": "01",
-          "title": "Say the job and the work order fills itself in",
+          "title": "Say the job and AI writes the order",
+          "tab": "Speak",
           "text": "On New order, tap Speak and say “Marina's Caloi, full tune-up and new chain”, or take a photo of the written order. The AI fills in the customer, bike, services and parts with your catalog prices. You check it and save.",
           "facts": [
             "Everything the AI filled in is marked with ✦, and you can undo it",
             "Fix it by speaking: “the chain is 120”",
             "Bike profile with type, wheel size, frame, groupset, brakes and serial number"
-          ],
-          "image": "ai-order.png",
-          "alt": "New order filled in by the AI assistant, with the filled fields marked and the Photo and Speak bar"
+          ]
         },
         {
           "number": "02",
-          "title": "Record how it came in",
-          "text": "Photograph the bike on the work order. To standardize check-in, build your own checklist with what the shop checks on every bike.",
+          "title": "Show how it came in",
+          "tab": "Record",
+          "text": "Photograph the bike on the work order. Want a standard check-in? Build your own checklist with what the shop checks on every bike.",
           "facts": [
-            "Text, number, yes/no, list and photo fields",
+            "Your way, with yes/no, notes and photos",
             "Photos on every checklist item",
             "One template for every tune-up"
-          ],
-          "image": "checklist.png",
-          "alt": "Intake checklist with damage photos and the checked items"
+          ]
         },
         {
           "number": "03",
-          "title": "Send the quote as a link",
+          "title": "Customers approve from their phone",
+          "tab": "Approve",
           "text": "Tune-ups, adjustments, brake bleeds and parts come from your catalog, already priced. The customer opens the work order in a browser, approves it and leaves comments.",
           "facts": [
-            "Approval recorded on the work order",
+            "The customer's yes is on file",
             "Customers see when the bike is ready",
             "Work order PDF to print or send"
-          ],
-          "image": "order.png",
-          "alt": "Work order screen with the customer, status, next-step button, services, parts and what is still owed"
+          ]
         },
         {
           "number": "04",
           "title": "Hand over the bike and get paid",
+          "tab": "Get paid",
           "text": "Record the payment in full or in parts, with a discount if needed. The Financial tab shows who still owes you, and you can send the customer a payment request.",
           "facts": [
             "Payment in parts and discount on the same work order",
@@ -317,7 +313,7 @@
     },
     "faq": {
       "title": "Questions from bike shop owners",
-      "lede": "If yours isn't here, send us an email — the PraticOS team answers it.",
+      "lede": "Can't find yours? Send us an email and the PraticOS team will answer.",
       "items": [
         {
           "question": "Do I have to pay to use it?",
@@ -325,7 +321,7 @@
         },
         {
           "question": "Does it work for mountain, road and e-bike shops?",
-          "answer": "Yes. When you pick the bike shop segment you choose a specialty — general workshop, MTB, road or e-bike — and the bike profile has type, wheel size, frame, gears, brakes and suspension."
+          "answer": "Yes. Pick the bike shop option, choose your specialty (general workshop, MTB, road or e-bike) and the bike profile comes with type, wheel size, frame, gears, brakes and suspension."
         },
         {
           "question": "Can I see what was already done on a bike?",
@@ -351,9 +347,9 @@
     "ogTitle": "Sistema para Bicicletería | PraticOS",
     "ogDescription": "Las órdenes de la bicicletería en el celular: ficha completa de la bici, fotos al ingreso, presupuesto aprobado por link e historial de cada service.",
     "hero": {
-      "title": "La ficha de la bici, el presupuesto",
-      "titleMark": "y su historial.",
-      "lede": "PraticOS es la app de órdenes de servicio para bicicleterías. Registra la bici con rodado, grupo, frenos y número de serie, documenta cómo llegó con fotos, envía el presupuesto por link para que el cliente lo apruebe y registra el pago — todo desde el celular.",
+      "title": "Cada bici con su dueño.",
+      "titleMark": "Cada repuesto en la cuenta.",
+      "lede": "PraticOS es la app de órdenes de servicio para bicicleterías. Sabes qué se cambió en cada bici, el cliente aprueba el presupuesto desde el celular y ningún repuesto queda fuera de la cuenta.",
       "ctaPrimary": "Descargar gratis",
       "ctaSecondary": "Ver cómo funciona",
       "note": "Empieza gratis · iOS y Android · planes pagos en la app",
@@ -396,85 +392,83 @@
       }
     },
     "problems": {
-      "title": "Dónde pierde plata la bicicletería",
-      "lede": "No es falta de bicis en el taller. Es la cámara que no entró en la cuenta, el service hecho sin saber qué se cambió y la bici lista que nadie avisó.",
+      "title": "Dónde se le escapa la plata a la bicicletería",
+      "lede": "Bicis en el taller no faltan. Lo que sale caro es la cámara fuera de la cuenta, el service sin saber qué se cambió y la bici lista que nadie avisó.",
       "answerLabel": "En PraticOS",
       "items": [
         {
           "problem": "Bici parecida, dueño equivocado",
           "detail": "Dos MTB negras rodado 29 colgadas una al lado de la otra. Al entregar, alguien se lleva la bici del otro.",
-          "answer": "Cada orden tiene la ficha de la bici: marca, modelo, color, rodado, talla del cuadro y número de serie. La búsqueda la encuentra por número de serie o nombre del cliente."
+          "answer": "Cada orden trae marca, modelo, color, rodado, talla del cuadro y número de serie. La bici correcta vuelve a su dueño."
         },
         {
           "problem": "Service a ciegas",
           "detail": "La bici vuelve y nadie recuerda si la cadena o las pastillas se cambiaron la última vez.",
-          "answer": "Busca por número de serie o por cliente y ve todas las órdenes de esa bici, con servicios, repuestos y fotos."
+          "answer": "Busca por número de serie o por cliente y ve todo lo que se hizo, con servicios, repuestos y fotos. Empiezas el service sabiendo toda la historia."
         },
         {
           "problem": "Repuestos que no se cobraron",
           "detail": "Cámara, cable, pastillas, cinta de manillar. Repuestos chicos que se escapan de la cuenta.",
-          "answer": "Servicios y repuestos entran en la orden con el precio de tu catálogo, y el total se suma al momento."
+          "answer": "Servicios y repuestos entran con el precio de tu catálogo y el total sale al momento. Nada queda fuera de la cuenta."
         },
         {
           "problem": "“¿Ese rayón ya estaba?”",
           "detail": "El cliente señala un rayón en el cuadro y no tienes cómo mostrar cómo llegó la bici.",
-          "answer": "Fotografía la bici al ingreso, directo en la orden. Para estandarizar, arma un checklist de ingreso con cuadro, ruedas, frenos y transmisión."
+          "answer": "Fotografía la bici al ingreso. Muestras cómo llegó y evitas la discusión."
         },
         {
           "problem": "Bicis listas ocupando lugar",
           "detail": "El taller se llena de bicis terminadas y el cliente ni sabe que ya puede retirarla.",
-          "answer": "Marca la orden como completada y la lista de Inicio muestra qué bicis ya pueden salir. El cliente ve el mismo estado en el link."
+          "answer": "Completa la orden y ve qué bicis ya pueden salir. El cliente sigue todo por el link."
         },
         {
           "problem": "Cerrar el mes sin saber cuánto entró",
           "detail": "Trabajo de taller y venta de repuestos en el mismo cuaderno. Nadie sabe quién todavía debe.",
-          "answer": "Registra pagos totales o en partes. Financiero muestra cuánto falta cobrar y de quién, y el informe del mes muestra lo que entró."
+          "answer": "Cobra completo o en partes. Ves quién todavía debe y lo que entró en el mes."
         }
       ]
     },
     "workflow": {
-      "title": "Cómo pasa una bici por el taller en PraticOS",
-      "lede": "Del mostrador al retiro, cada paso queda registrado en la orden de la bicicleta.",
+      "title": "Del mostrador al retiro, sin olvidar nada",
+      "lede": "Menos tiempo anotando, más tiempo en el taller. Entra la bici, el cliente aprueba y tú cobras.",
       "stages": [
         {
           "number": "01",
-          "title": "Di el servicio y la orden se completa",
+          "title": "Di el servicio y la IA arma la orden",
+          "tab": "Hablar",
           "text": "En Nueva OS, toca Hablar y di “Caloi de Marina, service completo y cambio de cadena”, o saca una foto del pedido anotado. La IA completa cliente, bici, servicios y repuestos con los precios de tu catálogo. Tú revisas y guardas.",
           "facts": [
             "Lo que completó la IA queda marcado con ✦, y puedes deshacerlo",
             "Corrige hablando: “la cadena es 120”",
             "Ficha de la bici con tipo, rodado, cuadro, grupo, freno y número de serie"
-          ],
-          "image": "ai-order.png",
-          "alt": "Nueva OS completada por el asistente de IA, con los campos marcados y la barra Foto y Hablar"
+          ]
         },
         {
           "number": "02",
-          "title": "Registra cómo llegó",
-          "text": "Fotografía la bici en la orden. Para estandarizar el ingreso, crea tu checklist con lo que el taller revisa en cada bicicleta.",
+          "title": "Muestra cómo llegó",
+          "tab": "Registrar",
+          "text": "Fotografía la bici en la orden. ¿Quieres un ingreso estándar? Crea tu checklist con lo que el taller revisa en cada bicicleta.",
           "facts": [
-            "Campos de texto, número, sí/no, lista y foto",
+            "A tu manera, con sí/no, notas y fotos",
             "Fotos en cada ítem del checklist",
             "La misma plantilla para todos los services"
-          ],
-          "image": "checklist.png",
-          "alt": "Checklist de ingreso con fotos de daños y los ítems revisados"
+          ]
         },
         {
           "number": "03",
-          "title": "Envía el presupuesto por link",
+          "title": "El cliente aprueba desde el celular",
+          "tab": "Aprobar",
           "text": "Service, ajustes, sangrado de frenos y repuestos salen de tu catálogo, con precio. El cliente abre la orden en el navegador, aprueba y deja comentarios.",
           "facts": [
-            "Aprobación registrada en la propia orden",
+            "El “sí” del cliente queda guardado",
             "El cliente ve cuándo la bici está lista",
             "PDF de la orden para imprimir o enviar"
-          ],
-          "image": "order.png",
-          "alt": "Pantalla de la orden con el cliente, el estado, el botón del próximo paso, servicios, repuestos y lo que falta cobrar"
+          ]
         },
         {
           "number": "04",
           "title": "Entrega la bici y cobra",
+          "tab": "Cobrar",
           "text": "Registra el pago total o en partes, con descuento si hace falta. En la pestaña Financiero ves quién todavía debe y le envías el cobro al cliente.",
           "facts": [
             "Pago en partes y descuento en la misma orden",
@@ -487,8 +481,8 @@
       ]
     },
     "faq": {
-      "title": "Preguntas de quien tiene bicicletería",
-      "lede": "Si la tuya no está aquí, escríbenos un correo — responde el equipo de PraticOS.",
+      "title": "Dudas de quien tiene bicicletería",
+      "lede": "¿No encuentras la tuya? Escríbenos un correo y te responde el equipo de PraticOS.",
       "items": [
         {
           "question": "¿Tengo que pagar para usarlo?",
@@ -496,7 +490,7 @@
         },
         {
           "question": "¿Sirve para talleres de MTB, ruta y e-bike?",
-          "answer": "Sí. Al elegir el segmento de bicicletería indicas la especialidad — taller general, MTB, ruta o e-bike — y la ficha de la bici trae tipo, rodado, cuadro, velocidades, freno y suspensión."
+          "answer": "Sí. Elige bicicletería, indica tu especialidad (taller general, MTB, ruta o e-bike) y la ficha de la bici trae tipo, rodado, cuadro, velocidades, freno y suspensión."
         },
         {
           "question": "¿Puedo ver lo que ya se hizo en una bici?",
