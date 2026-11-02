@@ -432,6 +432,17 @@ class _HomeContentState extends State<HomeContent> {
     return slivers;
   }
 
+  /// "Carlos Mendes · Última: Troca de óleo", or what there is of it.
+  String? _maintenanceSubtitle(BuildContext context, Device device) {
+    final customer = device.nextMaintenanceCustomer?.name?.trim() ?? '';
+    final service = device.nextMaintenanceLastService?.trim() ?? '';
+    final parts = [
+      if (customer.isNotEmpty) customer,
+      if (service.isNotEmpty) context.l10n.maintenanceLastService(service),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
+
   /// "Manutenções chegando": a reminder, outside the order list. It shows the
   /// first few so a busy month does not push the orders off the screen.
   Widget _buildMaintenances(BuildContext context) {
@@ -449,7 +460,7 @@ class _HomeContentState extends State<HomeContent> {
           AppListRow(
             key: ValueKey('home_maintenance_${device.id}'),
             title: device.name ?? '',
-            subtitle: device.nextMaintenanceCustomer?.name,
+            subtitle: _maintenanceSubtitle(context, device),
             trailing: format.formatDate(device.nextMaintenance),
             trailingStyle:
                 device.nextMaintenance?.isBefore(today) ?? false

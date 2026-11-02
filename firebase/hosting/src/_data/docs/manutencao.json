@@ -50,7 +50,7 @@
       {
         "id": "chegando",
         "title": "Manutenções chegando",
-        "intro": "Sete dias antes da data, a manutenção aparece no Início, com cliente, aparelho e data, e fica lá até a data mudar. Nesse dia chega também um aviso no celular, mesmo sem abrir o app.",
+        "intro": "Sete dias antes da data, a manutenção aparece no Início, com cliente, aparelho, data e o que foi feito da última vez, e fica lá até a data mudar. Nesse dia chega também um aviso no celular, mesmo sem abrir o app.",
         "features": [
           {
             "title": "Chamar cliente",
@@ -160,7 +160,7 @@
       {
         "id": "coming",
         "title": "Maintenance coming up",
-        "intro": "Seven days before the date, the maintenance shows on Home with the customer, device and date, and stays there until the date changes. That day a phone notification arrives too, even if the app stays closed.",
+        "intro": "Seven days before the date, the maintenance shows on Home with the customer, device, date and what was done last time, and stays there until the date changes. That day a phone notification arrives too, even if the app stays closed.",
         "features": [
           {
             "title": "Contact customer",
@@ -270,7 +270,7 @@
       {
         "id": "proximos",
         "title": "Mantenimientos próximos",
-        "intro": "Siete días antes de la fecha, el mantenimiento aparece en Inicio con cliente, equipo y fecha, y sigue ahí hasta que la fecha cambie. Ese día también llega un aviso al celular, aunque no abras la app.",
+        "intro": "Siete días antes de la fecha, el mantenimiento aparece en Inicio con cliente, equipo, fecha y lo que se hizo la última vez, y sigue ahí hasta que la fecha cambie. Ese día también llega un aviso al celular, aunque no abras la app.",
         "features": [
           {
             "title": "Contactar al cliente",

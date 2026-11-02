@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -40,6 +41,42 @@ DateTime addMonths(DateTime date, int months) {
 /// Whether a maintenance on [day] is late or within the "chegando" window.
 bool maintenanceIsNear(String? day, DateTime now) =>
     day != null && day.compareTo(maintenanceWindowEnd(now)) <= 0;
+
+/// First word of [name], without extra spaces; empty when there is none.
+String firstName(String? name) {
+  final words = (name ?? '').trim().split(RegExp(r'\s+'));
+  return words.first;
+}
+
+/// Message to the customer, greeting by the first name when there is one.
+String maintenanceWhatsappText(
+  AppLocalizations l10n, {
+  required String? customer,
+  required String device,
+  required String date,
+}) {
+  final name = firstName(customer);
+  return name.isEmpty
+      ? l10n.maintenanceWhatsappMessageNoName(device, date)
+      : l10n.maintenanceWhatsappMessage(name, device, date);
+}
+
+/// Name of the first service of [order] on [deviceId], or null. A line with no
+/// device belongs to all of them.
+String? mainServiceName(Order? order, String? deviceId) {
+  for (final line in order?.services ?? const <OrderService>[]) {
+    if (line.deviceId != null && line.deviceId != deviceId) continue;
+    final name = (line.service?.name ?? line.description ?? '').trim();
+    if (name.isNotEmpty) return name;
+  }
+  return null;
+}
+
+/// [mainServiceName] of [order] for each of [deviceIds] that has one.
+Map<String, String> mainServices(Order? order, Iterable<String> deviceIds) => {
+  for (final id in deviceIds)
+    if (mainServiceName(order, id) case final name?) id: name,
+};
 
 /// `wa.me` link with [message] ready for the person to review and send, or
 /// null when there is no number to call.
@@ -116,6 +153,7 @@ class DeviceMaintenanceService {
     Iterable<String> deviceIds, {
     required DateTime? date,
     CustomerAggr? customer,
+    Map<String, String> lastServices = const {},
     VoidCallback? onFailed,
   }) {
     final companyId = _companyId;
@@ -127,6 +165,7 @@ class DeviceMaintenanceService {
         ids,
         day: date == null ? null : maintenanceDay(date),
         customer: customer,
+        lastServices: lastServices,
         actor: Global.userAggr,
       ),
     ).catchError((Object e) {

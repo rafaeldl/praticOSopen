@@ -3014,5 +3014,9 @@
   "maintenanceNoPhone": "Cliente sem telefone",
   "maintenanceWhatsappError": "Não foi possível abrir o WhatsApp",
   "maintenanceWhatsappMessage": "Olá, {customer}! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?",
-  "@maintenanceWhatsappMessage": {"placeholders": {"customer": {"type": "String"}, "device": {"type": "String"}, "date": {"type": "String"}}}
+  "@maintenanceWhatsappMessage": {"placeholders": {"customer": {"type": "String"}, "device": {"type": "String"}, "date": {"type": "String"}}},
+  "maintenanceWhatsappMessageNoName": "Olá! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?",
+  "@maintenanceWhatsappMessageNoName": {"placeholders": {"device": {"type": "String"}, "date": {"type": "String"}}},
+  "maintenanceLastService": "Última: {service}",
+  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}}
 }

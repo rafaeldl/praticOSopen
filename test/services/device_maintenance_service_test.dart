@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -59,6 +61,87 @@ void main() {
     test('is null without a phone', () {
       expect(whatsappMessageUri(null, 'x'), isNull);
       expect(whatsappMessageUri('  ', 'x'), isNull);
+    });
+  });
+
+  group('firstName', () {
+    test('takes the first word, without extra spaces', () {
+      expect(firstName('Carlos Mendes'), 'Carlos');
+      expect(firstName('  Ana   Maria  Souza '), 'Ana');
+      expect(firstName('Bruno'), 'Bruno');
+    });
+
+    test('is empty without a name', () {
+      expect(firstName(null), '');
+      expect(firstName('   '), '');
+    });
+  });
+
+  group('maintenanceWhatsappText', () {
+    final pt = lookupAppLocalizations(const Locale('pt'));
+
+    test('greets by the first name', () {
+      final text = maintenanceWhatsappText(
+        pt,
+        customer: '  Carlos   Mendes ',
+        device: 'Split',
+        date: 'maio de 2027',
+      );
+      expect(text, startsWith('Olá, Carlos! Está chegando'));
+      expect(text, isNot(contains('Mendes')));
+    });
+
+    test('without a name the greeting stays whole', () {
+      for (final customer in [null, '', '   ']) {
+        final text = maintenanceWhatsappText(
+          pt,
+          customer: customer,
+          device: 'Split',
+          date: 'maio de 2027',
+        );
+        expect(text, startsWith('Olá! Está chegando a manutenção de Split'));
+      }
+    });
+
+    test('in the other languages too', () {
+      for (final (code, start) in [('en', 'Hi! The'), ('es', '¡Hola! Se')]) {
+        final text = maintenanceWhatsappText(
+          lookupAppLocalizations(Locale(code)),
+          customer: null,
+          device: 'Split',
+          date: 'x',
+        );
+        expect(text, startsWith(start));
+      }
+    });
+  });
+
+  group('mainServiceName', () {
+    OrderService line(String? name, {String? deviceId, String? text}) =>
+        OrderService()
+          ..service = (name == null ? null : (ServiceAggr()..name = name))
+          ..description = text
+          ..deviceId = deviceId;
+
+    test('is the first service of the order', () {
+      final order = Order()..services = [line('Limpeza'), line('Gás')];
+      expect(mainServiceName(order, 'd1'), 'Limpeza');
+    });
+
+    test('skips the lines of another device', () {
+      final order = Order()
+        ..services = [line('Gás', deviceId: 'd2'), line('Limpeza', deviceId: 'd1')];
+      expect(mainServiceName(order, 'd1'), 'Limpeza');
+      expect(mainServices(order, ['d1', 'd2']), {'d1': 'Limpeza', 'd2': 'Gás'});
+    });
+
+    test('falls back to the description, and to nothing', () {
+      expect(
+        mainServiceName(Order()..services = [line(null, text: 'Visita')], 'd1'),
+        'Visita',
+      );
+      expect(mainServiceName(Order()..services = [], 'd1'), isNull);
+      expect(mainServiceName(null, 'd1'), isNull);
     });
   });
 

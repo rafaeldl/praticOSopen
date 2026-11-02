@@ -173,10 +173,12 @@ Future<void> offerNextMaintenance(
   final months = answer.months;
   if (months != null) {
     await prefs.remove(_declinedKey());
+    final ids = free.map((device) => device.id!).toList();
     maintenance.save(
-      free.map((device) => device.id!),
+      ids,
       date: addMonths(today, months),
       customer: order.customer,
+      lastServices: mainServices(order, ids),
       onFailed: warn,
     );
     return;

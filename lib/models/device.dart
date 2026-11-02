@@ -33,6 +33,11 @@ class Device extends BaseAuditCompany {
   @JsonKey(includeToJson: false)
   CustomerAggr? nextMaintenanceCustomer;
 
+  /// Main service of the last order when the date was set, so "Manutenções
+  /// chegando" needs no query per row. Written and cleared with the date.
+  @JsonKey(includeToJson: false)
+  String? nextMaintenanceLastService;
+
   Device();
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
   @override

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/company.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -16,6 +17,7 @@ import 'package:praticos/repositories/tenant/tenant_device_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/screens/devices/device_detail_screen.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
 
 /// Serves a fixed order history instead of querying Firestore.
@@ -119,6 +121,45 @@ void main() {
     expect((pushed.single.arguments as Map)['order'], same(order));
   });
 
+  group('formatDeviceNumber', () {
+    final format = FormatService()..setLocale('pt');
+
+    CustomField field(String key, String type) =>
+        CustomField(key: key, type: type, labels: const {});
+
+    test('groups a number field, typed or saved as a number', () {
+      final mileage = field('device.mileage', 'number');
+      expect(formatDeviceNumber(mileage, '98000', format), '98.000');
+      expect(formatDeviceNumber(mileage, 98000, format), '98.000');
+      expect(formatDeviceNumber(mileage, 98000.0, format), '98.000');
+      expect(formatDeviceNumber(mileage, '1234567', format), '1.234.567');
+      expect(formatDeviceNumber(mileage, '-5', format), '-5');
+    });
+
+    test('follows the language', () {
+      final en = FormatService()..setLocale('en');
+      expect(
+        formatDeviceNumber(field('device.mileage', 'number'), '98000', en),
+        '98,000',
+      );
+    });
+
+    test('never the year, plate, serial or a text field', () {
+      expect(formatDeviceNumber(field('device.year', 'number'), '2015', format), isNull);
+      expect(formatDeviceNumber(field('device.serial', 'text'), '98000', format), isNull);
+      expect(formatDeviceNumber(field('device.chassis', 'text'), '12345', format), isNull);
+      expect(formatDeviceNumber(null, '98000', format), isNull);
+    });
+
+    test('leaves what is not a plain whole number as typed', () {
+      final mileage = field('device.mileage', 'number');
+      expect(formatDeviceNumber(mileage, '0123', format), isNull);
+      expect(formatDeviceNumber(mileage, '98.5', format), isNull);
+      expect(formatDeviceNumber(mileage, 98.5, format), isNull);
+      expect(formatDeviceNumber(mileage, 'abc', format), isNull);
+    });
+  });
+
   group('next maintenance', () {
     Device aggregate() => Device()
       ..id = 'd1'
@@ -126,7 +167,7 @@ void main() {
 
     Device withDate(String day) => aggregate()..nextMaintenanceDate = day;
 
-    final saves = <(DateTime?, String?)>[];
+    final saves = <(DateTime?, String?, String?)>[];
 
     Future<void> pump(
       WidgetTester tester,
@@ -152,8 +193,8 @@ void main() {
               ),
               deviceRepository: _FakeDeviceRepository(saved),
               canManageDevices: canManage,
-              saveMaintenance: (id, date, customer, onFailed) =>
-                  saves.add((date, customer?.name)),
+              saveMaintenance: (id, date, customer, service, onFailed) =>
+                  saves.add((date, customer?.name, service)),
               showPrices: true,
             ),
           ),
@@ -198,6 +239,10 @@ void main() {
         orders: [
           Order()
             ..id = 'o1'
+            ..status = 'done'
+            ..services = [
+              OrderService()..service = (ServiceAggr()..name = 'Limpeza'),
+            ]
             ..customer = (CustomerAggr()..name = 'Padaria'),
         ],
       );
@@ -210,6 +255,7 @@ void main() {
       expect(saves, hasLength(1));
       expect(saves.single.$1, isNotNull);
       expect(saves.single.$2, 'Padaria');
+      expect(saves.single.$3, 'Limpeza');
     });
 
     testWidgets('a double tap on "Salvar" stays on the screen', (tester) async {

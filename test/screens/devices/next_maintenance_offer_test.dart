@@ -8,6 +8,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/service.dart';
 import 'package:praticos/screens/devices/next_maintenance_offer.dart';
 import 'package:praticos/services/device_maintenance_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +19,15 @@ class _FakeService extends DeviceMaintenanceService {
 
   final Set<String> contracts;
   final Map<String, String> dates;
-  final List<({List<String> ids, DateTime? date, String? customer})> saved = [];
+  final List<
+    ({
+      List<String> ids,
+      DateTime? date,
+      String? customer,
+      Map<String, String> lastServices,
+    })
+  >
+  saved = [];
   bool failSave = false;
 
   @override
@@ -35,9 +44,15 @@ class _FakeService extends DeviceMaintenanceService {
     Iterable<String> deviceIds, {
     required DateTime? date,
     CustomerAggr? customer,
+    Map<String, String> lastServices = const {},
     VoidCallback? onFailed,
   }) {
-    saved.add((ids: deviceIds.toList(), date: date, customer: customer?.name));
+    saved.add((
+      ids: deviceIds.toList(),
+      date: date,
+      customer: customer?.name,
+      lastServices: lastServices,
+    ));
     if (failSave) onFailed?.call();
   }
 }
@@ -52,7 +67,10 @@ Order _order({List<String> devices = const ['d1']}) => Order()
   ..customer = (CustomerAggr()
     ..id = 'cu1'
     ..name = 'Padaria')
-  ..devices = devices.map(_aggr).toList();
+  ..devices = devices.map(_aggr).toList()
+  ..services = [
+    OrderService()..service = (ServiceAggr()..name = 'Limpeza'),
+  ];
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -152,6 +170,10 @@ void main() {
       expect(service.saved.single.ids, ['d1', 'd2']);
       expect(service.saved.single.date, DateTime(2027, 5, 2));
       expect(service.saved.single.customer, 'Padaria');
+      expect(service.saved.single.lastServices, {
+        'd1': 'Limpeza',
+        'd2': 'Limpeza',
+      });
       expect(find.text('finish'), findsOneWidget);
     });
 

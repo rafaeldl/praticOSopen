@@ -2635,5 +2635,9 @@
   "maintenanceNoPhone": "Customer has no phone",
   "maintenanceWhatsappError": "Couldn't open WhatsApp",
   "maintenanceWhatsappMessage": "Hi {customer}! The maintenance of {device} is coming up, planned for {date}. Can we pick a day?",
-  "@maintenanceWhatsappMessage": {"placeholders": {"customer": {"type": "String"}, "device": {"type": "String"}, "date": {"type": "String"}}}
+  "@maintenanceWhatsappMessage": {"placeholders": {"customer": {"type": "String"}, "device": {"type": "String"}, "date": {"type": "String"}}},
+  "maintenanceWhatsappMessageNoName": "Hi! The maintenance of {device} is coming up, planned for {date}. Can we pick a day?",
+  "@maintenanceWhatsappMessageNoName": {"placeholders": {"device": {"type": "String"}, "date": {"type": "String"}}},
+  "maintenanceLastService": "Last: {service}",
+  "@maintenanceLastService": {"placeholders": {"service": {"type": "String"}}}
 }

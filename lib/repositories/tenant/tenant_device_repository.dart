@@ -102,13 +102,16 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
   /// must not take the others with it, and only the server can tell (offline,
   /// a failed read says nothing). Touches only these fields, so it never undoes
   /// an edit made elsewhere, and clears the daily job's "already told" mark.
-  /// [customer] stays as it was when null. Offline it resolves only when the
-  /// connection is back: do not wait for it on screen.
+  /// [customer] stays as it was when null. [lastServices], by device id, says
+  /// what was done last; a device without an entry loses the old one, so a new
+  /// date never shows the service of another visit. Offline it resolves only
+  /// when the connection is back: do not wait for it on screen.
   Future<void> setNextMaintenance(
     String companyId,
     Iterable<String> deviceIds, {
     required String? day,
     CustomerAggr? customer,
+    Map<String, String> lastServices = const {},
     UserAggr? actor,
   }) {
     final fields = <String, dynamic>{
@@ -123,7 +126,11 @@ class TenantDeviceRepository extends TenantRepository<Device?> {
     };
     return writeEachExisting(
       deviceIds.map(
-        (id) => () => collectionFor(companyId).doc(id).update(fields),
+        (id) => () => collectionFor(companyId).doc(id).update({
+          ...fields,
+          'nextMaintenanceLastService':
+              (day == null ? null : lastServices[id]) ?? FieldValue.delete(),
+        }),
       ),
       isMissing: (e) => e is FirebaseException && e.code == 'not-found',
     );

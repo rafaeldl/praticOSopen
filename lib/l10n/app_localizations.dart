@@ -10601,6 +10601,18 @@ abstract class AppLocalizations {
     String device,
     String date,
   );
+
+  /// No description provided for @maintenanceWhatsappMessageNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Está chegando a manutenção de {device}, prevista para {date}. Podemos combinar um dia?'**
+  String maintenanceWhatsappMessageNoName(String device, String date);
+
+  /// No description provided for @maintenanceLastService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Última: {service}'**
+  String maintenanceLastService(String service);
 }
 
 class _AppLocalizationsDelegate

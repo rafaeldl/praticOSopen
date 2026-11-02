@@ -85,10 +85,11 @@ Future<void> callMaintenanceCustomer(
   if (!context.mounted) return;
   final uri = whatsappMessageUri(
     phone,
-    l10n.maintenanceWhatsappMessage(
-      customer?.name?.trim() ?? '',
-      device.name ?? '',
-      format.formatMonthYear(device.nextMaintenance),
+    maintenanceWhatsappText(
+      l10n,
+      customer: customer?.name,
+      device: device.name ?? '',
+      date: format.formatMonthYear(device.nextMaintenance),
     ),
   );
   if (uri == null) {

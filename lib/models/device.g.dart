@@ -39,7 +39,8 @@ Device _$DeviceFromJson(Map<String, dynamic> json) => Device()
       ? null
       : CustomerAggr.fromJson(
           json['nextMaintenanceCustomer'] as Map<String, dynamic>,
-        );
+        )
+  ..nextMaintenanceLastService = json['nextMaintenanceLastService'] as String?;
 
 Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'id': instance.id,

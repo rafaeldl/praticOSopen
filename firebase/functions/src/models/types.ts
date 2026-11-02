@@ -151,6 +151,8 @@ export interface Device extends DeviceAggr {
   nextMaintenanceDate?: string;
   /** Who the maintenance is for: the order's customer when it was set. */
   nextMaintenanceCustomer?: { id: string; name: string };
+  /** Main service of the last order when the date was set. */
+  nextMaintenanceLastService?: string;
   /** Day the daily job already told the company about. */
   nextMaintenanceNoticeFor?: string;
   company: CompanyAggr;

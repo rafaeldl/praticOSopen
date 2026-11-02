@@ -6509,4 +6509,14 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return 'Hi $customer! The maintenance of $device is coming up, planned for $date. Can we pick a day?';
   }
+
+  @override
+  String maintenanceWhatsappMessageNoName(String device, String date) {
+    return 'Hi! The maintenance of $device is coming up, planned for $date. Can we pick a day?';
+  }
+
+  @override
+  String maintenanceLastService(String service) {
+    return 'Last: $service';
+  }
 }

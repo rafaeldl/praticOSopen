@@ -30,6 +30,24 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/screens/contracts/contracts_title.dart';
 import 'package:provider/provider.dart';
 
+/// [value] of a number field, grouped for reading ("98.000"), or null to show
+/// it as it is. The saved value does not change. Year has the number type but
+/// is not a quantity. A value with a leading zero or any other text stays as
+/// typed.
+String? formatDeviceNumber(
+  CustomField? field,
+  Object? value,
+  FormatService format,
+) {
+  if (field?.type != 'number' || field?.fieldName == 'year') return null;
+  final number = value is num
+      ? (value == value.truncate() ? value.toInt() : null)
+      : RegExp(r'^-?[1-9]\d*$').hasMatch('$value')
+      ? int.tryParse('$value')
+      : null;
+  return number == null ? null : format.formatDecimal(number);
+}
+
 /// Vehicle (device) screen (`/device_detail`, arguments `device` and
 /// optionally `customer`): data, owner, next maintenance, "Nova OS" for this
 /// vehicle, order history and active contracts. Edit and delete live in the
@@ -70,6 +88,7 @@ class DeviceDetailScreen extends StatefulWidget {
     String deviceId,
     DateTime? date,
     CustomerAggr? customer,
+    String? lastService,
     VoidCallback onFailed,
   )?
   saveMaintenance;
@@ -393,7 +412,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             ],
           ),
         ),
-      _buildMaintenance(owner),
+      _buildMaintenance(owner, mainServiceName(lastDoneOrder(orders), device.id)),
       Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.blockMargin, AppSpacing.sm, AppSpacing.blockMargin, 0,
@@ -435,7 +454,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   /// "Próxima manutenção: maio de 2027". With an active contract the date is
   /// the contract's and nothing asks for another one.
-  Widget _buildMaintenance(Customer? owner) {
+  Widget _buildMaintenance(Customer? owner, String? lastService) {
     final contracts = _maintenanceContracts;
     final deviceStream = _maintenanceStream;
     if (contracts == null || deviceStream == null) {
@@ -460,7 +479,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               .where((order) => order.contract?.active == true)
               .firstOrNull;
           if (contract != null) return _contractMaintenanceRow(contract);
-          return _maintenanceRow(deviceSnapshot.data, owner);
+          return _maintenanceRow(deviceSnapshot.data, owner, lastService);
         },
       ),
     );
@@ -485,7 +504,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     );
   }
 
-  Widget _maintenanceRow(Device? device, Customer? owner) {
+  Widget _maintenanceRow(
+    Device? device,
+    Customer? owner,
+    String? lastService,
+  ) {
     final l10n = context.l10n;
     final format = FormatService()..setLocale(l10n.localeName);
     final date = device?.nextMaintenance;
@@ -504,7 +527,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       subtitle: date != null && _canManageDevices
           ? l10n.nextMaintenanceChangeHint
           : null,
-      onTap: _canManageDevices ? () => _editMaintenance(date, owner) : null,
+      onTap: _canManageDevices
+          ? () => _editMaintenance(date, owner, lastService)
+          : null,
     );
   }
 
@@ -515,7 +540,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   );
 
   /// The row stays on screen behind the sheet: only the first tap opens it.
-  Future<void> _editMaintenance(DateTime? current, Customer? owner) async {
+  Future<void> _editMaintenance(
+    DateTime? current,
+    Customer? owner,
+    String? lastService,
+  ) async {
     if (_editingMaintenance) return;
     _editingMaintenance = true;
     final l10n = context.l10n;
@@ -537,6 +566,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       _device!.id!,
       pick.date,
       owner?.toAggr(),
+      lastService,
       () {
         if (mounted) showAppToast(context, saveError);
       },
@@ -548,11 +578,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     String deviceId,
     DateTime? date,
     CustomerAggr? customer,
+    String? lastService,
     VoidCallback onFailed,
   ) {
-    DeviceMaintenanceService(
-      devices: widget.deviceRepository,
-    ).save([deviceId], date: date, customer: customer, onFailed: onFailed);
+    DeviceMaintenanceService(devices: widget.deviceRepository).save(
+      [deviceId],
+      date: date,
+      customer: customer,
+      lastServices: {deviceId: ?lastService},
+      onFailed: onFailed,
+    );
   }
 
   List<Widget> _buildInfoRows(SegmentConfigProvider config) {
@@ -576,6 +611,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     if (data == null) return const [];
     final locale = context.l10n.localeName;
     final fields = config.fieldsFor('device');
+    final format = FormatService()..setLocale(locale);
 
     final labelMap = <String, String>{};
     for (final f in fields) {
@@ -595,7 +631,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           );
       final display = (field != null && field.type == 'select')
           ? field.getOptionLabel(value, locale)
-          : value;
+          : formatDeviceNumber(field, entry.value, format) ?? value;
       return AppListRow(title: label, trailing: display);
     }).toList();
   }

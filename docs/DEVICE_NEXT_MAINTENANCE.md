@@ -16,13 +16,14 @@ Em `/companies/{companyId}/devices/{deviceId}`:
 |---|---|---|---|
 | `nextMaintenanceDate` | texto `YYYY-MM-DD` | App | Dia da manutenção |
 | `nextMaintenanceCustomer` | `{id, name}` | App | Para quem é. O aparelho não tem cliente próprio: é o cliente da OS ao marcar a data |
+| `nextMaintenanceLastService` | texto | App | Serviço principal da última OS, para "Última: Troca de óleo" no Início sem uma consulta por linha |
 | `nextMaintenanceNoticeFor` | texto `YYYY-MM-DD` | Function | Dia que o aviso já contou |
 
 O aviso também usa `companies/{companyId}/settings/maintenanceNotice_{dia}`, a trava do dia. Só a Function grava nela.
 
 O dia é texto, não `DateTime`: é um dia, não um momento, e a comparação como texto vale no app e no servidor em qualquer fuso.
 
-No `Device`, os dois primeiros têm `@JsonKey(includeToJson: false)`, como `Order.completedAt`. Quem grava é só `TenantDeviceRepository.setNextMaintenance`, com `update` destes campos. Assim, salvar um `Device` remontado de um `DeviceAggr` (que não tem data) nunca apaga a data. Pelo mesmo motivo, a ficha lê a data por `streamSingle`, não do aparelho que recebeu pela rota.
+No `Device`, os três primeiros têm `@JsonKey(includeToJson: false)`, como `Order.completedAt`. Quem grava é só `TenantDeviceRepository.setNextMaintenance`, com `update` destes campos. Assim, salvar um `Device` remontado de um `DeviceAggr` (que não tem data) nunca apaga a data. Pelo mesmo motivo, a ficha lê a data por `streamSingle`, não do aparelho que recebeu pela rota.
 
 O telefone não fica no aparelho. "Chamar cliente" lê o cadastro na hora.
 
@@ -57,7 +58,7 @@ Concluir a OS (o servidor aceitou, ou 3 s sem resposta)
   → Início: streamMaintenanceUntil(hoje + 7), tirando quem tem contrato ativo
   → 08:00: sendMaintenanceNotices → notifyMaintenanceDue → FCM e sino
 Tocar no item
-  → Chamar cliente: wa.me com a mensagem pronta
+  → Chamar cliente: wa.me com a mensagem pronta, só com o primeiro nome
   → Abrir OS: openNewOrder(prefill: maintenanceOrder(...))
 Concluir a nova OS → a pergunta volta
 ```
@@ -74,8 +75,9 @@ O aviso usa o caminho de sempre do servidor: `sendNotification` grava em `compan
 6. **Atrasada fica.** Continua no Início, com a data em vermelho, até mudar. Quem conclui sem poder editar aparelhos deixa a data lá: um dono ou supervisor resolve por "Ver aparelho".
 7. **Cada data avisa uma vez.** `nextMaintenanceNoticeFor` guarda o dia. Mudar a data avisa de novo, no dia seguinte. A trava do dia é criada antes do envio, então duas execuções ao mesmo tempo mandam um aviso só. O sino salvo conta como entrega: falha só do push não repete, e o sino não ganha cópias. Se nem o sino foi salvo, a trava é solta e a empresa tenta de novo.
 8. **Quem recebe o aviso.** Dono, admin, supervisor e o responsável da última OS do aparelho, se ainda estiver na equipe. Uma mensagem por empresa, com o total.
-9. **Abrir OS.** Traz cliente, aparelho e os serviços da última OS concluída daquele aparelho, sem fotos. Se o histórico não puder ser lido, abre sem serviços. Nada é salvo antes do "✓".
-10. **Toque duplo e falha de gravação.** O botão azul já tem a espera de `kStatusTapCooldown`. Se o servidor recusar "pronta", a situação e a marca "parada" voltam, aparece o aviso e não há pergunta. Sem internet, a pergunta sai depois de 3 segundos e a data fica na fila do Firestore. Se a gravação da data for recusada, aparece um aviso e o `streamSingle` da ficha volta sozinho. `OrderDateSheet` e o menu do item fecham uma vez só, e o Início abre um item por vez.
+9. **Último serviço.** É o primeiro serviço da OS naquele aparelho (linha sem aparelho vale para todos). Vem da OS concluída, na pergunta, ou da última OS concluída, na ficha. Gravar uma data sem serviço, ou tirar a data, limpa o campo. Sem ele, o Início mostra só o cliente. O aviso do celular não traz esse texto, para não alongar.
+10. **Abrir OS.** Traz cliente, aparelho e os serviços da última OS concluída daquele aparelho, sem fotos. Se o histórico não puder ser lido, abre sem serviços. Nada é salvo antes do "✓".
+11. **Toque duplo e falha de gravação.** O botão azul já tem a espera de `kStatusTapCooldown`. Se o servidor recusar "pronta", a situação e a marca "parada" voltam, aparece o aviso e não há pergunta. Sem internet, a pergunta sai depois de 3 segundos e a data fica na fila do Firestore. Se a gravação da data for recusada, aparece um aviso e o `streamSingle` da ficha volta sozinho. `OrderDateSheet` e o menu do item fecham uma vez só, e o Início abre um item por vez.
 
 ## Exemplos de Uso
 

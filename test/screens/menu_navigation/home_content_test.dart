@@ -178,6 +178,39 @@ void main() {
       expect(tapped.single.name, 'Split 12000');
     });
 
+    testWidgets('says what was done last time, next to the customer', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [
+              device('Split', 'Padaria', '2026-10-15')
+                ..nextMaintenanceLastService = 'Troca de óleo',
+            ],
+          ),
+        ),
+      );
+      expect(find.text('Padaria · Última: Troca de óleo'), findsOneWidget);
+    });
+
+    testWidgets('without a customer it shows only the service', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          _Host(
+            orders: mixed,
+            maintenances: [
+              device('Split', 'x', '2026-10-15')
+                ..nextMaintenanceCustomer = null
+                ..nextMaintenanceLastService = 'Limpeza',
+            ],
+          ),
+        ),
+      );
+      expect(find.text('Última: Limpeza'), findsOneWidget);
+    });
+
     testWidgets('does not exist without maintenances', (tester) async {
       await tester.pumpWidget(_app(_Host(orders: mixed)));
       expect(find.text('Manutenções chegando'), findsNothing);
