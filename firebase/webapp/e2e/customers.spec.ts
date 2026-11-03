@@ -71,19 +71,23 @@ test('busca por nome sem acento, telefone por dígitos e placa a partir de 3 let
 })
 
 test('cadastrar: máscara do telefone, ✓ só com nome e abre o cliente novo (customer.list.create, customer.form.save)', async ({ page }) => {
-  const name = `Nova Cliente ${Date.now()}`
+  const stamp = Date.now()
+  const name = `Nova Cliente ${stamp}`
+  // A phone of its own: the same number twice would open the repeated phone warning (--repeat-each).
+  const tail = String(stamp).slice(-8)
+  const shown = `(48) 9${tail.slice(0, 4)}-${tail.slice(4)}`
   await openCustomers(page, 'supervisor')
   await page.getByTestId('new-customer').click()
   const form = page.getByTestId('customer-form')
   await expect(form.getByText('Escreva o nome para salvar.')).toBeVisible()
-  await form.getByLabel('Telefone ou WhatsApp').pressSequentially('48912345678')
-  await expect(form.getByLabel('Telefone ou WhatsApp')).toHaveValue('(48) 91234-5678')
+  await form.getByLabel('Telefone ou WhatsApp').pressSequentially(`489${tail}`)
+  await expect(form.getByLabel('Telefone ou WhatsApp')).toHaveValue(shown)
   await form.getByTestId('save-customer').click()
   await expect(form.getByRole('alert')).toHaveText('Escreva o nome para salvar.')
   await form.getByLabel('Nome', { exact: true }).fill(name)
   await page.keyboard.press('ControlOrMeta+Enter')
   await expect(panel(page).getByRole('heading', { name })).toBeVisible()
-  await expect(panel(page).getByTestId('customer-contact')).toContainText('(48) 91234-5678')
+  await expect(panel(page).getByTestId('customer-contact')).toContainText(shown)
 })
 
 test('gerente e técnico não cadastram nem editam; consultor cadastra (permissão manageCustomers)', async ({ page }) => {

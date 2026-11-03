@@ -5,14 +5,14 @@
 // before "Salvar"; closing with changes asks first, also when editing (the app
 // only protects a new one, defect 14). A new customer with a phone already in
 // use asks before saving (customer.form.duplicate-*).
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRef, watch } from 'vue'
 import { Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { changedSince, saveCustomer, type CustomerDetail } from '@/lib/customers/data'
 import { findByPhone, mapsUrl, type CustomerRow } from '@/lib/customers/model'
-import { applyMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
+import { useMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { session } from '@/lib/session'
 import { isMac } from '@/lib/shortcuts'
@@ -33,9 +33,10 @@ const emit = defineEmits<{ saved: [id: string]; open: [id: string]; changed: [];
 
 const BUILT_IN = ['customer.name', 'customer.phone', 'customer.email', 'customer.address', 'customer.taxId']
 const editing = !!props.customer
-const country = session.company?.country
-const fields = namespaceFields('customer', BUILT_IN)
-const phoneMasks = fieldMasks(segmentField('customer.phone'), country)
+// The segment and the company's country may still be loading: everything that depends on them follows them.
+const country = computed(() => session.company?.country)
+const fieldList = computed(() => namespaceFields('customer', BUILT_IN))
+const fields = fieldList.value
 const label = (key: string) => resolveLabel(key, segmentLabels(), (k) => t(k))
 const initial = {
   name: props.customer?.name ?? props.draft?.name ?? '',
@@ -46,6 +47,16 @@ const initial = {
   custom: Object.fromEntries(fields.map((field) => [field.key.split('.').pop() as string, readCustom(props.customer?.customData, field) ?? null])) as Record<string, unknown>,
 }
 const form = reactive({ ...initial, custom: { ...initial.custom } })
+// Fields of a segment that arrived after the form opened: they come with what the record already has.
+watch(fieldList, (list) => {
+  for (const field of list) {
+    const name = field.key.split('.').pop() as string
+    if (name in form.custom) continue
+    const value = readCustom(props.customer?.customData, field) ?? null
+    initial.custom[name] = value
+    form.custom[name] = value
+  }
+})
 const more = ref(!!(initial.email || initial.address || initial.taxId || Object.values(initial.custom).some((v) => v !== null && v !== '')))
 const saving = ref(false)
 const failed = ref('')
@@ -58,16 +69,13 @@ const title = computed(() => (editing ? t('editCustomer') : t('web.customers.new
 const canSave = computed(() => !!form.name.trim() && !saving.value)
 const dirty = computed(() => JSON.stringify(form) !== JSON.stringify(initial))
 const taxIdError = computed(() => (form.taxId.trim() && !isValidTaxId(form.taxId) ? t('web.customers.taxIdInvalid') : ''))
-const fieldErrors = computed(() => Object.fromEntries(fields.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
-const sections = computed(() => groupBySection(fields, locale.value, t('web.customers.general')))
+const fieldErrors = computed(() => Object.fromEntries(fieldList.value.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
+const sections = computed(() => groupBySection(fieldList.value, locale.value, t('web.customers.general')))
 const map = computed(() => mapsUrl(form.address, props.customer?.latitude, props.customer?.longitude))
 const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
 
-function onPhone(event: Event) {
-  const input = event.target as HTMLInputElement
-  form.phone = applyMask(input.value, phoneMasks)
-  input.value = form.phone
-}
+// Typed before the mask arrived: masked when it arrives (useMask).
+const onPhone = useMask(toRef(form, 'phone'), () => fieldMasks(segmentField('customer.phone'), country.value))
 
 function errorText(error: FieldError, min?: number, max?: number, minLength?: number): string {
   if (error === 'required') return t('required')
@@ -92,7 +100,7 @@ async function save(skipDuplicate = false) {
   }
   // Only a new customer with a phone; never blocks: a number can be shared.
   if (!editing && !skipDuplicate && form.phone.trim()) {
-    const found = findByPhone(props.directory, form.phone, country)
+    const found = findByPhone(props.directory, form.phone, country.value)
     if (found) {
       duplicate.value = found
       return
@@ -106,8 +114,8 @@ async function save(skipDuplicate = false) {
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,
       address: form.address.trim() || null,
-      ...(usesTaxId(country) ? { taxId: normalizeTaxId(form.taxId) || null } : {}),
-      ...(fields.length || props.customer?.customData ? { customData: writeCustom(props.customer?.customData, fields, form.custom) } : {}),
+      ...(usesTaxId(country.value) ? { taxId: normalizeTaxId(form.taxId) || null } : {}),
+      ...(fieldList.value.length || props.customer?.customData ? { customData: writeCustom(props.customer?.customData, fieldList.value, form.custom) } : {}),
       ...(editing && props.version ? { version: props.version } : {}),
     })
     allowClose = true

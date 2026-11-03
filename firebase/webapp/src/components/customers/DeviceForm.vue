@@ -5,14 +5,14 @@
 // useDeviceManagement, on an existing device) is a list to choose from, not a
 // menu of actions (defect 18). Nothing is saved before "Salvar", and an error
 // is shown (the app shows nothing, defect 6).
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRef, watch } from 'vue'
 import { Check, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { changedSince, saveDevice, type DeviceDetail } from '@/lib/customers/data'
 import { DEVICE_STATUSES, modelSuggestions, serialError, type DeviceRow, type DeviceStatus } from '@/lib/customers/model'
-import { applyMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
+import { useMask, fieldMasks, groupBySection, namespaceFields, readCustom, segmentField, validateField, writeCustom, type FieldError } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
 import { session } from '@/lib/session'
 import { isMac } from '@/lib/shortcuts'
@@ -30,11 +30,12 @@ const emit = defineEmits<{ saved: [id: string]; changed: []; close: [] }>()
 
 const BUILT_IN = ['device.category', 'device.brand', 'device.model', 'device.serial']
 const editing = !!props.device
-const country = session.company?.country
+const country = computed(() => session.company?.country)
 const management = (session.company as { useDeviceManagement?: boolean } | null)?.useDeviceManagement === true
-const fields = namespaceFields('device', BUILT_IN)
-const serialField = segmentField('device.serial')
-const serialMasks = fieldMasks(serialField, country)
+// The segment may still be loading: the fields, the serial's mask and pattern follow it.
+const fieldList = computed(() => namespaceFields('device', BUILT_IN))
+const fields = fieldList.value
+const serialFieldRef = computed(() => segmentField('device.serial'))
 const label = (key: string) => resolveLabel(key, segmentLabels(), (k) => t(k))
 const initial = {
   name: props.device?.name ?? props.draft?.name ?? '',
@@ -46,6 +47,16 @@ const initial = {
   custom: Object.fromEntries(fields.map((field) => [field.key.split('.').pop() as string, readCustom(props.device?.customData, field) ?? null])) as Record<string, unknown>,
 }
 const form = reactive({ ...initial, custom: { ...initial.custom } })
+// Fields of a segment that arrived after the form opened: they come with what the record already has.
+watch(fieldList, (list) => {
+  for (const field of list) {
+    const name = field.key.split('.').pop() as string
+    if (name in form.custom) continue
+    const value = readCustom(props.device?.customData, field) ?? null
+    initial.custom[name] = value
+    form.custom[name] = value
+  }
+})
 const more = ref(!!(initial.manufacturer || initial.category || initial.description || Object.values(initial.custom).some((v) => v !== null && v !== '')))
 const saving = ref(false)
 const failed = ref('')
@@ -56,10 +67,10 @@ let allowClose = false
 
 const title = computed(() => (editing ? t('web.devices.edit', { device: label('device._entity') }) : t('web.devices.new', { device: label('device._entity') })))
 const dirty = computed(() => JSON.stringify(form) !== JSON.stringify(initial))
-const serialProblem = computed(() => serialError(form.serial, form.name, serialField?.pattern))
+const serialProblem = computed(() => serialError(form.serial, form.name, serialFieldRef.value?.pattern))
 const suggestions = computed(() => (suggestOpen.value ? modelSuggestions(props.devices, form.name) : []))
-const fieldErrors = computed(() => Object.fromEntries(fields.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
-const sections = computed(() => groupBySection(fields, locale.value, t('web.customers.general')))
+const fieldErrors = computed(() => Object.fromEntries(fieldList.value.map((field) => [field.key, validateField(field, form.custom[field.key.split('.').pop() as string])])) as Record<string, FieldError>)
+const sections = computed(() => groupBySection(fieldList.value, locale.value, t('web.customers.general')))
 const needsAny = computed(() => t('deviceSaveNeedsAny', { first: label('device.model').toLocaleLowerCase(), second: label('device.serial').toLocaleLowerCase() }))
 const statusLabel: Record<DeviceStatus, string> = {
   active: t('deviceStatusActive'),
@@ -69,11 +80,7 @@ const statusLabel: Record<DeviceStatus, string> = {
 }
 const saveKey = isMac ? '⌘ Enter' : 'Ctrl Enter'
 
-function onSerial(event: Event) {
-  const input = event.target as HTMLInputElement
-  form.serial = applyMask(input.value, serialMasks).toUpperCase()
-  input.value = form.serial
-}
+const onSerial = useMask(toRef(form, 'serial'), () => fieldMasks(serialFieldRef.value, country.value), (text) => text.toUpperCase())
 
 function pickSuggestion(item: { name: string; manufacturer: string | null; category: string | null }) {
   form.name = item.name
@@ -114,7 +121,7 @@ async function save() {
       category: form.category.trim() || null,
       description: form.description.trim() || null,
       ...(editing && management && form.status ? { status: form.status } : {}),
-      ...(fields.length || props.device?.customData ? { customData: writeCustom(props.device?.customData, fields, form.custom) } : {}),
+      ...(fieldList.value.length || props.device?.customData ? { customData: writeCustom(props.device?.customData, fieldList.value, form.custom) } : {}),
       ...(editing && props.version ? { version: props.version } : {}),
     })
     allowClose = true
@@ -188,7 +195,7 @@ function guard(): boolean {
             class="field num"
             autocomplete="off"
             autocapitalize="characters"
-            :placeholder="(serialField?.placeholder as string | undefined) ?? ''"
+            :placeholder="(serialFieldRef?.placeholder as string | undefined) ?? ''"
             :aria-invalid="tried && !!serialProblem"
             :aria-describedby="tried && serialProblem === 'pattern' ? 'df-serial-error' : undefined"
             @input="onSerial"
