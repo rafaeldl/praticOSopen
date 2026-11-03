@@ -47,7 +47,8 @@ const files = sourceFiles(resolve(webapp, 'src'))
 // main file. Each feature is a set of folders under src/.
 const FEATURES = {
   orders: ['src/components/orders'],
-  customers: ['src/components/customers', 'src/views/customers'],
+  // Cadastros: customers, devices and the catalog share one chunk (src/i18n/index.ts stays as is).
+  customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
 }
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
 const inFeature = (file, dirs) => dirs.some((dir) => file.startsWith(resolve(webapp, dir) + '/'))

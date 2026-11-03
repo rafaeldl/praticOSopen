@@ -158,3 +158,34 @@ export async function queryDocs(collection: string, field: string, value: unknow
 export async function readShareToken(token: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`links/share/tokens/${token}`).get()).data()
 }
+
+const CATALOG_COLLECTION = { service: 'services', product: 'products' } as const
+
+/**
+ * A fresh service or product in company A. Names start with "Zeta" so they sort
+ * after the seed's "Serviço N" and "Peça N", which the order tests type.
+ */
+export async function makeCatalogItem(kind: 'service' | 'product', data: Record<string, unknown> = {}): Promise<{ id: string; name: string }> {
+  const id = `k-${randomUUID().slice(0, 8)}`
+  const name = (data.name as string) ?? `Zeta ${id.slice(2)}`
+  const now = new Date().toISOString()
+  await db()
+    .doc(`companies/${COMPANY_A}/${CATALOG_COLLECTION[kind]}/${id}`)
+    .set({ name, value: null, photo: null, company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name }, createdAt: now, createdBy: aggr('owner'), updatedAt: now, ...data })
+  return { id, name }
+}
+
+export async function readCatalogItem(kind: 'service' | 'product', id: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${COMPANY_A}/${CATALOG_COLLECTION[kind]}/${id}`).get()).data()
+}
+
+/** Like the app saving the item: plain field update with a new updatedAt. */
+export async function updateCatalogItem(kind: 'service' | 'product', id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/${CATALOG_COLLECTION[kind]}/${id}`).update({ ...fields, updatedAt: new Date().toISOString() })
+}
+
+/** Items of company A whose name starts with `prefix`, with their data. */
+export async function catalogNamed(kind: 'service' | 'product', prefix: string): Promise<Record<string, unknown>[]> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/${CATALOG_COLLECTION[kind]}`).where('name', '>=', prefix).where('name', '<', `${prefix}\uf8ff`).get()
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+}

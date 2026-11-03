@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), e a fatia "Clientes e aparelhos" (ver a seção com esse nome). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos" e a do Catálogo (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -48,6 +48,7 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Dinheiro, situação, itens, datas, responsável, parada, apagar | API (`lib/orders/writes.ts`) |
 | Cliente e aparelho da OS, comentários, fotos | Firestore direto, só os campos que mudam (sem dinheiro) |
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
+| Telas do catálogo: lista, cadastro, foto, importação, preços em lote | API (`lib/catalog/data.ts`): `/v1/app/services`, `/v1/app/products`; a foto vai para o Storage na pasta do item |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Cache persistente fica desligado, porque o computador da oficina é compartilhado.
 
@@ -166,6 +167,22 @@ Código em `src/views/customers/`, `src/components/customers/` e `src/lib/custom
 **Uma fonte só.** Permissões pelo contrato gerado; telefone (`lib/phone.ts`) e CPF/CNPJ (`lib/tax-id.ts`) passam pelos casos de contrato `phone.json` e `tax-id.json`, os mesmos do app e do servidor; máscaras e campos vêm do segmento; textos pelos `.arb` e `web_*.json`.
 
 **Fica para depois.** Seletores da OS ("Qual cliente?" com Recentes e placa, "Qual veículo?" com Nenhum), vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho, recebimentos e notas do cliente, contratos do aparelho e a pergunta da próxima manutenção ao concluir a OS.
+
+### Catálogo
+
+Código em `src/views/catalog/`, `src/components/catalog/` e `src/lib/catalog/` (regras puras em `model.ts`, chamadas em `data.ts`). Testes: `tests/catalog.test.ts` e `e2e/catalog*.spec.ts`. Os textos ficam no mesmo pedaço dos de clientes (`-customers.json`), para não mexer no `src/i18n/index.ts` do primeiro download.
+
+**Dados pela API.** `/v1/app/services` e `/v1/app/products` (ver `docs/WEB_API.md`). Quem não tem `viewPrices` (supervisor, ou "Valores e cobrança" desligado) recebe a lista sem o campo `value`: o preço não chega à rede nem a cache nenhum. Nenhuma tela desta fatia usa o Firestore. A Nova OS continua lendo o catálogo como antes (`lib/orders/catalog.ts`).
+
+**Lista (`/catalog`).** Só com `viewServices` ou `viewProducts`; o técnico é barrado na rota (no app a rota aberta direto ainda assina serviços). Serviços (N) | Produtos (N), com o nome que o segmento dá aos produtos (`product._entity_plural`, ex. "Peças"); some quando o papel vê um tipo só. Tipo e busca na URL (`?kind=product`, `?q=`). Busca por nome, "contém", sem acento e sem caixa; ordem alfabética sem caixa (o app põe minúsculas e acentuados no fim). "Mais usados" do tipo no topo, sem busca. Preço só para quem vê valores, "sem valor" quando vazio. A linha abre o cadastro só para quem gerencia o tipo (só dono e admin); para os outros é só leitura. Vazio, erro com "Tentar de novo" e carregando por tipo. Dica do app no fim.
+
+**Cadastro.** Gaveta com nome (exemplo por ramo), preço só para quem tem `editPrices` (`MoneyInput`: 150 é 150) e "Foto e mais dados" com a foto e os campos `service.*`/`product.*` do segmento. Salvar cinza até ter nome, `Ctrl/⌘ Enter`. A foto (escolher, colar ou arrastar, até 10 MB) espera no navegador e sobe para `tenants/{empresa}/{services|products}/{id}/photo.jpg` só depois de o item existir: cancelar não deixa item sem nome (defeito C9 do app). Editar manda a versão lida; se alguém salvou depois, nada é gravado e a lista relê. Fechar com mudança pergunta (o app descarta a edição sem perguntar). Apagar fica no menu "…", com a confirmação do app, e leva a foto junto. Erro ao salvar ou apagar sempre aparece.
+
+**Importar planilha (`/catalog/import`).** Igual à de clientes: CSV ou XLSX no navegador, colunas adivinhadas (nome, tipo, preço) e conferidas, linhas sem tipo no tipo escolhido. Ficam de fora: sem nome, tipo que não é serviço nem produto, preço que não dá para ler, nome que já está no catálogo (mesmo tipo, sem acento e sem caixa) e nome repetido na planilha. O preço é lido como digitado, pelo país da empresa ("R$ 1.234,56" é 1234,56) e só entra para quem tem `editPrices`. Nada grava antes de "Importar"; vai de 200 em 200 com id por linha, e o id da importação nasce na prévia: "Importar" de novo depois de uma falha não duplica.
+
+**Preços em lote.** Na lista, para quem gerencia e tem `editPrices`: selecionar linhas, "Mudar preços", aumentar ou baixar por porcentagem (baixar até 100%), arredondar para inteiro. A prévia mostra cada item antes e depois; itens sem preço ficam como estão. "Aplicar" pede confirmação. A conta é em centavos. O servidor grava todos ou nenhum: cada mudança leva o preço que a pessoa viu, então um preço mudado no meio tempo recusa tudo e um pedido repetido não aplica duas vezes. O aviso tem "Desfazer".
+
+**Fica para depois.** Abrir o cadastro do catálogo de dentro da Nova OS ("Novo item" → "Serviço ou produto?") e preços em lote dos dois tipos juntos (a seleção é por tipo). Toda gravação aqui esquece as listas da Nova OS (`forgetLists`), que relê o catálogo na próxima vez.
 
 ### Mandar ao cliente, receber e cobrar
 
@@ -289,6 +306,8 @@ Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª v
 
 Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1ª visita e **487 ms** na volta.
 
+Com a fatia do catálogo, medido em 2026-11-03 com a máquina carregada (outros emuladores rodando): **1.334 ms** na 1ª visita e **659 ms** na volta. As telas do catálogo são rotas sob demanda e só usam a API; no caminho até a lista entram só as duas rotas novas no `router.ts` (239,3 KB contra 239,1 KB da master).
+
 O teste falha acima de 1,5 s. Ele roda sem o emulador de Functions e usa o "sim" da lista de acesso guardado, como numa visita depois da primeira.
 
 **Primeira visita fria**, com a rota `web-access` (`npm run e2e:perf:cold`, emulador de Functions ligado): login salvo, sem cache e sem "sim" guardado. Resultado: **1.462 ms** de p75. A resposta da lista de acesso chega em 1.017 ms, em paralelo com as leituras do Firestore. O emulador não tem a partida a frio do Cloud Functions: em produção, com a instância parada, a rota pode somar alguns segundos a essa visita.
@@ -339,4 +358,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 238,9 de 240 KB depois da fatia de mandar, receber e cobrar (238,7 depois da de clientes). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 239,3 de 240 KB depois da fatia do catálogo (239,1 antes dela; 238,9 medido na fatia de mandar, receber e cobrar). As telas novas ficam fora do primeiro download.
