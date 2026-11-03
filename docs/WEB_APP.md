@@ -64,7 +64,15 @@ A tela só decide o que mostrar. Quem protege é o servidor e as regras.
 
 Mesmas portas do app (`lib/screens/login.dart`): Google, Apple e "Já tenho conta com e-mail", com senha e "Esqueceu a senha?". Conta nova só por Google ou Apple, como no app. O app não tem entrada por link de e-mail, então o web também não tem.
 
-Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app. Hoje ele é `praticos.firebaseapp.com`. Passar para `praticos.web.app` exige cadastrar `https://praticos.web.app/__/auth/handler` no cliente OAuth do Google e no Services ID da Apple, um passo manual nos consoles.
+Google e Apple abrem em popup. Se o navegador bloquear o popup, a entrada segue por redirect (`shouldRedirect` em `lib/session.ts`). Para o redirect funcionar no Safari, o `authDomain` precisa estar no mesmo site do app, senão o Safari bloqueia o armazenamento entre sites. Por isso o `.env.production` usa `praticos.web.app`, e o Hosting serve o handler em `/__/auth/handler` (caminho reservado, fora das regras de `/app`).
+
+O handler está cadastrado nos consoles (passo manual, feito em 03/11/2026):
+
+- **Google Cloud**, cliente OAuth "Web client (auto created by Google Service)": origem `https://praticos.web.app` e retorno `https://praticos.web.app/__/auth/handler`.
+- **Apple Developer**, Services ID `br.com.rafsoft.praticos.app` (o mesmo do provedor Apple no Firebase): Sign In with Apple ligado, App ID principal `br.com.rafsoft.praticos`, domínios `praticos.web.app` e `praticos.firebaseapp.com` e os dois handlers.
+- **Firebase Auth**, domínios autorizados: `praticos.web.app` já estava.
+
+O `praticos.firebaseapp.com` continua cadastrado nos três, então voltar o `authDomain` para ele funciona sem mexer nos consoles. Um domínio novo para o web precisa dos mesmos três cadastros.
 
 Quem trabalha em mais de uma empresa escolhe onde entrar (`/app/choose-company`). A escolha fica lembrada neste navegador e pode ser trocada no menu.
 
