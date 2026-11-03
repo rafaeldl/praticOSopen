@@ -359,7 +359,7 @@ import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
-import appInviteRoutes from './routes/v1/invite.routes';
+import { mountAppInviteRoutes } from './routes/v1/app-invites.mount';
 import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
@@ -570,7 +570,8 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes);
 app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, customersRoutes);
 app.use('/v1/app/devices', ...appBearer, devicesRoutes);
-app.use('/v1/app/invites', ...appBearer, appInviteRoutes);
+// Invites: /pending and /:token/accept also serve an account without a company
+mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
 app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);
 app.use('/v1/app/payments/asaas', ...appBearer, asaasConnectionRoutes);
 app.use('/v1/app/nfse', ...appBearer, nfseRoutes);

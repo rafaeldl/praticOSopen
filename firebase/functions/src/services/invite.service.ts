@@ -16,6 +16,7 @@ import * as companyService from './company.service';
 import * as channelLinkService from './channel-link.service';
 import { memberRole, ownerId, privateMembershipRef, verifyMembership } from './membership.service';
 import { maskTokenForLog } from '../utils/log-redaction.utils';
+import { normalizePhone as toE164 } from '../utils/format.utils';
 
 // Bot WhatsApp number (from environment or config)
 const BOT_WHATSAPP_NUMBER = process.env.BOT_WHATSAPP_NUMBER || '+5548988794742';
@@ -357,6 +358,68 @@ export async function listByUser(email?: string, phone?: string): Promise<Invite
   });
 
   return invites;
+}
+
+/** Identity of the caller, from the verified ID token. */
+export interface InviteCaller {
+  email?: string;
+  /** Only a verified email matches an invite (anyone can sign up with an unverified one). */
+  emailVerified?: boolean;
+  /** E.164, from the token (verified by SMS). */
+  phone?: string;
+}
+
+function digits(value: unknown): string {
+  return typeof value === 'string' ? value.replace(/\D/g, '') : '';
+}
+
+/** Phone of the caller in the shapes an invite may have stored it. */
+function phoneVariants(phone?: string): string[] {
+  const d = digits(phone);
+  if (!d) return [];
+  const out = new Set<string>([`+${d}`, d]);
+  if (d.startsWith('55') && d.length >= 12) out.add(d.slice(2));
+  if (phone) out.add(phone.trim());
+  return [...out];
+}
+
+/**
+ * Whether the invite was sent to the caller: same verified email (any case)
+ * or same phone (invites without `+` are read as Brazilian, like the app).
+ */
+export function isInviteAddressedTo(invite: Pick<Invite, 'email' | 'phone'>, caller: InviteCaller): boolean {
+  const inviteEmail = normalizeEmail(invite.email);
+  if (inviteEmail && caller.emailVerified === true && inviteEmail === normalizeEmail(caller.email)) {
+    return true;
+  }
+  const callerDigits = digits(caller.phone);
+  if (callerDigits && invite.phone) {
+    if (digits(invite.phone) === callerDigits) return true;
+    if (digits(toE164(invite.phone)) === callerDigits) return true;
+  }
+  return false;
+}
+
+/** Pending, non-expired invites sent to the caller's verified email or phone. */
+export async function listAddressedTo(caller: InviteCaller): Promise<Invite[]> {
+  const emails = caller.emailVerified === true && caller.email
+    ? [...new Set([caller.email.trim(), normalizeEmail(caller.email)])]
+    : [];
+  const phones = phoneVariants(caller.phone);
+
+  const found = new Map<string, Invite>();
+  const queries = [
+    ...emails.map((email) => listByUser(email, undefined)),
+    ...phones.map((phone) => listByUser(undefined, phone)),
+  ];
+  for (const invites of await Promise.all(queries)) {
+    for (const invite of invites) {
+      if (isInviteAddressedTo(invite, caller)) found.set(invite.token, invite);
+    }
+  }
+  return [...found.values()].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 }
 
 /**

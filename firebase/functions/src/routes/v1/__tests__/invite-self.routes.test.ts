@@ -4,7 +4,7 @@ import express, { Request, Response, NextFunction } from 'express';
 jest.mock('../../../services/invite.service');
 
 import * as inviteService from '../../../services/invite.service';
-import router from '../invite.routes';
+import { createSelfInviteRouter } from '../invite-self.routes';
 
 const mockService = inviteService as jest.Mocked<typeof inviteService>;
 
@@ -17,7 +17,7 @@ function buildApp(email?: string) {
     r.userContext = { userId: 'user1', userName: 'User', companyId: 'comp1', role: 'technician' };
     next();
   });
-  app.use('/', router);
+  app.use('/', createSelfInviteRouter([]));
   return app;
 }
 

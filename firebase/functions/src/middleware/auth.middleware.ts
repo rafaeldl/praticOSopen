@@ -263,6 +263,29 @@ export async function bearerAuth(
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  return authenticateBearer(req, res, next, false);
+}
+
+/**
+ * Same as bearerAuth, but a user with no verified company still passes, with
+ * an empty companyId, no permissions and no userContext. Only for the routes
+ * that act on the caller's own invites (onboarding): GET /v1/app/invites/pending
+ * and POST /v1/app/invites/:token/accept. Never mount it on anything else.
+ */
+export async function bearerAuthAllowingNoCompany(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  return authenticateBearer(req, res, next, true);
+}
+
+async function authenticateBearer(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+  allowNoCompany: boolean
+): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
 
@@ -318,6 +341,21 @@ export async function bearerAuth(
       activeMembership = (await verifyUserMemberships(userId, companies))[0];
     }
 
+    // Identity from the verified ID token, used to match invites to the caller
+    const identity = {
+      userId,
+      userName: typeof userData?.name === 'string' ? userData.name : '',
+      email: decodedToken.email,
+      emailVerified: decodedToken.email_verified === true,
+      phone: decodedToken.phone_number,
+    };
+
+    if (!activeMembership && allowNoCompany && !requestedCompanyId) {
+      req.auth = { type: 'bearer', companyId: '', permissions: [], ...identity };
+      next();
+      return;
+    }
+
     if (!activeMembership) {
       console.log(`[BearerAuth] REJECTED - No verified company access for user ${userId}`);
       res.status(403).json({
@@ -342,9 +380,8 @@ export async function bearerAuth(
     req.auth = {
       type: 'bearer',
       companyId: activeMembership.companyId,
-      userId: userId,
-      email: decodedToken.email,
       permissions: permissions,
+      ...identity,
     };
 
     req.userContext = {

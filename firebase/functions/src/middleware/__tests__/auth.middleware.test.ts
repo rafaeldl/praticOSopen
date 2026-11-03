@@ -25,7 +25,13 @@ jest.mock('../../services/membership.service', () => ({
   verifyUserMemberships: jest.fn(),
 }));
 
-import { bearerAuth, botAuth, getRolePermissions, hasPermission } from '../auth.middleware';
+import {
+  bearerAuth,
+  bearerAuthAllowingNoCompany,
+  botAuth,
+  getRolePermissions,
+  hasPermission,
+} from '../auth.middleware';
 import { verifyMembership, verifyUserMemberships } from '../../services/membership.service';
 
 const mockVerify = verifyUserMemberships as jest.MockedFunction<typeof verifyUserMemberships>;
@@ -88,7 +94,9 @@ describe('bearerAuth', () => {
       type: 'bearer',
       companyId: 'c2',
       userId: 'u1',
+      userName: 'User',
       email: 'User@Example.com',
+      emailVerified: false,
       permissions: getRolePermissions('technician'),
     });
     expect(req.userContext).toEqual({
@@ -170,6 +178,59 @@ describe('bearerAuth', () => {
       success: false,
       error: { code: 'TOKEN_EXPIRED', message: 'Token has expired' },
     });
+  });
+});
+
+describe('bearerAuthAllowingNoCompany', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockVerifyIdToken.mockResolvedValue({
+      uid: 'u1', email: 'new@example.com', email_verified: true, phone_number: '+5548999990000',
+    });
+    mockUserGet.mockResolvedValue({ exists: true, data: () => ({ name: 'New', companies: [] }) });
+    mockVerify.mockResolvedValue([]);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('lets a user without a company through with no company and no permissions', async () => {
+    const req = buildReq();
+    const next = jest.fn();
+
+    await bearerAuthAllowingNoCompany(req, buildRes(), next);
+
+    expect(next).toHaveBeenCalled();
+    expect(req.auth).toEqual({
+      type: 'bearer',
+      companyId: '',
+      permissions: [],
+      userId: 'u1',
+      userName: 'New',
+      email: 'new@example.com',
+      emailVerified: true,
+      phone: '+5548999990000',
+    });
+    expect(req.userContext).toBeUndefined();
+  });
+
+  it('still refuses a requested company the user does not belong to', async () => {
+    const res = buildRes();
+    const next = jest.fn();
+
+    await bearerAuthAllowingNoCompany(buildReq({ 'x-company-id': 'c9' }), res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+  });
+
+  it('bearerAuth keeps refusing the same user', async () => {
+    const res = buildRes();
+    const next = jest.fn();
+
+    await bearerAuth(buildReq(), res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 });
 

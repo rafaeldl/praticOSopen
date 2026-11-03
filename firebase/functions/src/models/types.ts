@@ -542,6 +542,12 @@ export interface AuthenticatedRequest extends Request {
     userId?: string;
     /** Email from the verified ID token (bearer auth only) */
     email?: string;
+    /** Whether the provider verified that email (bearer auth only) */
+    emailVerified?: boolean;
+    /** Phone number from the verified ID token, E.164 (bearer auth only) */
+    phone?: string;
+    /** Name from users/{uid} (bearer auth only) */
+    userName?: string;
     permissions?: string[];
     companyCountry?: string;
   };

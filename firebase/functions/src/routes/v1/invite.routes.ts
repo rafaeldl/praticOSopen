@@ -203,52 +203,8 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
   }
 });
 
-/**
- * GET /api/v1/invites/pending
- * List pending invites for current user (by email/phone)
- * NOTE: This route MUST be defined before /:token to avoid matching "pending" as a token
- */
-router.get('/pending', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const userId = req.auth?.userId;
-
-    if (!userId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-      });
-      return;
-    }
-
-    // Get user's email from userContext (phone lookup would need to fetch from user doc)
-    const userEmail = req.userContext?.userName; // This is actually the name, we need email from somewhere else
-
-    // For now, use the listByUser with whatever context we have
-    // In a full implementation, we would fetch the user's email/phone from their profile
-    const invites = await inviteService.listByUser(userEmail, undefined);
-
-    res.json({
-      success: true,
-      data: {
-        invites: invites.map((inv: inviteService.Invite) => ({
-          token: inv.token,
-          companyId: inv.company.id,
-          companyName: inv.company.name,
-          role: inv.role,
-          createdAt: inv.createdAt,
-          expiresAt: inv.expiresAt,
-          invitedBy: inv.invitedBy?.name,
-        })),
-      },
-    });
-  } catch (error) {
-    console.error('List pending invites error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to list pending invites' },
-    });
-  }
-});
+// GET /pending and POST /:token/accept live in invite-self.routes.ts: they
+// also serve an account without a company and are mounted before this router.
 
 /**
  * GET /api/v1/invites/:token
@@ -319,71 +275,6 @@ router.get('/:token', async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to get invite' },
-    });
-  }
-});
-
-/**
- * POST /api/v1/invites/:token/accept
- * Accept an invite
- */
-router.post('/:token/accept', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const userId = req.auth?.userId;
-
-    if (!userId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-      });
-      return;
-    }
-
-    const token = String(req.params.token);
-
-    // Get user info
-    const userAggr = getUserAggr(req);
-
-    const result = await inviteService.acceptInvite(
-      token,
-      userId,
-      userAggr.name,
-      req.auth?.email
-    );
-
-    if (!result.success && result.code === 'ALREADY_MEMBER') {
-      res.status(409).json({
-        success: false,
-        error: { code: 'ALREADY_MEMBER', message: result.error },
-      });
-      return;
-    }
-
-    if (!result.success) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'INVALID_INVITE',
-          message: result.error,
-        },
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: {
-        success: true,
-        companyId: result.companyId,
-        companyName: result.companyName,
-        role: result.role,
-      },
-    });
-  } catch (error) {
-    console.error('Accept invite error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to accept invite' },
     });
   }
 });

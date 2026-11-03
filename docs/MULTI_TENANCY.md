@@ -121,6 +121,7 @@ Todo fluxo do servidor que altera membros mantém os quatro primeiros em sincron
 - Aceite (`POST /v1/app/invites/:token/accept` e WhatsApp) é atômico: em uma transação, exige convite `pending` e não expirado, registra o membro (5.1) e marca o convite como aceito.
 - Quem já é dono ou membro da empresa recebe `ALREADY_MEMBER` (409); o papel existente nunca é alterado por um convite.
 - Quando o e-mail do login difere do e-mail do convite, o aceite segue e é registrado um aviso (identificadores mascarados).
+- Conta ainda sem empresa (primeiro acesso): só `GET /v1/app/invites/pending` e `POST /v1/app/invites/:token/accept` passam sem empresa (`bearerAuthAllowingNoCompany`, montado em `routes/v1/app-invites.mount.ts`). A lista traz e o aceite só aceita convites enviados ao e-mail verificado (`email_verified`) ou ao telefone do login; outro convite recebe 403. As demais rotas de convite, inclusive `GET /v1/app/invites/:token` (busca por código), continuam exigindo empresa.
 - Tokens novos: `INV_` + 16 caracteres `A-Z0-9` gerados com `crypto.randomBytes`; tokens antigos continuam aceitos.
 - Pelo bot, apenas dono/admin criam convites de `manager`; os demais só convidam papéis abaixo do próprio (supervisor → apenas técnico).
 
