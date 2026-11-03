@@ -461,6 +461,7 @@ import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
 import contractsRoutes from './routes/v1/contracts.routes';
+import onboardingRoutes from './routes/v1/onboarding.routes';
 import { createAccountRouter } from './routes/v1/account.routes';
 import { createWebAccessRouter } from './routes/v1/web-access.routes';
 import { defaultAccountDeletionDeps } from './services/account-deletion.deps';
@@ -683,6 +684,8 @@ app.use('/v1/app/ai', ...appBearer, aiRoutes);
 app.use('/v1/app/team', ...appBearer, teamRoutes);
 // Recurring contracts: due orders on demand, off unless config/contracts.routeEnabled (docs/CONTRACTS_SERVER_JOB.md)
 app.use('/v1/app/contracts', ...appBearer, contractsRoutes);
+// First access on the web: the segment's checklists and samples after the browser creates the company (docs/WEB_API.md)
+app.use('/v1/app/onboarding', ...appBearer, onboardingRoutes);
 // Web app access list: own token check, works for people without a company (docs/WEB_APP.md)
 app.use('/v1/app/web-access', createWebAccessRouter({
   verifyIdToken: (token) => adminAuth.verifyIdToken(token),

@@ -104,3 +104,13 @@ O app não fala em "cadastro de empresa": a empresa continua existindo por baixo
 OS, permissões), mas para o usuário é a conta dele. Spec:
 `docs/superpowers/specs/2026-10-16-modo-individual-design.md`. Equipe é recurso pago: no Free,
 "Convidar" abre os planos (IAP) antes do formulário.
+
+## Web
+
+O app web segue o mesmo fluxo em `/app/start` (`docs/WEB_APP.md`, "Primeiro acesso"): cria a empresa com o mesmo lote e as mesmas regras, e os checklists e exemplos vêm de `POST /v1/app/onboarding/seed`, a versão do servidor do `BootstrapService` (`docs/WEB_API.md`).
+
+- **Uma vez por empresa.** A rota grava `onboardingSeededAt` na empresa numa transação antes de copiar. Com o marcador, ou com empresa criada há mais de um dia (ou sem `createdAt`), responde 409 e não grava nada. O web trata `ONBOARDING_ALREADY_SEEDED` como pronto (a resposta anterior se perdeu). Uma cópia que falhe no meio não é repetida.
+- **Checklists** entram com `create`, só os que a empresa não tem; um modelo que já existe nunca é regravado.
+- **OS de exemplo** têm ids `sample-order-1` a `sample-order-4`, e é por eles que se reconhecem. O pagamento fica nulo, como nas OS de exemplo do app (`Order` sem `payment`). As telas de dinheiro leem "aprovada, em andamento ou concluída sem `payment`" como em aberto e sem nada pago (`docs/WEB_API.md`, Financeiro), então elas aparecem como a receber pelo total, igual ao app.
+- **Recarregar** entre criar a empresa e copiar os dados continua de onde parou: o id da empresa e a escolha (com ou sem exemplos, idioma) ficam no `sessionStorage` da aba até o fim.
+- **Ramo trocado depois de um erro**: os dados do ramo só são copiados no fim. Depois de a cópia ter sido pedida, o web não deixa voltar ao ramo nem às especialidades, então checklists de um ramo nunca ficam numa empresa de outro.

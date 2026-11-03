@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app` (https://praticos.app/app; ver "Domínios"), código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists", a de "Contratos", a de "Financeiro e notas fiscais" e a de "Equipe, empresa e configurações" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda", a de "Checklists", a de "Contratos", a de "Financeiro e notas fiscais" a de "Equipe, empresa e configurações" e o "Primeiro acesso" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -349,6 +349,37 @@ Código em `src/views/contracts/`, `src/components/contracts/` e `src/lib/contra
 
 **Fica para depois.** Pausar e retomar (acima), contratos do aparelho (`device.detail.contracts`), a data da próxima manutenção pelo contrato, ligar e desligar Contratos nos dados da empresa, e o aviso antes da data.
 
+### Primeiro acesso
+
+Código em `src/views/onboarding/` e `src/lib/onboarding/` (regras puras em `model.ts`, testadas em `tests/onboarding.test.ts`; Firebase e API em `data.ts`). Textos no pedaço `-onboarding.json`. Testes: `e2e/onboarding.spec.ts`. Mesmo fluxo de `docs/ONBOARDING.md`.
+
+**Portão.** Quem entra na lista de acesso sem empresa cai em `/no-company`, que lê os convites: com convite, mostra o convite antes, com "Começar sem convite"; sem nenhum, vai a `/start`. Erro ao ler os convites mostra erro com "Tentar de novo" e nunca manda criar empresa (fatia 01, 72). Quem está fora da lista não chega a nenhuma das duas.
+
+**Passos (`/start?step=`).** "Qual é o seu ramo?" (só ramos `active`, por nome, nome no idioma), "O que você atende?" (só ramo com especialidades, todas marcadas) e "Para o cliente" (nome opcional quando a conta tem nome, telefone com a máscara `company.phone` do país, "Valores e cobrança" no padrão do ramo). Cada passo fica na URL, então o Voltar do navegador volta um passo. "Sair" no primeiro passo. Recarregar volta ao ramo.
+
+**Criar.** "Criar meu PraticOS" ou "Começar sem exemplos":
+
+1. Grava a empresa com o mesmo lote do app (`UserStore.createCompanyForUser` → `AuthService.signup`): `users/{uid}` (com `companies` e, se não existir, o cadastro), `companies/{id}` e `companies/{id}/memberships/{uid}` com papel admin, sob as mesmas regras. Os campos são os de `applyBusiness`, mais o país (o app não grava, defeito D8): região do navegador, senão a do idioma. Termos do ramo no idioma ativo.
+2. Espera a claim (token renovado a cada 500 ms, até 20 s). Tempo esgotado é erro, não segue (D9).
+3. `POST /v1/app/onboarding/seed` (ver `docs/WEB_API.md`): checklists sempre, exemplos só no botão azul, no idioma ativo.
+4. Relê o token e entra na empresa, na Início.
+
+Erro em qualquer passo mostra "Não deu para terminar…" com "Tentar de novo" (repete a última escolha) e "‹ Para o cliente" (volta ao formulário com o que foi digitado). A empresa salva fica guardada: tentar de novo completa a mesma, nunca cria outra. O id dela e a escolha ficam no `sessionStorage` (`lib/onboarding/pending.ts`): recarregar a página leva de volta ao primeiro acesso, que termina a mesma empresa (o roteador manda para lá enquanto houver pendência). Depois de pedir a cópia dos dados, o formulário não volta mais ao ramo. Um `409 ONBOARDING_ALREADY_SEEDED` conta como pronto.
+
+**Fica para depois.** "Recebi um código de convite" (a tela de código não existe no web), empresa que já existe sem ramo (o app retoma o primeiro acesso para ela; o web abre normalmente) e os eventos de analytics (`tutorial_begin`, `company_created`, `tutorial_complete`).
+
+### Início: manutenções, avisos e Agora
+
+**Manutenções chegando** (`src/components/orders/Maintenances.vue`, `src/lib/orders/maintenance.ts`). Nas listas abertas (Em aberto, Minhas, Orçamentos, Paradas), sem busca: aparelhos com manutenção atrasada ou em até 7 dias, lidos pelo REST do Firestore depois da lista aparecer, sem os que têm contrato ativo (quem não lê contratos, técnico e consultor, vê todos, como no app). 3 de cada vez, "Ver mais N", atrasada em vermelho. A linha abre: "Chamar cliente" (só com cliente na data; telefone lido na hora; `wa.me` com a mensagem pronta, nada é enviado sozinho; sem telefone ou cliente apagado, um aviso), "Abrir OS" (quem cria OS: Nova OS com cliente, aparelho e os serviços da última OS concluída com o valor dela, lida pela API) e "Ver {aparelho}". Falha só esconde a seção.
+
+**Sino e Avisos** (`src/lib/notifications/`, `src/views/notifications/`). O sino da Início mostra os avisos novos da pessoa (99+ acima de 99; o app conta no máximo 50), contados no servidor depois da lista. `/notifications` lista os 50 mais recentes em Novos e Antes, com o texto do app (aprovação sem o "da OS #", comentário, pagamento recebido, manutenção) e o tempo ("há 5 minutos", a data depois de um mês). Abrir marca como lido e abre a OS ao lado na Início (manutenção vai à Início). "Marcar todos como lidos" marca todos os novos, também os além dos 50. Os lembretes do app são do aparelho: o web não tem "Ajustar lembretes".
+
+**Agora** (técnico, em Minhas, sem busca). A primeira visita de hoje ainda não começada, senão a em andamento, com "Abrir OS N"; ela não se repete na lista. As visitas de hoje em Minhas mostram a hora.
+
+**Desempenho.** Medido em 2026-11-03 com esta fatia: **1.079 ms** na 1ª visita e **826 ms** na volta (`npm run e2e:perf`, p75). JS até a lista: 136,7 KB (134,6 na master com Configurações). O primeiro acesso, as manutenções e os avisos carregam sob demanda; no caminho até a lista entram só o sino, as iniciais, o "Agora" e as rotas novas.
+
+**Iniciais.** O botão do perfil (no celular, no topo; no computador, ao lado do nome da empresa) mostra as iniciais da empresa (primeira e última palavra, sem "da/de/do/e"). No web ele leva a Ajustes.
+
 ### Equipe, empresa e configurações
 
 Código em `src/views/settings/`, `src/components/settings/` e `src/lib/settings/` (regras puras em `model.ts`, testadas em `tests/settings-model.test.ts`; chamadas em `data.ts`). Textos no pedaço `-settings.json` (`FEATURES.settings` em `scripts/gen.mjs`), carregado com as telas. Testes: `e2e/team.spec.ts`, `e2e/company.spec.ts`, `e2e/settings.spec.ts`, `e2e/integrations.spec.ts`, `e2e/account-delete.spec.ts` e `e2e/settings-a11y.spec.ts`, cada um numa empresa própria do seed (gama, equipe e delta), para que desligar valores ou trocar papéis não mexa nos outros testes.
@@ -537,9 +568,9 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 ## Limitações
 
-- Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- Primeiro acesso: falta o código de convite e a empresa sem ramo (ver "Primeiro acesso").
+- OS: falta campos do segmento, documentos, linha "Nota fiscal" com a situação, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.

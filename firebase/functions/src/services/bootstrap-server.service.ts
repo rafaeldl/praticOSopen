@@ -18,7 +18,11 @@ import {
 import {
   UserAggr,
   CompanyAggr,
+  OrderStatus,
 } from '../models/types';
+import { createOrder } from './order.service';
+import { addFormToOrder, listFormTemplates } from './forms.service';
+import { companyZone, dayIn, nextDay } from '../utils/company-zone';
 
 // ============================================================================
 // Types
@@ -31,6 +35,13 @@ export interface BootstrapParams {
   userAggr: UserAggr;
   companyAggr: CompanyAggr;
   locale?: string;
+  /**
+   * Copy the segment checklists too (default). The first access copies them
+   * before, with or without samples, and passes false.
+   */
+  syncForms?: boolean;
+  /** Clock of the sample orders (tests). */
+  now?: Date;
 }
 
 export interface BootstrapResult {
@@ -42,6 +53,7 @@ export interface BootstrapResult {
   skippedProducts: string[];
   skippedDevices: string[];
   skippedCustomers: string[];
+  createdOrders: string[];
 }
 
 interface BootstrapData {
@@ -326,14 +338,16 @@ function localizeFormData(
 /**
  * Sync form templates from segment to company
  */
-async function syncCompanyFormsFromSegment(params: {
+export async function syncCompanyFormsFromSegment(params: {
   companyId: string;
   segmentId: string;
   subspecialties: string[];
   userAggr: UserAggr;
   locale?: string;
+  /** Create only the checklists the company does not have; never write over one (first access). */
+  onlyMissing?: boolean;
 }): Promise<void> {
-  const { companyId, segmentId, subspecialties, userAggr, locale } = params;
+  const { companyId, segmentId, subspecialties, userAggr, locale, onlyMissing = false } = params;
 
   const segmentSnapshot = await db
     .collection('segments')
@@ -381,6 +395,16 @@ async function syncCompanyFormsFromSegment(params: {
       formData.createdBy = userAggr;
     }
 
+    if (onlyMissing) {
+      if (existingIds.has(doc.id)) continue;
+      try {
+        await companyFormsRef.doc(doc.id).create(formData);
+      } catch (error) {
+        // Created meanwhile (ALREADY_EXISTS): left as it is.
+        if ((error as { code?: unknown }).code !== 6) throw error;
+      }
+      continue;
+    }
     await companyFormsRef.doc(doc.id).set(formData, { merge: true });
   }
 }
@@ -402,6 +426,8 @@ export async function executeServerBootstrap(
     userAggr,
     companyAggr,
     locale = 'pt-BR',
+    syncForms = true,
+    now: clock = new Date(),
   } = params;
 
   console.log(`[BOOTSTRAP] Starting for company ${companyId}, segment ${segmentId}`);
@@ -415,6 +441,7 @@ export async function executeServerBootstrap(
     skippedProducts: [],
     skippedDevices: [],
     skippedCustomers: [],
+    createdOrders: [],
   };
 
   // 1. Merge bootstrap data from subspecialties
@@ -562,18 +589,28 @@ export async function executeServerBootstrap(
     }
   }
 
-  // 7. Sync form templates from segment
+  // 7. Sync form templates from segment (before the orders: the first one gets a checklist)
+  if (syncForms) {
+    try {
+      await syncCompanyFormsFromSegment({
+        companyId,
+        segmentId,
+        subspecialties,
+        userAggr,
+        locale,
+      });
+      console.log(`[BOOTSTRAP] Form templates synced`);
+    } catch (error) {
+      console.error('[BOOTSTRAP] Error syncing form templates:', error);
+      // Non-fatal error
+    }
+  }
+
+  // 8. Sample orders, as the app's BootstrapService (only when the company has none)
   try {
-    await syncCompanyFormsFromSegment({
-      companyId,
-      segmentId,
-      subspecialties,
-      userAggr,
-      locale,
-    });
-    console.log(`[BOOTSTRAP] Form templates synced`);
+    result.createdOrders = await createSampleOrders({ companyId, userAggr, companyAggr, now: clock });
   } catch (error) {
-    console.error('[BOOTSTRAP] Error syncing form templates:', error);
+    console.error('[BOOTSTRAP] Error creating sample orders:', error instanceof Error ? error.message : 'unknown');
     // Non-fatal error
   }
 
@@ -582,7 +619,99 @@ export async function executeServerBootstrap(
     products: result.createdProducts.length,
     devices: result.createdDevices.length,
     customers: result.createdCustomers.length,
+    orders: result.createdOrders.length,
   })}`);
 
   return result;
+}
+
+// ============================================================================
+// Sample orders (lib/services/bootstrap_service.dart, _createSampleOrders)
+// ============================================================================
+
+/** Status of the i-th sample order: a quote, an approved one, one in progress and a finished one. */
+export const SAMPLE_ORDER_STATUSES: readonly OrderStatus[] = ['quote', 'approved', 'progress', 'done'];
+
+/**
+ * Due date of the i-th sample order, as BootstrapService.sampleOrderDueDate:
+ * the coming days (tomorrow, then every other day) at 09:00, so the first look
+ * shows upcoming work in the Agenda instead of late orders. Wall time of the
+ * company's zone, without a zone, the way the app stores dates.
+ */
+export function sampleOrderDueDate(index: number, now: Date, country?: string | null): string {
+  let day = dayIn(now, companyZone(country));
+  for (let i = 0; i < 1 + index * 2; i++) day = nextDay(day);
+  return `${day}T09:00:00.000`;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Four orders with different statuses over the customers, devices and services
+ * of the company (the samples just created). Nothing when the company already
+ * has an order or lacks one of the three. Fixed ids: a repeated call never
+ * creates them twice. The first one gets the first active checklist.
+ */
+export async function createSampleOrders(params: {
+  companyId: string;
+  userAggr: UserAggr;
+  companyAggr: CompanyAggr;
+  now?: Date;
+}): Promise<string[]> {
+  const { companyId, userAggr, companyAggr, now = new Date() } = params;
+  const company = db.collection('companies').doc(companyId);
+  const existing = await company.collection('orders').limit(1).get();
+  if (!existing.empty) return [];
+
+  const [customers, devices, services] = await Promise.all(
+    ['customers', 'devices', 'services'].map((name) => company.collection(name).limit(10).get()),
+  );
+  if (customers.empty || devices.empty || services.empty) return [];
+
+  const created: string[] = [];
+  for (let i = 0; i < SAMPLE_ORDER_STATUSES.length; i++) {
+    const customerDoc = customers.docs[i % customers.docs.length];
+    const deviceDoc = devices.docs[i % devices.docs.length];
+    const serviceDoc = services.docs[i % services.docs.length];
+    const customer = customerDoc.data();
+    const device = deviceDoc.data();
+    const service = serviceDoc.data();
+    const status = SAMPLE_ORDER_STATUSES[i];
+    const dueDate = sampleOrderDueDate(i, now, companyAggr.country);
+    const order = await createOrder(
+      companyId,
+      {
+        clientOrderId: `sample-order-${i + 1}`,
+        customerId: customerDoc.id,
+        customer: { id: customerDoc.id, name: customer.name ?? '', phone: customer.phone ?? null, email: customer.email ?? null },
+        deviceId: deviceDoc.id,
+        device: { id: deviceDoc.id, name: device.name ?? '', serial: device.serial ?? null, category: device.category ?? null },
+        services: [{ serviceId: serviceDoc.id, value: typeof service.value === 'number' ? service.value : null }],
+        status,
+        dueDate,
+        scheduledDate: status === 'done' ? undefined : dueDate,
+      },
+      userAggr,
+      companyAggr,
+    );
+    // Created some days ago, as the app does, so the list is not all "today".
+    // Payment left empty, as the app's sample orders (Order without payment): money screens read
+    // "aprovada, em andamento ou concluída sem payment" as open, nothing paid (docs/ONBOARDING.md).
+    await company.collection('orders').doc(order.id).update({
+      payment: null,
+      createdAt: new Date(now.getTime() - (11 - i * 2) * DAY_MS).toISOString(),
+      updatedAt: new Date(now.getTime() - (10 - i * 2) * DAY_MS).toISOString(),
+    });
+    created.push(order.id);
+
+    if (i === 0) {
+      try {
+        const [template] = await listFormTemplates(companyId);
+        if (template) await addFormToOrder(companyId, order.id, template.id, userAggr);
+      } catch (error) {
+        console.error('[BOOTSTRAP] Could not add a checklist to the sample order:', error instanceof Error ? error.message : 'unknown');
+      }
+    }
+  }
+  return created;
 }

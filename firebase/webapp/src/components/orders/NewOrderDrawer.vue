@@ -96,6 +96,11 @@ onMounted(async () => {
     devices.value = d
     catalog.value = k
     loading.value = false
+    // A maintenance's "Abrir OS": the services of the last finished order, with the value it had.
+    for (const seeded of seed?.items ?? []) {
+      const item = k.find((entry) => entry.kind === 'service' && entry.id === seeded.id)
+      if (item) lines.value = [...lines.value, { key: crypto.randomUUID(), item, value: showsMoney ? (seeded.value ?? item.value) : item.value, quantity: 1 }]
+    }
     // Only the customer: their devices are suggested first, none is picked (the app's rule).
     if (seed?.customer && !seed.device) customerDevices.value = await devicesOf(seed.customer.id)
     if (can('assignOrder')) team.value = await loadTeam()

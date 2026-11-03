@@ -291,6 +291,26 @@ export async function readOrderForms(orderId: string): Promise<Record<string, un
   return snapshot.docs.map((doc) => ({ docId: doc.id, ...doc.data() }))
 }
 
+/** Companies a first access created for `user` (owner.id), with what the server put in them. */
+export async function companiesOwnedBy(user: UserKey): Promise<{ id: string; data: Record<string, unknown>; forms: string[]; services: string[]; customers: string[]; orders: number }[]> {
+  const snapshot = await db().collection('companies').where('owner.id', '==', USERS[user].uid).get()
+  return Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const [forms, services, customers, orders] = await Promise.all(
+        ['forms', 'services', 'customers', 'orders'].map((name) => db().collection(`companies/${doc.id}/${name}`).get()),
+      )
+      return {
+        id: doc.id,
+        data: doc.data(),
+        forms: forms!.docs.map((form) => form.id).sort(),
+        services: services!.docs.map((service) => String(service.data().name)).sort(),
+        customers: customers!.docs.map((customer) => String(customer.data().name)).sort(),
+        orders: orders!.size,
+      }
+    }),
+  )
+}
+
 /** Another device writing the checklist as it is (the app's offline path replaces the whole list). */
 export async function writeOrderFormRaw(orderId: string, formId: string, fields: Record<string, unknown>): Promise<void> {
   await db().doc(`companies/${COMPANY_A}/orders/${orderId}/forms/${formId}`).update(fields)

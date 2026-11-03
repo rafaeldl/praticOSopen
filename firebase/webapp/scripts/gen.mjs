@@ -47,13 +47,14 @@ const files = sourceFiles(resolve(webapp, 'src'))
 // main file. Each feature is a set of folders under src/.
 const FEATURES = {
   // Checklists ride with the orders: they open inside the order, and src/i18n/index.ts (first download) stays as is.
-  orders: ['src/components/orders', 'src/components/forms', 'src/views/forms', 'src/components/contracts', 'src/views/contracts', 'src/lib/contracts', 'src/lib/pdf'],
+  orders: ['src/components/orders', 'src/components/forms', 'src/views/forms', 'src/components/contracts', 'src/views/contracts', 'src/lib/contracts', 'src/lib/pdf', 'src/views/notifications', 'src/lib/notifications'],
   // Cadastros: customers, devices and the catalog share one chunk (src/i18n/index.ts stays as is).
   customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
   agenda: ['src/components/agenda', 'src/views/agenda'],
   finance: ['src/components/finance', 'src/views/finance', 'src/lib/finance', 'src/lib/nfse'],
   // Equipe, empresa, plano, conta e integrações (Configurações and what opens from it).
   settings: ['src/components/settings', 'src/views/settings'],
+  onboarding: ['src/views/onboarding'],
 }
 const read = (list) => usedKeys(list.map((file) => readFileSync(file, 'utf8')))
 const inFeature = (file, dirs) => dirs.some((dir) => file.startsWith(resolve(webapp, dir) + '/'))

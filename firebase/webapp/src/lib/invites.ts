@@ -58,14 +58,14 @@ export async function listPendingInvites(): Promise<Invite[]> {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /** The claim is written by a trigger after the API answers: poll the token for it. */
-async function waitForCompanyClaim(companyId: string, timeoutMs = 20000): Promise<boolean> {
+export async function waitForCompanyClaim(companyId: string, timeoutMs = 20000, intervalMs = 1000): Promise<boolean> {
   const auth = await authClient()
   const started = Date.now()
   while (Date.now() - started < timeoutMs) {
     const token = await auth.currentUser?.getIdTokenResult(true)
     const roles = (token?.claims.roles ?? {}) as Record<string, string>
     if (roles[companyId]) return true
-    await sleep(1000)
+    await sleep(intervalMs)
   }
   return false
 }

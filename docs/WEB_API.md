@@ -139,6 +139,21 @@ Regras (contrato `docs/web-app/contract-cases/finance-summary.json`, as mesmas d
 
 Testes: `routes/v1/__tests__/app-finance.routes.test.ts`, `__tests__/contract-cases.test.ts` e os casos `finance.*` e `nofin.finance.*` de `__tests__/rbac/api-matrix.ts`.
 
+### Primeiro acesso
+
+`routes/v1/onboarding.routes.ts`, com a lógica em `services/onboarding-seed.service.ts` e `services/bootstrap-server.service.ts`. O navegador cria a empresa com o mesmo lote do app (`users/{uid}`, `companies/{id}`, `companies/{id}/memberships/{uid}`, sob as regras `createsOwnCompanyInBatch`), espera a claim e chama esta rota com a empresa nova no `X-Company-Id`.
+
+| Rota | O quê |
+|---|---|
+| `POST /onboarding/seed` `{withSamples, locale}` | Copia os checklists ativos do ramo (sempre) e, com `withSamples`, serviços, produtos, aparelhos, o cliente de exemplo e quatro OS de exemplo (orçamento, aprovada, em andamento, concluída; entrega amanhã e a cada dois dias, às 09:00 da empresa; a primeira com o primeiro checklist). `locale`: `pt-BR`, `en-US` ou `es-ES` |
+
+- Só `manageCompany` (dono e admin). Ramo, especialidades, nomes e país vêm do documento da empresa, nunca do pedido. Sem especialidade marcada num ramo que tem, usa todas (`seedSubspecialties`, igual a `OnboardingBusiness.seedSubspecialties`).
+- Uma vez por empresa: numa transação, grava `onboardingSeededAt` antes de copiar. Já marcada: `409 ONBOARDING_ALREADY_SEEDED`. Criada há mais de um dia ou sem `createdAt` (empresa antiga): `409 ONBOARDING_NOT_NEW`. Nos dois casos nada é gravado.
+- Checklists com `create`, só os que faltam: um modelo da empresa nunca é regravado. OS de exemplo com ids `sample-order-1..4`, pagamento nulo como no app.
+- `executeServerBootstrap` (o mesmo do cadastro pelo WhatsApp) ganhou as OS de exemplo do app e copia os checklists antes delas.
+
+Testes: `routes/v1/__tests__/onboarding.routes.test.ts` e o caso `onboarding.seed` de `__tests__/rbac/api-matrix.ts`.
+
 **Quem recebe (`canReceiveOnOrder`)**: dono, admin e gerente em qualquer OS; consultor nas OS que criou, com "Valores e cobrança" ligado. Supervisor e técnico nunca. Igual a `canReceiveOnOrderFor` no app e a `canReceiveOnOrder` nas regras do Firestore.
 
 **Financeiro**: `viewFinancialReports` (dono, admin, gerente), com "Valores e cobrança" ligado.
