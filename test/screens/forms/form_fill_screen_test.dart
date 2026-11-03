@@ -22,7 +22,7 @@ class _FakeForms implements FormsService {
   /// The checklist on the server (the web may have answered too).
   List<FormResponse> server;
   final changes = <FormAnswerChange>[];
-  final before = <FormResponse?>[];
+  final known = <List<FormResponse>>[];
   final statuses = <FormStatus>[];
 
   /// The response of the question changed, as the screen will show it.
@@ -36,11 +36,11 @@ class _FakeForms implements FormsService {
     String orderId,
     String formId,
     FormAnswerChange change, {
-    FormResponse? localBefore,
+    List<FormResponse> localKnown = const [],
   }) async {
     if (fail) throw StateError('permission-denied');
     changes.add(change);
-    before.add(localBefore);
+    known.add(localKnown);
     server = applyAnswerChange(server, change);
     return server;
   }
@@ -271,7 +271,7 @@ void main() {
     expect(change.itemId, 'b');
     expect((change as FormValueChange).value, 'Reserva');
     // What the screen had of "b" goes along for the offline queue.
-    expect(forms.before.single, isNull);
+    expect(forms.known.single.map((r) => r.itemId), ['a']);
     expect(forms.server.last.photoUrls, ['web/b.jpg']);
     expect(forms.server.last.value, 'Reserva');
   });

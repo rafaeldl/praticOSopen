@@ -121,25 +121,25 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
   /// Saves [change] (only that question, like the web) and shows the
   /// checklist as the server has it after the change, with what the web
-  /// answered meanwhile. [before] is the screen's response to the question
-  /// before the change, for the offline queue. Throws when refused.
+  /// answered meanwhile. [before] is the screen's responses before the
+  /// change, for the offline queue. Throws when refused.
   Future<void> _saveChange(
     FormAnswerChange change,
-    FormResponse? before,
+    List<FormResponse> before,
   ) async {
     final fresh = await _formsService.saveAnswer(
       widget.companyId,
       widget.orderId,
       _currentForm.id,
       change,
-      localBefore: before,
+      localKnown: before,
     );
     if (fresh != null) _update(() => _currentForm.responses = fresh);
   }
 
   Future<void> _saveItemResponse(String itemId, dynamic value) async {
     HapticFeedback.selectionClick();
-    final before = _currentForm.getResponse(itemId);
+    final before = List.of(_currentForm.responses);
     final change = FormValueChange(itemId, value);
     _update(() => _applyLocally(change));
     await _persistChange(change, before);
@@ -149,7 +149,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
   /// [FormsService.saveAnswer]); a refusal is told, never swallowed.
   Future<void> _persistChange(
     FormAnswerChange change,
-    FormResponse? before,
+    List<FormResponse> before,
   ) async {
     try {
       await _saveChange(change, before);
@@ -191,7 +191,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
       if (url == null) throw Exception('Falha no upload');
 
-      final before = _currentForm.getResponse(itemId);
+      final before = List.of(_currentForm.responses);
       final change = FormPhotosAdded(itemId, [url]);
       await _saveChange(change, before);
       // Offline the photo is queued: show it already.
@@ -248,7 +248,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
       }
 
       if (successCount > 0) {
-        final before = _currentForm.getResponse(itemId);
+        final before = List.of(_currentForm.responses);
         final change = FormPhotosAdded(itemId, uploaded);
         await _saveChange(change, before);
         // Offline the photos are queued: show them already.
@@ -280,8 +280,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
   Future<void> _deletePhoto(String itemId, String url) async {
     HapticFeedback.mediumImpact();
 
-    final before = _currentForm.getResponse(itemId);
-    if (before == null) return;
+    if (_currentForm.getResponse(itemId) == null) return;
+    final before = List.of(_currentForm.responses);
 
     final change = FormPhotoRemoved(itemId, url);
     _update(() => _applyLocally(change));

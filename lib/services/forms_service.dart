@@ -159,16 +159,17 @@ class FormsService {
   /// queued offline (or the checklist is gone).
   ///
   /// Without connection transactions fail, so the answer is queued as an
-  /// `arrayRemove` of [localBefore] (the screen's response to that question
-  /// before the change) and an `arrayUnion` of the new one
-  /// ([queuedAnswerWrite]): only that question, never the whole list nor
-  /// the status (it could reopen a checklist another device finished).
+  /// `arrayRemove` of every response to that question in [localKnown] (the
+  /// screen's responses before the change, so no copy is left behind) and an
+  /// `arrayUnion` of the new one ([queuedAnswerWrite]): only that question,
+  /// never the whole list nor the status (it could reopen a checklist
+  /// another device finished).
   Future<List<FormResponse>?> saveAnswer(
     String companyId,
     String orderId,
     String formId,
     FormAnswerChange change, {
-    FormResponse? localBefore,
+    List<FormResponse> localKnown = const [],
   }) async {
     final formRef = _getFormsCollection(companyId, orderId).doc(formId);
     try {
@@ -176,12 +177,12 @@ class FormsService {
     } catch (e) {
       if (!canQueueOffline(e)) rethrow;
       debugPrint('Checklist answer queued offline: $e');
-      final write = queuedAnswerWrite(localBefore, change);
+      final write = queuedAnswerWrite(localKnown, change);
       final now = DateTime.now().toIso8601String();
       final batch = _db.batch();
-      if (write.removed != null) {
+      if (write.removed.isNotEmpty) {
         batch.update(formRef, {
-          'responses': FieldValue.arrayRemove([write.removed]),
+          'responses': FieldValue.arrayRemove(write.removed),
         });
       }
       batch.update(formRef, {

@@ -54,13 +54,13 @@ class OrderForm {
   }
 
   /// Retorna a resposta para um determinado item, se existir. With the
-  /// question twice in the list (an old offline write), the last one.
+  /// question twice in the list, the first one, as the web, the bot and
+  /// older apps read it.
   FormResponse? getResponse(String itemId) {
-    FormResponse? found;
     for (final r in responses) {
-      if (r.itemId == itemId) found = r;
+      if (r.itemId == itemId) return r;
     }
-    return found;
+    return null;
   }
 }
 

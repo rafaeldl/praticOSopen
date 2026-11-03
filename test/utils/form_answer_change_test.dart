@@ -60,27 +60,46 @@ void main() {
     expect(start.first.photoUrls, ['web/a.jpg']);
   });
 
-  test('a question saved twice (old offline queue) becomes one', () {
+  // Web, bot and older apps read the first answer of a question: the app
+  // reads and edits the first one too, and leaves the others alone.
+  test('a question saved twice: the first is read and edited', () {
     final start = [
-      FormResponse(itemId: 'a', value: 'old'),
+      FormResponse(itemId: 'a', value: 'old', photoUrls: ['p']),
       FormResponse(itemId: 'b', value: 1),
-      FormResponse(itemId: 'a', value: 'new', photoUrls: ['p']),
+      FormResponse(itemId: 'a', value: 'new'),
     ];
     final next = applyAnswerChange(start, FormValueChange('a', 'newer'));
     expect(_json(next), [
-      {'itemId': 'b', 'value': 1, 'photoUrls': []},
       {'itemId': 'a', 'value': 'newer', 'photoUrls': ['p']},
+      {'itemId': 'b', 'value': 1, 'photoUrls': []},
+      {'itemId': 'a', 'value': 'new', 'photoUrls': []},
     ]);
+    final form = OrderForm(
+      id: 'f1',
+      formDefinitionId: 'd1',
+      title: 'x',
+      responses: start,
+    );
+    expect(form.getResponse('a')!.value, 'old');
   });
 
   test('offline: swaps only that question, never the whole list', () {
     final before = FormResponse(itemId: 'a', value: true, photoUrls: ['p']);
-    final write = queuedAnswerWrite(before, FormValueChange('a', false));
-    expect(write.removed, before.toJson());
+    final write = queuedAnswerWrite([before], FormValueChange('a', false));
+    expect(write.removed, [before.toJson()]);
     expect(write.added, {'itemId': 'a', 'value': false, 'photoUrls': ['p']});
 
-    final first = queuedAnswerWrite(null, FormValueChange('b', 'Reserva'));
-    expect(first.removed, isNull);
+    final first = queuedAnswerWrite(const [], FormValueChange('b', 'Reserva'));
+    expect(first.removed, isEmpty);
     expect(first.added, {'itemId': 'b', 'value': 'Reserva', 'photoUrls': []});
+  });
+
+  test('offline: takes out every copy of the question the app knows', () {
+    final old = FormResponse(itemId: 'a', value: 'old', photoUrls: ['p']);
+    final dup = FormResponse(itemId: 'a', value: 'new');
+    final write = queuedAnswerWrite([old, dup], FormValueChange('a', 'x'));
+    expect(write.removed, [old.toJson(), dup.toJson()]);
+    // Built on the first, as everyone reads it.
+    expect(write.added, {'itemId': 'a', 'value': 'x', 'photoUrls': ['p']});
   });
 }
