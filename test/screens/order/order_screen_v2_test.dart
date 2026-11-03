@@ -1866,6 +1866,29 @@ void main() {
       });
     });
 
+    testWidgets('due earlier today is not late, as in the list', (
+      tester,
+    ) async {
+      final now = DateTime.now();
+      final saved = order('approved')
+        ..dueDate = DateTime(now.year, now.month, now.day, 0, 1);
+      await _pump(
+        tester,
+        OrderScreenV2(
+          showAssistant: false,
+          store: OrderStore(),
+          catalogSource: FakeSource(),
+          catalogPermissions: _allCatalog,
+          permissions: _permissions(),
+          actions: FakeActions(),
+          mostUsed: () async => const [],
+        ),
+        args: {'order': saved},
+      );
+      expect(find.textContaining('Era para ficar pronto'), findsNothing);
+      expect(find.textContaining('Fica pronto'), findsOneWidget);
+    });
+
     testWidgets('a refused start also goes back and warns', (tester) async {
       final store = _StatusStore(() => Future.error(StateError('denied')));
       await _pump(

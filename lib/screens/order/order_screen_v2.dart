@@ -7,6 +7,8 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/screens/device_list_screen.dart'
     show kRemoveDeviceResult;
+import 'package:praticos/screens/menu_navigation/home_groups.dart'
+    show HomeRules;
 import 'package:praticos/screens/widgets/app_toast.dart';
 import 'package:praticos/services/notification_tap_handler.dart';
 import 'package:praticos/screens/widgets/picker_screen.dart';
@@ -3170,9 +3172,7 @@ class _OrderScreenV2State extends State<OrderScreenV2> {
   }
 
   bool _isOverdue(String? status, DateTime? due) =>
-      due != null &&
-      due.isBefore(DateTime.now()) &&
-      const ['quote', 'approved', 'progress'].contains(status);
+      HomeRules.isOverdueAt(status: status, due: due, now: DateTime.now());
 
   /// "hoje, 17:00", "amanhã", "15/10, 09:30": the day in words when close,
   /// without the time when it is midnight (no time was picked).
