@@ -70,6 +70,7 @@ async function callApi() {
         <button type="button" class="btn" @click="drawer = true">{{ t('web.gallery.drawer') }}</button>
         <button type="button" class="btn" @click="sheet = true">{{ t('web.gallery.sheet') }}</button>
         <button type="button" class="btn" @click="callApi">{{ t('web.gallery.api') }}</button>
+        <RouterLink class="btn" to="/orders?order=order-1">{{ t('web.gallery.openOrder') }}</RouterLink>
       </div>
       <p class="sub" data-testid="api-result">{{ apiResult }}</p>
       <EmptyState :title="t('web.gallery.emptyTitle')" :body="t('web.gallery.emptyBody')" />
@@ -86,11 +87,15 @@ async function callApi() {
       <button type="button" class="btn btn--primary" data-autofocus @click="close">{{ t('confirm') }}</button>
     </div>
   </Layer>
-  <Layer v-if="drawer" kind="drawer" :label="t('web.gallery.drawer')" :guard="confirmDiscard" @close="drawer = false">
+  <Layer v-if="drawer" v-slot="{ close }" kind="drawer" :label="t('web.gallery.drawer')" :guard="confirmDiscard" @close="drawer = false">
     <div class="layer-head"><h2 class="layer-title">{{ t('web.gallery.drawer') }}</h2></div>
     <div class="layer-body">
       <label class="field-label" for="g-note">{{ t('notes') }}</label>
       <textarea id="g-note" v-model="typed" class="field" data-autofocus></textarea>
+    </div>
+    <div class="layer-foot">
+      <button type="button" class="btn" @click="close">{{ t('cancel') }}</button>
+      <button type="button" class="btn" @click="dialog = true">{{ t('web.gallery.dialog') }}</button>
     </div>
   </Layer>
   <Layer v-if="sheet" kind="sheet" :label="t('web.gallery.sheet')" @close="sheet = false">

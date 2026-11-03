@@ -33,7 +33,7 @@ async function choose(companyId: string) {
         <p class="muted">{{ t('web.chooseCompany.sub') }}</p>
         <div class="choose-list">
           <button v-for="company in session.companies" :key="company.id" type="button" class="choose-row" @click="choose(company.id)">
-            <strong>{{ company.name || company.id }}</strong>
+            <strong>{{ company.name || t('web.nav.unnamedCompany') }}</strong>
             <span v-if="ROLE_LABELS[company.role]" class="sub">{{ t(ROLE_LABELS[company.role] as MessageKey) }}</span>
           </button>
         </div>

@@ -69,5 +69,8 @@
   "web.chooseCompany.sub": "Dá para trocar depois, no menu.",
   "web.notAllowed.title": "O PraticOS no computador ainda não foi liberado para você",
   "web.notAllowed.body": "Estamos abrindo aos poucos. Enquanto isso, continue pelo app no celular: está tudo lá.",
-  "web.invites.rejected": "Convite recusado"
+  "web.invites.rejected": "Convite recusado",
+  "web.nav.unnamedCompany": "Empresa sem nome",
+  "web.companyFailed": "Não deu para carregar os dados da empresa. Valores ficam escondidos até carregar.",
+  "web.gallery.openOrder": "Abrir a OS 1 na lista"
 }

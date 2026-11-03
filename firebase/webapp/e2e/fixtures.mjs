@@ -21,6 +21,8 @@ export const USERS = {
   /** Only for the invite tests, so accepting does not change other tests' users. */
   invitee: { ...user('invitee', 'Ivo Convidado'), roles: { [COMPANY_A]: 'technician' } },
   newcomer: { ...user('newcomer', 'Nara Nova'), roles: {} },
+  /** Administrator in A, technician in B: switching must re-check the open screen. */
+  mixed: { ...user('mixed', 'Mauro Dois Papeis'), roles: { [COMPANY_A]: 'admin', [COMPANY_B]: 'technician' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */

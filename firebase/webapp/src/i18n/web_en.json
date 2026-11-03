@@ -69,5 +69,8 @@
   "web.chooseCompany.sub": "You can switch later, from the menu.",
   "web.notAllowed.title": "PraticOS on the computer is not open to you yet",
   "web.notAllowed.body": "We are opening it little by little. Meanwhile, keep using the phone app: everything is there.",
-  "web.invites.rejected": "Invite declined"
+  "web.invites.rejected": "Invite declined",
+  "web.nav.unnamedCompany": "Unnamed company",
+  "web.companyFailed": "Could not load the company. Amounts stay hidden until it loads.",
+  "web.gallery.openOrder": "Open order 1 in the list"
 }

@@ -52,3 +52,14 @@ test('rota que não existe', async ({ page }) => {
   await login(page, 'admin', 'not-a-route')
   await expect(page.getByRole('heading', { name: 'Este endereço não existe' })).toBeVisible()
 })
+
+test('trocar de empresa passa pela guarda: admin em A, técnico em B, sai da Equipe', async ({ page }) => {
+  await login(page, 'mixed', 'team')
+  await chooseCompany(page, 'Oficina Alfa')
+  await expect(page).toHaveURL(/\/team$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Equipe' })).toBeVisible()
+  await page.getByLabel('Empresa').selectOption({ label: 'Beta Repairs' })
+  await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible()
+  await expect(page).toHaveURL(/\/app\/$/)
+  await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Equipe' })).toHaveCount(0)
+})

@@ -41,6 +41,8 @@ export interface SessionState {
   needsCompanyChoice: boolean
   /** Sign-in that came back from a redirect and failed. */
   signInError: string | null
+  /** The company document could not be read: money stays hidden until it loads. */
+  companyFailed: boolean
 }
 
 export const session = reactive<SessionState>({
@@ -56,6 +58,7 @@ export const session = reactive<SessionState>({
   webAccess: 'unknown',
   needsCompanyChoice: false,
   signInError: null,
+  companyFailed: false,
 })
 
 interface UserCompanyEntry {
@@ -76,15 +79,6 @@ export function resolveCompanies(entries: unknown, roles: Record<string, string>
     if (!seen.has(id)) list.push({ id, name: '', role })
   }
   return list
-}
-
-/** The user document lists a company the token does not know yet: the token is stale. */
-export function tokenIsStale(entries: unknown, roles: Record<string, string>): boolean {
-  if (!Array.isArray(entries)) return false
-  return (entries as UserCompanyEntry[]).some((entry) => {
-    const id = entry?.company?.id
-    return typeof id === 'string' && !roles[id]
-  })
 }
 
 export function pickCompany(companies: CompanyEntry[], saved: string | null): string | null {
@@ -118,8 +112,48 @@ async function readDocCacheFirst<T>(path: string, onFresh: (value: T | null) => 
 }
 
 async function loadCompany(companyId: string): Promise<void> {
-  const profile = await readDoc<CompanyProfile>(`companies/${companyId}`)
-  session.company = profile
+  try {
+    const profile = await readDoc<CompanyProfile>(`companies/${companyId}`)
+    if (session.companyId === companyId) {
+      session.company = profile
+      session.companyFailed = false
+    }
+  } catch (error) {
+    console.warn('session: company not loaded', error)
+    if (session.companyId === companyId) session.companyFailed = true
+  }
+}
+
+/** Retry after a failed company read. */
+export async function reloadCompany(): Promise<void> {
+  if (session.companyId) await loadCompany(session.companyId)
+}
+
+/**
+ * Values and billing only once the company says so: while its document has not
+ * loaded, `useFinancial` counts as off, so money is never shown by accident.
+ */
+export function effectiveUseFinancial(): boolean {
+  return session.company ? session.company.useFinancial !== false : false
+}
+
+const staleTriedKey = (uid: string) => `praticos.claimRefresh.${uid}`
+
+/**
+ * Companies listed in the user document but missing from the claim. A refresh
+ * is worth it once per new set: a company the claim will never have (an entry the
+ * server does not confirm) must not force a refresh on every start.
+ */
+export function staleCompanyIds(entries: unknown, roles: Record<string, string>): string[] {
+  if (!Array.isArray(entries)) return []
+  return (entries as UserCompanyEntry[])
+    .map((entry) => entry?.company?.id)
+    .filter((id): id is string => typeof id === 'string' && !roles[id])
+    .sort()
+}
+
+export function shouldRefreshForStale(missing: string[], lastTried: string | null): boolean {
+  return missing.length > 0 && missing.join(',') !== (lastTried ?? '')
 }
 
 export interface SessionHint {
@@ -189,6 +223,7 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     let token = await user.getIdTokenResult(forceRefresh)
     mark('session:token')
     const access = checkWebAccess(user.uid)
+    let companyReadFailed = false
     let roles = (token.claims.roles ?? {}) as Record<string, string>
     const saved = readStorage(savedCompanyKey(user.uid))
     // User and company documents in parallel: the claim already names the company.
@@ -203,11 +238,17 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
       guess
         ? readDocCacheFirst<CompanyProfile>(`companies/${guess}`, (fresh) => {
             if (session.companyId === guess) session.company = fresh
+          }).catch((error) => {
+            console.warn('session: company not loaded', error)
+            companyReadFailed = true
+            return null
           })
         : Promise.resolve(null),
     ])
     mark('session:docs')
-    if (!forceRefresh && tokenIsStale(profile?.companies, roles)) {
+    const missing = staleCompanyIds(profile?.companies, roles)
+    if (!forceRefresh && shouldRefreshForStale(missing, readStorage(staleTriedKey(user.uid)))) {
+      writeStorage(staleTriedKey(user.uid), missing.join(','))
       token = await user.getIdTokenResult(true)
       roles = (token.claims.roles ?? {}) as Record<string, string>
     }
@@ -217,11 +258,20 @@ async function hydrate(user: User, forceRefresh = false): Promise<void> {
     session.companyId = companyId
     session.role = session.companies.find((company) => company.id === companyId)?.role ?? null
     session.company = companyId && companyId === guess ? guessed : null
+    session.companyFailed = !!companyId && companyId === guess && companyReadFailed
     session.needsCompanyChoice = session.companies.length > 1 && !session.companies.some((company) => company.id === saved)
     await Promise.all([access, companyId && companyId !== guess ? loadCompany(companyId) : null])
   } catch (error) {
     console.error('session: could not load account', error)
-    session.failed = true
+    // Nothing from a previous account or company may stay on screen.
+    Object.assign(session, {
+      companies: [],
+      companyId: null,
+      company: null,
+      role: null,
+      needsCompanyChoice: false,
+      failed: true,
+    })
   }
 }
 
@@ -342,15 +392,16 @@ export async function selectCompany(companyId: string): Promise<void> {
   session.companyId = companyId
   session.role = entry.role
   session.company = null
+  session.companyFailed = false
   await loadCompany(companyId)
 }
 
 export function can(permission: Permission): boolean {
-  return roleHasPermission(session.role, permission, session.company?.useFinancial)
+  return roleHasPermission(session.role, permission, effectiveUseFinancial())
 }
 
 export function canAny(permissions: readonly Permission[]): boolean {
-  return hasAnyPermission(session.role, permissions, session.company?.useFinancial)
+  return hasAnyPermission(session.role, permissions, effectiveUseFinancial())
 }
 
 const client = createApi({

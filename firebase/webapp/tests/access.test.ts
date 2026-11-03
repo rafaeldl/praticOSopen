@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, test, vi } from 'vitest'
 import { decideAccess, type AccessContext } from '../src/lib/access'
 import { appRoleOf, hasAnyPermission, roleHasPermission } from '../src/lib/permissions'
-import { pickCompany, resolveCompanies, tokenIsStale } from '../src/lib/session'
+import { pickCompany, resolveCompanies, shouldRefreshForStale, staleCompanyIds } from '../src/lib/session'
 import { ROLE_PERMISSIONS } from '../src/generated/permissions'
 import { NAV } from '../src/navigation'
 
@@ -33,6 +33,9 @@ describe('permissions match the contract', () => {
 
   test('owner reads as admin and unknown roles get nothing', () => {
     expect(appRoleOf('owner')).toBe('admin')
+    expect(appRoleOf('toString')).toBeNull()
+    expect(appRoleOf('__proto__')).toBeNull()
+    expect(roleHasPermission('constructor', 'viewPrices')).toBe(false)
     expect(appRoleOf('user')).toBeNull()
     expect(roleHasPermission('hacker', 'viewPrices')).toBe(false)
     expect(roleHasPermission(null, 'viewPrices')).toBe(false)
@@ -129,9 +132,16 @@ describe('session companies', () => {
   })
 
   test('a listed company missing from the claim means a stale token', () => {
-    expect(tokenIsStale(entries, { a: 'admin' })).toBe(true)
-    expect(tokenIsStale(entries, { a: 'admin', b: 'admin' })).toBe(false)
-    expect(tokenIsStale(undefined, {})).toBe(false)
+    expect(staleCompanyIds(entries, { a: 'admin' })).toEqual(['b'])
+    expect(staleCompanyIds(entries, { a: 'admin', b: 'admin' })).toEqual([])
+    expect(staleCompanyIds(undefined, {})).toEqual([])
+  })
+
+  test('refresh once per missing set, not on every start', () => {
+    expect(shouldRefreshForStale(['b'], null)).toBe(true)
+    expect(shouldRefreshForStale(['b'], 'b')).toBe(false)
+    expect(shouldRefreshForStale(['b', 'c'], 'b')).toBe(true)
+    expect(shouldRefreshForStale([], null)).toBe(false)
   })
 
   test('picks the saved company only while it is still valid', () => {
@@ -196,5 +206,30 @@ describe('invites', () => {
     })
     expect(toInvite('t', { company: { id: 'c' }, expiresAt: '2026-10-01T00:00:00Z' }, now)).toBeNull()
     expect(toInvite('t', { role: 'admin' }, now)).toBeNull()
+  })
+})
+
+describe('values before the company loads', () => {
+  test('money stays hidden while the company document is missing', async () => {
+    const { can, effectiveUseFinancial, session } = await import('../src/lib/session')
+    Object.assign(session, { role: 'owner', companyId: 'c1', company: null })
+    expect(effectiveUseFinancial()).toBe(false)
+    expect(can('viewPrices')).toBe(false)
+    expect(can('manageUsers')).toBe(true)
+    session.company = { name: 'X' }
+    expect(can('viewPrices')).toBe(true)
+    session.company = { useFinancial: false }
+    expect(can('viewPrices')).toBe(false)
+    Object.assign(session, { role: null, companyId: null, company: null })
+  })
+})
+
+describe('closing the panel', () => {
+  test('goes back only when the list is right behind', async () => {
+    const { closeGoesBack } = await import('../src/lib/route-layer')
+    expect(closeGoesBack('/orders', '/orders')).toBe(true)
+    expect(closeGoesBack('/orders?status=done', '/orders?status=done')).toBe(true)
+    expect(closeGoesBack('/dev/components', '/orders')).toBe(false)
+    expect(closeGoesBack(null, '/orders')).toBe(false)
   })
 })
