@@ -100,8 +100,29 @@ const isoDateTime = z.string().datetime({ offset: true });
  * Visit and delivery: an instant with a zone, or the company's local time
  * without one, as the app writes it (Dart toIso8601String) and GET returns it.
  */
-export const ZONELESS_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?$/;
-const orderDate = z.union([isoDateTime, z.string().regex(ZONELESS_DATE_TIME)]);
+export const ZONELESS_DATE_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(\.\d{1,6})?)?$/;
+
+/** Zoneless text that is a real moment: month 1-12, a day the month has, hour 0-23, minute and second 0-59. */
+export function isValidZonelessDate(value: string): boolean {
+  const match = ZONELESS_DATE_TIME.exec(value);
+  if (!match) return false;
+  const [year, month, day, hour, minute, second = 0] = match.slice(1, 7).map((part) => Number(part ?? 0));
+  if (month < 1 || month > 12 || day < 1) return false;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day <= daysInMonth && hour <= 23 && minute <= 59 && second <= 59;
+}
+
+/** A visit or delivery the server can save: a real zoneless moment, or anything else Date reads. */
+export function isValidOrderDate(value: string): boolean {
+  if (ZONELESS_DATE_TIME.test(value)) return isValidZonelessDate(value);
+  return !Number.isNaN(Date.parse(value));
+}
+
+const orderDate = z.union([isoDateTime, z.string().regex(ZONELESS_DATE_TIME)]).refine(isValidOrderDate, {
+  message: 'Invalid date',
+});
+/** The bot's free text dates (anything Date reads), without impossible ones. */
+const botOrderDate = z.string().refine(isValidOrderDate, { message: 'Invalid date' });
 
 /** The `version` the server gave (order-version.ts), sent back as is; an ISO instant with a zone still works. */
 export const orderVersionSchema = z.string().min(1).max(64);
@@ -361,8 +382,8 @@ export const createFullOrderSchema = z.object({
     description: z.string().max(500).optional(),
   })).optional(),
 
-  dueDate: z.string().optional(),
-  scheduledDate: z.string().optional(),
+  dueDate: botOrderDate.optional(),
+  scheduledDate: botOrderDate.optional(),
   status: z.enum(['quote', 'approved', 'progress']).default('quote'),
 });
 
@@ -372,8 +393,8 @@ export const createFullOrderSchema = z.object({
  */
 export const updateBotOrderSchema = z.object({
   status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
-  dueDate: z.string().optional().nullable(),
-  scheduledDate: z.string().optional().nullable(),
+  dueDate: botOrderDate.optional().nullable(),
+  scheduledDate: botOrderDate.optional().nullable(),
   assignedTo: idSchema.optional().nullable(),
 }).refine(data => Object.values(data).some(v => v !== undefined), {
   message: 'At least one field must be provided',

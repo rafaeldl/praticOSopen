@@ -38,7 +38,7 @@ import * as catalogService from './catalog.service';
 import { roundMoney } from '../utils/money';
 import { computeOrderTotal, findLine, ItemKind } from './order-items';
 import { OrderRuleError } from './order-errors';
-import { ZONELESS_DATE_TIME } from '../utils/validation.utils';
+import { isValidOrderDate, ZONELESS_DATE_TIME } from '../utils/validation.utils';
 import { orderFilesPrefix, ReceiptFileInput, validatePaidAt, validateReceiptFile } from './payment-input';
 
 export { roundMoney };
@@ -89,6 +89,8 @@ function audit(actor: UserAggr | undefined, now: string): Record<string, unknown
  */
 export function storedOrderDate(value: string | null | undefined): string | null {
   if (!value) return null;
+  // Last guard for every caller (app routes, bot): an impossible date is a 400, never saved.
+  if (!isValidOrderDate(value)) throw new OrderRuleError('VALIDATION_ERROR', 400, 'Invalid date');
   return ZONELESS_DATE_TIME.test(value) ? value : new Date(value).toISOString();
 }
 

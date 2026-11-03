@@ -270,6 +270,17 @@ describe('GET /orders por data da visita (agenda)', () => {
     expect((await call('owner', 'patch', `${O}/v1`, { scheduledDate: '2031-03-11 14:00' })).status).toBe(400);
   });
 
+  it('data impossível sem fuso dá 400 e não grava nada', async () => {
+    for (const value of ['2031-13-45T99:99', '2031-02-30T10:00:00.000']) {
+      const res = await call('owner', 'patch', `${O}/v2`, { scheduledDate: value });
+      expect(res.status).toBe(400);
+      expect(doc('v2').scheduledDate).toBe('2031-03-10T09:30:00.000');
+    }
+    seed('companies/c1/customers/cust1', { name: 'João' });
+    const created = await call('owner', 'post', O, { customerId: 'cust1', dueDate: '2031-04-31T10:00' });
+    expect(created.status).toBe(400);
+  });
+
   it('B1: nova OS aceita visita e entrega sem fuso', async () => {
     seed('companies/c1/customers/cust1', { name: 'João' });
     const res = await call('owner', 'post', O, { customerId: 'cust1', scheduledDate: '2031-03-12T08:00:00.000', dueDate: '2031-03-13T00:00:00.000' });
