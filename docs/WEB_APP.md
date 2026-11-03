@@ -4,7 +4,7 @@
 
 App web do PraticOS: ferramenta de mesa para as mesmas contas e dados do app. Vue 3 + Vite, SPA estática em `/app`, código em `firebase/webapp/`. A decisão está em `docs/web-app/ADR-001-web-architecture.md`, as regras de tela em `docs/WEB_APP_DESIGN.md`, e a referência visual é o protótipo da branch `claude/web-app-prototype-bb3bbf` (tema Campo). Quando protótipo e `WEB_APP_DESIGN.md` divergem, vale o protótipo.
 
-Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo e a "Agenda" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
+Estado: fechado por lista de acesso. Tem entrada (Google, Apple, e-mail), convites, escolha de empresa, casca, permissões, componentes base a fatia "OS completa": Início com a lista de OS, Nova OS por teclado e a tela da OS (ver "Ordens de serviço"), a fatia "Clientes e aparelhos", a de mandar, receber e cobrar, a do Catálogo, a "Agenda" e a de "Checklists" (ver as seções com esses nomes). O deploy em `/app` sai junto com o site.
 
 Decisões fechadas: botão principal amarelo, densidade confortável, painel ao lado, IBM Plex Sans no texto, Outfit só no logo.
 
@@ -51,6 +51,7 @@ Nos builds (`--prune`) só entram as chaves citadas no código, 5% do total, o q
 | Telas de clientes e aparelhos, cadastro, importação, próxima manutenção | API (`lib/customers/data.ts`): `/v1/app/customers`, `/v1/app/devices` |
 | Agenda: leitura e mudar a data | API (`lib/agenda/data.ts`): `GET /v1/app/orders?sort=scheduledDate&startDate&endDate`, `PATCH /v1/app/orders/:id` com `expectedUpdatedAt` |
 | Telas do catálogo: lista, cadastro, foto, importação, preços em lote | API (`lib/catalog/data.ts`): `/v1/app/services`, `/v1/app/products`; a foto vai para o Storage na pasta do item |
+| Checklists: modelos e respostas na OS | Firestore direto (`lib/forms/data.ts`), cada gravação numa transação; fotos no Storage na pasta do checklist |
 
 Firebase é carregado sob demanda por `lib/firebase.ts`. A tela de entrada não baixa Firestore. Até a lista aparecer só vem o build REST (`firestoreLite()`, cerca de 29 KB); o cliente completo (`firestoreClient()`, cerca de 144 KB) chega depois, para as linhas ao vivo, a OS aberta e as gravações diretas. `scripts/check-budget.mjs` falha se o cliente completo entrar de novo no caminho até a lista.
 
@@ -236,6 +237,32 @@ Os dias são os do fuso do país da empresa (`companyZone`: Brasil é São Paulo
 
 **Fica para depois.** Faixa "Sem data" com as OS para marcar arrastando (o servidor não lista "sem campo"; precisaria de um filtro novo), mudar o responsável arrastando para a coluna da pessoa, aviso de conflito no mesmo horário, lembretes (no app são notificações locais; no web só com Web Push).
 
+### Checklists
+
+Código em `src/views/forms/`, `src/components/forms/` e `src/lib/forms/` (regras puras em `model.ts`, testadas em `tests/forms-model.test.ts`; Firestore e Storage em `data.ts`; oferta depois da Nova OS em `offer.ts`). Textos no pedaço de OS (`-orders.json`): o checklist abre dentro da OS e `src/i18n/index.ts` não muda. Testes: `e2e/forms.spec.ts` e `e2e/forms-a11y.spec.ts`. Não há protótipo destas telas; seguem `WEB_APP_DESIGN.md` e o app (`docs/formularios_dinamicos.md`).
+
+**Formato.** O mesmo do app: modelos em `/companies/{cid}/forms/{id}` com as chaves de `FormDefinition.toJson` (`id`, `title`, `description`, `isActive`, `items`, `titleI18n`, `descriptionI18n`, `company`, `createdAt/By`, `updatedAt/By`), lidos também no formato antigo (`name`, `fields`, `requiresPhoto`). Na OS, `/companies/{cid}/orders/{oid}/forms/{iid}` com a cópia das perguntas (`formDefinitionId`, `title`, `status` `pending`/`in_progress`/`completed`, `items`, `responses`, `startedAt`, `completedAt`, `updatedAt`, `titleI18n`, `deviceId`). Resposta: `{ itemId, value, photoUrls }`; sim/não é `bool`, escolha é a opção original do modelo (mostrada traduzida), várias é a lista, texto e número são texto (número validado pelo país da empresa e gravado como digitado, como o app lê). Fotos em `tenants/{cid}/orders/{oid}/forms/{iid}/{itemId}_{ms}_{n}.{ext}`, o caminho do app: `storage.rules` libera só um nível abaixo do checklist, então `.../items/{itemId}/` seria recusado.
+
+**App e web ao mesmo tempo.** Cada resposta é uma transação que relê o checklist e muda só a pergunta respondida (`applyChange`): valor novo mantém as fotos que outro pôs, foto nova mantém o valor, tirar foto tira só ela. Nada a migrar: o formato é o mesmo. As respostas de uma tela vão em fila, na ordem dada. Checklist concluído recusa resposta até ser reaberto (também a que estava sendo digitada). O web não apaga o que o app grava; o app ainda pode apagar o que o web grava: a tela do app não relê o checklist e troca a resposta inteira da pergunta (foto posta no web some, foto tirada no web volta), e a fila offline do app regrava a lista inteira. Isso vai para o lote de correções do app. Toda gravação do web é transação que lê antes: sem conexão ela falha e a tela diz, em vez de ficar na fila do navegador e aparecer como feita (a resposta fica marcada "Não deu para guardar", com "Tentar de novo").
+
+**Checklists (`/checklists`).** Só com `manageForms` (dono, admin e supervisor), pela rota e pelo link em Configurações; o app abre para qualquer papel (defeito 27). "Seus checklists" ao vivo e "Prontos para usar" do segmento, cada um com carregando e erro. O pronto já copiado (mesmo id ou mesmo título) não aparece de novo. Ver o pronto, Usar (com confirmação, id novo e aviso). Apagar na linha, com a confirmação de apagar do app; se falhar, a linha fica.
+
+**Editor.** Gaveta com nome, descrição e perguntas. Diz o que falta (nome, pergunta ou os dois). A pergunta (diálogo): texto, tipo (padrão Sim ou não, o primeiro da lista), opções uma por linha (2 ou mais), obrigatória e "Pode pôr foto"; "Só foto" nunca é obrigatória; tradução só fica com o mesmo texto. Reordenar arrastando, pelos botões ou com Alt + ↑/↓, no novo e na edição. Apagar pergunta com Desfazer dentro da gaveta. "…" com Parar de usar / Voltar a usar (na hora) e Apagar. Fechar com mudança pergunta, também ao sair da página. Salvar e Parar/Voltar a usar mandam a versão lida: se o app salvou depois, nada é gravado, a gaveta fica aberta com o que foi digitado e oferece "Recarregar" (descarta o texto e traz a versão salva) e "Copiar minhas perguntas".
+
+**Limite do plano.** Igual ao app: o app só aplica limite onde há planos pagos para comprar (`FeatureGateService.planLimitsEnforced = paidPlansEnabled`, falso no navegador), então o web não trava (`WEB_PLAN_LIMITS_ENFORCED = false`) e uma empresa Free não fica sem saída. A regra do número (ativos `isActive != false` na lista; limite de `companies/{id}.subscription`, vencido vale Free) está em `activeLimit`, e enquanto o plano não for lido nada é bloqueado. Não há trava no servidor; o contador de uso continua com a Function `onFormTemplateWrittenUsage`.
+
+**Na OS.** Seção "Checklists" com "x de y respondidas" ou "Completo", o aparelho e Remover (com confirmação). Adicionar segue `canManageOrderForms` (técnico só em orçamento, supervisor até concluir): com 2 ou mais aparelhos pergunta qual (ou Geral), depois "Qual checklist?" (ativos da empresa e prontos do segmento ainda não copiados, como o app, com "Da empresa" e "Globais" quando há os dois; por título, busca com mais de 10, erro com Tentar de novo) e "Novo checklist" para quem gerencia, que volta já escolhido. O pronto entra direto na OS, sem cópia, também para quem não tem `manageForms`.
+
+**Preencher.** Gaveta com todas as perguntas, respondidas no lugar. Tab passa de pergunta, setas escolhem, espaço ou o número marca (1 é a primeira), Enter segue. Responder passa para a próxima sem resposta; sem nada faltando, o checklist é concluído e fecha (como o app depois da última). Começar/Continuar/Concluir em azul, "Concluir assim mesmo" só com opcionais faltando, obrigatória vazia lista o que falta. Fotos (JPEG, PNG ou WebP abaixo de 10 MB): escolher, colar (com a pergunta em foco) ou arrastar, ver uma a uma (← →), tirar com confirmação, e o arquivo sai do Storage. Concluído é só leitura; reabrem admin, gerente e supervisor. Responder segue `fillForms`: o gerente só lê (no app ele responde).
+
+**Concluir a OS.** Com checklist que não está completo, o botão azul e "Mudar situação" param em "Falta terminar N checklist" e oferecem abrir o primeiro.
+
+**Depois da Nova OS.** Com veículo e não concluída, a OS aberta pergunta "Fazer o checklist de entrada?". Três "Agora não" seguidos param a pergunta (por empresa, neste navegador). O app só pergunta no ramo automotivo; o web pergunta onde a empresa tem checklist ativo, porque o segmento não tem um campo para isso.
+
+**Desempenho.** Medido em 2026-11-03: **1.088 ms** na 1ª visita e **704 ms** na volta. O caminho até a lista foi de 132,8 para 132,9 KB (a rota `/checklists` e o seu título no núcleo); as telas e os textos ficam fora do primeiro download.
+
+**Fica para depois.** Câmera (exceção proposta: no computador é arquivo), conferir checklists pendentes no quadro e no lote, campo do segmento para a oferta do checklist.
+
 ### Histórico do navegador
 
 Voltar fecha o que estiver aberto. O painel lateral usa `useRoutePanel`, com o id na URL. Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado.
@@ -397,7 +424,7 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.

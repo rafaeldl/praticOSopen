@@ -13,6 +13,7 @@ import { t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { firestoreLite } from '@/lib/firebase'
 import { orderCreated } from '@/lib/orders/bus'
+import { markOffer } from '@/lib/forms/offer'
 import { forgetLists, loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
 import { createStatuses, type OrderStatus } from '@/lib/orders/model'
 import { deviceLabel, lineKindText, money, orderShort, statusText, country } from '@/lib/orders/text'
@@ -272,6 +273,8 @@ async function save() {
     const results = await Promise.allSettled(after)
     allowClose = true
     orderCreated(created.id)
+    // With a device and not saved done: the order asks for the check-in checklist (order.offer.checklist).
+    if (device.value && status.value !== 'done') markOffer(created.id)
     const message = t('web.newOrder.created', { order: `${orderShort()} ${created.number}` })
     showToast(results.some((r) => r.status === 'rejected') ? t('web.newOrder.createdPartly', { order: `${orderShort()} ${created.number}` }) : message)
     announce(message)

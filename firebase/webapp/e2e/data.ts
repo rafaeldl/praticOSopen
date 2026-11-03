@@ -222,3 +222,76 @@ export async function catalogNamed(kind: 'service' | 'product', prefix: string):
   const snapshot = await db().collection(`companies/${COMPANY_A}/${CATALOG_COLLECTION[kind]}`).where('name', '>=', prefix).where('name', '<', `${prefix}\uf8ff`).get()
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
 }
+
+// \u2500\u2500 Checklists (fatia 07) \u2500\u2500
+
+type Question = { id: string; label: string; type: string; options?: string[] | null; required?: boolean; allowPhotos?: boolean }
+const question = (q: Question) => ({ options: null, required: false, allowPhotos: true, labelI18n: null, optionsI18n: null, ...q })
+
+/** A fresh checklist template in company A, with a unique title ("Zeta \u2026" sorts last). */
+export async function makeTemplate(data: { title?: string; isActive?: boolean; description?: string | null; items?: Question[] } = {}): Promise<{ id: string; title: string }> {
+  const id = `f-${randomUUID().slice(0, 8)}`
+  const title = data.title ?? `Zeta ${id.slice(2)}`
+  const now = new Date().toISOString()
+  await db()
+    .doc(`companies/${COMPANY_A}/forms/${id}`)
+    .set({
+      id,
+      title,
+      description: data.description ?? null,
+      isActive: data.isActive ?? true,
+      items: (data.items ?? [{ id: 'q1', label: 'Tudo certo?', type: 'boolean' }]).map(question),
+      titleI18n: null,
+      descriptionI18n: null,
+      company: { id: COMPANY_A, name: COMPANIES[COMPANY_A].name },
+      createdAt: now,
+      createdBy: aggr('owner'),
+      updatedAt: now,
+      updatedBy: aggr('owner'),
+    })
+  return { id, title }
+}
+
+export async function readTemplate(id: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${COMPANY_A}/forms/${id}`).get()).data()
+}
+
+/** Like the app saving the template: the whole document, a new updatedAt. */
+export async function updateTemplateDoc(id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/forms/${id}`).set({ ...fields, updatedAt: new Date().toISOString() }, { merge: true })
+}
+
+export async function templatesNamed(prefix: string): Promise<Record<string, unknown>[]> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/forms`).where('title', '>=', prefix).where('title', '<', `${prefix}\uf8ff`).get()
+  return snapshot.docs.map((doc) => ({ docId: doc.id, ...doc.data() }))
+}
+
+/** A checklist already in an order (as FormsService.addFormToOrder writes it). */
+export async function makeOrderForm(orderId: string, data: { title?: string; items?: Question[]; responses?: unknown[]; status?: string; deviceId?: string | null } = {}): Promise<string> {
+  const now = new Date().toISOString()
+  const ref = await db()
+    .collection(`companies/${COMPANY_A}/orders/${orderId}/forms`)
+    .add({
+      formDefinitionId: 'seg-entrada',
+      title: data.title ?? 'Vistoria de entrada',
+      status: data.status ?? 'pending',
+      items: (data.items ?? [{ id: 'q1', label: 'Tudo certo?', type: 'boolean' }]).map(question),
+      responses: data.responses ?? [],
+      startedAt: now,
+      completedAt: null,
+      updatedAt: now,
+      titleI18n: null,
+      deviceId: data.deviceId ?? null,
+    })
+  return ref.id
+}
+
+export async function readOrderForms(orderId: string): Promise<Record<string, unknown>[]> {
+  const snapshot = await db().collection(`companies/${COMPANY_A}/orders/${orderId}/forms`).get()
+  return snapshot.docs.map((doc) => ({ docId: doc.id, ...doc.data() }))
+}
+
+/** Another device writing the checklist as it is (the app's offline path replaces the whole list). */
+export async function writeOrderFormRaw(orderId: string, formId: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/orders/${orderId}/forms/${formId}`).update(fields)
+}
