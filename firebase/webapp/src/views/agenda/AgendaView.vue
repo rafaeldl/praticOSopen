@@ -145,9 +145,14 @@ async function load(quiet = false) {
   }
 }
 
-// What was on the screen stays while the next range loads, unless the range changes the company or the person.
+// Another month: read its grid (a keyboard move in progress follows to it).
 watch(
-  () => [grid.value[0], field.value, who.value, session.companyId],
+  () => grid.value[0],
+  () => void load(),
+)
+// Another person, company or kind of date: what was being moved belongs to the old list.
+watch(
+  () => [field.value, who.value, session.companyId],
   () => {
     pending.value = null
     void load()
@@ -309,6 +314,7 @@ function lineOf(item: AgendaOrder): string {
   return [device, order.assignedTo?.name ? t('agendaWithPerson', { name: order.assignedTo.name }) : ''].filter(Boolean).join(' · ')
 }
 
+const insidePanel = () => !!document.activeElement?.closest('.panel')
 const visitTime = (visit: Visit<AgendaOrder>) => (visit.allDay ? t('allDay') : timeOf(visit.at))
 
 let stopBus: (() => void) | undefined
@@ -332,8 +338,9 @@ onMounted(() => {
   })
   removers.push(
     registerShortcut({ keys: 't', label: 'web.shortcuts.agendaToday', run: () => goTo(todayDay.value) }),
-    registerShortcut({ keys: 'arrowleft', label: 'web.shortcuts.agendaStep', run: () => move(-1) }),
-    registerShortcut({ keys: 'arrowright', label: 'web.shortcuts.agendaStep', run: () => move(1) }),
+    // Arrows inside the open order belong to it.
+    registerShortcut({ keys: 'arrowleft', label: 'web.shortcuts.agendaStep', run: () => !insidePanel() && move(-1) }),
+    registerShortcut({ keys: 'arrowright', label: 'web.shortcuts.agendaStep', run: () => !insidePanel() && move(1) }),
   )
 })
 onBeforeUnmount(() => {

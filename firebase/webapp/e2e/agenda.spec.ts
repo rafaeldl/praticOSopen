@@ -3,8 +3,19 @@
 // keyboard, with confirmation and undo. Each test uses its own month far in the
 // future, so the orders other tests create never land on its screen.
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { makeOrder, makeOrderInB, readOrder, updateCompanyB, updateOrderDoc } from './data'
+import { makeOrder as makeOrderDoc, makeOrderInB, readOrder, updateCompanyB, updateOrderDoc } from './data'
 import { chooseCompany, expectNoAxeViolations, expectNoSideScroll, login, setTheme, type UserKey } from './helpers'
+
+// The orders a test made leave the lists of the other tests (Em aberto, Atrasadas) when it ends.
+const made: string[] = []
+const makeOrder: typeof makeOrderDoc = async (...args) => {
+  const order = await makeOrderDoc(...args)
+  made.push(order.id)
+  return order
+}
+test.afterEach(async () => {
+  await Promise.all(made.splice(0).map((id) => updateOrderDoc(id, { status: 'canceled' })))
+})
 
 const grid = (page: Page) => page.locator('.tg')
 const block = (page: Page, id: string) => page.locator(`[data-order="${id}"]`)
@@ -34,11 +45,11 @@ test('semana com visitas na hora da empresa, linha, cabeçalho do dia, pontos do
     devices: [{ id: 'device-2', name: 'Veículo 2' }, { id: 'device-3', name: 'Veículo 3' }],
   })
   const b = await makeOrder('admin', { scheduledDate: '2031-03-11T00:00:00.000' })
-  const c = await makeOrder('admin', { scheduledDate: '2031-03-12T14:00:00.000Z', dueDate: '2025-03-01T15:00:00.000Z' })
+  const c = await makeOrder('admin', { scheduledDate: '2031-03-12T14:00:00.000Z' })
   await openAgenda(page, 'admin', 'd=2031-03-11')
   await expect(page.getByTestId('agenda-summary')).toHaveText('9 de mar. a 15 de mar. · 3 marcados')
   await expect(block(page, a.id)).toHaveAccessibleName(new RegExp(`^09:30 Cliente 02 OS ${a.number} · Aprovado.*Veículo 2 \\+1 · com Tiago Tecnico$`))
-  await expect(block(page, c.id)).toHaveAccessibleName(new RegExp(`^11:00 Cliente 02 OS ${c.number} · Atrasada`))
+  await expect(block(page, c.id)).toHaveAccessibleName(new RegExp(`^11:00 Cliente 02 OS ${c.number} · Aprovado`))
   await expect(page.locator('.tg-allday[data-allday="2031-03-11"]')).toContainText('Cliente 02')
   await expect(page.locator('[data-head="2031-03-11"]')).toContainText('2 marcados')
   await expect(page.locator('[data-head="2031-03-11"]').getByRole('heading', { level: 2 })).toBeVisible()
@@ -63,30 +74,6 @@ test.describe('fuso da empresa, não o do computador', () => {
     await openAgenda(page, 'admin', 'd=2031-04-08&view=day')
     await expect(block(page, a.id)).toHaveAccessibleName(new RegExp(`^09:30 Cliente 02 OS ${a.number}`))
   })
-})
-
-test('formato do país da empresa: empresa dos EUA em 12 horas (agenda.view)', async ({ page }) => {
-  // 14:30 UTC is 10:30 in New York (summer time in May).
-  const { id } = await makeOrderInB({ scheduledDate: '2031-05-06T14:30:00.000Z' })
-  await login(page, 'owner', 'schedule?d=2031-05-06&view=day')
-  await chooseCompany(page, 'Beta Repairs')
-  await expect(block(page, id)).toHaveAccessibleName(/^10:30 AM Dana Customer/)
-  await expect(page.locator('.tg-hour', { hasText: /^1:00 PM$/ })).toBeVisible()
-})
-
-test('sem agendamento na empresa, a agenda mostra as entregas, todas como Dia todo (agenda.mode-due)', async ({ page }) => {
-  const { id } = await makeOrderInB({ dueDate: '2031-05-21T15:00:00.000Z' })
-  await updateCompanyB({ useScheduling: false })
-  try {
-    await login(page, 'owner', 'schedule?d=2031-05-21')
-    await chooseCompany(page, 'Beta Repairs')
-    await expect(page.locator(`.tg-allday[data-allday="2031-05-21"] [data-order="${id}"]`)).toBeVisible()
-    await expect(page.locator('.tg-col [data-order]')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Próxima semana' }).click()
-    await expect(page.getByTestId('agenda-empty')).toContainText('Nenhuma OS com entrega nesta semana')
-  } finally {
-    await updateCompanyB({ useScheduling: true })
-  }
 })
 
 test('arrastar para outro dia e hora pergunta antes, grava pela API e desfaz (agenda drag)', async ({ page }) => {
@@ -310,21 +297,61 @@ test('2560 px e texto a 200%: grade inteira e nada para o lado fora da grade', a
   await expectNoSideScroll(page, ['.list-pane'])
 })
 
-for (const theme of ['light', 'dark'] as const) {
-  test(`axe sem violações na agenda, tema ${theme === 'light' ? 'claro' : 'escuro'}`, async ({ page }) => {
-    await makeOrder('admin', { scheduledDate: '2032-04-13T13:00:00.000Z', dueDate: '2025-01-01T15:00:00.000Z' })
-    await makeOrder('admin', { scheduledDate: '2032-04-13T00:00:00.000' })
-    await page.emulateMedia({ colorScheme: theme })
-    await openAgenda(page, 'admin', 'd=2032-04-13')
-    await setTheme(page, theme)
-    await expect(grid(page)).toBeVisible()
-    await expectNoAxeViolations(page, `agenda semana ${theme}`)
-    await page.getByRole('button', { name: 'Dia', exact: true }).click()
-    await expectNoAxeViolations(page, `agenda dia ${theme}`)
-    await page.getByTestId('agenda-who').click()
-    await expectNoAxeViolations(page, `agenda de quem ${theme}`)
-    await page.keyboard.press('Escape')
-    await page.setViewportSize({ width: 375, height: 800 })
-    await expectNoAxeViolations(page, `agenda celular ${theme}`)
+// Company B (United States) in one worker, in order: the test without scheduling turns
+// useScheduling off on B for a moment, and the others there read it.
+test.describe.serial('empresa B', () => {
+  // Late orders go to company B: in A they would change the counts of the list tests running alongside.
+  test('atrasada pela entrega, em vermelho, mesmo com visita marcada (agenda.row)', async ({ page }) => {
+    const { id, number } = await makeOrderInB({ scheduledDate: '2031-05-13T14:30:00.000Z', dueDate: '2025-03-01T15:00:00.000Z' })
+    await login(page, 'owner', 'schedule?d=2031-05-13&view=day')
+    await chooseCompany(page, 'Beta Repairs')
+    await expect(block(page, id)).toHaveAccessibleName(new RegExp(`^10:30 AM Dana Customer OS ${number} · Atrasada`))
+    await expect(block(page, id)).toHaveClass(/is-late/)
   })
-}
+
+  test('formato do país da empresa: empresa dos EUA em 12 horas (agenda.view)', async ({ page }) => {
+    // 14:30 UTC is 10:30 in New York (summer time in May).
+    const { id } = await makeOrderInB({ scheduledDate: '2031-05-06T14:30:00.000Z' })
+    await login(page, 'owner', 'schedule?d=2031-05-06&view=day')
+    await chooseCompany(page, 'Beta Repairs')
+    await expect(block(page, id)).toHaveAccessibleName(/^10:30 AM Dana Customer/)
+    await expect(page.locator('.tg-hour', { hasText: /^1:00 PM$/ })).toBeVisible()
+  })
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`axe sem violações na agenda, tema ${theme === 'light' ? 'claro' : 'escuro'}`, async ({ page }) => {
+      // B, so the late one does not count in A's lists (see above).
+      await makeOrderInB({ scheduledDate: '2032-04-13T13:00:00.000Z', dueDate: '2025-01-01T15:00:00.000Z' })
+      await makeOrderInB({ scheduledDate: '2032-04-13T04:00:00.000Z' })
+      await page.emulateMedia({ colorScheme: theme })
+      await login(page, 'owner', 'schedule?d=2032-04-13')
+      await chooseCompany(page, 'Beta Repairs')
+      await expect(page.getByText('Carregando…')).toHaveCount(0)
+      await setTheme(page, theme)
+      await expect(grid(page)).toBeVisible()
+      await expectNoAxeViolations(page, `agenda semana ${theme}`)
+      await page.getByRole('button', { name: 'Dia', exact: true }).click()
+      await expectNoAxeViolations(page, `agenda dia ${theme}`)
+      await page.getByTestId('agenda-who').click()
+      await expectNoAxeViolations(page, `agenda de quem ${theme}`)
+      await page.keyboard.press('Escape')
+      await page.setViewportSize({ width: 375, height: 800 })
+      await expectNoAxeViolations(page, `agenda celular ${theme}`)
+    })
+  }
+
+  test('sem agendamento na empresa, a agenda mostra as entregas, todas como Dia todo (agenda.mode-due)', async ({ page }) => {
+    const { id } = await makeOrderInB({ dueDate: '2031-05-21T15:00:00.000Z' })
+    await updateCompanyB({ useScheduling: false })
+    try {
+      await login(page, 'owner', 'schedule?d=2031-05-21')
+      await chooseCompany(page, 'Beta Repairs')
+      await expect(page.locator(`.tg-allday[data-allday="2031-05-21"] [data-order="${id}"]`)).toBeVisible()
+      await expect(page.locator('.tg-col [data-order]')).toHaveCount(0)
+      await page.getByRole('button', { name: 'Próxima semana' }).click()
+      await expect(page.getByTestId('agenda-empty')).toContainText('Nenhuma OS com entrega nesta semana')
+    } finally {
+      await updateCompanyB({ useScheduling: true })
+    }
+  })
+})

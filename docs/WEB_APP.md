@@ -309,7 +309,7 @@ Com a fatia de clientes e aparelhos, medido em 2026-11-03: **1.324 ms** na 1ª v
 
 Com a fatia de mandar, receber e cobrar, medido em 2026-11-03: **1.325 ms** na 1ª visita e **487 ms** na volta.
 
-Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta máquina: **1.104 ms** na 1ª visita e **706 ms** na volta. Na mesma máquina e no mesmo dia, antes da mudança: 1.328 ms e 520 ms. O caminho até a lista caiu de 239,1 KB para 130,4 KB (brotli).
+Com o Firestore REST até a lista (fatia da agenda), medido em 2026-11-03 nesta máquina: **1.104 ms** na 1ª visita e **706 ms** na volta. Na mesma máquina e no mesmo dia, antes da mudança: 1.328 ms e 520 ms. O caminho até a lista caiu de 239,1 KB para 130,4 KB (brotli); com a agenda (atalhos e textos no núcleo), 131,1 KB.
 
 | Caminho medido | JS até a lista | 1ª visita | Volta |
 |---|---|---|---|
@@ -373,4 +373,4 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
-- Orçamento do primeiro download: 130,4 de 240 KB desde a fatia da agenda (era 239,1 KB). As telas novas ficam fora do primeiro download.
+- Orçamento do primeiro download: 131,1 de 240 KB desde a fatia da agenda (era 239,1 KB). As telas novas ficam fora do primeiro download.
