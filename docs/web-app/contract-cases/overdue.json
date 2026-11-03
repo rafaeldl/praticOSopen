@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "generatedFrom": "e05d6414",
+  "rule": "Atrasada: a data prometida ficou para trás (dia, não hora) e a OS não foi concluída nem cancelada. Orçamento conta, como na Início.",
+  "runsIn": ["dart", "functions", "web"],
+  "sourceOfTruth": ["lib/screens/menu_navigation/home_groups.dart HomeRules.isOverdue"],
+  "otherImplementations": ["firebase/functions/src/services/order.service.ts getOverdueOrders"],
+  "cases": [
+    {"id":"past-due-quote","given":{"status":"quote","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"correct":{"overdue":true},"divergesIn":{"functions":{"overdue":false}},"note":"A Início mostra orçamento vencido como atrasado; getOverdueOrders só olha approved e progress."},
+    {"id":"past-due-approved","given":{"status":"approved","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}},
+    {"id":"past-due-progress","given":{"status":"progress","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}},
+    {"id":"past-due-done","given":{"status":"done","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
+    {"id":"past-due-canceled","given":{"status":"canceled","dueDate":"2026-03-09T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
+    {"id":"due-today-is-not-late","given":{"status":"approved","dueDate":"2026-03-10T08:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
+    {"id":"due-tomorrow","given":{"status":"approved","dueDate":"2026-03-11T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
+    {"id":"no-due-date","given":{"status":"approved","dueDate":null,"now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":false}},
+    {"id":"long-past-due","given":{"status":"progress","dueDate":"2020-01-01T12:00:00.000Z","now":"2026-03-10T12:00:00.000Z"},"expect":{"overdue":true}}
+  ]
+}

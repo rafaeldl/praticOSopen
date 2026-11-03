@@ -204,8 +204,10 @@ abstract class _OrderStore with Store {
     final paid = paidAmount ?? 0.0;
     // Rounded: summing item prices leaves float noise (824.4200000000001)
     // that showed "Falta receber R$ 0,00" or refused a payment of the
-    // balance shown on screen.
-    return OrderPaymentMath.roundMoney(totalValue - paid);
+    // balance shown on screen. Never below zero (paid more than the total).
+    return OrderPaymentMath.floorAtZero(
+      OrderPaymentMath.roundMoney(totalValue - paid),
+    );
   }
 
   @computed
@@ -1894,7 +1896,8 @@ abstract class _OrderStore with Store {
     if (order?.discount == null) order!.discount = 0.0;
     discount = order?.discount;
     temp -= order!.discount!;
-    temp = OrderPaymentMath.roundMoney(temp);
+    // A discount above the items leaves the total at 0, never negative.
+    temp = OrderPaymentMath.floorAtZero(OrderPaymentMath.roundMoney(temp));
 
     final changed = order?.total != null && order!.total != temp;
     order?.total = temp;

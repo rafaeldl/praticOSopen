@@ -28,6 +28,49 @@ class ReceiptPlan {
   final Map<String, PaymentTransaction> transactions;
 }
 
+/// Why a receipt can't be booked (same codes as the server's
+/// ORDER_NOT_PAYABLE and VALUE_EXCEEDS_BALANCE).
+enum ReceiptPlanError { notPayable, exceedsBalance }
+
+class ReceiptPlanException implements Exception {
+  const ReceiptPlanException(this.error, this.orderId);
+
+  final ReceiptPlanError error;
+  final String orderId;
+
+  @override
+  String toString() => 'ReceiptPlanException($error, $orderId)';
+}
+
+int _cents(double value) => (value * 100).round();
+
+/// Throws [ReceiptPlanException] when an allocation goes to a quote or a
+/// canceled order, or above what the order still has open. Same checks as
+/// registerCustomerReceipt on the server.
+void checkReceiptAllocations(
+  List<Order> orders,
+  List<PaymentAllocation> allocations,
+) {
+  final byId = {for (final o in orders) o.id: o};
+  for (final allocation in allocations) {
+    final order = byId[allocation.orderId];
+    if (order == null) {
+      throw ArgumentError('Order ${allocation.orderId} not in orders');
+    }
+    if (allocation.amount <= 0) continue;
+    if (!OrderPaymentMath.hasPaymentStatus(order.status)) {
+      throw ReceiptPlanException(ReceiptPlanError.notPayable, allocation.orderId);
+    }
+    if (_cents(allocation.amount) >
+        _cents(OrderPaymentMath.remainingBalance(order))) {
+      throw ReceiptPlanException(
+        ReceiptPlanError.exceedsBalance,
+        allocation.orderId,
+      );
+    }
+  }
+}
+
 /// Builds the [ReceiptPlan] of a payment split as [allocations] over
 /// [orders] (current snapshots, used for the `paid`/`payment` status).
 ///
@@ -35,6 +78,7 @@ class ReceiptPlan {
 /// [paidAt] and `receiptGroupId` = [receiptId]. With [file], each order also
 /// gets a receipt [OrderDocument] pointing to the same Storage file, linked
 /// to its transaction, so "Ver comprovante" on the order keeps working.
+/// Throws [ReceiptPlanException] (see [checkReceiptAllocations]).
 ReceiptPlan buildReceiptPlan({
   required String receiptId,
   required CustomerAggr? customer,
@@ -47,6 +91,7 @@ ReceiptPlan buildReceiptPlan({
   CompanyAggr? company,
   ReceiptFile? file,
 }) {
+  checkReceiptAllocations(orders, allocations);
   final byId = {for (final o in orders) o.id: o};
   final orderUpdates = <String, Map<String, dynamic>>{};
   final transactions = <String, PaymentTransaction>{};

@@ -98,6 +98,13 @@ class CustomerReceiptService {
     if (companyId == null || request.allocations.isEmpty) {
       throw const CustomerReceiptException(CustomerReceiptFailure.failed);
     }
+    try {
+      // Before the upload: a refused receipt must not leave a file behind.
+      checkReceiptAllocations(request.orders, request.allocations);
+    } on ReceiptPlanException catch (e) {
+      debugPrint('CustomerReceiptService: refused: $e');
+      throw const CustomerReceiptException(CustomerReceiptFailure.failed);
+    }
     final repo = _repo;
     final receiptId = repo.newId(companyId);
     final file = await _upload(companyId, receiptId, request.file);
