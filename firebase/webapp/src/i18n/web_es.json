@@ -436,7 +436,7 @@
   "web.forms.added": "{name} en la orden",
   "web.forms.answerNow": "Responder ahora",
   "web.forms.askManager": "Quien gestiona los checklists los crea en Checklists.",
-  "web.forms.changedElsewhere": "Este checklist cambió en otro lugar. Ábralo de nuevo para verlo.",
+  "web.forms.changedElsewhere": "Este checklist cambió en otro lugar. No se grabó nada encima: recargue para verlo o copie sus preguntas antes.",
   "web.forms.completed": "{name}: completo",
   "web.forms.delete": "Eliminar",
   "web.forms.deleteFailed": "No se pudo eliminar el checklist.",
@@ -481,5 +481,11 @@
   "web.forms.useBody": "Entra en sus checklists y puede cambiar lo que quiera.",
   "web.forms.useNamed": "Usar {name}",
   "web.forms.useTitle": "¿Usar {name}?",
-  "web.forms.viewPhoto": "Ver foto {number} de {name}"
+  "web.forms.viewPhoto": "Ver foto {number} de {name}",
+  "web.forms.reload": "Recargar",
+  "web.forms.reloaded": "Checklist recargado",
+  "web.forms.copyMine": "Copiar mis preguntas",
+  "web.forms.copied": "Preguntas copiadas",
+  "web.forms.copyFailed": "No se pudo copiar. Seleccione y copie a mano.",
+  "web.forms.completedElsewhere": "Este checklist se concluyó. Reábralo para cambiar la respuesta."
 }

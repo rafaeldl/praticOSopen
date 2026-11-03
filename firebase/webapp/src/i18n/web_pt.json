@@ -436,7 +436,7 @@
   "web.forms.added": "{name} na OS",
   "web.forms.answerNow": "Responder agora",
   "web.forms.askManager": "Quem cuida dos checklists cria em Checklists.",
-  "web.forms.changedElsewhere": "Este checklist mudou em outro lugar. Abra de novo para ver como ficou.",
+  "web.forms.changedElsewhere": "Este checklist mudou em outro lugar. Nada foi gravado por cima: recarregue para ver como ficou ou copie suas perguntas antes.",
   "web.forms.completed": "{name}: completo",
   "web.forms.delete": "Apagar",
   "web.forms.deleteFailed": "Não deu para apagar o checklist.",
@@ -481,5 +481,11 @@
   "web.forms.useBody": "Ele entra nos seus checklists e você pode mudar o que quiser.",
   "web.forms.useNamed": "Usar {name}",
   "web.forms.useTitle": "Usar {name}?",
-  "web.forms.viewPhoto": "Ver foto {number} de {name}"
+  "web.forms.viewPhoto": "Ver foto {number} de {name}",
+  "web.forms.reload": "Recarregar",
+  "web.forms.reloaded": "Checklist recarregado",
+  "web.forms.copyMine": "Copiar minhas perguntas",
+  "web.forms.copied": "Perguntas copiadas",
+  "web.forms.copyFailed": "Não deu para copiar. Selecione e copie à mão.",
+  "web.forms.completedElsewhere": "Este checklist foi concluído. Reabra para mudar a resposta."
 }

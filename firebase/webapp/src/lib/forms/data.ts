@@ -6,6 +6,7 @@
 import { firestoreClient, firestoreLite, storageClient } from '@/lib/firebase'
 import { session } from '@/lib/session'
 import {
+  acceptsAnswer,
   applyChange,
   isAnswered,
   itemDoc,
@@ -43,6 +44,13 @@ function withTimeout<T>(work: Promise<T>): Promise<T> {
 async function online(run: (transaction: import('firebase/firestore').Transaction, firestore: typeof import('firebase/firestore'), db: import('firebase/firestore').Firestore) => Promise<void>): Promise<void> {
   const [db, firestore] = await Promise.all([firestoreClient(), import('firebase/firestore')])
   await withTimeout(firestore.runTransaction(db, (transaction) => run(transaction, firestore, db)))
+}
+
+/** The checklist was completed (here or in the app): no answer until it is reopened. */
+export class FormCompleted extends Error {
+  constructor() {
+    super('FORM_COMPLETED')
+  }
 }
 
 /** Someone saved the template since it was opened: nothing is written over it. */
@@ -146,12 +154,18 @@ export async function updateTemplate(id: string, seen: string | null, fields: Pa
   )
 }
 
-/** "Parar de usar" / "Voltar a usar": only `isActive`, right away (outside "Salvar checklist"). */
-export async function setTemplateActive(id: string, isActive: boolean): Promise<string> {
+/**
+ * "Parar de usar" / "Voltar a usar": only `isActive`, right away (outside
+ * "Salvar checklist"), and like it only over the version read: otherwise the
+ * next save would take the web's own version and write over the app (M1 of #524).
+ * Resolves with the new version.
+ */
+export async function setTemplateActive(id: string, seen: string | null, isActive: boolean): Promise<string> {
   const now = nowIso()
   await online(async (transaction, { doc }, db) => {
     const ref = doc(db, 'companies', companyId(), 'forms', id)
-    if (!(await transaction.get(ref)).exists()) throw new TemplateChanged()
+    const snapshot = await transaction.get(ref)
+    if (!snapshot.exists() || (normalizeTemplate(id, snapshot.data()).updatedAt ?? null) !== seen) throw new TemplateChanged()
     transaction.update(ref, { isActive, updatedAt: now, updatedBy: author() })
   })
   return now
@@ -223,6 +237,7 @@ export async function saveAnswer(orderId: string, formId: string, change: Answer
       const snapshot = await transaction.get(ref)
       if (!snapshot.exists()) throw Object.assign(new Error('form removed'), { code: 'not-found' })
       const form = normalizeOrderForm(formId, snapshot.data())
+      if (!acceptsAnswer(form.status)) throw new FormCompleted()
       const responses = applyChange(normalizeResponses(snapshot.data().responses), change)
       let status: FormStatus = statusAfter(form.status, responses)
       const next: OrderForm = { ...form, responses, status }
@@ -250,7 +265,6 @@ export async function setFormStatus(orderId: string, formId: string, status: For
   })
 }
 
-export const MAX_PHOTO = 10 * 1024 * 1024
 
 /**
  * Sends photos of a question, then adds them in one transaction. Returns how

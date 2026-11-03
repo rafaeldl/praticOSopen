@@ -436,7 +436,7 @@
   "web.forms.added": "{name} added to the order",
   "web.forms.answerNow": "Answer now",
   "web.forms.askManager": "Whoever manages checklists creates them in Checklists.",
-  "web.forms.changedElsewhere": "This checklist changed somewhere else. Open it again to see it.",
+  "web.forms.changedElsewhere": "This checklist changed somewhere else. Nothing was written over it: reload to see it, or copy your questions first.",
   "web.forms.completed": "{name}: complete",
   "web.forms.delete": "Delete",
   "web.forms.deleteFailed": "Could not delete the checklist.",
@@ -481,5 +481,11 @@
   "web.forms.useBody": "It joins your checklists and you can change anything.",
   "web.forms.useNamed": "Use {name}",
   "web.forms.useTitle": "Use {name}?",
-  "web.forms.viewPhoto": "See photo {number} of {name}"
+  "web.forms.viewPhoto": "See photo {number} of {name}",
+  "web.forms.reload": "Reload",
+  "web.forms.reloaded": "Checklist reloaded",
+  "web.forms.copyMine": "Copy my questions",
+  "web.forms.copied": "Questions copied",
+  "web.forms.copyFailed": "Could not copy. Select and copy by hand.",
+  "web.forms.completedElsewhere": "This checklist was completed. Reopen it to change the answer."
 }

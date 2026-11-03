@@ -3,6 +3,12 @@
 import { describe, expect, test } from 'vitest'
 import {
   activeCount,
+  acceptsAnswer,
+  activeLimit,
+  pickerGroups,
+  PHOTO_TYPES,
+  splitPhotos,
+  WEB_PLAN_LIMITS_ENFORCED,
   answerText,
   applyChange,
   canFinishAnyway,
@@ -190,6 +196,39 @@ describe('listas e plano', () => {
     expect(fitsOneMore(1, 1)).toBe(false)
     expect(fitsOneMore(0, 1)).toBe(true)
     expect(fitsOneMore(50, -1)).toBe(true)
+  })
+
+  test('como o app no navegador: limite de plano não vale (paidPlansEnabled é false em kIsWeb); Free não trava', () => {
+    const now = new Date('2026-11-03T12:00:00Z')
+    expect(WEB_PLAN_LIMITS_ENFORCED).toBe(false)
+    expect(activeLimit(null, now)).toBe(-1)
+    expect(activeLimit({ plan: 'free' }, now)).toBe(-1)
+    // Where the app enforces, the same numbers.
+    expect(activeLimit(null, now, true)).toBe(1)
+    expect(activeLimit({ plan: 'pro' }, now, true)).toBe(10)
+  })
+
+  test('checklist concluído não aceita resposta (B1)', () => {
+    expect(acceptsAnswer('pending')).toBe(true)
+    expect(acceptsAnswer('in_progress')).toBe(true)
+    expect(acceptsAnswer('completed')).toBe(false)
+  })
+
+  test('foto: só JPEG, PNG e WebP, abaixo de 10 MB como as regras (B2)', () => {
+    const file = (type: string, size = 100) => ({ type, size }) as File
+    const { ok, refused } = splitPhotos([file('image/jpeg'), file('image/png'), file('image/webp'), file('image/heic'), file('image/svg+xml'), file('image/jpeg', 10 * 1024 * 1024), file('text/plain')])
+    expect(ok.map((f) => f.type)).toEqual(['image/jpeg', 'image/png', 'image/webp'])
+    expect(refused).toBe(4)
+    expect(PHOTO_TYPES).toBe('image/jpeg,image/png,image/webp')
+  })
+
+  test('Qual checklist?: os da empresa e os prontos do segmento ainda não copiados, como o app', () => {
+    const company = [normalizeTemplate('seg-1', { title: 'Entrada' }), normalizeTemplate('mine', { title: 'Meu' }), normalizeTemplate('off', { title: 'Off', isActive: false })]
+    const ready = [normalizeTemplate('seg-1', { title: 'Entrada' }), normalizeTemplate('seg-2', { title: 'Teste final' })]
+    const groups = pickerGroups(company, ready)
+    expect(groups.company.map((t) => t.id)).toEqual(['seg-1', 'mine'])
+    expect(groups.ready.map((t) => t.id)).toEqual(['seg-2'])
+    expect(pickerGroups(company, null).ready).toEqual([])
   })
 
   test('quem faz o quê: gerente lê e reabre, consultor e técnico respondem sem reabrir', () => {

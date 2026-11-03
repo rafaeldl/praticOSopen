@@ -202,6 +202,19 @@ export function statusAfter(status: FormStatus, responses: FormResponse[]): Form
   return status === 'pending' && responses.length > 0 ? 'in_progress' : status
 }
 
+/** A completed checklist takes no new answer until it is reopened. */
+export const acceptsAnswer = (status: FormStatus) => status !== 'completed'
+
+/** Photo formats the app and the PDF show. */
+export const PHOTO_TYPES = 'image/jpeg,image/png,image/webp'
+/** storage.rules: under 10 MB. */
+export const MAX_PHOTO = 10 * 1024 * 1024
+export function splitPhotos(files: File[]): { ok: File[]; refused: number } {
+  const types = PHOTO_TYPES.split(',')
+  const ok = files.filter((file) => types.includes(file.type) && file.size < MAX_PHOTO)
+  return { ok, refused: files.length - ok.length }
+}
+
 /** Number answers: validated by the company's way of writing numbers, saved as typed (the app saves text). */
 export function numberAnswer(text: string, parse: (text: string) => number | null): string | null {
   const trimmed = text.trim()
@@ -328,6 +341,18 @@ export function readyNotCopied(ready: Template[], company: Template[]): Template
   return ready.filter((template) => template.isActive && !ids.has(template.id) && !titles.has(fold(template.title)))
 }
 
+/**
+ * "Qual checklist?" as the app (form_selection_screen): the company's active
+ * ones and the segment's ready-made ones, which go straight into the order
+ * (no copy, any role that adds checklists). A ready one already copied shows once.
+ */
+export function pickerGroups(company: Template[], ready: Template[] | null): { company: Template[]; ready: Template[] } {
+  return {
+    company: company.filter((template) => template.isActive).sort(byTitle),
+    ready: ready ? readyNotCopied(ready, company).sort(byTitle) : [],
+  }
+}
+
 export const hasPhotoQuestion = (template: Template) => template.items.some((item) => item.type === 'photo_only')
 
 // ── Plan limit (FeatureGateService.canCreateFormTemplate) ──
@@ -346,6 +371,19 @@ export function planLimit(subscription: unknown, now: Date): number {
   if (inForce !== plan) return PLAN_LIMITS[inForce] as number
   const stored = isRecord(sub.limits) ? sub.limits.formTemplates : undefined
   return typeof stored === 'number' ? stored : (PLAN_LIMITS[plan] as number)
+}
+
+/**
+ * The app applies plan limits only where paid plans can be bought
+ * (FeatureGateService.planLimitsEnforced = SubscriptionService.paidPlansEnabled),
+ * and that is false in a browser (kIsWeb). The web follows: no checklist limit,
+ * so a Free company is never stuck without a place to buy a plan.
+ */
+export const WEB_PLAN_LIMITS_ENFORCED = false
+
+/** Active checklists allowed here: -1 (no limit) unless plan limits are enforced. */
+export function activeLimit(subscription: unknown, now: Date, enforced = WEB_PLAN_LIMITS_ENFORCED): number {
+  return enforced ? planLimit(subscription, now) : -1
 }
 
 /** One more active checklist fits? Counted from the list (`isActive != false`), never from the stored counter. */

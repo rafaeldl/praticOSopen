@@ -157,11 +157,44 @@ test('editar: apagar pergunta com Desfazer, sair sem salvar pergunta, salvar por
   })
   await page.keyboard.press('Escape')
   await expect(editor(page)).toBeVisible()
-  // The app saved meanwhile: nothing is written over it.
+  // The app saved meanwhile: nothing is written over it, and the drawer keeps what was typed (M2).
   await updateTemplateDoc(template.id, { title: `${template.title} pelo app` })
   await editor(page).getByTestId('save-template').click()
-  await expect(page.getByText('Este checklist mudou em outro lugar.', { exact: false }).first()).toBeVisible()
+  const conflict = editor(page).getByTestId('template-conflict')
+  await expect(conflict).toContainText('Este checklist mudou em outro lugar.')
+  await expect(editor(page)).toBeVisible()
+  await expect(page.getByLabel('Nome do checklist')).toHaveValue(`${template.title} mudado`)
   expect((await readTemplate(template.id))?.title).toBe(`${template.title} pelo app`)
+  // "Copiar minhas perguntas" keeps the work; "Recarregar" brings the saved one.
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await conflict.getByRole('button', { name: 'Copiar minhas perguntas' }).click()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain(`${template.title} mudado\n1. Primeira\n2. Segunda`)
+  await conflict.getByRole('button', { name: 'Recarregar' }).click()
+  await expect(page.getByLabel('Nome do checklist')).toHaveValue(`${template.title} pelo app`)
+  await expect(conflict).toHaveCount(0)
+  // After reloading, saving works on top of the app's version.
+  await page.getByLabel('Descrição').fill('Depois de recarregar')
+  await editor(page).getByTestId('save-template').click()
+  await expect(editor(page)).toBeHidden()
+  expect(await readTemplate(template.id)).toMatchObject({ title: `${template.title} pelo app`, description: 'Depois de recarregar' })
+})
+
+test('app salva, web liga ou desliga e salva: o web avisa e não grava por cima (M1, checklist.form.toggle)', async ({ page }) => {
+  const template = await makeTemplate({ items: [{ id: 'a', label: 'Primeira', type: 'text' }] })
+  await openChecklists(page, 'admin')
+  await page.getByRole('button', { name: `Abrir ${template.title}` }).click()
+  await expect(editor(page)).toBeVisible()
+  await updateTemplateDoc(template.id, { items: [{ id: 'a', label: 'Primeira', type: 'text' }, { id: 'z', label: 'Do app', type: 'boolean' }] })
+  await editor(page).getByTestId('template-menu').click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Parar de usar' }).click()
+  await expect(editor(page).getByTestId('template-conflict')).toBeVisible()
+  expect((await readTemplate(template.id))?.isActive).toBe(true)
+  await page.getByLabel('Descrição').fill('Do web')
+  await editor(page).getByTestId('save-template').click()
+  await expect(editor(page).getByTestId('template-conflict')).toBeVisible()
+  const saved = await readTemplate(template.id)
+  expect((saved?.items as unknown[]).length).toBe(2)
+  expect(saved?.description ?? null).toBeNull()
 })
 
 test('parar de usar, voltar a usar e apagar pelo "…"; apagar na lista mantém a linha se falhar (checklist.form.toggle, checklist.form.delete, checklist.list.delete)', async ({ page }) => {
@@ -195,17 +228,36 @@ test('parar de usar, voltar a usar e apagar pelo "…"; apagar na lista mantém 
   expect(await readTemplate(other.id)).toBeUndefined()
 })
 
-test('plano Free: com 1 ativo, Novo checklist avisa antes de abrir e não religa outro (checklist.counter.active, checklist.view.new)', async ({ page }) => {
+test('plano Free com 1 ativo não trava no navegador, como o app sem planos pagos (checklist.counter.active, checklist.view.new)', async ({ page }) => {
   await login(page, 'owner', 'checklists')
   await chooseCompany(page, 'Beta Repairs')
-  await expect(page.getByTestId('checklists-summary')).toContainText('1 de 1 em uso')
-  await page.getByTestId('new-checklist').click()
-  await expect(page.getByTestId('checklists-limit')).toHaveText('Você já tem 1 de 1 checklists. Para criar outro, mude de plano.')
-  await expect(editor(page)).toHaveCount(0)
+  await expect(page.getByTestId('checklists-summary')).not.toContainText('em uso')
   await page.getByRole('button', { name: 'Abrir Old check' }).click()
   await editor(page).getByTestId('template-menu').click()
   await page.getByRole('dialog').getByRole('button', { name: 'Voltar a usar' }).click()
-  await expect(page.getByTestId('template-error')).toHaveText('Você já tem 1 de 1 checklists. Para criar outro, mude de plano.')
+  await expect(editor(page).getByTestId('template-off')).toHaveCount(0)
+  await expect(page.getByTestId('template-error')).toHaveCount(0)
+  await editor(page).getByRole('button', { name: 'Fechar' }).click()
+  await expect(editor(page)).toBeHidden()
+  await page.getByTestId('new-checklist').click()
+  await expect(editor(page)).toBeVisible()
+  await expect(page.getByTestId('checklists-limit')).toHaveCount(0)
+})
+
+test('pronto do segmento direto na OS, sem copiar, por quem não gerencia checklists (checklist.pick.choose)', async ({ page }) => {
+  const order = await makeOrder('technician', { status: 'quote', payment: null })
+  await openOrder(page, 'technician', order.id)
+  await forms(page).getByTestId('add-checklist').click()
+  const picker = page.getByTestId('checklist-picker')
+  await expect(picker.getByRole('heading', { name: 'Da empresa' })).toBeVisible()
+  await expect(picker.getByRole('heading', { name: 'Globais' })).toBeVisible()
+  await expect(picker.getByTestId('picker-new')).toHaveCount(0)
+  await picker.getByRole('button', { name: /Teste final/ }).click()
+  await expect(fill(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+  const [saved] = await readOrderForms(order.id)
+  expect(saved).toMatchObject({ formDefinitionId: 'seg-final', title: 'Teste final', status: 'pending' })
+  expect(await templatesNamed('Teste final')).toEqual([])
 })
 
 test('OS: adicionar abre direto na 1ª pergunta e responde só com teclado, como o app grava (order.checklist.add, checklist.pick.choose, checklist.fill.*, checklist.question.*)', async ({ page }) => {
@@ -251,7 +303,8 @@ test('OS: adicionar abre direto na 1ª pergunta e responde só com teclado, como
   await fill(page).getByRole('textbox', { name: 'Quilometragem' }).fill('12.345,5')
   // Last answer with nothing left: completed and back to the order.
   await page.keyboard.press('Enter')
-  await expect(fill(page)).toBeHidden()
+  // Five answers go one after the other; on a busy machine the last one may take a while.
+  await expect(fill(page)).toBeHidden({ timeout: 20_000 })
   await expect(forms(page).getByTestId('form-progress')).toHaveText('Completo')
   const [saved] = await readOrderForms(order.id)
   expect(saved).toMatchObject({ formDefinitionId: template.id, title: template.title, status: 'completed', deviceId: 'device-2' })
@@ -365,6 +418,32 @@ test('fotos: pôr na pergunta, ver, tirar (e o arquivo sai); obrigatória vazia 
   await expect(fill(page).getByTestId('fill-finish-anyway')).toHaveCount(0)
   await fill(page).getByTestId('fill-start').click()
   await expect(page.getByTestId('photo-input-p')).toBeFocused()
+})
+
+test('concluído em outro lugar enquanto se digita: a resposta não entra (B1)', async ({ page }) => {
+  const order = await makeOrder('admin')
+  const formId = await makeOrderForm(order.id, { items: [{ id: 't', label: 'Observação', type: 'text' }, { id: 'u', label: 'Outra', type: 'text' }], responses: [{ itemId: 'u', value: 'feito', photoUrls: [] }], status: 'in_progress' })
+  await openOrder(page, 'admin', order.id)
+  await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
+  await fill(page).getByRole('textbox', { name: 'Observação' }).fill('digitado no web')
+  await writeOrderFormRaw(order.id, formId, { status: 'completed', completedAt: new Date().toISOString() })
+  await expect(fill(page).getByTestId('fill-status')).toContainText('Completo')
+  await fill(page).getByRole('button', { name: 'Fechar' }).click()
+  await expect(fill(page)).toBeHidden()
+  const [saved] = await readOrderForms(order.id)
+  expect(saved?.status).toBe('completed')
+  expect(saved?.responses).toEqual([{ itemId: 'u', value: 'feito', photoUrls: [] }])
+})
+
+test('foto: só JPEG, PNG e WebP (B2)', async ({ page }) => {
+  const order = await makeOrder('admin')
+  await makeOrderForm(order.id, { items: [{ id: 'p', label: 'Foto da frente', type: 'photo_only' }] })
+  await openOrder(page, 'admin', order.id)
+  await forms(page).getByRole('button', { name: 'Abrir o checklist Vistoria de entrada' }).click()
+  await expect(page.getByTestId('photo-input-p')).toHaveAttribute('accept', 'image/jpeg,image/png,image/webp')
+  await page.getByTestId('photo-input-p').setInputFiles({ name: 'x.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>') })
+  await expect(page.getByText('1 foto não foi enviada', { exact: false }).first()).toBeVisible()
+  expect((await readOrderForms(order.id))[0]?.responses).toEqual([])
 })
 
 test('concluído: só leitura; admin reabre, técnico não; gerente lê sem responder (checklist.fill.reopen, checklist.fill.view)', async ({ page }) => {

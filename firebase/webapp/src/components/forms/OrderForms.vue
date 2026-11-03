@@ -14,8 +14,8 @@ import TemplateEditor from './TemplateEditor.vue'
 import TemplatePicker from './TemplatePicker.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
-import { addOrderForm, deleteOrderForm, loadSubscription, watchOrderForms, watchTemplates } from '@/lib/forms/data'
-import { activeCount, answeredCount, fitsOneMore, formsAccess, planLimit, titleOf, type OrderForm, type Template } from '@/lib/forms/model'
+import { addOrderForm, deleteOrderForm, loadReadyTemplates, loadSubscription, watchOrderForms, watchTemplates } from '@/lib/forms/data'
+import { activeCount, activeLimit, answeredCount, fitsOneMore, formsAccess, titleOf, WEB_PLAN_LIMITS_ENFORCED, type OrderForm, type Template } from '@/lib/forms/model'
 import { declinedCount, offerDone, offerWaiting, rememberDecline, shouldOffer } from '@/lib/forms/offer'
 import { orderRoleOf, type Order } from '@/lib/orders/model'
 import { deviceLabel } from '@/lib/orders/text'
@@ -33,6 +33,10 @@ const failed = ref(false)
 const templates = shallowRef<Template[] | null>(null)
 const templatesFailed = ref(false)
 const subscription = shallowRef<unknown>(null)
+/** The plan was read: before that the limit is unknown and blocks nobody (B3 of #524). */
+const planKnown = ref(false)
+/** The segment's ready-made ones, offered in "Qual checklist?" as in the app. */
+const ready = shallowRef<Template[] | null>(null)
 type Step = { kind: 'device' } | { kind: 'pick'; deviceId: string | null } | { kind: 'create'; deviceId: string | null } | { kind: 'remove'; form: OrderForm } | { kind: 'offer' }
 const step = shallowRef<Step | null>(null)
 const filling = ref<{ id: string; start: boolean } | null>(null)
@@ -59,7 +63,7 @@ const deviceChoices = computed<Choice[]>(() => [
   { id: '__none', label: t('generalNoDevice') },
 ])
 const active = computed(() => activeCount(templates.value ?? []))
-const limit = computed(() => planLimit(subscription.value, new Date()))
+const limit = computed(() => (planKnown.value ? activeLimit(subscription.value, new Date()) : -1))
 
 async function listen() {
   failed.value = false
@@ -84,6 +88,15 @@ async function listen() {
 
 async function loadTemplates() {
   templatesFailed.value = false
+  if (ready.value === null) {
+    // Optional, as in the app: without them the company's still show.
+    void loadReadyTemplates()
+      .then((list) => (ready.value = list))
+      .catch((error) => {
+        console.warn('forms: ready-made not read', error)
+        ready.value = []
+      })
+  }
   if (stopTemplates) return
   try {
     stopTemplates = await watchTemplates(
@@ -135,10 +148,17 @@ async function add(template: Template, deviceId: string | null) {
 }
 
 /** "Novo checklist" in the picker: created, then chosen for this order (the app only reloads the list). */
-async function create(deviceId: string | null) {
-  // The plan decides before the editor opens; unread, it does not block.
-  subscription.value = await loadSubscription().catch(() => ({ plan: 'business' }))
+function create(deviceId: string | null) {
   step.value = { kind: 'create', deviceId }
+  // Only where plan limits apply (not in the browser, like the app); read meanwhile, never assumed Free.
+  if (WEB_PLAN_LIMITS_ENFORCED && !planKnown.value) {
+    void loadSubscription()
+      .then((value) => {
+        subscription.value = value
+        planKnown.value = true
+      })
+      .catch((error) => console.warn('forms: plan not read', error))
+  }
 }
 function onCreated(id: string) {
   const deviceId = step.value?.kind === 'create' ? step.value.deviceId : null
@@ -248,11 +268,12 @@ onBeforeUnmount(() => {
   <TemplatePicker
     v-else-if="step?.kind === 'pick'"
     :templates="templates"
+    :ready="ready"
     :failed="templatesFailed"
     :can-create="can('manageForms')"
     :sub="deviceName(step.deviceId) ?? undefined"
     @pick="(template) => add(template, step?.kind === 'pick' ? step.deviceId : null)"
-    @create="void create(step?.kind === 'pick' ? step.deviceId : null)"
+    @create="create(step?.kind === 'pick' ? step.deviceId : null)"
     @retry="retryTemplates"
     @close="step = null"
   />

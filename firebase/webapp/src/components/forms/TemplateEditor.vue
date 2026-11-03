@@ -7,6 +7,7 @@
 // Closing with changes asks, also when leaving the page. Saving over a
 // version someone changed since is refused and the list is read again.
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArrowDown, ArrowUp, Check, MoreHorizontal, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import ChoiceDialog, { type Choice } from '@/components/orders/ChoiceDialog.vue'
@@ -29,9 +30,10 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ saved: [id: string]; close: [] }>()
 
+const router = useRouter()
 const editing = !!props.template
 let seen = props.template?.updatedAt ?? null
-const initial = { title: props.template?.title ?? '', description: props.template?.description ?? '', items: props.template?.items ?? [] }
+const initial = reactive({ title: props.template?.title ?? '', description: props.template?.description ?? '', items: (props.template?.items ?? []) as FormItem[] })
 const form = reactive({ title: initial.title, description: initial.description, items: [...initial.items] as FormItem[] })
 const saving = ref(false)
 const failed = ref('')
@@ -41,6 +43,8 @@ const dialog = ref<null | 'menu' | 'delete'>(null)
 const menuButton = ref<HTMLElement | null>(null)
 const layer = ref<InstanceType<typeof Layer> | null>(null)
 const active = ref(props.template?.isActive ?? true)
+/** Saved elsewhere since it was opened (M2 of #524): the drawer stays, with what was typed. */
+const conflict = ref(false)
 let allowClose = false
 
 const title = computed(() => (editing ? titleOf(props.template as Template, locale.value) || t('checklist') : t('checklistNew')))
@@ -166,12 +170,7 @@ async function save() {
     announce(message)
     emit('saved', id)
   } catch (error) {
-    if (error instanceof TemplateChanged) {
-      allowClose = true
-      showToast(t('web.forms.changedElsewhere'))
-      emit('close')
-      return
-    }
+    if (error instanceof TemplateChanged) return void showConflict()
     console.warn('forms: not saved', error)
     const key = errorMessageKey(error)
     failed.value = key === 'web.error.generic' ? t('checklistSaveError') : `${t('checklistSaveError')} ${t(key)}`
@@ -193,16 +192,54 @@ async function toggleActive() {
   }
   saving.value = true
   try {
-    // Its own write: "Salvar checklist" afterwards compares with this version.
-    seen = await setTemplateActive(template.id, next)
+    // Only over the version read; then "Salvar checklist" compares with the web's own write.
+    seen = await setTemplateActive(template.id, seen, next)
     active.value = next
     const message = next ? t('web.forms.turnedOn') : t('web.forms.turnedOff')
     showToast(message)
     announce(message)
   } catch (error) {
+    if (error instanceof TemplateChanged) return void showConflict()
     failed.value = t(errorMessageKey(error))
   } finally {
     saving.value = false
+  }
+}
+
+function showConflict() {
+  conflict.value = true
+  failed.value = ''
+  announce(t('web.forms.changedElsewhere'))
+  void nextTick(() => document.getElementById('tf-conflict')?.focus())
+}
+
+/** "Recarregar": the version saved now; what was typed here is discarded. */
+function reload() {
+  const latest = props.template
+  if (!latest) return
+  initial.title = latest.title
+  initial.description = latest.description ?? ''
+  initial.items = latest.items
+  form.title = initial.title
+  form.description = initial.description
+  form.items = [...latest.items]
+  seen = latest.updatedAt ?? null
+  active.value = latest.isActive
+  removed.value = null
+  conflict.value = false
+  announce(t('web.forms.reloaded'))
+  void nextTick(() => document.getElementById('tf-title')?.focus())
+}
+
+/** "Copiar minhas perguntas": the name, the description and the questions typed, to paste elsewhere. */
+async function copyMine() {
+  const lines = [form.title.trim(), form.description.trim(), ...form.items.map((item, index) => `${index + 1}. ${labelOf(item, locale.value)}`)].filter(Boolean)
+  try {
+    await navigator.clipboard.writeText(lines.join('\n'))
+    showToast(t('web.forms.copied'))
+    announce(t('web.forms.copied'))
+  } catch {
+    failed.value = t('web.forms.copyFailed')
   }
 }
 
@@ -223,9 +260,22 @@ async function remove() {
   }
 }
 
+/**
+ * The menu closes through the history (Voltar), like Esc, and only then the
+ * choice runs. Removed by the parent instead, its history entry would stay
+ * behind and the drawer's X would need two clicks.
+ */
+let picked: string | null = null
 function onPick(id: string) {
+  picked = id
+  router.back()
+}
+function onMenuClosed() {
+  dialog.value = null
+  const id = picked
+  picked = null
   if (id === 'toggle') void toggleActive()
-  else dialog.value = 'delete'
+  else if (id === 'delete') dialog.value = 'delete'
 }
 
 function onKeydown(event: KeyboardEvent) {
@@ -264,6 +314,13 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
         </button>
       </div>
       <div class="drawer-body">
+        <div v-if="conflict" id="tf-conflict" class="q-conflict" role="alert" tabindex="-1" data-testid="template-conflict">
+          <p>{{ t('web.forms.changedElsewhere') }}</p>
+          <div class="row-actions">
+            <button type="button" class="btn" @click="reload">{{ t('web.forms.reload') }}</button>
+            <button type="button" class="btn btn--ghost" @click="copyMine">{{ t('web.forms.copyMine') }}</button>
+          </div>
+        </div>
         <p v-if="failed" class="field-error" role="alert" data-testid="template-error">{{ failed }}</p>
         <div>
           <label class="field-label" for="tf-title">{{ t('checklistNameLabel') }}</label>
@@ -324,7 +381,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
     </form>
   </Layer>
   <QuestionDialog v-if="question" :item="question.item" @save="onQuestion" @remove="removeQuestion" @close="question = null" />
-  <ChoiceDialog v-else-if="dialog === 'menu' && template" :anchor="menuButton" :title="title" :choices="menuChoices" @pick="onPick" @close="dialog = null" />
+  <ChoiceDialog v-else-if="dialog === 'menu' && template" :anchor="menuButton" :title="title" :choices="menuChoices" @pick="onPick" @close="onMenuClosed" />
   <ConfirmDialog
     v-else-if="dialog === 'delete' && template"
     :title="t('checklistDeleteTitle')"

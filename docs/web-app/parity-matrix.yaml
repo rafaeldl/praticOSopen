@@ -8712,7 +8712,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458). Web: não grava contador (o servidor recontou em onFormTemplateWrittenUsage); o limite usa os ativos da lista (isActive != false) e o plano de companies/{id}.subscription (vencido vale Free), conferido antes de abrir Novo, ao Usar um pronto e ao religar. Sem trava nova no servidor."
+  note: "Não copiar: o app conta a coleção formTemplates em vez de forms e os checklists copiados no primeiro acesso não passam pelo limite nem pelo contador. Na web: contar no servidor os forms ativos (TODO #458). Web: não grava contador (o servidor reconta em onFormTemplateWrittenUsage). O limite segue o app: só vale onde o app aplica (FeatureGateService.planLimitsEnforced = paidPlansEnabled, falso no navegador), então no web não trava (WEB_PLAN_LIMITS_ENFORCED). A regra do número (ativos isActive != false na lista, plano de companies/{id}.subscription, vencido vale Free) fica pronta em activeLimit; enquanto o plano não for lido, nada é bloqueado."
 - id: checklist.view.list
   screen: lib/screens/forms/checklists_view.dart
   route: null
@@ -8783,7 +8783,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: manageForms
-  note: "Editando é decidido por createdAt: modelo sem createdAt abre como novo e salvar cria outro e confere o limite. Novo e edição mostram coisas diferentes (descrição em Mais dados no novo; título grande e N perguntas na edição). Ver checklist.counter.active. Web: editar é abrir um existente (pelo id, nunca por createdAt); grava todas as chaves de FormDefinition.toJson; editar manda a versão lida (updatedAt) numa transação: se o app salvou depois, nada é gravado e a tela avisa. Ctrl/⌘ Enter salva."
+  note: "Editando é decidido por createdAt: modelo sem createdAt abre como novo e salvar cria outro e confere o limite. Novo e edição mostram coisas diferentes (descrição em Mais dados no novo; título grande e N perguntas na edição). Ver checklist.counter.active. Web: editar é abrir um existente (pelo id); grava todas as chaves de FormDefinition.toJson; Salvar e Parar/Voltar a usar mandam a versão lida (updatedAt) numa transação: se o app salvou depois, nada é gravado, a gaveta fica aberta com o que foi digitado e oferece Recarregar e Copiar minhas perguntas. Ctrl/⌘ Enter salva."
 - id: checklist.form.question-add
   screen: lib/screens/forms/form_template_form_screen.dart
   route: "/form_template_form"
@@ -8978,7 +8978,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: editOrder
-  note: "Só modelos ativos, em ordem de título; rótulos Da empresa e Globais só com os dois; busca em título e descrição. Os prontos dependem do segmento já carregado. Não copiar: põe o pronto do segmento direto na OS, sem copiar para a empresa e sem limite; getCompanyTemplates devolve lista vazia quando falha e a falha dos prontos passa calada, então o erro vira vazio. Web: só os da empresa (o pronto entra pela tela Checklists, onde conta no plano); erro com Tentar de novo; busca com mais de 10."
+  note: "Só modelos ativos, em ordem de título; rótulos Da empresa e Globais só com os dois; busca em título e descrição. Os prontos dependem do segmento já carregado. Não copiar: getCompanyTemplates devolve lista vazia quando falha e a falha dos prontos passa calada, então o erro vira vazio. Web: como o app, os prontos do segmento ainda não copiados aparecem e entram direto na OS, sem cópia, para quem adiciona checklist (também sem manageForms); erro dos da empresa com Tentar de novo; busca com mais de 10."
 - id: checklist.pick.create
   screen: lib/screens/forms/form_selection_screen.dart
   route: null
@@ -9031,7 +9031,7 @@ rows:
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
   permission: fillForms
-  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar. Web: cada resposta numa transação que relê o checklist e muda só aquela pergunta (valor e fotos separados), então app e web juntos não se apagam; respostas em fila na ordem dada. Sem conexão a transação falha: a resposta fica na tela marcada Não deu para guardar, com Tentar de novo (não há fila offline no web)."
+  note: "Próxima pula as já respondidas. A primeira resposta muda pending para inProgress. Não copiar: grava por transação sem await nem catch; sem internet a resposta aparece e se perde sem aviso. Na web: gravação que entra na fila offline (update com merge) e aviso quando falhar. Web: cada resposta numa transação que relê o checklist e muda só aquela pergunta (valor e fotos separados), em fila na ordem dada; checklist concluído recusa resposta até ser reaberto. O web não apaga o que o app grava, mas o app ainda pode apagar o que o web grava: a tela do app não relê o checklist e troca a resposta inteira da pergunta (fotos do web somem, foto tirada no web volta), e a fila offline do app troca a lista inteira. Vai para o lote de correções do app. Sem conexão a transação falha: a resposta fica na tela marcada Não deu para guardar, com Tentar de novo (não há fila offline no web)."
 - id: checklist.fill.complete
   screen: lib/screens/forms/form_fill_screen.dart
   route: null
@@ -9099,7 +9099,7 @@ rows:
   web_status: done
   e2e: firebase/webapp/e2e/forms.spec.ts
   web_exception: null
-  note: "Web: escolher (várias) ou arrastar arquivo; cada falha é contada no aviso."
+  note: "Web: escolher (várias), colar ou arrastar; só JPEG, PNG e WebP abaixo de 10 MB (o que o app e o PDF mostram); cada falha é contada no aviso."
   permission: fillForms
 - id: checklist.fill.gallery
   screen: lib/screens/forms/form_fill_screen.dart

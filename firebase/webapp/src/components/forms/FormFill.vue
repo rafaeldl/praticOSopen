@@ -12,12 +12,13 @@
 // the web can answer at the same time. An answer that did not reach the
 // server stays on screen marked "não foi salvo", with "Tentar de novo".
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ChevronLeft, ChevronRight, ImagePlus, MoreHorizontal, X } from '@lucide/vue'
 import Layer from '@/components/Layer.vue'
 import ChoiceDialog from '@/components/orders/ChoiceDialog.vue'
 import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
 import { locale, t } from '@/i18n'
-import { addPhotos, MAX_PHOTO, removePhoto, saveAnswer, setFormStatus } from '@/lib/forms/data'
+import { addPhotos, FormCompleted, removePhoto, saveAnswer, setFormStatus } from '@/lib/forms/data'
 import {
   answerText,
   applyChange,
@@ -28,6 +29,8 @@ import {
   missingCount,
   numberAnswer,
   optionsOf,
+  PHOTO_TYPES,
+  splitPhotos,
   requiredMissing,
   responseOf,
   statusAfter,
@@ -45,12 +48,15 @@ import { announce } from '@/lib/ui'
 
 const props = defineProps<{ orderId: string; form: OrderForm; access: FormsAccess; devices: DeviceAggr[]; start?: boolean }>()
 const emit = defineEmits<{ close: [] }>()
+const router = useRouter()
 
 interface Pending {
   change: AnswerChange
   state: 'saving' | 'failed'
   /** Which send this is: a newer answer to the same question replaces it. */
   seq: number
+  /** Refused because the checklist was completed meanwhile (B1 of #524). */
+  completed?: boolean
 }
 let sequence = 0
 /** Answers on their way (or that did not arrive), shown over what the server has. */
@@ -70,7 +76,7 @@ let finished = false
 
 const view = computed<OrderForm>(() => {
   let responses = props.form.responses
-  for (const entry of Object.values(pending)) responses = applyChange(responses, entry.change)
+  for (const entry of Object.values(pending)) if (!entry.completed) responses = applyChange(responses, entry.change)
   return { ...props.form, responses, status: statusAfter(props.form.status, responses) }
 })
 const completed = computed(() => props.form.status === 'completed')
@@ -148,8 +154,9 @@ async function write(item: FormItem, change: AnswerChange, complete: boolean, se
     }
   } catch (error) {
     console.warn('forms: answer not saved', error)
-    if (pending[item.id]?.seq === seq) pending[item.id] = { change, state: 'failed', seq }
-    announce(t('checklistAnswerSaveFailed'))
+    const completed = error instanceof FormCompleted
+    if (pending[item.id]?.seq === seq) pending[item.id] = { change, state: 'failed', seq, completed }
+    announce(completed ? t('web.forms.completedElsewhere') : t('checklistAnswerSaveFailed'))
   }
 }
 
@@ -176,6 +183,11 @@ function toggle(item: FormItem, index: number) {
 
 /** Text and number: saved on leaving the field, or with Enter (which goes on). */
 function commitText(item: FormItem, goOn: boolean) {
+  // Completed meanwhile (here or in the app): what was typed does not go in (B1 of #524).
+  if (!editable.value) {
+    delete drafts[item.id]
+    return
+  }
   const draft = drafts[item.id]
   const index = view.value.items.findIndex((entry) => entry.id === item.id)
   if (draft === undefined) {
@@ -244,10 +256,9 @@ function doneMulti(item: FormItem) {
 
 async function onFiles(item: FormItem, files: FileList | File[] | null | undefined) {
   if (!editable.value) return
-  const images = [...(files ?? [])].filter((file) => file.type.startsWith('image/'))
-  if (!images.length) return
-  const tooBig = images.filter((file) => file.size >= MAX_PHOTO).length
-  const ok = images.filter((file) => file.size < MAX_PHOTO)
+  // JPEG, PNG and WebP under 10 MB: what the app and the PDF show (B2 of #524).
+  const { ok, refused: tooBig } = splitPhotos([...(files ?? [])])
+  if (!ok.length && !tooBig) return
   uploading[item.id] = (uploading[item.id] ?? 0) + ok.length
   try {
     const { failed } = ok.length ? await addPhotos(props.orderId, props.form.id, item.id, ok) : { failed: 0 }
@@ -266,6 +277,7 @@ async function onFiles(item: FormItem, files: FileList | File[] | null | undefin
 /** An image pasted while a question has the focus goes to it (when it takes photos). */
 function onPaste(event: ClipboardEvent, item: FormItem) {
   const files = [...(event.clipboardData?.files ?? [])].filter((file) => file.type.startsWith('image/'))
+  if (!editable.value) return
   if (!files.length || !(item.allowPhotos || item.type === 'photo_only')) return
   event.preventDefault()
   // Not the order's photos too (OrderPhotos listens on the window).
@@ -307,6 +319,20 @@ async function finish() {
     showToast(t('couldNotCompleteForm'))
   } finally {
     busy.value = false
+  }
+}
+
+/** As in the editor: the menu leaves through the history, then "Reabrir" runs. */
+let reopenPicked = false
+function pickReopen() {
+  reopenPicked = true
+  router.back()
+}
+function onMenuClosed() {
+  menuOpen.value = false
+  if (reopenPicked) {
+    reopenPicked = false
+    void reopen()
   }
 }
 
@@ -449,7 +475,7 @@ onMounted(() => {
                   <input
                     class="sr"
                     type="file"
-                    accept="image/*"
+                    :accept="PHOTO_TYPES"
                     multiple
                     :aria-label="t('web.forms.addPhotoTo', { name: labelOf(item, locale) })"
                     :data-testid="`photo-input-${item.id}`"
@@ -461,8 +487,8 @@ onMounted(() => {
 
               <p :id="`fq-${item.id}-state`" class="fill-state" :data-state="pending[item.id]?.state ?? (isAnswered(item, responseOf(view, item.id)) ? 'saved' : 'open')">
                 <template v-if="pending[item.id]?.state === 'failed'">
-                  <span class="fill-failed" role="alert">{{ t('checklistAnswerSaveFailed') }}</span>
-                  <button type="button" class="link" @click="retry(item)">{{ t('web.tryAgain') }}</button>
+                  <span class="fill-failed" role="alert">{{ pending[item.id]?.completed ? t('web.forms.completedElsewhere') : t('checklistAnswerSaveFailed') }}</span>
+                  <button v-if="!pending[item.id]?.completed" type="button" class="link" @click="retry(item)">{{ t('web.tryAgain') }}</button>
                 </template>
                 <span v-else-if="pending[item.id]?.state === 'saving'" class="sub">{{ t('web.newOrder.saving') }}</span>
                 <span v-else-if="editable && !isAnswered(item, responseOf(view, item.id))" class="sub sr">{{ t('checklistNoAnswer') }}</span>
@@ -474,7 +500,7 @@ onMounted(() => {
     </div>
   </Layer>
 
-  <ChoiceDialog v-if="menuOpen" :anchor="menuButton" :title="title" :choices="[{ id: 'reopen', label: t('reopen') }]" @pick="reopen" @close="menuOpen = false" />
+  <ChoiceDialog v-if="menuOpen" :anchor="menuButton" :title="title" :choices="[{ id: 'reopen', label: t('reopen') }]" @pick="pickReopen" @close="onMenuClosed" />
   <Layer v-if="viewed && !removing" kind="dialog" :label="t('photo')" @close="viewer = null">
     <template #default="{ close }">
       <div class="layer-body fill-viewer" data-testid="fill-viewer" @keydown.left.prevent="step(-1)" @keydown.right.prevent="step(1)">

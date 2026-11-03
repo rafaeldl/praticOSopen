@@ -45,3 +45,6 @@
 .fill-failed { color: var(--color-danger-text, var(--color-danger)); font-weight: 600; }
 .fill-viewer-nav { display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin: 0.5rem 0 0; }
 .q-removed { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; margin: 0 0 0.5rem; color: var(--color-muted); }
+.q-conflict { border: 1px solid var(--color-warning); border-left-width: 4px; border-radius: 6px; padding: 0.6rem 0.75rem; background: var(--color-card); display: grid; gap: 0.5rem; }
+.q-conflict p { margin: 0; }
+.picker-h { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0.5rem 0 0.2rem; }

@@ -16,7 +16,7 @@ import TemplateEditor from '@/components/forms/TemplateEditor.vue'
 import { locale, t } from '@/i18n'
 import { errorMessageKey } from '@/lib/api'
 import { deleteTemplate, importReady, loadReadyTemplates, loadSubscription, watchTemplates } from '@/lib/forms/data'
-import { activeCount, byTitle, descriptionOf, fitsOneMore, hasPhotoQuestion, labelOf, planLimit, readyNotCopied, titleOf, type Template } from '@/lib/forms/model'
+import { activeCount, activeLimit, byTitle, descriptionOf, fitsOneMore, hasPhotoQuestion, labelOf, readyNotCopied, titleOf, WEB_PLAN_LIMITS_ENFORCED, type Template } from '@/lib/forms/model'
 import { showToast } from '@/lib/toast'
 import { announce } from '@/lib/ui'
 import '@/styles/forms.css'
@@ -44,7 +44,8 @@ const editorOpen = computed(() => editingId.value === 'new' || !!editing.value)
 const sorted = computed(() => [...(templates.value ?? [])].sort(byTitle))
 const readyList = computed(() => (ready.value && templates.value ? readyNotCopied(ready.value, templates.value).sort(byTitle) : []))
 const active = computed(() => activeCount(templates.value ?? []))
-const limit = computed(() => (planKnown.value ? planLimit(subscription.value, new Date()) : -1))
+// Until the plan is read (and in the browser, where the app enforces no plan limits) nothing is blocked.
+const limit = computed(() => (planKnown.value ? activeLimit(subscription.value, new Date()) : -1))
 const fits = computed(() => fitsOneMore(active.value, limit.value))
 const state = computed(() => (failed.value ? 'failed' : templates.value === null ? 'loading' : 'ready'))
 const bothEmpty = computed(() => state.value === 'ready' && !sorted.value.length && ready.value !== null && !readyList.value.length)
@@ -146,12 +147,14 @@ async function useReady() {
 onMounted(() => {
   void listen()
   void loadReady()
-  plan = loadSubscription()
-    .then((value) => {
-      subscription.value = value
-      planKnown.value = true
-    })
-    .catch((error) => console.warn('forms: plan not read', error))
+  if (WEB_PLAN_LIMITS_ENFORCED) {
+    plan = loadSubscription()
+      .then((value) => {
+        subscription.value = value
+        planKnown.value = true
+      })
+      .catch((error) => console.warn('forms: plan not read', error))
+  }
 })
 onBeforeUnmount(() => {
   stop?.()
