@@ -4,9 +4,11 @@ export const PROJECT_ID = 'demo-praticos'
 export const PASSWORD = 'emulator-only-password'
 export const COMPANY_A = 'company-alpha'
 export const COMPANY_B = 'company-beta'
+/** "Valores e cobrança" off (useFinancial: false): nobody sees money, not even the owner. */
+export const COMPANY_C = 'company-gamma'
 /** Fatia 07 (equipe, empresa, plano): companies of their own, so switching values off or
  * changing roles never reaches the screens other tests read. */
-export const COMPANY_G = 'company-gamma'
+export const COMPANY_G = 'company-settings'
 export const COMPANY_T = 'company-team'
 export const COMPANY_D = 'company-delta'
 
@@ -30,6 +32,8 @@ export const USERS = {
   mixed: { ...user('mixed', 'Mauro Dois Papeis'), roles: { [COMPANY_A]: 'admin', [COMPANY_B]: 'technician' } },
   /** On the list, but the e-mail was never confirmed: the server says no. */
   unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
+  /** Owner of company C, where "Valores e cobrança" is off. */
+  noValues: { ...user('novalues', 'Vera Sem Valores'), roles: { [COMPANY_C]: 'owner' } },
   // Company gamma: settings, plan and integrations (its owner switches values off and on).
   gOwner: { ...user('g-owner', 'Gina Dona'), roles: { [COMPANY_G]: 'owner' } },
   gAdmin: { ...user('g-admin', 'Gil Admin'), roles: { [COMPANY_G]: 'admin' } },
@@ -58,6 +62,7 @@ export const INVITES = {
 export const COMPANIES = {
   [COMPANY_A]: { name: 'Oficina Alfa', country: 'BR', segment: 'automotive', owner: USERS.owner },
   [COMPANY_B]: { name: 'Beta Repairs', country: 'US', segment: 'electronics', owner: USERS.owner },
+  [COMPANY_C]: { name: 'Gama Sem Valores', country: 'BR', segment: 'automotive', owner: USERS.noValues, useFinancial: false },
   [COMPANY_G]: { name: 'Oficina Gama', country: 'BR', segment: 'automotive', owner: USERS.gOwner },
   [COMPANY_T]: { name: 'Equipe Teta', country: 'BR', segment: 'automotive', owner: USERS.tOwner },
   [COMPANY_D]: { name: 'Delta Sozinha', country: 'BR', segment: 'electronics', owner: USERS.dOwner },

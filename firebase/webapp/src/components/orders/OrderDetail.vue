@@ -9,7 +9,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import StatusLabel from '@/components/StatusLabel.vue'
 import type { ComboboxGroup, ComboboxItem } from '@/components/Combobox.vue'
-import { t } from '@/i18n'
+import { loadTexts, t } from '@/i18n'
 import { ApiError, errorMessageKey } from '@/lib/api'
 import { orderChanged, orderRemoved } from '@/lib/orders/bus'
 import { loadCatalog, loadCustomers, loadDevices, loadTeam, search, type CatalogItem, type Customer, type Device, type Member } from '@/lib/orders/catalog'
@@ -63,6 +63,8 @@ import { receivesMoney, type Payment } from '@/lib/receive/model'
 // Opened on demand: the order shows without them.
 const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
 const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
+// Notas fiscais (fatia 6): the dialog and its texts come only when asked for.
+const IssueInvoiceDialog = defineAsyncComponent(() => Promise.all([import('@/components/finance/IssueInvoiceDialog.vue'), loadTexts('finance')]).then(([m]) => m))
 // Checklists, after the order shows (their texts are in the orders chunk).
 const OrderForms = defineAsyncComponent(() => import('@/components/forms/OrderForms.vue'))
 
@@ -130,6 +132,9 @@ const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'a
 let watcher: ReturnType<typeof watchOrder> | undefined
 /** Payment links of Asaas: pilot on and account connected, for who charges (chargeOrder). */
 const chargesOn = ref(false)
+/** Notas fiscais on for the company (settings/payments): "Emitir nota fiscal" in the menu, for chargeOrder. */
+const nfseOn = ref(false)
+const issuing = ref(false)
 /** settings/payments still being read: whether there can be a link is not known yet. */
 const chargesPending = ref(false)
 onMounted(() => {
@@ -138,7 +143,10 @@ onMounted(() => {
   if (can('chargeOrder') || (session.role === 'consultant' && effectiveUseFinancial())) {
     chargesPending.value = true
     void paymentSettings()
-      .then((settings) => (chargesOn.value = settings.ready))
+      .then((settings) => {
+        chargesOn.value = settings.ready
+        nfseOn.value = settings.nfse
+      })
       .finally(() => (chargesPending.value = false))
   }
 })
@@ -434,6 +442,8 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
   list.push({ id: 'share', label: t('shareTitle') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
+  // The server decides the rest (already has a nota, no service with value, not set up) and the dialog says why.
+  if (nfseOn.value && can('chargeOrder') && o.status !== 'quote' && o.status !== 'canceled') list.push({ id: 'invoice', label: t('nfseIssueAction') })
   if (a.transitions.includes('canceled')) list.push({ id: 'cancel', label: t('orderMenuCancel', { order: orderShort() }), danger: true })
   if (a.canDelete) list.push({ id: 'delete', label: t('orderMenuDelete', { order: orderShort() }), danger: true })
   return list
@@ -450,6 +460,7 @@ function onMenu(id: string) {
   else if (id === 'assignee') void openPicker('assignee')
   else if (id === 'device') void openPicker('device')
   else if (id === 'print') print()
+  else if (id === 'invoice') issuing.value = true
   else if (id === 'share') dialog.value = { kind: 'share' }
   else if (id === 'cancel') dialog.value = { kind: 'cancel' }
   else if (id === 'delete') dialog.value = { kind: 'delete' }
@@ -682,5 +693,6 @@ watch(
     <ComboDialog v-else-if="dialog.kind === 'customer'" id="od-customer" :title="t('pickCustomerTitle')" :label="t('customer')" :groups="customerGroups" :selected-id="order.customer?.id" @pick="(item) => chooseCustomer(customers.find((c) => c.id === item.id) as Customer)" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'device'" id="od-device" :title="t('orderPickDevice', { device: deviceLabel().toLocaleLowerCase() })" :label="deviceLabel()" :groups="deviceGroups" @pick="(item) => addDevice(devices.find((d) => d.id === item.id) as Device)" @close="dialog = null" />
   </template>
+  <IssueInvoiceDialog v-if="issuing && order" :order-ids="[order.id]" :customer-id="order.customer?.id ?? null" @done="issuing = false" @close="issuing = false" />
   <OrderPrint v-if="printing && order" :order="order" />
 </template>

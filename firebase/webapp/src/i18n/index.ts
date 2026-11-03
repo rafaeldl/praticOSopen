@@ -48,7 +48,7 @@ export function render(message: Compiled, params: Params, locale: string): strin
 }
 
 // Texts only one feature uses, in their own chunks (scripts/gen.mjs FEATURES).
-export type Feature = 'orders' | 'customers' | 'agenda' | 'settings'
+export type Feature = 'orders' | 'customers' | 'agenda' | 'finance' | 'settings'
 const FEATURE_LOADERS: Record<Feature, Record<Locale, () => Promise<{ default: unknown }>>> = {
   orders: {
     pt: () => import('@/generated/i18n/pt-orders.json'),
@@ -64,6 +64,11 @@ const FEATURE_LOADERS: Record<Feature, Record<Locale, () => Promise<{ default: u
     pt: () => import('@/generated/i18n/pt-agenda.json'),
     en: () => import('@/generated/i18n/en-agenda.json'),
     es: () => import('@/generated/i18n/es-agenda.json'),
+  },
+  finance: {
+    pt: () => import('@/generated/i18n/pt-finance.json'),
+    en: () => import('@/generated/i18n/en-finance.json'),
+    es: () => import('@/generated/i18n/es-finance.json'),
   },
   settings: {
     pt: () => import('@/generated/i18n/pt-settings.json'),

@@ -25,7 +25,8 @@ export const NAV: NavEntry[] = [
   { name: 'schedule', path: '/schedule', label: 'agenda', icon: CalendarDays, access: { kind: 'member', anyOf: ANY_ORDERS }, tab: true },
   { name: 'finance', path: '/finance', label: 'financial', icon: Wallet, access: { kind: 'member', anyOf: ['viewFinancialReports'] }, tab: true },
   { name: 'customers', path: '/customers', label: 'customers', icon: Users, access: { kind: 'member', anyOf: ['viewCustomers'] } },
-  { name: 'invoices', path: '/invoices', label: 'web.nav.invoices', icon: FileText, access: { kind: 'member', anyOf: ['viewBilling'] } },
+  // Notas fiscais: who issues them (chargeOrder: owner, admin, manager); the screen says when the nota is off.
+  { name: 'invoices', path: '/invoices', label: 'web.nav.invoices', icon: FileText, access: { kind: 'member', anyOf: ['chargeOrder'] } },
   { name: 'catalog', path: '/catalog', label: 'web.nav.catalog', icon: Tags, access: { kind: 'member', anyOf: ['viewProducts', 'viewServices'] } },
   { name: 'team', path: '/team', label: 'web.nav.team', icon: UserCog, access: { kind: 'member', anyOf: ['manageUsers'] } },
 ]

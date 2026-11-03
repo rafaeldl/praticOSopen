@@ -51,6 +51,7 @@ const FEATURES = {
   // Cadastros: customers, devices and the catalog share one chunk (src/i18n/index.ts stays as is).
   customers: ['src/components/customers', 'src/views/customers', 'src/components/catalog', 'src/views/catalog'],
   agenda: ['src/components/agenda', 'src/views/agenda'],
+  finance: ['src/components/finance', 'src/views/finance', 'src/lib/finance', 'src/lib/nfse'],
   // Equipe, empresa, plano, conta e integrações (Configurações and what opens from it).
   settings: ['src/components/settings', 'src/views/settings'],
 }
