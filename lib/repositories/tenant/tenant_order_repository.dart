@@ -316,10 +316,32 @@ class TenantOrderRepository extends TenantRepository<Order?> {
           ? DateTime.tryParse(stored['nextDueDate'] as String)
           : null;
       if (storedDue == null || storedDue != due) return false;
-      await orderRef.set(json);
+      // Merge, without null fields: if the job or another device created
+      // this order in the meantime, nothing it has is erased (the number
+      // given by the trigger is never sent).
+      await orderRef.set(
+        contractFallbackWrite(json),
+        SetOptions(merge: true),
+      );
       await templateRef.update({'contract': contract.toJson()});
       return true;
     }
+  }
+
+  /// What the consultant/technician path of [createContractOrder] writes:
+  /// [json] without null fields (at any map depth) and without `number`.
+  /// `createdBy` stays: the create rule requires `createdBy.id` to be the
+  /// writer, and it is the template's author, the same the job writes.
+  /// `createdAt` stays too: lists sort by it.
+  static Map<String, dynamic> contractFallbackWrite(Map<String, dynamic> json) {
+    Map<String, dynamic> strip(Map<String, dynamic> map) => {
+      for (final entry in map.entries)
+        if (entry.value != null)
+          entry.key: entry.value is Map
+              ? strip((entry.value as Map).cast<String, dynamic>())
+              : entry.value,
+    };
+    return strip(json)..remove('number');
   }
 
   /// Offline without cache, `get()` throws: treat as a new order (full write).

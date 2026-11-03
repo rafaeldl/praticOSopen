@@ -90,6 +90,38 @@ void main() {
     }
   });
 
+  test('the consultant contract write never erases what exists', () {
+    final out = TenantOrderRepository.contractFallbackWrite({
+      'number': null,
+      'status': 'quote',
+      'discount': null,
+      'createdAt': '2026-11-03T02:00:00.000',
+      'createdBy': {'id': 'u1', 'name': 'Ana', 'photo': null},
+      'customer': {'id': 'c1', 'email': null},
+      'services': [
+        {'value': 10, 'photo': null},
+      ],
+    });
+    expect(out.containsKey('number'), isFalse);
+    expect(out.containsKey('discount'), isFalse);
+    expect(out['createdBy'], {'id': 'u1', 'name': 'Ana'});
+    expect(out['customer'], {'id': 'c1'});
+    expect(out['createdAt'], '2026-11-03T02:00:00.000');
+    // Lists are written as they are.
+    expect(out['services'], [
+      {'value': 10, 'photo': null},
+    ]);
+  });
+
+  test('a number in the order is never sent either', () {
+    expect(
+      TenantOrderRepository.contractFallbackWrite({'number': 7}).containsKey(
+        'number',
+      ),
+      isFalse,
+    );
+  });
+
   test('a month that fails to load is an error, not R\$ 0', () async {
     await expectLater(
       _FailingQueries().getOrdersByDateRange(
