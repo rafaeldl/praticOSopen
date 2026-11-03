@@ -1,14 +1,15 @@
 {
-  "version": 1,
+  "version": 2,
   "generatedFrom": "e05d6414",
-  "rule": "OS de contrato recorrente: o modelo (isContract) gera uma OS quando contract.active == true, contract.nextDueDate <= agora e contract.autoGenerate == true. A OS copia cliente, aparelhos, itens (só serviço/produto, descrição, valor, quantidade e total da linha), responsável e autor do modelo, nasce orçamento e não paga, sem número (o gatilho numera). O modelo grava lastGeneratedDate = agora, generatedCount + 1 e o próximo vencimento contado a partir de agora: períodos perdidos não são repostos e o dia 31 vira o dia 1 a 3 do mês seguinte, como o DateTime do Dart. Passado o endDate, gera uma última vez e desliga.",
+  "rule": "OS de contrato recorrente: o modelo (isContract) gera uma OS quando contract.active == true, contract.nextDueDate <= agora, o dia do vencimento não passa do dia do endDate (o término conta como incluído) e contract.autoGenerate == true. A OS copia cliente, aparelhos, itens (só serviço/produto, descrição, valor, quantidade e total da linha), responsável e autor do modelo, nasce orçamento e não paga, sem número (o gatilho numera). O modelo grava lastGeneratedDate = agora, generatedCount + 1 e, como próximo vencimento, o primeiro depois de agora contando períodos a partir do vencimento gerado: períodos perdidos não são repostos (uma OS só, nunca uma por abertura do app) e o dia do calendário se mantém. Mensal e anual caem à meia-noite e o dia 31 vira o dia 1 a 3 do mês seguinte, como o DateTime do Dart; diário e semanal mantêm a hora do vencimento. Sem próximo vencimento (frequência desconhecida) ou com ele depois do endDate, o contrato desliga.",
   "runsIn": [
     "dart",
     "functions"
   ],
   "sourceOfTruth": [
-    "lib/mobx/order_store.dart generateOrderFromContract e checkAndGenerateDueOrders",
-    "lib/models/order.dart OrderContract (computeNextDueDate, isDue, isExpired)"
+    "lib/models/order.dart OrderContract (isDueAt, stepFrom, nextDueAfter, advanceAfterGenerating)",
+    "lib/utils/contract_generation.dart (contractOrderId, buildContractOrder)",
+    "firebase/functions/src/services/contract-generation.ts (isContractDue, nextDueAfter, advanceContract, contractOrderId, buildContractOrder)"
   ],
   "dates": "Datas sem fuso são hora local: do aparelho no app, America/Sao_Paulo no servidor. `now` é o momento da geração.",
   "fields": "`given.template` e `given.contract` são mesclados sobre `template` e `contract`. `expect.order` lista só os campos conferidos; createdAt e updatedAt são o momento da geração.",
@@ -147,7 +148,8 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "id": null,
@@ -271,7 +273,8 @@
             "parentOrderNumber": 12
           },
           "isContract": null
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -288,8 +291,10 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -384,8 +389,10 @@
         "contract": {
           "nextDueDate": "2027-03-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2027-01-31T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20270131"
       }
     },
     {
@@ -404,8 +411,10 @@
         "contract": {
           "nextDueDate": "2027-04-03T00:00:00.000",
           "generatedCount": 4,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2027-03-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20270303"
       }
     },
     {
@@ -422,8 +431,10 @@
         "contract": {
           "nextDueDate": "2028-03-02T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2028-01-31T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20280131"
       }
     },
     {
@@ -440,8 +451,10 @@
         "contract": {
           "nextDueDate": "2027-03-02T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2027-01-30T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20270130"
       }
     },
     {
@@ -458,8 +471,10 @@
         "contract": {
           "nextDueDate": "2027-01-31T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-12-31T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261231"
       }
     },
     {
@@ -477,8 +492,10 @@
         "contract": {
           "nextDueDate": "2029-03-01T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2028-02-29T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20280229"
       }
     },
     {
@@ -495,12 +512,14 @@
         "contract": {
           "nextDueDate": "2027-02-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
-      "id": "daily-keeps-the-time-of-generation",
+      "id": "daily-keeps-the-time-of-the-due-date",
       "given": {
         "now": "2026-11-03T02:00:00.000",
         "contract": {
@@ -512,10 +531,12 @@
         "due": true,
         "generates": true,
         "contract": {
-          "nextDueDate": "2026-11-04T02:00:00.000",
+          "nextDueDate": "2026-11-03T14:35:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261102"
       }
     },
     {
@@ -531,10 +552,12 @@
         "due": true,
         "generates": true,
         "contract": {
-          "nextDueDate": "2026-11-17T02:00:00.000",
+          "nextDueDate": "2026-11-17T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -551,8 +574,10 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -571,8 +596,10 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 5,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20260803"
       }
     },
     {
@@ -590,14 +617,16 @@
         "due": true,
         "generates": true,
         "contract": {
-          "nextDueDate": "2026-11-04T02:00:00.000",
+          "nextDueDate": "2026-11-03T10:00:00.000",
           "generatedCount": 41,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20260805"
       }
     },
     {
-      "id": "opened-late-moves-the-due-day",
+      "id": "opened-late-keeps-the-due-day",
       "given": {
         "now": "2026-11-20T18:40:00.000",
         "contract": {
@@ -608,14 +637,16 @@
         "due": true,
         "generates": true,
         "contract": {
-          "nextDueDate": "2026-12-20T00:00:00.000",
+          "nextDueDate": "2026-12-15T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-20T18:40:00.000"
+        },
+        "orderId": "contract_tpl1_20261115"
       }
     },
     {
-      "id": "past-end-date-makes-one-last-order-and-stops",
+      "id": "past-end-date-makes-nothing",
       "given": {
         "now": "2026-11-03T02:00:00.000",
         "contract": {
@@ -623,17 +654,12 @@
         }
       },
       "expect": {
-        "due": true,
-        "generates": true,
-        "contract": {
-          "nextDueDate": "2026-12-03T00:00:00.000",
-          "generatedCount": 1,
-          "active": false
-        }
+        "due": false,
+        "generates": false
       }
     },
     {
-      "id": "end-date-ahead-stays-active",
+      "id": "next-due-after-the-end-stops",
       "given": {
         "now": "2026-11-03T02:00:00.000",
         "contract": {
@@ -646,12 +672,14 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": false,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
-      "id": "unknown-frequency-generates-and-clears-next-due-date",
+      "id": "unknown-frequency-generates-and-stops",
       "given": {
         "now": "2026-11-03T02:00:00.000",
         "contract": {
@@ -664,8 +692,10 @@
         "contract": {
           "nextDueDate": null,
           "generatedCount": 1,
-          "active": true
-        }
+          "active": false,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -682,8 +712,10 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
-        }
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -701,7 +733,8 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "device": {
@@ -727,7 +760,8 @@
           "deviceIds": [
             "d1"
           ]
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -772,7 +806,8 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "device": {
@@ -808,7 +843,8 @@
             "d2",
             "d3"
           ]
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -827,13 +863,15 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "device": null,
           "devices": null,
           "deviceIds": null
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -875,7 +913,8 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "services": [
@@ -909,7 +948,8 @@
             }
           ],
           "total": 30
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -927,13 +967,15 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "services": null,
           "products": null,
           "total": 0
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
     },
     {
@@ -951,7 +993,8 @@
         "contract": {
           "nextDueDate": "2026-12-03T00:00:00.000",
           "generatedCount": 1,
-          "active": true
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
         },
         "order": {
           "assignedTo": null,
@@ -969,8 +1012,113 @@
             "parentOrderId": "tpl1",
             "parentOrderNumber": null
           }
-        }
+        },
+        "orderId": "contract_tpl1_20261103"
       }
+    },
+    {
+      "id": "end-date-on-the-due-day-still-generates",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "endDate": "2026-11-03T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": false,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
+      }
+    },
+    {
+      "id": "end-date-far-ahead-stays-active",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "endDate": "2027-06-30T00:00:00.000"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
+      }
+    },
+    {
+      "id": "end-date-later-the-same-day-counts",
+      "given": {
+        "now": "2026-11-03T09:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-11-03T08:00:00.000",
+          "endDate": "2026-11-03T00:00:00.000",
+          "frequency": "daily"
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-11-04T08:00:00.000",
+          "generatedCount": 1,
+          "active": false,
+          "lastGeneratedDate": "2026-11-03T09:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
+      }
+    },
+    {
+      "id": "after-generating-the-same-day-is-not-due-again",
+      "given": {
+        "now": "2026-11-03T05:00:00.000",
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "lastGeneratedDate": "2026-11-03T02:00:00.000",
+          "generatedCount": 1
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      }
+    }
+  ],
+  "idRule": "Id da OS gerada: contract_{templateId}_{AAAAMMDD}, o dia do vencimento no fuso da empresa (America/Sao_Paulo enquanto a empresa não tem fuso próprio). Datas sem fuso já são hora local e valem como estão; datas com Z ou deslocamento são convertidas. App e servidor criam a OS numa transação só se ela não existir, então quem chega depois não duplica.",
+  "idCases": [
+    {
+      "id": "naive-midnight",
+      "templateId": "tpl1",
+      "due": "2026-11-03T00:00:00.000",
+      "orderId": "contract_tpl1_20261103"
+    },
+    {
+      "id": "naive-late-evening",
+      "templateId": "tpl1",
+      "due": "2026-11-03T23:59:00.000",
+      "orderId": "contract_tpl1_20261103"
+    },
+    {
+      "id": "utc-converts-to-sao-paulo",
+      "templateId": "tpl1",
+      "due": "2026-11-03T01:30:00.000Z",
+      "orderId": "contract_tpl1_20261102"
+    },
+    {
+      "id": "utc-same-day",
+      "templateId": "abc",
+      "due": "2026-03-05T15:00:00.000Z",
+      "orderId": "contract_abc_20260305"
     }
   ]
 }

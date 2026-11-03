@@ -72,22 +72,22 @@ describe('generateDueOrders', () => {
 
   it('a daily contract run by the job every night makes one order per night', async () => {
     seed('companies/c1/orders/t1', template({ frequency: 'daily', nextDueDate: '2026-11-03T00:00:00.000' }));
-    // The job passes its scheduled time: exactly 24h apart, so the next due date
-    // (now + 1 day) is reached on the next run, not skipped to the one after.
+    // The next due date steps from the due date (00:00), so each night's run
+    // finds exactly one due date.
     for (let day = 3; day <= 9; day++) {
       await generateDueOrders('c1', { now: at(`2026-11-${String(day).padStart(2, '0')}T02:00:00.000`) });
     }
     expect(generated()).toHaveLength(7);
-    expect(contractOf('t1')).toMatchObject({ generatedCount: 7, nextDueDate: '2026-11-10T02:00:00.000' });
+    expect(contractOf('t1')).toMatchObject({ generatedCount: 7, nextDueDate: '2026-11-10T00:00:00.000' });
   });
 
   it('a daily contract run a few seconds late is still due the next night', async () => {
     seed('companies/c1/orders/t1', template({ frequency: 'daily', nextDueDate: '2026-11-03T00:00:00.000' }));
     await generateDueOrders('c1', { now: at('2026-11-03T02:00:07.000') });
-    // An earlier start the next night (02:00:00) is before 02:00:07 + 1 day.
+    // The next due date is 4 Nov 00:00 (from the due date, not from the run),
+    // so an earlier start the next night still finds it.
     await generateDueOrders('c1', { now: at('2026-11-04T02:00:00.000') });
-    expect(generated()).toHaveLength(1);
-    // So the job must use its scheduled time, never the real start time.
+    expect(generated()).toHaveLength(2);
   });
 
   it('end of month: 31 January, then 3 March, then 3 April', async () => {

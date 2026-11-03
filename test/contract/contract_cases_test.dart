@@ -46,7 +46,7 @@ const _statuses = ['quote', 'approved', 'progress', 'done', 'canceled'];
 /// Every file this runner reads. A new file with `dart` in `runsIn` must be
 /// added here, or the "contract files" group fails.
 const _covered = {
-  'contract-generation.json', // contract_generation_cases_test.dart
+  'contract-generation.json', // runner Dart no PR #513 (fix/app-defects-batch-2)
   'currency.json',
   'order-delete.json',
   'order-items.json',

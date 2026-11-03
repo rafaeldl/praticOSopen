@@ -2,8 +2,9 @@
  * Runs docs/web-app/contract-cases/contract-generation.json against the real
  * server code: the job/route path (contract.service over the in-memory
  * Firestore) and the pure rules. The Dart side is
- * test/contract/contract_generation_cases_test.dart (the app's real
- * generateOrderFromContract). File listed in COVERED of contract-cases.test.ts.
+ * test/contract/contract_generation_cases_test.dart (OrderContract and
+ * lib/utils/contract_generation.dart, PR #513). File listed in COVERED of
+ * contract-cases.test.ts.
  */
 import { readFileSync } from 'fs';
 import * as path from 'path';
@@ -42,6 +43,14 @@ describe('contract-generation', () => {
     expect(doc.runsIn).toContain(LANG);
   });
 
+  describe('order id', () => {
+    for (const c of doc.idCases) {
+      it(c.id, () => {
+        expect(contractOrderId(c.templateId, c.due)).toBe(c.orderId);
+      });
+    }
+  });
+
   for (const c of doc.cases) {
     it(c.id, async () => {
       const expected = want(c);
@@ -66,6 +75,7 @@ describe('contract-generation', () => {
 
       const [order] = created;
       expect(order.id).toBe(contractOrderId(doc.templateId, contract.nextDueDate));
+      if (expected.orderId) expect(order.id).toBe(expected.orderId);
       expect(order.data.createdAt).toBe(c.given.now);
       expect(order.data.updatedAt).toBe(c.given.now);
       if (expected.order) expect(pick(order.data, expected.order)).toEqual(expected.order);

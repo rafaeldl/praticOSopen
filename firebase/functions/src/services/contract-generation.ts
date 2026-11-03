@@ -13,8 +13,6 @@
  * written back is naive again, like the app.
  */
 
-import { createHash } from 'crypto';
-
 /** Time zone of the scheduled job and of `now` on the server. */
 export const CONTRACT_TIME_ZONE = 'America/Sao_Paulo';
 
@@ -101,10 +99,13 @@ export interface ContractData {
 
 type Json = Record<string, unknown>;
 
-/** OrderContract.computeNextDueDate: from lastGeneratedDate (else startDate). */
-export function computeNextDueDate(contract: ContractData): number | null {
-  const base = parseContractDate(contract.lastGeneratedDate) ?? parseContractDate(contract.startDate);
-  if (base === null) return null;
+/**
+ * OrderContract.stepFrom: one period after `base`. Daily and weekly keep the
+ * time of day; monthly and yearly are midnight, and day 31 rolls into the next
+ * month like Dart's DateTime (31 Jan + 1 month is 3 March). Null for an
+ * unknown frequency.
+ */
+export function stepFrom(contract: ContractData, base: number): number | null {
   const step = contract.interval ?? 1;
   const d = new Date(base);
   switch (contract.frequency) {
@@ -113,7 +114,6 @@ export function computeNextDueDate(contract: ContractData): number | null {
     case 'weekly':
       return base + 7 * step * DAY_MS;
     case 'monthly':
-      // DateTime(y, m + step, d): midnight, and day 31 rolls into the next month.
       return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + step, d.getUTCDate());
     case 'yearly':
       return Date.UTC(d.getUTCFullYear() + step, d.getUTCMonth(), d.getUTCDate());
@@ -122,11 +122,43 @@ export function computeNextDueDate(contract: ContractData): number | null {
   }
 }
 
-/** OrderContract.isDue: active and nextDueDate at or before now. endDate is not checked. */
+/** OrderContract.computeNextDueDate: from lastGeneratedDate (else startDate). */
+export function computeNextDueDate(contract: ContractData): number | null {
+  const base = parseContractDate(contract.lastGeneratedDate) ?? parseContractDate(contract.startDate);
+  return base === null ? null : stepFrom(contract, base);
+}
+
+/**
+ * OrderContract.nextDueAfter: the first due date after `now`, stepping from
+ * nextDueDate. Missed periods are skipped, not made up, and the schedule's
+ * day is kept.
+ */
+export function nextDueAfter(contract: ContractData, now: number): number | null {
+  const due = parseContractDate(contract.nextDueDate);
+  if (due === null) return null;
+  let next = stepFrom(contract, due);
+  for (let guard = 0; next !== null && next <= now && guard < 100000; guard++) {
+    next = stepFrom(contract, next);
+  }
+  return next;
+}
+
+const dayOf = (wall: number) => Math.floor(wall / DAY_MS);
+
+/** `wall` falls after the contract's last day (endDate counts as included). */
+function afterEnd(contract: ContractData, wall: number): boolean {
+  const end = parseContractDate(contract.endDate);
+  return end !== null && dayOf(wall) > dayOf(end);
+}
+
+/**
+ * OrderContract.isDueAt: active, nextDueDate at or before now and the due day
+ * not after the contract's last day.
+ */
 export function isContractDue(contract: ContractData | null | undefined, now: number): boolean {
   if (!contract || contract.active !== true) return false;
   const next = parseContractDate(contract.nextDueDate);
-  return next !== null && next <= now;
+  return next !== null && next <= now && !afterEnd(contract, next);
 }
 
 /** OrderContract.isExpired: endDate before now. */
@@ -145,35 +177,38 @@ export interface ContractAdvance {
   lastGeneratedDate: string;
   generatedCount: number;
   nextDueDate: string | null;
-  /** Present (false) only when the contract ended. */
+  /** Present (false) only when the contract stops. */
   active?: false;
 }
 
 /**
- * What generateOrderFromContract writes on the template: lastGeneratedDate =
- * now, one more generated, nextDueDate from now (not from the old due date,
- * so missed periods are not made up), and inactive once endDate has passed.
+ * OrderContract.advanceAfterGenerating: lastGeneratedDate = now, one more
+ * generated, nextDueDate = the first due date after now (nextDueAfter), and
+ * inactive when there is none or it falls after endDate.
  */
 export function advanceContract(contract: ContractData, now: number): ContractAdvance {
-  const lastGeneratedDate = formatContractDate(now);
-  const next = computeNextDueDate({ ...contract, lastGeneratedDate });
+  const next = nextDueAfter(contract, now);
   const advance: ContractAdvance = {
-    lastGeneratedDate,
+    lastGeneratedDate: formatContractDate(now),
     generatedCount: (contract.generatedCount ?? 0) + 1,
     nextDueDate: next === null ? null : formatContractDate(next),
   };
-  if (isContractExpired(contract, now)) advance.active = false;
+  if (next === null || afterEnd(contract, next)) advance.active = false;
   return advance;
 }
 
 /**
- * Id of the order generated for one due date of one template, so the job,
- * the route and a retry write the same document.
+ * Id of the order generated for one due date of one template:
+ * `contract_{templateId}_{YYYYMMDD}`, the due day in the company time zone
+ * (America/Sao_Paulo: companies have no time zone of their own yet). The app
+ * uses the same id (lib/utils/contract_generation.dart contractOrderId), so
+ * the job, the route, a retry and the app write the same document.
  */
 export function contractOrderId(templateId: string, nextDueDate: string | null | undefined): string {
   const due = parseContractDate(nextDueDate);
-  const key = `${templateId}|${due === null ? '' : formatContractDate(due)}`;
-  return `contract_${createHash('sha256').update(key).digest('hex').slice(0, 32)}`;
+  if (due === null) return `contract_${templateId}_`;
+  const d = new Date(due);
+  return `contract_${templateId}_${pad(d.getUTCFullYear(), 4)}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`;
 }
 
 const isJson = (value: unknown): value is Json => !!value && typeof value === 'object' && !Array.isArray(value);
