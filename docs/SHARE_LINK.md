@@ -253,7 +253,7 @@ Lista todos os tokens ativos de uma ordem.
 
 #### `DELETE /v1/app/orders/{orderId}/share/{token}`
 
-Revoga um token específico.
+Revoga um token específico. O token precisa ser da empresa **e da OS** do caminho; senão, `404 NOT_FOUND` e nada muda (quem acessa uma OS não desliga o link de outra). Vale também em `/v1/orders/...`, que usa o mesmo roteador.
 
 **Response:**
 ```json

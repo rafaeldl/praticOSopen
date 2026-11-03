@@ -44,7 +44,8 @@ jest.mock('../services/device.service', () => ({
 jest.mock('../services/share-token.service', () => ({
   generateShareToken: jest.fn(async () => ({ token: 't1', permissions: ['view'], expiresAt: '2030-01-01T00:00:00Z' })),
   getTokensForOrder: jest.fn(async () => []),
-  getShareToken: jest.fn(async (token: string) => ({ token, companyId: 'c1', orderId: 'o1' })),
+  // A token belongs to one order: `tok_<orderId>` names its order, any other one is of o1.
+  getShareToken: jest.fn(async (token: string) => ({ token, companyId: 'c1', orderId: token.startsWith('tok_') ? token.slice(4) : 'o1' })),
   revokeShareToken: jest.fn(async () => undefined),
 }));
 
@@ -318,7 +319,7 @@ describe('Consultant and technician on the orders they created', () => {
         service: (await call('post', `/v1/app/orders/ownquote_${UID[role]}/services`, { serviceId: 's1' })).status,
         shareCreate: (await call('post', `/v1/app/orders/${id}/share`, { permissions: ['view'] })).status,
         shareList: (await call('get', `/v1/app/orders/${id}/share`)).status,
-        shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/t1`)).status,
+        shareRevoke: (await call('delete', `/v1/app/orders/${id}/share/tok_${id}`)).status,
       };
       expect(results).toEqual({ get: 200, patch: 200, service: 200, shareCreate: 201, shareList: 200, shareRevoke: 200 });
     });

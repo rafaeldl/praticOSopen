@@ -170,9 +170,10 @@ router.delete('/:orderId/share/:token', requireOrderAccess('orderId'), async (re
 
     const token = String(req.params.token);
 
-    // Verify token exists and belongs to this company
+    // Verify token exists and belongs to this company and to this order: access
+    // to one order must not turn off another order's link.
     const shareToken = await shareTokenService.getShareToken(token);
-    if (!shareToken || shareToken.companyId !== companyId) {
+    if (!shareToken || shareToken.companyId !== companyId || shareToken.orderId !== String(req.params.orderId)) {
       res.status(404).json({
         success: false,
         error: { code: 'NOT_FOUND', message: 'Share token not found' },

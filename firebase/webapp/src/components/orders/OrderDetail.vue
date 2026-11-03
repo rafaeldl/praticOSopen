@@ -3,7 +3,7 @@
 // (status and one phrase), the next step in blue, then what is done, money,
 // photos, comments and details. Each row opens its own editor; there is no
 // "Editar" mode. Money, status and items go through the API (writes.ts).
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { MoreHorizontal, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -57,6 +57,12 @@ import OrderComments from './OrderComments.vue'
 import OrderPhotos from './OrderPhotos.vue'
 import OrderPrint from './OrderPrint.vue'
 import OrderAssistant from './OrderAssistant.vue'
+import PaymentHistory from './receive/PaymentHistory.vue'
+import { paymentSettings, removeTransaction, resetPayments } from '@/lib/receive/data'
+import { receivesMoney, type Payment } from '@/lib/receive/model'
+// Opened on demand: the order shows without them.
+const ShareDialog = defineAsyncComponent(() => import('./receive/ShareDialog.vue'))
+const OrderCharge = defineAsyncComponent(() => import('./receive/OrderCharge.vue'))
 
 const props = defineProps<{ orderId: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -84,6 +90,7 @@ type Dialog =
   | { kind: 'customer' }
   | { kind: 'device' }
   | { kind: 'keepDevices'; customer: Customer }
+  | { kind: 'share' }
 const dialog = shallowRef<Dialog | null>(null)
 const menuButton = ref<HTMLElement | null>(null)
 const catalog = shallowRef<CatalogItem[]>([])
@@ -118,9 +125,26 @@ const stepLabel = computed(() => {
 const STATUS_DOT: Record<OrderStatus, string> = { quote: 'neutral', approved: 'accent', progress: 'warning', done: 'success', canceled: 'hollow' }
 
 let watcher: ReturnType<typeof watchOrder> | undefined
+/** Payment links of Asaas: pilot on and account connected, for who charges (chargeOrder). */
+const chargesOn = ref(false)
 onMounted(() => {
   watcher = watchOrder(ctx, props.orderId, (next) => (state.value = next))
+  // Who receives also reads the open link (the consultant included, #513 / R4); only chargeOrder acts on it.
+  if (can('chargeOrder') || (session.role === 'consultant' && effectiveUseFinancial())) void paymentSettings().then((settings) => (chargesOn.value = settings.ready))
 })
+/** A payment link is open: marking received is no longer the blue step, and the sheet says the link adjusts. */
+const linkOpen = ref(false)
+const showCharge = computed(() => chargesOn.value && !!order.value && receivesMoney(order.value.status) && !!access.value?.canReceive)
+
+async function removePayment(payment: Payment) {
+  if (!order.value || !payment.id) return
+  await run(() => removeTransaction(order.value!.id, payment.id as string, payment.type), t('web.receive.removed', { amount: money(payment.amount) }))
+}
+
+async function undoAllPayments() {
+  if (!order.value) return
+  await run(() => resetPayments(order.value!.id), t('web.receive.undoneAll'))
+}
 onBeforeUnmount(() => watcher?.stop())
 const clock = setInterval(() => (now.value = new Date()), 60_000)
 onBeforeUnmount(() => clearInterval(clock))
@@ -204,7 +228,7 @@ async function assign(id: string) {
   await run(() => writes.patchOrder(order.value!.id, { assignedTo: id === 'none' ? null : id }, expected()), t('web.saved'))
 }
 
-async function receive(value: { amount: number; paymentMethod?: string; clientTransactionId: string }) {
+async function receive(value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }) {
   const ok = await run(() => writes.receivePayment(order.value!.id, value, expected()), t('web.order.received', { amount: money(value.amount) }))
   if (ok) dialog.value = null
 }
@@ -381,6 +405,7 @@ const menuChoices = computed<Choice[]>(() => {
   if (a.canEditMainFields && !o.scheduledDate && useScheduling.value) list.push({ id: 'schedule', label: t('orderAddSchedule') })
   if (a.canAssign && !o.assignedTo) list.push({ id: 'assignee', label: t('orderAddResponsible') })
   if (a.canEditMainFields) list.push({ id: 'device', label: t('orderAddAnotherDevice', { device: deviceLabel().toLocaleLowerCase() }) })
+  list.push({ id: 'share', label: t('shareTitle') })
   if (canPrint.value) list.push({ id: 'print', label: t('web.order.print') })
   if (a.transitions.includes('canceled')) list.push({ id: 'cancel', label: t('orderMenuCancel', { order: orderShort() }), danger: true })
   if (a.canDelete) list.push({ id: 'delete', label: t('orderMenuDelete', { order: orderShort() }), danger: true })
@@ -398,6 +423,7 @@ function onMenu(id: string) {
   else if (id === 'assignee') void openPicker('assignee')
   else if (id === 'device') void openPicker('device')
   else if (id === 'print') print()
+  else if (id === 'share') dialog.value = { kind: 'share' }
   else if (id === 'cancel') dialog.value = { kind: 'cancel' }
   else if (id === 'delete') dialog.value = { kind: 'delete' }
 }
@@ -426,6 +452,7 @@ const removers = [
   registerShortcut({ keys: 's', label: 'web.shortcuts.status', run: () => statusChoices.value.length > 1 && (dialog.value = { kind: 'status' }) }),
   registerShortcut({ keys: 'c', label: 'web.shortcuts.customer', run: () => access.value?.canEditMainFields && void openPicker('customer') }),
   registerShortcut({ keys: 'd', label: 'web.shortcuts.schedule', run: () => access.value?.canEditMainFields && (dialog.value = { kind: 'schedule' }) }),
+  registerShortcut({ keys: 'm', label: 'web.shortcuts.share', run: () => order.value && (dialog.value = { kind: 'share' }) }),
   registerShortcut({ keys: 'r', label: 'web.shortcuts.receive', run: () => access.value?.canReceive && (money$.value?.remaining ?? 0) > 0 && (dialog.value = { kind: 'receive' }) }),
 ]
 onBeforeUnmount(() => removers.forEach((remove) => remove()))
@@ -480,7 +507,8 @@ watch(
           <strong>{{ holdLine.reason }}</strong> · {{ holdLine.days }}<template v-if="holdLine.note"><br /><span class="muted">{{ holdLine.note }}</span></template>
         </p>
         <div class="od-actions">
-          <button v-if="step" type="button" class="btn btn--primary" :disabled="busy" data-testid="next-step" @click="runStep">{{ stepLabel }}</button>
+          <button v-if="step" type="button" class="btn" :class="{ 'btn--primary': !(step.kind === 'receive' && linkOpen) }" :disabled="busy" data-testid="next-step" @click="runStep">{{ stepLabel }}</button>
+          <button type="button" class="link" data-testid="share-open" @click="dialog = { kind: 'share' }">{{ t('shareTitle') }}</button>
           <button v-if="access.canChangeHold && !isHeld(order) && isActive(order)" type="button" class="link" @click="dialog = { kind: 'hold' }">{{ t('orderHoldMark') }}</button>
         </div>
       </header>
@@ -522,6 +550,9 @@ watch(
           </dl>
           <p v-if="money$.unpricedCount" class="sub">{{ t('orderUnpricedCount', { count: money$.unpricedCount }) }}</p>
           <button v-if="access.canReceive && moneyRowTone && money$.remaining > 0 && step?.kind !== 'receive'" type="button" class="link" @click="dialog = { kind: 'receive' }">{{ t('receiveTitle') }}</button>
+          <p v-if="!moneyRowTone && order.transactions.length" class="sub" data-testid="blocked-status">{{ t('web.receive.blockedStatus', { status: statusText(order.status) }) }}</p>
+          <PaymentHistory :order="order" :can-receive="access.canReceive && !!moneyRowTone" :can-discount="access.canDiscount && !!moneyRowTone" :busy="busy" @remove="removePayment" @undo-all="undoAllPayments" />
+          <OrderCharge v-if="showCharge" :key="order.id" :order="order" :remaining="money$.remaining" :can-charge="can('chargeOrder')" @open="(open) => (linkOpen = open)" />
         </section>
 
         <OrderPhotos :order="order" />
@@ -601,7 +632,8 @@ watch(
     <HoldDialog v-else-if="dialog.kind === 'hold'" @save="hold" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'due'" :title="t('orderAddDueDate')" :label="t('orderDueLabel')" :value="order.dueDate" :clear-label="t('web.order.clearDue')" @save="(value) => saveDate('dueDate', value)" @close="dialog = null" />
     <DateDialog v-else-if="dialog.kind === 'schedule'" :title="t('orderAddSchedule')" :label="t('orderScheduleLabel')" :value="order.scheduledDate" :clear-label="t('orderScheduleRemove')" @save="(value) => saveDate('scheduledDate', value)" @close="dialog = null" />
-    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="receive" @close="dialog = null" />
+    <MoneyDialog v-else-if="dialog.kind === 'receive' && money$" kind="receive" :remaining="money$.remaining" :total="money$.total" :busy="busy" :created-at="order.createdAt" :link-note="linkOpen ? (order.customer?.name ? t('receiveChargeAdjusts', { customer: order.customer.name }) : t('receiveChargeAdjustsNoName')) : ''" @save="receive" @close="dialog = null" />
+    <ShareDialog v-else-if="dialog.kind === 'share'" :order="order" @pick-customer="openPicker('customer')" @close="dialog = null" />
     <MoneyDialog v-else-if="dialog.kind === 'discount' && money$" kind="discount" :remaining="money$.remaining" :total="money$.total" :busy="busy" @save="discount" @close="dialog = null" />
     <ItemDialog v-else-if="dialog.kind === 'item'" :line="dialog.line" :shows-money="showsMoney" :can-edit-price="can('editPrices')" :busy="busy" @save="(patch) => saveLine((dialog as { line: OrderLine }).line, patch)" @remove="removeLine((dialog as { line: OrderLine }).line)" @close="dialog = null" />
     <ComboDialog v-else-if="dialog.kind === 'addItem'" id="od-add-item" :title="t('pickerItemTitle')" :label="t('orderItemSearchPlaceholder')" :groups="itemGroups" @pick="pickItem" @close="dialog = null" />

@@ -78,6 +78,8 @@ export interface Order {
   discount?: number
   paidAmount?: number
   transactions: OrderTransaction[]
+  /** Proof files of payments (receiptDocumentId); only for who sees values. */
+  documents?: unknown[]
   address?: string | null
   customData?: Record<string, unknown>
 }
@@ -190,6 +192,7 @@ export function normalizeOrder(id: string, raw: Raw, showsMoney: boolean): Order
     discount: showsMoney ? (num(raw.discount) ?? 0) : undefined,
     paidAmount: showsMoney ? (num(raw.paidAmount) ?? 0) : undefined,
     transactions: showsMoney && Array.isArray(raw.transactions) ? (raw.transactions as OrderTransaction[]) : [],
+    documents: showsMoney && Array.isArray(raw.documents) ? (raw.documents as unknown[]) : undefined,
     address: (raw.address as string | null) ?? null,
     customData: (raw.customData as Record<string, unknown>) ?? undefined,
   }

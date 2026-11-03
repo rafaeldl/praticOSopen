@@ -4,7 +4,7 @@
 // and the segment fields too: the app hides them, defect 8), devices and
 // orders. Read by id from the API, never a stale copy (defects 19 and 20).
 // Consultant and technician see only their orders, and the screen says so.
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { MoreHorizontal, X } from '@lucide/vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -22,12 +22,15 @@ import { money, orderShort } from '@/lib/orders/text'
 import { dialable, formatPhone, whatsappNumber } from '@/lib/phone'
 import { fieldTitle, groupBySection, namespaceFields, readCustom, type FormField } from '@/lib/segment-fields'
 import { resolveLabel, segmentLabels } from '@/lib/segments'
-import { can, session } from '@/lib/session'
+import { can, effectiveUseFinancial, session } from '@/lib/session'
 import { formatTaxId, usesTaxId } from '@/lib/tax-id'
 import { showToast } from '@/lib/toast'
 import { announce, ui } from '@/lib/ui'
 import CustomerForm from './CustomerForm.vue'
 import DeviceForm from './DeviceForm.vue'
+// Several orders in one receipt, and the customer's receipts (pay.customer.view, customer.detail.receipts).
+const ReceiveCustomerDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiveCustomerDialog.vue'))
+const ReceiptsDialog = defineAsyncComponent(() => import('@/components/orders/receive/ReceiptsDialog.vue'))
 
 const props = defineProps<{ customerId: string; directory: CustomerRow[] }>()
 const emit = defineEmits<{ close: []; changed: []; removed: [] }>()
@@ -35,7 +38,9 @@ const router = useRouter()
 
 const state = ref<'loading' | 'ready' | 'failed' | 'notFound'>('loading')
 const detail = shallowRef<CustomerDetail | null>(null)
-const dialog = ref<null | 'menu' | 'delete' | 'edit' | 'device'>(null)
+const dialog = ref<null | 'menu' | 'delete' | 'edit' | 'device' | 'receive' | 'receipts'>(null)
+// Who receives also sees receipts: the server lists all for financial roles, a consultant's own.
+const canReceipts = computed(() => effectiveUseFinancial() && (can('viewFinancialReports') || session.role === 'consultant'))
 const menuButton = ref<HTMLElement | null>(null)
 const busy = ref(false)
 
@@ -95,11 +100,17 @@ function newOrder() {
   ui.newOrder = true
 }
 
-/** One order: straight to it; several: the list of what this customer owes (customer.detail.receive). */
+/** One order: straight to it; several: one receipt over them (customer.detail.receive, pay.customer.view). */
 function receive() {
   const ids = receivable.value
   if (ids.length === 1) void router.push({ path: '/', query: { order: ids[0] } })
-  else if (customer.value) void router.push({ path: '/', query: { f: 'unpaid', q: customer.value.name } })
+  else if (customer.value) dialog.value = 'receive'
+}
+
+async function onReceived() {
+  dialog.value = null
+  await load()
+  emit('changed')
 }
 
 function openOrder(id: string) {
@@ -185,6 +196,7 @@ onMounted(load)
             <template v-if="receivable.length"> · <button type="button" class="link" data-testid="customer-receive" @click="receive">{{ t('web.customers.receive') }}</button></template>
           </span>
           <span v-if="spent > 0" class="muted">{{ t('customerSpentValue', { value: money(spent) }) }}</span>
+          <button v-if="canReceipts" type="button" class="link" data-testid="customer-receipts" @click="dialog = 'receipts'">{{ t('receiptsSection') }}</button>
         </div>
         <p v-if="detail.partial" class="sub">{{ t('web.customers.partial') }}</p>
         <p v-if="canCreate" class="od-ask">{{ t('askOrderForCustomer', { name: firstName(customer.name) }) }}</p>
@@ -262,5 +274,7 @@ onMounted(load)
     />
     <CustomerForm v-else-if="dialog === 'edit' && customer" :customer="customer" :version="detail?.version" :directory="directory" @saved="onEdited" @changed="onChangedElsewhere" @close="dialog = null" />
     <DeviceForm v-else-if="dialog === 'device'" :devices="[]" @saved="onDeviceSaved" @close="dialog = null" />
+    <ReceiveCustomerDialog v-else-if="dialog === 'receive' && customer" :customer-id="customer.id" :customer-name="customer.name" :checked="receivable" @done="onReceived" @close="dialog = null" />
+    <ReceiptsDialog v-else-if="dialog === 'receipts' && customer" :customer-id="customer.id" :customer-name="customer.name" @changed="load" @close="dialog = null" />
   </section>
 </template>

@@ -23,7 +23,9 @@ const withCustomerTexts = <T>(view: () => Promise<T>) => () => Promise.all([view
 const CustomersView = withCustomerTexts(() => import('@/views/customers/CustomersView.vue'))
 const DevicesView = withCustomerTexts(() => import('@/views/customers/DevicesView.vue'))
 const ImportView = withCustomerTexts(() => import('@/views/customers/ImportView.vue'))
-const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView }
+// Financeiro > Receber: its texts are in the orders chunk (components/orders/receive).
+const FinanceView = () => Promise.all([import('@/components/orders/receive/FinanceReceive.vue'), loadOrderTexts()]).then(([m]) => m)
+const SCREENS: Record<string, RouteRecordRaw['component']> = { home: OrdersView, customers: CustomersView, finance: FinanceView }
 
 export const routes: RouteRecordRaw[] = [
   {

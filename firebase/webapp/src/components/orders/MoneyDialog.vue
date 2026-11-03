@@ -9,22 +9,31 @@ import MoneyInput from '@/components/MoneyInput.vue'
 import { newTransactionId } from '@/lib/orders/writes'
 import { country, money } from '@/lib/orders/text'
 import { roundMoney } from '@/lib/rules/order-rules'
+import { localDay, paidAtFor, toCents } from '@/lib/receive/model'
 
-const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean }>()
-const emit = defineEmits<{ save: [value: { amount: number; paymentMethod?: string; clientTransactionId: string }]; close: [] }>()
+const props = defineProps<{ kind: 'receive' | 'discount'; remaining: number; total: number; busy?: boolean; createdAt?: string | null; linkNote?: string }>()
+const emit = defineEmits<{ save: [value: { amount: number; paymentMethod?: string; paidAt?: string; clientTransactionId: string }]; close: [] }>()
 
 const transactionId = newTransactionId()
 const amount = ref<number | null>(props.kind === 'receive' ? props.remaining : null)
 const method = ref('')
+// "Quando": today by default, never in the future nor before the order (server: INVALID_PAID_AT).
+const today = localDay(new Date())
+const day = ref(today)
+// One day of slack before the order, like the server (24 h by the company's zone). Today is always fine.
+const minDay = props.createdAt ? localDay(new Date(Date.parse(props.createdAt) - 86_400_000)) : undefined
+const dayValid = computed(() => day.value === today || (!!day.value && day.value < today && (!minDay || day.value >= minDay)))
 const title = computed(() => (props.kind === 'receive' ? t('receiveTitle') : t('receiveGiveDiscount')))
 // Never above what is left, like ReceivePaymentSheet (max: remaining). The balance follows the order live.
 const tooMuch = computed(() => (amount.value ?? 0) > props.remaining + 0.001)
-const valid = computed(() => (amount.value ?? 0) > 0 && !tooMuch.value)
-const preview = computed(() =>
-  props.kind === 'discount' && valid.value
-    ? t('receiveDiscountNewTotal', { from: money(props.total), to: money(roundMoney(props.total - (amount.value ?? 0))) })
-    : '',
-)
+const valid = computed(() => (amount.value ?? 0) > 0 && !tooMuch.value && (props.kind === 'discount' || dayValid.value))
+// Discount: the new total. Receive: "Quita a OS." or "Ficam R$ X." (receive.amount-preview in the app), in cents.
+const preview = computed(() => {
+  if (!valid.value) return ''
+  if (props.kind === 'discount') return t('receiveDiscountNewTotal', { from: money(props.total), to: money(roundMoney(props.total - (amount.value ?? 0))) })
+  const left = toCents(props.remaining) - toCents(amount.value ?? 0)
+  return left <= 0 ? t('receivePreviewAll', { count: 1 }) : t('receivePreviewLeft', { amount: money(left / 100) })
+})
 const METHODS = [
   { id: 'pix', label: () => t('paymentMethodPix') },
   { id: 'cash', label: () => t('paymentMethodCash') },
@@ -34,7 +43,8 @@ const METHODS = [
 
 function save() {
   if (!valid.value || props.busy) return
-  emit('save', { amount: amount.value as number, ...(method.value ? { paymentMethod: method.value } : {}), clientTransactionId: transactionId })
+  const when = props.kind === 'receive' && day.value !== today ? { paidAt: paidAtFor(day.value, new Date()) } : {}
+  emit('save', { amount: amount.value as number, ...(method.value ? { paymentMethod: method.value } : {}), ...when, clientTransactionId: transactionId })
 }
 </script>
 
@@ -49,13 +59,17 @@ function save() {
         <div class="layer-body">
           <MoneyInput id="money-amount" v-model="amount" :label="kind === 'receive' ? t('receiveCustomerAmountLabel') : t('discount')" :country="country()" required />
           <p v-if="tooMuch" class="field-error" role="alert">{{ kind === 'discount' ? t('web.order.discountTooMuch', { amount: money(remaining) }) : t('web.order.receiveTooMuch', { amount: money(remaining) }) }}</p>
-          <p v-else-if="preview" class="sub">{{ preview }}</p>
+          <p v-else-if="preview" class="sub" data-testid="receive-preview" aria-live="polite">{{ preview }}</p>
+          <p v-if="kind === 'receive' && linkNote" class="sub" role="note">{{ linkNote }}</p>
           <template v-if="kind === 'receive'">
             <label class="field-label" for="money-method">{{ t('receivePaymentMethodQuestion') }} <span class="muted">({{ t('receivePaymentMethodOptional') }})</span></label>
             <select id="money-method" v-model="method" class="field">
               <option value="">{{ t('receivePaymentMethodNone') }}</option>
               <option v-for="item in METHODS" :key="item.id" :value="item.id">{{ item.label() }}</option>
             </select>
+            <label class="field-label" for="money-day">{{ t('receiveWhen') }}</label>
+            <input id="money-day" v-model="day" class="field" type="date" :max="today" required />
+            <p v-if="!dayValid" class="field-error" role="alert">{{ t('web.receive.dayInvalid') }}</p>
           </template>
         </div>
         <div class="layer-foot">
