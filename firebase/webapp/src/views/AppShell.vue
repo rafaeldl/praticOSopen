@@ -118,8 +118,9 @@ onBeforeUnmount(() => {
       <button v-if="canCreate" type="button" class="topbar-btn topbar-add" @click="openNewOrder">
         <Plus :size="18" aria-hidden="true" />{{ t('newOrderButton') }}
       </button>
-      <RouterLink class="topbar-btn" to="/settings" :aria-label="t('web.nav.profile', { company: companyName })" data-testid="profile-button">
+      <RouterLink class="topbar-btn" to="/settings" data-testid="profile-button">
         <span class="initials" aria-hidden="true">{{ companyInitials }}<User v-if="!companyInitials" :size="16" /></span>
+        <span class="sr">{{ t('web.nav.profile', { company: companyName }) }}</span>
       </RouterLink>
     </header>
 

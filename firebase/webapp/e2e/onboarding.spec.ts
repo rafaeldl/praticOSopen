@@ -56,7 +56,8 @@ test('primeiro acesso com exemplos: ramo, especialidades, para o cliente e Iníc
     termsOfService: 'Garantia de 90 dias.',
   })
   // Checklists of the segment, samples only of the picked specialty, four orders.
-  expect(company!.forms).toEqual(['seg-entrada', 'seg-final', 'seg-import'])
+  // (The checklist tests may add ready-made ones to the segment meanwhile.)
+  expect(company!.forms).toEqual(expect.arrayContaining(['seg-entrada', 'seg-final', 'seg-import']))
   expect(company!.services).toEqual(['Troca de óleo (exemplo)'])
   expect(company!.customers).toEqual(['Cliente (Exemplo)'])
   expect(company!.orders).toBe(4)

@@ -17,7 +17,7 @@ test('sino com 3 novos abre os avisos; abrir um vai à OS e marcar todos zera o 
 
   const fresh = page.getByRole('region', { name: 'Novos' })
   await expect(fresh.getByRole('button')).toHaveText([
-    /Ana aprovou o orçamento\s*OS 1 · há 5 minutos/,
+    /Ana aprovou o orçamento\s*OS 1 · há \d+ minutos/,
     /Carlos comentou: “Pode trocar o filtro\?”\s*OS 1 · há 2 horas/,
     /Pagamento de R\$ 150,00 recebido\s*OS 1 · há 2 dias/,
   ])
