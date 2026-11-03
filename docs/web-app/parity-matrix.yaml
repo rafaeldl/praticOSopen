@@ -3051,9 +3051,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Só OS salva."
+  note: "Só OS salva. Web: link 'Mandar para o cliente' no cabeçalho da OS, no menu '…' e tecla M, para todos os papéis."
 - id: order.share.copy-link
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -3067,8 +3068,10 @@ rows:
   feature_flags: []
   hardware: [clipboard]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
+  note: "Web: "Copiar o link" na folha, com a URL devolvida pela API."
 - id: order.pdf.view
   screen: lib/screens/order/order_screen_v2.dart
   route: null
@@ -4260,9 +4263,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share", "api:GET /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Reusa o link em cache na OS se não venceu, depois o primeiro token ativo da API, senão gera um (todas as permissões, 7 dias); falha ao ler tokens gera direto. OS sem cliente: o servidor recusa com 400 VALIDATION_ERROR. Frase do topo muda com a permissão e mostra Vale até dd/mm. Não copiar: OS sem cliente cai em erro genérico com Tentar de novo que nunca funciona (web diz que falta o cliente); URL /q/ montada no cliente em vez de usar a url devolvida pela API."
+  note: "Reusa o link em cache na OS se não venceu, depois o primeiro token ativo da API, senão gera um (todas as permissões, 7 dias); falha ao ler tokens gera direto. OS sem cliente: o servidor recusa com 400 VALIDATION_ERROR. Frase do topo muda com a permissão e mostra Vale até dd/mm. Não copiar: OS sem cliente cai em erro genérico com Tentar de novo que nunca funciona (web diz que falta o cliente); URL /q/ montada no cliente em vez de usar a url devolvida pela API. Web: reusa o primeiro link válido da API, senão gera (ver, aprovar e comentar, 7 dias); OS sem cliente diz o que falta e oferece escolher o cliente."
 - id: order.share-sheet.whatsapp
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4276,9 +4280,10 @@ rows:
   feature_flags: []
   hardware: [whatsapp]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Só quando o cliente tem telefone (botão azul; cinza vira Mandar de outro jeito); sem telefone o azul é Mandar link. Sem WhatsApp, cai na folha do sistema. Número normalizado pelo país da empresa (whatsappNumber). Não copiar: o telefone vem do agregado embutido na OS, não do cadastro do cliente; número trocado depois da OS vai para o antigo."
+  note: "Só quando o cliente tem telefone (botão azul; cinza vira Mandar de outro jeito); sem telefone o azul é Mandar link. Sem WhatsApp, cai na folha do sistema. Número normalizado pelo país da empresa (whatsappNumber). Não copiar: o telefone vem do agregado embutido na OS, não do cadastro do cliente; número trocado depois da OS vai para o antigo. Web: wa.me com o telefone do cadastro do cliente (não o da cópia na OS), em nova aba; sem telefone, o botão azul copia a mensagem."
 - id: order.share-sheet.other
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4307,7 +4312,8 @@ rows:
   feature_flags: []
   hardware: [clipboard]
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: order.share-sheet.permissions
   screen: lib/screens/widgets/share_link_sheet.dart
@@ -4322,9 +4328,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Trocar gera link novo na hora. Token sem permissões aparece como só ver."
+  note: "Trocar gera link novo na hora. Token sem permissões aparece como só ver. Web: trocar gera link novo e o servidor desativa os anteriores (revokeOlderTokens, #514)."
 - id: order.share-sheet.expiry
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4338,9 +4345,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Validade 7, 14 ou 30 dias. Trocar gera link novo na hora. Não copiar: com link reaproveitado o app não lê a validade e o seletor marca 7 dias mesmo quando o token é de 30."
+  note: "Validade 7, 14 ou 30 dias. Trocar gera link novo na hora. Não copiar: com link reaproveitado o app não lê a validade e o seletor marca 7 dias mesmo quando o token é de 30. Web: o seletor mostra a validade real do link (7/14/30 ou os dias que restam)."
 - id: order.share-sheet.regenerate
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4354,7 +4362,8 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: order.share-sheet.revoke
   screen: lib/screens/widgets/share_link_sheet.dart
@@ -4369,9 +4378,10 @@ rows:
   feature_flags: []
   hardware: null
   data: ["api:DELETE /v1/app/orders/{id}/share/{token}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "No menu … só com o link pronto e token. Alerta Cancelar/Desativar link (vermelho). Desativar fecha a folha; erro volta ao estado de erro."
+  note: "No menu … só com o link pronto e token. Alerta Cancelar/Desativar link (vermelho). Desativar fecha a folha; erro volta ao estado de erro. Web: confirmação com a consequência; DELETE apaga o token e o /q deixa de abrir."
 - id: order.share-sheet.message
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4385,9 +4395,10 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Texto por situação (aprovada, em andamento, concluída ou genérico), por idioma e com ou sem nome da empresa; WhatsApp abre wa.me/{número}?text=. OS nunca segue o rótulo do segmento (resumo do Receber, recibo, assunto e frase da folha usam orderShort). Web: i18n, rótulo do segmento e o que o link permite. Não copiar: texto fixo no ShareLinkService fora do i18n, diz OS fixo, artigo feminino fixo antes da empresa, promete aprovar e comentar mesmo quando o link só deixa ver, e sem nome sai Olá !; a folha aberta da OS, de Receber e do Financeiro não passa o nome da empresa."
+  note: "Texto por situação (aprovada, em andamento, concluída ou genérico), por idioma e com ou sem nome da empresa; WhatsApp abre wa.me/{número}?text=. OS nunca segue o rótulo do segmento (resumo do Receber, recibo, assunto e frase da folha usam orderShort). Web: i18n, rótulo do segmento e o que o link permite. Não copiar: texto fixo no ShareLinkService fora do i18n, diz OS fixo, artigo feminino fixo antes da empresa, promete aprovar e comentar mesmo quando o link só deixa ver, e sem nome sai Olá !; a folha aberta da OS, de Receber e do Financeiro não passa o nome da empresa. Web: textos em web.share.* (pt, en, es), com o rótulo do segmento, o que o link permite, a empresa na assinatura e sem artigo fixo; editável antes de mandar."
 - id: share.analytics
   screen: lib/screens/widgets/share_link_sheet.dart
   route: null
@@ -4607,9 +4618,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/orders/{id}/charges", "companies/{id}/receipts", "companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Consultor só em OS que criou (canReceiveOnOrder); PaymentManagementRoute decide e mostra AccessDeniedScreen. Com useFinancial desligado ninguém passa, nem o dono. Orçamento ou cancelada: só a situação e o histórico. Com link aberto, Tudo recebido vale com saldo abaixo de um centavo. Resumo A receber · OS N · aparelho ou primeiro serviço. Consultor (sem chargeOrder) não vê o link aberto na própria OS: segue com Marcar como recebido e Mandar link da OS."
+  note: "Consultor só em OS que criou (canReceiveOnOrder); PaymentManagementRoute decide e mostra AccessDeniedScreen. Com useFinancial desligado ninguém passa, nem o dono. Orçamento ou cancelada: só a situação e o histórico. Com link aberto, Tudo recebido vale com saldo abaixo de um centavo. Resumo A receber · OS N · aparelho ou primeiro serviço. Consultor (sem chargeOrder) não vê o link aberto na própria OS: segue com Marcar como recebido e Mandar link da OS. Web: 'Já recebido' na OS aberta, com quem anotou, forma, dia e comprovante."
 - id: pay.order.route
   screen: lib/screens/payment_management_screen.dart
   route: "/payment_management"
@@ -4638,9 +4650,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Parcial ou total; cobrança aberta se ajusta sozinha. Funciona offline (fila do Firestore com incremento). Com comprovante, o envio precisa de conexão; pagamento salvo e comprovante falhou mantém o pagamento e mostra erro. Depois de um registro offline, remover, desfazer e anexar dão precisa de conexão até o servidor confirmar. Gerente não vê Comprovante (sem attachPhotos). Rascunho volta se salvar falha. OS ainda não salva é gravada junto. Grava a forma de recebimento, quando informada."
+  note: "Parcial ou total; cobrança aberta se ajusta sozinha. Funciona offline (fila do Firestore com incremento). Com comprovante, o envio precisa de conexão; pagamento salvo e comprovante falhou mantém o pagamento e mostra erro. Depois de um registro offline, remover, desfazer e anexar dão precisa de conexão até o servidor confirmar. Gerente não vê Comprovante (sem attachPhotos). Rascunho volta se salvar falha. OS ainda não salva é gravada junto. Grava a forma de recebimento, quando informada. Web: pela API com clientTransactionId, version e paidAt; nenhuma forma vem marcada (REVISAO-UX 14)."
 - id: pay.order.discount
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4654,10 +4667,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Só com saldo maior que 0; máximo = saldo. Funciona offline. Some em orçamento ou cancelada. Soma em discount e subtrai do total (incremento); remover o desconto devolve ao total; Desfazer pagamentos zera discount e recalcula o total. payment só grava paid ou unpaid."
+  note: "Só com saldo maior que 0; máximo = saldo. Funciona offline. Some em orçamento ou cancelada. Soma em discount e subtrai do total (incremento); remover o desconto devolve ao total; Desfazer pagamentos zera discount e recalcula o total. payment só grava paid ou unpaid. Web: MoneyDialog de desconto pela API, até o que falta."
 - id: pay.order.send-charge
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4671,10 +4685,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só com Asaas conectado e sem parcela paga. Some em orçamento ou cancelada. Não copiar: depois de criar o app não manda o link (é preciso tocar Mandar de novo), enquanto o Financeiro e a tela de vários mandam na hora; na web criar e mandar são um passo só."
+  note: "Só com Asaas conectado e sem parcela paga. Some em orçamento ou cancelada. Não copiar: depois de criar o app não manda o link (é preciso tocar Mandar de novo), enquanto o Financeiro e a tela de vários mandam na hora; na web criar e mandar são um passo só. Web: criar e mandar num passo (defeito 6): depois de criada, a folha vira WhatsApp/Copiar com o link do Asaas. Asaas simulado no E2E."
 - id: pay.order.resend-charge
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4688,10 +4703,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [whatsapp, share_sheet, clipboard]
   data: ["api:POST /v1/app/orders/{id}/share", "api:GET /v1/app/orders/{id}/share"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Abre o ShareLinkSheet com o link da OS (/q/{token}), não o invoiceUrl. Azul só com o link vencido, cinza antes (Marcar como recebido vira link de texto). Não copiar: na tela de vários o mesmo botão manda o invoiceUrl; a web escolhe um link e usa nos dois lugares."
+  note: "Abre o ShareLinkSheet com o link da OS (/q/{token}), não o invoiceUrl. Azul só com o link vencido, cinza antes (Marcar como recebido vira link de texto). Não copiar: na tela de vários o mesmo botão manda o invoiceUrl; a web escolhe um link e usa nos dois lugares. Web: manda o invoiceUrl do Asaas pelo WhatsApp, o mesmo da tela do cliente (defeito 7: um link só nos dois lugares)."
 - id: pay.order.replace-charge
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4722,7 +4738,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [clipboard]
   data: ["companies/{id}/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: pay.order.cancel-link
@@ -4738,10 +4755,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["api:DELETE /v1/app/orders/{id}/charges/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Não com parcela já paga nem durante outro cancelamento. Alerta com Manter e Cancelar link (vermelho). Erro do Asaas em alerta com o texto de asaasErrorText, nunca o erro cru."
+  note: "Não com parcela já paga nem durante outro cancelamento. Alerta com Manter e Cancelar link (vermelho). Erro do Asaas em alerta com o texto de asaasErrorText, nunca o erro cru. Web: confirmação com 'Manter o link de R$ X' como ação padrão."
 - id: pay.order.send-order-link
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4771,9 +4789,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Só manuais; recebidos pelo Asaas ficam. Bloqueado (explica e oferece Abrir recebimento) se houver parte de recebimento de várias OS. Apaga os comprovantes dos manuais. Precisa de conexão. Alerta Desfazer pagamentos com Confirmar em vermelho; spinner no lugar do botão azul enquanto salva."
+  note: "Só manuais; recebidos pelo Asaas ficam. Bloqueado (explica e oferece Abrir recebimento) se houver parte de recebimento de várias OS. Apaga os comprovantes dos manuais. Precisa de conexão. Alerta Desfazer pagamentos com Confirmar em vermelho; spinner no lugar do botão azul enquanto salva. Web: POST /payments/reset, só financeiro, confirmação; parte de recebimento bloqueia e explica."
 - id: pay.order.remove-transaction
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4787,9 +4806,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Se for parte de recebimento de várias OS, manda abrir o recebimento; parte registrada por outra pessoa não mostra Remover. Apaga o comprovante junto; o do Asaas não sai. Precisa de conexão. Alerta Remover pagamento com tipo e valor, Remover em vermelho."
+  note: "Se for parte de recebimento de várias OS, manda abrir o recebimento; parte registrada por outra pessoa não mostra Remover. Apaga o comprovante junto; o do Asaas não sai. Precisa de conexão. Alerta Remover pagamento com tipo e valor, Remover em vermelho. Web: pede confirmação; Asaas e parte de recebimento de várias OS não mostram Remover."
 - id: pay.order.open-receipt-group
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4868,7 +4888,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Bloco cinza com a situação, sem botões e sem …; a lista Já recebido continua."
 - id: pay.order.back
@@ -4900,10 +4921,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Link de texto Manter link de R$ Y no bloco A OS mudou. Não copiar: no app vale só enquanto a tela está aberta (o bloco volta ao reabrir); a web guarda a escolha por cobrança."
+  note: "Link de texto Manter link de R$ Y no bloco A OS mudou. Não copiar: no app vale só enquanto a tela está aberta (o bloco volta ao reabrir); a web guarda a escolha por cobrança. Web: guardado por cobrança neste navegador (defeito 9)."
 - id: pay.order.payment-sheet
   screen: lib/screens/payment_management_screen.dart
   route: null
@@ -4949,9 +4971,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Salvar a OS inteira nunca grava transactions, paidAmount, paid nem payment (stripPaymentFields), para não apagar o que o servidor escreveu. Transações asaas_* são travadas. Passar para orçamento ou cancelada zera payment e paid. Web: atualização parcial ou API."
+  note: "Salvar a OS inteira nunca grava transactions, paidAmount, paid nem payment (stripPaymentFields), para não apagar o que o servidor escreveu. Transações asaas_* são travadas. Passar para orçamento ou cancelada zera payment e paid. Web: atualização parcial ou API. Web: dinheiro só pela API (POST/DELETE /payments, /discounts, /payments/reset); nunca grava a OS inteira."
 - id: pay.customer.view
   screen: lib/screens/payments/receive_customer_screen.dart
   route: "/receive_customer"
@@ -4965,9 +4988,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts", "companies/{id}/customerCharges", "companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Rota não está em appRoutes: CupertinoPageRoute com nome, no navegador raiz. Todas as OS passadas precisam ser recebíveis pela pessoa, senão AccessDeniedScreen. OS começam marcadas por checkedOrderIds (vindo de A receber); do cliente, todas marcadas. Uma OS só: sem círculo de marcar. Nenhuma marcada: R$ 0, botões desligados e Nenhuma OS marcada em vermelho. Voltar do ⓘ relê a OS; offline mantém."
+  note: "Rota não está em appRoutes: CupertinoPageRoute com nome, no navegador raiz. Todas as OS passadas precisam ser recebíveis pela pessoa, senão AccessDeniedScreen. OS começam marcadas por checkedOrderIds (vindo de A receber); do cliente, todas marcadas. Uma OS só: sem círculo de marcar. Nenhuma marcada: R$ 0, botões desligados e Nenhuma OS marcada em vermelho. Voltar do ⓘ relê a OS; offline mantém. Web: gaveta 'Receber de {nome}' a partir do cliente, da seleção da lista e do Financeiro."
 - id: pay.customer.pick-orders
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -4981,7 +5005,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: pay.customer.others
   screen: lib/screens/payments/receive_customer_screen.dart
@@ -5012,9 +5037,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts", "api:POST /v1/app/customers/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Antes de gravar, relê as OS no servidor: se algum saldo mudou, atualiza as linhas, avisa e não grava; offline segue com o que tem. Prévia da divisão das mais antigas para as mais novas. As próprias OS gravam offline (lote); comprovante ou Outras OS exigem conexão. Marcar ou desmarcar apaga o rascunho. Grava a forma de recebimento em cada transação e no recibo; a API aceita paymentMethod."
+  note: "Antes de gravar, relê as OS no servidor: se algum saldo mudou, atualiza as linhas, avisa e não grava; offline segue com o que tem. Prévia da divisão das mais antigas para as mais novas. As próprias OS gravam offline (lote); comprovante ou Outras OS exigem conexão. Marcar ou desmarcar apaga o rascunho. Grava a forma de recebimento em cada transação e no recibo; a API aceita paymentMethod. Web: POST /customers/:id/receipts com receiptId gerado ao abrir (repetir não grava em dobro); total e divisão visíveis e confirmação antes de gravar."
 - id: pay.customer.send-charge
   screen: lib/screens/payments/receive_customer_screen.dart
   route: null
@@ -5028,7 +5054,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [share_sheet]
   data: ["api:POST /v1/app/customers/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
   note: "Deixa as Outras OS de fora; confirma quando substitui um link de OS única; sem parcelamento. Abre o compartilhar do sistema com o invoiceUrl assim que cria."
@@ -5062,7 +5089,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: [clipboard]
   data: ["companies/{id}/customerCharges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: pay.customer.cancel-link
@@ -5078,7 +5106,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["api:DELETE /v1/app/customers/{id}/charges/{id}"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
   note: "No …, que só aparece com cobrança aberta e some durante uma operação. Alerta Cancelar o link de R$ X? com ação padrão Manter link de R$ X. Sucesso e erro aparecem em aviso (toast)."
@@ -5144,10 +5173,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["api:POST /v1/app/orders/{id}/charges", "companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Valor sempre em R$, qualquer idioma; vencimento padrão hoje + 3, sem dia passado. Validação: cliente, valor maior que 0, até o saldo (tolerância de um centavo), CPF/CNPJ obrigatório e válido; o ✓ fica cinza e a dica mostra o primeiro erro. NETWORK_ERROR deixa a folha aberta (a cobrança pode existir; o cartão mostra o link se o servidor recebeu). Não copiar: só o CPF conta como alterado, fechar no X depois de mudar valor, vencimento ou parcelas não pede confirmação."
+  note: "Valor sempre em R$, qualquer idioma; vencimento padrão hoje + 3, sem dia passado. Validação: cliente, valor maior que 0, até o saldo (tolerância de um centavo), CPF/CNPJ obrigatório e válido; o ✓ fica cinza e a dica mostra o primeiro erro. NETWORK_ERROR deixa a folha aberta (a cobrança pode existir; o cartão mostra o link se o servidor recebeu). Não copiar: só o CPF conta como alterado, fechar no X depois de mudar valor, vencimento ou parcelas não pede confirmação. Web: valor em R$, vencimento hoje + 3 sem passado, erro de rede deixa a folha aberta com aviso."
 - id: charge.order.tax-id
   screen: lib/screens/payments/create_charge_screen.dart
   route: null
@@ -5161,10 +5191,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/customers", "api:POST /v1/app/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Lido do cadastro do cliente (o agregado na OS não tem taxId); enquanto lê, o ✓ fica desligado. Pedido também quando o documento salvo é inválido. Aceita CNPJ alfanumérico; vai como customerTaxId. Não copiar: campo sem máscara e com teclado de texto; a web mascara CPF e CNPJ e mostra o erro no campo."
+  note: "Lido do cadastro do cliente (o agregado na OS não tem taxId); enquanto lê, o ✓ fica desligado. Pedido também quando o documento salvo é inválido. Aceita CNPJ alfanumérico; vai como customerTaxId. Não copiar: campo sem máscara e com teclado de texto; a web mascara CPF e CNPJ e mostra o erro no campo. Web: lido do cadastro (GET /customers/:id); pedido só se faltar ou for inválido; conferido antes de mandar."
 - id: charge.order.installments
   screen: lib/screens/payments/create_charge_screen.dart
   route: null
@@ -5178,7 +5209,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: charge.customer.form
@@ -5194,7 +5226,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["api:POST /v1/app/customers/{id}/charges", "companies/{id}/customers"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
   note: "Só pagamento único (sem parcelas). Valor inicial: o recebido se maior que 0 e até a soma em aberto, senão a soma. Vencimento padrão hoje + 3, sem dia passado. Texto lista os números das OS. NETWORK_ERROR deixa a folha aberta."
@@ -5244,7 +5277,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/receipts", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Financeiro: todos; consultor: os que registrou. Desfeito: Cancelado em negrito e nenhuma ação (sem …, sem Mandar recibo). Linhas OS N · R$ X · quitada ou falta R$ X pelo saldo de agora; OS que não pode ser lida mostra só número e valor e não abre. Não copiar: consultor abrindo recebimento de outra pessoa cai em erro com Tentar de novo, não em sem acesso."
 - id: receipt.detail.proof
@@ -5290,7 +5324,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/receipts", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: receipt.detail.open-order
   screen: lib/screens/payments/receipt_detail_screen.dart
@@ -5320,9 +5355,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [share_sheet, pdf_generation]
   data: ["companies/{id}", "companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: {status: proposed, reason: "Sheet nativa troca por baixar PDF e copiar link."}
-  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal."
+  note: "Sem leitura da empresa, usa o nome do agregado. Não copiar: erro mostra só Ocorreu um erro e o spinner fica dentro de um alerta modal. Web: recibo impresso pelo navegador (salvar como PDF)."
 - id: receipt.pdf.content
   screen: lib/screens/payments/receipt_share.dart
   route: null
@@ -5336,9 +5372,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [pdf_generation]
   data: ["companies/{id}", "companies/{id}/receipts", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Logo, nome, endereço, telefone e e-mail da empresa; Nº = 6 primeiros caracteres do id; frase Recebemos de {nome} a quantia de R$ X em {data}; colunas OS, Descrição, Pago agora, Ainda falta; Total recebido; Falta receber R$ X dessas OS; Registrado por {nome}; arquivo Recibo-{nº}.pdf. Não copiar: em aberto usa o saldo de agora (reenviar recibo antigo muda o conteúdo; gravar o saldo do momento); nº de 6 caracteres sem garantia de ser único; caracteres fora do Latin-1 somem dos nomes."
+  note: "Logo, nome, endereço, telefone e e-mail da empresa; Nº = 6 primeiros caracteres do id; frase Recebemos de {nome} a quantia de R$ X em {data}; colunas OS, Descrição, Pago agora, Ainda falta; Total recebido; Falta receber R$ X dessas OS; Registrado por {nome}; arquivo Recibo-{nº}.pdf. Não copiar: em aberto usa o saldo de agora (reenviar recibo antigo muda o conteúdo; gravar o saldo do momento); nº de 6 caracteres sem garantia de ser único; caracteres fora do Latin-1 somem dos nomes. Web: sem a coluna 'Ainda falta': o recebimento não guarda o saldo do dia (defeito 15)."
 - id: pay.errors.text
   screen: lib/screens/payments/asaas_error_text.dart
   route: null
@@ -5368,10 +5405,11 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges", "companies/{id}/settings/payments", "companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só assina ajustes com chargeOrder e só lê cobranças com o piloto ligado (as regras negam sem a permissão; erro de leitura conta como sem cobrança). Relê os pagamentos uma vez ao aparecer e quando uma cobrança passa a paga, estornada ou muda a contagem de parcelas pagas. Não copiar: consultor não vê o link aberto na própria OS e pode marcar recebido por cima."
+  note: "Só assina ajustes com chargeOrder e só lê cobranças com o piloto ligado (as regras negam sem a permissão; erro de leitura conta como sem cobrança). Relê os pagamentos uma vez ao aparecer e quando uma cobrança passa a paga, estornada ou muda a contagem de parcelas pagas. Não copiar: consultor não vê o link aberto na própria OS e pode marcar recebido por cima. Web: só com chargeOrder e settings/payments com asaasEnabled e asaasConnected."
 - id: pay.widget.charge-card
   screen: lib/screens/payments/widgets/order_charge_card.dart
   route: null
@@ -5385,7 +5423,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Esperando {nome} pagar, Venceu em dd/mm em vermelho e negrito, R$ X até dd/mm, Nx no cartão, N de M parcelas pagas, Falta mais R$ X fora do link. Cobrança paga ou estornada nunca aparece (chargeStatusLabel não é usado): só faz reler os pagamentos."
 - id: pay.widget.charge-changed
@@ -5401,7 +5440,8 @@ rows:
   feature_flags: ["useFinancial", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/orders/{id}/charges"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: chargeOrder
 - id: pay.widget.tx-icon
@@ -5466,7 +5506,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: pay.widget.block
   screen: lib/screens/payments/widgets/receive_block.dart
@@ -5496,9 +5537,10 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
-  note: "Não aceita data futura; sem limite para trás. Rótulo Hoje, Ontem ou a data. paidAt grava a hora atual quando é hoje e meio-dia do dia escolhido nos outros (o dia não muda com o fuso)."
+  note: "Não aceita data futura; sem limite para trás. Rótulo Hoje, Ontem ou a data. paidAt grava a hora atual quando é hoje e meio-dia do dia escolhido nos outros (o dia não muda com o fuso). Web: campo de data nativo; nem futuro nem antes da OS; hoje grava a hora atual, outro dia o meio-dia."
 - id: pay.widget.discount
   screen: lib/screens/payments/widgets/receive_discount_sheet.dart
   route: null
@@ -5512,7 +5554,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/order-detail.spec.ts
   web_exception: null
   permission: viewFinancialReports
   note: "Frase passa de R$ X para R$ Y só com valor maior que 0; acima do saldo vira texto vermelho. Não copiar: compara double sem centavos (a folha de pagamento compara em centavos)."
@@ -5529,7 +5572,8 @@ rows:
   feature_flags: []
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
 - id: pay.widget.sheet
   screen: lib/screens/payments/widgets/receive_payment_sheet.dart
@@ -5544,7 +5588,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: [camera, gallery, file]
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Sem attachPhotos (gerente), a linha Comprovante some. Não aceita mais que o saldo (compara em centavos). Prévia Quita a OS ou Fica faltando R$ X; com link aberto, nota A cobrança aberta se ajusta sozinha. Rascunho acima do saldo novo volta ao saldo. Mexer no valor, comprovante ou forma conta como alterado. Comprovante vira linha com nome e X para tirar."
 - id: pay.widget.method
@@ -5560,7 +5605,8 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders", "companies/{id}/receipts", "api:POST /v1/app/customers/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   note: "Pix, dinheiro, cartão ou outro. Pagamento antigo fica sem forma; valor desconhecido não quebra a leitura."
 - id: pay.widget.summary
@@ -6250,10 +6296,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos."
+  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500)."
 - id: fin.tab.pick-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6267,10 +6314,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Aparece só para OS sem cliente em A receber, ou na Próxima cobrança quando o Asaas não pode cobrar várias OS de uma vez."
+  note: "Aparece só para OS sem cliente em A receber, ou na Próxima cobrança quando o Asaas não pode cobrar várias OS de uma vez. Web: marcar OS de um cliente e receber numa vez; OS de dois clientes não recebem juntas."
 - id: fin.tab.progress
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -7150,10 +7198,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/receipts"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/receive.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Só recebimentos ativos, uma linha por recebimento ('R$ 700' / 'dia · N OS'); toque abre ReceiptDetailScreen. A seção some quando vazia."
+  note: "Só recebimentos ativos, uma linha por recebimento ('R$ 700' / 'dia · N OS'); toque abre ReceiptDetailScreen. A seção some quando vazia. Web: dono, admin, gerente e consultor (o servidor filtra: consultor vê os que registrou)."
 - id: customer.detail.nfse-list
   screen: lib/screens/customers/customer_detail_screen.dart
   route: null

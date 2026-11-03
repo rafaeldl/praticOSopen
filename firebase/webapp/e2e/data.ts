@@ -139,3 +139,16 @@ export async function makeDevice(data: Record<string, unknown> = {}): Promise<{ 
 export async function readDoc(path: string): Promise<Record<string, unknown> | undefined> {
   return (await db().doc(`companies/${COMPANY_A}/${path}`).get()).data()
 }
+
+/** Writes any document of company A (charges the tests simulate, since Asaas is not in the emulator). */
+export async function writeDoc(path: string, data: Record<string, unknown>, merge = false): Promise<void> {
+  await db().doc(`companies/${COMPANY_A}/${path}`).set(data, { merge })
+}
+
+export async function queryDocs(collection: string, field: string, value: unknown): Promise<Record<string, unknown>[]> {
+  return (await db().collection(`companies/${COMPANY_A}/${collection}`).where(field, '==', value).get()).docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+}
+
+export async function readShareToken(token: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`links/share/tokens/${token}`).get()).data()
+}

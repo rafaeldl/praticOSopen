@@ -1,0 +1,151 @@
+<script setup lang="ts">
+// The order's payment link (pay.widget.charge-card, charge-changed, charge-section):
+// waiting, overdue, installments, owed beyond the link, the order that now owes
+// less, the plan the server canceled. "Mandar de novo" sends the Asaas link,
+// the same one the customer screen sends (one link for both: defect 7).
+// "Manter o link" is kept per charge in this browser (defect 9).
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import ConfirmDialog from '@/components/orders/ConfirmDialog.vue'
+import { t } from '@/i18n'
+import { errorMessageKey } from '@/lib/api'
+import { formatDate, formatMoney } from '@/lib/format'
+import type { Order } from '@/lib/orders/model'
+import { orderTitle } from '@/lib/orders/text'
+import { whatsappNumber } from '@/lib/phone'
+import { cancelOrderCharge, watchOrderCharges } from '@/lib/receive/data'
+import { canceledPlanOf, chargeState, localDay, openChargeOf, whatsappLink, type Charge } from '@/lib/receive/model'
+import { session } from '@/lib/session'
+import { readStorage, writeStorage } from '@/lib/storage'
+import { showToast } from '@/lib/toast'
+import ChargeDialog from './ChargeDialog.vue'
+import '@/styles/receive.css'
+
+const props = defineProps<{ order: Order; remaining: number }>()
+
+const BR = 'BR'
+const charges = shallowRef<Charge[]>([])
+const loaded = ref(false)
+const dialog = ref<null | 'new' | 'cancel'>(null)
+const busy = ref(false)
+const keptKey = 'praticos.keptCharges'
+const kept = ref<string[]>(readKept())
+const today = localDay(new Date())
+
+function readKept(): string[] {
+  try {
+    const value = JSON.parse(readStorage(keptKey) ?? '[]')
+    return Array.isArray(value) ? value.filter((id) => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+const open = computed(() => openChargeOf(charges.value))
+const state = computed(() => (open.value ? chargeState(open.value, props.remaining, today) : null))
+const canceledPlan = computed(() => (open.value ? null : canceledPlanOf(charges.value, props.remaining)))
+const showChanged = computed(() => !!open.value && !!state.value?.changed && !kept.value.includes(open.value.id))
+const name = computed(() => props.order.customer?.name ?? '')
+const wa = computed(() => whatsappNumber(props.order.customer?.phone, session.company?.country))
+const date = (day: string) => formatDate(`${day}T12:00:00`, BR)
+const resend = computed(() => {
+  const charge = open.value
+  if (!charge?.invoiceUrl) return ''
+  const hello = name.value ? t('web.share.msgHello', { name: name.value }) : t('web.share.msgHelloNoName')
+  return `${hello} ${t('web.charge.msg', { amount: formatMoney(charge.value, BR), orders: orderTitle(props.order), date: date(charge.dueDate) })}\n${charge.invoiceUrl}`
+})
+
+let stop: (() => void) | undefined
+onMounted(async () => {
+  stop = await watchOrderCharges(props.order.id, (list) => {
+    charges.value = list
+    loaded.value = true
+  })
+})
+onBeforeUnmount(() => stop?.())
+
+function keep() {
+  if (!open.value) return
+  kept.value = [...kept.value, open.value.id].slice(-50)
+  writeStorage(keptKey, JSON.stringify(kept.value))
+}
+
+async function cancel() {
+  const charge = open.value
+  dialog.value = null
+  if (!charge || busy.value) return
+  busy.value = true
+  try {
+    await cancelOrderCharge(props.order.id, charge.id)
+    showToast(t('receiveCustomerChargeCanceled'))
+  } catch (error) {
+    showToast(t(errorMessageKey(error)))
+  } finally {
+    busy.value = false
+  }
+}
+
+async function copy() {
+  try {
+    await navigator.clipboard.writeText(open.value?.invoiceUrl ?? '')
+    showToast(t('chargeLinkCopied'))
+  } catch {
+    showToast(t('web.share.copyFailed'))
+  }
+}
+</script>
+
+<template>
+  <section v-if="loaded" class="charge-card" aria-labelledby="od-charge-title" data-testid="order-charge">
+    <h3 id="od-charge-title">{{ t('chargeLinkSection') }}</h3>
+    <template v-if="open && state">
+      <p :class="{ 'is-late': state.expired }" data-testid="charge-state">
+        <strong v-if="state.expired">{{ t('chargeExpiredOn', { date: date(open.dueDate) }) }}</strong>
+        <template v-else>{{ name ? t('chargeWaitingFor', { customer: name }) : t('chargeWaitingPayment') }}</template>
+      </p>
+      <p class="sub">
+        <template v-if="open.mode === 'cardInstallments' && open.installmentCount">{{ t('chargeInstallmentsUntil', { count: open.installmentCount, date: date(open.dueDate) }) }}</template>
+        <template v-else>{{ t('chargeDetailUntil', { value: formatMoney(open.value, BR), date: date(open.dueDate) }) }}</template>
+      </p>
+      <p v-if="open.paidCount && open.installmentCount" class="sub">{{ t('chargeInstallmentsPaid', { paid: open.paidCount, count: open.installmentCount }) }}</p>
+      <p v-if="state.outside" class="sub">{{ t('chargeMissingOutsideLink', { value: formatMoney(state.outside, BR) }) }}</p>
+      <div v-if="showChanged" class="charge-warn" role="status" data-testid="charge-changed">
+        <strong>{{ t('chargeOrderChanged') }}</strong>
+        <p>{{ t('chargeNowMissing', { remaining: formatMoney(remaining, BR), value: formatMoney(open.value, BR) }) }}</p>
+        <div class="row-actions">
+          <button type="button" class="btn btn--small btn--primary" @click="dialog = 'new'">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
+          <button type="button" class="link" @click="keep">{{ t('chargeKeepLink', { value: formatMoney(open.value, BR) }) }}</button>
+        </div>
+      </div>
+      <div class="row-actions">
+        <a v-if="wa && resend" class="btn btn--small" :class="{ 'btn--primary': state.expired && !showChanged }" :href="whatsappLink(wa, resend)" target="_blank" rel="noopener noreferrer" data-testid="charge-resend">{{ t('chargeSendAgainWhatsApp') }}</a>
+        <button v-if="open.invoiceUrl" type="button" class="link" @click="copy">{{ t('chargeCopyLink') }}</button>
+        <button v-if="!open.paidCount" type="button" class="link link--danger" :disabled="busy" data-testid="charge-cancel" @click="dialog = 'cancel'">{{ t('chargeCancelLink') }}</button>
+      </div>
+    </template>
+    <div v-else-if="canceledPlan" class="charge-warn" role="status">
+      <strong>{{ t('chargeInstallmentsCanceled') }}</strong>
+      <p>{{ t('chargeSendNewLink', { value: formatMoney(remaining, BR) }) }}</p>
+      <button type="button" class="btn btn--small btn--primary" @click="dialog = 'new'">{{ t('chargeGenerateNew', { value: formatMoney(remaining, BR) }) }}</button>
+    </div>
+    <button v-else-if="remaining > 0" type="button" class="btn btn--small" data-testid="charge-new" @click="dialog = 'new'">{{ t('chargeSend') }}</button>
+    <ChargeDialog
+      v-if="dialog === 'new'"
+      :order-id="order.id"
+      :orders-text="orderTitle(order)"
+      :customer-id="order.customer?.id"
+      :customer-name="order.customer?.name"
+      :owed="remaining"
+      @close="dialog = null"
+    />
+    <ConfirmDialog
+      v-else-if="dialog === 'cancel' && open"
+      :title="t('receiveCustomerChargeCancelTitle', { amount: formatMoney(open.value, BR) })"
+      :body="t('chargeCancelConfirm')"
+      :confirm="t('chargeCancelLink')"
+      :keep="t('chargeKeepLink', { value: formatMoney(open.value, BR) })"
+      danger
+      @confirm="cancel"
+      @close="dialog = null"
+    />
+  </section>
+</template>

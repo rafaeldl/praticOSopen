@@ -149,6 +149,9 @@ async function seedCatalog() {
         ...audit(author, 90000),
       })
     }
+    // Payment links (Asaas pilot) on in company A. The charges themselves are
+    // simulated by the tests: no Asaas account exists in the emulator.
+    if (id === COMPANY_A) batch.set(db.doc(`companies/${id}/settings/payments`), { asaasEnabled: true, asaasConnected: true, asaasEnvironment: 'sandbox' })
     await batch.commit()
   }
 }

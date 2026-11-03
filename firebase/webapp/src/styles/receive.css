@@ -1,0 +1,37 @@
+/* Mandar ao cliente, receber e cobrar. Loaded with the screens that use it. */
+.share .field { width: 100%; }
+.share-url { margin: 0.25rem 0 0.5rem; }
+.share-url code { overflow-wrap: anywhere; font-size: 0.875rem; }
+.share-opts { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.share-foot { flex-wrap: wrap; }
+.share-foot a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+
+.pay-history, .charge-card { margin-top: 1rem; display: grid; gap: 0.4rem; }
+.pay-history h3, .charge-card h3 { font-size: 0.9375rem; font-weight: 700; }
+.pay-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.15rem; }
+.pay-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--color-rule); }
+.pay-main { min-width: 0; }
+.pay-main .sub { display: block; }
+.pay-acts { display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }
+.charge-card .is-late strong { color: var(--color-danger-text); }
+.charge-card a.btn { text-decoration: none; }
+.charge-warn { border-left: 3px solid var(--color-warning-text); padding: 0.5rem 0.75rem; background: var(--color-paper-2); display: grid; gap: 0.35rem; }
+.charge-warn strong { color: var(--color-warning-text); }
+
+.pick-orders { border: 0; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 0.15rem; }
+.pick-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 0.5rem; align-items: center; min-height: 2.75rem; border-bottom: 1px solid var(--color-rule); }
+.pick-row label { cursor: pointer; }
+.pay-total { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--color-rule-strong); }
+
+.receipt-item { padding: 0.6rem 0; border-bottom: 1px solid var(--color-rule); display: grid; gap: 0.25rem; }
+.receipt-orders { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+
+.fin-tabs { display: flex; gap: 0.25rem; padding: 0 1.25rem 0.5rem; }
+.fin-tab { font-weight: 700; border-bottom: 2px solid var(--color-ink); padding: 0.25rem 0.5rem; }
+.recv { padding: 0 0.5rem 2rem; overflow-x: auto; }
+.recv-group th { font-weight: 700; }
+.recv-group .link { margin-left: 0.75rem; font-weight: 600; }
+
+/* Batch print and batch receive are extras of a large screen. */
+@media (max-width: 48rem) { .wide-only { display: none; } }
+@media print { .print-sheet + .print-sheet { break-before: page; } }

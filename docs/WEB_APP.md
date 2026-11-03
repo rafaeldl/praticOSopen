@@ -167,6 +167,28 @@ Código em `src/views/customers/`, `src/components/customers/` e `src/lib/custom
 
 **Fica para depois.** Seletores da OS ("Qual cliente?" com Recentes e placa, "Qual veículo?" com Nenhum), vínculo do aparelho cadastrado pela tela do cliente (não há campo de dono), foto do aparelho, recebimentos e notas do cliente, contratos do aparelho e a pergunta da próxima manutenção ao concluir a OS.
 
+### Mandar ao cliente, receber e cobrar
+
+Código em `src/components/orders/receive/`, regras puras em `src/lib/receive/model.ts` (dinheiro em centavos, testadas em `tests/receive-model.test.ts`) e chamadas em `src/lib/receive/data.ts`. Os textos ficam no pedaço de OS (`-orders.json`), fora do primeiro download. Testes: `e2e/receive.spec.ts`.
+
+**Mandar para o cliente.** No cabeçalho da OS, no menu "…" e na tecla `M`, para todos os papéis. Usa o primeiro link válido de `GET /v1/app/orders/:id/share` ou gera um (`POST`, ver, aprovar e comentar, 7 dias); a URL é a que a API devolve, nunca montada no navegador. A mensagem segue a situação, o que o link permite, o rótulo do segmento e o idioma (`web.share.*`), com o nome da empresa na assinatura, e pode ser editada. "Mandar pelo WhatsApp" abre `wa.me` em nova aba com o telefone do cadastro do cliente (não a cópia guardada na OS); sem telefone, o botão azul copia a mensagem. Trocar o que o cliente pode fazer ou a validade gera um link novo, e o servidor desativa os anteriores. "Desativar o link" pede confirmação. OS sem cliente diz o que falta e oferece escolher o cliente.
+
+**Receber de uma OS.** O "Receber" (`MoneyDialog`) pergunta quanto, como (nada vem marcado) e quando (nem no futuro nem antes da OS). "Já recebido" mostra cada pagamento e desconto, do dia mais novo, com forma, quem anotou e o comprovante. "Remover" e "Desfazer pagamentos" pedem confirmação e vão pela API (`DELETE /payments/:id`, `DELETE /discounts/:id`, `POST /payments/reset`). Pagamento do Asaas e parte de um recebimento de várias OS não saem daqui. OS em orçamento ou cancelada mostra só o histórico.
+
+**Receber de um cliente em várias OS.** Gaveta "Receber de {nome}", aberta pelo cliente, pela seleção de OS de um mesmo cliente na lista (tela grande) e pelo Financeiro. Lista as OS em aberto (`GET /customers/:id/open-orders`), divide o valor da mais antiga para a mais nova e mostra a divisão e o total antes de gravar; uma confirmação repete os dois. Antes de gravar, relê os saldos: se algo mudou, avisa e não grava. O `receiptId` é gerado ao abrir, então repetir depois de a resposta se perder não grava em dobro. O consultor vê as OS de outra pessoa à parte e desmarcadas.
+
+**Recebimentos.** Na tela do cliente: lista (`GET /customers/:id/receipts`), recibo impresso pelo navegador e "Desfazer recebimento", com confirmação. O recibo não tem "Ainda falta": o recebimento não guarda o saldo daquele dia, e o saldo de hoje mudaria um recibo antigo.
+
+**Cobrança (Asaas).** Só para quem tem `chargeOrder`, com `settings/payments.asaasEnabled` e `asaasConnected`. Na OS: cartão do link aberto (esperando, vencido, parcelas, o que falta fora do link), aviso "A OS mudou de valor" com "Gerar link novo" e "Manter o link" (guardado por cobrança neste navegador), parcelamento cancelado pelo servidor, copiar, mandar de novo e cancelar. "Mandar cobrança" pede valor (sempre em R$), vencimento (hoje + 3, nunca no passado), parcelas (só uma OS) e CPF/CNPJ quando o cadastro não tem um válido. Criar e mandar são um passo só: a folha vira "Mandar pelo WhatsApp" com o link do Asaas. Na gaveta do cliente: um link para várias OS, copiar e cancelar. O link mandado de novo é sempre o do Asaas, na OS e no cliente.
+
+**Financeiro > Receber (`/finance`).** OS concluídas que ainda devem (`payment == 'unpaid'`, as 500 mais novas), por cliente, de quem espera há mais tempo. Marcar OS de um cliente abre a gaveta de receber; OS de dois clientes não recebem juntas. O Resumo do Financeiro é da fatia 6.
+
+**Imprimir várias OS.** Na seleção da lista (tela grande), cada OS numa página.
+
+**No E2E** o WhatsApp nunca abre (os testes leem o link) e o Asaas é simulado: as rotas de cobrança são respondidas pelo teste, que grava o documento da cobrança como o servidor gravaria. O seed liga `settings/payments` na empresa A.
+
+**Fica para depois.** Anexar e trocar comprovante (`PUT /payments/:id/receipt`), "Mandar de outro jeito" testado (o Chrome de mesa não tem `navigator.share`), "Mandar recibo" de um pagamento só, parte de recebimento abrindo o recebimento, link de OS única substituído pela cobrança de várias OS (confirmação), "Próxima cobrança" e Resumo do Financeiro, arquivo vindo de outro app, eventos de compartilhar no GA4 e o aviso "Pagamento recebido" no sino.
+
 ### Histórico do navegador
 
 Voltar fecha o que estiver aberto. O painel lateral usa `useRoutePanel`, com o id na URL. Quem chega por link recebe a lista atrás do painel, então o primeiro Voltar não sai do app. `Layer` empilha um parâmetro `layer` no histórico, e `guard` pergunta antes de fechar quando há texto digitado.
@@ -311,7 +333,7 @@ CI: `.github/workflows/webapp_check.yml`, em PR que toque o web, os casos de con
 
 - Sem criação de empresa no web.
 - Conta nova não aceita o primeiro convite (limitação do servidor, ver Convites).
-- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, mandar ao cliente (link), nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
+- OS: falta Manutenções chegando, sino de avisos, iniciais no perfil, "Primeira vez" com E2E, campos do segmento, checklists, documentos, contrato, nota fiscal, local editável, apagar foto e escolher aparelho por item com 2 ou mais aparelhos.
 - `expectedUpdatedAt` só protege entre telas do web: o app grava itens sem atualizar `updatedAt` e regrava a OS inteira.
 - O pedido do cliente fica no primeiro comentário interno (como no app); o campo `service_order.observation` do segmento ainda não é gravado pelo web.
 - Quem não vê valores não tem tempo real: a OS é lida de novo depois de cada gravação e ao voltar à janela.
