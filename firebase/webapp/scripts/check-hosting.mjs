@@ -41,7 +41,7 @@ writeFileSync(tempConfig, JSON.stringify({ hosting: config.hosting, emulators: {
 const emulator = spawn(
   'npx',
   ['firebase', 'emulators:start', '--only', 'hosting', '--project', 'demo-praticos', '--config', tempConfig],
-  { cwd: webapp, stdio: ['ignore', 'pipe', 'pipe'] },
+  { cwd: webapp, stdio: ['ignore', 'pipe', 'pipe'], detached: true },
 )
 let log = ''
 emulator.stdout.on('data', (chunk) => (log += chunk))
@@ -118,7 +118,15 @@ try {
   const robots = await get('/robots.txt')
   check(robots.status === 200 && robots.headers.get('cache-control') === 'public, max-age=3600', '/robots.txt igual')
 } finally {
-  emulator.kill('SIGINT')
+  // npx starts the emulator as a grandchild: stop the whole process group, or
+  // its open pipes keep this script (and the CI job) alive after the checks.
+  try {
+    process.kill(-emulator.pid, 'SIGKILL')
+  } catch {
+    emulator.kill('SIGKILL')
+  }
+  emulator.stdout.destroy()
+  emulator.stderr.destroy()
   rmSync(tempConfig, { force: true })
 }
 
@@ -127,3 +135,4 @@ if (failures.length) {
   process.exit(1)
 }
 console.log('\nHosting ok')
+process.exit(0)
