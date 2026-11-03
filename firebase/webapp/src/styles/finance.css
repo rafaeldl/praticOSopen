@@ -1,0 +1,129 @@
+/* Financeiro, relatório e notas fiscais. Loaded with the screens that use it. */
+.finance { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.fin { padding: 0 1.25rem 2rem; display: grid; gap: 1.25rem; align-content: start; }
+/* Old numbers while new ones come: a line on top, never faded text (contrast stays). */
+.fin[aria-busy="true"] { cursor: progress; box-shadow: inset 0 2px 0 var(--color-accent); }
+
+.fin-nav { display: flex; gap: 0.25rem; padding: 0 1.25rem 0.75rem; flex-wrap: wrap; }
+.fin-nav-link { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 0.6rem; color: var(--color-muted); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; }
+.fin-nav-link:hover { color: var(--color-ink); }
+.fin-nav-link[aria-current="page"] { color: var(--color-ink); border-bottom-color: var(--color-ink); }
+
+.fin-month { display: flex; align-items: center; gap: 0.15rem; flex-wrap: wrap; }
+.fin-month-label { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.25rem; border: 0; background: transparent; color: var(--color-ink); font-weight: 600; padding: 0 0.4rem; border-radius: 6px; }
+.fin-month-label:not(:disabled):hover { background: var(--color-paper-2); text-decoration: underline; text-underline-offset: 3px; }
+.fin-month-label:disabled { cursor: default; opacity: 1; }
+.fin-month .icon-btn:disabled { opacity: 0.4; cursor: default; }
+
+.fin-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.fin-group h2, .fin-list h2, .report-sec h2, .nfse-attention h2 { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); margin: 0 0 0.4rem; }
+.fin-group > div { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.fin-card { display: grid; gap: 0.15rem; justify-items: start; text-align: left; padding: 0.75rem 0.85rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-card); color: var(--color-ink); min-height: 2.75rem; }
+.fin-card:hover { background: var(--color-paper-2); }
+.fin-card[aria-pressed="true"] { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); }
+.fin-card span { font-weight: 600; color: var(--color-muted); }
+.fin-card b { font-size: 1.25rem; overflow-wrap: anywhere; }
+.fin-card small { color: var(--color-muted); font-size: 0.8125rem; }
+.fin-card--small b { font-size: 1.05rem; }
+
+.fin-links { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.fin-links a.btn { text-decoration: none; }
+.fin-nfse { display: inline-flex; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; min-height: 2.25rem; padding: 0 0.5rem; color: var(--color-accent); font-weight: 600; }
+.fin-nfse-alert { color: var(--color-danger-text); font-weight: 700; }
+
+.fin-rows { list-style: none; padding: 0; margin: 0; }
+.fin-row { display: flex; justify-content: space-between; gap: 0.25rem 1rem; width: 100%; padding: 0.55rem 0.25rem; min-height: 2.75rem; border: 0; border-bottom: 1px solid var(--color-rule); background: transparent; color: var(--color-ink); text-align: left; text-decoration: none; align-items: baseline; flex-wrap: wrap; }
+button.fin-row:hover, a.fin-row:hover { background: var(--color-paper-2); }
+.fin-row[aria-pressed="true"], .fin-row.is-open { background: var(--color-selected); }
+.fin-row > span:first-child { min-width: 0; flex: 1 1 14rem; overflow-wrap: anywhere; }
+.fin-row--plain { cursor: default; }
+.fin-row-status { margin-left: 0.5rem; }
+.fin-sub { font-size: 0.875rem; font-weight: 700; margin: 0.75rem 0 0.25rem; }
+.fin-none { padding: 0.75rem 0; }
+.block { display: block; }
+
+/* Long words wrap at 200% and on a phone (the base keeps buttons and status on one line). */
+.finance .btn, .issue .btn { white-space: normal; text-align: center; }
+.finance .status { white-space: normal; }
+
+/* The order beside the list (B6 of #525): no rule above the cards, the list scrolls on its own. */
+.fin-work { border-top: 0; }
+.fin-work .list-pane .fin { padding-top: 0.25rem; }
+
+/* Report */
+.report-tools { padding-top: 0; }
+.report-tools .btn { min-height: 2.25rem; }
+.report-totals { display: grid; gap: 0.75rem; }
+.report-numbers { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); margin: 0; }
+.report-numbers dt { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+.report-numbers dd { margin: 0; font-size: 1.35rem; overflow-wrap: anywhere; }
+.report-legend { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.report-cols { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); align-items: start; }
+.report-sec { min-width: 0; }
+.report-sec .link { margin-top: 0.5rem; min-height: 2.25rem; }
+.sw { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 2px; margin-right: 0.4rem; vertical-align: baseline; }
+.sw--paid { background: var(--color-success); }
+.sw--open { background: var(--color-warning); }
+.sw--a { background: var(--color-accent); }
+.sw--b { background: var(--color-neutral); }
+.fin-mix { display: flex; height: 0.6rem; border-radius: 3px; overflow: hidden; background: var(--color-neutral); margin-bottom: 0.5rem; }
+.fin-mix i { background: var(--color-accent); }
+.fin-legend { display: grid; gap: 0.25rem; margin: 0; }
+.fin-legend div { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.fin-legend dd { margin: 0; }
+.print-only { display: none; }
+.period-fields { min-width: min(100%, 22rem); }
+
+/* Notas fiscais */
+.invoices .list-pane .toolbar { padding: 0.5rem 1.25rem; }
+.nfse-search { width: min(100%, 20rem) !important; }
+.nfse-attention { padding: 0.5rem 1.25rem 0.75rem; border-bottom: 2px solid var(--color-danger-text); }
+.nfse-attention h2 { color: var(--color-danger-text); font-weight: 700; }
+.nfse-reason { display: block; color: var(--color-danger-text); font-weight: 700; overflow-wrap: anywhere; }
+.nfse-panel { display: flex; flex-direction: column; min-height: 0; overflow: auto; background: var(--color-card); border-left: 1px solid var(--color-rule); }
+.nfse-top { display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.5rem 0 1rem; color: var(--color-muted); }
+.nfse-head { padding: 0.1rem 1rem 0.85rem; display: grid; gap: 0.35rem; justify-items: start; }
+.nfse-name { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; line-height: 1.15; margin: 0; overflow-wrap: anywhere; }
+.nfse-actions { display: flex; gap: 0.75rem; margin-top: 0.4rem; flex-wrap: wrap; width: 100%; }
+.nfse-actions .btn { text-decoration: none; }
+.nfse-actions .btn--primary { flex: 1 1 12rem; min-height: 2.75rem; }
+.nfse-facts { margin: 0; padding: 0.75rem 1rem; border-top: 1px solid var(--color-rule); display: grid; gap: 0.5rem; }
+.nfse-facts dt { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+.nfse-facts dd { margin: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.nfse-order { min-height: 1.5rem; }
+.nfse-danger { padding: 0.75rem 1rem; border-top: 1px solid var(--color-rule); }
+.nfse-danger .link { min-height: 2.25rem; }
+.invoices > .field-error { padding: 0 1rem; }
+
+/* Emitir nota */
+.issue { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+.issue .layer-body { flex: 1; }
+.issue-lines { list-style: none; margin: 0; padding: 0; }
+.issue-total { display: flex; justify-content: space-between; gap: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--color-rule-strong); margin: 0; }
+.issue-contact { border: 0; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+.issue textarea { resize: vertical; min-height: 5rem; }
+
+@media (max-width: 68.75rem) {
+  .invoices .workspace.has-panel { grid-template-columns: minmax(0, 1fr); }
+  .invoices .workspace.has-panel .list-pane { display: none; }
+  .nfse-panel { border-left: 0; }
+}
+@media (max-width: 48rem) {
+  .fin { padding-inline: 1rem; }
+  .fin-nav { padding-inline: 1rem; }
+  .fin-row { min-height: 2.75rem; }
+}
+
+/* The report prints itself: the page, all rows, no navigation (WEB_APP_DESIGN, Impressão). */
+@media print {
+  html body #app:has(.report.is-printing) { display: block !important; }
+  body:has(.report.is-printing) .side,
+  body:has(.report.is-printing) .topbar,
+  body:has(.report.is-printing) .tabbar,
+  .report .no-print,
+  .report .fin-nav { display: none !important; }
+  .report .print-only { display: block; font-weight: 700; padding: 0 1.25rem; }
+  .report .page-head { display: none; }
+  .report, .report * { color: #000 !important; background: #fff !important; box-shadow: none !important; }
+  .report .fin-row { break-inside: avoid; }
+}

@@ -55,7 +55,7 @@ Cada linha da resposta tem `id`. Linhas gravadas pela API guardam um `id` própr
 
 ## Rotas
 
-Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/devices` (aparelhos) e `/v1/app/services`, `/v1/app/products` (catálogo).
+Base: `/v1/app/orders` (OS), `/v1/app/customers` (clientes e recibos), `/v1/app/devices` (aparelhos), `/v1/app/services`, `/v1/app/products` (catálogo) e `/v1/app/finance` (Financeiro).
 
 | Rota | Quem | Observação |
 |---|---|---|
@@ -117,6 +117,27 @@ Testes: `routes/v1/__tests__/app-directory.routes.test.ts` e os casos `customers
 | `POST /prices` | manage e `editPrices` | `{batchId?, changes: [{id, from, to}]}`, até 500 e sem id repetido, numa transação só (todos ou nenhum), com uma leitura (`getAll`). `batchId` fica no item (`priceBatchId`); o web manda a mesma chave e os mesmos `from` em cada nova tentativa. `from` é o preço que a pessoa viu: item já em `to` fica (repetir depois de a resposta se perder), item em `from` muda, qualquer outro valor (ou item apagado) → `409 CATALOG_ITEM_CHANGED` com `error.ids` e nada gravado. Compara em centavos. Resposta `{updated, unchanged}` |
 
 Testes: `routes/v1/__tests__/app-catalog.routes.test.ts` e os casos `catalog.*` e `nofin.catalog.price` de `__tests__/rbac/api-matrix.ts`.
+
+### Financeiro
+
+`routes/v1/app-finance.routes.ts`, com a lógica em `services/app-finance.service.ts` e o fuso em `utils/company-zone.ts`. Só quem tem `viewFinancialReports` (dono, admin e gerente, com "Valores e cobrança" ligado): o resto recebe 403 antes de qualquer validação, sem número nenhum. Os números são somados aqui, em centavos, e o navegador não lê OS para isso. O app Flutter não chama estas rotas.
+
+| Rota | O quê |
+|---|---|
+| `GET /finance/summary?month=AAAA-MM` | Recebido e Vendido do mês, A receber e Em andamento de hoje, com as linhas de cada lista (`received`, `sold`, `receivable.debtors`/`deposits`, `progress`). Sem `month`, o mês atual |
+| `GET /finance/report?from=AAAA-MM-DD&to=AAAA-MM-DD` | Faturamento, já pago, a receber, quantidade, composição, ranking de clientes, serviços e produtos, e as OS do período. `customer=<id>` (ou `none`) estreita tudo menos o ranking de clientes; `payment=paid\|unpaid` estreita a lista de OS, a composição e os rankings de serviços e produtos (como o app), não os totais nem o ranking de clientes. Até 4.000 dias |
+| `GET /finance/receivable` | Financeiro > Receber: toda OS que ainda deve (concluída com saldo e aberta com sinal), da mais antiga |
+
+Regras (contrato `docs/web-app/contract-cases/finance-summary.json`, as mesmas de `lib/utils/financial_summary.dart` e do relatório do app):
+
+- **Dias da empresa.** `zone` (o fuso do navegador) só vale se for um fuso do país da empresa; senão, o principal do país (`companyZone`, igual a `lib/zone.ts` do web). Texto sem fuso, como o app grava, é hora da empresa. O período inclui o último dia (o app deixava de fora, defeito 60).
+- **Recebido** pela data de cada pagamento (`paidAt`, senão `createdAt`), em OS de qualquer mês (achadas por `lastPaymentAt`, com a mesma folga de 14 h: o campo lê o texto sem fuso do app como -03:00, e uma empresa a oeste de Brasília que recebe logo depois da meia-noite do dia 1 ficaria de fora). Dinheiro antigo sem transação conta no dia da OS; `payment: 'paid'` sem `paidAmount` conta o total.
+- **Vendido e faturamento**: OS criadas no período, sem orçamento nem cancelada.
+- **Em aberto**: `payment` `unpaid` ou `partial`, e aprovada, em andamento ou concluída sem `payment`. Cada OS conta num lugar: concluída com saldo e aberta com sinal em A receber; aberta sem nada pago em Em andamento.
+- **Relatório**: "a receber" é tudo que não está pago (também parcial e sem situação; o app listava só `unpaid`, defeito 58).
+- Leitura em páginas de 1.000, até 20.000 OS por resposta, somando todas as consultas dela: rodam uma depois da outra no mesmo limite (primeiro as em aberto), então nunca passam disso. Acima, `truncated: true` e a tela avisa; `read` diz quantas foram lidas. As em aberto vêm na ordem dos ids (nenhum índice de campo único as ordena por data), então a que falta pode ser qualquer uma. As datas gravadas como texto são comparadas como texto, então a consulta pede 14 h a mais de cada lado e cada OS é posta no dia pelo fuso.
+
+Testes: `routes/v1/__tests__/app-finance.routes.test.ts`, `__tests__/contract-cases.test.ts` e os casos `finance.*` e `nofin.finance.*` de `__tests__/rbac/api-matrix.ts`.
 
 **Quem recebe (`canReceiveOnOrder`)**: dono, admin e gerente em qualquer OS; consultor nas OS que criou, com "Valores e cobrança" ligado. Supervisor e técnico nunca. Igual a `canReceiveOnOrderFor` no app e a `canReceiveOnOrder` nas regras do Firestore.
 
@@ -202,6 +223,7 @@ curl -X POST "$API/v1/app/orders/$ORDER/payments" \
 |---|---|
 | `firebase/functions/src/routes/v1/__tests__/orders.routes.test.ts` | Rotas, transações concorrentes, `expectedUpdatedAt`, projeção, outra empresa |
 | `firebase/functions/src/routes/v1/__tests__/app-catalog.routes.test.ts` | Catálogo: preço escondido, `editPrices`, versão, foto, importação e preço em lote |
+| `firebase/functions/src/routes/v1/__tests__/app-finance.routes.test.ts` | Financeiro: resumo, relatório e receber, último dia, fuso, papéis e valores desligados |
 | `firebase/functions/src/__tests__/rbac/api-matrix.ts` + `rbac-api.test.ts` | Papel × rota |
 | `firebase/functions/src/__tests__/contract-cases.test.ts` | `docs/web-app/contract-cases/*.json` no servidor |
 | `firebase/functions/src/utils/app-rate-limit.utils.test.ts` | Limite por usuário e CORS |

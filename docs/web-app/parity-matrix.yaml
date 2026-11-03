@@ -5708,10 +5708,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices", "companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Frase com as emitidas do mês (autorizadas e cancelamento negado, sem conflito); leitura ao vivo. Linha com problema mostra o motivo em vermelho; linha OK mostra número, OS e dia. Rodapé: só serviços entram na nota. Não copiar: a consulta lê do mês escolhido até hoje sem limite superior; com a nota desligada a tela fica no spinner para sempre (web: dizer que a nota não está ligada e como configurar)."
+  note: "Frase com as emitidas do mês (autorizadas e cancelamento negado, sem conflito); leitura ao vivo. Linha com problema mostra o motivo em vermelho; linha OK mostra número, OS e dia. Rodapé: só serviços entram na nota. Não copiar: a consulta lê do mês escolhido até hoje sem limite superior; com a nota desligada a tela fica no spinner para sempre (web: dizer que a nota não está ligada e como configurar). Web (fatia 6): /invoices, leitura de effectiveDate entre o início pedido e o fim do mês (com limite de cima, D12); nota desligada mostra o aviso em vez de girar (D23)."
 - id: nfse.list.customer
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: "/nfse_list"
@@ -5742,10 +5743,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Próximo chega até o mês de uma nota agendada no futuro. Trocar de mês limpa a busca."
+  note: "Próximo chega até o mês de uma nota agendada no futuro. Trocar de mês limpa a busca. Web: seguinte vai até o mês de hoje mais 60 dias (prazo da nota agendada); trocar de mês limpa a busca."
 - id: nfse.list.search
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: null
@@ -5759,10 +5761,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Campo só com mais de 10 notas; ignora acento e caixa."
+  note: "Campo só com mais de 10 notas; ignora acento e caixa. Web: busca na URL (?q=)."
 - id: nfse.list.attention
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: null
@@ -5776,10 +5779,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Erro não reemitido, conflito ou cancelamento negado, do mês anterior a hoje em diante, qualquer que seja o mês escolhido."
+  note: "Erro não reemitido, conflito ou cancelamento negado, do mês anterior a hoje em diante, qualquer que seja o mês escolhido. Web: seção Precisa de atenção no topo com o motivo em vermelho."
 - id: nfse.list.open
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: null
@@ -5793,9 +5797,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
+  note: "Web: a nota abre ao lado (?invoice=)."
 - id: nfse.list.setup
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: null
@@ -5825,10 +5831,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "lib/models/nfse.dart nfseMonthList e nfseQuerySince: lê do mês escolhido ou do mês anterior a hoje (o que for mais cedo); emitidas = autorizada e cancelamento negado sem conflito; atenção desde o mês anterior a hoje; erro cujas OS já têm nota ativa some; creating com mais de 15 min some."
+  note: "lib/models/nfse.dart nfseMonthList e nfseQuerySince: lê do mês escolhido ou do mês anterior a hoje (o que for mais cedo); emitidas = autorizada e cancelamento negado sem conflito; atenção desde o mês anterior a hoje; erro cujas OS já têm nota ativa some; creating com mais de 15 min some. Web: lib/nfse/model.ts monthList, mesma regra, testada em tests/finance.test.ts."
 - id: fin.tab.nfse-row
   screen: lib/screens/nfse/nfse_list_screen.dart
   route: "/nfse_list"
@@ -5842,10 +5849,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices", "companies/{id}/settings/payments"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Mostra só a contagem de emitidas, nunca dinheiro; linha vermelha com quantas precisam de atenção; segue o mês da aba. Some com a nota desligada. Não copiar: quando a leitura falha mostra 0 como se não houvesse notas."
+  note: "Mostra só a contagem de emitidas, nunca dinheiro; linha vermelha com quantas precisam de atenção; segue o mês da aba. Some com a nota desligada. Não copiar: quando a leitura falha mostra 0 como se não houvesse notas. Web: Notas fiscais · N no Resumo, só contagem; leitura que falha não mostra 0 (D10), a linha some."
 - id: nfse.access.controller
   screen: lib/screens/nfse/nfse_access.dart
   route: null
@@ -5859,10 +5867,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable", "asaasEnabled"]
   hardware: null
   data: ["companies/{id}/settings/payments", "companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Ligada = nfseEnabled, asaasEnabled e asaasConnected em settings/payments, mais a permissão chargeOrder; pronta = ligada e nfseReady. Sem empresa ou sem permissão nada é lido. Erro de leitura vira nenhuma nota (a lista mostra erro). Nota ativa bloqueia a segunda: cancelada, erro, conflito e creating com mais de 15 min não contam."
+  note: "Ligada = nfseEnabled, asaasEnabled e asaasConnected em settings/payments, mais a permissão chargeOrder; pronta = ligada e nfseReady. Sem empresa ou sem permissão nada é lido. Erro de leitura vira nenhuma nota (a lista mostra erro). Nota ativa bloqueia a segunda: cancelada, erro, conflito e creating com mais de 15 min não contam. Web: menu e lista só com chargeOrder; settings/payments com nfseEnabled, asaasEnabled e asaasConnected; erro de leitura vira erro com tentar de novo, nunca nenhuma."
 - id: nfse.access.not-ready
   screen: lib/screens/nfse/nfse_access.dart
   route: null
@@ -5892,11 +5901,12 @@ rows:
   states: []
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
-  data: ["companies/{id}/orders", "companies/{id}/invoices"]
-  web_status: todo
+  data: ["companies/{id}/orders", "companies/{id}/invoices", "api:POST /v1/app/nfse/invoices/preview"]
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "nfseValueOfOrder e orderCanHaveNfse: valor = serviços menos a parte deles no desconto (proporcional, em centavos); OS salva, não orçamento nem cancelada, valor > 0 e sem nota ativa. Mesma regra do servidor (invoiceValueOfOrder)."
+  note: "nfseValueOfOrder e orderCanHaveNfse: valor = serviços menos a parte deles no desconto (proporcional, em centavos); OS salva, não orçamento nem cancelada, valor > 0 e sem nota ativa. Mesma regra do servidor (invoiceValueOfOrder). Web: Emitir nota fiscal no menu da OS fora de orçamento e cancelada; o resto (valor, nota ativa) vem da prévia do servidor e trava o Emitir."
 - id: nfse.issue.preview
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5910,10 +5920,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable", "nfseReady"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices/preview"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "O ✓ trava com o primeiro motivo, nesta ordem: OS já com nota (lista os números), valor zero, CPF/CNPJ inválido, e-mail ou endereço faltando; o motivo aparece como dica. Avisos de só serviços e desconto proporcional quando há produtos."
+  note: "O ✓ trava com o primeiro motivo, nesta ordem: OS já com nota (lista os números), valor zero, CPF/CNPJ inválido, e-mail ou endereço faltando; o motivo aparece como dica. Avisos de só serviços e desconto proporcional quando há produtos. Web: gaveta com a prévia do servidor, valor por OS, aviso de peças fora e desconto repartido."
 - id: nfse.issue.fix-customer
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5927,10 +5938,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "O app não grava em customers: manda CPF/CNPJ e contato junto com a emissão e o servidor grava. CPF/CNPJ aceita CNPJ alfanumérico; e-mail por regex; CEP com 8 dígitos; endereço inteiro pedido se faltar qualquer parte; complemento opcional. Não copiar: CPF/CNPJ sem máscara visual."
+  note: "O app não grava em customers: manda CPF/CNPJ e contato junto com a emissão e o servidor grava. CPF/CNPJ aceita CNPJ alfanumérico; e-mail por regex; CEP com 8 dígitos; endereço inteiro pedido se faltar qualquer parte; complemento opcional. Não copiar: CPF/CNPJ sem máscara visual. Web: CPF/CNPJ (também alfanumérico) e e-mail/endereço com CEP pedidos quando faltam; recusa sobre o cliente abre todos os campos."
 - id: nfse.issue.date
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5944,10 +5956,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Não antes de hoje, sem máximo. Popup com a roda e só Confirmar (tocar fora descarta); a linha mostra Hoje ou a data; hoje vai nulo para o servidor."
+  note: "Não antes de hoje, sem máximo. Popup com a roda e só Confirmar (tocar fora descarta); a linha mostra Hoje ou a data; hoje vai nulo para o servidor. Web: campo de data de hoje até 60 dias; hoje vai como nada."
 - id: nfse.issue.municipal-service
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5961,10 +5974,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só mostra o nome vindo da prévia; não é escolha. A busca de serviços da prefeitura é só para dono e admin (configuração)."
+  note: "Só mostra o nome vindo da prévia; não é escolha. A busca de serviços da prefeitura é só para dono e admin (configuração). Web: o serviço da prefeitura aparece na gaveta, só leitura."
 - id: nfse.issue.send
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5978,10 +5992,47 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Recusas: CUSTOMER_DATA_REQUIRED mostra todos os campos de contato e recarrega a prévia mantendo o texto; erros de configuração oferecem Configurar a dono e admin e peça ao dono aos outros; o resto mostra o texto do Asaas. Data de hoje vai nula. O aviso Nota enviada fica no chamador."
+  note: "Recusas: CUSTOMER_DATA_REQUIRED mostra todos os campos de contato e recarrega a prévia mantendo o texto; erros de configuração oferecem Configurar a dono e admin e peça ao dono aos outros; o resto mostra o texto do Asaas. Data de hoje vai nula. O aviso Nota enviada fica no chamador. Web: E2E com a resposta do Asaas simulada (page.route); nenhuma nota real."
+- id: nfse.issue.blockers
+  screen: lib/screens/nfse/nfse_issue_sheet.dart
+  route: null
+  action: "O que trava o ✓ da nota"
+  kind: logic
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial", "nfseAvailable", "nfseReady"]
+  hardware: null
+  data: ["api:POST /v1/app/nfse/invoices/preview"]
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
+  web_exception: null
+  permission: chargeOrder
+  note: "Ordem: OS já com nota (lista números), valor zero, CPF/CNPJ inválido, e-mail/endereço faltando. O motivo aparece como dica. Web: lib/nfse/model.ts blockerOf, mesma ordem, motivo como dica."
+- id: nfse.issue.refusal
+  screen: lib/screens/nfse/nfse_issue_sheet.dart
+  route: null
+  action: "Tratar recusa do Asaas ao emitir"
+  kind: action
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: [error]
+  feature_flags: ["useFinancial", "nfseAvailable"]
+  hardware: null
+  data: ["api:POST /v1/app/nfse/invoices", "api:POST /v1/app/nfse/invoices/preview"]
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
+  web_exception: null
+  permission: chargeOrder
+  note: "CUSTOMER_DATA_REQUIRED: mostra todos os campos de contato e recarrega a prévia mantendo o texto. Erros de configuração: dono/admin ganham Configurar; gerente lê peça ao dono. Web: CUSTOMER_DATA_REQUIRED reabre a prévia com todos os campos e o texto do Asaas; erros de configuração mandam configurar no app (a configuração não está no web)."
 - id: nfse.issue.description
   screen: lib/screens/nfse/nfse_issue_sheet.dart
   route: null
@@ -5995,10 +6046,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Vem do modelo da configuração. Não copiar: editar o texto ou a data não conta como alteração (fecha sem perguntar e perde o texto); só CPF/CNPJ e contato contam."
+  note: "Vem do modelo da configuração. Não copiar: editar o texto ou a data não conta como alteração (fecha sem perguntar e perde o texto); só CPF/CNPJ e contato contam. Web: editar o texto conta como mudança e fechar pergunta antes (D14); o texto fica depois de uma recusa."
 - id: nfse.orders.pick
   screen: lib/screens/nfse/nfse_orders_picker.dart
   route: null
@@ -6029,10 +6081,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Recebe a nota pronta e acompanha ao vivo (webhook muda a situação). Situação em texto: Agendada para (só data futura), Aguardando prefeitura, Emitida nº, Cancelando, Cancelamento negado, Cancelada, Erro. Parágrafo de conflito; rótulo do motivo muda para nota automática quando há errorCode; linha de OS só texto. Spinner no lugar do … enquanto trabalha. Não copiar: nota apagada continua na tela; erro do listener ignorado; valor em R$ fixo, sem seguir o locale."
+  note: "Recebe a nota pronta e acompanha ao vivo (webhook muda a situação). Situação em texto: Agendada para (só data futura), Aguardando prefeitura, Emitida nº, Cancelando, Cancelamento negado, Cancelada, Erro. Parágrafo de conflito; rótulo do motivo muda para nota automática quando há errorCode; linha de OS só texto. Spinner no lugar do … enquanto trabalha. Não copiar: nota apagada continua na tela; erro do listener ignorado; valor em R$ fixo, sem seguir o locale. Web: situação, frase, valor, número, data, OS que abrem, motivo e aviso de conflito; valor pelo país."
 - id: nfse.invoice.share-pdf
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -6063,10 +6116,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: [external_browser]
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só com situação emitida."
+  note: "Só com situação emitida. Web: só emitida, link https em nova aba."
 - id: nfse.invoice.open-xml
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -6080,10 +6134,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: [external_browser]
   data: ["companies/{id}/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só com situação emitida."
+  note: "Só com situação emitida. Web: só emitida, link https em nova aba."
 - id: nfse.invoice.fix
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -6097,10 +6152,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices/preview", "api:POST /v1/app/nfse/invoices"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só com erro, sem conflito e com OS. Ao emitir mostra o aviso e fecha a tela."
+  note: "Só com erro, sem conflito e com OS. Ao emitir mostra o aviso e fecha a tela. Web: Corrigir e emitir abre a gaveta das mesmas OS."
 - id: nfse.invoice.cancel
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -6114,10 +6170,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices/{id}/cancel"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Só agendada, emitida ou cancelamento negado. Alerta com o valor e Manter como padrão; aviso diferente para cancelada e para pedido enviado. CANCEL_NOT_SUPPORTED leva a nfse.invoice.manual-cancel."
+  note: "Só agendada, emitida ou cancelamento negado. Alerta com o valor e Manter como padrão; aviso diferente para cancelada e para pedido enviado. CANCEL_NOT_SUPPORTED leva a nfse.invoice.manual-cancel. Web: confirmação com Manter nota no foco; avisos diferentes para cancelada e pedido enviado; E2E com a resposta simulada."
 - id: nfse.invoice.manual-cancel
   screen: lib/screens/nfse/nfse_invoice_screen.dart
   route: null
@@ -6131,10 +6188,11 @@ rows:
   feature_flags: ["useFinancial", "nfseAvailable"]
   hardware: null
   data: ["api:POST /v1/app/nfse/invoices/{id}/cancel"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/invoices.spec.ts
   web_exception: null
   permission: chargeOrder
-  note: "Prefeitura que não deixa cancelar por API."
+  note: "Prefeitura que não deixa cancelar por API. Web: CANCEL_NOT_SUPPORTED abre Cancele no site da prefeitura e Já cancelei na prefeitura manda onlyOnAsaas."
 - id: nfse.setup.view
   screen: lib/screens/nfse/nfse_setup_screen.dart
   route: null
@@ -6282,11 +6340,12 @@ rows:
   states: [error, loading, refresh, retry, denied]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Recarrega ao voltar para a aba e ao voltar de qualquer tela aberta dali: OS mudam em outras abas. Aba embrulhada em ProtectedRoute. Erro só no primeiro load; refresh com falha mantém os dados velhos sem aviso. Trocar de mês recarrega só Recebido e Vendido (spinner nos dois blocos); resposta atrasada de mês já deixado é ignorada. A receber e Em andamento são tocáveis mesmo com R$ 0 e abrem a lista com o vazio; a aba não tem vazio próprio. Recebido conta pagamentos com data no mês em OS de qualquer mês (lastPaymentAt). Não copiar: falha na busca das OS do mês vira R$ 0 sem aviso (o repositório engole o erro)."
+  note: "Recarrega ao voltar para a aba e ao voltar de qualquer tela aberta dali: OS mudam em outras abas. Aba embrulhada em ProtectedRoute. Erro só no primeiro load; refresh com falha mantém os dados velhos sem aviso. Trocar de mês recarrega só Recebido e Vendido (spinner nos dois blocos); resposta atrasada de mês já deixado é ignorada. A receber e Em andamento são tocáveis mesmo com R$ 0 e abrem a lista com o vazio; a aba não tem vazio próprio. Recebido conta pagamentos com data no mês em OS de qualquer mês (lastPaymentAt). Não copiar: falha na busca das OS do mês vira R$ 0 sem aviso (o repositório engole o erro). Web (fatia 6): /finance, números do servidor (GET /v1/app/finance/summary), nada somado no navegador. Erro só na 1a carga; trocar de mês mantém os números antigos marcados como ocupados e descarta resposta atrasada. Relê ao voltar à janela. Mês na URL (?month=)."
 - id: fin.tab.month
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6299,10 +6358,12 @@ rows:
   states: [loading]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: setas e teclas seta, seguinte desabilitado no mês atual, rótulo volta para hoje; resposta de um mês já deixado é ignorada."
 - id: fin.tab.next-charge
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6366,12 +6427,12 @@ rows:
   states: [empty]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/receivable"]
   web_status: done
-  e2e: firebase/webapp/e2e/receive.spec.ts
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500). Revisão #518: entram as concluídas com saldo e as abertas com sinal (não copia o P1 do teste do Marcos); lê todas as OS sem pagar em páginas de 500, ordena das mais antigas e avisa se passar de 20.000."
+  note: "Valor e contagem somam os dois grupos; cliente nos dois conta uma vez. OS em aberto com pagamento parcial sai de Em andamento. Agrupa por cliente (OS sem cliente num grupo só), mais antigo primeiro. Toque no cliente: 1 OS em aberto abre o Receber da OS; várias com cliente abrem Receber de cliente (um pagamento dividido da mais antiga, concluídas marcadas, inclui OS em aberto não concluídas); sem cliente abre Qual OS?. Linha de sinal abre a própria OS. O rótulo Concluídas só aparece quando há os dois grupos. Web: aba Receber do Financeiro: OS concluídas com saldo, por cliente, a mais antiga primeiro (até 500). Revisão #518: entram as concluídas com saldo e as abertas com sinal (não copia o P1 do teste do Marcos); lê todas as OS sem pagar em páginas de 500, ordena das mais antigas e avisa se passar de 20.000. Web (fatia 6): lido no servidor (GET /v1/app/finance/receivable, payment unpaid/partial e aprovada sem payment, como o app), não mais até 20.000 OS no navegador. No Resumo, A receber por cliente abre Receber de cliente. Acima de 20.000 OS em aberto avisa que algumas podem faltar (ordem dos ids)."
 - id: fin.tab.pick-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6402,11 +6463,12 @@ rows:
   states: [empty]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Cada OS conta em um lugar só: no primeiro pagamento vai para A receber."
+  note: "Cada OS conta em um lugar só: no primeiro pagamento vai para A receber. Web: aprovadas e em andamento sem nada pago, a mais antiga primeiro, com a situação; a linha abre a OS."
 - id: fin.tab.received
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6419,10 +6481,12 @@ rows:
   states: [empty]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: Recebido pela data de cada pagamento (paidAt, senão createdAt), OS de qualquer mês (lastPaymentAt); legado sem transação conta no dia da OS. Contrato finance-summary.json. lastPaymentAt com folga de 14 h (empresa a oeste de Brasília recebendo logo depois da meia-noite do dia 1, revisão do #525, M1)."
 - id: fin.tab.sold
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6435,10 +6499,12 @@ rows:
   states: [empty]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: OS abertas no mês sem orçamento e cancelada, no fuso da empresa, último dia incluído (texto sem fuso do app é hora da empresa)."
 - id: fin.tab.report
   screen: lib/screens/dashboard/financial_tab.dart
   route: "/financial_report"
@@ -6451,11 +6517,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: []
-  web_status: todo
+  data: ["api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Fica no menu …; abre no mês escolhido na aba."
+  note: "Fica no menu …; abre no mês escolhido na aba. Web: Ver o relatório abre /finance/report no mês escolhido no Resumo."
 - id: fin.tab.other-period
   screen: lib/screens/dashboard/financial_tab.dart
   route: "/financial_report"
@@ -6468,11 +6535,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: []
-  web_status: todo
+  data: ["api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Fica no menu …; abre o relatório já com a sheet de datas."
+  note: "Fica no menu …; abre o relatório já com a sheet de datas. Web: Outro período abre o relatório já com Que período?."
 - id: fin.tab.open-order
   screen: lib/screens/dashboard/financial_tab.dart
   route: "/order"
@@ -6486,10 +6554,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: ["companies/{id}/orders"]
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Abre a OS, não o Receber. Recarrega a aba ao voltar."
+  note: "Abre a OS, não o Receber. Recarrega a aba ao voltar. Web: linha de Em andamento, Recebido, Vendido e sinal abre a OS ao lado da lista (?order=), sem sair do Financeiro; fechar relê os números."
 - id: fin.summary.rules
   screen: lib/screens/dashboard/financial_tab.dart
   route: null
@@ -6502,11 +6571,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "lib/utils/financial_summary.dart: Recebido por data de pagamento, em OS de qualquer mês (OS antiga sem transações conta no mês de criação; paga sem paidAmount conta o total). Vendido = OS criadas no mês, sem orçamento nem cancelada. Em aberto inclui payment nulo com status approved, progress ou done. Cada OS conta num lugar só. Ordem: Recebido por último pagamento; Vendido mais nova primeiro; Em andamento e sinal mais antiga primeiro."
+  note: "lib/utils/financial_summary.dart: Recebido por data de pagamento, em OS de qualquer mês (OS antiga sem transações conta no mês de criação; paga sem paidAmount conta o total). Vendido = OS criadas no mês, sem orçamento nem cancelada. Em aberto inclui payment nulo com status approved, progress ou done. Cada OS conta num lugar só. Ordem: Recebido por último pagamento; Vendido mais nova primeiro; Em andamento e sinal mais antiga primeiro. Web: regras no servidor (services/app-finance.service.ts), casos em docs/web-app/contract-cases/finance-summary.json e testes em app-finance.routes.test.ts."
 - id: fin.list.view
   screen: lib/screens/dashboard/financial_list_screen.dart
   route: null
@@ -6519,11 +6589,12 @@ rows:
   states: [empty, refresh]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/summary"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Lê o store da aba ao vivo (atualiza depois de receber). Frase do topo e texto de vazio próprios de cada lista."
+  note: "Lê o store da aba ao vivo (atualiza depois de receber). Frase do topo e texto de vazio próprios de cada lista. Web: a lista fica embaixo dos cartões do Resumo (?list=), com título e vazio por lista."
 - id: fin.report.view
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6536,11 +6607,12 @@ rows:
   states: [empty, refresh, denied]
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Sem loading: mostra o período anterior até chegar. Composição some quando serviços + produtos = 0; seções vazias somem; período sem OS mostra só Nenhuma OS no período. Não copiar: erro vira vazio sem aviso e não há guarda contra resposta atrasada; filtros vivem no OrderStore global e persistem entre aberturas; Clientes, OS e Cliente vêm fixos do l10n em vez do rótulo do segmento."
+  note: "Sem loading: mostra o período anterior até chegar. Composição some quando serviços + produtos = 0; seções vazias somem; período sem OS mostra só Nenhuma OS no período. Não copiar: erro vira vazio sem aviso e não há guarda contra resposta atrasada; filtros vivem no OrderStore global e persistem entre aberturas; Clientes, OS e Cliente vêm fixos do l10n em vez do rótulo do segmento. Web (fatia 6): /finance/report, números do servidor; carregando, erro com tentar de novo e vazio próprios (D3); filtros na URL, não persistem entre aberturas (D4)."
 - id: fin.report.period
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6553,11 +6625,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Presets do menu … zeram o offset mas mantêm filtro de pagamento e cliente. Rótulo muda por tipo (Hoje ou data, intervalo da semana, Mês atual ou mês, Ano atual ou ano). Web: enum em inglês e uma função de semana pelo locale. Não copiar: Esta semana busca uma semana diferente da mostrada (três contas de semana entre repositório, tela e PDF); chaves de período em português e rótulo do PDF em pt_BR fixo."
+  note: "Presets do menu … zeram o offset mas mantêm filtro de pagamento e cliente. Rótulo muda por tipo (Hoje ou data, intervalo da semana, Mês atual ou mês, Ano atual ou ano). Web: enum em inglês e uma função de semana pelo locale. Não copiar: Esta semana busca uma semana diferente da mostrada (três contas de semana entre repositório, tela e PDF); chaves de período em português e rótulo do PDF em pt_BR fixo. Web: Hoje, Esta semana (domingo a sábado, uma conta só para tela, busca e exportação, D2), Este mês, Este ano e Escolher datas; contrato finance-period.json."
 - id: fin.report.step
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6570,11 +6643,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Próximo desabilitado no período atual. Tocar no rótulo volta ao atual e limpa o filtro de pagamento e o cliente selecionado."
+  note: "Próximo desabilitado no período atual. Tocar no rótulo volta ao atual e limpa o filtro de pagamento e o cliente selecionado. Web: seguinte desabilitado no período atual; setas do teclado."
 - id: fin.report.custom
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6587,11 +6661,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Abre com os últimos 30 dias. Linhas Começa e Termina escolhem qual data a roda edita; mínimo 2020, máximo hoje; início depois do fim puxa o fim e vice-versa; ✓ sempre ativo, aviso de descarte só se mudou. Com datas próprias o seletor vira uma linha com calendário que reabre a sheet. Não copiar: depois de escolher datas, filtrar, escolher cliente ou puxar para atualizar recarrega o mês atual com o rótulo das datas; o último dia escolhido provavelmente fica de fora (fim exclusivo à meia-noite)."
+  note: "Abre com os últimos 30 dias. Linhas Começa e Termina escolhem qual data a roda edita; mínimo 2020, máximo hoje; início depois do fim puxa o fim e vice-versa; ✓ sempre ativo, aviso de descarte só se mudou. Com datas próprias o seletor vira uma linha com calendário que reabre a sheet. Não copiar: depois de escolher datas, filtrar, escolher cliente ou puxar para atualizar recarrega o mês atual com o rótulo das datas; o último dia escolhido provavelmente fica de fora (fim exclusivo à meia-noite). Web: de 2020 até hoje, início depois do fim puxa o fim e vice-versa; as datas ficam valendo ao filtrar (D1) e o último dia entra (D20, defeito 60)."
 - id: fin.report.payment-filter
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6604,11 +6679,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "A legenda é o filtro (toque liga e desliga): muda títulos, o valor por cliente e reordena o ranking pelo valor filtrado. Sem filtro, a linha do cliente mostra A receber quando há saldo. Não copiar: a lista a receber usa payment == unpaid (some com partial e nulo) enquanto o valor conta tudo que não é paid; contagens e ticket médio saem da lista já filtrada."
+  note: "A legenda é o filtro (toque liga e desliga): muda títulos, o valor por cliente e reordena o ranking pelo valor filtrado. Sem filtro, a linha do cliente mostra A receber quando há saldo. Não copiar: a lista a receber usa payment == unpaid (some com partial e nulo) enquanto o valor conta tudo que não é paid; contagens e ticket médio saem da lista já filtrada. Web: a receber lista tudo que não está pago (parcial e sem situação também, D5/defeito 58); totais, contagem, média e ranking de clientes não mudam com o filtro; composição e rankings de serviços e produtos mudam, como no app."
 - id: fin.report.composition
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6621,10 +6697,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: some sem serviços nem peças; percentuais pelo país; segue o filtro de pagamento, como o app (revisão do #525, B1)."
 - id: fin.report.customer-ranking
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6637,11 +6715,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Top 5 e Ver todos. Tocar num cliente filtra o relatório inteiro (faturamento, composição, rankings, OS e PDF); tocar de novo limpa. OS sem cliente viram um item próprio. Não copiar: o ranking encolhe para o cliente escolhido (não dá para comparar nem trocar direto); Sem Cliente e Cliente sem nome fixos em português no store."
+  note: "Top 5 e Ver todos. Tocar num cliente filtra o relatório inteiro (faturamento, composição, rankings, OS e PDF); tocar de novo limpa. OS sem cliente viram um item próprio. Não copiar: o ranking encolhe para o cliente escolhido (não dá para comparar nem trocar direto); Sem Cliente e Cliente sem nome fixos em português no store. Web: escolher um cliente filtra os números e mantém o ranking com todos (D6); Sem cliente traduzido (D7)."
 - id: fin.report.service-ranking
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6654,11 +6733,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Agrupa por nome (catálogo, depois descrição, depois serviço sem nome). Produtos usam total ou valor × quantidade e somam a quantidade. Não copiar: N itens conta linhas, não quantidade."
+  note: "Agrupa por nome (catálogo, depois descrição, depois serviço sem nome). Produtos usam total ou valor × quantidade e somam a quantidade. Não copiar: N itens conta linhas, não quantidade. Web: agrupa por nome e mostra a quantidade (D16); segue o filtro de pagamento, como o app."
 - id: fin.report.product-ranking
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6671,10 +6751,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
+  note: "Web: total da linha ou valor vezes quantidade, com unidades; segue o filtro de pagamento, como o app."
 - id: fin.report.orders
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6687,11 +6769,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Ordem por updatedAt. Ponto e texto são do pagamento, não da situação da OS: Pago (verde) só com payment == paid; parcial e nulo viram Pendente (âmbar). Sem nome mostra Cliente. Toque abre /order. Não copiar: não recarrega ao voltar da OS."
+  note: "Ordem por updatedAt. Ponto e texto são do pagamento, não da situação da OS: Pago (verde) só com payment == paid; parcial e nulo viram Pendente (âmbar). Sem nome mostra Cliente. Toque abre /order. Não copiar: não recarrega ao voltar da OS. Web: ponto e texto do pagamento (Pago/Pendente), data no fuso da empresa; a linha abre a OS ao lado do relatório."
 - id: fin.report.pdf
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6704,11 +6787,30 @@ rows:
   states: [loading, error]
   feature_flags: ["useFinancial"]
   hardware: [share_sheet, pdf_generation]
-  data: ["companies/{id}/orders", "companies/{id}"]
-  web_status: todo
+  data: ["companies/{id}/orders", "companies/{id}", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "PDF montado no cliente. Botão azul fixo embaixo; alerta bloqueante Preparando relatório e depois compartilhar. Com cliente selecionado vira relatório do cliente (faturamento, recebido, a receber e tabela das OS); sem cliente: resumo com percentuais e rankings, respeitando o filtro de pagamento. Cabeçalho com dados e logo da empresa (falhas ignoradas). Não copiar: botão visível no período sem OS (gera PDF vazio); acentos removidos de tudo; coluna Veículo fixa (ignora o segmento); período em pt_BR fixo; percentuais sem FormatService; fontes baixadas do Google na hora."
+  note: "PDF montado no cliente. Botão azul fixo embaixo; alerta bloqueante Preparando relatório e depois compartilhar. Com cliente selecionado vira relatório do cliente (faturamento, recebido, a receber e tabela das OS); sem cliente: resumo com percentuais e rankings, respeitando o filtro de pagamento. Cabeçalho com dados e logo da empresa (falhas ignoradas). Não copiar: botão visível no período sem OS (gera PDF vazio); acentos removidos de tudo; coluna Veículo fixa (ignora o segmento); período em pt_BR fixo; percentuais sem FormatService; fontes baixadas do Google na hora. Web: Imprimir ou salvar PDF com folha própria (todas as linhas, sem navegação), mais Exportar CSV e Exportar planilha (XLSX) com o que o servidor deu ao papel; desabilitado no período sem OS. Sem folha de compartilhar (não há no navegador de mesa)."
+- id: fin.report.reset-period
+  screen: lib/screens/dashboard/financial_report_screen.dart
+  route: "/financial_report"
+  action: "Voltar ao período atual tocando no rótulo"
+  kind: action
+  roles: [owner, admin, manager]
+  segments: all
+  segment_variation: []
+  i18n: [pt, en, es]
+  states: []
+  feature_flags: ["useFinancial"]
+  hardware: null
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
+  web_exception: null
+  permission: viewFinancialReports
+  note: "Também limpa o filtro de pagamento e o cliente selecionado. Web: o rótulo volta ao período atual e tira filtro de pagamento e cliente."
 - id: fin.report.see-all
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6722,10 +6824,11 @@ rows:
   feature_flags: ["useFinancial"]
   hardware: null
   data: []
-  web_status: todo
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "Mostra 5; o link aparece com mais de 5. Cabeçalho com o total à direita."
+  note: "Mostra 5; o link aparece com mais de 5. Cabeçalho com o total à direita. Web: Ver todos (N) e Ver menos nas quatro listas; na impressão vão todas as linhas."
 - id: fin.report.rules
   screen: lib/screens/dashboard/financial_report_screen.dart
   route: "/financial_report"
@@ -6738,11 +6841,12 @@ rows:
   states: []
   feature_flags: ["useFinancial"]
   hardware: null
-  data: ["companies/{id}/orders"]
-  web_status: todo
+  data: ["companies/{id}/orders", "api:GET /v1/app/finance/report"]
+  web_status: done
+  e2e: firebase/webapp/e2e/finance-report.spec.ts
   web_exception: null
   permission: viewFinancialReports
-  note: "lib/mobx/order_store.dart loadOrdersForDashboard: OS por createdAt no período, sem orçamento nem cancelada (regra do Vendido); já pago usa paidAmount, ou o total quando paid sem paidAmount; a receber = total menos pago das não pagas; ranking por total. Não copiar: o mesmo cálculo está duplicado para período e para datas; web usa uma função por intervalo."
+  note: "lib/mobx/order_store.dart loadOrdersForDashboard: OS por createdAt no período, sem orçamento nem cancelada (regra do Vendido); já pago usa paidAmount, ou o total quando paid sem paidAmount; a receber = total menos pago das não pagas; ranking por total. Não copiar: o mesmo cálculo está duplicado para período e para datas; web usa uma função por intervalo. Web: regras no servidor (reportOf), uma função por intervalo (D19); contrato finance-summary.json."
 - id: agenda.view
   screen: lib/screens/agenda/agenda_screen.dart
   route: "/agenda"

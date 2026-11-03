@@ -4,6 +4,8 @@ export const PROJECT_ID = 'demo-praticos'
 export const PASSWORD = 'emulator-only-password'
 export const COMPANY_A = 'company-alpha'
 export const COMPANY_B = 'company-beta'
+/** "Valores e cobrança" off (useFinancial: false): nobody sees money, not even the owner. */
+export const COMPANY_C = 'company-gamma'
 
 const user = (key, name) => ({ uid: `e2e-${key}`, email: `${key}@praticos.test`, name })
 
@@ -25,6 +27,8 @@ export const USERS = {
   mixed: { ...user('mixed', 'Mauro Dois Papeis'), roles: { [COMPANY_A]: 'admin', [COMPANY_B]: 'technician' } },
   /** On the list, but the e-mail was never confirmed: the server says no. */
   unverified: { ...user('unverified', 'Ugo Sem Confirmar'), roles: { [COMPANY_A]: 'technician' }, emailVerified: false },
+  /** Owner of company C, where "Valores e cobrança" is off. */
+  noValues: { ...user('novalues', 'Vera Sem Valores'), roles: { [COMPANY_C]: 'owner' } },
 }
 
 /** Pending invites: one for who has no company, one for who already works in A. */
@@ -36,6 +40,7 @@ export const INVITES = {
 export const COMPANIES = {
   [COMPANY_A]: { name: 'Oficina Alfa', country: 'BR', segment: 'automotive', owner: USERS.owner },
   [COMPANY_B]: { name: 'Beta Repairs', country: 'US', segment: 'electronics', owner: USERS.owner },
+  [COMPANY_C]: { name: 'Gama Sem Valores', country: 'BR', segment: 'automotive', owner: USERS.noValues, useFinancial: false },
 }
 
 export const DEFAULT_ORDERS = 30

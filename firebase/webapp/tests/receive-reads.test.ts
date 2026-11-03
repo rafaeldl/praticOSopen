@@ -88,7 +88,7 @@ describe('canal ao vivo travado (CI do #521, R4)', () => {
   })
 
   it('settings/payments não espera o canal (o getDoc do cliente completo fica preso nele)', async () => {
-    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true })
+    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true, nfse: false })
   })
 })
 
@@ -130,6 +130,6 @@ describe('leituras do Receber que falham uma vez', () => {
 
   it('settings/payments: uma falha passageira não desliga a cobrança', async () => {
     settingsFailures = 1
-    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true })
+    expect(await paymentSettings({ wait: 0 })).toEqual({ ready: true, nfse: false })
   })
 })

@@ -13,6 +13,7 @@ import {
   receivePermissions,
   isOverdue,
 } from '../src/lib/rules/order-rules'
+import { periodOf } from '../src/lib/finance/period'
 
 const dir = resolve(process.cwd(), '../../docs/web-app/contract-cases')
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,5 +78,11 @@ describe('overdue', () => {
 describe('order-permissions', () => {
   test.each(cases('order-permissions.json'))('$id', (c) => {
     expect(orderPermissions(c.given.role, c.given.isCreator, c.given.status)).toEqual(c.expect)
+  })
+})
+
+describe('finance-period', () => {
+  test.each(cases('finance-period.json'))('$id', (c) => {
+    expect(periodOf(c.given.kind, c.given.offset, c.given.today)).toEqual(c.correct ?? c.expect)
   })
 })

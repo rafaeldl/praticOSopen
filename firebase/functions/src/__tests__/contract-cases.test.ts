@@ -34,6 +34,7 @@ import {
 } from '../middleware/app-permission.middleware';
 import ordersRouter from '../routes/v1/orders.routes';
 import { syncPaymentStatusWithTotal } from '../services/asaas/order-payment.service';
+import { reportOf, summarizeOrders } from '../services/app-finance.service';
 import * as catalogService from '../services/catalog.service';
 import { canReceiveForCustomer, registerCustomerReceipt } from '../services/customer-receipt.service';
 import * as orderService from '../services/order.service';
@@ -52,6 +53,7 @@ const STATUSES = ['quote', 'approved', 'progress', 'done', 'canceled'] as const;
 /** Every file this runner reads. A new file naming `functions` in `runsIn` must be added here. */
 const COVERED = [
   'currency.json',
+  'finance-summary.json',
   'order-delete.json',
   'order-items.json',
   'order-permissions.json',
@@ -492,6 +494,49 @@ describe('receipts', () => {
             return { id, payment, paid, paidAmount };
           }),
         }).toEqual(expected);
+      }
+    });
+  }
+});
+
+describe('finance-summary', () => {
+  for (const c of cases('finance-summary.json')) {
+    it(c.id, () => {
+      const { op, zone, from, to, orders, customer, payment } = c.given;
+      const expected = want(c);
+      if (op === 'summary') {
+        const s = summarizeOrders(orders, { from, to, zone });
+        const facts = {
+          received: s.received.total,
+          sold: s.sold.total,
+          receivable: s.receivable.total,
+          owed: s.receivable.owed,
+          depositOwed: s.receivable.depositOwed,
+          receivableCustomers: s.receivable.customers,
+          progress: s.progress.total,
+          receivedIds: s.received.orders.map((o) => o.id),
+          soldIds: s.sold.orders.map((o) => o.id),
+          depositIds: s.receivable.deposits.map((o) => o.id),
+          progressIds: s.progress.orders.map((o) => o.id),
+          debtorKeys: s.receivable.debtors.map((d) => d.key),
+        };
+        expect(pick(facts, expected)).toEqual(expected);
+      } else {
+        const r = reportOf(orders, { from, to, zone, customer, payment });
+        const facts = {
+          revenue: r.revenue,
+          paid: r.paid,
+          remaining: r.remaining,
+          count: r.count,
+          paidCount: r.paidCount,
+          orderIds: r.orders.map((o) => o.id),
+          customerIds: r.customers.map((x) => x.id),
+          compositionServices: r.composition.services,
+          compositionProducts: r.composition.products,
+          serviceNames: r.services.map((x) => x.name),
+          productNames: r.products.map((x) => x.name),
+        };
+        expect(pick(facts, expected)).toEqual(expected);
       }
     });
   }
