@@ -16,6 +16,7 @@ const DECODED: Record<string, Record<string, unknown>> = {
   unverified: { uid: 'unverified', email: 'newbie@example.com', email_verified: false },
   stranger: { uid: 'stranger', email: 'stranger@example.com', email_verified: true },
   admin1: { uid: 'admin1', email: 'admin@example.com', email_verified: true },
+  member2: { uid: 'member2', email: 'member2@example.com', email_verified: true },
 };
 
 jest.mock('../services/firestore.service', () => ({
@@ -60,6 +61,17 @@ function seedAll() {
   invite('INV_PHONE', { phone: '5548999990000' });
   invite('INV_LOCAL', { phone: '(48) 99999-0000', createdAt: '2020-01-01T00:00:00.000Z' });
   invite('INV_OTHER', { email: 'someone-else@example.com' });
+  invite('INV_ADMIN', { email: 'newbie@example.com', role: 'admin' });
+  invite('INV_OLD', { email: 'someone-else@example.com', expiresAt: undefined, createdAt: daysAgo(8) });
+  invite('INV_RECENT', { email: 'someone-else@example.com', expiresAt: undefined, createdAt: daysAgo(1) });
+  // A member of another company.
+  seed('companies/c2', { name: 'Outra', owner: { id: 'member2', name: 'M' }, users: [] });
+  seed('companies/c2/private/membership', { members: {} });
+  seed('users/member2', { name: 'M', companies: [{ company: { id: 'c2', name: 'Outra' }, role: 'owner' }] });
+}
+
+function daysAgo(days: number): string {
+  return new Date(Date.now() - days * 24 * 3600 * 1000).toISOString();
 }
 
 function buildApp(): Express {
@@ -86,7 +98,7 @@ describe('invites for an account without a company', () => {
     const res = await request(app).get('/v1/app/invites/pending').set(as('newbie'));
 
     expect(res.status).toBe(200);
-    expect(res.body.data.invites.map((i: { token: string }) => i.token)).toEqual(['INV_EMAIL']);
+    expect(res.body.data.invites.map((i: { token: string }) => i.token).sort()).toEqual(['INV_ADMIN', 'INV_EMAIL']);
   });
 
   it('lists the invites addressed to the verified phone', async () => {
@@ -128,25 +140,82 @@ describe('invites for an account without a company', () => {
     expect(read('companies/c1/private/membership')?.members).toMatchObject({ phoneuser: 'technician' });
   });
 
-  it('refuses an invite addressed to someone else', async () => {
-    const res = await request(app).post('/v1/app/invites/INV_OTHER/accept').set(as('stranger'));
+  it('looks up an invite by code', async () => {
+    const res = await request(app).get('/v1/app/invites/INV_OTHER').set(as('stranger'));
 
-    expect(res.status).toBe(403);
-    expect(read('links/invites/tokens/INV_OTHER')?.status).toBe('pending');
-    expect(read('companies/c1/private/membership')?.members).not.toHaveProperty('stranger');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ token: 'INV_OTHER', company: { id: 'c1', name: 'Oficina' }, role: 'technician' });
+    expect(res.body.data).not.toHaveProperty('email');
   });
 
-  it('refuses an invite matched only by an unverified email', async () => {
-    const res = await request(app).post('/v1/app/invites/INV_EMAIL/accept').set(as('unverified'));
+  it('accepts by code an invite sent to another email or phone', async () => {
+    const res = await request(app).post('/v1/app/invites/INV_OTHER/accept').set(as('stranger'));
 
-    expect(res.status).toBe(403);
-    expect(read('links/invites/tokens/INV_EMAIL')?.status).toBe('pending');
+    expect(res.status).toBe(200);
+    expect(read('companies/c1/private/membership')?.members).toMatchObject({ stranger: 'technician' });
+  });
+
+  describe('admin invite', () => {
+    it.each(['stranger', 'unverified', 'member2'])('%s, who is not the recipient, cannot accept it', async (who) => {
+      const res = await request(app).post('/v1/app/invites/INV_ADMIN/accept').set(as(who));
+
+      expect(res.status).toBe(403);
+      expect(read('links/invites/tokens/INV_ADMIN')?.status).toBe('pending');
+      expect(read('companies/c1/private/membership')?.members).not.toHaveProperty(who);
+    });
+
+    it('the recipient accepts it', async () => {
+      const res = await request(app).post('/v1/app/invites/INV_ADMIN/accept').set(as('newbie'));
+
+      expect(res.status).toBe(200);
+      expect(read('companies/c1/private/membership')?.members).toMatchObject({ newbie: 'admin' });
+    });
+  });
+
+  describe('wrong codes', () => {
+    it('after 10 wrong codes in an hour the user gets 429, also for a right code', async () => {
+      for (let i = 0; i < 5; i++) {
+        expect((await request(app).get(`/v1/app/invites/INV_NOPE${i}`).set(as('stranger'))).status).toBe(404);
+      }
+      for (let i = 5; i < 10; i++) {
+        expect((await request(app).post(`/v1/app/invites/INV_NOPE${i}/accept`).set(as('stranger'))).status).toBe(400);
+      }
+      expect((await request(app).get('/v1/app/invites/INV_NOPE10').set(as('stranger'))).status).toBe(429);
+      expect((await request(app).get('/v1/app/invites/INV_OTHER').set(as('stranger'))).status).toBe(429);
+      const accept = await request(app).post('/v1/app/invites/INV_OTHER/accept').set(as('stranger'));
+      expect(accept.status).toBe(429);
+      expect(read('links/invites/tokens/INV_OTHER')?.status).toBe('pending');
+    });
+
+    it('counts per user', async () => {
+      for (let i = 0; i < 10; i++) await request(app).get(`/v1/app/invites/INV_NOPE${i}`).set(as('stranger'));
+      expect((await request(app).get('/v1/app/invites/INV_OTHER').set(as('newbie'))).status).toBe(200);
+    });
+
+    it('the window of an hour starts over', async () => {
+      seed('inviteCodeAttempts/stranger', { windowStart: daysAgo(1), failures: 50 });
+      expect((await request(app).get('/v1/app/invites/INV_OTHER').set(as('stranger'))).status).toBe(200);
+    });
+  });
+
+  describe('invite without expiresAt', () => {
+    it('older than 7 days is expired', async () => {
+      const get = await request(app).get('/v1/app/invites/INV_OLD').set(as('stranger'));
+      expect(get.status).toBe(400);
+      expect(get.body.error.code).toBe('EXPIRED');
+      expect((await request(app).post('/v1/app/invites/INV_OLD/accept').set(as('stranger'))).status).toBe(400);
+      expect(read('links/invites/tokens/INV_OLD')?.status).toBe('pending');
+    });
+
+    it('within 7 days of createdAt still works', async () => {
+      expect((await request(app).get('/v1/app/invites/INV_RECENT').set(as('stranger'))).status).toBe(200);
+      expect((await request(app).post('/v1/app/invites/INV_RECENT/accept').set(as('stranger'))).status).toBe(200);
+    });
   });
 
   it('keeps every other invite route closed without a company', async () => {
     const results = await Promise.all([
       request(app).get('/v1/app/invites').set(as('newbie')),
-      request(app).get('/v1/app/invites/INV_OTHER').set(as('newbie')),
       request(app).post('/v1/app/invites').set(as('newbie')).send({ email: 'x@example.com', role: 'technician' }),
       request(app).delete('/v1/app/invites/INV_OTHER').set(as('newbie')),
     ]);

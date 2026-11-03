@@ -202,14 +202,30 @@ export async function acceptInvite(
   };
 }
 
+/**
+ * When the invite stops being valid: its `expiresAt`, or 7 days after
+ * `createdAt` for an old invite saved without it. Null (expired) when neither
+ * is known.
+ */
+export function inviteExpiresAt(invite: Pick<Invite, 'expiresAt' | 'createdAt'>): Date | null {
+  const expiresAt = toDate(invite.expiresAt);
+  if (expiresAt) return expiresAt;
+  const createdAt = toDate(invite.createdAt);
+  return createdAt ? new Date(createdAt.getTime() + INVITE_TOKEN_EXPIRATION) : null;
+}
+
+export function isInviteExpired(invite: Pick<Invite, 'expiresAt' | 'createdAt'>, now: Date = new Date()): boolean {
+  const expiresAt = inviteExpiresAt(invite);
+  return !expiresAt || expiresAt < now;
+}
+
 /** Validates an invite's state; returns an error message or null when usable. */
-function inviteStateError(invite: Invite): string | null {
+export function inviteStateError(invite: Invite): string | null {
   if (invite.status === 'accepted') return 'Invite has already been used';
   if (invite.status === 'cancelled') return 'Invite has been cancelled';
   if (invite.status === 'rejected') return 'Invite has been rejected';
   if (invite.status !== 'pending') return 'Invite is not pending';
-  const expiresAt = toDate(invite.expiresAt);
-  if (expiresAt && expiresAt < new Date()) return 'Invite has expired';
+  if (isInviteExpired(invite)) return 'Invite has expired';
   return null;
 }
 
@@ -323,8 +339,7 @@ export async function listByUser(email?: string, phone?: string): Promise<Invite
       const invite = doc.data() as Invite;
       if (!seenTokens.has(invite.token)) {
         // Check if not expired
-        const expiresAt = toDate(invite.expiresAt);
-        if (expiresAt && expiresAt > new Date()) {
+        if (!isInviteExpired(invite)) {
           invites.push(invite);
           seenTokens.add(invite.token);
         }
@@ -343,8 +358,7 @@ export async function listByUser(email?: string, phone?: string): Promise<Invite
       const invite = doc.data() as Invite;
       if (!seenTokens.has(invite.token)) {
         // Check if not expired
-        const expiresAt = toDate(invite.expiresAt);
-        if (expiresAt && expiresAt > new Date()) {
+        if (!isInviteExpired(invite)) {
           invites.push(invite);
           seenTokens.add(invite.token);
         }
@@ -643,8 +657,7 @@ export async function findPendingInvitesByPhone(phone: string): Promise<Invite[]
       if (seenTokens.has(invite.token)) continue;
 
       // Check expiration
-      const expiresAt = toDate(invite.expiresAt);
-      if (expiresAt && expiresAt < new Date()) continue;
+      if (isInviteExpired(invite)) continue;
 
       invites.push(invite);
       seenTokens.add(invite.token);
@@ -700,6 +713,11 @@ export async function acceptInviteViaWhatsApp(
   const stateError = inviteStateError(invite);
   if (stateError) {
     return { success: false, error: stateError };
+  }
+
+  // An admin invite is only accepted by its recipient
+  if (invite.role === 'admin' && !isInviteAddressedTo(invite, { phone: whatsappNumber })) {
+    return { success: false, error: 'This invite was sent to someone else' };
   }
 
   // Check if WhatsApp is already linked

@@ -2,6 +2,10 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
 jest.mock('../../../services/invite.service');
+jest.mock('../../../services/invite-attempts.service', () => ({
+  isBlocked: jest.fn(async () => false),
+  recordWrongCode: jest.fn(async () => undefined),
+}));
 
 import * as inviteService from '../../../services/invite.service';
 import { createSelfInviteRouter } from '../invite-self.routes';
@@ -22,7 +26,10 @@ function buildApp(email?: string) {
 }
 
 describe('invite.routes accept', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockService.getByToken.mockResolvedValue({ token: 'INV_ABC', role: 'technician' } as inviteService.Invite);
+  });
 
   it('passes the verified caller email to the service', async () => {
     mockService.acceptInvite.mockResolvedValue({

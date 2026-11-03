@@ -1,14 +1,22 @@
 /**
- * Invite routes that act on the caller's own invites.
+ * Invite routes that act on the caller's own invites: the pending list, the
+ * lookup by code and the acceptance.
  *
  * They also serve an account that has no company yet (onboarding), so they are
- * mounted behind bearerAuthAllowingNoCompany — see app-invites.mount.ts. Such
- * an account only sees and accepts invites sent to its verified email or phone.
+ * mounted behind bearerAuthAllowingNoCompany — see app-invites.mount.ts.
+ * - The code (token) is the secret: anyone signed in who has it can look the
+ *   invite up and accept it, with or without a company.
+ * - An admin invite is only accepted by its recipient (verified email or the
+ *   login phone), whoever asks.
+ * - Unknown codes are counted per user (invite-attempts.service.ts): after 10
+ *   in an hour, lookup and acceptance answer 429.
  */
 
 import { Router, Response, RequestHandler } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import * as inviteService from '../../services/invite.service';
+import * as attempts from '../../services/invite-attempts.service';
+import { maskTokenForLog } from '../../utils/log-redaction.utils';
 
 function callerOf(req: AuthenticatedRequest): inviteService.InviteCaller {
   return {
@@ -18,8 +26,32 @@ function callerOf(req: AuthenticatedRequest): inviteService.InviteCaller {
   };
 }
 
+function unauthorized(res: Response): void {
+  res.status(401).json({
+    success: false,
+    error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
+  });
+}
+
+function tooManyWrongCodes(res: Response): void {
+  res.status(429).json({
+    success: false,
+    error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many wrong invite codes, try again later' },
+  });
+}
+
+/** Looks the code up, counting an unknown one; null when unknown. */
+async function findInvite(userId: string, token: string): Promise<inviteService.Invite | null> {
+  const invite = await inviteService.getByToken(token);
+  if (!invite) {
+    console.warn(`[Invite] unknown code: invite=${maskTokenForLog(token)} uid=${userId.slice(0, 6)}`);
+    await attempts.recordWrongCode(userId);
+  }
+  return invite;
+}
+
 /**
- * @param auth Authentication for these two routes only; requests to any other
+ * @param auth Authentication for these routes only; requests to any other
  * path fall through untouched.
  */
 export function createSelfInviteRouter(auth: RequestHandler[]): Router {
@@ -28,16 +60,11 @@ export function createSelfInviteRouter(auth: RequestHandler[]): Router {
   /**
    * GET /v1/app/invites/pending
    * Pending invites sent to the caller's verified email or phone.
+   * Defined before /:token so "pending" is never read as a code.
    */
   router.get('/pending', ...auth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.auth?.userId) {
-        res.status(401).json({
-          success: false,
-          error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-        });
-        return;
-      }
+      if (!req.auth?.userId) return unauthorized(res);
 
       const invites = await inviteService.listAddressedTo(callerOf(req));
 
@@ -50,7 +77,7 @@ export function createSelfInviteRouter(auth: RequestHandler[]): Router {
             companyName: inv.company.name,
             role: inv.role,
             createdAt: inv.createdAt,
-            expiresAt: inv.expiresAt,
+            expiresAt: inviteService.inviteExpiresAt(inv)?.toISOString(),
             invitedBy: inv.invitedBy?.name,
           })),
         },
@@ -65,32 +92,92 @@ export function createSelfInviteRouter(auth: RequestHandler[]): Router {
   });
 
   /**
-   * POST /v1/app/invites/:token/accept
-   * A member of some company accepts by code (token). An account without a
-   * company accepts only an invite sent to its verified email or phone.
+   * GET /v1/app/invites/:token
+   * Invite details for the code entry flow (limited info).
    */
-  router.post('/:token/accept', ...auth, async (req: AuthenticatedRequest, res: Response) => {
+  router.get('/:token', ...auth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.auth?.userId;
-      if (!userId) {
-        res.status(401).json({
+      if (!userId) return unauthorized(res);
+      if (await attempts.isBlocked(userId)) return tooManyWrongCodes(res);
+
+      const invite = await findInvite(userId, String(req.params.token));
+      if (!invite) {
+        res.status(404).json({
           success: false,
-          error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
+          error: { code: 'NOT_FOUND', message: 'Invite not found' },
         });
         return;
       }
 
-      const token = String(req.params.token);
+      if (invite.status !== 'pending') {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_INVITE',
+            message: invite.status === 'accepted' ? 'Invite already used' : 'Invite is no longer valid',
+          },
+        });
+        return;
+      }
 
-      if (!req.auth?.companyId) {
-        const invite = await inviteService.getByToken(token);
-        if (!invite || !inviteService.isInviteAddressedTo(invite, callerOf(req))) {
-          res.status(403).json({
-            success: false,
-            error: { code: 'FORBIDDEN', message: 'This invite was not sent to this account' },
-          });
-          return;
-        }
+      if (inviteService.isInviteExpired(invite)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'EXPIRED', message: 'Invite has expired' },
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: {
+          token: invite.token,
+          company: {
+            id: invite.company.id,
+            name: invite.company.name,
+          },
+          role: invite.role,
+          invitedBy: invite.invitedBy?.name,
+          expiresAt: inviteService.inviteExpiresAt(invite)?.toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error('Get invite error:', error);
+      res.status(500).json({
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to get invite' },
+      });
+    }
+  });
+
+  /**
+   * POST /v1/app/invites/:token/accept
+   * Accepts by code, with or without a company. An admin invite only by its
+   * recipient.
+   */
+  router.post('/:token/accept', ...auth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.auth?.userId;
+      if (!userId) return unauthorized(res);
+      if (await attempts.isBlocked(userId)) return tooManyWrongCodes(res);
+
+      const token = String(req.params.token);
+      const invite = await findInvite(userId, token);
+      if (!invite) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_INVITE', message: 'Invalid invite code' },
+        });
+        return;
+      }
+
+      if (invite.role === 'admin' && !inviteService.isInviteAddressedTo(invite, callerOf(req))) {
+        res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'This invite was sent to someone else' },
+        });
+        return;
       }
 
       const userName = req.userContext?.userName ?? req.auth?.userName ?? '';

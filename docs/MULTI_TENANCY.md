@@ -121,7 +121,11 @@ Todo fluxo do servidor que altera membros mantém os quatro primeiros em sincron
 - Aceite (`POST /v1/app/invites/:token/accept` e WhatsApp) é atômico: em uma transação, exige convite `pending` e não expirado, registra o membro (5.1) e marca o convite como aceito.
 - Quem já é dono ou membro da empresa recebe `ALREADY_MEMBER` (409); o papel existente nunca é alterado por um convite.
 - Quando o e-mail do login difere do e-mail do convite, o aceite segue e é registrado um aviso (identificadores mascarados).
-- Conta ainda sem empresa (primeiro acesso): só `GET /v1/app/invites/pending` e `POST /v1/app/invites/:token/accept` passam sem empresa (`bearerAuthAllowingNoCompany`, montado em `routes/v1/app-invites.mount.ts`). A lista traz e o aceite só aceita convites enviados ao e-mail verificado (`email_verified`) ou ao telefone do login; outro convite recebe 403. As demais rotas de convite, inclusive `GET /v1/app/invites/:token` (busca por código), continuam exigindo empresa.
+- O código (token) é o segredo: quem está logado e tem o código busca o convite (`GET /v1/app/invites/:token`) e aceita (`POST /v1/app/invites/:token/accept`), tenha empresa ou não. Essas duas rotas e `GET /v1/app/invites/pending` passam sem empresa (`bearerAuthAllowingNoCompany`, montado em `routes/v1/app-invites.mount.ts`). As demais rotas de convite (criar, listar da empresa, cancelar) continuam exigindo empresa.
+- `GET /v1/app/invites/pending` traz só os convites enviados ao e-mail verificado (`email_verified`) ou ao telefone do login.
+- Convite com papel `admin` só é aceito pelo destinatário (e-mail verificado ou telefone do login; no WhatsApp, o número), com ou sem empresa. Outro login recebe 403.
+- Código errado: cada código inexistente na busca ou no aceite conta para o usuário em `inviteCodeAttempts/{uid}` (Firestore, só servidor). Com 10 erros em uma hora, busca e aceite respondem 429 até a hora acabar, mesmo com código certo.
+- Validade: `expiresAt` do convite; convite antigo sem `expiresAt` vale 7 dias a partir de `createdAt` (calculado no código, sem migrar dados) e, sem nenhuma das datas, está vencido.
 - Tokens novos: `INV_` + 16 caracteres `A-Z0-9` gerados com `crypto.randomBytes`; tokens antigos continuam aceitos.
 - Pelo bot, apenas dono/admin criam convites de `manager`; os demais só convidam papéis abaixo do próprio (supervisor → apenas técnico).
 

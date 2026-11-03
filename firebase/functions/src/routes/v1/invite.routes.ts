@@ -203,80 +203,8 @@ router.delete('/:token', async (req: AuthenticatedRequest, res: Response) => {
   }
 });
 
-// GET /pending and POST /:token/accept live in invite-self.routes.ts: they
-// also serve an account without a company and are mounted before this router.
-
-/**
- * GET /api/v1/invites/:token
- * Get invite details by token (for code entry flow)
- * Returns invite info without requiring company membership
- */
-router.get('/:token', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const userId = req.auth?.userId;
-
-    if (!userId) {
-      res.status(401).json({
-        success: false,
-        error: { code: 'UNAUTHORIZED', message: 'Authentication required' },
-      });
-      return;
-    }
-
-    const token = String(req.params.token);
-
-    // Get the invite
-    const invite = await inviteService.getByToken(token);
-    if (!invite) {
-      res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Invite not found' },
-      });
-      return;
-    }
-
-    // Check if invite is valid
-    if (invite.status !== 'pending') {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'INVALID_INVITE',
-          message: invite.status === 'accepted' ? 'Invite already used' : 'Invite is no longer valid',
-        },
-      });
-      return;
-    }
-
-    // Check expiration
-    if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
-      res.status(400).json({
-        success: false,
-        error: { code: 'EXPIRED', message: 'Invite has expired' },
-      });
-      return;
-    }
-
-    // Return invite details (limited info for security)
-    res.json({
-      success: true,
-      data: {
-        token: invite.token,
-        company: {
-          id: invite.company.id,
-          name: invite.company.name,
-        },
-        role: invite.role,
-        invitedBy: invite.invitedBy?.name,
-        expiresAt: invite.expiresAt,
-      },
-    });
-  } catch (error) {
-    console.error('Get invite error:', error);
-    res.status(500).json({
-      success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to get invite' },
-    });
-  }
-});
+// GET /pending, GET /:token and POST /:token/accept live in
+// invite-self.routes.ts: they also serve an account without a company and are
+// mounted before this router.
 
 export default router;
