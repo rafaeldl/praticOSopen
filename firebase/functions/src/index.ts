@@ -423,6 +423,8 @@ import integrationsRoutes from './routes/v1/integrations.routes';
 import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
 import chargesRoutes from './routes/v1/charges.routes';
 import customerPaymentsRoutes from './routes/v1/customer-payments.routes';
+import appCustomersRoutes from './routes/v1/app-customers.routes';
+import appDevicesRoutes from './routes/v1/app-devices.routes';
 import nfseRoutes from './routes/v1/nfse.routes';
 import aiRoutes from './routes/v1/ai.routes';
 import teamRoutes from './routes/v1/team.routes';
@@ -628,8 +630,9 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 // Bearer token routes (for Flutter app)
 // Single mount so the rate limit and token check run once per request.
 app.use('/v1/app/orders', ...appBearer, ordersRoutes, shareRoutes, chargesRoutes);
-app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, customersRoutes);
-app.use('/v1/app/devices', ...appBearer, devicesRoutes);
+// Web app reads and writes of customers and devices (app-*.routes.ts) answer before the generic ones.
+app.use('/v1/app/customers', ...appBearer, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
+app.use('/v1/app/devices', ...appBearer, appDevicesRoutes, devicesRoutes);
 // Invites: /pending and /:token/accept also serve an account without a company
 mountAppInviteRoutes(app, { ip: appIpLimiter, user: appUserLimiter });
 app.use('/v1/app/integrations', ...appBearer, integrationsRoutes);

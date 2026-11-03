@@ -128,6 +128,8 @@ import chargesRoutes from '../routes/v1/charges.routes';
 import customersRoutes from '../routes/v1/customers.routes';
 import customerPaymentsRoutes from '../routes/v1/customer-payments.routes';
 import devicesRoutes from '../routes/v1/devices.routes';
+import appCustomersRoutes from '../routes/v1/app-customers.routes';
+import appDevicesRoutes from '../routes/v1/app-devices.routes';
 import appInviteRoutes from '../routes/v1/invite.routes';
 import integrationsRoutes from '../routes/v1/integrations.routes';
 import asaasConnectionRoutes from '../routes/v1/asaas-connection.routes';
@@ -157,6 +159,8 @@ function seedTenants() {
     seed(`companies/${cid}/private/membership`, { members });
     seed(`companies/${cid}/services/s1`, { name: 'Polimento', value: 80 });
     seed(`companies/${cid}/products/p1`, { name: 'Cera', value: 10 });
+    seed(`companies/${cid}/customers/cust1`, { name: 'Ana' });
+    seed(`companies/${cid}/devices/d1`, { name: 'Uno' });
     seed(`companies/${cid}/receipts/r1`, {
       customer: { id: 'cust1', name: 'Ana' }, amount: 0, status: 'active', allocations: [], createdBy: { id: 'ghost', name: 'Ghost' },
     });
@@ -206,8 +210,8 @@ function buildApp(): Express {
   const app = express();
   app.use(express.json());
   app.use('/v1/app/orders', bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
-  app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, customersRoutes);
-  app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, devicesRoutes);
+  app.use('/v1/app/customers', bearerAuth, resolveCompanyContext, customerPaymentsRoutes, appCustomersRoutes, customersRoutes);
+  app.use('/v1/app/devices', bearerAuth, resolveCompanyContext, appDevicesRoutes, devicesRoutes);
   app.use('/v1/app/invites', bearerAuth, resolveCompanyContext, appInviteRoutes);
   app.use('/v1/app/integrations', bearerAuth, resolveCompanyContext, integrationsRoutes);
   app.use('/v1/app/payments/asaas', bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
