@@ -23,6 +23,8 @@ export interface CompanyProfile {
   useFinancial?: boolean
   /** Device control (Configurações shows the devices list only with it on). */
   useDeviceManagement?: boolean
+  /** Contratos on (company.settings.contracts). */
+  useContracts?: boolean
 }
 
 export interface SessionState {
@@ -471,7 +473,7 @@ export async function followCompany(companyId: string | null): Promise<void> {
         if (session.companyId !== companyId || !snapshot.exists()) return
         const data = snapshot.data() as CompanyProfile
         const next: CompanyProfile = { ...(session.company ?? {}) }
-        for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement'] as const) {
+        for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement', 'useContracts'] as const) {
           ;(next as Record<string, unknown>)[key] = data[key] ?? undefined
         }
         if (JSON.stringify(next) !== JSON.stringify(session.company)) session.company = next

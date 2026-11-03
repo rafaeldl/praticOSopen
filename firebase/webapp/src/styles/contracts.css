@@ -1,0 +1,35 @@
+/* Contratos: the list, the schedule fields and the card on the order.
+   Loaded with the screen, out of the first download. Reuses the drawer and
+   rows of orders.css. */
+
+.contracts-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 0.75rem 1rem 2rem; max-width: 56rem; align-content: start; }
+.contracts-tabs { justify-self: start; max-width: 100%; flex-wrap: wrap; }
+/* A tab wraps to the next line before its word leaves the button (text at 200% on a phone). */
+.contracts-tabs button { min-width: auto; }
+.contracts-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.contracts-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; padding: 0.35rem 0; border-bottom: 1px solid var(--color-rule); }
+.contracts-row-main { flex: 1 1 min(14rem, 100%); min-width: 0; display: grid; gap: 0.1rem; text-align: left; min-height: 2.75rem; padding: 0.3rem 0.35rem; }
+.contracts-row-main .who { font-weight: 600; overflow-wrap: anywhere; }
+.contracts-row-main .sub { overflow-wrap: anywhere; }
+.contracts-row-main[aria-current='true'] { background: var(--color-accent-soft); border-radius: 6px; }
+.contracts-foot { margin: 0.5rem 0 0; }
+.contracts-off { display: grid; gap: 0.75rem; max-width: 36rem; padding: 1rem 0; }
+.contracts-off h2 { margin: 0; font-size: 1.25rem; }
+.contracts-off p { margin: 0; }
+.contracts-off .btn { justify-self: start; }
+
+.contract-state { margin: 0; overflow-wrap: anywhere; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.contract-state--muted { color: var(--color-muted); }
+.contract-state--late { color: var(--color-warning-text, var(--color-ink)); font-weight: 600; }
+
+.repeat-fields { display: grid; gap: 0.85rem; }
+.repeat-end { display: grid; gap: 0.5rem; }
+.repeat-next { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.contract-actions { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.contract-actions p { margin: 0; }
+
+.od-contract { display: grid; gap: 0.5rem; }
+.od-contract p { margin: 0; }
+.od-contract > .btn { justify-self: start; }
+.od-contract-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
+.od-contract-list .link { min-height: 2.75rem; }

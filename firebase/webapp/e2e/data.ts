@@ -295,3 +295,64 @@ export async function readOrderForms(orderId: string): Promise<Record<string, un
 export async function writeOrderFormRaw(orderId: string, formId: string, fields: Record<string, unknown>): Promise<void> {
   await db().doc(`companies/${COMPANY_A}/orders/${orderId}/forms/${formId}`).update(fields)
 }
+
+/** "2026-11-03T00:00:00.000": a day in Brazil, `offset` days from today, as the app writes contract dates. */
+export function brWall(offset = 0): string {
+  return `${brDay(offset).slice(0, 10)}T00:00:00.000`
+}
+
+/** "03/11/2026": the same day as the screen shows it (pt-BR). */
+export function brShown(wall: string): string {
+  const [y, m, d] = wall.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
+
+/** An order that repeats (isContract + contract, OrderContract.toJson), in company A, for one test. */
+export async function makeContract(author: UserKey, contract: Record<string, unknown> = {}, data: Record<string, unknown> = {}): Promise<TestOrder & { customer: string }> {
+  const customer = `Contrato ${randomUUID().slice(0, 6)}`
+  const order = await makeOrder(author, {
+    status: 'approved',
+    customer: { id: 'customer-2', name: customer },
+    isContract: true,
+    contract: {
+      frequency: 'monthly',
+      interval: 1,
+      startDate: brWall(-20),
+      endDate: null,
+      nextDueDate: brWall(10),
+      lastGeneratedDate: null,
+      generatedCount: 0,
+      autoGenerate: true,
+      active: true,
+      reminderDaysBefore: 3,
+      parentOrderId: null,
+      parentOrderNumber: null,
+      ...contract,
+    },
+    ...data,
+  })
+  return { ...order, customer }
+}
+
+/** Any field of a company (Contratos on or off in company C). */
+export async function setCompanyFields(company: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${company}`).set(fields, { merge: true })
+}
+
+export async function readCompany(company: string): Promise<Record<string, unknown> | undefined> {
+  return (await db().doc(`companies/${company}`).get()).data()
+}
+
+/** A ready-made checklist of the automotive segment, unique per test, so "Usar" can run again. */
+export async function makeReadyTemplate(title: string): Promise<string> {
+  const id = `seg-${randomUUID().slice(0, 8)}`
+  await db()
+    .doc(`segments/automotive/forms/${id}`)
+    .set({ title, description: 'Só o teste de Usar', isActive: true, items: [question({ id: 'um', label: 'Uma pergunta', type: 'text' })] })
+  return id
+}
+
+/** Fields of a checklist of company B (merge), so a test starts from the seed's state. */
+export async function setTemplateInB(id: string, fields: Record<string, unknown>): Promise<void> {
+  await db().doc(`companies/${COMPANY_B}/forms/${id}`).set({ ...fields, updatedAt: new Date().toISOString() }, { merge: true })
+}

@@ -10,6 +10,7 @@ import { getUserAggr } from '../../middleware/company.middleware';
 import { requirePermission, hasPermission } from '../../middleware/auth.middleware';
 import * as inviteService from '../../services/invite.service';
 import { validateInput } from '../../utils/validation.utils';
+import { requirePlanCapacity } from '../../middleware/plan-limit.middleware';
 
 const router: Router = Router();
 
@@ -30,6 +31,7 @@ const createInviteSchema = z.object({
 router.post(
   '/',
   requirePermission('manage:members'),
+  requirePlanCapacity('collaborator'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const companyId = req.auth?.companyId;

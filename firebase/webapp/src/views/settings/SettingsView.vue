@@ -26,6 +26,8 @@ const leaving = ref(false)
 const companyName = computed(() => session.company?.name || session.companies.find((item) => item.id === session.companyId)?.name || '')
 const roleText = computed(() => (session.role ? t(session.role === 'owner' ? 'owner' : ROLE_LABEL[displayRole(session.role)]) : ''))
 const accountSub = computed(() => [session.email ?? '', [companyName.value, roleText.value].filter(Boolean).join(' · ')].filter((line) => !!line))
+// As the app: with Contratos on, or for who can turn it on.
+const showsContracts = computed(() => !!session.companyId && (session.company?.useContracts === true || can('manageCompany')))
 const devicesPlural = computed(() => segmentLabels()['device._entity_plural'])
 
 const companyRows = computed<Row[]>(() => {
@@ -91,7 +93,7 @@ async function leave() {
         </ul>
       </section>
 
-      <section v-if="registerRows.length || can('manageForms')" aria-labelledby="set-registers" class="set-section">
+      <section v-if="registerRows.length || can('manageForms') || showsContracts" aria-labelledby="set-registers" class="set-section">
         <h2 id="set-registers" class="set-h">{{ t('web.settings.registers') }}</h2>
         <ul class="set-list">
           <li v-for="row in registerRows" :key="row.to">
@@ -100,6 +102,12 @@ async function leave() {
                 <span class="who">{{ row.title }}</span>
                 <span v-if="row.sub" class="sub">{{ row.sub }}</span>
               </span>
+              <ChevronRight :size="18" aria-hidden="true" />
+            </RouterLink>
+          </li>
+          <li v-if="showsContracts">
+            <RouterLink class="set-row" to="/contracts" data-testid="settings-contracts">
+              <span class="set-text"><span class="who">{{ t('contracts') }}</span></span>
               <ChevronRight :size="18" aria-hidden="true" />
             </RouterLink>
           </li>

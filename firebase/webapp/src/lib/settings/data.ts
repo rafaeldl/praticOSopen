@@ -147,7 +147,7 @@ export async function saveCompanyChecked(fields: Partial<CompanyDoc>, expected: 
 
 function applyToSession(fields: Partial<CompanyDoc>): void {
   if (!session.company) return
-  for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement'] as const) {
+  for (const key of ['name', 'country', 'segment', 'useFinancial', 'useDeviceManagement', 'useContracts'] as const) {
     if (key in fields) (session.company as Record<string, unknown>)[key] = fields[key] ?? undefined
   }
 }
