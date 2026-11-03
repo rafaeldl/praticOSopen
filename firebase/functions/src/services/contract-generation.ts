@@ -95,6 +95,8 @@ export interface ContractData {
   reminderDaysBefore?: number | null;
   parentOrderId?: string | null;
   parentOrderNumber?: number | null;
+  /** Paused on the web (text or Timestamp): generates nothing, like the app. */
+  pausedAt?: unknown;
 }
 
 type Json = Record<string, unknown>;
@@ -152,11 +154,13 @@ function afterEnd(contract: ContractData, wall: number): boolean {
 }
 
 /**
- * OrderContract.isDueAt: active, nextDueDate at or before now and the due day
+ * OrderContract.isDueAt: active, not paused (pausedAt), nextDueDate at or before now and the due day
  * not after the contract's last day.
  */
 export function isContractDue(contract: ContractData | null | undefined, now: number): boolean {
   if (!contract || contract.active !== true) return false;
+  // Paused (OrderContract.isRunning in the app): no order until resumed.
+  if (contract.pausedAt !== undefined && contract.pausedAt !== null) return false;
   const next = parseContractDate(contract.nextDueDate);
   return next !== null && next <= now && !afterEnd(contract, next);
 }
@@ -223,7 +227,8 @@ function normalizedDevices(template: Json): { device: Json | null; devices: Json
   return { device, devices };
 }
 
-const emptyContract = (): Record<keyof ContractData, null> => ({
+// pausedAt is left out, as OrderContract.toJson leaves it out when null.
+const emptyContract = (): Record<Exclude<keyof ContractData, 'pausedAt'>, null> => ({
   frequency: null,
   interval: null,
   startDate: null,

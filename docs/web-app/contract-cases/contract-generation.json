@@ -337,6 +337,41 @@
       }
     },
     {
+      "id": "paused-contract-is-never-due",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "pausedAt": "2026-11-01T10:00:00.000"
+        }
+      },
+      "expect": {
+        "due": false,
+        "generates": false
+      },
+      "note": "Pausado no web (pausedAt): não gera, mesmo com active true, no app e no job."
+    },
+    {
+      "id": "paused-at-null-is-running",
+      "given": {
+        "now": "2026-11-03T02:00:00.000",
+        "contract": {
+          "pausedAt": null
+        }
+      },
+      "expect": {
+        "due": true,
+        "generates": true,
+        "contract": {
+          "nextDueDate": "2026-12-03T00:00:00.000",
+          "generatedCount": 1,
+          "active": true,
+          "lastGeneratedDate": "2026-11-03T02:00:00.000"
+        },
+        "orderId": "contract_tpl1_20261103"
+      },
+      "note": "pausedAt nulo não é pausa."
+    },
+    {
       "id": "reminder-only-contract-is-due-but-creates-nothing",
       "given": {
         "now": "2026-11-03T02:00:00.000",

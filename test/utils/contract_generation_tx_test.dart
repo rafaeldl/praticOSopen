@@ -2,6 +2,7 @@
 // read inside the transaction (contractAdvanceUpdate). The app reads the
 // templates from its cache when it opens: a contract stopped or paused on the
 // web since then must not get an order nor be turned back on.
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/utils/contract_generation.dart';
@@ -114,6 +115,20 @@ void main() {
       expect(paused.isRunning, isFalse);
       expect(contract().isRunning, isTrue);
       expect(contract().isDueAt(_now), isTrue);
+    });
+
+    test('a Firestore Timestamp also counts as paused', () {
+      final paused = contract(
+        pausedAt: Timestamp.fromDate(DateTime(2026, 11, 1, 10)),
+      );
+      expect(paused.pausedAt, DateTime(2026, 11, 1, 10));
+      expect(paused.isDueAt(_now), isFalse);
+      expect(
+        _update(
+          _template(pausedAt: Timestamp.fromDate(DateTime(2026, 11, 1))),
+        ),
+        isNull,
+      );
     });
 
     test('kept when the app writes the contract back', () {
