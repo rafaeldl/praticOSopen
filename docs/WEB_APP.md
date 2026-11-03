@@ -356,7 +356,7 @@ Erro em qualquer passo mostra "Não deu para terminar…" com "Tentar de novo" (
 
 **Agora** (técnico, em Minhas, sem busca). A primeira visita de hoje ainda não começada, senão a em andamento, com "Abrir OS N"; ela não se repete na lista. As visitas de hoje em Minhas mostram a hora.
 
-**Desempenho.** Medido em 2026-11-03 com esta fatia: **1.079 ms** na 1ª visita e **826 ms** na volta (`npm run e2e:perf`, p75). JS até a lista: 134,7 KB. O primeiro acesso, as manutenções e os avisos carregam sob demanda; no caminho até a lista entram só o sino, as iniciais, o "Agora" e as rotas novas.
+**Desempenho.** Medido em 2026-11-03 com esta fatia: **1.079 ms** na 1ª visita e **826 ms** na volta (`npm run e2e:perf`, p75). JS até a lista: 136,7 KB (134,6 na master com Configurações). O primeiro acesso, as manutenções e os avisos carregam sob demanda; no caminho até a lista entram só o sino, as iniciais, o "Agora" e as rotas novas.
 
 **Iniciais.** O botão do perfil (no celular, no topo; no computador, ao lado do nome da empresa) mostra as iniciais da empresa (primeira e última palavra, sem "da/de/do/e"). No web ele leva a Ajustes.
 
